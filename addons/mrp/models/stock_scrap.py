@@ -9,10 +9,10 @@ class StockScrap(models.Model):
 
     production_id = fields.Many2one(
         'mrp.production', 'Manufacturing Order',
-        states={'done': [('readonly', True)]}, check_company=True)
+        readonly=[('state', '=', 'done')], check_company=True)
     workorder_id = fields.Many2one(
         'mrp.workorder', 'Work Order',
-        states={'done': [('readonly', True)]},
+        readonly=[('state', '=', 'done')],
         check_company=True) # Not to restrict or prefer quants, but informative
 
     @api.onchange('workorder_id')

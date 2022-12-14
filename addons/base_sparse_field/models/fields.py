@@ -42,7 +42,7 @@ def _get_attrs(self, model_class, name):
         attrs['store'] = False
         attrs['copy'] = attrs.get('copy', False)
         attrs['compute'] = self._compute_sparse
-        if not attrs.get('readonly'):
+        if attrs.get('readonly') is not True:
             attrs['inverse'] = self._inverse_sparse
     return attrs
 

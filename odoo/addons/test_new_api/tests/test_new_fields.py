@@ -233,7 +233,6 @@ class TestFields(TransactionCaseWithUserDemo):
             sum(invalid_transitive_depends in field_triggers.get(None, []) for field_triggers in triggers.values()), 1
         )
 
-    @mute_logger('odoo.fields')
     def test_10_computed_stored_x_name(self):
         # create a custom model with two fields
         self.env["ir.model"].create({
@@ -3681,11 +3680,11 @@ class TestFieldParametersValidation(common.TransactionCase):
         Foo._build_model(self.registry, self.env.cr)
         self.addCleanup(self.registry.__delitem__, Foo._name)
 
-        with self.assertLogs('odoo.fields', level='WARNING') as cm:
+        with self.assertWarns(UserWarning) as cm:
             self.registry.setup_models(self.env.cr)
 
-        self.assertTrue(cm.output[0].startswith(
-            "WARNING:odoo.fields:Field test_new_api.field_parameter_validation.name: "
+        self.assertTrue(cm.warning.args[0].startswith(
+            "Field test_new_api.field_parameter_validation.name: "
             "unknown parameter 'invalid_parameter'"
         ))
 
@@ -4062,7 +4061,7 @@ class TestPrecompute(common.TransactionCase):
           but with a states attributes changing the readonly of the field according to the state of the record,
           can be altered by the user.
         The `bar` field is store=True, precompute=True, readonly=True
-        The `baz` field is store=True, precompute=True, readonly=True, states={'draft': [('readonly', False)]}
+        The `baz` field is store=True, precompute=True, readonly=[('state', '!=', 'draft')],
         """
         model = self.env['test_new_api.precompute.readonly']
 
@@ -4078,7 +4077,7 @@ class TestPrecompute(common.TransactionCase):
         self.assertEqual(record.baz, 'COMPUTED')
 
         # no value for bar, value for baz
-        # baz is readonly=True but states={'draft': [('readonly', False)]}
+        # baz is readonly=True but readonly=[('state', '!=', 'draft')],
         # the value for baz must be taken into account
         record = model.create({'foo': 'foo', 'baz': 'baz'})
         self.assertEqual(record.bar, 'COMPUTED')

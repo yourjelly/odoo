@@ -14,7 +14,7 @@
                 <label for="l10n_latam_identification_type_id" string="Identification Number"/>
                 <div>
                     <field name="l10n_latam_identification_type_id" options="{'no_open': True, 'no_create': True}" placeholder="Type" class="oe_inline"
-                        attrs="{'readonly': [('parent_id','!=',False)]}"
+                        readonly="[('parent_id', '!=', False)]"
                         required="True"
                         domain="[('country_id', 'in', [False, country_id])] if country_id else []"/>
                     <span class="oe_read_only"> - </span>

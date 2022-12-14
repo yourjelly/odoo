@@ -135,14 +135,6 @@ class Field(MetaField('DummyField', (object,), {})):
         ``default=None`` to discard default values for the field
     :type default: value or callable
 
-    :param dict states: a dictionary mapping state values to lists of UI attribute-value
-        pairs; possible attributes are: ``readonly``, ``required``.
-
-        .. warning:: Any state-based condition requires the ``state`` field value to be
-            available on the client-side UI. This is typically done by including it in
-            the relevant views, possibly made invisible if not relevant for the
-            end-user.
-
     :param str groups: comma-separated list of group xml ids (string); this
         restricts the field access to the users of the given groups only
 
@@ -291,9 +283,9 @@ class Field(MetaField('DummyField', (object,), {})):
 
     string = None                       # field label
     help = None                         # field tooltip
-    readonly = False                    # whether the field is readonly
+    readonly = False                    # whether the field is readonly (True, False, domain or domain as string)
     required = False                    # whether the field is required
-    states = None                       # set readonly and required depending on state
+    states = None                       # set readonly and required depending on state  # TODO: remove me
     groups = None                       # csv list of group xml ids
     change_default = False              # whether the field may trigger a "user-onchange"
 
@@ -422,7 +414,7 @@ class Field(MetaField('DummyField', (object,), {})):
             # readonly), and readonly (unless inversible)
             attrs['store'] = store = attrs.get('store', False)
             attrs['compute_sudo'] = attrs.get('compute_sudo', store)
-            if not (attrs['store'] and not attrs.get('readonly', True)):
+            if not (attrs['store'] and attrs.get('readonly', True) is not True):
                 attrs['copy'] = attrs.get('copy', False)
             attrs['readonly'] = attrs.get('readonly', not attrs.get('inverse'))
         if attrs.get('related'):
@@ -447,7 +439,7 @@ class Field(MetaField('DummyField', (object,), {})):
             attrs['copy'] = attrs.get('copy', False)
             attrs['default'] = attrs.get('default', self._default_company_dependent)
             attrs['compute'] = self._compute_company_dependent
-            if not attrs.get('readonly'):
+            if attrs.get('readonly') is not True:
                 attrs['inverse'] = self._inverse_company_dependent
             attrs['search'] = self._search_company_dependent
             attrs['depends_context'] = attrs.get('depends_context', ()) + ('company',)
@@ -502,12 +494,11 @@ class Field(MetaField('DummyField', (object,), {})):
             # validate field params
             for key in self._extra_keys:
                 if not model._valid_field_parameter(self, key):
-                    _logger.warning(
-                        "Field %s: unknown parameter %r, if this is an actual"
-                        " parameter you may want to override the method"
-                        " _valid_field_parameter on the relevant model in order to"
-                        " allow it",
-                        self, key
+                    warnings.warn(
+                        f"Field {self}: unknown parameter {key!r}, if this is an actual"
+                        f" parameter you may want to override the method"
+                        f" _valid_field_parameter on the relevant model in order to"
+                        f" allow it"
                     )
             if self.related:
                 self.setup_related(model)
@@ -515,9 +506,13 @@ class Field(MetaField('DummyField', (object,), {})):
                 self.setup_nonrelated(model)
 
             if self.required not in (True, False):
-                _logger.warning('"required" property on the field "%s" should be a boolean or a domain (list or str)', self)
+                warnings.warn(f'"required" property on the field "{self}" should be a boolean')
+
+            if self.states:
+                warnings.warn(f'"states" property on the field "{self}" is deprecated', DeprecationWarning)
 
             self._setup_done = True
+
 
     #
     # Setup of non-related fields
@@ -594,7 +589,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # determine dependencies, compute, inverse, and search
         self.compute = self._compute_related
-        if self.inherited or not (self.readonly or field.readonly):
+        if self.inherited or not (self.readonly is True or field.readonly is True):
             self.inverse = self._inverse_related
         if field._description_searchable:
             # allow searching on self only if the related field is searchable
@@ -602,8 +597,8 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # A readonly related field without an inverse method should not have a
         # default value, as it does not make sense.
-        if self.default and self.readonly and not self.inverse:
-            _logger.warning("Redundant default on %s", self)
+        if self.default and self.readonly is True and not self.inverse:
+            warnings.warn(f"Redundant default on {self}")
 
         # copy attributes from field to self (string, help, etc.)
         for attr, prop in self.related_attrs:
@@ -619,8 +614,6 @@ class Field(MetaField('DummyField', (object,), {})):
         # special cases of inherited fields
         if self.inherited:
             self.inherited_field = field
-            if not self.states:
-                self.states = field.states
             if field.required is True:
                 self.required = True
             # add modules from delegate and target fields; the first one ensures
@@ -630,7 +623,7 @@ class Field(MetaField('DummyField', (object,), {})):
             self._modules = tuple({*self._modules, *delegate_field._modules, *field._modules})
 
         if self.store and self.translate:
-            _logger.warning("Translated stored related field (%s) will not be computed correctly in all languages", self)
+            warnings.warn(f"Translated stored related field ({self}) will not be computed correctly in all languages")
 
     def traverse_related(self, record):
         """ Traverse the fields of the related field `self` except for the last
@@ -840,7 +833,6 @@ class Field(MetaField('DummyField', (object,), {})):
     _description_company_dependent = property(attrgetter('company_dependent'))
     _description_readonly = property(attrgetter('readonly'))
     _description_required = property(attrgetter('required'))
-    _description_states = property(attrgetter('states'))
     _description_groups = property(attrgetter('groups'))
     _description_change_default = property(attrgetter('change_default'))
     _description_group_operator = property(attrgetter('group_operator'))
@@ -874,9 +866,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def is_editable(self):
         """ Return whether the field can be editable in a view. """
-        return not self.readonly or self.states and any(
-            'readonly' in item for items in self.states.values() for item in items
-        )
+        return self.readonly is not True
 
     ############################################################################
     #
@@ -1175,7 +1165,7 @@ class Field(MetaField('DummyField', (object,), {})):
                     ]))
                 value = env.cache.get(record, self)
 
-            elif self.store and record._origin and not (self.compute and self.readonly):
+            elif self.store and record._origin and not (self.compute and self.readonly is True):
                 # new record with origin: fetch from origin
                 value = self.convert_to_cache(record._origin[self.name], record)
                 env.cache.set(record, self, value)
@@ -1194,7 +1184,7 @@ class Field(MetaField('DummyField', (object,), {})):
                     try:
                         value = env.cache.get(record, self)
                     except CacheMiss:
-                        if self.readonly and not self.store:
+                        if self.readonly is True and not self.store:
                             raise ValueError("Compute method failed to assign %s.%s" % (record, self.name))
                         # fallback to null value if compute gives nothing
                         value = self.convert_to_cache(False, record, validate=False)
@@ -2478,7 +2468,7 @@ class Image(Binary):
         records.env.cache.update(records, self, itertools.repeat(cache_value), dirty=dirty)
 
     def _image_process(self, value):
-        if self.readonly and not self.max_width and not self.max_height:
+        if self.readonly is True and not self.max_width and not self.max_height:
             # no need to process images for computed fields, or related fields
             return value
         try:
@@ -2585,11 +2575,11 @@ class Selection(Field):
             # because those attributes are overridden by ``_setup_attrs``.
             if 'selection' in field.args:
                 if self.related:
-                    _logger.warning("%s: selection attribute will be ignored as the field is related", self)
+                    warnings.warn(f"{self}: selection attribute will be ignored as the field is related")
                 selection = field.args['selection']
                 if isinstance(selection, list):
                     if values is not None and values != [kv[0] for kv in selection]:
-                        _logger.warning("%s: selection=%r overrides existing selection; use selection_add instead", self, selection)
+                        warnings.warn(f"{self}: selection={selection!r} overrides existing selection; use selection_add instead")
                     values = [kv[0] for kv in selection]
                     labels = dict(selection)
                     self.ondelete = {}
@@ -2601,7 +2591,7 @@ class Selection(Field):
 
             if 'selection_add' in field.args:
                 if self.related:
-                    _logger.warning("%s: selection_add attribute will be ignored as the field is related", self)
+                    warnings.warn(f"{self}: selection_add attribute will be ignored as the field is related")
                 selection_add = field.args['selection_add']
                 assert isinstance(selection_add, list), \
                     "%s: selection_add=%r must be a list" % (self, selection_add)
@@ -2795,7 +2785,7 @@ class _Relational(Field):
     def setup_nonrelated(self, model):
         super().setup_nonrelated(model)
         if self.comodel_name not in model.pool:
-            _logger.warning("Field %s with unknown comodel_name %r", self, self.comodel_name)
+            warnings.warn(f"Field {self} with unknown comodel_name {self.comodel_name!r}")
             self.comodel_name = '_unknown'
 
     def get_domain_list(self, model):

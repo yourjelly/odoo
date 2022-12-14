@@ -44,7 +44,7 @@ class StockMove(models.Model):
         'product.product', 'Product',
         check_company=True,
         domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', False), ('company_id', '=', company_id)]", index=True, required=True,
-        states={'done': [('readonly', True)]})
+        readonly=[('state', '=', 'done')])
     description_picking = fields.Text('Description of Picking')
     product_qty = fields.Float(
         'Real Quantity', compute='_compute_product_qty', inverse='_set_product_qty',
@@ -53,7 +53,7 @@ class StockMove(models.Model):
     product_uom_qty = fields.Float(
         'Demand',
         digits='Product Unit of Measure',
-        default=1.0, required=True, states={'done': [('readonly', True)]},
+        default=1.0, required=True, readonly=[('state', '=', 'done')],
         help="This is the quantity of products from an inventory "
              "point of view. For moves in the state 'done', this is the "
              "quantity of products that were actually moved. For other "
@@ -84,9 +84,9 @@ class StockMove(models.Model):
     location_dest_usage = fields.Selection(string="Destination Location Type", related='location_dest_id.usage')
     partner_id = fields.Many2one(
         'res.partner', 'Destination Address ',
-        states={'done': [('readonly', True)]},
+        readonly=[('state', '=', 'done')],
         help="Optional address where goods are to be delivered, specifically used for allotment",
-        compute='_compute_partner_id', store=True, readonly=False)
+        compute='_compute_partner_id', store=True)
     move_dest_ids = fields.Many2many(
         'stock.move', 'stock_move_move_rel', 'move_orig_id', 'move_dest_id', 'Destination Moves',
         copy=False,
@@ -95,7 +95,7 @@ class StockMove(models.Model):
         'stock.move', 'stock_move_move_rel', 'move_dest_id', 'move_orig_id', 'Original Move',
         copy=False,
         help="Optional: previous stock move when chaining them")
-    picking_id = fields.Many2one('stock.picking', 'Transfer', index=True, states={'done': [('readonly', True)]}, check_company=True)
+    picking_id = fields.Many2one('stock.picking', 'Transfer', index=True, readonly=[('state', '=', 'done')], check_company=True)
     state = fields.Selection([
         ('draft', 'New'), ('cancel', 'Cancelled'),
         ('waiting', 'Waiting Another Move'),

@@ -486,15 +486,11 @@ def transfer_field_to_modifiers(field, modifiers, attributes):
     state_exceptions = {}
     for attr in attributes:
         state_exceptions[attr] = []
-        default_values[attr] = bool(field.get(attr))
-    for state, modifs in field.get("states", {}).items():
-        for modif in modifs:
-            if modif[0] in attributes and default_values[modif[0]] != modif[1]:
-                state_exceptions[modif[0]].append(state)
+        default_values[attr] = field.get(attr)
 
     for attr, default_value in default_values.items():
         if state_exceptions[attr]:
-            modifiers[attr] = [("state", "not in" if default_value else "in", state_exceptions[attr])]
+            modifiers[attr] = [("state", "not in" if default_value is True else "in", state_exceptions[attr])]
         else:
             modifiers[attr] = default_value
 
@@ -1631,7 +1627,7 @@ actual arch.
 
             # remove consumed attributes
             for attr in ('attrs', 'states', 'column_invisible', 'invisible', 'readonly', 'required'):
-                node.attrib.pop('attrs', None)
+                node.attrib.pop(attr, None)
 
             # simplify modifiers and convert to string for contextual domain
             for attr in list(modifiers):
@@ -3292,12 +3288,11 @@ class NameManager:
 
     @lazy_property
     def field_info(self):
-        field_info = self.model.fields_get(attributes=['invisible', 'states', 'readonly', 'required'])
+        field_info = self.model.fields_get(attributes=['readonly', 'required'])
         has_access = functools.partial(self.model.check_access_rights, raise_exception=False)
         if not (has_access('write') or has_access('create')):
             for info in field_info.vals():
                 info['readonly'] = True
-                info['states'] = {}
         return field_info
 
     def has_field(self, node, name, info=frozendict()):

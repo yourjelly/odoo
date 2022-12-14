@@ -60,8 +60,8 @@ class TestReflection(common.TransactionCase):
                         self.assertEqual(ir_field.store, bool(field.store))
                         self.assertEqual(ir_field.copied, bool(field.copy))
                         self.assertEqual(ir_field.related, field.related or False)
-                        self.assertEqual(ir_field.readonly, bool(field.readonly))
-                        self.assertEqual(ir_field.required, bool(field.required))
+                        self.assertEqual(ir_field.readonly, field.readonly is True)
+                        self.assertEqual(ir_field.required, field.required is True)
                         self.assertEqual(ir_field.selectable, bool(field.search or field.store))
                         self.assertEqual(ir_field.translate, bool(field.translate))
                         if field.relational:

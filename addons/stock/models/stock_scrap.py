@@ -14,39 +14,39 @@ class StockScrap(models.Model):
 
     name = fields.Char(
         'Reference',  default=lambda self: _('New'),
-        copy=False, readonly=True, required=True,
-        states={'done': [('readonly', True)]})
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True, states={'done': [('readonly', True)]})
+        copy=False, required=True,
+        readonly=[('state', '=', 'done')])
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True, readonly=[('state', '=', 'done')])
     origin = fields.Char(string='Source Document')
     product_id = fields.Many2one(
         'product.product', 'Product', domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
-        required=True, states={'done': [('readonly', True)]}, check_company=True)
+        required=True, readonly=[('state', '=', 'done')], check_company=True)
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
-        compute="_compute_product_uom_id", store=True, readonly=False, precompute=True,
-        required=True, states={'done': [('readonly', True)]}, domain="[('category_id', '=', product_uom_category_id)]")
+        compute="_compute_product_uom_id", store=True, precompute=True,
+        required=True, readonly=[('state', '=', 'done')], domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
     tracking = fields.Selection(string='Product Tracking', readonly=True, related="product_id.tracking")
     lot_id = fields.Many2one(
         'stock.lot', 'Lot/Serial',
-        states={'done': [('readonly', True)]}, domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
+        readonly=[('state', '=', 'done')], domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
     package_id = fields.Many2one(
         'stock.quant.package', 'Package',
-        states={'done': [('readonly', True)]}, check_company=True)
-    owner_id = fields.Many2one('res.partner', 'Owner', states={'done': [('readonly', True)]}, check_company=True)
+        readonly=[('state', '=', 'done')], check_company=True)
+    owner_id = fields.Many2one('res.partner', 'Owner', readonly=[('state', '=', 'done')], check_company=True)
     move_id = fields.Many2one('stock.move', 'Scrap Move', readonly=True, check_company=True, copy=False)
-    picking_id = fields.Many2one('stock.picking', 'Picking', states={'done': [('readonly', True)]}, check_company=True)
+    picking_id = fields.Many2one('stock.picking', 'Picking', readonly=[('state', '=', 'done')], check_company=True)
     location_id = fields.Many2one(
         'stock.location', 'Source Location',
-        compute='_compute_location_id', store=True, required=True, precompute=True, states={'done': [('readonly', True)]},
+        compute='_compute_location_id', store=True, required=True, precompute=True, readonly=[('state', '=', 'done')],
         domain="[('usage', '=', 'internal'), ('company_id', 'in', [company_id, False])]", check_company=True)
     scrap_location_id = fields.Many2one(
         'stock.location', 'Scrap Location',
-        compute='_compute_scrap_location_id', store=True, required=True, precompute=True, states={'done': [('readonly', True)]},
+        compute='_compute_scrap_location_id', store=True, required=True, precompute=True, readonly=[('state', '=', 'done')],
         domain="[('scrap_location', '=', True), ('company_id', 'in', [company_id, False])]", check_company=True)
     scrap_qty = fields.Float(
-        'Quantity', required=True, states={'done': [('readonly', True)]}, digits='Product Unit of Measure',
-        compute='_compute_scrap_qty', precompute=True, readonly=False, store=True)
+        'Quantity', required=True, readonly=[('state', '=', 'done')], digits='Product Unit of Measure',
+        compute='_compute_scrap_qty', precompute=True, store=True)
     state = fields.Selection([
         ('draft', 'Draft'),
         ('done', 'Done')],

@@ -1810,7 +1810,7 @@ class Task(models.Model):
 
         writable_fields = self.SELF_WRITABLE_FIELDS
         for field_name, description in public_fields.items():
-            if field_name not in writable_fields and not description.get('readonly', False):
+            if field_name not in writable_fields and description.get('readonly', False) is not True:
                 # If the field is not in Writable fields and it is not readonly then we force the readonly to True
                 description['readonly'] = True
 
