@@ -412,8 +412,8 @@ export class Messaging {
                             continue;
                         }
                         this.updateMessageStarredState(message, starred);
+                        this.state.discuss.starred.sortMessages();
                     }
-                    this.state.discuss.starred.messages.sort();
                     break;
                 }
                 case "mail.channel.member/seen": {
@@ -1020,7 +1020,9 @@ export class Messaging {
         message.isStarred = isStarred;
         if (isStarred) {
             this.state.discuss.starred.counter++;
-            this.state.discuss.starred.messages.push(message.id);
+            if (this.state.discuss.starred.messages.length > 0) {
+                this.state.discuss.starred.messages.push(message.id);
+            }
         } else {
             this.state.discuss.starred.counter--;
             removeFromArray(this.state.discuss.starred.messages, message.id);
