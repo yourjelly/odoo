@@ -197,7 +197,8 @@ class ProductProduct(models.Model):
                 if rounding_error:
                     # If it is bigger than the (smallest number of the currency * quantity) / 2,
                     # then it isn't a rounding error but a stock valuation error, we shouldn't fix it under the hood ...
-                    if abs(rounding_error) <= (abs(quantity) * currency.rounding) / 2:
+                    rounding_error = abs(rounding_error) * quantity / self.quantity_svl
+                    if abs(rounding_error) <= abs(quantity) * currency.rounding / 2:
                         vals['value'] += rounding_error
                         vals['rounding_adjustment'] = '\nRounding Adjustment: %s%s %s' % (
                             '+' if rounding_error > 0 else '',
