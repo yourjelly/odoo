@@ -6,8 +6,6 @@ import { useService } from "@web/core/utils/hooks";
 import { Field } from "@web/views/fields/field";
 import {
     getImageSrcFromRecordInfo,
-    getRawValue,
-    getValue,
     isHtmlEmpty,
 } from "@web/views/kanban/kanban_record";
 import { useViewCompiler } from "@web/views/view_compiler";
@@ -30,20 +28,10 @@ export class ActivityRecord extends Component {
     }
 
     getRenderingContext() {
-        const record = this.props.record;
-        for (const fieldName in record.data) {
-            record[fieldName] = {
-                get value() {
-                    return getValue(record, fieldName);
-                },
-                get raw_value() {
-                    return getRawValue(record, fieldName);
-                },
-            };
-        }
-
+        const { record } = this.props;
+        console.log(this.props.record)
         return {
-            record,
+            record: record.formattedRecord,
             activity_image: (...args) => getImageSrcFromRecordInfo(record, ...args),
             user_context: this.user.context,
             widget: this.widget,
