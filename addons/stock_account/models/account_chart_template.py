@@ -26,6 +26,8 @@ class AccountChartTemplate(models.Model):
             'property_stock_account_input_categ_id',
             'property_stock_account_output_categ_id',
             'property_stock_valuation_account_id',
+            'property_stock_account_production_cost_id',
+            'property_stock_account_inventory_loss_id',
         ]
         for field in todo_list:
             account = self[field]

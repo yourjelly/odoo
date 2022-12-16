@@ -94,6 +94,8 @@ class ResCompany(models.Model):
     property_stock_account_input_categ_id = fields.Many2one('account.account', string="Input Account for Stock Valuation")
     property_stock_account_output_categ_id = fields.Many2one('account.account', string="Output Account for Stock Valuation")
     property_stock_valuation_account_id = fields.Many2one('account.account', string="Account Template for Stock Valuation")
+    property_stock_account_production_cost_id = fields.Many2one('account.account', string="Account Template for Production Cost")
+    property_stock_account_inventory_loss_id = fields.Many2one('account.account', string="Account Template for Inventory Loss")
     bank_journal_ids = fields.One2many('account.journal', 'company_id', domain=[('type', '=', 'bank')], string='Bank Journals')
     incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm',
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')

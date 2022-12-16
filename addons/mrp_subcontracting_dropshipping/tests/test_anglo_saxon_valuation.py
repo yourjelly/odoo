@@ -12,6 +12,7 @@ class TestSubcontractingDropshippingValuation(ValuationReconciliationTestCommon)
     def setUpClass(cls, chart_template_ref=None):
         super().setUpClass(chart_template_ref=chart_template_ref)
 
+        cls.env.user.groups_id += cls.env.ref('stock_account.group_stock_accounting_automatic')
         categ_form = Form(cls.env['product.category'])
         categ_form.name = 'fifo auto'
         categ_form.parent_id = cls.env.ref('product.product_category_all')

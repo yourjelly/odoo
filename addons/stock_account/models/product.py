@@ -7,6 +7,14 @@ from odoo.tools import float_is_zero, float_repr, float_round, float_compare
 from odoo.exceptions import ValidationError
 from collections import defaultdict
 
+STOCK_PROPERTY_FIELDS = [
+    'property_stock_account_input_categ_id',
+    'property_stock_account_output_categ_id',
+    'property_stock_valuation_account_id',
+    'property_stock_account_production_cost_id',
+    'property_stock_account_inventory_loss_id',
+]
+
 
 class ProductTemplate(models.Model):
     _name = 'product.template'
@@ -749,6 +757,14 @@ class ProductCategory(models.Model):
         'account.account', 'Stock Valuation Account', company_dependent=True,
         domain="[('company_id', '=', allowed_company_ids[0]), ('deprecated', '=', False)]", check_company=True,
         help="""When automated inventory valuation is enabled on a product, this account will hold the current value of the products.""",)
+    property_stock_account_production_cost_id = fields.Many2one(
+        'account.account', 'Production Account', company_dependent=True,
+        domain="[('company_id', '=', allowed_company_ids[0]), ('deprecated', '=', False)]", check_company=True,
+        help="")
+    property_stock_account_inventory_loss_id = fields.Many2one(
+        'account.account', 'Inventory Loss Account', company_dependent=True,
+        domain="[('company_id', '=', allowed_company_ids[0]), ('deprecated', '=', False)]", check_company=True,
+        help="")
 
     @api.constrains('property_stock_valuation_account_id', 'property_stock_account_output_categ_id', 'property_stock_account_input_categ_id')
     def _check_valuation_accouts(self):
@@ -784,20 +800,19 @@ class ProductCategory(models.Model):
             new_valuation = vals.get('property_valuation')
 
             for product_category in self:
-                property_stock_fields = ['property_stock_account_input_categ_id', 'property_stock_account_output_categ_id', 'property_stock_valuation_account_id']
                 if 'property_valuation' in vals and vals['property_valuation'] == 'manual_periodic' and product_category.property_valuation != 'manual_periodic':
-                    for stock_property in property_stock_fields:
+                    for stock_property in STOCK_PROPERTY_FIELDS:
                         vals[stock_property] = False
                 elif 'property_valuation' in vals and vals['property_valuation'] == 'real_time' and product_category.property_valuation != 'real_time':
                     company_id = self.env.company
-                    for stock_property in property_stock_fields:
+                    for stock_property in STOCK_PROPERTY_FIELDS:
                         vals[stock_property] = vals.get(stock_property, False) or company_id[stock_property]
                 elif product_category.property_valuation == 'manual_periodic':
-                    for stock_property in property_stock_fields:
+                    for stock_property in STOCK_PROPERTY_FIELDS:
                         if stock_property in vals:
                             vals.pop(stock_property)
                 else:
-                    for stock_property in property_stock_fields:
+                    for stock_property in STOCK_PROPERTY_FIELDS:
                         if stock_property in vals and vals[stock_property] is False:
                             vals.pop(stock_property)
                 valuation_impacted = False
@@ -845,26 +860,20 @@ class ProductCategory(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if 'property_valuation' not in vals or vals['property_valuation'] == 'manual_periodic':
-                vals['property_stock_account_input_categ_id'] = False
-                vals['property_stock_account_output_categ_id'] = False
-                vals['property_stock_valuation_account_id'] = False
+                for stock_property in STOCK_PROPERTY_FIELDS:
+                    vals[stock_property] = False
             if 'property_valuation' in vals and vals['property_valuation'] == 'real_time':
                 company_id = self.env.company
-                vals['property_stock_account_input_categ_id'] = vals.get('property_stock_account_input_categ_id', False) or company_id.property_stock_account_input_categ_id
-                vals['property_stock_account_output_categ_id'] = vals.get('property_stock_account_output_categ_id', False) or company_id.property_stock_account_output_categ_id
-                vals['property_stock_valuation_account_id'] = vals.get('property_stock_valuation_account_id', False) or company_id.property_stock_valuation_account_id
-
+                for stock_property in STOCK_PROPERTY_FIELDS:
+                    vals[stock_property] = vals.get(stock_property, False) or company_id[stock_property]
         return super().create(vals_list)
 
     @api.onchange('property_valuation')
     def onchange_property_valuation(self):
         # Remove or set the account stock properties if necessary
-        if self.property_valuation == 'manual_periodic':
-            self.property_stock_account_input_categ_id = False
-            self.property_stock_account_output_categ_id = False
-            self.property_stock_valuation_account_id = False
-        if self.property_valuation == 'real_time':
-            company_id = self.env.company
-            self.property_stock_account_input_categ_id = company_id.property_stock_account_input_categ_id
-            self.property_stock_account_output_categ_id = company_id.property_stock_account_output_categ_id
-            self.property_stock_valuation_account_id = company_id.property_stock_valuation_account_id
+        for stock_property in STOCK_PROPERTY_FIELDS:
+            if self.property_valuation == 'manual_periodic':
+                self[stock_property] = False
+            if self.property_valuation == 'real_time':
+                company_id = self.env.company
+                self[stock_property] = company_id[stock_property]

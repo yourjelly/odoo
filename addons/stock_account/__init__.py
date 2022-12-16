@@ -18,6 +18,8 @@ def _configure_journals(cr, registry):
         'property_stock_account_input_categ_id',
         'property_stock_account_output_categ_id',
         'property_stock_valuation_account_id',
+        'property_stock_account_production_cost_id',
+        'property_stock_account_inventory_loss_id',
     ]
     # Property Stock Accounts
     for company_id in company_ids:

@@ -311,6 +311,8 @@ class AccountChartTemplate(models.Model):
     property_stock_account_input_categ_id = fields.Many2one('account.account.template', string="Input Account for Stock Valuation")
     property_stock_account_output_categ_id = fields.Many2one('account.account.template', string="Output Account for Stock Valuation")
     property_stock_valuation_account_id = fields.Many2one('account.account.template', string="Account Template for Stock Valuation")
+    property_stock_account_production_cost_id = fields.Many2one('account.account.template', string="Account Template for Production Cost")
+    property_stock_account_inventory_loss_id = fields.Many2one('account.account.template', string="Account Template for Inventory Loss")
     property_tax_payable_account_id = fields.Many2one('account.account.template', string="Tax current account (payable)")
     property_tax_receivable_account_id = fields.Many2one('account.account.template', string="Tax current account (receivable)")
     property_advance_tax_payment_account_id = fields.Many2one('account.account.template', string="Advance tax payment account")
@@ -700,6 +702,8 @@ class AccountChartTemplate(models.Model):
             'property_stock_account_input_categ_id',
             'property_stock_account_output_categ_id',
             'property_stock_valuation_account_id',
+            'property_stock_account_production_cost_id',
+            'property_stock_account_inventory_loss_id',
         ]
         for stock_property in stock_properties:
             account = getattr(self, stock_property)
