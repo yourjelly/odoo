@@ -61,6 +61,46 @@ class Home(http.Controller):
         except AccessError:
             return request.redirect('/web/login?error=access')
 
+    @http.route("/web/unity_read/<string:model>", type='json', auth='user')
+    def unity_read(self, *args, **kwargs):
+        env = request.env
+        context = kwargs["kwargs"]["context"]
+        model = kwargs["model"]
+        fields_spec = kwargs["kwargs"]["fields"]
+        read_params = kwargs["kwargs"]["read"]
+
+        main_model = env[model]
+        result = main_model.with_context(context).browse(read_params["ids"]).read([
+            field for field in fields_spec if main_model._fields[field].type not in ["one2many", "many2many"]
+        ])
+
+        for (field, definition) in fields_spec.items():
+            if main_model._fields[field].type in ["one2many", "many2many"] and isinstance(definition, dict):
+                comodel_name = main_model._fields[field].comodel_name
+                # todo: how to read effectively x2many using the prefetch set of the "parent object"
+                #  or event better: the top level objects [1,2,3] traversing all the relations
+
+                # todo: add context keys on read for comodels if it is defined
+                result[field] = main_model.env[comodel_name].read([
+                    f for f in definition if result.env[comodel_name]._fields[field].type not in ["one2many", "many2many"]
+                ])
+
+        return result
+
+
+    # todo : check for context propagation (if a x2many has active_test=false, its children should not
+    # todo : recursively check for x2many
+    def _unity_toMany_recursive(self, parent_model, co_model, field, field_spec):
+        for (field, definition) in field_spec.items():
+            if parent_model._fields[field].type in ["one2many", "many2many"] and isinstance(definition, dict):
+                self._unity_toMany_recursive(parent_model,
+                                             request.env[parent_model._fields[field].comodel_name],
+                                             field,
+                                             definition)
+
+
+
+
     @http.route('/web/webclient/load_menus/<string:unique>', type='http', auth='user', methods=['GET'])
     def web_load_menus(self, unique):
         """
