@@ -69,37 +69,26 @@ class Home(http.Controller):
         fields_spec = kwargs["kwargs"]["fields"]
         read_params = kwargs["kwargs"]["read"]
 
-        main_model = env[model]
-        result = main_model.with_context(context).browse(read_params["ids"]).read([
-            field for field in fields_spec if main_model._fields[field].type not in ["one2many", "many2many"]
+        main_model = env[model].with_context(context).browse(read_params["ids"])
+        result = main_model.read([
+            field for field in fields_spec if not field.startswith("__")
         ])
 
-        for (field, definition) in fields_spec.items():
-            if main_model._fields[field].type in ["one2many", "many2many"] and isinstance(definition, dict):
-                comodel_name = main_model._fields[field].comodel_name
-                # todo: how to read effectively x2many using the prefetch set of the "parent object"
-                #  or event better: the top level objects [1,2,3] traversing all the relations
+        for (field_x2many, x2many_definition) in fields_spec.items():
+            if not field_x2many.startswith("__") and main_model._fields[field_x2many].type in ["one2many", "many2many"] and isinstance(x2many_definition, dict):
+                # we load more than the IDs on xmany fields if we have a dict definition for them
+                comodel_name = main_model._fields[field_x2many].comodel_name
 
-                # todo: add context keys on read for comodels if it is defined
-                result[field] = main_model.env[comodel_name].read([
-                    f for f in definition if result.env[comodel_name]._fields[field].type not in ["one2many", "many2many"]
-                ])
-
+                # TODO: add context keys on read for comodels if it is defined in key __context on comodel definition
+                # TODO : recursively check for x2many in x2many
+                all_comodel_values = main_model[field_x2many].read([f for f in x2many_definition if not f.startswith("__")])
+                for i in result:
+                    # replace for each record, the id of x2many by the actual object representing it
+                    for index, comodel_id in enumerate(i[field_x2many]):
+                        for comodel in all_comodel_values:
+                            if comodel["id"] == comodel_id:
+                                i[field_x2many][index] = comodel
         return result
-
-
-    # todo : check for context propagation (if a x2many has active_test=false, its children should not
-    # todo : recursively check for x2many
-    def _unity_toMany_recursive(self, parent_model, co_model, field, field_spec):
-        for (field, definition) in field_spec.items():
-            if parent_model._fields[field].type in ["one2many", "many2many"] and isinstance(definition, dict):
-                self._unity_toMany_recursive(parent_model,
-                                             request.env[parent_model._fields[field].comodel_name],
-                                             field,
-                                             definition)
-
-
-
 
     @http.route('/web/webclient/load_menus/<string:unique>', type='http', auth='user', methods=['GET'])
     def web_load_menus(self, unique):
