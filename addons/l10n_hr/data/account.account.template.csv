@@ -307,13 +307,13 @@ hr_421000,421000,Income tax and surtax costs,expense,l10n_hr.l10n_hr_chart_templ
 hr_422000,422000,Contributions from salaries costs,expense,l10n_hr.l10n_hr_chart_template,False
 hr_423000,423000,Contributions on salaries costs,expense,l10n_hr.l10n_hr_chart_template,False
 hr_424000,424000,Gross salaries,expense,l10n_hr.l10n_hr_chart_template,False
-hr_430000,430000,Amortisation of intangible assets,depreciation,l10n_hr.l10n_hr_chart_template,False
-hr_431000,431000,"Depreciation of property, plant and equipment",depreciation,l10n_hr.l10n_hr_chart_template,False
-hr_432000,432000,Depreciation of cars and other vehicles for personal transportation,depreciation,l10n_hr.l10n_hr_chart_template,False
-hr_433000,433000,"Depreciation of property, plant and - management and selling department",depreciation,l10n_hr.l10n_hr_chart_template,False
-hr_434000,434000,Depreciation surplus due to revaluation of assets,depreciation,l10n_hr.l10n_hr_chart_template,False
-hr_435000,435000,"Depreciation of biological assets (vineyards, orchards, live stock)",depreciation,l10n_hr.l10n_hr_chart_template,False
-hr_436000,436000,Tax not-deductible depreciation,depreciation,l10n_hr.l10n_hr_chart_template,False
+hr_430000,430000,Amortisation of intangible assets,expense_depreciation,l10n_hr.l10n_hr_chart_template,False
+hr_431000,431000,"Depreciation of property, plant and equipment",expense_depreciation,l10n_hr.l10n_hr_chart_template,False
+hr_432000,432000,Depreciation of cars and other vehicles for personal transportation,expense_depreciation,l10n_hr.l10n_hr_chart_template,False
+hr_433000,433000,"Depreciation of property, plant and - management and selling department",expense_depreciation,l10n_hr.l10n_hr_chart_template,False
+hr_434000,434000,Depreciation surplus due to revaluation of assets,expense_depreciation,l10n_hr.l10n_hr_chart_template,False
+hr_435000,435000,"Depreciation of biological assets (vineyards, orchards, live stock)",expense_depreciation,l10n_hr.l10n_hr_chart_template,False
+hr_436000,436000,Tax not-deductible depreciation,expense_depreciation,l10n_hr.l10n_hr_chart_template,False
 hr_440000,440000,Value adjustment of non-current intangible assets (acc. 018),expense,l10n_hr.l10n_hr_chart_template,False
 hr_441000,441000,"Value adjustment of property, plant and equipment",expense,l10n_hr.l10n_hr_chart_template,False
 hr_442000,442000,Value adjustment of non-current receivables (acc. 078),expense,l10n_hr.l10n_hr_chart_template,False
@@ -366,11 +366,11 @@ hr_490000,490000,"Allocation of costs to cost of conversion (cost of production)
 hr_491000,491000,Allocation of management and administrative overheads to expense for the year - (on acc. 72),expense,l10n_hr.l10n_hr_chart_template,False
 hr_500000,500000,Material used in management and administrative overheads,expense,l10n_hr.l10n_hr_chart_template,False
 hr_501000,501000,Wages and other costs of administration,expense,l10n_hr.l10n_hr_chart_template,False
-hr_502000,502000,Depreciation used in management and administrative overheads,depreciation,l10n_hr.l10n_hr_chart_template,False
+hr_502000,502000,Depreciation used in management and administrative overheads,expense_depreciation,l10n_hr.l10n_hr_chart_template,False
 hr_505000,505000,Other costs related to the administration and selling,expense,l10n_hr.l10n_hr_chart_template,False
 hr_510000,510000,Material used during selling process in total selling costs,expense,l10n_hr.l10n_hr_chart_template,False
 hr_511000,511000,Wages in selling costs,expense,l10n_hr.l10n_hr_chart_template,False
-hr_512000,512000,Depreciation in selling costs,depreciation,l10n_hr.l10n_hr_chart_template,False
+hr_512000,512000,Depreciation in selling costs,expense_depreciation,l10n_hr.l10n_hr_chart_template,False
 hr_513000,513000,Rents in the cost of sales,expense,l10n_hr.l10n_hr_chart_template,False
 hr_515000,515000,"Other costs related to the deliverables, invoicing and marketing, packaging, export",expense,l10n_hr.l10n_hr_chart_template,False
 hr_590000,590000,"Allocation of costs to cost of conversion (cost of production) - (on acc. 60, 62, 63)",expense,l10n_hr.l10n_hr_chart_template,False
@@ -499,8 +499,8 @@ hr_780000,780000,Income from liability write off and from discounts received,inc
 hr_781000,781000,"Net gain on disposal of assets, surpluses and evaluation",income_other,l10n_hr.l10n_hr_chart_template,False
 hr_782000,782000,Income from reversal of value adjustment and provisions and collected receivables written off,income_other,l10n_hr.l10n_hr_chart_template,False
 hr_783000,783000,"Income from grants, subsidies and compensations",income_other,l10n_hr.l10n_hr_chart_template,False
-hr_780900,7809000,Income from the write-off of liabilities to entrepreneurs within the group,income_other,l10n_hr.l10n_hr_chart_template,False
-hr_783900,7839000,Income from grants and compensation from entrepreneurs within the group,income_other,l10n_hr.l10n_hr_chart_template,False
+hr_780900,780900,Income from the write-off of liabilities to entrepreneurs within the group,income_other,l10n_hr.l10n_hr_chart_template,False
+hr_783900,783900,Income from grants and compensation from entrepreneurs within the group,income_other,l10n_hr.l10n_hr_chart_template,False
 hr_784000,784000,Income from losses and revaluations reversals,income_other,l10n_hr.l10n_hr_chart_template,False
 hr_785000,785000,Other business income,income_other,l10n_hr.l10n_hr_chart_template,False
 hr_786000,786000,Income from government grants,income_other,l10n_hr.l10n_hr_chart_template,False
