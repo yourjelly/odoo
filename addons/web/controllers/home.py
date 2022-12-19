@@ -77,17 +77,19 @@ class Home(http.Controller):
         for (field_x2many, x2many_definition) in fields_spec.items():
             if not field_x2many.startswith("__") and main_model._fields[field_x2many].type in ["one2many", "many2many"] and isinstance(x2many_definition, dict):
                 # we load more than the IDs on xmany fields if we have a dict definition for them
-                comodel_name = main_model._fields[field_x2many].comodel_name
+                #comodel_name = main_model._fields[field_x2many].comodel_name
 
                 # TODO: add context keys on read for comodels if it is defined in key __context on comodel definition
                 # TODO : recursively check for x2many in x2many
-                all_comodel_values = main_model[field_x2many].read([f for f in x2many_definition if not f.startswith("__")])
+                all_comodel_values = {f["id"]: f for f in
+                    main_model[field_x2many].read([f for f in x2many_definition if not f.startswith("__")])
+                }
+
                 for i in result:
                     # replace for each record, the id of x2many by the actual object representing it
                     for index, comodel_id in enumerate(i[field_x2many]):
-                        for comodel in all_comodel_values:
-                            if comodel["id"] == comodel_id:
-                                i[field_x2many][index] = comodel
+                        i[field_x2many][index] = all_comodel_values[comodel_id]
+
         return result
 
     @http.route('/web/webclient/load_menus/<string:unique>', type='http', auth='user', methods=['GET'])
