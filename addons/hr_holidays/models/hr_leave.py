@@ -974,8 +974,9 @@ class HolidaysRequest(models.Model):
 
         holidays = super(HolidaysRequest, self.with_context(mail_create_nosubscribe=True)).create(vals_list)
 
-        for holiday in holidays:
-            if not self._context.get('leave_fast_create'):
+        if not self._context.get('leave_fast_create'):
+            responsibles = self._get_responsible_for_approval()
+            for holiday in holidays:
                 # Everything that is done here must be done using sudo because we might
                 # have different create and write rights
                 # eg : holidays_user can create a leave request with validation_type = 'manager' for someone else
@@ -987,7 +988,7 @@ class HolidaysRequest(models.Model):
                 if holiday.validation_type == 'no_validation':
                     # Automatic validation should be done in sudo, because user might not have the rights to do it by himself
                     holiday_sudo.action_validate()
-                    holiday_sudo.message_subscribe(partner_ids=[holiday._get_responsible_for_approval().partner_id.id])
+                    holiday_sudo.message_subscribe(partner_ids=[responsibles[holiday.id].partner_id.id])
                     holiday_sudo.message_post(body=_("The time off has been automatically approved"), subtype_xmlid="mail.mt_comment") # Message from OdooBot (sudo)
                 elif not self._context.get('import_file'):
                     holiday_sudo.activity_update()
@@ -1512,28 +1513,36 @@ class HolidaysRequest(models.Model):
     # ------------------------------------------------------------
 
     def _get_responsible_for_approval(self):
-        self.ensure_one()
+        vals = {}
+        all_officers = None
 
-        responsible = self.env.user
+        for leave in self:
+            responsibles = self.env['res.users']
 
-        if self.holiday_type != 'employee':
-            return responsible
+            if leave.holiday_type != 'employee':
+                vals[leave.id] = self.env.user
+                continue
 
-        if self.validation_type == 'manager' or (self.validation_type == 'both' and self.state == 'confirm'):
-            if self.employee_id.leave_manager_id:
-                responsible = self.employee_id.leave_manager_id
-            elif self.employee_id.parent_id.user_id:
-                responsible = self.employee_id.parent_id.user_id
-        elif self.validation_type == 'hr' or (self.validation_type == 'both' and self.state == 'validate1'):
-            if self.holiday_status_id.responsible_ids:
-                responsible = self.holiday_status_id.responsible_ids
-            else:
-                responsible = self.env.ref('hr_holidays.group_hr_holidays_user').users.filtered(lambda u: self.holiday_status_id.company_id in u.company_ids)
+            if leave.validation_type == 'manager' or (leave.validation_type == 'both' and leave.state == 'confirm'):
+                if leave.employee_id.leave_manager_id:
+                    responsibles = leave.employee_id.leave_manager_id
+                elif leave.employee_id.parent_id.user_id:
+                    responsibles = leave.employee_id.parent_id.user_id
+            elif leave.validation_type == 'hr' or (leave.validation_type == 'both' and leave.state == 'validate1'):
+                if leave.holiday_status_id.responsible_ids:
+                    responsibles = leave.holiday_status_id.responsible_ids
+                else:
+                    if all_officers is None:
+                        all_officers = self.env.ref('hr_holidays.group_hr_holidays_user').users
+                    responsibles = all_officers.filtered(lambda u: leave.holiday_status_id.company_id in u.company_ids)
 
-        return responsible
+            vals[leave.id] = responsibles or self.env.user
+
+        return vals
 
     def activity_update(self):
         to_clean, to_do = self.env['hr.leave'], self.env['hr.leave']
+        responsibles = self.sudo()._get_responsible_for_approval()
         for holiday in self:
             note = _(
                 'New %(leave_type)s Request created by %(user)s',
@@ -1543,20 +1552,20 @@ class HolidaysRequest(models.Model):
             if holiday.state == 'draft':
                 to_clean |= holiday
             elif holiday.state == 'confirm':
-                user_ids = holiday.sudo()._get_responsible_for_approval().ids or self.env.user.ids
+                user_ids = responsibles[holiday.id]
                 for user_id in user_ids:
                     holiday.activity_schedule(
                         'hr_holidays.mail_act_leave_approval',
                         note=note,
-                        user_id=user_id)
+                        user_id=user_id.id)
             elif holiday.state == 'validate1':
                 holiday.activity_feedback(['hr_holidays.mail_act_leave_approval'])
-                user_ids = holiday.sudo()._get_responsible_for_approval().ids or self.env.user.ids
+                user_ids = responsibles[holiday.id]
                 for user_id in user_ids:
                     holiday.activity_schedule(
                         'hr_holidays.mail_act_leave_second_approval',
                         note=note,
-                        user_id=user_id)
+                        user_id=user_id.id)
             elif holiday.state == 'validate':
                 to_do |= holiday
             elif holiday.state == 'refuse':
