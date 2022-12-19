@@ -3136,21 +3136,24 @@ class BaseModel(metaclass=MetaModel):
                 if f.prefetch == field.prefetch
                 # discard fields with groups that the user may not access
                 if not (f.groups and not self.user_has_groups(f.groups))
+                if name != 'id'
             ]
             if field.name not in fnames:
                 fnames.append(field.name)
         else:
             fnames = [field.name]
-        self._read(fnames)
+        
+        self._read(fnames)  # 
 
     def _read(self, field_names):
         """ Read the given fields of the records in ``self`` from the database,
             and store them in cache. Skip fields that are not stored.
 
             :param field_names: list of field names to read
+            TODO: should return a rescord of existing records in DB
         """
         if not self:
-            return
+            return self
         self.check_access_rights('read')
 
         # determine columns fields and those with their own read() method
@@ -3168,7 +3171,7 @@ class BaseModel(metaclass=MetaModel):
                 column_fields.append(field)
             elif field.store and not field.column_type:
                 # non-column fields: for the sake of simplicity, we ignore inherited fields
-                other_fields.append(field)
+                other_fields.append(field)  # TODO: Should be done outside
             if field.store and field.translate:
                 translated_field_names.append(field.name)
 
@@ -3176,7 +3179,7 @@ class BaseModel(metaclass=MetaModel):
                 # force calling fields.read for properties field because
                 # we want to read all relational properties in batch
                 # (and check their existence in batch as well)
-                other_fields.append(field)
+                other_fields.append(field)  # TODO: Should be done outside, also read of field doesn't manage missing error
 
         if column_fields:
             cr, context = self.env.cr, self.env.context
@@ -3251,7 +3254,7 @@ class BaseModel(metaclass=MetaModel):
 
             # process non-column fields
             for field in other_fields:
-                field.read(fetched)
+                field.read(fetched)  # TODO: Should be done outside, 
 
         # possibly raise exception for the records that could not be read
         missing = self - fetched
