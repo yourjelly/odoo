@@ -15,7 +15,7 @@ import {
     isUnbreakable,
     closestElement,
     getUrlsInfosInString,
-    URL_REGEX,
+    textContent,
 } from './utils.js';
 
 const NOT_A_NUMBER = /[^\d]/g;
@@ -197,11 +197,10 @@ class Sanitize {
             }
             // Update link URL if label is a new valid link.
             if (node.nodeName === 'A' && anchorEl === node) {
-                const linkLabel = node.textContent;
-                const match = linkLabel.match(URL_REGEX);
-                if (match && match[0] === node.textContent) {
-                    const urlInfo = getUrlsInfosInString(linkLabel)[0];
-                    node.setAttribute('href', urlInfo.url);
+                const linkLabel = textContent(node);
+                const urlInfo = getUrlsInfosInString(linkLabel);
+                if (urlInfo.length && urlInfo[0].label === linkLabel) {
+                    node.setAttribute('href', urlInfo[0].url);
                 }
             }
             node = node.nextSibling;
