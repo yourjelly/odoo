@@ -3371,7 +3371,7 @@ export class OdooEditor extends EventTarget {
                     const textFragments = splitAroundUrl[i].split(/\r?\n/);
                     let textIndex = 1;
                     for (const textFragment of textFragments) {
-                        this.execCommand('insertText', textFragment);
+                        this._applyCommand('insertText', textFragment);
                         if (textIndex < textFragments.length) {
                             this._applyCommand('oShiftEnter');
                         }
