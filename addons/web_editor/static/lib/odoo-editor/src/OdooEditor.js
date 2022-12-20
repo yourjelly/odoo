@@ -52,7 +52,7 @@ import {
     rightLeafOnlyNotBlockPath,
     isBlock,
     isZWS,
-    removeZWS,
+    removeZWSChars,
     isContentFullySelected,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
@@ -2829,16 +2829,16 @@ export class OdooEditor extends EventTarget {
         // If the element have a class,
         // we only remove the attribute to ensure we don't break some style.
         // Otherwise we remove the entire inline element.
-        for (const emptyElement of element.querySelectorAll('[oe-zws-empty-inline]')) {
-            if (emptyElement.textContent.length === 1 && emptyElement.textContent.includes('\u200B')) {
-                if (emptyElement.classList.length > 0) {
-                    emptyElement.removeAttribute('oe-zws-empty-inline');
+        for (const el of element.querySelectorAll('[oe-zws-empty-inline]')) {
+            if (isZWS(el)) {
+                if (el.classList.length > 0) {
+                    el.removeAttribute('oe-zws-empty-inline');
                 } else {
-                    emptyElement.remove();
+                    el.remove();
                 }
             } else {
-                emptyElement.textContent = emptyElement.textContent.replace('\u200B', '');
-                emptyElement.removeAttribute('oe-zws-empty-inline');
+                removeZWSChars(el); 
+                el.removeAttribute('oe-zws-empty-inline');
             }
         }
         sanitize(element);
@@ -2854,10 +2854,10 @@ export class OdooEditor extends EventTarget {
             el.removeAttribute('oe-keep-contenteditable');
         }
 
-        // Remove Zero Width Spzces on Font awesome elements
+        // Remove Zero Width Spaces on Font awesome elements
         const faSelector = 'i.fa,span.fa,i.fab,span.fab,i.fad,span.fad,i.far,span.far';
         for (const el of element.querySelectorAll(faSelector)) {
-            el.textContent = el.textContent.replace('\u200B', '');
+            removeZWSChars(el);
         }
 
     }
