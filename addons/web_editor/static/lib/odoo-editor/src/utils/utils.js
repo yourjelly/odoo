@@ -2429,3 +2429,93 @@ export const rightLeafOnlyNotBlockNotEditablePath = createDOMPathGenerator(DIREC
 export function peek(arr) {
     return arr[arr.length - 1];
 }
+
+/**
+ * 
+ * @param {Selection} selection
+ * @param {Node} node
+ * @param {boolean} ignoreZWS
+ * @returns {boolean}
+ */
+export function selectionMatchesTextContent(node, ignoreZWS = true) {
+    const selectedText = document.getSelection.toString();
+    // const textContent = ignoreZWS ? node.textContent.replace(/\u200B/g, '') : node.textContent;
+    const textContent = textContentHackyWay(node);
+    return selectedText === textContent;
+}
+
+/**
+ * @param {Element} element
+ * @returns {boolean}
+ */
+export function isContentFullySelected(element) {
+    const selection = element.ownerDocument.getSelection();
+    if (!selection.rangeCount) {
+        return false;
+    }
+    const range = selection.getRangeAt(0);
+    return range.isPointInRange(element.firstChild, 0) &&
+        range.isPointInRange(element.lastChild, element.childNodes.length);
+}
+
+/**
+ * Removes all ZeroWidthSpace characters from a node and its descendants.
+ * It does not remove nodes from the DOM.
+ *
+ * @param {Node} node
+ */
+export function removeZWS(node) {
+    [node, ...descendants(node)]
+        .filter(node => node.nodeType === Node.TEXT_NODE)
+        .forEach(node => node.nodeValue = node.nodeValue.replace(/\u200B/g, ''));
+}
+
+/**
+ * Returns the text content of a node and its descendants.
+ * Unlike Node.textContent, this function is aware of line breaks introduced
+ * by <br> and block elements.
+ *
+ * @param {Node} node
+ * @returns {string}
+ */
+export function textContent(node) {
+    const content = [];
+    const mustBreakLine = () => content.length && content[content.length - 1] !== '\n';
+
+    function fillContentArray(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            content.push(node.textContent);
+            return;
+        }
+        if (node.nodeName === 'BR') {
+            content.push('\n');
+            return;
+        }
+        for (const child of (node.childNodes || [])) {
+            const isBlockElement = blockTagNames.includes(child.nodeName);
+            if (isBlockElement && mustBreakLine()) {
+                content.push('\n');
+            }
+            fillContentArray(child, content);
+            if (isBlockElement && mustBreakLine()) {
+                content.push('\n');
+            }
+        }
+    }
+
+    fillContentArray(node);
+    return ''.concat(...content);
+}
+
+export function textContentHackyWay(node) {
+    const document = node.ownerDocument;
+    const selection = document.getSelection();
+    const restoreCursor = preserveCursor(document);
+    const range = new Range();
+    range.selectNode(node);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const textContent = selection.toString();
+    restoreCursor();
+    return textContent;
+}
