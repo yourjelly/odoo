@@ -51,8 +51,9 @@ import {
     rightPos,
     rightLeafOnlyNotBlockPath,
     isBlock,
-    childNodeIndex,
-    getSelectedNodes
+    isZWS,
+    removeZWS,
+    isContentFullySelected,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -1326,6 +1327,20 @@ export class OdooEditor extends EventTarget {
         }
 
         [...editableChildren, link].forEach(node => node.setAttribute('contenteditable', true));
+    }
+
+    /**
+     * Whether link is the isolated contenteditable area, done via
+     * setContenteditableLink
+     *
+     * @param {HTMLAnchorElement} link
+     * @returns {boolean}
+     *
+     * @see setContenteditableLink
+     */
+    _isContentEditableLink(link) {
+        return this._fixLinkMutatedElements &&
+            this._fixLinkMutatedElements.link === link;
     }
 
     /**
@@ -3158,12 +3173,45 @@ export class OdooEditor extends EventTarget {
         }
         return Promise.all(promises).then(html => html.join(''));
     }
+
+    /**
+     * If the text content of a link is fully selected, sets selection outside
+     * the bondaries of the link and disables isolation link, so that pasted content
+     * replaces the element.
+     *
+     * @param {Selection} selection
+     */
+    _adjustSelectionAroundLink() {
+        const selection = this.document.getSelection();
+        const link = closestElement(selection.anchorNode, 'a', true);
+        if (!link)
+            return;
+        // check if selection focus is also inside the link
+        if (closestElement(selection.focusNode, 'a', true) !== link)
+            return;
+        console.log("selection is inside link");
+        if (!(isContentFullySelected(link) || isZWS(link))) {
+            return;
+        }
+        console.log("all content is selected");
+        if (this._isContentEditableLink(link)) {
+            // disable isolation link
+            this.resetContenteditableLink();
+            this._activateContenteditable();
+        }
+        // setSelection(...boundariesOut(link));
+        const range = new Range();
+        range.selectNode(link);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
     /**
      * Handle safe pasting of html or plain text into the editor.
      */
     _onPaste(ev) {
         ev.preventDefault();
         const sel = this.document.getSelection();
+        this._adjustSelectionAroundLink();
         const files = getImageFiles(ev.clipboardData);
         const clipboardHtml = ev.clipboardData.getData('text/html');
         if (files.length) {
