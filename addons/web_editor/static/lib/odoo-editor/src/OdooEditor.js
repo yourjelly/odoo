@@ -3175,13 +3175,10 @@ export class OdooEditor extends EventTarget {
     }
 
     /**
-     * If the text content of a link is fully selected, sets selection outside
-     * the bondaries of the link and disables isolation link, so that pasted content
-     * replaces the element.
-     *
-     * @param {Selection} selection
+     * When pasting insided a link, if it's empty or its contents are fully
+     * selected, the link is removed so that the pasted content replaces it.
      */
-    _adjustSelectionAroundLink() {
+    _handlePasteInsideLink() {
         const selection = this.document.getSelection();
         const link = closestElement(selection.anchorNode, 'a', true);
         if (!link)
@@ -3189,21 +3186,16 @@ export class OdooEditor extends EventTarget {
         // check if selection focus is also inside the link
         if (closestElement(selection.focusNode, 'a', true) !== link)
             return;
-        console.log("selection is inside link");
-        if (!(isContentFullySelected(link) || isZWS(link))) {
+        if (!(isZWS(link) || isContentFullySelected(link)))
             return;
-        }
-        console.log("all content is selected");
+        const cursor = [link.parentNode, childNodeIndex(link)];
         if (this._isContentEditableLink(link)) {
             // disable isolation link
             this.resetContenteditableLink();
             this._activateContenteditable();
         }
-        // setSelection(...boundariesOut(link));
-        const range = new Range();
-        range.selectNode(link);
-        selection.removeAllRanges();
-        selection.addRange(range);
+        link.remove();
+        setSelection(...cursor);
     }
     /**
      * Handle safe pasting of html or plain text into the editor.
@@ -3211,13 +3203,13 @@ export class OdooEditor extends EventTarget {
     _onPaste(ev) {
         ev.preventDefault();
         const sel = this.document.getSelection();
-        this._adjustSelectionAroundLink();
         const files = getImageFiles(ev.clipboardData);
         const clipboardHtml = ev.clipboardData.getData('text/html');
+        this._handlePasteInsideLink();
         if (files.length) {
             this.addImagesFiles(files).then(html => this.execCommand('insertHTML', this._prepareClipboardData(html)));
         } else if (clipboardHtml) {
-            this.execCommand('insertHTML', this._prepareClipboardData(clipboardHtml));
+            this._applyCommand('insertHTML', this._prepareClipboardData(clipboardHtml));
         } else {
             const text = ev.clipboardData.getData('text/plain');
             const splitAroundUrl = text.split(URL_REGEX);
