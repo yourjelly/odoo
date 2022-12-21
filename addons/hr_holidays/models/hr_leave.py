@@ -641,7 +641,6 @@ class HolidaysRequest(models.Model):
                 ('date_from', '<', holiday.date_to),
                 ('date_to', '>', holiday.date_from),
                 ('id', '!=', holiday.id),
-                ('state', 'not in', ['cancel', 'refuse']),
             ]
 
             employee_ids = (holiday.employee_id | holiday.employee_ids).ids
@@ -693,11 +692,11 @@ class HolidaysRequest(models.Model):
     @api.constrains('state', 'number_of_days', 'holiday_status_id')
     def _check_holidays(self):
         for holiday in self:
-            mapped_days = self.holiday_status_id.get_employees_days((holiday.employee_id | holiday.employee_ids).ids, holiday.date_from.date())
             if holiday.holiday_type != 'employee'\
                     or not holiday.employee_id and not holiday.employee_ids\
                     or holiday.holiday_status_id.requires_allocation == 'no':
                 continue
+            mapped_days = holiday.holiday_status_id.get_employees_days((holiday.employee_id | holiday.employee_ids).ids, holiday.date_from.date())
             if holiday.employee_id:
                 leave_days = mapped_days[holiday.employee_id.id][holiday.holiday_status_id.id]
                 if float_compare(leave_days['remaining_leaves'], 0, precision_digits=2) == -1\
@@ -1224,6 +1223,8 @@ class HolidaysRequest(models.Model):
         leaves_second_approver = self.env['hr.leave']
         leaves_first_approver = self.env['hr.leave']
 
+        leaves_to_validate = self.env['hr.leave']
+
         for leave in self:
             if leave.validation_type == 'both':
                 leaves_second_approver += leave
@@ -1307,7 +1308,7 @@ class HolidaysRequest(models.Model):
                         leave_skip_state_check=True
                     ).create(split_leaves_vals)
 
-                    split_leaves.filtered(lambda l: l.state in 'validate')._validate_leave_request()
+                    leaves_to_validate |= split_leaves.filtered(lambda l: l.state in 'validate')
 
                 values = leave._prepare_employees_holiday_values(employees)
                 leaves = self.env['hr.leave'].with_context(
@@ -1322,13 +1323,14 @@ class HolidaysRequest(models.Model):
                     leave_compute_date_from_to=True,
                 ).create(values)
 
-                leaves._validate_leave_request()
+                leaves_to_validate |= leaves
 
         leaves_second_approver.write({'second_approver_id': current_employee.id})
         leaves_first_approver.write({'first_approver_id': current_employee.id})
 
         employee_requests = self.filtered(lambda hol: hol.holiday_type == 'employee')
-        employee_requests._validate_leave_request()
+        leaves_to_validate |= employee_requests
+        leaves_to_validate._validate_leave_request()
         if not self.env.context.get('leave_fast_create'):
             employee_requests.filtered(lambda holiday: holiday.validation_type != 'no_validation').activity_update()
         return True
