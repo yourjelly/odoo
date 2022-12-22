@@ -215,7 +215,7 @@ export class Composer extends Component {
                 this.props.startEditingLastMessageOfCurrentUser?.();
                 break;
             case "Enter": {
-                if (this.hasSuggestions) {
+                if (isEventHandled(ev, "NavigableList.select")) {
                     return;
                 }
                 const shouldPost = this.props.mode === "extended" ? ev.ctrlKey : !ev.shiftKey;
