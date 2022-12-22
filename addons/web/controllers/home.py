@@ -2,7 +2,7 @@
 
 import json
 import logging
-
+from typing import Union
 
 import odoo
 import odoo.modules.registry
@@ -61,35 +61,27 @@ class Home(http.Controller):
         except AccessError:
             return request.redirect('/web/login?error=access')
 
+    UnityReadFieldSpec = dict[str, bool | 'UnityReadFieldSpec']
+
     @http.route("/web/unity_read/<string:model>", type='json', auth='user')
     def unity_read(self, *args, **kwargs):
-        env = request.env
-        context = kwargs["kwargs"]["context"]
-        model = kwargs["model"]
-        fields_spec = kwargs["kwargs"]["fields"]
-        read_params = kwargs["kwargs"]["read"]
+        env: odoo.api.Environment = request.env
+        context: dict = kwargs["kwargs"]["context"]
+        model: str = kwargs["model"]
+        fields_spec: Home.UnityReadFieldSpec = kwargs["kwargs"]["fields"]
+        read_params: dict = kwargs["kwargs"]["read"]
+        main_model: odoo.models.BaseModel = env[model].with_context(context).browse(read_params["ids"])
+        result: list[dict] = main_model._read_format([field for field in fields_spec if not field.startswith("__")])
 
-        main_model = env[model].with_context(context).browse(read_params["ids"])
-        result = main_model.read([
-            field for field in fields_spec if not field.startswith("__")
-        ])
+        def _unity_read_x2many(parent_field_spec, parent, records: list):
+            for one_record in records:
+                for (field, definition) in parent_field_spec.items():
+                    if not field.startswith("__") and isinstance(definition, dict) and parent._fields[field].type in ["one2many", "many2many"]:
+                        x2many_context = parent[field].with_context(definition["__context"]) if "__context" in definition else parent[field]
+                        one_record[field] = x2many_context._read_format([f for f in definition if not f.startswith("__")])
+                        _unity_read_x2many(definition, x2many_context, one_record[field])
 
-        for (field_x2many, x2many_definition) in fields_spec.items():
-            if not field_x2many.startswith("__") and main_model._fields[field_x2many].type in ["one2many", "many2many"] and isinstance(x2many_definition, dict):
-                # we load more than the IDs on xmany fields if we have a dict definition for them
-                #comodel_name = main_model._fields[field_x2many].comodel_name
-
-                # TODO: add context keys on read for comodels if it is defined in key __context on comodel definition
-                # TODO : recursively check for x2many in x2many
-                all_comodel_values = {f["id"]: f for f in
-                    main_model[field_x2many].read([f for f in x2many_definition if not f.startswith("__")])
-                }
-
-                for i in result:
-                    # replace for each record, the id of x2many by the actual object representing it
-                    for index, comodel_id in enumerate(i[field_x2many]):
-                        i[field_x2many][index] = all_comodel_values[comodel_id]
-
+        _unity_read_x2many(fields_spec, main_model, result)
         return result
 
     @http.route('/web/webclient/load_menus/<string:unique>', type='http', auth='user', methods=['GET'])
