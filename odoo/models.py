@@ -28,6 +28,7 @@ import datetime
 import dateutil
 import fnmatch
 import functools
+import hashlib
 import inspect
 import itertools
 import io
@@ -562,6 +563,8 @@ class BaseModel(metaclass=MetaModel):
     "maximum number of transient records, unlimited if ``0``"
     _transient_max_hours = lazy_classproperty(lambda _: config.get('transient_age_limit'))
     "maximum idle lifetime (in hours), unlimited if ``0``"
+
+    _load_checksum = False
 
     def _valid_field_parameter(self, field, name):
         """ Return whether the given parameter name is valid for the field. """
@@ -3765,6 +3768,12 @@ class BaseModel(metaclass=MetaModel):
 
         if check_company and self._check_company_auto:
             self._check_company()
+
+        if self._load_checksum:
+            self.env['ir.model.data'].search(
+                [('model', '=', self._name), ('res_id', 'in', self._ids)]
+            )._write({'load_checksum': False})
+
         return True
 
     def _write(self, vals):
@@ -4323,11 +4332,13 @@ class BaseModel(metaclass=MetaModel):
                 elif not update:
                     to_create.append(data)
                 continue
+            if self._load_checksum:
+                data['load_checksum'] = hashlib.md5(repr(data['values']).encode()).hexdigest()
             row = existing.get(xml_id)
             if not row:
                 to_create.append(data)
                 continue
-            d_id, d_module, d_name, d_model, d_res_id, d_noupdate, r_id = row
+            d_id, d_module, d_name, d_model, d_res_id, d_noupdate, load_checksum, r_id = row
             if self._name != d_model:
                 raise ValidationError(
                     f"For external id {xml_id} "
@@ -4339,7 +4350,8 @@ class BaseModel(metaclass=MetaModel):
                 data['record'] = record
                 imd_data_list.append(data)
                 if not (update and d_noupdate):
-                    to_update.append(data)
+                    if not data.get('load_checksum') or data['load_checksum'] != load_checksum:
+                        to_update.append(data)
             else:
                 imd.browse(d_id).unlink()
                 to_create.append(data)

@@ -50,6 +50,7 @@ class IrActions(models.Model):
     _description = 'Actions'
     _table = 'ir_actions'
     _order = 'name'
+    _load_checksum = True
 
     name = fields.Char(string='Action Name', required=True, translate=True)
     type = fields.Char(string='Action Type', required=True)

@@ -21,6 +21,7 @@ class IrUiMenu(models.Model):
     _description = 'Menu'
     _order = "sequence,id"
     _parent_store = True
+    _load_checksum = True
 
     name = fields.Char(string='Menu', required=True, translate=True)
     active = fields.Boolean(default=True)

@@ -1738,6 +1738,7 @@ class IrModelAccess(models.Model):
     _name = 'ir.model.access'
     _description = 'Model Access'
     _order = 'model_id,group_id,name,id'
+    _load_checksum = True
 
     name = fields.Char(required=True, index=True)
     active = fields.Boolean(default=True, help='If you uncheck the active field, it will disable the ACL without deleting it (if you delete a native ACL, it will be re-created when you reload the module).')
@@ -1955,6 +1956,7 @@ class IrModelData(models.Model):
     res_id = fields.Many2oneReference(string='Record ID', help="ID of the target record in the database", model_field='model')
     noupdate = fields.Boolean(string='Non Updatable', default=False)
     reference = fields.Char(string='Reference', compute='_compute_reference', readonly=True, store=False)
+    load_checksum = fields.Char(string='Load Checksum', readonly=True)
 
     _sql_constraints = [
         ('name_nospaces', "CHECK(name NOT LIKE '% %')",
@@ -2066,7 +2068,7 @@ class IrModelData(models.Model):
         cr = self.env.cr
         for prefix, suffixes in bymodule.items():
             query = """
-                SELECT d.id, d.module, d.name, d.model, d.res_id, d.noupdate, r.id
+                SELECT d.id, d.module, d.name, d.model, d.res_id, d.noupdate, d.load_checksum, r.id
                 FROM ir_model_data d LEFT JOIN "{}" r on d.res_id=r.id
                 WHERE d.module=%s AND d.name IN %s
             """.format(model._table)
@@ -2091,8 +2093,9 @@ class IrModelData(models.Model):
         for data in data_list:
             prefix, suffix = data['xml_id'].split('.', 1)
             record = data['record']
+            load_checksum = data.get('load_checksum')
             noupdate = bool(data.get('noupdate'))
-            rows.add((prefix, suffix, record._name, record.id, noupdate))
+            rows.add((prefix, suffix, record._name, record.id, noupdate, load_checksum))
 
         for sub_rows in self.env.cr.split_for_in_conditions(rows):
             # insert rows or update them
@@ -2109,13 +2112,13 @@ class IrModelData(models.Model):
     # NOTE: this method is overriden in web_studio; if you need to make another
     #  override, make sure it is compatible with the one that is there.
     def _build_update_xmlids_query(self, sub_rows, update):
-        rowf = "(%s, %s, %s, %s, %s)"
+        rowf = "(%s, %s, %s, %s, %s, %s)"
         return """
-            INSERT INTO ir_model_data (module, name, model, res_id, noupdate)
+            INSERT INTO ir_model_data (module, name, model, res_id, noupdate, load_checksum)
             VALUES {rows}
             ON CONFLICT (module, name)
-            DO UPDATE SET (model, res_id, write_date) =
-                (EXCLUDED.model, EXCLUDED.res_id, now() at time zone 'UTC')
+            DO UPDATE SET (model, res_id, load_checksum, write_date) =
+                (EXCLUDED.model, EXCLUDED.res_id, EXCLUDED.load_checksum, now() at time zone 'UTC')
                 {where}
         """.format(
             rows=", ".join([rowf] * len(sub_rows)),

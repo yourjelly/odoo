@@ -157,6 +157,7 @@ class CountryState(models.Model):
     _description = "Country state"
     _name = 'res.country.state'
     _order = 'code'
+    _load_checksum = True
 
     country_id = fields.Many2one('res.country', string='Country', required=True)
     name = fields.Char(string='State Name', required=True,

@@ -80,6 +80,7 @@ class ModuleCategory(models.Model):
     _name = "ir.module.category"
     _description = "Application"
     _order = 'name'
+    _load_checksum = True
 
     @api.depends('module_ids')
     def _compute_module_nr(self):

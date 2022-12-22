@@ -128,6 +128,7 @@ class Groups(models.Model):
     _description = "Access Groups"
     _rec_name = 'full_name'
     _order = 'name'
+    _load_checksum = True
 
     name = fields.Char(required=True, translate=True)
     users = fields.Many2many('res.users', 'res_groups_users_rel', 'gid', 'uid')

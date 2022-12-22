@@ -229,6 +229,8 @@ class View(models.Model):
     _name = 'ir.ui.view'
     _description = 'View'
     _order = "priority,name,id"
+    # ('ir.ui.view', 'res.lang', 'ir.ui.menu', 'res.groups', 'ir.actions.act_window', 'ir.model.access', 'res.country.state', 'ir.rule', 'ir.module.category'):
+    _load_checksum = True
 
     name = fields.Char(string='View Name', required=True)
     model = fields.Char(index=True)

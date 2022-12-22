@@ -14,6 +14,7 @@ class IrRule(models.Model):
     _name = 'ir.rule'
     _description = 'Record Rule'
     _order = 'model_id DESC,id'
+    _load_checksum = True
     _MODES = ['read', 'write', 'create', 'unlink']
 
     name = fields.Char(index=True)
