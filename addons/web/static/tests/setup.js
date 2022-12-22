@@ -351,6 +351,26 @@ patch(assets, "TestAssetsLoadXML", {
 });
 
 export async function setupTests() {
+    let memoryBeforeModule;
+    QUnit.moduleStart(({ tests }) => {
+        if (tests.length) {
+            window.gc();
+            memoryBeforeModule = window.performance.memory.usedJSHeapSize;
+        }
+    });
+    QUnit.moduleDone(({ name }) => {
+        if (memoryBeforeModule) {
+            window.gc();
+            const afterGc = window.performance.memory.usedJSHeapSize;
+            console.log(
+                `MEMINFO - After suite "${name}" - after gc: ${afterGc} delta: ${
+                    afterGc - memoryBeforeModule
+                }`
+            );
+            memoryBeforeModule = null;
+        }
+    });
+
     QUnit.testStart(() => {
         checkGlobalObjectsIntegrity();
         prepareRegistriesWithCleanup();
