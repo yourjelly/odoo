@@ -61,7 +61,7 @@ class Home(http.Controller):
         except AccessError:
             return request.redirect('/web/login?error=access')
 
-    UnityReadFieldSpec = dict[str, bool | 'UnityReadFieldSpec']
+    UnityReadFieldSpec = dict[str, Union[bool, 'UnityReadFieldSpec']]
 
     @http.route("/web/unity_read/<string:model>", type='json', auth='user')
     def unity_read(self, *args, **kwargs):
