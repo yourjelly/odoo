@@ -10,7 +10,7 @@ class AccountDebitNote(models.TransientModel):
     def _prepare_default_values(self, move):
         return {
             **super(AccountDebitNote, self)._prepare_default_values(move),
-            'l10n_sa_reversal_reason': self.reason
+            'l10n_sa_adjustment_reason': self.reason
         }
 
     def create_debit(self):
@@ -18,4 +18,4 @@ class AccountDebitNote(models.TransientModel):
         for move in self.move_ids:
             if move.journal_id.country_code == 'SA' and not self.reason:
                 raise UserError(_("For debit notes issued in Saudi Arabia, you need to specify a Reason"))
-        return super().reverse_moves()
+        return super().create_debit()
