@@ -15,6 +15,7 @@ const session = require('web.session');
 const utils = require('web.utils');
 const widgetRegistry = require('web.widget_registry');
 const widgetRegistryOwl = require("web.widgetRegistry");
+const { isModifierAlwaysTrue } = require('@web/views/utils');
 
 const { WidgetAdapterMixin } = require('web.OwlCompatibility');
 const FieldWrapper = require('web.FieldWrapper');
@@ -350,7 +351,7 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
             // If the view is in edit mode and that a widget have to switch
             // its "readonly" state, we have to re-render it completely
             if ('readonly' in modifiers && element.widget) {
-                var mode = modifiers.readonly ? 'readonly' : modifiersData.baseModeByRecord[record.id];
+                var mode = isModifierAlwaysTrue(modifiers.readonly) ? 'readonly' : modifiersData.baseModeByRecord[record.id];
                 if (mode !== element.widget.mode) {
                     self._rerenderFieldWidget(element.widget, record, {
                         keepBaseMode: true,
@@ -361,9 +362,9 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
             }
 
             // Toggle modifiers CSS classes if necessary
-            element.$el.toggleClass("o_invisible_modifier", !!modifiers.invisible);
-            element.$el.toggleClass("o_readonly_modifier", !!modifiers.readonly);
-            element.$el.toggleClass("o_required_modifier", !!modifiers.required);
+            element.$el.toggleClass("o_invisible_modifier", isModifierAlwaysTrue(modifiers.invisible));
+            element.$el.toggleClass("o_readonly_modifier", isModifierAlwaysTrue(modifiers.readonly));
+            element.$el.toggleClass("o_required_modifier", isModifierAlwaysTrue(modifiers.required));
 
             if (element.widget && element.widget.updateModifiersValue) {
                 element.widget.updateModifiersValue(modifiers);
@@ -760,8 +761,8 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
             // Distinct readonly from renderer and readonly from modifier,
             // renderer can be readonly while modifier not.
             // This is needed as modifiers are set after first render
-            hasReadonlyModifier: modifiers.readonly || this.viewEditable === false,
-            mode: modifiers.readonly ? 'readonly' : mode,
+            hasReadonlyModifier: isModifierAlwaysTrue(modifiers.readonly) || this.viewEditable === false,
+            mode: isModifierAlwaysTrue(modifiers.readonly) ? 'readonly' : mode,
             viewType: this.viewType,
         };
         let widget;
@@ -814,7 +815,7 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
                 callback: function (element, modifiers, record) {
                     element.$el.toggleClass('o_field_empty', !!(
                         record.data.id &&
-                        (modifiers.readonly || mode === 'readonly') &&
+                        (isModifierAlwaysTrue(modifiers.readonly) || mode === 'readonly') &&
                         element.widget.isEmpty()
                     ));
                 },

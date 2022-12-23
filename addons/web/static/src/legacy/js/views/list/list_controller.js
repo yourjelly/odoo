@@ -14,6 +14,7 @@ import Dialog from 'web.Dialog';
 import ListConfirmDialog from 'web.ListConfirmDialog';
 import session from 'web.session';
 import viewUtils from 'web.viewUtils';
+import { isModifierAlwaysTrue } from "@web/views/utils";
 
 var _t = core._t;
 var qweb = core.qweb;
@@ -539,7 +540,7 @@ var ListController = BasicController.extend({
         var validRecordIds = recordIds.reduce((result, nextRecordId) => {
             var record = this.model.get(nextRecordId);
             var modifiers = this.renderer._registerModifiers(node, record);
-            if (!modifiers.readonly && (!modifiers.required || value)) {
+            if (!isModifierAlwaysTrue(modifiers.readonly) && (!isModifierAlwaysTrue(modifiers.required) || value)) {
                 result.push(nextRecordId);
             }
             return result;
