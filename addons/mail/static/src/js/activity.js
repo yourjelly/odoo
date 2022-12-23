@@ -41,7 +41,7 @@ const KanbanActivity = AbstractField.extend({
         this._super.apply(this, arguments);
         this._draftFeedback = {};
         this.selection = {};
-        for (const [key, value] of record.fields.activity_state.selection) {
+        for (const [key, value] of (record.fields.activity_state.selection || [])) {
             this.selection[key] = value;
         }
         this.defaultActivityType = options.activityType;

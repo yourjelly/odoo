@@ -20,6 +20,7 @@ var pyUtils = require('web.py_utils');
 var utils = require('web.utils');
 const widgetRegistry = require('web.widget_registry');
 const widgetRegistryOwl = require('web.widgetRegistry');
+const { isModifierAlwaysTrue } = require('@web/views/utils');
 
 const { Component } = require("@odoo/owl");
 
@@ -273,7 +274,7 @@ var BasicView = AbstractView.extend({
         // and add another key in debug mode containing the raw value.
         // for now, we look inside the modifiers and consider the value only if
         // it is static (=== true),
-        if (attrs.modifiers.invisible === true || attrs.modifiers.column_invisible === true) {
+        if (isModifierAlwaysTrue(attrs.modifiers.invisible) || isModifierAlwaysTrue(attrs.modifiers.column_invisible)) {
             attrs.__no_fetch = true;
         }
 

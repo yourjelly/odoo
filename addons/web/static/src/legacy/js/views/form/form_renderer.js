@@ -6,6 +6,7 @@ var config = require('web.config');
 var core = require('web.core');
 var dom = require('web.dom');
 var viewUtils = require('web.viewUtils');
+const { isModifierAlwaysTrue } = require('@web/views/utils');
 
 var _t = core._t;
 var qweb = core.qweb;
@@ -598,7 +599,7 @@ var FormRenderer = BasicRenderer.extend({
      * @override
      */
     _renderFieldWidget(node) {
-        if (!this.renderInvisible && node.attrs.modifiers.invisible === true) {
+        if (!this.renderInvisible && isModifierAlwaysTrue(node.attrs.modifiers.invisible)) {
             return $();
         }
         return this._super(...arguments);
@@ -982,7 +983,7 @@ var FormRenderer = BasicRenderer.extend({
      */
     _renderTagLabel: function (node) {
         if (!this.renderInvisible && node.tag === 'field' &&
-            node.attrs.modifiers.invisible === true) {
+            isModifierAlwaysTrue(node.attrs.modifiers.invisible)) {
             // skip rendering of invisible fields/labels
             return $();
         }
@@ -1024,7 +1025,7 @@ var FormRenderer = BasicRenderer.extend({
                     }
                     element.$el.toggleClass('o_form_label_empty', !!( // FIXME condition is evaluated twice (label AND widget...)
                         record.data.id
-                        && (modifiers.readonly || self.mode === 'readonly')
+                        && (isModifierAlwaysTrue(modifiers.readonly) || self.mode === 'readonly')
                         && !widget.isSet()
                     ));
                 },
