@@ -47,6 +47,9 @@ import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder";
 /** @type {(params: DraggableParams) => DraggableState} */
 export const useDraggable = makeDraggableHook({
     name: "useDraggable",
+    onWillStartDrag({ ctx, helpers }) {
+        helpers.execHandler("onWillStartDrag", { element: ctx.currentElement });
+    },
     onDragStart({ ctx, helpers }) {
         helpers.execHandler("onDragStart", { element: ctx.currentElement });
     },
