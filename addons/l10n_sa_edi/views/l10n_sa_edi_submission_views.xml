@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <record id="l10n_sa_edi_submission_view_form" model="ir.ui.view">
+            <field name="name">l10n_sa_edi_submission_view_form</field>
+            <field name="model">l10n_sa_edi.submission</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="l10n_sa_move_id"/>
+                                <field name="l10n_sa_journal_id"/>
+                                <field name="l10n_sa_chain_index"/>
+                            </group>
+                            <group>
+                                <field name="l10n_sa_xml_content" />
+                                <field name="l10n_sa_status" />
+                                <field name="l10n_sa_errors" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <record id="l10n_sa_edi_submission_view_tree" model="ir.ui.view">
+            <field name="name">l10n_sa_edi_submission_view_tree</field>
+            <field name="model">l10n_sa_edi.submission</field>
+            <field name="arch" type="xml">
+                <tree decoration-success="l10n_sa_status == 'accepted'" decoration-danger="l10n_sa_status == 'rejected'">
+                    <field name="l10n_sa_move_id"/>
+                    <field name="l10n_sa_journal_id"/>
+                    <field name="l10n_sa_chain_index"/>
+                    <field name="l10n_sa_status" />
+                </tree>
+            </field>
+        </record>
+        
+        <record id="l10n_sa_edi_submission_action" model="ir.actions.act_window">
+            <field name="name">ZATCA Submissions</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">l10n_sa_edi.submission</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="l10n_sa_edi_submission_menu" name="ZATCA Submissions" groups="base.group_no_one"
+                  parent="account.menu_finance_receivables" action="l10n_sa_edi_submission_action" sequence="999"/>
+    
+    </data>
+</odoo>

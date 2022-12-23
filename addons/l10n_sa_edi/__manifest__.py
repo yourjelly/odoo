@@ -6,10 +6,9 @@
     'icon': '/l10n_sa/static/description/icon.png',
     'version': '0.1',
     'depends': [
-        'account_edi_ubl',
+        'account_edi_ubl_cii',
         'account_debit_note',
         'l10n_sa_invoice',
-        'l10n_sa_pos',
     ],
     'author': 'Odoo',
     'summary': """
@@ -19,20 +18,22 @@
         E-invoice implementation for the Kingdom of Saudi Arabia
     """,
     'category': 'Accounting/Localizations/EDI',
-    'website': 'https://www.odoo.com/',
     'license': 'LGPL-3',
     'data': [
         'security/ir.model.access.csv',
         'data/account_edi_format.xml',
-        'data/ir_config_parameter.xml',
-        'data/sa_zatca_template.xml',
+        'data/ubl_21_zatca.xml',
+        'data/res_country_data.xml',
         'wizard/l10n_sa_edi_otp_wizard.xml',
         'views/account_tax_group_views.xml',
         'views/account_move_views.xml',
+        'views/account_tax_views.xml',
         'views/account_journal_views.xml',
         'views/res_partner_views.xml',
         'views/res_company_views.xml',
-        'views/res_config_settings_view.xml'
+        'views/res_config_settings_view.xml',
+        'views/report_invoice.xml',
+        'views/l10n_sa_edi_submission_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
