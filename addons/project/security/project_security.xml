@@ -141,11 +141,11 @@
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
 
-    <record id="ir_rule_project_personal_stage_my" model="ir.rule">
-        <field name="name">Project: See my own personal stage</field>
-        <field name="model_id" ref="project.model_project_task_stage_personal"/>
-        <field name="domain_force">[('user_id', '=', user.id)]</field>
-    </record>
+    <!-- <record id="ir_rule_project_personal_stage_my" model="ir.rule"> -->
+    <!--     <field name="name">Project: See my own personal stage</field> -->
+    <!--     <field name="model_id" ref="project.model_project_task_stage_personal"/> -->
+    <!--     <field name="domain_force">[('user_id', '=', user.id)]</field> -->
+    <!-- </record> -->
 
     <record id="ir_rule_private_task" model="ir.rule">
         <field name="name">Project: See private tasks</field>

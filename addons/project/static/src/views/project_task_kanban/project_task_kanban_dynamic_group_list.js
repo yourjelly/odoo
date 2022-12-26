@@ -8,7 +8,7 @@ export class ProjectTaskKanbanDynamicGroupList extends KanbanDynamicGroupList {
     get context() {
         const context = super.context;
         if (context.createPersonalStageGroup) {
-            context.default_user_id = context.uid;
+            context.default_user_id = context.uid; /** same context key should be used in note -- Can be simply add in the xml view of note (default_user_id=uid*/
             delete context.createPersonalStageGroup;
             delete context.default_project_id;
         }
