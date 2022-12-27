@@ -472,7 +472,7 @@ env['res.partner'].create({'name': partner_name})
             <field name="name">ir.actions.todo.select</field>
             <field name="arch" type="xml">
                 <search string="Search Actions">
-                    <filter string="To Do" name="todo" domain=" [('state','=','open')]" help="Wizards to be Launched"/>
+                    <filter string="To Do" name="todo" domain="[('state','=','open')]" help="Wizards to be Launched"/>
                     <field name="action_id"/>
                     <field name="state"/>
                 </search>

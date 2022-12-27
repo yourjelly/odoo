@@ -288,7 +288,7 @@ var MockServer = Class.extend({
      */
     _getView: function (arch, model, fields, context) {
         var self = this;
-        var modifiersNames = ['invisible', 'readonly', 'required'];
+        var modifiersNames = ['column_invisible', 'invisible', 'readonly', 'required'];
         var onchanges = this.data[model].onchanges || {};
         var fieldNodes = {};
         var groupbyNodes = {};
@@ -379,8 +379,11 @@ var MockServer = Class.extend({
                 var mod = node.getAttribute(a);
                 if (mod) {
                     var pyevalContext = window.py.dict.fromJSON(context || {});
-                    var v = pyUtils.py_eval(mod, {context: pyevalContext}) ? true: false;
-                    if (inTreeView && !inListHeader && a === 'invisible') {
+                    var v = pyUtils.py_eval(mod, {context: pyevalContext});
+                    if (!(v instanceof Array)) {
+                        v = !!v;
+                    }
+                    if (inTreeView && !inListHeader && a === 'invisible' && !_.isArray(v)) {
                         modifiers.column_invisible = v;
                     } else if (v || !(a in modifiers) || !_.isArray(modifiers[a])) {
                         modifiers[a] = v;

@@ -2566,7 +2566,7 @@ class BaseModel(metaclass=MetaModel):
         if self._auto:
             if must_create_table:
                 def make_type(field):
-                    return field.column_type[1] + (" NOT NULL" if field.required else "")
+                    return field.column_type[1] + (" NOT NULL" if field.required is True else "")
 
                 tools.create_model_table(cr, self._table, self._description, [
                     (field.name, make_type(field), field.string)
@@ -2695,7 +2695,7 @@ class BaseModel(metaclass=MetaModel):
                 from .fields import Many2one
                 field = Many2one(table, string="Automatically created field to link to parent %s" % table, required=True, ondelete="cascade")
                 self._add_field(field_name, field)
-            elif not (field.required and (field.ondelete or "").lower() in ("cascade", "restrict")):
+            elif not (field.required is True and (field.ondelete or "").lower() in ("cascade", "restrict")):
                 _logger.warning('Field definition for _inherits reference "%s" in "%s" must be marked as "required" with ondelete="cascade" or "restrict", forcing it to required + cascade.', field_name, self._name)
                 field.required = True
                 field.ondelete = "cascade"
@@ -2704,7 +2704,7 @@ class BaseModel(metaclass=MetaModel):
         # reflect fields with delegate=True in dictionary self._inherits
         for field in self._fields.values():
             if field.type == 'many2one' and not field.related and field.delegate:
-                if not field.required:
+                if field.required is not True:
                     _logger.warning("Field %s with delegate=True must be required.", field)
                     field.required = True
                 if field.ondelete.lower() not in ('cascade', 'restrict'):
@@ -5483,7 +5483,7 @@ class BaseModel(metaclass=MetaModel):
 
                     if comparator == '=':
                         ok = value in data
-                    elif comparator in ('!=', '<>'):
+                    elif comparator == '!=':
                         ok = value not in data
                     elif comparator == '=?':
                         ok = not value or (value in data)

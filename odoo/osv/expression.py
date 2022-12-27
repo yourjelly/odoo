@@ -807,12 +807,12 @@ class expression(object):
                         # instance "id NOT IN (42, NULL)" is never TRUE.
                         in_ = 'NOT IN' if operator in NEGATIVE_TERM_OPERATORS else 'IN'
                         if isinstance(ids2, Query):
-                            if not inverse_field.required:
+                            if inverse_field.required is not True:
                                 ids2.add_where(f'"{comodel._table}"."{inverse_field.name}" IS NOT NULL')
                             subquery, subparams = ids2.subselect(f'"{comodel._table}"."{inverse_field.name}"')
                         else:
                             subquery = f'SELECT "{inverse_field.name}" FROM "{comodel._table}" WHERE "id" IN %s'
-                            if not inverse_field.required:
+                            if inverse_field.required is not True:
                                 subquery += f' AND "{inverse_field.name}" IS NOT NULL'
                             subparams = [tuple(ids2) or (None,)]
                         push_result(f'("{alias}"."id" {in_} ({subquery}))', subparams)

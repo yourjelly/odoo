@@ -239,7 +239,7 @@ export class MockServer {
         function isNodeProcessed(node) {
             return processedNodes.findIndex((n) => n.isSameNode(node)) > -1;
         }
-        const modifiersNames = ["invisible", "readonly", "required"];
+        const modifiersNames = ["column_invisible", "invisible", "readonly", "required"];
         const onchanges = params.models[modelName].onchanges || {};
         const fieldNodes = {};
         const groupbyNodes = {};
@@ -334,8 +334,11 @@ export class MockServer {
                 const mod = node.getAttribute(attr);
                 node.removeAttribute(attr);
                 if (mod) {
-                    const v = evaluateExpr(mod, context) ? true : false;
-                    if (inTreeView && !inListHeader && attr === "invisible") {
+                    let v = evaluateExpr(mod, context);
+                    if (!(v instanceof Array)) {
+                        v = !!v;
+                    }
+                    if (inTreeView && !inListHeader && attr === "invisible" && !_.isArray(v)) {
                         modifiers.column_invisible = v;
                     } else if (v || !(attr in modifiers) || !Array.isArray(modifiers[attr])) {
                         modifiers[attr] = v;

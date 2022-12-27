@@ -3,6 +3,7 @@
 import { useService } from '@web/core/utils/hooks';
 import { KanbanRenderer } from '@web/views/kanban/kanban_renderer';
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
+import { isModifierAlwaysTrue } from "@web/views/utils";
 
 const { onWillStart } = owl;
 
@@ -21,7 +22,7 @@ export class ProjectTaskKanbanRenderer extends KanbanRenderer {
         if (!canMoveRecords && this.canResequenceRecords && this.props.list.isGroupedByPersonalStages) {
             const { groupByField } = this.props.list;
             const { modifiers } = groupByField;
-            canMoveRecords = !(modifiers && modifiers.readonly);
+            canMoveRecords = !(modifiers && isModifierAlwaysTrue(modifiers.readonly));
         }
         return canMoveRecords;
     }
@@ -31,7 +32,7 @@ export class ProjectTaskKanbanRenderer extends KanbanRenderer {
         if (!canResequenceGroups && this.props.list.isGroupedByPersonalStages) {
             const { modifiers } = this.props.list.groupByField;
             const { groupsDraggable } = this.props.archInfo;
-            canResequenceGroups = groupsDraggable && !(modifiers && modifiers.readonly);
+            canResequenceGroups = groupsDraggable && !(modifiers && isModifierAlwaysTrue(modifiers.readonly));
         }
         return canResequenceGroups;
     }

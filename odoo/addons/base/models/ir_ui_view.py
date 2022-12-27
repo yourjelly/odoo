@@ -25,10 +25,17 @@ from odoo.modules.module import get_resource_from_path, get_resource_path
 from odoo.tools import config, ConstantMapping, get_diff, pycompat, apply_inheritance_specs, locate_node, str2bool
 from odoo.tools.convert import _fix_multiple_roots
 from odoo.tools import safe_eval, lazy, lazy_property, frozendict
-from odoo.tools.view_validation import valid_view, get_variable_names, get_domain_identifiers, get_dict_asts
+from odoo.tools.view_validation import valid_view, get_attrs_symbols, get_variable_names, get_dict_asts
 from odoo.tools.translate import xml_translate, TRANSLATED_ATTRS
 from odoo.models import check_method_name
-from odoo.osv.expression import expression
+from odoo.osv.expression import (
+    expression,
+    DOMAIN_OPERATORS,
+    TERM_OPERATORS,
+    AND, OR, is_false,
+    get_domain_field_names,
+    normalize_domain,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -57,6 +64,419 @@ def att_names(name):
     yield f"t-att-{name}"
     yield f"t-attf-{name}"
 
+########################################## Modifiers
+
+class ContextDependentDomainItem():
+    def __init__(self, value, names, returns_boolean=False, returns_domain=False):
+        self.value = value
+        self.contextual_values = names
+        self.returns_boolean = returns_boolean
+        self.returns_domain = returns_domain
+    def __str__(self):
+        if self.returns_domain:
+            return repr(self.value)
+        return self.value
+    def __repr__(self):
+        return self.__str__()
+
+def _modifier_to_domain_ast_wrap_domain(modifier_ast):
+    try:
+        domain_item = _modifier_to_domain_ast_item(modifier_ast, should_contain_domain=True)
+    except Exception as e:
+        raise ValueError(f'{e}\nExpression must returning a valid domain in all cases') from None
+
+    if not isinstance(domain_item, ContextDependentDomainItem) or not domain_item.returns_domain:
+        raise ValueError('Expression must returning a valid domain in all cases')
+    return domain_item.value
+
+def _modifier_to_domain_ast_domain(modifier_ast):
+    # ['|', ('a', '=', 'b'), ('user_id', '=', uid)]
+
+    if not isinstance(modifier_ast, ast.List):
+        raise ValueError('This part must be a domain') from None
+
+    domain = []
+    for leaf in modifier_ast.elts:
+        if isinstance(leaf, ast.Str) and leaf.s in DOMAIN_OPERATORS:
+            # !, |, &
+            domain.append(leaf.s)
+        elif isinstance(leaf, ast.Constant):
+            if leaf.value is True or leaf.value is False:
+                domain.append(leaf.value)
+            else:
+                raise ValueError("Domain can contain only '!', '&', '|', tuples or expression whose returns boolean")
+        elif isinstance(leaf, (ast.List, ast.Tuple)):
+            # domain tuple
+            if len(leaf.elts) != 3:
+                raise ValueError("Leaf must contain 3 items")
+            elif not isinstance(leaf.elts[0], ast.Constant):
+                raise ValueError("Leaf first item must be a field as string, 0 or 1")
+            elif not isinstance(leaf.elts[1], ast.Constant):
+                raise ValueError("Leaf middle item must be a string representing a comparator")
+
+            left_ast, operator_ast, right_ast = leaf.elts
+
+            if operator_ast.value not in TERM_OPERATORS:
+                raise ValueError(f"Unknown operator: {operator_ast.value!r}")
+
+            right = _modifier_to_domain_ast_item(right_ast)
+            domain.append((left_ast.value, operator_ast.value, right))
+        else:
+            item = _modifier_to_domain_ast_item(leaf)
+            domain.append(item)
+            if item not in (True, False) and isinstance(item, ContextDependentDomainItem) and not item.returns_boolean:
+                raise ValueError("Domain can contain only '!', '&', '|', tuples or expression whose returns boolean")
+
+    return normalize_domain(domain)
+
+def _modifier_to_domain_ast_item(item_ast, should_contain_domain=False):
+    # [('a', '=', True)]
+    # True
+    if isinstance(item_ast, ast.Constant):
+        return item_ast.value
+
+    # [('a', '=', 'b')]
+    # 'b'
+    if isinstance(item_ast, ast.Str):
+        return item_ast.s
+
+    # [('a', '=', 1)] if context.get('b') else []
+    # [('a', '=', 1)]
+    if should_contain_domain and isinstance(item_ast, ast.List):
+        domain = _modifier_to_domain_ast_domain(item_ast)
+        vnames = get_domain_value_names(domain)
+        return ContextDependentDomainItem(domain, vnames, returns_domain=True)
+
+    # [('obj_ids', 'in', [uid or False, 33])]
+    # [uid or False, 33]
+    if isinstance(item_ast, (ast.List, ast.Tuple)):
+        vnames = set()
+        values = []
+        for item in item_ast.elts:
+            value = _modifier_to_domain_ast_item(item)
+            if isinstance(value, ContextDependentDomainItem):
+                vnames.update(value.contextual_values)
+            values.append(value)
+
+        if isinstance(item_ast, ast.Tuple):
+            values = tuple(values)
+
+        if vnames:
+            return ContextDependentDomainItem(repr(values), vnames)
+        else:
+            return values
+
+    # [('a', '=', uid)]
+    # uid
+    if isinstance(item_ast, ast.Name):
+        vnames = {item_ast.id}
+        return ContextDependentDomainItem(item_ast.id, vnames)
+
+    # [('a', '=', parent.b)]
+    # parent.b
+    if isinstance(item_ast, ast.Attribute):
+        vnames = set()
+        name = _modifier_to_domain_ast_item(item_ast.value)
+        if isinstance(name, ContextDependentDomainItem):
+            vnames.update(name.contextual_values)
+        value = f"{name!r}.{item_ast.attr}"
+        if value.startswith('parent.'):
+            vnames.add(value)
+        return ContextDependentDomainItem(value, vnames)
+
+    # [('a', '=', company_ids[1])]
+    # [1]
+    if isinstance(item_ast, ast.Index): # deprecated python ast class for Subscript key
+        return _modifier_to_domain_ast_item(item_ast.value)
+
+    # [('a', '=', company_ids[1])]
+    # [1]
+    if isinstance(item_ast, ast.Subscript):
+        vnames = set()
+        name = _modifier_to_domain_ast_item(item_ast.value)
+        if isinstance(name, ContextDependentDomainItem):
+            vnames.update(name.contextual_values)
+
+        key = _modifier_to_domain_ast_item(item_ast.slice)
+        if isinstance(key, ContextDependentDomainItem):
+            vnames.update(key.contextual_values)
+        value = f"{name!r}[{key!r}]"
+
+        return ContextDependentDomainItem(value, vnames)
+
+    # [('a', '=', context.get('abc', 'default') == 'b')]
+    # ==
+    if isinstance(item_ast, ast.Compare):
+        vnames = set()
+
+        left = _modifier_to_domain_ast_item(item_ast.left)
+        if isinstance(left, ContextDependentDomainItem):
+            vnames.update(left.contextual_values)
+
+        operator = None
+        if isinstance(item_ast.ops[0], ast.Eq):
+            operator = '=='
+        elif isinstance(item_ast.ops[0], ast.NotEq):
+            operator = '!='
+        elif isinstance(item_ast.ops[0], ast.Lt):
+            operator = '<'
+        elif isinstance(item_ast.ops[0], ast.LtE):
+            operator = '<='
+        elif isinstance(item_ast.ops[0], ast.Gt):
+            operator = '>'
+        elif isinstance(item_ast.ops[0], ast.GtE):
+            operator = '>='
+        elif isinstance(item_ast.ops[0], ast.Is):
+            operator = 'is'
+        elif isinstance(item_ast.ops[0], ast.IsNot):
+            operator = 'is not'
+        elif isinstance(item_ast.ops[0], ast.In):
+            operator = 'in'
+        elif isinstance(item_ast.ops[0], ast.NotIn):
+            operator = 'not in'
+
+        right = []
+        for sub_ast in item_ast.comparators:
+            r = _modifier_to_domain_ast_item(sub_ast)
+            if isinstance(r, ContextDependentDomainItem):
+                vnames.update(r.contextual_values)
+            right.append(repr(r))
+
+        expr = f"{left!r} {operator} {','.join(right)}"
+        if vnames:
+            return ContextDependentDomainItem(expr, vnames, returns_boolean=True)
+        else:
+            raise ValueError(f"Should not use expression for static content: {expr}")
+
+    # [('a', '=', 1 - 3]
+    # 1 - 3
+    if isinstance(item_ast, ast.BinOp):
+        vnames = set()
+
+        left = _modifier_to_domain_ast_item(item_ast.left)
+        if isinstance(left, ContextDependentDomainItem):
+            vnames.update(left.contextual_values)
+
+        operator = None
+        if isinstance(item_ast.op, ast.Add):
+            operator = '+'
+        elif isinstance(item_ast.op, ast.Sub):
+            operator = '-'
+        elif isinstance(item_ast.op, ast.Mult):
+            operator = '*'
+        elif isinstance(item_ast.op, ast.Div):
+            operator = '/'
+        elif isinstance(item_ast.op, ast.FloorDiv):
+            operator = '//'
+        elif isinstance(item_ast.op, ast.Mod):
+            operator = '%'
+        elif isinstance(item_ast.op, ast.Pow):
+            operator = '^'
+
+        right = _modifier_to_domain_ast_item(item_ast.right)
+        if isinstance(right, ContextDependentDomainItem):
+            vnames.update(right.contextual_values)
+
+        expr = f"{left!r} {operator} {right!r}"
+        if vnames:
+            return ContextDependentDomainItem(expr, vnames)
+        else:
+            raise ValueError(f"Should not use expression for static content: {expr}")
+
+    # [(1, '=', field_name and 1 or 0]
+    # field_name and 1
+    if isinstance(item_ast, ast.BoolOp):
+        vnames = set()
+
+        returns_boolean = True
+        returns_domain = False
+
+        values = []
+        for ast_value in item_ast.values:
+            value = _modifier_to_domain_ast_item(ast_value, should_contain_domain)
+            if isinstance(value, ContextDependentDomainItem):
+                vnames.update(value.contextual_values)
+                if not value.returns_boolean:
+                    returns_boolean = False
+                if value.returns_domain:
+                    returns_domain = True
+            elif not isinstance(value, bool):
+                returns_boolean = False
+            values.append(repr(value))
+
+        if returns_domain:
+            raise ValueError("Use if/else condition instead of boolean operator to return domain.")
+
+        operator = ' and ' if isinstance(item_ast.op, ast.And) else ' or '
+        expr = operator.join(values)
+        if vnames:
+            return ContextDependentDomainItem(expr, vnames, returns_boolean=returns_boolean)
+        else:
+            raise ValueError(f"Should not use expression for static content: {expr}")
+
+    # [('a', '=', not context.get('abc', 'default'))]
+    # not context.get('abc', 'default')
+    if isinstance(item_ast, ast.UnaryOp):
+        leaf = _modifier_to_domain_ast_item(item_ast.operand)
+        vnames = set()
+        if isinstance(leaf, ContextDependentDomainItem):
+            vnames.update(leaf.contextual_values)
+
+        expr = f"not {leaf!r}"
+        if vnames:
+            return ContextDependentDomainItem(expr, vnames, returns_boolean=True)
+        else:
+            raise ValueError(f"Should not use expression for static content: {expr}")
+
+    # [('a', '=', int(context.get('abc', False))]
+    # context.get('abc', False)
+    if isinstance(item_ast, ast.Call):
+        vnames = set()
+
+        name = _modifier_to_domain_ast_item(item_ast.func)
+        if isinstance(name, ContextDependentDomainItem) and name.value not in safe_eval._BUILTINS:
+            vnames.update(name.contextual_values)
+        returns_boolean = str(name) == 'bool'
+
+        values = []
+        for arg in item_ast.args:
+            value = _modifier_to_domain_ast_item(arg)
+            if isinstance(value, ContextDependentDomainItem):
+                vnames.update(value.contextual_values)
+            values.append(repr(value))
+
+        expr = f"{name!r}({', '.join(values)})"
+        if vnames:
+            return ContextDependentDomainItem(expr, vnames, returns_boolean=returns_boolean)
+        else:
+            raise ValueError(f"Should not use expression for static content: {expr}")
+
+    # [('a', '=', 1 if context.get('abc', 'default') == 'b' else 0)]
+    # 1 if context.get('abc', 'default') == 'b' else 0
+    if isinstance(item_ast, ast.IfExp):
+        vnames = set()
+
+        test = _modifier_to_domain_ast_item(item_ast.test)
+        if isinstance(test, ContextDependentDomainItem):
+            vnames.update(test.contextual_values)
+
+        if not vnames:
+            raise ValueError(f"Should not use expression for static content: {test}")
+
+        returns_boolean = True
+        returns_domain = True
+
+        body = _modifier_to_domain_ast_item(item_ast.body, should_contain_domain)
+        if isinstance(body, ContextDependentDomainItem):
+            vnames.update(body.contextual_values)
+            if not body.returns_boolean:
+                returns_boolean = False
+            if not body.returns_domain:
+                returns_domain = False
+        else:
+            returns_domain = False
+            if not isinstance(body, bool):
+                returns_boolean = False
+
+        orelse = _modifier_to_domain_ast_item(item_ast.orelse, should_contain_domain)
+        if isinstance(orelse, ContextDependentDomainItem):
+            vnames.update(orelse.contextual_values)
+            if not orelse.returns_boolean:
+                returns_boolean = False
+            if not orelse.returns_domain:
+                returns_domain = False
+        else:
+            returns_domain = False
+            if not isinstance(orelse, bool):
+                returns_boolean = False
+
+        if returns_domain:
+            # [('id', '=', 42)] if parent.a else []
+            not_test = ContextDependentDomainItem(f"not ({test})", vnames, returns_boolean=True)
+            if not isinstance(test, ContextDependentDomainItem) or not test.returns_boolean:
+                test = ContextDependentDomainItem(f"bool({test})", vnames, returns_boolean=True)
+            # ['|', '&', bool(parent.a), ('id', '=', 42), not parent.a]
+            expr = ['|', '&', test] + body.value + ['&', not_test] + orelse.value
+        else:
+            expr = f"{body!r} if {test} else {orelse!r}"
+
+        return ContextDependentDomainItem(expr, vnames, returns_boolean=returns_boolean, returns_domain=returns_domain)
+
+    raise ValueError(f"Undefined item {item_ast!r}.")
+
+def _modifier_to_domain_validation(domain):
+    for leaf in domain:
+        if leaf is True or leaf is False:
+            continue
+        if leaf in DOMAIN_OPERATORS:
+            continue
+        try:
+            left, operator, _right = leaf
+        except ValueError:
+            raise ValueError("Leaf must contain 3 items")
+        except TypeError:
+            if isinstance(leaf, ContextDependentDomainItem):
+                if leaf.returns_boolean:
+                    continue
+                raise ValueError(f'Expression must return a boolean: {leaf!r}')
+            raise ValueError(f"Domain can contain only '!', '&', '|', tuples or expression whose returns boolean: {leaf!r}")
+        if left not in (1, 0) and not isinstance(left, str): # TODO: remove 1 and 0 (replaced by True and False)
+            raise ValueError(f'Left segment should be a string, 1 or 0: {leaf!r}')
+        if operator not in TERM_OPERATORS:
+            raise ValueError(f"Unknown operator: {operator!r}")
+
+def modifier_to_domain(modifier):
+    """
+    Convert modifier values to domain. Generated domains can contain
+    contextual elements (right part of domain leaves). The domain can be
+    concatenated with others using the `AND` and `OR` methods.
+    The representation of the domain can be evaluated with the corresponding
+    context.
+
+    :params modifier (bool|0|1|domain|str|ast)
+    :return a normalized domain (list(tuple|"&"|"|"|"!"|True|False))
+    """
+
+    if isinstance(modifier, bool):
+        return [modifier]
+    if isinstance(modifier, int):
+        return [bool(modifier)]
+    if isinstance(modifier, (list, tuple)):
+        _modifier_to_domain_validation(modifier)
+        return normalize_domain(modifier)
+    if isinstance(modifier, ast.AST):
+        try:
+            return _modifier_to_domain_ast_domain(modifier)
+        except Exception as e:
+            raise ValueError(f'{e}: {modifier!r}') from None
+
+    modifier = modifier.strip()
+    try:
+        # most (~95%) elements are 1/True/0/False
+        return [str2bool(modifier)]
+    except ValueError:
+        pass
+
+    modifier_str = modifier.strip()
+    # [('a', '=', 'b')]
+    try:
+        domain = ast.literal_eval(modifier_str)
+        _modifier_to_domain_validation(domain)
+        return normalize_domain(domain)
+    except SyntaxError:
+        raise ValueError(f'Wrong domain python syntax: {modifier_str}')
+    except ValueError:
+        pass
+
+    # [('a', '=', parent.b), ('a', '=', context.get('b'))]
+    try:
+        modifier_ast = ast.parse(modifier_str, mode='eval').body
+        if isinstance(modifier_ast, ast.List):
+            return _modifier_to_domain_ast_domain(modifier_ast)
+        else:
+            return _modifier_to_domain_ast_wrap_domain(modifier_ast)
+    except Exception as e:
+        raise ValueError(f'{e}: {modifier_str}')
 
 def transfer_field_to_modifiers(field, modifiers, attributes):
     default_values = {}
@@ -75,69 +495,112 @@ def transfer_field_to_modifiers(field, modifiers, attributes):
         else:
             modifiers[attr] = default_value
 
+def merge_node_modifiers(node, py_modifiers):
+    # bool and int are replaced by domain
+    for attr in py_modifiers:
+        value = py_modifiers[attr]
+        if value in (1, 0):
+            if 'xml' in config['dev_mode']:
+                warnings.warn(f"Numerical value of field '{attr}' is deprecated", DeprecationWarning, 2)
+            py_modifiers[attr] = [bool(value)]
+        elif isinstance(value, bool):
+            py_modifiers[attr] = [value]
 
-def transfer_node_to_modifiers(node, modifiers):
-    # Don't deal with groups, it is done by check_group().
-    attrs = node.attrib.pop('attrs', None)
+    modifiers = {}
+    # deprecated modifiers from attrs
+    attrs = node.attrib.get('attrs')
     if attrs:
-        modifiers.update(ast.literal_eval(attrs.strip()))
-        for a in ('invisible', 'readonly', 'required'):
-            if a in modifiers and isinstance(modifiers[a], int):
-                modifiers[a] = bool(modifiers[a])
-
-    states = node.attrib.pop('states', None)
-    if states:
-        states = states.split(',')
-        if 'invisible' in modifiers and isinstance(modifiers['invisible'], list):
-            # TODO combine with AND or OR, use implicit AND for now.
-            modifiers['invisible'].append(('state', 'not in', states))
-        else:
-            modifiers['invisible'] = [('state', 'not in', states)]
-
-    context_dependent_modifiers = {}
-    for attr in ('invisible', 'readonly', 'required'):
-        value_str = node.attrib.pop(attr, None)
-        if value_str:
-
-            if (attr == 'invisible'
-                    and any(parent.tag == 'tree' for parent in node.iterancestors())
-                    and not any(parent.tag == 'header' for parent in node.iterancestors())):
-                # Invisible in a tree view has a specific meaning, make it a
-                # new key in the modifiers attribute.
-                attr = 'column_invisible'
-
-            # TODO: for invisible="context.get('...')", delegate to the web client.
+        if 'xml' in config['dev_mode']:
+            warnings.warn("Attribute 'attrs' is deprecated: %s" % attrs, DeprecationWarning, 2)
+        for attr, val in ast.literal_eval(attrs.strip()).items():
             try:
-                # most (~95%) elements are 1/True/0/False
-                value = str2bool(value_str)
-            except ValueError:
-                # if str2bool fails, it means it's something else than 1/True/0/False,
-                # meaning most-likely `context.get('...')`,
-                # which should be evaluated after retrieving the view arch from the cache
-                context_dependent_modifiers[attr] = value_str
-                continue
+                domain = modifier_to_domain(val)
+            except Exception as e:
+                raise ValueError(_("Invalid format in modifier %(use)r: %(expr)r\n%(error)s", error=e, expr=val, use=attr))
+            # keep the previous behaviour (replace the domain instead of combine domains)s
+            modifiers[attr] = domain
 
-            if value or (attr not in modifiers or not isinstance(modifiers[attr], list)):
-                # Don't set the attribute to False if a dynamic value was
-                # provided (i.e. a domain from attrs or states).
-                modifiers[attr] = value
+    # deprecated invisible modifier from states
+    states = node.attrib.get('states')
+    if states:
+        if 'xml' in config['dev_mode']:
+            warnings.warn("Attribute 'states' is deprecated: %s" % states, DeprecationWarning, 2)
+        domain = [('state', 'not in', tuple(states.split(',')))]
+        if 'invisible' in modifiers and isinstance(modifiers['invisible'], list):
+            modifiers['invisible'] = AND([modifiers['invisible'], domain])
+        else:
+            modifiers['invisible'] = domain
 
-    if context_dependent_modifiers:
-        node.set('context-dependent-modifiers', json.dumps(context_dependent_modifiers))
+    for attr in ('column_invisible', 'invisible', 'readonly', 'required'):
+        value_str = node.attrib.get(attr, "").strip()
+        if not value_str:
+            continue
 
+        if (attr == 'invisible'
+                and not value_str.startswith('[')
+                and any(parent.tag == 'tree' for parent in node.iterancestors())
+                and not any(parent.tag == 'header' for parent in node.iterancestors())):
+            if 'xml' in config['dev_mode']:
+                warnings.warn("Attribute 'invisible' converted into 'column_invisible' is deprecated", DeprecationWarning, 2)
+            # Invisible in a tree view has a specific meaning, make it a
+            # new key in the modifiers attribute.
+            attr = 'column_invisible'
 
-def simplify_modifiers(modifiers):
-    for a in ('column_invisible', 'invisible', 'readonly', 'required'):
-        if a in modifiers and not modifiers[a]:
-            del modifiers[a]
+        try:
+            domain = modifier_to_domain(value_str)
+        except ValueError as e:
+            if value_str.startswith('['):
+                raise ValueError(_("Invalid format in modifier %(use)r: %(expr)r\n%(error)s", error=e, expr=value_str, use=attr))
 
+            # attribute value is a most-likely `context.get('...')`
+            if 'xml' in config['dev_mode']:
+                warnings.warn("Attribute value use context directly is deprecated", DeprecationWarning, 2)
+            try:
+                domain = modifier_to_domain(f"[bool({value_str})]")
+            except ValueError as e:
+                raise ValueError(_("Invalid format in modifier %(use)r: %(expr)r\n%(error)s", error=e, expr=value_str, use=attr))
 
-def transfer_modifiers_to_node(modifiers, node):
-    if modifiers:
-        simplify_modifiers(modifiers)
-        if modifiers:
-            node.set('modifiers', json.dumps(modifiers))
+        modifiers[attr] = OR([domain, modifiers.get(attr, [False])])
 
+    py_modifiers.update(modifiers)
+
+def get_domain_value_names(domain):
+    """ Return all field name used by this domain
+    eg: [
+            ('id', 'in', [1, 2, 3]),
+            ('field_a', 'in', parent.truc),
+            ('field_b', 'in', context.get('b')),
+            (1, '=', 1),
+            bool(context.get('c')),
+        ]
+        returns {'parent', 'parent.truc', 'context'}
+
+    :param domain: list(tuple)
+    :return: set(str)
+    """
+    value_names = set()
+    for leaf in domain:
+        if leaf in DOMAIN_OPERATORS or leaf in (True, False):
+            # "&", "|", "!", True, False
+            continue
+        try:
+            # (1, "=", context.get('a'))
+            left, operator, right = leaf  # pylint: disable=unused-variable
+            value_names.update(right.contextual_values)
+        except AttributeError:
+            # right value is not a ContextDependentDomainItem item
+            pass
+        except (TypeError, ValueError):
+            # leaf is not a domain tuple
+            try:
+                if leaf.returns_boolean:
+                    # str expression whose returns boolean, converted into ContextDependentDomainItem
+                    value_names.update(leaf.contextual_values)
+            except AttributeError:
+                raise ValueError(f"Domain can contain only '!', '&', '|', tuples or expression whose returns boolean: {domain!r}.")
+    return value_names
+
+##########################################
 
 @lazy
 def keep_query():
@@ -462,14 +925,21 @@ actual arch.
                         view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
                         _logger.warning('Invalid view %s definition in %s \n%s', view_name, view.arch_fs, view.arch)
             except ValueError as e:
-                lines = etree.tostring(combined_arch, encoding='unicode').splitlines(keepends=True)
-                fivelines = "".join(lines[max(0, e.context["line"]-3):e.context["line"]+2])
-                err = ValidationError(_(
-                    "Error while validating view near:\n\n%(fivelines)s\n%(error)s",
-                    fivelines=fivelines, error=tools.ustr(e),
-                ))
-                err.context = e.context
-                raise err.with_traceback(e.__traceback__) from None
+                if hasattr(e, 'context'):
+                    lines = etree.tostring(combined_arch, encoding='unicode').splitlines(keepends=True)
+                    fivelines = "".join(lines[max(0, e.context["line"]-3):e.context["line"]+2])
+                    err = ValidationError(_(
+                        "Error while validating view near:\n\n%(fivelines)s\n%(error)s",
+                        fivelines=fivelines, error=tools.ustr(e),
+                    ))
+                    err.context = e.context
+                    raise err.with_traceback(e.__traceback__) from None
+                else:
+                    err = ValidationError(_(
+                        "Error while validating view:\n\n%(error)s", error=tools.ustr(e.__context__),
+                    ))
+                    err.context = {'name': 'invalid view'}
+                    raise err.with_traceback(e.__context__.__traceback__) from None
 
         return True
 
@@ -1106,31 +1576,6 @@ actual arch.
 
         return tree
 
-    def _postprocess_context_dependent(self, tree):
-        """
-        Evaluate the modifiers which depends on the context after retrieving the view from the cache.
-
-        e.g.
-        <field name="date_approve" invisible="context.get('quotation_only', False)"
-
-        For such modifiers, which cannot be cached, the modifier has been stored under it's non-evaluated expression,
-        along with a temporary technical attribute `context-dependent-modifiers`
-        to tell which modifier should be evaluated after retrieving the view from the cache.
-        e.g.
-        <field
-            name="date_approve"
-            modifiers="{&quot;invisible&quot;: &quot;context.get('quotation_only')&quot;}"
-            context-dependent-modifiers="invisible"/>
-        """
-        for node in tree.xpath('//*[@context-dependent-modifiers]'):
-            modifiers = json.loads(node.attrib.pop('modifiers', '{}'))
-            for attr, value in json.loads(node.attrib.pop('context-dependent-modifiers')).items():
-                value = bool(safe_eval.safe_eval(value, {'context': self._context}))
-                if value or (attr not in modifiers or not isinstance(modifiers[attr], list)):
-                    modifiers[attr] = value
-            transfer_modifiers_to_node(modifiers, node)
-        return tree
-
     def _postprocess_view(self, node, model_name, editable=True, parent_name_manager=None, **options):
         """ Process the given architecture, modifying it in-place to add and
         remove stuff.
@@ -1177,8 +1622,24 @@ actual arch.
                     # the node has been removed, stop processing here
                     continue
 
-            transfer_node_to_modifiers(node, node_info['modifiers'])
-            transfer_modifiers_to_node(node_info['modifiers'], node)
+            modifiers = node_info['modifiers']
+            merge_node_modifiers(node, modifiers)
+
+            # remove consumed attributes
+            for attr in ('attrs', 'states', 'column_invisible', 'invisible', 'readonly', 'required'):
+                node.attrib.pop('attrs', None)
+
+            # simplify modifiers and convert to string for contextual domain
+            for attr in list(modifiers):
+                value = modifiers[attr]
+                if not value or is_false(value):
+                    del modifiers[attr]
+                elif get_domain_value_names(value):
+                    modifiers[attr] = repr(value)
+
+            # add modifier on node
+            if modifiers:
+                node.set('modifiers', json.dumps(modifiers))
 
             # if present, iterate on node_info['children'] instead of node
             for child in reversed(node_info.get('children', node)):
@@ -1519,11 +1980,15 @@ actual arch.
                     # dynamic domain: in [('foo', '=', bar)], field 'foo' must
                     # exist on the comodel and field 'bar' must be in the view
                     desc = (f'domain of <field name="{name}">' if node.get('domain')
-                            else f"domain of field '{name}'")
-                    fnames, vnames = self._get_domain_identifiers(node, domain, desc)
-                    self._check_field_paths(node, fnames, field.comodel_name, f"{desc} ({domain})")
-                    if vnames:
-                        name_manager.must_have_fields(node, vnames, f"{desc} ({domain})")
+                            else f"domain of python field '{name}'")
+                    try:
+                        self._validate_domain_identifiers(node, name_manager, domain, desc, field.comodel_name)
+                    except ValueError as e:
+                        if 'Modifier must be a domain' in str(e):
+                            if 'xml' in config['dev_mode']:
+                                warnings.warn(f"Non-domain syntaxes are deprecated for attribute 'domain': {desc}\n{domain!r}", DeprecationWarning, 2)
+                        else:
+                            raise
 
             elif validate and node.get('domain'):
                 msg = _(
@@ -1552,22 +2017,6 @@ actual arch.
 
         name_manager.has_field(node, name, {'id': node.get('id'), 'select': node.get('select')})
 
-        if validate:
-            for attribute in ('invisible', 'readonly', 'required'):
-                val = node.get(attribute)
-                if val:
-                    try:
-                        # most (~95%) elements are 1/True/0/False
-                        res = str2bool(val)
-                    except ValueError:
-                        res = safe_eval.safe_eval(val, {'context': self._context})
-                    if res not in (1, 0, True, False, None):
-                        msg = _(
-                            'Attribute %(attribute)s evaluation expects a boolean, got %(value)s',
-                            attribute=attribute, value=val,
-                        )
-                        self._raise_view_error(msg, node)
-
     def _validate_tag_filter(self, node, name_manager, node_info):
         if not node_info['validate']:
             return
@@ -1575,10 +2024,7 @@ actual arch.
         if domain:
             name = node.get('name')
             desc = f'domain of <filter name="{name}">' if name else 'domain of <filter>'
-            fnames, vnames = self._get_domain_identifiers(node, domain, desc)
-            self._check_field_paths(node, fnames, name_manager.model._name, f"{desc} ({domain})")
-            if vnames:
-                name_manager.must_have_fields(node, vnames, f"{desc} ({domain})")
+            self._validate_domain_identifiers(node, name_manager, domain, desc, name_manager.model._name)
 
     def _validate_tag_button(self, node, name_manager, node_info):
         if not node_info['validate']:
@@ -1641,11 +2087,8 @@ actual arch.
                     self._raise_view_error(msg, node)
                 domain = node_info['editable'] and field._description_domain(self.env)
                 if isinstance(domain, str):
-                    desc = f"domain of field '{name}'"
-                    fnames, vnames = self._get_domain_identifiers(node, domain, desc)
-                    self._check_field_paths(node, fnames, field.comodel_name, f"{desc} ({domain})")
-                    if vnames:
-                        name_manager.must_have_fields(node, vnames, f"{desc} ({domain})")
+                    desc = f"domain of python field '{name}'"
+                    self._validate_domain_identifiers(node, name_manager, domain, desc, field.comodel_name)
 
             # move all children nodes into a new node <groupby>
             groupby_node = E.groupby(*node)
@@ -1743,23 +2186,25 @@ actual arch.
 
     def _validate_attrs(self, node, name_manager, node_info):
         """ Generic validation of node attrs. """
+
+        # validate: 'attrs', 'states', 'column_invisible', 'invisible', 'readonly', 'required'
+        modifiers = {}
+        try:
+            merge_node_modifiers(node, modifiers)
+        except ValueError as e:
+            self._raise_view_error(e, node)
+
+        for attr, domain in modifiers.items():
+            # domains used in for readonly, invisible, ...
+            # and thus are only executed client side
+            desc = f"modifier {attr!r}"
+            self._validate_domain_identifiers(node, name_manager, domain, desc)
+
         for attr, expr in node.items():
             if attr in ('class', 't-att-class', 't-attf-class'):
                 self._validate_classes(node, expr)
 
-            elif attr == 'attrs':
-                for key, val_ast in get_dict_asts(expr).items():
-                    if isinstance(val_ast, ast.List):
-                        # domains in attrs are used for readonly, invisible, ...
-                        # and thus are only executed client side
-                        fnames, vnames = self._get_domain_identifiers(node, val_ast, attr, expr)
-                        name_manager.must_have_fields(node, fnames | vnames, f"attrs ({expr})")
-                    else:
-                        vnames = get_variable_names(val_ast)
-                        if vnames:
-                            name_manager.must_have_fields(node, vnames, f"attrs ({expr})")
-
-            elif attr == 'context':
+            if attr == 'context':
                 for key, val_ast in get_dict_asts(expr).items():
                     if key == 'group_by':  # only in context
                         if not isinstance(val_ast, ast.Str):
@@ -1965,12 +2410,25 @@ actual arch.
         if (not next(filter(lambda regex: re.match(regex, directive), allowed_directives), None)):
             self._raise_view_error(_("Forbidden owl directive used in arch (%s).", directive), node)
 
-    def _get_domain_identifiers(self, node, domain, use, expr=None):
+    def _validate_domain_identifiers(self, node, name_manager, domain, use, model=None):
         try:
-            return get_domain_identifiers(domain)
-        except ValueError:
-            msg = _("Invalid domain format %(expr)s in %(use)s", expr=expr or domain, use=use)
-            self._raise_view_error(msg, node)
+            domain = modifier_to_domain(domain)
+            fnames = get_domain_field_names(domain)
+        except ValueError as e:
+            msg = _("Invalid format in %(use)s: %(expr)r\n%(error)s", use=use, expr=domain, error=e)
+            self._raise_view_error(msg, node, from_exception=e)
+
+        if fnames:
+            if model:
+                self._check_field_paths(node, fnames, model, f"{use} ({domain!r})")
+            else:
+                name_manager.must_have_fields(node, fnames, f"{use} ({domain!r})")
+
+        IGNORED = get_attrs_symbols() | {'parent'}
+        value_names = get_domain_value_names(domain)
+        vnames = set(name for name in value_names if name not in IGNORED)
+        if vnames:
+            name_manager.must_have_fields(node, vnames, f"{use} ({domain!r})")
 
     def _check_field_paths(self, node, field_paths, model_name, use):
         """ Check whether the given field paths (dot-separated field names)
@@ -2694,7 +3152,6 @@ class Model(models.AbstractModel):
 
         node = etree.fromstring(result['arch'])
         node = self.env['ir.ui.view']._postprocess_access_rights(node)
-        node = self.env['ir.ui.view']._postprocess_context_dependent(node)
         result['arch'] = etree.tostring(node, encoding="unicode").replace('\t', '')
 
         return result
