@@ -18,7 +18,7 @@ _relaxng_cache = {}
 READONLY = re.compile(r"\breadonly\b")
 
 
-def _get_attrs_symbols():
+def get_attrs_symbols():
     """ Return a set of predefined symbols for evaluating attrs. """
     return {
         'True', 'False', 'None',    # those are identifiers in Python 2.7
@@ -51,7 +51,7 @@ def get_variable_names(expr):
     """ Return the subexpressions of the kind "VARNAME(.ATTNAME)*" in the given
     string or AST node.
     """
-    IGNORED = _get_attrs_symbols()
+    IGNORED = get_attrs_symbols()
     names = set()
 
     def get_name_seq(node):
@@ -94,44 +94,6 @@ def get_dict_asts(expr):
 def _check(condition, explanation):
     if not condition:
         raise ValueError("Expression is not a valid domain: %s" % explanation)
-
-
-def get_domain_identifiers(expr):
-    """ Check that the given string or AST node represents a domain expression,
-    and return a pair of sets ``(fields, vars)`` where ``fields`` are the field
-    names on the left-hand side of conditions, and ``vars`` are the variable
-    names on the right-hand side of conditions.
-    """
-    if not expr:  # case of expr=""
-        return (set(), set())
-    if isinstance(expr, str):
-        expr = ast.parse(expr.strip(), mode='eval').body
-
-    fnames = set()
-    vnames = set()
-
-    if isinstance(expr, ast.List):
-        for elem in expr.elts:
-            if isinstance(elem, ast.Str):
-                # note: this doesn't check the and/or structure
-                _check(elem.s in ('&', '|', '!'),
-                       f"logical operators should be '&', '|', or '!', found {elem.s!r}")
-                continue
-
-            if not isinstance(elem, (ast.List, ast.Tuple)):
-                continue
-
-            _check(len(elem.elts) == 3,
-                   f"segments should have 3 elements, found {len(elem.elts)}")
-            lhs, operator, rhs = elem.elts
-            _check(isinstance(operator, ast.Str),
-                   f"operator should be a string, found {type(operator).__name__}")
-            if isinstance(lhs, ast.Str):
-                fnames.add(lhs.s)
-
-    vnames.update(get_variable_names(expr))
-
-    return (fnames, vnames)
 
 
 def valid_view(arch, **kwargs):

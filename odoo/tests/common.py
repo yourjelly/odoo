@@ -55,7 +55,7 @@ from odoo.models import BaseModel
 from odoo.exceptions import AccessError
 from odoo.modules.registry import Registry
 from odoo.osv import expression
-from odoo.osv.expression import normalize_domain, TRUE_LEAF, FALSE_LEAF
+from odoo.osv.expression import OR_OPERATOR, NOT_OPERATOR, AND_OPERATOR
 from odoo.service import security
 from odoo.sql_db import BaseCursor, Cursor
 from odoo.tools import float_compare, single_email_re, profiler, lower_logging
@@ -2070,6 +2070,120 @@ def can_import(module):
         return True
 
 
+class ProxyDict(dict):
+    def __init__(self, getter):
+        super().__init__()
+        self.getter = getter
+    def __getitem__(self, key):
+        return self.getter(key)
+
+
+def reduce_domain(domain, values=None):
+    """Reduce the domain and return a boolean if the domain is completely
+    reduced (no value related to a field) otherwise returns the domain
+    with the item with contextual key and whose result is indeterminate.
+
+    eg.
+        [(1, "=", 0), ('parent.id', 'in', [1, 2, 3])] is always False
+
+        ['|', True, ('parent.id', 'in', [1, 2, 3])] is always True
+
+        [True, ('parent.id', 'in', [1, 2, 3]), True]
+            returns [('parent.id', 'in', [1, 2, 3])] if they are no item
+            parent in the values dictionary, or the id does not exists
+            in the parent value, this method
+
+    :param domain: :ref:`A search domain <reference/orm/domains>`.
+    :param values: dict witch contains key item
+
+    :return: boolean or rest of the domain if contains contextual values
+    """
+    assert isinstance(domain, (list, tuple)), f"Domains to normalize must have a 'domain' form: a list or tuple of domain components: {domain!r}"
+
+    if not domain:
+        return True
+
+    stack = []
+    for leaf in reversed(domain):
+        if leaf == OR_OPERATOR:
+            first = stack.pop()
+            second = stack.pop()
+            if first is True or second is True:
+                stack.append(True)
+            elif first is False or second is False:
+                stack.append(first or second)
+            else:
+                raise NotImplementedError()
+        elif leaf == NOT_OPERATOR:
+            stack.append(not stack.pop())
+        elif leaf == AND_OPERATOR:
+            first = stack.pop()
+            second = stack.pop()
+            if first is False or second is False:
+                stack.append(False)
+            elif first is True:
+                stack.append(second)
+            elif second is True:
+                stack.append(first)
+            else:
+                raise NotImplementedError()
+        elif isinstance(leaf, bool):
+            stack.append(leaf)
+        else:
+            (source, op, value) = leaf
+
+            if (source == 1 and value) or (source == 0 and not value):
+                # (1, '=', Truly) or (0, '=', Falsy value from context.get(...) or other contextual value)
+                stack.append(True)
+                continue
+            elif source in (1, 0):
+                # (0, '=', Truly value from context.get(...) or other contextual value)
+                stack.append(False)
+                continue
+
+            if isinstance(source, str):
+                if values is None:
+                    stack.append(leaf)
+                    continue
+                try:
+                    source = (values or {})[source]
+                except KeyError:
+                    stack.append(leaf)
+                    continue
+
+            if op in _OPS:
+                stack.append(_OPS[op](source, value))
+            else:
+                raise ValueError(f"Operator '{op}' for '{leaf}' doesn't exist in domain: {domain!r}")
+
+    contextual_domain = []
+    for item in stack:
+        if item is False:
+            return False
+        elif item is not True:
+            contextual_domain.append(item)
+
+    return contextual_domain if len(contextual_domain) > 0 else True
+
+
+# Python implementation of domain comparison operators
+_OPS = {
+    '=': operator.eq,
+    '==': operator.eq,
+    '!=': operator.ne,
+    '<': operator.lt,
+    '<=': operator.le,
+    '>=': operator.ge,
+    '>': operator.gt,
+    'in': lambda a, b: (a in b) if isinstance(b, (tuple, list)) else (b in a),
+    'not in': lambda a, b: (a not in b) if isinstance(b, (tuple, list)) else (b not in a),
+    'like': lambda a, b: a and b and isinstance(a, str) and isinstance(b, str) and a in b,
+    'ilike': lambda a, b: a and b and isinstance(a, str) and isinstance(b, str) and a.lower() in b.lower(),
+    'not like': lambda a, b: a and b and isinstance(a, str) and isinstance(b, str) and a not in b,
+    'not ilike': lambda a, b: a and b and isinstance(a, str) and isinstance(b, str) and a.lower() not in b.lower(),
+}
+
+
 class Form(object):
     """ Server-side form view implementation (partial)
 
@@ -2250,19 +2364,16 @@ class Form(object):
 
             node_modifiers = {}
             for modifier, domain in json.loads(f.get('modifiers', '{}')).items():
-                if isinstance(domain, (int, bool)):
-                    node_modifiers[modifier] = [bool(domain)]
-                elif isinstance(domain, str):
-                    node_modifiers[modifier] = normalize_domain(safe_eval(domain, eval_context))
-                else:
-                    node_modifiers[modifier] = normalize_domain(domain)
+                if isinstance(domain, str):
+                    domain = safe_eval(domain, eval_context)
+                node_modifiers[modifier] = odoo.addons.base.models.ir_ui_view.modifier_to_domain(domain)
 
             for a in f.xpath('ancestor::*[@modifiers][count(ancestor::field) = %s]' % field_level):
                 ancestor_modifiers = json.loads(a.get('modifiers'))
                 for modifier in inherited_modifiers:
                     if modifier in ancestor_modifiers:
                         domain = ancestor_modifiers[modifier]
-                        ancestor_domain = ([bool(domain)]) if isinstance(domain, (int, bool)) else normalize_domain(domain)
+                        ancestor_domain = odoo.addons.base.models.ir_ui_view.modifier_to_domain(domain)
                         node_domain = node_modifiers.get(modifier, [False])
                         # Combine the field modifiers with his ancestor modifiers with an OR connector
                         # e.g. A field is invisible if its own invisible modifier is True
@@ -2336,42 +2447,25 @@ class Form(object):
     def _get_modifier(self, field, modifier, *, default=False, view=None, modmap=None, vals=None):
         if view is None:
             view = self._view
+        if vals is None:
+            vals = self._values
 
         d = (modmap or view['modifiers'])[field].get(modifier, default)
         if isinstance(d, bool):
             return d
 
-        if vals is None:
-            vals = self._values
-        stack = []
-        for it in reversed(d):
-            if it == '!':
-                stack.append(not stack.pop())
-            elif it == '&':
-                e1 = stack.pop()
-                e2 = stack.pop()
-                stack.append(e1 and e2)
-            elif it == '|':
-                e1 = stack.pop()
-                e2 = stack.pop()
-                stack.append(e1 or e2)
-            elif isinstance(it, bool):
-                stack.append(it)
-                continue
-            elif isinstance(it, tuple):
-                if it == TRUE_LEAF:
-                    stack.append(True)
-                    continue
-                elif it == FALSE_LEAF:
-                    stack.append(False)
-                    continue
-                f, op, val = it
-                # hack-ish handling of parent.<field> modifiers
-                f, n = re.subn(r'^parent\.', '', f, 1)
-                if n:
-                    field_val = vals['•parent•'][f]
+        def getter(key):
+            value = vals
+            keys = key.split('.')
+            for f in keys:
+                if f == 'context':
+                    value = self._env.context
+                elif f == 'parent' and len(keys) > 1:
+                    value = value['•parent•']
+                elif f not in value:
+                    raise KeyError(f'"{key}" is undefined.')
                 else:
-                    field_val = vals[f]
+                    value = value[f]
                     # apparent artefact of JS data representation: m2m field
                     # values are assimilated to lists of ids?
                     # FIXME: SSF should do that internally, but the requirement
@@ -2384,28 +2478,16 @@ class Form(object):
                     f_ = view['fields'].get(f, {'type': None})
                     if f_['type'] == 'many2many':
                         # field value should be [(6, _, ids)], we want just the ids
-                        field_val = field_val[0][2] if field_val else []
+                        value = value[0][2] if value else []
+            return value
+        values = ProxyDict(getter)
 
-                stack.append(self._OPS[op](field_val, val))
-            else:
-                raise ValueError("Unknown domain element %s" % [it])
-        [result] = stack
-        return result
-    _OPS = {
-        '=': operator.eq,
-        '==': operator.eq,
-        '!=': operator.ne,
-        '<': operator.lt,
-        '<=': operator.le,
-        '>=': operator.ge,
-        '>': operator.gt,
-        'in': lambda a, b: (a in b) if isinstance(b, (tuple, list)) else (b in a),
-        'not in': lambda a, b: (a not in b) if isinstance(b, (tuple, list)) else (b not in a),
-        'like': lambda a, b: a and b and isinstance(a, str) and isinstance(b, str) and a in b,
-        'ilike': lambda a, b: a and b and isinstance(a, str) and isinstance(b, str) and a.lower() in b.lower(),
-        'not like': lambda a, b: a and b and isinstance(a, str) and isinstance(b, str) and a not in b,
-        'not ilike': lambda a, b: a and b and isinstance(a, str) and isinstance(b, str) and a.lower() not in b.lower(),
-    }
+        domain = safe_eval(repr(d), values, nocopy=True)
+        result = reduce_domain(domain, values)
+
+        # if the domain contains field whose result is indeterminate, the result is considered to be false.
+        return result if isinstance(result, bool) else False
+
     def _get_context(self, field):
         c = self._view['contexts'].get(field)
         if not c:

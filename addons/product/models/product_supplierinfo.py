@@ -19,7 +19,7 @@ class SupplierInfo(models.Model):
         return product_id
 
     def _domain_product_id(self):
-        domain = "product_tmpl_id and [('product_tmpl_id', '=', product_tmpl_id)] or []"
+        domain = "[('product_tmpl_id', '=', product_tmpl_id)] if product_tmpl_id else []"
         if self.env.context.get('base_model_name') == 'product.template':
             domain = "[('product_tmpl_id', '=', parent.id)]"
         elif self.env.context.get('base_model_name') == 'product.product':

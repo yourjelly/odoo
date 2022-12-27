@@ -704,7 +704,7 @@ class IrModelFields(models.Model):
     @api.onchange('required', 'ttype', 'on_delete')
     def _onchange_required(self):
         for rec in self:
-            if rec.ttype == 'many2one' and rec.required and rec.on_delete == 'set null':
+            if rec.ttype == 'many2one' and rec.required is True and rec.on_delete == 'set null':
                 return {'warning': {'title': _("Warning"), 'message': _(
                     "The m2o field %s is required but declares its ondelete policy "
                     "as being 'set null'. Only 'restrict' and 'cascade' make sense.", rec.name,
@@ -1486,7 +1486,7 @@ class IrModelSelection(models.Model):
 
             ondelete = (field.ondelete or {}).get(selection.value)
             # special case for custom fields
-            if ondelete is None and field.manual and not field.required:
+            if ondelete is None and field.manual and field.required is not True:
                 ondelete = 'set null'
 
             if ondelete is None:

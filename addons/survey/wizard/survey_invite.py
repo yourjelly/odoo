@@ -41,8 +41,8 @@ class SurveyInvite(models.TransientModel):
     partner_ids = fields.Many2many(
         'res.partner', 'survey_invite_partner_ids', 'invite_id', 'partner_id', string='Recipients',
         domain="[ \
-            '|', (survey_users_can_signup, '=', 1), \
-            '|', (not survey_users_login_required, '=', 1), \
+            '|', bool(survey_users_can_signup), \
+            '|', not survey_users_login_required, \
                  ('user_ids', '!=', False), \
         ]"
     )
