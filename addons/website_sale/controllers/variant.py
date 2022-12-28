@@ -29,5 +29,6 @@ class WebsiteSaleVariantController(VariantController):
 
     @http.route(auth="public")
     def create_product_variant(self, product_template_id, product_template_attribute_value_ids, **kwargs):
+    
         """Override because on the website the public user must access it."""
         return super(WebsiteSaleVariantController, self).create_product_variant(product_template_id, product_template_attribute_value_ids, **kwargs)
