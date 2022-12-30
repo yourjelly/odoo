@@ -1617,8 +1617,7 @@ class TestMrpOrder(TestMrpCommon):
         with details_operation_form.move_line_ids.new() as ml:
             ml.qty_done = 1
         details_operation_form.save()
-        with self.assertRaises(UserError):
-            res_dict = mo.button_mark_done()
+        mo.button_mark_done()
 
     def test_immediate_validate_3(self):
         """ In a production with a serial number tracked product. Check that the immediate production only creates
