@@ -17,6 +17,7 @@ import zipfile
 from threading import Thread
 import time
 import contextlib
+import requests
 
 from odoo import _, http, service
 from odoo.tools.func import lazy_property
@@ -330,3 +331,21 @@ def write_file(filename, text, mode='w'):
         path = path_file(filename)
         with open(path, mode) as f:
             f.write(text)
+
+# "filename" needs to be a path relative to the $HOME
+def download_from_url(url, filename, mode='wb'):
+    try:
+        response = requests.get(url)
+        if response.status_code == requests.codes.ok:
+            write_file(filename, response.content, mode)
+        else:
+            _logger.error(response)
+    except Exception as e:
+        _logger.error(f'Error while downloading from {url}: {e}')
+
+def unzip_file(zipfile, path_to_extract):
+    try:
+        zip_file = zipfile.ZipFile(filename)
+        zip_file.extractall(path_to_extract)
+    except Exception as e:
+        _logger.error(f'Failed to unzip {zipfile}: e')
