@@ -7,6 +7,9 @@ import pytz
 from datetime import date, datetime
 from odoo import api, models
 
+from odoo.exceptions import ValidationError
+import logging
+_logger = logging.getLogger(__name__)
 
 class HrContract(models.Model):
     _inherit = 'hr.contract'
@@ -14,7 +17,19 @@ class HrContract(models.Model):
 
     @api.constrains('date_start', 'date_end', 'state')
     def _check_contracts(self):
-        self._get_leaves()._check_contracts()
+        from_cron = 'from_cron' in self.env.context
+        if from_cron:
+            try:
+                self._get_leaves()._check_contracts()
+            except ValidationError:
+                for contract in self:
+                    try:
+                        contract._get_leaves()._check_contracts()
+                    except ValidationError as e:
+                        _logger.warning(e)
+                        pass
+        else:
+            self._get_leaves()._check_contracts()
 
     def _get_leaves(self):
         return self.env['hr.leave'].search([

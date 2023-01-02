@@ -148,7 +148,13 @@ class Contract(models.Model):
                 ))
 
     @api.model
-    def update_state(self):
+    def update_state(self, from_cron=False):
+
+        self.env.context = {
+            **self.env.context,
+            'from_cron': from_cron,
+        }
+
         contracts = self.search([
             ('state', '=', 'open'), ('kanban_state', '!=', 'blocked'),
             '|',
