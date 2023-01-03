@@ -9,6 +9,10 @@ from odoo.exceptions import ValidationError
 
 from odoo.osv import expression
 
+import logging
+_logger = logging.getLogger(__name__)
+
+
 class Contract(models.Model):
     _name = 'hr.contract'
     _description = 'Contract'
@@ -130,6 +134,7 @@ class Contract(models.Model):
 
     @api.model
     def update_state(self):
+        from_cron = 'from_cron' in self.env.context
         contracts = self.search([
             ('state', '=', 'open'), ('kanban_state', '!=', 'blocked'),
             '|',
@@ -147,20 +152,20 @@ class Contract(models.Model):
                 _("The contract of %s is about to expire.", contract.employee_id.name),
                 user_id=contract.hr_responsible_id.id or self.env.uid)
 
-        contracts.write({'kanban_state': 'blocked'})
+        contracts.safe_write_for_cron({'kanban_state': 'blocked'}, from_cron)
 
         self.search([
             ('state', '=', 'open'),
             '|',
             ('date_end', '<=', fields.Date.to_string(date.today() + relativedelta(days=1))),
             ('visa_expire', '<=', fields.Date.to_string(date.today() + relativedelta(days=1))),
-        ]).write({
-            'state': 'close'
-        })
+        ]).safe_write_for_cron({
+            'state': 'close'},
+            from_cron)
 
-        self.search([('state', '=', 'draft'), ('kanban_state', '=', 'done'), ('date_start', '<=', fields.Date.to_string(date.today())),]).write({
-            'state': 'open'
-        })
+        self.search([('state', '=', 'draft'), ('kanban_state', '=', 'done'), ('date_start', '<=', fields.Date.to_string(date.today())),]).safe_write_for_cron({
+            'state': 'open'},
+            from_cron)
 
         contract_ids = self.search([('date_end', '=', False), ('state', '=', 'close'), ('employee_id', '!=', False)])
         # Ensure all closed contract followed by a new contract have a end date.
@@ -172,16 +177,30 @@ class Contract(models.Model):
                 ('date_start', '>', contract.date_start)
             ], order="date_start asc", limit=1)
             if next_contract:
-                contract.date_end = next_contract.date_start - relativedelta(days=1)
+                contract.safe_write_for_cron({'date_end': next_contract.date_start - relativedelta(days=1)}, from_cron)
                 continue
             next_contract = self.search([
                 ('employee_id', '=', contract.employee_id.id),
                 ('date_start', '>', contract.date_start)
             ], order="date_start asc", limit=1)
             if next_contract:
-                contract.date_end = next_contract.date_start - relativedelta(days=1)
+                contract.safe_write_for_cron({'date_end': next_contract.date_start - relativedelta(days=1)}, from_cron)
 
         return True
+
+    def safe_write_for_cron(self, vals, from_cron=False):
+        if from_cron:
+            try:
+                self.write(vals)
+            except ValidationError:
+                for contract in self:
+                    try:
+                        contract.write(vals)
+                    except ValidationError as e:
+                        _logger.warning(e)
+                        pass
+        else:
+            self.self.write(vals)
 
     def _assign_open_contract(self):
         for contract in self:
