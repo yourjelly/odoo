@@ -29,7 +29,7 @@
                                 <field name="child_id" context="{'default_parent_id': active_id}">
                                     <tree string="Menu">
                                         <field name="sequence"/>
-                                        <field icon="icon" name="name" string="Menu"/>
+                                        <field icon="icon" name="name"/>
                                     </tree>
                                 </field>
                             </page>
@@ -55,7 +55,7 @@
             <field name="model">ir.ui.menu</field>
             <field name="arch" type="xml">
                 <search string="Menu">
-                    <field name="name" string="Menu"/>
+                    <field name="name"/>
                     <field name="parent_id"/>
                     <separator/>
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>

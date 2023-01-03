@@ -443,7 +443,7 @@
             <field name="model">ir.model.fields.selection</field>
             <field name="arch" type="xml">
                 <search string="Fields">
-                    <field name="field_id" string="Field"/>
+                    <field name="field_id"/>
                     <field name="name"
                            filter_domain="['|', ('name','ilike',self), ('value','ilike',self)]"
                            string="Selection" />
@@ -504,7 +504,7 @@
             <field name="model">ir.model.data</field>
             <field name="arch" type="xml">
                 <search string="External Identifiers">
-                    <field name="name" filter_domain="[('name','ilike',self)]" string="External Identifier"/>
+                    <field name="name" filter_domain="[('name','ilike',self)]"/>
                     <filter string="Updatable" name="updatable" domain="[('noupdate', '=', False)]"/>
                     <field name="module"/>
                     <field name="model"/>
@@ -672,7 +672,7 @@
                         <field name="perm_create"/>
                         <field name="perm_unlink"/>
                     </group>
-                   </sheet> 
+                   </sheet>
                 </form>
             </field>
         </record>

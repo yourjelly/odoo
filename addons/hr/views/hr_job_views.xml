@@ -92,7 +92,7 @@
             <field name="model">hr.job</field>
             <field name="arch" type="xml">
                 <search string="Jobs">
-                    <field name="name" string="Job Position"/>
+                    <field name="name"/>
                     <field name="department_id" operator="child_of"/>
                     <separator/>
                     <filter name="message_needaction" string="Unread Messages" domain="[('message_needaction', '=', True)]" groups="mail.group_mail_notification_type_inbox"/>

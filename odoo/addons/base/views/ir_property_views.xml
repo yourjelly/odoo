@@ -7,7 +7,7 @@
             <field name="model">ir.property</field>
             <field name="arch" type="xml">
                 <search string="Parameters">
-                    <field name="name" string="Name"/>
+                    <field name="name"/>
                     <filter string="Generic" name="generic"
                         help="Parameters that are used by all resources."
                         domain="[('res_id','=',False)]"/>

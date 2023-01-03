@@ -97,7 +97,7 @@
                                     <field name="product_tmpl_id" invisible="1"/>
                                     <field name="name" string="Applicable On"/>
                                     <field name="min_quantity"/>
-                                    <field name="price" string="Price"/>
+                                    <field name="price"/>
                                     <field name="date_start"/>
                                     <field name="date_end"/>
                                     <field name="base" invisible="1"/>

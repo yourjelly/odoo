@@ -56,7 +56,7 @@
             <field name="model">ir.ui.view</field>
             <field name="arch" type="xml">
                 <tree string="Views">
-                    <field name="priority" string="Sequence" widget="handle"/>
+                    <field name="priority" widget="handle"/>
                     <field name="name"/>
                     <field name="type"/>
                     <field name="model"/>

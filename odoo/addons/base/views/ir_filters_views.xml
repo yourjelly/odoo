@@ -42,7 +42,7 @@
             <field name="model">ir.filters</field>
             <field name="arch" type="xml">
                 <search string="Filters">
-                    <field name="name" string="Filter Name"/>
+                    <field name="name"/>
                     <filter string="User" domain="[('user_id','!=',False)]" name="user" help="Filters visible only for one user"/>
                     <filter string="Shared" domain="[('user_id','=',False)]" name="shared" help="Filters shared with all users"/>
                     <filter string="My filters" domain="[('user_id','=',uid)]" name="my_filters" help="Filters created by myself"/>

@@ -6,8 +6,8 @@
         <field name="arch" type="xml">
             <form string="phone_blacklist_removal">
                 <group class="oe_title">
-                    <field name="phone" string="Phone Number"/>
-                    <field name="reason" string="Reason"/>
+                    <field name="phone"/>
+                    <field name="reason"/>
                 </group>
                 <footer>
                     <button name="action_unblacklist_apply" string="Confirm" type="object" class="btn-primary" data-hotkey="q"/>

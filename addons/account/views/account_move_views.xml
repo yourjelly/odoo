@@ -413,7 +413,7 @@
                     <field name="invoice_origin" optional="hide" string="Source Document"/>
                     <field name="payment_reference" optional="hide" invisible="context.get('default_move_type') in ('out_invoice', 'out_refund','out_receipt')"/>
                     <field name="ref" optional="hide"/>
-                    <field name="invoice_user_id" optional="hide" invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund','out_receipt')" string="Salesperson" widget="many2one_avatar_user"/>
+                    <field name="invoice_user_id" optional="hide" invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund','out_receipt')" widget="many2one_avatar_user"/>
                     <field name="activity_ids" widget="list_activity" optional="show"/>
                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="hide"/>
                     <field name="amount_untaxed_signed" string="Tax Excluded" sum="Total" optional="show"/>
@@ -912,12 +912,8 @@
                                                context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain}"
                                                options="{'no_create': True}"
                                                optional="show"/>
-                                        <field name="price_subtotal"
-                                               string="Subtotal"
-                                               groups="account.group_show_line_subtotals_tax_excluded"/>
-                                        <field name="price_total"
-                                               string="Total"
-                                               groups="account.group_show_line_subtotals_tax_included"/>
+                                        <field name="price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+                                        <field name="price_total" groups="account.group_show_line_subtotals_tax_included"/>
 
                                         <!-- Others fields -->
                                         <field name="partner_id" invisible="1"/>
@@ -1012,8 +1008,8 @@
                                             <label for="name" string="Note" attrs="{'invisible': [('display_type', '!=', 'line_note')]}"/>
                                             <field name="name" widget="text"/>
                                             <group>
-                                                <field name="price_subtotal" string="Subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
-                                                <field name="price_total" string="Total" groups="account.group_show_line_subtotals_tax_included"/>
+                                                <field name="price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+                                                <field name="price_total" groups="account.group_show_line_subtotals_tax_included"/>
                                             </group>
                                         </sheet>
                                     </form>
@@ -1102,10 +1098,7 @@
                                                sum="Total Credit"
                                                attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))], 'readonly': [('parent.move_type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')), ('display_type', 'in', ('line_section', 'line_note', 'product'))]}"/>
                                         <field name="balance" invisible="1"/>
-                                        <field name="discount_date"
-                                               string="Discount Date"
-                                               optional="hide"
-                                        />
+                                        <field name="discount_date" optional="hide"/>
                                         <field name="discount_amount_currency"
                                                string="Discount Amount"
                                                optional="hide"
@@ -1293,7 +1286,7 @@
                                 ('partner_id', 'child_of', self)]"/>
                     <field name="journal_id"/>
                     <field name="partner_id" operator="child_of"/>
-                    <field name="invoice_user_id" string="Salesperson" domain="[('share', '=', False)]"/>
+                    <field name="invoice_user_id" domain="[('share', '=', False)]"/>
                     <field name="date" string="Period"/>
                     <field name="line_ids" string="Invoice Line"/>
                     <filter domain="[('invoice_user_id', '=', uid)]" name="myinvoices" help="My Invoices"/>

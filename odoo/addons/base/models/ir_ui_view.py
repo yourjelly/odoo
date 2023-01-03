@@ -1522,10 +1522,18 @@ actual arch.
 
             elif validate and node.get('domain'):
                 msg = _(
-                    'Domain on non-relational field "%(name)s" makes no sense (domain:%(domain)s)',
+                    'Domain on non-relational field "%(name)s" makes no sense (domain: %(domain)s)',
                     name=name, domain=node.get('domain'),
                 )
                 self._raise_view_error(msg, node)
+
+            if validate and node.get('string') == field.string:
+                msg = _(
+                    'String on field "%(name)s" is the same as the field definition (string: %(desc)s).\n'
+                    'It can be safely removed to simplify view content',
+                    name=name, desc=node.get('string'),
+                )
+                self._log_view_warning(msg, node)
 
             for child in node:
                 if child.tag not in ('form', 'tree', 'graph', 'kanban', 'calendar'):
@@ -1679,6 +1687,19 @@ actual arch.
             self._raise_view_error(msg, node)
         else:
             name_manager.must_have_name(for_, '<label for="...">')
+        if node.get('string'):
+            field = name_manager.model._fields.get(for_)
+            if field and field.string == node.get('string'):
+                msg = _(
+                    'String on label for "%(name)s" is the same as the field definition (string: %(desc)s).\n'
+                    'It can be safely removed to simplify view content',
+                    name=for_, desc=node.get('string'),
+                )
+                self._log_view_warning(msg, node)
+        # TODO monetary fields
+        # TODO string on view headers tree, search, ... for nothing
+        # TODO forbid string on sheet tag ?
+
 
     def _validate_tag_page(self, node, name_manager, node_info):
         if not node_info['validate']:

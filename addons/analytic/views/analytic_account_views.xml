@@ -100,7 +100,7 @@
             <field name="model">account.analytic.account</field>
             <field name="arch" type="xml">
                 <search string="Analytic Account">
-                    <field name="name" filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]" string="Analytic Account"/>
+                    <field name="name" filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]"/>
                     <field name="partner_id"/>
                     <separator/>
                     <filter string="Archived" domain="[('active', '=', False)]" name="inactive"/>

@@ -4,7 +4,7 @@
             <field name="model">ir.config_parameter</field>
             <field name="arch" type="xml">
                 <search string="System Properties">
-                    <field name="key" string="Key"/>
+                    <field name="key"/>
                     <field name="value"/>
                 </search>
             </field>

@@ -28,7 +28,7 @@
                             <field name="layout_background" widget="selection" required="1"/>
                             <field name="layout_background_image" options="{'accepted_file_extensions': 'image/*'}" attrs="{'invisible': [('layout_background', '!=', 'Custom')], 'required': [('layout_background', '=', 'Custom')]}">Upload your file</field>
                             <field name="report_header" placeholder="e.g. Global Business Solutions" options="{'resizable': false}"/>
-                            <field name="company_details" string="Company Details" options="{'resizable': false}"/>
+                            <field name="company_details" options="{'resizable': false}"/>
                             <field name="report_footer" string="Footer" options="{'resizable': false}"/>
                             <field name="paperformat_id" widget="selection" required="1" domain="[('report_ids', '=', False)]"/>
                         </group>
@@ -56,4 +56,3 @@
 
     </data>
 </odoo>
-
