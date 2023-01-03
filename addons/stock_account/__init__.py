@@ -57,7 +57,7 @@ def _configure_journals(cr, registry):
                     account,
                     company_id,
                 )
-    for name in todo_list:
+    for name in todo_list + ['property_stock_journal']:
         env['ir.property']._set_multi(
             name,
             'product.category',

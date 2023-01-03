@@ -683,6 +683,18 @@ msgid "The added value doesn't have any impact on the stock valuation"
 msgstr ""
 
 #. module: stock_account
+#: code:addons/stock_account/models/product.py:0
+#, python-format
+msgid ""
+"The category is not correctly configured. If the inventory valuation is set to 'Automated', these fields must defined:\n"
+"- Stock Journal\n"
+"- Stock Input Account\n"
+"- Stock Output Account\n"
+"- Stock Valuation Account\n"
+"In the other case (if the valuation is set to 'Manual') the above fields should not be defined."
+msgstr ""
+
+#. module: stock_account
 #: code:addons/stock_account/models/stock_move.py:0
 #, python-format
 msgid ""

@@ -759,6 +759,23 @@ class ProductCategory(models.Model):
             if valuation_account and valuation_account in input_and_output_accounts:
                 raise ValidationError(_('The Stock Input and/or Output accounts cannot be the same as the Stock Valuation account.'))
 
+    @api.constrains('property_valuation', 'property_stock_journal', 'property_stock_account_input_categ_id',
+                    'property_stock_account_output_categ_id', 'property_stock_valuation_account_id')
+    def _check_valuation_consistency(self):
+        fields = ['property_stock_journal', 'property_stock_account_input_categ_id',
+                  'property_stock_account_output_categ_id', 'property_stock_valuation_account_id']
+        for category in self:
+            if (category.property_valuation == 'real_time' and any(not category[f] for f in fields)) \
+                    or (category.property_valuation == 'manual_periodic' and any(category[f] for f in fields)):
+                raise ValidationError(_("The category is not correctly configured. If the inventory valuation is set "
+                                        "to 'Automated', these fields must defined:\n"
+                                        "- Stock Journal\n"
+                                        "- Stock Input Account\n"
+                                        "- Stock Output Account\n"
+                                        "- Stock Valuation Account\n"
+                                        "In the other case (if the valuation is set to 'Manual') the above fields "
+                                        "should not be defined."))
+
     @api.onchange('property_cost_method')
     def onchange_property_cost(self):
         if not self._origin:
@@ -784,22 +801,6 @@ class ProductCategory(models.Model):
             new_valuation = vals.get('property_valuation')
 
             for product_category in self:
-                property_stock_fields = ['property_stock_account_input_categ_id', 'property_stock_account_output_categ_id', 'property_stock_valuation_account_id']
-                if 'property_valuation' in vals and vals['property_valuation'] == 'manual_periodic' and product_category.property_valuation != 'manual_periodic':
-                    for stock_property in property_stock_fields:
-                        vals[stock_property] = False
-                elif 'property_valuation' in vals and vals['property_valuation'] == 'real_time' and product_category.property_valuation != 'real_time':
-                    company_id = self.env.company
-                    for stock_property in property_stock_fields:
-                        vals[stock_property] = vals.get(stock_property, False) or company_id[stock_property]
-                elif product_category.property_valuation == 'manual_periodic':
-                    for stock_property in property_stock_fields:
-                        if stock_property in vals:
-                            vals.pop(stock_property)
-                else:
-                    for stock_property in property_stock_fields:
-                        if stock_property in vals and vals[stock_property] is False:
-                            vals.pop(stock_property)
                 valuation_impacted = False
                 if new_cost_method and new_cost_method != product_category.property_cost_method:
                     valuation_impacted = True
@@ -822,6 +823,14 @@ class ProductCategory(models.Model):
                     move_vals_list += Product._svl_empty_stock_am(out_stock_valuation_layers)
                 impacted_categories[product_category] = (products, description, products_orig_quantity_svl)
 
+        if vals.get('property_valuation') == 'manual_periodic':
+            vals.update({
+                'property_stock_account_input_categ_id': False,
+                'property_stock_account_output_categ_id': False,
+                'property_stock_valuation_account_id': False,
+                'property_stock_journal': False,
+            })
+
         res = super(ProductCategory, self).write(vals)
 
         for product_category, (products, description, products_orig_quantity_svl) in impacted_categories.items():
@@ -840,21 +849,6 @@ class ProductCategory(models.Model):
             account_moves._post()
         return res
 
-
-    @api.model
-    def create(self, vals):
-        if 'property_valuation' not in vals or vals['property_valuation'] == 'manual_periodic':
-            vals['property_stock_account_input_categ_id'] = False
-            vals['property_stock_account_output_categ_id'] = False
-            vals['property_stock_valuation_account_id'] = False
-        if 'property_valuation' in vals and vals['property_valuation'] == 'real_time':
-            company_id = self.env.company
-            vals['property_stock_account_input_categ_id'] = vals.get('property_stock_account_input_categ_id', False) or company_id.property_stock_account_input_categ_id
-            vals['property_stock_account_output_categ_id'] = vals.get('property_stock_account_output_categ_id', False) or company_id.property_stock_account_output_categ_id
-            vals['property_stock_valuation_account_id'] = vals.get('property_stock_valuation_account_id', False) or company_id.property_stock_valuation_account_id
-
-        return super().create(vals)
-
     @api.onchange('property_valuation')
     def onchange_property_valuation(self):
         # Remove or set the account stock properties if necessary
@@ -862,8 +856,14 @@ class ProductCategory(models.Model):
             self.property_stock_account_input_categ_id = False
             self.property_stock_account_output_categ_id = False
             self.property_stock_valuation_account_id = False
-        if self.property_valuation == 'real_time':
+            self.property_stock_journal = False
+        elif self.property_valuation == 'real_time':
             company_id = self.env.company
+            stock_journal = self.env['account.journal'].search(
+                [('name', '=', _('Inventory Valuation')), ('company_id', '=', company_id.id), ('type', '=', 'general')],
+                limit=1)
+
             self.property_stock_account_input_categ_id = company_id.property_stock_account_input_categ_id
             self.property_stock_account_output_categ_id = company_id.property_stock_account_output_categ_id
             self.property_stock_valuation_account_id = company_id.property_stock_valuation_account_id
+            self.property_stock_journal = stock_journal
