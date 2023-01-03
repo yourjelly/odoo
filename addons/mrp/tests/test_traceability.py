@@ -414,9 +414,19 @@ class TestTraceability(TestMrpCommon):
         mo_form.product_qty = 15
         mo = mo_form.save()
         mo.action_confirm()
-        action = mo.button_mark_done()
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        wizard.process()
+
+        mo_form.qty_producing = 15
+        mo = mo_form.save()
+        details_operation_form = Form(mo.move_raw_ids, view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.new() as ml:
+            ml.lot_id = lot_B01
+            ml.qty_done = 10
+        details_operation_form.save()
+        with details_operation_form.move_line_ids.new() as ml:
+            ml.lot_id = lot_B02
+            ml.qty_done = 5
+        details_operation_form.save()
+        mo.button_mark_done()
 
         # Produce 15 x productB
         mo_form = Form(self.env['mrp.production'])

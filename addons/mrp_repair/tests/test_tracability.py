@@ -81,7 +81,7 @@ class TestRepairTraceability(TestMrpCommon):
         this component is removed from the product and returned as available stock. The user should be able to
         use the component in a new MO
         """
-        def produce_one(product, component):
+        def produce_one(product, component, lot):
             mo_form = Form(self.env['mrp.production'])
             mo_form.product_id = product
             with mo_form.move_raw_ids.new() as raw_line:
@@ -90,9 +90,14 @@ class TestRepairTraceability(TestMrpCommon):
             mo = mo_form.save()
             mo.action_confirm()
             mo.action_assign()
-            action = mo.button_mark_done()
-            wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-            wizard.process()
+            mo_form.qty_producing = 1
+            mo = mo_form.save()
+            details_operation_form = Form(mo.move_raw_ids, view=self.env.ref('stock.view_stock_move_operations'))
+            with details_operation_form.move_line_ids.new() as ml:
+                ml.lot_id = lot
+                ml.qty_done = 1
+            details_operation_form.save()
+            mo.button_mark_done()
             return mo
 
         stock_location = self.env.ref('stock.stock_location_stock')
@@ -101,7 +106,7 @@ class TestRepairTraceability(TestMrpCommon):
             'name': 'Finished Product',
             'type': 'product',
         }, {
-            'name': 'SN Componentt',
+            'name': 'SN Component',
             'type': 'product',
             'tracking': 'serial',
         }])
@@ -113,7 +118,7 @@ class TestRepairTraceability(TestMrpCommon):
         })
         self.env['stock.quant']._update_available_quantity(component, stock_location, 1, lot_id=sn_lot)
 
-        mo = produce_one(finished, component)
+        mo = produce_one(finished, component, sn_lot)
         self.assertEqual(mo.state, 'done')
         self.assertEqual(mo.move_raw_ids.lot_ids, sn_lot)
 
@@ -129,6 +134,6 @@ class TestRepairTraceability(TestMrpCommon):
         ro.action_repair_start()
         ro.action_repair_end()
 
-        mo = produce_one(finished, component)
+        mo = produce_one(finished, component, sn_lot)
         self.assertEqual(mo.state, 'done')
         self.assertEqual(mo.move_raw_ids.lot_ids, sn_lot)
