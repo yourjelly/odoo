@@ -219,20 +219,22 @@ class ResPartner(models.Model):
             company = self.env['res.company'].browse(self.env.context['company_id'])
         else:
             company = self.env.company
-
+        vat = company.country_id.vat_label if company.country_id else "VAT"
         expected_format = _ref_vat.get(country_code, "'CC##' (CC=Country Code, ##=VAT Number)")
 
         if company.vat_check_vies:
             if 'False' not in record_label:
                 return '\n' + _(
-                    "The VAT number [%(wrong_vat)s] for %(record_label)s either failed the VIES VAT validation check or did not respect the expected format %(expected_format)s.",
+                    "The [%(vat)s] number [%(wrong_vat)s] for %(record_label)s either failed the VIES VAT validation check or did not respect the expected format %(expected_format)s.",
+                    vat=vat,
                     wrong_vat=wrong_vat,
                     record_label=record_label,
                     expected_format=expected_format,
                 )
             else:
                 return '\n' + _(
-                    "The VAT number [%(wrong_vat)s] either failed the VIES VAT validation check or did not respect the expected format %(expected_format)s.",
+                    "The [%(vat)s] number [%(wrong_vat)s] either failed the VIES VAT validation check or did not respect the expected format %(expected_format)s.",
+                    vat=vat,
                     wrong_vat=wrong_vat,
                     expected_format=expected_format,
                 )
@@ -240,14 +242,16 @@ class ResPartner(models.Model):
         # Catch use case where the record label is about the public user (name: False)
         if 'False' not in record_label:
             return '\n' + _(
-                'The VAT number [%(wrong_vat)s] for %(record_label)s does not seem to be valid. \nNote: the expected format is %(expected_format)s',
+                'The [%(vat)s] number [%(wrong_vat)s] for %(record_label)s does not seem to be valid. \nNote: the expected format is %(expected_format)s',
+                vat=vat,
                 wrong_vat=wrong_vat,
                 record_label=record_label,
                 expected_format=expected_format,
             )
         else:
             return '\n' + _(
-                'The VAT number [%(wrong_vat)s] does not seem to be valid. \nNote: the expected format is %(expected_format)s',
+                'The [%(vat)s] number [%(wrong_vat)s] does not seem to be valid. \nNote: the expected format is %(expected_format)s',
+                vat=vat,
                 wrong_vat=wrong_vat,
                 expected_format=expected_format,
             )

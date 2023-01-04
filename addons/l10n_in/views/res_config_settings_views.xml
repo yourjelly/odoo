@@ -21,6 +21,26 @@
                     </div>
                 </div>
             </div>
+            <div data-key="account" position="inside">
+                <h2 attrs="{'invisible': [('country_code', '!=', 'IN')]}">Indian Electronic Invoicing</h2>
+                <div class='row mt16 o_settings_container' name="l10n_in_edi_iap"
+                     attrs="{'invisible': [('country_code', '!=', 'IN')]}">
+                    <div class="col-12 col-lg-6 o_setting_box" id="gsp_setting">
+                        <div class="o_setting_left_pane">
+                            <field name="module_l10n_in_edi"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <t class="o_form_label">Setup E-invoice</t>
+                            <span class="fa fa-lg fa-building-o" title="Values set here are company-specific."
+                                  aria-label="Values set here are company-specific." groups="base.group_multi_company"
+                                  role="img"/>
+                            <div class="text-muted">
+                                Connect to NIC(National Informatics Center) to submit invoices on posting
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </field>
     </record>
 </odoo>
