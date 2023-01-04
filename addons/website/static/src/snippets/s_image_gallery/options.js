@@ -270,6 +270,7 @@ options.registry.gallery = options.Class.extend({
      * Displays the images with a "slideshow" layout.
      */
     slideshow: function () {
+
         const imageEls = this._getImages();
         const images = _.map(imageEls, img => ({
             // Use getAttribute to get the attribute value otherwise .src

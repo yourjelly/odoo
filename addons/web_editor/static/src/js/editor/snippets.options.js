@@ -3238,10 +3238,18 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      */
     async willStart() {
         const _super = this._super.bind(this);
+        console.log("before loadImage");
         await this._loadImageInfo();
+        console.log("after loadImage");
         return _super(...arguments);
     },
-
+/*
+    destroy() {
+        //debugger;
+        console.log("Inside destroy of Image Handler");
+        this._super(...arguments);
+    },
+*/
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------

@@ -928,6 +928,7 @@ var SnippetEditor = Widget.extend({
      * @param {Event} ev
      */
     _onRemoveClick: function (ev) {
+        this.trigger_up('stop_record_overlay');
         ev.preventDefault();
         ev.stopPropagation();
         this.trigger_up('request_history_undo_record', {$target: this.$target});
@@ -1027,6 +1028,7 @@ var SnippetsMenu = Widget.extend({
         'user_value_widget_opening': '_onUserValueWidgetOpening',
         'user_value_widget_closing': '_onUserValueWidgetClosing',
         'reload_snippet_template': '_onReloadSnippetTemplate',
+        'stop_record_overlay': '_onStopRecordOverlay',
     },
     // enum of the SnippetsMenu's tabs.
     tabs: {
@@ -1174,6 +1176,7 @@ var SnippetsMenu = Widget.extend({
         var debouncedCoverUpdate = _.throttle(() => {
             this.updateCurrentSnippetEditorOverlay();
         }, 50);
+
         this.$window.on('resize.snippets_menu', debouncedCoverUpdate);
         this.$window.on('content_changed.snippets_menu', debouncedCoverUpdate);
 
@@ -1375,6 +1378,7 @@ var SnippetsMenu = Widget.extend({
                 snippetEditor.cover();
                 continue;
             }
+            //debugger;
             // Destroy options whose $target are not in the DOM anymore but
             // only do it once all options executions are done.
             this._mutex.exec(() => snippetEditor.destroy());
@@ -2765,6 +2769,13 @@ var SnippetsMenu = Widget.extend({
     _onReloadSnippetTemplate: async function (ev) {
         await this._activateSnippet(false);
         await this._loadSnippetsTemplates(true);
+    },
+    /**
+     * @private
+     */
+    _onStopRecordOverlay: function (ev) {
+        this.$window.off('resize.snippets_menu');
+        this.$window.off('content_changed.snippets_menu');
     },
     /**
      * @private
