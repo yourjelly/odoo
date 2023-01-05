@@ -27,6 +27,12 @@
                     </setting>
                 </block>
             </app>
+            <xpath expr="//div[@id='misc_default_accounts']" position="inside">
+                <div class="row mt8">
+                    <label for="l10n_in_edi_advance_tax_account_id" class="col-lg-5 o_light_label"/>
+                    <field name="l10n_in_edi_advance_tax_account_id"/>
+                </div>
+            </xpath>
         </field>
     </record>
 </odoo>

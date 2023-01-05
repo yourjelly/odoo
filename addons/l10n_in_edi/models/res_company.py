@@ -16,6 +16,10 @@ class ResCompany(models.Model):
         help="Enable the use of production credentials",
         groups="base.group_system",
     )
+    l10n_in_edi_advance_tax_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string="Advance Tax Account",
+        help="Account that will be set on lines created in journal entry created from payments with taxes set.")
 
     def _l10n_in_edi_token_is_valid(self):
         self.ensure_one()

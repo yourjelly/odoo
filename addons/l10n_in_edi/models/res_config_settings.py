@@ -15,6 +15,12 @@ class ResConfigSettings(models.TransientModel):
         related="company_id.l10n_in_edi_production_env",
         readonly=False
     )
+    l10n_in_edi_advance_tax_account_id = fields.Many2one(
+        comodel_name='account.account',
+        related='company_id.l10n_in_edi_advance_tax_account_id',
+        readonly=False,
+        domain="""[('deprecated', '=', False), ('company_id', '=', company_id), ('account_type', 'not in', ('asset_receivable', 'liability_payable'))]""",
+    ) # ToConfirm: If account_type domain is correct or not ?
 
     def l10n_in_edi_test(self):
         self.env["account.edi.format"]._l10n_in_edi_authenticate(self.company_id)

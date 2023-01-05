@@ -225,7 +225,7 @@
                         <t groups="account.group_account_user">
                             <block title="Default Accounts" id="default_accounts">
                                 <setting attrs="{'invisible': [('group_multi_currency', '=', False)]}" string="Post Exchange difference entries in:">
-                                    <div class="content-group">
+                                    <div class="content-group" id="exchange_difference_accounts">
                                         <div class="row mt8">
                                             <label for="currency_exchange_journal_id" class="col-lg-4 o_light_label" string="Journal" />
                                             <field name="currency_exchange_journal_id"/>
@@ -241,7 +241,7 @@
                                     </div>
                                 </setting>
                                 <setting string="The following default accounts are used with certain features.">
-                                    <div class="content-group">
+                                    <div class="content-group" id="misc_default_accounts">
                                         <div class="row mt8">
                                             <label for="account_journal_suspense_account_id" class="col-lg-5 o_light_label"/>
                                             <field name="account_journal_suspense_account_id"/>
