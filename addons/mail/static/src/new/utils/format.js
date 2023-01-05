@@ -26,7 +26,7 @@ export async function prettifyMessageContent(rawBody, validRecords = []) {
     // the current design makes this quite hard to do.
     body = generateMentionsLinks(body, validRecords);
     body = parseAndTransform(body, addLink);
-    body = _generateEmojisOnHtml(body);
+    body = await _generateEmojisOnHtml(body);
     return body;
 }
 
