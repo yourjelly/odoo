@@ -20,7 +20,7 @@ from .query import Query, _generate_table_alias
 from .sql import *
 from .template_inheritance import *
 from .translate import *
-from .trigger_tree import TriggerGraph
+from .trigger_tree import TriggerGraph, TriggerTree
 from .xml_utils import *
 from .convert import *
 from . import osutil

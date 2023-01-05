@@ -5,6 +5,41 @@ from collections import defaultdict
 from .misc import OrderedSet
 
 
+class TriggerTree(dict):
+    """ The triggers of a set of fields Fs is a tree where the root contains the
+    fields that depend on the fields Fs, and each subtree is labeled with a
+    field to inverse to find out which records to recompute.
+
+    For instance, assume that G depends on F, H depends on X.F, I depends on
+    W.X.F, and J depends on Y.F. The triggers of F will be the tree::
+
+                                 [G]
+                               X/   \\Y
+                             [H]     [J]
+                           W/
+                         [I]
+
+    This tree provides perfect support for the trigger mechanism: when F is
+    modified on records,
+     - mark G to recompute on records,
+     - mark H to recompute on inverse(X, records),
+     - mark I to recompute on inverse(W, inverse(X, records)),
+     - mark J to recompute on inverse(Y, records).
+    """
+    __slots__ = ['root']
+
+    # pylint: disable=keyword-arg-before-vararg
+    def __init__(self, root=(), *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.root = tuple(root)
+
+    def __bool__(self):
+        return bool(self.root or len(self))
+
+    def __eq__(self, other):
+        return isinstance(other, TriggerTree) and self.root == other.root and super().__eq__(other)
+
+
 class TriggerGraph:
     """ This implements a graph that represents field dependencies, and is used
     to build so-called "trigger trees", which are used to determine the
@@ -65,7 +100,7 @@ class TriggerGraph:
         """
         nodes = OrderedSet(fields)
         fields = [node for node in self.transitive_closure(nodes) if node and select(node)]
-        tree = {None: fields} if fields else {}
+        tree = TriggerTree(fields)
         for label, from_nodes in self.outgoing(self.full_closure(nodes)).items():
             if label is not None:
                 subtree = self._make_tree(from_nodes, select)
@@ -77,7 +112,7 @@ class TriggerGraph:
         nodes = [node for node in self.full_closure(nodes) if node not in ignore]
         fields = [node for node in nodes if node and select(node)]
         ignore = ignore | frozenset(nodes)
-        tree = {None: fields} if fields else {}
+        tree = TriggerTree(fields)
         for label, from_nodes in self.outgoing(nodes).items():
             if label is not None:
                 subtree = self._make_tree(from_nodes, select, ignore)

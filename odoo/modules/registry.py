@@ -335,11 +335,9 @@ class Registry(Mapping):
     def get_dependent_fields(self, field):
         """ Return an iterator on the fields that depend on ``field``. """
         def traverse(tree):
-            for key, val in tree.items():
-                if key is None:
-                    yield from val
-                else:
-                    yield from traverse(val)
+            yield from tree.root
+            for subtree in tree.values():
+                yield from traverse(subtree)
         return traverse(self.get_trigger_tree([field]))
 
     def _discard_fields(self, fields: list):
