@@ -195,10 +195,10 @@ class AccountBankStatement(models.Model):
         (self - invalids).is_valid = True
 
     def _search_is_valid(self, operator, value):
-        if operator not in ('=', '!=', '<>'):
+        if operator not in ('=', '!='):
             raise UserError(_('Operation not supported'))
         invalid_ids = self._get_invalid_statement_ids(all_statements=True)
-        if operator in ('!=', '<>') and value or operator == '=' and not value:
+        if operator == '!=' and value or operator == '=' and not value:
             return [('id', 'in', invalid_ids)]
         return [('id', 'not in', invalid_ids)]
 

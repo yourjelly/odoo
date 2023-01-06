@@ -72,8 +72,8 @@ class TestItEdiReverseCharge(TestItEdi):
                 RepartitionLine(-100, 'tax', ('-4v',))),
             'refund_repartition_line_ids': repartition_lines(
                 RepartitionLine(100, 'base', ('-03', '-vj9')),
-                RepartitionLine(100, 'tax', False),
-                RepartitionLine(-100, 'tax', False)),
+                RepartitionLine(100, 'tax', ()),
+                RepartitionLine(-100, 'tax', ())),
         }
         # Purchase tax 4% with Reverse Charge
         cls.purchase_tax_4p = cls.env['account.tax'].with_company(cls.company).create(tax_data)
@@ -91,8 +91,8 @@ class TestItEdiReverseCharge(TestItEdi):
                 RepartitionLine(-100, 'tax', ('-4v',))),
             'refund_repartition_line_ids': repartition_lines(
                 RepartitionLine(100, 'base', ('-03', '-vj3')),
-                RepartitionLine(100, 'tax', False),
-                RepartitionLine(-100, 'tax', False)),
+                RepartitionLine(100, 'tax', ()),
+                RepartitionLine(-100, 'tax', ())),
         }
 
         cls.purchase_tax_4p_already_in_italy = cls.env['account.tax'].with_company(cls.company).create(tax_data_4p_already_in_italy)

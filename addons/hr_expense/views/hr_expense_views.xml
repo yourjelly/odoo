@@ -713,8 +713,8 @@
                         </button>
                     </div>
                     <field name="payment_state" invisible="True"/>
-                    <widget name="web_ribbon" title="Posted" bg_color="bg-success" attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('payment_mode', '==', 'own_account')]}"/>
-                    <widget name="web_ribbon" title="Paid" bg_color="bg-success" attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('payment_mode', '==', 'company_account')]}"/>
+                    <widget name="web_ribbon" title="Posted" bg_color="bg-success" attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('payment_mode', '=', 'own_account')]}"/>
+                    <widget name="web_ribbon" title="Paid" bg_color="bg-success" attrs="{'invisible': ['|', ('payment_state', '!=', 'paid'), ('payment_mode', '=', 'company_account')]}"/>
                     <widget name="web_ribbon" title="Partial" bg_color="bg-info" attrs="{'invisible': [('payment_state', '!=', 'partial')]}"/>
                     <widget name="web_ribbon" title="In Payment" attrs="{'invisible': [('payment_state', '!=', 'in_payment')]}"/>
                     <div class="oe_title">

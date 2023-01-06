@@ -379,7 +379,7 @@ class Post(models.Model):
         help="Editor Features: image and links")
 
     def _search_can_view(self, operator, value):
-        if operator not in ('=', '!=', '<>'):
+        if operator not in ('=', '!='):
             raise ValueError('Invalid operator: %s' % (operator,))
 
         if not value:
