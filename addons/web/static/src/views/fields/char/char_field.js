@@ -9,55 +9,21 @@ import { standardFieldProps } from "../standard_field_props";
 import { TranslationButton } from "../translation_button";
 import { useDynamicPlaceholder } from "../dynamicplaceholder_hook";
 
-import { Component, onMounted, onWillUnmount, useRef } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useRef, useEffect } from "@odoo/owl";
 
 export class CharField extends Component {
     setup() {
-        if (this.props.dynamicPlaceholder) {
-            this.dynamicPlaceholder = useDynamicPlaceholder();
-        }
-
         this.input = useRef("input");
+        if (this.props.dynamicPlaceholder) {
+            this.dynamicPlaceholder = useDynamicPlaceholder(this.input);
+            onMounted(() => {
+                this.dynamicPlaceholder.refreshBaseModel();
+                this.dynamicPlaceholder.addTriggerKeyListener();
+            });
+            onWillUnmount(this.dynamicPlaceholder.removeTriggerKeyListener);
+            useEffect(this.dynamicPlaceholder.refreshBaseModel);
+        }
         useInputField({ getValue: () => this.props.value || "", parse: (v) => this.parse(v) });
-        onMounted(this.onMounted);
-        onWillUnmount(this.onWillUnmount);
-    }
-    async onKeydownListener(ev) {
-        if (ev.key === this.dynamicPlaceholder.TRIGGER_KEY && ev.target === this.input.el) {
-            const baseModel = this.props.record.data.mailing_model_real;
-            if (baseModel) {
-                await this.dynamicPlaceholder.open(
-                    this.input.el,
-                    baseModel,
-                    {
-                        validateCallback: this.onDynamicPlaceholderValidate.bind(this),
-                        closeCallback: this.onDynamicPlaceholderClose.bind(this)
-                    }
-                );
-            }
-        }
-    }
-    onMounted() {
-        if (this.props.dynamicPlaceholder) {
-            this.keydownListenerCallback = this.onKeydownListener.bind(this);
-            document.addEventListener('keydown', this.keydownListenerCallback);
-        }
-    }
-    onWillUnmount() {
-        if (this.props.dynamicPlaceholder) {
-            document.removeEventListener('keydown', this.keydownListenerCallback);
-        }
-    }
-    onDynamicPlaceholderValidate(chain, defaultValue) {
-        if (chain) {
-            const triggerKeyReplaceRegex = new RegExp(`${this.dynamicPlaceholder.TRIGGER_KEY}$`);
-            let dynamicPlaceholder = "{{object." + chain.join('.');
-            dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''}}` : '}}';
-            this.props.update(this.input.el.value.replace(triggerKeyReplaceRegex, '') + dynamicPlaceholder);
-        }
-    }
-    onDynamicPlaceholderClose() {
-        this.input.el.focus();
     }
 
     get formattedValue() {
@@ -82,7 +48,7 @@ CharField.props = {
     autocomplete: { type: String, optional: true },
     isPassword: { type: Boolean, optional: true },
     placeholder: { type: String, optional: true },
-    dynamicPlaceholder: { type: Boolean, optional: true},
+    dynamicPlaceholder: { type: Boolean, optional: true },
     shouldTrim: { type: Boolean, optional: true },
     maxLength: { type: Number, optional: true },
     isTranslatable: { type: Boolean, optional: true },
@@ -96,7 +62,7 @@ CharField.extractProps = ({ attrs, field }) => {
         shouldTrim: field.trim && !archParseBoolean(attrs.password), // passwords shouldn't be trimmed
         maxLength: field.size,
         isTranslatable: field.translate,
-        dynamicPlaceholder: attrs.options.dynamic_placeholder,
+        dynamicPlaceholder: attrs.options?.dynamic_placeholder,
         autocomplete: attrs.autocomplete,
         isPassword: archParseBoolean(attrs.password),
         placeholder: attrs.placeholder,

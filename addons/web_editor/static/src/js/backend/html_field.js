@@ -154,6 +154,11 @@ export class HtmlField extends Component {
                 }
             })();
         });
+        onMounted(() => {
+            if (this.dynamicPlaceholder) {
+                this.dynamicPlaceholder.setElementRef(this.wysiwyg);
+            }
+        });
         onWillUnmount(() => {
             if (this._qwebPlugin) {
                 this._qwebPlugin.destroy();
@@ -185,22 +190,18 @@ export class HtmlField extends Component {
                         fontawesome: 'fa-magic',
                         callback: () => {
                             this.wysiwygRangePosition = getRangePosition(document.createElement('x'), this.wysiwyg.options.document || document);
-                            const baseModel = this.props.record.data.mailing_model_real || this.props.record.data.model;
-                            if (baseModel) {
-                                // The method openDynamicPlaceholder need to be triggered
-                                // after the focus from powerBox prevalidate.
-                                setTimeout(async () => {
-                                    await this.dynamicPlaceholder.open(
-                                        this.wysiwyg.$editable[0],
-                                        baseModel,
-                                        {
-                                            validateCallback: this.onDynamicPlaceholderValidate.bind(this),
-                                            closeCallback: this.onDynamicPlaceholderClose.bind(this),
-                                            positionCallback: this.positionDynamicPlaceholder.bind(this),
-                                        }
-                                    );
-                                });
-                            }
+                            this.dynamicPlaceholder.refreshBaseModel();
+                            // The method openDynamicPlaceholder need to be triggered
+                            // after the focus from powerBox prevalidate.
+                            setTimeout(async () => {
+                                await this.dynamicPlaceholder.open(
+                                    {
+                                        validateCallback: this.onDynamicPlaceholderValidate.bind(this),
+                                        closeCallback: this.onDynamicPlaceholderClose.bind(this),
+                                        positionCallback: this.positionDynamicPlaceholder.bind(this),
+                                    }
+                                );
+                            });
                         },
                     }
                 ],

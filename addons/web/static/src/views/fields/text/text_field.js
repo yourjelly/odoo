@@ -13,10 +13,15 @@ import { Component, useEffect, onMounted, onWillUnmount, useRef } from "@odoo/ow
 
 export class TextField extends Component {
     setup() {
-        if (this.props.dynamicPlaceholder) {
-            this.dynamicPlaceholder = useDynamicPlaceholder();
-        }
         this.textareaRef = useRef("textarea");
+        if (this.props.dynamicPlaceholder) {
+            this.dynamicPlaceholder = useDynamicPlaceholder(this.textareaRef);
+            onMounted(() => {
+                this.dynamicPlaceholder.refreshBaseModel();
+                this.dynamicPlaceholder.addTriggerKeyListener();
+            });
+            onWillUnmount(this.dynamicPlaceholder.removeTriggerKeyListener);
+        }
         useInputField({ getValue: () => this.props.value || "", refName: "textarea" });
         useSpellCheck({ refName: "textarea" });
 
@@ -24,45 +29,10 @@ export class TextField extends Component {
             if (!this.props.readonly) {
                 this.resize();
             }
-        });
-        onMounted(this.onMounted);
-        onWillUnmount(this.onWillUnmount);
-    }
-    async onKeydownListener(ev) {
-        if (ev.key === this.dynamicPlaceholder.TRIGGER_KEY && ev.target === this.textareaRef.el) {
-            const baseModel = this.props.record.data.mailing_model_real;
-            if (baseModel) {
-                await this.dynamicPlaceholder.open(this.textareaRef.el, baseModel, {
-                    validateCallback: this.onDynamicPlaceholderValidate.bind(this),
-                    closeCallback: this.onDynamicPlaceholderClose.bind(this),
-                });
+            if (this.dynamicPlaceholder) {
+                this.dynamicPlaceholder.refreshBaseModel();
             }
-        }
-    }
-    onMounted() {
-        if (this.props.dynamicPlaceholder) {
-            this.keydownListenerCallback = this.onKeydownListener.bind(this);
-            document.addEventListener("keydown", this.keydownListenerCallback);
-        }
-    }
-    onWillUnmount() {
-        if (this.props.dynamicPlaceholder) {
-            document.removeEventListener("keydown", this.keydownListenerCallback);
-        }
-    }
-    onDynamicPlaceholderValidate(chain, defaultValue) {
-        if (chain) {
-            const triggerKeyReplaceRegex = new RegExp(`${this.dynamicPlaceholder.TRIGGER_KEY}$`);
-            let dynamicPlaceholder = "{{object." + chain.join(".");
-            dynamicPlaceholder +=
-                defaultValue && defaultValue !== "" ? ` or '''${defaultValue}'''}}` : "}}";
-            this.props.update(
-                this.textareaRef.el.value.replace(triggerKeyReplaceRegex, "") + dynamicPlaceholder
-            );
-        }
-    }
-    onDynamicPlaceholderClose() {
-        this.textareaRef.el.focus();
+        });
     }
 
     get minimumHeight() {
