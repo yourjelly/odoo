@@ -695,6 +695,9 @@ export function getDeepRange(editable, { range, sel, splitText, select, correctT
     ) {
         const previous = previousLeaf(end, editable, true);
         if (previous && closestElement(previous).isContentEditable) {
+            if (isVisibleEmpty(previous)) {
+                [end, endOffset] = [previous.parentElement, childNodeIndex(previous)];
+            }
             [end, endOffset] = [previous, nodeSize(previous)];
         }
     }
