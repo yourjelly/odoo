@@ -70,6 +70,9 @@ import {
     parseHTML,
     splitTextNode,
     isEditorTab,
+    URL_REGEX_STRICT,
+    EMAIL_REGEX,
+    PHONE_REGEX,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -696,6 +699,70 @@ export class OdooEditor extends EventTarget {
         this._toRollback = false;
     }
 
+    /**
+     * Update link's href if label if valid url.
+     * Return true if link's label matches href
+     * @param {HTMLAnchorElement} link
+     */
+    _updateLinkUrl(link) {
+        // Resolve protocol
+        const protocolMatch = /^(https?:\/\/|mailto:|tel:(?:\/\/)?)/i.exec(link.href);
+        if (!protocolMatch)
+            return;
+        const protocol = protocolMatch[0].toLowerCase();
+        const regex = {
+            'http://': URL_REGEX_STRICT,
+            'https://': URL_REGEX_STRICT,
+            'mailto:': EMAIL_REGEX,
+            'tel:': PHONE_REGEX,
+            'tel://': PHONE_REGEX,
+        };
+        if (!regex[protocol])
+            return;
+
+        // Test if label is valid url
+        const linkLabel = link.innerText;
+        const match = regex[protocol].exec(linkLabel);
+        if (match) {
+            // Update link href
+            // match[1] is the captured group with the protocol
+            link.href = match[1] ? linkLabel : protocol + linkLabel;
+            return true;
+        }
+        return false;
+    }
+
+    // TODO: maybe go over records in currentStep looking from closestElement 'A'
+    /**
+     * Updates links in the subtree rooted at node.
+     * @param {Node} node 
+     */
+    _updateLinks(node) {
+        let links;
+        const link = closestElement(node, 'a');
+        if (link) {
+            links = [link];
+        } else {
+            links = [node, ...descendants(node)].filter(node => node.nodeName === 'A');
+        }
+        links.forEach(link => {
+            const urlMatchesText = this._updateLinkUrl(link);
+            if (urlMatchesText) {
+                link.classList.add('oe_auto_update_link');
+            } else if (link.classList.contains('oe_auto_update_link')) {
+                // remove link
+                const restoreCursor = preserveCursor(this.document);
+                const parent = link.parentElement;
+                Array.from(link.childNodes).forEach(child => parent.insertBefore(child, link));
+                if (this._fixLinkMutatedElements && this._fixLinkMutatedElements.link === link) {
+                    this.resetContenteditableLink();
+                    this._activateContenteditable();
+                }
+                link.remove();
+                restoreCursor();
+            }
+        });
+    }
     sanitize() {
         this.observerFlush();
 
@@ -712,6 +779,7 @@ export class OdooEditor extends EventTarget {
 
         // sanitize and mark current position as sanitized
         sanitize(commonAncestor);
+        this._updateLinks(commonAncestor);
         this._pluginCall('sanitizeElement', [commonAncestor]);
         this.options.onPostSanitize(commonAncestor);
     }
@@ -3577,7 +3645,10 @@ export class OdooEditor extends EventTarget {
         if (!appliedCustomSelection) {
             this._updateToolbar(!selection.isCollapsed && this.isSelectionInEditable(selection));
         }
+        // const link = closestElement(anchorNode, 'a');
+        // if (link) this._updateLinkUrl(link);
     }
+
 
     /**
      * Returns true if the current selection is inside the editable.
