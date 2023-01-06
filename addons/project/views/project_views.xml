@@ -607,7 +607,7 @@
                                                 <div class="text-muted">
                                                     Get customer feedback
                                                 </div>
-                                                <div class="mt16" attrs="{'invisible':[('rating_active','==',False)]}">
+                                                <div class="mt16" attrs="{'invisible':[('rating_active','=',False)]}">
                                                     <field name="rating_status" widget="radio" />
                                                     <div  attrs="{'required': [('rating_status','=','periodic')], 'invisible': [('rating_status','!=','periodic')]}">
                                                         <label for="rating_status_period"/>
