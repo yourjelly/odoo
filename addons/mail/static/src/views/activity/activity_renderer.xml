@@ -74,13 +74,15 @@
     </tfoot>
 </t>
 
-<div t-name="mail.ActivityRenderer" class="o_activity_view h-100" owl="1">
-    <t t-if="!props.activityTypes.length" t-call="web.NoContentHelper"/>
-    <table t-else="" class="table table-bordered mb-5 bg-view o_activity_view_table">
-        <t t-call="mail.ActivityViewHeader"/>
-        <t t-call="mail.ActivityViewBody"/>
-        <t t-call="mail.ActivityViewFooter"/>
-    </table>
+<div t-name="mail.ActivityRenderer" t-ref="root" owl="1">
+    <div class="o_activity_view">
+        <t t-if="!props.activityTypes.length" t-call="web.NoContentHelper"/>
+        <table t-else="" class="table table-bordered mb-5 bg-view o_activity_view_table">
+            <t t-call="mail.ActivityViewHeader"/>
+            <t t-call="mail.ActivityViewBody"/>
+            <t t-call="mail.ActivityViewFooter"/>
+        </table>
+    </div>
 </div>
 
 </templates>
