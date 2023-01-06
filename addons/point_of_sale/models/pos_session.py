@@ -336,7 +336,7 @@ class PosSession(models.Model):
                 st_line_vals = {
                     'journal_id': self.cash_journal_id.id,
                     'amount': amount,
-                    'date': self.statement_line_ids.sorted()[-1:].date or fields.Date.context_today(self),
+                    'date': self.sudo().statement_line_ids.sorted()[-1:].date or fields.Date.context_today(self),
                     'pos_session_id': self.id,
                 }
 
@@ -358,7 +358,7 @@ class PosSession(models.Model):
                 st_line_vals['payment_ref'] = _("Cash difference observed during the counting (Profit)")
                 st_line_vals['counterpart_account_id'] = self.cash_journal_id.profit_account_id.id
 
-            self.env['account.bank.statement.line'].create(st_line_vals)
+            self.env['account.bank.statement.line'].sudo().create(st_line_vals)
 
     def _close_session_action(self, amount_to_balance):
         # NOTE This can't handle `bank_payment_method_diffs` because there is no field in the wizard that can carry it.
