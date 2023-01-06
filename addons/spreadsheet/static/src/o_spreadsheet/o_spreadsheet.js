@@ -28471,7 +28471,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         getHeaderSize(sheetId, dimension, index) {
             var _a, _b, _c, _d;
-            return (((_b = (_a = this.sizes[sheetId]) === null || _a === void 0 ? void 0 : _a[dimension][index]) === null || _b === void 0 ? void 0 : _b.manualSize) ||
+            return Math.round(((_b = (_a = this.sizes[sheetId]) === null || _a === void 0 ? void 0 : _a[dimension][index]) === null || _b === void 0 ? void 0 : _b.manualSize) ||
                 ((_d = (_c = this.sizes[sheetId]) === null || _c === void 0 ? void 0 : _c[dimension][index]) === null || _d === void 0 ? void 0 : _d.computedSize()) ||
                 this.getDefaultHeaderSize(dimension));
         }
@@ -35621,6 +35621,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "UNFREEZE_COLUMNS_ROWS":
                     this.resetViewports(this.getters.getActiveSheetId());
                     break;
+                case "START_EDITION":
+                    const { col, row } = this.getters.getPosition();
+                    this.refreshViewport(this.getters.getActiveSheetId(), { col, row });
+                    break;
             }
         }
         finalize() {
@@ -42132,8 +42136,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-01-04T17:30:44.594Z';
-    exports.__info__.hash = 'bcf70ba';
+    exports.__info__.date = '2023-01-06T06:09:49.557Z';
+    exports.__info__.hash = 'bfdb35d';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
