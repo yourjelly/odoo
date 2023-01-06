@@ -141,6 +141,34 @@ def fix_import_export_id_paths(fieldname):
     return fixed_external_id.split('/')
 
 
+from time import time_ns
+import inspect
+from statistics import fmean, pstdev
+
+
+def time_method(meth):
+    def wrapper(*args, **kwargs):
+        # Warmup
+        res = meth(*args, **kwargs)
+
+        times = []
+        for __ in range(7):
+            s = time_ns()
+            res = meth(*args, **kwargs)
+            e = time_ns()
+            times.append((e - s) / 1_000_000)
+
+        method = inspect.currentframe().f_back
+        while method.f_code.co_name in ('_read_group', 'read_group'):
+            method = method.f_back
+
+        x_best = sorted(times)[:5]
+        print(f"{fmean(x_best):.4f} +- {pstdev(x_best):.4f} ms {method.f_code.co_name} : {args[0]} - {args[1] if len(args) > 1 else kwargs['domain']}")
+        return res
+
+    return wrapper
+
+
 class MetaModel(api.Meta):
     """ The metaclass of all model classes.
         Its main purpose is to register the models per module.
