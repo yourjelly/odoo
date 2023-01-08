@@ -21,6 +21,7 @@ class CopyClipboardField extends Component {
     }
     get fieldProps() {
         const fieldProps = {...this.props};
+        delete fieldProps.disabled;
         delete fieldProps.string;
         return fieldProps;
     }
@@ -28,11 +29,13 @@ class CopyClipboardField extends Component {
 CopyClipboardField.template = "web.CopyClipboardField";
 CopyClipboardField.props = {
     ...standardFieldProps,
+    disabled: { type: Boolean },
     string: { type: String, optional: true },
 };
 CopyClipboardField.extractProps = ({ attrs }) => {
     return {
         string: attrs.string,
+        disabled: Boolean(attrs.disable),
     };
 };
 
