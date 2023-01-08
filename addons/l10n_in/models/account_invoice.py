@@ -41,11 +41,14 @@ class AccountMove(models.Model):
     def _compute_l10n_in_state_id(self):
         for move in self:
             if move.country_code == 'IN':
-                country_code = move.partner_id.country_id.code
-                if country_code == 'IN':
-                    move.l10n_in_state_id = move.partner_id.state_id
-                elif country_code:
-                    move.l10n_in_state_id = self.env.ref('l10n_in.state_in_oc', raise_if_not_found=False)
+                if move.journal_id.type == 'sale':
+                    country_code = move.partner_id.country_id.code
+                    if country_code == 'IN':
+                        move.l10n_in_state_id = move.partner_id.state_id
+                    elif country_code:
+                        move.l10n_in_state_id = self.env.ref('l10n_in.state_in_oc', raise_if_not_found=False)
+                    else:
+                        move.l10n_in_state_id = move.company_id.state_id
                 else:
                     move.l10n_in_state_id = move.company_id.state_id
             else:

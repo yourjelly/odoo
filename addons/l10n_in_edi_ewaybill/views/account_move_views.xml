@@ -18,11 +18,11 @@
                             attrs="{'invisible': [('l10n_in_edi_ewaybill_direct_api', '!=', True)]}">
                             <field name="l10n_in_type_id"
                                 attrs="{'invisible': [
-                                    ('move_type','in',('in_invoice','in_refund','in_receipt'))]}"
+                                    ('move_type','not in',('in_invoice','in_refund','in_receipt'))]}"
                                 domain="[('allowed_supply_type','in',('in','both'))]"/>
                             <field name="l10n_in_type_id"
                                 attrs="{'invisible': [
-                                    ('move_type','in',('out_invoice','out_refund','out_receipt'))]}"
+                                    ('move_type','not in',('out_invoice','out_refund','out_receipt'))]}"
                                 domain="[('allowed_supply_type','in',('out','both'))]"/>
                         </group>
                         <group string="Transportation Details" name="transportation_group">

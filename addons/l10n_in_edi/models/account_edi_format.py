@@ -276,7 +276,7 @@ class AccountEdiFormat(models.Model):
             })
         else:
             partner_details.update({"Nm": partner.name})
-        if is_overseas:
+        if is_overseas and (partner.country_id and partner.country_id.code != 'IN') or not partner.country_id:
             partner_details.update({
                 "GSTIN": "URP",
                 "Pin": 999999,

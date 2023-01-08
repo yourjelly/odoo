@@ -338,7 +338,7 @@ class AccountEdiFormat(models.Model):
         if move.is_purchase_document(include_receipts=True):
             res = {
                 "seller_details":  move.partner_id,
-                "dispatch_details": move._l10n_in_get_shipping_partner(),
+                "dispatch_details": move.partner_shipping_id or move.partner_id,
                 "buyer_details": move.company_id.partner_id,
                 "ship_to_details": move._l10n_in_get_warehouse_address() or move.company_id.partner_id,
             }
@@ -451,9 +451,9 @@ class AccountEdiFormat(models.Model):
         if invoices.l10n_in_mode in ("2", "3", "4"):
             json_payload.update({
                 "transMode": invoices.l10n_in_mode,
-                "transDocNo": invoices.l10n_in_transporter_doc_no or "",
-                "transDocDate": invoices.l10n_in_transporter_doc_date and
-                    invoices.l10n_in_transporter_doc_date.strftime("%d/%m/%Y") or "",
+                "transDocNo": invoices.l10n_in_transportation_doc_no or "",
+                "transDocDate": invoices.l10n_in_transportation_doc_date and
+                    invoices.l10n_in_transportation_doc_date.strftime("%d/%m/%Y") or "",
             })
         if invoices.l10n_in_mode == "1":
             json_payload.update({
@@ -554,7 +554,7 @@ class AccountEdiFormat(models.Model):
         endpoint = self.env["ir.config_parameter"].sudo().get_param("l10n_in_edi_ewaybill.endpoint", default_endpoint)
         url = "%s%s" % (endpoint, url_path)
         try:
-            return jsonrpc(url, params=params, timeout=25)
+            return jsonrpc(url, params=params, timeout=90)
         except AccessError as e:
             _logger.warning("Connection error: %s", e.args[0])
             return {
