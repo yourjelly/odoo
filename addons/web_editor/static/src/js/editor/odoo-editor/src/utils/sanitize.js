@@ -18,6 +18,7 @@ import {
     isZWS,
     getUrlsInfosInString,
     URL_REGEX,
+    setSelection,
 } from './utils.js';
 
 const NOT_A_NUMBER = /[^\d]/g;
@@ -130,21 +131,26 @@ class Sanitize {
                 node = nodeP;
             }
 
-            // Merge adjacent text nodes
+            // Merge adjacent text nodes.
             while (
                 node.nodeType === Node.TEXT_NODE &&
-                node.nextSibling && node.nextSibling.nodeType === Node.TEXT_NODE
+                node.nextSibling &&
+                node.nextSibling.nodeType === Node.TEXT_NODE
             ) {
-                let startPos = 
+                const range = getDeepRange(this.root);
+                if (!range) break;
+                let { startContainer, startOffset } = range;
+                if (startContainer === node.nextSibling) {
+                    startContainer = node;
+                    startOffset += node.textContent;
+                }
                 node.textContent = node.textContent + node.nextSibling.textContent;
                 node.nextSibling.remove();
-                // Todo: restore selection
-
+                setSelection(startContainer, startOffset);
             }
 
             const selection = this.root.ownerDocument.getSelection();
             const anchor = selection && selection.anchorNode;
-            const anchorEl = anchor && closestElement(anchor);
             // Remove zero-width spaces added by `fillEmpty` when there is
             // content and the selection is not next to it.
             if (
@@ -238,15 +244,6 @@ class Sanitize {
             }
             if (node.firstChild) {
                 this._parse(node.firstChild);
-            }
-            // Update link URL if label is a new valid link.
-            if (node.nodeName === 'A' && anchorEl === node) {
-                const linkLabel = node.textContent;
-                const match = linkLabel.match(URL_REGEX);
-                if (match && match[0] === node.textContent && !node.href.startsWith('mailto:')) {
-                    const urlInfo = getUrlsInfosInString(linkLabel)[0];
-                    node.setAttribute('href', urlInfo.url);
-                }
             }
             node = node.nextSibling;
         }

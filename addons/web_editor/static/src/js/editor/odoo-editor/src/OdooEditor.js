@@ -73,6 +73,7 @@ import {
     URL_REGEX_STRICT,
     EMAIL_REGEX,
     PHONE_REGEX,
+    linkRegexes,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -732,43 +733,58 @@ export class OdooEditor extends EventTarget {
         return false;
     }
 
-    // TODO: maybe go over records in currentStep looking from closestElement 'A'
     /**
-     * Updates links in the subtree rooted at node.
-     * @param {Node} node 
+     * Update href in mutated link elements.
      */
     _updateLinks() {
         this.observerFlush();
-        // let links;
-        // const link = closestElement(node, 'a');
-        // if (link) {
-        //     links = [link];
-        // } else {
-        //     links = [node, ...descendants(node)].filter(node => node.nodeName === 'A');
-        // }
-        const links = new Set();
-        for (const record of this._currentStep.mutations) {
-            const node = this.idFind(record.id);
-            const link = closestElement(node, 'a');
-            if (link) links.add(link);
-        }
-        for (const link of links) {
-            const urlMatchesText = this._updateLinkUrl(link);
-            if (urlMatchesText) {
+        const links = new Set(
+            this._currentStep.mutations
+                .map(record => closestElement(this.idFind(record.id), 'a'))
+                .filter(element => !!element)
+        );
+        links.forEach(link => {
+            // Resolve protocol
+            const hrefLowerCase = link.href.toLowerCase();
+            // OBS: I could Url.protocol instead
+            const protocol = Object.keys(linkRegexes).find(protocol => hrefLowerCase.startsWith(protocol));
+            if (!protocol) return;
+            // Test if label is valid url
+            const linkLabel = link.innerText.replace(/\u200b/g, '');
+            //??? document or this.document? where does popover live when editable is inside an iframe?
+            const popover = this.document.getElementById(link.getAttribute('aria-describedby'));
+            const match = linkRegexes[protocol].exec(linkLabel);
+            if (match) {
+                // Update link href and popover
+                // match[1] is the captured group with the protocol
+                const newUrl = match[1] ? linkLabel : protocol + linkLabel;
+                link.href = newUrl;
+                // tag link as auto_updatable
                 link.classList.add('oe_auto_update_link');
+                // update popover
+                if (popover) {
+                    const popoverLink = popover.querySelector('.o_we_url_link');
+                    popoverLink.href = newUrl;
+                    popoverLink.textContent = newUrl;
+                }
             } else if (link.classList.contains('oe_auto_update_link')) {
-                // remove link
+                // Remove link.
+                // TODO: check how the link is removed via the popover
                 const restoreCursor = preserveCursor(this.document);
                 const parent = link.parentElement;
                 Array.from(link.childNodes).forEach(child => parent.insertBefore(child, link));
+                // Disable isolated link.
                 if (this._fixLinkMutatedElements && this._fixLinkMutatedElements.link === link) {
                     this.resetContenteditableLink();
                     this._activateContenteditable();
                 }
+                if (popover) {
+                    popover.remove()
+                }
                 link.remove();
                 restoreCursor();
             }
-        };
+        });
     }
     sanitize() {
         this.observerFlush();
