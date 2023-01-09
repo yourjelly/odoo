@@ -605,7 +605,7 @@
         class="o-dropdown-content o-text-options "
         t-if="state.menuState.isOpen"
         t-on-click.stop="">
-        <t t-foreach="fontSizes" t-as="fontSize" t-key="font_index">
+        <t t-foreach="fontSizes" t-as="fontSize" t-key="fontSize">
           <div
             t-esc="fontSize"
             t-att-data-size="fontSize"

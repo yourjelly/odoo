@@ -43570,8 +43570,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-01-09T14:03:11.418Z';
-    exports.__info__.hash = '5f6ae5f';
+    exports.__info__.date = '2023-01-09T14:42:21.738Z';
+    exports.__info__.hash = 'd5f9848';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
