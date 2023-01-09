@@ -130,6 +130,18 @@ class Sanitize {
                 node = nodeP;
             }
 
+            // Merge adjacent text nodes
+            while (
+                node.nodeType === Node.TEXT_NODE &&
+                node.nextSibling && node.nextSibling.nodeType === Node.TEXT_NODE
+            ) {
+                let startPos = 
+                node.textContent = node.textContent + node.nextSibling.textContent;
+                node.nextSibling.remove();
+                // Todo: restore selection
+
+            }
+
             const selection = this.root.ownerDocument.getSelection();
             const anchor = selection && selection.anchorNode;
             const anchorEl = anchor && closestElement(anchor);

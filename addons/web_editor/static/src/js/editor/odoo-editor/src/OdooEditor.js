@@ -737,15 +737,22 @@ export class OdooEditor extends EventTarget {
      * Updates links in the subtree rooted at node.
      * @param {Node} node 
      */
-    _updateLinks(node) {
-        let links;
-        const link = closestElement(node, 'a');
-        if (link) {
-            links = [link];
-        } else {
-            links = [node, ...descendants(node)].filter(node => node.nodeName === 'A');
+    _updateLinks() {
+        this.observerFlush();
+        // let links;
+        // const link = closestElement(node, 'a');
+        // if (link) {
+        //     links = [link];
+        // } else {
+        //     links = [node, ...descendants(node)].filter(node => node.nodeName === 'A');
+        // }
+        const links = new Set();
+        for (const record of this._currentStep.mutations) {
+            const node = this.idFind(record.id);
+            const link = closestElement(node, 'a');
+            if (link) links.add(link);
         }
-        links.forEach(link => {
+        for (const link of links) {
             const urlMatchesText = this._updateLinkUrl(link);
             if (urlMatchesText) {
                 link.classList.add('oe_auto_update_link');
@@ -761,7 +768,7 @@ export class OdooEditor extends EventTarget {
                 link.remove();
                 restoreCursor();
             }
-        });
+        };
     }
     sanitize() {
         this.observerFlush();
@@ -779,7 +786,6 @@ export class OdooEditor extends EventTarget {
 
         // sanitize and mark current position as sanitized
         sanitize(commonAncestor);
-        this._updateLinks(commonAncestor);
         this._pluginCall('sanitizeElement', [commonAncestor]);
         this.options.onPostSanitize(commonAncestor);
     }
@@ -1091,6 +1097,7 @@ export class OdooEditor extends EventTarget {
         if (!this._historyStepsActive) {
             return;
         }
+        this._updateLinks();
         this.sanitize();
         // check that not two unBreakables modified
         if (this._toRollback) {
