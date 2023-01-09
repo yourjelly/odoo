@@ -12,7 +12,7 @@
                                 type="action"
                                 class="oe_stat_button"
                                 icon="fa-tasks"
-                                attrs="{'invisible': [('task_count', '=', 0)]}"
+                                invisible="[('task_count', '=', 0)]"
                                 context="{'default_project_id': project_id}"
                                 groups="project.group_project_milestone"
                                 close="1"
@@ -54,7 +54,7 @@
                         title="View Tasks"
                         string="View Tasks"
                         class="btn btn-link float-end"
-                        attrs="{'invisible': [('task_count', '=', 0)]}"
+                        invisible="[('task_count', '=', 0)]"
                         groups="project.group_project_milestone"
                 />
             </tree>

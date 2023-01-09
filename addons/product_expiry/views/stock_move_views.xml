@@ -22,14 +22,14 @@
                 <button class="fa fa-exclamation-triangle text-danger"
                     title="This lot is expired." string="This lot is expired"
                     disabled="1"
-                    attrs="{'invisible': [('is_expired', '=', False)]}"/>
+                    invisible="[('is_expired', '=', False)]"/>
             </xpath>
             <xpath expr="//field[@name='lot_name']" position="after" >
                 <field name="picking_type_use_existing_lots" invisible="1"/>
-                <field name="expiration_date" force_save="1" attrs="{
-                    'column_invisible': ['|', ('parent.use_expiration_date', '!=', True), ('parent.picking_code', '!=', 'incoming')],
-                    'readonly': [('picking_type_use_existing_lots', '=', True)],
-                }"/>
+                <field name="expiration_date" force_save="1" 
+                    column_invisible="['|', ('parent.use_expiration_date', '!=', True), ('parent.picking_code', '!=', 'incoming')]"
+                    readonly="[('picking_type_use_existing_lots', '=', True)]"
+                />
             </xpath>
         </field>
     </record>
@@ -41,17 +41,17 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='lot_name']" position="after">
                 <field name="picking_type_use_existing_lots" invisible="1"/>
-                <field name="expiration_date" force_save="1" attrs="{
-                    'column_invisible': [('parent.picking_type_code', '!=', 'incoming')],
-                    'readonly': [('picking_type_use_existing_lots', '=', True)],
-                }"/>
+                <field name="expiration_date" force_save="1"
+                    column_invisible="[('parent.picking_type_code', '!=', 'incoming')]"
+                    readonly="[('picking_type_use_existing_lots', '=', True)]"
+                />
             </xpath>
             <xpath expr="//field[@name='lot_id']" position="after">
                 <field name="is_expired" invisible="1"/>
                 <button class="fa fa-exclamation-triangle text-danger"
                     title="This lot is expired." string="This lot is expired"
                     disabled="1"
-                    attrs="{'invisible': [('is_expired', '=', False)]}"/>
+                    invisible="[('is_expired', '=', False)]"/>
             </xpath>
         </field>
     </record>

@@ -15,7 +15,7 @@
                 </header>
                 <sheet>
                     <field name="active" invisible="1"/>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <field name="currency_id" invisible="1"/>
                     <div class="oe_title">
                         <h1><field name="name"/></h1>
@@ -39,7 +39,7 @@
                             <label for="cost_generated"/>
                             <div class="o_row">
                                 <span class="w-25">
-                                    <field name="cost_generated" attrs="{'invisible': [('cost_frequency','=','no')]}" widget="monetary"/>
+                                    <field name="cost_generated" invisible="[('cost_frequency','=','no')]" widget="monetary"/>
                                 </span>
                                 <field name="cost_frequency"/>
                             </div>
@@ -47,7 +47,7 @@
                         <group>
                             <field name="date" string="Invoice Date"/>
                             <field name="start_date"/>
-                            <field name="expiration_date" attrs="{'required': [('cost_frequency', '!=', 'no')]}"/>
+                            <field name="expiration_date" required="[('cost_frequency', '!=', 'no')]"/>
                         </group>
                     </group>
                     <separator string="Included Services"/>
@@ -224,7 +224,7 @@
                     <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <group col="2">
                         <group>
                             <field name="description" />

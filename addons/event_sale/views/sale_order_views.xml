@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <button name="action_preview_sale_order" position="before">
                 <button name="action_view_attendee_list" type="object"
-                        class="oe_stat_button" icon="fa-users" attrs="{'invisible': [('attendee_count', '=', 0)]}">
+                        class="oe_stat_button" icon="fa-users" invisible="[('attendee_count', '=', 0)]">
                     <field name="attendee_count" widget="statinfo" string="Attendees"/>
                 </button>
             </button>
@@ -19,7 +19,7 @@
                         ('date_end','&gt;=',time.strftime('%Y-%m-%d 00:00:00')),
                         '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)
                     ]"
-                    attrs="{'invisible': [('product_type', '!=', 'event')], 'required': [('product_type', '=', 'event')]}"
+                    invisible="[('product_type', '!=', 'event')]" required="[('product_type', '=', 'event')]"
                     options="{'no_open': True, 'no_create': True}"
                 />
                 <field
@@ -28,10 +28,8 @@
                         ('event_id', '=', event_id), ('product_id','=',product_id),
                          '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)
                     ]"
-                    attrs="{
-                        'invisible': ['|', ('product_type', '!=', 'event'), ('event_id', '=', False)],
-                        'required': [('product_type', '=', 'event'), ('event_id', '!=', False)],
-                    }"
+                    invisible="['|', ('product_type', '!=', 'event'), ('event_id', '=', False)]"
+                    required="[('product_type', '=', 'event'), ('event_id', '!=', False)]"
                     options="{'no_open': True, 'no_create': True}"
                 />
             </xpath>

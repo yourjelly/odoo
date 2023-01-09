@@ -19,7 +19,7 @@
         <field name="arch" type="xml">
             <form>
                 <group>
-                    <field name="event_id" invisible="context.get('default_event_id', False)"/>
+                    <field name="event_id" invisible="[bool(context.get('default_event_id'))]"/>
                     <field name="name" placeholder="e.g. Inspiring Business Talk"/>
                     <field name="date"/>
                 </group>
@@ -157,7 +157,7 @@
                     <field name="legend_blocked" invisible="1"/>
                     <field name="legend_normal" invisible="1"/>
                     <field name="legend_done" invisible="1"/>
-                    <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" text="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <div class="d-flex gap-4 mb-3">
                         <div class="flex-grow-1">
                             <label for="name"/>
@@ -193,8 +193,8 @@
                             <group string="Contact Details" class="display-flex justify-content-between">
                                 <group>
                                     <field name="partner_id" context="{'default_phone': contact_phone, 'default_email': contact_email}"/>
-                                    <field name="contact_email" attrs="{'readonly': [('partner_id', '!=', False)]}"/>
-                                    <field name="contact_phone" class="o_force_ltr" attrs="{'readonly': [('partner_id', '!=', False)]}"/>
+                                    <field name="contact_email" readonly="[('partner_id', '!=', False)]"/>
+                                    <field name="contact_phone" class="o_force_ltr" readonly="[('partner_id', '!=', False)]"/>
                                 </group>
                             </group>
                             <group string="Speaker Bio" class="display-flex justify-content-between">
@@ -221,16 +221,14 @@
                                 <group name="event_track_cta_group">
                                     <field name="website_cta"/>
                                     <field name="website_cta_title" placeholder="e.g. Get Yours Now !"
-                                        attrs="{'invisible': [('website_cta', '=', False)],
-                                                'required': [('website_cta', '=', True)]}"/>
+                                        invisible="[('website_cta', '=', False)]" required="[('website_cta', '=', True)]"/>
                                     <field name="website_cta_url" placeholder="e.g. http://www.example.com"
-                                        attrs="{'invisible': [('website_cta', '=', False)],
-                                                'required': [('website_cta', '=', True)]}"/>
+                                        invisible="[('website_cta', '=', False)]" required="[('website_cta', '=', True)]"/>
                                     <label for="website_cta_delay"
-                                        attrs="{'invisible': [('website_cta', '=', False)]}"/>
-                                    <div attrs="{'invisible': [('website_cta', '=', False)]}">
+                                        invisible="[('website_cta', '=', False)]"/>
+                                    <div invisible="[('website_cta', '=', False)]">
                                         <field name="website_cta_delay" class="oe_inline"
-                                            attrs="{'required': [('website_cta', '=', True)]}"/> minutes after track starts
+                                            required="[('website_cta', '=', True)]"/> minutes after track starts
                                     </div>
                                 </group>
                             </group>
@@ -257,7 +255,7 @@
                 <field name="partner_id" optional="hide"/>
                 <field name="partner_email"/>
                 <field name="partner_phone"/>
-                <field name="event_id" invisible="context.get('default_event_id')"/>
+                <field name="event_id" column_invisible="[bool(context.get('default_event_id'))]"/>
                 <field name="wishlisted_by_default" optional="hide"/>
                 <field name="wishlist_visitor_count" optional="hide"/>
                 <field name="stage_id"/>

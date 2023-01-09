@@ -12,7 +12,7 @@
                         class="oe_stat_button"
                         icon="fa-truck"
                         string="Batch"
-                        attrs="{'invisible': [('batch_id', '=', False)]}"/>
+                        invisible="[('batch_id', '=', False)]"/>
             </div>
         </field>
     </record>

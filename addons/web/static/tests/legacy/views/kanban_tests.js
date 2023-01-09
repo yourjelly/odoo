@@ -962,7 +962,7 @@ QUnit.module('LegacyViews', {
             archs: {
                 'partner,some_view_ref,form': '<form>' +
                     '<field name="foo" required="1"/>' +
-                    '<field name="int_field" attrs=\'{"invisible": [["foo", "=", false]]}\'/>' +
+                    '<field name="int_field" invisible=\'[["foo", "=", false]]\'/>' +
                 '</form>',
             },
             groupBy: ['bar'],
@@ -5828,7 +5828,7 @@ QUnit.module('LegacyViews', {
                         '<t t-name="kanban-box">' +
                             '<div>' +
                                 '<field name="foo"/>' +
-                                '<button type="object" attrs="{\'invisible\':[\'|\', (\'bar\',\'=\',True), (\'category_ids\', \'!=\', [])]}" class="btn btn-primary float-end" name="arbitrary">Join</button>' +
+                                '<button type="object" invisible="[\'|\', (\'bar\',\'=\',True), (\'category_ids\', \'!=\', [])]" class="btn btn-primary float-end" name="arbitrary">Join</button>' +
                             '</div>' +
                         '</t>' +
                     '</templates>' +

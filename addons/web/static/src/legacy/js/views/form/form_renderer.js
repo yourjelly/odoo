@@ -1071,12 +1071,12 @@ var FormRenderer = BasicRenderer.extend({
                 callback: function (element, modifiers) {
                     // if the active tab is invisible, activate the first visible tab instead
                     var $link = element.$el.find('.nav-link');
-                    if (modifiers.invisible && $link.hasClass('active')) {
+                    if (isModifierAlwaysTrue(modifiers.invisible) && $link.hasClass('active')) {
                         $link.removeClass('active');
                         tab.$page.removeClass('active');
                         self.inactiveNotebooks.push(renderedTabs);
                     }
-                    if (!modifiers.invisible) {
+                    if (!isModifierAlwaysTrue(modifiers.invisible)) {
                         // make first page active if there is only one page to display
                         var $visibleTabs = $headers.find('li:not(.o_invisible_modifier)');
                         if ($visibleTabs.length === 1) {

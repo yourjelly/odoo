@@ -44,9 +44,9 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
         # <field name="invoice_vendor_bill_id" position="after">
         #     <field name="purchase_id" invisible="1"/>
         #     <label for="purchase_vendor_bill_id" string="Auto-Complete" class="oe_edit_only"
-        #             attrs="{'invisible': ['|', ('state','!=','draft'), ('move_type', '!=', 'in_invoice')]}" />
+        #             invisible="['|', ('state','!=','draft'), ('move_type', '!=', 'in_invoice')]" />
         #     <field name="purchase_vendor_bill_id" nolabel="1"
-        #             attrs="{'invisible': ['|', ('state','!=','draft'), ('move_type', '!=', 'in_invoice')]}"
+        #             invisible="['|', ('state','!=','draft'), ('move_type', '!=', 'in_invoice')]"
         #             class="oe_edit_only"
         #             domain="('company_id', '=', company_id), ('partner_id.commercial_partner_id', '=', commercial_partner_id)] if partner_id else [('company_id', '=', company_id)]"
         #             placeholder="Select a purchase order or an old bill"

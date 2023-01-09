@@ -8,19 +8,19 @@
                     <header>
                         <button name="action_set_won_rainbowman" string="Won"
                             type="object" class="oe_highlight" data-hotkey="w" title="Mark as won"
-                            attrs="{'invisible': ['|','|', ('active','=',False), ('probability', '=', 100), ('type', '=', 'lead')]}"/>
+                            invisible="['|','|', ('active','=',False), ('probability', '=', 100), ('type', '=', 'lead')]"/>
                         <button name="%(crm.crm_lead_lost_action)d" string="Lost" data-hotkey="l" title="Mark as lost"
-                            type="action" context="{'default_lead_id': active_id}" attrs="{'invisible': ['|', ('type', '=', 'lead'), '&amp;',('active', '=', False),('probability', '&lt;', 100)]}"/>
+                            type="action" context="{'default_lead_id': active_id}" invisible="['|', ('type', '=', 'lead'), '&amp;',('active', '=', False),('probability', '&lt;', 100)]"/>
                         <button name="%(crm.action_crm_lead2opportunity_partner)d" string="Convert to Opportunity" type="action" help="Convert to Opportunity"
-                            class="oe_highlight" attrs="{'invisible': ['|', ('type', '=', 'opportunity'), ('active', '=', False)]}" data-hotkey="v"/>
+                            class="oe_highlight" invisible="['|', ('type', '=', 'opportunity'), ('active', '=', False)]" data-hotkey="v"/>
                         <button name="toggle_active" string="Restore" type="object" data-hotkey="z"
-                            attrs="{'invisible': ['|', ('probability', '&gt;', 0), ('active', '=', True)]}"/>
+                            invisible="['|', ('probability', '&gt;', 0), ('active', '=', True)]"/>
                         <button name="action_set_lost" string="Lost" type="object" data-hotkey="l" title="Mark as lost"
-                            attrs="{'invisible': ['|', ('type', '=', 'opportunity'), '&amp;', ('probability', '=', 0), ('active', '=', False)]}"/>
+                            invisible="['|', ('type', '=', 'opportunity'), '&amp;', ('probability', '=', 0), ('active', '=', False)]"/>
                         <field name="stage_id" widget="statusbar" class="o_field_statusbar"
                             options="{'clickable': '1', 'fold_field': 'fold'}"
                             domain="['|', ('team_id', '=', team_id), ('team_id', '=', False)]"
-                            attrs="{'invisible': ['|', ('active', '=', False), ('type', '=', 'lead')]}"/>
+                            invisible="['|', ('active', '=', False), ('type', '=', 'lead')]"/>
                     </header>
                     <sheet>
                         <field name="active" invisible="1"/>
@@ -29,29 +29,29 @@
                             <button name="action_schedule_meeting" type="object"
                                 class="oe_stat_button" icon="fa-calendar"
                                 context="{'partner_id': partner_id}"
-                                attrs="{'invisible': [('type', '=', 'lead')]}">
+                                invisible="[('type', '=', 'lead')]">
                                 <div class="o_stat_info">
                                     <field name="calendar_event_count" class="o_stat_value"/>
-                                    <span class="o_stat_text" attrs="{'invisible': [('calendar_event_count', '&lt;', 2)]}"> Meetings</span>
-                                    <span class="o_stat_text" attrs="{'invisible': [('calendar_event_count', '&gt;', 1)]}"> Meeting</span>
+                                    <span class="o_stat_text" invisible="[('calendar_event_count', '&lt;', 2)]"> Meetings</span>
+                                    <span class="o_stat_text" invisible="[('calendar_event_count', '&gt;', 1)]"> Meeting</span>
                                 </div>
                             </button>
                             <button name="action_show_potential_duplicates" type="object"
                                 class="oe_stat_button" icon="fa-star"
-                                attrs="{'invisible': [('duplicate_lead_count', '&lt;', 1)]}">
+                                invisible="[('duplicate_lead_count', '&lt;', 1)]">
                                 <div class="o_stat_info">
                                     <field name="duplicate_lead_count" class="o_stat_value"/>
-                                    <span class="o_stat_text" attrs="{'invisible': [('duplicate_lead_count', '&lt;', 2)]}">Similar Leads</span>
-                                    <span class="o_stat_text" attrs="{'invisible': [('duplicate_lead_count', '&gt;', 1)]}">Similar Lead</span>
+                                    <span class="o_stat_text" invisible="[('duplicate_lead_count', '&lt;', 2)]">Similar Leads</span>
+                                    <span class="o_stat_text" invisible="[('duplicate_lead_count', '&gt;', 1)]">Similar Lead</span>
                                 </div>
                             </button>
                         </div>
-                        <widget name="web_ribbon" title="Lost" bg_color="bg-danger" attrs="{'invisible': ['|', ('probability', '&gt;', 0), ('active', '=', True)]}"/>
-                        <widget name="web_ribbon" title="Won" attrs="{'invisible': [('probability', '&lt;', 100)]}" />
+                        <widget name="web_ribbon" title="Lost" bg_color="bg-danger" invisible="['|', ('probability', '&gt;', 0), ('active', '=', True)]"/>
+                        <widget name="web_ribbon" title="Won" invisible="[('probability', '&lt;', 100)]" />
                         <div class="oe_title">
                             <h1><field class="text-break" name="name" placeholder="e.g. Product Pricing"/></h1>
                             <h2 class="d-flex gap-2 g-0 align-items-end pb-3">
-                                <div attrs="{'invisible': [('type', '=', 'lead')]}">
+                                <div invisible="[('type', '=', 'lead')]">
                                     <label for="expected_revenue" class="oe_edit_only pb-1" />
                                     <div class="d-flex align-items-end">
                                         <field name="company_currency" invisible="1"/>
@@ -60,13 +60,13 @@
                                         <span class="oe_grey p-2" groups="!crm.group_use_recurring_revenues"> at </span>
                                     </div>
                                 </div>
-                                <div attrs="{'invisible': [('type', '=', 'lead')]}" groups="crm.group_use_recurring_revenues">
+                                <div invisible="[('type', '=', 'lead')]" groups="crm.group_use_recurring_revenues">
                                     <field name="recurring_revenue" class="oe_inline o_input_10ch" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                                 </div>
-                                <div attrs="{'invisible': [('type', '=', 'lead')]}" groups="crm.group_use_recurring_revenues">
+                                <div invisible="[('type', '=', 'lead')]" groups="crm.group_use_recurring_revenues">
                                     <div class="d-flex align-items-end ps-2">
                                         <field name="recurring_plan" class="oe_inline o_input_12ch" placeholder="E.g. Monthly"
-                                               attrs="{'required': [('recurring_revenue', '!=', 0)]}" options="{'no_create': True, 'no_open': True}"/>
+                                               required="[('recurring_revenue', '!=', 0)]" options="{'no_create': True, 'no_open': True}"/>
                                         <span class="oe_grey p-2"> at </span>
                                     </div>
                                 </div>
@@ -75,10 +75,10 @@
                                         <label for="probability"/>
                                         <div class="d-flex align-items-center">
                                             <button class="ps-0 ps-md-2 btn btn-link" name="action_set_automated_probability" type="object"
-                                                    attrs="{'invisible': [('is_automated_probability', '=', True)]}">
+                                                    invisible="[('is_automated_probability', '=', True)]">
                                                 <i class="fa fa-gear" role="img" title="Switch to automatic probability" aria-label="Switch to automatic probability"></i>
                                             </button>
-                                            <small class="oe_grey h6 mb0 d-flex" attrs="{'invisible': [('is_automated_probability', '=', True)]}">
+                                            <small class="oe_grey h6 mb0 d-flex" invisible="[('is_automated_probability', '=', True)]">
                                                 <field class="mb0" name="automated_probability" force_save="1"/> %
                                             </small>
                                         </div>
@@ -92,7 +92,7 @@
                             </h2>
                         </div>
                         <group>
-                            <group name="lead_partner" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                            <group name="lead_partner" invisible="[('type', '=', 'opportunity')]">
                                 <!-- Preload all the partner's information -->
                                 <field name="is_partner_visible" invisible='1'/>
                                 <field name="partner_id" widget="res_partner_many2one"
@@ -114,7 +114,7 @@
                                         'default_website': website,
                                         'default_lang': lang_code,
                                         'show_vat': True
-                                    }" attrs="{'invisible': [('is_partner_visible', '=', False)]}"/>
+                                    }" invisible="[('is_partner_visible', '=', False)]"/>
                                 <field name="partner_name"/>
                                 <label for="street" string="Address"/>
                                 <div class="o_address_format">
@@ -128,11 +128,11 @@
                                 <field name="website" widget="url" placeholder="e.g. https://www.odoo.com"/>
                                 <field name="lang_active_count" invisible="1"/>
                                 <field name="lang_code" invisible="1"/>
-                                <field name="lang_id" attrs="{'invisible': [('lang_active_count', '&lt;=', 1)]}"
+                                <field name="lang_id" invisible="[('lang_active_count', '&lt;=', 1)]"
                                     options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
                             </group>
 
-                            <group name="opportunity_partner" attrs="{'invisible': [('type', '=', 'lead')]}">
+                            <group name="opportunity_partner" invisible="[('type', '=', 'lead')]">
                                 <field name="partner_id"
                                     widget="res_partner_many2one"
                                     string="Customer"
@@ -171,28 +171,28 @@
                                     <button name="mail_action_blacklist_remove" class="fa fa-ban text-danger"
                                         title="This email is blacklisted for mass mailings. Click to unblacklist."
                                         type="object" context="{'default_email': email_from}" groups="base.group_user"
-                                        attrs="{'invisible': [('is_blacklisted', '=', False)]}"/>
+                                        invisible="[('is_blacklisted', '=', False)]"/>
                                     <field name="email_from" string="Email" widget="email"/>
                                     <span class="fa fa-exclamation-triangle text-warning oe_edit_only"
                                         title="By saving this change, the customer email will also be updated."
-                                        attrs="{'invisible': [('partner_email_update', '=', False)]}"/>
+                                        invisible="[('partner_email_update', '=', False)]"/>
                                 </div>
                                 <label for="phone" class="oe_inline"/>
                                 <div class="o_row o_row_readonly">
                                     <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
                                         title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
                                         type="object" context="{'default_phone': phone}" groups="base.group_user"
-                                        attrs="{'invisible': [('phone_blacklisted', '=', False)]}"/>
+                                        invisible="[('phone_blacklisted', '=', False)]"/>
                                     <field name="phone" widget="phone"/>
                                     <span class="fa fa-exclamation-triangle text-warning oe_edit_only"
                                         title="By saving this change, the customer phone number will also be updated."
-                                        attrs="{'invisible': [('partner_phone_update', '=', False)]}"/>
+                                        invisible="[('partner_phone_update', '=', False)]"/>
                                 </div>
-                                <field name="lost_reason_id" attrs="{'invisible': [('active', '=', True)]}"/>
+                                <field name="lost_reason_id" invisible="[('active', '=', True)]"/>
                                 <field name="date_conversion" invisible="1"/>
                                 <field name="user_company_ids" invisible="1"/>
                             </group>
-                            <group name="lead_info" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                            <group name="lead_info" invisible="[('type', '=', 'opportunity')]">
                                 <label for="contact_name"/>
                                 <div class="o_row">
                                     <field name="contact_name"/>
@@ -209,11 +209,11 @@
                                     <button name="mail_action_blacklist_remove" class="fa fa-ban text-danger"
                                         title="This email is blacklisted for mass mailings. Click to unblacklist."
                                         type="object" context="{'default_email': email_from}" groups="base.group_user"
-                                        attrs="{'invisible': [('is_blacklisted', '=', False)]}"/>
+                                        invisible="[('is_blacklisted', '=', False)]"/>
                                     <field name="email_from" id="email_from_group_lead_info" string="Email" widget="email"/>
                                     <span class="fa fa-exclamation-triangle text-warning oe_edit_only"
                                         title="By saving this change, the customer email will also be updated."
-                                        attrs="{'invisible': [('partner_email_update', '=', False)]}"/>
+                                        invisible="[('partner_email_update', '=', False)]"/>
                                 </div>
                                 <field name="email_cc" groups="base.group_no_one"/>
                                 <field name="function"/>
@@ -222,23 +222,23 @@
                                     <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
                                         title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
                                         type="object" context="{'default_phone': phone}" groups="base.group_user"
-                                        attrs="{'invisible': [('phone_blacklisted', '=', False)]}"/>
+                                        invisible="[('phone_blacklisted', '=', False)]"/>
                                     <field name="phone" id="phone_group_lead_info" widget="phone"/>
                                     <span class="fa fa-exclamation-triangle text-warning oe_edit_only"
                                         title="By saving this change, the customer phone number will also be updated."
-                                        attrs="{'invisible': [('partner_phone_update', '=', False)]}"/>
+                                        invisible="[('partner_phone_update', '=', False)]"/>
                                 </div>
                                 <label for="mobile" class="oe_inline"/>
                                 <div class="o_row o_row_readonly">
                                     <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
                                         title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
                                         type="object" context="{'default_phone': mobile}" groups="base.group_user"
-                                        attrs="{'invisible': [('mobile_blacklisted', '=', False)]}"/>
+                                        invisible="[('mobile_blacklisted', '=', False)]"/>
                                     <field name="mobile" widget="phone" string="Mobile"/>
                                 </div>
                             </group>
                             <field name="type" invisible="1"/>
-                            <group attrs="{'invisible': [('type', '=', 'lead')]}">
+                            <group invisible="[('type', '=', 'lead')]">
                                 <field name="user_id"
                                     context="{'default_sales_team_id': team_id}" widget="many2one_avatar_user"/>
                                 <label for="date_deadline">Expected Closing</label>
@@ -248,23 +248,23 @@
                                 </div>
                                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                             </group>
-                            <group attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                            <group invisible="[('type', '=', 'opportunity')]">
                                 <field name="user_id"
                                     context="{'default_sales_team_id': team_id}" widget="many2one_avatar_user"/>
                                 <field name="team_id" options="{'no_open': True, 'no_create': True}"/>
                             </group>
-                            <group name="lead_priority" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                            <group name="lead_priority" invisible="[('type', '=', 'opportunity')]">
                                 <field name="priority" widget="priority"/>
                                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                             </group>
                         </group>
-                        <field attrs="{'invisible': [('team_id', '=', False)]}"
+                        <field invisible="[('team_id', '=', False)]"
                             name="lead_properties" nolabel="1" columns="2" hideKanbanOption="1"/>
                         <notebook>
                             <page string="Internal Notes" name="internal_notes">
                                 <field name="description" placeholder="Add a description..." options="{'collaborative': true}" />
                             </page>
-                            <page name="extra" string="Extra Info" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                            <page name="extra" string="Extra Info" invisible="[('type', '=', 'opportunity')]">
                                 <group>
                                     <group string="Email" groups="base.group_no_one">
                                         <field name="message_bounce" readonly="1"/>
@@ -284,7 +284,7 @@
                                     </group>
                                 </group>
                             </page>
-                            <page name="lead" string="Extra Information" attrs="{'invisible': [('type', '=', 'lead')]}">
+                            <page name="lead" string="Extra Information" invisible="[('type', '=', 'lead')]">
                                 <group>
                                     <group string="Contact Information">
                                         <field name="partner_name"/>
@@ -299,7 +299,7 @@
                                         </div>
                                         <field name="website" widget="url" placeholder="e.g. https://www.odoo.com"/>
                                         <field name="lang_active_count" invisible="1"/>
-                                        <field name="lang_id" attrs="{'invisible': [('lang_active_count', '&lt;=', 1)]}"
+                                        <field name="lang_id" invisible="[('lang_active_count', '&lt;=', 1)]"
                                             options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
                                     </group>
                                     <group class="mt48">
@@ -314,7 +314,7 @@
                                             <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
                                                 title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
                                                 type="object" context="{'default_phone': mobile}" groups="base.group_user"
-                                                attrs="{'invisible': [('mobile_blacklisted', '=', False)]}"/>
+                                                invisible="[('mobile_blacklisted', '=', False)]"/>
                                             <field name="mobile" id="mobile_page_lead" widget="phone"/>
                                         </div>
                                     </group>
@@ -481,7 +481,7 @@
                             <div class="o_row" groups="crm.group_use_recurring_revenues">
                                 <field name="recurring_revenue" class="oe_inline" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                                 <field name="recurring_plan" class="oe_inline" placeholder="E.g. Monthly"
-                                    attrs="{'required': [('recurring_revenue', '!=', 0)]}" options="{'no_create': True, 'no_open': True}"/>
+                                    required="[('recurring_revenue', '!=', 0)]" options="{'no_create': True, 'no_open': True}"/>
                             </div>
                         </div>
                         <field name="company_currency" invisible="1"/>
@@ -563,7 +563,7 @@
                             <t t-set="lost_ribbon" t-value="!record.active.raw_value and record.probability and record.probability.raw_value == 0"/>
                             <div t-attf-class="#{!selection_mode ? kanban_color(record.color.raw_value) : ''} #{lost_ribbon ? 'oe_kanban_card_ribbon' : ''} oe_kanban_global_click oe_kanban_card d-flex flex-column">
                                 <div class="ribbon ribbon-top-right"
-                                    attrs="{'invisible': ['|', ('probability', '&gt;', 0), ('active', '=', True)]}">
+                                    invisible="['|', ('probability', '&gt;', 0), ('active', '=', True)]">
                                     <span class="bg-danger">Lost</span>
                                 </div>
 
@@ -644,8 +644,8 @@
                 </xpath>
                 <xpath expr="//div[hasclass('ribbon')]" position="replace">
                     <div class="ribbon ribbon-top-right"
-                        attrs="{'invisible': ['&amp;', '|', ('probability', '&gt;', 0), ('active', '=', True),
-                            '|', ('probability', '&lt;', 100), ('active', '=', False)]}">
+                        invisible="['&amp;', '|', ('probability', '&gt;', 0), ('active', '=', True),
+                            '|', ('probability', '&lt;', 100), ('active', '=', False)]">
                         <span t-if="won_ribbon" class="bg-success">Won</span>
                         <span t-elif="lost_ribbon" class="bg-danger">Lost</span>
                     </div>
@@ -808,11 +808,11 @@
                     <field name="message_needaction" invisible="1"/>
                     <button name="%(crm.action_lead_mail_compose)d" type="action" string="Email" icon="fa-envelope"/>
                     <button name="action_reschedule_meeting" class="text-warning" type="object" string="Reschedule"
-                        icon="fa-calendar" attrs="{'invisible': ['|', ('my_activity_date_deadline', '=', False),
-                        ('activity_calendar_event_id', '=', False)]}"/>
+                        icon="fa-calendar" invisible="['|', ('my_activity_date_deadline', '=', False),
+                        ('activity_calendar_event_id', '=', False)]"/>
                     <button name="action_snooze" class="text-warning" type="object" string="Snooze 7d"
-                        icon="fa-bell-slash" attrs="{'invisible': ['|', ('my_activity_date_deadline', '=', False),
-                        ('activity_calendar_event_id', '!=', False)]}"/>
+                        icon="fa-bell-slash" invisible="['|', ('my_activity_date_deadline', '=', False),
+                        ('activity_calendar_event_id', '!=', False)]"/>
                 </tree>
             </field>
         </record>
@@ -1025,9 +1025,9 @@
                         <filter string="Source" name="source" domain="[]" context="{'group_by':'source_id'}"/>
                         <separator orientation="vertical" />
                         <filter string="Creation Date" name="month" context="{'group_by':'create_date:month'}"
-                                invisible="context.get('crm_lead_view_hide_month')"/>
+                                invisible="[bool(context.get('crm_lead_view_hide_month'))]"/>
                         <filter string="Creation Date" name="group_by_create_date_day" context="{'group_by':'create_date:day'}"
-                                invisible="not context.get('crm_lead_view_hide_month')"/>
+                               invisible="[not context.get('crm_lead_view_hide_month')]"/>
                         <filter string="Conversion Date" name="date_conversion" context="{'group_by': 'date_conversion'}" groups="crm.group_use_lead"/>
                         <filter string="Expected Closing" name="date_deadline" context="{'group_by':'date_deadline'}"/>
                         <filter string="Closed Date" name="date_closed" context="{'group_by':'date_closed'}"/>

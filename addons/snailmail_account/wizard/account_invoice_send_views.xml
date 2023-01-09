@@ -13,8 +13,8 @@
                             <field name="snailmail_is_letter" />
                             <b><label for="snailmail_is_letter"/></b>
                         </div>
-                        <span attrs="{'invisible': [('snailmail_is_letter','=', False)]}">
-                            <span class="mr4" attrs="{'invisible': [('snailmail_cost', '=', 0)]}">
+                        <span invisible="[('snailmail_is_letter','=', False)]">
+                            <span class="mr4" invisible="[('snailmail_cost', '=', 0)]">
                                 <b>(
                                     <span>
                                         <field name="snailmail_cost" options="{'digits':[0,0]}" class="mr4"/>
@@ -23,12 +23,12 @@
                                     <i class="fa fa-info-circle" role="img" aria-label="Warning" title="Make sure you have enough Stamps on your account."/>
                                 )</b>
                             </span>
-                            <span class="text-end d-inline-block " attrs="{'invisible': ['|', ('composition_mode', '=', 'mass_mail'), ('partner_id', '=', False)]}" name="address">
-                                <span class="text-muted" attrs="{'invisible': [('invalid_addresses', '!=', 0)]}"> to: </span>
-                                <span class="text-danger" attrs="{'invisible': [('invalid_addresses', '=', 0)]}"> The customer's address is incomplete: </span>
+                            <span class="text-end d-inline-block " invisible="['|', ('composition_mode', '=', 'mass_mail'), ('partner_id', '=', False)]" name="address">
+                                <span class="text-muted" invisible="[('invalid_addresses', '!=', 0)]"> to: </span>
+                                <span class="text-danger" invisible="[('invalid_addresses', '=', 0)]"> The customer's address is incomplete: </span>
                                 <field name="partner_id" readonly="1" force_save="1" context="{'show_address': 1, 'address_inline': 1}" options="{'always_reload': True, 'no_quick_create': True}"/>
                             </span>
-                            <span attrs="{'invisible': ['|', ('composition_mode', '!=', 'mass_mail'), ('invalid_addresses', '=', 0)]}">
+                            <span invisible="['|', ('composition_mode', '!=', 'mass_mail'), ('invalid_addresses', '=', 0)]">
                                 <span class="text-danger">
                                     Some customer addresses are incomplete.
                                 </span>
@@ -38,13 +38,13 @@
                     </div>
                 </xpath>
                 <xpath expr="//footer/button[hasclass('send_and_print')]" position='attributes'>
-                    <attribute name="attrs">{'invisible': ['|', ('is_print', '=', False), '&amp;', '&amp;', ('is_print', '=', True), ('snailmail_is_letter', '=', False), ('is_email', '=', False)]}</attribute>
+                    <attribute name="invisible">['|', ('is_print', '=', False), '&amp;', '&amp;', ('is_print', '=', True), ('snailmail_is_letter', '=', False), ('is_email', '=', False)]</attribute>
                 </xpath>
                 <xpath expr="//footer/button[hasclass('send')]" position='attributes'>
-                    <attribute name="attrs">{'invisible': ['|', ('is_print', '=', True), '&amp;', '&amp;', ('is_print', '=', False), ('snailmail_is_letter', '=', False), ('is_email', '=', False)]}</attribute>
+                    <attribute name="invisible">['|', ('is_print', '=', True), '&amp;', '&amp;', ('is_print', '=', False), ('snailmail_is_letter', '=', False), ('is_email', '=', False)]</attribute>
                 </xpath>
                 <xpath expr="//footer/button[hasclass('print')]" position='attributes'>
-                    <attribute name="attrs">{'invisible': ['|', '|', ('is_print', '=', False), ('snailmail_is_letter', '=', True), ('is_email', '=', True)]}</attribute>
+                    <attribute name="invisible">['|', '|', ('is_print', '=', False), ('snailmail_is_letter', '=', True), ('is_email', '=', True)]</attribute>
                 </xpath>
             </field>
         </record>

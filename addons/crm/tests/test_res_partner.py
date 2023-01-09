@@ -55,13 +55,11 @@ class TestPartner(TestCrmCommon):
         # So, set a temporary `parent_id` before setting the contact as company
         # to make `parent_id` visible in the interface while being a company
         # <field name="parent_id"
-        #     attrs="{
-        #         'invisible': [
+        #         invisible="[
         #             '|',
         #             '&amp;', ('is_company','=', True),('parent_id', '=', False),
         #             ('company_name', '!=', False),('company_name', '!=', '')
-        #         ]
-        #     }"
+        #         ]"
         # />
         partner_form.parent_id = contact_company_1
         partner_form.company_type = 'company'

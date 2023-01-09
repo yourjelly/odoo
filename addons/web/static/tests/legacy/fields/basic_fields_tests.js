@@ -377,7 +377,7 @@ QUnit.module('Legacy basic_fields', {
             data: this.data,
             arch: `
                 <form>
-                    <field name="bar" attrs="{'readonly': True}"/>
+                    <field name="bar" readonly="True"/>
                 </form>`,
             res_id: 1,
         });
@@ -2404,7 +2404,7 @@ QUnit.module('Legacy basic_fields', {
                 <form string="Partners">
                     <sheet>
                         <group>
-                            <field name="foo" widget="url" attrs="{'readonly': True}" />
+                            <field name="foo" widget="url" readonly="True" />
                             <field name="foo2" />
                         </group>
                     </sheet>
@@ -2619,7 +2619,7 @@ QUnit.module('Legacy basic_fields', {
             arch: `
                 <form string="Partners">
                     <field name="bar"/>
-                    <field name="txt" attrs="{'invisible': [('bar', '=', True)]}"/>
+                    <field name="txt" invisible="[('bar', '=', True)]"/>
                 </form>`,
             data: this.data,
             model: 'partner',
@@ -5225,7 +5225,7 @@ QUnit.module('Legacy basic_fields', {
                         '</tree>' +
                         '<form>' +
                             // display datetime in readonly as modal will open in edit
-                            '<field name="datetime" widget="date" attrs="{\'readonly\': 1}"/>' +
+                            '<field name="datetime" widget="date" readonly="1"/>' +
                         '</form>' +
                      '</field>' +
                  '</form>',
@@ -5270,7 +5270,7 @@ QUnit.module('Legacy basic_fields', {
                         '</tree>' +
                         '<form>' +
                             // display datetime in readonly as modal will open in edit
-                            '<field name="datetime" widget="date" attrs="{\'readonly\': 1}"/>' +
+                            '<field name="datetime" widget="date" readonly="1"/>' +
                         '</form>' +
                      '</field>' +
                  '</form>',

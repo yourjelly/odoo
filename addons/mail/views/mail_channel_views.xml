@@ -26,8 +26,8 @@
                                     <p class="oe_module_name">
                                         <field name="description"/>
                                     </p>
-                                    <button type="object" attrs="{'invisible':['|', ('is_member','=',True), ('group_ids', '!=', [])]}" class="btn btn-primary float-end" name="channel_join">Join</button>
-                                    <button type="object" attrs="{'invisible':['|', ('is_member','=',False), ('group_ids', '!=', [])]}" class="btn btn-secondary float-end" name="action_unfollow">Leave</button>
+                                    <button type="object" invisible="['|', ('is_member','=',True), ('group_ids', '!=', [])]" class="btn btn-primary float-end" name="channel_join">Join</button>
+                                    <button type="object" invisible="['|', ('is_member','=',False), ('group_ids', '!=', [])]" class="btn btn-secondary float-end" name="action_unfollow">Leave</button>
                                 </div>
                             </div>
                         </t>
@@ -60,18 +60,18 @@
                             <page string="Privacy" name="privacy">
                                 <group class="o_label_nowrap">
                                     <field name="group_public_id"
-                                        attrs="{'invisible': [('channel_type', '!=', 'channel')]}"
+                                        invisible="[('channel_type', '!=', 'channel')]"
                                         />
                                     <field name="group_ids" widget="many2many_tags"
-                                        attrs="{'invisible': [('channel_type', '!=', 'channel')]}"
+                                        invisible="[('channel_type', '!=', 'channel')]"
                                         string="Auto Subscribe Groups"/>
                                 </group>
                             </page>
                             <page string="Members" name="members">
                                 <field name="channel_type" invisible="1"/>
-                                <field name="channel_member_ids" mode="tree" context="{'active_test': False}" attrs="{'readonly': [('channel_type', '=', 'chat')]}">
+                                <field name="channel_member_ids" mode="tree" context="{'active_test': False}" readonly="[('channel_type', '=', 'chat')]">
                                     <tree string="Members" editable="bottom">
-                                        <field name="partner_id" required="1" attrs="{'readonly': [('id', '!=', False)]}"/>
+                                        <field name="partner_id" required="1" readonly="[('id', '!=', False)]"/>
                                         <field name="partner_email" readonly="1"/>
                                     </tree>
                                 </field>

@@ -89,7 +89,7 @@
                         <group>
                             <field name="partner_id"/>
                             <field name="resource_ref" string="Course"/>
-                            <field name="feedback" attrs="{'invisible': [('feedback','=',False)]}"/>
+                            <field name="feedback" invisible="[('feedback','=',False)]"/>
                         </group>
                         <group>
                             <field name="rating"/>

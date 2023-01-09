@@ -26,19 +26,19 @@
                         <label for="frequency"/>
                         <div class="o_col">
                             <field name="frequency"/>
-                            <div class="o_row" attrs="{'invisible': [('frequency', '!=', 'weekly')]}">
+                            <div class="o_row" invisible="[('frequency', '!=', 'weekly')]">
                                 <label for="week_day" string="on"/><field name="week_day"/>
                             </div>
-                            <div class="o_row" attrs="{'invisible': [('frequency', '!=', 'monthly')]}">
+                            <div class="o_row" invisible="[('frequency', '!=', 'monthly')]">
                                 <label for="first_day_display" string="on the"/><field name="first_day_display" required="1"/> of the month
                             </div>
-                            <div class="o_row" attrs="{'invisible': [('frequency', '!=', 'bimonthly')]}">
+                            <div class="o_row" invisible="[('frequency', '!=', 'bimonthly')]">
                                 <label for="first_day_display" string="on the"/><field name="first_day_display" required="1"/> and on the <field name="second_day_display" required="1"/> of the month
                             </div>
-                            <div class="o_row" attrs="{'invisible': [('frequency', '!=', 'biyearly')]}">
+                            <div class="o_row" invisible="[('frequency', '!=', 'biyearly')]">
                                 <label for="first_month_day_display" string="on the"/><field name="first_month_day_display" required="1"/> of <field name="first_month"/> and on the <field name="second_month_day_display" required="1"/> of <field name="second_month"/>
                             </div>
-                            <div class="o_row" attrs="{'invisible': [('frequency', '!=', 'yearly')]}">
+                            <div class="o_row" invisible="[('frequency', '!=', 'yearly')]">
                                 <label for="yearly_day_display" string="on the"/><field name="yearly_day_display" required="1"/> of <field name="yearly_month" class="w-25"/>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                             </div>
                         </div>
                         <field name="action_with_unused_accruals" style="width: 40%"/>
-                        <field name="postpone_max_days" attrs="{'invisible': [('action_with_unused_accruals', '!=', 'postponed')]}"/>
+                        <field name="postpone_max_days" invisible="[('action_with_unused_accruals', '!=', 'postponed')]"/>
                     </group>
                 </sheet>
             </form>
@@ -77,7 +77,7 @@
             <form string="Accrual Plan">
                 <field name="show_transition_mode" invisible="1" />
                 <sheet>
-                    <div class="oe_button_box" name="button_box" attrs="{'invisible': [('id', '=', False)]}">
+                    <div class="oe_button_box" name="button_box" invisible="[('id', '=', False)]">
                         <button name="action_open_accrual_plan_employees" type="object" class="oe_stat_button" icon="fa-users">
                             <field name="employees_count" widget="statinfo"/>
                         </button>
@@ -90,7 +90,7 @@
                             <field name="time_off_type_id"/>
                         </group>
                         <group>
-                            <field name="transition_mode" widget="radio" attrs="{'invisible': [('show_transition_mode', '=', False)]}"/>
+                            <field name="transition_mode" widget="radio" invisible="[('show_transition_mode', '=', False)]"/>
                         </group>
                     </group>
                     <span class="oe_grey" invisible="1">
@@ -98,7 +98,7 @@
                     </span>
                     <div class="o_hr_holidays_hierarchy">
                         <div class="o_hr_holidays_title">Rules</div>
-                        <div class="o_hr_holidays_hierarchy_readonly" attrs="{'invisible': [('level_ids', '!=', [])]}">
+                        <div class="o_hr_holidays_hierarchy_readonly" invisible="[('level_ids', '!=', [])]">
                             <p>
                                 No rule has been set up for this accrual plan.
                             </p>

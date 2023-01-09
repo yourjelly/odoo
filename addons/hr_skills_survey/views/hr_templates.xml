@@ -9,7 +9,7 @@
             <xpath expr="//field[@name='line_type_id']" position="after">
                 <field name="survey_id" readonly="0"
                     domain="[('certification', '=', True)]"
-                    attrs="{'invisible': [('display_type', '!=', 'certification')]}"/>
+                    invisible="[('display_type', '!=', 'certification')]"/>
             </xpath>
         </field>
     </record>

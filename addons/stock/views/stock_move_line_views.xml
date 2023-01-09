@@ -9,7 +9,7 @@
                 <field name="location_dest_usage" invisible="1"/>
                 <field name="date"/>
                 <field name="reference" string="Reference"
-                       invisible="context.get('no_reference', False)"/>
+                       column_invisible="[bool(context.get('no_reference'))]"/>
                 <field name="product_id"/>
                 <field name="lot_id" optional="show" groups="stock.group_production_lot"/>
                 <field name="package_id" optional="hide" groups="stock.group_tracking_lot"/>
@@ -83,8 +83,8 @@
                             <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                         </group>
                         <group>
-                            <label for="reserved_uom_qty" string="Quantity Reserved" attrs="{'invisible': [('state', '=', 'done')]}"/>
-                            <div class="o_row" attrs="{'invisible': [('state', '=', 'done')]}">
+                            <label for="reserved_uom_qty" string="Quantity Reserved" invisible="[('state', '=', 'done')]"/>
+                            <div class="o_row" invisible="[('state', '=', 'done')]">
                                 <field name="reserved_uom_qty" readonly="1"/>
                                 <field name="product_uom_id" options="{'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                             </div>
@@ -93,8 +93,8 @@
                                 <field name="qty_done"/>
                                 <field name="product_uom_id" options="{'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                             </div>
-                            <field name="lot_id" groups="stock.group_production_lot" context="{'default_product_id': product_id, 'active_picking_id': picking_id, 'default_company_id': company_id}" attrs="{'invisible': [('lot_id', '=', False),('lot_name', '!=', False)]}"/>
-                            <field name="lot_name" groups="stock.group_production_lot" attrs="{'invisible': ['|',('lot_id', '!=', False),('lot_name', '=', False)]}"/>
+                            <field name="lot_id" groups="stock.group_production_lot" context="{'default_product_id': product_id, 'active_picking_id': picking_id, 'default_company_id': company_id}" invisible="[('lot_id', '=', False),('lot_name', '!=', False)]"/>
+                            <field name="lot_name" groups="stock.group_production_lot" invisible="['|',('lot_id', '!=', False),('lot_name', '=', False)]"/>
                             <field name="package_id" string="Source Package" groups="stock.group_tracking_lot"/>
                             <field name="result_package_id" string="Destination Package" groups="stock.group_tracking_lot"/>
                             <field name="owner_id" string="Owner" groups="stock.group_tracking_owner"/>
@@ -173,10 +173,10 @@
                                 →
                                 <field name="location_dest_id"/>
                             </div>
-                            <div groups="stock.group_production_lot" attrs="{'invisible': [('lot_id', '=', False),('lot_name', '=', False)]}">
+                            <div groups="stock.group_production_lot" invisible="[('lot_id', '=', False),('lot_name', '=', False)]">
                                 Lot/SN:
-                                <field name="lot_id" attrs="{'invisible': [('lot_id', '=', False),('lot_name', '!=', False)]}"/>
-                                <field name="lot_name" attrs="{'invisible': ['|',('lot_id', '!=', False),('lot_name', '=', False)]}"/>
+                                <field name="lot_id" invisible="[('lot_id', '=', False),('lot_name', '!=', False)]"/>
+                                <field name="lot_name" invisible="['|',('lot_id', '!=', False),('lot_name', '=', False)]"/>
                             </div>
                             <div class="row">
                                 <div class="col-6">

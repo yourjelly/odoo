@@ -38,7 +38,7 @@
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button name="toggle_prod_environment"
-                                    attrs="{'invisible': ['|', '|', ('prod_environment', '=', False), ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule')]}"
+                                    invisible="['|', '|', ('prod_environment', '=', False), ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule')]"
                                     class="oe_stat_button"
                                     type="object" icon="fa-play">
                                 <div class="o_stat_info o_field_widget">
@@ -48,7 +48,7 @@
                             </button>
                             <!-- transfer referenced here due to view inheritance issue in current master (post-saas-16) -->
                             <button name="toggle_prod_environment"
-                                    attrs="{'invisible': ['|', '|', ('prod_environment', '=', True), ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule')]}"
+                                    invisible="['|', '|', ('prod_environment', '=', True), ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule')]"
                                     class="oe_stat_button"
                                     type="object" icon="fa-stop">
                                 <div class="o_stat_info o_field_widget">
@@ -57,7 +57,7 @@
                                 </div>
                             </button>
                             <button name="toggle_debug"
-                                    attrs="{'invisible': ['|', '|', ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule'), ('debug_logging', '=', True)]}"
+                                    invisible="['|', '|', ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule'), ('debug_logging', '=', True)]"
                                     class="oe_stat_button"
                                     type="object" icon="fa-code">
                                 <div class="o_stat_info o_field_widget">
@@ -65,7 +65,7 @@
                                 </div>
                             </button>
                             <button name="toggle_debug"
-                                    attrs="{'invisible': ['|', '|', ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule'), ('debug_logging', '=', False)]}"
+                                    invisible="['|', '|', ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule'), ('debug_logging', '=', False)]"
                                     class="oe_stat_button"
                                     type="object" icon="fa-code">
                                 <div class="o_stat_info o_field_widget">
@@ -73,7 +73,7 @@
                                 </div>
                             </button>
                         </div>
-                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                         <div class="oe_title" name="title">
                             <label for="name" string="Shipping Method"/>
                             <h1>
@@ -91,33 +91,33 @@
                                     <field name="delivery_type" />
                                     <button string="Install more Providers" name="install_more_provider" type="object" class="oe_link oe_edit_only"/>
                                 </div>
-                                <field name="integration_level" widget="radio" attrs="{'invisible': ['|', ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule')]}"/>
+                                <field name="integration_level" widget="radio" invisible="['|', ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule')]"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                             </group>
                             <group name="delivery_details">
                                 <field name="product_id" context="{'default_detailed_type': 'service', 'default_sale_ok': False, 'default_purchase_ok': False, 'default_invoice_policy': 'order'}" />
-                                <field name="invoice_policy" widget="radio" attrs="{'invisible': ['|', ('delivery_type', 'in', ('fixed', 'base_on_rule')), ('integration_level', '=', 'rate')]}"/>
+                                <field name="invoice_policy" widget="radio" invisible="['|', ('delivery_type', 'in', ('fixed', 'base_on_rule')), ('integration_level', '=', 'rate')]"/>
                                 <label for="margin" string="Margin on Rate"/>
                                 <div>
                                     <field name="margin" class="oe_inline"/>%
                                 </div>
                                 <field name="free_over"/>
-                                <field name="amount" attrs="{'required':[('free_over','!=', False)], 'invisible':[('free_over','=', False)]}"/>
+                                <field name="amount" required="[('free_over','!=', False)]" invisible="[('free_over','=', False)]"/>
                                 <field name="supports_shipping_insurance" invisible="1"/>
-                                <label for="shipping_insurance" String="Shipping Insurance" attrs="{'invisible': [('supports_shipping_insurance', '=', False)]}"/>
-                                <div attrs="{'invisible': [('supports_shipping_insurance', '=', False)]}">
+                                <label for="shipping_insurance" String="Shipping Insurance" invisible="[('supports_shipping_insurance', '=', False)]"/>
+                                <div invisible="[('supports_shipping_insurance', '=', False)]">
                                     <field name="shipping_insurance" class="oe_inline"/>%
                                 </div>
                             </group>
                         </group>
                         <notebook>
-                            <page name="pricing" string="Pricing" attrs="{'invisible': [('delivery_type', 'not in', ['fixed', 'base_on_rule'])]}">
-                                <group attrs="{'invisible':[('delivery_type', '!=', 'fixed')]}">
+                            <page name="pricing" string="Pricing" invisible="[('delivery_type', 'not in', ['fixed', 'base_on_rule'])]">
+                                <group invisible="[('delivery_type', '!=', 'fixed')]">
                                     <group name="fixed_price">
                                         <field name="fixed_price"/>
                                     </group>
                                 </group>
-                                <group name="general" attrs="{'invisible':[('delivery_type', '!=', 'base_on_rule')]}">
+                                <group name="general" invisible="[('delivery_type', '!=', 'base_on_rule')]">
                                     <field name="price_rule_ids" nolabel="1" colspan="2"/>
                                 </group>
                             </page>
@@ -231,12 +231,12 @@
                 <xpath expr="//group[@name='other_infos']" position="before">
                     <group name='carrier_data' string="Shipping Information">
                         <field name="is_return_picking" invisible="1"/>
-                        <field name="carrier_id" attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}" options="{'no_create': True, 'no_open': True}"/>
-                        <field name="delivery_type" attrs="{'invisible':True}"/>
+                        <field name="carrier_id" readonly="[('state', 'in', ('done', 'cancel'))]" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="delivery_type" invisible="True"/>
                         <label for="carrier_tracking_ref"/>
                         <div name="tracking">
-                            <field name="carrier_tracking_ref" class="oe_inline" attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
-                            <button type='object' class="fa fa-arrow-right oe_link" confirm="Cancelling a delivery may not be undoable. Are you sure you want to continue?" name="cancel_shipment" string="Cancel" attrs="{'invisible':['|','|','|',('carrier_tracking_ref','=',False),('delivery_type','in', ['fixed', 'base_on_rule']),('delivery_type','=',False),('state','not in',('done'))]}"/>
+                            <field name="carrier_tracking_ref" class="oe_inline" readonly="[('state', 'in', ('done', 'cancel'))]"/>
+                            <button type='object' class="fa fa-arrow-right oe_link" confirm="Cancelling a delivery may not be undoable. Are you sure you want to continue?" name="cancel_shipment" string="Cancel" invisible="['|','|','|',('carrier_tracking_ref','=',False),('delivery_type','in', ['fixed', 'base_on_rule']),('delivery_type','=',False),('state','not in',('done'))]"/>
                         </div>
                         <label for="weight" string="Weight"/>
                         <div>
@@ -252,17 +252,17 @@
                 </xpath>
                 <div name="button_box" position="inside">
                     <button type="object" name="open_website_url" class="oe_stat_button" icon='fa-truck' string="Tracking"
-                         attrs="{'invisible': ['|','|',('carrier_tracking_ref','=',False),('carrier_id', '=', False),('delivery_type','=','grid')]}" />
+                         invisible="['|','|',('carrier_tracking_ref','=',False),('carrier_id', '=', False),('delivery_type','=','grid')]" />
                 </div>
                 <xpath expr="/form/header/button[last()]" position="after">
-                    <button name="send_to_shipper" string="Send to Shipper" type="object" attrs="{'invisible':['|','|','|','|',('carrier_tracking_ref','!=',False),('delivery_type','in', ['fixed', 'base_on_rule']),('delivery_type','=',False),('state','not in',('done')),('picking_type_code', '=', 'incoming')]}" data-hotkey="shift+v"/>
+                    <button name="send_to_shipper" string="Send to Shipper" type="object" invisible="['|','|','|','|',('carrier_tracking_ref','!=',False),('delivery_type','in', ['fixed', 'base_on_rule']),('delivery_type','=',False),('state','not in',('done')),('picking_type_code', '=', 'incoming')]" data-hotkey="shift+v"/>
                 </xpath>
                 <xpath expr="/form/header/button[last()]" position="after">
-                    <button name="print_return_label" string="Print Return Label" type="object" attrs="{'invisible':['|', '|', ('is_return_picking', '=', False),('state', '=', 'done'),('picking_type_code', '!=', 'incoming')]}" data-hotkey="shift+o"/>
+                    <button name="print_return_label" string="Print Return Label" type="object" invisible="['|', '|', ('is_return_picking', '=', False),('state', '=', 'done'),('picking_type_code', '!=', 'incoming')]" data-hotkey="shift+o"/>
                 </xpath>
               </data>
               <xpath expr="//field[@name='partner_id']" position="attributes">
-                  <attribute name="attrs">{'required': ['&amp;', ('delivery_type', '!=', False), ('delivery_type', 'not in', ['fixed', 'base_on_rule'])]}</attribute>
+                  <attribute name="required">['&amp;', ('delivery_type', '!=', False), ('delivery_type', 'not in', ['fixed', 'base_on_rule'])]</attribute>
               </xpath>
             </field>
         </record>
@@ -323,7 +323,7 @@
                                 string="Add shipping"
                                 name="action_open_delivery_wizard"
                                 type="object"
-                                attrs="{'invisible': ['|', '|',('is_all_service', '=', True), ('order_line', '=', []), ('delivery_set', '=', True)]}"
+                                invisible="['|', '|',('is_all_service', '=', True), ('order_line', '=', []), ('delivery_set', '=', True)]"
                             />
                             <button
                                 string="Update shipping cost"
@@ -331,14 +331,14 @@
                                 context="{'carrier_recompute':True}"
                                 type="object"
                                 class="text-warning btn-secondary"
-                                attrs="{'invisible': ['|', '|',('is_all_service', '=', True), ('recompute_delivery_price', '=', False), ('delivery_set', '=', False)]}"
+                                invisible="['|', '|',('is_all_service', '=', True), ('recompute_delivery_price', '=', False), ('delivery_set', '=', False)]"
                             />
                             <button
                                 string="Update shipping cost"
                                 name="action_open_delivery_wizard"
                                 context="{'carrier_recompute':True}"
                                 type="object"
-                                attrs="{'invisible': ['|', '|',('is_all_service', '=', True), ('recompute_delivery_price', '=', True), ('delivery_set', '=', False)]}"
+                                invisible="['|', '|',('is_all_service', '=', True), ('recompute_delivery_price', '=', True), ('delivery_set', '=', False)]"
                             />
                         </div>
                     </xpath>

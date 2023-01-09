@@ -461,11 +461,11 @@ QUnit.module("Views", (hooks) => {
                 <form>
                     <group>
                         <group>
-                            <field name="foo" class="foo_1" attrs="{'invisible': [('bar','=',False)]}"/>
-                            <field name="foo" class="foo_2" attrs="{'invisible': [('bar','=',True)]}"/>
+                            <field name="foo" class="foo_1" invisible="[('bar','=',False)]"/>
+                            <field name="foo" class="foo_2" invisible="[('bar','=',True)]"/>
                             <field name="foo" class="foo_3"/>
-                            <field name="int_field" class="int_field_1" attrs="{'readonly': [('bar','=',True)]}"/>
-                            <field name="int_field" class="int_field_2" attrs="{'readonly': [('bar','=',False)]}"/>
+                            <field name="int_field" class="int_field_1" readonly="[('bar','=',True)]"/>
+                            <field name="int_field" class="int_field_2" readonly="[('bar','=',False)]"/>
                             <field name="bar"/>
                         </group>
                     </group>
@@ -1179,8 +1179,8 @@ QUnit.module("Views", (hooks) => {
                             <group>
                                 <field name="int_field"/>
                                 <field name="timmy" invisible="1"/>
-                                <field name="foo" attrs='{"invisible": [("int_field", "=", 10)]}'/>
-                                <field name="bar" attrs='{"invisible": [("bar", "=", False), ("timmy", "=", [])]}'/>
+                                <field name="foo" invisible='[("int_field", "=", 10)]'/>
+                                <field name="bar" invisible='[("bar", "=", False), ("timmy", "=", [])]'/>
                             </group>
                         </sheet>
                     </form>`,
@@ -1211,7 +1211,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <field name="int_field"/>
-                            <notebook name="test_name" class="new_class" attrs='{"invisible": [["int_field", "=", 10]]}'>
+                            <notebook name="test_name" class="new_class" invisible='[["int_field", "=", 10]]'>
                                 <page string="Foo">
                                     <field name="foo"/>
                                 </page>
@@ -1303,10 +1303,10 @@ QUnit.module("Views", (hooks) => {
                     <sheet>
                         <field name="bar"/>
                         <notebook>
-                            <page string="A" attrs='{"invisible": [["bar", "=", false]]}'>
+                            <page string="A" invisible='[["bar", "=", false]]'>
                                 <field name="foo"/>
                             </page>
-                            <page string="B" attrs='{"invisible": [["bar", "=", true]]}'>
+                            <page string="B" invisible='[["bar", "=", true]]'>
                                 <field name="int_field"/>
                             </page>
                             <page string="C">
@@ -1341,7 +1341,7 @@ QUnit.module("Views", (hooks) => {
                     <sheet>
                         <field name="int_field"/>
                         <notebook>
-                            <page string="Foo" attrs='{"invisible": [["int_field", "=", 44]]}'>
+                            <page string="Foo" invisible='[["int_field", "=", 44]]'>
                                 <field name="foo"/>
                             </page>
                             <page string="Bar">
@@ -1374,7 +1374,7 @@ QUnit.module("Views", (hooks) => {
                     <sheet>
                         <field name="bar"/>
                         <notebook>
-                            <page string="Foo" attrs='{"invisible": [["bar", "!=", false]]}'>
+                            <page string="Foo" invisible='[["bar", "!=", false]]'>
                                 <field name="foo"/>
                             </page>
                         </notebook>
@@ -1429,13 +1429,13 @@ QUnit.module("Views", (hooks) => {
                     <sheet>
                         <field name="bar"/>
                         <notebook class="new_class">
-                            <page string="Foo" attrs="{'invisible': [['bar', '=', true]]}">
+                            <page string="Foo" invisible="[['bar', '=', true]]">
                                 <field name="foo"/>
                             </page>
                             <page string="Qux" invisible="1">
                                 <field name="qux"/>
                             </page>
-                            <page string="IntField" attrs="{'invisible': [['bar', '=', true]]}">
+                            <page string="IntField" invisible="[['bar', '=', true]]">
                                 <field name="int_field"/>
                             </page>
                         </notebook>
@@ -1606,7 +1606,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <field name="bar"/>
-                            <group attrs='{"invisible": [["bar", "!=", true]]}'>
+                            <group invisible='[["bar", "!=", true]]'>
                                 <group>
                                     <field name="foo"/>
                                 </group>
@@ -1635,7 +1635,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <field name="foo"/>
-                            <group attrs='{"invisible": [["int_field", "=", 0.0]]}'>
+                            <group invisible='[["int_field", "=", 0.0]]'>
                                 <div class="hello">this should be invisible</div>
                                 <field name="int_field"/>
                             </group>
@@ -1795,7 +1795,7 @@ QUnit.module("Views", (hooks) => {
                             <button class="oe_stat_button" type="action" name="someaction">
                                 <field name="int_field"/>
                             </button>
-                            <button class="oe_stat_button" name="some_action" type="action" attrs='{"invisible": [["bar", "=", true]]}'>
+                            <button class="oe_stat_button" name="some_action" type="action" invisible='[["bar", "=", true]]'>
                                 <field name="bar"/>
                             </button>
                         </div>
@@ -1851,7 +1851,7 @@ QUnit.module("Views", (hooks) => {
                             <button class="oe_stat_button">
                                 <field name="int_field"/>
                             </button>
-                            <button class="oe_stat_button" name="some_action" type="action" attrs='{"invisible": [["bar", "=", true]]}'>
+                            <button class="oe_stat_button" name="some_action" type="action" invisible='[["bar", "=", true]]'>
                                 <field name="bar"/>
                             </button>
                         </div>
@@ -2033,8 +2033,8 @@ QUnit.module("Views", (hooks) => {
                 <form>
                     <sheet>
                         <group>
-                            <label for="bar" string="label1" attrs='{"invisible": [["bar", "=", True]]}'/>
-                            <label for="bar" string="label2" attrs='{"invisible": [["bar", "=", False]]}'/>
+                            <label for="bar" string="label1" invisible='[["bar", "=", True]]'/>
+                            <label for="bar" string="label2" invisible='[["bar", "=", False]]'/>
                             <field name="bar" nolabel="1"/>
                         </group>
                     </sheet>
@@ -2063,7 +2063,7 @@ QUnit.module("Views", (hooks) => {
                     <sheet>
                         <group>
                             <div>
-                                <label for="bar" attrs='{"invisible": [["bar", "=", True]]}'/>
+                                <label for="bar" invisible='[["bar", "=", True]]'/>
                                 <field name="bar" />
                             </div>
                         </group>
@@ -2391,7 +2391,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <group>
-                                <field name="foo" attrs="{'readonly': [['bar', '=', True]]}"/>
+                                <field name="foo" readonly="[['bar', '=', True]]"/>
                                 <field name="bar"/>
                             </group>
                         </sheet>
@@ -2432,7 +2432,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <form>
-                    <field name="int_field" attrs="{'readonly': [('id', '!=', False)]}"/>
+                    <field name="int_field" readonly="[('id', '!=', False)]"/>
                 </form>`,
         });
 
@@ -2489,7 +2489,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `
                     <form>
                         <field name="trululu"/>
-                        <field name="product_ids" attrs="{'readonly': [['trululu', '=', False]]}">
+                        <field name="product_ids" readonly="[['trululu', '=', False]]">
                             <tree editable="top"><field name="int_field" widget="handle" /><field name="name"/></tree>
                         </field>
                     </form>
@@ -2537,7 +2537,7 @@ QUnit.module("Views", (hooks) => {
                     <sheet>
                         <group>
                             <field name="foo"/>
-                            <field name="trululu" attrs="{'readonly': [['foo', '=', False]]}"/>
+                            <field name="trululu" readonly="[['foo', '=', False]]"/>
                             <field name="int_field"/>
                         </group>
                     </sheet>
@@ -2598,7 +2598,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <group>
                             <field name="foo"/>
-                            <field name="display_name" attrs="{'readonly': [['foo', '=', 'readonly']]}"/>
+                            <field name="display_name" readonly="[['foo', '=', 'readonly']]"/>
                         </group>
                     </form>`,
                 resId: 2,
@@ -2679,9 +2679,9 @@ QUnit.module("Views", (hooks) => {
                         <sheet>
                             <label for="foo" string="Foo"/>
                             <field name="foo"/>
-                            <label for="trululu" string="Trululu" attrs="{'readonly': [['foo', '=', False]]}"/>
-                            <field name="trululu" attrs="{'readonly': [['foo', '=', False]]}"/>
-                            <label for="int_field" string="IntField" attrs="{'readonly': [['int_field', '=', False]]}"/>
+                            <label for="trululu" string="Trululu" readonly="[['foo', '=', False]]"/>
+                            <field name="trululu" readonly="[['foo', '=', False]]"/>
+                            <label for="int_field" string="IntField" readonly="[['int_field', '=', False]]"/>
                             <field name="int_field"/>
                         </sheet>
                     </form>`,
@@ -2714,7 +2714,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <group>
-                                <field name="foo" attrs="{'required': [['bar', '=', True]]}"/>
+                                <field name="foo" required="[['bar', '=', True]]"/>
                                 <field name="bar"/>
                             </group>
                         </sheet>
@@ -2830,7 +2830,7 @@ QUnit.module("Views", (hooks) => {
                 <form>
                     <sheet>
                         <group>
-                            <separator string="Geolocation" attrs='{"invisible": [["bar", "=", True]]}'/>
+                            <separator string="Geolocation" invisible='[["bar", "=", True]]'/>
                             <field name="bar"/>
                         </group>
                     </sheet>
@@ -5497,7 +5497,7 @@ QUnit.module("Views", (hooks) => {
                 <form>
                     <sheet>
                         <group>
-                            <field name="foo" class="foo_field" attrs='{"invisible": [["bar", "=", True]]}'/>
+                            <field name="foo" class="foo_field" invisible='[["bar", "=", True]]'/>
                             <field name="bar"/>
                         </group>
                     </sheet>
@@ -5976,7 +5976,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="foo"/>
                     <field name="p">
                         <tree editable="top">
-                            <field name="display_name" attrs="{'readonly': [('timmy', '=', false)]}"/>
+                            <field name="display_name" readonly="[('timmy', '=', false)]"/>
                             <field name="timmy"/>
                         </tree>
                     </field>
@@ -7335,7 +7335,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <form>
-                    <field name="foo" attrs="{'readonly': [('bar','=',False)]}"/>
+                    <field name="foo" readonly="[('bar','=',False)]"/>
                     <field name="bar"/>
                 </form>`,
             resId: 1,
@@ -7416,7 +7416,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <form>
                     <field name="bar"/>
-                    <field name="timmy" widget="many2many_tags" attrs="{'readonly': [('bar','=',True)]}"/>
+                    <field name="timmy" widget="many2many_tags" readonly="[('bar','=',True)]"/>
                 </form>`,
             resId: 5,
         });
@@ -7466,11 +7466,11 @@ QUnit.module("Views", (hooks) => {
             "partner,false,form": `
                 <form>
                     <field name="bar"/>
-                    <footer attrs="{'invisible': [('bar','=',False)]}">
+                    <footer invisible="[('bar','=',False)]">
                         <button>Hello</button>
                         <button>World</button>
                     </footer>
-                    <footer attrs="{'invisible': [('bar','!=',False)]}">
+                    <footer invisible="[('bar','!=',False)]">
                         <button>Foo</button>
                     </footer>
                 </form>`,
@@ -8301,7 +8301,7 @@ QUnit.module("Views", (hooks) => {
                     <form>
                         <sheet>
                             <notebook>
-                                <page string="Foo" attrs='{"invisible": [["id", "=", 2]]}'>
+                                <page string="Foo" invisible='[["id", "=", 2]]'>
                                     <field name="foo"/>
                                 </page>
                                 <page string="Bar">
@@ -8798,8 +8798,8 @@ QUnit.module("Views", (hooks) => {
             <form>
                 <field name="foo" />
                 <group>
-                    <div class="cell1" attrs='{"invisible": [["foo", "=", "1"]]}' />
-                    <div class="cell2" attrs='{"invisible": [["foo", "=", "2"]]}' />
+                    <div class="cell1" invisible='[["foo", "=", "1"]]' />
+                    <div class="cell2" invisible='[["foo", "=", "2"]]' />
                 </group>
             </form>`,
         });
@@ -9781,7 +9781,7 @@ QUnit.module("Views", (hooks) => {
                         <tree><field name="display_name"/></tree>
                         <form>
                             <field name="display_name"/>
-                            <field name="foo" attrs="{'readonly': [['display_name', '=', 'readonly']]}"/>
+                            <field name="foo" readonly="[['display_name', '=', 'readonly']]"/>
                         </form>
                     </field>
                 </form>`,
@@ -9857,7 +9857,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <form>
                     <field name="id"/>
-                    <field name="foo" attrs="{'readonly': [['id', '=', False]]}"/>
+                    <field name="foo" readonly="[['id', '=', False]]"/>
                 </form>`,
         });
 
@@ -9978,7 +9978,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <form>
                     <header>
-                        <button name="some_method" class="oe_highlight" string="Button" type="object" title="This is title" attrs="{'readonly': [['display_name', '=', 'readonly']]}"/>
+                        <button name="some_method" class="oe_highlight" string="Button" type="object" title="This is title" readonly="[['display_name', '=', 'readonly']]"/>
                         <button name="empty_method" string="Empty Button" type="object"/>
                     </header>
                     <button name="other_method" class="oe_highlight" string="Button2" type="object" help="help Button2"/>
@@ -10274,7 +10274,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <form>
                     <sheet>
-                        <field name="product_id" context="{'lang': 'en_US'}" attrs='{"invisible": [["product_id", "=", 33]]}' widget="many2one"/>
+                        <field name="product_id" context="{'lang': 'en_US'}" invisible='[["product_id", "=", 33]]' widget="many2one"/>
                     </sheet>
                 </form>`,
         });
@@ -12429,7 +12429,7 @@ QUnit.module("Views", (hooks) => {
                             <form>
                                 <field name="length"/>
                                 <field name="display_name"/>
-                                <field name="foo" attrs="{'readonly': [['display_name', '=', 'readonly']]}"/>
+                                <field name="foo" readonly="[['display_name', '=', 'readonly']]"/>
                             </form>
                         </field>
                     </form>`,

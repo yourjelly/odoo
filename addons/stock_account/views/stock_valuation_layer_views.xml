@@ -9,7 +9,7 @@
                         <group>
                             <field name="create_date" string="Date" />
                             <field name="product_id" />
-                            <field name="stock_move_id" attrs="{'invisible': [('stock_move_id', '=', False)]}" />
+                            <field name="stock_move_id" invisible="[('stock_move_id', '=', False)]" />
                         </group>
                     </group>
                     <notebook>
@@ -26,9 +26,9 @@
                         <page string="Other Info" name="other_info">
                             <group>
                                 <field name="description" />
-                                <field name="account_move_id" groups="account.group_account_invoice" attrs="{'invisible': [('account_move_id', '=', False)]}" />
+                                <field name="account_move_id" groups="account.group_account_invoice" invisible="[('account_move_id', '=', False)]" />
                                 <field name="company_id" groups="base.group_multi_company" />
-                                <field name="stock_valuation_layer_id" attrs="{'invisible': [('stock_valuation_layer_id', '=', False)]}" />
+                                <field name="stock_valuation_layer_id" invisible="[('stock_valuation_layer_id', '=', False)]" />
                             </group>
                         </page>
                     </notebook>
@@ -46,7 +46,7 @@
                   action="action_open_reference" type="object">
                 <header>
                     <button name="action_valuation_at_date" string="Valuation at Date" type="object"
-                            invisible="((context.get('inventory_mode') and not context.get('inventory_report_mode')) or context.get('no_at_date'))"
+                            invisible="[bool((context.get('inventory_mode') and not context.get('inventory_report_mode')) or context.get('no_at_date'))]"
                             class="btn-primary ms-1"
                             display="always"/>
                 </header>
@@ -63,7 +63,7 @@
                 <groupby name="product_id">
                     <field name="cost_method" invisible="1"/>
                     <field name="quantity_svl" invisible="1"/>
-                    <button name="action_revaluation" icon="fa-plus" title="Add Manual Valuation" type="object" attrs="{'invisible':['|', ('cost_method', '=', 'standard'), ('quantity_svl', '&lt;=', 0)]}" />
+                    <button name="action_revaluation" icon="fa-plus" title="Add Manual Valuation" type="object" invisible="['|', ('cost_method', '=', 'standard'), ('quantity_svl', '&lt;=', 0)]" />
                 </groupby>
             </tree>
         </field>
@@ -161,7 +161,7 @@
                 <button string="Valuation" type="object"
                     name="action_view_stock_valuation_layers"
                     class="oe_stat_button" icon="fa-dollar" groups="base.group_no_one"
-                    attrs="{'invisible': [('state', 'not in', ['done'])]}" />
+                    invisible="[('state', 'not in', ['done'])]" />
             </xpath>
         </field>
     </record>

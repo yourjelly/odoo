@@ -9,8 +9,8 @@
             <group>
                 <field name="name" placeholder="e.g. Technical Assistance" string="Forum Name"/>
                 <field name="mode" widget="radio" required="True" string="Forum Mode"/>
-                <field name="privacy" widget="radio" attrs="{'required': True}"/>
-                <field name="authorized_group_id" options="{'no_create': True}" attrs="{'invisible': [('privacy', '!=', 'private')], 'required': [('privacy', '=', 'private')]}"/>
+                <field name="privacy" widget="radio" required="True"/>
+                <field name="authorized_group_id" options="{'no_create': True}" invisible="[('privacy', '!=', 'private')]" required="[('privacy', '=', 'private')]"/>
             </group>
         </form>
     </field>

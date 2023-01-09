@@ -18,7 +18,7 @@
                         <div class="oe_button_box" name="button_box">
                             <button name="action_open_document" string="Open Document"
                                     type="object" class="oe_link" icon="fa-file-text-o"
-                                    attrs="{'invisible': ['|', ('model', '=', False), ('res_id', '=', 0)]}"/>
+                                    invisible="['|', ('model', '=', False), ('res_id', '=', 0)]"/>
                         </div>
                         <field name="mail_message_id_int" required="0" invisible="1"/>
                         <label for="subject" class="oe_edit_only"/>
@@ -45,9 +45,9 @@
                                 <group>
                                     <group string="Status">
                                         <field name="auto_delete"
-                                            attrs="{'invisible': [('state', '!=', 'outgoing'), ('state', '!=', 'exception')]}"/>
+                                            invisible="[('state', '!=', 'outgoing'), ('state', '!=', 'exception')]"/>
                                         <field name="to_delete"
-                                            attrs="{'invisible': [('state', '=', 'outgoing')]}"/>
+                                            invisible="[('state', '=', 'outgoing')]"/>
                                         <field name="is_notification"/>
                                         <field name="message_type"/>
                                         <field name="mail_server_id"/>
@@ -64,14 +64,14 @@
                             </page>
                             <page string="Attachments" name="attachments">
                                 <div class="alert alert-warning" role="alert"
-                                    attrs="{'invisible': [('restricted_attachment_count', '=', 0)]}">
+                                    invisible="[('restricted_attachment_count', '=', 0)]">
                                     You do not have access to <field name="restricted_attachment_count"/>
                                     attachment(s) of this email.
                                 </div>
                                 <field name="unrestricted_attachment_ids"
                                     domain="[('res_field','=', False)]"/>
                             </page>
-                            <page string="Failure Reason" name="failure_reason" attrs="{'invisible': [('state', '!=', 'exception')]}">
+                            <page string="Failure Reason" name="failure_reason" invisible="[('state', '!=', 'exception')]">
                                 <field name="failure_reason"/>
                             </page>
                         </notebook>

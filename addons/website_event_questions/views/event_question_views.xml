@@ -16,7 +16,7 @@
                             <field name="once_per_order"/>
                         </group>
                     </group>
-                    <notebook attrs="{'invisible': [('question_type', '!=', 'simple_choice')]}">
+                    <notebook invisible="[('question_type', '!=', 'simple_choice')]">
                         <page string="Answers" name="answers">
                             <field name="answer_ids">
                                 <tree editable="bottom">

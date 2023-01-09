@@ -16,7 +16,7 @@
                 <field name="email" optional="show"/>
                 <field name="phone" optional="show"/>
                 <field name="mobile" optional="hide"/>
-                <field name="event_id" invisible="context.get('default_event_id')"/>
+                <field name="event_id" column_invisible="[bool(context.get('default_event_id'))]"/>
                 <field name="event_ticket_id" domain="[('event_id', '=', event_id)]"/>
                 <field name="activity_ids" widget="list_activity"/>
                 <field name="state" decoration-info="state in ('draft', 'open')"
@@ -25,12 +25,12 @@
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
                 <field name="message_needaction" invisible="1"/>
                 <button name="action_confirm" string="Confirm" type="object" icon="fa-check"
-                        attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'draft')]}"/>
+                        invisible="['|', ('active', '=', False), ('state', '!=', 'draft')]"/>
                 <button name="action_set_done" string="Mark as Attending" type="object" icon="fa-level-down"
-                        attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'open')]}"/>
+                        invisible="['|', ('active', '=', False), ('state', '!=', 'open')]"/>
                 <button name="action_cancel" string="Cancel" type="object"
                         class="o_btn_cancel_registration" icon="fa-times"
-                        attrs="{'invisible': ['|', ('active', '=', False), '&amp;', ('state', '!=', 'open'), ('state', '!=', 'draft')]}"/>
+                        invisible="['|', ('active', '=', False), '&amp;', ('state', '!=', 'open'), ('state', '!=', 'draft')]"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
             </tree>
         </field>
@@ -44,20 +44,20 @@
                 <field name="active" invisible="1"/>
                 <header>
                     <button name="action_send_badge_email" string="Send by Email" type="object" class="oe_highlight"
-                            attrs="{'invisible': ['|', ('active', '=', False), '&amp;', ('state', '!=', 'open'), ('state', '!=', 'done')]}"/>
+                            invisible="['|', ('active', '=', False), '&amp;', ('state', '!=', 'open'), ('state', '!=', 'done')]"/>
                     <button name="action_confirm" string="Confirm" type="object" class="oe_highlight"
-                            attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'draft')]}"/>
+                            invisible="['|', ('active', '=', False), ('state', '!=', 'draft')]"/>
                     <button name="action_set_done" string="Attended" type="object" class="oe_highlight"
-                            attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'open')]}"/>
+                            invisible="['|', ('active', '=', False), ('state', '!=', 'open')]"/>
                     <button name="action_set_draft" string="Set To Unconfirmed" type="object"
-                            attrs="{'invisible': ['|', ('active', '=', False), '&amp;', ('state', '!=', 'cancel'), ('state', '!=', 'done')]}"/>
+                            invisible="['|', ('active', '=', False), '&amp;', ('state', '!=', 'cancel'), ('state', '!=', 'done')]"/>
                     <button name="action_cancel" string="Cancel Registration" type="object"
-                            attrs="{'invisible': ['|', ('active', '=', False), '&amp;', ('state', '!=', 'open'), ('state', '!=', 'draft')]}"/>
+                            invisible="['|', ('active', '=', False), '&amp;', ('state', '!=', 'open'), ('state', '!=', 'draft')]"/>
                     <field name="state" nolabel="1" colspan="2" widget="statusbar" statusbar_visible="draft,open,done"/>
                 </header>
                 <sheet string="Registration">
                     <div class="oe_button_box" name="button_box"/>
-                    <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" text="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <group>
                         <group string="Attendee" name="attendee">
                             <field class="o_text_overflow" name="name"/>
@@ -66,9 +66,9 @@
                             <field name="mobile" class="o_force_ltr" widget="phone"/>
                         </group>
                         <group string="Event Information" name="event">
-                            <field class="o_text_overflow" name="event_id" attrs="{'readonly': [('state', '!=', 'draft')]}"
+                            <field class="o_text_overflow" name="event_id" readonly="[('state', '!=', 'draft')]"
                                    context="{'name_with_seats_availability': True}" options="{'no_create': True}"/>
-                            <field name="event_ticket_id" attrs="{'invisible': [('event_id', '=', False)]}"
+                            <field name="event_ticket_id" invisible="[('event_id', '=', False)]"
                                    context="{'name_with_seats_availability': True}" options="{'no_open': True, 'no_create': True}"
                                    domain="[('event_id', '=', event_id)]"/>
                             <field name="partner_id"/>
@@ -148,8 +148,8 @@
                                     <div class="oe_kanban_content h-100">
                                         <div class="o_kanban_record_body pt-1 ps-2 h-100 d-flex flex-column">
                                             <b class="o_kanban_record_title"><field name="name"/></b>
-                                            <field class="o_text_overflow" name="event_id" invisible="context.get('default_event_id')" />
-                                            <span class="o_text_overflow" attrs="{'invisible': [('partner_id', '=', False)]}">Booked by <field name="partner_id" /></span>
+                                            <field class="o_text_overflow" name="event_id" invisible="[bool(context.get('default_event_id'))]" />
+                                            <span class="o_text_overflow" invisible="[('partner_id', '=', False)]">Booked by <field name="partner_id" /></span>
                                             <div id="event_ticket_id" class="o_field_many2manytags o_field_widget d-flex mt-auto">
                                                 <t t-if="record.event_ticket_id.raw_value">
                                                     <div t-attf-class="badge rounded-pill o_tag_color_#{(record.event_ticket_id.raw_value % 11) + 1}" >
@@ -243,9 +243,9 @@
                     <filter string="Ticket Type" name ="group_event_ticket_id" domain="[]" context="{'group_by': 'event_ticket_id'}"/>
                     <filter string="Status" name="status" domain="[]" context="{'group_by':'state'}"/>
                     <filter string="Registration Date" name="group_by_create_date_week" domain="[]" context="{'group_by': 'create_date:week'}"
-                            invisible="context.get('registration_view_hide_group_by_create_date_week')"/>
+                            invisible="[bool(context.get('registration_view_hide_group_by_create_date_week'))]"/>
                     <filter string="Registration Date" name="group_by_create_date_day" domain="[]" context="{'group_by': 'create_date:day'}"
-                            invisible="not context.get('registration_view_hide_group_by_create_date_week')"/>
+                           invisible="[not context.get('registration_view_hide_group_by_create_date_week')]"/>
                     <filter string="Campaign" name="group_by_utm_campaign_id" domain="[]"
                             context="{'group_by': 'utm_campaign_id'}"/>
                     <filter string="Medium" name="group_by_utm_medium_id" domain="[]"

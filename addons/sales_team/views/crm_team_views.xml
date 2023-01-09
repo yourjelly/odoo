@@ -23,12 +23,12 @@
         <field name="arch" type="xml">
             <form string="Sales Team">
                 <div class="alert alert-info text-center" role="alert"
-                    attrs="{'invisible': ['|', ('is_membership_multi', '=', True), ('member_warning', '=', False)]}">
+                    invisible="['|', ('is_membership_multi', '=', True), ('member_warning', '=', False)]">
                     <field name="member_warning"/>
                 </div>
                 <sheet>
                     <div class="oe_button_box" name="button_box"/>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <div class="oe_title">
                         <label for="name" string="Sales Team"/>
                         <h1>
@@ -80,7 +80,7 @@
                             </field>
                             <field name="crm_team_member_ids" mode="kanban"
                                 class="w-100"
-                                attrs="{'invisible': ['|', ('is_membership_multi', '=', True), ('is_membership_multi', '=', False)]}"
+                                invisible="['|', ('is_membership_multi', '=', True), ('is_membership_multi', '=', False)]"
                                 context="{
                                     'kanban_view_ref': 'sales_team.crm_team_member_view_kanban_from_team',
                                     'form_view_ref': 'sales_team.crm_team_member_view_form_from_team',

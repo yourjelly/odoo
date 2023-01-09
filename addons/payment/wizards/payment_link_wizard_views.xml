@@ -8,7 +8,7 @@
             <form string="Generate Payment Link">
                 <div class="alert alert-warning fw-bold"
                      role="alert"
-                     attrs="{'invisible': [('partner_email', '!=', False)]}">
+                     invisible="[('partner_email', '!=', False)]">
                      This partner has no email, which may cause issues with some payment providers.
                      Setting an email for this partner is advised.
                 </div>
@@ -25,7 +25,7 @@
                         <field name="amount"/>
                         <field name="currency_id" invisible="1"/>
                         <field name="payment_provider_selection"
-                            attrs="{'invisible':[('has_multiple_providers', '=', False)]}"/>
+                            invisible="[('has_multiple_providers', '=', False)]"/>
                     </group>
                 </group>
                 <footer>

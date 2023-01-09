@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="calendar.calendar_alarm_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='mail_template_id']" position="after">
-                <field name="sms_template_id" attrs="{'invisible': [('alarm_type','!=','sms')], 'required': [('alarm_type', '=', 'sms')]}"
+                <field name="sms_template_id" invisible="[('alarm_type','!=','sms')]" required="[('alarm_type', '=', 'sms')]"
                     context="{'default_model': 'calendar.event'}"/>
             </xpath>
         </field>

@@ -10,7 +10,7 @@
                 <field name="module_sale_quotation_builder" invisible="1"/>
                 <setting id="standardized_offers_setting" help="Create standardized offers with default products" documentation="/applications/sales/sales/send_quotations/quote_template.html">
                     <field name="group_sale_order_template"/>
-                    <div class="content-group" attrs="{'invisible': [('group_sale_order_template', '=', False)]}">
+                    <div class="content-group" invisible="[('group_sale_order_template', '=', False)]">
                         <div class="mt16">
                             <label for="company_so_template_id" class="o_light_label"/>
                             <field name="company_so_template_id" class="oe_inline"/>
@@ -20,11 +20,11 @@
                         </div>
                     </div>
                 </setting>
-                <setting id="design_quotation_template_setting" attrs="{'invisible': [('group_sale_order_template','=',False)]}">
+                <setting id="design_quotation_template_setting" invisible="[('group_sale_order_template','=',False)]">
                     <field name="module_sale_quotation_builder"/>
                     <div class="text-muted">
                         Design your quotation templates using building blocks<br/>
-                        <em attrs="{'invisible': [('module_sale_quotation_builder','=',False)]}">Warning: this option will install the Website app.</em>
+                        <em invisible="[('module_sale_quotation_builder','=',False)]">Warning: this option will install the Website app.</em>
                     </div>
                 </setting>
             </xpath>

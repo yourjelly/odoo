@@ -261,15 +261,15 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
                 # For `parent_id` to  be visible in the view, you need
                 # 1. The debug mode
                 # 2. `allow_subtasks` to be true
-                # <field name="parent_id" attrs="{'invisible': [('allow_subtasks', '=', False)]}" groups="base.group_no_one"/>
+                # <field name="parent_id" invisible="[('allow_subtasks', '=', False)]" groups="base.group_no_one"/>
                 # `allow_subtasks` is a related to `allow_subtasks` on the project
                 # as the point of the test is to test the behavior of the task `_compute_project_id` when there is no project,
                 # `allow_subtasks` is by default invisible, and you shouldn't therefore be able to change it.
                 # So, to make it visible, temporary modify the view to make it visible even when `allow_subtasks` is `False`.
                 view = self.env.ref('project.view_task_form2').sudo()
                 tree = etree.fromstring(view.arch)
-                for node in tree.xpath('//field[@name="parent_id"][@attrs]'):
-                    node.attrib.pop('attrs')
+                for node in tree.xpath('''//field[@name="parent_id"][@invisible="[('allow_subtasks', '=', False)]"]'''):
+                    node.attrib.pop('invisible')
                 view.arch = etree.tostring(tree)
                 with self.debug_mode():
                     with Form(self.task_2) as task_form:
@@ -286,15 +286,15 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
         # For `parent_id` to  be visible in the view, you need
         # 1. The debug mode
         # 2. `allow_subtasks` to be true
-        # <field name="parent_id" attrs="{'invisible': [('allow_subtasks', '=', False)]}" groups="base.group_no_one"/>
+        # <field name="parent_id" invisible="[('allow_subtasks', '=', False)]" groups="base.group_no_one"/>
         # `allow_subtasks` is a related to `allow_subtasks` on the project
         # as the point of the test is to test the behavior of the task `_compute_project_id` when there is no project,
         # `allow_subtasks` is by default invisible, and you shouldn't therefore be able to change it.
         # So, to make it visible, temporary modify the view to make it visible even when `allow_subtasks` is `False`.
         view = self.env.ref('project.view_task_form2').sudo()
         tree = etree.fromstring(view.arch)
-        for node in tree.xpath('//field[@name="parent_id"][@attrs]'):
-            node.attrib.pop('attrs')
+        for node in tree.xpath('''//field[@name="parent_id"][@invisible="[('allow_subtasks', '=', False)]"]'''):
+            node.attrib.pop('invisible')
         view.arch = etree.tostring(tree)
 
         with self.sudo('employee-a'):

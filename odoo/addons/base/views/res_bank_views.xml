@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <form string="Bank">
                     <sheet>
-                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                         <group name="bank_details" col="4">
                             <field name="name"/>
                             <field name="bic"/>
@@ -81,7 +81,7 @@
             <field name="arch" type="xml">
                 <form string="Bank account" name="bank_account_form">
                 <sheet>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <group>
                         <group>
                             <field name="sequence" invisible="1"/>
@@ -125,7 +125,7 @@
             <field name="arch" type="xml">
                 <search string="Bank Accounts">
                     <field name="bank_name" filter_domain="['|', ('bank_name','ilike',self), ('acc_number','ilike',self)]" string="Bank Name"/>
-                    <field name="company_id" invisible="context.get('company_hide', True)"/>
+                    <field name="company_id" invisible="[bool(context.get('company_hide', True))]"/>
                     <field name="partner_id"/>
                 </search>
             </field>

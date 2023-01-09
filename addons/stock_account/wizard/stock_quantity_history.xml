@@ -14,7 +14,7 @@
             <field name="inventory_datetime" position="after">
                 <field name="inventory_datetime" string="Valuation at Date"
                        help="Choose a date to get the valuation at that date"
-                       invisible="context.get('active_model') != 'stock.valuation.layer'"/>
+                       invisible="[context.get('active_model') != 'stock.valuation.layer']"/>
             </field>
         </field>
     </record>

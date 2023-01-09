@@ -17,7 +17,7 @@
                 </group>
                 <notebook>
                     <field name="warehouseinfo_ids" invisible="1"/>
-                    <page string="Warehouses" attrs="{'invisible' : [('warehouseinfo_ids', '=', [])]}">
+                    <page string="Warehouses" invisible="[('warehouseinfo_ids', '=', [])]">
                         <field name="wh_replenishment_option_ids"/>
                     </page>
                 </notebook>
@@ -65,7 +65,7 @@
                     <field name="warning_message"/>
                 </div>
                 <footer>
-                    <button name="order_avbl" type="object" class="btn-primary" attrs="{'invisible': [('free_qty', '&lt;=', 0.0)]}">
+                    <button name="order_avbl" type="object" class="btn-primary" invisible="[('free_qty', '&lt;=', 0.0)]">
                         Order <field name="free_qty"/>
                     </button>
                     <button name="order_all" type="object">

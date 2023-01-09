@@ -57,7 +57,7 @@
                     string="Send a Recovery Email"
                     type="object"
                     class="btn-primary"
-                    attrs="{'invisible': ['|', ('is_abandoned_cart', '=', False), ('cart_recovery_email_sent', '=', True)]}"/>
+                    invisible="['|', ('is_abandoned_cart', '=', False), ('cart_recovery_email_sent', '=', True)]"/>
             </xpath>
         </field>
     </record>
@@ -267,7 +267,7 @@
                 }</attribute>
             </field>
             <field name="team_id" position="after">
-                <field name="website_id" attrs="{'invisible': [('website_id', '=', False)]}" groups="website.group_multi_website"/>
+                <field name="website_id" invisible="[('website_id', '=', False)]" groups="website.group_multi_website"/>
             </field>
         </field>
     </record>

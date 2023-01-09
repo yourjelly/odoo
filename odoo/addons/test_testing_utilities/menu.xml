@@ -122,7 +122,7 @@
         <field name="arch" type="xml">
             <form>
                 <field name="f1"/>
-                <field name="f2" attrs="{'readonly': [['f1', '=', '63'], ['f3', '=', 5]]}"/>
+                <field name="f2" readonly="[['f1', '=', '63'], ['f3', '=', 5]]"/>
                 <field name="f3"/>
                 <field name="f4"/>
                 <field name="f5" readonly="[True]"/>
@@ -197,7 +197,7 @@
         <field name="arch" type="xml">
             <field name="subs" position="inside">
                 <form>
-                    <field name="value" attrs="{'readonly': [('v', '!=', False)]}"/>
+                    <field name="value" readonly="[('v', '!=', False)]"/>
                     <field name="v"/>
                 </form>
             </field>
@@ -221,7 +221,7 @@
         <field name="model">test_testing_utilities.e</field>
         <field name="arch" type="xml">
             <form>
-                <field name="count" attrs="{'readonly': [('m2m', '=', [])]}"/>
+                <field name="count" readonly="[('m2m', '=', [])]"/>
                 <field name="m2m"/>
             </form>
         </field>

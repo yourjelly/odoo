@@ -1334,7 +1334,7 @@ QUnit.module('Legacy relational_fields', {
             data: this.data,
             arch: '<form string="Partners">' +
                         '<field name="feedback_value"/>' +
-                        '<field name="color" attrs="{\'required\': [(\'feedback_value\', \'=\', \'bad\')]}"/>' +
+                        '<field name="color" required="[(\'feedback_value\', \'=\', \'bad\')]"/>' +
                 '</form>',
             res_id: 1
         });
@@ -2776,7 +2776,7 @@ QUnit.module('Legacy relational_fields', {
                 <form string="Partners">
                     <group>
                         <field name="timmy" widget="many2many_checkboxes"
-                            attrs="{'readonly': true}"/>
+                            readonly="true"/>
                     </group>
                 </form>`,
             res_id: 1,
@@ -3143,7 +3143,7 @@ QUnit.module('Legacy relational_fields', {
                 '</form>',
             archs: {
                 // make field reference readonly as the modal opens in edit mode
-                'partner,false,form': '<form><field name="reference" attrs="{\'readonly\': 1}"/></form>',
+                'partner,false,form': '<form><field name="reference" readonly="1"/></form>',
                 'partner,false,list': '<tree><field name="display_name"/></tree>',
             },
             res_id: 1,
@@ -3728,8 +3728,8 @@ QUnit.module('Legacy relational_fields', {
                                 '<field name="bar"/>' +
                                 '<field name="p">' +
                                     '<tree>' +
-                                        '<field name="foo" attrs="{\'column_invisible\': [(\'parent.product_id\', \'!=\', False)]}"/>' +
-                                        '<field name="bar" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                                        '<field name="foo" column_invisible="[(\'parent.product_id\', \'!=\', False)]"/>' +
+                                        '<field name="bar" column_invisible="[(\'parent.bar\', \'=\', False)]"/>' +
                                     '</tree>' +
                                 '</field>' +
                             '</page>' +
@@ -3780,7 +3780,7 @@ QUnit.module('Legacy relational_fields', {
                     '<field name="p">' +
                         '<tree editable="bottom">' +
                             '<field name="foo"/>' +
-                            '<field name="int_field" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                            '<field name="int_field" column_invisible="[(\'parent.bar\', \'=\', False)]"/>' +
                         '</tree>' +
                     '</field>' +
                 '</form>',
@@ -3830,8 +3830,8 @@ QUnit.module('Legacy relational_fields', {
             res_id: 1,
             archs: {
                 'partner,false,list': '<tree>' +
-                    '<field name="foo" attrs="{\'column_invisible\': [(\'parent.product_id\', \'!=\', False)]}"/>' +
-                    '<field name="bar" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                    '<field name="foo" column_invisible="[(\'parent.product_id\', \'!=\', False)]"/>' +
+                    '<field name="bar" column_invisible="[(\'parent.bar\', \'=\', False)]"/>' +
                 '</tree>',
             },
         });

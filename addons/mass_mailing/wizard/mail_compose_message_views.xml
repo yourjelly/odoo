@@ -10,37 +10,33 @@
                 <xpath expr="//field[@name='notify']" position="after">
                     <field name="model_is_thread" invisible="1"/>
                     <field name="campaign_id" groups="mass_mailing.group_mass_mailing_campaign"
-                        attrs="{'invisible': ['|', ('composition_mode', '!=', 'mass_mail'), ('model_is_thread', '!=', True)]}"/>
+                        invisible="['|', ('composition_mode', '!=', 'mass_mail'), ('model_is_thread', '!=', True)]"/>
                     <field name="mass_mailing_name"
-                        attrs="{'invisible': ['|', ('composition_mode', '!=', 'mass_mail'), ('model_is_thread', '!=', True)]}"/>
+                        invisible="['|', ('composition_mode', '!=', 'mass_mail'), ('model_is_thread', '!=', True)]"/>
                 </xpath>
                 <xpath expr="//button[@name='action_send_mail'][not(hasclass('o_mail_send'))]" position="attributes">
                     <!-- 'Log' button -->
-                    <attribute name="attrs">
-                        {'invisible': [
+                    <attribute name="invisible">[
                             '|',
                                 ('is_log', '=', False),
                                 '&amp;',
                                     ('mass_mailing_name', '!=', ''),
                                     ('mass_mailing_name', '!=', False)
-                        ]}
-                    </attribute>
+                        ]</attribute>
                 </xpath>
                 <xpath expr="//button[hasclass('o_mail_send')]" position="attributes">
                     <!-- 'Send' button -->
-                    <attribute name="attrs">
-                        {'invisible': [
+                    <attribute name="invisible">[
                             '|',
                                 ('is_log', '=', True),
                                 '&amp;',
                                     ('mass_mailing_name', '!=', ''),
                                     ('mass_mailing_name', '!=', False)
-                        ]}
-                    </attribute>
+                        ]</attribute>
                 </xpath>
                 <xpath expr="//button[@name='action_send_mail']" position="after">
                     <button string="Send Mass Mailing" name="action_send_mail" type="object" class="btn-primary o_mail_send"
-                        attrs="{'invisible': ['|', ('mass_mailing_name', '=', ''), ('mass_mailing_name', '=', False)]}" data-hotkey="q"/>
+                        invisible="['|', ('mass_mailing_name', '=', ''), ('mass_mailing_name', '=', False)]" data-hotkey="q"/>
                 </xpath>
             </field>
         </record>

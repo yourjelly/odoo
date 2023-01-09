@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <form string="Restaurant Floor">
                     <sheet>
-                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                         <field name="active" invisible="1"/>
                         <group col="4">
                             <field name="name" />
@@ -124,7 +124,7 @@
                         <group>
                             <field name="name" />
                             <field name="printer_type" widget="radio"/>
-                            <field name="proxy_ip" attrs="{'invisible': [('printer_type', '!=', 'iot')]}"/>
+                            <field name="proxy_ip" invisible="[('printer_type', '!=', 'iot')]"/>
                             <field name="product_categories_ids" />
                         </group>
                     </sheet>

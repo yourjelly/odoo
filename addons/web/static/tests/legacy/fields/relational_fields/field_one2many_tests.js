@@ -335,8 +335,8 @@ QUnit.module('Legacy fields', {}, function () {
                     '<field name="p">' +
                     '<tree editable="bottom">' +
                     '<field name="turtles" invisible="1"/>' +
-                    '<field name="foo" attrs="{&quot;readonly&quot; : [(&quot;turtles&quot;, &quot;!=&quot;, [])] }"/>' +
-                    '<field name="qux" attrs="{&quot;readonly&quot; : [(&quot;turtles&quot;, &quot;!=&quot;, [])] }"/>' +
+                    '<field name="foo" readonly="[(&quot;turtles&quot;, &quot;!=&quot;, [])]"/>' +
+                    '<field name="qux" readonly="[(&quot;turtles&quot;, &quot;!=&quot;, [])]"/>' +
                     '</tree>' +
                     '</field>' +
                     '</form>',
@@ -1091,7 +1091,7 @@ QUnit.module('Legacy fields', {}, function () {
                                     '<tree editable="bottom" default_order="turtle_int" limit="10">' +
                                         '<field name="turtle_int" widget="handle"/>' +
                                         '<field name="turtle_foo"/>' +
-                                        '<field name="turtle_qux" attrs="{\'readonly\': [(\'turtle_foo\', \'=\', False)]}"/>' +
+                                        '<field name="turtle_qux" readonly="[(\'turtle_foo\', \'=\', False)]"/>' +
                                    '</tree>' +
                                 '</field>' +
                             '</group>' +
@@ -3896,7 +3896,7 @@ QUnit.module('Legacy fields', {}, function () {
                 arch: '<form string="Partners">' +
                     '<field name="turtles">' +
                     '<tree editable="bottom">' +
-                    '<field name="turtle_foo" widget="char" attrs="{\'readonly\': [(\'turtle_int\', \'==\', 11111)]}"/>' +
+                    '<field name="turtle_foo" widget="char" readonly="[(\'turtle_int\', \'==\', 11111)]"/>' +
                     '<field name="turtle_int"/>' +
                     '</tree>' +
                     '</field>' +
@@ -3970,7 +3970,7 @@ QUnit.module('Legacy fields', {}, function () {
                 arch: '<form string="Partners">' +
                     '<field name="p">' +
                     '<tree editable="top">' +
-                    '<field name="display_name" attrs=\'{"readonly": [["product_id", "=", false]]}\'/>' +
+                    '<field name="display_name" readonly=\'[["product_id", "=", false]]\'/>' +
                     '<field name="product_id"/>' +
                     '</tree>' +
                     '</field>' +
@@ -5162,7 +5162,7 @@ QUnit.module('Legacy fields', {}, function () {
                     '<field name="turtles">' +
                     '<tree editable="top" limit="2">' +
                     '<field name="turtle_foo"/>' +
-                    '<field name="partner_ids" widget="many2many_tags" attrs="{\'readonly\': [(\'turtle_foo\', \'=\', \'a\')]}"/>' +
+                    '<field name="partner_ids" widget="many2many_tags" readonly="[(\'turtle_foo\', \'=\', \'a\')]"/>' +
                     '</tree>' +
                     '</field>' +
                     '</form>',
@@ -6315,7 +6315,7 @@ QUnit.module('Legacy fields', {}, function () {
                     '<field name="turtles">' +
                     '<tree editable="top">' +
                     '<field name="turtle_int"/>' +
-                    '<field name="turtle_foo" attrs=\'{"required": [["turtle_int", "=", 0]]}\'/>' +
+                    '<field name="turtle_foo" required=\'[["turtle_int", "=", 0]]\'/>' +
                     '</tree>' +
                     '</field>' +
                     '</form>',
@@ -6714,7 +6714,7 @@ QUnit.module('Legacy fields', {}, function () {
                 arch: `
                     <form>
                         <field name="name"/>
-                        <field name="p" attrs="{'readonly': [['name', '=', 'readonly']]}">
+                        <field name="p" readonly="[['name', '=', 'readonly']]">
                             <tree><field name="display_name"/></tree>
                             <form>
                                 <field name="display_name"/>
@@ -8704,8 +8704,8 @@ QUnit.module('Legacy fields', {}, function () {
                     '<field name="bar"/>' +
                     '<field name="p">' +
                     '<tree>' +
-                    '<field name="foo" attrs="{\'column_invisible\': [(\'parent.product_id\', \'!=\', False)]}"/>' +
-                    '<field name="bar" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                    '<field name="foo" column_invisible="[(\'parent.product_id\', \'!=\', False)]"/>' +
+                    '<field name="bar" column_invisible="[(\'parent.bar\', \'=\', False)]"/>' +
                     '</tree>' +
                     '</field>' +
                     '</page>' +
@@ -8748,7 +8748,7 @@ QUnit.module('Legacy fields', {}, function () {
                         <field name="p">
                             <tree>
                                 <field name="foo"/>
-                                <button name="abc" string="Do it" class="some_button" attrs="{'column_invisible': [('parent.product_id', '=', False)]}"/>
+                                <button name="abc" string="Do it" class="some_button" column_invisible="[('parent.product_id', '=', False)]"/>
                             </tree>
                         </field>
                     </form>`,
@@ -8787,10 +8787,10 @@ QUnit.module('Legacy fields', {}, function () {
                         <field name="p">
                             <tree>
                                 <button name="abc1" string="Do it 1" class="some_button1"/>
-                                <button name="abc2" string="Do it 2" class="some_button2" attrs="{'column_invisible': [('parent.product_id', '!=', False)]}"/>
+                                <button name="abc2" string="Do it 2" class="some_button2" column_invisible="[('parent.product_id', '!=', False)]"/>
                                 <field name="foo"/>
-                                <button name="abc3" string="Do it 3" class="some_button3" attrs="{'column_invisible': [('parent.product_id', '!=', False)]}"/>
-                                <button name="abc4" string="Do it 4" class="some_button4" attrs="{'column_invisible': [('parent.trululu', '!=', False)]}"/>
+                                <button name="abc3" string="Do it 3" class="some_button3" column_invisible="[('parent.product_id', '!=', False)]"/>
+                                <button name="abc4" string="Do it 4" class="some_button4" column_invisible="[('parent.trululu', '!=', False)]"/>
                             </tree>
                         </field>
                     </form>`,
@@ -8844,7 +8844,7 @@ QUnit.module('Legacy fields', {}, function () {
                     '<field name="p">' +
                     '<tree editable="bottom">' +
                     '<field name="foo"/>' +
-                    '<field name="int_field" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                    '<field name="int_field" column_invisible="[(\'parent.bar\', \'=\', False)]"/>' +
                     '</tree>' +
                     '</field>' +
                     '</form>',
@@ -8893,8 +8893,8 @@ QUnit.module('Legacy fields', {}, function () {
                 res_id: 1,
                 archs: {
                     'partner,false,list': '<tree>' +
-                        '<field name="foo" attrs="{\'column_invisible\': [(\'parent.product_id\', \'!=\', False)]}"/>' +
-                        '<field name="bar" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                        '<field name="foo" column_invisible="[(\'parent.product_id\', \'!=\', False)]"/>' +
+                        '<field name="bar" column_invisible="[(\'parent.bar\', \'=\', False)]"/>' +
                         '</tree>',
                 },
             });

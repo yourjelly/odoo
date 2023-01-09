@@ -19,7 +19,7 @@
                             </div>
                         </group>
                         <group string="Pricelist">
-                            <field name="product_tmpl_id" string="Product" invisible="context.get('visible_product_tmpl_id', True)"/>
+                            <field name="product_tmpl_id" string="Product" invisible="[bool(context.get('visible_product_tmpl_id', True))]"/>
                             <field name="product_id" groups="product.group_product_variant" options="{'no_create': True}"/>
                             <label for="min_qty"/>
                             <div class="o_row">
@@ -101,10 +101,10 @@
                 <field name="sequence" widget="handle"/>
                 <field name="partner_id" readonly="1"/>
                 <field name="product_id" readonly="1" optional="hide"
-                    invisible="context.get('product_template_invisible_variant', False)"
+                    column_invisible="[bool(context.get('product_template_invisible_variant'))]"
                     groups="product.group_product_variant"/>
                 <field name="product_tmpl_id" string="Product" readonly="1"
-                    invisible="context.get('visible_product_tmpl_id', True)"/>
+                    column_invisible="[bool(context.get('visible_product_tmpl_id', True))]"/>
                 <field name="product_name" optional="hide"/>
                 <field name="product_code" optional="hide"/>
                 <field name="date_start" optional="hide"/>

@@ -37,26 +37,26 @@
             <form string="Repair Order">
                <header>
                    <button name="action_validate" states="draft" type="object" string="Confirm Repair" class="oe_highlight" data-hotkey="v"/>
-                   <button name="action_repair_start" attrs="{'invisible': ['&amp;', ('state','!=','confirmed'), '!', '&amp;', ('state','=','ready'), ('invoice_method','=','b4repair')]}"
+                   <button name="action_repair_start" invisible="['&amp;', ('state','!=','confirmed'), '!', '&amp;', ('state','=','ready'), ('invoice_method','=','b4repair')]"
                     type="object" string="Start Repair" class="oe_highlight" data-hotkey="q"/>
                    <button name="action_repair_end" states="under_repair" type="object" string="End Repair" class="oe_highlight" data-hotkey="x"/>
-                   <button name="action_repair_invoice_create" type="object" string="Create Invoice" class="oe_highlight" groups="account.group_account_invoice" attrs="{'invisible': ['|', ('state', '!=', '2binvoiced'), ('invoice_id', '!=', False)]}" data-hotkey="w"/>
+                   <button name="action_repair_invoice_create" type="object" string="Create Invoice" class="oe_highlight" groups="account.group_account_invoice" invisible="['|', ('state', '!=', '2binvoiced'), ('invoice_id', '!=', False)]" data-hotkey="w"/>
                    <button name="action_send_mail" states="draft" string="Send Quotation" type="object" data-hotkey="g"/>
                    <button name="print_repair_order" states="draft" string="Print Quotation" type="object" data-hotkey="y"/>
                    <button name="action_repair_cancel_draft" states="cancel" string="Set to Draft" type="object" data-hotkey="z"/>
-                   <button name="action_repair_cancel" string="Cancel Repair" type="object" confirm="Draft invoices for this order will be cancelled. Do you confirm the action?" attrs="{'invisible':['|', ('state', '=', 'cancel'), ('invoice_state', '!=', 'draft')]}" data-hotkey="l"/>
-                   <button name="action_repair_cancel" string="Cancel Repair" type="object" attrs="{'invisible': ['|', ('state','=', 'cancel',), ('invoice_state', '=', 'draft')]}" data-hotkey="l"/>
+                   <button name="action_repair_cancel" string="Cancel Repair" type="object" confirm="Draft invoices for this order will be cancelled. Do you confirm the action?" invisible="['|', ('state', '=', 'cancel'), ('invoice_state', '!=', 'draft')]" data-hotkey="l"/>
+                   <button name="action_repair_cancel" string="Cancel Repair" type="object" invisible="['|', ('state','=', 'cancel',), ('invoice_state', '=', 'draft')]" data-hotkey="l"/>
                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                </header>
                <sheet string="Repairs order">
                     <div class="oe_button_box" name="button_box">
                         <field name="invoice_id" invisible="1"/>
-                        <button name="%(action_repair_move_lines)d" type="action" string="Product Moves" class="oe_stat_button" icon="fa-exchange" attrs="{'invisible': [('state', 'not in', ['done', 'cancel'])]}"/>
+                        <button name="%(action_repair_move_lines)d" type="action" string="Product Moves" class="oe_stat_button" icon="fa-exchange" invisible="[('state', 'not in', ['done', 'cancel'])]"/>
                         <button name="action_created_invoice"
                             type="object"
                             class="oe_stat_button"
                             icon="fa-pencil-square-o"
-                            attrs="{'invisible': [('invoice_id', '=', False)]}"
+                            invisible="[('invoice_id', '=', False)]"
                             groups="account.group_account_invoice">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_text">1</span>
@@ -75,17 +75,17 @@
                         <group>
                             <field name="description"/>
                             <field name="invoice_state" invisible="1"/>
-                            <field name="tracking" invisible="1" attrs="{'readonly': 1}"/>
+                            <field name="tracking" invisible="1" readonly="1"/>
                             <field name="company_id" invisible="1"/>
                             <field name="product_id"/>
-                            <field name="lot_id" context="{'default_product_id': product_id, 'default_company_id': company_id}" groups="stock.group_production_lot" attrs="{'required':[('tracking', 'in', ['serial', 'lot'])], 'invisible': [('tracking', 'not in', ['serial', 'lot'])], 'readonly': ['|', ('state', '=', 'done'), ('tracking', 'not in', ['serial', 'lot'])]}"/>
+                            <field name="lot_id" context="{'default_product_id': product_id, 'default_company_id': company_id}" groups="stock.group_production_lot" required="[('tracking', 'in', ['serial', 'lot'])]" invisible="[('tracking', 'not in', ['serial', 'lot'])]" readonly="['|', ('state', '=', 'done'), ('tracking', 'not in', ['serial', 'lot'])]"/>
                             <field name="product_uom_category_id" invisible="1"/>
                             <label for="product_qty"/>
                             <div class="o_row">
-                                <field name="product_qty" attrs="{'readonly':[('tracking', '=', 'serial')]}"/>
+                                <field name="product_qty" readonly="[('tracking', '=', 'serial')]"/>
                                 <field name="product_uom" groups="uom.group_uom"/>
                             </div>
-                            <field name="partner_id" widget="res_partner_many2one" attrs="{'required':[('invoice_method','!=','none')]}" context="{'res_partner_search_mode': 'customer', 'show_vat': True}"/>
+                            <field name="partner_id" widget="res_partner_many2one" required="[('invoice_method','!=','none')]" context="{'res_partner_search_mode': 'customer', 'show_vat': True}"/>
                             <field name="address_id" groups="account.group_delivery_invoice_address"/>
                             <field name="sale_order_id"/>
                             <field name="allowed_picking_type_ids" invisible="1"/>
@@ -98,15 +98,15 @@
                             <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                             <field name="guarantee_limit"/>
                             <field name="invoice_method"/>
-                            <field name="partner_invoice_id" attrs="{'invisible':[('invoice_method','=', 'none')],'required':[('invoice_method','!=','none')]}" groups="account.group_delivery_invoice_address"/>
-                            <field name="pricelist_id" groups="product.group_product_pricelist" context="{'product_id':product_id}" attrs="{'invisible':[('invoice_method','=', 'none')]}"/>
+                            <field name="partner_invoice_id" invisible="[('invoice_method','=', 'none')]" required="[('invoice_method','!=','none')]" groups="account.group_delivery_invoice_address"/>
+                            <field name="pricelist_id" groups="product.group_product_pricelist" context="{'product_id':product_id}" invisible="[('invoice_method','=', 'none')]"/>
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
                 <notebook>
                     <page string="Parts" name="parts">
-                        <field name="operations" context="{'default_product_uom_qty': product_qty, 'default_company_id': company_id}" attrs="{'readonly':[('state', 'in', ['done', 'cancel'])]}">
+                        <field name="operations" context="{'default_product_uom_qty': product_qty, 'default_company_id': company_id}" readonly="[('state', 'in', ['done', 'cancel'])]">
                             <form string="Operations">
                                 <group>
                                     <group>
@@ -132,7 +132,7 @@
                                         <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                                     </group>
                                 </group>
-                                <group name="History" string="History" attrs="{'invisible':[('move_id','=', False)]}">
+                                <group name="History" string="History" invisible="[('move_id','=', False)]">
                                     <field name="move_id"/>
                                     <field name="invoice_line_id" invisible="1"/>
                                 </group>
@@ -144,7 +144,7 @@
                                 <field name='name' optional="show"/>
                                 <field name="product_uom_category_id" invisible="1"/>
                                 <field name="tracking" invisible="1"/>
-                                <field name="lot_id" context="{'default_product_id': product_id, 'default_company_id': company_id}" groups="stock.group_production_lot" attrs="{'readonly':[('tracking', 'not in', ['serial', 'lot'])]}"/>
+                                <field name="lot_id" context="{'default_product_id': product_id, 'default_company_id': company_id}" groups="stock.group_production_lot" readonly="[('tracking', 'not in', ['serial', 'lot'])]"/>
                                 <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" optional="show"/>
                                 <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" optional="show"/>
                                 <field name="product_uom_qty" string="Quantity"/>
@@ -169,7 +169,7 @@
                         <div class="clearfix"/>
                     </page>
                     <page string="Operations" name="operations">
-                        <field name="fees_lines" context="{'default_company_id': company_id}" attrs="{'readonly':[('state', 'in', ['done', 'cancel'])]}">
+                        <field name="fees_lines" context="{'default_company_id': company_id}" readonly="[('state', 'in', ['done', 'cancel'])]">
                             <form string="Fees">
                                 <group>
                                     <field name="company_id" invisible="1" force_save="1"/>

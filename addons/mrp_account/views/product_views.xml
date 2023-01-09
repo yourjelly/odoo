@@ -13,7 +13,7 @@
                         <field name="valuation" invisible="1"/>
                         <button name="button_bom_cost"
                             string="Compute Price from BoM" type="object"
-                            attrs="{'invisible': ['|', ('bom_count', '=', 0), '&amp;', ('valuation', '=', 'real_time'), ('cost_method', '=', 'fifo')]}"
+                            invisible="['|', ('bom_count', '=', 0), '&amp;', ('valuation', '=', 'real_time'), ('cost_method', '=', 'fifo')]"
                             help="Compute the price of the product using products and operations of related bill of materials, for manufactured products only."
                             class="oe_link pt-0"/>
                         </t>
@@ -34,7 +34,7 @@
                         <field name="valuation" invisible="1"/>
                         <button name="button_bom_cost"
                             string="Compute Price from BoM" type="object"
-                            attrs="{'invisible': ['|', ('bom_count', '=', 0), '&amp;', ('valuation', '=', 'real_time'), ('cost_method', '=', 'fifo')]}"
+                            invisible="['|', ('bom_count', '=', 0), '&amp;', ('valuation', '=', 'real_time'), ('cost_method', '=', 'fifo')]"
                             help="Compute the price of the product using products and operations of related bill of materials, for manufactured products only."
                             class="oe_link pt-0"
                             colspan="2"/>
@@ -60,7 +60,7 @@
                             <button name="button_bom_cost"
                                 string="Compute Price from BoM"
                                 type="object"
-                                attrs="{'invisible': ['|', ('bom_count', '=', 0), '&amp;', ('valuation', '=', 'real_time'), ('cost_method', '=', 'fifo')]}"
+                                invisible="['|', ('bom_count', '=', 0), '&amp;', ('valuation', '=', 'real_time'), ('cost_method', '=', 'fifo')]"
                                 help="Compute the price of the product using products and operations of related bill of materials, for manufactured products only."
                                 class="oe_link pt-0"/>
                         </t>

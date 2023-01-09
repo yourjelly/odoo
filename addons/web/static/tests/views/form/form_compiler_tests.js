@@ -321,7 +321,7 @@ QUnit.module("Form Renderer", (hooks) => {
                     <div modifiers="{&quot;invisible&quot;: &quot;[['display_name', '=', uid]]&quot;}">
                         <field name="charfield"/>
                     </div>
-                    <field name="display_name" attrs="{'readonly': &quot;[['display_name', '=', uid]]&quot;}"/>
+                    <field name="display_name" readonly="[['display_name', '=', uid]]"/>
                 </form>`,
         };
 
@@ -343,7 +343,7 @@ QUnit.module("Form Renderer", (hooks) => {
                 <form>
                     <sheet>
                         <notebook>
-                            <page name="p1" attrs="{'invisible': [['display_name', '=', 'lol']]}"><field name="charfield"/></page>
+                            <page name="p1" invisible="[['display_name', '=', 'lol']]"><field name="charfield"/></page>
                             <page name="p2"><field name="display_name"/></page>
                         </notebook>
                     </sheet>

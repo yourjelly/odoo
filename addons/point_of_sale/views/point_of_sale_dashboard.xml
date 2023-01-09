@@ -140,7 +140,7 @@
                                             </div>
                                         </div>
 
-                                        <div t-if="record.last_session_closing_date.value" attrs='{"invisible": [("cash_control","=",False)]}' class="row">
+                                        <div t-if="record.last_session_closing_date.value" invisible='[("cash_control","=",False)]' class="row">
                                             <div class="col-6">
                                                 <span>Last Closing Cash Balance</span>
                                             </div>

@@ -43,8 +43,8 @@
                             <field name="name" invisible="1"/>
                             <field name="alarm_type"/>
                             <field name="mail_template_id" context="{'default_model': 'calendar.event'}"
-                                   attrs="{'invisible': [('alarm_type', '!=', 'email')], 'required': [('alarm_type', '=', 'email')]}"/>
-                            <field name="body" attrs="{'invisible': [('alarm_type', '!=', 'notification')]}"/>
+                                   invisible="[('alarm_type', '!=', 'email')]" required="[('alarm_type', '=', 'email')]"/>
+                            <field name="body" invisible="[('alarm_type', '!=', 'notification')]"/>
                         </group>
                         <group name="right_details">
                             <label for="duration"/>
@@ -76,19 +76,19 @@
                     <button name="action_open_composer" type="object" context="{'composition_mode':'mass_mail'}"
                             string="Send Mail"/>
                 </header>
-                <field name="name" string="Subject" decoration-bf="1" attrs="{'readonly':[('recurrency','=',True)]}"/>
+                <field name="name" string="Subject" decoration-bf="1" readonly="[('recurrency','=',True)]"/>
                 <field name="start" string="Start Date" readonly="1"/>
                 <field name="stop" string="End Date" readonly="1"/>
-                <field name="user_id" widget="many2one_avatar_user" attrs="{'readonly':[('recurrency','=',True)]}" optional="hide"/>
-                <field name="partner_ids" widget="many2many_tags" attrs="{'readonly':[('recurrency','=',True)]}" optional="show"/>
-                <field name="alarm_ids" widget="many2many_tags" optional="hide" attrs="{'readonly':[('recurrency','=',True)]}"/>
-                <field name="categ_ids" widget="many2many_tags" optional="hide" attrs="{'readonly':[('recurrency','=',True)]}"/>
+                <field name="user_id" widget="many2one_avatar_user" readonly="[('recurrency','=',True)]" optional="hide"/>
+                <field name="partner_ids" widget="many2many_tags" readonly="[('recurrency','=',True)]" optional="show"/>
+                <field name="alarm_ids" widget="many2many_tags" optional="hide" readonly="[('recurrency','=',True)]"/>
+                <field name="categ_ids" widget="many2many_tags" optional="hide" readonly="[('recurrency','=',True)]"/>
                 <field name="recurrency" optional="hide" readonly="1"/>
-                <field name="privacy" optional="hide" attrs="{'readonly':[('recurrency','=',True)]}"/>
-                <field name="show_as" optional="hide" attrs="{'readonly':[('recurrency','=',True)]}"/>
-                <field name="location" optional="show" attrs="{'readonly':[('recurrency','=',True)]}"/>
+                <field name="privacy" optional="hide" readonly="[('recurrency','=',True)]"/>
+                <field name="show_as" optional="hide" readonly="[('recurrency','=',True)]"/>
+                <field name="location" optional="show" readonly="[('recurrency','=',True)]"/>
                 <field name="duration" widget="float_time" readonly="1"/>
-                <field name="description" optional="hide" attrs="{'readonly':[('recurrency','=',True)]}"/>
+                <field name="description" optional="hide" readonly="[('recurrency','=',True)]"/>
                 <field name="allday" invisible="1"/>
                 <field name="message_needaction" invisible="1"/>
             </tree>
@@ -101,15 +101,15 @@
         <field name="priority" eval="1"/>
         <field name="arch" type="xml">
             <form string="Meetings" js_class="calendar_form">
-                <div attrs="{'invisible': [('recurrence_id','=',False)]}" class="alert alert-info oe_edit_only" role="status">
+                <div invisible="[('recurrence_id','=',False)]" class="alert alert-info oe_edit_only" role="status">
                     <p>Edit recurring event</p>
                     <field name="recurrence_update" widget="radio"/>
                 </div>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button string="Document" icon="fa-bars" type="object" name="action_open_calendar_event" attrs="{'invisible': ['|', ('res_model', '=', False), ('res_id', '=', False)]}"/>
+                        <button string="Document" icon="fa-bars" type="object" name="action_open_calendar_event" invisible="['|', ('res_model', '=', False), ('res_id', '=', False)]"/>
                     </div>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <field name="res_model" invisible="1" />
                     <field name="res_id" invisible="1" />
                     <field name="attendee_status" invisible="1"/>
@@ -132,9 +132,9 @@
                         <div name="send_buttons" class="sm-2">
                             <button name="action_open_composer" help="Send Email to attendees" type="object" string=" EMAIL" icon="fa-envelope"/>
                         </div>
-                        <button name="action_join_video_call" class="btn-primary" help="Join Video Call" type="object" string="Join Video Call" attrs="{'invisible': [('videocall_location', '=', False)]}"/>
+                        <button name="action_join_video_call" class="btn-primary" help="Join Video Call" type="object" string="Join Video Call" invisible="[('videocall_location', '=', False)]"/>
                     </div>
-                    <div class="alert alert-warning o_form_header mt-2" attrs="{'invisible': [('invalid_email_partner_ids', '=', [])]}" role="status">
+                    <div class="alert alert-warning o_form_header mt-2" invisible="[('invalid_email_partner_ids', '=', [])]" role="status">
                         <p><strong>The following attendees have invalid email addresses and won't receive any email notifications:</strong></p>
                         <field name="invalid_email_partner_ids" widget="many2manyattendee" class="oe_inline o_calendar_attendees"/>
                     </div>
@@ -143,17 +143,17 @@
                             <group>
                                 <group>
 
-                                    <field name="start_date" string="Starting at" attrs="{'required': [('allday','=',True)], 'invisible': [('allday','=',False)]}" force_save="1"/>
-                                    <field name="stop_date" string="Ending at" attrs="{'required': [('allday','=',True)],'invisible': [('allday','=',False)]}" force_save="1"/>
+                                    <field name="start_date" string="Starting at" required="[('allday','=',True)]" invisible="[('allday','=',False)]" force_save="1"/>
+                                    <field name="stop_date" string="Ending at" required="[('allday','=',True)]" invisible="[('allday','=',False)]" force_save="1"/>
 
-                                    <field name="start" string="Starting at" attrs="{'required': [('allday','=',False)], 'invisible': [('allday','=',True)]}"/>
-                                    <field name="stop" string="Ending At" attrs="{'invisible': [('allday','=',True)]}"/>
-                                    <label for="duration" attrs="{'invisible': [('allday','=',True)]}"/>
-                                    <div attrs="{'invisible': [('allday','=',True)]}">
-                                        <field name="duration" widget="float_time" string="Duration" class="oe_inline" attrs="{'readonly': [('id', '!=', False), ('recurrency','=',True)]}"/>
+                                    <field name="start" string="Starting at" required="[('allday','=',False)]" invisible="[('allday','=',True)]"/>
+                                    <field name="stop" string="Ending At" invisible="[('allday','=',True)]"/>
+                                    <label for="duration" invisible="[('allday','=',True)]"/>
+                                    <div invisible="[('allday','=',True)]">
+                                        <field name="duration" widget="float_time" string="Duration" class="oe_inline" readonly="[('id', '!=', False), ('recurrency','=',True)]"/>
                                         <span> hours</span>
                                     </div>
-                                     <field name="event_tz" attrs="{'invisible': [('recurrency', '=', False)]}"/>
+                                     <field name="event_tz" invisible="[('recurrency', '=', False)]"/>
                                     <field name="allday" force_save="1"/>
                                     <field name="user_id" widget="many2one_avatar_user"/>
                                 </group>
@@ -162,13 +162,13 @@
                                     <field name="location" />
                                     <label for="videocall_location"/>
                                     <div col="2" class="o_row">
-                                        <field name="videocall_location" class="oe_inline" string="Videocall URL" widget="CopyClipboardChar" force_save="1" readonly="1" attrs="{'readonly':[('videocall_source','=', 'discuss')]}"/>
+                                        <field name="videocall_location" class="oe_inline" string="Videocall URL" widget="CopyClipboardChar" force_save="1" readonly="[('videocall_source','=', 'discuss')]"/>
                                         <button name="clear_videocall_location" type="object" class="btn btn-link"
-                                            attrs="{'invisible': [('videocall_location', '=', False)]}" context="{'recurrence_update': recurrence_update}">
+                                            invisible="[('videocall_location', '=', False)]" context="{'recurrence_update': recurrence_update}">
                                             <span class="fa fa-times"></span><span> Clear meeting</span>
                                         </button>
                                         <button name="set_discuss_videocall_location" type="object" class="btn btn-link"
-                                            attrs="{'invisible':  [('videocall_location', '!=', False)]}" context="{'recurrence_update': recurrence_update}">
+                                            invisible="[('videocall_location', '!=', False)]" context="{'recurrence_update': recurrence_update}">
                                             <span class="fa fa-plus"></span><span> Add Odoo meeting</span>
                                         </button>
                                     </div>
@@ -187,36 +187,33 @@
                                     <group>
                                         <field name="recurrency"/>
                                     </group>
-                                    <div attrs="{'invisible': [('recurrency', '=', False)]}">
+                                    <div invisible="[('recurrency', '=', False)]">
                                         <group>
                                             <label for="interval"/>
                                             <div class="o_col">
                                                 <div class="o_row">
-                                                    <field name="interval" class="oe_inline" attrs="{'required': [('recurrency', '=', True)]}"/>
-                                                    <field name="rrule_type" attrs="{'required': [('recurrency', '=', True)]}"/>
+                                                    <field name="interval" class="oe_inline" required="[('recurrency', '=', True)]"/>
+                                                    <field name="rrule_type" required="[('recurrency', '=', True)]"/>
                                                 </div>
-                                                <widget name="week_days" attrs="{'invisible': [('rrule_type', '!=', 'weekly')]}"/>
+                                                <widget name="week_days" invisible="[('rrule_type', '!=', 'weekly')]"/>
                                             </div>
                                             <label string="Until" for="end_type"/>
                                             <div class="o_row">
-                                                <field name="end_type" attrs="{'required': [('recurrency', '=', True)]}"/>
-                                                <field name="count" attrs="{'invisible': [('end_type', '!=', 'count')], 'required': [('recurrency', '=', True)]}"/>
-                                                <field name="until" attrs="{'invisible': [('end_type', '!=', 'end_date')], 'required': [('end_type', '=', 'end_date'), ('recurrency', '=', True)]}"/>
+                                                <field name="end_type" required="[('recurrency', '=', True)]"/>
+                                                <field name="count" invisible="[('end_type', '!=', 'count')]" required="[('recurrency', '=', True)]"/>
+                                                <field name="until" invisible="[('end_type', '!=', 'end_date')]" required="[('end_type', '=', 'end_date'), ('recurrency', '=', True)]"/>
                                             </div>
                                         </group>
-                                        <group attrs="{'invisible': [('rrule_type', '!=', 'monthly')]}">
+                                        <group invisible="[('rrule_type', '!=', 'monthly')]">
                                             <label string="Day of Month" for="month_by"/>
                                             <div class="o_row">
                                                 <field name="month_by"/>
                                                 <field name="day"
-                                                    attrs="{'required': [('month_by', '=', 'date'), ('rrule_type', '=', 'monthly')],
-                                                            'invisible': [('month_by', '!=', 'date')]}"/>
+                                                    required="[('month_by', '=', 'date'), ('rrule_type', '=', 'monthly')]" invisible="[('month_by', '!=', 'date')]"/>
                                                 <field name="byday" string="The"
-                                                    attrs="{'required': [('recurrency', '=', True), ('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')],
-                                                            'invisible': [('month_by', '!=', 'day')]}"/>
+                                                    required="[('recurrency', '=', True), ('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')]" invisible="[('month_by', '!=', 'day')]"/>
                                                 <field name="weekday" nolabel="1"
-                                                    attrs="{'required': [('recurrency', '=', True), ('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')],
-                                                            'invisible': [('month_by', '!=', 'day')]}"/>
+                                                    required="[('recurrency', '=', True), ('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')]" invisible="[('month_by', '!=', 'day')]"/>
                                             </div>
                                         </group>
                                     </div>
@@ -289,15 +286,15 @@
                        filters="1" widget="many2manyattendee" write_model="calendar.filters"
                        write_field="partner_id" filter_field="partner_checked" avatar_field="avatar_128"
                 />
-                <field name="videocall_location" widget="url" text="Join Video Call" options="{'icon': 'fa fa-lg fa-video-camera'}" attrs="{'invisible': [('videocall_location', '=', False)]}"/>
+                <field name="videocall_location" widget="url" text="Join Video Call" options="{'icon': 'fa fa-lg fa-video-camera'}" invisible="[('videocall_location', '=', False)]"/>
                 <field name="is_highlighted" invisible="1"/>
                 <field name="is_organizer_alone" invisible="1"/>
                 <field name="display_description" invisible="1"/>
-                <field name="location" attrs="{'invisible': [('location', '=', False)]}"/>
-                <field name="description" attrs="{'invisible': [('display_description', '=', False)]}"/>
+                <field name="location" invisible="[('location', '=', False)]"/>
+                <field name="description" invisible="[('display_description', '=', False)]"/>
                 <field name="privacy"/>
-                <field name="alarm_ids" attrs="{'invisible': [('alarm_ids', '=', [])]}"/>
-                <field name="categ_ids" attrs="{'invisible': [('categ_ids', '=', [])]}"/>
+                <field name="alarm_ids" invisible="[('alarm_ids', '=', [])]"/>
+                <field name="categ_ids" invisible="[('categ_ids', '=', [])]"/>
                 <!-- For recurrence update Dialog -->
                 <field name="recurrency" invisible="1"/>
                 <field name="recurrence_update" invisible="1"/>
@@ -363,8 +360,8 @@
             <field name="arch" type="xml">
                 <notebook colspan="4" position="inside">
                     <!-- Placeholder container to hold information about external accounts (Google calendar, Microsoft calendar, ...) -->
-                    <page string="Calendar" name="calendar" invisible="1" groups="base.group_system"
-                         attrs="{'invisible': [('share', '=', True)]}">
+                    <page string="Calendar" name="calendar" groups="base.group_system"
+                         invisible="[('share', '=', True)]">
                         <group name="calendar_accounts"/>
                     </page>
                 </notebook>

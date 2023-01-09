@@ -14,7 +14,7 @@
                         </div>
                     </button>
                 </div>
-                <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                 <label for="name"/>
                 <h1>
                     <field name="name" placeholder="e.g. When should I plant my tomatoes?"/>
@@ -48,7 +48,7 @@
                         <field name="relevancy"/>
                     </group>
                 </group>
-                <group name="answers" string="Answers" attrs="{'invisible':[('parent_id','!=',False)]}">
+                <group name="answers" string="Answers" invisible="[('parent_id','!=',False)]">
                     <field name="child_ids" nolabel="1">
                         <tree>
                             <field name="create_uid" string="Answered by"/>

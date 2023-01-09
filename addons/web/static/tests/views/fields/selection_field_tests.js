@@ -329,7 +329,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="feedback_value" />
-                    <field name="color" attrs="{'required': [('feedback_value', '=', 'bad')]}" />
+                    <field name="color" required="[('feedback_value', '=', 'bad')]" />
                 </form>`,
         });
 
@@ -382,7 +382,7 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="feedback_value" />
-                    <field name="color" attrs="{'required': [('feedback_value', '=', 'bad')]}" />
+                    <field name="color" required="[('feedback_value', '=', 'bad')]" />
                 </form>`,
             });
 

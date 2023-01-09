@@ -26,7 +26,7 @@ class TestSurveyInvite(common.TestSurveyCommon):
         # By default, `<field name="emails"/>` is invisible when `survey_users_login_required` is True,
         # making it normally impossible to change by the user in the web client by default.
         # For tests `test_survey_invite_authentication_nosignup` and `test_survey_invite_token_internal`
-        tree.xpath('//field[@name="emails"]')[0].attrib.pop('attrs', None)
+        tree.xpath('//field[@name="emails"]')[0].attrib.pop('invisible', None)
         view.arch = etree.tostring(tree)
         return res
 

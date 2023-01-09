@@ -12,7 +12,7 @@
                     <field name="recycle_model_id" string="Recycle Rule" optional="hide" />
                     <field name="name" />
                     <button icon="fa-check" string="Validate" type="object" name="action_validate" />
-                    <button icon="fa-times" string="Discard" type="object" name="action_discard" attrs="{'invisible': [('active', '=', False)]}" />
+                    <button icon="fa-times" string="Discard" type="object" name="action_discard" invisible="[('active', '=', False)]" />
                 </tree>
             </field>
         </record>

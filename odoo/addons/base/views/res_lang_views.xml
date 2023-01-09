@@ -19,17 +19,17 @@
                         string="Activate"
                         type="action"
                         icon="fa-check"
-                        attrs="{'invisible': [('active', '=', True)]}"/>
+                        invisible="[('active', '=', True)]"/>
                     <button name="%(base.action_view_base_language_install)d"
                         string="Update"
                         type="action"
                         icon="fa-refresh"
-                        attrs="{'invisible': [('active', '!=', True)]}"/>
+                        invisible="[('active', '!=', True)]"/>
                     <button name="action_archive"
                         string="Disable"
                         type="object"
                         icon="fa-times"
-                        attrs="{'invisible': [('active', '!=', True)]}"/>
+                        invisible="[('active', '!=', True)]"/>
                 </tree>
             </field>
         </record>

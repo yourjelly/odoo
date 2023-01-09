@@ -3599,8 +3599,8 @@ QUnit.module('Legacy fields', {}, function () {
                                     '<field name="bar"/>' +
                                     '<field name="p">' +
                                         '<tree>' +
-                                            '<field name="foo" attrs="{\'column_invisible\': [(\'parent.product_id\', \'!=\', False)]}"/>' +
-                                            '<field name="bar" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                                            '<field name="foo" column_invisible="[(\'parent.product_id\', \'!=\', False)]"/>' +
+                                            '<field name="bar" column_invisible="[(\'parent.bar\', \'=\', False)]"/>' +
                                         '</tree>' +
                                     '</field>' +
                                 '</page>' +
@@ -3651,7 +3651,7 @@ QUnit.module('Legacy fields', {}, function () {
                         '<field name="p">' +
                             '<tree editable="bottom">' +
                                 '<field name="foo"/>' +
-                                '<field name="int_field" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                                '<field name="int_field" column_invisible="[(\'parent.bar\', \'=\', False)]"/>' +
                             '</tree>' +
                         '</field>' +
                     '</form>',
@@ -3700,8 +3700,8 @@ QUnit.module('Legacy fields', {}, function () {
                 res_id: 1,
                 archs: {
                     'partner,false,list': '<tree>' +
-                        '<field name="foo" attrs="{\'column_invisible\': [(\'parent.product_id\', \'!=\', False)]}"/>' +
-                        '<field name="bar" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                        '<field name="foo" column_invisible="[(\'parent.product_id\', \'!=\', False)]"/>' +
+                        '<field name="bar" column_invisible="[(\'parent.bar\', \'=\', False)]"/>' +
                     '</tree>',
                 },
             });

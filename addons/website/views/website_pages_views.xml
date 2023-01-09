@@ -49,8 +49,8 @@
                         <field name="is_published" string="Published" widget="boolean_toggle"/>
                         <field name="date_publish" widget="datetime"/>
                         <field name="visibility"/>
-                        <field name="visibility_password_display" attrs="{'invisible': [('visibility', '!=', 'password')], 'required': [('visibility', '=', 'password')]}" password="True" string="Password"/>
-                        <field name="groups_id" attrs="{'invisible': [('visibility', '!=', 'restricted_group')]}" string="Authorized Groups" widget="many2many_tags"/>
+                        <field name="visibility_password_display" invisible="[('visibility', '!=', 'password')]" required="[('visibility', '=', 'password')]" password="True" string="Password"/>
+                        <field name="groups_id" invisible="[('visibility', '!=', 'restricted_group')]" string="Authorized Groups" widget="many2many_tags"/>
                     </group>
                 </page>
             </notebook>
@@ -179,21 +179,21 @@
             <label for="key"/>
             <div class='o_row'>
                 <field name="key"/>
-                <button title="Show site map" attrs="{'invisible': [('type', '!=', 'qweb')]}" name="website.action_website_view_hierarchy" icon="fa-sitemap" type="action" class="btn btn-link"/>
+                <button title="Show site map" invisible="[('type', '!=', 'qweb')]" name="website.action_website_view_hierarchy" icon="fa-sitemap" type="action" class="btn btn-link"/>
             </div>
             <field name="page_ids" invisible="1" />
-            <field name="first_page_id" attrs="{'invisible': [('page_ids', '=', [])]}" />
-            <field name="visibility" attrs="{'invisible': [('type', '!=', 'qweb')]}" />
-            <field name="visibility_password_display" attrs="{'invisible': [('visibility', '!=', 'password')]}" password="True" string="Visibility Password" />
+            <field name="first_page_id" invisible="[('page_ids', '=', [])]" />
+            <field name="visibility" invisible="[('type', '!=', 'qweb')]" />
+            <field name="visibility_password_display" invisible="[('visibility', '!=', 'password')]" password="True" string="Visibility Password" />
         </field>
         <sheet position="before">
             <header>
                 <button type="action" name="website.action_website_pages_list"
-                    string="Go to Page Manager" attrs="{'invisible': [('page_ids', '=', [])]}"/>
+                    string="Go to Page Manager" invisible="[('page_ids', '=', [])]"/>
             </header>
         </sheet>
         <field name="active" position="after">
-            <field name="track" attrs="{'invisible': [('type', '!=', 'qweb')]}" widget="boolean_toggle"/>
+            <field name="track" invisible="[('type', '!=', 'qweb')]" widget="boolean_toggle"/>
         </field>
     </field>
 </record>

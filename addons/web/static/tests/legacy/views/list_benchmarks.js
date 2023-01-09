@@ -100,7 +100,7 @@ odoo.define('web.list_benchmarks', function (require) {
             }
             this.arch = `
                 <tree editable="bottom">
-                    <field name="foo" attrs="{'readonly': [['bar', '=', True]]}"/>
+                    <field name="foo" readonly="[['bar', '=', True]]"/>
                     <field name="int_field"/>
                     <field name="bar"/>
                     <field name="qux"/>

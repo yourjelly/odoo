@@ -10,7 +10,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='tz']" position="after">
                     <field name="livechat_username" string="Online Chat Name" readonly="0"
-                        attrs="{'invisible': [('share', '=', True)]}"/>
+                        invisible="[('share', '=', True)]"/>
                 </xpath>
             </field>
         </record>
@@ -23,7 +23,7 @@
             <field name="arch" type="xml">
                     <xpath expr="//group[@name='messaging']" position="after">
                         <group name="livechat" string="Livechat"
-                            attrs="{'invisible': [('share', '=', True)]}">
+                            invisible="[('share', '=', True)]">
                             <field name="livechat_username"/>
                         </group>
                     </xpath>

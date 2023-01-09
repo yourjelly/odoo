@@ -159,7 +159,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="bar" />
-                    <field name="txt" attrs="{'invisible': [('bar', '=', True)]}" />
+                    <field name="txt" invisible="[('bar', '=', True)]" />
                 </form>`,
         });
 

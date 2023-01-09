@@ -12,9 +12,9 @@
             <group name="down_payment_specification" position="after">
                 <field name="invoicing_timesheet_enabled" invisible="1"/>
                 <group name="timesheet_invoice_date_range"
-                    attrs="{'invisible': [ '|', ('invoicing_timesheet_enabled', '=', False), ('advance_payment_method', '!=', 'delivered')]}">
-                    <label for="date_start_invoice_timesheet" string="Timesheets Period" attrs="{'invisible': [ '|', ('invoicing_timesheet_enabled', '=', False), ('advance_payment_method', '!=', 'delivered')]}"/>
-                    <div class="o_row" attrs="{'invisible': [ '|',('invoicing_timesheet_enabled', '=', False), ('advance_payment_method', '!=', 'delivered')]}">
+                    invisible="[ '|', ('invoicing_timesheet_enabled', '=', False), ('advance_payment_method', '!=', 'delivered')]">
+                    <label for="date_start_invoice_timesheet" string="Timesheets Period" invisible="[ '|', ('invoicing_timesheet_enabled', '=', False), ('advance_payment_method', '!=', 'delivered')]"/>
+                    <div class="o_row" invisible="[ '|',('invoicing_timesheet_enabled', '=', False), ('advance_payment_method', '!=', 'delivered')]">
                         <field name="date_start_invoice_timesheet"
                             class="oe_inline" widget="daterange"
                             options="{'related_end_date': 'date_end_invoice_timesheet'}"

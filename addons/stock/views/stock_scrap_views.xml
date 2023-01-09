@@ -34,11 +34,11 @@
                         <div class="oe_button_box" name="button_box">
                             <button class="oe_stat_button" name="action_get_stock_picking"
                                     string="Stock Operation" type="object"
-                                    attrs="{'invisible':[('picking_id','=',False)]}" icon="fa-cogs"/>
+                                    invisible="[('picking_id','=',False)]" icon="fa-cogs"/>
                             <field name="picking_id" invisible="1"/>
                             <button class="oe_stat_button" name="action_get_stock_move_lines"
                                     string="Product Moves" type="object"
-                                    attrs="{'invisible':[('move_id','=',False)]}" icon="fa-exchange"/>
+                                    invisible="[('move_id','=',False)]" icon="fa-exchange"/>
                             <field name="move_id" invisible="1"/>
                         </div>
                         <div class="oe_title">
@@ -50,11 +50,11 @@
                                 <field name="tracking" invisible="1"/>
                                 <label for="scrap_qty"/>
                                 <div class="o_row">
-                                    <field name="scrap_qty" attrs="{'readonly': [('tracking', '=', 'serial')]}"/>
+                                    <field name="scrap_qty" readonly="[('tracking', '=', 'serial')]"/>
                                     <field name="product_uom_category_id" invisible="1"/>
-                                    <field name="product_uom_id" attrs="{'readonly': [('tracking', '=', 'serial')]}" groups="uom.group_uom" force_save="1"/>
+                                    <field name="product_uom_id" readonly="[('tracking', '=', 'serial')]" groups="uom.group_uom" force_save="1"/>
                                 </div>
-                                <field name="lot_id" context="{'default_product_id': product_id, 'default_company_id': company_id}" attrs="{'invisible': ['|',('product_id', '=', False),('tracking', '=', 'none')], 'required': [('tracking', '!=', 'none')]}" groups="stock.group_production_lot"/>
+                                <field name="lot_id" context="{'default_product_id': product_id, 'default_company_id': company_id}" invisible="['|',('product_id', '=', False),('tracking', '=', 'none')]" required="[('tracking', '!=', 'none')]" groups="stock.group_production_lot"/>
                             </group>
                             <group>
                                 <field name="company_id" invisible="1"/>
@@ -63,8 +63,8 @@
                                 <field name="location_id" options="{'no_create': True, 'no_open': True}" groups="stock.group_stock_multi_locations" force_save="1"/>
                                 <field name="scrap_location_id" options="{'no_create': True, 'no_open': True}" groups="stock.group_stock_multi_locations" force_save="1"/>
                                 <field name="origin"/>
-                                <field name="date_done" attrs="{'invisible': [('state', '=', 'draft')]}"/>
-                                <field name="picking_id" attrs="{'invisible': [('picking_id', '=', False)]}"/>
+                                <field name="date_done" invisible="[('state', '=', 'draft')]"/>
+                                <field name="picking_id" invisible="[('picking_id', '=', False)]"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                             </group>
                         </group>
@@ -163,13 +163,13 @@
                             <field name="tracking" invisible="1"/>
                             <label for="scrap_qty"/>
                             <div class="o_row">
-                                <field name="scrap_qty" attrs="{'readonly': [('tracking', '=', 'serial')]}"/>
+                                <field name="scrap_qty" readonly="[('tracking', '=', 'serial')]"/>
                                 <field name="product_uom_category_id" invisible="1"/>
-                                <field name="product_uom_id" attrs="{'readonly': [('tracking', '=', 'serial')]}" groups="uom.group_uom"/>
+                                <field name="product_uom_id" readonly="[('tracking', '=', 'serial')]" groups="uom.group_uom"/>
                             </div>
                             <field name="lot_id" groups="stock.group_production_lot"
                                 context="{'default_company_id': company_id, 'default_product_id': product_id}"
-                                attrs="{'invisible': ['|',('product_id', '=', False),('tracking', '=', 'none')], 'required': [('tracking', '!=', 'none')]}"/>
+                                invisible="['|',('product_id', '=', False),('tracking', '=', 'none')]" required="[('tracking', '!=', 'none')]"/>
                         </group>
                         <group>
                             <field name="picking_id" invisible="1"/>

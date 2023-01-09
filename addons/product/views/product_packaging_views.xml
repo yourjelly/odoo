@@ -44,7 +44,7 @@
                         <field name="id" invisible='1'/>
                         <field name="company_id" invisible="1"/>
                         <group name="group_product">
-                            <field name="product_id"  required='True' attrs="{'readonly': [('id', '!=', False)]}"/>
+                            <field name="product_id"  required='True' readonly="[('id', '!=', False)]"/>
                         </group>
                         <group name="qty">
                             <label for="qty" string="Contained quantity"/>

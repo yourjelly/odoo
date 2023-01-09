@@ -7,10 +7,10 @@
             <form string="Point of Sale Session" create="0" edit="0">
                 <header>
                     <button name="open_frontend_cb" type="object" string="Continue Selling"
-                        attrs="{'invisible' : ['|', ('rescue', '=', True), ('state', 'not in', ['opening_control', 'opened'])]}"/>
+                        invisible="['|', ('rescue', '=', True), ('state', 'not in', ['opening_control', 'opened'])]"/>
                     <button id="validate_closing_control" name="action_pos_session_closing_control" type="object" string="Close Session &amp; Post Entries" states="closing_control"
-                            attrs="{'invisible': [ '|', '&amp;',('state', '!=', 'closing_control'), ('rescue', '=', False),
-                                '&amp;',('state', '=', 'closed'), ('rescue', '=', True)]}"
+                            invisible="[ '|', '&amp;',('state', '!=', 'closing_control'), ('rescue', '=', False),
+                                '&amp;',('state', '=', 'closed'), ('rescue', '=', True)]"
                     class="oe_highlight"/>
                     <field name="state" widget="statusbar" statusbar_visible="opened,closing_control,closed" nolabel="1" />
                 </header>
@@ -24,9 +24,9 @@
                             type="object">
                             <field name="order_count" widget="statinfo" string="Orders"/>
                         </button>
-                        <button class="oe_stat_button" name="action_stock_picking" type="object" icon="fa-truck" attrs="{'invisible':[('picking_count', '=', 0)]}">
-                            <field name="picking_count" widget="statinfo" string="Pickings" attrs="{'invisible': [('failed_pickings', '!=', False)]}"/>
-                            <field name="picking_count" widget="statinfo" string="Pickings" class="text-danger" attrs="{'invisible': [('failed_pickings', '=', False)]}"/>
+                        <button class="oe_stat_button" name="action_stock_picking" type="object" icon="fa-truck" invisible="[('picking_count', '=', 0)]">
+                            <field name="picking_count" widget="statinfo" string="Pickings" invisible="[('failed_pickings', '!=', False)]"/>
+                            <field name="picking_count" widget="statinfo" string="Pickings" class="text-danger" invisible="[('failed_pickings', '=', False)]"/>
                         </button>
                         <button
                             name="action_show_payments_list"
@@ -51,12 +51,12 @@
                             class="oe_stat_button"
                             icon="fa-bars"
                             string="Cash Register"
-                            attrs="{'invisible':[('cash_control', '=', False)]}"
+                            invisible="[('cash_control', '=', False)]"
                             groups="account.group_account_readonly"
                         />
                     </div>
                     <h1 class="oe_title">
-                        <field name="name" attrs="{'invisible': [('name','=','/')]}" class="oe_inline"/>
+                        <field name="name" invisible="[('name','=','/')]" class="oe_inline"/>
                     </h1>
                     <group>
                         <field name="cash_control" invisible="1" />
@@ -64,10 +64,10 @@
                         <field name="currency_id" invisible="1"/>
                         <field name="config_id" readonly="1"/>
                         <field name="move_id" readonly="1" groups="account.group_account_readonly" />
-                        <field name="start_at" attrs="{'invisible' : [('state', '=', 'opening_control')]}"/>
-                        <field name="stop_at" attrs="{'invisible' : [('state', '!=', 'closed')]}"/>
+                        <field name="start_at" invisible="[('state', '=', 'opening_control')]"/>
+                        <field name="stop_at" invisible="[('state', '!=', 'closed')]"/>
                         <field name="cash_register_balance_start"/>
-                        <field name="cash_register_balance_end_real" attrs="{'invisible': [('state', '!=', 'closed')]}"/>
+                        <field name="cash_register_balance_end_real" invisible="[('state', '!=', 'closed')]"/>
                     </group>
                 </sheet>
                 <div class="oe_chatter">

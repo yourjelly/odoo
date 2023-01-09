@@ -41,7 +41,7 @@
                                     </div>
                                 </div>
                                 <field name="create_date"/>
-                                <field name="feedback" attrs="{'invisible': [('feedback','=',False)]}"/>
+                                <field name="feedback" invisible="[('feedback','=',False)]"/>
                             </group>
                         </group>
                     </sheet>

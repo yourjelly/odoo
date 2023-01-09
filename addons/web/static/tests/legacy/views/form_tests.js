@@ -259,11 +259,11 @@ QUnit.module('LegacyViews', {
             arch: '<form>' +
                     '<group>' +
                         '<group>' +
-                            '<field name="foo" attrs="{\'invisible\': [(\'bar\',\'=\',True)]}"/>' +
-                            '<field name="foo" attrs="{\'invisible\': [(\'bar\',\'=\',False)]}"/>' +
+                            '<field name="foo" invisible="[(\'bar\',\'=\',True)]"/>' +
+                            '<field name="foo" invisible="[(\'bar\',\'=\',False)]"/>' +
                             '<field name="foo"/>' +
-                            '<field name="int_field" attrs="{\'readonly\': [(\'bar\',\'=\',False)]}"/>' +
-                            '<field name="int_field" attrs="{\'readonly\': [(\'bar\',\'=\',True)]}"/>' +
+                            '<field name="int_field" readonly="[(\'bar\',\'=\',False)]"/>' +
+                            '<field name="int_field" readonly="[(\'bar\',\'=\',True)]"/>' +
                             '<field name="bar"/>' +
                         '</group>' +
                     '</group>' +
@@ -663,8 +663,8 @@ QUnit.module('LegacyViews', {
                     '<sheet><group>' +
                         '<field name="product_id"/>' +
                         '<field name="timmy" invisible="1"/>' +
-                        '<field name="foo" class="foo_field" attrs=\'{"invisible": [["product_id", "=", false]]}\'/>' +
-                        '<field name="bar" class="bar_field" attrs=\'{"invisible":[("bar","=",False),("timmy","=",[])]}\'/>' +
+                        '<field name="foo" class="foo_field" invisible=\'[["product_id", "=", false]]\'/>' +
+                        '<field name="bar" class="bar_field" invisible=\'[("bar","=",False),("timmy","=",[])]\'/>' +
                     '</group></sheet>' +
                 '</form>',
             res_id: 1,
@@ -728,7 +728,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<field name="product_id"/>' +
-                        '<notebook class="new_class" attrs=\'{"invisible": [["product_id", "=", false]]}\'>' +
+                        '<notebook class="new_class" invisible=\'[["product_id", "=", false]]\'>' +
                             '<page string="Foo">' +
                                 '<field name="foo"/>' +
                             '</page>' +
@@ -825,10 +825,10 @@ QUnit.module('LegacyViews', {
                     <sheet>
                         <field name="bar"/>
                         <notebook>
-                            <page string="First" attrs='{"invisible": [["bar", "=", false]]}'>
+                            <page string="First" invisible='[["bar", "=", false]]'>
                                 <field name="foo"/>
                             </page>
-                            <page string="Second" attrs='{"invisible": [["bar", "=", true]]}'>
+                            <page string="Second" invisible='[["bar", "=", true]]'>
                                 <field name="int_field"/>
                             </page>
                             <page string="Third">
@@ -876,7 +876,7 @@ QUnit.module('LegacyViews', {
                     '<sheet>' +
                         '<field name="product_id"/>' +
                         '<notebook>' +
-                            '<page string="Foo" attrs=\'{"invisible": [["product_id", "!=", false]]}\'>' +
+                            '<page string="Foo" invisible=\'[["product_id", "!=", false]]\'>' +
                                 '<field name="foo"/>' +
                             '</page>' +
                             '<page string="Bar">' +
@@ -912,7 +912,7 @@ QUnit.module('LegacyViews', {
                     '<sheet>' +
                         '<field name="bar"/>' +
                         '<notebook>' +
-                            '<page string="Foo" attrs=\'{"invisible": [["bar", "!=", false]]}\'>' +
+                            '<page string="Foo" invisible=\'[["bar", "!=", false]]\'>' +
                                 '<field name="foo"/>' +
                             '</page>' +
                         '</notebook>' +
@@ -980,7 +980,7 @@ QUnit.module('LegacyViews', {
                     <sheet>
                         <field name="bar"/>
                         <notebook class="new_class">
-                            <page string="Foo" attrs="{'invisible': [['bar', '=', true]]}">
+                            <page string="Foo" invisible="[['bar', '=', true]]">
                                 <field name="foo"/>
                             </page>
                         </notebook>
@@ -1176,7 +1176,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<field name="bar"/>' +
-                        '<group attrs=\'{"invisible": [["bar", "!=", true]]}\'>' +
+                        '<group invisible=\'[["bar", "!=", true]]\'>' +
                             '<group>' +
                                 '<field name="foo"/>' +
                             '</group>' +
@@ -1207,7 +1207,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<field name="foo"/>' +
-                        '<group attrs=\'{"invisible": [["int_field", "=", 0.0]]}\'>' +
+                        '<group invisible=\'[["int_field", "=", 0.0]]\'>' +
                             '<div class="hello">this should be invisible</div>' +
                             '<field name="int_field"/>' +
                         '</group>' +
@@ -1284,7 +1284,7 @@ QUnit.module('LegacyViews', {
                             '<button class="oe_stat_button" >' +
                                 '<field name="int_field"/>' +
                             '</button>' +
-                            '<button class="oe_stat_button" name="some_action" type="action" attrs=\'{"invisible": [["bar", "=", true]]}\'>' +
+                            '<button class="oe_stat_button" name="some_action" type="action" invisible=\'[["bar", "=", true]]\'>' +
                                 '<field name="bar"/>' +
                             '</button>' +
                         '</div>' +
@@ -1321,7 +1321,7 @@ QUnit.module('LegacyViews', {
                             '<button class="oe_stat_button">' +
                                 '<field name="int_field"/>' +
                             '</button>' +
-                            '<button class="oe_stat_button" attrs=\'{"invisible": [["bar", "=", true]]}\'>' +
+                            '<button class="oe_stat_button" invisible=\'[["bar", "=", true]]\'>' +
                                 '<field name="bar"/>' +
                             '</button>' +
                         '</div>' +
@@ -1651,7 +1651,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<group>' +
-                            '<field name="foo" attrs="{\'readonly\': [[\'bar\', \'=\', True]]}"/>' +
+                            '<field name="foo" readonly="[[\'bar\', \'=\', True]]"/>' +
                             '<field name="bar"/>' +
                         '</group>' +
                     '</sheet>' +
@@ -1704,7 +1704,7 @@ QUnit.module('LegacyViews', {
             arch: `
             <form>
                 <field name="trululu"/>
-                <field name="product_ids" attrs="{'readonly': [['trululu', '=', False]]}">
+                <field name="product_ids" readonly="[['trululu', '=', False]]">
                     <tree editable="top"><field name="int_field" widget="handle" /><field name="name"/></tree>
                 </field>
             </form>
@@ -1750,7 +1750,7 @@ QUnit.module('LegacyViews', {
                     '<sheet>' +
                         '<group>' +
                             '<field name="foo"/>' +
-                            '<field name="trululu" attrs="{\'readonly\': [[\'foo\', \'=\', False]]}"/>' +
+                            '<field name="trululu" readonly="[[\'foo\', \'=\', False]]"/>' +
                             '<field name="int_field"/>' +
                         '</group>' +
                     '</sheet>' +
@@ -1801,7 +1801,7 @@ QUnit.module('LegacyViews', {
             arch: '<form>' +
                     '<group>' +
                         '<field name="foo"/>' +
-                        '<field name="display_name" attrs="{\'readonly\': [[\'foo\', \'=\', \'readonly\']]}"/>' +
+                        '<field name="display_name" readonly="[[\'foo\', \'=\', \'readonly\']]"/>' +
                     '</group>' +
                 '</form>',
             res_id: 2,
@@ -1877,9 +1877,9 @@ QUnit.module('LegacyViews', {
                     <sheet>
                         <label for="foo" string="Foo"/>
                         <field name="foo"/>
-                        <label for="trululu" string="Trululu" attrs="{'readonly': [['foo', '=', False]]}"/>
-                        <field name="trululu" attrs="{'readonly': [['foo', '=', False]]}"/>
-                        <label for="int_field" string="IntField" attrs="{'readonly': [['int_field', '=', False]]}"/>
+                        <label for="trululu" string="Trululu" readonly="[['foo', '=', False]]"/>
+                        <field name="trululu" readonly="[['foo', '=', False]]"/>
+                        <label for="int_field" string="IntField" readonly="[['int_field', '=', False]]"/>
                         <field name="int_field"/>
                     </sheet>
                 </form>`,
@@ -1953,7 +1953,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<group>' +
-                            '<field name="foo" attrs="{\'required\': [[\'bar\', \'=\', True]]}"/>' +
+                            '<field name="foo" required="[[\'bar\', \'=\', True]]"/>' +
                             '<field name="bar"/>' +
                         '</group>' +
                     '</sheet>' +
@@ -2076,7 +2076,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<group>' +
-                            '<separator string="Geolocation" attrs=\'{"invisible": [["bar", "=", True]]}\'/>'+
+                            '<separator string="Geolocation" invisible=\'[["bar", "=", True]]\'/>'+
                             '<field name="bar"/>' +
                         '</group>' +
                     '</sheet>' +
@@ -3877,7 +3877,7 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch: '<form string="Partners">' +
                     '<sheet><group>' +
-                        '<field name="foo" class="foo_field" attrs=\'{"invisible": [["bar", "=", True]]}\'/>' +
+                        '<field name="foo" class="foo_field" invisible=\'[["bar", "=", True]]\'/>' +
                         '<field name="bar"/>' +
                     '</group></sheet>' +
                 '</form>',
@@ -4464,7 +4464,7 @@ QUnit.module('LegacyViews', {
                     '<field name="foo"/>' +
                     '<field name="p">' +
                         '<tree editable="top">' +
-                            '<field name="display_name" attrs="{\'readonly\': [(\'timmy\', \'=\', false)]}"/>' +
+                            '<field name="display_name" readonly="[(\'timmy\', \'=\', false)]"/>' +
                             '<field name="timmy"/>' +
                         '</tree>' +
                     '</field>' +
@@ -5399,7 +5399,7 @@ QUnit.module('LegacyViews', {
                     '<sheet><group>' +
                         '<field name="foo"/>' +
                         '<field name="bar" invisible="1"/>' +
-                        '<field name="product_id" attrs=\'{"invisible": [["bar", "=", true]]}\'/>' +
+                        '<field name="product_id" invisible=\'[["bar", "=", true]]\'/>' +
                         '<field name="int_field"/>' +
                     '</group></sheet>' +
                 '</form>',
@@ -5975,7 +5975,7 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch: '<form string="Partners">' +
                     '<sheet>' +
-                        '<field name="foo" attrs="{\'readonly\': [(\'bar\',\'=\',False)]}"/>' +
+                        '<field name="foo" readonly="[(\'bar\',\'=\',False)]"/>' +
                         '<field name="bar"/>' +
                     '</sheet>' +
                 '</form>',
@@ -6020,7 +6020,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                       '<sheet>' +
                           '<field name="bar"/>' +
-                          '<field name="timmy" widget="many2many_tags" attrs="{\'readonly\': [(\'bar\',\'=\',True)]}"/>' +
+                          '<field name="timmy" widget="many2many_tags" readonly="[(\'bar\',\'=\',True)]"/>' +
                       '</sheet>' +
                   '</form>',
             res_id: 5,
@@ -6078,11 +6078,11 @@ QUnit.module('LegacyViews', {
             arch:
                 '<form>' +
                     '<field name="bar"/>' +
-                    '<footer attrs="{\'invisible\': [(\'bar\',\'=\',False)]}">' +
+                    '<footer invisible="[(\'bar\',\'=\',False)]">' +
                         '<button>Hello</button>' +
                         '<button>World</button>' +
                     '</footer>' +
-                    '<footer attrs="{\'invisible\': [(\'bar\',\'!=\',False)]}">' +
+                    '<footer invisible="[(\'bar\',\'!=\',False)]">' +
                         '<button>Foo</button>' +
                     '</footer>' +
                 '</form>',
@@ -6804,7 +6804,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<notebook>' +
-                            '<page string="Foo" attrs=\'{"invisible": [["id", "=", 2]]}\'>' +
+                            '<page string="Foo" invisible=\'[["id", "=", 2]]\'>' +
                                 '<field name="foo"/>' +
                             '</page>' +
                             '<page string="Bar">' +
@@ -8108,7 +8108,7 @@ QUnit.module('LegacyViews', {
                         '</tree>' +
                         '<form string="Partners">' +
                             '<field name="display_name"/>' +
-                            '<field name="foo" attrs="{\'readonly\': [[\'display_name\', \'=\', \'readonly\']]}"/>' +
+                            '<field name="foo" readonly="[[\'display_name\', \'=\', \'readonly\']]"/>' +
                         '</form>' +
                     '</field>' +
                 '</form>',
@@ -8164,7 +8164,7 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch: '<form string="Partners">' +
                         '<field name="id"/>' +
-                        '<field name="foo" attrs="{\'readonly\': [[\'id\', \'=\', False]]}"/>' +
+                        '<field name="foo" readonly="[[\'id\', \'=\', False]]"/>' +
                 '</form>',
         });
 
@@ -9873,7 +9873,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<group>' +
-                            '<field name="foo" attrs="{\'required\': [[\'bar\', \'=\', True]]}"/>' +
+                            '<field name="foo" required="[[\'bar\', \'=\', True]]"/>' +
                             '<field name="bar"/>' +
                         '</group>' +
                     '</sheet>' +
@@ -9901,7 +9901,7 @@ QUnit.module('LegacyViews', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<group>' +
-                            '<field name="foo" attrs="{\'required\': [[\'bar\', \'=\', True]]}"/>' +
+                            '<field name="foo" required="[[\'bar\', \'=\', True]]"/>' +
                             '<field name="bar"/>' +
                         '</group>' +
                     '</sheet>' +
@@ -11093,7 +11093,7 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch: `
                 <form>
-                    <field name="p" attrs="{'readonly': True}">
+                    <field name="p" readonly="True">
                         <tree>
                             <field name="foo"/>
                         </tree>
@@ -11496,7 +11496,7 @@ QUnit.module('LegacyViews', {
             arch: `
                 <form>
                     <field name="timmy" widget="many2many_checkboxes"
-                        attrs="{'readonly': 1}"/>
+                        readonly="1"/>
                 </form>`,
             res_id: 1,
         });
@@ -11578,7 +11578,7 @@ QUnit.module('LegacyViews', {
             arch: `
                 <form>
                     <field name="trululu" widget="radio"
-                        attrs="{'readonly': 1}"/>
+                        readonly="1"/>
                 </form>`,
             res_id: 1,
         });
@@ -12009,7 +12009,7 @@ QUnit.module('LegacyViews', {
                         <form string="Partners">
                             <field name="length"/>
                             <field name="display_name"/>
-                            <field name="foo" attrs="{\'readonly\': [[\'display_name\', \'=\', \'readonly\']]}"/>
+                            <field name="foo" readonly="[[\'display_name\', \'=\', \'readonly\']]"/>
                         </form>
                     </field>
                 </form>`,

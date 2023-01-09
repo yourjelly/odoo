@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
             <form string="Product">
                 <header>
-                    <button string="Print Labels" type="object" name="action_open_label_layout" attrs="{'invisible': [('detailed_type', '=', 'service')]}"/>
+                    <button string="Print Labels" type="object" name="action_open_label_layout" invisible="[('detailed_type', '=', 'service')]"/>
                 </header>
                 <sheet name="product_form">
                     <field name='product_variant_count' invisible='1'/>
@@ -27,16 +27,16 @@
                                     <span class="o_stat_value">
                                         <field name="pricelist_item_count"/>
                                     </span>
-                                    <span attrs="{'invisible': [('pricelist_item_count', '=', 1)]}">
+                                    <span invisible="[('pricelist_item_count', '=', 1)]">
                                         Extra Prices
                                     </span>
-                                    <span attrs="{'invisible': [('pricelist_item_count', '!=', 1)]}">
+                                    <span invisible="[('pricelist_item_count', '!=', 1)]">
                                         Extra Price
                                     </span>
                                </div>
                         </button>
                     </div>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <field name="id" invisible="True"/>
                     <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
                     <div class="oe_title">
@@ -80,8 +80,8 @@
                                       <field name="list_price" class="oe_inline" widget='monetary'
                                         options="{'currency_field': 'currency_id', 'field_digits': True}"/>
                                     </div>
-                                    <label for="standard_price" attrs="{'invisible': [('product_variant_count', '&gt;', 1), ('is_product_variant', '=', False)]}"/>
-                                    <div name="standard_price_uom" attrs="{'invisible': [('product_variant_count', '&gt;', 1), ('is_product_variant', '=', False)]}">
+                                    <label for="standard_price" invisible="[('product_variant_count', '&gt;', 1), ('is_product_variant', '=', False)]"/>
+                                    <div name="standard_price_uom" invisible="[('product_variant_count', '&gt;', 1), ('is_product_variant', '=', False)]">
                                         <field name="standard_price" class="oe_inline" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
                                         <span groups="uom.group_uom" >per
                                             <field name="uom_name" class="oe_inline"/>
@@ -100,7 +100,7 @@
                                 <field colspan="2" name="description" nolabel="1" placeholder="This note is only for internal purposes."/>
                             </group>
                         </page>
-                        <page string="Sales" attrs="{'invisible':[('sale_ok','=',False)]}" name="sales" invisible="1">
+                        <page string="Sales" invisible="[('sale_ok','=',False)]" name="sales">
                             <group name="sale">
                                 <group string="Upsell &amp; Cross-Sell" name="upsell" invisible="1"/>
                             </group>
@@ -110,21 +110,21 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Purchase" name="purchase" attrs="{'invisible': [('purchase_ok','=',False)]}" invisible="1">
+                        <page string="Purchase" name="purchase" invisible="[('purchase_ok','=',False)]">
                             <group name="purchase">
                                 <group string="Vendor Bills" name="bill"/>
                             </group>
                         </page>
-                        <page string="Inventory" name="inventory" groups="product.group_stock_packaging" attrs="{'invisible':[('type', '=', 'service')]}">
+                        <page string="Inventory" name="inventory" groups="product.group_stock_packaging" invisible="[('type', '=', 'service')]">
                             <group name="inventory">
-                                <group name="group_lots_and_weight" string="Logistics" attrs="{'invisible': [('type', 'not in', ['product', 'consu'])]}">
-                                    <label for="weight" attrs="{'invisible':[('product_variant_count', '>', 1), ('is_product_variant', '=', False)]}"/>
-                                    <div class="o_row" name="weight" attrs="{'invisible':[('product_variant_count', '>', 1), ('is_product_variant', '=', False)]}">
+                                <group name="group_lots_and_weight" string="Logistics" invisible="[('type', 'not in', ['product', 'consu'])]">
+                                    <label for="weight" invisible="[('product_variant_count', '>', 1), ('is_product_variant', '=', False)]"/>
+                                    <div class="o_row" name="weight" invisible="[('product_variant_count', '>', 1), ('is_product_variant', '=', False)]">
                                         <field name="weight" class="oe_inline"/>
                                         <field name="weight_uom_name"/>
                                     </div>
-                                    <label for="volume" attrs="{'invisible':[('product_variant_count', '>', 1), ('is_product_variant', '=', False)]}"/>
-                                    <div class="o_row" name="volume" attrs="{'invisible':[('product_variant_count', '>', 1), ('is_product_variant', '=', False)]}">
+                                    <label for="volume" invisible="[('product_variant_count', '>', 1), ('is_product_variant', '=', False)]"/>
+                                    <div class="o_row" name="volume" invisible="[('product_variant_count', '>', 1), ('is_product_variant', '=', False)]">
                                         <field name="volume" string="Volume" class="oe_inline"/>
                                         <field name="volume_uom_name"/>
                                     </div>
@@ -132,7 +132,7 @@
                             </group>
                             <group name="packaging" string="Packaging"
                                 colspan="4"
-                                attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '>', 1), ('is_product_variant', '=', False)]}"
+                                invisible="['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '>', 1), ('is_product_variant', '=', False)]"
                                 groups="product.group_stock_packaging">
                                 <field colspan="2" name="packaging_ids" nolabel="1" context="{'tree_view_ref':'product.product_packaging_tree_view2', 'default_company_id': company_id}"/>
                             </group>
@@ -243,7 +243,7 @@
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box"/>
-                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                         <field name="active" invisible="1"/>
                         <field name="id" invisible="1"/>
                         <field name="company_id" invisible="1"/>
@@ -267,7 +267,7 @@
                                 <field name="product_variant_count" invisible="1"/>
                                 <label for="lst_price" string="Sales Price"/>
                                 <div class="o_row col-5 ps-0">
-                                    <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}" attrs="{'readonly': [('product_variant_count', '&gt;', 1)]}"/>
+                                    <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}" readonly="[('product_variant_count', '&gt;', 1)]"/>
                                 </div>
                                 <field name="standard_price" widget='monetary' options="{'currency_field': 'cost_currency_id'}"/>
                                 <field name="currency_id" invisible='1'/>
@@ -275,7 +275,7 @@
                             </group>
                         </group>
                         <group>
-                            <group name="weight" string="Logistics" attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}">
+                            <group name="weight" string="Logistics" invisible="[('type', 'not in', ['product', 'consu'])]">
                                 <label for="volume"/>
                                 <div class="o_row">
                                     <field name="volume"/>
@@ -372,7 +372,7 @@
                     <attribute name="readonly">1</attribute>
                 </xpath>
                 <field name="list_price" position="attributes">
-                   <attribute name="attrs">{'readonly': [('product_variant_count', '&gt;', 1)]}</attribute>
+                   <attribute name="readonly">[('product_variant_count', '&gt;', 1)]</attribute>
                    <attribute name="invisible">1</attribute>
                 </field>
                 <xpath expr="//label[@for='list_price']" position="replace">
@@ -382,10 +382,10 @@
                    <field name="lst_price" class="oe_inline" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}"/>
                 </field>
                 <group name="packaging" position="attributes">
-                    <attribute name="attrs">{'invisible': 0}</attribute>
+                    <attribute name="invisible">0</attribute>
                 </group>
                 <field name="name" position="after">
-                    <field name="product_tmpl_id" class="oe_inline" readonly="1" invisible="1" attrs="{'required': [('id', '!=', False)]}"/>
+                    <field name="product_tmpl_id" class="oe_inline" readonly="1" invisible="1" required="[('id', '!=', False)]"/>
                 </field>
                 <xpath expr="//div[hasclass('oe_title')]" position="inside">
                     <field name="product_template_variant_value_ids" widget="many2many_tags" readonly="1" groups="product.group_product_variant"/>

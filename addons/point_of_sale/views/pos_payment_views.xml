@@ -12,9 +12,9 @@
                         <field name="amount" />
                         <field name="pos_order_id" readonly="1"/>
                         <field name="payment_method_id" readonly="1"/>
-                        <field name="card_type" readonly="1" attrs="{'invisible': [('card_type', '=', False)]}"/>
-                        <field name="cardholder_name" readonly="1" attrs="{'invisible': [('cardholder_name', '=', False)]}"/>
-                        <field name="transaction_id" readonly="1" attrs="{'invisible': [('transaction_id', '=', False)]}"/>
+                        <field name="card_type" readonly="1" invisible="[('card_type', '=', False)]"/>
+                        <field name="cardholder_name" readonly="1" invisible="[('cardholder_name', '=', False)]"/>
+                        <field name="transaction_id" readonly="1" invisible="[('transaction_id', '=', False)]"/>
                         <field name="session_id" />
                     </group>
                 </sheet>

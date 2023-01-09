@@ -10,12 +10,12 @@
                 <data>
                     <xpath expr="//field[@name='state']" position="after">
                         <field name="website_published"
-                            attrs="{'invisible': [('state', '!=', 'code')]}"/>
+                            invisible="[('state', '!=', 'code')]"/>
                         <field name="xml_id" invisible="1"/>
                         <field name="website_path"
-                            attrs="{'invisible': ['|', ('website_published', '!=', True), ('state', '!=', 'code')]}"/>
+                            invisible="['|', ('website_published', '!=', True), ('state', '!=', 'code')]"/>
                         <field name="website_url" readonly="1" widget="url"
-                            attrs="{'invisible': ['|', ('website_published', '!=', True), ('state', '!=', 'code')]}"/>
+                            invisible="['|', ('website_published', '!=', True), ('state', '!=', 'code')]"/>
                     </xpath>
                 </data>
             </field>

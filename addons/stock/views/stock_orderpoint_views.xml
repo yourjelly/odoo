@@ -43,15 +43,15 @@
                 <field name="company_id" invisible="1"/>
                 <field name="product_category_id" invisible="1"/>
                 <field name="product_tmpl_id" invisible="1"/>
-                <field name="product_id" attrs="{'readonly': [('product_id', '!=', False)]}" force_save="1"/>
+                <field name="product_id" readonly="[('product_id', '!=', False)]" force_save="1"/>
                 <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                 <field name="warehouse_id" options="{'no_create': True}" groups="stock.group_stock_multi_warehouses" optional="hide"/>
                 <field name="qty_on_hand" force_save="1"/>
                 <field name="qty_forecast" force_save="1"/>
-                <button name="action_product_forecast_report" type="object" icon="fa-area-chart" title="Forecast Report" attrs="{'invisible': [('id', '=', False)]}"/>
+                <button name="action_product_forecast_report" type="object" icon="fa-area-chart" title="Forecast Report" invisible="[('id', '=', False)]"/>
                 <field name="visibility_days" optional="hidden"/>
                 <field name="route_id" options="{'no_create': True, 'no_open': True}"/>
-                <button name="action_stock_replenishment_info" type="object" icon="fa-info-circle" title="Replenishment Information" attrs="{'invisible': [('id', '=', False)]}"/>
+                <button name="action_stock_replenishment_info" type="object" icon="fa-info-circle" title="Replenishment Information" invisible="[('id', '=', False)]"/>
                 <field name="trigger" optional="hide"/>
                 <field name="group_id" optional="hide" groups="stock.group_adv_location"/>
                 <field name="product_min_qty" optional="show"/>
@@ -61,11 +61,11 @@
                 <field name="product_uom_name" string="UoM" groups="uom.group_uom"/>
                 <field name="company_id" optional="hide" readonly="1" groups="base.group_multi_company"/>
                 <button name="action_replenish" string="Order Once" type="object" class="o_replenish_buttons" icon="fa-truck"
-                    attrs="{'invisible': [('qty_to_order', '&lt;=', 0.0)]}"/>
+                    invisible="[('qty_to_order', '&lt;=', 0.0)]"/>
                 <button name="action_replenish_auto" string="Automate Orders" type="object" class="o_replenish_buttons" icon="fa-refresh"
-                    attrs="{'invisible': ['|', ('qty_to_order', '&lt;=', 0.0), ('trigger', '=', 'auto')]}"/>
+                    invisible="['|', ('qty_to_order', '&lt;=', 0.0), ('trigger', '=', 'auto')]"/>
                 <button name="%(action_orderpoint_snooze)d" string="Snooze" type="action" class="text-warning" icon="fa-bell-slash"
-                    attrs="{'invisible': [('trigger', '!=', 'manual')]}" context="{'default_orderpoint_ids': [id]}"/>
+                    invisible="[('trigger', '!=', 'manual')]" context="{'default_orderpoint_ids': [id]}"/>
             </tree>
         </field>
     </record>
@@ -132,7 +132,7 @@
                     <a style="cursor: pointer" class="alert-link o_form_uri" type="action" name="%(action_procurement_compute)d">Run the scheduler</a> manually to trigger the reordering rules right now.
                 </div>
                 <sheet>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <div class="oe_title">
                         <h1>
                             <field name="name"/>
@@ -148,7 +148,7 @@
                             <div class="o_row">
                                 <field name="product_min_qty"/>
                                 <field name="product_uom_name"/>
-                                <button name="stock.action_stock_replenishment_info" string="Forecast Description" type="action" icon="fa-area-chart" attrs="{'invisible': [('id', '=', False)]}"/>
+                                <button name="stock.action_stock_replenishment_info" string="Forecast Description" type="action" icon="fa-area-chart" invisible="[('id', '=', False)]"/>
                             </div>
                             <label for="product_max_qty"/>
                             <div class="o_row">

@@ -810,9 +810,9 @@ class TestPacking(TestPackingCommon):
         package = self.env["stock.quant.package"].create({"name": "Src Pack"})
         self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 100, package_id=package)
         # Required for `package_level_ids_details` to be visible in the view
-        # <page string="Detailed Operations" attrs="{'invisible': [('show_operations', '=', False)]}">
+        # <page string="Detailed Operations" invisible="[('show_operations', '=', False)]">
         # <field name="package_level_ids_details"
-        #   attrs="{'invisible': ['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', False)]}"
+        #   invisible="['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', False)]"
         self.warehouse.out_type_id.show_operations = True
         self.warehouse.out_type_id.show_entire_packs = True
         picking = self.env['stock.picking'].create({
@@ -957,9 +957,9 @@ class TestPacking(TestPackingCommon):
         picking.button_validate()
 
         # Required for `package_level_ids_details` to be visible in the view
-        # <page string="Detailed Operations" attrs="{'invisible': [('show_operations', '=', False)]}">
+        # <page string="Detailed Operations" invisible="[('show_operations', '=', False)]">
         # <field name="package_level_ids_details"
-        #   attrs="{'invisible': ['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', False)]}"
+        #   invisible="['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', False)]"
         delivery_type.show_operations = True
         delivery_type.show_entire_packs = True
         picking, _, _ = create_picking(delivery_type, delivery_type.default_location_src_id, self.customer_location)

@@ -116,20 +116,20 @@
                             <field name="has_diff" invisible="1"/>
                             <field name="view_id" invisible="1"/>
                             <field name="view_name"/>
-                            <field name="compare_view_id" attrs="{'invisible': [('reset_mode', '!=', 'other_view')]}" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="compare_view_id" invisible="[('reset_mode', '!=', 'other_view')]" options="{'no_create': True, 'no_open': True}"/>
                         </group>
                         <group>
                             <field name="reset_mode" widget="radio"/>
                         </group>
                     </group>
-                    <field name="arch_diff" attrs="{'invisible': [('arch_diff', '=', False)]}"/>
-                    <div class="alert alert-warning my-2" role="alert" attrs="{'invisible': [('arch_diff', '!=', False)]}">
-                        <span attrs="{'invisible': [('reset_mode', '!=', 'soft')]}">This view has no previous version.</span>
-                        <span attrs="{'invisible': [('reset_mode', '!=', 'hard')]}">This view is not coming from a file.</span>
-                        <span attrs="{'invisible': [('reset_mode', '!=', 'other_view')]}">You need two views to compare.</span>
+                    <field name="arch_diff" invisible="[('arch_diff', '=', False)]"/>
+                    <div class="alert alert-warning my-2" role="alert" invisible="[('arch_diff', '!=', False)]">
+                        <span invisible="[('reset_mode', '!=', 'soft')]">This view has no previous version.</span>
+                        <span invisible="[('reset_mode', '!=', 'hard')]">This view is not coming from a file.</span>
+                        <span invisible="[('reset_mode', '!=', 'other_view')]">You need two views to compare.</span>
                     </div>
                     <footer>
-                        <button string="Reset View" name="reset_view_button" type="object" class="btn-primary" attrs="{'invisible': [('has_diff', '=', False)]}" data-hotkey="q"/>
+                        <button string="Reset View" name="reset_view_button" type="object" class="btn-primary" invisible="[('has_diff', '=', False)]" data-hotkey="q"/>
                         <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z" />
                     </footer>
                 </form>

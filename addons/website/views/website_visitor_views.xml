@@ -141,7 +141,7 @@
                                 </div>
                                 <div class="w_visitor_kanban_actions_ungrouped col-lg-3 col-sm-12 py-0 my-2 text-lg-end">
                                     <button name="action_send_mail" type="object"
-                                            class="btn btn-secondary border" attrs="{'invisible': [('email', '=', False)]}">
+                                            class="btn btn-secondary border" invisible="[('email', '=', False)]">
                                             Email
                                     </button>
                                 </div>
@@ -164,7 +164,7 @@
                                 <div t-if="record.page_count.raw_value" id="o_page_count">Visited Pages<span class="float-end fw-bold"><field name="page_count"/></span></div>
                                 <div class="w_visitor_kanban_actions">
                                     <button name="action_send_mail" type="object"
-                                            class="btn btn-secondary" attrs="{'invisible': [('email', '=', False)]}">
+                                            class="btn btn-secondary" invisible="[('email', '=', False)]">
                                             Email
                                     </button>
                                 </div>
@@ -183,15 +183,15 @@
             <form string="Website Visitor">
                 <header>
                     <button name="action_send_mail" type="object" class="btn btn-primary"
-                            attrs="{'invisible': [('email', '=', False)]}" string="Send Email"/>
+                            invisible="[('email', '=', False)]" string="Send Email"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button o_stat_button_info" disabled="1" attrs="{'invisible': [('is_connected', '=', False)]}">
+                        <button class="oe_stat_button o_stat_button_info" disabled="1" invisible="[('is_connected', '=', False)]">
                             <i class="fa fa-fw o_button_icon fa-circle text-success"/>
                             <span>Connected</span>
                         </button>
-                        <button class="oe_stat_button o_stat_button_info" disabled="1" attrs="{'invisible': [('is_connected', '=', True)]}">
+                        <button class="oe_stat_button o_stat_button_info" disabled="1" invisible="[('is_connected', '=', True)]">
                             <i class="fa fa-fw o_button_icon fa-circle text-danger"/>
                             <span>Offline</span>
                         </button>
@@ -204,7 +204,7 @@
                             <field name="visitor_page_count" widget="statinfo" string="Page Views"/>
                         </button>
                     </div>
-                    <div class="float-end" attrs="{'invisible': [('country_id', '=', False)]}">
+                    <div class="float-end" invisible="[('country_id', '=', False)]">
                         <field name="country_flag" widget="image_url" options='{"size": [32, 32]}'/>
                     </div>
                     <div class="oe_title">
@@ -216,7 +216,7 @@
                             <field name="partner_id"/>
                             <field name="email"/>
                             <field name="mobile" class="o_force_ltr"/>
-                            <field name="country_id" attrs="{'invisible': [('country_id', '=', False)]}"/>
+                            <field name="country_id" invisible="[('country_id', '=', False)]"/>
                             <field name="lang_id"/>
                         </group>
                         <group id="visits" string="Visits">
@@ -248,7 +248,7 @@
                 <field name="is_connected" invisible="1"/>
                 <field name="email" invisible="1"/>
                 <button string="Email" name="action_send_mail" type="object"
-                    icon="fa-envelope" attrs="{'invisible': [('email', '=', False)]}"/>
+                    icon="fa-envelope" invisible="[('email', '=', False)]"/>
             </tree>
         </field>
     </record>

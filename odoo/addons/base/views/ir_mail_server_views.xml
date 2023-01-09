@@ -11,7 +11,7 @@
                     </header>
                     <sheet>
                         <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
-                            attrs="{'invisible': [('active', '=', True)]}"/>
+                            invisible="[('active', '=', True)]"/>
                         <group>
                             <group>
                                 <field name="name" placeholder="e.g. My Outgoing Server"/>
@@ -28,7 +28,7 @@
                             </group>
                             <group>
                                 <div class="text-muted fst-italic" role="alert" colspan="2"
-                                    attrs="{'invisible': [('smtp_authentication_info', '=', False)]}">
+                                    invisible="[('smtp_authentication_info', '=', False)]">
                                     <field name="smtp_authentication_info"/>
                                 </div>
                             </group>
@@ -43,10 +43,10 @@
                                         <field name="smtp_debug" groups="base.group_no_one"/>
                                     </group>
                                     <group>
-                                        <field name="smtp_user" attrs="{'invisible': [('smtp_authentication', '=', 'certificate')]}" force_save="1"/>
-                                        <field name="smtp_pass" attrs="{'invisible': [('smtp_authentication', '!=', 'login')]}" password="True" force_save="1"/>
-                                        <field name="smtp_ssl_certificate" attrs="{'invisible': [('smtp_authentication', '!=', 'certificate')]}" force_save="1"/>
-                                        <field name="smtp_ssl_private_key" attrs="{'invisible': [('smtp_authentication', '!=', 'certificate')]}" force_save="1"/>
+                                        <field name="smtp_user" invisible="[('smtp_authentication', '=', 'certificate')]" force_save="1"/>
+                                        <field name="smtp_pass" invisible="[('smtp_authentication', '!=', 'login')]" password="True" force_save="1"/>
+                                        <field name="smtp_ssl_certificate" invisible="[('smtp_authentication', '!=', 'certificate')]" force_save="1"/>
+                                        <field name="smtp_ssl_private_key" invisible="[('smtp_authentication', '!=', 'certificate')]" force_save="1"/>
                                     </group>
                                 </group>
                             </page>

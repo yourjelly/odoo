@@ -8,33 +8,33 @@
                 <field name="company_id" invisible="1"/>
                 <field name="package_type_ids" invisible="1"/>
                 <field name="sequence" widget="handle"
-                       invisible="context.get('invisible_handle', False)"/>
+                       column_invisible="[bool(context.get('invisible_handle'))]"/>
                 <field name="location_in_id" string="When product arrives in"
                        options="{'no_create': True}"
-                       readonly="context.get('fixed_location', False)"/>
+                       readonly="[bool(context.get('fixed_location'))]"/>
                 <field name="product_id" string="Product"
-                       attrs="{'readonly': [('category_id', '!=', False)], 'required': [('category_id', '=', False), ('package_type_ids', '=', False)]}"
+                       readonly="['|', bool(context.get('single_product')), ('category_id', '!=', False)]"
+                       required="[('category_id', '=', False), ('package_type_ids', '=', False)]"
                        options="{'no_create': True, 'no_open': True}"
-                       readonly="context.get('single_product', False)"
                        force_save="1"/>
                 <field name="category_id" string="Product Category"
-                       attrs="{'readonly': [('product_id', '!=', False)], 'required': [('product_id', '=', False), ('package_type_ids', '=', False)]}"
+                       readonly="['|', bool(context.get('fixed_category')), ('product_id', '!=', False)]"
+                       required="[('product_id', '=', False), ('package_type_ids', '=', False)]"
                        options="{'no_create': True, 'no_open': True}"
-                       readonly="context.get('fixed_category', False)"
                        force_save="1"/>
                 <field name="package_type_ids" string="Package type"
                        options="{'no_create': True, 'no_open': True}"
                        groups="stock.group_tracking_lot" widget="many2many_tags"
                        optional="show"/>
                 <field name="location_out_id"
-                       attrs="{'readonly': [('location_in_id', '=', False)]}"
+                       readonly="[('location_in_id', '=', False)]"
                        options="{'no_create': True}"
                        optional="show"/>
                 <field name="storage_category_id" string="Having Category"
                        groups="stock.group_stock_storage_categories"
                        options="{'no_create': True}"
                        optional="show"/>
-                <field name="company_id" groups="stock.group_stock_multi_locations" force_save="1" readonly="context.get('fixed_location', False)" options="{'no_create': True}" optional="show"/>
+                <field name="company_id" groups="stock.group_stock_multi_locations" force_save="1" readonly="[bool(context.get('fixed_location'))]" options="{'no_create': True}" optional="show"/>
             </tree>
         </field>
     </record>

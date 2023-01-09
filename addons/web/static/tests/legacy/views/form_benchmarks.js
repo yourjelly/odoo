@@ -85,7 +85,7 @@ odoo.define('web.form_benchmarks', function (require) {
                     <field name="many2many">
                         <tree editable="top" limit="250">
                             <field name="char"/>
-                            <field name="many2many" widget="many2many_tags" attrs="{'readonly': [('char', '==', 'toto')]}"/>
+                            <field name="many2many" widget="many2many_tags" readonly="[('char', '==', 'toto')]"/>
                         </tree>
                     </field>
                 </form>`;

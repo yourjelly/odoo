@@ -34,11 +34,11 @@
             <sheet>
                 <field name="active" invisible="1" />
                 <field name="company_id" invisible="1"/>
-                <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                 <group>
                     <group name="user_details">
                         <field name="name"/>
-                        <field name="user_id" attrs="{'required':[('resource_type','=','user')], 'invisible': [('resource_type','=','material')]}"/>
+                        <field name="user_id" required="[('resource_type','=','user')]" invisible="[('resource_type','=','material')]"/>
                         <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                         <field name="resource_type" />
                     </group>
@@ -133,7 +133,7 @@
                     <group name="leave_details">
                         <field name="name" string="Reason"/>
                         <field name="calendar_id"/>
-                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" attrs="{'invisible':[('calendar_id','=',False)]}"/>
+                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" invisible="[('calendar_id','=',False)]"/>
                         <field name="resource_id"/>
                     </group>
                     <group name="leave_dates">
@@ -207,8 +207,8 @@
             <tree string="Working Time" editable="top">
                 <field name="sequence" widget="handle"/>
                 <field name="display_type" invisible="1"/>
-                <field name="display_name" width="1" string=" " attrs="{'invisible': [('display_type', '!=', 'line_section')]}"/>
-                <field name="name" attrs="{'invisible': [('display_type', '=', 'line_section')]}"/>
+                <field name="display_name" width="1" string=" " invisible="[('display_type', '!=', 'line_section')]"/>
+                <field name="name" invisible="[('display_type', '=', 'line_section')]"/>
                 <field name="dayofweek"/>
                 <field name="day_period"/>
                 <field name="hour_from" widget="float_time"/>
@@ -264,11 +264,11 @@
             <form string="Working Time">
                 <field name="two_weeks_calendar" invisible="1"/>
                 <header>
-                    <button name="switch_calendar_type" attrs="{'invisible':[('two_weeks_calendar', '=', True)]}" string="Switch to 2 weeks calendar" type="object" confirm="Are you sure you want to switch this calendar to 2 weeks calendar ? All entries will be lost"/>
-                    <button name="switch_calendar_type" attrs="{'invisible':[('two_weeks_calendar', '=', False)]}" string="Switch to 1 week calendar" type="object" confirm="Are you sure you want to switch this calendar to 1 week calendar ? All entries will be lost"/>
+                    <button name="switch_calendar_type" invisible="[('two_weeks_calendar', '=', True)]" string="Switch to 2 weeks calendar" type="object" confirm="Are you sure you want to switch this calendar to 2 weeks calendar ? All entries will be lost"/>
+                    <button name="switch_calendar_type" invisible="[('two_weeks_calendar', '=', False)]" string="Switch to 1 week calendar" type="object" confirm="Are you sure you want to switch this calendar to 1 week calendar ? All entries will be lost"/>
                 </header>
                 <sheet string="Working Time">
-                    <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" text="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="%(resource_calendar_leaves_action_from_calendar)d" type="action"
                                 string="Time Off" icon="fa-plane"
@@ -293,7 +293,7 @@
                     </group>
                     <notebook>
                         <page string="Working Hours" name="working_hours">
-                            <field name="two_weeks_explanation" attrs="{'invisible':[('two_weeks_calendar', '=', False)]}"/>
+                            <field name="two_weeks_explanation" invisible="[('two_weeks_calendar', '=', False)]"/>
                             <field name="attendance_ids" widget="section_one2many"/>
                         </page>
                     </notebook>

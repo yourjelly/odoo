@@ -23,11 +23,11 @@
                     <button string="Valuation" type="object"
                         name="action_view_stock_valuation_layers"
                         class="oe_stat_button" icon="fa-dollar" groups="base.group_no_one"
-                        attrs="{'invisible': [('show_valuation', '=', False)]}" />
+                        invisible="[('show_valuation', '=', False)]" />
                     <button class="oe_stat_button" type="object"
                         name="action_view_analytic_account"
                         string="Analytic Account" icon="fa-bar-chart-o"
-                        attrs="{'invisible': ['|', ('analytic_account_id', '=', False), ('state', 'in', ['draft', 'cancel'])]}"
+                        invisible="['|', ('analytic_account_id', '=', False), ('state', 'in', ['draft', 'cancel'])]"
                         groups="analytic.group_analytic_accounting"/>
                 </t>
             </xpath>

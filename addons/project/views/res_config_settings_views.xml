@@ -20,7 +20,7 @@
                             </setting>
                             <setting id="project_stages" help="Track the progress of your projects">
                                 <field name="group_project_stages"/>
-                                <div class="content-group" attrs="{'invisible': [('group_project_stages', '=', False)]}">
+                                <div class="content-group" invisible="[('group_project_stages', '=', False)]">
                                     <div class="mt8">
                                         <button name="%(project.project_project_stage_configure)d" icon="fa-arrow-right" type="action" string="Configure Stages" class="btn-link"/>
                                     </div>
@@ -41,7 +41,7 @@
                         <block title="Analytics" name="analytic">
                             <setting id="track_customer_satisfaction_setting" help="Track customer satisfaction on tasks">
                                 <field name="group_project_rating"/>
-                                <div class="content-group" attrs="{'invisible': [('group_project_rating', '=', False)]}">
+                                <div class="content-group" invisible="[('group_project_rating', '=', False)]">
                                     <div class="mt16">
                                         <button name="%(project.open_task_type_form)d" context="{'project_id':id}" icon="fa-arrow-right" type="action" string="Set a Rating Email Template on Stages" class="btn-link"/>
                                     </div>

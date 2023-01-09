@@ -28,14 +28,14 @@
                         class="oe_stat_button"
                         icon="fa-history"
                         type="action"
-                        attrs="{'invisible': [('total_overtime', '=', 0.0)]}"
+                        invisible="[('total_overtime', '=', 0.0)]"
                         context="{'search_default_employee_id': active_id}"
                         groups="hr_attendance.group_hr_attendance_user">
                     <div class="o_stat_info">
-                        <span class="o_stat_value text-success" attrs="{'invisible': [('total_overtime', '&lt;', 0)]}">
+                        <span class="o_stat_value text-success" invisible="[('total_overtime', '&lt;', 0)]">
                             <field name="total_overtime" widget="float_time"/>
                         </span>
-                        <span class="o_stat_value text-danger" attrs="{'invisible': [('total_overtime', '&gt;=', 0)]}">
+                        <span class="o_stat_value text-danger" invisible="[('total_overtime', '&gt;=', 0)]">
                             <field name="total_overtime" widget="float_time"/>
                         </span>
                         <span class="o_stat_text">Extra Hours</span>
@@ -74,15 +74,15 @@
                         class="oe_stat_button"
                         icon="fa-history"
                         type="action"
-                        attrs="{'invisible': [('total_overtime', '=', 0.0)]}"
+                        invisible="[('total_overtime', '=', 0.0)]"
                         context="{'search_default_employee_id': employee_ids}"
                         groups="base.group_user"
                         help="Amount of extra hours">
                     <div class="o_stat_info">
-                        <span class="o_stat_value text-success" attrs="{'invisible': [('total_overtime', '&lt;', 0)]}">
+                        <span class="o_stat_value text-success" invisible="[('total_overtime', '&lt;', 0)]">
                             <field name="total_overtime" widget="float_time"/>
                         </span>
-                        <span class="o_stat_value text-danger" attrs="{'invisible': [('total_overtime', '&gt;=', 0)]}">
+                        <span class="o_stat_value text-danger" invisible="[('total_overtime', '&gt;=', 0)]">
                             <field name="total_overtime" widget="float_time"/>
                         </span>
                         <span class="o_stat_text">Extra Hours</span>

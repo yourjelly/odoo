@@ -433,7 +433,7 @@ QUnit.module('LegacyViews', {
             arch: `
                 <tree>
                     <button name="a" type="object" icon="fa-car"/>
-                    <field name="foo" attrs="{'invisible': [['foo', '=', 'blip']]}"/>
+                    <field name="foo" invisible="[['foo', '=', 'blip']]"/>
                     <button name="x" type="object" icon="fa-star"/>
                     <button name="y" type="object" icon="fa-refresh"/>
                     <button name="z" type="object" icon="fa-exclamation"/>
@@ -481,9 +481,9 @@ QUnit.module('LegacyViews', {
             arch: `
                 <tree>
                     <field name="foo"/>
-                    <button name="x" type="object" icon="fa-star" attrs="{'invisible': [['foo', '=', 'blip']]}"/>
-                    <button name="y" type="object" icon="fa-refresh" attrs="{'invisible': [['foo', '=', 'yop']]}"/>
-                    <button name="z" type="object" icon="fa-exclamation" attrs="{'invisible': [['foo', '=', 'gnap']]}"/>
+                    <button name="x" type="object" icon="fa-star" invisible="[['foo', '=', 'blip']]"/>
+                    <button name="y" type="object" icon="fa-refresh" invisible="[['foo', '=', 'yop']]"/>
+                    <button name="z" type="object" icon="fa-exclamation" invisible="[['foo', '=', 'gnap']]"/>
                 </tree>`,
         });
 
@@ -939,7 +939,7 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch: '<tree>' +
                     '<field name="foo"/>' +
-                    '<field name="bar" attrs="{\'invisible\': [(\'id\',\'=\', 1)]}"/>' +
+                    '<field name="bar" invisible="[(\'id\',\'=\', 1)]"/>' +
                     '<field name="int_field"/>' +
                 '</tree>',
         });
@@ -3032,7 +3032,7 @@ QUnit.module('LegacyViews', {
             arch: '<form>' +
                     '<sheet>' +
                         '<field name="bar"/>' +
-                        '<field name="o2m" attrs="{\'invisible\': [(\'bar\', \'=\', True)]}">' +
+                        '<field name="o2m" invisible="[(\'bar\', \'=\', True)]">' +
                             '<tree editable="bottom">' +
                                 '<field name="titi"/>' +
                                 '<field name="grosminet"/>' +
@@ -5088,7 +5088,7 @@ QUnit.module('LegacyViews', {
                 '<field name="foo"/>' +
                 '<groupby name="currency_id">' +
                     '<field name="position"/>' +
-                    '<button string="Button 1" type="object" name="button_method" attrs=\'{"invisible": [("position", "=", "after")]}\'/>' +
+                    '<button string="Button 1" type="object" name="button_method" invisible=\'[("position", "=", "after")]\'/>' +
                 '</groupby>' +
             '</tree>',
             mockRPC: function (route, args) {
@@ -5135,7 +5135,7 @@ QUnit.module('LegacyViews', {
                     <field name="foo"/>
                     <groupby name="currency_id">
                         <field name="m2o"/>
-                        <button string="Button 1" type="object" name="button_method" attrs='{"invisible": [("m2o", "=", false)]}'/>
+                        <button string="Button 1" type="object" name="button_method" invisible='[("m2o", "=", false)]'/>
                     </groupby>
                 </tree>`,
             mockRPC(route, args) {
@@ -5164,7 +5164,7 @@ QUnit.module('LegacyViews', {
                 '<field name="foo"/>' +
                 '<groupby name="currency_id">' +
                     '<field name="position"/>' +
-                    '<button string="Button 1" type="object" name="button_method" attrs=\'{"invisible": [("position", "=", "after")]}\'/>' +
+                    '<button string="Button 1" type="object" name="button_method" invisible=\'[("position", "=", "after")]\'/>' +
                 '</groupby>' +
             '</tree>',
             groupBy: ['currency_id'],
@@ -5191,7 +5191,7 @@ QUnit.module('LegacyViews', {
                 '<field name="foo"/>' +
                 '<groupby name="currency_id">' +
                     '<field name="position"/>' +
-                    '<button string="Button 1" type="object" name="button_method" attrs=\'{"invisible": [("position", "=", "after")]}\'/>' +
+                    '<button string="Button 1" type="object" name="button_method" invisible=\'[("position", "=", "after")]\'/>' +
                 '</groupby>' +
             '</tree>',
             groupBy: ['currency_id'],
@@ -5503,10 +5503,10 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch: '<tree editable="top">' +
                     '<button string="a button" name="button_action" icon="fa-car" ' +
-                        'type="object" attrs="{\'invisible\': [(\'id\',\'=\', 1)]}"/>' +
+                        'type="object" invisible="[(\'id\',\'=\', 1)]"/>' +
                     '<field name="int_field"/>' +
                     '<field name="qux"/>' +
-                    '<field name="foo" attrs="{\'invisible\': [(\'id\',\'=\', 1)]}"/>' +
+                    '<field name="foo" invisible="[(\'id\',\'=\', 1)]"/>' +
                 '</tree>',
         });
 
@@ -5870,7 +5870,7 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch:
                 '<tree editable="top">' +
-                    '<field name="foo" attrs="{\'invisible\': [[\'bar\', \'=\', True]]}"/>' +
+                    '<field name="foo" invisible="[[\'bar\', \'=\', True]]"/>' +
                     '<field name="bar"/>' +
                 '</tree>',
         });
@@ -5915,7 +5915,7 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch:
                 '<tree editable="top">' +
-                    '<field name="foo" attrs="{\'readonly\': [[\'bar\', \'=\', True]]}"/>' +
+                    '<field name="foo" readonly="[[\'bar\', \'=\', True]]"/>' +
                     '<field name="bar"/>' +
                 '</tree>',
         });
@@ -5965,7 +5965,7 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch:
                 '<tree editable="top">' +
-                    '<field name="foo" attrs="{\'required\': [[\'bar\', \'=\', True]]}"/>' +
+                    '<field name="foo" required="[[\'bar\', \'=\', True]]"/>' +
                     '<field name="bar"/>' +
                 '</tree>',
         });
@@ -6035,7 +6035,7 @@ QUnit.module('LegacyViews', {
                 `<form>
                     <field name="o2m">
                         <tree editable="top">
-                            <field name="display_name" attrs="{'invisible': [('stage', '=', 'open')]}"/>
+                            <field name="display_name" invisible="[('stage', '=', 'open')]"/>
                             <field name="stage"/>
                         </tree>
                     </field>
@@ -8660,7 +8660,7 @@ QUnit.module('LegacyViews', {
             arch: '<tree multi_edit="1">' +
                         '<field name="id"/>' +
                         '<field name="foo"/>' +
-                        '<field name="int_field" attrs=\'{"readonly": [("id", ">" , 2)]}\'/>' +
+                        '<field name="int_field" readonly=\'[("id", ">" , 2)]\'/>' +
                     '</tree>',
             mockRPC: function (route, args) {
                 if (args.method === 'write') {
@@ -9123,8 +9123,8 @@ QUnit.module('LegacyViews', {
             arch: `
                 <tree editable="top">
                     <field name="bar"/>
-                    <field name="foo" attrs="{'readonly': [['bar','=',True]]}"/>
-                    <field name="m2o" attrs="{'readonly': [['bar','=',False]]}"/>
+                    <field name="foo" readonly="[['bar','=',True]]"/>
+                    <field name="m2o" readonly="[['bar','=',False]]"/>
                     <field name="int_field"/>
                 </tree>`,
         });
@@ -9784,8 +9784,8 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch: '<tree editable="top">' +
                     '<field name="id" invisible="1"/>' +
-                    '<field name="foo" attrs="{\'readonly\': [[\'id\',\'!=\',False]]}"/>' +
-                    '<field name="int_field" attrs="{\'invisible\': [[\'id\',\'!=\',False]]}"/>' +
+                    '<field name="foo" readonly="[[\'id\',\'!=\',False]]"/>' +
+                    '<field name="int_field" invisible="[[\'id\',\'!=\',False]]"/>' +
                 '</tree>',
         });
 
@@ -9825,7 +9825,7 @@ QUnit.module('LegacyViews', {
             data: this.data,
             arch: '<tree editable="bottom">' +
                       '<field name="foo"/>' +
-                      '<field name="bar" attrs="{\'readonly\': [(\'foo\', \'!=\', \'yop\')]}"/>' +
+                      '<field name="bar" readonly="[(\'foo\', \'!=\', \'yop\')]"/>' +
                   '</tree>',
         });
 
@@ -12702,7 +12702,7 @@ QUnit.module('LegacyViews', {
                         '<field name="o2m">' +
                             '<tree editable="bottom">' +
                                 '<field name="foo"/>' +
-                                '<field name="date" attrs="{\'readonly\': [(\'foo\', \'!=\', \'yop\')]}"/>' +
+                                '<field name="date" readonly="[(\'foo\', \'!=\', \'yop\')]"/>' +
                                 '<field name="int_field"/>' +
                             '</tree>' +
                         '</field>' +

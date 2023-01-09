@@ -9,7 +9,7 @@
             <page name="order_lines" position="after">
                 <page string="Optional Products"
                     name="optional_products"
-                    attrs="{'invisible': [('state', 'not in', ['draft', 'sent'])]}">
+                    invisible="[('state', 'not in', ['draft', 'sent'])]">
                     <field name="sale_order_option_ids" mode="tree,form,kanban">
                         <form string="Optional Products">
                             <group>
@@ -46,7 +46,7 @@
                                                     class="btn btn-link oe_link fa fa-shopping-cart"
                                                     title="Add to order lines"
                                                     type="object"
-                                                    attrs="{'invisible': [('is_present', '=', True)]}"/>
+                                                    invisible="[('is_present', '=', True)]"/>
                                             </div>
                                         </div>
                                         <div class="row">
@@ -94,7 +94,7 @@
                                 class="oe_link"
                                 icon="fa-shopping-cart"
                                 title="Add to order lines"
-                                attrs="{'invisible': [('is_present', '=', True)]}"/>
+                                invisible="[('is_present', '=', True)]"/>
                         </tree>
                     </field>
                 </page>
