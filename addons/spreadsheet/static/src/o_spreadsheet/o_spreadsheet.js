@@ -296,28 +296,7 @@
     })(ComponentsImportance || (ComponentsImportance = {}));
     const DEFAULT_SHEETVIEW_SIZE = 1000;
     const MAXIMAL_FREEZABLE_RATIO = 0.85;
-
-    const fontSizes = [
-        { pt: 7.5, px: 10 },
-        { pt: 8, px: 11 },
-        { pt: 9, px: 12 },
-        { pt: 10, px: 13 },
-        { pt: 10.5, px: 14 },
-        { pt: 11, px: 15 },
-        { pt: 12, px: 16 },
-        { pt: 14, px: 18.7 },
-        { pt: 15, px: 20 },
-        { pt: 16, px: 21.3 },
-        { pt: 18, px: 24 },
-        { pt: 22, px: 29.3 },
-        { pt: 24, px: 32 },
-        { pt: 26, px: 34.7 },
-        { pt: 36, px: 48 },
-    ];
-    const fontSizeMap = {};
-    for (let font of fontSizes) {
-        fontSizeMap[font.pt] = font.px;
-    }
+    const FONT_SIZES = [6, 7, 8, 9, 10, 11, 12, 14, 18, 24, 36];
 
     // -----------------------------------------------------------------------------
     // Date Type
@@ -723,12 +702,23 @@
     function computeTextLinesHeight(textLineHeight, numberOfLines = 1) {
         return numberOfLines * (textLineHeight + MIN_CELL_TEXT_MARGIN) - MIN_CELL_TEXT_MARGIN;
     }
+    /**
+     * Get the default height of the cell given its style.
+     */
+    function getDefaultCellHeight(style) {
+        // TO DO: take multi text line into account to compute the real cell height in case of wrapping cell
+        const fontSize = computeTextFontSizeInPixels(style);
+        return computeTextLinesHeight(fontSize) + 2 * PADDING_AUTORESIZE_VERTICAL;
+    }
     function computeTextWidth(context, text, style) {
         context.save();
         context.font = computeTextFont(style);
         const textWidth = context.measureText(text).width;
         context.restore();
         return textWidth;
+    }
+    function fontSizeInPixels(fontSize) {
+        return Math.round(10 * ((fontSize * 96) / 72)) / 10;
     }
     function computeTextFont(style) {
         const italic = style.italic ? "italic " : "";
@@ -738,10 +728,7 @@
     }
     function computeTextFontSizeInPixels(style) {
         const sizeInPt = (style === null || style === void 0 ? void 0 : style.fontSize) || DEFAULT_FONT_SIZE;
-        if (!fontSizeMap[sizeInPt]) {
-            throw new Error("Size of the font is not supported");
-        }
-        return fontSizeMap[sizeInPt];
+        return fontSizeInPixels(sizeInPt);
     }
     /**
      * Return the font size that makes the width of a text match the given line width.
@@ -3568,6 +3555,12 @@
         CellValueType["error"] = "error";
     })(CellValueType || (CellValueType = {}));
 
+    var ClipboardMIMEType;
+    (function (ClipboardMIMEType) {
+        ClipboardMIMEType["PlainText"] = "text/plain";
+        ClipboardMIMEType["Html"] = "text/html";
+    })(ClipboardMIMEType || (ClipboardMIMEType = {}));
+
     function isSheetDependent(cmd) {
         return "sheetId" in cmd;
     }
@@ -4217,6 +4210,18 @@
         return `${strikethrough ? "line-through" : ""} ${underline ? "underline" : ""}`;
     }
     /**
+     * Convert the cell style to CSS properties.
+     */
+    function cellStyleToCss(style) {
+        const attributes = cellTextStyleToCss(style);
+        if (!style)
+            return attributes;
+        if (style.fillColor) {
+            attributes["background"] = style.fillColor;
+        }
+        return attributes;
+    }
+    /**
      * Convert the cell text style to CSS properties.
      */
     function cellTextStyleToCss(style) {
@@ -4239,11 +4244,12 @@
         }
         return attributes;
     }
-    function cssPropertiesToCss(attributes) {
+    function cssPropertiesToCss(attributes, newLine = true) {
+        const separator = newLine ? "\n" : "";
         const str = Object.entries(attributes)
             .map(([attName, attValue]) => `${attName}: ${attValue};`)
-            .join("\n");
-        return "\n" + str + "\n";
+            .join(separator);
+        return str ? "\n" + str + "\n" : "";
     }
 
     const ERROR_TOOLTIP_MAX_HEIGHT = 80;
@@ -7837,17 +7843,6 @@
             style,
         });
     }
-    async function readOsClipboard(env) {
-        try {
-            return await env.clipboard.readText();
-        }
-        catch (e) {
-            // Permission is required to read the clipboard.
-            console.warn("The OS clipboard could not be read.");
-            console.error(e);
-            return undefined;
-        }
-    }
     //------------------------------------------------------------------------------
     // Simple actions
     //------------------------------------------------------------------------------
@@ -7855,40 +7850,35 @@
     const REDO_ACTION = (env) => env.model.dispatch("REQUEST_REDO");
     const COPY_ACTION = async (env) => {
         env.model.dispatch("COPY");
-        await env.clipboard.writeText(env.model.getters.getClipboardContent());
+        await env.clipboard.write(env.model.getters.getClipboardContent());
     };
     const CUT_ACTION = async (env) => {
         interactiveCut(env);
-        await env.clipboard.writeText(env.model.getters.getClipboardContent());
+        await env.clipboard.write(env.model.getters.getClipboardContent());
     };
-    const PASTE_ACTION = async (env) => {
-        const spreadsheetClipboard = env.model.getters.getClipboardContent();
-        const osClipboard = await readOsClipboard(env);
-        const target = env.model.getters.getSelectedZones();
-        if (osClipboard && osClipboard !== spreadsheetClipboard) {
-            interactivePasteFromOS(env, target, osClipboard);
+    const PASTE_ACTION = async (env) => paste(env);
+    const PASTE_VALUE_ACTION = async (env) => paste(env, "onlyValue");
+    async function paste(env, pasteOption) {
+        const spreadsheetClipboard = env.model.getters.getClipboardTextContent();
+        const osClipboard = await env.clipboard.readText();
+        switch (osClipboard.status) {
+            case "ok":
+                const target = env.model.getters.getSelectedZones();
+                if (osClipboard && osClipboard.content !== spreadsheetClipboard) {
+                    interactivePasteFromOS(env, target, osClipboard.content);
+                }
+                else {
+                    interactivePaste(env, target, pasteOption);
+                }
+                break;
+            case "notImplemented":
+                env.raiseError(_lt("Pasting from the context menu is not supported in this browser. Use keyboard shortcuts ctrl+c / ctrl+v instead."));
+                break;
+            case "permissionDenied":
+                env.raiseError(_lt("Access to the clipboard denied by the browser. Please enable clipboard permission for this page in your browser settings."));
+                break;
         }
-        else {
-            interactivePaste(env, target);
-        }
-    };
-    const PASTE_VALUE_ACTION = async (env) => {
-        const spreadsheetClipboard = env.model.getters.getClipboardContent();
-        const osClipboard = await readOsClipboard(env);
-        const target = env.model.getters.getSelectedZones();
-        if (osClipboard && osClipboard !== spreadsheetClipboard) {
-            env.model.dispatch("PASTE_FROM_OS_CLIPBOARD", {
-                target,
-                text: osClipboard,
-            });
-        }
-        else {
-            env.model.dispatch("PASTE", {
-                target: env.model.getters.getSelectedZones(),
-                pasteOption: "onlyValue",
-            });
-        }
-    };
+    }
     const PASTE_FORMAT_ACTION = (env) => interactivePaste(env, env.model.getters.getSelectedZones(), "onlyFormat");
     const DELETE_CONTENT_ACTION = (env) => env.model.dispatch("DELETE_CONTENT", {
         sheetId: env.model.getters.getActiveSheetId(),
@@ -9264,11 +9254,11 @@
         isVisible: SELECTION_CONTAINS_FILTER,
     });
     // Font-sizes
-    for (let fs of fontSizes) {
-        topbarMenuRegistry.addChild(`format_font_size_${fs.pt}`, ["format", "format_font_size"], {
-            name: fs.pt.toString(),
-            sequence: fs.pt,
-            action: (env) => setStyle(env, { fontSize: fs.pt }),
+    for (let fs of FONT_SIZES) {
+        topbarMenuRegistry.addChild(`format_font_size_${fs}`, ["format", "format_font_size"], {
+            name: fs.toString(),
+            sequence: fs,
+            action: (env) => setStyle(env, { fontSize: fs }),
         });
     }
 
@@ -11639,7 +11629,7 @@
                 action: async () => {
                     this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
                     this.env.model.dispatch("COPY");
-                    await this.env.clipboard.writeText(this.env.model.getters.getClipboardContent());
+                    await this.env.clipboard.clear();
                 },
             });
             registry.add("cut", {
@@ -11648,7 +11638,7 @@
                 action: async () => {
                     this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
                     this.env.model.dispatch("CUT");
-                    await this.env.clipboard.writeText(this.env.model.getters.getClipboardContent());
+                    await this.env.clipboard.clear();
                 },
             });
             registry.add("delete", {
@@ -15341,7 +15331,7 @@
         assert(() => pv > 0, _lt("The present value (%s) must be strictly positive.", pv.toString()));
     }
     function assertPeriodSmallerOrEqualToLife(period, life) {
-        assert(() => period <= life, _lt("The period (%s) must be less than or equal life (%.", period.toString(), life.toString()));
+        assert(() => period <= life, _lt("The period (%s) must be less than or equal life (%s).", period.toString(), life.toString()));
     }
     function assertInvestmentStrictlyPositive(investment) {
         assert(() => investment > 0, _lt("The investment (%s) must be strictly positive.", investment.toString()));
@@ -21356,7 +21346,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       background: ${background};
       color: ${color};
 
-      font-size: ${fontSizeMap[fontSize]}px;
+      font-size: ${fontSizeInPixels(fontSize)}px;
       font-weight: ${fontWeight};
       font-style: ${fontStyle};
       text-decoration: ${textDecoration};
@@ -23510,6 +23500,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (!this.gridEl.contains(document.activeElement)) {
                 return;
             }
+            const clipboardData = ev.clipboardData;
+            if (!clipboardData) {
+                this.displayWarningCopyPasteNotSupported();
+                return;
+            }
             /* If we are currently editing a cell, let the default behavior */
             if (this.env.model.getters.getEditionMode() !== "inactive") {
                 return;
@@ -23521,7 +23516,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.env.model.dispatch("COPY");
             }
             const content = this.env.model.getters.getClipboardContent();
-            ev.clipboardData.setData("text/plain", content);
+            for (const type in content) {
+                clipboardData.setData(type, content[type]);
+            }
             ev.preventDefault();
         }
         paste(ev) {
@@ -23529,11 +23526,15 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return;
             }
             const clipboardData = ev.clipboardData;
-            if (clipboardData.types.indexOf("text/plain") > -1) {
-                const content = clipboardData.getData("text/plain");
+            if (!clipboardData) {
+                this.displayWarningCopyPasteNotSupported();
+                return;
+            }
+            if (clipboardData.types.indexOf(ClipboardMIMEType.PlainText) > -1) {
+                const content = clipboardData.getData(ClipboardMIMEType.PlainText);
                 const target = this.env.model.getters.getSelectedZones();
-                const clipBoardString = this.env.model.getters.getClipboardContent();
-                if (clipBoardString === content) {
+                const clipboardString = this.env.model.getters.getClipboardTextContent();
+                if (clipboardString === content) {
                     // the paste actually comes from o-spreadsheet itself
                     interactivePaste(this.env, target);
                 }
@@ -23541,6 +23542,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     interactivePasteFromOS(this.env, target, content);
                 }
             }
+        }
+        displayWarningCopyPasteNotSupported() {
+            this.env.raiseError(_lt("Copy/Paste is not supported in this browser."));
         }
         closeMenu() {
             this.menuState.isOpen = false;
@@ -24336,9 +24340,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 ? convertColor((_j = styleStruct.fillStyle) === null || _j === void 0 ? void 0 : _j.fgColor)
                 : convertColor((_k = styleStruct.fillStyle) === null || _k === void 0 ? void 0 : _k.bgColor),
             textColor: convertColor((_l = styleStruct.fontStyle) === null || _l === void 0 ? void 0 : _l.color),
-            fontSize: ((_m = styleStruct.fontStyle) === null || _m === void 0 ? void 0 : _m.size)
-                ? getClosestFontSize(styleStruct.fontStyle.size)
-                : undefined,
+            fontSize: ((_m = styleStruct.fontStyle) === null || _m === void 0 ? void 0 : _m.size) ? styleStruct.fontStyle.size : undefined,
         };
     }
     function convertFormats(data, warningManager) {
@@ -24385,15 +24387,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         warningManager.generateNotSupportedWarning(WarningTypes.NumFmtIdNotSupported, format || `nmFmtId ${numFmtId}`);
         return undefined;
-    }
-    /**
-     * We currently only support only a set of font sizes, we cannot define new font sizes.
-     * This function adapts an arbitrary font size to the closest supported font size.
-     */
-    function getClosestFontSize(fontSize) {
-        const supportedSizes = Object.keys(fontSizeMap).map(Number);
-        const closest = supportedSizes.reduce((prev, curr) => Math.abs(curr - fontSize) < Math.abs(prev - fontSize) ? curr : prev);
-        return closest;
     }
     // ---------------------------------------------------------------------------
     // Warnings
@@ -25467,8 +25460,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     function formatAttributes(attrs) {
         return new XMLString(attrs.map(([key, val]) => `${key}="${xmlEscape(val)}"`).join(" "));
     }
-    function parseXML(xmlString) {
-        const document = new DOMParser().parseFromString(xmlString.toString(), "text/xml");
+    function parseXML(xmlString, mimeType = "text/xml") {
+        const document = new DOMParser().parseFromString(xmlString.toString(), mimeType);
         const parserError = document.querySelector("parsererror");
         if (parserError) {
             const errorString = parserError.innerHTML;
@@ -29233,7 +29226,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         getHeaderSize(sheetId, dimension, index) {
             var _a, _b, _c, _d;
-            return (((_b = (_a = this.sizes[sheetId]) === null || _a === void 0 ? void 0 : _a[dimension][index]) === null || _b === void 0 ? void 0 : _b.manualSize) ||
+            return Math.round(((_b = (_a = this.sizes[sheetId]) === null || _a === void 0 ? void 0 : _a[dimension][index]) === null || _b === void 0 ? void 0 : _b.manualSize) ||
                 ((_d = (_c = this.sizes[sheetId]) === null || _c === void 0 ? void 0 : _c[dimension][index]) === null || _d === void 0 ? void 0 : _d.computedSize()) ||
                 this.getDefaultHeaderSize(dimension));
         }
@@ -29266,9 +29259,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return DEFAULT_CELL_HEIGHT;
             }
             const cell = this.getters.getCell(position);
-            // TO DO: take multi text line into account to compute the real cell height in case of wrapping cell
-            const fontSize = computeTextFontSizeInPixels(cell === null || cell === void 0 ? void 0 : cell.style);
-            return computeTextLinesHeight(fontSize) + 2 * PADDING_AUTORESIZE_VERTICAL;
+            return getDefaultCellHeight(cell === null || cell === void 0 ? void 0 : cell.style);
         }
         /**
          * Get the tallest cell of a row and its size.
@@ -29540,7 +29531,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 action: async () => {
                     this.env.model.dispatch("SELECT_FIGURE", { id: this.figureId });
                     this.env.model.dispatch("COPY");
-                    await this.env.clipboard.writeText(this.env.model.getters.getClipboardContent());
+                    await this.env.clipboard.clear();
                 },
             });
             registry.add("cut", {
@@ -29550,7 +29541,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 action: async () => {
                     this.env.model.dispatch("SELECT_FIGURE", { id: this.figureId });
                     this.env.model.dispatch("CUT");
-                    await this.env.clipboard.writeText(this.env.model.getters.getClipboardContent());
+                    await this.env.clipboard.clear();
                 },
             });
             registry.add("reset_size", {
@@ -36712,6 +36703,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     const position = { col, row, sheetId };
                     cellsInRow.push({
                         cell: getters.getCell(position),
+                        style: getters.getCellComputedStyle(position),
                         evaluatedCell: getters.getEvaluatedCell(position),
                         border: getters.getCellBorder(position) || undefined,
                         position,
@@ -37062,6 +37054,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
         }
         getClipboardContent() {
+            return {
+                [ClipboardMIMEType.PlainText]: this.getPlainTextContent(),
+                [ClipboardMIMEType.Html]: this.getHTMLContent(),
+            };
+        }
+        getPlainTextContent() {
             return (this.cells
                 .map((cells) => {
                 return cells
@@ -37069,6 +37067,23 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     .join("\t");
             })
                 .join("\n") || "\t");
+        }
+        getHTMLContent() {
+            if (this.cells.length == 1 && this.cells[0].length == 1) {
+                return this.getters.getCellText(this.cells[0][0].position);
+            }
+            let htmlTable = '<table border="1" style="border-collapse:collapse">';
+            for (const row of this.cells) {
+                htmlTable += "<tr>";
+                for (const cell of row) {
+                    const cssStyle = cssPropertiesToCss(cellStyleToCss(cell.style), false);
+                    const cellText = this.getters.getCellText(cell.position);
+                    htmlTable += `<td style="${cssStyle}">` + xmlEscape(cellText) + "</td>";
+                }
+                htmlTable += "</tr>";
+            }
+            htmlTable += "</table>";
+            return htmlTable;
         }
         isColRowDirtyingClipboard(position, dimension) {
             if (!this.zones)
@@ -37160,7 +37175,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.dispatch("SELECT_FIGURE", { id: newId });
         }
         getClipboardContent() {
-            return "\t";
+            return { [ClipboardMIMEType.PlainText]: "\t" };
         }
         isColRowDirtyingClipboard(position, dimension) {
             return false;
@@ -37250,7 +37265,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.selection.selectZone({ cell: { col: activeCol, row: activeRow }, zone });
         }
         getClipboardContent() {
-            return this.values.map((values) => values.join("\t")).join("\n");
+            return {
+                [ClipboardMIMEType.PlainText]: this.values.map((values) => values.join("\t")).join("\n"),
+            };
         }
         getPasteZone(target) {
             const height = this.values.length;
@@ -37407,7 +37424,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          */
         getClipboardContent() {
             var _a;
-            return ((_a = this.state) === null || _a === void 0 ? void 0 : _a.getClipboardContent()) || "\t";
+            return ((_a = this.state) === null || _a === void 0 ? void 0 : _a.getClipboardContent()) || { [ClipboardMIMEType.PlainText]: "\t" };
+        }
+        getClipboardTextContent() {
+            var _a;
+            return ((_a = this.state) === null || _a === void 0 ? void 0 : _a.getClipboardContent()[ClipboardMIMEType.PlainText]) || "\t";
         }
         isCutOperation() {
             return this.state ? this.state.operation === "CUT" : false;
@@ -37485,7 +37506,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     ClipboardPlugin.layers = [2 /* LAYERS.Clipboard */];
-    ClipboardPlugin.getters = ["getClipboardContent", "isCutOperation", "isPaintingFormat"];
+    ClipboardPlugin.getters = [
+        "getClipboardContent",
+        "getClipboardTextContent",
+        "isCutOperation",
+        "isPaintingFormat",
+    ];
 
     const selectionStatisticFunctions = [
         {
@@ -38817,6 +38843,98 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
 
+    // -----------------------------------------------------------------------------
+    // TopBar
+    // -----------------------------------------------------------------------------
+    css /* scss */ `
+  .o-spreadsheet-topbar {
+    /* Toolbar + Cell Content */
+    .o-topbar-toolbar {
+      input.o-font-size {
+        height: 20px;
+        width: 23px;
+        border: none;
+        background-color: rgba(0, 0, 0, 0);
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+      }
+    }
+  }
+`;
+    class FontEditor extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.fontSizes = FONT_SIZES;
+            this.style = {};
+            this.state = owl.useState({
+                menuState: { isOpen: false, position: null, menuItems: [] },
+            });
+            this.openedEl = null;
+            this.inputFontSize = owl.useRef("inputFontSize");
+            this.parentDiv = owl.useRef("FontSizeContainer");
+        }
+        setup() {
+            owl.useExternalListener(window, "click", this.onExternalClick);
+            owl.onWillStart(() => this.updateCellState());
+            owl.onWillUpdateProps(() => this.updateCellState());
+        }
+        onExternalClick(ev) {
+            var _a;
+            //@ts-ignore
+            if (!((_a = this.parentDiv.el) === null || _a === void 0 ? void 0 : _a.contains(ev.target))) {
+                this.closeFontList();
+            }
+        }
+        toggleFontList(ev) {
+            var _a;
+            const isOpen = this.state.menuState.isOpen;
+            if (!isOpen) {
+                this.props.callback();
+                (_a = this.inputFontSize.el) === null || _a === void 0 ? void 0 : _a.focus();
+            }
+            else {
+                this.closeFontList();
+            }
+        }
+        closeFontList() {
+            this.state.menuState.isOpen = false;
+            this.openedEl = null;
+        }
+        updateCellState() {
+            this.style = { ...this.env.model.getters.getCurrentStyle() };
+            this.style.fontSize = this.style.fontSize || DEFAULT_FONT_SIZE;
+        }
+        setSize(fontSizeStr) {
+            this.style.fontSize = clip(parseFloat(fontSizeStr), 1, 400);
+            setStyle(this.env, { fontSize: this.style.fontSize });
+            this.closeFontList();
+        }
+        setSizeFromInput(ev) {
+            this.setSize(ev.target.value);
+        }
+        onFontsizeInputFocused(ev) {
+            this.state.menuState.isOpen = true;
+            ev.target.select();
+        }
+        onFontSizeKeydown(ev) {
+            if (ev.key === "Enter" || ev.key === "Escape") {
+                this.closeFontList();
+                const target = ev.target;
+                if (ev.key === "Escape") {
+                    target.value = `${this.style.fontSize || DEFAULT_FONT_SIZE}`;
+                }
+                target.blur();
+            }
+        }
+    }
+    FontEditor.template = "o-spreadsheet-FontEditor";
+    FontEditor.components = {};
+
     const FORMATS = [
         { name: "automatic", text: NumberFormatTerms.Automatic },
         { name: "number", text: NumberFormatTerms.Number, description: "1,000.12", value: "#,##0.00" },
@@ -39063,11 +39181,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     class TopBar extends owl.Component {
         constructor() {
             super(...arguments);
-            this.DEFAULT_FONT_SIZE = DEFAULT_FONT_SIZE;
             this.commonFormats = FORMATS;
             this.customFormats = CUSTOM_FORMATS;
             this.currentFormatName = "automatic";
-            this.fontSizes = fontSizes;
             this.style = {};
             this.state = owl.useState({
                 menuState: { isOpen: false, position: null, menuItems: [] },
@@ -39250,11 +39366,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 target: this.env.model.getters.getSelectedZones(),
             });
         }
-        setSize(fontSizeStr) {
-            const fontSize = parseFloat(fontSizeStr);
-            setStyle(this.env, { fontSize });
-            this.onClick();
-        }
         doAction(action) {
             action(this.env);
             this.closeMenus();
@@ -39289,12 +39400,72 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     TopBar.template = "o-spreadsheet-TopBar";
-    TopBar.components = { ColorPicker, Menu, Composer };
+    TopBar.components = { ColorPicker, Menu, Composer, FontEditor };
     TopBar.props = {
         onClick: Function,
         focusComposer: String,
         onComposerContentFocused: Function,
     };
+
+    function instantiateClipboard() {
+        return new WebClipboardWrapper(navigator.clipboard);
+    }
+    class WebClipboardWrapper {
+        // Can be undefined because navigator.clipboard doesn't exist in old browsers
+        constructor(clipboard) {
+            this.clipboard = clipboard;
+        }
+        async write(clipboardContent) {
+            var _a;
+            try {
+                (_a = this.clipboard) === null || _a === void 0 ? void 0 : _a.write(this.getClipboardItems(clipboardContent));
+            }
+            catch (e) { }
+        }
+        async writeText(text) {
+            var _a;
+            try {
+                (_a = this.clipboard) === null || _a === void 0 ? void 0 : _a.writeText(text);
+            }
+            catch (e) { }
+        }
+        async readText() {
+            let permissionResult = undefined;
+            try {
+                //@ts-ignore - clipboard-read is not implemented in all browsers
+                permissionResult = await navigator.permissions.query({ name: "clipboard-read" });
+            }
+            catch (e) { }
+            try {
+                const clipboardContent = await this.clipboard.readText();
+                return { status: "ok", content: clipboardContent };
+            }
+            catch (e) {
+                const status = (permissionResult === null || permissionResult === void 0 ? void 0 : permissionResult.state) === "denied" ? "permissionDenied" : "notImplemented";
+                return { status };
+            }
+        }
+        async clear() {
+            var _a;
+            try {
+                (_a = this.clipboard) === null || _a === void 0 ? void 0 : _a.write([]);
+            }
+            catch (e) { }
+        }
+        getClipboardItems(content) {
+            return [
+                new ClipboardItem({
+                    [ClipboardMIMEType.PlainText]: this.getBlob(content, ClipboardMIMEType.PlainText),
+                    [ClipboardMIMEType.Html]: this.getBlob(content, ClipboardMIMEType.Html),
+                }),
+            ];
+        }
+        getBlob(clipboardContent, type) {
+            return new Blob([clipboardContent[type] || ""], {
+                type,
+            });
+        }
+    }
 
     css /* scss */ `
   .o-spreadsheet {
@@ -39399,7 +39570,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 openSidePanel: this.openSidePanel.bind(this),
                 toggleSidePanel: this.toggleSidePanel.bind(this),
                 _t: Spreadsheet._t,
-                clipboard: navigator.clipboard,
+                clipboard: this.env.clipboard || instantiateClipboard(),
             });
             owl.useExternalListener(window, "resize", () => this.render(true));
             owl.useExternalListener(window, "beforeunload", this.unbindModelEvents.bind(this));
@@ -43399,8 +43570,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-01-04T17:31:52.940Z';
-    exports.__info__.hash = 'f88b16b';
+    exports.__info__.date = '2023-01-09T14:03:11.418Z';
+    exports.__info__.hash = '5f6ae5f';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
