@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-# Copyright (C) 2009 P. Christeas <p_christ@hol.gr>. All Rights Reserved
-
 {
     'name': 'Greece - Accounting',
-    'author': 'P. Christeas, OpenERP SA.',
-    'website': 'http://openerp.hellug.gr/',
+    'version': '2.0',
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This is the base module to manage the accounting chart for Greece.
