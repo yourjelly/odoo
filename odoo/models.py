@@ -5989,24 +5989,24 @@ class BaseModel(metaclass=MetaModel):
         #  - mark I to recompute on inverse(W, inverse(X, records)),
         #  - mark J to recompute on inverse(Y, records).
         fields = [self._fields[fname] for fname in fnames]
-        cache = self.env.cache
 
-        # The fields' trigger trees are merged in order to evaluate all triggers
-        # at once. For non-stored computed fields, `_modified_triggers` might
-        # traverse the tree (at the cost of extra queries) only to know which
-        # records to invalidate in cache. But in many cases, most of these
-        # fields have no data in cache, so they can be ignored from the start.
-        # This allows us to discard subtrees from the merged tree when they
-        # only contain such fields.
-        tree = self.pool.get_trigger_tree(
-            fields,
-            select=lambda field: (field.compute and field.store) or cache.contains_field(field),
-        )
-        if not tree:
-            return
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
 
         # determine what to compute (through an iterator)
-        tocompute = self.sudo().with_context(active_test=False)._modified_triggers(tree, create)
+        tocompute = self.sudo().with_context(active_test=False)._modified_triggers(fields, create)
 
         # When called after modification, one should traverse backwards
         # dependencies by taking into account all fields already known to be
@@ -6053,22 +6053,58 @@ class BaseModel(metaclass=MetaModel):
                         ", before=True" if before else "", pformat(done),
                         stack_info=True)
 
-    def _modified_triggers(self, tree, create=False):
+    def _modified_triggers(self, nodes, create=False, seen=None):
         """ Return an iterator traversing a tree of field triggers on ``self``,
         traversing backwards field dependencies along the way, and yielding
         tuple ``(field, records, created)`` to recompute.
         """
-        if not self:
+        if not self or not nodes:
             return
 
-        # first yield what to compute
-        for field in tree.root:
-            yield field, self, create
+        graph = self.pool._field_trigger_graph
+        cache = self.env.cache
 
-        # then traverse dependencies backwards, and proceed recursively
-        for field, subtree in tree.items():
+        def should_trigger(field):
+            # purpose: ignore non-stored computed fields that are not in cache
+            return (field.compute and field.store) or cache.contains_field(field)
+
+        def should_keep(node):
+            # purpose: ignore fields above unless they are dependencies of other fields
+            field = node or node.field
+            return should_trigger(field) or field in graph._edges
+
+        # first determine what to trigger on self
+        if seen is None:
+            # toplevel call: trigger the nodes' transitive closure
+            seen = defaultdict(OrderedSet)
+            self_nodes = [node for node in graph.transitive_closure(nodes) if should_keep(node)]
+            touched_nodes = OrderedSet(nodes)
+        else:
+            # auxiliary call: trigger all nodes (already a closure)
+            self_nodes = nodes
+            touched_nodes = OrderedSet()
+
+        for field in self_nodes:
+            seen_ids = seen[field]
+            if all(id_ in seen_ids for id_ in self._ids):
+                continue
+            if field and should_trigger(field):
+                yield field, self, create
+            seen_ids.update(self._ids)
+            touched_nodes.add(field)
+
+        # determine what to trigger on other records, and process them recursively
+        for field, nodes in graph.outgoing(touched_nodes).items():
+            if field is None:
+                # already handled above
+                continue
+
             if create and field.type in ('many2one', 'many2one_reference'):
                 # upon creation, no other record has a reference to self
+                continue
+
+            nodes = [node for node in graph.full_closure(nodes) if should_keep(node)]
+            if not nodes:
                 continue
 
             model = self.env[field.model_name]
@@ -6106,7 +6142,7 @@ class BaseModel(metaclass=MetaModel):
                     cache_records = self.env.cache.get_records(model, field)
                     records |= cache_records.filtered(lambda r: set(r[field.name]._ids) & set(self._ids))
 
-            yield from records._modified_triggers(subtree)
+            yield from records._modified_triggers(nodes, seen=seen)
 
     @api.model
     def recompute(self, fnames=None, records=None):

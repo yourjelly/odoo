@@ -75,7 +75,7 @@ class TriggerGraph:
             return self._edges[to_field][None].add(field)
 
         # make a chained list with dummy nodes between 'to_field' and 'field'
-        nodes = [field, *(Dummy() for _i in range(len(path) - 1)), to_field]
+        nodes = [field, *(Dummy(field) for _i in range(len(path) - 1)), to_field]
         for step, to_node, from_node in zip(path, nodes, nodes[1:]):
             self._edges[from_node][step].add(to_node)
 
@@ -159,7 +159,10 @@ class Dummy:
     field dependencies. Those objects are considered distinct, which enables to
     have many of them inside the graph.
     """
-    __slots__ = ()
+    __slots__ = ['field']
+
+    def __init__(self, field):
+        self.field = field
 
     def __bool__(self):
         return False
