@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="l10n_gr_chart_template" model="account.chart.template">
-            <field name="name">Πρότυπο Ελληνικού Λογιστικού Σχεδίου</field>
+            <field name="name">Standard Greek Chart of Accounts</field>
             <field name="bank_account_code_prefix">38</field>
             <field name="cash_account_code_prefix">38</field>
             <field name="transfer_account_code_prefix">38.07</field>

@@ -1,15 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- tax definitions for VAT on sales (income) -->
-    <record id="ivat19" model="account.tax.template">
+    <!-- SALES -->
+    <record id="vat13_sales" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
-        <field name="name">Πωλήσεις ΦΠΑ 19%</field>
-        <field name="description">Πωλήσεις ΦΠΑ 19%</field>
-        <field eval="19" name="amount"/>
+        <field name="name">Sales VAT 13%</field>
+        <field name="description">Sales VAT 13% for Greece (apart from the Aegean Islands)</field>
+        <field name="amount" eval="13"/>
+        <field name="sequence" eval="1"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_13"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_301_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_01'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_331_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_301_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_01'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_331_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat6_sales" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Sales VAT 6%</field>
+        <field name="description">Sales VAT 6% for Greece (apart from the Aegean Islands)</field>
+        <field name="amount" eval="6"/>
+        <field name="sequence" eval="2"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_6"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_302_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_01'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_332_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_302_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_01'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_332_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat24_sales" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Sales VAT 24%</field>
+        <field name="description">Sales VAT 24% for Greece (apart from the Aegean Islands)</field>
+        <field name="amount" eval="24"/>
         <field name="sequence" eval="3"/>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="tax_group_id" ref="tax_group_19"/>
+        <field name="tax_group_id" ref="tax_group_24"/>
         <field name="invoice_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'repartition_type': 'base',
@@ -17,239 +81,1296 @@
                 }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_01'),
                     'plus_report_expression_ids': [ref('account_tax_report_line_333_tag')],
                 }),
             ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {'repartition_type': 'base'}),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_303_tag')],
+                }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_01'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_333_tag')],
                 }),
             ]"/>
     </record>
-    <record id="ivat21" model="account.tax.template">
+    <record id="vat9_sales" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
-        <field name="name">Πωλήσεις ΦΠΑ 21%</field>
-        <field name="description">Πωλήσεις ΦΠΑ 21%</field>
-        <field eval="21" name="amount"/>
-        <field name="sequence" eval="2"/>
+        <field name="name">Sales VAT 9%</field>
+        <field name="description">Sales VAT 9% for the Aegean Islands</field>
+        <field name="amount" eval="9"/>
+        <field name="sequence" eval="4"/>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="tax_group_id" ref="tax_group_21"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+        <field name="tax_group_id" ref="tax_group_9"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'repartition_type': 'base',
-                    'plus_report_expression_ids': [ref('account_tax_report_line_303_tag')],
+                    'plus_report_expression_ids': [ref('account_tax_report_line_304_tag')],
                 }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
-                    'plus_report_expression_ids': [ref('account_tax_report_line_333_tag')],
+                    'account_id': ref('chartgr_54_02_01'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_334_tag')],
                 }),
             ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {'repartition_type': 'base'}),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_304_tag')],
+                }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_01'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_334_tag')],
                 }),
             ]"/>
     </record>
-    <record id="ivat23" model="account.tax.template">
+    <record id="vat4_sales" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
-        <field name="name">Πωλήσεις ΦΠΑ 23%</field>
-        <field name="description">Πωλήσεις ΦΠΑ 23%</field>
-        <field eval="23" name="amount"/>
+        <field name="name">Sales VAT 4%</field>
+        <field name="description">Sales VAT 4% for the Aegean Islands</field>
+        <field name="amount" eval="4"/>
+        <field name="sequence" eval="5"/>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="tax_group_id" ref="tax_group_23"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+        <field name="tax_group_id" ref="tax_group_4"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'repartition_type': 'base',
-                    'plus_report_expression_ids': [ref('account_tax_report_line_303_tag')],
+                    'plus_report_expression_ids': [ref('account_tax_report_line_305_tag')],
                 }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
-                    'plus_report_expression_ids': [ref('account_tax_report_line_333_tag')],
+                    'account_id': ref('chartgr_54_02_01'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_335_tag')],
                 }),
             ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {'repartition_type': 'base'}),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_305_tag')],
+                }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_01'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_335_tag')],
                 }),
             ]"/>
     </record>
-    <!-- tax definitions for return VAT from purchases -->
-    <record id="pvat19" model="account.tax.template">
+    <record id="vat17_sales" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
-        <field name="name">Αγορές ΦΠΑ19%</field>
-        <field name="description">Αγορές ΦΠΑ19%</field>
-        <field eval="19" name="amount"/>
-        <field name="sequence" eval="3"/>
+        <field name="name">Sales VAT 17%</field>
+        <field name="description">Sales VAT 17% for the Aegean Islands</field>
+        <field name="amount" eval="17"/>
+        <field name="sequence" eval="6"/>
         <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="tax_group_19"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_17"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'repartition_type': 'base',
-                    'plus_report_expression_ids': [ref('account_tax_report_line_353_tag')],
+                    'plus_report_expression_ids': [ref('account_tax_report_line_306_tag')],
                 }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
-                    'plus_report_expression_ids': [ref('account_tax_report_line_373_tag')],
+                    'account_id': ref('chartgr_54_02_01'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_336_tag')],
                 }),
             ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {'repartition_type': 'base'}),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_306_tag')],
+                }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_01'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_336_tag')],
                 }),
             ]"/>
     </record>
-    <record id="pvat21" model="account.tax.template">
+
+    <!-- Purchases -->
+    <!-- 13% -->
+    <record id="vat13_purchase_domestic" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
-        <field name="name">Αγορές ΦΠΑ21%</field>
-        <field name="description">Αγορές ΦΠΑ21%</field>
-        <field eval="21" name="amount"/>
-        <field name="sequence" eval="2"/>
+        <field name="name">Purchases and Expenditures within the Country (VAT 13%)</field>
+        <field name="description">Purchase VAT 13% for domestic purchase and expenditures</field>
+        <field name="amount" eval="13"/>
+        <field name="sequence" eval="7"/>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="tax_group_21"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+        <field name="tax_group_id" ref="tax_group_13"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'repartition_type': 'base',
-                    'plus_report_expression_ids': [ref('account_tax_report_line_353_tag')],
+                    'plus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
                 }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
-                    'plus_report_expression_ids': [ref('account_tax_report_line_373_tag')],
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
                 }),
             ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {'repartition_type': 'base'}),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
                 }),
             ]"/>
     </record>
-    <record id="pvat23" model="account.tax.template">
+    <record id="vat13_purchase_imports" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
-        <field name="name">Αγορές ΦΠΑ23%</field>
-        <field name="description">Αγορές ΦΠΑ23%</field>
-        <field eval="23" name="amount"/>
+        <field name="name">Purchases and Imports of Investments Goods (VAT 13%)</field>
+        <field name="description">Purchase VAT 13% for imports of investments goods</field>
+        <field name="amount" eval="13"/>
+        <field name="sequence" eval="8"/>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="tax_group_23"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+        <field name="tax_group_id" ref="tax_group_13"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'repartition_type': 'base',
-                    'plus_report_expression_ids': [ref('account_tax_report_line_353_tag')],
+                    'plus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
                 }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
-                    'plus_report_expression_ids': [ref('account_tax_report_line_373_tag')],
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
                 }),
             ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {'repartition_type': 'base'}),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
                 }),
             ]"/>
     </record>
-    <!-- return VAT on expenses (different from purchases ) -->
-    <record id="evat19" model="account.tax.template">
+    <record id="vat13_purchase_other_imports" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
-        <field name="name">Δαπάνες ΦΠΑ19%</field>
-        <field name="description">Δαπάνες ΦΠΑ19%</field>
-        <field eval="19" name="amount"/>
-        <field name="sequence" eval="3"/>
+        <field name="name">Other Imports (VAT 13%)</field>
+        <field name="description">Purchase VAT 13% for imports other than investments goods</field>
+        <field name="amount" eval="13"/>
+        <field name="sequence" eval="9"/>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="tax_group_19"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+        <field name="tax_group_id" ref="tax_group_13"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'repartition_type': 'base',
-                    'plus_report_expression_ids': [ref('account_tax_report_line_357_tag')],
+                    'plus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
                 }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
-                    'plus_report_expression_ids': [ref('account_tax_report_line_377_tag')],
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
                 }),
             ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {'repartition_type': 'base'}),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
                 }),
             ]"/>
     </record>
-    <record id="evat21" model="account.tax.template">
+    <record id="vat13_purchase_intracommunity_goods" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
-        <field name="name">Δαπάνες ΦΠΑ21%</field>
-        <field name="description">Δαπάνες ΦΠΑ21%</field>
-        <field eval="21" name="amount"/>
-        <field name="sequence" eval="2"/>
+        <field name="name">Intra-Community Acquisitions of Goods (VAT 13%)</field>
+        <field name="description">Purchase VAT 13% for intra-community acquisitions of goods</field>
+        <field name="amount" eval="13"/>
+        <field name="sequence" eval="10"/>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="tax_group_21"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+        <field name="tax_group_id" ref="tax_group_13"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'repartition_type': 'base',
-                    'plus_report_expression_ids': [ref('account_tax_report_line_357_tag')],
+                    'plus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
                 }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
-                    'plus_report_expression_ids': [ref('account_tax_report_line_377_tag')],
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
                 }),
             ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {'repartition_type': 'base'}),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
                 }),
             ]"/>
     </record>
-    <record id="evat23" model="account.tax.template">
+    <record id="vat13_purchase_intracommunity_services" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_gr_chart_template"/>
-        <field name="name">Δαπάνες ΦΠΑ23%</field>
-        <field name="description">Δαπάνες ΦΠΑ23%</field>
-        <field eval="23" name="amount"/>
-        <field name="sequence" eval="2"/>
+        <field name="name">Intra-Community Acquisitions of Services (VAT 13%)</field>
+        <field name="description">Purchase VAT 13% for intra-community acquisitions of services</field>
+        <field name="amount" eval="13"/>
+        <field name="sequence" eval="11"/>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="tax_group_23"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+        <field name="tax_group_id" ref="tax_group_13"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
                 (0,0, {
                     'repartition_type': 'base',
-                    'plus_report_expression_ids': [ref('account_tax_report_line_357_tag')],
+                    'plus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
                 }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
-                    'plus_report_expression_ids': [ref('account_tax_report_line_377_tag')],
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
                 }),
             ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-                (0,0, {'repartition_type': 'base'}),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
                 (0,0, {
                     'repartition_type': 'tax',
-                    'account_id': ref('chartgr_54_00'),
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat13_purchase_reverse_charge" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Reverse-Charge Transactions (VAT 13%)</field>
+        <field name="description">Purchase VAT 13% for other reverse-charge transactions</field>
+        <field name="amount" eval="13"/>
+        <field name="sequence" eval="12"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_13"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+    </record>
+    <!-- 6% -->
+    <record id="vat6_purchase_domestic" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Expenditures within the Country (VAT 6%)</field>
+        <field name="description">Purchase VAT 6% for domestic purchase and expenditures</field>
+        <field name="amount" eval="6"/>
+        <field name="sequence" eval="13"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_6"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat6_purchase_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Imports of Investments Goods (VAT 6%)</field>
+        <field name="description">Purchase VAT 6% for imports of investments goods</field>
+        <field name="amount" eval="6"/>
+        <field name="sequence" eval="14"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_6"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat6_purchase_other_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Imports (VAT 6%)</field>
+        <field name="description">Purchase VAT 6% for imports other than investments goods</field>
+        <field name="amount" eval="6"/>
+        <field name="sequence" eval="15"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_6"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat6_purchase_intracommunity_goods" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Goods (VAT 6%)</field>
+        <field name="description">Purchase VAT 6% for intra-community acquisitions of goods</field>
+        <field name="amount" eval="6"/>
+        <field name="sequence" eval="16"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_6"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat6_purchase_intracommunity_services" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Services (VAT 6%)</field>
+        <field name="description">Purchase VAT 6% for intra-community acquisitions of services</field>
+        <field name="amount" eval="6"/>
+        <field name="sequence" eval="17"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_6"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat6_purchase_reverse_charge" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Reverse-Charge Transactions (VAT 6%)</field>
+        <field name="description">Purchase VAT 6% for other reverse-charge transactions</field>
+        <field name="amount" eval="6"/>
+        <field name="sequence" eval="18"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_6"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+    </record>
+    <!-- 24% -->
+    <record id="vat24_purchase_domestic" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Expenditures within the Country (VAT 24%)</field>
+        <field name="description">Purchase VAT 24% for domestic purchase and expenditures</field>
+        <field name="amount" eval="24"/>
+        <field name="sequence" eval="19"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_24"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat24_purchase_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Imports of Investments Goods (VAT 24%)</field>
+        <field name="description">Purchase VAT 24% for imports of investments goods</field>
+        <field name="amount" eval="24"/>
+        <field name="sequence" eval="20"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_24"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat24_purchase_other_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Imports (VAT 24%)</field>
+        <field name="description">Purchase VAT 24% for imports other than investments goods</field>
+        <field name="amount" eval="24"/>
+        <field name="sequence" eval="21"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_24"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat24_purchase_intracommunity_goods" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Goods (VAT 24%)</field>
+        <field name="description">Purchase VAT 24% for intra-community acquisitions of goods</field>
+        <field name="amount" eval="24"/>
+        <field name="sequence" eval="22"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_24"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat24_purchase_intracommunity_services" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Services (VAT 24%)</field>
+        <field name="description">Purchase VAT 24% for intra-community acquisitions of services</field>
+        <field name="amount" eval="24"/>
+        <field name="sequence" eval="23"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_24"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat24_purchase_reverse_charge" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Reverse-Charge Transactions (VAT 24%)</field>
+        <field name="description">Purchase VAT 24% for other reverse-charge transactions</field>
+        <field name="amount" eval="24"/>
+        <field name="sequence" eval="24"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_24"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+    </record>
+    <!-- 9% -->
+    <record id="vat9_purchase_domestic" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Expenditures within the Country (VAT 9%)</field>
+        <field name="description">Purchase VAT 9% for domestic purchase and expenditures</field>
+        <field name="amount" eval="9"/>
+        <field name="sequence" eval="25"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_9"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat9_purchase_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Imports of Investments Goods (VAT 9%)</field>
+        <field name="description">Purchase VAT 9% for imports of investments goods</field>
+        <field name="amount" eval="9"/>
+        <field name="sequence" eval="26"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_9"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat9_purchase_other_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Imports (VAT 9%)</field>
+        <field name="description">Purchase VAT 9% for imports other than investments goods</field>
+        <field name="amount" eval="9"/>
+        <field name="sequence" eval="27"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_9"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat9_purchase_intracommunity_goods" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Goods (VAT 9%)</field>
+        <field name="description">Purchase VAT 9% for intra-community acquisitions of goods</field>
+        <field name="amount" eval="9"/>
+        <field name="sequence" eval="28"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_9"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat9_purchase_intracommunity_services" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Services (VAT 9%)</field>
+        <field name="description">Purchase VAT 9% for intra-community acquisitions of services</field>
+        <field name="amount" eval="9"/>
+        <field name="sequence" eval="29"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_9"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat9_purchase_reverse_charge" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Reverse-Charge Transactions (VAT 9%)</field>
+        <field name="description">Purchase VAT 9% for other reverse-charge transactions</field>
+        <field name="amount" eval="9"/>
+        <field name="sequence" eval="30"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_9"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+    </record>
+    <!-- 4% -->
+    <record id="vat4_purchase_domestic" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Expenditures within the Country (VAT 4%)</field>
+        <field name="description">Purchase VAT 4% for domestic purchase and expenditures</field>
+        <field name="amount" eval="4"/>
+        <field name="sequence" eval="31"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_4"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat4_purchase_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Imports of Investments Goods (VAT 4%)</field>
+        <field name="description">Purchase VAT 4% for imports of investments goods</field>
+        <field name="amount" eval="4"/>
+        <field name="sequence" eval="32"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_4"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat4_purchase_other_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Imports (VAT 4%)</field>
+        <field name="description">Purchase VAT 4% for imports other than investments goods</field>
+        <field name="amount" eval="4"/>
+        <field name="sequence" eval="33"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_4"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat4_purchase_intracommunity_goods" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Goods (VAT 4%)</field>
+        <field name="description">Purchase VAT 4% for intra-community acquisitions of goods</field>
+        <field name="amount" eval="4"/>
+        <field name="sequence" eval="34"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_4"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat4_purchase_intracommunity_services" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Services (VAT 4%)</field>
+        <field name="description">Purchase VAT 4% for intra-community acquisitions of services</field>
+        <field name="amount" eval="4"/>
+        <field name="sequence" eval="35"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_4"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat4_purchase_reverse_charge" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Reverse-Charge Transactions (VAT 4%)</field>
+        <field name="description">Purchase VAT 4% for other reverse-charge transactions</field>
+        <field name="amount" eval="4"/>
+        <field name="sequence" eval="36"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_4"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+    </record>
+    <!-- 17% -->
+    <record id="vat17_purchase_domestic" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Expenditures within the Country (VAT 17%)</field>
+        <field name="description">Purchase VAT 17% for domestic purchase and expenditures</field>
+        <field name="amount" eval="17"/>
+        <field name="sequence" eval="37"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_17"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_361_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_381_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat17_purchase_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Purchases and Imports of Investments Goods (VAT 17%)</field>
+        <field name="description">Purchase VAT 17% for imports of investments goods</field>
+        <field name="amount" eval="17"/>
+        <field name="sequence" eval="38"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_17"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_362_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_382_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat17_purchase_other_imports" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Imports (VAT 17%)</field>
+        <field name="description">Purchase VAT 17% for imports other than investments goods</field>
+        <field name="amount" eval="17"/>
+        <field name="sequence" eval="39"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_17"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_363_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_383_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat17_purchase_intracommunity_goods" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Goods (VAT 17%)</field>
+        <field name="description">Purchase VAT 17% for intra-community acquisitions of goods</field>
+        <field name="amount" eval="17"/>
+        <field name="sequence" eval="40"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_17"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_364_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_384_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat17_purchase_intracommunity_services" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Intra-Community Acquisitions of Services (VAT 17%)</field>
+        <field name="description">Purchase VAT 17% for intra-community acquisitions of services</field>
+        <field name="amount" eval="17"/>
+        <field name="sequence" eval="41"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_17"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_365_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_385_tag')],
+                }),
+            ]"/>
+    </record>
+    <record id="vat17_purchase_reverse_charge" model="account.tax.template">
+        <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        <field name="name">Other Reverse-Charge Transactions (VAT 17%)</field>
+        <field name="description">Purchase VAT 17% for other reverse-charge transactions</field>
+        <field name="amount" eval="17"/>
+        <field name="sequence" eval="42"/>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_17"/>
+        <field name="active" eval="False"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'plus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'plus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'repartition_type': 'base',
+                    'minus_report_expression_ids': [ref('account_tax_report_line_366_tag')],
+                }),
+                (0,0, {
+                    'repartition_type': 'tax',
+                    'account_id': ref('chartgr_54_02_02'),
+                    'minus_report_expression_ids': [ref('account_tax_report_line_386_tag')],
                 }),
             ]"/>
     </record>

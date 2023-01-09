@@ -1,0 +1,3732 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_gr
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-01-27 12:23+0000\n"
+"PO-Revision-Date: 2023-01-27 12:23+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_301
+msgid "301 Sales 13%"
+msgstr "301 Πωλήσεις 13%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_302
+msgid "302 Sales 6%"
+msgstr "302 Πωλήσεις 6%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_303
+msgid "303 Sales 24%"
+msgstr "303 Πωλήσεις 24%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_304
+msgid "304 Sales 9%"
+msgstr "304 Πωλήσεις 9%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_305
+msgid "305 Sales 4%"
+msgstr "305 Πωλήσεις 4%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_306
+msgid "306 Sales 17%"
+msgstr "306 Πωλήσεις 17%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_307
+msgid "307 Taxable Outputs"
+msgstr "307 Συνολο Φορολογητέα Εισροων"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_310
+msgid "310 Outputs Exempted or Excepted, Without Right to Deduct"
+msgstr "310 Εκροές Απαλλ/νες & Εξαιρ/νες Χωρίς Δικαίωμα Έκπτωσης"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_311
+msgid "311 Total Outputs"
+msgstr "311 Συνολικές Εκροές"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_312
+msgid "312 VAT Turnover"
+msgstr "312 Κύκλος Εργασιών ΦΠΑ"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_331
+msgid "331 VAT Sales 13%"
+msgstr "331 ΦΠΑ Πωλήσεις 13%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_332
+msgid "332 VAT Sales 6%"
+msgstr "332 ΦΠΑ Πωλήσεις 6%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_333
+msgid "333 VAT Sales 24%"
+msgstr "333 ΦΠΑ Πωλήσεις 24%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_334
+msgid "334 VAT Sales 9%"
+msgstr "334 ΦΠΑ Πωλήσεις 9%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_335
+msgid "335 VAT Sales 4%"
+msgstr "335 ΦΠΑ Πωλήσεις 4%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_336
+msgid "336 VAT Sales 17%"
+msgstr "336 ΦΠΑ Πωλήσεις 17%"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_337
+msgid "337 VAT Taxable Outputs"
+msgstr "337 Φορολογητέα Εκροές ΦΠΑ"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_342
+msgid "342 Intra-Community Supplies"
+msgstr "342 Ενδοκοινοτικές Παραδόσεις"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_345
+msgid "345 Intra-Community Supplies of Services"
+msgstr "345 Ενδοκοινοτικές Παροχές Υπηρεσιών Άρθρ. 14.2.α"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_348
+msgid "348 Exports and Exemptions of Ships and Aircrafts"
+msgstr "348 Εξαγωγές & Απαλλαγές Πλοίων & Αεροσκαφών"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_349
+msgid "349 Other Outputs Without VAT With Right to Deduct"
+msgstr "349 Λοιπές Εκροές χωρίς ΦΠΑ με δικαίωμα έκπτωσης"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_361
+msgid "361 Purchases and Expenditures within the Country"
+msgstr "361 Αγορές & δαπάνες στο εσωτεπικό της χώρας"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_362
+msgid "362 Purchases and Imports of Investment Goods"
+msgstr "362 Αγορές & εισαγωγές Επενδυτικών Αγαθών (πάγια)"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_363
+msgid "363 Other Imports"
+msgstr "363 Λοιπές Εισαγωγές Εκτός Επενδυτικών Αγαθών (πάγια)"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_364
+msgid "364 Intra-Community Acquisitions of Goods"
+msgstr "364 Ενδοκοινοτικές Αποκτήσεις Αγαθών"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_365
+msgid "365 Intra-Community Acquisitions of Services"
+msgstr "365 Ενδοκοινοτικές Λήψεις Υπηρεσιών Άρθρ. 14.2.α"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_366
+msgid "366 Other Reverse-Charge Transactions"
+msgstr "366 Λοιπές Πράξεις Λήπτη"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_367
+msgid "367 Taxable Inputs"
+msgstr "367 Συνολο Φορολογητέα Εισροων"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_381
+msgid "381 VAT Purchases and Expenditures within the Country"
+msgstr "381 ΦΠΑ Αγορές & δαπάνες στο εσωτεπικό της χώρας"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_382
+msgid "382 VAT Purchases and Imports of Investment Goods"
+msgstr "382 ΦΠΑ Αγορές & Εισαγωγές Επενδυτικών Αγαθών (πάγια)"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_383
+msgid "383 VAT Other Imports"
+msgstr "383 ΦΠΑ Λοιπές Εισαγωγές Εκτός Επενδυτικών Αγαθών (πάγια)"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_384
+msgid "384 VAT Intra-Community Acquisitions of Goods"
+msgstr "384 ΦΠΑ Ενδοκοινοτικές Αποκτήσεις Αγαθών"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_385
+msgid "385 VAT Intra-Community Acquisitions of Services"
+msgstr "385 ΦΠΑ Ενδοκοινοτικές Λήψεις Υπηρεσιών Άρθρ. 14.2.α"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_386
+msgid "386 VAT Other Reverse-Charge Transactions"
+msgstr "386 ΦΠΑ Λοιπές Πράξεις Λήπτη"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_387
+msgid "387 VAT Taxable Inputs"
+msgstr "387 ΦΠΑ Συνολο Φορολογητέα Εισροων"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_400
+msgid "400 Tax Refund (Sales of Agricultural Products)"
+msgstr "400 Επιστροφή φόρου (Πωλήσεις Αγροτικών Προϊόντων)"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_402
+msgid "402 Other Added Amounts"
+msgstr "402 Άλλα προστιθέμενα ποσά"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_407
+msgid "407 Amounts of Adjustments of Previous Tax Year for Deduction"
+msgstr "407 Ποσά Αναπροσαρμογών Προηγούμενου Φορολογικού Έτους για Έκπτωση"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_410
+msgid "410 Added Amounts to Total Inputs Tax"
+msgstr "410 Προστιθέμενα ποσά στον φόρο συνολικών εισροών"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_411
+msgid "411 Inputs VAT Reduced under Prorata Scheme"
+msgstr "411 Μείωση ΦΠΑ εισροών στο πλαίσιο του προγράμματος Prorata"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_422
+msgid "422 Other Removable Amounts"
+msgstr "422 Άλλα αφαιρούμενα ποσά"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_423
+msgid "423 Amount of Adjustments of Previous Tax Year to be paid"
+msgstr "423 Ποσό Αναπροσαρμογών Προηγούμενου Φορολογικού Έτους προς πληρωμή"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_428
+msgid "428 Amounts Removable from Total Inputs Tax"
+msgstr "428 Αφαιρούμενα Ποσά από Φόρο Συνολικών Εισροών"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_430
+msgid "430 Remaining Inputs VAT"
+msgstr "430 Υπόλοιπες Φ.Π.Α"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_470
+msgid "470 Credit Balance"
+msgstr "470 Πιστωτικό Υπόλοιπο"
+
+#. module: l10n_gr
+#: model:account.report.line,name:l10n_gr.account_tax_report_line_480
+msgid "480 Debit Balance"
+msgstr "480 Χρεωστικό Υπόλοιπο"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_50_00
+#: model:account.account,name:l10n_gr.2_chartgr_50_00
+#: model:account.account.template,name:l10n_gr.chartgr_50_00
+msgid "Accounts payable"
+msgstr "Πληρωτέοι λογαριασμοί"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_50_01
+#: model:account.account,name:l10n_gr.2_chartgr_50_01
+#: model:account.account.template,name:l10n_gr.chartgr_50_01
+msgid "Accounts payable – non-related entities"
+msgstr "Λογαριασμοί πληρωτέοι – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_50_02
+#: model:account.account,name:l10n_gr.2_chartgr_50_02
+#: model:account.account.template,name:l10n_gr.chartgr_50_02
+msgid "Accounts payable – related entities"
+msgstr "Λογαριασμοί πληρωτέοι – συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_00
+#: model:account.account,name:l10n_gr.2_chartgr_30_00
+#: model:account.account.template,name:l10n_gr.chartgr_30_00
+msgid "Accounts receivable"
+msgstr "Εισπρακτέοι λογαριασμοί"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_01
+#: model:account.account,name:l10n_gr.2_chartgr_30_01
+#: model:account.account.template,name:l10n_gr.chartgr_30_01
+msgid "Accounts receivables from non-related entities"
+msgstr "Απαιτήσεις από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_30_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_30_01_01
+msgid "Accounts receivables from non-related entities – nominal amount"
+msgstr "Απαιτήσεις από μη συνδεδεμένες οντότητες – ονομαστικό ποσό"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_02
+#: model:account.account,name:l10n_gr.2_chartgr_30_02
+#: model:account.account.template,name:l10n_gr.chartgr_30_02
+msgid "Accounts receivables from related entities"
+msgstr "Λογαριασμοί εισπρακτέων από συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_30_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_30_02_01
+msgid "Accounts receivables from related entities – nominal amount"
+msgstr "Απαιτήσεις από συνδεδεμένες οντότητες – ονομαστικό ποσό"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_56_01
+#: model:account.account,name:l10n_gr.2_chartgr_56_01
+#: model:account.account.template,name:l10n_gr.chartgr_56_01
+msgid "Accrued expenses"
+msgstr "Δεδουλευμένα έξοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_56_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_56_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_56_01_01
+msgid "Accrued expenses – non-related entities"
+msgstr "Δεδουλευμένα έξοδα – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_56_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_56_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_56_01_02
+msgid "Accrued expenses – related entities"
+msgstr "Δεδουλευμένα έξοδα – συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_37_02
+#: model:account.account,name:l10n_gr.2_chartgr_37_02
+#: model:account.account.template,name:l10n_gr.chartgr_37_02
+msgid "Accrued revenue"
+msgstr "Δεδουλευμένα έσοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_37_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_37_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_37_02_01
+msgid "Accrued revenue from non-related entities"
+msgstr "Δεδουλευμένα έσοδα από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_37_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_37_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_37_02_02
+msgid "Accrued revenue from related entities"
+msgstr "Δεδουλευμένα έσοδα από συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_11_02
+#: model:account.account,name:l10n_gr.1_chartgr_12_02
+#: model:account.account,name:l10n_gr.1_chartgr_13_02
+#: model:account.account,name:l10n_gr.1_chartgr_14_02
+#: model:account.account,name:l10n_gr.1_chartgr_15_02
+#: model:account.account,name:l10n_gr.1_chartgr_16_02
+#: model:account.account,name:l10n_gr.1_chartgr_17_01_02
+#: model:account.account,name:l10n_gr.1_chartgr_17_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_11_02
+#: model:account.account,name:l10n_gr.2_chartgr_12_02
+#: model:account.account,name:l10n_gr.2_chartgr_13_02
+#: model:account.account,name:l10n_gr.2_chartgr_14_02
+#: model:account.account,name:l10n_gr.2_chartgr_15_02
+#: model:account.account,name:l10n_gr.2_chartgr_16_02
+#: model:account.account,name:l10n_gr.2_chartgr_17_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_17_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_11_02
+#: model:account.account.template,name:l10n_gr.chartgr_12_02
+#: model:account.account.template,name:l10n_gr.chartgr_13_02
+#: model:account.account.template,name:l10n_gr.chartgr_14_02
+#: model:account.account.template,name:l10n_gr.chartgr_15_02
+#: model:account.account.template,name:l10n_gr.chartgr_16_02
+#: model:account.account.template,name:l10n_gr.chartgr_17_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_17_02_02
+msgid "Accumulated depreciation"
+msgstr "Συσσωρευμένες αποσβέσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_18_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_18_01_02
+msgid "Accumulated depreciation of development expenditure"
+msgstr "Σωρευμένες αποσβέσεις αναπτυξιακών δαπανών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_18_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_18_02_02
+msgid "Accumulated depreciation of goodwill"
+msgstr "Σωρευμένες αποσβέσεις υπεραξίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_03_02
+#: model:account.account,name:l10n_gr.2_chartgr_18_03_02
+#: model:account.account.template,name:l10n_gr.chartgr_18_03_02
+msgid "Accumulated depreciation of other intangibles"
+msgstr "Σωρευμένες αποσβέσεις λοιπών άυλων παγίων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_10_02
+#: model:account.account,name:l10n_gr.1_chartgr_11_03
+#: model:account.account,name:l10n_gr.1_chartgr_12_03
+#: model:account.account,name:l10n_gr.1_chartgr_13_03
+#: model:account.account,name:l10n_gr.1_chartgr_14_03
+#: model:account.account,name:l10n_gr.1_chartgr_15_03
+#: model:account.account,name:l10n_gr.1_chartgr_16_03
+#: model:account.account,name:l10n_gr.1_chartgr_17_01_03
+#: model:account.account,name:l10n_gr.1_chartgr_17_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_10_02
+#: model:account.account,name:l10n_gr.2_chartgr_11_03
+#: model:account.account,name:l10n_gr.2_chartgr_12_03
+#: model:account.account,name:l10n_gr.2_chartgr_13_03
+#: model:account.account,name:l10n_gr.2_chartgr_14_03
+#: model:account.account,name:l10n_gr.2_chartgr_15_03
+#: model:account.account,name:l10n_gr.2_chartgr_16_03
+#: model:account.account,name:l10n_gr.2_chartgr_17_01_03
+#: model:account.account,name:l10n_gr.2_chartgr_17_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_10_02
+#: model:account.account.template,name:l10n_gr.chartgr_11_03
+#: model:account.account.template,name:l10n_gr.chartgr_12_03
+#: model:account.account.template,name:l10n_gr.chartgr_13_03
+#: model:account.account.template,name:l10n_gr.chartgr_14_03
+#: model:account.account.template,name:l10n_gr.chartgr_15_03
+#: model:account.account.template,name:l10n_gr.chartgr_16_03
+#: model:account.account.template,name:l10n_gr.chartgr_17_01_03
+#: model:account.account.template,name:l10n_gr.chartgr_17_02_03
+msgid "Accumulated impairment"
+msgstr "Συσσωρευμένη απομείωση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_01_03
+#: model:account.account,name:l10n_gr.2_chartgr_18_01_03
+#: model:account.account.template,name:l10n_gr.chartgr_18_01_03
+msgid "Accumulated impairment of development expenditure"
+msgstr "Σωρευμένη απομείωση αναπτυξιακών δαπανών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_18_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_18_02_03
+msgid "Accumulated impairment of goodwill"
+msgstr "Σωρευμένη απομείωση υπεραξίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_03_03
+#: model:account.account,name:l10n_gr.2_chartgr_18_03_03
+#: model:account.account.template,name:l10n_gr.chartgr_18_03_03
+msgid "Accumulated impairment of other intangibles"
+msgstr "Σωρευμένη απομείωση λοιπών άυλων παγίων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_82_01
+#: model:account.account,name:l10n_gr.2_chartgr_82_01
+#: model:account.account.template,name:l10n_gr.chartgr_82_01
+msgid "Accumulation of all revenue, expenses, gains and losses"
+msgstr "Συσσώρευση όλων των εσόδων, εξόδων, κερδών και ζημιών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_13_01
+#: model:account.account,name:l10n_gr.1_chartgr_14_01
+#: model:account.account,name:l10n_gr.1_chartgr_15_01
+#: model:account.account,name:l10n_gr.2_chartgr_13_01
+#: model:account.account,name:l10n_gr.2_chartgr_14_01
+#: model:account.account,name:l10n_gr.2_chartgr_15_01
+#: model:account.account.template,name:l10n_gr.chartgr_13_01
+#: model:account.account.template,name:l10n_gr.chartgr_14_01
+#: model:account.account.template,name:l10n_gr.chartgr_15_01
+msgid "Acquisition cost"
+msgstr "Κόστος απόκτησης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_18_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_18_01_01
+msgid "Acquisition cost of development expenditure"
+msgstr "Κόστος κτήσης δαπάνη ανάπτυξης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_18_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_18_02_01
+msgid "Acquisition cost of goodwill"
+msgstr "Κόστος κτήσης υπεραξίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_03_01
+#: model:account.account,name:l10n_gr.2_chartgr_18_03_01
+#: model:account.account.template,name:l10n_gr.chartgr_18_03_01
+msgid "Acquisition cost of other intangibles"
+msgstr "Κόστος κτήσης άλλων άυλων στοιχείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_43_01
+#: model:account.account,name:l10n_gr.2_chartgr_43_01
+#: model:account.account.template,name:l10n_gr.chartgr_43_01
+msgid "Acquisition cost of treasury titles"
+msgstr "Κόστος κτήσης τίτλων ταμείου"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_01_03
+#: model:account.account,name:l10n_gr.2_chartgr_54_01_03
+#: model:account.account.template,name:l10n_gr.chartgr_54_01_03
+msgid "Advance payment of income tax (contra account)"
+msgstr "Προκαταβολή φόρου εισοδήματος (αντιλογαριασμός)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_50_03_02
+#: model:account.account,name:l10n_gr.2_chartgr_50_03_02
+#: model:account.account.template,name:l10n_gr.chartgr_50_03_02
+msgid "Advances for inventory, non-related entities"
+msgstr "Προκαταβολές για αποθέματα, μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_50_04_02
+#: model:account.account,name:l10n_gr.2_chartgr_50_04_02
+#: model:account.account.template,name:l10n_gr.chartgr_50_04_02
+msgid "Advances for inventory, related entities"
+msgstr "Προκαταβολές για αποθέματα, συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_50_03_01
+#: model:account.account,name:l10n_gr.2_chartgr_50_03_01
+#: model:account.account.template,name:l10n_gr.chartgr_50_03_01
+msgid "Advances for non-current assets, non-related entities"
+msgstr "Προκαταβολές για μη κυκλοφορούντα περιουσιακά στοιχεία, μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_50_04_01
+#: model:account.account,name:l10n_gr.2_chartgr_50_04_01
+#: model:account.account.template,name:l10n_gr.chartgr_50_04_01
+msgid "Advances for non-current assets, related entities"
+msgstr "Προκαταβολές για μη κυκλοφορούντα περιουσιακά στοιχεία, συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_01_03
+#: model:account.account,name:l10n_gr.2_chartgr_30_01_03
+#: model:account.account.template,name:l10n_gr.chartgr_30_01_03
+msgid "Advances from customers – non-related entities"
+msgstr "Προκαταβολές από πελάτες – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_30_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_30_02_03
+msgid "Advances from customers – related entities"
+msgstr "Προκαταβολές από πελάτες – συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_10
+#: model:account.account,name:l10n_gr.2_chartgr_64_10
+#: model:account.account.template,name:l10n_gr.chartgr_64_10
+msgid "Advertising"
+msgstr "Διαφήμιση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_66_08
+#: model:account.account,name:l10n_gr.2_chartgr_66_08
+#: model:account.account.template,name:l10n_gr.chartgr_66_08
+msgid "Amortization"
+msgstr "Χρεολυσία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_71_01
+#: model:account.account,name:l10n_gr.2_chartgr_71_01
+#: model:account.account.template,name:l10n_gr.chartgr_71_01
+msgid "Amortization of government grants for fixed assets"
+msgstr "Απόσβεση κρατικών επιχορηγήσεων για πάγια περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_48_00
+#: model:account.account,name:l10n_gr.2_chartgr_48_00
+#: model:account.account.template,name:l10n_gr.chartgr_48_00
+msgid "Articles of association and other reserves"
+msgstr "Καταστατικό και λοιπά αποθεματικά"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_48_01
+#: model:account.account,name:l10n_gr.2_chartgr_48_01
+#: model:account.account.template,name:l10n_gr.chartgr_48_01
+msgid "Articles of association reserves"
+msgstr "Αποθεματικό καταστατικού"
+
+#. module: l10n_gr
+#: model:account.report.column,name:l10n_gr.tax_report_balance
+msgid "Balance"
+msgstr "Ισορροπία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_52_00
+#: model:account.account,name:l10n_gr.2_chartgr_52_00
+#: model:account.account.template,name:l10n_gr.chartgr_52_00
+msgid "Bank loans"
+msgstr "τραπεζικά δάνεια"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_52_01
+#: model:account.account,name:l10n_gr.2_chartgr_52_01
+#: model:account.account.template,name:l10n_gr.chartgr_52_01
+msgid "Bank loans from non-related entities"
+msgstr "Τραπεζικά δάνεια από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_52_02
+#: model:account.account,name:l10n_gr.2_chartgr_52_02
+#: model:account.account.template,name:l10n_gr.chartgr_52_02
+msgid "Bank loans from related entities"
+msgstr "Τραπεζικά δάνεια από συναφείς φορείς"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_00
+#: model:account.account,name:l10n_gr.2_chartgr_22_00
+#: model:account.account.template,name:l10n_gr.chartgr_22_00
+msgid "Biological current assets"
+msgstr "Βιολογικά κυκλοφορούντα περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_17_00
+#: model:account.account,name:l10n_gr.2_chartgr_17_00
+#: model:account.account.template,name:l10n_gr.chartgr_17_00
+msgid "Biological fixed assets"
+msgstr "Βιολογικά πάγια περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_12_00
+#: model:account.account,name:l10n_gr.2_chartgr_12_00
+#: model:account.account.template,name:l10n_gr.chartgr_12_00
+msgid "Buildings and physical infrastructure"
+msgstr "Κτίρια και φυσική υποδομή"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_40_00
+#: model:account.account,name:l10n_gr.2_chartgr_40_00
+#: model:account.account.template,name:l10n_gr.chartgr_40_00
+msgid "Capital (paid-in)"
+msgstr "Κεφάλαιο (με πληρωμή)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_38_00
+#: model:account.account,name:l10n_gr.2_chartgr_38_00
+#: model:account.account.template,name:l10n_gr.chartgr_38_00
+msgid "Cash and cash equivalents"
+msgstr "μετρητά και ισοδύναμα μετρητών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_38_01
+#: model:account.account,name:l10n_gr.2_chartgr_38_01
+#: model:account.account.template,name:l10n_gr.chartgr_38_01
+msgid "Cash in hand"
+msgstr "Μετρητά στο χέρι"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_23_02
+#: model:account.account,name:l10n_gr.2_chartgr_23_02
+#: model:account.account.template,name:l10n_gr.chartgr_23_02
+msgid "Closing balance of work in progress"
+msgstr "Υπόλοιπο κλεισίματος των εργασιών σε εξέλιξη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_08
+#: model:account.account,name:l10n_gr.2_chartgr_64_08
+#: model:account.account.template,name:l10n_gr.chartgr_64_08
+msgid "Consumables"
+msgstr "Αναλώσιμα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_81_02
+#: model:account.account,name:l10n_gr.2_chartgr_81_02
+#: model:account.account.template,name:l10n_gr.chartgr_81_02
+msgid "Credit liaison accounts with branches"
+msgstr "Πιστωτικοί λογαριασμοί με υποκαταστήματα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_69_01
+#: model:account.account,name:l10n_gr.2_chartgr_69_01
+#: model:account.account.template,name:l10n_gr.chartgr_69_01
+msgid "Current period tax expense"
+msgstr "Έξοδα φόρου τρέχουσας περιόδου"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_78_01
+#: model:account.account,name:l10n_gr.2_chartgr_78_01
+#: model:account.account.template,name:l10n_gr.chartgr_78_01
+msgid "Current period tax revenue"
+msgstr "Φορολογικά έσοδα τρέχουσας περιόδου"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_81_01
+#: model:account.account,name:l10n_gr.2_chartgr_81_01
+#: model:account.account.template,name:l10n_gr.chartgr_81_01
+msgid "Debit liaison accounts with branches"
+msgstr "Χρεωστικοί λογαριασμοί σύνδεσης με υποκαταστήματα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_34_01
+#: model:account.account,name:l10n_gr.2_chartgr_34_01
+#: model:account.account.template,name:l10n_gr.chartgr_34_01
+msgid "Debt instruments"
+msgstr "Χρεωστικά μέσα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_39_00
+#: model:account.account,name:l10n_gr.2_chartgr_39_00
+#: model:account.account.template,name:l10n_gr.chartgr_39_00
+msgid "Deferred tax asset"
+msgstr "Αναβαλλόμενη φορολογική απαίτηση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_69_02
+#: model:account.account,name:l10n_gr.2_chartgr_69_02
+#: model:account.account.template,name:l10n_gr.chartgr_69_02
+msgid "Deferred tax expense"
+msgstr "Έξοδα αναβαλλόμενης φορολογίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_59_00
+#: model:account.account,name:l10n_gr.2_chartgr_59_00
+#: model:account.account.template,name:l10n_gr.chartgr_59_00
+msgid "Deferred tax liability"
+msgstr "Αναβαλλόμενη φορολογική υποχρέωση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_78_02
+#: model:account.account,name:l10n_gr.2_chartgr_78_02
+#: model:account.account.template,name:l10n_gr.chartgr_78_02
+msgid "Deferred tax revenue"
+msgstr "Αναβαλλόμενα φορολογικά έσοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_11_00
+#: model:account.account,name:l10n_gr.2_chartgr_11_00
+#: model:account.account.template,name:l10n_gr.chartgr_11_00
+msgid "Depreciable land improvements"
+msgstr "Αποσβέσιμες βελτιώσεις γης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_66_00
+#: model:account.account,name:l10n_gr.1_chartgr_80_02
+#: model:account.account,name:l10n_gr.2_chartgr_66_00
+#: model:account.account,name:l10n_gr.2_chartgr_80_02
+#: model:account.account.template,name:l10n_gr.chartgr_66_00
+#: model:account.account.template,name:l10n_gr.chartgr_80_02
+msgid "Depreciation"
+msgstr "Υποτίμηση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_66_07
+#: model:account.account,name:l10n_gr.2_chartgr_66_07
+#: model:account.account.template,name:l10n_gr.chartgr_66_07
+msgid "Depreciation of biological fixed assets"
+msgstr "Αποσβέσεις βιολογικών παγίων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_66_02
+#: model:account.account,name:l10n_gr.2_chartgr_66_02
+#: model:account.account.template,name:l10n_gr.chartgr_66_02
+msgid "Depreciation of buildings and physical infrastructure"
+msgstr "Αποσβέσεις κτιρίων και υλικών υποδομών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_66_01
+#: model:account.account,name:l10n_gr.2_chartgr_66_01
+#: model:account.account.template,name:l10n_gr.chartgr_66_01
+msgid "Depreciation of depreciable land improvements"
+msgstr "Αποσβέσεις αποσβέσιμων βελτιώσεων γης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_66_06
+#: model:account.account,name:l10n_gr.2_chartgr_66_06
+#: model:account.account.template,name:l10n_gr.chartgr_66_06
+msgid "Depreciation of investment property"
+msgstr "Απόσβεση επενδύσεων σε ακίνητα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_66_03
+#: model:account.account,name:l10n_gr.2_chartgr_66_03
+#: model:account.account.template,name:l10n_gr.chartgr_66_03
+msgid "Depreciation of machinery"
+msgstr "Απόσβεση μηχανημάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_66_05
+#: model:account.account,name:l10n_gr.2_chartgr_66_05
+#: model:account.account.template,name:l10n_gr.chartgr_66_05
+msgid "Depreciation of other equipment"
+msgstr "Απόσβεση λοιπού εξοπλισμού"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_66_04
+#: model:account.account,name:l10n_gr.2_chartgr_66_04
+#: model:account.account.template,name:l10n_gr.chartgr_66_04
+msgid "Depreciation of transportation equipment"
+msgstr "Απόσβεση μεταφορικού εξοπλισμού"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_01
+#: model:account.account,name:l10n_gr.2_chartgr_18_01
+#: model:account.account.template,name:l10n_gr.chartgr_18_01
+msgid "Development expenditure"
+msgstr "Δαπάνες ανάπτυξης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_24_03
+#: model:account.account,name:l10n_gr.2_chartgr_24_03
+#: model:account.account.template,name:l10n_gr.chartgr_24_03
+msgid "Discounts and allowances of materials"
+msgstr "Εκπτώσεις και επιδόματα υλικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_20_03
+#: model:account.account,name:l10n_gr.2_chartgr_20_03
+#: model:account.account.template,name:l10n_gr.chartgr_20_03
+msgid "Discounts and allowances of merchandise"
+msgstr "Εκπτώσεις και επιδόματα εμπορευμάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_27_03
+#: model:account.account,name:l10n_gr.2_chartgr_27_03
+#: model:account.account.template,name:l10n_gr.chartgr_27_03
+msgid "Discounts and allowances of other inventory"
+msgstr "Εκπτώσεις και επιδόματα λοιπών αποθεμάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_25_03
+#: model:account.account,name:l10n_gr.2_chartgr_25_03
+#: model:account.account.template,name:l10n_gr.chartgr_25_03
+msgid "Discounts and allowances of packing materials"
+msgstr "Εκπτώσεις και επιδόματα υλικών συσκευασίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_26_03
+#: model:account.account,name:l10n_gr.2_chartgr_26_03
+#: model:account.account.template,name:l10n_gr.chartgr_26_03
+msgid "Discounts and allowances of spare parts"
+msgstr "Εκπτώσεις και επιδόματα ανταλλακτικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_01_03
+#: model:account.account,name:l10n_gr.2_chartgr_22_01_03
+#: model:account.account.template,name:l10n_gr.chartgr_22_01_03
+msgid "Discounts and allowances on living animals"
+msgstr "Εκπτώσεις και επιδόματα σε ζωντανά ζώα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_22_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_22_02_03
+msgid "Discounts and allowances on trees and plants"
+msgstr "Εκπτώσεις και επιδόματα σε δέντρα και φυτά"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_01_03
+#: model:account.account,name:l10n_gr.1_chartgr_70_03_03
+#: model:account.account,name:l10n_gr.1_chartgr_70_05_03
+#: model:account.account,name:l10n_gr.1_chartgr_70_07_03
+#: model:account.account,name:l10n_gr.2_chartgr_70_01_03
+#: model:account.account,name:l10n_gr.2_chartgr_70_03_03
+#: model:account.account,name:l10n_gr.2_chartgr_70_05_03
+#: model:account.account,name:l10n_gr.2_chartgr_70_07_03
+#: model:account.account.template,name:l10n_gr.chartgr_70_01_03
+#: model:account.account.template,name:l10n_gr.chartgr_70_03_03
+#: model:account.account.template,name:l10n_gr.chartgr_70_05_03
+#: model:account.account.template,name:l10n_gr.chartgr_70_07_03
+msgid "Discounts and allowances – non-related entities"
+msgstr "Εκπτώσεις και επιδόματα – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_02_03
+#: model:account.account,name:l10n_gr.1_chartgr_70_06_03
+#: model:account.account,name:l10n_gr.1_chartgr_70_08_03
+#: model:account.account,name:l10n_gr.2_chartgr_70_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_70_06_03
+#: model:account.account,name:l10n_gr.2_chartgr_70_08_03
+#: model:account.account.template,name:l10n_gr.chartgr_70_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_70_06_03
+#: model:account.account.template,name:l10n_gr.chartgr_70_08_03
+msgid "Discounts and allowances – related entities"
+msgstr "Εκπτώσεις και επιδόματα – συναφείς φορείς"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_04_03
+#: model:account.account,name:l10n_gr.2_chartgr_70_04_03
+#: model:account.account.template,name:l10n_gr.chartgr_70_04_03
+msgid "Discounts and allowances –related entities"
+msgstr "Εκπτώσεις και επιδόματα που σχετίζονται με οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_53_05
+#: model:account.account,name:l10n_gr.2_chartgr_53_05
+#: model:account.account.template,name:l10n_gr.chartgr_53_05
+msgid "Dividends and amounts of a similar nature payable"
+msgstr "Μερίσματα και ποσά παρόμοιας φύσης πληρωτέα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_74_00
+#: model:account.account,name:l10n_gr.2_chartgr_74_00
+#: model:account.account.template,name:l10n_gr.chartgr_74_00
+msgid "Dividends and similar revenue"
+msgstr "Μερίσματα και παρόμοια έσοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_74_01
+#: model:account.account,name:l10n_gr.2_chartgr_74_01
+#: model:account.account.template,name:l10n_gr.chartgr_74_01
+msgid "Dividends from associates"
+msgstr "Μερίσματα από συνεργάτες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_74_03
+#: model:account.account,name:l10n_gr.2_chartgr_74_03
+#: model:account.account.template,name:l10n_gr.chartgr_74_03
+msgid "Dividends from joint ventures"
+msgstr "Μερίσματα από κοινοπραξίες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_74_04
+#: model:account.account,name:l10n_gr.2_chartgr_74_04
+#: model:account.account.template,name:l10n_gr.chartgr_74_04
+msgid "Dividends from other participating interests"
+msgstr "Μερίσματα από άλλες συμμετοχές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_74_02
+#: model:account.account,name:l10n_gr.2_chartgr_74_02
+#: model:account.account.template,name:l10n_gr.chartgr_74_02
+msgid "Dividends from subsidiaries"
+msgstr "Μερίσματα από θυγατρικές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_60_00
+#: model:account.account,name:l10n_gr.1_chartgr_80_01
+#: model:account.account,name:l10n_gr.2_chartgr_60_00
+#: model:account.account,name:l10n_gr.2_chartgr_80_01
+#: model:account.account.template,name:l10n_gr.chartgr_60_00
+#: model:account.account.template,name:l10n_gr.chartgr_80_01
+msgid "Employee compensation"
+msgstr "Αποζημίωση εργαζομένων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_53_03
+#: model:account.account,name:l10n_gr.2_chartgr_53_03
+#: model:account.account.template,name:l10n_gr.chartgr_53_03
+msgid "Employee compensation payable"
+msgstr "Καταβλητέα αποζημίωση εργαζομένων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_60_05
+#: model:account.account,name:l10n_gr.2_chartgr_60_05
+#: model:account.account.template,name:l10n_gr.chartgr_60_05
+msgid "Employee compensation – related entities"
+msgstr "Αμοιβές εργαζομένων – συναφείς φορείς"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_60_02
+#: model:account.account,name:l10n_gr.2_chartgr_60_02
+#: model:account.account.template,name:l10n_gr.chartgr_60_02
+msgid "Employer's social security contributions"
+msgstr "Εργοδοτικές εισφορές κοινωνικής ασφάλισης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_02
+#: model:account.account,name:l10n_gr.2_chartgr_64_02
+#: model:account.account.template,name:l10n_gr.chartgr_64_02
+msgid "Energy"
+msgstr "Ενέργεια"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_45_00
+#: model:account.account,name:l10n_gr.2_chartgr_45_00
+#: model:account.account.template,name:l10n_gr.chartgr_45_00
+msgid "Exchange differences"
+msgstr "Συναλλαγματικές διαφορές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_80_00
+#: model:account.account,name:l10n_gr.2_chartgr_80_00
+#: model:account.account.template,name:l10n_gr.chartgr_80_00
+msgid "Expenses charged to self-constructed assets"
+msgstr "Έξοδα που χρεώνονται σε ιδιοκατασκευασμένα περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_67_05
+#: model:account.account,name:l10n_gr.2_chartgr_67_05
+#: model:account.account.template,name:l10n_gr.chartgr_67_05
+msgid "Extraordinary expenses and losses – related entities"
+msgstr "Έκτακτα έξοδα και ζημιές – συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_67_00
+#: model:account.account,name:l10n_gr.2_chartgr_67_00
+#: model:account.account.template,name:l10n_gr.chartgr_67_00
+msgid "Extraordinary expenses, losses and fines"
+msgstr "Έκτακτα έξοδα, απώλειες και πρόστιμα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_79_00
+#: model:account.account,name:l10n_gr.2_chartgr_79_00
+#: model:account.account.template,name:l10n_gr.chartgr_79_00
+msgid "Extraordinary revenue and gains"
+msgstr "Έκτακτα έσοδα και κέρδη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_79_01
+#: model:account.account,name:l10n_gr.2_chartgr_79_01
+#: model:account.account.template,name:l10n_gr.chartgr_79_01
+msgid "Extraordinary revenue and gains from non-related entities"
+msgstr "Έκτακτα έσοδα και κέρδη από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_79_02
+#: model:account.account,name:l10n_gr.2_chartgr_79_02
+#: model:account.account.template,name:l10n_gr.chartgr_79_02
+msgid "Extraordinary revenue and gains from related entities"
+msgstr "Έκτακτα έσοδα και κέρδη από συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.report,name:l10n_gr.tax_report
+msgid "F2 Tax Report"
+msgstr "F2 Έκθεση Φορολογίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_02_06
+#: model:account.account,name:l10n_gr.2_chartgr_22_02_06
+#: model:account.account.template,name:l10n_gr.chartgr_22_02_06
+msgid "Fair value differences of trees and plants"
+msgstr "Διαφορές εύλογης αξίας δέντρων και φυτών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_01_06
+#: model:account.account,name:l10n_gr.2_chartgr_22_01_06
+#: model:account.account.template,name:l10n_gr.chartgr_22_01_06
+msgid "Fair value differences – living animals"
+msgstr "Διαφορές εύλογης αξίας – ζωντανά ζώα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_07_02
+#: model:account.account,name:l10n_gr.2_chartgr_61_07_02
+#: model:account.account.template,name:l10n_gr.chartgr_61_07_02
+msgid "Fair value losses – biological assets"
+msgstr "Απώλειες εύλογης αξίας – βιολογικά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_07_03
+#: model:account.account,name:l10n_gr.2_chartgr_61_07_03
+#: model:account.account.template,name:l10n_gr.chartgr_61_07_03
+msgid "Fair value losses – financial assets"
+msgstr "Ζημίες εύλογης αξίας – χρηματοοικονομικά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_07_01
+#: model:account.account,name:l10n_gr.2_chartgr_61_07_01
+#: model:account.account.template,name:l10n_gr.chartgr_61_07_01
+msgid "Fair value losses – tangible assets"
+msgstr "Ζημιές εύλογης αξίας – ενσώματα πάγια στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_44_02
+#: model:account.account,name:l10n_gr.2_chartgr_44_02
+#: model:account.account.template,name:l10n_gr.chartgr_44_02
+msgid "Fair value reserves - available for sale"
+msgstr "Αποθεματικά εύλογης αξίας - διαθέσιμα προς πώληση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_44_03
+#: model:account.account,name:l10n_gr.2_chartgr_44_03
+#: model:account.account.template,name:l10n_gr.chartgr_44_03
+msgid "Fair value reserves - cash flow hedges"
+msgstr "Αποθεματικά εύλογης αξίας - αντισταθμίσεις ταμειακών ροών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_44_01
+#: model:account.account,name:l10n_gr.2_chartgr_44_01
+#: model:account.account.template,name:l10n_gr.chartgr_44_01
+msgid "Fair value reserves - tangible assets"
+msgstr "Αποθεματικά εύλογης αξίας - ενσώματα πάγια"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_01
+#: model:account.account,name:l10n_gr.2_chartgr_64_01
+#: model:account.account.template,name:l10n_gr.chartgr_64_01
+msgid "Fees for services"
+msgstr "Τέλη για υπηρεσίες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_64_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_64_01_01
+msgid "Fees for services to non-related entities."
+msgstr "Τέλη για υπηρεσίες σε μη συνδεδεμένες οντότητες."
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_64_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_64_01_02
+msgid "Fees for services to related entities"
+msgstr "Αμοιβές για υπηρεσίες σε συναφείς φορείς"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_65_00
+#: model:account.account,name:l10n_gr.1_chartgr_80_04
+#: model:account.account,name:l10n_gr.2_chartgr_65_00
+#: model:account.account,name:l10n_gr.2_chartgr_80_04
+#: model:account.account.template,name:l10n_gr.chartgr_65_00
+#: model:account.account.template,name:l10n_gr.chartgr_80_04
+msgid "Financial expenses"
+msgstr "Οικονομικά έξοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_34_00
+#: model:account.account,name:l10n_gr.2_chartgr_34_00
+#: model:account.account.template,name:l10n_gr.chartgr_34_00
+msgid "Financial instruments (investments)"
+msgstr "Χρηματοοικονομικά μέσα (επενδύσεις)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_35_02
+#: model:account.account,name:l10n_gr.2_chartgr_35_02
+#: model:account.account.template,name:l10n_gr.chartgr_35_02
+msgid "Financial instruments held for cash flow hedging"
+msgstr "Χρηματοοικονομικά μέσα που κατέχονται για αντιστάθμιση ταμειακών ροών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_35_01
+#: model:account.account,name:l10n_gr.2_chartgr_35_01
+#: model:account.account.template,name:l10n_gr.chartgr_35_01
+msgid "Financial instruments held for fair value hedging"
+msgstr "Χρηματοοικονομικά μέσα που κατέχονται για αντιστάθμιση εύλογης αξίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_35_00
+#: model:account.account,name:l10n_gr.2_chartgr_35_00
+#: model:account.account.template,name:l10n_gr.chartgr_35_00
+msgid "Financial instruments held for hedging"
+msgstr "Χρηματοοικονομικά μέσα που κατέχονται για αντιστάθμιση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_67_04
+#: model:account.account,name:l10n_gr.2_chartgr_67_04
+#: model:account.account.template,name:l10n_gr.chartgr_67_04
+msgid "Fines and penalties"
+msgstr "Πρόστιμα και ποινές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_21_00
+#: model:account.account,name:l10n_gr.2_chartgr_21_00
+#: model:account.account.template,name:l10n_gr.chartgr_21_00
+msgid "Finished products"
+msgstr "Τελικών προϊόντων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_21_04
+#: model:account.account,name:l10n_gr.2_chartgr_21_04
+#: model:account.account.template,name:l10n_gr.chartgr_21_04
+msgid "Finished products – closing balance"
+msgstr "Έτοιμα προϊόντα – υπόλοιπο κλεισίματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_21_01
+#: model:account.account,name:l10n_gr.2_chartgr_21_01
+#: model:account.account.template,name:l10n_gr.chartgr_21_01
+msgid "Finished products – opening balance"
+msgstr "Έτοιμα προϊόντα – υπόλοιπο ανοίγματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_04
+#: model:account.account,name:l10n_gr.2_chartgr_54_04
+#: model:account.account.template,name:l10n_gr.chartgr_54_04
+msgid "Fiscal stamp due"
+msgstr "Οφειλόμενο φορολογικό χαρτόσημο"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_62_02
+#: model:account.account,name:l10n_gr.1_chartgr_73_02
+#: model:account.account,name:l10n_gr.2_chartgr_62_02
+#: model:account.account,name:l10n_gr.2_chartgr_73_02
+#: model:account.account.template,name:l10n_gr.chartgr_62_02
+#: model:account.account.template,name:l10n_gr.chartgr_73_02
+msgid "Foreign exchange differences from measurement"
+msgstr "Συναλλαγματικές διαφορές από μέτρηση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_62_02_01
+#: model:account.account,name:l10n_gr.1_chartgr_73_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_62_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_73_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_62_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_73_02_01
+msgid ""
+"Foreign exchange differences from measurement of trade receivables and "
+"payable"
+msgstr "Συναλλαγματικές διαφορές από επιμέτρηση εμπορικών απαιτήσεων και απαιτήσεων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_62_02_02
+#: model:account.account,name:l10n_gr.1_chartgr_73_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_62_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_73_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_62_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_73_02_02
+msgid "Foreign exchange differences measurement of loans"
+msgstr "Μέτρηση συναλλαγματικών διαφορών δανείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_62_02_03
+#: model:account.account,name:l10n_gr.1_chartgr_73_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_62_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_73_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_62_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_73_02_03
+msgid "Foreign exchange differences measurement of other balance sheet items"
+msgstr "Επιμέτρηση συναλλαγματικών διαφορών άλλων στοιχείων του ισολογισμού"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_62_01
+#: model:account.account,name:l10n_gr.1_chartgr_73_01
+#: model:account.account,name:l10n_gr.2_chartgr_62_01
+#: model:account.account,name:l10n_gr.2_chartgr_73_01
+#: model:account.account.template,name:l10n_gr.chartgr_62_01
+#: model:account.account.template,name:l10n_gr.chartgr_73_01
+msgid "Foreign exchange differences on settlement of accounts"
+msgstr "Συναλλαγματικές διαφορές εκκαθάρισης λογαριασμών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_62_01_02
+#: model:account.account,name:l10n_gr.1_chartgr_73_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_62_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_73_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_62_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_73_01_02
+msgid "Foreign exchange differences on settlement of loans"
+msgstr "Συναλλαγματικές διαφορές διακανονισμού δανείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_62_01_03
+#: model:account.account,name:l10n_gr.1_chartgr_73_01_03
+#: model:account.account,name:l10n_gr.2_chartgr_62_01_03
+#: model:account.account,name:l10n_gr.2_chartgr_73_01_03
+#: model:account.account.template,name:l10n_gr.chartgr_62_01_03
+#: model:account.account.template,name:l10n_gr.chartgr_73_01_03
+msgid ""
+"Foreign exchange differences on settlement of other balance sheet items"
+msgstr "Συναλλαγματικές διαφορές επί διακανονισμού άλλων στοιχείων του ισολογισμού"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_62_01_01
+#: model:account.account,name:l10n_gr.1_chartgr_73_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_62_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_73_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_62_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_73_01_01
+msgid ""
+"Foreign exchange differences on settlement of trade receivables and payable"
+msgstr "Συναλλαγματικές διαφορές επί διακανονισμού εμπορικών απαιτήσεων και απαιτήσεων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_62_00
+#: model:account.account,name:l10n_gr.2_chartgr_62_00
+#: model:account.account.template,name:l10n_gr.chartgr_62_00
+msgid "Foreign exchange differences – expense"
+msgstr "Συναλλαγματικές διαφορές – έξοδο"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_73_00
+#: model:account.account,name:l10n_gr.2_chartgr_73_00
+#: model:account.account.template,name:l10n_gr.chartgr_73_00
+msgid "Foreign exchange differences – gains"
+msgstr "Συναλλαγματικές διαφορές – κέρδη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_79_03
+#: model:account.account,name:l10n_gr.2_chartgr_79_03
+#: model:account.account.template,name:l10n_gr.chartgr_79_03
+msgid "Gain from bargain purchase of a business"
+msgstr "Κέρδος από αγορά ευκαιρίας μιας επιχείρησης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_43_02
+#: model:account.account,name:l10n_gr.2_chartgr_43_02
+#: model:account.account.template,name:l10n_gr.chartgr_43_02
+msgid "Gain/Loss from the sale of treasury titles"
+msgstr "Κέρδος/Ζημιά από την πώληση ομολόγων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_77_00
+#: model:account.account,name:l10n_gr.2_chartgr_77_00
+#: model:account.account.template,name:l10n_gr.chartgr_77_00
+msgid "Gains from fair value measurement"
+msgstr "Κέρδη από επιμέτρηση εύλογης αξίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_77_02
+#: model:account.account,name:l10n_gr.2_chartgr_77_02
+#: model:account.account.template,name:l10n_gr.chartgr_77_02
+msgid "Gains from fair value measurement – biological assets"
+msgstr "Κέρδη από επιμέτρηση εύλογης αξίας – βιολογικά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_77_03
+#: model:account.account,name:l10n_gr.2_chartgr_77_03
+#: model:account.account.template,name:l10n_gr.chartgr_77_03
+msgid "Gains from fair value measurement – financial assets"
+msgstr "Κέρδη από επιμέτρηση εύλογης αξίας – χρηματοοικονομικά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_77_01
+#: model:account.account,name:l10n_gr.2_chartgr_77_01
+#: model:account.account.template,name:l10n_gr.chartgr_77_01
+msgid "Gains from fair value measurement – tangible assets"
+msgstr "Κέρδη από επιμέτρηση εύλογης αξίας – ενσώματα πάγια"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_06
+#: model:account.account,name:l10n_gr.2_chartgr_76_06
+#: model:account.account.template,name:l10n_gr.chartgr_76_06
+msgid ""
+"Gains from reversal of impairment - tangible assets other than biological"
+msgstr "Κέρδη από αναστροφή απομείωσης - ενσώματα πάγια εκτός από βιολογικά"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_10_01
+#: model:account.account,name:l10n_gr.2_chartgr_76_10_01
+#: model:account.account.template,name:l10n_gr.chartgr_76_10_01
+msgid "Gains from reversal of impairment – accounts receivable"
+msgstr "Κέρδη από αναστροφή απομείωσης – εισπρακτέοι λογαριασμοί"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_07
+#: model:account.account,name:l10n_gr.2_chartgr_76_07
+#: model:account.account.template,name:l10n_gr.chartgr_76_07
+msgid "Gains from reversal of impairment – biological assets"
+msgstr "Κέρδη από αναστροφή απομείωσης – βιολογικά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_10
+#: model:account.account,name:l10n_gr.2_chartgr_76_10
+#: model:account.account.template,name:l10n_gr.chartgr_76_10
+msgid "Gains from reversal of impairment – financial assets"
+msgstr "Κέρδη από αναστροφή απομείωσης – χρηματοοικονομικά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_10_03
+#: model:account.account,name:l10n_gr.2_chartgr_76_10_03
+#: model:account.account.template,name:l10n_gr.chartgr_76_10_03
+msgid "Gains from reversal of impairment – held to maturity investments"
+msgstr "Κέρδη από αναστροφή απομείωσης – επενδύσεις που διακρατούνται μέχρι τη λήξη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_08
+#: model:account.account,name:l10n_gr.2_chartgr_76_08
+#: model:account.account.template,name:l10n_gr.chartgr_76_08
+msgid "Gains from reversal of impairment – intangible assets"
+msgstr "Κέρδη από αναστροφή απομείωσης – άυλα περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_09
+#: model:account.account,name:l10n_gr.2_chartgr_76_09
+#: model:account.account.template,name:l10n_gr.chartgr_76_09
+msgid "Gains from reversal of impairment – inventory"
+msgstr "Κέρδη από αναστροφή απομείωσης – αποθέματα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_10_05
+#: model:account.account,name:l10n_gr.2_chartgr_76_10_05
+#: model:account.account.template,name:l10n_gr.chartgr_76_10_05
+msgid "Gains from reversal of impairment – investments in associates"
+msgstr "Κέρδη από αναστροφή απομείωσης – επενδύσεις σε συγγενείς επιχειρήσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_10_06
+#: model:account.account,name:l10n_gr.2_chartgr_76_10_06
+#: model:account.account.template,name:l10n_gr.chartgr_76_10_06
+msgid "Gains from reversal of impairment – investments in joint ventures"
+msgstr "Κέρδη από αναστροφή απομείωσης – επενδύσεις σε κοινοπραξίες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_10_04
+#: model:account.account,name:l10n_gr.2_chartgr_76_10_04
+#: model:account.account.template,name:l10n_gr.chartgr_76_10_04
+msgid "Gains from reversal of impairment – investments in subsidiaries"
+msgstr "Κέρδη από αναστροφή απομείωσης – επενδύσεις σε θυγατρικές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_10_02
+#: model:account.account,name:l10n_gr.2_chartgr_76_10_02
+#: model:account.account.template,name:l10n_gr.chartgr_76_10_02
+msgid "Gains from reversal of impairment – notes receivable"
+msgstr "Κέρδη από αναστροφή απομείωσης – γραμμάτια εισπρακτέα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_11
+#: model:account.account,name:l10n_gr.2_chartgr_76_11
+#: model:account.account.template,name:l10n_gr.chartgr_76_11
+msgid "Gains from reversal of impairment – other assets"
+msgstr "Κέρδη από αναστροφή απομείωσης – λοιπά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_03
+#: model:account.account,name:l10n_gr.2_chartgr_76_03
+#: model:account.account.template,name:l10n_gr.chartgr_76_03
+msgid "Gains from reversal of provisions for environmental restoration"
+msgstr "Κέρδη από ανατροπή διατάξεων για περιβαλλοντική αποκατάσταση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_02
+#: model:account.account,name:l10n_gr.2_chartgr_76_02
+#: model:account.account.template,name:l10n_gr.chartgr_76_02
+msgid "Gains from reversal of provisions for guarantees given"
+msgstr "Κέρδη από αναστροφή προβλέψεων για εγγυήσεις που έχουν δοθεί"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_01
+#: model:account.account,name:l10n_gr.2_chartgr_76_01
+#: model:account.account.template,name:l10n_gr.chartgr_76_01
+msgid "Gains from reversal of provisions for judicial expenses"
+msgstr "Κέρδη από αναστροφή προβλέψεων για δικαστικά έξοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_05
+#: model:account.account,name:l10n_gr.2_chartgr_76_05
+#: model:account.account.template,name:l10n_gr.chartgr_76_05
+msgid "Gains from reversal of provisions for other expenses and risks"
+msgstr "Κέρδη από αναστροφή προβλέψεων για άλλα έξοδα και κινδύνους"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_76_04
+#: model:account.account,name:l10n_gr.2_chartgr_76_04
+#: model:account.account.template,name:l10n_gr.chartgr_76_04
+msgid ""
+"Gains from reversal of provisions for tax audit surcharges, other than "
+"income tax"
+msgstr "Κέρδη από αναστροφή προβλέψεων για προσαυξήσεις φορολογικού ελέγχου, πλην του φόρου εισοδήματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_75_03
+#: model:account.account,name:l10n_gr.2_chartgr_75_03
+#: model:account.account.template,name:l10n_gr.chartgr_75_03
+msgid "Gains from the disposal of financial fixed assets"
+msgstr "Κέρδη από διάθεση χρηματοοικονομικών παγίων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_75_04
+#: model:account.account,name:l10n_gr.2_chartgr_75_04
+#: model:account.account.template,name:l10n_gr.chartgr_75_04
+msgid "Gains from the disposal of financial fixed assets to related entities"
+msgstr "Κέρδη από τη διάθεση χρηματοοικονομικών παγίων σε συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_75_02
+#: model:account.account,name:l10n_gr.2_chartgr_75_02
+#: model:account.account.template,name:l10n_gr.chartgr_75_02
+msgid "Gains from the disposal of intangible fixed assets"
+msgstr "Κέρδη από διάθεση άυλων παγίων στοιχείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_75_00
+#: model:account.account,name:l10n_gr.2_chartgr_75_00
+#: model:account.account.template,name:l10n_gr.chartgr_75_00
+msgid "Gains from the disposal of non-current assets"
+msgstr "Κέρδη από διάθεση μη κυκλοφορούντων περιουσιακών στοιχείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_75_01
+#: model:account.account,name:l10n_gr.2_chartgr_75_01
+#: model:account.account.template,name:l10n_gr.chartgr_75_01
+msgid "Gains from the disposal of tangible fixed assets"
+msgstr "Κέρδη από διάθεση ενσώματων παγίων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_78_03
+#: model:account.account,name:l10n_gr.2_chartgr_78_03
+#: model:account.account.template,name:l10n_gr.chartgr_78_03
+msgid "Gains from the reversal of provisions for income tax audit surcharges"
+msgstr "Κέρδη από αναστροφή προβλέψεων για προσαυξήσεις φορολογικού ελέγχου"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_02
+#: model:account.account,name:l10n_gr.2_chartgr_18_02
+#: model:account.account.template,name:l10n_gr.chartgr_18_02
+msgid "Goodwill"
+msgstr "Φήμη και πελατεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_58_00
+#: model:account.account,name:l10n_gr.2_chartgr_58_00
+#: model:account.account.template,name:l10n_gr.chartgr_58_00
+msgid "Government grants"
+msgstr "Κρατικές επιχορηγήσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_71_02
+#: model:account.account,name:l10n_gr.2_chartgr_71_02
+#: model:account.account.template,name:l10n_gr.chartgr_71_02
+msgid "Government grants for interest expenses"
+msgstr "Κρατικές επιχορηγήσεις για δαπάνες τόκων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_71_03
+#: model:account.account,name:l10n_gr.2_chartgr_71_03
+#: model:account.account.template,name:l10n_gr.chartgr_71_03
+msgid "Government grants for other expenses"
+msgstr "Κρατικές επιχορηγήσεις για άλλες δαπάνες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_12_01
+#: model:account.account,name:l10n_gr.1_chartgr_16_01
+#: model:account.account,name:l10n_gr.1_chartgr_17_01_01
+#: model:account.account,name:l10n_gr.1_chartgr_17_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_12_01
+#: model:account.account,name:l10n_gr.2_chartgr_16_01
+#: model:account.account,name:l10n_gr.2_chartgr_17_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_17_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_12_01
+#: model:account.account.template,name:l10n_gr.chartgr_16_01
+#: model:account.account.template,name:l10n_gr.chartgr_17_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_17_02_01
+msgid "Gross amount (cost or revaluation)"
+msgstr "Μικτό ποσό (κόστος ή αναπροσαρμογή)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_11_01
+#: model:account.account,name:l10n_gr.2_chartgr_11_01
+#: model:account.account.template,name:l10n_gr.chartgr_11_01
+msgid "Gross amount (cost or revaluation) of depreciable land improvements"
+msgstr "Μικτό ποσό (κόστος ή επανεκτίμηση) αποσβέσιμων βελτιώσεων γης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_10_01
+#: model:account.account,name:l10n_gr.2_chartgr_10_01
+#: model:account.account.template,name:l10n_gr.chartgr_10_01
+msgid "Gross amount (cost or revaluation) of land"
+msgstr "Ακαθάριστο ποσό (κόστος ή επανεκτίμηση) της γης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_60_01
+#: model:account.account,name:l10n_gr.2_chartgr_60_01
+#: model:account.account.template,name:l10n_gr.chartgr_60_01
+msgid "Gross employee remuneration"
+msgstr "Ακαθάριστες αποδοχές εργαζομένων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_01_01
+#: model:account.account,name:l10n_gr.1_chartgr_70_05_01
+#: model:account.account,name:l10n_gr.1_chartgr_70_07_01
+#: model:account.account,name:l10n_gr.2_chartgr_70_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_70_05_01
+#: model:account.account,name:l10n_gr.2_chartgr_70_07_01
+#: model:account.account.template,name:l10n_gr.chartgr_70_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_70_05_01
+#: model:account.account.template,name:l10n_gr.chartgr_70_07_01
+msgid "Gross sales – non-related entities"
+msgstr "Ακαθάριστες πωλήσεις – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_02_01
+#: model:account.account,name:l10n_gr.1_chartgr_70_06_01
+#: model:account.account,name:l10n_gr.1_chartgr_70_08_01
+#: model:account.account,name:l10n_gr.2_chartgr_70_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_70_06_01
+#: model:account.account,name:l10n_gr.2_chartgr_70_08_01
+#: model:account.account.template,name:l10n_gr.chartgr_70_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_70_06_01
+#: model:account.account.template,name:l10n_gr.chartgr_70_08_01
+msgid "Gross sales – related entities"
+msgstr "Ακαθάριστες πωλήσεις – συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_04
+#: model:account.account,name:l10n_gr.2_chartgr_33_04
+#: model:account.account.template,name:l10n_gr.chartgr_33_04
+msgid "Guarantees"
+msgstr "Εγγυήσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_01
+#: model:account.account,name:l10n_gr.2_chartgr_61_01
+#: model:account.account.template,name:l10n_gr.chartgr_61_01
+msgid "Impairment - tangible fixed assets (other than biological)"
+msgstr "Απομείωση - ενσώματα πάγια στοιχεία (εκτός από βιολογικά)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_05_01
+#: model:account.account,name:l10n_gr.2_chartgr_61_05_01
+#: model:account.account.template,name:l10n_gr.chartgr_61_05_01
+msgid "Impairment of accounts receivable"
+msgstr "Απομείωση εισπρακτέων λογαριασμών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_05_03
+#: model:account.account,name:l10n_gr.2_chartgr_61_05_03
+#: model:account.account.template,name:l10n_gr.chartgr_61_05_03
+msgid "Impairment of held to maturity financial instruments"
+msgstr "Απομείωση χρηματοοικονομικών μέσων διακρατούμενων μέχρι τη λήξη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_36_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_36_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_36_02_02
+msgid "Impairment of investment in associates"
+msgstr "Απομείωση επενδύσεων σε συγγενείς επιχειρήσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_36_03_02
+#: model:account.account,name:l10n_gr.2_chartgr_36_03_02
+#: model:account.account.template,name:l10n_gr.chartgr_36_03_02
+msgid "Impairment of investment in joint ventures"
+msgstr "Απομείωση επενδύσεων σε κοινοπραξίες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_36_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_36_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_36_01_02
+msgid "Impairment of investment in subsidiaries"
+msgstr "Απομείωση επενδύσεων σε θυγατρικές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_05_05
+#: model:account.account,name:l10n_gr.2_chartgr_61_05_05
+#: model:account.account.template,name:l10n_gr.chartgr_61_05_05
+msgid "Impairment of investments in associates"
+msgstr "Απομείωση επενδύσεων σε συγγενείς επιχειρήσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_05_06
+#: model:account.account,name:l10n_gr.2_chartgr_61_05_06
+#: model:account.account.template,name:l10n_gr.chartgr_61_05_06
+msgid "Impairment of investments in joint ventures"
+msgstr "Απομείωση επενδύσεων σε κοινοπραξίες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_05_04
+#: model:account.account,name:l10n_gr.2_chartgr_61_05_04
+#: model:account.account.template,name:l10n_gr.chartgr_61_05_04
+msgid "Impairment of investments in subsidiaries"
+msgstr "Απομείωση επενδύσεων σε θυγατρικές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_32_04
+#: model:account.account,name:l10n_gr.2_chartgr_32_04
+#: model:account.account.template,name:l10n_gr.chartgr_32_04
+msgid "Impairment of loans given"
+msgstr "Απομείωση των δανείων που δόθηκαν"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_05_02
+#: model:account.account,name:l10n_gr.2_chartgr_61_05_02
+#: model:account.account.template,name:l10n_gr.chartgr_61_05_02
+msgid "Impairment of notes receivable"
+msgstr "Απομείωση χρεογράφων εισπρακτέων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_06
+#: model:account.account,name:l10n_gr.2_chartgr_61_06
+#: model:account.account.template,name:l10n_gr.chartgr_61_06
+msgid "Impairment of other assets"
+msgstr "Απομείωση λοιπών περιουσιακών στοιχείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_03_02
+#: model:account.account,name:l10n_gr.2_chartgr_33_03_02
+#: model:account.account.template,name:l10n_gr.chartgr_33_03_02
+msgid "Impairment of other receivables from non-related entities"
+msgstr "Απομείωση λοιπών απαιτήσεων από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_33_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_33_02_02
+msgid "Impairment of other receivables from related entities"
+msgstr "Απομείωση λοιπών απαιτήσεων από συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_01_04
+#: model:account.account,name:l10n_gr.1_chartgr_31_01_03
+#: model:account.account,name:l10n_gr.2_chartgr_30_01_04
+#: model:account.account,name:l10n_gr.2_chartgr_31_01_03
+#: model:account.account.template,name:l10n_gr.chartgr_30_01_04
+#: model:account.account.template,name:l10n_gr.chartgr_31_01_03
+msgid "Impairment of receivables from non-related entities"
+msgstr "Απομείωση απαιτήσεων από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_02_04
+#: model:account.account,name:l10n_gr.1_chartgr_31_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_30_02_04
+#: model:account.account,name:l10n_gr.2_chartgr_31_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_30_02_04
+#: model:account.account.template,name:l10n_gr.chartgr_31_02_03
+msgid "Impairment of receivables from related entities"
+msgstr "Απομείωση απαιτήσεων από συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_33_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_33_01_02
+msgid "Impairment of revenue from equity investments receivable"
+msgstr "Απομείωση εσόδων από εισπρακτέες επενδύσεις σε μετοχές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_02
+#: model:account.account,name:l10n_gr.2_chartgr_61_02
+#: model:account.account.template,name:l10n_gr.chartgr_61_02
+msgid "Impairment – biological assets"
+msgstr "Απομείωση – βιολογικά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_05
+#: model:account.account,name:l10n_gr.2_chartgr_61_05
+#: model:account.account.template,name:l10n_gr.chartgr_61_05
+msgid "Impairment – financial assets"
+msgstr "Απομείωση – χρηματοοικονομικά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_03
+#: model:account.account,name:l10n_gr.2_chartgr_61_03
+#: model:account.account.template,name:l10n_gr.chartgr_61_03
+msgid "Impairment – intangible assets"
+msgstr "Απομείωση αξίας – άυλα περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_04
+#: model:account.account,name:l10n_gr.2_chartgr_61_04
+#: model:account.account.template,name:l10n_gr.chartgr_61_04
+msgid "Impairment – inventory"
+msgstr "Απομείωση – απογραφή"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_54_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_54_01_01
+msgid "Income tax due as per annual tax return"
+msgstr "Φόρος εισοδήματος που οφείλεται σύμφωνα με την ετήσια φορολογική δήλωση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_69_00
+#: model:account.account,name:l10n_gr.2_chartgr_69_00
+#: model:account.account.template,name:l10n_gr.chartgr_69_00
+msgid "Income tax expense"
+msgstr "Φόρος εισοδήματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_03_02
+#: model:account.account,name:l10n_gr.2_chartgr_54_03_02
+#: model:account.account.template,name:l10n_gr.chartgr_54_03_02
+msgid "Income tax of business income"
+msgstr "Φόρος εισοδήματος εισοδήματος από επιχειρήσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_03_01
+#: model:account.account,name:l10n_gr.2_chartgr_54_03_01
+#: model:account.account.template,name:l10n_gr.chartgr_54_03_01
+msgid "Income tax of salaries and pensions"
+msgstr "Φόρος εισοδήματος μισθών και συντάξεων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_03
+#: model:account.account,name:l10n_gr.2_chartgr_54_03
+#: model:account.account.template,name:l10n_gr.chartgr_54_03
+msgid "Income tax of third parties withheld"
+msgstr "Παρακρατήθηκε φόρος εισοδήματος τρίτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_03_03
+#: model:account.account,name:l10n_gr.2_chartgr_54_03_03
+#: model:account.account.template,name:l10n_gr.chartgr_54_03_03
+msgid "Income tax on dividends"
+msgstr "Φόρος εισοδήματος στα μερίσματα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_01
+#: model:account.account,name:l10n_gr.2_chartgr_54_01
+#: model:account.account.template,name:l10n_gr.chartgr_54_01
+msgid "Income tax payable"
+msgstr "Καταβλητέος φόρος εισοδήματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_78_00
+#: model:account.account,name:l10n_gr.2_chartgr_78_00
+#: model:account.account.template,name:l10n_gr.chartgr_78_00
+msgid "Income tax revenue"
+msgstr "Έσοδα φόρου εισοδήματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_54_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_54_01_02
+msgid "Income tax withheld (contra account)"
+msgstr "Παρακρατήθηκε φόρος εισοδήματος (αντιλογαριασμός)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_06
+#: model:account.account,name:l10n_gr.2_chartgr_64_06
+#: model:account.account.template,name:l10n_gr.chartgr_64_06
+msgid "Insurance"
+msgstr "ΑΣΦΑΛΙΣΗ"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_65_01
+#: model:account.account,name:l10n_gr.2_chartgr_65_01
+#: model:account.account.template,name:l10n_gr.chartgr_65_01
+msgid "Interest expense – bank loans"
+msgstr "Δαπάνες τόκων – τραπεζικά δάνεια"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_65_04
+#: model:account.account,name:l10n_gr.2_chartgr_65_04
+#: model:account.account.template,name:l10n_gr.chartgr_65_04
+msgid "Interest expense – liabilities and provisions"
+msgstr "Έξοδα τόκων – υποχρεώσεις και προβλέψεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_65_03
+#: model:account.account,name:l10n_gr.2_chartgr_65_03
+#: model:account.account.template,name:l10n_gr.chartgr_65_03
+msgid "Interest expense – other loans"
+msgstr "Έξοδα τόκων – άλλα δάνεια"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_65_02
+#: model:account.account,name:l10n_gr.2_chartgr_65_02
+#: model:account.account.template,name:l10n_gr.chartgr_65_02
+msgid "Interest expense –loans from related parties"
+msgstr "Έξοδα τόκων – δάνεια από συνδεδεμένα μέρη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_30_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_30_01_02
+msgid "Interest not accrued on receivables from non-related entities"
+msgstr "Τόκοι μη δεδουλευμένοι σε απαιτήσεις από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_31_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_31_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_31_01_02
+msgid "Interest not-accrued on receivables from non-related entities"
+msgstr "Τόκοι μη δεδουλευμένοι για απαιτήσεις από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_30_02_02
+#: model:account.account,name:l10n_gr.1_chartgr_31_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_30_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_31_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_30_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_31_02_02
+msgid "Interest not-accrued on receivables from related entities"
+msgstr "Τόκοι μη δεδουλευμένοι για απαιτήσεις από συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_72_00
+#: model:account.account,name:l10n_gr.2_chartgr_72_00
+#: model:account.account.template,name:l10n_gr.chartgr_72_00
+msgid "Interest revenue"
+msgstr "Έσοδα από τόκους"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_72_02
+#: model:account.account,name:l10n_gr.2_chartgr_72_02
+#: model:account.account.template,name:l10n_gr.chartgr_72_02
+msgid "Interest revenue from loans and other receivables"
+msgstr "Έσοδα από τόκους από δάνεια και λοιπές απαιτήσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_72_04
+#: model:account.account,name:l10n_gr.2_chartgr_72_04
+#: model:account.account.template,name:l10n_gr.chartgr_72_04
+msgid "Interest revenue from other investments"
+msgstr "Έσοδα από τόκους από άλλες επενδύσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_72_03
+#: model:account.account,name:l10n_gr.2_chartgr_72_03
+#: model:account.account.template,name:l10n_gr.chartgr_72_03
+msgid "Interest revenue from related entities"
+msgstr "Έσοδα από τόκους από συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_72_01
+#: model:account.account,name:l10n_gr.2_chartgr_72_01
+#: model:account.account.template,name:l10n_gr.chartgr_72_01
+msgid "Interest revenue on sales"
+msgstr "Έσοδα από τόκους από πωλήσεις"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat13_purchase_intracommunity_goods
+#: model:account.tax,name:l10n_gr.2_vat13_purchase_intracommunity_goods
+#: model:account.tax.template,name:l10n_gr.vat13_purchase_intracommunity_goods
+msgid "Intra-Community Acquisitions of Goods (VAT 13%)"
+msgstr "Ενδοκοινοτικές Αγορές Αγαθών (ΦΠΑ 13%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat17_purchase_intracommunity_goods
+#: model:account.tax,name:l10n_gr.2_vat17_purchase_intracommunity_goods
+#: model:account.tax.template,name:l10n_gr.vat17_purchase_intracommunity_goods
+msgid "Intra-Community Acquisitions of Goods (VAT 17%)"
+msgstr "Ενδοκοινοτικές Αγορές Αγαθών (ΦΠΑ 17%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat24_purchase_intracommunity_goods
+#: model:account.tax,name:l10n_gr.2_vat24_purchase_intracommunity_goods
+#: model:account.tax.template,name:l10n_gr.vat24_purchase_intracommunity_goods
+msgid "Intra-Community Acquisitions of Goods (VAT 24%)"
+msgstr "Ενδοκοινοτικές Αγορές Αγαθών (ΦΠΑ 24%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat4_purchase_intracommunity_goods
+#: model:account.tax,name:l10n_gr.2_vat4_purchase_intracommunity_goods
+#: model:account.tax.template,name:l10n_gr.vat4_purchase_intracommunity_goods
+msgid "Intra-Community Acquisitions of Goods (VAT 4%)"
+msgstr "Ενδοκοινοτικές Αγορές Αγαθών (ΦΠΑ 4%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat6_purchase_intracommunity_goods
+#: model:account.tax,name:l10n_gr.2_vat6_purchase_intracommunity_goods
+#: model:account.tax.template,name:l10n_gr.vat6_purchase_intracommunity_goods
+msgid "Intra-Community Acquisitions of Goods (VAT 6%)"
+msgstr "Ενδοκοινοτικές Αγορές Αγαθών (ΦΠΑ 6%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat9_purchase_intracommunity_goods
+#: model:account.tax,name:l10n_gr.2_vat9_purchase_intracommunity_goods
+#: model:account.tax.template,name:l10n_gr.vat9_purchase_intracommunity_goods
+msgid "Intra-Community Acquisitions of Goods (VAT 9%)"
+msgstr "Ενδοκοινοτικές Αγορές Αγαθών (ΦΠΑ 9%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat13_purchase_intracommunity_services
+#: model:account.tax,name:l10n_gr.2_vat13_purchase_intracommunity_services
+#: model:account.tax.template,name:l10n_gr.vat13_purchase_intracommunity_services
+msgid "Intra-Community Acquisitions of Services (VAT 13%)"
+msgstr "Ενδοκοινοτικές Αποκτήσεις Υπηρεσιών (ΦΠΑ 13%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat17_purchase_intracommunity_services
+#: model:account.tax,name:l10n_gr.2_vat17_purchase_intracommunity_services
+#: model:account.tax.template,name:l10n_gr.vat17_purchase_intracommunity_services
+msgid "Intra-Community Acquisitions of Services (VAT 17%)"
+msgstr "Ενδοκοινοτικές Αποκτήσεις Υπηρεσιών (ΦΠΑ 17%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat24_purchase_intracommunity_services
+#: model:account.tax,name:l10n_gr.2_vat24_purchase_intracommunity_services
+#: model:account.tax.template,name:l10n_gr.vat24_purchase_intracommunity_services
+msgid "Intra-Community Acquisitions of Services (VAT 24%)"
+msgstr "Ενδοκοινοτικές Αποκτήσεις Υπηρεσιών (ΦΠΑ 24%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat4_purchase_intracommunity_services
+#: model:account.tax,name:l10n_gr.2_vat4_purchase_intracommunity_services
+#: model:account.tax.template,name:l10n_gr.vat4_purchase_intracommunity_services
+msgid "Intra-Community Acquisitions of Services (VAT 4%)"
+msgstr "Ενδοκοινοτικές Αποκτήσεις Υπηρεσιών (ΦΠΑ 4%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat6_purchase_intracommunity_services
+#: model:account.tax,name:l10n_gr.2_vat6_purchase_intracommunity_services
+#: model:account.tax.template,name:l10n_gr.vat6_purchase_intracommunity_services
+msgid "Intra-Community Acquisitions of Services (VAT 6%)"
+msgstr "Ενδοκοινοτικές Αποκτήσεις Υπηρεσιών (ΦΠΑ 6%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat9_purchase_intracommunity_services
+#: model:account.tax,name:l10n_gr.2_vat9_purchase_intracommunity_services
+#: model:account.tax.template,name:l10n_gr.vat9_purchase_intracommunity_services
+msgid "Intra-Community Acquisitions of Services (VAT 9%)"
+msgstr "Ενδοκοινοτικές Αποκτήσεις Υπηρεσιών (ΦΠΑ 9%)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_36_02
+#: model:account.account,name:l10n_gr.1_chartgr_36_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_36_02
+#: model:account.account,name:l10n_gr.2_chartgr_36_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_36_02
+#: model:account.account.template,name:l10n_gr.chartgr_36_02_01
+msgid "Investment in associates"
+msgstr "Επένδυση σε συνεργάτες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_36_03
+#: model:account.account,name:l10n_gr.1_chartgr_36_03_01
+#: model:account.account,name:l10n_gr.2_chartgr_36_03
+#: model:account.account,name:l10n_gr.2_chartgr_36_03_01
+#: model:account.account.template,name:l10n_gr.chartgr_36_03
+#: model:account.account.template,name:l10n_gr.chartgr_36_03_01
+msgid "Investment in joint ventures"
+msgstr "Επένδυση σε κοινοπραξίες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_36_01
+#: model:account.account,name:l10n_gr.1_chartgr_36_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_36_01
+#: model:account.account,name:l10n_gr.2_chartgr_36_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_36_01
+#: model:account.account.template,name:l10n_gr.chartgr_36_01_01
+msgid "Investment in subsidiaries"
+msgstr "Επένδυση σε θυγατρικές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_16_00
+#: model:account.account,name:l10n_gr.2_chartgr_16_00
+#: model:account.account.template,name:l10n_gr.chartgr_16_00
+msgid "Investment property"
+msgstr "Επενδύσεις σε ακίνητα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_36_00
+#: model:account.account,name:l10n_gr.2_chartgr_36_00
+#: model:account.account.template,name:l10n_gr.chartgr_36_00
+msgid "Investments (equity)"
+msgstr "Επενδύσεις (μετοχικό κεφάλαιο)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_10_00
+#: model:account.account,name:l10n_gr.2_chartgr_10_00
+#: model:account.account.template,name:l10n_gr.chartgr_10_00
+msgid "Land"
+msgstr "Γη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_46_00
+#: model:account.account,name:l10n_gr.2_chartgr_46_00
+#: model:account.account.template,name:l10n_gr.chartgr_46_00
+msgid "Legal reserves"
+msgstr "Νόμιμα αποθεματικά"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_53_04
+#: model:account.account,name:l10n_gr.2_chartgr_53_04
+#: model:account.account.template,name:l10n_gr.chartgr_53_04
+msgid "Liabilities to owners and management"
+msgstr "Υποχρεώσεις προς ιδιοκτήτες και διοίκηση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_81_00
+#: model:account.account,name:l10n_gr.2_chartgr_81_00
+#: model:account.account.template,name:l10n_gr.chartgr_81_00
+msgid "Liaison accounts with branches"
+msgstr "Λογαριασμοί διασύνδεσης με υποκαταστήματα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_l10n_gr_chart_template_liquidity_transfer
+#: model:account.account,name:l10n_gr.2_l10n_gr_chart_template_liquidity_transfer
+#: model:account.account.template,name:l10n_gr.l10n_gr_chart_template_liquidity_transfer
+msgid "Liquidity Transfer"
+msgstr "Μεταφορά Ρευστότητας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_01
+#: model:account.account,name:l10n_gr.2_chartgr_22_01
+#: model:account.account.template,name:l10n_gr.chartgr_22_01
+msgid "Living Animals"
+msgstr "Ζωντανά Ζώα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_01_07
+#: model:account.account,name:l10n_gr.2_chartgr_22_01_07
+#: model:account.account.template,name:l10n_gr.chartgr_22_01_07
+msgid "Living Animals – closing balance"
+msgstr "Ζωντανά ζώα – ισορροπία κλεισίματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_22_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_22_01_01
+msgid "Living Animals – opening balance"
+msgstr "Ζωντανά ζώα – ισορροπία ανοίγματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_17_01
+#: model:account.account,name:l10n_gr.2_chartgr_17_01
+#: model:account.account.template,name:l10n_gr.chartgr_17_01
+msgid "Living animals"
+msgstr "Ζωντανά ζώα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_32_00
+#: model:account.account,name:l10n_gr.2_chartgr_32_00
+#: model:account.account.template,name:l10n_gr.chartgr_32_00
+msgid "Loans given"
+msgstr "Δάνεια που δόθηκαν"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_32_02
+#: model:account.account,name:l10n_gr.2_chartgr_32_02
+#: model:account.account.template,name:l10n_gr.chartgr_32_02
+msgid "Loans given to personnel and management"
+msgstr "Δάνεια σε προσωπικό και διοίκηση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_32_01
+#: model:account.account,name:l10n_gr.2_chartgr_32_01
+#: model:account.account.template,name:l10n_gr.chartgr_32_01
+msgid "Loans given to related parties"
+msgstr "Δάνεια σε συνδεδεμένα μέρη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_53_01
+#: model:account.account,name:l10n_gr.2_chartgr_53_01
+#: model:account.account.template,name:l10n_gr.chartgr_53_01
+msgid "Loans received from non-related parties"
+msgstr "Δάνεια που λαμβάνονται από μη συνδεδεμένα μέρη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_53_02
+#: model:account.account,name:l10n_gr.2_chartgr_53_02
+#: model:account.account.template,name:l10n_gr.chartgr_53_02
+msgid "Loans received from related parties"
+msgstr "Δάνεια που λαμβάνονται από συνδεδεμένα μέρη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_07
+#: model:account.account,name:l10n_gr.2_chartgr_61_07
+#: model:account.account.template,name:l10n_gr.chartgr_61_07
+msgid "Losses from fair value measurement"
+msgstr "Ζημιές από επιμέτρηση εύλογης αξίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_61_00
+#: model:account.account,name:l10n_gr.2_chartgr_61_00
+#: model:account.account.template,name:l10n_gr.chartgr_61_00
+msgid "Losses from measurement of assets"
+msgstr "Ζημιές από επιμέτρηση περιουσιακών στοιχείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_67_02
+#: model:account.account,name:l10n_gr.2_chartgr_67_02
+#: model:account.account.template,name:l10n_gr.chartgr_67_02
+msgid "Losses from other disasters"
+msgstr "Απώλειες από άλλες καταστροφές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_67_01
+#: model:account.account,name:l10n_gr.2_chartgr_67_01
+#: model:account.account.template,name:l10n_gr.chartgr_67_01
+msgid "Losses from physical disasters"
+msgstr "Απώλειες από φυσικές καταστροφές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_63_04
+#: model:account.account,name:l10n_gr.2_chartgr_63_04
+#: model:account.account.template,name:l10n_gr.chartgr_63_04
+msgid "Losses from the disposal or retirement of assets to related entities"
+msgstr "Ζημιές από τη διάθεση ή την απόσυρση περιουσιακών στοιχείων σε συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_63_03
+#: model:account.account,name:l10n_gr.2_chartgr_63_03
+#: model:account.account.template,name:l10n_gr.chartgr_63_03
+msgid "Losses from the disposal or retirement of financial assets"
+msgstr "Ζημίες από διάθεση ή απόσυρση χρηματοοικονομικών περιουσιακών στοιχείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_63_02
+#: model:account.account,name:l10n_gr.2_chartgr_63_02
+#: model:account.account.template,name:l10n_gr.chartgr_63_02
+msgid "Losses from the disposal or retirement of intangible assets"
+msgstr "Ζημιές από διάθεση ή απόσυρση άυλων περιουσιακών στοιχείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_63_01
+#: model:account.account,name:l10n_gr.2_chartgr_63_01
+#: model:account.account.template,name:l10n_gr.chartgr_63_01
+msgid "Losses from the disposal or retirement of tangible assets"
+msgstr "Ζημιές από διάθεση ή απόσυρση ενσώματων περιουσιακών στοιχείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_63_00
+#: model:account.account,name:l10n_gr.2_chartgr_63_00
+#: model:account.account.template,name:l10n_gr.chartgr_63_00
+msgid "Losses on disposal or retirement of non-current assets"
+msgstr "Ζημιές από διάθεση ή απόσυρση μη κυκλοφορούντων περιουσιακών στοιχείων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_13_00
+#: model:account.account,name:l10n_gr.2_chartgr_13_00
+#: model:account.account.template,name:l10n_gr.chartgr_13_00
+msgid "Machinery"
+msgstr "Μηχανήματα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_24_00
+#: model:account.account,name:l10n_gr.2_chartgr_24_00
+#: model:account.account.template,name:l10n_gr.chartgr_24_00
+msgid "Materials"
+msgstr "Υλικά"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_24_06
+#: model:account.account,name:l10n_gr.2_chartgr_24_06
+#: model:account.account.template,name:l10n_gr.chartgr_24_06
+msgid "Materials – closing balance"
+msgstr "Υλικά – ισορροπία κλεισίματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_24_01
+#: model:account.account,name:l10n_gr.2_chartgr_24_01
+#: model:account.account.template,name:l10n_gr.chartgr_24_01
+msgid "Materials–opening balance of materials"
+msgstr "Υλικά-ανοικτό ισοζύγιο υλικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_20_00
+#: model:account.account,name:l10n_gr.2_chartgr_20_00
+#: model:account.account.template,name:l10n_gr.chartgr_20_00
+msgid "Merchandise"
+msgstr "Εμπορεύματα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_20_06
+#: model:account.account,name:l10n_gr.2_chartgr_20_06
+#: model:account.account.template,name:l10n_gr.chartgr_20_06
+msgid "Merchandise – closing balance"
+msgstr "Εμπορεύματα – υπόλοιπο κλεισίματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_20_01
+#: model:account.account,name:l10n_gr.2_chartgr_20_01
+#: model:account.account.template,name:l10n_gr.chartgr_20_01
+msgid "Merchandise – opening balance"
+msgstr "Εμπορεύματα – ισοζύγιο έναρξης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_82_00
+#: model:account.account,name:l10n_gr.2_chartgr_82_00
+#: model:account.account.template,name:l10n_gr.chartgr_82_00
+msgid "Net income (loss) for the period"
+msgstr "Καθαρό εισόδημα (ζημία) της περιόδου"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_82_02
+#: model:account.account,name:l10n_gr.2_chartgr_82_02
+#: model:account.account.template,name:l10n_gr.chartgr_82_02
+msgid "Net income after tax for the period"
+msgstr "Καθαρό εισόδημα μετά από φόρους για την περίοδο"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_82_03
+#: model:account.account,name:l10n_gr.2_chartgr_82_03
+#: model:account.account.template,name:l10n_gr.chartgr_82_03
+msgid "Net loss after tax for the period"
+msgstr "Καθαρή ζημία μετά από φόρους για την περίοδο"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_51_00
+#: model:account.account,name:l10n_gr.2_chartgr_51_00
+#: model:account.account.template,name:l10n_gr.chartgr_51_00
+msgid "Notes payable"
+msgstr "Γραμμάτια πληρωτέα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_51_01
+#: model:account.account,name:l10n_gr.2_chartgr_51_01
+#: model:account.account.template,name:l10n_gr.chartgr_51_01
+msgid "Notes payable to non-related entities"
+msgstr "Ομόλογα πληρωτέα σε μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_51_02
+#: model:account.account,name:l10n_gr.2_chartgr_51_02
+#: model:account.account.template,name:l10n_gr.chartgr_51_02
+msgid "Notes payable to related entities"
+msgstr "Ομόλογα πληρωτέα σε συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_31_00
+#: model:account.account,name:l10n_gr.2_chartgr_31_00
+#: model:account.account.template,name:l10n_gr.chartgr_31_00
+msgid "Notes receivables"
+msgstr "Σημειώσεις απαιτήσεων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_31_01
+#: model:account.account,name:l10n_gr.2_chartgr_31_01
+#: model:account.account.template,name:l10n_gr.chartgr_31_01
+msgid "Notes receivables from non-related entities"
+msgstr "Σημειώσεις απαιτήσεων από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_31_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_31_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_31_01_01
+msgid "Notes receivables from non-related entities – nominal amount"
+msgstr "Σημειώσεις Απαιτήσεις από μη συνδεδεμένες οντότητες – ονομαστικό ποσό"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_31_02
+#: model:account.account,name:l10n_gr.2_chartgr_31_02
+#: model:account.account.template,name:l10n_gr.chartgr_31_02
+msgid "Notes receivables from related entities"
+msgstr "Σημειώσεις απαιτήσεων από συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_31_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_31_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_31_02_01
+msgid "Notes receivables from related entities – nominal amount"
+msgstr "Σημειώσεις απαιτήσεων από συνδεδεμένες οντότητες – ονομαστικό ποσό"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_23_01
+#: model:account.account,name:l10n_gr.2_chartgr_23_01
+#: model:account.account.template,name:l10n_gr.chartgr_23_01
+msgid "Opening balance of work in progress"
+msgstr "Ανοικτό ισοζύγιο εργασιών σε εξέλιξη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_48_02
+#: model:account.account,name:l10n_gr.2_chartgr_48_02
+#: model:account.account.template,name:l10n_gr.chartgr_48_02
+msgid "Optional reserves formed by a decision of the owners’ general assembly"
+msgstr "Προαιρετικά αποθεματικά που σχηματίζονται με απόφαση της γενικής συνέλευσης των ιδιοκτητών"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat13_purchase_other_imports
+#: model:account.tax,name:l10n_gr.2_vat13_purchase_other_imports
+#: model:account.tax.template,name:l10n_gr.vat13_purchase_other_imports
+msgid "Other Imports (VAT 13%)"
+msgstr "Λοιπές εισαγωγές (ΦΠΑ 13%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat17_purchase_other_imports
+#: model:account.tax,name:l10n_gr.2_vat17_purchase_other_imports
+#: model:account.tax.template,name:l10n_gr.vat17_purchase_other_imports
+msgid "Other Imports (VAT 17%)"
+msgstr "Λοιπές εισαγωγές (ΦΠΑ 17%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat24_purchase_other_imports
+#: model:account.tax,name:l10n_gr.2_vat24_purchase_other_imports
+#: model:account.tax.template,name:l10n_gr.vat24_purchase_other_imports
+msgid "Other Imports (VAT 24%)"
+msgstr "Λοιπές εισαγωγές (ΦΠΑ 24%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat4_purchase_other_imports
+#: model:account.tax,name:l10n_gr.2_vat4_purchase_other_imports
+#: model:account.tax.template,name:l10n_gr.vat4_purchase_other_imports
+msgid "Other Imports (VAT 4%)"
+msgstr "Λοιπές εισαγωγές (ΦΠΑ 4%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat6_purchase_other_imports
+#: model:account.tax,name:l10n_gr.2_vat6_purchase_other_imports
+#: model:account.tax.template,name:l10n_gr.vat6_purchase_other_imports
+msgid "Other Imports (VAT 6%)"
+msgstr "Λοιπές εισαγωγές (ΦΠΑ 6%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat9_purchase_other_imports
+#: model:account.tax,name:l10n_gr.2_vat9_purchase_other_imports
+#: model:account.tax.template,name:l10n_gr.vat9_purchase_other_imports
+msgid "Other Imports (VAT 9%)"
+msgstr "Λοιπές εισαγωγές (ΦΠΑ 9%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat13_purchase_reverse_charge
+#: model:account.tax,name:l10n_gr.2_vat13_purchase_reverse_charge
+#: model:account.tax.template,name:l10n_gr.vat13_purchase_reverse_charge
+msgid "Other Reverse-Charge Transactions (VAT 13%)"
+msgstr "Άλλες συναλλαγές με αντίστροφη χρέωση (ΦΠΑ 13%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat17_purchase_reverse_charge
+#: model:account.tax,name:l10n_gr.2_vat17_purchase_reverse_charge
+#: model:account.tax.template,name:l10n_gr.vat17_purchase_reverse_charge
+msgid "Other Reverse-Charge Transactions (VAT 17%)"
+msgstr "Άλλες συναλλαγές με αντίστροφη χρέωση (ΦΠΑ 17%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat24_purchase_reverse_charge
+#: model:account.tax,name:l10n_gr.2_vat24_purchase_reverse_charge
+#: model:account.tax.template,name:l10n_gr.vat24_purchase_reverse_charge
+msgid "Other Reverse-Charge Transactions (VAT 24%)"
+msgstr "Άλλες συναλλαγές με αντίστροφη χρέωση (ΦΠΑ 24%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat4_purchase_reverse_charge
+#: model:account.tax,name:l10n_gr.2_vat4_purchase_reverse_charge
+#: model:account.tax.template,name:l10n_gr.vat4_purchase_reverse_charge
+msgid "Other Reverse-Charge Transactions (VAT 4%)"
+msgstr "Άλλες συναλλαγές με αντίστροφη χρέωση (ΦΠΑ 4%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat6_purchase_reverse_charge
+#: model:account.tax,name:l10n_gr.2_vat6_purchase_reverse_charge
+#: model:account.tax.template,name:l10n_gr.vat6_purchase_reverse_charge
+msgid "Other Reverse-Charge Transactions (VAT 6%)"
+msgstr "Άλλες συναλλαγές με αντίστροφη χρέωση (ΦΠΑ 6%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat9_purchase_reverse_charge
+#: model:account.tax,name:l10n_gr.2_vat9_purchase_reverse_charge
+#: model:account.tax.template,name:l10n_gr.vat9_purchase_reverse_charge
+msgid "Other Reverse-Charge Transactions (VAT 9%)"
+msgstr "Άλλες συναλλαγές με αντίστροφη χρέωση (ΦΠΑ 9%)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_50_03_03
+#: model:account.account,name:l10n_gr.2_chartgr_50_03_03
+#: model:account.account.template,name:l10n_gr.chartgr_50_03_03
+msgid "Other advances to suppliers, non-related entities"
+msgstr "Άλλες προκαταβολές σε προμηθευτές, μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_50_04_03
+#: model:account.account,name:l10n_gr.2_chartgr_50_04_03
+#: model:account.account.template,name:l10n_gr.chartgr_50_04_03
+msgid "Other advances to suppliers, related entities"
+msgstr "Άλλες προκαταβολές σε προμηθευτές, συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_38_04
+#: model:account.account,name:l10n_gr.2_chartgr_38_04
+#: model:account.account.template,name:l10n_gr.chartgr_38_04
+msgid "Other cash equivalents"
+msgstr "Άλλα χρηματικά ισοδύναμα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_60_03
+#: model:account.account,name:l10n_gr.2_chartgr_60_03
+#: model:account.account.template,name:l10n_gr.chartgr_60_03
+msgid "Other compensation"
+msgstr "Άλλη αποζημίωση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_15_00
+#: model:account.account,name:l10n_gr.2_chartgr_15_00
+#: model:account.account.template,name:l10n_gr.chartgr_15_00
+msgid "Other equipment"
+msgstr "Άλλος εξοπλισμός"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_34_02
+#: model:account.account,name:l10n_gr.2_chartgr_34_02
+#: model:account.account.template,name:l10n_gr.chartgr_34_02
+msgid "Other equity instruments"
+msgstr "Άλλα μετοχικά μέσα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_12
+#: model:account.account,name:l10n_gr.2_chartgr_64_12
+#: model:account.account.template,name:l10n_gr.chartgr_64_12
+msgid "Other expenses"
+msgstr "Αλλα έξοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_67_03
+#: model:account.account,name:l10n_gr.2_chartgr_67_03
+#: model:account.account.template,name:l10n_gr.chartgr_67_03
+msgid "Other extraordinary expenses and losses"
+msgstr "Άλλα έκτακτα έξοδα και ζημίες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_34_03
+#: model:account.account,name:l10n_gr.2_chartgr_34_03
+#: model:account.account.template,name:l10n_gr.chartgr_34_03
+msgid "Other financial assets"
+msgstr "Άλλα χρηματοοικονομικά περιουσιακά στοιχεία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_65_05
+#: model:account.account,name:l10n_gr.2_chartgr_65_05
+#: model:account.account.template,name:l10n_gr.chartgr_65_05
+msgid "Other financial expenses"
+msgstr "Άλλα οικονομικά έξοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_03_04
+#: model:account.account,name:l10n_gr.2_chartgr_54_03_04
+#: model:account.account.template,name:l10n_gr.chartgr_54_03_04
+msgid "Other income tax"
+msgstr "Λοιποί φόροι εισοδήματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_18_03
+#: model:account.account,name:l10n_gr.2_chartgr_18_03
+#: model:account.account.template,name:l10n_gr.chartgr_18_03
+msgid "Other intangibles"
+msgstr "Άλλα άυλα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_27_00
+#: model:account.account,name:l10n_gr.2_chartgr_27_00
+#: model:account.account.template,name:l10n_gr.chartgr_27_00
+msgid "Other inventory"
+msgstr "Άλλο απόθεμα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_27_06
+#: model:account.account,name:l10n_gr.2_chartgr_27_06
+#: model:account.account.template,name:l10n_gr.chartgr_27_06
+msgid "Other inventory – closing balance"
+msgstr "Άλλο απόθεμα – υπόλοιπο κλεισίματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_27_01
+#: model:account.account,name:l10n_gr.2_chartgr_27_01
+#: model:account.account.template,name:l10n_gr.chartgr_27_01
+msgid "Other inventory – opening balance"
+msgstr "Άλλο απόθεμα – υπόλοιπο έναρξης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_53_00
+#: model:account.account,name:l10n_gr.2_chartgr_53_00
+#: model:account.account.template,name:l10n_gr.chartgr_53_00
+msgid "Other liabilities"
+msgstr "Λοιπές υποχρεώσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_53_06
+#: model:account.account,name:l10n_gr.2_chartgr_53_06
+#: model:account.account.template,name:l10n_gr.chartgr_53_06
+msgid "Other liabilities to non-related entities"
+msgstr "Λοιπές υποχρεώσεις προς μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_53_07
+#: model:account.account,name:l10n_gr.2_chartgr_53_07
+#: model:account.account.template,name:l10n_gr.chartgr_53_07
+msgid "Other liabilities to related entities"
+msgstr "Λοιπές υποχρεώσεις προς συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_32_03
+#: model:account.account,name:l10n_gr.2_chartgr_32_03
+#: model:account.account.template,name:l10n_gr.chartgr_32_03
+msgid "Other loans given"
+msgstr "Άλλα δάνεια που δόθηκαν"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_00
+#: model:account.account,name:l10n_gr.1_chartgr_80_03
+#: model:account.account,name:l10n_gr.2_chartgr_64_00
+#: model:account.account,name:l10n_gr.2_chartgr_80_03
+#: model:account.account.template,name:l10n_gr.chartgr_64_00
+#: model:account.account.template,name:l10n_gr.chartgr_80_03
+msgid "Other operating expenses"
+msgstr "Λοιπά λειτουργικά έξοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_71_00
+#: model:account.account,name:l10n_gr.2_chartgr_71_00
+#: model:account.account.template,name:l10n_gr.chartgr_71_00
+msgid "Other ordinary revenue"
+msgstr "Άλλα τακτικά έσοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_57_02
+#: model:account.account,name:l10n_gr.1_chartgr_57_02_05
+#: model:account.account,name:l10n_gr.1_chartgr_68_05
+#: model:account.account,name:l10n_gr.2_chartgr_57_02
+#: model:account.account,name:l10n_gr.2_chartgr_57_02_05
+#: model:account.account,name:l10n_gr.2_chartgr_68_05
+#: model:account.account.template,name:l10n_gr.chartgr_57_02
+#: model:account.account.template,name:l10n_gr.chartgr_57_02_05
+#: model:account.account.template,name:l10n_gr.chartgr_68_05
+msgid "Other provisions"
+msgstr "Άλλες διατάξεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_00
+#: model:account.account,name:l10n_gr.2_chartgr_33_00
+#: model:account.account.template,name:l10n_gr.chartgr_33_00
+msgid "Other receivables"
+msgstr "Αλλά παραληφθέντα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_03
+#: model:account.account,name:l10n_gr.2_chartgr_33_03
+#: model:account.account.template,name:l10n_gr.chartgr_33_03
+msgid "Other receivables from non-related entities"
+msgstr "Λοιπές απαιτήσεις από μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_03_01
+#: model:account.account,name:l10n_gr.2_chartgr_33_03_01
+#: model:account.account.template,name:l10n_gr.chartgr_33_03_01
+msgid "Other receivables from non-related entities, nominal amount"
+msgstr "Λοιπές απαιτήσεις από μη συνδεδεμένες οντότητες, ονομαστικό ποσό"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_02
+#: model:account.account,name:l10n_gr.2_chartgr_33_02
+#: model:account.account.template,name:l10n_gr.chartgr_33_02
+msgid "Other receivables from related entities"
+msgstr "Λοιπές απαιτήσεις από συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_33_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_33_02_01
+msgid "Other receivables from related entities– nominal amount"
+msgstr "Λοιπές απαιτήσεις από συνδεδεμένες οντότητες – ονομαστικό ποσό"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_71_04
+#: model:account.account,name:l10n_gr.2_chartgr_71_04
+#: model:account.account.template,name:l10n_gr.chartgr_71_04
+msgid "Other revenue"
+msgstr "Άλλα έσοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_71_05
+#: model:account.account,name:l10n_gr.2_chartgr_71_05
+#: model:account.account.template,name:l10n_gr.chartgr_71_05
+msgid "Other revenue from related entities"
+msgstr "Άλλα έσοδα από συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_05
+#: model:account.account,name:l10n_gr.2_chartgr_54_05
+#: model:account.account.template,name:l10n_gr.chartgr_54_05
+msgid "Other taxes, levies and contributions"
+msgstr "Άλλοι φόροι, εισφορές και εισφορές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_42_00
+#: model:account.account,name:l10n_gr.2_chartgr_42_00
+#: model:account.account.template,name:l10n_gr.chartgr_42_00
+msgid "Owners' deposits"
+msgstr "Καταθέσεις ιδιοκτητών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_25_00
+#: model:account.account,name:l10n_gr.2_chartgr_25_00
+#: model:account.account.template,name:l10n_gr.chartgr_25_00
+msgid "Packing materials"
+msgstr "Υλικά συσκευασίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_25_06
+#: model:account.account,name:l10n_gr.2_chartgr_25_06
+#: model:account.account.template,name:l10n_gr.chartgr_25_06
+msgid "Packing materials – closing balance"
+msgstr "Υλικά συσκευασίας – ισορροπία κλεισίματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_25_01
+#: model:account.account,name:l10n_gr.2_chartgr_25_01
+#: model:account.account.template,name:l10n_gr.chartgr_25_01
+msgid "Packing materials – opening balance"
+msgstr "Υλικά συσκευασίας – ισορροπία ανοίγματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_37_01
+#: model:account.account,name:l10n_gr.2_chartgr_37_01
+#: model:account.account.template,name:l10n_gr.chartgr_37_01
+msgid "Prepaid expenses"
+msgstr "Προπληρωθέντα έξοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_37_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_37_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_37_01_01
+msgid "Prepaid expenses to non-related entities"
+msgstr "Προπληρωμένα έξοδα σε μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_37_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_37_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_37_01_02
+msgid "Prepaid expenses to related entities"
+msgstr "Προπληρωμένα έξοδα σε συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_55_01
+#: model:account.account,name:l10n_gr.2_chartgr_55_01
+#: model:account.account.template,name:l10n_gr.chartgr_55_01
+msgid "Primary social security"
+msgstr "Πρωτοβάθμια κοινωνική ασφάλιση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_21_02
+#: model:account.account,name:l10n_gr.2_chartgr_21_02
+#: model:account.account.template,name:l10n_gr.chartgr_21_02
+msgid "Production of goods"
+msgstr "Παραγωγή αγαθών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_60_04
+#: model:account.account,name:l10n_gr.2_chartgr_60_04
+#: model:account.account.template,name:l10n_gr.chartgr_60_04
+msgid "Provision for post-employment benefits"
+msgstr "Πρόβλεψη για επιδόματα μετά την έξοδο από την υπηρεσία"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_68_03
+#: model:account.account,name:l10n_gr.2_chartgr_68_03
+#: model:account.account.template,name:l10n_gr.chartgr_68_03
+msgid "Provision-expense for environmental restoration"
+msgstr "Πρόβλεψη-δαπάνη για αποκατάσταση περιβάλλοντος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_68_02
+#: model:account.account,name:l10n_gr.2_chartgr_68_02
+#: model:account.account.template,name:l10n_gr.chartgr_68_02
+msgid "Provision-expense for guarantees granted"
+msgstr "Προβλέψεις-έξοδα για εγγυήσεις που χορηγήθηκαν"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_68_01
+#: model:account.account,name:l10n_gr.2_chartgr_68_01
+#: model:account.account.template,name:l10n_gr.chartgr_68_01
+msgid "Provision-expense for judicial expenses"
+msgstr "Πρόβλεψη-έξοδα για δικαστικές δαπάνες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_68_04
+#: model:account.account,name:l10n_gr.2_chartgr_68_04
+#: model:account.account.template,name:l10n_gr.chartgr_68_04
+msgid "Provision-expense for tax audit surcharges, other than income tax"
+msgstr "Πρόβλεψη-έξοδα για προσαυξήσεις φορολογικού ελέγχου, πλην του φόρου εισοδήματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_68_00
+#: model:account.account,name:l10n_gr.1_chartgr_80_05
+#: model:account.account,name:l10n_gr.2_chartgr_68_00
+#: model:account.account,name:l10n_gr.2_chartgr_80_05
+#: model:account.account.template,name:l10n_gr.chartgr_68_00
+#: model:account.account.template,name:l10n_gr.chartgr_80_05
+msgid "Provisions"
+msgstr "Προμήθειες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_57_01
+#: model:account.account,name:l10n_gr.2_chartgr_57_01
+#: model:account.account.template,name:l10n_gr.chartgr_57_01
+msgid "Provisions for employee benefits"
+msgstr "Προβλέψεις για παροχές σε εργαζόμενους"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_57_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_57_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_57_02_03
+msgid "Provisions for environmental restoration"
+msgstr "Διατάξεις για την αποκατάσταση του περιβάλλοντος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_57_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_57_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_57_02_02
+msgid "Provisions for guarantees granted"
+msgstr "Προβλέψεις για χορηγηθείσες εγγυήσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_69_03
+#: model:account.account,name:l10n_gr.2_chartgr_69_03
+#: model:account.account.template,name:l10n_gr.chartgr_69_03
+msgid "Provisions for income tax audit surcharges"
+msgstr "Προβλέψεις για προσαυξήσεις φορολογικού ελέγχου"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_57_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_57_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_57_02_01
+msgid "Provisions for judicial expenses"
+msgstr "Προβλέψεις για δικαστικές δαπάνες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_57_03
+#: model:account.account,name:l10n_gr.1_chartgr_68_06
+#: model:account.account,name:l10n_gr.2_chartgr_57_03
+#: model:account.account,name:l10n_gr.2_chartgr_68_06
+#: model:account.account.template,name:l10n_gr.chartgr_57_03
+#: model:account.account.template,name:l10n_gr.chartgr_68_06
+msgid "Provisions for related entities"
+msgstr "Προβλέψεις για συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_57_02_04
+#: model:account.account,name:l10n_gr.2_chartgr_57_02_04
+#: model:account.account.template,name:l10n_gr.chartgr_57_02_04
+msgid "Provisions for tax audit surcharges"
+msgstr "Προβλέψεις για προσαυξήσεις φορολογικού ελέγχου"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat13_purchase_domestic
+#: model:account.tax,description:l10n_gr.2_vat13_purchase_domestic
+#: model:account.tax.template,description:l10n_gr.vat13_purchase_domestic
+msgid "Purchase VAT 13% for domestic purchase and expenditures"
+msgstr "Αγορά ΦΠΑ 13% για εγχώριες αγορές και δαπάνες"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat13_purchase_imports
+#: model:account.tax,description:l10n_gr.2_vat13_purchase_imports
+#: model:account.tax.template,description:l10n_gr.vat13_purchase_imports
+msgid "Purchase VAT 13% for imports of investments goods"
+msgstr "Αγορά ΦΠΑ 13% για εισαγωγές επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat13_purchase_other_imports
+#: model:account.tax,description:l10n_gr.2_vat13_purchase_other_imports
+#: model:account.tax.template,description:l10n_gr.vat13_purchase_other_imports
+msgid "Purchase VAT 13% for imports other than investments goods"
+msgstr "Αγορά ΦΠΑ 13% για εισαγωγές εκτός επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat13_purchase_intracommunity_goods
+#: model:account.tax,description:l10n_gr.2_vat13_purchase_intracommunity_goods
+#: model:account.tax.template,description:l10n_gr.vat13_purchase_intracommunity_goods
+msgid "Purchase VAT 13% for intra-community acquisitions of goods"
+msgstr "Αγορά ΦΠΑ 13% για ενδοκοινοτικές αποκτήσεις αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat13_purchase_intracommunity_services
+#: model:account.tax,description:l10n_gr.2_vat13_purchase_intracommunity_services
+#: model:account.tax.template,description:l10n_gr.vat13_purchase_intracommunity_services
+msgid "Purchase VAT 13% for intra-community acquisitions of services"
+msgstr "Αγορά ΦΠΑ 13% για ενδοκοινοτικές αποκτήσεις υπηρεσιών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat13_purchase_reverse_charge
+#: model:account.tax,description:l10n_gr.2_vat13_purchase_reverse_charge
+#: model:account.tax.template,description:l10n_gr.vat13_purchase_reverse_charge
+msgid "Purchase VAT 13% for other reverse-charge transactions"
+msgstr "Αγορά ΦΠΑ 13% για άλλες συναλλαγές με αντίστροφη χρέωση"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat17_purchase_domestic
+#: model:account.tax,description:l10n_gr.2_vat17_purchase_domestic
+#: model:account.tax.template,description:l10n_gr.vat17_purchase_domestic
+msgid "Purchase VAT 17% for domestic purchase and expenditures"
+msgstr "Αγορά ΦΠΑ 17% για εγχώριες αγορές και δαπάνες"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat17_purchase_imports
+#: model:account.tax,description:l10n_gr.2_vat17_purchase_imports
+#: model:account.tax.template,description:l10n_gr.vat17_purchase_imports
+msgid "Purchase VAT 17% for imports of investments goods"
+msgstr "Αγορά ΦΠΑ 17% για εισαγωγές επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat17_purchase_other_imports
+#: model:account.tax,description:l10n_gr.2_vat17_purchase_other_imports
+#: model:account.tax.template,description:l10n_gr.vat17_purchase_other_imports
+msgid "Purchase VAT 17% for imports other than investments goods"
+msgstr "Αγορά ΦΠΑ 17% για εισαγωγές εκτός επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat17_purchase_intracommunity_goods
+#: model:account.tax,description:l10n_gr.2_vat17_purchase_intracommunity_goods
+#: model:account.tax.template,description:l10n_gr.vat17_purchase_intracommunity_goods
+msgid "Purchase VAT 17% for intra-community acquisitions of goods"
+msgstr "Αγορά ΦΠΑ 17% για ενδοκοινοτικές αποκτήσεις αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat17_purchase_intracommunity_services
+#: model:account.tax,description:l10n_gr.2_vat17_purchase_intracommunity_services
+#: model:account.tax.template,description:l10n_gr.vat17_purchase_intracommunity_services
+msgid "Purchase VAT 17% for intra-community acquisitions of services"
+msgstr "Αγορά ΦΠΑ 17% για ενδοκοινοτικές αποκτήσεις υπηρεσιών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat17_purchase_reverse_charge
+#: model:account.tax,description:l10n_gr.2_vat17_purchase_reverse_charge
+#: model:account.tax.template,description:l10n_gr.vat17_purchase_reverse_charge
+msgid "Purchase VAT 17% for other reverse-charge transactions"
+msgstr "Αγορά ΦΠΑ 17% για άλλες συναλλαγές με αντίστροφη χρέωση"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat24_purchase_domestic
+#: model:account.tax,description:l10n_gr.2_vat24_purchase_domestic
+#: model:account.tax.template,description:l10n_gr.vat24_purchase_domestic
+msgid "Purchase VAT 24% for domestic purchase and expenditures"
+msgstr "Αγορά ΦΠΑ 24% για εγχώριες αγορές και δαπάνες"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat24_purchase_imports
+#: model:account.tax,description:l10n_gr.2_vat24_purchase_imports
+#: model:account.tax.template,description:l10n_gr.vat24_purchase_imports
+msgid "Purchase VAT 24% for imports of investments goods"
+msgstr "Αγορά ΦΠΑ 24% για εισαγωγές επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat24_purchase_other_imports
+#: model:account.tax,description:l10n_gr.2_vat24_purchase_other_imports
+#: model:account.tax.template,description:l10n_gr.vat24_purchase_other_imports
+msgid "Purchase VAT 24% for imports other than investments goods"
+msgstr "Αγορά ΦΠΑ 24% για εισαγωγές εκτός επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat24_purchase_intracommunity_goods
+#: model:account.tax,description:l10n_gr.2_vat24_purchase_intracommunity_goods
+#: model:account.tax.template,description:l10n_gr.vat24_purchase_intracommunity_goods
+msgid "Purchase VAT 24% for intra-community acquisitions of goods"
+msgstr "Αγορά ΦΠΑ 24% για ενδοκοινοτικές αγορές αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat24_purchase_intracommunity_services
+#: model:account.tax,description:l10n_gr.2_vat24_purchase_intracommunity_services
+#: model:account.tax.template,description:l10n_gr.vat24_purchase_intracommunity_services
+msgid "Purchase VAT 24% for intra-community acquisitions of services"
+msgstr "Αγορά ΦΠΑ 24% για ενδοκοινοτικές αποκτήσεις υπηρεσιών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat24_purchase_reverse_charge
+#: model:account.tax,description:l10n_gr.2_vat24_purchase_reverse_charge
+#: model:account.tax.template,description:l10n_gr.vat24_purchase_reverse_charge
+msgid "Purchase VAT 24% for other reverse-charge transactions"
+msgstr "Αγορά ΦΠΑ 24% για άλλες συναλλαγές με αντίστροφη χρέωση"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat4_purchase_domestic
+#: model:account.tax,description:l10n_gr.2_vat4_purchase_domestic
+#: model:account.tax.template,description:l10n_gr.vat4_purchase_domestic
+msgid "Purchase VAT 4% for domestic purchase and expenditures"
+msgstr "Αγορά ΦΠΑ 4% για εγχώριες αγορές και δαπάνες"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat4_purchase_imports
+#: model:account.tax,description:l10n_gr.2_vat4_purchase_imports
+#: model:account.tax.template,description:l10n_gr.vat4_purchase_imports
+msgid "Purchase VAT 4% for imports of investments goods"
+msgstr "Αγορά ΦΠΑ 4% για εισαγωγές επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat4_purchase_other_imports
+#: model:account.tax,description:l10n_gr.2_vat4_purchase_other_imports
+#: model:account.tax.template,description:l10n_gr.vat4_purchase_other_imports
+msgid "Purchase VAT 4% for imports other than investments goods"
+msgstr "Αγορά ΦΠΑ 4% για εισαγωγές εκτός από επενδυτικά αγαθά"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat4_purchase_intracommunity_goods
+#: model:account.tax,description:l10n_gr.2_vat4_purchase_intracommunity_goods
+#: model:account.tax.template,description:l10n_gr.vat4_purchase_intracommunity_goods
+msgid "Purchase VAT 4% for intra-community acquisitions of goods"
+msgstr "Αγορά ΦΠΑ 4% για ενδοκοινοτικές αποκτήσεις αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat4_purchase_intracommunity_services
+#: model:account.tax,description:l10n_gr.2_vat4_purchase_intracommunity_services
+#: model:account.tax.template,description:l10n_gr.vat4_purchase_intracommunity_services
+msgid "Purchase VAT 4% for intra-community acquisitions of services"
+msgstr "Αγορά ΦΠΑ 4% για ενδοκοινοτικές αποκτήσεις υπηρεσιών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat4_purchase_reverse_charge
+#: model:account.tax,description:l10n_gr.2_vat4_purchase_reverse_charge
+#: model:account.tax.template,description:l10n_gr.vat4_purchase_reverse_charge
+msgid "Purchase VAT 4% for other reverse-charge transactions"
+msgstr "Αγορά ΦΠΑ 4% για άλλες συναλλαγές με αντίστροφη χρέωση"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat6_purchase_domestic
+#: model:account.tax,description:l10n_gr.2_vat6_purchase_domestic
+#: model:account.tax.template,description:l10n_gr.vat6_purchase_domestic
+msgid "Purchase VAT 6% for domestic purchase and expenditures"
+msgstr "Αγορά ΦΠΑ 6% για εγχώριες αγορές και δαπάνες"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat6_purchase_imports
+#: model:account.tax,description:l10n_gr.2_vat6_purchase_imports
+#: model:account.tax.template,description:l10n_gr.vat6_purchase_imports
+msgid "Purchase VAT 6% for imports of investments goods"
+msgstr "Αγορά ΦΠΑ 6% για εισαγωγές επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat6_purchase_other_imports
+#: model:account.tax,description:l10n_gr.2_vat6_purchase_other_imports
+#: model:account.tax.template,description:l10n_gr.vat6_purchase_other_imports
+msgid "Purchase VAT 6% for imports other than investments goods"
+msgstr "Αγορά ΦΠΑ 6% για εισαγωγές εκτός επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat6_purchase_intracommunity_goods
+#: model:account.tax,description:l10n_gr.2_vat6_purchase_intracommunity_goods
+#: model:account.tax.template,description:l10n_gr.vat6_purchase_intracommunity_goods
+msgid "Purchase VAT 6% for intra-community acquisitions of goods"
+msgstr "Αγορά ΦΠΑ 6% για ενδοκοινοτικές αποκτήσεις αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat6_purchase_intracommunity_services
+#: model:account.tax,description:l10n_gr.2_vat6_purchase_intracommunity_services
+#: model:account.tax.template,description:l10n_gr.vat6_purchase_intracommunity_services
+msgid "Purchase VAT 6% for intra-community acquisitions of services"
+msgstr "Αγορά ΦΠΑ 6% για ενδοκοινοτικές αποκτήσεις υπηρεσιών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat6_purchase_reverse_charge
+#: model:account.tax,description:l10n_gr.2_vat6_purchase_reverse_charge
+#: model:account.tax.template,description:l10n_gr.vat6_purchase_reverse_charge
+msgid "Purchase VAT 6% for other reverse-charge transactions"
+msgstr "Αγοράστε ΦΠΑ 6% για άλλες συναλλαγές με αντίστροφη χρέωση"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat9_purchase_domestic
+#: model:account.tax,description:l10n_gr.2_vat9_purchase_domestic
+#: model:account.tax.template,description:l10n_gr.vat9_purchase_domestic
+msgid "Purchase VAT 9% for domestic purchase and expenditures"
+msgstr "Αγορά ΦΠΑ 9% για εγχώριες αγορές και δαπάνες"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat9_purchase_imports
+#: model:account.tax,description:l10n_gr.2_vat9_purchase_imports
+#: model:account.tax.template,description:l10n_gr.vat9_purchase_imports
+msgid "Purchase VAT 9% for imports of investments goods"
+msgstr "Αγορά ΦΠΑ 9% για εισαγωγές επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat9_purchase_other_imports
+#: model:account.tax,description:l10n_gr.2_vat9_purchase_other_imports
+#: model:account.tax.template,description:l10n_gr.vat9_purchase_other_imports
+msgid "Purchase VAT 9% for imports other than investments goods"
+msgstr "Αγορά ΦΠΑ 9% για εισαγωγές εκτός επενδυτικών αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat9_purchase_intracommunity_goods
+#: model:account.tax,description:l10n_gr.2_vat9_purchase_intracommunity_goods
+#: model:account.tax.template,description:l10n_gr.vat9_purchase_intracommunity_goods
+msgid "Purchase VAT 9% for intra-community acquisitions of goods"
+msgstr "Αγορά ΦΠΑ 9% για ενδοκοινοτικές αγορές αγαθών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat9_purchase_intracommunity_services
+#: model:account.tax,description:l10n_gr.2_vat9_purchase_intracommunity_services
+#: model:account.tax.template,description:l10n_gr.vat9_purchase_intracommunity_services
+msgid "Purchase VAT 9% for intra-community acquisitions of services"
+msgstr "Αγορά ΦΠΑ 9% για ενδοκοινοτικές αποκτήσεις υπηρεσιών"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat9_purchase_reverse_charge
+#: model:account.tax,description:l10n_gr.2_vat9_purchase_reverse_charge
+#: model:account.tax.template,description:l10n_gr.vat9_purchase_reverse_charge
+msgid "Purchase VAT 9% for other reverse-charge transactions"
+msgstr "Αγοράστε ΦΠΑ 9% για άλλες συναλλαγές με αντίστροφη χρέωση"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat13_purchase_domestic
+#: model:account.tax,name:l10n_gr.2_vat13_purchase_domestic
+#: model:account.tax.template,name:l10n_gr.vat13_purchase_domestic
+msgid "Purchases and Expenditures within the Country (VAT 13%)"
+msgstr "Αγορές και δαπάνες εντός της χώρας (ΦΠΑ 13%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat17_purchase_domestic
+#: model:account.tax,name:l10n_gr.2_vat17_purchase_domestic
+#: model:account.tax.template,name:l10n_gr.vat17_purchase_domestic
+msgid "Purchases and Expenditures within the Country (VAT 17%)"
+msgstr "Αγορές και δαπάνες εντός της χώρας (ΦΠΑ 17%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat24_purchase_domestic
+#: model:account.tax,name:l10n_gr.2_vat24_purchase_domestic
+#: model:account.tax.template,name:l10n_gr.vat24_purchase_domestic
+msgid "Purchases and Expenditures within the Country (VAT 24%)"
+msgstr "Αγορές και δαπάνες εντός της χώρας (ΦΠΑ 24%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat4_purchase_domestic
+#: model:account.tax,name:l10n_gr.2_vat4_purchase_domestic
+#: model:account.tax.template,name:l10n_gr.vat4_purchase_domestic
+msgid "Purchases and Expenditures within the Country (VAT 4%)"
+msgstr "Αγορές και δαπάνες εντός της χώρας (ΦΠΑ 4%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat6_purchase_domestic
+#: model:account.tax,name:l10n_gr.2_vat6_purchase_domestic
+#: model:account.tax.template,name:l10n_gr.vat6_purchase_domestic
+msgid "Purchases and Expenditures within the Country (VAT 6%)"
+msgstr "Αγορές και δαπάνες εντός της χώρας (ΦΠΑ 6%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat9_purchase_domestic
+#: model:account.tax,name:l10n_gr.2_vat9_purchase_domestic
+#: model:account.tax.template,name:l10n_gr.vat9_purchase_domestic
+msgid "Purchases and Expenditures within the Country (VAT 9%)"
+msgstr "Αγορές και δαπάνες εντός της χώρας (ΦΠΑ 9%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat13_purchase_imports
+#: model:account.tax,name:l10n_gr.2_vat13_purchase_imports
+#: model:account.tax.template,name:l10n_gr.vat13_purchase_imports
+msgid "Purchases and Imports of Investments Goods (VAT 13%)"
+msgstr "Αγορές και Εισαγωγές Επενδυτικών Αγαθών (ΦΠΑ 13%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat17_purchase_imports
+#: model:account.tax,name:l10n_gr.2_vat17_purchase_imports
+#: model:account.tax.template,name:l10n_gr.vat17_purchase_imports
+msgid "Purchases and Imports of Investments Goods (VAT 17%)"
+msgstr "Αγορές και Εισαγωγές Επενδυτικών Αγαθών (ΦΠΑ 17%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat24_purchase_imports
+#: model:account.tax,name:l10n_gr.2_vat24_purchase_imports
+#: model:account.tax.template,name:l10n_gr.vat24_purchase_imports
+msgid "Purchases and Imports of Investments Goods (VAT 24%)"
+msgstr "Αγορές και Εισαγωγές Επενδυτικών Αγαθών (ΦΠΑ 24%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat4_purchase_imports
+#: model:account.tax,name:l10n_gr.2_vat4_purchase_imports
+#: model:account.tax.template,name:l10n_gr.vat4_purchase_imports
+msgid "Purchases and Imports of Investments Goods (VAT 4%)"
+msgstr "Αγορές και Εισαγωγές Επενδυτικών Αγαθών (ΦΠΑ 4%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat6_purchase_imports
+#: model:account.tax,name:l10n_gr.2_vat6_purchase_imports
+#: model:account.tax.template,name:l10n_gr.vat6_purchase_imports
+msgid "Purchases and Imports of Investments Goods (VAT 6%)"
+msgstr "Αγορές και Εισαγωγές Επενδυτικών Αγαθών (ΦΠΑ 6%)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat9_purchase_imports
+#: model:account.tax,name:l10n_gr.2_vat9_purchase_imports
+#: model:account.tax.template,name:l10n_gr.vat9_purchase_imports
+msgid "Purchases and Imports of Investments Goods (VAT 9%)"
+msgstr "Αγορές και Εισαγωγές Επενδυτικών Αγαθών (ΦΠΑ 9%)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_22_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_22_01_02
+msgid "Purchases of living animals"
+msgstr "Αγορές ζωντανών ζώων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_24_02
+#: model:account.account,name:l10n_gr.2_chartgr_24_02
+#: model:account.account.template,name:l10n_gr.chartgr_24_02
+msgid "Purchases of materials"
+msgstr "Αγορές υλικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_20_02
+#: model:account.account,name:l10n_gr.2_chartgr_20_02
+#: model:account.account.template,name:l10n_gr.chartgr_20_02
+msgid "Purchases of merchandise"
+msgstr "Αγορές εμπορευμάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_27_02
+#: model:account.account,name:l10n_gr.2_chartgr_27_02
+#: model:account.account.template,name:l10n_gr.chartgr_27_02
+msgid "Purchases of other inventory"
+msgstr "Αγορές λοιπών αποθεμάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_25_02
+#: model:account.account,name:l10n_gr.2_chartgr_25_02
+#: model:account.account.template,name:l10n_gr.chartgr_25_02
+msgid "Purchases of packing materials"
+msgstr "Αγορές υλικών συσκευασίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_26_02
+#: model:account.account,name:l10n_gr.2_chartgr_26_02
+#: model:account.account.template,name:l10n_gr.chartgr_26_02
+msgid "Purchases of spare parts"
+msgstr "Αγορές ανταλλακτικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_22_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_22_02_02
+msgid "Purchases of trees and plants"
+msgstr "Αγορές δέντρων και φυτών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_05
+#: model:account.account,name:l10n_gr.2_chartgr_64_05
+#: model:account.account.template,name:l10n_gr.chartgr_64_05
+msgid "Rents"
+msgstr "Ενοίκια"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_05_01
+#: model:account.account,name:l10n_gr.2_chartgr_64_05_01
+#: model:account.account.template,name:l10n_gr.chartgr_64_05_01
+msgid "Rents to non-related entities"
+msgstr "Ενοίκια σε μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_05_02
+#: model:account.account,name:l10n_gr.2_chartgr_64_05_02
+#: model:account.account.template,name:l10n_gr.chartgr_64_05_02
+msgid "Rents to related entities"
+msgstr "Ενοίκια σε συναφείς φορείς"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_09
+#: model:account.account,name:l10n_gr.2_chartgr_64_09
+#: model:account.account.template,name:l10n_gr.chartgr_64_09
+msgid "Repairs and maintenance"
+msgstr "Επισκευές και συντήρηση"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_49_00
+#: model:account.account,name:l10n_gr.2_chartgr_49_00
+#: model:account.account.template,name:l10n_gr.chartgr_49_00
+msgid "Retained earnings"
+msgstr "Παρακρατημένα κέρδη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_01_04
+#: model:account.account,name:l10n_gr.2_chartgr_22_01_04
+#: model:account.account.template,name:l10n_gr.chartgr_22_01_04
+msgid "Returns of living animals"
+msgstr "Επιστροφές ζωντανών ζώων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_24_04
+#: model:account.account,name:l10n_gr.2_chartgr_24_04
+#: model:account.account.template,name:l10n_gr.chartgr_24_04
+msgid "Returns of materials"
+msgstr "Επιστροφές υλικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_20_04
+#: model:account.account,name:l10n_gr.2_chartgr_20_04
+#: model:account.account.template,name:l10n_gr.chartgr_20_04
+msgid "Returns of merchandise"
+msgstr "Επιστροφές εμπορευμάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_27_04
+#: model:account.account,name:l10n_gr.2_chartgr_27_04
+#: model:account.account.template,name:l10n_gr.chartgr_27_04
+msgid "Returns of other inventory"
+msgstr "Επιστροφές λοιπών αποθεμάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_25_04
+#: model:account.account,name:l10n_gr.2_chartgr_25_04
+#: model:account.account.template,name:l10n_gr.chartgr_25_04
+msgid "Returns of packing materials"
+msgstr "Επιστροφές υλικών συσκευασίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_26_04
+#: model:account.account,name:l10n_gr.2_chartgr_26_04
+#: model:account.account.template,name:l10n_gr.chartgr_26_04
+msgid "Returns of spare parts"
+msgstr "Επιστροφές ανταλλακτικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_02_04
+#: model:account.account,name:l10n_gr.2_chartgr_22_02_04
+#: model:account.account.template,name:l10n_gr.chartgr_22_02_04
+msgid "Returns of trees and plants"
+msgstr "Επιστροφές δέντρων και φυτών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_01_02
+#: model:account.account,name:l10n_gr.1_chartgr_70_03_02
+#: model:account.account,name:l10n_gr.1_chartgr_70_05_02
+#: model:account.account,name:l10n_gr.1_chartgr_70_07_02
+#: model:account.account,name:l10n_gr.2_chartgr_70_01_02
+#: model:account.account,name:l10n_gr.2_chartgr_70_03_02
+#: model:account.account,name:l10n_gr.2_chartgr_70_05_02
+#: model:account.account,name:l10n_gr.2_chartgr_70_07_02
+#: model:account.account.template,name:l10n_gr.chartgr_70_01_02
+#: model:account.account.template,name:l10n_gr.chartgr_70_03_02
+#: model:account.account.template,name:l10n_gr.chartgr_70_05_02
+#: model:account.account.template,name:l10n_gr.chartgr_70_07_02
+msgid "Returns – non-related entities"
+msgstr "Επιστροφές – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_02_02
+#: model:account.account,name:l10n_gr.1_chartgr_70_06_02
+#: model:account.account,name:l10n_gr.1_chartgr_70_08_02
+#: model:account.account,name:l10n_gr.2_chartgr_70_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_70_06_02
+#: model:account.account,name:l10n_gr.2_chartgr_70_08_02
+#: model:account.account.template,name:l10n_gr.chartgr_70_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_70_06_02
+#: model:account.account.template,name:l10n_gr.chartgr_70_08_02
+msgid "Returns – related entities"
+msgstr "Επιστροφές – σχετικές οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_04_02
+#: model:account.account,name:l10n_gr.2_chartgr_70_04_02
+#: model:account.account.template,name:l10n_gr.chartgr_70_04_02
+msgid "Returns –related entities"
+msgstr "Οντότητες που σχετίζονται με επιστροφές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_01
+#: model:account.account,name:l10n_gr.2_chartgr_33_01
+#: model:account.account.template,name:l10n_gr.chartgr_33_01
+msgid "Revenue from equity investments receivable"
+msgstr "Έσοδα από εισπρακτέες επενδύσεις σε μετοχές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_33_01_01
+#: model:account.account,name:l10n_gr.2_chartgr_33_01_01
+#: model:account.account.template,name:l10n_gr.chartgr_33_01_01
+msgid "Revenue from equity investments receivable – nominal amount"
+msgstr "Έσοδα από εισπρακτέες επενδύσεις σε μετοχές – ονομαστικό ποσό"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_00
+#: model:account.account,name:l10n_gr.2_chartgr_70_00
+#: model:account.account.template,name:l10n_gr.chartgr_70_00
+msgid "Sale of goods and services"
+msgstr "Πώληση αγαθών και υπηρεσιών"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat13_sales
+#: model:account.tax,name:l10n_gr.2_vat13_sales
+#: model:account.tax.template,name:l10n_gr.vat13_sales
+msgid "Sales VAT 13%"
+msgstr "ΦΠΑ πωλήσεων 13%"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat13_sales
+#: model:account.tax,description:l10n_gr.2_vat13_sales
+#: model:account.tax.template,description:l10n_gr.vat13_sales
+msgid "Sales VAT 13% for Greece (apart from the Aegean Islands)"
+msgstr "ΦΠΑ πωλήσεων 13% για την Ελλάδα (εκτός από τα νησιά του Αιγαίου)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat17_sales
+#: model:account.tax,name:l10n_gr.2_vat17_sales
+#: model:account.tax.template,name:l10n_gr.vat17_sales
+msgid "Sales VAT 17%"
+msgstr "ΦΠΑ πωλήσεων 17%"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat17_sales
+#: model:account.tax,description:l10n_gr.2_vat17_sales
+#: model:account.tax.template,description:l10n_gr.vat17_sales
+msgid "Sales VAT 17% for the Aegean Islands"
+msgstr "ΦΠΑ πωλήσεων 17% για τα νησιά του Αιγαίου"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat24_sales
+#: model:account.tax,name:l10n_gr.2_vat24_sales
+#: model:account.tax.template,name:l10n_gr.vat24_sales
+msgid "Sales VAT 24%"
+msgstr "ΦΠΑ πωλήσεων 24%"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat24_sales
+#: model:account.tax,description:l10n_gr.2_vat24_sales
+#: model:account.tax.template,description:l10n_gr.vat24_sales
+msgid "Sales VAT 24% for Greece (apart from the Aegean Islands)"
+msgstr "ΦΠΑ πωλήσεων 24% για την Ελλάδα (εκτός από τα νησιά του Αιγαίου)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat4_sales
+#: model:account.tax,name:l10n_gr.2_vat4_sales
+#: model:account.tax.template,name:l10n_gr.vat4_sales
+msgid "Sales VAT 4%"
+msgstr "ΦΠΑ πωλήσεων 4%"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat4_sales
+#: model:account.tax,description:l10n_gr.2_vat4_sales
+#: model:account.tax.template,description:l10n_gr.vat4_sales
+msgid "Sales VAT 4% for the Aegean Islands"
+msgstr "ΦΠΑ πωλήσεων 4% για τα νησιά του Αιγαίου"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat6_sales
+#: model:account.tax,name:l10n_gr.2_vat6_sales
+#: model:account.tax.template,name:l10n_gr.vat6_sales
+msgid "Sales VAT 6%"
+msgstr "ΦΠΑ πωλήσεων 6%"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat6_sales
+#: model:account.tax,description:l10n_gr.2_vat6_sales
+#: model:account.tax.template,description:l10n_gr.vat6_sales
+msgid "Sales VAT 6% for Greece (apart from the Aegean Islands)"
+msgstr "ΦΠΑ πωλήσεων 6% για την Ελλάδα (εκτός από τα νησιά του Αιγαίου)"
+
+#. module: l10n_gr
+#: model:account.tax,name:l10n_gr.1_vat9_sales
+#: model:account.tax,name:l10n_gr.2_vat9_sales
+#: model:account.tax.template,name:l10n_gr.vat9_sales
+msgid "Sales VAT 9%"
+msgstr "ΦΠΑ πωλήσεων 9%"
+
+#. module: l10n_gr
+#: model:account.tax,description:l10n_gr.1_vat9_sales
+#: model:account.tax,description:l10n_gr.2_vat9_sales
+#: model:account.tax.template,description:l10n_gr.vat9_sales
+msgid "Sales VAT 9% for the Aegean Islands"
+msgstr "ΦΠΑ πωλήσεων 9% για τα νησιά του Αιγαίου"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_03
+#: model:account.account,name:l10n_gr.2_chartgr_70_03
+#: model:account.account.template,name:l10n_gr.chartgr_70_03
+msgid ""
+"Sales of finished goods and work in progress (net) – non-related entities"
+msgstr "Πωλήσεις τελικών προϊόντων και εργασίες σε εξέλιξη (καθαρές) – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_04
+#: model:account.account,name:l10n_gr.2_chartgr_70_04
+#: model:account.account.template,name:l10n_gr.chartgr_70_04
+msgid "Sales of finished goods and work in progress (net) –related entities"
+msgstr "Πωλήσεις ετοίμων προϊόντων και εργασίες σε εξέλιξη (καθαρές) -σχετικές οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_03_01
+#: model:account.account,name:l10n_gr.2_chartgr_70_03_01
+#: model:account.account.template,name:l10n_gr.chartgr_70_03_01
+msgid "Sales of finished goods and work in progress – non-related entities"
+msgstr "Πωλήσεις τελικών προϊόντων και εργασίες σε εξέλιξη – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_04_01
+#: model:account.account,name:l10n_gr.2_chartgr_70_04_01
+#: model:account.account.template,name:l10n_gr.chartgr_70_04_01
+msgid "Sales of finished goods and work in progress –related entities"
+msgstr "Πωλήσεις τελικών προϊόντων και οντότητες που σχετίζονται με εργασίες σε εξέλιξη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_01
+#: model:account.account,name:l10n_gr.2_chartgr_70_01
+#: model:account.account.template,name:l10n_gr.chartgr_70_01
+msgid "Sales of merchandise (net) – non-related entities"
+msgstr "Πωλήσεις εμπορευμάτων (καθαρές) – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_02
+#: model:account.account,name:l10n_gr.2_chartgr_70_02
+#: model:account.account.template,name:l10n_gr.chartgr_70_02
+msgid "Sales of merchandise (net) – related entities"
+msgstr "Πωλήσεις εμπορευμάτων (καθαρές) – συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_05
+#: model:account.account,name:l10n_gr.2_chartgr_70_05
+#: model:account.account.template,name:l10n_gr.chartgr_70_05
+msgid "Sales of other inventory (net) – non-related entities"
+msgstr "Πωλήσεις λοιπών αποθεμάτων (καθαρά) – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_06
+#: model:account.account,name:l10n_gr.2_chartgr_70_06
+#: model:account.account.template,name:l10n_gr.chartgr_70_06
+msgid "Sales of other inventory (net) – related entities"
+msgstr "Πωλήσεις λοιπών αποθεμάτων (καθαρά) – συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_07
+#: model:account.account,name:l10n_gr.2_chartgr_70_07
+#: model:account.account.template,name:l10n_gr.chartgr_70_07
+msgid "Sales of services (net) – non-related entities"
+msgstr "Πωλήσεις υπηρεσιών (καθαρές) – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_70_08
+#: model:account.account,name:l10n_gr.2_chartgr_70_08
+#: model:account.account.template,name:l10n_gr.chartgr_70_08
+msgid "Sales of services (net) – related entities"
+msgstr "Πωλήσεις υπηρεσιών (καθαρές) – συναφείς οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_41_00
+#: model:account.account,name:l10n_gr.2_chartgr_41_00
+#: model:account.account.template,name:l10n_gr.chartgr_41_00
+msgid "Share premium"
+msgstr "Μοιραστείτε το premium"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_38_02
+#: model:account.account,name:l10n_gr.2_chartgr_38_02
+#: model:account.account.template,name:l10n_gr.chartgr_38_02
+msgid "Sight deposits"
+msgstr "Καταθέσεις όψεως"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_55_00
+#: model:account.account,name:l10n_gr.2_chartgr_55_00
+#: model:account.account.template,name:l10n_gr.chartgr_55_00
+msgid "Social security contributions"
+msgstr "Εισφορές κοινωνικής ασφάλισης"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_26_00
+#: model:account.account,name:l10n_gr.2_chartgr_26_00
+#: model:account.account.template,name:l10n_gr.chartgr_26_00
+msgid "Spare parts"
+msgstr "Ανταλλακτικά"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_26_06
+#: model:account.account,name:l10n_gr.2_chartgr_26_06
+#: model:account.account.template,name:l10n_gr.chartgr_26_06
+msgid "Spare parts – closing balance"
+msgstr "Ανταλλακτικά – υπόλοιπο κλεισίματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_26_01
+#: model:account.account,name:l10n_gr.2_chartgr_26_01
+#: model:account.account.template,name:l10n_gr.chartgr_26_01
+msgid "Spare parts – opening balance"
+msgstr "Ανταλλακτικά – ισορροπία ανοίγματος"
+
+#. module: l10n_gr
+#: model:account.chart.template,name:l10n_gr.l10n_gr_chart_template
+msgid "Standard Greek Chart of Accounts"
+msgstr "Πρότυπο Ελληνικό Λογιστικό Σχέδιο"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_55_02
+#: model:account.account,name:l10n_gr.2_chartgr_55_02
+#: model:account.account.template,name:l10n_gr.chartgr_55_02
+msgid "Supplementary social security"
+msgstr "Συμπληρωματική κοινωνική ασφάλιση"
+
+#. module: l10n_gr
+#: model:account.tax.group,name:l10n_gr.tax_group_13
+msgid "TVA 13%"
+msgstr "TVA 13%"
+
+#. module: l10n_gr
+#: model:account.tax.group,name:l10n_gr.tax_group_17
+msgid "TVA 17%"
+msgstr "TVA 17%"
+
+#. module: l10n_gr
+#: model:account.tax.group,name:l10n_gr.tax_group_24
+msgid "TVA 24%"
+msgstr "TVA 24%"
+
+#. module: l10n_gr
+#: model:account.tax.group,name:l10n_gr.tax_group_4
+msgid "TVA 4%"
+msgstr "TVA 4%"
+
+#. module: l10n_gr
+#: model:account.tax.group,name:l10n_gr.tax_group_6
+msgid "TVA 6%"
+msgstr "TVA 6%"
+
+#. module: l10n_gr
+#: model:account.tax.group,name:l10n_gr.tax_group_9
+msgid "TVA 9%"
+msgstr "TVA 9%"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_47_00
+#: model:account.account,name:l10n_gr.2_chartgr_47_00
+#: model:account.account.template,name:l10n_gr.chartgr_47_00
+msgid "Tax reserves"
+msgstr "Φορολογικά αποθεματικά"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_11
+#: model:account.account,name:l10n_gr.2_chartgr_64_11
+#: model:account.account.template,name:l10n_gr.chartgr_64_11
+msgid "Taxes and levies (other than income tax)"
+msgstr "Φόροι και εισφορές (εκτός του φόρου εισοδήματος)"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_04
+#: model:account.account,name:l10n_gr.2_chartgr_64_04
+#: model:account.account.template,name:l10n_gr.chartgr_64_04
+msgid "Telecommunications"
+msgstr "Τηλεπικοινωνίες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_38_03
+#: model:account.account,name:l10n_gr.2_chartgr_38_03
+#: model:account.account.template,name:l10n_gr.chartgr_38_03
+msgid "Time deposits"
+msgstr "Αποθέματα χρόνου"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_07
+#: model:account.account,name:l10n_gr.2_chartgr_64_07
+#: model:account.account.template,name:l10n_gr.chartgr_64_07
+msgid "Transportation"
+msgstr "Μεταφορά"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_14_00
+#: model:account.account,name:l10n_gr.2_chartgr_14_00
+#: model:account.account.template,name:l10n_gr.chartgr_14_00
+msgid "Transportation equipment"
+msgstr "Εξοπλισμός μεταφοράς"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_43_00
+#: model:account.account,name:l10n_gr.2_chartgr_43_00
+#: model:account.account.template,name:l10n_gr.chartgr_43_00
+msgid "Treasury titles"
+msgstr "Τίτλοι Οικονομικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_17_02
+#: model:account.account,name:l10n_gr.1_chartgr_22_02
+#: model:account.account,name:l10n_gr.2_chartgr_17_02
+#: model:account.account,name:l10n_gr.2_chartgr_22_02
+#: model:account.account.template,name:l10n_gr.chartgr_17_02
+#: model:account.account.template,name:l10n_gr.chartgr_22_02
+msgid "Trees and plants"
+msgstr "Δέντρα και φυτά"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_02_07
+#: model:account.account,name:l10n_gr.2_chartgr_22_02_07
+#: model:account.account.template,name:l10n_gr.chartgr_22_02_07
+msgid "Trees and plants – closing balance"
+msgstr "Δέντρα και φυτά – ισορροπία κλεισίματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_22_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_22_02_01
+msgid "Trees and plants – opening balance"
+msgstr "Δέντρα και φυτά – ισορροπία ανοίγματος"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_56_02
+#: model:account.account,name:l10n_gr.2_chartgr_56_02
+#: model:account.account.template,name:l10n_gr.chartgr_56_02
+msgid "Unearned revenue"
+msgstr "Μη δεδουλευμένα έσοδα"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_56_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_56_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_56_02_01
+msgid "Unearned revenue – non-related entities"
+msgstr "Μη δεδουλευμένα έσοδα – μη συνδεδεμένες οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_56_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_56_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_56_02_02
+msgid "Unearned revenue – related entities"
+msgstr "Μη δεδουλευμένα έσοδα που σχετίζονται με οντότητες"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_02
+#: model:account.account,name:l10n_gr.2_chartgr_54_02
+#: model:account.account.template,name:l10n_gr.chartgr_54_02
+msgid "Value Added Tax"
+msgstr "Φόρος Προστιθέμενης Αξίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_02_02
+#: model:account.account,name:l10n_gr.2_chartgr_54_02_02
+#: model:account.account.template,name:l10n_gr.chartgr_54_02_02
+msgid "Value added tax on purchases"
+msgstr "Φόρος προστιθέμενης αξίας στις αγορές"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_02_01
+#: model:account.account,name:l10n_gr.2_chartgr_54_02_01
+#: model:account.account.template,name:l10n_gr.chartgr_54_02_01
+msgid "Value added tax on sales revenue"
+msgstr "Φόρος προστιθέμενης αξίας στα έσοδα από τις πωλήσεις"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_54_02_03
+#: model:account.account,name:l10n_gr.2_chartgr_54_02_03
+#: model:account.account.template,name:l10n_gr.chartgr_54_02_03
+msgid "Value added tax paid"
+msgstr "Καταβλήθηκε φόρος προστιθέμενης αξίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_13
+#: model:account.account,name:l10n_gr.2_chartgr_64_13
+#: model:account.account.template,name:l10n_gr.chartgr_64_13
+msgid "Various expenses – related entities"
+msgstr "Διάφορα έξοδα – συναφείς φορείς"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_64_03
+#: model:account.account,name:l10n_gr.2_chartgr_64_03
+#: model:account.account.template,name:l10n_gr.chartgr_64_03
+msgid "Water"
+msgstr "Νερό"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_23_00
+#: model:account.account,name:l10n_gr.2_chartgr_23_00
+#: model:account.account.template,name:l10n_gr.chartgr_23_00
+msgid "Work in progress"
+msgstr "Εργασία σε εξέλιξη"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_21_03
+#: model:account.account,name:l10n_gr.2_chartgr_21_03
+#: model:account.account.template,name:l10n_gr.chartgr_21_03
+msgid "Write-downs of goods"
+msgstr "Διαγραφές εμπορευμάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_01_05
+#: model:account.account,name:l10n_gr.2_chartgr_22_01_05
+#: model:account.account.template,name:l10n_gr.chartgr_22_01_05
+msgid "Write-downs of living animals"
+msgstr "Καταγραφές ζωντανών ζώων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_24_05
+#: model:account.account,name:l10n_gr.2_chartgr_24_05
+#: model:account.account.template,name:l10n_gr.chartgr_24_05
+msgid "Write-downs of materials"
+msgstr "Καταγραφή υλικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_20_05
+#: model:account.account,name:l10n_gr.2_chartgr_20_05
+#: model:account.account.template,name:l10n_gr.chartgr_20_05
+msgid "Write-downs of merchandise"
+msgstr "Απογραφές εμπορευμάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_27_05
+#: model:account.account,name:l10n_gr.2_chartgr_27_05
+#: model:account.account.template,name:l10n_gr.chartgr_27_05
+msgid "Write-downs of other inventory"
+msgstr "Καταγραφές λοιπών αποθεμάτων"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_25_05
+#: model:account.account,name:l10n_gr.2_chartgr_25_05
+#: model:account.account.template,name:l10n_gr.chartgr_25_05
+msgid "Write-downs of packing materials"
+msgstr "Καταγραφές υλικών συσκευασίας"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_26_05
+#: model:account.account,name:l10n_gr.2_chartgr_26_05
+#: model:account.account.template,name:l10n_gr.chartgr_26_05
+msgid "Write-downs of spare parts"
+msgstr "Διαγραφή ανταλλακτικών"
+
+#. module: l10n_gr
+#: model:account.account,name:l10n_gr.1_chartgr_22_02_05
+#: model:account.account,name:l10n_gr.2_chartgr_22_02_05
+#: model:account.account.template,name:l10n_gr.chartgr_22_02_05
+msgid "Write-downs of trees and plants"
+msgstr "Καταγραφή δέντρων και φυτών"

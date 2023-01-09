@@ -5,10 +5,10 @@
     <record id="l10n_gr_chart_template" model="account.chart.template">
         <field name="property_account_receivable_id" ref="chartgr_30_00"/>
         <field name="property_account_payable_id" ref="chartgr_50_00"/>
-        <field name="property_account_expense_categ_id" ref="chartgr_64_98"/>
-        <field name="property_account_income_categ_id" ref="chartgr_71_00"/>
-        <field name="income_currency_exchange_account_id" ref="chartgr_79_79"/>
-        <field name="expense_currency_exchange_account_id" ref="chartgr_64_98_06"/>
-        <field name="default_pos_receivable_account_id" ref="chartgr_30_00_01" />
+        <field name="property_account_expense_categ_id" ref="chartgr_64_12"/>
+        <field name="property_account_income_categ_id" ref="chartgr_70_00"/>
+        <field name="income_currency_exchange_account_id" ref="chartgr_73_00"/>
+        <field name="expense_currency_exchange_account_id" ref="chartgr_62_00"/>
+        <field name="default_pos_receivable_account_id" ref="chartgr_30_00" />
     </record>
 </odoo>
