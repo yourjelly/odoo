@@ -212,24 +212,22 @@ class Lang(models.Model):
     def _lang_get_id(self, code):
         return self.with_context(active_test=True).search([('code', '=', code)]).id
 
-    @tools.ormcache('code')
+    @api.model
     def _lang_get_direction(self, code):
-        return self.with_context(active_test=True).search([('code', '=', code)]).direction
+        return self._lang_get(code)._get_cached_values()['direction']
 
     @tools.ormcache('url_code')
     def _lang_get_code(self, url_code):
-        return self.with_context(active_test=True).search([('url_code', '=', url_code)]).code or url_code
+        lang = self.with_context(active_test=True).search([('url_code', '=', url_code)])
+        return lang and lang._get_cached_values()['code'] or url_code
 
     def _lang_get(self, code):
         """ Return the language using this code if it is active """
         return self.browse(self._lang_get_id(code))
 
-    @tools.ormcache('self.code', 'monetary')
-    def _data_get(self, monetary=False):
-        thousands_sep = self.thousands_sep or ''
-        decimal_point = self.decimal_point
-        grouping = self.grouping
-        return grouping, thousands_sep, decimal_point
+    def _data_get(self):
+        vals = self._get_cached_values()
+        return vals['grouping'], vals['thousands_sep'] or '', vals['decimal_point']
 
     @api.model
     @tools.ormcache()
@@ -247,22 +245,23 @@ class Lang(models.Model):
     def _get_cached_values(self):
         self.ensure_one()
         return {
-            'id': self.id,
             'code': self.code,
             'url_code': self.url_code,
             'name': self.name,
+            'direction': self.direction,
+            'thousands_sep': self.thousands_sep,
+            'decimal_point': self.decimal_point,
+            'grouping': self.grouping,
         }
 
     def _get_cached(self, field):
         return self._get_cached_values()[field]
 
     @api.model
-    @tools.ormcache('code')
     def _lang_code_to_urlcode(self, code):
-        for c, urlc, name, *_ in self.get_available():
+        for c, urlc, *_ in self.get_available():
             if c == code:
                 return urlc
-        return self._lang_get(code).url_code
 
     @api.model
     @tools.ormcache()
@@ -329,7 +328,7 @@ class Lang(models.Model):
 
         # floats and decimal ints need special action!
         if grouping:
-            lang_grouping, thousands_sep, decimal_point = self._data_get(monetary)
+            lang_grouping, thousands_sep, decimal_point = self._data_get()
             eval_lang_grouping = ast.literal_eval(lang_grouping)
 
             if percent[-1] in 'eEfFgG':
