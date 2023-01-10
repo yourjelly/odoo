@@ -9,7 +9,6 @@ import { useRtc } from "../rtc/rtc_hook";
 import { useMessageEdition, useMessageHighlight } from "@mail/new/utils/hooks";
 import { Composer } from "../composer/composer";
 import { Call } from "../rtc/call";
-import { Guest } from "../core/guest_model";
 import { ChannelMemberList } from "./channel_member_list";
 import {
     Component,
