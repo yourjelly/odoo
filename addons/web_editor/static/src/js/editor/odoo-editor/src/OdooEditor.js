@@ -925,6 +925,9 @@ export class OdooEditor extends EventTarget {
             }
         }
         for (const record of records) {
+            if (!record.target.oid) {
+                this.idSet(record.target)
+            }
             switch (record.type) {
                 case 'characterData': {
                     this._currentStep.mutations.push({
