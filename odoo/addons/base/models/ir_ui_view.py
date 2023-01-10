@@ -1828,6 +1828,28 @@ actual arch.
             elif (attr.startswith("t-")):
                 self._validate_qweb_directive(node, attr, node_info["view_type"])
 
+            elif attr == "default_order":
+                try:
+                    name_manager.model._check_qorder(expr)
+                except UserError:
+                    msg = _('Invalid "default_order" specified. '
+                        'A valid "order" specification is a comma-separated list of valid field names '
+                        '(optionally followed by asc/desc for the direction)')
+                    self._raise_view_error(msg, node)
+                order_fields = re.findall(r'"?(\w+)"?\s*(?:asc|desc)?', expr, flags=re.I)
+                for fname in order_fields:
+                    if fname not in name_manager.model._fields:
+                        msg = _('Unknown field "%s" in "default_order" value', fname)
+                        self._log_view_warning(msg, node)
+
+            elif attr == "default_group_by":
+                groups = expr.split(",")
+                for group in groups:
+                    fname = group.split(":")[0].strip()  # date:day, date:month support
+                    if not fname in name_manager.model._fields:
+                        msg = _('Unknown field "%s" in "default_group_by" value', fname)
+                        self._log_view_warning(msg, node)
+
     def _validate_classes(self, node, expr):
         """ Validate the classes present on node. """
         classes = set(expr.split(' '))
