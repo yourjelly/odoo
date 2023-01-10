@@ -235,8 +235,11 @@ class IrRule(models.Model):
         # clean up the cache of records prefetched with display_name above
         records_sudo.invalidate_recordset()
 
+        #msg = f"{operation_error}\n\n{resolution_info}"
+        #details = f"{failing_records}\n{failing_user}\n\n{failing_rules}"
         msg = f"{operation_error}\n\n{failing_records}\n{failing_user}\n\n{failing_rules}\n\n{resolution_info}"
-        return AccessError(msg)
+        details = None
+        return AccessError(msg, details)
 
 
 #

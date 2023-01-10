@@ -13,6 +13,7 @@ import { Component, useState } from "@odoo/owl";
 export const standardErrorDialogProps = {
     traceback: { type: [String, { value: null }], optional: true },
     message: { type: String, optional: true },
+    details: { type: String, optional: true},
     name: { type: String, optional: true },
     exceptionName: { type: [String, { value: null }], optional: true },
     data: { type: [Object, { value: null }], optional: true },
@@ -29,8 +30,8 @@ export const odooExceptionTitleMap = new Map(
         ),
         "odoo.exceptions.AccessDenied": _lt("Access Denied"),
         "odoo.exceptions.MissingError": _lt("Missing Record"),
-        "odoo.exceptions.UserError": _lt("User Error"),
-        "odoo.exceptions.ValidationError": _lt("Validation Error"),
+        "odoo.exceptions.UserError": _lt("Something went wrong"),
+        "odoo.exceptions.ValidationError": _lt("Something went wrong"),
         "odoo.exceptions.AccessError": _lt("Access Error"),
         "odoo.exceptions.Warning": _lt("Warning"),
     })
@@ -116,11 +117,16 @@ export class RPCErrorDialog extends ErrorDialog {
 export class WarningDialog extends Component {
     setup() {
         this.title = this.inferTitle();
-        const { data, message } = this.props;
+        const { data, message, details } = this.props;
         if (data && data.arguments && data.arguments.length > 0) {
             this.message = data.arguments[0];
         } else {
             this.message = message;
+        }
+        if (data && data.arguments && data.arguments.length > 1) {
+            this.details = data.arguments[1];
+        } else {
+            this.details = details;
         }
     }
     inferTitle() {
@@ -137,6 +143,60 @@ WarningDialog.props = {
     title: { type: String, optional: true },
 };
 
+// USer Error v17
+export class UserErrorDialog extends Component {
+    setup() {
+        this.title = this.inferTitle();
+        const { data, message } = this.props;
+        if (data && data.arguments && data.arguments.length > 0) {
+            this.message = data.arguments[0];
+        } else {
+            this.message = message;
+        }
+        if (data && data.arguments && data.arguments.length > 1) {
+            this.details = data.arguments[1];
+        } else {
+            this.details = details;
+        }
+    }
+    inferTitle() {
+        if (this.props.exceptionName && odooExceptionTitleMap.has(this.props.exceptionName)) {
+            return odooExceptionTitleMap.get(this.props.exceptionName).toString();
+        }
+        return this.props.title || this.env._t("Odoo Warning");
+    }
+}
+UserErrorDialog.template = "web.UserErrorDialog";
+UserErrorDialog.components = { Dialog };
+UserErrorDialog.props = {
+    ...standardErrorDialogProps,
+    title: { type: String, optional: true },
+};
+
+
+export class AccessErrorDialog extends Component {
+    setup() {
+        this.title = this.env._t("Access Error");
+        const { data, message } = this.props;
+        if (data && data.arguments && data.arguments.length > 0) {
+            this.message = data.arguments[0];
+        } else {
+            this.message = message;
+        }
+        if (data && data.arguments && data.arguments.length > 1) {
+            this.details = data.arguments[1];
+        } else {
+            this.details = details;
+        }
+        console.log(this.props);
+    }
+}
+AccessErrorDialog.template = "web.AccessErrorDialog";
+AccessErrorDialog.components = { Dialog };
+AccessErrorDialog.props = {
+    ...standardErrorDialogProps,
+    title: { type: String, optional: true },
+};
 // -----------------------------------------------------------------------------
 // Redirect Warning Dialog
 // -----------------------------------------------------------------------------
@@ -189,10 +249,10 @@ SessionExpiredDialog.props = { ...standardErrorDialogProps };
 registry
     .category("error_dialogs")
     .add("odoo.exceptions.AccessDenied", WarningDialog)
-    .add("odoo.exceptions.AccessError", WarningDialog)
-    .add("odoo.exceptions.MissingError", WarningDialog)
-    .add("odoo.exceptions.UserError", WarningDialog)
-    .add("odoo.exceptions.ValidationError", WarningDialog)
+    .add("odoo.exceptions.AccessError", AccessErrorDialog)
+    .add("odoo.exceptions.MissingError", UserErrorDialog)
+    .add("odoo.exceptions.UserError", UserErrorDialog)
+    .add("odoo.exceptions.ValidationError", UserErrorDialog)
     .add("odoo.exceptions.RedirectWarning", RedirectWarningDialog)
     .add("odoo.http.SessionExpiredException", SessionExpiredDialog)
     .add("werkzeug.exceptions.Forbidden", SessionExpiredDialog)

@@ -235,6 +235,11 @@ $modal-content-border-radius: $border-radius !default;
 
 $modal-scale-transform: none !default;
 
+// Remove border colors for modal header and footer as wel as the main modal
+$modal-header-border-color: transparent !default;
+$modal-footer-border-color: transparent !default;
+$modal-content-border-color: transparent !default;
+
 // Breadcrumbs
 
 $breadcrumb-padding-y: 0 !default;

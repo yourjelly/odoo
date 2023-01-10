@@ -2,6 +2,7 @@
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { registry } from "@web/core/registry";
+import { _lt } from "@web/core/l10n/translation";
 
 import { Component } from "@odoo/owl";
 const errorHandlerRegistry = registry.category("error_handlers");
@@ -28,6 +29,7 @@ export class FormErrorDialog extends Component {
 }
 FormErrorDialog.template = "web.FormErrorDialog";
 FormErrorDialog.components = { Dialog };
+FormErrorDialog.title = "Oh Snap!";
 
 function formSaveErrorHandler(env, error, originalError) {
     if (originalError.__raisedOnFormSave) {

@@ -8,7 +8,7 @@
                 t-att-class="{ o_technical_modal: props.technical, o_modal_full: isFullscreen }"
                 t-ref="modalRef"
                 >
-                <div class="modal-dialog" t-attf-class="modal-{{props.size}}">
+                <div class="modal-dialog modal-dialog-scrollable" t-attf-class="modal-{{props.size}}">
                     <div class="modal-content" t-att-class="props.contentClass">
                         <header t-if="props.header" class="modal-header">
                             <t t-if="isFullscreen">
@@ -26,7 +26,7 @@
                         <footer t-if="props.footer" class="modal-footer justify-content-around justify-content-sm-start flex-wrap gap-1" style="order:2">
                             <t t-slot="footer" close="data.close">
                                 <button class="btn btn-primary o-default-button" t-on-click="data.close">
-                                    <t>Ok</t>
+                                    <t>Close</t>
                                 </button>
                             </t>
                         </footer>

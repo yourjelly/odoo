@@ -9,6 +9,34 @@
       </Dialog>
     </t>
 
+    <t t-name="web.UserErrorDialog" owl="1">
+       <Dialog size="'md'" title="title">
+            <div role="alert" class="o_dialog_warning">
+                <p t-esc="message" style="white-space: pre-wrap;"/>
+                <details t-if="details">
+                    <summary>Details</summary>
+                    <pre t-esc="details"/>
+                </detail>
+                <p t-else="">No details</p>
+            </div>
+        </Dialog>
+    </t>
+
+    <t t-name="web.AccessErrorDialog" owl="1">
+       <Dialog size="'md'" title="title">
+            <div role="alert" class="o_dialog_warning">
+                <p t-esc="message" style="white-space: pre-wrap;"/>
+                <details t-if="details">
+                    <summary>Details</summary>
+                    <pre t-esc="details"/>
+                </details>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-secondary" t-on-click="props.close">Close</button>
+            </t>
+        </Dialog>
+    </t>
+
     <t t-name="web.RedirectWarningDialog" owl="1">
       <Dialog title="title">
         <div role="alert">
