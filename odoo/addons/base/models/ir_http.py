@@ -215,6 +215,10 @@ class IrHttp(models.AbstractModel):
         if not lang:
             lang = self._context.get("lang")
         langs = self.env['res.lang']._lang_get(lang)
+        if not langs:
+            lang = self.env.user.lang or 'en_US'
+            langs = self.env['res.lang']._lang_get(lang)
+
         lang_params = None
         if langs:
             lang_params = {
