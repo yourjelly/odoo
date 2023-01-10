@@ -1240,7 +1240,7 @@ class WebsiteSale(http.Controller):
         # assigned to ensure the right behavior from `shop_payment_confirmation()`.
         request.session['sale_last_order_id'] = order_sudo.id
 
-        if shipping_address and shipping_option:
+        if shipping_address:
             self._include_country_and_state_in_address(shipping_address)
 
             if order_sudo.partner_shipping_id.name.endswith(order_sudo.name):
@@ -1266,7 +1266,8 @@ class WebsiteSale(http.Controller):
                     shipping_address, type='delivery', parent_id=order_sudo.partner_id.id
                 )
             # Process the delivery carrier
-            order_sudo._check_carrier_quotation(force_carrier_id=int(shipping_option['id']))
+            if shipping_option:
+                order_sudo._check_carrier_quotation(force_carrier_id=int(shipping_option['id']))
 
         return order_sudo.partner_id.id
 
@@ -1465,7 +1466,6 @@ class WebsiteSale(http.Controller):
     # ------------------------------------------------------
 
     def _get_express_shop_payment_values(self, order, **kwargs):
-        request.session['sale_last_order_id'] = order.id
         payment_form_values = sale_portal.CustomerPortal._get_payment_values(
             self, order, website_id=request.website.id, is_express_checkout=True
         )

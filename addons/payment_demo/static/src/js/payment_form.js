@@ -1,9 +1,11 @@
 /** @odoo-module **/
     
+    import { _processDemoPayment } from '@payment_demo/js/payment_demo_mixin';
+
     import checkoutForm from "payment.checkout_form";
     import manageForm from "payment.manage_form";
 
-    const paymentDemoMixin = {
+    const paymentDemoForm = {
 
         //--------------------------------------------------------------------------
         // Private
@@ -23,19 +25,7 @@
             if (code !== 'demo') {
                 return this._super(...arguments);
             }
-
-            const customerInput = document.getElementById('customer_input').value;
-            const simulatedPaymentState = document.getElementById('simulated_payment_state').value;
-            return this._rpc({
-                route: '/payment/demo/simulate_payment',
-                params: {
-                    'reference': processingValues.reference,
-                    'payment_details': customerInput,
-                    'simulated_state': simulatedPaymentState,
-                },
-            }).then(() => {
-                window.location = '/payment/status';
-            });
+            new _processDemoPayment(processingValues);
         },
 
         /**
@@ -48,7 +38,7 @@
          * @param {string} flow - The online payment flow of the selected payment option
          * @return {Promise}
          */
-        _prepareInlineForm: function (code, paymentOptionId, flow) {
+        _prepareInlineForm: async function (code, paymentOptionId, flow) {
             if (code !== 'demo') {
                 return this._super(...arguments);
             } else if (flow === 'token') {
@@ -58,5 +48,5 @@
             return Promise.resolve()
         },
     };
-    checkoutForm.include(paymentDemoMixin);
-    manageForm.include(paymentDemoMixin);
+    checkoutForm.include(paymentDemoForm);
+    manageForm.include(paymentDemoForm);
