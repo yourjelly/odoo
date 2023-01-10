@@ -2309,7 +2309,8 @@
                 }
             }
             this.component = new C(props, env, this);
-            this.renderFn = app.getTemplate(C.template).bind(this.component, this.component, this);
+            const ctx = Object.assign(Object.create(this.component), { this: this.component });
+            this.renderFn = app.getTemplate(C.template).bind(this.component, ctx, this);
             this.component.setup();
             currentNode = null;
         }
@@ -2894,8 +2895,8 @@
         }
         return slotBDom || text("");
     }
-    function capture(ctx, component) {
-        const result = ObjectCreate(component);
+    function capture(ctx) {
+        const result = ObjectCreate(ctx);
         for (let k in ctx) {
             result[k] = ctx[k];
         }
@@ -2950,7 +2951,7 @@
     class LazyValue {
         constructor(fn, ctx, component, node, key) {
             this.fn = fn;
-            this.ctx = capture(ctx, component);
+            this.ctx = capture(ctx);
             this.component = component;
             this.node = node;
             this.key = key;
@@ -3232,7 +3233,7 @@
     //------------------------------------------------------------------------------
     // Misc types, constants and helpers
     //------------------------------------------------------------------------------
-    const RESERVED_WORDS = "true,false,NaN,null,undefined,debugger,console,window,in,instanceof,new,function,return,this,eval,void,Math,RegExp,Array,Object,Date".split(",");
+    const RESERVED_WORDS = "true,false,NaN,null,undefined,debugger,console,window,in,instanceof,new,function,return,eval,void,Math,RegExp,Array,Object,Date".split(",");
     const WORD_REPLACEMENT = Object.assign(Object.create(null), {
         and: "&&",
         or: "||",
@@ -4508,7 +4509,7 @@
                 if (this.target.loopLevel || !this.hasSafeContext) {
                     ctxStr = generateId("ctx");
                     this.helpers.add("capture");
-                    this.define(ctxStr, `capture(ctx, this)`);
+                    this.define(ctxStr, `capture(ctx)`);
                 }
                 let slotStr = [];
                 for (let slotName in ast.slots) {
@@ -4667,7 +4668,7 @@
             if (this.target.loopLevel || !this.hasSafeContext) {
                 ctxStr = generateId("ctx");
                 this.helpers.add("capture");
-                this.define(ctxStr, `capture(ctx, this)`);
+                this.define(ctxStr, `capture(ctx)`);
             }
             let id = generateId("comp");
             this.staticDefs.push({
