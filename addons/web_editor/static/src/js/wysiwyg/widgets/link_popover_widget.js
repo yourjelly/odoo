@@ -112,6 +112,20 @@ const LinkPopoverWidget = Widget.extend({
                 this._loadAsyncLinkPreview();
             }
         });
+        this.$target.on('linkHrefUpdated', (e) => {
+            if (popoverShown) {
+                this._loadAsyncLinkPreview();
+                this.$target.popover('update');
+            }
+
+        });
+        this.$target.on('linkRemoved', (e) => {
+            this.destroy();
+
+        });
+        this.$target.on('linkLabelChanged', (e) => {
+            this.$target.popover('update');
+        });
         const onClickDocument = (e) => {
             if (popoverShown) {
                 const hierarchy = [e.target, ...ancestors(e.target)];

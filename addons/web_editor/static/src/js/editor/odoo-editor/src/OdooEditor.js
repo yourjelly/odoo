@@ -700,89 +700,54 @@ export class OdooEditor extends EventTarget {
         this._toRollback = false;
     }
 
-    /**
-     * Update link's href if label if valid url.
-     * Return true if link's label matches href
-     * @param {HTMLAnchorElement} link
-     */
-    _updateLinkUrl(link) {
-        // Resolve protocol
-        const protocolMatch = /^(https?:\/\/|mailto:|tel:(?:\/\/)?)/i.exec(link.href);
-        if (!protocolMatch)
-            return;
-        const protocol = protocolMatch[0].toLowerCase();
-        const regex = {
-            'http://': URL_REGEX_STRICT,
-            'https://': URL_REGEX_STRICT,
-            'mailto:': EMAIL_REGEX,
-            'tel:': PHONE_REGEX,
-            'tel://': PHONE_REGEX,
-        };
-        if (!regex[protocol])
-            return;
-
-        // Test if label is valid url
-        const linkLabel = link.innerText;
-        const match = regex[protocol].exec(linkLabel);
-        if (match) {
-            // Update link href
-            // match[1] is the captured group with the protocol
-            link.href = match[1] ? linkLabel : protocol + linkLabel;
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Update href in mutated link elements.
+     * If label is valid URL, href gets updated and link is tagged as auto-updatable.
+     * If label of an auto-updatable link is an invalid URL, link gets disabled. 
      */
     _updateLinks() {
+        console.log("hello from updateLinks");
         this.observerFlush();
         const links = new Set(
             this._currentStep.mutations
                 .map(record => closestElement(this.idFind(record.id), 'a'))
-                .filter(element => !!element)
+                .filter(element => element && element.href)
         );
         links.forEach(link => {
-            // Resolve protocol
+            // Resolve protocol.
             const hrefLowerCase = link.href.toLowerCase();
-            // OBS: I could Url.protocol instead
             const protocol = Object.keys(linkRegexes).find(protocol => hrefLowerCase.startsWith(protocol));
             if (!protocol) return;
-            // Test if label is valid url
+
+            // Check if label is a valid URL.
             const linkLabel = link.innerText.replace(/\u200b/g, '');
-            //??? document or this.document? where does popover live when editable is inside an iframe?
-            const popover = this.document.getElementById(link.getAttribute('aria-describedby'));
             const match = linkRegexes[protocol].exec(linkLabel);
             if (match) {
-                // Update link href and popover
-                // match[1] is the captured group with the protocol
                 const newUrl = match[1] ? linkLabel : protocol + linkLabel;
-                link.href = newUrl;
-                // tag link as auto_updatable
-                link.classList.add('oe_auto_update_link');
-                // update popover
-                if (popover) {
-                    const popoverLink = popover.querySelector('.o_we_url_link');
-                    popoverLink.href = newUrl;
-                    popoverLink.textContent = newUrl;
+                // Update link href.
+                if (!this.skipLinkUpdate) {
+                    link.href = newUrl;
                 }
+                // Tag link as auto updatable.
+                link.classList.add('oe_auto_update_link');
+                link.dispatchEvent(new Event('linkHrefUpdated'));
             } else if (link.classList.contains('oe_auto_update_link')) {
-                // Remove link.
-                // TODO: check how the link is removed via the popover
+                // An auto updatable link is disabled once the label in not a valid URL.
                 const restoreCursor = preserveCursor(this.document);
                 const parent = link.parentElement;
                 Array.from(link.childNodes).forEach(child => parent.insertBefore(child, link));
                 // Disable isolated link.
+                // TODO: refactor this with that one from onPaste.
                 if (this._fixLinkMutatedElements && this._fixLinkMutatedElements.link === link) {
                     this.resetContenteditableLink();
                     this._activateContenteditable();
                 }
-                if (popover) {
-                    popover.remove()
-                }
                 link.remove();
+                link.dispatchEvent(new Event('linkRemoved'));
                 restoreCursor();
+            } else {
+                link.dispatchEvent(new Event('linkLabelChanged'));
             }
         });
     }

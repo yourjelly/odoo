@@ -1250,7 +1250,9 @@ const Wysiwyg = Widget.extend({
                     data.rel = 'ugc';
                 }
                 linkWidget.applyLinkToDom(data);
+                this.odooEditor.skipLinkUpdate = true;
                 this.odooEditor.historyStep();
+                this.odooEditor.skipLinkUpdate = false;
                 link = linkWidget.$link[0];
                 this.odooEditor.setContenteditableLink(linkWidget.$link[0]);
                 setSelection(link, 0, link, link.childNodes.length, false);

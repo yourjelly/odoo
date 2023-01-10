@@ -205,6 +205,7 @@ const Link = Widget.extend({
         if (!this.$link.attr('target')) {
             this.$link[0].removeAttribute('target');
         }
+        this.$link.removeClass('oe_auto_update_link');
         this._updateLinkContent(this.$link, data);
     },
     /**
