@@ -98,7 +98,7 @@ QUnit.module("QuestionPageOneToManyField", (hooks) => {
             arch: `
                 <form>
                     <field name="question_and_page_ids" widget="question_page_one2many">
-                        <tree>
+                        <tree open_on_click="1">
                             <field name="is_page" invisible="1" />
                             <field name="title" />
                             <field name="random_questions_count" />
@@ -144,9 +144,14 @@ QUnit.module("QuestionPageOneToManyField", (hooks) => {
             serverData,
             arch: `
                 <form>
+<<<<<<< HEAD
                     <field name="favorite_color"/>
                     <field name="question_and_page_ids" widget="question_page_one2many">
                         <tree>
+=======
+                    <field name="lines" widget="question_page_one2many">
+                        <tree open_on_click="1">
+>>>>>>> f4da0ee9d322 ([IMP] web: x2many: disable form view modal opening)
                             <field name="is_page" invisible="1" />
                             <field name="title" />
                             <field name="random_questions_count" />
