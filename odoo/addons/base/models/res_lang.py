@@ -10,6 +10,7 @@ from operator import itemgetter
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.misc import frozendict
 
 _logger = logging.getLogger(__name__)
 
@@ -208,67 +209,84 @@ class Lang(models.Model):
                 partner.write({'lang': lang_code})
         return True
 
-    @tools.ormcache('code')
+    @api.model
+    @tools.ormcache()
+    def _lang_data(self) -> 'frozendict':
+        all_langs = self.with_context(active_test=False).search([], order='name')
+        installed_langs = all_langs.filtered('active')
+        fields_to_save = (
+            'id', 'code', 'url_code', 'name', 'direction', 'active',
+            'thousands_sep', 'decimal_point', 'grouping',
+        )
+        lang_data = [
+            frozendict({
+                field: lang[field]
+                for field in fields_to_save
+            }) for lang in all_langs
+        ]
+        # Or the same dict because code is string and id is int ?
+        return frozendict({
+            'available_langs_ids': all_langs.ids,        # Sorted by name
+            'installed_langs_ids': installed_langs.ids,  # Sorted by name
+            'lang_by_id': frozendict({vals['id']: vals for vals in lang_data}),
+            'lang_by_code': frozendict({vals['code']: vals for vals in lang_data}),
+            'lang_by_url_code': frozendict({vals['url_code']: vals for vals in lang_data}),
+        })
+
+    @api.model
     def _lang_get_id(self, code):
-        return self.with_context(active_test=True).search([('code', '=', code)]).id
+        lang = self._lang_data()['lang_by_code'].get(code, {})
+        if lang and lang['active']:
+            return lang['id']
+        return None
 
     @api.model
     def _lang_get_direction(self, code):
-        return self._lang_get(code)._get_cached_values()['direction']
+        return self._lang_data()['lang_by_code'].get(code, {}).get('direction', False)
 
-    @tools.ormcache('url_code')
+    @api.model
     def _lang_get_code(self, url_code):
-        lang = self.with_context(active_test=True).search([('url_code', '=', url_code)])
-        return lang and lang._get_cached_values()['code'] or url_code
+        lang: 'dict | None' = self._lang_data()['lang_by_url_code'].get(url_code)
+        if lang and lang['active']:  # Only active
+            return lang['code']
+        return url_code
 
+    @api.model
     def _lang_get(self, code):
         """ Return the language using this code if it is active """
         return self.browse(self._lang_get_id(code))
 
-    def _data_get(self):
-        vals = self._get_cached_values()
-        return vals['grouping'], vals['thousands_sep'] or '', vals['decimal_point']
-
     @api.model
-    @tools.ormcache()
     def get_available(self):
         """ Return the available languages as a list of (code, url_code, name,
             active) sorted by name.
         """
-        langs = self.with_context(active_test=False).search([])
-        return langs.get_sorted()
+        lang_data = self._lang_data()
+        lang_by_id = lang_data['lang_by_id']
+        return [
+            (
+                lang_by_id[_id]['code'], lang_by_id[_id]['url_code'], lang_by_id[_id]['name'],
+                lang_by_id[_id]['active'], lang_by_id[_id]['flag_image_url'],
+            )
+            for _id in lang_data['available_langs_ids']
+        ]
 
     def get_sorted(self):
         return sorted([(lang.code, lang.url_code, lang.name, lang.active, lang.flag_image_url) for lang in self], key=itemgetter(2))
 
-    @tools.ormcache('self.id')
-    def _get_cached_values(self):
-        self.ensure_one()
-        return {
-            'code': self.code,
-            'url_code': self.url_code,
-            'name': self.name,
-            'direction': self.direction,
-            'thousands_sep': self.thousands_sep,
-            'decimal_point': self.decimal_point,
-            'grouping': self.grouping,
-        }
-
     def _get_cached(self, field):
-        return self._get_cached_values()[field]
+        return self._lang_data()['lang_by_id'].get(self.id, {}).get(field, False)
 
     @api.model
     def _lang_code_to_urlcode(self, code):
-        for c, urlc, *_ in self.get_available():
-            if c == code:
-                return urlc
+        return self._lang_data()['lang_by_code'].get(code, {}).get(code, False)
 
     @api.model
-    @tools.ormcache()
     def get_installed(self):
         """ Return the installed languages as a list of (code, name) sorted by name. """
-        langs = self.with_context(active_test=True).search([])
-        return sorted([(lang.code, lang.name) for lang in langs], key=itemgetter(1))
+        lang_data = self._lang_data()
+        lang_by_id = lang_data['lang_by_id']
+        return [(lang_by_id[_id]['code'], lang_by_id[_id]['name']) for _id in lang_data['installed_langs_ids']]
 
     def toggle_active(self):
         super().toggle_active()
@@ -328,7 +346,9 @@ class Lang(models.Model):
 
         # floats and decimal ints need special action!
         if grouping:
-            lang_grouping, thousands_sep, decimal_point = self._data_get()
+            lang_grouping = self._get_cached('grouping')
+            thousands_sep = self._get_cached('thousands_sep') or ''
+            decimal_point = self._get_cached('decimal_point')
             eval_lang_grouping = ast.literal_eval(lang_grouping)
 
             if percent[-1] in 'eEfFgG':
