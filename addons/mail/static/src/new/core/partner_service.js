@@ -8,6 +8,7 @@ import { createLocalId } from "./thread_model.create_local_id";
 export class PartnerService {
     constructor(env, services) {
         this.env = env;
+        this.rpc = services.rpc;
         /** @type {import("@mail/new/core/store_service").Store} */
         this.store = services["mail.store"];
     }
@@ -100,7 +101,7 @@ export class PartnerService {
 }
 
 export const partnerService = {
-    dependencies: ["mail.store"],
+    dependencies: ["rpc", "mail.store"],
     start(env, services) {
         return new PartnerService(env, services);
     },
