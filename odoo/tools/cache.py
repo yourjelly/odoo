@@ -4,7 +4,7 @@
 # decorator makes wrappers that have the same API as their wrapped function
 from collections import Counter, defaultdict
 from decorator import decorator
-from inspect import signature
+from inspect import signature, Parameter
 import logging
 
 unsafe_eval = eval
@@ -63,8 +63,12 @@ class ormcache(object):
     def determine_key(self):
         """ Determine the function that computes a cache key from arguments. """
         if self.skiparg is None:
+            # Remove annotation because lambda doesn't accept it
+            args = ', '.join(
+                str(params.replace(annotation=Parameter.empty))
+                for params in signature(self.method).parameters.values()
+            )
             # build a string that represents function code and evaluate it
-            args = str(signature(self.method))[1:-1]
             if self.args:
                 code = "lambda %s: (%s,)" % (args, ", ".join(self.args))
             else:
