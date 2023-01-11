@@ -115,16 +115,16 @@ const LinkPopoverWidget = Widget.extend({
         this.$target.on('linkHrefUpdated', (e) => {
             if (popoverShown) {
                 this._loadAsyncLinkPreview();
-                this.$target.popover('update');
             }
-
         });
         this.$target.on('linkRemoved', (e) => {
-            this.destroy();
-
+            popoverShown = false;
+            this.$target.popover('hide');
         });
-        this.$target.on('linkLabelChanged', (e) => {
-            this.$target.popover('update');
+        this.$target.on('linkUpdate', (e) => {
+            if (popoverShown) {
+                this.$target.popover('update');
+            }
         });
         const onClickDocument = (e) => {
             if (popoverShown) {

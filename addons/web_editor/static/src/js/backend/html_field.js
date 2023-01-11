@@ -355,13 +355,13 @@ export class HtmlField extends Component {
     async commitChanges({ urgent } = {}) {
         if (this._isDirty() || urgent) {
             if (this.wysiwyg) {
-                // Avoid listening to changes made during the _toInline process.
-                this.wysiwyg.odooEditor.observerUnactive('commitChanges');
                 await this.wysiwyg.savePendingImages();
+                // Avoid listening to changes made during the _toInline process.
                 if (this.props.isInlineStyle) {
+                    this.wysiwyg.odooEditor.observerUnactive('commitChanges');
                     await this._toInline();
+                    this.wysiwyg.odooEditor.observerActive('commitChanges');
                 }
-                this.wysiwyg.odooEditor.observerActive('commitChanges');
             }
             await this.updateValue();
         }

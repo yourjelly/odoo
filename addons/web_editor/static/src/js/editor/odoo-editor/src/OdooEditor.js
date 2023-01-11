@@ -700,56 +700,68 @@ export class OdooEditor extends EventTarget {
         this._toRollback = false;
     }
 
-
     /**
      * Update href in mutated link elements.
      * If label is valid URL, href gets updated and link is tagged as auto-updatable.
      * If label of an auto-updatable link is an invalid URL, link gets disabled. 
      */
     _updateLinks() {
-        console.log("hello from updateLinks");
         this.observerFlush();
+        debugger;
         const links = new Set(
             this._currentStep.mutations
                 .map(record => closestElement(this.idFind(record.id), 'a'))
+                // Empty link created by Link should be ignored.
                 .filter(element => element && element.href)
         );
-        links.forEach(link => {
+        for (const link of links) {
             // Resolve protocol.
             const hrefLowerCase = link.href.toLowerCase();
             const protocol = Object.keys(linkRegexes).find(protocol => hrefLowerCase.startsWith(protocol));
-            if (!protocol) return;
+            if (!protocol) {
+                continue;
+            }
 
             // Check if label is a valid URL.
-            const linkLabel = link.innerText.replace(/\u200b/g, '');
+            const linkLabel = link.innerText.replace(/\u200b/g, '').trim();
             const match = linkRegexes[protocol].exec(linkLabel);
-            if (match) {
-                const newUrl = match[1] ? linkLabel : protocol + linkLabel;
-                // Update link href.
-                if (!this.skipLinkUpdate) {
-                    link.href = newUrl;
+            if (link.classList.contains('oe_auto_update_link')) {
+                if (match) {
+                    const url = match[1] ? linkLabel : protocol + linkLabel;
+                    link.href = url;
+                    link.dispatchEvent(new Event('linkHrefUpdated'));
+                } else {
+                    // Unlink.
+                    const restoreCursor = preserveCursor(this.document);
+                    const parent = link.parentElement;
+                    [...link.childNodes].forEach(child => parent.insertBefore(child, link));
+                    // Disable isolated link.
+                    // TODO: refactor this with that one from onPaste.
+                    if (this._fixLinkMutatedElements && this._fixLinkMutatedElements.link === link) {
+                        this.resetContenteditableLink();
+                        this._activateContenteditable();
+                    }
+                    link.remove();
+                    link.dispatchEvent(new Event('linkRemoved'));
+                    restoreCursor();
                 }
-                // Tag link as auto updatable.
-                link.classList.add('oe_auto_update_link');
-                link.dispatchEvent(new Event('linkHrefUpdated'));
-            } else if (link.classList.contains('oe_auto_update_link')) {
-                // An auto updatable link is disabled once the label in not a valid URL.
-                const restoreCursor = preserveCursor(this.document);
-                const parent = link.parentElement;
-                Array.from(link.childNodes).forEach(child => parent.insertBefore(child, link));
-                // Disable isolated link.
-                // TODO: refactor this with that one from onPaste.
-                if (this._fixLinkMutatedElements && this._fixLinkMutatedElements.link === link) {
-                    this.resetContenteditableLink();
-                    this._activateContenteditable();
-                }
-                link.remove();
-                link.dispatchEvent(new Event('linkRemoved'));
-                restoreCursor();
             } else {
-                link.dispatchEvent(new Event('linkLabelChanged'));
+                // Check if label matches current URL.
+                let match;
+                const coreUrlRegex = new RegExp(`^(?:${protocol})?(.*?)\/?$`, 'i');
+                match = coreUrlRegex.exec(linkLabel);
+                const label = match && match[1];
+                console.log('label', label);
+                match = coreUrlRegex.exec(link.href);
+                const url = match && match[1];
+                console.log('url', url);
+                if (label === url) {
+                    // Promote link to auto-updatable.
+                    link.classList.add('oe_auto_update_link');
+                }
             }
-        });
+            link.dispatchEvent(new Event('linkUpdate'));
+        }
     }
     sanitize() {
         this.observerFlush();
@@ -890,9 +902,7 @@ export class OdooEditor extends EventTarget {
             }
         }
         for (const record of records) {
-            if (!record.target.oid) {
-                this.idSet(record.target)
-            }
+                // this.idSet(record.target)
             switch (record.type) {
                 case 'characterData': {
                     this._currentStep.mutations.push({
