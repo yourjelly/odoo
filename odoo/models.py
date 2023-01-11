@@ -6020,12 +6020,8 @@ class BaseModel(metaclass=MetaModel):
         if before:
             tocompute = list(tocompute)
 
-        done = defaultdict(OrderedSet)
-        nothing = True
-
         # process what to compute
         for field, records, create in tocompute:
-            nothing = False
             records -= self.env.protected(field)
             if not records:
                 continue
@@ -6039,19 +6035,9 @@ class BaseModel(metaclass=MetaModel):
                 if field.recursive:
                     recursively_marked = records & self.env.cache.get_records(records, field)
                 self.env.cache.invalidate([(field, records._ids)])
-            done[str(field)].update(records._ids)
             # recursively trigger recomputation of field's dependents
             if field.recursive:
                 recursively_marked.modified([field.name], create)
-
-        if nothing:
-            return
-
-        from pprint import pformat
-        _logger.warning("modified(%s, %s%s%s)\n%s", self, list(fnames),
-                        ", create=True" if create else "",
-                        ", before=True" if before else "", pformat(done),
-                        stack_info=True)
 
     def _modified_triggers(self, nodes, create=False, seen=None):
         """ Return an iterator traversing a tree of field triggers on ``self``,
