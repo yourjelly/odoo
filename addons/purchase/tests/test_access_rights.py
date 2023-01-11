@@ -54,7 +54,9 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
         purchase_order_form.partner_id = self.vendor
         with purchase_order_form.order_line.new() as line:
             line.name = self.product.name
-            line.product_id = self.product
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product
             line.product_qty = 4
             line.price_unit = 5
 
@@ -79,7 +81,9 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
         purchase_order_form.partner_id = self.vendor
         with purchase_order_form.order_line.new() as line:
             line.name = self.product.name
-            line.product_id = self.product
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product
             line.product_qty = 4
             line.price_unit = 5
 
@@ -116,7 +120,9 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
         purchase_order_form.partner_id = self.vendor
         with purchase_order_form.order_line.new() as line:
             line.name = self.product.name
-            line.product_id = self.product
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product
             line.product_qty = 4
             line.price_unit = 5
 

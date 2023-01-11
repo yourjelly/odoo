@@ -374,7 +374,9 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.env['res.partner'].create({'name': 'vendor'})
         with po_form.order_line.new() as po_line:
-            po_line.product_id = self.product1
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product1
             po_line.product_qty = 1
             po_line.price_unit = 455.0
         order = po_form.save()

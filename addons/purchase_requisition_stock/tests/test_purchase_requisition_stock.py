@@ -208,7 +208,9 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
         unit_price = 50
         po_form = Form(orig_po)
         with po_form.order_line.new() as line:
-            line.product_id = self.product_09
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product_09
             line.product_qty = 5.0
             line.price_unit = unit_price
         po_form.save()

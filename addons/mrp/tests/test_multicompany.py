@@ -165,13 +165,14 @@ class TestMrpMulticompany(common.TransactionCase):
             'company_id': self.company_a.id,
             'bom_line_ids': [(0, 0, {'product_id': component.id})]
         })
-        mo_form = Form(self.env['mrp.production'].with_user(self.user_a))
+        mo_form = Form(self.env['mrp.production'].with_user(self.user_a).with_context(show_lots_m2o=True))
         mo_form.product_id = product
         mo = mo_form.save()
         mo.with_user(self.user_b).action_confirm()
         mo_form = Form(mo)
         mo_form.qty_producing = 1
         mo = mo_form.save()
+        mo = mo.with_context(show_lots_m2o=True) # show the lot_id field in tree view
         details_operation_form = Form(mo.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.edit(0) as ml:
             ml.lot_id = lot_b

@@ -13,7 +13,9 @@ class TestPurchaseStockReports(TestReportsCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
-            line.product_id = self.product
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product
             line.product_qty = 5
         po = po_form.save()
 
@@ -87,7 +89,10 @@ class TestPurchaseStockReports(TestReportsCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
-            line.product_id = self.product
+
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product
             line.product_qty = 4
         po = po_form.save()
 
@@ -154,7 +159,9 @@ class TestPurchaseStockReports(TestReportsCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
-            line.product_id = self.product
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product
             line.product_qty = 5
         po1 = po_form.save()
         po1.button_confirm()
@@ -188,14 +195,18 @@ class TestPurchaseStockReports(TestReportsCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
-            line.product_id = self.product
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product
             line.product_qty = 50
         po_form.save()
 
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
-            line.product_id = self.product
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product
             line.product_qty = 100
         po = po_form.save()
         po.with_user(basic_purchase_user).button_confirm()

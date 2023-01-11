@@ -8,6 +8,9 @@ class TestStockCommon(common.TransactionCase):
     def setUpClass(cls):
         super(TestStockCommon, cls).setUpClass()
 
+        # show the lot_id and lot_name field in tree view
+        cls.env = cls.env(context=dict(cls.env.context, show_lots_m2o=True, show_lots_text=True))
+
         cls.ProductObj = cls.env['product.product']
         cls.UomObj = cls.env['uom.uom']
         cls.PartnerObj = cls.env['res.partner']

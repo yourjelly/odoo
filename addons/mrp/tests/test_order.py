@@ -242,6 +242,9 @@ class TestMrpOrder(TestMrpCommon):
         mo, bom, p_final, p1, p2 = self.generate_mo(tracking_base_1='lot')
         self.assertEqual(len(mo), 1, 'MO should have been created')
 
+        # show the lot_id field in tree view
+        mo = mo.with_context(show_lots_m2o=True)
+
         lot_1 = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': p1.id,
@@ -734,6 +737,9 @@ class TestMrpOrder(TestMrpCommon):
         self.stock_shelf_2 = self.stock_location_14
         mo, _, p_final, p1, p2 = self.generate_mo(tracking_base_1='lot', qty_base_1=10, qty_final=1)
 
+        # show the lot_id field in tree view
+        mo = mo.with_context(show_lots_m2o=True)
+
         # Required for `lot_producing_id` to be visible in the view
         # <field name="lot_producing_id" attrs="{'invisible': [('product_tracking', 'in', ('none', False))]}"/>
         p_final.tracking = 'lot'
@@ -1108,6 +1114,9 @@ class TestMrpOrder(TestMrpCommon):
         mo_form.product_qty = 2
         mo = mo_form.save()
 
+        # show the lot_id field in tree view
+        mo = mo.with_context(show_lots_m2o=True)
+
         mo.action_confirm()
         move_byproduct_1 = mo.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct1)
         self.assertEqual(len(move_byproduct_1), 1)
@@ -1289,7 +1298,8 @@ class TestMrpOrder(TestMrpCommon):
             'product_id': p2.id,
             'company_id': self.env.company.id,
         })
-        mo_form = Form(mo1)
+
+        mo_form = Form(mo1.with_context(show_lots_m2o=True))
         mo_form.qty_producing = 1
         mo1 = mo_form.save()
         details_operation_form = Form(mo1.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
@@ -1298,7 +1308,7 @@ class TestMrpOrder(TestMrpCommon):
         details_operation_form.save()
         mo1.button_mark_done()
 
-        mo_form = Form(self.env['mrp.production'])
+        mo_form = Form(self.env['mrp.production'].with_context(show_lots_m2o=True))
         mo_form.product_id = p_final
         mo_form.bom_id = bom
         mo_form.product_qty = 1
@@ -1340,6 +1350,9 @@ class TestMrpOrder(TestMrpCommon):
         mo = mo_form.save()
         mo.action_confirm()
 
+        # show the lot_id field in tree view
+        mo = mo.with_context(show_lots_m2o=True)
+
         sn = self.env['stock.lot'].create({
             'name': 'sn used twice',
             'product_id': byproduct.id,
@@ -1356,7 +1369,7 @@ class TestMrpOrder(TestMrpCommon):
         details_operation_form.save()
         mo.button_mark_done()
 
-        mo_form = Form(self.env['mrp.production'])
+        mo_form = Form(self.env['mrp.production'].with_context(show_lots_m2o=True))
         mo_form.product_id = finished_product
         mo_form.bom_id = bom
         mo_form.product_qty = 1
@@ -1378,6 +1391,10 @@ class TestMrpOrder(TestMrpCommon):
         """ Consuming the same serial number two times should not give an error if
         a repair order of the first production has been made before the second one"""
         mo1, bom, p_final, p1, p2 = self.generate_mo(tracking_base_2='serial', qty_final=1, qty_base_1=1,)
+
+        # show the lot_id field in tree view
+        mo1 = mo1.with_context(show_lots_m2o=True)
+
         sn = self.env['stock.lot'].create({
             'name': 'sn used twice',
             'product_id': p2.id,

@@ -2142,6 +2142,8 @@ class Form(object):
 
     .. versionadded:: 12.0
     """
+    _bypass_invisible = False
+
     def __init__(self, recordp, view=None):
         # necessary as we're overriding setattr
         assert isinstance(recordp, BaseModel)
@@ -2242,7 +2244,7 @@ class Form(object):
             "relativedelta": relativedelta,
             "current_date": time.strftime("%Y-%m-%d"),
             "allowed_company_ids": [self._env.user.company_id.id],
-            "context": {},
+            "context": self._env.context,
         }
         for f in fvg['tree'].xpath('.//field[count(ancestor::field) = %s]' % field_level):
             fname = f.get('name')
@@ -2427,6 +2429,14 @@ class Form(object):
         )
         return safe_eval(c, ctx, {'context': ctx})
 
+    @contextmanager
+    def bypass_invisible(self):
+        try:
+            object.__setattr__(self, '_bypass_invisible', True)
+            yield
+        finally:
+            object.__setattr__(self, '_bypass_invisible', False)
+
     def __setattr__(self, field, value):
         descr = self._view['fields'].get(field)
         assert descr is not None, "%s was not found in the view" % field
@@ -2435,8 +2445,11 @@ class Form(object):
 
         assert not self._get_modifier(field, 'readonly'), \
             "can't write on readonly field {}".format(field)
-        assert not self._get_modifier(field, 'invisible'), \
-            "can't write on invisible field {}".format(field)
+        if not self._bypass_invisible:
+            assert not self._get_modifier(field, 'invisible'), \
+                "can't write on invisible field {}".format(field)
+            assert not self._get_modifier(field, 'column_invisible'), \
+                "can't write on invisible field {}".format(field)
 
         if descr['type'] == 'many2one':
             assert isinstance(value, BaseModel) and value._name == descr['relation']

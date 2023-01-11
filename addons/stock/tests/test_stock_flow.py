@@ -1992,7 +1992,7 @@ class TestStockFlow(TestStockCommon):
         })
         # Creates two receipts using some lot names in common.
         picking_type = self.env['stock.picking.type'].browse(self.picking_type_in)
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(show_lots_text=True))
         picking_form.picking_type_id = picking_type
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product_lot
@@ -2012,7 +2012,7 @@ class TestStockFlow(TestStockCommon):
             line.qty_done = 2
         move = move_form.save()
 
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(show_lots_text=True))
         picking_form.picking_type_id = picking_type
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product_lot
@@ -2056,7 +2056,7 @@ class TestStockFlow(TestStockCommon):
         # Checks also it still raise an error when it tries to create multiple time
         # the same serial numbers (same scenario but with SN instead of lots).
         picking_type = self.env['stock.picking.type'].browse(self.picking_type_in)
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(show_lots_text=True))
         picking_form.picking_type_id = picking_type
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product_serial
@@ -2071,7 +2071,7 @@ class TestStockFlow(TestStockCommon):
             line.lot_name = 'sn-002'
         move = move_form.save()
 
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(show_lots_text=True))
         picking_form.picking_type_id = picking_type
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product_serial
@@ -2292,7 +2292,7 @@ class TestStockFlow(TestStockCommon):
         self.productA.tracking = 'serial'
         type_in = self.env['stock.picking.type'].browse(self.picking_type_in)
 
-        receipt_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=True))
+        receipt_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=True, show_lots_text=True))
         receipt_form.picking_type_id = type_in
         with receipt_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.productA

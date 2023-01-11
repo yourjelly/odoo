@@ -465,7 +465,9 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner_a
         with po_form.order_line.new() as line:
-            line.product_id = self.product_a
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product_a
             line.product_qty = 10
         po = po_form.save()
         po.button_confirm()

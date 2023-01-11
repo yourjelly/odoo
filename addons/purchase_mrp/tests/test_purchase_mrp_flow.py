@@ -237,7 +237,9 @@ class TestPurchaseMrpFlow(TransactionCase):
         f = Form(self.env['purchase.order'])
         f.partner_id = partner
         with f.order_line.new() as line:
-            line.product_id = self.kit_parent
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.kit_parent
             line.product_qty = 7.0
             line.price_unit = 10
 

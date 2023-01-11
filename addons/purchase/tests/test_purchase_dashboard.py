@@ -42,10 +42,14 @@ class TestPurchaseDashboard(AccountTestInvoicingCommon, MailCase):
         for rfq, qty in zip(rfqs, [1, 2, 3]):
             rfq_form = Form(rfq)
             with rfq_form.order_line.new() as line_1:
-                line_1.product_id = self.product_100
+                with line_1.bypass_invisible():
+                    # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                    line_1.product_id = self.product_100
                 line_1.product_qty = qty
             with rfq_form.order_line.new() as line_2:
-                line_2.product_id = self.product_250
+                with line_2.bypass_invisible():
+                    # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                    line_2.product_id = self.product_250
                 line_2.product_qty = qty
             rfq_form.save()
 

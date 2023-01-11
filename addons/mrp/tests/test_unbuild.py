@@ -119,7 +119,9 @@ class TestUnbuild(TestMrpCommon):
             x.product_qty = 3
             unbuild_order = x.save()
 
-        x = Form(self.env['mrp.unbuild'])
+        x = Form(self.env['mrp.unbuild'].with_context(show_lots_m2o=True))
+        mo = mo.with_context(show_lots_m2o=True)
+
         x.product_id = p_final
         x.bom_id = bom
         x.product_qty = 3
@@ -130,7 +132,7 @@ class TestUnbuild(TestMrpCommon):
         self.assertEqual(self.env['stock.quant']._get_available_quantity(p1, self.stock_location), 92, 'You should have 80 products in stock')
         self.assertEqual(self.env['stock.quant']._get_available_quantity(p2, self.stock_location), 3, 'You should have consumed all the 5 product in stock')
 
-        x = Form(self.env['mrp.unbuild'])
+        x = Form(self.env['mrp.unbuild'].with_context(show_lots_m2o=True))
         x.product_id = p_final
         x.bom_id = bom
         x.product_qty = 2
@@ -141,7 +143,7 @@ class TestUnbuild(TestMrpCommon):
         self.assertEqual(self.env['stock.quant']._get_available_quantity(p1, self.stock_location), 100, 'You should have 80 products in stock')
         self.assertEqual(self.env['stock.quant']._get_available_quantity(p2, self.stock_location), 5, 'You should have consumed all the 5 product in stock')
 
-        x = Form(self.env['mrp.unbuild'])
+        x = Form(self.env['mrp.unbuild'].with_context(show_lots_m2o=True))
         x.product_id = p_final
         x.bom_id = bom
         x.product_qty = 5
@@ -159,6 +161,10 @@ class TestUnbuild(TestMrpCommon):
         order and ensure it is correct.
         """
         mo, bom, p_final, p1, p2 = self.generate_mo(tracking_base_1='lot')
+
+        # show the lot_id field in tree view
+        mo = mo.with_context(show_lots_m2o=True)
+
         self.assertEqual(len(mo), 1, 'MO should have been created')
 
         lot = self.env['stock.lot'].create({
@@ -406,6 +412,10 @@ class TestUnbuild(TestMrpCommon):
         """ This test produces an MO in two times and checks that the move lines are linked in a correct way
         """
         mo, bom, p_final, p1, p2 = self.generate_mo(tracking_final='lot', tracking_base_1='none', tracking_base_2='lot')
+
+        # show the lot_id field in tree view
+        mo = mo.with_context(show_lots_m2o=True)
+
         # Young Tom
         #    \ Botox - 4 - p1
         #    \ Old Tom - 1 - p2
@@ -807,7 +817,7 @@ class TestUnbuild(TestMrpCommon):
         unbuild_form.save().action_unbuild()
 
         #mo2
-        mo_form = Form(self.env['mrp.production'])
+        mo_form = Form(self.env['mrp.production'].with_context(show_lots_m2o=True))
         mo_form.product_id = product_2
         mo2 = mo_form.save()
         mo2.action_confirm()

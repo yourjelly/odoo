@@ -104,9 +104,13 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
         po_form.partner_id = self.partner_a
         po_form.date_order = datetime.now() + timedelta(days=10)
         with po_form.order_line.new() as line:
-            line.product_id = self.product_a
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product_a
         with po_form.order_line.new() as line:
-            line.product_id = self.product_b
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product_b
         po_form.date_planned = datetime.now() + timedelta(days=15)
         po = po_form.save()
 

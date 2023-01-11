@@ -80,6 +80,10 @@ class TestStockLot(TestStockCommon):
         mo_form = Form(mo)
         mo_form.qty_producing = 1
         mo = mo_form.save()
+
+        # show the lot_id field in tree view
+        mo = mo.with_context(show_lots_m2o=True)
+
         details_operation_form = Form(mo.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.qty_done = 3
@@ -103,6 +107,10 @@ class TestStockLot(TestStockCommon):
         mo_form = Form(mo)
         mo_form.qty_producing = 1
         mo = mo_form.save()
+
+        # show the lot_id field in tree view
+        mo = mo.with_context(show_lots_m2o=True)
+
         details_operation_form = Form(mo.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.qty_done = 3

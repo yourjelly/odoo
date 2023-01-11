@@ -58,7 +58,9 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
         order_form = Form(self.env['purchase.order'])
         order_form.partner_id = res_partner_3
         with order_form.order_line.new() as line:
-            line.product_id = product_lifo_icecream
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = product_lifo_icecream
             line.product_qty = 10.0
             line.price_unit = 60.0
         purchase_order_lifo1 = order_form.save()
@@ -67,7 +69,9 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
         order2_form = Form(self.env['purchase.order'])
         order2_form.partner_id = res_partner_3
         with order2_form.order_line.new() as line:
-            line.product_id = product_lifo_icecream
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = product_lifo_icecream
             line.product_qty = 30.0
             line.price_unit = 80.0
         purchase_order_lifo2 = order2_form.save()

@@ -458,11 +458,15 @@ class TestCreatePicking(common.TestProductCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner_id
         with po_form.order_line.new() as line:
-            line.product_id = self.product_id_1
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product_id_1
             line.date_planned = datetime.today()
             line.product_qty = 1.0
         with po_form.order_line.new() as line:
-            line.product_id = self.product_id_1
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product_id_1
             line.date_planned = datetime.today() + timedelta(days=7)
             line.product_qty = 1.0
         po = po_form.save()
@@ -616,7 +620,9 @@ class TestCreatePicking(common.TestProductCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner_id
         with po_form.order_line.new() as po_line:
-            po_line.product_id = self.product_id_1
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product_id_1
             po_line.product_qty = 10
         purchase_order = po_form.save()
 

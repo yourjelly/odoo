@@ -9,6 +9,10 @@ class StockGenerate(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super(StockGenerate, cls).setUpClass()
+
+        # show the lot_id and lot_name field in tree view
+        cls.env = cls.env(context=dict(cls.env.context, show_lots_m2o=True, show_lots_text=True))
+
         Product = cls.env['product.product']
         cls.product_serial = Product.create({
             'name': 'Tracked by SN',
@@ -321,7 +325,7 @@ class StockGenerate(TransactionCase):
         ]
         values = '\n'.join(value_list)
 
-        move_form = Form(move, view='stock.view_stock_move_nosuggest_operations')
+        move_form = Form(move.with_context(show_lots_text=True), view='stock.view_stock_move_nosuggest_operations')
         with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_name = values
         move = move_form.save()
@@ -348,6 +352,9 @@ class StockGenerate(TransactionCase):
         move.picking_type_id = picking_type
         # We must begin with a move with five move lines.
         self.assertEqual(len(move.move_line_ids), nbre_of_lines)
+
+        # show the lot_name field in tree view
+        move = move.with_context(show_lots_text=True)
 
         value_list = [
             '',

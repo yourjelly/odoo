@@ -3543,8 +3543,9 @@ class TestAutoAssign(TestStockCommon):
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product1
             move.product_uom_qty = 10
-            move.location_id = self.env.ref('stock.stock_location_suppliers')
-            move.location_dest_id = self.env.ref('stock.stock_location_stock')
+            with move.bypass_invisible():
+                move.location_id = self.env.ref('stock.stock_location_suppliers')
+                move.location_dest_id = self.env.ref('stock.stock_location_stock')
         picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product1

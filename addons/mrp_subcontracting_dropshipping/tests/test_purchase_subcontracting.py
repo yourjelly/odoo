@@ -99,7 +99,9 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
         po = Form(self.env['purchase.order'])
         po.partner_id = self.subcontractor_partner1
         with po.order_line.new() as po_line:
-            po_line.product_id = self.finished
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.finished
             po_line.product_qty = 1
             po_line.price_unit = 100
         po = po.save()

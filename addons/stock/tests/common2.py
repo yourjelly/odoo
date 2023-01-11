@@ -20,6 +20,9 @@ class TestStockCommon(common.TestProductCommon):
     def setUpClass(cls):
         super(TestStockCommon, cls).setUpClass()
 
+        # show the lot_id and lot_name field in tree view
+        cls.env = cls.env(context=dict(cls.env.context, show_lots_m2o=True, show_lots_text=True))
+
         # User Data: stock user and stock manager
         cls.user_stock_user = mail_new_test_user(
             cls.env,

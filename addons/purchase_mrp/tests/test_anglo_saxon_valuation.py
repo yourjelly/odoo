@@ -54,7 +54,9 @@ class TestAngloSaxonValuationPurchaseMRP(TransactionCase):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.vendor01
         with po_form.order_line.new() as pol_form:
-            pol_form.product_id = kit
+            with pol_form.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                pol_form.product_id = kit
             pol_form.price_unit = 100
         po = po_form.save()
         po.button_confirm()

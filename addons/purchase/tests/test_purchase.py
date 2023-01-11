@@ -19,11 +19,15 @@ class TestPurchase(AccountTestInvoicingCommon):
         po = Form(self.env['purchase.order'])
         po.partner_id = self.partner_a
         with po.order_line.new() as po_line:
-            po_line.product_id = self.product_a
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product_a
             po_line.product_qty = 1
             po_line.price_unit = 100
         with po.order_line.new() as po_line:
-            po_line.product_id = self.product_b
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product_b
             po_line.product_qty = 10
             po_line.price_unit = 200
         po = po.save()
@@ -76,11 +80,15 @@ class TestPurchase(AccountTestInvoicingCommon):
         po = Form(self.env['purchase.order'])
         po.partner_id = self.partner_a
         with po.order_line.new() as po_line:
-            po_line.product_id = self.product_a
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product_a
             po_line.product_qty = 1
             po_line.price_unit = 100
         with po.order_line.new() as po_line:
-            po_line.product_id = self.product_b
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product_b
             po_line.product_qty = 10
             po_line.price_unit = 200
         # set to send reminder today
@@ -110,11 +118,15 @@ class TestPurchase(AccountTestInvoicingCommon):
         po = Form(self.env['purchase.order'])
         po.partner_id = self.partner_a
         with po.order_line.new() as po_line:
-            po_line.product_id = self.product_a
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product_a
             po_line.product_qty = 1
             po_line.price_unit = 100
         with po.order_line.new() as po_line:
-            po_line.product_id = self.product_b
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product_b
             po_line.product_qty = 10
             po_line.price_unit = 200
         # set to send reminder tomorrow
@@ -137,12 +149,16 @@ class TestPurchase(AccountTestInvoicingCommon):
         po = Form(self.env['purchase.order'])
         po.partner_id = self.partner_a
         with po.order_line.new() as po_line:
-            po_line.product_id = self.product_a
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product_a
             po_line.product_qty = 1
             po_line.price_unit = 100
             po_line.date_planned = '2020-06-06 00:00:00'
         with po.order_line.new() as po_line:
-            po_line.product_id = self.product_b
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = self.product_b
             po_line.product_qty = 10
             po_line.price_unit = 200
             po_line.date_planned = '2020-06-06 00:00:00'
@@ -197,7 +213,9 @@ class TestPurchase(AccountTestInvoicingCommon):
         })
         po_form = Form(po)
         with po_form.order_line.new() as line:
-            line.product_id = self.product_a
+            with line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                line.product_id = self.product_a
             line.product_qty = 1.0
         po_form.save()
         self.assertEqual(po.order_line.product_packaging_id, packaging_single)
@@ -264,9 +282,13 @@ class TestPurchase(AccountTestInvoicingCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner_a
         with po_form.order_line.new() as po_line:
-            po_line.product_id = product_01
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = product_01
         with po_form.order_line.new() as po_line:
-            po_line.product_id = product_02
+            with po_line.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line.product_id = product_02
             po_line.product_uom = uom_dozens
         po = po_form.save()
 
@@ -284,7 +306,9 @@ class TestPurchase(AccountTestInvoicingCommon):
         po = Form(self.env['purchase.order'])
         po.partner_id = self.partner_a
         with po.order_line.new() as pol:
-            pol.product_id = self.product_a
+            with pol.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                pol.product_id = self.product_a
             pol.product_qty = 1
 
         pol.name = "New custom description"

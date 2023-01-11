@@ -336,7 +336,9 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         po_form.partner_id = self.partner_a
         with po_form.order_line.new() as po_line_form:
             po_line_form.name = self.product_order.name
-            po_line_form.product_id = self.product_order
+            with po_line_form.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line_form.product_id = self.product_order
             po_line_form.product_qty = 1.0
             po_line_form.price_unit = 10
             po_line_form.analytic_distribution = analytic_distribution_manual
@@ -523,7 +525,9 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         po_form = Form(self.env['purchase.order'])
         po_form.partner_id = self.partner_a
         with po_form.order_line.new() as po_line_form:
-            po_line_form.product_id = self.product_order
+            with po_line_form.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line_form.product_id = self.product_order
             po_line_form.product_qty = 1
         po = po_form.save()
         po_line = po.order_line[0]
@@ -550,7 +554,9 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         self.assertEqual(30.0, po_line.price_unit, "Unit price should be set to 30.0 for 3 quantity")
 
         with po_form.order_line.new() as po_line_form:
-            po_line_form.product_id = self.product_order
+            with po_line_form.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line_form.product_id = self.product_order
             po_line_form.product_qty = 1
         po = po_form.save()
         po_line = po.order_line[1]

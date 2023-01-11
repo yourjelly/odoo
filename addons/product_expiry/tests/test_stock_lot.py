@@ -292,6 +292,9 @@ class TestStockLot(TestStockCommon):
         receipt = picking_form.save()
         receipt.action_confirm()
 
+        # show the lot_name field in tree view
+        receipt = receipt.with_context(show_lots_text=True)
+
         # Defines a date during the receipt.
         move_form = Form(receipt.move_ids_without_package, view="stock.view_stock_move_operations")
         with move_form.move_line_ids.new() as line:

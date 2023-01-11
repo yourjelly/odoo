@@ -180,6 +180,9 @@ class TestTraceability(TestMrpCommon):
         mo = mo_form.save()
         mo.action_confirm()
 
+        # show the lot_id field in tree view
+        mo = mo.with_context(show_lots_m2o=True)
+
         mo_form = Form(mo)
         mo_form.lot_producing_id = self.env['stock.lot'].create({
             'product_id': product_final.id,
