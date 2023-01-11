@@ -237,29 +237,30 @@ class AccountMove(models.Model):
             raise UserError(error_msg)
         return {
             'type': 'ir.actions.client',
-            'tag': 'post_send',
-            'params': {
-                'invoices': {
-                    move.id: {
-                        'messages': json.dumps([msg.decode('cp1251') for msg in move._l10n_ke_get_cu_messages()]),
-                        'proxy_address': move.company_id.l10n_ke_cu_proxy_address,
-                        'company_vat': move.company_id.vat
-                    } for move in self
-                }
-            }
+            'tag': 'l10n_ke_post_send',
+            'params': [
+                {
+                    'move_id': move.id,
+                    'messages': json.dumps([msg.decode('cp1251') for msg in move._l10n_ke_get_cu_messages()]),
+                    'proxy_address': move.company_id.l10n_ke_cu_proxy_address,
+                    'company_vat': move.company_id.vat,
+                    'name': move.name,
+                } for move in self
+            ]
         }
 
-    def l10n_ke_cu_response(self, response):
+    def l10n_ke_cu_responses(self, responses):
         """ Set the fields related to the fiscal device on the invoice.
 
         This is intended to be utilized by an RPC call from the javascript
         client action.
         """
-        move = self.browse(int(response['move_id']))
-        replies = [msg for msg in response['replies']]
-        move.update({
-            'l10n_ke_cu_serial_number': response['serial_number'],
-            'l10n_ke_cu_invoice_number': replies[-2].split(';')[0],
-            'l10n_ke_cu_qrcode': replies[-2].split(';')[1].strip(),
-            'l10n_ke_cu_datetime': datetime.strptime(replies[-1], '%d-%m-%Y %H:%M'),
-        })
+        for response in responses:
+            move = self.browse(int(response['move_id']))
+            replies = [msg for msg in response['replies']]
+            move.update({
+                'l10n_ke_cu_serial_number': response['serial_number'],
+                'l10n_ke_cu_invoice_number': replies[-2].split(';')[0],
+                'l10n_ke_cu_qrcode': replies[-2].split(';')[1].strip(),
+                'l10n_ke_cu_datetime': datetime.strptime(replies[-1], '%d-%m-%Y %H:%M'),
+            })

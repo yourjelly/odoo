@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="l10n_ke_edi_tremol.KEProxyDialog" owl="1">
+        <Dialog>
+            <t t-set-slot="header">
+                <h4 class="modal-title text-break">
+                    Sending Invoices to Fiscal Device
+                </h4>
+            </t>
+            <t t-set-slot="default">
+                <div t-att-class="{'alert alert-danger': state.error}">
+                    <p>
+                        <t t-esc="state.message"/>
+                    </p>
+                    <t t-if="!state.error">
+                        <div t-attf-class="o_progressbar align-items-center w-100 d-flex">
+                            <div class="o_progress w-100 flex-fill" aria-valuemin="0" t-att-aria-valuemax="state.length" t-att-aria-valuenow="state.successfullySent">
+                                <div t-attf-class="{{ state.successfullySent > state.length ? 'bg-secondary' : 'bg-primary' }} h-100" t-att-style="'width: min(' + 100 * state.successfullySent / state.length + '%, 100%)'"></div>
+                            </div>
+                            <div class="o_progressbar_value flex-shrink-0 ms-2" t-esc="state.successfullySent + ' / ' + state.length"/>
+                        </div>
+                    </t>
+                </div>
+            </t>
+            <t t-set-slot="footer">
+                <t t-if="state.error">
+                    <button class="btn btn-primary o-default-button" t-on-click="closeAndReload">
+                        <t>Ok</t>
+                    </button>
+                </t>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

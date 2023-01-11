@@ -3,8 +3,11 @@
 import { registry } from "../registry";
 
 function checkResponseStatus(response) {
-    if (response.status === 502) {
-        throw new Error("Failed to fetch");
+    switch (response.status) {
+        case 502:
+            throw new Error("Failed to fetch");
+        case 404:
+            throw new Error("Not found");
     }
 }
 
