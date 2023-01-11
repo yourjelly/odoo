@@ -61,14 +61,14 @@ class Home(http.Controller):
         except AccessError:
             return request.redirect('/web/login?error=access')
 
-    UnityReadFieldSpec = dict[str, Union[bool, 'UnityReadFieldSpec']]
+    # UnityReadFieldSpec = dict[str, Union[bool, 'UnityReadFieldSpec']]
 
     @http.route("/web/unity_read/<string:model>", type='json', auth='user')
     def unity_read(self, *args, **kwargs):
         env: odoo.api.Environment = request.env
         context: dict = kwargs["kwargs"]["context"]
         model: str = kwargs["model"]
-        fields_spec: Home.UnityReadFieldSpec = kwargs["kwargs"]["fields"]
+        fields_spec = kwargs["kwargs"]["fields"]
         read_params: dict = kwargs["kwargs"]["read"]
         main_model: odoo.models.BaseModel = env[model].with_context(context).browse(read_params["ids"])
         result: list[dict] = main_model._read_format([field for field in fields_spec if not field.startswith("__")])
