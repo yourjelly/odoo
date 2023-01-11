@@ -4,6 +4,7 @@ import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
+import { symmetricalDifference } from "@web/core/utils/arrays";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { escape } from "@web/core/utils/strings";
 import { mapDoActionOptionAPI } from "@web/legacy/backend_utils";
@@ -1109,10 +1110,11 @@ export class StaticList extends DataPoint {
 }
 
 export class RelationalModel extends Model {
-    setup(params, { action, dialog, notification }) {
+    setup(params, { action, dialog, notification, rpc }) {
         this.actionService = action;
         this.dialogService = dialog;
         this.notificationService = notification;
+        this.rpc = rpc;
         this.keepLast = new KeepLast();
 
         if (params.rootType !== "record") {
@@ -1147,6 +1149,15 @@ export class RelationalModel extends Model {
 
         this.onWillSaveRecord = params.onWillSaveRecord || (() => {});
         this.onRecordSaved = params.onRecordSaved || (() => {});
+
+        // // ----------------------- UNITY READ -----------------------
+        // this.unityReadResult = false;
+        // const originalRead = this.orm.read.bind(this.orm);
+        // this.orm.read = () => {
+        //     debugger;
+        //     originalRead();
+        // };
+        // // ----------------------- UNITY READ -----------------------
     }
 
     async duplicateDatapoint(record, params) {
@@ -1334,6 +1345,120 @@ export class RelationalModel extends Model {
             },
             state
         );
+
+        // ----------------------- UNITY READ -----------------------
+        function isX2Many(field) {
+            return field && ["one2many", "many2many"].includes(field.type);
+        }
+        function sanitize(record, fields) {
+            const sanitized = {};
+            for (const fieldName in record) {
+                if (isX2Many(fields[fieldName])) {
+                    sanitized[fieldName] = record[fieldName].map((r) => r.id);
+                } else {
+                    sanitized[fieldName] = record[fieldName];
+                }
+            }
+            return sanitized;
+        }
+        await this.keepLast.add(
+            (async () => {
+                this.unityRead = {
+                    subRequests: {},
+                    result: false,
+                };
+                const getFieldsSpec = (fieldsInfo, resModel, fields, context, path = "") => {
+                    console.log("getFieldsSpec " + path);
+                    const fieldsSpec = {};
+                    for (const fieldName in fieldsInfo) {
+                        const subPath = path.length ? `${path},${fieldName}` : fieldName;
+                        const fieldDescr = fieldsInfo[fieldName].__WOWL_FIELD_DESCR__ || {};
+                        const relatedFields =
+                            fieldsInfo[fieldName].relatedFields || fieldDescr.relatedFields;
+                        const coModel = fieldsInfo[fieldName].relation || fieldDescr.relation;
+                        const subContext = fieldsInfo[fieldName].context || fieldDescr.context;
+                        const subView = fieldDescr.views && fieldDescr.views[fieldDescr.viewMode];
+                        if (fieldDescr.alwaysInvisible) {
+                            fieldsSpec[fieldName] = "1";
+                        } else if (subView) {
+                            fieldsSpec[fieldName] = {
+                                ...getFieldsSpec(
+                                    subView.activeFields,
+                                    coModel,
+                                    relatedFields,
+                                    subContext,
+                                    subPath
+                                ),
+                                // __context: subContext, // FIXME: context must be a string, evaluated server side
+                            };
+                        } else {
+                            const fieldsToFetch =
+                                fieldDescr.fieldsToFetch || fieldsInfo[fieldName].fieldsToFetch;
+                            if (fieldsToFetch && Object.keys(fieldsToFetch).length > 0) {
+                                fieldsSpec[fieldName] = getFieldsSpec(
+                                    fieldsToFetch,
+                                    coModel,
+                                    relatedFields || fieldsToFetch,
+                                    subContext,
+                                    subPath
+                                );
+                            } else {
+                                fieldsSpec[fieldName] = "1";
+                            }
+                        }
+                    }
+                    if (path === "" && !fieldsSpec.display_name) {
+                        // form view always fetch "display_name"
+                        fieldsSpec.display_name = "1";
+                    }
+                    this.unityRead.subRequests[path] = {
+                        method: "read",
+                        resModel,
+                        fieldNames: Object.keys(fieldsSpec),
+                        fields,
+                        context,
+                        records: {},
+                    };
+                    return fieldsSpec;
+                };
+                this.unityRead.result = await this.rpc(`/web/unity_read/${loadParams.modelName}`, {
+                    args: [],
+                    kwargs: {
+                        context: { ...loadParams.context, bin_size: true },
+                        model: loadParams.modelName,
+                        read: {
+                            ids: [loadParams.res_id],
+                        },
+                        fields: getFieldsSpec(
+                            loadParams.fieldsInfo.form,
+                            loadParams.modelName,
+                            loadParams.fields,
+                            loadParams.context
+                        ),
+                    },
+                });
+                const populateResults = (result, path = "") => {
+                    const request = this.unityRead.subRequests[path];
+                    if (!request) {
+                        return; // always invisible
+                    }
+                    for (const fieldName of request.fieldNames) {
+                        if (isX2Many(request.fields[fieldName])) {
+                            const subPath = path.length ? `${path},${fieldName}` : fieldName;
+                            for (const record of result) {
+                                populateResults(record[fieldName], subPath);
+                            }
+                        }
+                    }
+                    for (const record of result) {
+                        request.records[record.id] = sanitize(record, request.fields);
+                    }
+                };
+                populateResults(this.unityRead.result);
+            })()
+        );
+        // ----------------------- UNITY READ -----------------------
+
         await this.keepLast.add(nextRoot.load());
         this.root = nextRoot;
         this.__bm_load_params__ = loadParams;
@@ -1352,6 +1477,23 @@ export class RelationalModel extends Model {
                     return payload.callback(new Promise(() => {}));
                 }
                 const prom = new Promise((resolve, reject) => {
+                    // ----------------------- UNITY READ -----------------------
+                    const { method, model } = payload.args[1];
+                    if (method === "read") {
+                        const [resIds, fieldNames] = payload.args[1].args;
+                        const request = Object.values(this.unityRead.subRequests).find((r) => {
+                            if (r.resModel === model) {
+                                return symmetricalDifference(r.fieldNames, fieldNames).length === 0;
+                                // TODO: also check context
+                            }
+                            return false;
+                        });
+                        if (request) {
+                            resolve(resIds.map((resId) => request.records[resId]));
+                            return;
+                        }
+                    }
+                    // ----------------------- UNITY READ -----------------------
                     owl.Component.env.session
                         .rpc(...args)
                         .then((value) => {
@@ -1429,6 +1571,6 @@ export class RelationalModel extends Model {
         return new this.constructor.Record(this, params, state);
     }
 }
-RelationalModel.services = ["action", "dialog", "notification"];
+RelationalModel.services = ["action", "dialog", "notification", "rpc"];
 RelationalModel.LegacyModel = BasicModel;
 RelationalModel.Record = Record;
