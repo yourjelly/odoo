@@ -12,6 +12,7 @@ export class WelcomePage extends Component {
         this.messaging = useMessaging();
         this.store = useStore();
         this.rpc = useService("rpc");
+        this.partnerService = useService("mail.partner");
         this.state = useState({
             userName: "Guest",
         });
@@ -25,7 +26,7 @@ export class WelcomePage extends Component {
 
     async joinChannel() {
         if (this.store.currentGuest) {
-            await this.messaging.updateGuestName(
+            await this.partnerService.updateGuestName(
                 this.store.currentGuest,
                 this.state.userName.trim()
             );
