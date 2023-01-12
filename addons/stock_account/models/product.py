@@ -651,8 +651,8 @@ class ProductProduct(models.Model):
             return price or 0.0
         return self.uom_id._compute_price(price, uom)
 
-    def _compute_average_price(self, qty_invoiced, qty_to_invoice, stock_moves):
-        """Go over the valuation layers of `stock_moves` to value `qty_to_invoice` while taking
+    def _compute_average_price(self, qty_invoiced, qty_to_invoice, stock_moves, value_invoiced):
+        """TODO Go over the valuation layers of `stock_moves` to value `qty_to_invoice` while taking
         care of ignoring `qty_invoiced`. If `qty_to_invoice` is greater than what's possible to
         value with the valuation layers, use the product's standard price.
 
@@ -678,8 +678,10 @@ class ProductProduct(models.Model):
             .filtered(lambda m: is_returned == bool(m.origin_returned_move_id and sum(m.stock_valuation_layer_ids.mapped('quantity')) >= 0))\
             .mapped('stock_valuation_layer_ids')\
             .sorted()
-        qty_to_take_on_candidates = qty_to_invoice
         tmp_value = 0  # to accumulate the value taken on the candidates
+        available_qty = -qty_invoiced
+        available_value = -value_invoiced
+
         for candidate in candidates:
             if not candidate.quantity:
                 continue
@@ -688,24 +690,24 @@ class ProductProduct(models.Model):
                 candidate_quantity -= returned_quantities[candidate.stock_move_id.id]
             if float_is_zero(candidate_quantity, precision_rounding=candidate.uom_id.rounding):
                 continue  # correction entries
-            if not float_is_zero(qty_invoiced, precision_rounding=candidate.uom_id.rounding):
-                qty_ignored = min(qty_invoiced, candidate_quantity)
-                qty_invoiced -= qty_ignored
-                candidate_quantity -= qty_ignored
-                if float_is_zero(candidate_quantity, precision_rounding=candidate.uom_id.rounding):
-                    continue
-            qty_taken_on_candidate = min(qty_to_take_on_candidates, candidate_quantity)
 
-            qty_to_take_on_candidates -= qty_taken_on_candidate
-            tmp_value += qty_taken_on_candidate * \
+            available_qty += candidate_quantity
+            available_value += candidate_quantity * \
                 ((candidate.value + sum(candidate.stock_valuation_layer_ids.mapped('value'))) / candidate.quantity)
-            if float_is_zero(qty_to_take_on_candidates, precision_rounding=candidate.uom_id.rounding):
-                break
+
+        relevant_svl_qty = min(available_qty, qty_to_invoice)
+        if candidates and \
+                float_compare(relevant_svl_qty, 0, precision_rounding=self.uom_id.rounding) > 0 and \
+                float_compare(available_value, 0, precision_rounding=candidates[0].currency_id.rounding) > 0:
+            tmp_value += (available_value / available_qty) * relevant_svl_qty
+        else:
+            relevant_svl_qty = 0
 
         # If there's still quantity to invoice but we're out of candidates, we chose the standard
         # price to estimate the anglo saxon price unit.
-        if not float_is_zero(qty_to_take_on_candidates, precision_rounding=self.uom_id.rounding):
-            negative_stock_value = self.standard_price * qty_to_take_on_candidates
+        missing_qty = qty_to_invoice - relevant_svl_qty
+        if float_compare(missing_qty, 0, precision_rounding=self.uom_id.rounding) > 0:
+            negative_stock_value = self.standard_price * missing_qty
             tmp_value += negative_stock_value
 
         return tmp_value / qty_to_invoice
