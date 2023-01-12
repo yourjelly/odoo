@@ -21329,7 +21329,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const color = (!isFormula && style.textColor) || "#000000";
             // font style
             const fontSize = (!isFormula && style.fontSize) || 10;
-            const fontWeight = !isFormula && style.bold ? "bold" : 500;
+            const fontWeight = !isFormula && style.bold ? "bold" : "";
             const fontStyle = !isFormula && style.italic ? "italic" : "normal";
             const textDecoration = !isFormula ? getTextDecoration(style) : "none";
             // align style
@@ -21347,7 +21347,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       color: ${color};
 
       font-size: ${fontSizeInPixels(fontSize)}px;
-      font-weight: ${fontWeight};
+      ${fontWeight === "" ? "" : `font-weight: ${fontWeight};`}
       font-style: ${fontStyle};
       text-decoration: ${textDecoration};
 
@@ -38910,7 +38910,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.style.fontSize = this.style.fontSize || DEFAULT_FONT_SIZE;
         }
         setSize(fontSizeStr) {
-            this.style.fontSize = clip(parseFloat(fontSizeStr), 1, 400);
+            this.style.fontSize = clip(Math.floor(parseFloat(fontSizeStr)), 1, 400);
             setStyle(this.env, { fontSize: this.style.fontSize });
             this.closeFontList();
         }
@@ -43570,8 +43570,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-01-09T14:42:21.738Z';
-    exports.__info__.hash = 'd5f9848';
+    exports.__info__.date = '2023-01-12T06:36:40.138Z';
+    exports.__info__.hash = '5086db1';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
