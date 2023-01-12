@@ -337,17 +337,8 @@ class MailMail(models.Model):
         """
         self.ensure_one()
         body = self._send_prepare_body()
-        if partner and 'unfollow_placeholder_start' in body and \
-                self.mail_message_id.model and self.mail_message_id.res_id and \
-                (getattr(self.env[self.mail_message_id.model], '_partner_unfollow_enabled', False) or
-                 any(user._is_internal() for user in partner.user_ids)):
-            unfollow_url = self.env['mail.thread']._notify_get_action_link('unfollow',
-                                                                           model=self.mail_message_id.model,
-                                                                           res_id=self.mail_message_id.res_id,
-                                                                           pid=partner.id)
-            body = re.sub(_UNFOLLOW_REGEX, lambda match: match[1].replace('/mail/unfollow', unfollow_url), body)
-        else:
-            body = re.sub(_UNFOLLOW_REGEX, '', body)
+        body = self._send_prepare_body_insert_unfollow_link(partner, body)
+
         body_alternative = tools.html2plaintext(body)
         if partner:
             email_to = [tools.formataddr((partner.name or 'False', partner.email or 'False'))]
@@ -359,6 +350,33 @@ class MailMail(models.Model):
             'email_to': email_to,
         }
         return res
+
+    def _send_prepare_body_insert_unfollow_link(self, partner, body):
+        if '<div id="mail_unfollow"></div>' not in body:
+            return body
+
+        model = self.env[self.model] if self.model and self.res_id else None
+        is_internal = any(user._is_internal() for user in partner.user_ids)
+
+        link = ""
+        if partner and (getattr(model, '_partner_unfollow_enabled', False) or is_internal):
+            followers = self.notification_ids.filtered(
+                lambda notif: notif.is_follow_up).res_partner_id
+
+            if partner in followers:
+                unfollow_url = self.env['mail.thread']._notify_get_action_link(
+                    'unfollow', model=self.model, res_id=self.res_id, pid=partner.id)
+
+                # TODO: replace by QWeb template
+                link = f"""
+                <p style="color: #999999; margin-top:2px; font-size:11px;">
+                    <a href="{unfollow_url}" style="text-decoration:none; color: #999999;">
+                        Stop following the document
+                    </a>
+                </p>
+                """
+
+        return body.replace('<div id="mail_unfollow"></div>', link)
 
     def _split_by_mail_configuration(self):
         """Group the <mail.mail> based on their "email_from" and their "mail_server_id".
