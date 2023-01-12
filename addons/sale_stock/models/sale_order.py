@@ -279,6 +279,13 @@ class SaleOrderLine(models.Model):
     qty_to_deliver = fields.Float(compute='_compute_qty_to_deliver', digits='Product Unit of Measure')
     is_mto = fields.Boolean(compute='_compute_is_mto')
     display_qty_widget = fields.Boolean(compute='_compute_qty_to_deliver')
+    administration_group = fields.Boolean(compute='_compute_user_group')
+    user_all_docs_group = fields.Boolean(compute='_compute_user_group')
+
+    def _compute_user_group(self):
+        for line in self:
+            line.administration_group = self.env.user.has_group('base.group_system')
+            line.user_all_docs_group = self.env.user.has_group('sales_team.group_sale_salesman_all_leads')
 
     @api.depends('product_type', 'product_uom_qty', 'qty_delivered', 'state', 'move_ids', 'product_uom')
     def _compute_qty_to_deliver(self):
