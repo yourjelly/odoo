@@ -9,19 +9,15 @@ import { standardFieldProps } from "../standard_field_props";
 import { TranslationButton } from "../translation_button";
 import { useDynamicPlaceholder } from "../dynamicplaceholder_hook";
 
-import { Component, onMounted, onWillUnmount, useRef, useEffect } from "@odoo/owl";
+import { Component, useExternalListener, useRef, useEffect } from "@odoo/owl";
 
 export class CharField extends Component {
     setup() {
         this.input = useRef("input");
         if (this.props.dynamicPlaceholder) {
-            this.dynamicPlaceholder = useDynamicPlaceholder(this.input);
-            onMounted(() => {
-                this.dynamicPlaceholder.refreshBaseModel();
-                this.dynamicPlaceholder.addTriggerKeyListener();
-            });
-            onWillUnmount(this.dynamicPlaceholder.removeTriggerKeyListener);
-            useEffect(this.dynamicPlaceholder.refreshBaseModel);
+            const dynamicPlaceholder = useDynamicPlaceholder(this.input);
+            useExternalListener(document, "keydown", dynamicPlaceholder.onKeydownListener);
+            useEffect(dynamicPlaceholder.refreshBaseModel);
         }
         useInputField({ getValue: () => this.props.value || "", parse: (v) => this.parse(v) });
     }

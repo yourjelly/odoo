@@ -9,18 +9,15 @@ import { TranslationButton } from "../translation_button";
 import { useDynamicPlaceholder } from "../dynamicplaceholder_hook";
 import { parseInteger } from "../parsers";
 
-import { Component, useEffect, onMounted, onWillUnmount, useRef } from "@odoo/owl";
+import { Component, useEffect, useExternalListener, useRef } from "@odoo/owl";
 
 export class TextField extends Component {
     setup() {
         this.textareaRef = useRef("textarea");
         if (this.props.dynamicPlaceholder) {
-            this.dynamicPlaceholder = useDynamicPlaceholder(this.textareaRef);
-            onMounted(() => {
-                this.dynamicPlaceholder.refreshBaseModel();
-                this.dynamicPlaceholder.addTriggerKeyListener();
-            });
-            onWillUnmount(this.dynamicPlaceholder.removeTriggerKeyListener);
+            const dynamicPlaceholder = useDynamicPlaceholder(this.input);
+            useExternalListener(document, "keydown", dynamicPlaceholder.onKeydownListener);
+            useEffect(dynamicPlaceholder.refreshBaseModel);
         }
         useInputField({ getValue: () => this.props.value || "", refName: "textarea" });
         useSpellCheck({ refName: "textarea" });
@@ -28,9 +25,6 @@ export class TextField extends Component {
         useEffect(() => {
             if (!this.props.readonly) {
                 this.resize();
-            }
-            if (this.dynamicPlaceholder) {
-                this.dynamicPlaceholder.refreshBaseModel();
             }
         });
     }

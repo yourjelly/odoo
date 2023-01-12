@@ -106,20 +106,13 @@ export function useDynamicPlaceholder(elementRef) {
             });
         }
     }
-    function addTriggerKeyListener() {
-        document.addEventListener("keydown", onKeydownListener);
-    }
-    function removeTriggerKeyListener() {
-        document.removeEventListener("keydown", onKeydownListener);
-    }
     function refreshBaseModel() {
         const recordData = ownerField.props.record.data;
         baseModel = recordData?.mailing_model_real || recordData.model;
     }
 
     return {
-        addTriggerKeyListener: addTriggerKeyListener,
-        removeTriggerKeyListener: removeTriggerKeyListener,
+        onKeydownListener,
         refreshBaseModel: refreshBaseModel,
         setElementRef: (er) => (elementRef = er),
         open: open,
