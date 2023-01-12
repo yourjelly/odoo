@@ -2582,3 +2582,22 @@ export function peek(arr) {
 export function isMacOS() {
     return window.navigator.userAgent.includes('Mac');
 }
+
+export function resolveProtocol(href) {
+    const hrefLowerCase = href.toLowerCase();
+    return Object.keys(linkRegexes).find(protocol => hrefLowerCase.startsWith(protocol));
+}
+
+export function linkLabelMatchesUrl(link) {
+    if (!link) return;
+    const protocol = resolveProtocol(link.href);
+    if (!protocol) return;
+    const linkLabel = link.innerText.replace(/\u200b/g, '').trim();
+    let match;
+    const coreUrlRegex = new RegExp(`^(?:${protocol})?(.*?)\/?$`, 'i');
+    match = coreUrlRegex.exec(linkLabel);
+    const label = match && match[1];
+    match = coreUrlRegex.exec(link.href);
+    const url = match && match[1];
+    return label === url;
+}

@@ -8,6 +8,7 @@ const {isColorGradient} = require('web_editor.utils');
 
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getInSelection = OdooEditorLib.getInSelection;
+const linkLabelMatchesUrl = OdooEditorLib.linkLabelMatchesUrl;
 const _t = core._t;
 
 /**
@@ -205,8 +206,14 @@ const Link = Widget.extend({
         if (!this.$link.attr('target')) {
             this.$link[0].removeAttribute('target');
         }
-        this.$link.removeClass('oe_auto_update_link');
         this._updateLinkContent(this.$link, data);
+        // debugger;
+        // if url matches text, tag it as auto_update. Otherwise, untag it.
+        if (linkLabelMatchesUrl(this.$link.get(0))) {
+            this.$link.addClass('oe_auto_update_link');
+        } else {
+            this.$link.removeClass('oe_auto_update_link');
+        }
     },
     /**
      * Focuses the url input.

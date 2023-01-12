@@ -74,6 +74,8 @@ import {
     EMAIL_REGEX,
     PHONE_REGEX,
     linkRegexes,
+    linkLabelMatchesUrl,
+    resolveProtocol,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -701,68 +703,48 @@ export class OdooEditor extends EventTarget {
     }
 
     /**
-     * Update href in mutated link elements.
+     * Update link's href.
      * If label is valid URL, href gets updated and link is tagged as auto-updatable.
      * If label of an auto-updatable link is an invalid URL, link gets disabled. 
      */
-    _updateLinks() {
-        this.observerFlush();
-        debugger;
-        const links = new Set(
-            this._currentStep.mutations
-                .map(record => closestElement(this.idFind(record.id), 'a'))
-                // Empty link created by Link should be ignored.
-                .filter(element => element && element.href)
-        );
-        for (const link of links) {
-            // Resolve protocol.
-            const hrefLowerCase = link.href.toLowerCase();
-            const protocol = Object.keys(linkRegexes).find(protocol => hrefLowerCase.startsWith(protocol));
-            if (!protocol) {
-                continue;
-            }
+    _updateLink() {
+        const selection = this.document.getSelection();
+        const link = closestElement(selection?.anchorNode, 'a');
+        if (!link) return;
 
-            // Check if label is a valid URL.
+        if (link.classList.contains('oe_auto_update_link')) {
+            // Resolve protocol.
+            const protocol = resolveProtocol(link.href);
+            if (!protocol) return;
+            // Check if label is valid URL.
             const linkLabel = link.innerText.replace(/\u200b/g, '').trim();
             const match = linkRegexes[protocol].exec(linkLabel);
-            if (link.classList.contains('oe_auto_update_link')) {
-                if (match) {
-                    const url = match[1] ? linkLabel : protocol + linkLabel;
-                    link.href = url;
-                    link.dispatchEvent(new Event('linkHrefUpdated'));
-                } else {
-                    // Unlink.
-                    const restoreCursor = preserveCursor(this.document);
-                    const parent = link.parentElement;
-                    [...link.childNodes].forEach(child => parent.insertBefore(child, link));
-                    // Disable isolated link.
-                    // TODO: refactor this with that one from onPaste.
-                    if (this._fixLinkMutatedElements && this._fixLinkMutatedElements.link === link) {
-                        this.resetContenteditableLink();
-                        this._activateContenteditable();
-                    }
-                    link.remove();
-                    link.dispatchEvent(new Event('linkRemoved'));
-                    restoreCursor();
-                }
+            if (match) {
+                const url = match[1] ? linkLabel : protocol + linkLabel;
+                link.href = url;
+                link.dispatchEvent(new Event('linkHrefUpdated'));
             } else {
-                // Check if label matches current URL.
-                let match;
-                const coreUrlRegex = new RegExp(`^(?:${protocol})?(.*?)\/?$`, 'i');
-                match = coreUrlRegex.exec(linkLabel);
-                const label = match && match[1];
-                console.log('label', label);
-                match = coreUrlRegex.exec(link.href);
-                const url = match && match[1];
-                console.log('url', url);
-                if (label === url) {
-                    // Promote link to auto-updatable.
-                    link.classList.add('oe_auto_update_link');
+                // Unlink.
+                const restoreCursor = preserveCursor(this.document);
+                const parent = link.parentElement;
+                [...link.childNodes].forEach(child => parent.insertBefore(child, link));
+                // Disable isolated link.
+                // TODO: refactor this with that one from onPaste.
+                if (this._fixLinkMutatedElements && this._fixLinkMutatedElements.link === link) {
+                    this.resetContenteditableLink();
+                    this._activateContenteditable();
                 }
+                link.remove();
+                link.dispatchEvent(new Event('linkRemoved'));
+                restoreCursor();
             }
-            link.dispatchEvent(new Event('linkUpdate'));
+        } else if (linkLabelMatchesUrl(link)) {
+            // Promote link to auto-updatable.
+            link.classList.add('oe_auto_update_link');
         }
+        link.dispatchEvent(new Event('linkUpdate'));
     }
+
     sanitize() {
         this.observerFlush();
 
@@ -1091,7 +1073,6 @@ export class OdooEditor extends EventTarget {
         if (!this._historyStepsActive) {
             return;
         }
-        this._updateLinks();
         this.sanitize();
         // check that not two unBreakables modified
         if (this._toRollback) {
@@ -3126,6 +3107,17 @@ export class OdooEditor extends EventTarget {
     _onBeforeInput(ev) {
         this._lastBeforeInputType = ev.inputType;
     }
+    
+    /**
+     * Revert current history step and run callback within one history step.
+     */
+    revertUserInput(callback) {
+        this.historyRollback();
+        this.historyPauseSteps();
+        callback();
+        this.historyUnpauseSteps();
+        this.historyStep();
+    }
 
     /**
      * If backspace/delete input, rollback the operation and handle the
@@ -3164,33 +3156,34 @@ export class OdooEditor extends EventTarget {
         if (this.keyboardType === KEYBOARD_TYPES.PHYSICAL || !wasCollapsed) {
             if (ev.inputType === 'deleteContentBackward') {
                 this._compositionStep();
-                this.historyRollback();
-                ev.preventDefault();
-                this._applyCommand('oDeleteBackward');
+                this.revertUserInput(() => {
+                    this._applyCommand('oDeleteBackward')
+                    this._updateLink();
+                });
             } else if (ev.inputType === 'deleteContentForward' || isChromeDeleteforward) {
                 this._compositionStep();
-                this.historyRollback();
-                ev.preventDefault();
-                this._applyCommand('oDeleteForward');
+                this.revertUserInput(() => {
+                    this._applyCommand('oDeleteForward');
+                    this._updateLink();
+                });
             } else if (ev.inputType === 'insertParagraph' || isChromeInsertParagraph) {
                 this._compositionStep();
-                this.historyRollback();
-                ev.preventDefault();
-                if (this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
-                    const brs = this._applyCommand('oShiftEnter');
-                    const anchor = brs[0].parentElement;
-                    if (anchor.nodeName === 'A') {
-                        if (brs.includes(anchor.firstChild)) {
-                            brs.forEach(br => anchor.before(br));
-                            setSelection(...rightPos(brs[brs.length - 1]));
-                            this.historyStep();
-                        } else if (brs.includes(anchor.lastChild)) {
-                            brs.forEach(br => anchor.after(br));
-                            setSelection(...rightPos(brs[0]));
-                            this.historyStep();
+                this.revertUserInput(()=> {
+                    if (this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
+                        const brs = this._applyCommand('oShiftEnter');
+                        const anchor = brs[0].parentElement;
+                        if (anchor.nodeName === 'A') {
+                            if (brs.includes(anchor.firstChild)) {
+                                brs.forEach(br => anchor.before(br));
+                                setSelection(...rightPos(brs[brs.length - 1]));
+                            } else if (brs.includes(anchor.lastChild)) {
+                                brs.forEach(br => anchor.after(br));
+                                setSelection(...rightPos(brs[0]));
+                            }
                         }
                     }
-                }
+                    this._updateLink();
+                });
             } else if (['insertText', 'insertCompositionText'].includes(ev.inputType)) {
                 // insertCompositionText, courtesy of Samsung keyboard.
                 const selection = this.document.getSelection();
@@ -3299,13 +3292,16 @@ export class OdooEditor extends EventTarget {
                         setSelection(codeElement.nextSibling, 1);
                     }
                 }
+                this._updateLink();
                 this.historyStep();
             } else if (ev.inputType === 'insertLineBreak') {
                 this._compositionStep();
-                this.historyRollback();
-                ev.preventDefault();
-                this._applyCommand('oShiftEnter');
+                this.revertUserInput(() => {
+                    this._applyCommand('oShiftEnter');
+                    this._updateLink();
+                });
             } else {
+                this._updateLink();
                 this.historyStep();
             }
         } else if (ev.inputType === 'insertCompositionText') {
@@ -3410,7 +3406,11 @@ export class OdooEditor extends EventTarget {
                     // deleteBackward input event with a collapsed selection in
                     // front of a contentEditable="false" (eg: font awesome).
                     ev.preventDefault();
-                    this._applyCommand('oDeleteBackward');
+                    this._recordHistorySelection(true);
+                    this.revertUserInput(() => {
+                        this._applyCommand('oDeleteBackward')
+                        this._updateLink();
+                    });
                 }
             } else if (selection.isCollapsed && selection.anchorNode) {
                 const anchor = (selection.anchorNode.nodeType !== Node.TEXT_NODE && selection.anchorOffset) ?
@@ -4240,6 +4240,7 @@ export class OdooEditor extends EventTarget {
         range.setEnd(textNode, index + length);
         link.appendChild(range.extractContents());
         range.insertNode(link);
+        link.classList.add('oe_auto_update_link');
     }
 
     /**
