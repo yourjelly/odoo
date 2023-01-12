@@ -31,6 +31,52 @@ from odoo.tools import config
 
 _logger = logging.getLogger(__name__)
 
+# ------------------------------------------------------
+# DEBUG LOGGER
+# ------------------------------------------------------
+
+
+class ThreadSafeCounter:
+    def __init__(self):
+        self._val = 0
+        self._lock = threading.Lock()
+
+    def increment(self):
+        with self._lock:
+            self._val += 1
+
+    def reset(self):
+        with self._lock:
+            self._val = 0
+
+    @property
+    def value(self):
+        return self._val
+
+
+_request_count_by_type = {}
+_outgoing_message_count = ThreadSafeCounter()
+_lifecycle_events_count = ThreadSafeCounter()
+
+
+def start_debug_logger(interval=60):
+    def log_and_schedule_next():
+        msg = json.dumps({
+            'interval': interval,
+            'request_count_by_type': _request_count_by_type,
+            'number_of_outgoing_messages': _outgoing_message_count.value,
+            'number_of_lifecycle_events': _lifecycle_events_count.value,
+            'websocket_count': len(Websocket._instances)
+        }, indent=2, default=lambda x: x.value)
+        _request_count_by_type.clear()
+        _outgoing_message_count.reset()
+        _lifecycle_events_count.reset()
+        _logger.debug(msg)
+        t = threading.Timer(interval, log_and_schedule_next)
+        t.daemon = True
+        t.start()
+    log_and_schedule_next()
+
 
 MAX_TRY_ON_POOL_ERROR = 10
 DELAY_ON_POOL_ERROR = 0.03
@@ -602,6 +648,7 @@ class Websocket:
         registered for this event type. Every callback is given both the
         environment and the related websocket.
         """
+        _lifecycle_events_count.increment()
         with closing(acquire_cursor(self._session.db)) as cr:
             env = api.Environment(cr, self._session.uid, self._session.context)
             for callback in type(self)._event_callbacks[event_type]:
@@ -621,6 +668,7 @@ class Websocket:
         `SESSION_EXPIRED` close code. If no cursor can be acquired,
         close the connection with the `TRY_LATER` close code.
         """
+        _outgoing_message_count.increment()
         session = root.session_store.get(self._session.sid)
         if not session:
             raise SessionExpiredException()
@@ -761,6 +809,7 @@ class WebsocketRequest:
         appropriate ir.websocket method since only two events are
         tolerated: `subscribe` and `update_presence`.
         """
+        _request_count_by_type.setdefault(event_name, ThreadSafeCounter()).increment()
         ir_websocket = self.env['ir.websocket']
         ir_websocket._authenticate()
         if event_name == 'subscribe':
@@ -886,3 +935,4 @@ class WebsocketConnectionHandler:
 
 
 CommonServer.on_stop(Websocket._kick_all)
+start_debug_logger()
