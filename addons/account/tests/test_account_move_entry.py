@@ -2,7 +2,7 @@
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged, new_test_user
 from odoo.tests.common import Form
-from odoo import fields
+from odoo import Command, fields
 from odoo.exceptions import UserError, RedirectWarning
 
 from dateutil.relativedelta import relativedelta
@@ -805,3 +805,48 @@ class TestAccountMove(AccountTestInvoicingCommon):
         # You can remove journal items if the related journal entry is draft.
         self.test_move.button_draft()
         edit_tax_on_posted_moves()
+
+    def test_misc_entry_raise_exception_when_posting_with_automatic_balancing_line(self):
+        """Check that a UserError is raised when posting a misc entry without having it balanced"""
+        # you should be able to create a misc move that isn't balanced
+        misc_move = self.env["account.move"].create({
+            "move_type": "entry",
+            "line_ids": [
+                Command.create({
+                    "name": "revenue line",
+                    "account_id": self.company_data["default_account_revenue"].id,
+                    "balance": -10.0,
+                }),
+            ]
+        })
+        technical_balancing_account = self.env.ref(f"account.{misc_move.company_id.id}_technical_balancing_account")
+
+        # The balancing line should use the technical account
+        balancing_line = misc_move.line_ids.filtered("debit")
+        self.assertRecordValues(balancing_line, [{
+            "balance": 10,
+            "account_id": technical_balancing_account.id,
+        }])
+
+        # Ensure it doesn't create a second technical account
+        misc_move = self.env["account.move"].create({
+            "move_type": "entry",
+            "line_ids": [
+                Command.create({
+                    "name": "revenue line",
+                    "account_id": self.company_data["default_account_revenue"].id,
+                    "balance": -10.0,
+                }),
+            ]
+        })
+        balancing_line = misc_move.line_ids.filtered("debit")
+        self.assertRecordValues(balancing_line, [{
+            "balance": 10,
+            "account_id": technical_balancing_account.id,
+        }])
+
+        with self.assertRaises(UserError):
+            misc_move.action_post()
+        # when account is changed, UserError shouldn't occur anymore:
+        balancing_line.account_id = self.company_data["default_account_expense"]
+        misc_move.action_post()

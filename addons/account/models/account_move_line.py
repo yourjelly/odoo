@@ -1145,11 +1145,17 @@ class AccountMoveLine(models.Model):
 
     @api.constrains('account_id', 'journal_id')
     def _check_constrains_account_id_journal_id(self):
-        for line in self.filtered(lambda x: x.display_type not in ('line_section', 'line_note')):
+        accounting_lines = self.filtered(lambda x: x.display_type not in ('line_section', 'line_note'))
+        technical_account_by_company = {
+            company.id: self.env.ref(f"account.{company.id}_technical_balancing_account", raise_if_not_found=False)
+            for company in accounting_lines.company_id
+        }
+        for line in accounting_lines:
             account = line.account_id
             journal = line.move_id.journal_id
 
-            if account.deprecated:
+            technical_account = technical_account_by_company.get(line.company_id.id)
+            if account.deprecated and not technical_account:
                 raise UserError(_('The account %s (%s) is deprecated.') % (account.name, account.code))
 
             account_currency = account.currency_id

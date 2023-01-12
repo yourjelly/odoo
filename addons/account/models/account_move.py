@@ -1884,22 +1884,23 @@ class AccountMove(models.Model):
     def _sync_unbalanced_lines(self, container):
         yield
         # Skip posted moves.
-        for invoice in (x for x in container['records'] if x.state != 'posted'):
+        not_posted = (x for x in container['records'] if x.state != 'posted')
+        for move in not_posted:
 
-            # Unlink tax lines if all tax tags have been removed.
-            if not invoice.line_ids.tax_ids:
-                invoice.line_ids.filtered('tax_line_id').unlink()
+            # Unlink tax lines if all tax have been removed.
+            if not move.line_ids.tax_ids:
+                move.line_ids.filtered('tax_line_id').unlink()
 
             # Set the balancing line's balance and amount_currency to zero,
             # so that it does not interfere with _get_unbalanced_moves() below.
             balance_name = _('Automatic Balancing Line')
-            existing_balancing_line = invoice.line_ids.filtered(lambda line: line.name == balance_name)
+            existing_balancing_line = move.line_ids.filtered(lambda line: line.name == balance_name)
             if existing_balancing_line:
                 existing_balancing_line.balance = existing_balancing_line.amount_currency = 0.0
 
             # Create an automatic balancing line to make sure the entry can be saved/posted.
             # If such a line already exists, we simply update its amounts.
-            unbalanced_moves = self._get_unbalanced_moves({'records': invoice})
+            unbalanced_moves = self._get_unbalanced_moves({'records': move})
             if isinstance(unbalanced_moves, list) and len(unbalanced_moves) == 1:
                 dummy, debit, credit = unbalanced_moves[0]
                 balance = debit - credit
@@ -1912,11 +1913,24 @@ class AccountMove(models.Model):
                 if existing_balancing_line:
                     existing_balancing_line.write(vals)
                 else:
+                    technical_account_xml_id = f"account.{move.company_id.id}_technical_balancing_account"
+                    balancing_account = self.env.ref(technical_account_xml_id, raise_if_not_found=False)
+                    if not balancing_account:
+                        balancing_account = self.env["account.account"].sudo()._load_records([{
+                            'xml_id': technical_account_xml_id,
+                            'noupdate': True,
+                            'values': {
+                                "code": "Odoo",  # this isn't expected to be picked by any standard report
+                                "name": "Unbalanced Entries",
+                                "account_type": "asset_current",
+                                "deprecated": True,
+                            }
+                        }])
                     vals.update({
                         'name': balance_name,
-                        'move_id': invoice.id,
-                        'account_id': invoice.company_id.account_journal_suspense_account_id.id,
-                        'currency_id': invoice.currency_id.id,
+                        'move_id': move.id,
+                        'account_id': balancing_account.id,
+                        'currency_id': move.currency_id.id,
                     })
                     container['records'].env['account.move.line'].create(vals)
 
@@ -3278,6 +3292,10 @@ class AccountMove(models.Model):
                 ))
 
             if move.line_ids.account_id.filtered(lambda account: account.deprecated):
+                technical_balancing_account = self.env.ref(f"account.{move.company_id.id}_technical_balancing_account", raise_if_not_found=False)
+                if technical_balancing_account and technical_balancing_account in move.line_ids.account_id:
+                    raise UserError(_("A line of this move is a balancing line automatically created.") + "\n" +
+                                    _("Either delete and balance the move or change the account on the balancing line."))
                 raise UserError(_("A line of this move is using a deprecated account, you cannot post it."))
 
             affects_tax_report = move._affect_tax_report()
