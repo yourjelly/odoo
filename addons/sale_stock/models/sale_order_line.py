@@ -27,6 +27,13 @@ class SaleOrderLine(models.Model):
     customer_lead = fields.Float(
         compute='_compute_customer_lead', store=True, readonly=False, precompute=True,
         inverse='_inverse_customer_lead')
+    administration_group = fields.Boolean(compute='_compute_user_group')
+    user_all_docs_group = fields.Boolean(compute='_compute_user_group')
+
+    def _compute_user_group(self):
+        for line in self:
+            line.administration_group = self.env.user.has_group('base.group_system')
+            line.user_all_docs_group = self.env.user.has_group('sales_team.group_sale_salesman_all_leads')
 
     @api.depends('product_type', 'product_uom_qty', 'qty_delivered', 'state', 'move_ids', 'product_uom')
     def _compute_qty_to_deliver(self):

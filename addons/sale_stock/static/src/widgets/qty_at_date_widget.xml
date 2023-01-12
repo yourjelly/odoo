@@ -61,7 +61,7 @@
                 </t>
             </tbody>
         </table>
-        <button t-if="!props.record.data.is_mto" class="text-start btn btn-link"
+        <button t-if="!props.record.data.is_mto and (props.record.data.administration_group or props.record.data.user_all_docs_group)" class="text-start btn btn-link"
             type="button" t-on-click="openForecast">
             <i class="fa fa-fw o_button_icon fa-arrow-right"></i>
             View Forecast
