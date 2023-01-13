@@ -10,7 +10,7 @@
     </t>
 
     <t t-name="web.NoContentHelper" owl="1">
-        <div class="o_view_nocontent" role="alert">
+        <div class="o_view_nocontent h-100" role="alert">
             <div class="o_nocontent_help">
                 <p class="o_view_nocontent_empty_folder">
                     <t t-if="title" t-esc="title"/>
