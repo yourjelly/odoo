@@ -726,8 +726,7 @@ export class OdooEditor extends EventTarget {
                 link.href = url;
                 link.dispatchEvent(new Event('linkHrefUpdated'));
             } else {
-                // this._applyRawCommand('unlink');
-                editorCommands['unlink'](this);
+                this._applyRawCommand('unlink');
                 link.dispatchEvent(new Event('linkRemoved'));
             }
         } else if (linkLabelMatchesUrl(link)) {

@@ -131,12 +131,15 @@ class Sanitize {
                 node = nodeP;
             }
 
+            // THIS BREAKS A MILLION TESTS
             // Merge adjacent text nodes.
             while (
                 node.nodeType === Node.TEXT_NODE &&
                 node.nextSibling &&
-                node.nextSibling.nodeType === Node.TEXT_NODE
-            ) {
+                node.nextSibling.nodeType === Node.TEXT_NODE 
+                ) {
+                break;
+                if (isZWS(node) || isZWS(node.nextSibling)) break;
                 const range = getDeepRange(this.root);
                 if (!range) break;
                 let { startContainer, startOffset } = range;
