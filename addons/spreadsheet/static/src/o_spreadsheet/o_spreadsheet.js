@@ -656,6 +656,13 @@
         return "clone" in obj && obj.clone instanceof Function;
     }
     /**
+     * Escapes a string to use as a literal string in a RegExp.
+     * @url https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping
+     */
+    function escapeRegExp(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+    /**
      * Deep copy arrays, plain objects and primitive values.
      * Throws an error for other types such as class instances.
      * Sparse arrays remain sparse.
@@ -3815,7 +3822,9 @@
             // within our control and to avoid leaking into external DOM
             const horizontalPosition = `left:${this.horizontalPosition() - this.spreadsheetPosition.x}`;
             const verticalPosition = `top:${this.verticalPosition() - this.spreadsheetPosition.y}`;
-            const height = `max-height:${this.viewportDimension.height - BOTTOMBAR_HEIGHT - SCROLLBAR_WIDTH$1}`;
+            const max_height = Math.max(0, this.viewportDimension.height - BOTTOMBAR_HEIGHT - SCROLLBAR_WIDTH$1);
+            const height = `max-height:${max_height}`;
+            const shadow = max_height !== 0 ? "box-shadow: 1px 2px 5px 2px rgb(51 51 51 / 15%);" : "";
             return `
       position: absolute;
       z-index: ${ComponentsImportance.Popover};
@@ -3825,7 +3834,7 @@
       width:${this.props.childWidth}px;
       overflow-y: auto;
       overflow-x: hidden;
-      box-shadow: 1px 2px 5px 2px rgb(51 51 51 / 15%);
+     ${shadow};
     `;
         }
         get viewportDimension() {
@@ -4672,13 +4681,13 @@
     };
     function interactiveAddFilter(env, sheetId, target) {
         const result = env.model.dispatch("CREATE_FILTER_TABLE", { target, sheetId });
-        if (result.isCancelledBecause(76 /* CommandResult.FilterOverlap */)) {
+        if (result.isCancelledBecause(77 /* CommandResult.FilterOverlap */)) {
             env.raiseError(AddFilterInteractiveContent.filterOverlap);
         }
-        else if (result.isCancelledBecause(78 /* CommandResult.MergeInFilter */)) {
+        else if (result.isCancelledBecause(79 /* CommandResult.MergeInFilter */)) {
             env.raiseError(AddFilterInteractiveContent.mergeInFilter);
         }
-        else if (result.isCancelledBecause(79 /* CommandResult.NonContinuousTargets */)) {
+        else if (result.isCancelledBecause(80 /* CommandResult.NonContinuousTargets */)) {
             env.raiseError(AddFilterInteractiveContent.nonContinuousTargets);
         }
     }
@@ -5736,22 +5745,22 @@
     const CfTerms = {
         Errors: {
             [24 /* CommandResult.InvalidRange */]: _lt("The range is invalid"),
-            [49 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
-            [50 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
-            [51 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
-            [52 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
-            [53 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
-            [54 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
-            [55 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
-            [45 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
-            [48 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
-            [47 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
-            [46 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
-            [56 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
-            [58 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
-            [57 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
-            [59 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
-            [60 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
+            [50 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
+            [51 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
+            [52 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
+            [53 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
+            [54 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
+            [55 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
+            [56 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
+            [46 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
+            [49 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
+            [48 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
+            [47 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
+            [57 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
+            [59 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
+            [58 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
+            [60 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
+            [61 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
             [23 /* CommandResult.EmptyRange */]: _lt("A range needs to be defined"),
             Unexpected: _lt("The rule is invalid for an unknown reason"),
         },
@@ -5779,20 +5788,20 @@
         Errors: {
             Unexpected: _lt("The chart definition is invalid for an unknown reason"),
             // BASIC CHART ERRORS (LINE | BAR | PIE)
-            [30 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
-            [31 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
+            [31 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
+            [32 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
             // SCORECARD CHART ERRORS
-            [32 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
-            [33 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
+            [33 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
+            [34 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
             // GAUGE CHART ERRORS
-            [34 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
-            [35 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
-            [36 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
-            [37 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
-            [38 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
-            [39 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
-            [40 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
-            [41 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
+            [35 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
+            [36 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
+            [37 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
+            [38 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
+            [39 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
+            [40 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
+            [41 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
+            [42 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
         },
     };
     const NumberFormatTerms = {
@@ -5816,7 +5825,7 @@
         const sheetId = env.model.getters.getActiveSheetId();
         const cmd = dimension === "COL" ? "FREEZE_COLUMNS" : "FREEZE_ROWS";
         const result = env.model.dispatch(cmd, { sheetId, quantity: base });
-        if (result.isCancelledBecause(63 /* CommandResult.MergeOverlap */)) {
+        if (result.isCancelledBecause(64 /* CommandResult.MergeOverlap */)) {
             env.raiseError(MergeErrorMessage);
         }
     }
@@ -8223,9 +8232,10 @@
     z-index: ${ComponentsImportance.ColorPicker};
     box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
     background-color: white;
-    padding: ${PICKER_PADDING}px 0px;
     line-height: 1.2;
-    width: ${GRADIENT_WIDTH + 2 * PICKER_PADDING}px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: ${GRADIENT_WIDTH + 4 * PICKER_PADDING}px;
 
     .o-color-picker-section-name {
       margin: 0px ${ITEM_HORIZONTAL_MARGIN}px;
@@ -8374,6 +8384,10 @@
                     top: "0",
                 },
             });
+        }
+        get dropdownStyle() {
+            const { height } = this.env.model.getters.getSheetViewDimension();
+            return `max-height:${height}px`;
         }
         onColorClick(color) {
             if (color) {
@@ -9998,38 +10012,45 @@
         constructor() {
             super(...arguments);
             this.ctx = document.createElement("canvas").getContext("2d");
+            this.state = owl.useState({ width: 0, height: 0 });
+        }
+        setup() {
+            this.chartRef = owl.useRef("chart");
+            const resizeObserver = new ResizeObserver(() => {
+                const { width, height } = this.chartRef.el.getBoundingClientRect();
+                this.state.width = width;
+                this.state.height = height;
+            });
+            owl.useEffect(() => {
+                const el = this.chartRef.el;
+                resizeObserver.observe(el);
+                return () => resizeObserver.unobserve(el);
+            }, () => [this.chartRef.el]);
         }
         get runtime() {
             return this.env.model.getters.getChartRuntime(this.props.figure.id);
         }
         get title() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.title) || "";
+            return this.runtime.title;
         }
         get keyValue() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.keyValue) || "";
+            return this.runtime.keyValue;
         }
         get baseline() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineDisplay) || "";
+            return this.runtime.baselineDisplay;
         }
         get baselineDescr() {
-            var _a;
-            const baselineDescr = ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineDescr) || "";
+            const baselineDescr = this.runtime.baselineDescr || "";
             return this.baseline && baselineDescr ? " " + baselineDescr : baselineDescr;
         }
         get baselineArrowDirection() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineArrow) || "neutral";
+            return this.runtime.baselineArrow;
         }
         get backgroundColor() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.background) || "#ffffff";
+            return this.runtime.background;
         }
         get primaryFontColor() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.fontColor) || "#000000";
+            return this.runtime.fontColor;
         }
         get secondaryFontColor() {
             return relativeLuminance(this.primaryFontColor) <= 0.3 ? "#757575" : "#bbbbbb";
@@ -10039,8 +10060,6 @@
         }
         get chartStyle() {
             return `
-      height:${this.figure.height}px;
-      width:${this.figure.width}px;
       padding:${this.chartPadding}px;
       background:${this.backgroundColor};
     `;
@@ -10051,12 +10070,12 @@
     `;
         }
         get chartPadding() {
-            return this.figure.width * CHART_PADDING_RATIO;
+            return this.state.width * CHART_PADDING_RATIO;
         }
         getTextStyles() {
             var _a, _b, _c;
             // If the widest text overflows horizontally, scale it down, and apply the same scaling factors to all the other fonts.
-            const maxLineWidth = this.figure.width * (1 - 2 * CHART_PADDING_RATIO);
+            const maxLineWidth = this.state.width * (1 - 2 * CHART_PADDING_RATIO);
             const widestElement = this.getWidestElement();
             const baseFontSize = widestElement.getElementMaxFontSize(this.getDrawableHeight(), this);
             const fontSizeMatchingWidth = getFontSizeMatchingWidth(maxLineWidth, baseFontSize, (fontSize) => widestElement.getElementWidth(fontSize, this.ctx, this));
@@ -10101,7 +10120,7 @@
         /** Get the height of the chart minus all the vertical paddings */
         getDrawableHeight() {
             const verticalPadding = 2 * this.chartPadding;
-            let availableHeight = this.figure.height - verticalPadding;
+            let availableHeight = this.state.height - verticalPadding;
             availableHeight -= this.title ? TITLE_FONT_SIZE * LINE_HEIGHT : 0;
             return availableHeight;
         }
@@ -17605,7 +17624,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return _textToSearch;
             }
             const _replaceWith = toString(replaceWith);
-            const reg = new RegExp(_searchFor, "g");
+            const reg = new RegExp(escapeRegExp(_searchFor), "g");
             if (_occurrenceNumber === 0) {
                 return _textToSearch.replace(reg, _replaceWith);
             }
@@ -20539,19 +20558,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     const ACTIVE_BORDER_WIDTH = 2;
     css /*SCSS*/ `
   div.o-figure {
-    box-sizing: content-box;
+    box-sizing: border-box;
     position: absolute;
     width: 100%;
     height: 100%;
 
-    bottom: 0px;
-    right: 0px;
     border: solid ${FIGURE_BORDER_COLOR};
     &:focus {
       outline: none;
-    }
-    &.active {
-      border: solid ${SELECTION_BORDER_COLOR};
     }
 
     &.o-dragging {
@@ -20560,17 +20574,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
   }
 
+  div.o-active-figure-border {
+    box-sizing: border-box;
+    z-index: 1;
+    border: ${ACTIVE_BORDER_WIDTH}px solid ${SELECTION_BORDER_COLOR};
+  }
+
   .o-figure-wrapper {
     position: absolute;
     box-sizing: content-box;
 
-    .o-figure-overflow-wrapper {
-      position: absolute;
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-    }
-    .o-anchor {
+    .o-fig-resizer {
       z-index: ${ComponentsImportance.ChartAnchor};
       position: absolute;
       width: ${ANCHOR_SIZE}px;
@@ -20605,6 +20619,61 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
   }
 `;
+    /**
+     * Each figure ⭐ is positioned inside a container `div` placed and sized
+     * according to the split pane the figure is part of.
+     * Any part of the figure outside of the container is hidden
+     * thanks to its `overflow: hidden` property.
+     *
+     * Additionally, the figure is placed inside a "inverse viewport" `div` 🟥.
+     * Its position represents the viewport position in the grid: its top/left
+     * corner represents the top/left corner of the grid.
+     *
+     * It allows to position the figure inside this div regardless of the
+     * (possibly freezed) viewports and the scrolling position.
+     *
+     * --: container limits
+     * 🟥: inverse viewport
+     * ⭐: figure top/left position
+     *
+     *                     container
+     *                         ↓
+     * |🟥--------------------------------------------
+     * |  \                                          |
+     * |   \                                         |
+     * |    \                                        |
+     * |     \          visible area                 |  no scroll
+     * |      ⭐                                     |
+     * |                                             |
+     * |                                             |
+     * -----------------------------------------------
+     *
+     * the scrolling of the pane is applied as an inverse offset
+     * to the div which will in turn move the figure up and down
+     * inside the container.
+     * Hence, once the figure position is (resp. partly) out of
+     * the container dimensions, it will be (resp. partly) hidden.
+     *
+     * The same reasoning applies to the horizontal axis.
+     *
+     *  🟥 ························
+     *    \                       ↑
+     *     \                      |
+     *      \                     | inverse viewport = -1 * scroll of pane
+     *       \                    |
+     *        ⭐ <- not visible   |
+     *                            ↓
+     * -----------------------------------------------
+     * |                                             |
+     * |                                             |
+     * |                                             |
+     * |               visible area                  |
+     * |                                             |
+     * |                                             |
+     * |                                             |
+     * -----------------------------------------------
+     *
+     */
     class FigureComponent extends owl.Component {
         constructor() {
             super(...arguments);
@@ -20624,113 +20693,68 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         get isSelected() {
             return this.env.model.getters.getSelectedFigureId() === this.props.figure.id;
         }
-        /** Get the current figure size, which is either the stored figure size of the DnD figure size */
-        getFigureSize() {
-            const { width, height } = this.displayedFigure;
-            return { width, height };
+        get containerStyle() {
+            const { x: figureX, y: figureY } = this.props.figure;
+            const { width: viewWidth, height: viewHeight } = this.env.model.getters.getMainViewportRect();
+            const { x, y } = this.env.model.getters.getMainViewportCoordinates();
+            const left = figureX >= x ? x : 0;
+            const width = viewWidth - left;
+            const top = figureY >= y ? y : 0;
+            const height = viewHeight - top;
+            return `
+      left: ${left}px;
+      top: ${top}px;
+      width: ${width}px;
+      height: ${height}px
+    `;
         }
-        getFigureSizeWithBorders() {
-            const { width, height } = this.getFigureSize();
-            const borders = this.getBorderWidth() * 2;
-            return { width: width + borders, height: height + borders };
+        get inverseViewportPositionStyle() {
+            const { x: figureX, y: figureY } = this.props.figure;
+            const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
+            const { x, y } = this.env.model.getters.getMainViewportCoordinates();
+            const left = figureX >= x ? -(x + offsetX) : 0;
+            const top = figureY >= y ? -(y + offsetY) : 0;
+            return `
+      left: ${left}px;
+      top: ${top}px;
+    `;
         }
         getBorderWidth() {
-            return this.isSelected ? ACTIVE_BORDER_WIDTH : this.env.isDashboard() ? 0 : BORDER_WIDTH;
+            return this.env.isDashboard() ? 0 : BORDER_WIDTH;
         }
-        getFigureStyle() {
-            const { width, height } = this.displayedFigure;
-            return `width:${width}px;height:${height}px;border-width: ${this.getBorderWidth()}px;`;
+        get figureStyle() {
+            return `border-width: ${this.getBorderWidth()}px;`;
         }
-        getContainerStyle() {
-            const target = this.displayedFigure;
-            const { x: offsetCorrectionX, y: offsetCorrectionY } = this.env.model.getters.getMainViewportCoordinates();
-            const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
-            let { width, height } = this.getFigureSizeWithBorders();
-            let x, y;
-            // Visually, the content of the container is slightly shifted as it includes borders and/or corners.
-            // If we want to make assertions on the position of the content, we need to take this shift into account
-            const borderShift = ANCHOR_SIZE / 2;
-            if (target.x + borderShift < offsetCorrectionX) {
-                x = target.x;
-            }
-            else if (target.x + borderShift < offsetCorrectionX + offsetX) {
-                x = offsetCorrectionX;
-                width += target.x - offsetCorrectionX - offsetX;
-            }
-            else {
-                x = target.x - offsetX;
-            }
-            if (target.y + borderShift < offsetCorrectionY) {
-                y = target.y;
-            }
-            else if (target.y + borderShift < offsetCorrectionY + offsetY) {
-                y = offsetCorrectionY;
-                height += target.y - offsetCorrectionY - offsetY;
-            }
-            else {
-                y = target.y - offsetY;
-            }
-            if (width < 0 || height < 0) {
-                return `display:none;`;
-            }
-            const borderOffset = BORDER_WIDTH - this.getBorderWidth();
-            // TODO : remove the +1 once 2951210 is fixed
-            return (`top:${y + borderOffset + 1}px;` +
-                `left:${x + borderOffset}px;` +
+        get wrapperStyle() {
+            const { x, y, width, height } = this.displayedFigure;
+            return (`top:${y}px;` +
+                `left:${x}px;` +
                 `width:${width}px;` +
                 `height:${height}px;` +
                 `z-index: ${ComponentsImportance.Figure + (this.isSelected ? 1 : 0)}`);
         }
-        getAnchorPosition(anchor) {
-            let { width, height } = this.getFigureSizeWithBorders();
+        getResizerPosition(resizer) {
             const anchorCenteringOffset = (ANCHOR_SIZE - ACTIVE_BORDER_WIDTH) / 2;
-            const target = this.displayedFigure;
-            let x = 0;
-            let y = 0;
-            const { x: offsetCorrectionX, y: offsetCorrectionY } = this.env.model.getters.getMainViewportCoordinates();
-            const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
-            const borderShift = ANCHOR_SIZE / 2;
-            if (target.x + borderShift < offsetCorrectionX) {
-                x = 0;
+            let style = "";
+            if (resizer.includes("top")) {
+                style += `top: ${-anchorCenteringOffset}px;`;
             }
-            else if (target.x + borderShift < offsetCorrectionX + offsetX) {
-                x = target.x - offsetCorrectionX - offsetX;
+            else if (resizer.includes("bottom")) {
+                style += `bottom: ${-anchorCenteringOffset}px;`;
             }
             else {
-                x = 0;
+                style += ` bottom: calc(50% - ${anchorCenteringOffset}px);`;
             }
-            if (target.y + borderShift < offsetCorrectionY) {
-                y = 0;
+            if (resizer.includes("left")) {
+                style += `left: ${-anchorCenteringOffset}px;`;
             }
-            else if (target.y + borderShift < offsetCorrectionY + offsetY) {
-                y = target.y - offsetCorrectionY - offsetY;
-            }
-            else {
-                y = 0;
-            }
-            if (anchor.includes("top")) {
-                y -= anchorCenteringOffset;
-            }
-            else if (anchor.includes("bottom")) {
-                y += height - ACTIVE_BORDER_WIDTH - anchorCenteringOffset;
+            else if (resizer.includes("right")) {
+                style += `right: ${-anchorCenteringOffset}px;`;
             }
             else {
-                y += (height - ACTIVE_BORDER_WIDTH) / 2 - anchorCenteringOffset;
+                style += ` right: calc(50% - ${anchorCenteringOffset}px);`;
             }
-            if (anchor.includes("left")) {
-                x += -anchorCenteringOffset;
-            }
-            else if (anchor.includes("right")) {
-                x += width - ACTIVE_BORDER_WIDTH - anchorCenteringOffset;
-            }
-            else {
-                x += (width - ACTIVE_BORDER_WIDTH) / 2 - anchorCenteringOffset;
-            }
-            let visibility = "visible";
-            if (x < -anchorCenteringOffset || y < -anchorCenteringOffset) {
-                visibility = "hidden";
-            }
-            return `visibility:${visibility};top:${y}px; left:${x}px;`;
+            return style;
         }
         setup() {
             owl.useEffect((selectedFigureId, thisFigureId, el) => {
@@ -20805,6 +20829,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const position = gridOverlayPosition();
             const { x: offsetCorrectionX, y: offsetCorrectionY } = this.env.model.getters.getMainViewportCoordinates();
             const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
+            const sheetId = this.env.model.getters.getActiveSheetId();
             const initialX = ev.clientX - position.left;
             const initialY = ev.clientY - position.top;
             this.dnd.x = figure.x;
@@ -20815,31 +20840,28 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.dnd.isActive = true;
                 const newX = ev.clientX - position.left;
                 let deltaX = newX - initialX;
-                if (newX > offsetCorrectionX && initialX < offsetCorrectionX) {
-                    deltaX += offsetX;
-                }
-                else if (newX < offsetCorrectionX && initialX > offsetCorrectionX) {
-                    deltaX -= offsetX;
-                }
                 this.dnd.x = Math.max(figure.x + deltaX, 0);
                 const newY = ev.clientY - position.top;
                 let deltaY = newY - initialY;
-                if (newY > offsetCorrectionY && initialY < offsetCorrectionY) {
-                    deltaY += offsetY;
-                }
-                else if (newY < offsetCorrectionY && initialY > offsetCorrectionY) {
-                    deltaY -= offsetY;
-                }
                 this.dnd.y = Math.max(figure.y + deltaY, 0);
             };
             const onMouseUp = (ev) => {
+                let { x, y } = this.dnd;
+                // Correct position in case of moving to/from a frozen pane
+                if (this.dnd.x > offsetCorrectionX && figure.x < offsetCorrectionX) {
+                    x += offsetX;
+                }
+                else if (this.dnd.x < offsetCorrectionX && figure.x > offsetCorrectionX) {
+                    x -= offsetX;
+                }
+                if (this.dnd.y > offsetCorrectionY && figure.y < offsetCorrectionY) {
+                    y += offsetY;
+                }
+                else if (this.dnd.y < offsetCorrectionY && figure.y > offsetCorrectionY) {
+                    y -= offsetY;
+                }
                 this.dnd.isActive = false;
-                this.env.model.dispatch("UPDATE_FIGURE", {
-                    sheetId: this.env.model.getters.getActiveSheetId(),
-                    id: figure.id,
-                    x: this.dnd.x,
-                    y: this.dnd.y,
-                });
+                this.env.model.dispatch("UPDATE_FIGURE", { sheetId, id: figure.id, x, y });
             };
             startDnd(onMouseMove, onMouseUp);
         }
@@ -26396,6 +26418,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         initialMessages = fixTranslatedSheetIds(data, initialMessages);
         initialMessages = dropCommands(initialMessages, "SORT_CELLS");
         initialMessages = dropCommands(initialMessages, "SET_DECIMAL");
+        initialMessages = fixChartDefinitions(data, initialMessages);
         return initialMessages;
     }
     /**
@@ -26440,6 +26463,54 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 messages.push({
                     ...message,
                     commands: message.commands.filter((command) => command.type !== commandType),
+                });
+            }
+            else {
+                messages.push(message);
+            }
+        }
+        return messages;
+    }
+    function fixChartDefinitions(data, initialMessages) {
+        var _a;
+        const messages = [];
+        const map = {};
+        for (const sheet of data.sheets || []) {
+            (_a = sheet.figures) === null || _a === void 0 ? void 0 : _a.forEach((figure) => {
+                if (figure.tag === "chart") {
+                    // chart definition
+                    map[figure.id] = figure.data;
+                }
+            });
+        }
+        for (const message of initialMessages) {
+            if (message.type === "REMOTE_REVISION") {
+                const commands = [];
+                for (const cmd of message.commands) {
+                    let command = cmd;
+                    switch (cmd.type) {
+                        case "CREATE_CHART":
+                            map[cmd.id] = cmd.definition;
+                            break;
+                        case "UPDATE_CHART":
+                            if (!map[cmd.id]) {
+                                /** the chart does not exist on the map, it might have been created after a duplicate sheet.
+                                 * We don't have access to the definition, so we skip the command.
+                                 */
+                                console.log(`Fix chart definition: chart with id ${cmd.id} not found.`);
+                                continue;
+                            }
+                            const definition = map[cmd.id];
+                            const newDefinition = { ...definition, ...cmd.definition };
+                            command = { ...cmd, definition: newDefinition };
+                            map[cmd.id] = newDefinition;
+                            break;
+                    }
+                    commands.push(command);
+                }
+                messages.push({
+                    ...message,
+                    commands,
                 });
             }
             else {
@@ -28471,7 +28542,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         getHeaderSize(sheetId, dimension, index) {
             var _a, _b, _c, _d;
-            return (((_b = (_a = this.sizes[sheetId]) === null || _a === void 0 ? void 0 : _a[dimension][index]) === null || _b === void 0 ? void 0 : _b.manualSize) ||
+            return Math.round(((_b = (_a = this.sizes[sheetId]) === null || _a === void 0 ? void 0 : _a[dimension][index]) === null || _b === void 0 ? void 0 : _b.manualSize) ||
                 ((_d = (_c = this.sizes[sheetId]) === null || _c === void 0 ? void 0 : _c[dimension][index]) === null || _d === void 0 ? void 0 : _d.computedSize()) ||
                 this.getDefaultHeaderSize(dimension));
         }
@@ -32769,7 +32840,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * the value toSearch
          */
         updateRegex() {
-            let searchValue = this.toSearch;
+            let searchValue = escapeRegExp(this.toSearch);
             const flags = !this.searchOptions.matchCase ? "i" : "";
             if (this.searchOptions.exactMatch) {
                 searchValue = `^${searchValue}$`;
@@ -37240,7 +37311,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     };
     function interactiveAddMerge(env, sheetId, target) {
         const result = env.model.dispatch("ADD_MERGE", { sheetId, target });
-        if (result.isCancelledBecause(78 /* CommandResult.MergeInFilter */)) {
+        if (result.isCancelledBecause(79 /* CommandResult.MergeInFilter */)) {
             env.raiseError(AddMergeInteractiveContent.MergeInFilter);
         }
         else if (result.isCancelledBecause(3 /* CommandResult.MergeIsDestructive */)) {
@@ -37422,6 +37493,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             position: absolute;
             top: calc(100% + 5px);
             left: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
             z-index: ${ComponentsImportance.Dropdown};
             box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
             background-color: white;
@@ -37509,6 +37582,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     height: 34px;
     background-color: white;
   `;
+        }
+        get dropdownStyle() {
+            const { height } = this.env.model.getters.getSheetViewDimension();
+            return `max-height:${height}px`;
         }
         setup() {
             owl.useExternalListener(window, "click", this.onClick);
@@ -42132,8 +42209,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-01-04T17:30:44.594Z';
-    exports.__info__.hash = 'bcf70ba';
+    exports.__info__.date = '2023-01-25T09:58:13.724Z';
+    exports.__info__.hash = '464fcd9';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
