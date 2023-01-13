@@ -301,7 +301,7 @@ class TestSaleStockInvoices(TestSaleCommon):
         action = return_wizard.create_returns()
         pick_return = self.env['stock.picking'].browse(action['res_id'])
 
-        move_form = Form(pick_return.move_ids, view='stock.view_stock_move_nosuggest_operations')
+        move_form = Form(pick_return.move_ids.with_context(show_lots_m2o=True), view='stock.view_stock_move_nosuggest_operations')
         with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_id = lot01
             line.qty_done = 10
@@ -316,7 +316,7 @@ class TestSaleStockInvoices(TestSaleCommon):
 
         # Deliver 3 x LOT0002
         delivery02.do_unreserve()
-        move_form = Form(delivery02.move_ids, view='stock.view_stock_move_nosuggest_operations')
+        move_form = Form(delivery02.move_ids.with_context(show_lots_m2o=True), view='stock.view_stock_move_nosuggest_operations')
         with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_id = lot02
             line.qty_done = 3
@@ -341,7 +341,7 @@ class TestSaleStockInvoices(TestSaleCommon):
         # Deliver 5 x LOT0002 + 2 x LOT0003
         delivery03 = delivery02.backorder_ids
         delivery03.do_unreserve()
-        move_form = Form(delivery03.move_ids, view='stock.view_stock_move_nosuggest_operations')
+        move_form = Form(delivery03.move_ids.with_context(show_lots_m2o=True), view='stock.view_stock_move_nosuggest_operations')
         with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_id = lot02
             line.qty_done = 5
