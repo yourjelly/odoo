@@ -7,7 +7,6 @@ import { loadJS, templates } from "@web/core/assets";
 
 const { App } = owl;
 const { Spreadsheet } = spreadsheet;
-const { getMenuChildren } = spreadsheet.helpers;
 
 /** @typedef {import("@spreadsheet/o_spreadsheet/o_spreadsheet").Model} Model */
 
@@ -34,7 +33,7 @@ export async function doMenuAction(registry, path, env) {
     const root = path[0];
     let node = registry.get(root);
     for (const p of path.slice(1)) {
-        const children = getMenuChildren(node, env);
+        const children = node.children(env);
         node = children.find((child) => child.id === p);
     }
     if (!node) {
