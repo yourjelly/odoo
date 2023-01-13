@@ -374,7 +374,9 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         po_form.partner_id = self.env.ref('base.res_partner_1')
         with po_form.order_line.new() as po_line_form:
             po_line_form.name = super_product.name
-            po_line_form.product_id = super_product
+            with po_line_form.bypass_invisible():
+                # purchase_product_matrix set invisible="1" on product_id and add product_template_id to update the product
+                po_line_form.product_id = super_product
         purchase_order = po_form.save()
         purchase_order_line = purchase_order.order_line
 
