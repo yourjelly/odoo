@@ -38899,6 +38899,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
             else {
                 this.closeFontList();
+                this.props.callback();
             }
         }
         closeFontList() {
@@ -38913,6 +38914,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.style.fontSize = clip(Math.floor(parseFloat(fontSizeStr)), 1, 400);
             setStyle(this.env, { fontSize: this.style.fontSize });
             this.closeFontList();
+            this.props.callback();
         }
         setSizeFromInput(ev) {
             this.setSize(ev.target.value);
@@ -43570,8 +43572,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-01-12T06:36:40.138Z';
-    exports.__info__.hash = '5086db1';
+    exports.__info__.date = '2023-01-13T13:41:28.141Z';
+    exports.__info__.hash = '410e426';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map

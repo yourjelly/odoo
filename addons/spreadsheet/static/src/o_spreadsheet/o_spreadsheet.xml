@@ -3126,7 +3126,7 @@
             </div>
           </div>
           <div class="o-divider"/>
-          <FontEditor callback="() => this.closeMenus()"/>
+          <FontEditor callback="() => this.onClick()"/>
           <div class="o-divider"/>
           <div
             class="o-tool"
