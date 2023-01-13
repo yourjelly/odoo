@@ -68,11 +68,18 @@ class Project(models.Model):
         sequence_per_invoice_type['expenses'] = 11
         return sequence_per_invoice_type
 
+    def _get_invoice_line_already_included_profitability(self, lines=None):
+        lines = super()._get_invoice_line_already_included_profitability(lines)
+        subset_expense_refund_lines = self.env['account.move.line'].search([('move_type', '=', 'in_refund'), ('expense_id', '!=', False)])
+        expense_refund_move = subset_expense_refund_lines.move_id
+        expense_bill_move = self.env['account.move'].search([('move_type', '=', 'in_invoice'), ('expense_sheet_id', '!=', False)])
+        return super()._get_invoice_line_already_included_profitability(lines) | expense_bill_move.line_ids | expense_refund_move.line_ids
+
     def _get_expenses_profitability_items(self, with_action=True):
         if not self.analytic_account_id:
             return {}
         can_see_expense = with_action and self.user_has_groups('hr_expense.group_hr_expense_team_approver')
-        query = self.env['hr.expense']._search([('is_refused', '=', False), ('state', 'in', ['approved', 'done'])])
+        query = self.env['hr.expense']._search([('state', 'in', ['approved', 'done'])])
         query.order = None
         query.add_where('hr_expense.analytic_distribution ? %s', [str(self.analytic_account_id.id)])
         query_string, query_param = query.select('array_agg(id) as ids', 'SUM(untaxed_amount) as untaxed_amount')

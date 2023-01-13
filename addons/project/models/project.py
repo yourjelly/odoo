@@ -925,6 +925,9 @@ class Project(models.Model):
     def _get_profitability_sequence_per_invoice_type(self):
         return {}
 
+    def _get_invoice_line_already_included_profitability(self, lines=None):
+        return self.env['account.move.line']
+
     def _get_user_values(self):
         return {
             'is_project_user': self.user_has_groups('project.group_project_user'),
