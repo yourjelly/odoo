@@ -142,7 +142,7 @@ class Sanitize {
                 let { startContainer, startOffset } = range;
                 if (startContainer === node.nextSibling) {
                     startContainer = node;
-                    startOffset += node.textContent;
+                    startOffset += node.textContent.length;
                 }
                 node.textContent = node.textContent + node.nextSibling.textContent;
                 node.nextSibling.remove();

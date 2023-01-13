@@ -709,6 +709,8 @@ export class OdooEditor extends EventTarget {
      */
     _updateLink() {
         const selection = this.document.getSelection();
+        // TODO: get link as parameter. Must look at selection BEFORE
+        // commands that changes it is executed
         const link = closestElement(selection?.anchorNode, 'a');
         if (!link) return;
 
@@ -724,19 +726,9 @@ export class OdooEditor extends EventTarget {
                 link.href = url;
                 link.dispatchEvent(new Event('linkHrefUpdated'));
             } else {
-                // Unlink.
-                const restoreCursor = preserveCursor(this.document);
-                const parent = link.parentElement;
-                [...link.childNodes].forEach(child => parent.insertBefore(child, link));
-                // Disable isolated link.
-                // TODO: refactor this with that one from onPaste.
-                if (this._fixLinkMutatedElements && this._fixLinkMutatedElements.link === link) {
-                    this.resetContenteditableLink();
-                    this._activateContenteditable();
-                }
-                link.remove();
+                // this._applyRawCommand('unlink');
+                editorCommands['unlink'](this);
                 link.dispatchEvent(new Event('linkRemoved'));
-                restoreCursor();
             }
         } else if (linkLabelMatchesUrl(link)) {
             // Promote link to auto-updatable.
@@ -1726,6 +1718,7 @@ export class OdooEditor extends EventTarget {
     }
 
     setContenteditableLink(link) {
+        if (!link.isConnected) return;
         const editableChildren = link.querySelectorAll('[contenteditable=true]');
         this._stopContenteditable();
 
@@ -2207,6 +2200,18 @@ export class OdooEditor extends EventTarget {
             delete this._fixLinkMutatedElements;
         }
     }
+    /**
+     * if `link` is isolated disable it and restore content editable root.
+     * 
+     * @param {HtmlElement} link 
+     */
+    disableIsolatedLink(link) {
+        if (!link) return false;
+        if (this._fixLinkMutatedElements?.link !== link) return;
+        this.resetContenteditableLink();
+        this._activateContenteditable()
+    }
+
     _activateContenteditable() {
         this.observerUnactive('_activateContenteditable');
         this.editable.setAttribute('contenteditable', this.options.isRootEditable);

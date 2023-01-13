@@ -2588,16 +2588,18 @@ export function resolveProtocol(href) {
     return Object.keys(linkRegexes).find(protocol => hrefLowerCase.startsWith(protocol));
 }
 
+/**
+ * 
+ * @param {HtmlElement} link 
+ * @returns {boolean}
+ */
 export function linkLabelMatchesUrl(link) {
-    if (!link) return;
+    if (!link) return false;
     const protocol = resolveProtocol(link.href);
-    if (!protocol) return;
-    const linkLabel = link.innerText.replace(/\u200b/g, '').trim();
-    let match;
+    if (!protocol) return false;
     const coreUrlRegex = new RegExp(`^(?:${protocol})?(.*?)\/?$`, 'i');
-    match = coreUrlRegex.exec(linkLabel);
-    const label = match && match[1];
-    match = coreUrlRegex.exec(link.href);
-    const url = match && match[1];
-    return label === url;
+    const linkLabel = link.innerText.replace(/\u200b/g, '').trim();
+    const label = coreUrlRegex.exec(linkLabel)?.[1];
+    const url = coreUrlRegex.exec(link.href)?.[1];
+    return !!label && label === url;
 }

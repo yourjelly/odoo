@@ -61,7 +61,7 @@ const LinkPopoverWidget = Widget.extend({
             tooltips.push(Tooltip.getOrCreateInstance(el));
         }
         let popoverShown = true;
-        this.$target.popover({
+        this.coucou = this.$target.popover({
             html: true,
             content: this.$el,
             placement: 'bottom',
@@ -280,10 +280,16 @@ const LinkPopoverWidget = Widget.extend({
      */
     _onRemoveLinkClick(ev) {
         ev.preventDefault();
-        this.options.wysiwyg.removeLink();
+        const removeLink = () => {
+            this.options.wysiwyg.removeLink();
+            this.$target.off('hidden.bs.popover.link_popover', removeLink);
+        }
+        this.$target.on('hidden.bs.popover.link_popover', removeLink);
         ev.stopImmediatePropagation();
     },
 });
+
+LinkPopoverWidget.counter = 0;
 
 LinkPopoverWidget.createFor = async function (parent, targetEl, options) {
     const noLinkPopoverClass = ".o_no_link_popover, .carousel-control-prev, .carousel-control-next, .dropdown-toggle";
@@ -301,6 +307,7 @@ LinkPopoverWidget.createFor = async function (parent, targetEl, options) {
     if (wysiwyg) {
         wysiwyg.odooEditor.observerActive('LinkPopoverWidget');
     }
+    console.log(LinkPopoverWidget.counter++);
     return popoverWidget;
 };
 
