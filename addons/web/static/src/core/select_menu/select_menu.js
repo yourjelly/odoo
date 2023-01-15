@@ -18,6 +18,7 @@ export class SelectMenu extends Component {
         class: "",
         togglerClass: "",
         onSelect: () => {},
+        required: false,
         searchPlaceholder: _lt("Search..."),
         choices: [],
         groups: [],
@@ -57,6 +58,7 @@ export class SelectMenu extends Component {
         },
         class: { type: String, optional: true },
         togglerClass: { type: String, optional: true },
+        required: { type: Boolean, optional: true },
         searchPlaceholder: { type: String, optional: true },
         value: { optional: true },
         onSelect: { type: Function, optional: true },
@@ -115,7 +117,7 @@ export class SelectMenu extends Component {
     }
 
     canClear() {
-        return this.props.value != null;
+        return !this.props.required && this.props.value != null;
     }
 
     // ==========================================================================================
