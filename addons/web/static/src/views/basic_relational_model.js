@@ -1396,7 +1396,8 @@ export class RelationalModel extends Model {
                                     subContext,
                                     subPath
                                 ),
-                                // __context: subContext, // FIXME: context must be a string, evaluated server side
+
+                                 __context: subContext, // FIXME: context must be a string, evaluated server side
                             };
                         } else {
                             const fieldsToFetch =

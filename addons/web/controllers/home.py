@@ -10,7 +10,7 @@ from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.service import security
-from odoo.tools import ustr
+from odoo.tools import ustr, safe_eval
 from odoo.tools.translate import _
 from .utils import ensure_db, _get_login_redirect_url, is_user_internal
 
@@ -75,9 +75,22 @@ class Home(http.Controller):
 
         def _unity_read_x2many(parent_field_spec, parent, records: list):
             for one_record in records:
+                local_context_dict = {'parent': one_record, 'context': context, **one_record}
+
                 for (field, definition) in parent_field_spec.items():
-                    if not field.startswith("__") and isinstance(definition, dict) and parent._fields[field].type in ["one2many", "many2many"]:
-                        x2many_context = parent[field].with_context(definition["__context"]) if "__context" in definition else parent[field]
+                    if not field.startswith("__") and \
+                            isinstance(definition, dict) and \
+                            parent._fields[field].relational:
+                        if "__context" in definition:
+                            print(field, ":", definition["__context"])
+                            evaluated_context = safe_eval.safe_eval(definition["__context"], globals_dict=None, locals_dict=local_context_dict)
+                            print("=========>\n", evaluated_context)
+
+                            x2many_context = parent[field].with_context(evaluated_context)
+                        else:
+                            x2many_context = parent[field]
+                        # TODO VSC: because we now assign new contexts for the many2One (so that name_get is called  with the correct context
+                        #           do we need to use a stack of contexts to removed the keys assigned "lower" in the tree ?
                         one_record[field] = x2many_context._read_format([f for f in definition if not f.startswith("__")])
                         _unity_read_x2many(definition, x2many_context, one_record[field])
 
