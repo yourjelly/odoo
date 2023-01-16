@@ -604,7 +604,8 @@ export class OdooEditor extends EventTarget {
         this.addDomListener(this.editable, 'mousedown', this._onMouseDown);
         this.addDomListener(this.editable, 'mouseup', this._onMouseup);
         this.addDomListener(this.editable, 'mousemove', this._onMousemove);
-        this.addDomListener(this.editable, 'paste', this._onPaste);
+        // this.addDomListener(this.editable, 'paste', this._onPaste);
+        this.addDomListener(this.editable, 'paste', this._onPasteWrapper);
         this.addDomListener(this.editable, 'dragstart', this._onDragStart);
         this.addDomListener(this.editable, 'drop', this._onDrop);
         this.addDomListener(this.editable, 'copy', this._onClipboardCopy);
@@ -708,10 +709,7 @@ export class OdooEditor extends EventTarget {
      * If label of an auto-updatable link is an invalid URL, link gets disabled. 
      */
     _updateLink() {
-        const selection = this.document.getSelection();
-        // TODO: get link as parameter. Must look at selection BEFORE
-        // commands that changes it is executed
-        const link = closestElement(selection?.anchorNode, 'a');
+        const link = closestElement(this.document.getSelection()?.focusNode, 'a');
         if (!link) return;
 
         if (link.classList.contains('oe_auto_update_link')) {
@@ -4266,6 +4264,13 @@ export class OdooEditor extends EventTarget {
         }
         return Promise.all(promises).then(html => html.join(''));
     }
+    _onPasteWrapper(ev) {
+        this.historyPauseSteps();
+        this._onPaste(ev);
+        this._updateLink();
+        this.historyUnpauseSteps();
+        this.historyStep();
+    }
     /**
      * Handle safe pasting of html or plain text into the editor.
      */
@@ -4445,6 +4450,7 @@ export class OdooEditor extends EventTarget {
                     } else {
                         const link = document.createElement('A');
                         link.setAttribute('href', url);
+                        link.classList.add('oe_auto_update_link');
                         for (const attribute in linkAttributes) {
                             link.setAttribute(attribute, linkAttributes[attribute]);
                         }

@@ -424,15 +424,24 @@ export const editorCommands = {
         }
     },
     unlink: editor => {
-        const { startContainer, endContainer } = getDeepRange(editor.editable);
-        const link = closestElement(startContainer, 'a') || closestElement(endContainer, 'a');
-        if (!link) return;
-        // editor.disableIsolatedLink(link);
-        const restoreCursor = preserveCursor(editor.document);
-        const parent = link.parentElement;
-        [...link.childNodes].forEach(child => parent.insertBefore(child, link));
-        link.remove();
-        restoreCursor();
+        const sel = editor.document.getSelection();
+        // we need to remove the contentEditable isolation of links
+        // before we apply the unlink, otherwise the command is not performed
+        // because the content editable root is the link
+        const closestEl = closestElement(sel.focusNode, 'a');
+        if (closestEl && closestEl.getAttribute('contenteditable') === 'true') {
+            editor._activateContenteditable();
+        }
+        if (sel.isCollapsed) {
+            const cr = preserveCursor(editor.document);
+            const node = closestElement(sel.focusNode, 'a');
+            setSelection(node, 0, node, node.childNodes.length, false);
+            editor.document.execCommand('unlink');
+            cr();
+        } else {
+            editor.document.execCommand('unlink');
+            setSelection(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset);
+        }
     },
 
     // List
