@@ -10,9 +10,11 @@
         <field name="implied_ids" eval="[(4, ref('mail.group_mail_template_editor'))]"/>
     </record>
 
-    <!-- By default, allow all users to edit mail templates -->
-    <record id="base.group_user" model="res.groups">
-        <field name="implied_ids" eval="[(4, ref('mail.group_mail_template_editor'))]"/>
+    <!-- activate template restriction by default
+         do not use set_param to avoid removing users when updating -->
+    <record id="restrict_template_rendering_icp" model="ir.config_parameter" forcecreate="False">
+        <field name="key">mail.restrict.template.rendering</field>
+        <field name="value" eval="True" />
     </record>
 </data>
 </odoo>

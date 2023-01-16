@@ -53,7 +53,9 @@ class TestMailTemplate(MailCommon):
     def test_mail_template_acl(self):
         # Sanity check
         self.assertTrue(self.user_admin.has_group('mail.group_mail_template_editor'))
+        self.assertTrue(self.user_admin.has_group('base.group_sanitize_override'))
         self.assertFalse(self.user_employee.has_group('mail.group_mail_template_editor'))
+        self.assertFalse(self.user_employee.has_group('base.group_sanitize_override'))
 
         # Group System can create / write / unlink mail template
         mail_template = self.env['mail.template'].with_user(self.user_admin).create({'name': 'Test template'})
