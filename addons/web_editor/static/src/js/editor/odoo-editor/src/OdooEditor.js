@@ -599,17 +599,14 @@ export class OdooEditor extends EventTarget {
         this.observerActive();
 
         this.addDomListener(this.editable, 'keydown', this._onKeyDown);
-        // this.addDomListener(this.editable, 'input', this._onInput);
-        this.addDomListener(this.editable, 'input',this._eventHandlerWrapper(this._onInput, this._updateLink));
+        this.addDomListener(this.editable, 'input', this._onInput);
         this.addDomListener(this.editable, 'beforeinput', this._onBeforeInput);
         this.addDomListener(this.editable, 'mousedown', this._onMouseDown);
         this.addDomListener(this.editable, 'mouseup', this._onMouseup);
         this.addDomListener(this.editable, 'mousemove', this._onMousemove);
-        // this.addDomListener(this.editable, 'paste', this._onPaste);
-        this.addDomListener(this.editable, 'paste', this._eventHandlerWrapper(this._onPaste, this._updateLink));
+        this.addDomListener(this.editable, 'paste', this._onPaste);
         this.addDomListener(this.editable, 'dragstart', this._onDragStart);
-        // this.addDomListener(this.editable, 'drop', this._onDrop);
-        this.addDomListener(this.editable, 'drop', this._eventHandlerWrapper(this._onDrop, this._updateLink));
+        this.addDomListener(this.editable, 'drop', this._onDrop);
         this.addDomListener(this.editable, 'copy', this._onClipboardCopy);
         this.addDomListener(this.editable, 'cut', this._onClipboardCut);
 
@@ -715,15 +712,6 @@ export class OdooEditor extends EventTarget {
         this._toRollback = false;
     }
 
-    _eventHandlerWrapper(eventHandler, postHandlerHook) {
-        return (ev) => {
-            this.historyPauseSteps();
-            eventHandler.call(this, ev);
-            postHandlerHook.call(this);
-            this.historyUnpauseSteps();
-            this.historyStep();
-        }
-    }
     /**
      * Update link's href.
      * If label is valid URL, href gets updated and link is tagged as auto-updatable.
@@ -2106,6 +2094,13 @@ export class OdooEditor extends EventTarget {
             hiliteColorInput.value = hiliteColor.length <= 7 ? hiliteColor : hexFromColor(hiliteColor);
         }
     }
+    _applyCustomCommand(callback) {
+        this._recordHistorySelection(true);
+        this.historyPauseSteps();
+        callback();
+        this.historyUnpauseSteps();
+        this.historyStep();
+    }
 
     /**
      * Applies the given command to the current selection. This does *NOT*:
@@ -2231,18 +2226,6 @@ export class OdooEditor extends EventTarget {
             delete this._fixLinkMutatedElements;
         }
     }
-    /**
-     * if `link` is isolated disable it and restore content editable root.
-     * 
-     * @param {HtmlElement} link 
-     */
-    disableIsolatedLink(link) {
-        if (!link) return false;
-        if (this._fixLinkMutatedElements?.link !== link) return;
-        this.resetContenteditableLink();
-        this._activateContenteditable()
-    }
-
     _activateContenteditable() {
         this.observerUnactive('_activateContenteditable');
         this.editable.setAttribute('contenteditable', this.options.isRootEditable);
@@ -3145,14 +3128,11 @@ export class OdooEditor extends EventTarget {
     }
     
     /**
-     * Revert current history step and run callback within one history step.
+     * Revert current history step and apply command.
      */
-    revertUserInput(callback) {
+    _replaceUserInput(command) {
         this.historyRollback();
-        this.historyPauseSteps();
-        callback();
-        this.historyUnpauseSteps();
-        this.historyStep();
+        this._applyCommand(command);
     }
 
     /**
@@ -3190,36 +3170,29 @@ export class OdooEditor extends EventTarget {
             ev.data === null &&
             this._lastBeforeInputType === 'insertParagraph';
         if (this.keyboardType === KEYBOARD_TYPES.PHYSICAL || !wasCollapsed) {
+            this.historyPauseSteps();
             if (ev.inputType === 'deleteContentBackward') {
                 this._compositionStep();
-                this.revertUserInput(() => {
-                    this._applyCommand('oDeleteBackward')
-                    // this._updateLink();
-                });
+                this._replaceUserInput('oDeleteBackward')
             } else if (ev.inputType === 'deleteContentForward' || isChromeDeleteforward) {
                 this._compositionStep();
-                this.revertUserInput(() => {
-                    this._applyCommand('oDeleteForward');
-                    // this._updateLink();
-                });
+                this._replaceUserInput('oDeleteForward');
             } else if (ev.inputType === 'insertParagraph' || isChromeInsertParagraph) {
                 this._compositionStep();
-                this.revertUserInput(()=> {
-                    if (this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
-                        const brs = this._applyCommand('oShiftEnter');
-                        const anchor = brs[0].parentElement;
-                        if (anchor.nodeName === 'A') {
-                            if (brs.includes(anchor.firstChild)) {
-                                brs.forEach(br => anchor.before(br));
-                                setSelection(...rightPos(brs[brs.length - 1]));
-                            } else if (brs.includes(anchor.lastChild)) {
-                                brs.forEach(br => anchor.after(br));
-                                setSelection(...rightPos(brs[0]));
-                            }
+                this.historyRollback();
+                if (this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
+                    const brs = this._applyCommand('oShiftEnter');
+                    const anchor = brs[0].parentElement;
+                    if (anchor.nodeName === 'A') {
+                        if (brs.includes(anchor.firstChild)) {
+                            brs.forEach(br => anchor.before(br));
+                            setSelection(...rightPos(brs[brs.length - 1]));
+                        } else if (brs.includes(anchor.lastChild)) {
+                            brs.forEach(br => anchor.after(br));
+                            setSelection(...rightPos(brs[0]));
                         }
                     }
-                    // this._updateLink();
-                });
+                }
             } else if (['insertText', 'insertCompositionText'].includes(ev.inputType)) {
                 // insertCompositionText, courtesy of Samsung keyboard.
                 const selection = this.document.getSelection();
@@ -3232,6 +3205,7 @@ export class OdooEditor extends EventTarget {
                 // we cannot trust the browser to keep the selection inside empty tags.
                 const latestSelectionInsideEmptyTag = this._isLatestComputedSelectionInsideEmptyInlineTag();
                 if (wasTextSelected || isUnitTests || latestSelectionInsideEmptyTag) {
+                    // Not sure this line does anything
                     ev.preventDefault();
                     if (!isUnitTests) {
                         // First we need to undo the character inserted by the browser.
@@ -3328,18 +3302,13 @@ export class OdooEditor extends EventTarget {
                         setSelection(codeElement.nextSibling, 1);
                     }
                 }
-                // this._updateLink();
-                this.historyStep();
             } else if (ev.inputType === 'insertLineBreak') {
                 this._compositionStep();
-                this.revertUserInput(() => {
-                    this._applyCommand('oShiftEnter');
-                    // this._updateLink();
-                });
-            } else {
-                // this._updateLink();
-                this.historyStep();
+                this._replaceUserInput('oShiftEnter');
             }
+            this._updateLink();
+            this.historyUnpauseSteps();
+            this.historyStep();
         } else if (ev.inputType === 'insertCompositionText') {
             this._fromCompositionText = true;
         }
@@ -3442,8 +3411,7 @@ export class OdooEditor extends EventTarget {
                     // deleteBackward input event with a collapsed selection in
                     // front of a contentEditable="false" (eg: font awesome).
                     ev.preventDefault();
-                    this._recordHistorySelection(true);
-                    this.revertUserInput(() => {
+                    this._applyCustomCommand(() => {
                         this._applyCommand('oDeleteBackward')
                         this._updateLink();
                     });
@@ -4308,6 +4276,7 @@ export class OdooEditor extends EventTarget {
         const odooEditorHtml = ev.clipboardData.getData('text/odoo-editor');
         const clipboardHtml = ev.clipboardData.getData('text/html');
         const targetSupportsHtmlContent = isHtmlContentSupported(sel.anchorNode);
+        this.historyPauseSteps();
         if (odooEditorHtml && targetSupportsHtmlContent) {
             const fragment = parseHTML(odooEditorHtml);
 
@@ -4349,7 +4318,6 @@ export class OdooEditor extends EventTarget {
             if(!text.match(/\${.*}/gi)) {
                 splitAroundUrl = text.split(URL_REGEX);
             }
-            this.historyPauseSteps("_onPaste");
             for (let i = 0; i < splitAroundUrl.length; i++) {
                 const url = /^https?:\/\//gi.test(splitAroundUrl[i])
                     ? splitAroundUrl[i]
@@ -4503,7 +4471,8 @@ export class OdooEditor extends EventTarget {
                     }
                 }
             }
-            this.historyUnpauseSteps("_onPaste");
+            this._updateLink();
+            this.historyUnpauseSteps();
             this.historyStep();
         }
     }
@@ -4566,11 +4535,10 @@ export class OdooEditor extends EventTarget {
         } else if (htmlTransferItem) {
             htmlTransferItem.getAsString(pastedText => {
                 // this.execCommand('insert', this._prepareClipboardData(pastedText));
-                this.historyPauseSteps();
-                this._applyCommand('insert', this._prepareClipboardData(pastedText));
-                this._updateLink();
-                this.historyUnpauseSteps();
-                this.historyStep();
+                this._applyCustomCommand(() => {
+                    this._applyCommand('insert', this._prepareClipboardData(pastedText));
+                    this._updateLink();
+                });
             });
         }
         // should this be done?
