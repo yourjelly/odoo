@@ -618,6 +618,7 @@ function makeActionManager(env) {
                 _executeCloseAction();
             }
         };
+        controller._loading = true;
 
         class ControllerComponent extends Component {
             setup() {
@@ -651,6 +652,8 @@ function makeActionManager(env) {
             onError(error) {
                 reject(error);
                 cleanDomFromBootstrap();
+                const loading = controller._loading;
+                delete controller._loading;
                 if (action.target === "new") {
                     // get the dialog service to close the dialog.
                     throw error;
@@ -661,9 +664,13 @@ function makeActionManager(env) {
                         if (lastCt.jsId === controller.jsId) {
                             // the error occurred on the controller which is
                             // already in the DOM, so simply show the error
-                            Promise.resolve().then(() => {
-                                throw error;
-                            });
+                            if (!loading) {
+                                // only throw if the controller is not being reloaded as in this
+                                // case the error will be shown anyway as the promise has been rejected
+                                Promise.resolve().then(() => {
+                                    throw error;
+                                });
+                            }
                             return;
                         } else {
                             info = lastCt.__info__;
@@ -677,6 +684,7 @@ function makeActionManager(env) {
                 }
             }
             onMounted() {
+                delete controller._loading;
                 if (action.target === "new") {
                     dialogCloseProm = new Promise((_r) => {
                         dialogCloseResolve = _r;
@@ -1420,7 +1428,7 @@ function makeActionManager(env) {
         if (!canProceed) {
             return;
         }
-        const controller = controllerStack[index];
+        const controller = { ...controllerStack[index] };
         if (controller.action.type === "ir.actions.act_window") {
             const { action, exportedState, view, views } = controller;
             const props = { ...controller.props };

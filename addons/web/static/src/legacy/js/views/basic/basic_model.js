@@ -94,7 +94,18 @@ var utils = require('web.utils');
 var viewUtils = require('web.viewUtils');
 var localStorage = require('web.local_storage');
 
+const { registry } = require("@web/core/registry");
+
 var _t = core._t;
+
+class MissingRecordError extends Error {};
+function missingRecordErrorHandler(env, error, originalError) {
+    if (originalError instanceof MissingRecordError) {
+        env.services.notification.add(originalError.message, { type: "danger" });
+        return true;
+    }
+}
+registry.category("error_handlers").add("missingRecordErrorHandler", missingRecordErrorHandler);
 
 // field types that can be aggregated in grouped views
 const AGGREGATABLE_TYPES = ['float', 'integer', 'monetary'];
@@ -2595,7 +2606,7 @@ var BasicModel = AbstractModel.extend({
             })
             .then(function (result) {
                 if (result.length === 0) {
-                    return Promise.reject();
+                    return Promise.reject(new MissingRecordError(_.str.sprintf('Record %d of model %s does not exist', record.res_id, record.model)));
                 }
                 result = result[0];
                 record.data = _.extend({}, record.data, result);
