@@ -289,8 +289,6 @@ const LinkPopoverWidget = Widget.extend({
     },
 });
 
-LinkPopoverWidget.counter = 0;
-
 LinkPopoverWidget.createFor = async function (parent, targetEl, options) {
     const noLinkPopoverClass = ".o_no_link_popover, .carousel-control-prev, .carousel-control-next, .dropdown-toggle";
     // Target might already have a popover, eg cart icon in navbar
@@ -307,7 +305,6 @@ LinkPopoverWidget.createFor = async function (parent, targetEl, options) {
     if (wysiwyg) {
         wysiwyg.odooEditor.observerActive('LinkPopoverWidget');
     }
-    console.log(LinkPopoverWidget.counter++);
     return popoverWidget;
 };
 

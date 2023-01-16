@@ -599,15 +599,17 @@ export class OdooEditor extends EventTarget {
         this.observerActive();
 
         this.addDomListener(this.editable, 'keydown', this._onKeyDown);
-        this.addDomListener(this.editable, 'input', this._onInput);
+        // this.addDomListener(this.editable, 'input', this._onInput);
+        this.addDomListener(this.editable, 'input',this._eventHandlerWrapper(this._onInput, this._updateLink));
         this.addDomListener(this.editable, 'beforeinput', this._onBeforeInput);
         this.addDomListener(this.editable, 'mousedown', this._onMouseDown);
         this.addDomListener(this.editable, 'mouseup', this._onMouseup);
         this.addDomListener(this.editable, 'mousemove', this._onMousemove);
         // this.addDomListener(this.editable, 'paste', this._onPaste);
-        this.addDomListener(this.editable, 'paste', this._onPasteWrapper);
+        this.addDomListener(this.editable, 'paste', this._eventHandlerWrapper(this._onPaste, this._updateLink));
         this.addDomListener(this.editable, 'dragstart', this._onDragStart);
-        this.addDomListener(this.editable, 'drop', this._onDrop);
+        // this.addDomListener(this.editable, 'drop', this._onDrop);
+        this.addDomListener(this.editable, 'drop', this._eventHandlerWrapper(this._onDrop, this._updateLink));
         this.addDomListener(this.editable, 'copy', this._onClipboardCopy);
         this.addDomListener(this.editable, 'cut', this._onClipboardCut);
 
@@ -629,6 +631,16 @@ export class OdooEditor extends EventTarget {
                 this._historyMakeSnapshot();
             }, HISTORY_SNAPSHOT_INTERVAL);
         }
+
+        // this._hookToDomListener(
+        //     'paste',
+        //     this.historyPauseSteps.bind(this),
+        //     () => {
+        //         this._updateLink();
+        //         this.historyUnpauseSteps();
+        //         this.historyStep();
+        //     }
+        // );
 
         // -------
         // Toolbar
@@ -703,6 +715,15 @@ export class OdooEditor extends EventTarget {
         this._toRollback = false;
     }
 
+    _eventHandlerWrapper(eventHandler, postHandlerHook) {
+        return (ev) => {
+            this.historyPauseSteps();
+            eventHandler.call(this, ev);
+            postHandlerHook.call(this);
+            this.historyUnpauseSteps();
+            this.historyStep();
+        }
+    }
     /**
      * Update link's href.
      * If label is valid URL, href gets updated and link is tagged as auto-updatable.
@@ -711,7 +732,7 @@ export class OdooEditor extends EventTarget {
     _updateLink() {
         const link = closestElement(this.document.getSelection()?.focusNode, 'a');
         if (!link) return;
-
+        
         if (link.classList.contains('oe_auto_update_link')) {
             // Resolve protocol.
             const protocol = resolveProtocol(link.href);
@@ -759,6 +780,19 @@ export class OdooEditor extends EventTarget {
         this._domListeners.push([element, eventName, boundCallback]);
         element.addEventListener(eventName, boundCallback);
     }
+
+    // _hoookToDomListener(eventName, preCallback, postCallback) {
+    //     const entry = this._domListeners.find(arr => arr[1] === eventName);
+    //     const [element, eventName, boundCallback] = entry;
+    //     element.removeEventListener(eventName, boundCallback);
+    //     if (preCallback) {
+    //         element.addEventListener(eventName, preCallback);
+    //     }
+    //     element.addEventListener(eventName, boundCallback);
+    //     if (postCallback) {
+    //         element.addEventListener(eventName, postCallback)
+    //     }
+    // }
 
     _generateId() {
         // No need for secure random number.
@@ -3160,13 +3194,13 @@ export class OdooEditor extends EventTarget {
                 this._compositionStep();
                 this.revertUserInput(() => {
                     this._applyCommand('oDeleteBackward')
-                    this._updateLink();
+                    // this._updateLink();
                 });
             } else if (ev.inputType === 'deleteContentForward' || isChromeDeleteforward) {
                 this._compositionStep();
                 this.revertUserInput(() => {
                     this._applyCommand('oDeleteForward');
-                    this._updateLink();
+                    // this._updateLink();
                 });
             } else if (ev.inputType === 'insertParagraph' || isChromeInsertParagraph) {
                 this._compositionStep();
@@ -3184,7 +3218,7 @@ export class OdooEditor extends EventTarget {
                             }
                         }
                     }
-                    this._updateLink();
+                    // this._updateLink();
                 });
             } else if (['insertText', 'insertCompositionText'].includes(ev.inputType)) {
                 // insertCompositionText, courtesy of Samsung keyboard.
@@ -3294,16 +3328,16 @@ export class OdooEditor extends EventTarget {
                         setSelection(codeElement.nextSibling, 1);
                     }
                 }
-                this._updateLink();
+                // this._updateLink();
                 this.historyStep();
             } else if (ev.inputType === 'insertLineBreak') {
                 this._compositionStep();
                 this.revertUserInput(() => {
                     this._applyCommand('oShiftEnter');
-                    this._updateLink();
+                    // this._updateLink();
                 });
             } else {
-                this._updateLink();
+                // this._updateLink();
                 this.historyStep();
             }
         } else if (ev.inputType === 'insertCompositionText') {
@@ -4264,13 +4298,6 @@ export class OdooEditor extends EventTarget {
         }
         return Promise.all(promises).then(html => html.join(''));
     }
-    _onPasteWrapper(ev) {
-        this.historyPauseSteps();
-        this._onPaste(ev);
-        this._updateLink();
-        this.historyUnpauseSteps();
-        this.historyStep();
-    }
     /**
      * Handle safe pasting of html or plain text into the editor.
      */
@@ -4538,9 +4565,15 @@ export class OdooEditor extends EventTarget {
             });
         } else if (htmlTransferItem) {
             htmlTransferItem.getAsString(pastedText => {
-                this.execCommand('insert', this._prepareClipboardData(pastedText));
+                // this.execCommand('insert', this._prepareClipboardData(pastedText));
+                this.historyPauseSteps();
+                this._applyCommand('insert', this._prepareClipboardData(pastedText));
+                this._updateLink();
+                this.historyUnpauseSteps();
+                this.historyStep();
             });
         }
+        // should this be done?
         this.historyStep();
     }
 
