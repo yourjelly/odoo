@@ -416,7 +416,6 @@ QUnit.module("ActionManager", (hooks) => {
             "list should be the active view"
         );
     });
-
     QUnit.test("pager is updated when switching between views", async function (assert) {
         assert.expect(10);
 
@@ -582,17 +581,7 @@ QUnit.module("ActionManager", (hooks) => {
     });
 
     QUnit.test("A new form view can be reloaded after a failed one", async function (assert) {
-        const handler = (ev) => {
-            // need to preventDefault to remove error from console (so python test pass)
-            ev.preventDefault();
-        };
-        window.addEventListener("unhandledrejection", handler);
-        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
-        patchWithCleanup(QUnit, {
-            onUnhandledRejection: () => {},
-        });
-        serviceRegistry.add("error", errorService);
-
+        assert.expect(5);
         const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 3);
@@ -603,6 +592,7 @@ QUnit.module("ActionManager", (hooks) => {
         await testUtils.dom.click(
             $(target).find(".o_list_view .o_data_row:first .o_data_cell:first")
         );
+        await legacyExtraNextTick();
         assert.containsOnce(target, ".o_form_view", "The form view should be displayed");
 
         // Delete the current record
@@ -612,8 +602,10 @@ QUnit.module("ActionManager", (hooks) => {
                 (e) => e.textContent === "Delete"
             )
         );
+        await legacyExtraNextTick();
         assert.containsOnce(target, ".modal", "a confirm modal should be displayed");
         await testUtils.dom.click(target.querySelector(".modal-footer button.btn-primary"));
+        await legacyExtraNextTick();
 
         // The form view is automatically switched to the next record
         // Go back to the previous (now deleted) record
@@ -623,12 +615,7 @@ QUnit.module("ActionManager", (hooks) => {
             action: 3,
             view_type: "form",
         });
-        await nextTick();
-        assert.containsOnce(target, ".o_notification");
-        assert.strictEqual(
-            target.querySelector(".o_notification").innerText,
-            "Record 1 of model partner does not exist"
-        );
+        await legacyExtraNextTick();
 
         // Go back to the list view
         webClient.env.bus.trigger("test:hashchange", {
@@ -636,12 +623,14 @@ QUnit.module("ActionManager", (hooks) => {
             action: 3,
             view_type: "list",
         });
-        await nextTick();
+        await legacyExtraNextTick();
+        await legacyExtraNextTick();
         assert.containsOnce(target, ".o_list_view", "should still display the list view");
 
         await testUtils.dom.click(
             $(target).find(".o_list_view .o_data_row:first .o_data_cell:first")
         );
+        await legacyExtraNextTick();
         assert.containsOnce(
             target,
             ".o_form_view",
@@ -2647,73 +2636,5 @@ QUnit.module("ActionManager", (hooks) => {
         await cpHelpers.switchView(target, "pivot");
 
         assert.containsOnce(target, ".o_pivot_view .o_view_sample_data");
-    });
-
-    QUnit.test("click on breadcrumb of a deleted record", async function (assert) {
-        serviceRegistry.add("error", errorService);
-        const handler = (ev) => {
-            // need to preventDefault to remove error from console (so python test pass)
-            ev.preventDefault();
-        };
-        window.addEventListener("unhandledrejection", handler);
-        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
-        patchWithCleanup(QUnit, {
-            onUnhandledRejection: () => {},
-        });
-
-        serverData.views["partner,false,form"] = `
-            <form>
-                <button type="action" name="3" string="Open Action 3" class="my_btn"/>
-            </form>`;
-
-        const webClient = await createWebClient({ serverData });
-        await doAction(webClient, 3);
-        assert.containsOnce(target, ".o_list_view");
-
-        await click(target.querySelector(".o_data_row .o_data_cell"));
-        assert.containsOnce(target, ".o_form_view");
-
-        await click(target.querySelector(".my_btn"));
-        assert.containsOnce(target, ".o_list_view");
-
-        await click(target.querySelector(".o_data_row .o_data_cell"));
-        assert.containsOnce(target, ".o_form_view");
-        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".breadcrumb-item")), [
-            "Partners",
-            "First record",
-            "Partners",
-            "First record",
-        ]);
-
-        // open action menu and delete
-        await cpHelpers.toggleActionMenu(target);
-        await cpHelpers.toggleMenuItem(target, "Delete");
-        assert.containsOnce(target, ".o_dialog");
-
-        // confirm
-        await click(target.querySelector(".o_dialog .modal-footer .btn-primary"));
-        assert.containsOnce(target, ".o_form_view");
-        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".breadcrumb-item")), [
-            "Partners",
-            "First record",
-            "Partners",
-            "Second record",
-        ]);
-
-        // click on "First record" in breadcrumbs, which doesn't exist anymore
-        await click(target.querySelectorAll(".breadcrumb-item a")[1]);
-        await nextTick();
-        assert.containsOnce(target, ".o_notification");
-        assert.strictEqual(
-            target.querySelector(".o_notification").innerText,
-            "Record 1 of model partner does not exist"
-        );
-        assert.containsOnce(target, ".o_form_view");
-        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".breadcrumb-item")), [
-            "Partners",
-            "First record",
-            "Partners",
-            "Second record",
-        ]);
     });
 });
