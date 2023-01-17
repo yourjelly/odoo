@@ -5269,7 +5269,6 @@
                 dataSets,
                 labelRange,
                 type: "bar",
-                background: BACKGROUND_CHART_COLOR,
                 stacked: false,
                 dataSetsHaveTitle,
                 verticalAxisPosition: "left",
@@ -42196,8 +42195,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-01-13T12:30:34.987Z';
-    exports.__info__.hash = '7c01151';
+    exports.__info__.date = '2023-01-17T09:06:50.971Z';
+    exports.__info__.hash = 'b309a0f';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
