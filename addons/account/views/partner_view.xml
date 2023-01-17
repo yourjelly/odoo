@@ -164,7 +164,8 @@
                             <separator string="Warning on the Invoice" colspan="2"/>
                             <field name="invoice_warn" nolabel="1" colspan="2" required="1"/>
                             <field name="invoice_warn_msg" placeholder="Type a message..." colspan="2" nolabel="1"
-                                required="[('invoice_warn','!=', False), ('invoice_warn','!=','no-message')]" invisible="[('invoice_warn','in',(False,'no-message'))]"/>
+                                required="[('invoice_warn','!=', False), ('invoice_warn','!=','no-message')]"
+                                invisible="[('invoice_warn','in',(False,'no-message'))]"/>
                         </group>
                     </group>
                 </page>

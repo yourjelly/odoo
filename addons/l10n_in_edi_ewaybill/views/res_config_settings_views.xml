@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <app name="account" position="inside">
-                <block title="Indian Electronic Waybill" attrs="{'invisible': [('country_code', '!=', 'IN')]}">
+                <block title="Indian Electronic Waybill" invisible="[('country_code', '!=', 'IN')]">
                     <setting id="l10n_in_eway_iap" string="Setup Electronic Waybill" help="Check the documentation to get credentials." company_dependent="1">
                         <div class="content-group">
                             <div class="mt16 row">

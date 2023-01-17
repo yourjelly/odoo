@@ -20,7 +20,8 @@
                            placeholder="City"
                            class="o_address_city"
                            domain="[('country_id', '=', country_id)]"
-                           invisible="[('country_enforce_cities', '=', False)]" readonly="[('type', '=', 'contact'),('parent_id', '!=', False)]"
+                           invisible="[('country_enforce_cities', '=', False)]"
+                           readonly="[('type', '=', 'contact'),('parent_id', '!=', False)]"
                            context="{'default_country_id': country_id, 'default_state_id': state_id, 'default_zipcode': zip}"/>
                     <field name="city"
                            placeholder="City"

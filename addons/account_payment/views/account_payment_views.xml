@@ -33,7 +33,8 @@
                 <field name="suitable_payment_token_ids" invisible="1"/>
                 <field name="use_electronic_payment_method" invisible="1"/>
                 <field name="payment_token_id" options="{'no_create': True}"
-                    invisible="[('use_electronic_payment_method', '!=', True)]" readonly="[('state', '!=', 'draft')]"/>
+                    invisible="[('use_electronic_payment_method', '!=', True)]"
+                    readonly="[('state', '!=', 'draft')]"/>
             </field>
         </field>
     </record>

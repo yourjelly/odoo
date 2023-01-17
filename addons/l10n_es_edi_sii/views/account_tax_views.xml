@@ -10,9 +10,11 @@
                     <field name="l10n_es_type"
                            invisible="[('country_code', '!=', 'ES')]"/>
                     <field name="l10n_es_exempt_reason"
-                           invisible="[('country_code', '!=', 'ES'), ('l10n_es_type', '!=', 'exento')]" required="[('l10n_es_type', '=', 'exento'), ('type_tax_use', '=', 'sale')]"/>
+                           invisible="[('country_code', '!=', 'ES'), ('l10n_es_type', '!=', 'exento')]"
+                           required="[('l10n_es_type', '=', 'exento'), ('type_tax_use', '=', 'sale')]"/>
                     <field name="l10n_es_bien_inversion"
-                           invisible="[('country_code', '!=', 'ES'), ('l10n_es_type', '!=', 'exento')]" required="[('l10n_es_type', '=', 'exento'), ('type_tax_use', '=', 'sale')]"/>
+                           invisible="[('country_code', '!=', 'ES'), ('l10n_es_type', '!=', 'exento')]"
+                           required="[('l10n_es_type', '=', 'exento'), ('type_tax_use', '=', 'sale')]"/>
                 </xpath>
             </field>
         </record>

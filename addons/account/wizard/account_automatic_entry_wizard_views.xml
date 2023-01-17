@@ -19,9 +19,11 @@
                         <group invisible="[('action', '!=', 'change_period')]">
                             <field name="date" string="Recognition Date"/>
                             <field name="expense_accrual_account" string="Accrued Account"
-                                   invisible="[('account_type', '!=', 'expense')]" required="[('account_type', '=', 'expense'), ('action', '=', 'change_period')]"/>
+                                   invisible="[('account_type', '!=', 'expense')]"
+                                   required="[('account_type', '=', 'expense'), ('action', '=', 'change_period')]"/>
                             <field name="revenue_accrual_account" string="Accrued Account"
-                                   invisible="[('account_type', '!=', 'income')]" required="[('account_type', '=', 'income'), ('action', '=', 'change_period')]"/>
+                                   invisible="[('account_type', '!=', 'income')]"
+                                   required="[('account_type', '=', 'income'), ('action', '=', 'change_period')]"/>
                         </group>
                         <group invisible="[('action', '!=', 'change_account')]">
                             <field name="date" string="Transfer Date"/>

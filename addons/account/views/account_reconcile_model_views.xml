@@ -101,11 +101,13 @@
                                         <div class="d-flex gap-2" invisible="[('rule_type', '=', 'writeoff_button')]">
                                             <field name="match_amount"/>
                                             <field name="match_amount_min"
-                                                   invisible="[('match_amount', 'in', (False, 'lower'))]" required="[('match_amount', '!=', False)]"/>
+                                                   invisible="[('match_amount', 'in', (False, 'lower'))]"
+                                                   required="[('match_amount', '!=', False)]"/>
                                             <span class="o_form_label"
                                                   invisible="[('match_amount', '!=', 'between')]">and</span>
                                             <field name="match_amount_max"
-                                                   invisible="[('match_amount', 'in', (False, 'greater'))]" required="[('match_amount', '=', 'between')]"/>
+                                                   invisible="[('match_amount', 'in', (False, 'greater'))]"
+                                                   required="[('match_amount', '=', 'between')]"/>
                                         </div>
                                         <label for="allow_payment_tolerance"
                                                invisible="[('rule_type', '!=', 'invoice_matching')]"/>
@@ -133,19 +135,22 @@
                                         <div class="d-flex gap-3" invisible="[('rule_type', '=', 'writeoff_button')]">
                                             <field name="match_label"/>
                                             <field name="match_label_param"
-                                                   invisible="[('match_label', '=', False)]" required="[('match_label', '!=', False)]"/>
+                                                   invisible="[('match_label', '=', False)]"
+                                                   required="[('match_label', '!=', False)]"/>
                                         </div>
                                         <label for="match_note" invisible="[('rule_type', '=', 'writeoff_button')]"/>
                                         <div class="d-flex gap-3" invisible="[('rule_type', '=', 'writeoff_button')]">
                                             <field name="match_note"/>
                                             <field name="match_note_param"
-                                                   invisible="[('match_note', '=', False)]" required="[('match_note', '!=', False)]"/>
+                                                   invisible="[('match_note', '=', False)]"
+                                                   required="[('match_note', '!=', False)]"/>
                                         </div>
                                         <label for="match_transaction_type" invisible="[('rule_type', '=', 'writeoff_button')]"/>
                                         <div class="d-flex gap-3" invisible="[('rule_type', '=', 'writeoff_button')]">
                                             <field name="match_transaction_type"/>
                                             <field name="match_transaction_type_param"
-                                                   invisible="[('match_transaction_type', '=', False)]" required="[('match_transaction_type', '!=', False)]"/>
+                                                   invisible="[('match_transaction_type', '=', False)]"
+                                                   required="[('match_transaction_type', '!=', False)]"/>
                                         </div>
                                         <field name="match_partner"
                                                invisible="[('rule_type', '=', 'writeoff_button')]"/>
