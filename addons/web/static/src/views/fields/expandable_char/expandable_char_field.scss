@@ -1,0 +1,27 @@
+// Heading element normally takes the full width of the parent,
+// so the char_field wrapper should take the same width.
+.o_expandable_char {
+    width: inherit;
+    display: grid;
+
+    textarea {
+        resize: none;
+
+        /* Firefox shows scrollbar on growth, you can hide like this. */
+        overflow: hidden;
+        grid-area: 1 / 1 / 2 / 2;
+        font-weight: inherit;
+    }
+
+    span.duplicate {
+        /* This is how textarea text behaves */
+        white-space: pre-wrap;
+
+        /* Hidden from view, clicks, and screen readers */
+        visibility: hidden;
+        grid-area: 1 / 1 / 2 / 2;
+        padding: 1px 0;
+        border-bottom: 1px solid transparent;
+        font-weight: inherit;
+    }
+}
