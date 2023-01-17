@@ -61,7 +61,8 @@
                             <field name="reply_to_mode" invisible="[('composition_mode', '!=', 'mass_mail')]" widget="radio"/>
                             <group>
                                 <field name="reply_to" string="Reply-to Address" placeholder='e.g: "info@mycompany.odoo.com"'
-                                    invisible="['|', ('reply_to_mode', '=', 'update'), ('composition_mode', '!=', 'mass_mail')]" required="[('reply_to_mode', '!=', 'update'), ('composition_mode', '=', 'mass_mail')]"/>
+                                    invisible="['|', ('reply_to_mode', '=', 'update'), ('composition_mode', '!=', 'mass_mail')]"
+                                    required="[('reply_to_mode', '!=', 'update'), ('composition_mode', '=', 'mass_mail')]"/>
                             </group>
                         </page>
                     </notebook>

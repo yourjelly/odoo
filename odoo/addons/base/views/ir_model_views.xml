@@ -81,23 +81,34 @@
                                                 </group>
                                                 <group>
                                                     <field name="translate"
-                                                        readonly="[('ttype','not in',['char','text','html'])]" invisible="[('ttype','not in',['char','text','html'])]"/>
+                                                        readonly="[('ttype','not in',['char','text','html'])]"
+                                                        invisible="[('ttype','not in',['char','text','html'])]"/>
                                                     <field name="size" groups="base.group_no_one"
-                                                        readonly="[('ttype','not in',['char','reference'])]" invisible="[('ttype','not in',['char','reference'])]"/>
+                                                        readonly="[('ttype','not in',['char','reference'])]"
+                                                        invisible="[('ttype','not in',['char','reference'])]"/>
                                                     <field name="relation"
-                                                        required="[('ttype','in',['many2one','one2many','many2many'])]" readonly="[('ttype','not in',['many2one','one2many','many2many'])]" invisible="[('ttype','not in',['many2one','one2many','many2many'])]"/>
+                                                        required="[('ttype','in',['many2one','one2many','many2many'])]"
+                                                        readonly="[('ttype','not in',['many2one','one2many','many2many'])]"
+                                                        invisible="[('ttype','not in',['many2one','one2many','many2many'])]"/>
                                                     <field name="on_delete" groups="base.group_no_one"
-                                                        readonly="[('ttype','!=','many2one')]" invisible="[('ttype','!=','many2one')]"/>
+                                                        readonly="[('ttype','!=','many2one')]"
+                                                        invisible="[('ttype','!=','many2one')]"/>
                                                     <field name="relation_field"
-                                                        required="[('ttype','=','one2many')]" readonly="[('ttype','!=','one2many')]" invisible="[('ttype','!=','one2many')]"/>
+                                                        required="[('ttype','=','one2many')]"
+                                                        readonly="[('ttype','!=','one2many')]"
+                                                        invisible="[('ttype','!=','one2many')]"/>
                                                     <field name="relation_table" groups="base.group_no_one"
-                                                        readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]" invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
+                                                        readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"
+                                                        invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
                                                     <field name="column1" groups="base.group_no_one"
-                                                        readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]" invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
+                                                        readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"
+                                                        invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
                                                     <field name="column2" groups="base.group_no_one"
-                                                        readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]" invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
+                                                        readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"
+                                                        invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
                                                     <field name="domain" groups="base.group_no_one"
-                                                        readonly="[('ttype','not in',['many2one','one2many','many2many'])]" invisible="[('ttype','not in',['many2one','one2many','many2many'])]"/>
+                                                        readonly="[('ttype','not in',['many2one','one2many','many2many'])]"
+                                                        invisible="[('ttype','not in',['many2one','one2many','many2many'])]"/>
                                                 </group>
                                             </group>
                                             <group readonly="[('ttype','not in',['selection','reference'])]" invisible="[('ttype','not in',['selection','reference'])]">
@@ -261,25 +272,37 @@
                                     </group>
                                     <group>
                                         <field name="translate"
-                                            readonly="[('ttype','not in',['char','text','html'])]" invisible="[('ttype','not in',['char','text','html'])]"/>
+                                            readonly="[('ttype','not in',['char','text','html'])]"
+                                            invisible="[('ttype','not in',['char','text','html'])]"/>
                                         <field name="size" groups="base.group_no_one"
-                                            readonly="[('ttype','not in',['char','reference'])]" invisible="[('ttype','not in',['char','reference'])]"/>
+                                            readonly="[('ttype','not in',['char','reference'])]"
+                                            invisible="[('ttype','not in',['char','reference'])]"/>
                                         <field name="relation"
-                                            required="[('ttype','in',['many2one','one2many','many2many'])]" readonly="[('ttype','not in',['many2one','one2many','many2many'])]" invisible="[('ttype','not in',['many2one','one2many','many2many'])]"/>
+                                            required="[('ttype','in',['many2one','one2many','many2many'])]"
+                                            readonly="[('ttype','not in',['many2one','one2many','many2many'])]"
+                                            invisible="[('ttype','not in',['many2one','one2many','many2many'])]"/>
                                         <field name="group_expand" groups="base.group_no_one"
-                                            readonly="[('ttype','not in', ['many2one', 'selection'])]" invisible="[('ttype','not in', ['many2one', 'selection'])]"/>
+                                            readonly="[('ttype','not in', ['many2one', 'selection'])]"
+                                            invisible="[('ttype','not in', ['many2one', 'selection'])]"/>
                                         <field name="on_delete" groups="base.group_no_one"
-                                            readonly="[('ttype','!=','many2one')]" invisible="[('ttype','!=','many2one')]"/>
+                                            readonly="[('ttype','!=','many2one')]"
+                                            invisible="[('ttype','!=','many2one')]"/>
                                         <field name="relation_field"
-                                            required="[('ttype','=','one2many')]" readonly="[('ttype','!=','one2many')]" invisible="[('ttype','!=','one2many')]"/>
+                                            required="[('ttype','=','one2many')]"
+                                            readonly="[('ttype','!=','one2many')]"
+                                            invisible="[('ttype','!=','one2many')]"/>
                                         <field name="relation_table" groups="base.group_no_one"
-                                            readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]" invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
+                                            readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"
+                                            invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
                                         <field name="column1" groups="base.group_no_one"
-                                            readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]" invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
+                                            readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"
+                                            invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
                                         <field name="column2" groups="base.group_no_one"
-                                            readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]" invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
+                                            readonly="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"
+                                            invisible="['|', ('ttype','!=','many2many'), ('state','!=','manual')]"/>
                                         <field name="domain" groups="base.group_no_one"
-                                            readonly="[('ttype','not in',['many2one','one2many','many2many'])]" invisible="[('ttype','not in',['many2one','one2many','many2many'])]"/>
+                                            readonly="[('ttype','not in',['many2one','one2many','many2many'])]"
+                                            invisible="[('ttype','not in',['many2one','one2many','many2many'])]"/>
                                     </group>
                                 </group>
                                 <group readonly="[('ttype','not in',['selection','reference'])]" invisible="[('ttype','not in',['selection','reference'])]">

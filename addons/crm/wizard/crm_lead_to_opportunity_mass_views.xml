@@ -37,7 +37,8 @@
                     <group col="2">
                         <field name="partner_id"
                             widget="res_partner_many2one"
-                            required="[('action', '=', 'exist')]" invisible="[('action','!=','exist')]"
+                            required="[('action', '=', 'exist')]"
+                            invisible="[('action','!=','exist')]"
                             context="{'show_vat': True}"
                             class="oe_inline"/>
                     </group>

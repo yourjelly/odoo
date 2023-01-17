@@ -10,33 +10,33 @@
                 <field name="session_state" invisible="1"/>
                 <field name="question_ids" invisible="1"/>
                 <header>
-                    <button name="action_send_survey" string="Share" type="object" class="oe_highlight" attrs="{'invisible': [('active', '=', False)]}"/>
+                    <button name="action_send_survey" string="Share" type="object" class="oe_highlight" invisible="[('active', '=', False)]"/>
                     <button name="action_result_survey" string="See results" type="object" class="oe_highlight"
-                      attrs="{'invisible': [('answer_done_count', '&lt;=', 0)]}"/>
+                      invisible="[('answer_done_count', '&lt;=', 0)]"/>
                     <button name="action_start_session" string="Create Live Session" type="object" class="d-none d-sm-block"
-                        attrs="{'invisible': ['|', ('session_state', '!=', False), '|', ('active', '=', False), ('certification', '=', True)]}" />
+                        invisible="['|', ('session_state', '!=', False), '|', ('active', '=', False), ('certification', '=', True)]" />
                     <button name="action_open_session_manager" string="Open Session Manager" type="object" class="d-none d-sm-block"
-                        attrs="{'invisible': [('session_state', '=', False)]}" />
+                        invisible="[('session_state', '=', False)]" />
                     <button name="action_end_session" string="Close Live Session" type="object" class="d-none d-sm-block"
-                        attrs="{'invisible': [('session_state', 'not in', ['ready', 'in_progress'])]}" />
-                    <button name="action_test_survey" string="Test" type="object" attrs="{'invisible': ['|', ('active', '=', False), ('question_ids', '=', [])]}"/>
-                    <button name="action_unarchive" string="Reopen" class="btn-primary" type="object" attrs="{'invisible': [('active', '=', True)]}"/>
-                    <button name="action_print_survey" string="Print" type="object" attrs="{'invisible': [('active', '=', False)]}"/>
-                    <button name="action_archive" string="Close" type="object" attrs="{'invisible': [('active', '=', False)]}"/>
+                        invisible="[('session_state', 'not in', ['ready', 'in_progress'])]" />
+                    <button name="action_test_survey" string="Test" type="object" invisible="['|', ('active', '=', False), ('question_ids', '=', [])]"/>
+                    <button name="action_unarchive" string="Reopen" class="btn-primary" type="object" invisible="[('active', '=', True)]"/>
+                    <button name="action_print_survey" string="Print" type="object" invisible="[('active', '=', False)]"/>
+                    <button name="action_archive" string="Close" type="object" invisible="[('active', '=', False)]"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_survey_user_input"
                             type="object"
                             class="oe_stat_button"
-                            attrs="{'invisible': [('access_mode', '=', 'public')]}"
+                            invisible="[('access_mode', '=', 'public')]"
                             icon="fa-envelope-o">
                             <field string="Registered" name="answer_count" widget="statinfo"/>
                         </button>
                         <button name="action_survey_user_input_certified"
                             type="object"
                             class="oe_stat_button"
-                            attrs="{'invisible': [('certification', '=', False)]}"
+                            invisible="[('certification', '=', False)]"
                             icon="fa-trophy">
                             <field string="Certified" name="success_count" widget="statinfo"/>
                         </button>
@@ -47,11 +47,11 @@
                             <field string="Participations" name="answer_done_count" widget="statinfo"/>
                         </button>
                     </div>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="[('active', '=', True)]"/>
                     <field name="background_image" widget="image" class="oe_avatar"/>
                     <div class="oe_title" style="width: 100%;">
-                        <label for="title" class="oe_edit_only" string="Survey Title" attrs="{'invisible': [('certification', '=', True)]}"/>
-                        <label for="title" class="oe_edit_only" string="Certification Title" attrs="{'invisible': [('certification', '=', False)]}"/>
+                        <label for="title" class="oe_edit_only" string="Survey Title" invisible="[('certification', '=', True)]"/>
+                        <label for="title" class="oe_edit_only" string="Certification Title" invisible="[('certification', '=', False)]"/>
                         <h1>
                             <field name="title" placeholder="e.g. Satisfaction Survey"/>
                         </h1>
@@ -77,7 +77,8 @@
                                     <field name="matrix_row_ids" invisible="1"/>
                                     <field name="survey_id" invisible="1"/>
                                     <field name="random_questions_count"
-                                        attrs="{'column_invisible': [('parent.questions_selection', '=', 'all')], 'invisible': [('is_page', '=', False)]}"/>
+                                        column_invisible="[('parent.questions_selection', '=', 'all')]"
+                                        invisible="[('is_page', '=', False)]"/>
                                     <field name="is_conditional" invisible="1"/>
                                     <field name="triggering_question_id" invisible="1"/>
                                     <field name="triggering_answer_id" invisible="1"/>
@@ -95,20 +96,20 @@
                             <group name="options">
                                 <group string="Questions" name="questions">
                                     <field name="questions_layout" widget="radio"
-                                        attrs="{'readonly': [('session_state', 'in', ['ready', 'in_progress'])]}"/>
-                                    <field name="progression_mode" widget="radio" attrs="{'invisible': [('questions_layout', '=', 'one_page')]}"/>
+                                        readonly="[('session_state', 'in', ['ready', 'in_progress'])]"/>
+                                    <field name="progression_mode" widget="radio" invisible="[('questions_layout', '=', 'one_page')]"/>
                                     <field name="questions_selection" widget="radio" />
-                                    <field name="users_can_go_back" string="Back Button" attrs="{'invisible': [('questions_layout', '=', 'one_page')]}"/>
+                                    <field name="users_can_go_back" string="Back Button" invisible="[('questions_layout', '=', 'one_page')]"/>
                                 </group>
                                 <group string="Participants" name="participants">
                                     <field name="access_mode"/>
                                     <field name="users_login_required"/>
                                     <label for="is_attempts_limited" string="Limit Attempts"
-                                           attrs="{'invisible': ['|', ('has_conditional_questions', '=', True), '&amp;', ('access_mode', '=', 'public'), ('users_login_required', '=', False)]}"/>
+                                           invisible="['|', ('has_conditional_questions', '=', True), '&amp;', ('access_mode', '=', 'public'), ('users_login_required', '=', False)]"/>
                                     <div class="o_checkbox_optional_field"
-                                        attrs="{'invisible': ['|', ('has_conditional_questions', '=', True), '&amp;', ('access_mode', '=', 'public'), ('users_login_required', '=', False)]}">
+                                        invisible="['|', ('has_conditional_questions', '=', True), '&amp;', ('access_mode', '=', 'public'), ('users_login_required', '=', False)]">
                                         <field name="is_attempts_limited" nolabel="1"/>
-                                        <div attrs="{'invisible': [('is_attempts_limited', '=', False)]}">
+                                        <div invisible="[('is_attempts_limited', '=', False)]">
                                             to <field name="attempts_limit" nolabel="1" class="oe_inline"/> attempts
                                         </div>
                                     </div>
@@ -117,16 +118,16 @@
                                     <label for="is_time_limited" string="Survey Time Limit"/>
                                     <div class="o_checkbox_optional_field">
                                         <field name="is_time_limited" nolabel="1"/>
-                                        <div attrs="{'invisible': [('is_time_limited', '=', False)]}">
+                                        <div invisible="[('is_time_limited', '=', False)]">
                                             <field name="time_limit" widget="float_time" nolabel="1" class="oe_inline"/> minutes
                                         </div>
                                     </div>  
                                     <field name="scoring_type" widget="radio" />
-                                    <field name="scoring_success_min" attrs="{'invisible': [('scoring_type', '=', 'no_scoring')]}" />
+                                    <field name="scoring_success_min" invisible="[('scoring_type', '=', 'no_scoring')]" />
                                     <label for="certification"/>
                                     <div class="o_checkbox_optional_field">
                                         <field name="certification" nolabel="1"/>
-                                        <div attrs="{'invisible': [('certification', '=', False)]}" class="w-100">
+                                        <div invisible="[('certification', '=', False)]" class="w-100">
                                             <field name="certification_report_layout" placeholder="Pick a Style..." class="w-50"/>
                                             <button name="action_survey_preview_certification_template"
                                                 string="Preview" type="object"
@@ -135,23 +136,24 @@
                                     </div> 
                                     <field name="certification_mail_template_id"
                                         placeholder="Pick a Template..."
-                                        attrs="{'invisible': [('certification', '=', False)]}"/>
+                                        invisible="[('certification', '=', False)]"/>
                                     <label for="certification_give_badge"
-                                           attrs="{'invisible': ['|', ('certification', '=', False), ('users_login_required', '=', False)]}"/>
+                                           invisible="['|', ('certification', '=', False), ('users_login_required', '=', False)]"/>
                                     <div class="float-start o_checkbox_optional_field"
-                                        attrs="{'invisible': ['|', ('certification', '=', False), ('users_login_required', '=', False)]}">
+                                        invisible="['|', ('certification', '=', False), ('users_login_required', '=', False)]">
                                         <field name="certification_give_badge"/>
-                                        <div attrs="{'invisible': [('certification_give_badge', '=', False)]}">
+                                        <div invisible="[('certification_give_badge', '=', False)]">
                                             <field name="certification_badge_id"
                                                 placeholder="Pick a Badge..."
-                                                attrs="{'invisible': ['|', ('certification_give_badge', '=', False), ('certification_badge_id', '!=', False)], 'required': [('certification_give_badge', '=', True)]}"
+                                                invisible="['|', ('certification_give_badge', '=', False), ('certification_badge_id', '!=', False)]"
+                                                required="[('certification_give_badge', '=', True)]"
                                                 domain="[('survey_id', '=', active_id), ('survey_id', '!=', False)]"
                                                 context="{'default_name': title,
                                                         'default_description': 'Congratulations, you have succeeded this certification',
                                                         'default_rule_auth': 'nobody',
                                                         'default_level': None,
                                                         'form_view_ref': 'survey.gamification_badge_form_view_simplified'}"/>
-                                            <field name="certification_badge_id_dummy" attrs="{'invisible': ['|', ('certification_give_badge', '=', False), ('certification_badge_id', '=', False)]}"
+                                            <field name="certification_badge_id_dummy" invisible="['|', ('certification_give_badge', '=', False), ('certification_badge_id', '=', False)]"
                                                 placeholder="Pick a Badge..."
                                                 options="{'no_create': True}"
                                                 context="{'form_view_ref': 'survey.gamification_badge_form_view_simplified'}"/>
@@ -191,7 +193,7 @@
                 <field name="title"/>
                 <button name="certification" type="button" disabled="disabled"
                     icon="fa-trophy" title="Certification" aria-label="Certification"
-                    attrs="{'invisible': [('certification', '=', False)]}"/>
+                    invisible="[('certification', '=', False)]"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
                 <field name="answer_duration_avg" widget="float_time"/>
                 <field name="answer_count"/>
@@ -285,43 +287,43 @@
                                 <button name="action_send_survey"
                                         string="Share" type="object"
                                         class="btn btn-secondary border"
-                                        attrs="{'invisible': [('active', '=', False)]}">
+                                        invisible="[('active', '=', False)]">
                                     Share
                                 </button>
                                 <button name="action_test_survey"
                                         string="Test" type="object"
                                         class="btn btn-secondary border"
-                                        attrs="{'invisible': [('active', '=', False)]}">
+                                        invisible="[('active', '=', False)]">
                                     Test
                                 </button>
                                 <button name="action_result_survey"
                                         string="See results" type="object"
                                         class="btn btn-secondary border"
-                                        attrs="{'invisible': [('active', '=', False)]}">
+                                        invisible="[('active', '=', False)]">
                                     See results
                                 </button>
                                 <button name="action_start_session"
                                         string="Start Live Session" type="object"
                                         class="btn btn-secondary border"
-                                        attrs="{'invisible': ['|', '|', ('session_state', '!=', False), ('certification', '=', True), ('active', '=', False)]}">
+                                        invisible="['|', '|', ('session_state', '!=', False), ('certification', '=', True), ('active', '=', False)]">
                                     Start Live Session
                                 </button>
                                 <button name="action_end_session"
                                         string="End Live Session" type="object"
                                         class="btn btn-secondary border"
-                                        attrs="{'invisible': ['|', ('session_state', 'not in', ['ready', 'in_progress']), ('active', '=', False)]}">
+                                        invisible="['|', ('session_state', 'not in', ['ready', 'in_progress']), ('active', '=', False)]">
                                     End Live Session
                                 </button>
                             </div>
                             <widget name="web_ribbon" title="Archived"
                                 bg_color="bg-danger"
-                                attrs="{'invisible': [('active', '=', True)]}"/>
+                                invisible="[('active', '=', True)]"/>
                         </div>
                         <!-- displayed in grouped mode -->
                         <div class="o_survey_kanban_card_grouped">
                             <widget name="web_ribbon" title="Archived"
                                 bg_color="bg-danger"
-                                attrs="{'invisible': [('active', '=', True)]}"/>
+                                invisible="[('active', '=', True)]"/>
                             <div class="o_kanban_record_top">
                                 <h4 class="o_kanban_record_title p-0 mb4"><field name="title" /></h4>
                             </div>

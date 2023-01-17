@@ -59,7 +59,9 @@
                         <group string="Warning when Purchasing this Product" groups="purchase.group_warning_purchase">
                             <field name="purchase_line_warn" nolabel="1" colspan="2"/>
                             <field name="purchase_line_warn_msg" colspan="2" nolabel="1" placeholder="Type a message..."
-                                required="[('purchase_line_warn','!=','no-message')]" readonly="[('purchase_line_warn','=','no-message')]" invisible="[('purchase_line_warn','=','no-message')]"/>
+                                required="[('purchase_line_warn','!=','no-message')]"
+                                readonly="[('purchase_line_warn','=','no-message')]"
+                                invisible="[('purchase_line_warn','=','no-message')]"/>
                         </group>
                     </group>
                 </group>

@@ -19,7 +19,8 @@
                         ('date_end','&gt;=',time.strftime('%Y-%m-%d 00:00:00')),
                         '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)
                     ]"
-                    invisible="[('product_type', '!=', 'event')]" required="[('product_type', '=', 'event')]"
+                    invisible="[('product_type', '!=', 'event')]"
+                    required="[('product_type', '=', 'event')]"
                     options="{'no_open': True, 'no_create': True}"
                 />
                 <field

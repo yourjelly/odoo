@@ -33,7 +33,8 @@
                     <field name="on_change_field_ids" string="Trigger Fields"
                         options="{'no_open': True, 'no_create': True}"
                         domain="[('model_id', '=', model_id)]"
-                        invisible="[('trigger', '!=', 'on_change')]" required="[('trigger', '=', 'on_change')]"
+                        invisible="[('trigger', '!=', 'on_change')]"
+                        required="[('trigger', '=', 'on_change')]"
                         widget='many2many_tags'/>
 
                     <field name="filter_pre_domain" widget="domain" options="{'model': 'model_name', 'in_dialog': True}"
@@ -41,7 +42,8 @@
                     <field name="filter_domain" widget="domain" options="{'model': 'model_name', 'in_dialog': True}"/>
                     <field name="trg_date_id"
                         options="{'no_open': True, 'no_create': True}"
-                        invisible="[('trigger', '!=', 'on_time')]" required="[('trigger', '=', 'on_time')]"/>
+                        invisible="[('trigger', '!=', 'on_time')]"
+                        required="[('trigger', '=', 'on_time')]"/>
                     <label for="trg_date_range"
                         invisible="[('trigger', '!=', 'on_time')]"/>
                     <div class="o_row" invisible="[('trigger', '!=', 'on_time')]">

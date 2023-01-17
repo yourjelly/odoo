@@ -18,7 +18,8 @@
                 <group invisible="[('code', '!=', 'alipay')]">
                     <field name="alipay_payment_method" widget="radio"/>
                     <field name="alipay_seller_email"
-                           invisible="[('alipay_payment_method', '=', 'standard_checkout')]" required="[('code', '=', 'alipay'), ('alipay_payment_method', '=', 'express_checkout')]"/>
+                           invisible="[('alipay_payment_method', '=', 'standard_checkout')]"
+                           required="[('code', '=', 'alipay'), ('alipay_payment_method', '=', 'express_checkout')]"/>
                     <field name="alipay_merchant_partner_id"/>
                     <field name="alipay_md5_signature_key" password="True"/>
                 </group>

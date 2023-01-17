@@ -122,7 +122,8 @@
             <xpath expr="//page[@name='mail_body']" position="after">
                 <page string="SMS Content" name="sms_body" invisible="[('mailing_type', '!=', 'sms')]">
                     <field name="body_plaintext" widget="sms_widget"
-                        required="[('mailing_type', '=', 'sms')]" readonly="[('state', 'in', ('sending', 'done'))]"
+                        required="[('mailing_type', '=', 'sms')]"
+                        readonly="[('state', 'in', ('sending', 'done'))]"
                         options="{'dynamic_placeholder': true}" enable_emojis="true"/>
                 </page>
             </xpath>

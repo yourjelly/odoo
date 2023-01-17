@@ -200,7 +200,8 @@
                                             <field name="contact_list_ids" widget="many2many_tags"
                                                 placeholder="Select mailing lists..." class="oe_inline mb-0"
                                                 context="{'form_view_ref': 'mass_mailing.mailing_list_view_form_simplified'}"
-                                                required="[('mailing_on_mailing_list', '=', True)]" readonly="[('state', 'in', ('sending', 'done'))]"/>
+                                                required="[('mailing_on_mailing_list', '=', True)]"
+                                                readonly="[('state', 'in', ('sending', 'done'))]"/>
                                             <button icon="fa-user-plus" type="object" class="btn btn-secondary py-0 px-1 ms-1"
                                                 invisible="['|', '|', ('contact_list_ids', '=', False), ('contact_list_ids', '=', []), ('state', 'in', ('sending', 'done'))]"
                                                 name="action_view_mailing_contacts" title="Add Mailing Contacts"/>
@@ -265,9 +266,13 @@
                                             </span>
                                         </span>
                                         <field name="ab_testing_winner_selection"
-                                            required="[('ab_testing_enabled', '=', True), ('mailing_type', '=', 'mail')]" invisible="['|', ('ab_testing_enabled', '=', False), ('mailing_type', '!=', 'mail')]" readonly="[('state', '!=', 'draft')]"/>
+                                            required="[('ab_testing_enabled', '=', True), ('mailing_type', '=', 'mail')]"
+                                            invisible="['|', ('ab_testing_enabled', '=', False), ('mailing_type', '!=', 'mail')]"
+                                            readonly="[('state', '!=', 'draft')]"/>
                                         <field name="ab_testing_schedule_datetime"
-                                            required="[('ab_testing_enabled', '=', True), ('ab_testing_winner_selection', '!=', 'manual')]" readonly="['|', ('ab_testing_enabled', '=', False), ('state', '!=', 'draft')]" invisible="['|', ('ab_testing_enabled', '=', False), ('ab_testing_winner_selection', '=', 'manual')]"/>
+                                            required="[('ab_testing_enabled', '=', True), ('ab_testing_winner_selection', '!=', 'manual')]"
+                                            readonly="['|', ('ab_testing_enabled', '=', False), ('state', '!=', 'draft')]"
+                                            invisible="['|', ('ab_testing_enabled', '=', False), ('ab_testing_winner_selection', '=', 'manual')]"/>
                                     </group>
                                     <div>
                                         <field name="ab_testing_mailings_count" invisible="1"/>
@@ -310,9 +315,12 @@
                                         <label for="reply_to"/>
                                         <div name="reply_to_details">
                                             <field name="reply_to_mode" widget="radio"
-                                                invisible="[('mailing_model_name', 'in', ['mailing.contact', 'res.partner', 'mailing.list'])]" readonly="[('state', 'in', ('sending', 'done'))]"/>
+                                                invisible="[('mailing_model_name', 'in', ['mailing.contact', 'res.partner', 'mailing.list'])]"
+                                                readonly="[('state', 'in', ('sending', 'done'))]"/>
                                             <field name="reply_to"
-                                                required="[('reply_to_mode', '=', 'new')]" invisible="[('reply_to_mode', '=', 'update')]" readonly="[('state', 'in', ('sending', 'done'))]"/>
+                                                required="[('reply_to_mode', '=', 'new')]"
+                                                invisible="[('reply_to_mode', '=', 'update')]"
+                                                readonly="[('state', 'in', ('sending', 'done'))]"/>
                                             <div style="margin-top:-5px">
                                                 <small class="oe_edit_only text-muted mb-2"
                                                     style="font-size:74%"

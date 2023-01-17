@@ -122,9 +122,11 @@
                                             placeholder='e.g "https://drive.google.com/file/..."'
                                             widget="url"/>
                                         <field name="document_binary_content" string="" options="{'accepted_file_extensions': '.pdf'}"
-                                            invisible="['|', ('source_type', '=', 'external'), ('slide_category', '!=', 'document')]" readonly="['|', ('source_type', '=', 'external'), ('slide_category', '!=', 'document')]"/>
+                                            invisible="['|', ('source_type', '=', 'external'), ('slide_category', '!=', 'document')]"
+                                            readonly="['|', ('source_type', '=', 'external'), ('slide_category', '!=', 'document')]"/>
                                         <field name="image_binary_content" string="" options="{'accepted_file_extensions': 'image/*'}"
-                                            invisible="['|', ('source_type', '=', 'external'), ('slide_category', '!=', 'infographic')]" readonly="['|', ('source_type', '=', 'external'), ('slide_category', '!=', 'infographic')]"/>
+                                            invisible="['|', ('source_type', '=', 'external'), ('slide_category', '!=', 'infographic')]"
+                                            readonly="['|', ('source_type', '=', 'external'), ('slide_category', '!=', 'infographic')]"/>
                                     </group>
                                     <group name="related_details">
                                         <field name="user_id" string="Responsible" domain="[('share', '=', False)]" widget="many2one_avatar"/>
@@ -153,7 +155,8 @@
                                             <field name="file_name" invisible="1"/>
                                             <field name="data" readonly="[('resource_type', '=', 'url')]" filename="file_name"/>
                                             <field name="link" string="Link"
-                                                readonly="[('resource_type', '=', 'file')]" required="[('resource_type', '=', 'url')]"/>
+                                                readonly="[('resource_type', '=', 'file')]"
+                                                required="[('resource_type', '=', 'url')]"/>
                                         </tree>
                                     </field>
                                 </group>

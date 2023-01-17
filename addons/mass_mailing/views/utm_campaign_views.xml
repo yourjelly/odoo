@@ -51,7 +51,8 @@
                         <field name="ab_testing_completed" invisible="1"/>
                         <field name="ab_testing_winner_selection" readonly="[('ab_testing_completed', '=', True)]"/>
                         <field name="ab_testing_schedule_datetime"
-                            invisible="[('ab_testing_winner_selection', '=', 'manual')]" readonly="[('ab_testing_completed', '=', True)]"/>
+                            invisible="[('ab_testing_winner_selection', '=', 'manual')]"
+                            readonly="[('ab_testing_completed', '=', True)]"/>
                     </group>
                 </group>
             </xpath>

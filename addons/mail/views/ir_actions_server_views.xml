@@ -33,11 +33,13 @@
                     <field name="partner_ids" widget="many2many_tags"
                            invisible="[('state', '!=', 'followers')]"/>
                     <field name="template_id"
-                           invisible="[('state', '!=', 'mail_post')]" required="[('state', '=', 'mail_post')]"
+                           invisible="[('state', '!=', 'mail_post')]"
+                           required="[('state', '=', 'mail_post')]"
                            context="{'default_model': model_name,
                                      'default_use_default_to': True}"/>
                     <field name="mail_post_method"
-                           invisible="[('state', '!=', 'mail_post')]" required="[('state', '=', 'mail_post')]"/>
+                           invisible="[('state', '!=', 'mail_post')]"
+                           required="[('state', '=', 'mail_post')]"/>
                     <field name="mail_post_autofollow" invisible="1"/>
                 </xpath>
             </field>

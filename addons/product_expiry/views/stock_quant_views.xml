@@ -24,7 +24,8 @@
             <xpath expr="//field[@name='lot_id']" position="after">
                 <field name="use_expiration_date" invisible="1"/>
                 <field name="removal_date" optional="hide"
-                    invisible="[bool(context.get('hide_removal_date'))]" readonly="['|', ('tracking', '=', 'none'), ('use_expiration_date', '=', False)]"/>
+                    invisible="[bool(context.get('hide_removal_date'))]"
+                    readonly="['|', ('tracking', '=', 'none'), ('use_expiration_date', '=', False)]"/>
             </xpath>
         </field>
     </record>

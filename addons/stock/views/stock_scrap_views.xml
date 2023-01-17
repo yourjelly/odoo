@@ -169,7 +169,8 @@
                             </div>
                             <field name="lot_id" groups="stock.group_production_lot"
                                 context="{'default_company_id': company_id, 'default_product_id': product_id}"
-                                invisible="['|',('product_id', '=', False),('tracking', '=', 'none')]" required="[('tracking', '!=', 'none')]"/>
+                                invisible="['|',('product_id', '=', False),('tracking', '=', 'none')]"
+                                required="[('tracking', '!=', 'none')]"/>
                         </group>
                         <group>
                             <field name="picking_id" invisible="1"/>

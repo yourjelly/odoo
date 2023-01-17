@@ -266,7 +266,8 @@
                         column_invisible="[not context.get('show_owner')]"
                         groups="stock.group_tracking_owner"/>
                     <field name="reserved_uom_qty"
-                        column_invisible="[not context.get('show_reserved_quantity')]" readonly="1"/>
+                        column_invisible="[not context.get('show_reserved_quantity')]"
+                        readonly="1"/>
                     <field name="state" invisible="1"/>
                     <field name="is_locked" invisible="1"/>
                     <field name="picking_code" invisible="1"/>

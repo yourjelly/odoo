@@ -27,7 +27,8 @@
                         <group name="activity_planning" string="Next Activity">
                             <field name="chaining_type" invisible="[('category', '=', 'upload_file')]"/>
                             <field name="triggered_next_type_id" options="{'no_open': True}" context="{'default_res_model': res_model}"
-                                required="['&amp;', ('chaining_type', '=', 'trigger'), ('category', '!=', 'upload_file')]" invisible="['&amp;', ('chaining_type', '=', 'suggest'), ('category', '!=', 'upload_file')]"/>
+                                required="['&amp;', ('chaining_type', '=', 'trigger'), ('category', '!=', 'upload_file')]"
+                                invisible="['&amp;', ('chaining_type', '=', 'suggest'), ('category', '!=', 'upload_file')]"/>
                             <field name="suggested_next_type_ids" widget="many2many_tags" context="{'default_res_model': res_model}"
                                 invisible="['|', ('chaining_type', '=', 'trigger'), ('category', '=', 'upload_file')]"/>
                             <field name="mail_template_ids" widget="many2many_tags"

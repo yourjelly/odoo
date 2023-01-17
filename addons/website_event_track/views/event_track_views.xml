@@ -221,9 +221,11 @@
                                 <group name="event_track_cta_group">
                                     <field name="website_cta"/>
                                     <field name="website_cta_title" placeholder="e.g. Get Yours Now !"
-                                        invisible="[('website_cta', '=', False)]" required="[('website_cta', '=', True)]"/>
+                                        invisible="[('website_cta', '=', False)]"
+                                        required="[('website_cta', '=', True)]"/>
                                     <field name="website_cta_url" placeholder="e.g. http://www.example.com"
-                                        invisible="[('website_cta', '=', False)]" required="[('website_cta', '=', True)]"/>
+                                        invisible="[('website_cta', '=', False)]"
+                                        required="[('website_cta', '=', True)]"/>
                                     <label for="website_cta_delay"
                                         invisible="[('website_cta', '=', False)]"/>
                                     <div invisible="[('website_cta', '=', False)]">

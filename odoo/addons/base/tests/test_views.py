@@ -2779,7 +2779,7 @@ class TestViews(ViewCase):
             'arch': """
                 <form>
                     <field name="active"/>
-                    <field name="name" groups="base.group_multi_company" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <field name="name" groups="base.group_multi_company" invisible="[('active', '=', True)]"/>
                 </form>
             """,
         })
@@ -2851,7 +2851,7 @@ class TestViews(ViewCase):
                 %s
                 <groupby name="model_data_id">
                     %s
-                    <button type="object" name="action_archive" attrs="{'invisible': [('noupdate', '=', True)]}" string="Button1"/>
+                    <button type="object" name="action_archive" invisible="[('noupdate', '=', True)]" string="Button1"/>
                 </groupby>
             </tree>
         """
@@ -3976,11 +3976,11 @@ class ViewModifiers(ViewCase):
             {"required": str_true_domain},
         )
         _test_modifiers(
-            """<field name="a" attrs="{'invisible': [('b', '=', 'c')]}"/>""",
+            """<field name="a" invisible="[('b', '=', 'c')]"/>""",
             {"invisible": "[('b', '=', 'c')]"},
         )
         _test_modifiers(
-            """<field name="a" attrs="{'invisible': [['b', '=', 'c']]}"/>""",
+            """<field name="a" invisible="[['b', '=', 'c']]"/>""",
             {"invisible": "[('b', '=', 'c')]"},
         )
         _test_modifiers(
@@ -4062,41 +4062,41 @@ class ViewModifiers(ViewCase):
             {"invisible": "['&', (1, '=', context.get('hide_field', False)), ('b', '=', 'c')]"},
         )
         _test_modifiers(
-            """<field name="a" invisible="not context.get('hide_field'   )" attrs="{'invisible': [('b', '=', 'c')]}"/>""",
+            """<field name="a" invisible="not context.get('hide_field'   )" invisible="[('b', '=', 'c')]"/>""",
             {"invisible": "['|', bool(not context.get('hide_field')), ('b', '=', 'c')]"},
         )
         _test_modifiers(
-            """<field name="a" invisible="context.get('hide_field') == 'abc'" attrs="{'invisible': [['b', '=', 'c']]}"/>""",
+            """<field name="a" invisible="context.get('hide_field') == 'abc'" invisible="[['b', '=', 'c']]"/>""",
             {"invisible": "['|', bool(context.get('hide_field') == 'abc'), ('b', '=', 'c')]"},
         )
         _test_modifiers(
-            """<field name="a" invisible="context.get('hide_field') == 'abc'" attrs="{'invisible': [('b', '=', 'c')]}"/>""",
+            """<field name="a" invisible="context.get('hide_field') == 'abc'" invisible="[('b', '=', 'c')]"/>""",
             {"invisible": "['|', bool(context.get('hide_field') == 'abc'), ('b', '=', 'c')]"},
         )
         _test_modifiers(
-            """<field name="a" invisible="context.get('hide_field')  !=   'abc'" attrs="{'invisible': [('b', '=', 'c')]}"/>""",
+            """<field name="a" invisible="context.get('hide_field')  !=   'abc'" invisible="[('b', '=', 'c')]"/>""",
             {"invisible": "['|', bool(context.get('hide_field') != 'abc'), ('b', '=', 'c')]"},
         )
         _test_modifiers(
-            """<field name="a" invisible="context.get('hide_field') in ('a', 'b')" attrs="{'invisible': [('b', '=', 'c')]}"/>""",
+            """<field name="a" invisible="context.get('hide_field') in ('a', 'b')" invisible="[('b', '=', 'c')]"/>""",
             {"invisible": "['|', bool(context.get('hide_field') in ('a', 'b')), ('b', '=', 'c')]"},
         )
         _test_modifiers(
-            """<field name="a" invisible="context.get('hide_field') in ['a', 'b']" attrs="{'invisible': [('b', '=', 'c')]}"/>""",
+            """<field name="a" invisible="context.get('hide_field') in ['a', 'b']" invisible="[('b', '=', 'c')]"/>""",
             {"invisible": "['|', bool(context.get('hide_field') in ['a', 'b']), ('b', '=', 'c')]"},
         )
         _test_modifiers(
-            """<field name="a" invisible="True" attrs="{'invisible': [('b', '=', 'c')]}"/>""",
+            """<field name="a" invisible="True" invisible="[('b', '=', 'c')]"/>""",
             {"invisible": "[True]"},
         )
         _test_modifiers(
-            """<field name="a" invisible="True" attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>""",
+            """<field name="a" invisible="True" invisible="[('state', 'not in', ['draft'])]"/>""",
             {"invisible": "[True]"},
         )
 
         # test attrs deprecation
         _test_modifiers(
-            """<field name="a" invisible="context.get('hide_field', False)" attrs="{'invisible': [('b', '=', 'c')]}"/>""",
+            """<field name="a" invisible="context.get('hide_field', False)" invisible="[('b', '=', 'c')]"/>""",
             {"invisible": "['|', bool(context.get('hide_field', False)), ('b', '=', 'c')]"},
         )
 
@@ -4152,7 +4152,7 @@ class ViewModifiers(ViewCase):
         view = self.assertValid("""
             <form string="View">
                 <field name="type" invisible="1"/>
-                <field name="name" invisible="context.get('foo')" attrs="{'invisible': [('type', '=', 'tree')]}"/>
+                <field name="name" invisible="context.get('foo')" invisible="[('type', '=', 'tree')]"/>
             </form>
         """)
         for context, expected in [
@@ -4176,7 +4176,7 @@ class ViewModifiers(ViewCase):
             <form string="View">
                 <field name="name"/>%s
                 <field name="inherit_id"
-                       attrs="{'readonly': [('model', '=', 'ir.ui.view')]}"/>
+                       readonly="[('model', '=', 'ir.ui.view')]"/>
             </form>
         """
         self.assertValid(arch % '<field name="model"/>')
@@ -4192,7 +4192,7 @@ class ViewModifiers(ViewCase):
                 <field name="name"/>
                 <field name="model"/>
                 <field name="inherit_id"
-                       attrs="{'readonly': [('model', 'ir.ui.view')]}"/>
+                       readonly="[('model', 'ir.ui.view')]"/>
             </form>
         """
         self.assertInvalid(
@@ -4281,7 +4281,7 @@ class ViewModifiers(ViewCase):
                     <form string="Children">
                         <field name="name"/>%s
                         <field name="inherit_id"
-                               attrs="{'readonly': [('model', '=', 'ir.ui.view')]}"/>
+                               readonly="[('model', '=', 'ir.ui.view')]"/>
                     </form>
                 </field>
             </form>
@@ -4305,7 +4305,7 @@ class ViewModifiers(ViewCase):
                     <form string="Children">
                         <field name="name"/>%s
                         <field name="inherit_id"
-                               attrs="{'readonly': [('parent.model', '=', 'ir.ui.view')]}"/>
+                               readonly="[('parent.model', '=', 'ir.ui.view')]"/>
                     </form>
                 </field>
             </form>

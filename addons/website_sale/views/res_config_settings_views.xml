@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//button[@name='action_update_terms']" position="replace">
-                <div class="mt8" attrs="{'invisible': [('terms_type', '!=', 'html')]}" groups="website.group_website_designer">
+                <div class="mt8" invisible="[('terms_type', '!=', 'html')]" groups="website.group_website_designer">
                     <strong class="align-top">URL: </strong><field name="terms_url"/>
                     <div>
                         <button name='action_update_terms' icon="fa-arrow-right" type="object" string="Edit in Website Builder" class="btn-link"/>
@@ -48,7 +48,7 @@
                     </setting>
                     <setting help="Add a customizable form during checkout (after address)">
                         <field name="enabled_extra_checkout_step"/>
-                        <div class="row mt8 ms-4" attrs="{'invisible': [('enabled_extra_checkout_step', '=', False)]}">
+                        <div class="row mt8 ms-4" invisible="[('enabled_extra_checkout_step', '=', False)]">
                             <button type="object" name="action_open_extra_info" string="Configure Form " class="btn-link" icon="fa-arrow-right"/>
                         </div>
                     </setting>
@@ -84,12 +84,12 @@
                     </setting>
                     <setting id="pricelists_setting" title="With the first mode you can set several prices in the product config form (from Sales tab). With the second one, you set prices and computation rules from Pricelists." help="Manage pricelists to apply specific prices per country, customer, products, etc">
                         <field name="group_product_pricelist"/>
-                        <div class="content-group mt16" attrs="{'invisible': [('group_product_pricelist', '=', False)]}">
+                        <div class="content-group mt16" invisible="[('group_product_pricelist', '=', False)]">
                             <field name="group_sale_pricelist" invisible="1"/>
                             <field name="group_product_pricelist" invisible="1"/>
                             <field name="product_pricelist_setting" class="o_light_label w-75" widget="radio"/>
                         </div>
-                        <div attrs="{'invisible': [('group_product_pricelist', '=', False)]}">
+                        <div invisible="[('group_product_pricelist', '=', False)]">
                             <button type="action" name="%(product.product_pricelist_action2)d" string="Pricelists" class="btn-link" icon="fa-arrow-right"/>
                         </div>
                     </setting>
@@ -101,7 +101,7 @@
                     </setting>
                     <setting id="product_attributes_setting" string="Product Variants" help="One product might have different attributes (size, color, ...)">
                         <field name="group_product_variant"/>
-                        <div class="content-group" attrs="{'invisible': [('group_product_variant', '=', False)]}">
+                        <div class="content-group" invisible="[('group_product_variant', '=', False)]">
                             <div class="mt8">
                                 <button type="action" name="%(product.attribute_action)d" string="Attributes" class="btn-link" icon="fa-arrow-right"/>
                             </div>
@@ -118,7 +118,7 @@
                     </setting>
                     <setting id="hide_add_to_cart_setting" help="If product price equals 0, replace 'Add to Cart' by 'Contact us'.">
                         <field name="website_sale_prevent_zero_price_sale"/>
-                        <div class="content-group" attrs="{'invisible': [('website_sale_prevent_zero_price_sale', '=', False)]}">
+                        <div class="content-group" invisible="[('website_sale_prevent_zero_price_sale', '=', False)]">
                             <div class="row mt16">
                                 <label class="o_light_label col-lg-3" string="Button url" for="website_sale_contact_us_button_url"/>
                                 <field name="website_sale_contact_us_button_url"/>
@@ -168,7 +168,7 @@
                 </block>
 
                 <field name='module_account' invisible="1"/>
-                    <block title="Invoicing" id="sale_invoicing_settings" attrs="{'invisible': [('module_account', '=', False)]}">
+                    <block title="Invoicing" id="sale_invoicing_settings" invisible="[('module_account', '=', False)]">
                         <setting id="invoicing_policy_setting" title="The mode selected here applies as invoicing policy of any new product created but not of products already existing." string="Invoicing Policy" help="Issue invoices to customers">
                             <div class="content-group">
                                 <div class="mt16">
@@ -176,9 +176,9 @@
                                 </div>
                             </div>
                         </setting>
-                        <setting id="automatic_invoice_generation" attrs="{'invisible': [('default_invoice_policy', '=', 'delivery')]}" help="Generate the invoice automatically when the online payment is confirmed">
+                        <setting id="automatic_invoice_generation" invisible="[('default_invoice_policy', '=', 'delivery')]" help="Generate the invoice automatically when the online payment is confirmed">
                             <field name="automatic_invoice"/>
-                            <div  attrs="{'invisible': [('automatic_invoice','=',False)]}">
+                            <div  invisible="[('automatic_invoice','=',False)]">
                                 <label for="invoice_mail_template_id" class="o_light_label"/>
                                 <field name="invoice_mail_template_id" class="oe_inline"/>
                             </div>
@@ -209,7 +209,7 @@
                     help="Mail only sent to signed in customers with items available for sale in their cart.">
                     <field name="send_abandoned_cart_email"/>
 
-                    <div attrs="{'invisible': [('send_abandoned_cart_email', '=', False)]}" class="content-group" title="Carts are flagged as abandoned after this delay.">
+                    <div invisible="[('send_abandoned_cart_email', '=', False)]" class="content-group" title="Carts are flagged as abandoned after this delay.">
                         <div class="row mt16">
                             <div class="col-12">
                                 <label for="cart_abandoned_delay" string="Send after" class="o_light_label"/>
@@ -217,7 +217,7 @@
                             </div>
                         </div>
                     </div>
-                    <div attrs="{'invisible': [('send_abandoned_cart_email', '=', False)]}" class="mt8">
+                    <div invisible="[('send_abandoned_cart_email', '=', False)]" class="mt8">
                         <button type="object" name="action_open_abandoned_cart_mail_template" string="Customize Abandoned Email Template" class="btn-link" icon="fa-arrow-right"/>
                     </div>
                 </setting>

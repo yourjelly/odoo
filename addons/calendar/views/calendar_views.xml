@@ -43,7 +43,8 @@
                             <field name="name" invisible="1"/>
                             <field name="alarm_type"/>
                             <field name="mail_template_id" context="{'default_model': 'calendar.event'}"
-                                   invisible="[('alarm_type', '!=', 'email')]" required="[('alarm_type', '=', 'email')]"/>
+                                   invisible="[('alarm_type', '!=', 'email')]"
+                                   required="[('alarm_type', '=', 'email')]"/>
                             <field name="body" invisible="[('alarm_type', '!=', 'notification')]"/>
                         </group>
                         <group name="right_details">
@@ -209,11 +210,14 @@
                                             <div class="o_row">
                                                 <field name="month_by"/>
                                                 <field name="day"
-                                                    required="[('month_by', '=', 'date'), ('rrule_type', '=', 'monthly')]" invisible="[('month_by', '!=', 'date')]"/>
+                                                    required="[('month_by', '=', 'date'), ('rrule_type', '=', 'monthly')]"
+                                                    invisible="[('month_by', '!=', 'date')]"/>
                                                 <field name="byday" string="The"
-                                                    required="[('recurrency', '=', True), ('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')]" invisible="[('month_by', '!=', 'day')]"/>
+                                                    required="[('recurrency', '=', True), ('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')]"
+                                                    invisible="[('month_by', '!=', 'day')]"/>
                                                 <field name="weekday" nolabel="1"
-                                                    required="[('recurrency', '=', True), ('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')]" invisible="[('month_by', '!=', 'day')]"/>
+                                                    required="[('recurrency', '=', True), ('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')]"
+                                                    invisible="[('month_by', '!=', 'day')]"/>
                                             </div>
                                         </group>
                                     </div>

@@ -58,7 +58,8 @@
                                 <group invisible="[('server_type', '=', 'local')]" string="Login Information">
                                     <field name="user" required="[('server_type', '!=', 'local')]"/>
                                     <field name="password" password="True"
-                                        required="[('server_type', 'in', ('imap', 'pop'))]" invisible="[('server_type', 'not in', ('imap', 'pop'))]"/>
+                                        required="[('server_type', 'in', ('imap', 'pop'))]"
+                                        invisible="[('server_type', 'not in', ('imap', 'pop'))]"/>
                                 </group>
                                 <group string="Actions to Perform on Incoming Mails">
                                     <field name="object_id"/>
