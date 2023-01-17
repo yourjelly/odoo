@@ -280,11 +280,9 @@
                             <label for="request_hour_from" string="" invisible="[('request_unit_hours', '=', False)]"/>
                             <div class="o_row o_row_readonly" invisible="[('request_unit_hours', '=', False)]">
                                 <label for="request_hour_from" string="From" />
-                                <field name="request_hour_from" readonly="[('state', '=', 'validate')],
-                                            'required': [('request_unit_hours', '=', True)]" invisible="[('request_unit_hours', '=', False)]" />
+                                <field name="request_hour_from" readonly="[('state', '=', 'validate')]" required="[('request_unit_hours', '=', True)]" invisible="[('request_unit_hours', '=', False)]" />
                                 <label for="request_hour_to" string="To" />
-                                <field name="request_hour_to" readonly="[('state', '=', 'validate')],
-                                            'required': [('request_unit_hours', '=', True)]" invisible="[('request_unit_hours', '=', False)]" />
+                                <field name="request_hour_to" readonly="[('state', '=', 'validate')]" required="[('request_unit_hours', '=', True)]" invisible="[('request_unit_hours', '=', False)]" />
                             </div>
 
                             <label for="number_of_days_display" string="Duration" invisible="[('request_unit_half', '=', True), ('leave_type_request_unit', '!=', 'hour')]" />
@@ -410,10 +408,10 @@
                 <field name="department_id" groups="hr_holidays.group_hr_holidays_user" required="[('holiday_type', '=', 'department')]" invisible="[('holiday_type', '!=', 'department')]"/>
                     <field name="multi_employee" invisible="1" force_save="1"/>
                     <field name="employee_id" groups="hr_holidays.group_hr_holidays_user" invisible="['|', '|', ('holiday_type', '!=', 'employee'), ('state', '!=', 'validate'), ('employee_id', '=', False)]" widget="many2one_avatar_employee"/>
-                    <field name="employee_ids" groups="hr_holidays.group_hr_holidays_user" attrs="{
-                        'required': [('holiday_type', '=', 'employee'), ('state', 'in', ('draft', 'cancel', 'refuse'))],
-                        'invisible': ['|', ('holiday_type', '!=', 'employee'), '&amp;', ('state', '=', 'validate'), ('employee_id', '!=', False)],
-                        }" widget="many2many_avatar_employee"/>
+                    <field name="employee_ids" groups="hr_holidays.group_hr_holidays_user"
+                        required="[('holiday_type', '=', 'employee'), ('state', 'in', ('draft', 'cancel', 'refuse'))]"
+                        invisible="['|', ('holiday_type', '!=', 'employee'), '&amp;', ('state', '=', 'validate'), ('employee_id', '!=', False)]"
+                        widget="many2many_avatar_employee"/>
             </xpath>
             <field name="name" position="replace"/>
             <field name="user_id" position="before">
