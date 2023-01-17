@@ -9,6 +9,11 @@ const {isColorGradient} = require('web_editor.utils');
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getInSelection = OdooEditorLib.getInSelection;
 const linkLabelMatchesUrl = OdooEditorLib.linkLabelMatchesUrl;
+const EMAIL_REGEX = OdooEditorLib.EMAIL_REGEX;
+const PHONE_REGEX = OdooEditorLib.PHONE_REGEX;
+const URL_REGEX_STRICT = OdooEditorLib.URL_REGEX_STRICT;
+const linkRegexes = OdooEditorLib.linkRegexes;
+const resolveProtocol = OdooEditorLib.resolveProtocol;
 const _t = core._t;
 
 /**
@@ -90,11 +95,13 @@ const Link = Widget.extend({
             } else {
                 this.data.originalHTML = linkNode.innerHTML;
             }
-            this.data.url = this.$link.attr('href') || '';
+            // this.data.url = this.$link.attr('href') || '';
+            this.data.url = this._deduceUrl(this.$link.attr('href'));
         } else {
             this.data.content = this.data.content ? this.data.content.replace(/[ \t\r\n]+/g, ' ') : '';
         }
 
+        // deduce url from label if valid url
         if (!this.data.url) {
             const urls = this.data.content.match(OdooEditorLib.URL_REGEX_WITH_INFOS);
             if (urls) {
@@ -191,7 +198,8 @@ const Link = Widget.extend({
             this.$link.css('border-color', data.customBorder);
         }
         const attrs = Object.assign({}, this.data.oldAttributes, {
-            href: data.url,
+            // href: data.url,
+            href: this._deduceHref(data.url),
             target: data.isNewWindow ? '_blank' : '',
         });
         if (typeof data.classes === "string") {
@@ -207,7 +215,6 @@ const Link = Widget.extend({
             this.$link[0].removeAttribute('target');
         }
         this._updateLinkContent(this.$link, data);
-        // debugger;
         // if url matches text, tag it as auto_update. Otherwise, untag it.
         if (linkLabelMatchesUrl(this.$link.get(0))) {
             this.$link.addClass('oe_auto_update_link');
@@ -250,6 +257,7 @@ const Link = Widget.extend({
     /**
      * @private
      */
+    // TODO: remove this one?
     _correctLink: function (url) {
         if (url.indexOf('mailto:') === 0 || url.indexOf('tel:') === 0) {
             url = url.replace(/^tel:([0-9]+)$/, 'tel://$1');
@@ -257,9 +265,45 @@ const Link = Widget.extend({
             url = 'mailto:' + url;
         } else if (url && url.indexOf('://') === -1 && url[0] !== '/'
                     && url[0] !== '#' && url.slice(0, 2) !== '${') {
+            // THIS is where 'http://' gets added   
             url = 'http://' + url;
         }
         return url;
+    },
+    /**
+     * @param {string} url 
+     */
+    _deduceHref(url) {
+        // Consider taking the current href or Url object as parameter, 
+        // get its protocol and start search there, to save other regex searches.
+        url = url.trim();
+        for (const protocol of ['mailto:', 'tel://', 'https://']) {
+            const match = linkRegexes[protocol].exec(url);
+            if (match) {
+                let href = match[1] ? url : protocol + url;
+                // Enforce tel:// as protocol for phone number.
+                if (match[1] === 'tel:') {
+                    href = href.replace(/^tel:/, 'tel://');
+                }
+                return href;
+            }
+        }
+         // Url will be considered a relative url.
+        return url;
+
+    },
+    /**
+     * @param {string} href 
+     */
+    _deduceUrl(href) {
+        if (!href) {
+            return '';
+        }
+        const protocol = resolveProtocol(href);
+        if (!protocol) {
+            return href;
+        }
+        return href.slice(protocol.length);
     },
     /**
      * Abstract method: return true if the URL should be stripped of its domain.
@@ -303,19 +347,22 @@ const Link = Widget.extend({
             (type && size ? (' btn-' + size) : '');
         var isNewWindow = this._isNewWindow(url);
         var doStripDomain = this._doStripDomain();
-        if (
-            url.indexOf('@') >= 0 && url.indexOf('mailto:') < 0 && !url.match(/^http[s]?/i) ||
-            this._link && this._link.href.includes('mailto:') && !url.includes('mailto:')
-        ) {
-            url = ('mailto:' + url);
-        } else if (url.indexOf(location.origin) === 0 && doStripDomain) {
+        // if (
+        //     url.indexOf('@') >= 0 && url.indexOf('mailto:') < 0 && !url.match(/^http[s]?/i) ||
+        //     this._link && this._link.href.includes('mailto:') && !url.includes('mailto:')
+        // ) {
+        //     // THIS makes 'mailto' be shown
+        //     url = ('mailto:' + url);
+        // } else if (url.indexOf(location.origin) === 0 && doStripDomain) {
+        if (url.indexOf(location.origin) === 0 && doStripDomain) {
             url = url.slice(location.origin.length);
         }
         var allWhitespace = /\s+/gi;
         var allStartAndEndSpace = /^\s+|\s+$/gi;
         return {
             content: content,
-            url: this._correctLink(url),
+            // url: this._correctLink(url),
+            url: url,
             classes: classes.replace(allWhitespace, ' ').replace(allStartAndEndSpace, ''),
             customTextColor: customTextColor,
             customFill: customFill,
@@ -582,7 +629,7 @@ Link.getOrCreateLink = ({ containerNode, startNode } = {})  => {
     } else if (!link && isContained) {
         link = document.createElement('a');
         if (range.collapsed) {
-            range.insertNode(link);
+            range.insertNode(link)
             needLabel = true;
         } else {
             link.appendChild(range.extractContents());
