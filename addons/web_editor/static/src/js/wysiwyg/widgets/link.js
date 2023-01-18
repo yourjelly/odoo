@@ -163,6 +163,20 @@ const Link = Widget.extend({
             this._savedURLInputOnDestroy = false;
         }
 
+        if (this.$link) {
+            this.$link.on('linkHrefUpdated', () => {
+                this.data.url = this._deduceUrl(this.$link.attr('href'));
+                this.$('input[name="url"]').val(this.data.url);
+                this._onURLInput();
+                // TODO: What is this for?
+                this._savedURLInputOnDestroy = false;
+            });
+            this.$link.on('linkRemoved', () => {
+                this._savedURLInputOnDestroy = false;
+                this.destroy();
+            });
+        }
+
         if (!this.noFocusUrl) {
             this.focusUrl();
         }
@@ -581,10 +595,7 @@ const Link = Widget.extend({
         // TODO: check if $link is always guaranteed to exist
         const linkHref = this.$link.attr('href') || '';
         // let value = $linkUrlInput.val();
-        // TODO: Phone must be exclude as well. Consider storing the link type in a property.
         // let isLink = value.indexOf('@') < 0;
-        // const isLink = !['mailto:', 'tel:'].some(protocol => linkHref.startsWith(protocol));
-        // const isLink = !(linkHref.startsWith('mailto:') || linkHref.startsWith('tel:'));
         const isLink = !/^(mailto:|tel:)/.test(linkHref);
         this._getIsNewWindowFormRow().toggleClass('d-none', !isLink);
         this.$('.o_strip_domain').toggleClass('d-none', linkHref.indexOf(window.location.origin) !== 0);

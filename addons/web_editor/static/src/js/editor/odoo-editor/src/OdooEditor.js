@@ -736,6 +736,7 @@ export class OdooEditor extends EventTarget {
                 this._applyRawCommand('unlink');
                 link.dispatchEvent(new Event('linkRemoved'));
             }
+        // or Should it match ANY url?
         } else if (linkLabelMatchesUrl(link)) {
             // Promote link to auto-updatable.
             link.classList.add('oe_auto_update_link');

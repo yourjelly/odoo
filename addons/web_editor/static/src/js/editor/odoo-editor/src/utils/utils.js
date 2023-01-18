@@ -58,7 +58,7 @@ export const YOUTUBE_URL_GET_VIDEO_ID =
 
 export const URL_REGEX_STRICT = new RegExp(`^(?:(?:${httpCapturedRegex}${urlRegexBase})$`, 'i');
 export const EMAIL_REGEX = /^(mailto:)?[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/i;
-export const PHONE_REGEX = /^(tel:(?:\/\/)?)?\+?[\d\s.\-()\/]{4,20}$/;
+export const PHONE_REGEX = /^(tel:(?:\/\/)?)?\+?[\d\s.\-()\/]{3,20}$/;
 export const linkRegexes = {
     'https://': URL_REGEX_STRICT,
     'http://': URL_REGEX_STRICT,
