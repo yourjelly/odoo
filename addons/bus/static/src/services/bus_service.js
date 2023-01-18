@@ -2,9 +2,9 @@
 
 import { browser } from "@web/core/browser/browser";
 import { Deferred } from "@web/core/utils/concurrency";
-import { registry } from '@web/core/registry';
-import { session } from '@web/session';
-import { isIosApp } from '@web/core/browser/feature_detection';
+import { registry } from "@web/core/registry";
+import { session } from "@web/session";
+import { isIosApp } from "@web/core/browser/feature_detection";
 import { WORKER_VERSION } from "@bus/workers/websocket_worker";
 import legacySession from "web.session";
 
@@ -21,13 +21,13 @@ const { EventBus } = owl;
  *  @emits notification
  */
 export const busService = {
-    dependencies: ['localization', 'multi_tab'],
+    dependencies: ["localization", "multi_tab"],
     async: true,
 
     async start(env, { multi_tab: multiTab }) {
-        if (session.dbuuid && multiTab.getSharedValue('dbuuid') !== session.dbuuid) {
-            multiTab.setSharedValue('dbuuid', session.dbuuid);
-            multiTab.removeSharedValue('last_notification_id');
+        if (session.dbuuid && multiTab.getSharedValue("dbuuid") !== session.dbuuid) {
+            multiTab.setSharedValue("dbuuid", session.dbuuid);
+            multiTab.removeSharedValue("last_notification_id");
         }
         const bus = new EventBus();
         let workerURL = `${legacySession.prefix}/bus/websocket_worker_bundle?v=${WORKER_VERSION}`;
@@ -37,11 +37,15 @@ export const busService = {
             // URL that will then load the bundle via "importScripts" which
             // allows cross origin.
             const source = `importScripts("${workerURL}");`;
-            workerURL = 'data:application/javascript;base64,' + window.btoa(source);
+            workerURL = "data:application/javascript;base64," + window.btoa(source);
         }
-        const workerClass = 'SharedWorker' in window && !isIosApp() ? browser.SharedWorker : browser.Worker;
+        const workerClass =
+            "SharedWorker" in window && !isIosApp() ? browser.SharedWorker : browser.Worker;
         const worker = new workerClass(workerURL, {
-            name: 'SharedWorker' in window && !isIosApp() ? 'odoo:websocket_shared_worker' : 'odoo:websocket_worker',
+            name:
+                "SharedWorker" in window && !isIosApp()
+                    ? "odoo:websocket_shared_worker"
+                    : "odoo:websocket_worker",
         });
         const connectionInitializedDeferred = new Deferred();
         worker.addEventListener("error", (e) => {
@@ -50,16 +54,16 @@ export const busService = {
         });
 
         /**
-        * Send a message to the worker.
-        *
-        * @param {WorkerAction} action Action to be
-        * executed by the worker.
-        * @param {Object|undefined} data Data required for the action to be
-        * executed.
-        */
+         * Send a message to the worker.
+         *
+         * @param {WorkerAction} action Action to be
+         * executed by the worker.
+         * @param {Object|undefined} data Data required for the action to be
+         * executed.
+         */
         function send(action, data) {
             const message = { action, data };
-            if ('SharedWorker' in window && !isIosApp()) {
+            if ("SharedWorker" in window && !isIosApp()) {
                 worker.port.postMessage(message);
             } else {
                 worker.postMessage(message);
@@ -76,10 +80,10 @@ export const busService = {
         function handleMessage(messageEv) {
             const { type } = messageEv.data;
             let { data } = messageEv.data;
-            if (type === 'notification') {
-                multiTab.setSharedValue('last_notification_id', data[data.length - 1].id);
-                data = data.map(notification => notification.message);
-            } else if (type === 'initialized') {
+            if (type === "notification") {
+                multiTab.setSharedValue("last_notification_id", data[data.length - 1].id);
+                data = data.map((notification) => notification.message);
+            } else if (type === "initialized") {
                 connectionInitializedDeferred.resolve();
                 return;
             }
@@ -104,44 +108,44 @@ export const busService = {
             if (!uid && uid !== undefined) {
                 uid = false;
             }
-            send('initialize_connection', {
+            send("initialize_connection", {
                 websocketURL: `${legacySession.prefix.replace("http", "ws")}/websocket`,
                 debug: odoo.debug,
-                lastNotificationId: multiTab.getSharedValue('last_notification_id', 0),
+                lastNotificationId: multiTab.getSharedValue("last_notification_id", 0),
                 uid,
             });
         }
 
-        if ('SharedWorker' in window && !isIosApp()) {
+        if ("SharedWorker" in window && !isIosApp()) {
             worker.port.start();
-            worker.port.addEventListener('message', handleMessage);
+            worker.port.addEventListener("message", handleMessage);
         } else {
-            worker.addEventListener('message', handleMessage);
+            worker.addEventListener("message", handleMessage);
         }
         initializeWorkerConnection();
-        browser.addEventListener('pagehide', ({ persisted }) => {
+        browser.addEventListener("pagehide", ({ persisted }) => {
             if (!persisted) {
                 // Page is gonna be unloaded, disconnect this client
                 // from the worker.
-                send('leave');
+                send("leave");
             }
         });
         await connectionInitializedDeferred;
 
         return {
             addEventListener: bus.addEventListener.bind(bus),
-            addChannel: channel => {
-                send('add_channel', channel);
-                send('start');
+            addChannel: (channel) => {
+                send("add_channel", channel);
+                send("start");
             },
-            deleteChannel: channel => send('delete_channel', channel),
-            forceUpdateChannels: () => send('force_update_channels'),
+            deleteChannel: (channel) => send("delete_channel", channel),
+            forceUpdateChannels: () => send("force_update_channels"),
             trigger: bus.trigger.bind(bus),
             removeEventListener: bus.removeEventListener.bind(bus),
-            send: (eventName, data) => send('send', { event_name: eventName, data }),
-            start: () => send('start'),
-            stop: () => send('leave'),
+            send: (eventName, data) => send("send", { event_name: eventName, data }),
+            start: () => send("start"),
+            stop: () => send("leave"),
         };
     },
 };
-registry.category('services').add('bus_service', busService);
+registry.category("services").add("bus_service", busService);
