@@ -47,7 +47,7 @@ const tldWhitelist = [
     'ug', 'uk', 'um', 'us', 'uy', 'uz', 'va', 'vc', 've', 'vg', 'vi', 'vn',
     'vu', 'wf', 'ws', 'ye', 'yt', 'yu', 'za', 'zm', 'zr', 'zw', 'co\\.uk'];
 
-const urlRegexBase = `|(?:[-a-zA-Z0-9@:%._\\+~#=]{1,64}\\.))[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-zA-Z][a-zA-Z0-9]{1,62}|(?:[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.(?:${tldWhitelist.join('|')})))\\b(?:(?!\\.)[^\\s]*`;
+const urlRegexBase = `|(?:[-a-zA-Z0-9:%._\\+~#=]{1,64}\\.))[-a-zA-Z0-9:%._\\+~#=]{2,256}\\.[a-zA-Z][a-zA-Z0-9]{1,62}|(?:[-a-zA-Z0-9:%._\\+~#=]{2,256}\\.(?:${tldWhitelist.join('|')})))\\b(?:(?!\\.)[^\\s]*`;
 const httpRegex = `(?:https?:\\/\\/)`;
 const httpCapturedRegex= `(https?:\\/\\/)`;
 
@@ -60,8 +60,8 @@ export const URL_REGEX_STRICT = new RegExp(`^(?:(?:${httpCapturedRegex}${urlRege
 export const EMAIL_REGEX = /^(mailto:)?[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/i;
 export const PHONE_REGEX = /^(tel:(?:\/\/)?)?\+?[\d\s.\-()\/]{4,20}$/;
 export const linkRegexes = {
-    'http://': URL_REGEX_STRICT,
     'https://': URL_REGEX_STRICT,
+    'http://': URL_REGEX_STRICT,
     'mailto:': EMAIL_REGEX,
     'tel://': PHONE_REGEX, // order matters
     'tel:': PHONE_REGEX,

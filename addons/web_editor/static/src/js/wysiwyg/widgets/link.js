@@ -9,9 +9,6 @@ const {isColorGradient} = require('web_editor.utils');
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getInSelection = OdooEditorLib.getInSelection;
 const linkLabelMatchesUrl = OdooEditorLib.linkLabelMatchesUrl;
-const EMAIL_REGEX = OdooEditorLib.EMAIL_REGEX;
-const PHONE_REGEX = OdooEditorLib.PHONE_REGEX;
-const URL_REGEX_STRICT = OdooEditorLib.URL_REGEX_STRICT;
 const linkRegexes = OdooEditorLib.linkRegexes;
 const resolveProtocol = OdooEditorLib.resolveProtocol;
 const _t = core._t;
@@ -100,13 +97,21 @@ const Link = Widget.extend({
         } else {
             this.data.content = this.data.content ? this.data.content.replace(/[ \t\r\n]+/g, ' ') : '';
         }
-
         // deduce url from label if valid url
         if (!this.data.url) {
-            const urls = this.data.content.match(OdooEditorLib.URL_REGEX_WITH_INFOS);
-            if (urls) {
-                this.data.url = urls[0];
+            const label = this.data.content.trim();
+            for (const protocol of ['mailto:', 'tel://', 'https://']) {
+                if (linkRegexes[protocol].test(label)) {
+                    this.data.url = label;
+                    break;
+                }
             }
+            // LET OP: different behaviour. A url was searched anywhere in the string, now the whole string must match
+
+            // const urls = this.data.content.match(OdooEditorLib.URL_REGEX_WITH_INFOS);
+            // if (urls) {
+            //     this.data.url = urls[0];
+            // }
         }
 
         if (this.linkEl) {
@@ -150,9 +155,11 @@ const Link = Widget.extend({
         await this._updateOptionsUI();
 
         if (this.data.url) {
-            var match = /mailto:(.+)/.exec(this.data.url);
-            this.$('input[name="url"]').val(match ? match[1] : this.data.url);
+            // var match = /mailto:(.+)/.exec(this.data.url);
+            // this.$('input[name="url"]').val(match ? match[1] : this.data.url);
+            this.$('input[name="url"]').val(this.data.url);
             this._onURLInput();
+            this._adaptPreview();
             this._savedURLInputOnDestroy = false;
         }
 
@@ -271,6 +278,8 @@ const Link = Widget.extend({
         return url;
     },
     /**
+     * Deduce link href from user input URL.
+     * 
      * @param {string} url 
      */
     _deduceHref(url) {
@@ -288,11 +297,11 @@ const Link = Widget.extend({
                 return href;
             }
         }
-         // Url will be considered a relative url.
+        // Url will be considered a relative url.
         return url;
-
     },
     /**
+     * Deduce user-facing URL from link's href.
      * @param {string} href 
      */
     _deduceUrl(href) {
@@ -300,10 +309,7 @@ const Link = Widget.extend({
             return '';
         }
         const protocol = resolveProtocol(href);
-        if (!protocol) {
-            return href;
-        }
-        return href.slice(protocol.length);
+        return protocol ? href.slice(protocol.length) : href;
     },
     /**
      * Abstract method: return true if the URL should be stripped of its domain.
@@ -573,6 +579,7 @@ const Link = Widget.extend({
         this._savedURLInputOnDestroy = true;
         var $linkUrlInput = this.$('#o_link_dialog_url_input');
         let value = $linkUrlInput.val();
+        // TODO: Phone must be exclude as well. Consider storing the link type in a property.
         let isLink = value.indexOf('@') < 0;
         this._getIsNewWindowFormRow().toggleClass('d-none', !isLink);
         this.$('.o_strip_domain').toggleClass('d-none', value.indexOf(window.location.origin) !== 0);
