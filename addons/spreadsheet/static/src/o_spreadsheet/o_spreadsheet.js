@@ -104,8 +104,8 @@
         }
     }
     class NotAvailableError extends EvaluationError {
-        constructor() {
-            super(CellErrorType.NotAvailable, _lt("Data not available"), CellErrorLevel.silent);
+        constructor(errorMessage = undefined) {
+            super(CellErrorType.NotAvailable, errorMessage || _lt("Data not available"), errorMessage ? CellErrorLevel.error : CellErrorLevel.silent);
         }
     }
     class UnknownFunctionError extends EvaluationError {
@@ -655,6 +655,13 @@
     }
     function isCloneable(obj) {
         return "clone" in obj && obj.clone instanceof Function;
+    }
+    /**
+     * Escapes a string to use as a literal string in a RegExp.
+     * @url https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping
+     */
+    function escapeRegExp(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
     /**
      * Deep copy arrays, plain objects and primitive values.
@@ -1987,246 +1994,6 @@
         return format;
     }
 
-    class RangeImpl {
-        constructor(args, getSheetSize) {
-            this.getSheetSize = getSheetSize;
-            this.prefixSheet = false;
-            this._zone = args.zone;
-            this.parts = args.parts;
-            this.prefixSheet = args.prefixSheet;
-            this.invalidXc = args.invalidXc;
-            this.sheetId = args.sheetId;
-            this.invalidSheetName = args.invalidSheetName;
-        }
-        static fromRange(range, getters) {
-            if (range instanceof RangeImpl) {
-                return range;
-            }
-            return new RangeImpl(range, getters.getSheetSize);
-        }
-        get unboundedZone() {
-            return this._zone;
-        }
-        get zone() {
-            const { left, top, bottom, right } = this._zone;
-            if (right !== undefined && bottom !== undefined)
-                return { left, top, right, bottom };
-            else if (bottom === undefined && right !== undefined) {
-                return { right, top, left, bottom: this.getSheetSize(this.sheetId).height - 1 };
-            }
-            else if (right === undefined && bottom !== undefined) {
-                return { bottom, left, top, right: this.getSheetSize(this.sheetId).width - 1 };
-            }
-            throw new Error(_lt("Bad zone format"));
-        }
-        static getRangeParts(xc, zone) {
-            const parts = xc.split(":").map((p) => {
-                const isFullRow = isRowReference(p);
-                return {
-                    colFixed: isFullRow ? false : p.startsWith("$"),
-                    rowFixed: isFullRow ? p.startsWith("$") : p.includes("$", 1),
-                };
-            });
-            const isFullCol = zone.bottom === undefined;
-            const isFullRow = zone.right === undefined;
-            if (isFullCol) {
-                parts[0].rowFixed = parts[0].rowFixed || parts[1].rowFixed;
-                parts[1].rowFixed = parts[0].rowFixed || parts[1].rowFixed;
-                if (zone.left === zone.right) {
-                    parts[0].colFixed = parts[0].colFixed || parts[1].colFixed;
-                    parts[1].colFixed = parts[0].colFixed || parts[1].colFixed;
-                }
-            }
-            if (isFullRow) {
-                parts[0].colFixed = parts[0].colFixed || parts[1].colFixed;
-                parts[1].colFixed = parts[0].colFixed || parts[1].colFixed;
-                if (zone.top === zone.bottom) {
-                    parts[0].rowFixed = parts[0].rowFixed || parts[1].rowFixed;
-                    parts[1].rowFixed = parts[0].rowFixed || parts[1].rowFixed;
-                }
-            }
-            return parts;
-        }
-        get isFullCol() {
-            return this._zone.bottom === undefined;
-        }
-        get isFullRow() {
-            return this._zone.right === undefined;
-        }
-        get rangeData() {
-            return {
-                _zone: this._zone,
-                _sheetId: this.sheetId,
-            };
-        }
-        /**
-         * Check that a zone is valid regarding the order of top-bottom and left-right.
-         * Left should be smaller than right, top should be smaller than bottom.
-         * If it's not the case, simply invert them, and invert the linked parts
-         */
-        orderZone() {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
-            const zone = { ...this._zone };
-            let parts = this.parts;
-            if (zone.right !== undefined && zone.right < zone.left) {
-                let right = zone.right;
-                zone.right = zone.left;
-                zone.left = right;
-                parts = [
-                    {
-                        colFixed: ((_a = parts[1]) === null || _a === void 0 ? void 0 : _a.colFixed) || false,
-                        rowFixed: ((_b = parts[0]) === null || _b === void 0 ? void 0 : _b.rowFixed) || false,
-                    },
-                    {
-                        colFixed: ((_c = parts[0]) === null || _c === void 0 ? void 0 : _c.colFixed) || false,
-                        rowFixed: ((_d = parts[1]) === null || _d === void 0 ? void 0 : _d.rowFixed) || false,
-                    },
-                ];
-            }
-            if (zone.bottom !== undefined && zone.bottom < zone.top) {
-                let bottom = zone.bottom;
-                zone.bottom = zone.top;
-                zone.top = bottom;
-                parts = [
-                    {
-                        colFixed: ((_e = parts[0]) === null || _e === void 0 ? void 0 : _e.colFixed) || false,
-                        rowFixed: ((_f = parts[1]) === null || _f === void 0 ? void 0 : _f.rowFixed) || false,
-                    },
-                    {
-                        colFixed: ((_g = parts[1]) === null || _g === void 0 ? void 0 : _g.colFixed) || false,
-                        rowFixed: ((_h = parts[0]) === null || _h === void 0 ? void 0 : _h.rowFixed) || false,
-                    },
-                ];
-            }
-            return this.clone({ zone, parts });
-        }
-        /**
-         *
-         * @param rangeParams optional, values to put in the cloned range instead of the current values of the range
-         */
-        clone(rangeParams) {
-            return new RangeImpl({
-                zone: (rangeParams === null || rangeParams === void 0 ? void 0 : rangeParams.zone) ? rangeParams.zone : { ...this._zone },
-                sheetId: (rangeParams === null || rangeParams === void 0 ? void 0 : rangeParams.sheetId) ? rangeParams.sheetId : this.sheetId,
-                invalidSheetName: rangeParams && "invalidSheetName" in rangeParams // 'attr in obj' instead of just 'obj.attr' because we accept undefined values
-                    ? rangeParams.invalidSheetName
-                    : this.invalidSheetName,
-                invalidXc: rangeParams && "invalidXc" in rangeParams ? rangeParams.invalidXc : this.invalidXc,
-                parts: (rangeParams === null || rangeParams === void 0 ? void 0 : rangeParams.parts)
-                    ? rangeParams.parts
-                    : this.parts.map((part) => {
-                        return { rowFixed: part.rowFixed, colFixed: part.colFixed };
-                    }),
-                prefixSheet: (rangeParams === null || rangeParams === void 0 ? void 0 : rangeParams.prefixSheet) ? rangeParams.prefixSheet : this.prefixSheet,
-            }, this.getSheetSize);
-        }
-    }
-    /**
-     * Copy a range. If the range is on the sheetIdFrom, the range will target
-     * sheetIdTo.
-     */
-    function copyRangeWithNewSheetId(sheetIdFrom, sheetIdTo, range) {
-        const sheetId = range.sheetId === sheetIdFrom ? sheetIdTo : range.sheetId;
-        return range.clone({ sheetId });
-    }
-    /**
-     * Create a range from a xc. If the xc is empty, this function returns undefined.
-     */
-    function createRange(getters, sheetId, range) {
-        return range ? getters.getRangeFromSheetXC(sheetId, range) : undefined;
-    }
-
-    /** Methods from Odoo Web Utils  */
-    /**
-     * This function computes a score that represent the fact that the
-     * string contains the pattern, or not
-     *
-     * - If the score is 0, the string does not contain the letters of the pattern in
-     *   the correct order.
-     * - if the score is > 0, it actually contains the letters.
-     *
-     * Better matches will get a higher score: consecutive letters are better,
-     * and a match closer to the beginning of the string is also scored higher.
-     */
-    function fuzzyMatch(pattern, str) {
-        pattern = pattern.toLocaleLowerCase();
-        str = str.toLocaleLowerCase();
-        let totalScore = 0;
-        let currentScore = 0;
-        let len = str.length;
-        let patternIndex = 0;
-        for (let i = 0; i < len; i++) {
-            if (str[i] === pattern[patternIndex]) {
-                patternIndex++;
-                currentScore += 100 + currentScore - i / 200;
-            }
-            else {
-                currentScore = 0;
-            }
-            totalScore = totalScore + currentScore;
-        }
-        return patternIndex === pattern.length ? totalScore : 0;
-    }
-    /**
-     * Return a list of things that matches a pattern, ordered by their 'score' (
-     * higher score first). An higher score means that the match is better. For
-     * example, consecutive letters are considered a better match.
-     */
-    function fuzzyLookup(pattern, list, fn) {
-        const results = [];
-        list.forEach((data) => {
-            const score = fuzzyMatch(pattern, fn(data));
-            if (score > 0) {
-                results.push({ score, elem: data });
-            }
-        });
-        // we want better matches first
-        results.sort((a, b) => b.score - a.score);
-        return results.map((r) => r.elem);
-    }
-
-    function createDefaultRows(rowNumber) {
-        const rows = [];
-        for (let i = 0; i < rowNumber; i++) {
-            const row = {
-                cells: {},
-            };
-            rows.push(row);
-        }
-        return rows;
-    }
-
-    /*
-     * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-     * */
-    class UuidGenerator {
-        constructor() {
-            this.isFastIdStrategy = false;
-            this.fastIdStart = 0;
-        }
-        setIsFastStrategy(isFast) {
-            this.isFastIdStrategy = isFast;
-        }
-        uuidv4() {
-            if (this.isFastIdStrategy) {
-                this.fastIdStart++;
-                return String(this.fastIdStart);
-                //@ts-ignore
-            }
-            else if (window.crypto && window.crypto.getRandomValues) {
-                //@ts-ignore
-                return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) => (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16));
-            }
-            else {
-                // mainly for jest and other browsers that do not have the crypto functionality
-                return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-                    var r = (Math.random() * 16) | 0, v = c == "x" ? r : (r & 0x3) | 0x8;
-                    return v.toString(16);
-                });
-            }
-        }
-    }
-
     /**
      * Convert from a cartesian reference to a Zone
      * The range boundaries will be kept in the same order as the
@@ -2817,6 +2584,285 @@
         return set;
     }
 
+    class RangeImpl {
+        constructor(args, getSheetSize) {
+            this.getSheetSize = getSheetSize;
+            this.prefixSheet = false;
+            this._zone = args.zone;
+            this.parts = args.parts;
+            this.prefixSheet = args.prefixSheet;
+            this.invalidXc = args.invalidXc;
+            this.sheetId = args.sheetId;
+            this.invalidSheetName = args.invalidSheetName;
+        }
+        static fromRange(range, getters) {
+            if (range instanceof RangeImpl) {
+                return range;
+            }
+            return new RangeImpl(range, getters.getSheetSize);
+        }
+        get unboundedZone() {
+            return this._zone;
+        }
+        get zone() {
+            const { left, top, bottom, right } = this._zone;
+            if (right !== undefined && bottom !== undefined)
+                return { left, top, right, bottom };
+            else if (bottom === undefined && right !== undefined) {
+                return { right, top, left, bottom: this.getSheetSize(this.sheetId).height - 1 };
+            }
+            else if (right === undefined && bottom !== undefined) {
+                return { bottom, left, top, right: this.getSheetSize(this.sheetId).width - 1 };
+            }
+            throw new Error(_lt("Bad zone format"));
+        }
+        static getRangeParts(xc, zone) {
+            const parts = xc.split(":").map((p) => {
+                const isFullRow = isRowReference(p);
+                return {
+                    colFixed: isFullRow ? false : p.startsWith("$"),
+                    rowFixed: isFullRow ? p.startsWith("$") : p.includes("$", 1),
+                };
+            });
+            const isFullCol = zone.bottom === undefined;
+            const isFullRow = zone.right === undefined;
+            if (isFullCol) {
+                parts[0].rowFixed = parts[0].rowFixed || parts[1].rowFixed;
+                parts[1].rowFixed = parts[0].rowFixed || parts[1].rowFixed;
+                if (zone.left === zone.right) {
+                    parts[0].colFixed = parts[0].colFixed || parts[1].colFixed;
+                    parts[1].colFixed = parts[0].colFixed || parts[1].colFixed;
+                }
+            }
+            if (isFullRow) {
+                parts[0].colFixed = parts[0].colFixed || parts[1].colFixed;
+                parts[1].colFixed = parts[0].colFixed || parts[1].colFixed;
+                if (zone.top === zone.bottom) {
+                    parts[0].rowFixed = parts[0].rowFixed || parts[1].rowFixed;
+                    parts[1].rowFixed = parts[0].rowFixed || parts[1].rowFixed;
+                }
+            }
+            return parts;
+        }
+        get isFullCol() {
+            return this._zone.bottom === undefined;
+        }
+        get isFullRow() {
+            return this._zone.right === undefined;
+        }
+        get rangeData() {
+            return {
+                _zone: this._zone,
+                _sheetId: this.sheetId,
+            };
+        }
+        /**
+         * Check that a zone is valid regarding the order of top-bottom and left-right.
+         * Left should be smaller than right, top should be smaller than bottom.
+         * If it's not the case, simply invert them, and invert the linked parts
+         */
+        orderZone() {
+            var _a, _b, _c, _d, _e, _f, _g, _h;
+            const zone = { ...this._zone };
+            let parts = this.parts;
+            if (zone.right !== undefined && zone.right < zone.left) {
+                let right = zone.right;
+                zone.right = zone.left;
+                zone.left = right;
+                parts = [
+                    {
+                        colFixed: ((_a = parts[1]) === null || _a === void 0 ? void 0 : _a.colFixed) || false,
+                        rowFixed: ((_b = parts[0]) === null || _b === void 0 ? void 0 : _b.rowFixed) || false,
+                    },
+                    {
+                        colFixed: ((_c = parts[0]) === null || _c === void 0 ? void 0 : _c.colFixed) || false,
+                        rowFixed: ((_d = parts[1]) === null || _d === void 0 ? void 0 : _d.rowFixed) || false,
+                    },
+                ];
+            }
+            if (zone.bottom !== undefined && zone.bottom < zone.top) {
+                let bottom = zone.bottom;
+                zone.bottom = zone.top;
+                zone.top = bottom;
+                parts = [
+                    {
+                        colFixed: ((_e = parts[0]) === null || _e === void 0 ? void 0 : _e.colFixed) || false,
+                        rowFixed: ((_f = parts[1]) === null || _f === void 0 ? void 0 : _f.rowFixed) || false,
+                    },
+                    {
+                        colFixed: ((_g = parts[1]) === null || _g === void 0 ? void 0 : _g.colFixed) || false,
+                        rowFixed: ((_h = parts[0]) === null || _h === void 0 ? void 0 : _h.rowFixed) || false,
+                    },
+                ];
+            }
+            return this.clone({ zone, parts });
+        }
+        /**
+         *
+         * @param rangeParams optional, values to put in the cloned range instead of the current values of the range
+         */
+        clone(rangeParams) {
+            return new RangeImpl({
+                zone: (rangeParams === null || rangeParams === void 0 ? void 0 : rangeParams.zone) ? rangeParams.zone : { ...this._zone },
+                sheetId: (rangeParams === null || rangeParams === void 0 ? void 0 : rangeParams.sheetId) ? rangeParams.sheetId : this.sheetId,
+                invalidSheetName: rangeParams && "invalidSheetName" in rangeParams // 'attr in obj' instead of just 'obj.attr' because we accept undefined values
+                    ? rangeParams.invalidSheetName
+                    : this.invalidSheetName,
+                invalidXc: rangeParams && "invalidXc" in rangeParams ? rangeParams.invalidXc : this.invalidXc,
+                parts: (rangeParams === null || rangeParams === void 0 ? void 0 : rangeParams.parts)
+                    ? rangeParams.parts
+                    : this.parts.map((part) => {
+                        return { rowFixed: part.rowFixed, colFixed: part.colFixed };
+                    }),
+                prefixSheet: (rangeParams === null || rangeParams === void 0 ? void 0 : rangeParams.prefixSheet) ? rangeParams.prefixSheet : this.prefixSheet,
+            }, this.getSheetSize);
+        }
+    }
+    /**
+     * Copy a range. If the range is on the sheetIdFrom, the range will target
+     * sheetIdTo.
+     */
+    function copyRangeWithNewSheetId(sheetIdFrom, sheetIdTo, range) {
+        const sheetId = range.sheetId === sheetIdFrom ? sheetIdTo : range.sheetId;
+        return range.clone({ sheetId });
+    }
+    /**
+     * Create a range from a xc. If the xc is empty, this function returns undefined.
+     */
+    function createRange(getters, sheetId, range) {
+        return range ? getters.getRangeFromSheetXC(sheetId, range) : undefined;
+    }
+    /**
+     * Spread multiple colrows zone to one row/col zone and add a many new input range as needed.
+     * For example, A1:B4 will become [A1:A4, B1:B4]
+     */
+    function spreadRange(model, ranges, id) {
+        for (const range of ranges) {
+            const sheetName = range.xc.includes("!") ? range.xc.split("!")[0] + "!" : "";
+            const zone = toUnboundedZone(range.xc);
+            if (zone.bottom !== zone.top && zone.left != zone.right) {
+                model.dispatch("REMOVE_RANGE", { id, rangeId: range.id });
+                if (zone.right) {
+                    for (let j = zone.left; j <= zone.right; ++j) {
+                        model.dispatch("ADD_RANGE", {
+                            id,
+                            value: `${sheetName}${zoneToXc({
+                            left: j,
+                            right: j,
+                            top: zone.top,
+                            bottom: zone.bottom,
+                        })}`,
+                        });
+                    }
+                }
+                else {
+                    for (let j = zone.top; j <= zone.bottom; ++j) {
+                        model.dispatch("ADD_RANGE", {
+                            id,
+                            value: `${sheetName}${zoneToXc({
+                            left: zone.left,
+                            right: zone.right,
+                            top: j,
+                            bottom: j,
+                        })}`,
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    /** Methods from Odoo Web Utils  */
+    /**
+     * This function computes a score that represent the fact that the
+     * string contains the pattern, or not
+     *
+     * - If the score is 0, the string does not contain the letters of the pattern in
+     *   the correct order.
+     * - if the score is > 0, it actually contains the letters.
+     *
+     * Better matches will get a higher score: consecutive letters are better,
+     * and a match closer to the beginning of the string is also scored higher.
+     */
+    function fuzzyMatch(pattern, str) {
+        pattern = pattern.toLocaleLowerCase();
+        str = str.toLocaleLowerCase();
+        let totalScore = 0;
+        let currentScore = 0;
+        let len = str.length;
+        let patternIndex = 0;
+        for (let i = 0; i < len; i++) {
+            if (str[i] === pattern[patternIndex]) {
+                patternIndex++;
+                currentScore += 100 + currentScore - i / 200;
+            }
+            else {
+                currentScore = 0;
+            }
+            totalScore = totalScore + currentScore;
+        }
+        return patternIndex === pattern.length ? totalScore : 0;
+    }
+    /**
+     * Return a list of things that matches a pattern, ordered by their 'score' (
+     * higher score first). An higher score means that the match is better. For
+     * example, consecutive letters are considered a better match.
+     */
+    function fuzzyLookup(pattern, list, fn) {
+        const results = [];
+        list.forEach((data) => {
+            const score = fuzzyMatch(pattern, fn(data));
+            if (score > 0) {
+                results.push({ score, elem: data });
+            }
+        });
+        // we want better matches first
+        results.sort((a, b) => b.score - a.score);
+        return results.map((r) => r.elem);
+    }
+
+    function createDefaultRows(rowNumber) {
+        const rows = [];
+        for (let i = 0; i < rowNumber; i++) {
+            const row = {
+                cells: {},
+            };
+            rows.push(row);
+        }
+        return rows;
+    }
+
+    /*
+     * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+     * */
+    class UuidGenerator {
+        constructor() {
+            this.isFastIdStrategy = false;
+            this.fastIdStart = 0;
+        }
+        setIsFastStrategy(isFast) {
+            this.isFastIdStrategy = isFast;
+        }
+        uuidv4() {
+            if (this.isFastIdStrategy) {
+                this.fastIdStart++;
+                return String(this.fastIdStart);
+                //@ts-ignore
+            }
+            else if (window.crypto && window.crypto.getRandomValues) {
+                //@ts-ignore
+                return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) => (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16));
+            }
+            else {
+                // mainly for jest and other browsers that do not have the crypto functionality
+                return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+                    var r = (Math.random() * 16) | 0, v = c == "x" ? r : (r & 0x3) | 0x8;
+                    return v.toString(16);
+                });
+            }
+        }
+    }
+
     class ChartJsComponent extends owl.Component {
         constructor() {
             super(...arguments);
@@ -3081,38 +3127,45 @@
         constructor() {
             super(...arguments);
             this.ctx = document.createElement("canvas").getContext("2d");
+            this.state = owl.useState({ width: 0, height: 0 });
+        }
+        setup() {
+            this.chartRef = owl.useRef("chart");
+            const resizeObserver = new ResizeObserver(() => {
+                const { width, height } = this.chartRef.el.getBoundingClientRect();
+                this.state.width = width;
+                this.state.height = height;
+            });
+            owl.useEffect(() => {
+                const el = this.chartRef.el;
+                resizeObserver.observe(el);
+                return () => resizeObserver.unobserve(el);
+            }, () => [this.chartRef.el]);
         }
         get runtime() {
             return this.env.model.getters.getChartRuntime(this.props.figure.id);
         }
         get title() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.title) || "";
+            return this.runtime.title;
         }
         get keyValue() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.keyValue) || "";
+            return this.runtime.keyValue;
         }
         get baseline() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineDisplay) || "";
+            return this.runtime.baselineDisplay;
         }
         get baselineDescr() {
-            var _a;
-            const baselineDescr = ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineDescr) || "";
+            const baselineDescr = this.runtime.baselineDescr || "";
             return this.baseline && baselineDescr ? " " + baselineDescr : baselineDescr;
         }
         get baselineArrowDirection() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.baselineArrow) || "neutral";
+            return this.runtime.baselineArrow;
         }
         get backgroundColor() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.background) || "#ffffff";
+            return this.runtime.background;
         }
         get primaryFontColor() {
-            var _a;
-            return ((_a = this.runtime) === null || _a === void 0 ? void 0 : _a.fontColor) || "#000000";
+            return this.runtime.fontColor;
         }
         get secondaryFontColor() {
             return relativeLuminance(this.primaryFontColor) <= 0.3 ? "#757575" : "#bbbbbb";
@@ -3122,8 +3175,6 @@
         }
         get chartStyle() {
             return `
-      height:${this.figure.height}px;
-      width:${this.figure.width}px;
       padding:${this.chartPadding}px;
       background:${this.backgroundColor};
     `;
@@ -3134,12 +3185,11 @@
     `;
         }
         get chartPadding() {
-            return this.figure.width * CHART_PADDING_RATIO;
+            return this.state.width * CHART_PADDING_RATIO;
         }
         getTextStyles() {
-            var _a, _b, _c;
             // If the widest text overflows horizontally, scale it down, and apply the same scaling factors to all the other fonts.
-            const maxLineWidth = this.figure.width * (1 - 2 * CHART_PADDING_RATIO);
+            const maxLineWidth = this.state.width * (1 - 2 * CHART_PADDING_RATIO);
             const widestElement = this.getWidestElement();
             const baseFontSize = widestElement.getElementMaxFontSize(this.getDrawableHeight(), this);
             const fontSizeMatchingWidth = getFontSizeMatchingWidth(maxLineWidth, baseFontSize, (fontSize) => widestElement.getElementWidth(fontSize, this.ctx, this));
@@ -3154,7 +3204,7 @@
                 }),
                 keyStyle: this.getTextStyle({
                     fontSize: keyFontSize,
-                    cellStyle: (_a = this.runtime) === null || _a === void 0 ? void 0 : _a.keyValueStyle,
+                    cellStyle: this.runtime.keyValueStyle,
                     color: this.primaryFontColor,
                 }),
                 baselineStyle: this.getTextStyle({
@@ -3162,8 +3212,8 @@
                 }),
                 baselineValueStyle: this.getTextStyle({
                     fontSize: baselineFontSize,
-                    cellStyle: (_b = this.runtime) === null || _b === void 0 ? void 0 : _b.baselineStyle,
-                    color: ((_c = this.runtime) === null || _c === void 0 ? void 0 : _c.baselineColor) || this.secondaryFontColor,
+                    cellStyle: this.runtime.baselineStyle,
+                    color: this.runtime.baselineColor || this.secondaryFontColor,
                 }),
                 baselineDescrStyle: this.getTextStyle({
                     fontSize: baselineFontSize * BASELINE_DESCR_FONT_RATIO,
@@ -3184,7 +3234,7 @@
         /** Get the height of the chart minus all the vertical paddings */
         getDrawableHeight() {
             const verticalPadding = 2 * this.chartPadding;
-            let availableHeight = this.figure.height - verticalPadding;
+            let availableHeight = this.state.height - verticalPadding;
             availableHeight -= this.title ? TITLE_FONT_SIZE * LINE_HEIGHT : 0;
             return availableHeight;
         }
@@ -13914,6 +13964,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     const DEFAULT_IS_SORTED = true;
     const DEFAULT_MATCH_MODE = 0;
     const DEFAULT_SEARCH_MODE = 1;
+    function assertAvailable(variable, searchKey) {
+        if (variable === undefined) {
+            throw new NotAvailableError(_lt("Did not find value '%s' in [[FUNCTION_NAME]] evaluation.", toString(searchKey)));
+        }
+    }
     // -----------------------------------------------------------------------------
     // COLUMN
     // -----------------------------------------------------------------------------
@@ -13968,8 +14023,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             else {
                 colIndex = linearSearch(range, _searchKey, "strict", range.length, getNormalizedValueFromRowRange);
             }
-            assert(() => colIndex > -1, _lt("Did not find value '%s' in [[FUNCTION_NAME]] evaluation.", toString(searchKey)));
-            return range[colIndex][_index - 1];
+            const col = range[colIndex];
+            assertAvailable(col, searchKey);
+            return col[_index - 1];
         },
         isExported: true,
     };
@@ -13994,7 +14050,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 : getNormalizedValueFromRowRange;
             const rangeLength = verticalSearch ? nbRow : nbCol;
             const index = dichotomicSearch(searchArray, _searchKey, "nextSmaller", "asc", rangeLength, getElement);
-            assert(() => index >= 0, _lt("Did not find value '%s' in [[FUNCTION_NAME]] evaluation.", toString(searchKey)));
+            assertAvailable(searchArray[0][index], searchKey);
             if (resultRange === undefined) {
                 return (verticalSearch ? searchArray[nbCol - 1][index] : searchArray[index][nbRow - 1]);
             }
@@ -14043,7 +14099,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     index = dichotomicSearch(range, _searchKey, "nextGreater", "desc", rangeLen, getElement);
                     break;
             }
-            assert(() => index >= 0, _lt("Did not find value '%s' in [[FUNCTION_NAME]] evaluation.", toString(searchKey)));
+            assertAvailable(nbCol === 1 ? range[0][index] : range[index], searchKey);
             return index + 1;
         },
         isExported: true,
@@ -14101,8 +14157,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             else {
                 rowIndex = linearSearch(range, _searchKey, "strict", range[0].length, getNormalizedValueFromColumnRange);
             }
-            assert(() => rowIndex > -1, _lt("Did not find value '%s' in [[FUNCTION_NAME]] evaluation.", toString(searchKey)));
-            return range[_index - 1][rowIndex];
+            const value = range[_index - 1][rowIndex];
+            assertAvailable(value, searchKey);
+            return value;
         },
         isExported: true,
     };
@@ -14151,7 +14208,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return (lookupRange.length === 1 ? returnRange[0][index] : returnRange[index][0]);
             }
             const _defaultValue = defaultValue === null || defaultValue === void 0 ? void 0 : defaultValue();
-            assert(() => !!_defaultValue, _lt("Did not find value '%s' in [[FUNCTION_NAME]] evaluation.", toString(searchKey)));
+            assertAvailable(_defaultValue, searchKey);
             return _defaultValue;
         },
         isExported: true,
@@ -14718,7 +14775,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return _textToSearch;
             }
             const _replaceWith = toString(replaceWith);
-            const reg = new RegExp(_searchFor, "g");
+            const reg = new RegExp(escapeRegExp(_searchFor), "g");
             if (_occurrenceNumber === 0) {
                 return _textToSearch.replace(reg, _replaceWith);
             }
@@ -19649,6 +19706,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         get isConfirmable() {
             return this.hasFocus && this.ranges.every((range) => range.isValidRange);
         }
+        get isResettable() {
+            return this.previousRanges.join() !== this.ranges.map((r) => r.xc).join();
+        }
         setup() {
             owl.onMounted(() => this.enableNewSelectionInput());
             owl.onWillUnmount(async () => this.disableNewSelectionInput());
@@ -19679,9 +19739,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             var _a, _b;
             const ranges = this.env.model.getters.getSelectionInputValue(this.id);
             (_b = (_a = this.props).onSelectionChanged) === null || _b === void 0 ? void 0 : _b.call(_a, ranges);
-            if (this.isConfirmable) {
-                this.previousRanges = ranges;
-            }
         }
         onKeydown(ev) {
             if (ev.key === "F2") {
@@ -19698,15 +19755,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
         }
         focus(rangeId) {
-            var _a;
             this.state.isMissing = false;
             this.state.mode = "select-range";
-            if ((_a = this.ranges.find((r) => r.id == rangeId)) === null || _a === void 0 ? void 0 : _a.isValidRange) {
-                this.env.model.dispatch("FOCUS_RANGE", {
-                    id: this.id,
-                    rangeId,
-                });
-            }
+            this.env.model.dispatch("FOCUS_RANGE", {
+                id: this.id,
+                rangeId,
+            });
         }
         addEmptyInput() {
             this.env.model.dispatch("ADD_EMPTY_RANGE", { id: this.id });
@@ -19727,7 +19781,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             target.blur();
             this.triggerChange();
         }
-        reset(ev) {
+        reset() {
             var _a, _b, _c, _d;
             const existingSelectionRange = this.env.model.getters.getSelectionInput(this.id);
             for (var i = 0; i < this.ranges.length; i++) {
@@ -19741,66 +19795,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             (_d = (_c = this.props).onSelectionConfirmed) === null || _d === void 0 ? void 0 : _d.call(_c);
         }
         confirm() {
-            var _a, _b, _c, _d;
-            this.env.model.dispatch("UNFOCUS_SELECTION_INPUT");
+            var _a, _b, _c, _d, _e, _f;
             const ranges = this.env.model.getters
                 .getSelectionInput(this.id)
                 .filter((r) => this.env.model.getters.isRangeValid(r.xc));
             if (this.props.required && ranges.length === 0) {
                 this.state.isMissing = true;
             }
-            for (const range of ranges) {
-                const zone = toUnboundedZone(range.xc);
-                if (zone.bottom !== zone.top && zone.left != zone.right) {
-                    if (zone.right) {
-                        //test if we don't have something like 1:2
-                        this.env.model.dispatch("CHANGE_RANGE", {
-                            id: this.id,
-                            rangeId: range.id,
-                            value: zoneToXc({
-                                left: zone.left,
-                                right: zone.left,
-                                top: zone.top,
-                                bottom: zone.bottom,
-                            }),
-                        });
-                        for (var j = zone.left + 1; j <= zone.right; ++j) {
-                            this.env.model.dispatch("ADD_RANGE", {
-                                id: this.id,
-                                value: zoneToXc({
-                                    left: j,
-                                    right: j,
-                                    top: zone.top,
-                                    bottom: zone.bottom,
-                                }),
-                            });
-                        }
-                    }
-                    else {
-                        this.env.model.dispatch("CHANGE_RANGE", {
-                            id: this.id,
-                            rangeId: range.id,
-                            value: zoneToXc({
-                                left: zone.left,
-                                right: zone.right,
-                                top: zone.top,
-                                bottom: zone.top,
-                            }),
-                        });
-                        for (var j = zone.top + 1; j <= zone.bottom; ++j) {
-                            this.env.model.dispatch("ADD_RANGE", {
-                                id: this.id,
-                                value: zoneToXc({
-                                    left: zone.left,
-                                    right: zone.right,
-                                    top: j,
-                                    bottom: j,
-                                }),
-                            });
-                        }
-                    }
-                }
-            }
+            (_b = (_a = this.props).postProcessSelection) === null || _b === void 0 ? void 0 : _b.call(_a, ranges, this.id);
             const activeSheetId = this.env.model.getters.getActiveSheetId();
             if (this.originSheet !== activeSheetId) {
                 this.env.model.dispatch("ACTIVATE_SHEET", {
@@ -19809,8 +19811,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 });
             }
             const existingSelectionRange = this.env.model.getters.getSelectionInputValue(this.id);
-            (_b = (_a = this.props).onSelectionChanged) === null || _b === void 0 ? void 0 : _b.call(_a, existingSelectionRange);
-            (_d = (_c = this.props).onSelectionConfirmed) === null || _d === void 0 ? void 0 : _d.call(_c);
+            (_d = (_c = this.props).onSelectionChanged) === null || _d === void 0 ? void 0 : _d.call(_c, existingSelectionRange);
+            (_f = (_e = this.props).onSelectionConfirmed) === null || _f === void 0 ? void 0 : _f.call(_e);
+            this.previousRanges = existingSelectionRange;
+            this.env.model.dispatch("UNFOCUS_SELECTION_INPUT");
         }
     }
     SelectionInput.template = "o-spreadsheet-SelectionInput";
@@ -19822,6 +19826,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         class: { type: String, optional: true },
         onSelectionChanged: { type: Function, optional: true },
         onSelectionConfirmed: { type: Function, optional: true },
+        postProcessSelection: { type: Function, optional: true },
     };
 
     class LineBarPieConfigPanel extends owl.Component {
@@ -19865,6 +19870,15 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.state.datasetDispatchResult = this.props.updateChart({
                 dataSets: this.dataSeriesRanges,
             });
+        }
+        /**
+         * Post-process the dataSeries ranges. In this case, we want to spread zones to one col/row at a time.
+         * e.g. : A1:B4 should be spread to [A1:A4, B1:B4]
+         * @param ranges The rangeInputValue from the selectionInput
+         * @param id The id of the related selectionInput
+         */
+        postProcessSelection(ranges, id) {
+            spreadRange(this.env.model, ranges, id);
         }
         /**
          * Change the local labelRange. The model should be updated when the
@@ -21248,6 +21262,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.state.currentCF.ranges = ranges;
             }
         }
+        postProcessSelection(ranges, id) {
+            spreadRange(this.env.model, ranges, id);
+        }
         /*****************************************************************************
          * Common
          ****************************************************************************/
@@ -21700,20 +21717,15 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     const ACTIVE_BORDER_WIDTH = 2;
     css /*SCSS*/ `
   div.o-figure {
-    box-sizing: content-box;
+    box-sizing: border-box;
     position: absolute;
     width: 100%;
     height: 100%;
     user-select: none;
 
-    bottom: 0px;
-    right: 0px;
     border: solid ${FIGURE_BORDER_COLOR};
     &:focus {
       outline: none;
-    }
-    &.active {
-      border: solid ${SELECTION_BORDER_COLOR};
     }
 
     &.o-dragging {
@@ -21722,17 +21734,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
   }
 
+  div.o-active-figure-border {
+    box-sizing: border-box;
+    z-index: 1;
+    border: ${ACTIVE_BORDER_WIDTH}px solid ${SELECTION_BORDER_COLOR};
+  }
+
   .o-figure-wrapper {
     position: absolute;
     box-sizing: content-box;
 
-    .o-figure-overflow-wrapper {
-      position: absolute;
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-    }
-    .o-anchor {
+    .o-fig-resizer {
       z-index: ${ComponentsImportance.ChartAnchor};
       position: absolute;
       width: ${ANCHOR_SIZE}px;
@@ -21785,6 +21797,61 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
   }
 `;
+    /**
+     * Each figure ⭐ is positioned inside a container `div` placed and sized
+     * according to the split pane the figure is part of.
+     * Any part of the figure outside of the container is hidden
+     * thanks to its `overflow: hidden` property.
+     *
+     * Additionally, the figure is placed inside a "inverse viewport" `div` 🟥.
+     * Its position represents the viewport position in the grid: its top/left
+     * corner represents the top/left corner of the grid.
+     *
+     * It allows to position the figure inside this div regardless of the
+     * (possibly freezed) viewports and the scrolling position.
+     *
+     * --: container limits
+     * 🟥: inverse viewport
+     * ⭐: figure top/left position
+     *
+     *                     container
+     *                         ↓
+     * |🟥--------------------------------------------
+     * |  \                                          |
+     * |   \                                         |
+     * |    \                                        |
+     * |     \          visible area                 |  no scroll
+     * |      ⭐                                     |
+     * |                                             |
+     * |                                             |
+     * -----------------------------------------------
+     *
+     * the scrolling of the pane is applied as an inverse offset
+     * to the div which will in turn move the figure up and down
+     * inside the container.
+     * Hence, once the figure position is (resp. partly) out of
+     * the container dimensions, it will be (resp. partly) hidden.
+     *
+     * The same reasoning applies to the horizontal axis.
+     *
+     *  🟥 ························
+     *    \                       ↑
+     *     \                      |
+     *      \                     | inverse viewport = -1 * scroll of pane
+     *       \                    |
+     *        ⭐ <- not visible   |
+     *                            ↓
+     * -----------------------------------------------
+     * |                                             |
+     * |                                             |
+     * |                                             |
+     * |               visible area                  |
+     * |                                             |
+     * |                                             |
+     * |                                             |
+     * -----------------------------------------------
+     *
+     */
     class FigureComponent extends owl.Component {
         constructor() {
             super(...arguments);
@@ -21824,113 +21891,68 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         get isSelected() {
             return this.env.model.getters.getSelectedFigureId() === this.props.figure.id;
         }
-        /** Get the current figure size, which is either the stored figure size of the DnD figure size */
-        getFigureSize() {
-            const { width, height } = this.displayedFigure;
-            return { width, height };
+        get containerStyle() {
+            const { x: figureX, y: figureY } = this.props.figure;
+            const { width: viewWidth, height: viewHeight } = this.env.model.getters.getMainViewportRect();
+            const { x, y } = this.env.model.getters.getMainViewportCoordinates();
+            const left = figureX >= x ? x : 0;
+            const width = viewWidth - left;
+            const top = figureY >= y ? y : 0;
+            const height = viewHeight - top;
+            return `
+      left: ${left}px;
+      top: ${top}px;
+      width: ${width}px;
+      height: ${height}px
+    `;
         }
-        getFigureSizeWithBorders() {
-            const { width, height } = this.getFigureSize();
-            const borders = this.getBorderWidth() * 2;
-            return { width: width + borders, height: height + borders };
+        get inverseViewportPositionStyle() {
+            const { x: figureX, y: figureY } = this.props.figure;
+            const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
+            const { x, y } = this.env.model.getters.getMainViewportCoordinates();
+            const left = figureX >= x ? -(x + offsetX) : 0;
+            const top = figureY >= y ? -(y + offsetY) : 0;
+            return `
+      left: ${left}px;
+      top: ${top}px;
+    `;
         }
         getBorderWidth() {
-            return this.isSelected ? ACTIVE_BORDER_WIDTH : this.env.isDashboard() ? 0 : this.borderWidth;
+            return this.env.isDashboard() ? 0 : this.borderWidth;
         }
-        getFigureStyle() {
-            const { width, height } = this.displayedFigure;
-            return `width:${width}px;height:${height}px;border-width: ${this.getBorderWidth()}px;`;
+        get figureStyle() {
+            return `border-width: ${this.getBorderWidth()}px;`;
         }
-        getContainerStyle() {
-            const target = this.displayedFigure;
-            const { x: offsetCorrectionX, y: offsetCorrectionY } = this.env.model.getters.getMainViewportCoordinates();
-            const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
-            let { width, height } = this.getFigureSizeWithBorders();
-            let x, y;
-            // Visually, the content of the container is slightly shifted as it includes borders and/or corners.
-            // If we want to make assertions on the position of the content, we need to take this shift into account
-            const borderShift = ANCHOR_SIZE / 2;
-            if (target.x + borderShift < offsetCorrectionX) {
-                x = target.x;
-            }
-            else if (target.x + borderShift < offsetCorrectionX + offsetX) {
-                x = offsetCorrectionX;
-                width += target.x - offsetCorrectionX - offsetX;
-            }
-            else {
-                x = target.x - offsetX;
-            }
-            if (target.y + borderShift < offsetCorrectionY) {
-                y = target.y;
-            }
-            else if (target.y + borderShift < offsetCorrectionY + offsetY) {
-                y = offsetCorrectionY;
-                height += target.y - offsetCorrectionY - offsetY;
-            }
-            else {
-                y = target.y - offsetY;
-            }
-            if (width < 0 || height < 0) {
-                return `display:none;`;
-            }
-            const borderOffset = this.borderWidth - this.getBorderWidth();
-            // TODO : remove the +1 once 2951210 is fixed
-            return (`top:${y + borderOffset + 1}px;` +
-                `left:${x + borderOffset}px;` +
+        get wrapperStyle() {
+            const { x, y, width, height } = this.displayedFigure;
+            return (`top:${y}px;` +
+                `left:${x}px;` +
                 `width:${width}px;` +
                 `height:${height}px;` +
                 `z-index: ${ComponentsImportance.Figure + (this.isSelected ? 1 : 0)}`);
         }
-        getAnchorPosition(anchor) {
-            let { width, height } = this.getFigureSizeWithBorders();
+        getResizerPosition(resizer) {
             const anchorCenteringOffset = (ANCHOR_SIZE - ACTIVE_BORDER_WIDTH) / 2;
-            const target = this.displayedFigure;
-            let x = 0;
-            let y = 0;
-            const { x: offsetCorrectionX, y: offsetCorrectionY } = this.env.model.getters.getMainViewportCoordinates();
-            const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
-            const borderShift = ANCHOR_SIZE / 2;
-            if (target.x + borderShift < offsetCorrectionX) {
-                x = 0;
+            let style = "";
+            if (resizer.includes("top")) {
+                style += `top: ${-anchorCenteringOffset}px;`;
             }
-            else if (target.x + borderShift < offsetCorrectionX + offsetX) {
-                x = target.x - offsetCorrectionX - offsetX;
+            else if (resizer.includes("bottom")) {
+                style += `bottom: ${-anchorCenteringOffset}px;`;
             }
             else {
-                x = 0;
+                style += ` bottom: calc(50% - ${anchorCenteringOffset}px);`;
             }
-            if (target.y + borderShift < offsetCorrectionY) {
-                y = 0;
+            if (resizer.includes("left")) {
+                style += `left: ${-anchorCenteringOffset}px;`;
             }
-            else if (target.y + borderShift < offsetCorrectionY + offsetY) {
-                y = target.y - offsetCorrectionY - offsetY;
-            }
-            else {
-                y = 0;
-            }
-            if (anchor.includes("top")) {
-                y -= anchorCenteringOffset;
-            }
-            else if (anchor.includes("bottom")) {
-                y += height - ACTIVE_BORDER_WIDTH - anchorCenteringOffset;
+            else if (resizer.includes("right")) {
+                style += `right: ${-anchorCenteringOffset}px;`;
             }
             else {
-                y += (height - ACTIVE_BORDER_WIDTH) / 2 - anchorCenteringOffset;
+                style += ` right: calc(50% - ${anchorCenteringOffset}px);`;
             }
-            if (anchor.includes("left")) {
-                x += -anchorCenteringOffset;
-            }
-            else if (anchor.includes("right")) {
-                x += width - ACTIVE_BORDER_WIDTH - anchorCenteringOffset;
-            }
-            else {
-                x += (width - ACTIVE_BORDER_WIDTH) / 2 - anchorCenteringOffset;
-            }
-            let visibility = "visible";
-            if (x < -anchorCenteringOffset || y < -anchorCenteringOffset) {
-                visibility = "hidden";
-            }
-            return `visibility:${visibility};top:${y}px; left:${x}px;`;
+            return style;
         }
         resize(dirX, dirY, ev) {
             const figure = this.props.figure;
@@ -22006,6 +22028,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const position = gridOverlayPosition();
             const { x: offsetCorrectionX, y: offsetCorrectionY } = this.env.model.getters.getMainViewportCoordinates();
             const { offsetX, offsetY } = this.env.model.getters.getActiveSheetScrollInfo();
+            const sheetId = this.env.model.getters.getActiveSheetId();
             const initialX = ev.clientX - position.left;
             const initialY = ev.clientY - position.top;
             this.dnd.x = figure.x;
@@ -22016,31 +22039,28 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.dnd.isActive = true;
                 const newX = ev.clientX - position.left;
                 let deltaX = newX - initialX;
-                if (newX > offsetCorrectionX && initialX < offsetCorrectionX) {
-                    deltaX += offsetX;
-                }
-                else if (newX < offsetCorrectionX && initialX > offsetCorrectionX) {
-                    deltaX -= offsetX;
-                }
                 this.dnd.x = Math.max(figure.x + deltaX, 0);
                 const newY = ev.clientY - position.top;
                 let deltaY = newY - initialY;
-                if (newY > offsetCorrectionY && initialY < offsetCorrectionY) {
-                    deltaY += offsetY;
-                }
-                else if (newY < offsetCorrectionY && initialY > offsetCorrectionY) {
-                    deltaY -= offsetY;
-                }
                 this.dnd.y = Math.max(figure.y + deltaY, 0);
             };
             const onMouseUp = (ev) => {
+                let { x, y } = this.dnd;
+                // Correct position in case of moving to/from a frozen pane
+                if (this.dnd.x > offsetCorrectionX && figure.x < offsetCorrectionX) {
+                    x += offsetX;
+                }
+                else if (this.dnd.x < offsetCorrectionX && figure.x > offsetCorrectionX) {
+                    x -= offsetX;
+                }
+                if (this.dnd.y > offsetCorrectionY && figure.y < offsetCorrectionY) {
+                    y += offsetY;
+                }
+                else if (this.dnd.y < offsetCorrectionY && figure.y > offsetCorrectionY) {
+                    y -= offsetY;
+                }
                 this.dnd.isActive = false;
-                this.env.model.dispatch("UPDATE_FIGURE", {
-                    sheetId: this.env.model.getters.getActiveSheetId(),
-                    id: figure.id,
-                    x: this.dnd.x,
-                    y: this.dnd.y,
-                });
+                this.env.model.dispatch("UPDATE_FIGURE", { sheetId, id: figure.id, x, y });
             };
             startDnd(onMouseMove, onMouseUp);
         }
@@ -27313,6 +27333,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         initialMessages = fixTranslatedSheetIds(data, initialMessages);
         initialMessages = dropCommands(initialMessages, "SORT_CELLS");
         initialMessages = dropCommands(initialMessages, "SET_DECIMAL");
+        initialMessages = fixChartDefinitions(data, initialMessages);
         return initialMessages;
     }
     /**
@@ -27357,6 +27378,54 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 messages.push({
                     ...message,
                     commands: message.commands.filter((command) => command.type !== commandType),
+                });
+            }
+            else {
+                messages.push(message);
+            }
+        }
+        return messages;
+    }
+    function fixChartDefinitions(data, initialMessages) {
+        var _a;
+        const messages = [];
+        const map = {};
+        for (const sheet of data.sheets || []) {
+            (_a = sheet.figures) === null || _a === void 0 ? void 0 : _a.forEach((figure) => {
+                if (figure.tag === "chart") {
+                    // chart definition
+                    map[figure.id] = figure.data;
+                }
+            });
+        }
+        for (const message of initialMessages) {
+            if (message.type === "REMOTE_REVISION") {
+                const commands = [];
+                for (const cmd of message.commands) {
+                    let command = cmd;
+                    switch (cmd.type) {
+                        case "CREATE_CHART":
+                            map[cmd.id] = cmd.definition;
+                            break;
+                        case "UPDATE_CHART":
+                            if (!map[cmd.id]) {
+                                /** the chart does not exist on the map, it might have been created after a duplicate sheet.
+                                 * We don't have access to the definition, so we skip the command.
+                                 */
+                                console.log(`Fix chart definition: chart with id ${cmd.id} not found.`);
+                                continue;
+                            }
+                            const definition = map[cmd.id];
+                            const newDefinition = { ...definition, ...cmd.definition };
+                            command = { ...cmd, definition: newDefinition };
+                            map[cmd.id] = newDefinition;
+                            break;
+                    }
+                    commands.push(command);
+                }
+                messages.push({
+                    ...message,
+                    commands,
                 });
             }
             else {
@@ -34409,7 +34478,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * the value toSearch
          */
         updateRegex() {
-            let searchValue = this.toSearch;
+            let searchValue = escapeRegExp(this.toSearch);
             const flags = !this.searchOptions.matchCase ? "i" : "";
             if (this.searchOptions.exactMatch) {
                 searchValue = `^${searchValue}$`;
@@ -43666,8 +43735,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-01-12T10:03:06.922Z';
-    exports.__info__.hash = 'f7d2d52';
+    exports.__info__.date = '2023-01-18T10:24:25.966Z';
+    exports.__info__.hash = 'a7e236d';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
