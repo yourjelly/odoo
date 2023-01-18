@@ -158,8 +158,8 @@ const Link = Widget.extend({
             // var match = /mailto:(.+)/.exec(this.data.url);
             // this.$('input[name="url"]').val(match ? match[1] : this.data.url);
             this.$('input[name="url"]').val(this.data.url);
-            this._onURLInput();
             this._adaptPreview();
+            this._onURLInput();
             this._savedURLInputOnDestroy = false;
         }
 
@@ -577,12 +577,17 @@ const Link = Widget.extend({
      */
     _onURLInput: function () {
         this._savedURLInputOnDestroy = true;
-        var $linkUrlInput = this.$('#o_link_dialog_url_input');
-        let value = $linkUrlInput.val();
+        // var $linkUrlInput = this.$('#o_link_dialog_url_input');
+        // TODO: check if $link is always guaranteed to exist
+        const linkHref = this.$link.attr('href') || '';
+        // let value = $linkUrlInput.val();
         // TODO: Phone must be exclude as well. Consider storing the link type in a property.
-        let isLink = value.indexOf('@') < 0;
+        // let isLink = value.indexOf('@') < 0;
+        // const isLink = !['mailto:', 'tel:'].some(protocol => linkHref.startsWith(protocol));
+        // const isLink = !(linkHref.startsWith('mailto:') || linkHref.startsWith('tel:'));
+        const isLink = !/^(mailto:|tel:)/.test(linkHref);
         this._getIsNewWindowFormRow().toggleClass('d-none', !isLink);
-        this.$('.o_strip_domain').toggleClass('d-none', value.indexOf(window.location.origin) !== 0);
+        this.$('.o_strip_domain').toggleClass('d-none', linkHref.indexOf(window.location.origin) !== 0);
     },
     /**
      * @private

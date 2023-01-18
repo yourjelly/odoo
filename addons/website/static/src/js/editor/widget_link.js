@@ -46,7 +46,7 @@ weWidgets.LinkTools.include({
      * @private
      */
     _adaptPageAnchor: function () {
-        const linkHref = this._link.href;
+        const linkHref = this.$link.attr('href') || '';
         const $pageAnchor = this.$('.o_link_dialog_page_anchor');
         const isFromWebsite = linkHref[0] === '/';
         const $selectMenu = this.$('we-selection-items[name="link_anchor"]');
