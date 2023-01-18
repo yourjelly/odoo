@@ -3231,8 +3231,8 @@ export class OdooEditor extends EventTarget {
                     selection &&
                     selection.anchorNode &&
                     !closestElement(selection.anchorNode).closest('a') &&
-                    selection.anchorNode.nodeType === Node.TEXT_NODE &&
-                    !this.powerbox.isOpen
+                    selection.anchorNode.nodeType === Node.TEXT_NODE //&&
+                    // !this.powerbox.isOpen
                 ) {
                     const textSliced = selection.anchorNode.textContent.slice(0, selection.anchorOffset);
                     const textNodeSplitted = textSliced.split(/\s/);
@@ -3240,7 +3240,7 @@ export class OdooEditor extends EventTarget {
                     // Remove added space
                     textNodeSplitted.pop();
                     const potentialUrl = textNodeSplitted.pop();
-                    const lastWordMatch = potentialUrl.match(URL_REGEX_WITH_INFOS);
+                    const lastWordMatch = potentialUrl.match(URL_REGEX_STRICT);
 
                     if (lastWordMatch) {
                         const matches = getUrlsInfosInString(textSliced);
