@@ -118,12 +118,29 @@ export const busService = {
             worker.addEventListener('message', handleMessage);
         }
         initializeWorkerConnection();
-        browser.addEventListener('pagehide', ({ persisted }) => {
+        browser.addEventListener("pagehide", ({ persisted }) => {
+            console.debug(
+                `%c${new Date().toLocaleString()} - [pageHide]`,
+                "color: #c6e; font-weight: bold;",
+                persisted
+            );
             if (!persisted) {
                 // Page is gonna be unloaded, disconnect this client
                 // from the worker.
                 send('leave');
             }
+        });
+        browser.addEventListener("frozen", () => {
+            console.debug(
+                `%c${new Date().toLocaleString()} - [frozen]`,
+                "color: #c6e; font-weight: bold;"
+            );
+        });
+        browser.addEventListener("resume", () => {
+            console.debug(
+                `%c${new Date().toLocaleString()} - [resume]`,
+                "color: #c6e; font-weight: bold;",
+            );
         });
         await connectionInitializedDeferred;
 
