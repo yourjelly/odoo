@@ -35,7 +35,7 @@ export const WEBSOCKET_CLOSE_CODES = Object.freeze({
 // Should be incremented on every worker update in order to force
 // update of the worker in browser cache.
 export const WORKER_VERSION = "1.0.1";
-
+const INITIAL_RETRY_DELAY = 1000;
 /**
  * This class regroups the logic necessary in order for the
  * SharedWorker/Worker to work. Indeed, Safari and some minor browsers
@@ -49,7 +49,7 @@ export class WebsocketWorker {
         this.currentUID = null;
         this.isWaitingForNewUID = true;
         this.channelsByClient = new Map();
-        this.connectRetryDelay = 1000;
+        this.connectRetryDelay = INITIAL_RETRY_DELAY;
         this.connectTimeout = null;
         this.debugModeByClient = new Map();
         this.isDebug = false;
@@ -121,6 +121,10 @@ export class WebsocketWorker {
             case 'send':
                 return this._sendToServer(data);
             case 'start':
+                return this._start();
+            case 'offline':
+                return this._stop();
+            case 'online':
                 return this._start();
             case 'leave':
                 return this._unregisterClient(client);
@@ -322,7 +326,7 @@ export class WebsocketWorker {
         this.messageWaitQueue.forEach(msg => this.websocket.send(msg));
         this.messageWaitQueue = [];
         this.broadcast(this.isReconnecting ? 'reconnect' : 'connect');
-        this.connectRetryDelay = 0;
+        this.connectRetryDelay = INITIAL_RETRY_DELAY;
         this.connectTimeout = null;
         this.isReconnecting = false;
     }
@@ -333,6 +337,7 @@ export class WebsocketWorker {
      */
     _retryConnectionWithDelay() {
         this.connectRetryDelay = this.connectRetryDelay * 1.5 + 500 * Math.random();
+        console.warn("=== RECONNECTING", this.connectRetryDelay)
         this.connectTimeout = setTimeout(this._start.bind(this), this.connectRetryDelay);
     }
 
@@ -364,6 +369,16 @@ export class WebsocketWorker {
         this.websocket.addEventListener('error', this._onWebsocketError.bind(this));
         this.websocket.addEventListener('message', this._onWebsocketMessage.bind(this));
         this.websocket.addEventListener('close', this._onWebsocketClose.bind(this));
+    }
+
+    /**
+     * Stop the worker.
+     */
+    _stop() {
+        clearTimeout(this.connectTimeout);
+        this.connectRetryDelay = INITIAL_RETRY_DELAY;
+        this.isReconnecting = false;
+        this.websocket.close();
     }
 
     /**

@@ -255,9 +255,10 @@ class Websocket:
             try:
                 readables = {
                     selector_key[0].fileobj for selector_key in
-                    self._selector.select(type(self).INACTIVITY_TIMEOUT)
+                    self._selector.select(10)
                 }
                 if self._timeout_manager.has_timed_out() and self.state is ConnectionState.OPEN:
+                    print("=== DROPPED")
                     self.disconnect(
                         CloseCode.ABNORMAL_CLOSURE
                         if self._timeout_manager.timeout_reason is TimeoutReason.NO_RESPONSE
@@ -265,6 +266,7 @@ class Websocket:
                     )
                     continue
                 if not readables:
+                    print("=== PING")
                     self._send_ping_frame()
                     continue
                 if self._notif_sock_r in readables:
@@ -285,6 +287,7 @@ class Websocket:
         orderly shutdown. Note that we don't need to wait for the
         acknowledgment if the connection was failed beforewards.
         """
+        print("== DISCONNECT", code)
         if code is not CloseCode.ABNORMAL_CLOSURE:
             self._send_close_frame(code, reason)
         else:
@@ -414,8 +417,7 @@ class Websocket:
         """
         frame = self._get_next_frame()
         if frame.opcode in CTRL_OP:
-            self._handle_control_frame(frame)
-            return
+            return self._handle_control_frame(frame)
         if self.state is not ConnectionState.OPEN:
             # After receiving a control frame indicating the connection
             # should be closed, a peer discards any further data
@@ -653,7 +655,7 @@ class TimeoutManager:
     the connection is considered to have timed out. To determine if the
     connection has timed out, use the `has_timed_out` method.
     """
-    TIMEOUT = 15
+    TIMEOUT = 5
     # Timeout specifying how many seconds the connection should be kept
     # alive.
     KEEP_ALIVE_TIMEOUT = int(config['websocket_keep_alive_timeout'])
@@ -675,6 +677,8 @@ class TimeoutManager:
 
     def acknowledge_frame_receipt(self, frame):
         if self._awaited_opcode is frame.opcode:
+            if frame.opcode == Opcode.PONG:
+                print("=== PONG")
             self._awaited_opcode = None
             self._waiting_start_time = None
 
