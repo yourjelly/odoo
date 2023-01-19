@@ -456,6 +456,12 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _import_fill_invoice_form(self, journal, tree, invoice, qty_factor):
+
+        def _find_value(xpath, element=tree):
+            nsmap = tree.nsmap
+            nsmap.pop(None)  # otherwise, raise TypeError: empty namespace prefix is not supported in XPath
+            return self.env['account.edi.format']._find_value(xpath, element, nsmap)
+
         logs = []
 
         if qty_factor == -1:
@@ -463,13 +469,14 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
         # ==== partner_id ====
 
-        partner = self._import_retrieve_info_from_map(
-            tree,
-            self._import_retrieve_partner_map(self.env.company, journal.type),
+        partner_type = "Customer" if invoice.journal_id.type == 'sale' else "Supplier"
+        invoice.partner_id = self.env['account.edi.format']._retrieve_partner(
+            name=_find_value(f'.//cac:Accounting{partner_type}Party/cac:Party//cbc:Name'),
+            mail=_find_value(f'.//cac:Accounting{partner_type}Party/cac:Party//cbc:ElectronicMail'),
+            phone=_find_value(f'.//cac:Accounting{partner_type}Party/cac:Party//cbc:Telephone'),
+            vat=_find_value(f'.//cac:Accounting{partner_type}Party/cac:Party//cbc:CompanyID'),
         )
-        if partner:
-            invoice.partner_id = partner
-        else:
+        if not invoice.partner_id:
             logs.append(_("Could not retrieve the %s.", _("customer") if invoice.is_sale_document() else _("vendor")))
 
         # ==== currency_id ====
@@ -501,7 +508,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             narration += note_node.text + "\n"
 
         payment_terms_node = tree.find('./{*}PaymentTerms/{*}Note')  # e.g. 'Payment within 10 days, 2% discount'
-        if payment_terms_node is not None:
+        if payment_terms_node is not None and payment_terms_node.text:
             narration += payment_terms_node.text + "\n"
 
         invoice.narration = narration
@@ -556,13 +563,20 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     def _import_fill_invoice_line_form(self, journal, tree, invoice, invoice_line, qty_factor):
         logs = []
 
-        # Product
-        product = self._import_retrieve_info_from_map(
-            tree,
-            self._import_retrieve_product_map(journal),
+        def _find_value(xpath, element=tree):
+            nsmap = tree.nsmap
+            nsmap.pop(None)  # otherwise, raise TypeError: empty namespace prefix is not supported in XPath
+            return self.env['account.edi.format']._find_value(xpath, element, nsmap)
+
+        # Product.
+        name = _find_value('./cac:Item/cbc:Name', tree)
+        invoice_line.product_id = self.env['account.edi.format']._retrieve_product(
+            default_code=_find_value('./cac:Item/cac:SellersItemIdentification/cbc:ID'),
+            name=_find_value('./cac:Item/cbc:Name'),
+            barcode=_find_value("./cac:Item/cac:StandardItemIdentification/cbc:ID[@schemeID='0160']")
         )
-        if product is not None:
-            invoice_line.product_id = product
+        if name:
+            invoice_line.name = name
 
         # Description
         description_node = tree.find('./{*}Item/{*}Description')
@@ -614,74 +628,3 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         if tree.tag == '{urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2}CreditNote':
             return 'refund', 1
         return None, None
-
-    def _import_retrieve_partner_map(self, company, move_type='purchase'):
-        role = "Customer" if move_type == 'sale' else "Supplier"
-
-        def with_vat(tree, extra_domain):
-            vat_node = tree.find(f'.//{{*}}Accounting{role}Party/{{*}}Party//{{*}}CompanyID')
-            vat = None if vat_node is None else vat_node.text
-            return self.env['account.edi.format']._retrieve_partner_with_vat(vat, extra_domain)
-
-        def with_phone_mail(tree, extra_domain):
-            phone_node = tree.find(f'.//{{*}}Accounting{role}Party/{{*}}Party//{{*}}Telephone')
-            mail_node = tree.find(f'.//{{*}}Accounting{role}Party/{{*}}Party//{{*}}ElectronicMail')
-
-            phone = None if phone_node is None else phone_node.text
-            mail = None if mail_node is None else mail_node.text
-            return self.env['account.edi.format']._retrieve_partner_with_phone_mail(phone, mail, extra_domain)
-
-        def with_name(tree, extra_domain):
-            name_node = tree.find(f'.//{{*}}Accounting{role}Party/{{*}}Party//{{*}}Name')
-            name = None if name_node is None else name_node.text
-            return self.env['account.edi.format']._retrieve_partner_with_name(name, extra_domain)
-
-        return {
-            10: lambda tree: with_vat(tree, [('company_id', '=', company.id)]),
-            20: lambda tree: with_vat(tree, []),
-            30: lambda tree: with_phone_mail(tree, [('company_id', '=', company.id)]),
-            40: lambda tree: with_phone_mail(tree, []),
-            50: lambda tree: with_name(tree, [('company_id', '=', company.id)]),
-            60: lambda tree: with_name(tree, []),
-        }
-
-    def _import_retrieve_product_map(self, company):
-
-        def with_code_barcode(tree, extra_domain):
-            domains = []
-
-            default_code_node = tree.find('./{*}Item/{*}SellersItemIdentification/{*}ID')
-            if default_code_node is not None:
-                domains.append([('default_code', '=', default_code_node.text)])
-
-            barcode_node = tree.find("./{*}Item/{*}StandardItemIdentification/{*}ID[@schemeID='0160']")
-            if barcode_node is not None:
-                domains.append([('barcode', '=', barcode_node.text)])
-
-            if not domains:
-                return None
-
-            return self.env['product.product'].search(extra_domain + expression.OR(domains), limit=1)
-
-        def with_name(tree, extra_domain):
-            name_node = tree.find('./{*}Item/{*}Name')
-
-            if name_node is None:
-                return None
-
-            return self.env['product.product'].search(extra_domain + [('name', 'ilike', name_node.text)], limit=1)
-
-        return {
-            10: lambda tree: with_code_barcode(tree, [('company_id', '=', company.id)]),
-            20: lambda tree: with_code_barcode(tree, []),
-            30: lambda tree: with_name(tree, [('company_id', '=', company.id)]),
-            40: lambda tree: with_name(tree, []),
-        }
-
-    def _import_retrieve_info_from_map(self, tree, import_method_map):
-        for key in sorted(import_method_map.keys()):
-            record = import_method_map[key](tree)
-            if record:
-                return record
-
-        return None
