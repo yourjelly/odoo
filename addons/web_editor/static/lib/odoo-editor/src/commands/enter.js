@@ -14,6 +14,7 @@ import {
     splitTextNode,
     toggleClass,
     isVisible,
+    closestBlock,
 } from '../utils/utils.js';
 
 Text.prototype.oEnter = function (offset) {
@@ -73,8 +74,21 @@ HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
         restore();
 
         fillEmpty(clearEmpty(this));
-        fillEmpty(splitEl);
+        const fillers = fillEmpty(closestBlock(splitEl));
+        const filler = fillers.br ? fillers.br : fillers.zws;
 
+        let newEl = splitEl;
+        let currEl = this;
+        while (currEl.childElementCount) {
+            let style = currEl.lastElementChild.attributes['style'];
+            currEl = currEl.lastElementChild;
+            if (style && style.value) {
+                newEl.prepend(document.createElement(currEl.nodeName));
+                newEl = newEl.firstElementChild;
+                newEl.setAttribute(style.name, style.value);
+                newEl.appendChild(filler);
+            }
+        }
         const focusToElement =
             splitEl.nodeType === Node.ELEMENT_NODE && splitEl.tagName === 'A'
                 ? clearEmpty(splitEl)

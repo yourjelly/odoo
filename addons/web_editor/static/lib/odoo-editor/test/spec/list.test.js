@@ -5686,8 +5686,8 @@ describe('List', () => {
                                         <li class="oe-nested">
                                             <ul>
                                                 <li><font style="color: red;">cd</font></li>
-                                                <li>b</li>
-                                                <li>[]<br></li>
+                                                <li><font style="color: red;">b</font></li>
+                                                <li><font style="color: red;">[]<br></font></li>
                                             </ul>
                                         </li>
                                         <li>ef</li>
@@ -6028,8 +6028,8 @@ describe('List', () => {
                                         <li class="oe-nested">
                                             <ul class="o_checklist">
                                                 <li><font style="color: red;">cd</font></li>
-                                                <li>0</li>
-                                                <li>[]<br></li>
+                                                <li><font style="color: red;">0</font></li>
+                                                <li><font style="color: red;">[]<br></font></li>
                                             </ul>
                                         </li>
                                         <li class="o_checked">ef</li>
@@ -6123,8 +6123,8 @@ describe('List', () => {
                                         <li class="oe-nested">
                                             <ul class="o_checklist">
                                                 <li class="o_checked"><font style="color: red;">cd</font></li>
-                                                <li>0</li>
-                                                <li>[]<br></li>
+                                                <li><font style="color: red;">0</font></li>
+                                                <li><font style="color: red;">[]<br></font></li>
                                             </ul>
                                         </li>
                                         <li class="o_checked">ef</li>
