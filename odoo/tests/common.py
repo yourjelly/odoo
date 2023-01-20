@@ -954,10 +954,10 @@ class TransactionCase(BaseCase):
         # restore environments after the test to avoid invoking flush() with an
         # invalid environment (inexistent user id) from another test
         envs = self.env.all.envs
-        for env in list(envs):
+        for env in envs.values():
             self.addCleanup(env.clear)
         # restore the set of known environments as it was at setUp
-        self.addCleanup(envs.update, list(envs))
+        self.addCleanup(envs.update, list(envs.values()))
         self.addCleanup(envs.clear)
 
         self.addCleanup(self.registry.clear_caches)

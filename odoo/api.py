@@ -483,7 +483,7 @@ class Environment(Mapping):
         if uid == SUPERUSER_ID:
             su = True
         assert context is not None
-        args = (cr, uid, context, su)
+        args = (cr, uid, frozendict(context), su)
 
         # determine transaction object
         transaction = cr.transaction
@@ -491,21 +491,19 @@ class Environment(Mapping):
             transaction = cr.transaction = Transaction(Registry(cr.dbname))
 
         # if env already exists, return it
-        for env in transaction.envs:
-            if env.args == args:
-                return env
+        if args in transaction.envs:
+            return transaction.envs[args]
 
         # otherwise create environment, and add it in the set
         self = object.__new__(cls)
-        args = (cr, uid, frozendict(context), su)
-        self.cr, self.uid, self.context, self.su = self.args = args
+        self.cr, self.uid, self.context, self.su = args
 
         self.transaction = self.all = transaction
         self.registry = transaction.registry
         self.cache = transaction.cache
         self._cache_key = {}                    # memo {field: cache_key}
         self._protected = transaction.protected
-        transaction.envs.add(self)
+        transaction.envs[args] = self
         return self
 
     #
@@ -823,8 +821,8 @@ class Transaction:
     """ A object holding ORM data structures for a transaction. """
     def __init__(self, registry):
         self.registry = registry
-        # weak set of environments
-        self.envs = WeakSet()
+        # dict of environments, key is args of envs.
+        self.envs = {}
         # cache for all records
         self.cache = Cache()
         # fields to protect {field: ids}
@@ -835,7 +833,7 @@ class Transaction:
     def flush(self):
         """ Flush pending computations and updates in the transaction. """
         env_to_flush = None
-        for env in self.envs:
+        for env in reversed(self.envs.values()):
             if isinstance(env.uid, int) or env.uid is None:
                 env_to_flush = env
                 if env.uid is not None:
@@ -847,6 +845,7 @@ class Transaction:
         """ Clear the caches and pending computations and updates in the translations. """
         self.cache.clear()
         self.tocompute.clear()
+        self.envs.clear()
 
     def reset(self):
         """ Reset the transaction.  This clears the transaction, and reassigns
