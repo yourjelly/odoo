@@ -11,6 +11,7 @@
                                 t-if="create.type === 'create'"
                                 type="button"
                                 class="btn btn-secondary"
+                                t-att-class="create.class"
                                 t-on-click.stop.prevent="() => this.onAdd({ context: create.context })"
                             >
                                 <t t-esc="create.string"/>

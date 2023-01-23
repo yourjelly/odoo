@@ -42,7 +42,7 @@ export class X2ManyField extends Component {
             archInfo = this.activeField.views[this.viewMode];
             this.creates = archInfo.creates.length
                 ? archInfo.creates
-                : [{ type: "create", string: this.addButtonText }];
+                : [{ type: "create", string: this.addButtonText, class: "o-kanban-button-new" }];
         } else {
             archInfo = {};
         }
