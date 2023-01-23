@@ -10,7 +10,7 @@ from odoo.addons.base_iban.models.res_partner_bank import normalize_iban, pretty
 from odoo.exceptions import ValidationError, UserError
 from odoo.tools.misc import mod10r
 
-ISR_SUBSCRIPTION_CODE = {'CHF': '01', 'EUR': '03'}
+QR_SUBSCRIPTION_CODE = {'CHF': '01', 'EUR': '03'}
 CLEARING = "09000"
 _re_postal = re.compile('^[0-9]{2}-[0-9]{1,6}-[0-9]$')
 
@@ -29,11 +29,11 @@ def _is_l10n_ch_postal(account_ref):
         return mod10r(account_ref_without_check) == account_ref
     return False
 
-def _is_l10n_ch_isr_issuer(account_ref, currency_code):
-    """ Returns True if the string account_ref is a valid a valid ISR issuer
-    An ISR issuer is postal account number that starts by 01 (CHF) or 03 (EUR),
+def _is_l10n_ch_qrr_issuer(account_ref, currency_code):
+    """ Returns True if the string account_ref is a valid a valid QRR issuer
+    An QRR issuer is postal account number that starts by 01 (CHF) or 03 (EUR),
     """
-    if (account_ref or '').startswith(ISR_SUBSCRIPTION_CODE[currency_code]):
+    if (account_ref or '').startswith(QR_SUBSCRIPTION_CODE[currency_code]):
         return _is_l10n_ch_postal(account_ref)
     return False
 
@@ -44,7 +44,7 @@ def validate_qr_iban(qr_iban):
     # We sanitize first so that _check_qr_iban_range() can extract correct IID from IBAN to validate it.
     sanitized_qr_iban = sanitize_account_number(qr_iban)
 
-    if sanitized_qr_iban[:2] not in ['CH', 'LI']:
+    if sanitized_qr_iban[:2] != 'CH':
         raise ValidationError(_("QR-IBAN numbers are only available in Switzerland."))
 
     # Now, check if it's valid QR-IBAN (based on its IID).
@@ -82,13 +82,11 @@ class ResPartnerBank(models.Model):
                                        "QR-IBAN for the barcode.  ")
 
     # fields to configure ISR payment slip generation
-    l10n_ch_isr_subscription_chf = fields.Char(string='CHF ISR Subscription Number', help='The subscription number provided by the bank or Postfinance to identify the bank, used to generate ISR in CHF. eg. 01-162-8')
-    l10n_ch_isr_subscription_eur = fields.Char(string='EUR ISR Subscription Number', help='The subscription number provided by the bank or Postfinance to identify the bank, used to generate ISR in EUR. eg. 03-162-5')
     l10n_ch_show_subscription = fields.Boolean(compute='_compute_l10n_ch_show_subscription', default=lambda self: self.env.company.account_fiscal_country_id.code == 'CH')
 
-    def _is_isr_issuer(self):
-        return (_is_l10n_ch_isr_issuer(self.l10n_ch_postal, 'CHF')
-                or _is_l10n_ch_isr_issuer(self.l10n_ch_postal, 'EUR'))
+    def _is_qrr_issuer(self):
+        return (_is_l10n_ch_qrr_issuer(self.l10n_ch_postal, 'CHF')
+                or _is_l10n_ch_qrr_issuer(self.l10n_ch_postal, 'EUR'))
 
     @api.constrains("l10n_ch_postal", "partner_id")
     def _check_postal_num(self):
@@ -102,31 +100,15 @@ class ResPartnerBank(models.Model):
                           "It must be a valid postal number format. eg. 10-8060-7").format(rec.l10n_ch_postal))
         return True
 
-    @api.constrains("l10n_ch_isr_subscription_chf", "l10n_ch_isr_subscription_eur")
-    def _check_subscription_num(self):
-        """Validate ISR subscription number format
-        Subscription number can only starts with 01 or 03
-        """
-        for rec in self:
-            for currency in ["CHF", "EUR"]:
-                subscrip = rec.l10n_ch_isr_subscription_chf if currency == "CHF" else rec.l10n_ch_isr_subscription_eur
-                if subscrip and not _is_l10n_ch_isr_issuer(subscrip, currency):
-                    example = "01-162-8" if currency == "CHF" else "03-162-5"
-                    raise ValidationError(
-                        _("The ISR subcription {} for {} number is not valid.\n"
-                          "It must starts with {} and we a valid postal number format. eg. {}"
-                          ).format(subscrip, currency, ISR_SUBSCRIPTION_CODE[currency], example))
-        return True
-
     @api.depends('partner_id', 'company_id')
     def _compute_l10n_ch_show_subscription(self):
         for bank in self:
             if bank.partner_id:
-                bank.l10n_ch_show_subscription = bank.partner_id.ref_company_ids.country_id.code in ('CH', 'LI')
+                bank.l10n_ch_show_subscription = bank.partner_id.ref_company_ids.country_id.code == 'CH'
             elif bank.company_id:
-                bank.l10n_ch_show_subscription = bank.company_id.account_fiscal_country_id.code in ('CH', 'LI')
+                bank.l10n_ch_show_subscription = bank.company_id.account_fiscal_country_id.code == 'CH'
             else:
-                bank.l10n_ch_show_subscription = self.env.company.account_fiscal_country_id.code in ('CH', 'LI')
+                bank.l10n_ch_show_subscription = self.env.company.account_fiscal_country_id.code == 'CH'
 
     @api.depends('acc_number', 'acc_type')
     def _compute_sanitized_acc_number(self):
@@ -207,7 +189,7 @@ class ResPartnerBank(models.Model):
         CHXX 0900 0XXX XXXX XXXX K
         Where 09000 is the clearing number
         """
-        return iban.startswith(('CH', 'LI')) and iban[4:9] == CLEARING
+        return iban.startswith('CH') and iban[4:9] == CLEARING
 
     @api.model
     def _pretty_postal_num(self, number):
@@ -347,15 +329,13 @@ class ResPartnerBank(models.Model):
                # see https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/iso11649.py
 
     def _eligible_for_qr_code(self, qr_method, debtor_partner, currency, raises_error=True):
-        if qr_method == 'sct_qr' and debtor_partner.country_id.code == 'CH' and self.journal_id.country_code == 'CH':
-            return False
         if qr_method == 'ch_qr':
             error_messages = [_("The QR code could not be generated for the following reason(s):")]
             if self.acc_type != 'iban':
                 error_messages.append(_("The account type isn't QR-IBAN or IBAN."))
             if self.partner_id.country_id.code != 'CH':
                 error_messages.append(_("Your company isn't located in Switzerland."))
-            if not debtor_partner or debtor_partner.country_id.code not in ('CH', 'LI'):
+            if not debtor_partner or debtor_partner.country_id.code != 'CH':
                 error_messages.append(_("The debtor partner's address isn't located in Switzerland."))
             if currency.id not in (self.env.ref('base.EUR').id, self.env.ref('base.CHF').id):
                 error_messages.append(_("The currency isn't EUR nor CHF. \r\n"))
