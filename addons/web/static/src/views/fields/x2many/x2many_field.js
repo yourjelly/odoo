@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
 import { makeContext } from "@web/core/context";
-import { registry } from "@web/core/registry";
+import { _lt } from "@web/core/l10n/translation";
 import { Pager } from "@web/core/pager/pager";
+import { registry } from "@web/core/registry";
 import { sprintf } from "@web/core/utils/strings";
 import {
     useActiveActions,
@@ -15,7 +16,7 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { evalDomain } from "@web/views/utils";
-import { _lt } from "@web/core/l10n/translation";
+import { ViewButton } from "@web/views/view_button/view_button";
 
 import { Component } from "@odoo/owl";
 
@@ -39,6 +40,9 @@ export class X2ManyField extends Component {
         let archInfo;
         if (this.viewMode) {
             archInfo = this.activeField.views[this.viewMode];
+            this.creates = archInfo.creates.length
+                ? archInfo.creates
+                : [{ type: "create", string: this.addButtonText }];
         } else {
             archInfo = {};
         }
@@ -229,7 +233,7 @@ export class X2ManyField extends Component {
         return this._openRecord({ record, mode: this.props.readonly ? "readonly" : "edit" });
     }
 }
-X2ManyField.components = { Pager, KanbanRenderer, ListRenderer };
+X2ManyField.components = { Pager, KanbanRenderer, ListRenderer, ViewButton };
 X2ManyField.props = {
     ...standardFieldProps,
     addLabel: { type: "string", optional: true },
