@@ -1,0 +1,7 @@
+<odoo>
+    <menuitem id="safety_stock_menu_root" name="Safety Stock">
+        <menuitem id="safety_stock_menu" name="Safety Stock">
+            <menuitem id="safety_stock_report_menu_action" action="safety_stock_model_action"/>
+        </menuitem>
+    </menuitem>
+</odoo>

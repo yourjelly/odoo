@@ -1,0 +1,25 @@
+<odoo>
+     <record id="view_safety_stock_info" model="ir.ui.view">
+        <field name="name">Safety stock Information</field>
+        <field name="model">safety.stock.info</field>
+        <field name="arch" type="xml">
+            <form>
+                <h1>Safety stock suggested</h1>
+                <field name="SS1"/>
+                <footer>
+                    <button string="Close" class="btn-default" special="cancel" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_safety_stock_info" model="ir.actions.act_window">
+        <field name="name">Safety stock Information</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">safety.stock.info</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_safety_stock_info"/>
+        <field name="context">{'default_orderpoint_id': active_id}</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
