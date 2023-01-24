@@ -59,5 +59,3 @@ move_ids = models.execute_kw(db, uid, password, 'stock.move', 'create', [moves_v
 for ml, move_id in zip(move_lines_values, move_ids):
     ml['move_id'] = move_id
 move_ids = models.execute_kw(db, uid, password, 'stock.move.line', 'create', [move_lines_values])
-
-
