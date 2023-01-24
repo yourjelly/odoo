@@ -2594,7 +2594,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.debug(
+    QUnit.test(
         "one2many in kanban: add a line custom control create editable",
         async function (assert) {
             serverData.views = {
