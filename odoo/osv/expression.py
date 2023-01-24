@@ -729,6 +729,34 @@ class expression(object):
                     expr = f"(({sql_path} -> '{property_name}') {operator} '%s' {key_existence_expr})"
                     push_result(expr, [right])
 
+                elif operator in ('in', 'not in'):
+                    # convert both side in array and calculate the intersection to support
+                    # >>> array in value
+                    # >>> value in array
+                    # >>> array in array
+                    inverse = ''
+                    if operator == 'not in':
+                        inverse = 'NOT'
+                    if not isinstance(right, (list, tuple)):
+                        right = [right]
+
+                    sql_path = f""""{alias}"."{field.name}" -> '{property_name}'"""
+                    value = f"""
+                        CASE
+                            WHEN jsonb_typeof({sql_path}) = 'array'
+                            THEN ({sql_path})
+                            ELSE jsonb_build_array({sql_path})
+                        END
+                    """
+                    # convert the jsonb to text[]
+                    agg_alias = f"{alias}_{property_name}_agg"
+                    array = f"""
+                        SELECT array_agg({agg_alias})
+                          FROM jsonb_array_elements_text({value}) AS {agg_alias})
+                    """
+                    expr = f"{inverse} (%s::text[] && ({array})"
+                    push_result(expr, [list(right)])
+
                 else:
                     if 'like' in operator:
                         right = f'%{pycompat.to_text(right)}%'
@@ -736,23 +764,14 @@ class expression(object):
                     else:
                         unaccent = lambda x: x
 
-                    inverse = ''
-                    arrow = '->'  # raw value
-                    if operator in ('in', 'not in'):
-                        if operator == 'not in':
-                            inverse = 'NOT'
-                        if isinstance(right, (list, tuple)):
-                            operator = '<@'
-                        else:
-                            operator = '@>'
-                        right = json.dumps(right)
-                    elif isinstance(right, str):
+                    if isinstance(right, str):
                         arrow = '->>'  # JSONified value
                     else:
+                        arrow = '->'  # raw value
                         right = json.dumps(right)
 
                     sql_path = f""""{alias}"."{field.name}" {arrow} '{property_name}'"""
-                    expr = f"""({inverse} ({unaccent(sql_path)}) {operator} ({unaccent('%s')}))"""
+                    expr = f"""(({unaccent(sql_path)}) {operator} ({unaccent('%s')}))"""
                     push_result(expr, [right])
 
             elif len(path) > 1 and field.store and field.auto_join:

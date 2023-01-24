@@ -1547,6 +1547,13 @@ class PropertiesSearchCase(PropertiesCase):
         messages = self.env['test_new_api.message'].search([('attributes.mytags', 'ilike', '["aa"]')])
         self.assertEqual(messages, self.message_3)
 
+        messages = self.env['test_new_api.message'].search([('attributes.mytags', 'in', ['a', 'aa'])])
+        self.assertEqual(messages, self.message_1 | self.message_3)
+
+        # IN operator do not crash if the right array type is not correct
+        messages = self.env['test_new_api.message'].search([('attributes.mytags', 'in', [1, 3])])
+        self.assertFalse(messages)
+
     @mute_logger('odoo.fields')
     def test_properties_field_search_many2many(self):
         self.messages.discussion = self.discussion_1
@@ -1572,6 +1579,14 @@ class PropertiesSearchCase(PropertiesCase):
         messages = self.env['test_new_api.message'].search(
             [('attributes.mymany2many', 'not in', partners[0].id)])
         self.assertEqual(messages, self.message_2 | self.message_3)
+
+        messages = self.env['test_new_api.message'].search(
+            [('attributes.mymany2many', 'in', [partners[0].id, partners[2].id])])
+        self.assertEqual(messages, self.message_1 | self.message_3)
+        # use tuple instead of list
+        messages = self.env['test_new_api.message'].search(
+            [('attributes.mymany2many', 'in', (partners[0].id, partners[2].id))])
+        self.assertEqual(messages, self.message_1 | self.message_3)
 
     @mute_logger('odoo.fields')
     def test_properties_field_search_unaccent(self):
