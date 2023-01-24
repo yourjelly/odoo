@@ -75,7 +75,14 @@ class Home(http.Controller):
 
         def _unity_read_x2many(parent_field_spec, parent, records: list):
             for one_record in records:
-                local_context_dict = {'parent': one_record, 'context': context, **one_record}
+                local_context_dict = {
+                    'parent': one_record,
+                    'active_id': one_record['id'],
+                    'active_ids': [one_record['id']],
+                    'active_model': parent._name,
+                    'context': context,
+                    **one_record
+                }
 
                 for (field, definition) in parent_field_spec.items():
                     if not field.startswith("__") and \
