@@ -172,10 +172,14 @@ class ResCompany(models.Model):
             if rec.fiscalyear_last_day > max_day:
                 raise ValidationError(_("Invalid fiscal year last day"))
 
-    @api.depends('country_id')
+    @api.depends('country_id', 'chart_template_id.country_id')
     def compute_account_tax_fiscal_country(self):
         for record in self:
-            record.account_fiscal_country_id = record.country_id
+            if not record.account_fiscal_country_id:
+                if record.chart_template_id and record.chart_template_id.country_id:
+                    record.account_fiscal_country_id = record.chart_template_id.country_id
+                else:
+                    record.account_fiscal_country_id = record.country_id
 
     @api.depends('account_fiscal_country_id')
     def _compute_account_enabled_tax_country_ids(self):
