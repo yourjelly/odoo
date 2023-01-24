@@ -78,7 +78,9 @@ export class StatusBarField extends Component {
     get currentName() {
         switch (this.type) {
             case "many2one": {
-                const item = this.options.find((item) => this.props.value && item.id === this.props.value[0]);
+                const item = this.options.find(
+                    (item) => this.props.value && item.id === this.props.value[0]
+                );
                 return item ? item.display_name : "";
             }
             case "selection": {
@@ -208,6 +210,20 @@ StatusBarField.components = {
 StatusBarField.displayName = _lt("Status");
 StatusBarField.supportedTypes = ["many2one", "selection"];
 StatusBarField.legacySpecialData = "_fetchSpecialStatus";
+StatusBarField.specialData = ({ attrs, field }) => {
+    if (field.type === "many2one") {
+        const foldField = attrs.options.fold_field;
+        const fields = { display_name: "1" };
+        if (foldField) {
+            fields[foldField] = "1";
+        }
+        return {
+            __method: "search_read",
+            domain: attrs.domain,
+            fields,
+        };
+    }
+};
 
 StatusBarField.isEmpty = (record, fieldName) => {
     return record.model.env.isSmall ? !record.data[fieldName] : false;

@@ -1385,9 +1385,27 @@ export class RelationalModel extends Model {
                         const coModel = fieldsInfo[fieldName].relation || fieldDescr.relation;
                         const subContext = fieldsInfo[fieldName].context || fieldDescr.context;
                         const subView = fieldDescr.views && fieldDescr.views[fieldDescr.viewMode];
+                        // always invisible
                         if (fieldDescr.alwaysInvisible) {
                             fieldsSpec[fieldName] = "1";
-                        } else if (subView) {
+                            continue;
+                        }
+                        // specialData
+                        if (fieldDescr.FieldComponent && fieldDescr.FieldComponent.specialData) {
+                            const specialDataSpec = fieldDescr.FieldComponent.specialData({
+                                field: fields[fieldName],
+                                attrs: {
+                                    ...fieldDescr.rawAttrs,
+                                    options: fieldDescr.options,
+                                },
+                            });
+                            if (specialDataSpec) {
+                                fieldsSpec[fieldName] = specialDataSpec;
+                                continue;
+                            }
+                        }
+                        // x2many with list or kanban sub view
+                        if (subView) {
                             fieldsSpec[fieldName] = {
                                 ...getFieldsSpec(
                                     subView.activeFields,
@@ -1398,29 +1416,29 @@ export class RelationalModel extends Model {
                                 ),
                                 __context: subContext,
                             };
-                        } else {
-                            const fieldsToFetch =
-                                fieldDescr.fieldsToFetch || fieldsInfo[fieldName].fieldsToFetch;
-                            if (fieldsToFetch && Object.keys(fieldsToFetch).length > 0) {
-                                fieldsSpec[fieldName] = getFieldsSpec(
-                                    fieldsToFetch,
-                                    coModel,
-                                    relatedFields || fieldsToFetch,
-                                    subContext,
-                                    subPath
-                                );
-                                // FIXME: doesn't work for now, can't evaluate parent
-                            } else if (
-                                fields[fieldName].type === "many2one" &&
-                                subContext !== "{}"
-                            ) {
-                                fieldsSpec[fieldName] = {
-                                    __context: subContext,
-                                };
-                            } else {
-                                fieldsSpec[fieldName] = "1";
-                            }
+                            continue;
                         }
+                        const fieldsToFetch =
+                            fieldDescr.fieldsToFetch || fieldsInfo[fieldName].fieldsToFetch;
+                        // x2many with custom widget (e.g. many2manytags)
+                        if (fieldsToFetch && Object.keys(fieldsToFetch).length > 0) {
+                            fieldsSpec[fieldName] = getFieldsSpec(
+                                fieldsToFetch,
+                                coModel,
+                                relatedFields || fieldsToFetch,
+                                subContext,
+                                subPath
+                            );
+                            continue;
+                        }
+                        // many2one with context
+                        // FIXME: doesn't work for now, can't evaluate parent
+                        if (fields[fieldName].type === "many2one" && subContext !== "{}") {
+                            fieldsSpec[fieldName] = { __context: subContext };
+                            continue;
+                        }
+                        // all other cases
+                        fieldsSpec[fieldName] = "1";
                     }
                     if (path === "" && !fieldsSpec.display_name) {
                         // form view always fetch "display_name"
