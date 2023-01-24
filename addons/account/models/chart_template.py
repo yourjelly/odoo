@@ -116,9 +116,8 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
             if not (aml_using_tag or tax_using_tag or report_line_using_tag):
                 tag.unlink()
 
-    def _update_fiscal_positions_from_templates(company, chart_template_id, new_taxes_template):
-        chart_template = env["account.chart.template"].browse(chart_template_id)
-        positions = env['account.fiscal.position.template'].search([('chart_template_id', '=', chart_template_id)])
+    def _update_fiscal_positions_from_templates(company, chart_template, new_taxes_template):
+        positions = env['account.fiscal.position.template'].search([('chart_template_id', '=', chart_template.id)])
         tax_template_ref = _get_template_to_real_xmlid_mapping(company, 'account.tax')
         fp_template_ref = _get_template_to_real_xmlid_mapping(company, 'account.fiscal.position')
 
@@ -135,6 +134,14 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
                         'position_id': fp.id,
                     }))
         chart_template._create_records_with_xmlid('account.fiscal.position.tax', tax_template_vals, company)
+
+    def _check_valid_country_configuration(chart_template, companies):
+        for company in companies:
+            if chart_template.country_id != company.account_fiscal_country_id:
+                raise ValidationError(_("The fiscal country (%(fiscal_country)s) is different from the localization's country (%(loc_country)s).\n"
+                                        "The fiscal country can be set in Settings > Accounting > Taxes > Fiscal Country.",
+                                        fiscal_country=company.account_fiscal_country_id.name,
+                                        loc_country=chart_template.country_id.name))
 
     def _notify_accountant_managers(taxes_to_check):
         accountant_manager_group = env.ref("account.group_account_manager")
@@ -159,13 +166,14 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
             )
 
     env = api.Environment(cr, SUPERUSER_ID, {})
-    chart_template_id = env.ref(chart_template_xmlid).id
-    companies = env['res.company'].search([('chart_template_id', 'child_of', chart_template_id)])
+    chart_template = env.ref(chart_template_xmlid)
+    companies = env['res.company'].search([('chart_template_id', 'child_of', chart_template.id)])
+    _check_valid_country_configuration(chart_template, companies)
     outdated_taxes = []
     new_taxes_template = []
     for company in companies:
         template_to_tax = _get_template_to_real_xmlid_mapping(company, 'account.tax')
-        templates = env['account.tax.template'].with_context(active_test=False).search([("chart_template_id", "=", chart_template_id)])
+        templates = env['account.tax.template'].with_context(active_test=False).search([("chart_template_id", "=", chart_template.id)])
         for template in templates:
             tax = env["account.tax"].browse(template_to_tax.get(template.id))
             if not tax or not _is_tax_and_template_same(template, tax):
@@ -176,7 +184,7 @@ def update_taxes_from_templates(cr, chart_template_xmlid):
                     new_taxes_template.append(template)
             else:
                 _update_tax_from_template(template, tax)
-        _update_fiscal_positions_from_templates(company, chart_template_id, new_taxes_template)
+        _update_fiscal_positions_from_templates(company, chart_template, new_taxes_template)
     if outdated_taxes:
         _notify_accountant_managers(outdated_taxes)
 

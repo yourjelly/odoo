@@ -1,5 +1,6 @@
 from odoo import Command
 from odoo.addons.account.models.chart_template import update_taxes_from_templates
+from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
@@ -213,3 +214,14 @@ class TestChartTemplate(TransactionCase):
 
         # if only the fiscal position mapping has been removed, it won't be recreated
         self.assertEqual(len(fiscal_position.tax_ids), 0)
+
+    def test_country_misconfig(self):
+        """
+        We can only update taxes if the fiscal country is correctly set to the same as the used
+        chart_template.country_id. If it's misconfigured we raise a ValidationError.
+        """
+        self.chart_template.country_id.id = self.env.ref('base.be').id
+        self.company_1.country_id.id = self.env.ref('base.fr').id
+        chart_template_xml_id = self.chart_template.get_external_id()[self.chart_template.id]
+        with self.assertRaises(ValidationError):
+            update_taxes_from_templates(self.env.cr, chart_template_xml_id)
