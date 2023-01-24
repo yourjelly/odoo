@@ -73,16 +73,18 @@ class Home(http.Controller):
         main_model: odoo.models.BaseModel = env[model].with_context(context).browse(read_params["ids"])
         result: list[dict] = main_model._read_format([field for field in fields_spec if not field.startswith("__")])
 
-        def _unity_read_x2many(parent_field_spec, parent, records: list):
+        def _unity_read_x2many(parent_field_spec, parent, records: list, parentRecord=None):
             for one_record in records:
                 local_context_dict = {
-                    'parent': one_record,
+                    # 'parent': one_record,
                     'active_id': one_record['id'],
                     'active_ids': [one_record['id']],
                     'active_model': parent._name,
                     'context': context,
                     **one_record
                 }
+                if parentRecord is not None:
+                    local_context_dict['parent'] = parentRecord
 
                 for (field, definition) in parent_field_spec.items():
                     if not field.startswith("__") and \
@@ -99,7 +101,7 @@ class Home(http.Controller):
                         # TODO VSC: because we now assign new contexts for the many2One (so that name_get is called  with the correct context
                         #           do we need to use a stack of contexts to removed the keys assigned "lower" in the tree ?
                         one_record[field] = x2many_context._read_format([f for f in definition if not f.startswith("__")])
-                        _unity_read_x2many(definition, x2many_context, one_record[field])
+                        _unity_read_x2many(definition, x2many_context, one_record[field], one_record)
 
         _unity_read_x2many(fields_spec, main_model, result)
         return result

@@ -1396,8 +1396,7 @@ export class RelationalModel extends Model {
                                     subContext,
                                     subPath
                                 ),
-
-                                 __context: subContext, // FIXME: context must be a string, evaluated server side
+                                __context: subContext,
                             };
                         } else {
                             const fieldsToFetch =
@@ -1410,6 +1409,14 @@ export class RelationalModel extends Model {
                                     subContext,
                                     subPath
                                 );
+                                // FIXME: doesn't work for now, can't evaluate parent
+                            } else if (
+                                fields[fieldName].type === "many2one" &&
+                                subContext !== "{}"
+                            ) {
+                                fieldsSpec[fieldName] = {
+                                    __context: subContext,
+                                };
                             } else {
                                 fieldsSpec[fieldName] = "1";
                             }
