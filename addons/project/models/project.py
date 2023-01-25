@@ -2135,7 +2135,7 @@ class Task(models.Model):
             tasks = tasks.sudo()
 
         # Track user_ids to send assignment notifications
-        old_user_ids = {t: t.user_ids for t in self}
+        old_user_ids = {t: t.user_ids for t in self.sudo()}
 
         if "personal_stage_type_id" in vals and not vals['personal_stage_type_id']:
             del vals['personal_stage_type_id']
