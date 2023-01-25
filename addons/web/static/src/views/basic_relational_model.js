@@ -1399,6 +1399,7 @@ export class RelationalModel extends Model {
                                     options: fieldDescr.options,
                                 },
                             });
+                            // FIXME missing context (here or case by case?)
                             if (specialDataSpec) {
                                 fieldsSpec[fieldName] = specialDataSpec;
                                 continue;
