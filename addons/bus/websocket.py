@@ -258,7 +258,6 @@ class Websocket:
                     self._selector.select(10)
                 }
                 if self._timeout_manager.has_timed_out() and self.state is ConnectionState.OPEN:
-                    print("=== DROPPED")
                     self.disconnect(
                         CloseCode.ABNORMAL_CLOSURE
                         if self._timeout_manager.timeout_reason is TimeoutReason.NO_RESPONSE
@@ -266,7 +265,7 @@ class Websocket:
                     )
                     continue
                 if not readables:
-                    print("=== PING")
+                    _logger.info("=== PING")
                     self._send_ping_frame()
                     continue
                 if self._notif_sock_r in readables:
@@ -287,7 +286,7 @@ class Websocket:
         orderly shutdown. Note that we don't need to wait for the
         acknowledgment if the connection was failed beforewards.
         """
-        print("== DISCONNECT", code)
+        _logger.info("== DISCONNECT")
         if code is not CloseCode.ABNORMAL_CLOSURE:
             self._send_close_frame(code, reason)
         else:
@@ -678,7 +677,7 @@ class TimeoutManager:
     def acknowledge_frame_receipt(self, frame):
         if self._awaited_opcode is frame.opcode:
             if frame.opcode == Opcode.PONG:
-                print("=== PONG")
+                _logger.info("=== PONG")
             self._awaited_opcode = None
             self._waiting_start_time = None
 
