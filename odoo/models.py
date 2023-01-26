@@ -4431,6 +4431,9 @@ class BaseModel(metaclass=MetaModel):
         Rule = self.env['ir.rule']
         domain = Rule._compute_domain(self._name, mode)
         if domain:
+            if expression.is_false(self, domain):
+                _logger.info("Avoid query ir rule will add a falsy domain, force the result of the query")
+                query._result = []
             expression.expression(domain, self.sudo(), self._table, query)
 
         # apply ir.rules from the parents (through _inherits)
