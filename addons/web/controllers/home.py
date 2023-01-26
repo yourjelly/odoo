@@ -9,7 +9,6 @@ from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.models import BaseModel
-from odoo.fields import Many2one, _RelationalMulti
 from odoo.service import security
 from odoo.tools import ustr, safe_eval
 from odoo.tools.translate import _
@@ -78,97 +77,72 @@ class Home(http.Controller):
             'context': context,
         }
 
-        def read_x2many(field_name, specification, record, record_raw, local_context_dict) -> list[dict]:
-            assert record["id"] == record_raw["id"]
-            if "__context" in specification:
-                evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict, local_context_dict)
-                print(f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
-                x2many = record[field_name].with_context(**evaluated_context)
-            else:
-                x2many = record[field_name]
-            return [read_main(specification, rec, record_raw) for rec in x2many]
+        return [Home._read_main(global_context_dict, fields_spec, record) for record in records]
 
-        def read_many2one(field_name, specification, record, local_context_dict) -> list:
+    @http.route("/web/unity_search/<string:model>", type='json', auth='user')
+    def unity_search(self, *args, **kwargs):
+        env: odoo.api.Environment = request.env
+        context: dict = kwargs["kwargs"]["context"]
+        model: str = kwargs["model"]
+        fields_spec: dict = kwargs["kwargs"]["fields"]
+        read_params: dict = kwargs["kwargs"]["read"]
+        records: odoo.models.BaseModel = env[model].with_context(context).search(read_params["domain"])
+
+        global_context_dict = {
+            'active_ids': read_params["ids"],
+            'active_model': records._name,
+            'context': context,
+        }
+        return [Home._read_main(global_context_dict, fields_spec, record) for record in records]
+
+    @staticmethod
+    def _read_x2many(global_context_dict, field_name, specification, record, record_raw, local_context_dict) -> list[dict]:
+        assert record["id"] == record_raw["id"]
+        if "__context" in specification:
+            evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict,
+                                                    local_context_dict)
+            print(
+                f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
+            x2many = record[field_name].with_context(**evaluated_context)
+        else:
+            x2many = record[field_name]
+        return [Home._read_main(global_context_dict, specification, rec, record_raw) for rec in x2many]
+
+    @staticmethod
+    def _read_many2one(global_context_dict, field_name, specification, record, local_context_dict) -> list:
+        if "__context" in specification:
             evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict, local_context_dict)
             print(f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
 
             many2one_record = record[field_name].with_context(**evaluated_context)
-            return record._fields[field_name].convert_to_read(many2one_record, record, use_name_get=True)
+        else:
+            many2one_record = record[field_name]
+        return record._fields[field_name].convert_to_read(many2one_record, record, use_name_get=True)
 
-        def read_main(specification, record: BaseModel, parent_raw: dict = None) -> dict:
-            record_result_raw: dict = record._read_format([field for field in specification if not field.startswith("__")], load=None)[0]
-            vals = {}
-            local_context_dict = {
-                'active_id': record['id'],
-                **record_result_raw
-            }
-            for field_name, field_spec in specification.items():
-                if field_name.startswith("__"):
-                    continue
-                field = record._fields[field_name]
-                if field_spec == "1":
-                    vals[field_name] = field.convert_to_read(record[field_name], record, use_name_get=True)
+    @staticmethod
+    def _read_main(global_context_dict, specification, record: BaseModel, parent_raw: dict = None) -> dict:
+        record_result_raw: dict = \
+        record._read_format([field for field in specification if not field.startswith("__")], load=None)[0]
+        vals = {}
+        local_context_dict = {
+            'active_id': record['id'],
+            **record_result_raw
+        }
+        for field_name, field_spec in specification.items():
+            if field_name.startswith("__"):
+                continue
+            field = record._fields[field_name]
+            if field_spec == "1":
+                vals[field_name] = field.convert_to_read(record[field_name], record, use_name_get=True)
+            else:
+                if field.type == "many2one":
+                    vals[field_name] = Home._read_many2one(global_context_dict, field_name, field_spec, record, local_context_dict) or False
                 else:
-                    if field.type == "many2one":
-                        vals[field_name] = read_many2one(field_name, field_spec, record, local_context_dict) or False
-                    else:
-                        assert field.type in ["many2many", "one2many"]
-                        if parent_raw:
-                            local_context_dict["parent"] = odoo.tools.DotDict(parent_raw)
-                        vals[field_name] = read_x2many(field_name, field_spec, record, record_result_raw, local_context_dict)
-            return vals
-
-        return [read_main(fields_spec, record) for record in records]
-
-
-
-        # def _unity_read_relational(parent_field_spec,
-        #                            parent: BaseModel,
-        #                            records: list[dict],
-        #                            current_records_raw: list[dict],
-        #                            parent_record_raw: dict = None):
-        #     for (one_record, one_record_raw) in zip(records, current_records_raw):
-        #         assert one_record['id'] == one_record_raw['id']
-        #         local_context_dict = {
-        #             'active_id': one_record['id'],
-        #             'active_ids': [one_record['id']],
-        #             'active_model': parent._name,
-        #             'context': context,
-        #             **one_record_raw
-        #         }
-        #         if parent_record_raw:
-        #             local_context_dict['parent'] = parent_record_raw  # should be a "dot dict"
-        #
-        #         for (field_name, definition) in parent_field_spec.items():
-        #             if not field_name.startswith("__") and isinstance(definition, dict):
-        #                 if "__context" in definition:
-        #                     evaluated_context = safe_eval.safe_eval(definition["__context"], globals_dict=None,
-        #                                                             locals_dict=local_context_dict)
-        #                     print(f"[{field_name}] with context: {definition['__context']} has been evaluated to {evaluated_context}")
-        #
-        #                     relational_context = parent[field_name].with_context(**evaluated_context)
-        #                 else:
-        #                     relational_context = parent[field_name]
-        #                 if isinstance(parent._fields[field_name], _RelationalMulti):
-        #                     # x2many
-        #                     # TODO VSC: because we now assign new contexts for the many2One (so that name_get is called  with the correct context
-        #                     #           do we need to use a stack of contexts to removed the keys assigned "lower" in the tree ?
-        #
-        #                     raw_value_2: dict = one_record_raw[field_name]
-        #                     one_record[field_name] = relational_context._read_format([f for f in definition if not f.startswith("__")])
-        #                     if one_record[field_name]:
-        #                         _unity_read_relational(definition, relational_context, )
-        #
-        #                 elif isinstance(parent._fields[field_name], Many2one):
-        #                     # many2one
-        #                     one_record[field_name] = parent._fields[field_name].convert_to_read(relational_context, parent, use_name_get=True)
-        #
-        # _unity_read_relational(fields_spec, main_model, results, main_records_raw)
-        # return results
-
-    def unity_search(self):
-        pass
-
+                    assert field.type in ["many2many", "one2many"]
+                    if parent_raw:
+                        local_context_dict["parent"] = odoo.tools.DotDict(parent_raw)
+                    vals[field_name] = Home._read_x2many(global_context_dict, field_name, field_spec, record, record_result_raw, local_context_dict)
+        return vals
 
     def unity_group(self):
         """
