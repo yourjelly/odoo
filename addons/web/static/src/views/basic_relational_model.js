@@ -1387,7 +1387,7 @@ export class RelationalModel extends Model {
                         const subView = fieldDescr.views && fieldDescr.views[fieldDescr.viewMode];
                         // always invisible
                         if (fieldDescr.alwaysInvisible) {
-                            fieldsSpec[fieldName] = "1";
+                            fieldsSpec[fieldName] = 1;
                             continue;
                         }
                         // specialData
@@ -1438,11 +1438,11 @@ export class RelationalModel extends Model {
                             continue;
                         }
                         // all other cases
-                        fieldsSpec[fieldName] = "1";
+                        fieldsSpec[fieldName] = 1;
                     }
                     if (path === "" && !fieldsSpec.display_name) {
                         // form view always fetch "display_name"
-                        fieldsSpec.display_name = "1";
+                        fieldsSpec.display_name = 1;
                     }
                     this.unityRead.subRequests[path] = {
                         method: "read",

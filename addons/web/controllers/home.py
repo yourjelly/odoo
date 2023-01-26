@@ -132,7 +132,7 @@ class Home(http.Controller):
             if field_name.startswith("__"):
                 continue
             field = record._fields[field_name]
-            if field_spec == "1":
+            if field_spec == 1:
                 vals[field_name] = field.convert_to_read(record[field_name], record, use_name_get=True)
             else:
                 if field.type == "many2one":
