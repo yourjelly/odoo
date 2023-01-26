@@ -78,56 +78,45 @@ class Home(http.Controller):
             'context': context,
         }
 
-        def read_to_many(specification, record, record_raw) -> dict:
+        def read_x2many(field_name, specification, record, record_raw, local_context_dict) -> list[dict]:
             assert record["id"] == record_raw["id"]
-            fields_2many_definition = {field_many2one: specification[field_many2one] for field_many2one in specification if
-                                          not field_many2one.startswith("__") and
-                                          isinstance(records._fields[field_many2one], _RelationalMulti) and
-                                          isinstance(specification[field_many2one], dict)}
-            local_context_dict = {
-                'active_id': record['id'],
-                **record_raw
-            }
-            result = {}
-            for field_name, definition in fields_2many_definition.items():
-                if "__context" in definition:
-                    evaluated_context = safe_eval.safe_eval(definition["__context"], global_context_dict, local_context_dict)
-                    print(f"[{field_name}] with context: {definition['__context']} has been evaluated to {evaluated_context}")
-                    x2many = record[field_name].with_context(**evaluated_context)
-                else:
-                    x2many = record[field_name]
-                result[field_name] = [read_main(specification, rec, record_raw) for rec in x2many]
+            if "__context" in specification:
+                evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict, local_context_dict)
+                print(f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
+                x2many = record[field_name].with_context(**evaluated_context)
+            else:
+                x2many = record[field_name]
+            return [read_main(specification, rec, record_raw) for rec in x2many]
 
-            return result
+        def read_many2one(field_name, specification, record, local_context_dict) -> list:
+            evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict, local_context_dict)
+            print(f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
 
-        def read_many_to_one_specific_context(specification, record, record_raw) -> dict:
-            assert record["id"] == record_raw["id"]
-            fields_many2one_definition = {field_many2one: specification[field_many2one] for field_many2one in specification if not field_many2one.startswith("__") and
-                                          isinstance(records._fields[field_many2one], Many2one) and
-                                          isinstance(specification[field_many2one], dict)}
-            local_context_dict = {
-                'active_id': record['id'],
-                **record_raw
-            }
-            result = {}
+            many2one_record = record[field_name].with_context(**evaluated_context)
+            return record._fields[field_name].convert_to_read(many2one_record, record, use_name_get=True)
 
-            for field_name, definition in fields_many2one_definition.items():
-                evaluated_context = safe_eval.safe_eval(definition["__context"], global_context_dict, local_context_dict)
-                print(f"[{field_name}] with context: {definition['__context']} has been evaluated to {evaluated_context}")
-
-                many2one_record = record[field_name].with_context(**evaluated_context)
-                result[field_name] = many2one_record._fields[field_name].convert_to_read(many2one_record, record, use_name_get=True)
-            return result
-
-        def read_main(specification, record: BaseModel, parent_raw=None) -> dict:
-            fields_requested_except_many2one = [field for field in specification if not field.startswith("__") and
-                                                not isinstance(records._fields[field], Many2one) and
-                                                not isinstance(specification[field], dict)]
-            record_result: dict = record._read_format(fields_requested_except_many2one)[0]
+        def read_main(specification, record: BaseModel, parent_raw: dict = None) -> dict:
             record_result_raw: dict = record._read_format([field for field in specification if not field.startswith("__")], load=None)[0]
-            record_result.update(read_many_to_one_specific_context(specification, record, record_result_raw))  # append the many2ones to the result dictionary
-            record_result.update(read_to_many(specification, record, record_result_raw))  # append the x2many to the result dictionary
-            return record_result
+            vals = {}
+            local_context_dict = {
+                'active_id': record['id'],
+                **record_result_raw
+            }
+            for field_name, field_spec in specification.items():
+                if field_name.startswith("__"):
+                    continue
+                field = record._fields[field_name]
+                if field_spec == "1":
+                    vals[field_name] = field.convert_to_read(record[field_name], record, use_name_get=True)
+                else:
+                    if field.type == "many2one":
+                        vals[field_name] = read_many2one(field_name, field_spec, record, local_context_dict) or False
+                    else:
+                        assert field.type in ["many2many", "one2many"]
+                        if parent_raw:
+                            local_context_dict["parent"] = odoo.tools.DotDict(parent_raw)
+                        vals[field_name] = read_x2many(field_name, field_spec, record, record_result_raw, local_context_dict)
+            return vals
 
         return [read_main(fields_spec, record) for record in records]
 
