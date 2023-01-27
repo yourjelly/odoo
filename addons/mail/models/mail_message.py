@@ -656,16 +656,14 @@ class Message(models.Model):
         if not self:
             return True
         self.check_access_rule('unlink')
-        self.mapped('attachment_ids').filtered(
-            lambda attach: attach.res_model == self._name and (attach.res_id in self.ids or attach.res_id == 0)
-        ).unlink()
         messages_by_partner = defaultdict(lambda: self.env['mail.message'])
         partners_with_user = self.partner_ids.filtered('user_ids')
+
+        to_invalidate = self.filtered(lambda mail: mail.is_thread_message())
         for elem in self:
             for partner in elem.partner_ids & partners_with_user:
                 messages_by_partner[partner] |= elem
-            if elem.is_thread_message():
-                elem._invalidate_documents()
+        to_invalidate._invalidate_documents()
 
         # Notify front-end of messages deletion for partners having a user
         if messages_by_partner:
@@ -674,6 +672,9 @@ class Message(models.Model):
                 for partner, messages in messages_by_partner.items()
             ])
 
+        self.mapped('attachment_ids').filtered(
+            lambda attach: attach.res_model == self._name and (attach.res_id in self.ids or attach.res_id == 0)
+        ).unlink()
         return super(Message, self).unlink()
 
     @api.model
