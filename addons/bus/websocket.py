@@ -574,6 +574,7 @@ class Websocket:
         if code is CloseCode.SERVER_ERROR:
             reason = None
             _logger.error(exc, exc_info=True)
+        _logger.info("ERROR %s", code)
         self.disconnect(code, reason)
 
     def _limit_rate(self):
