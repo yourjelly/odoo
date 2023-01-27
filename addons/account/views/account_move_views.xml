@@ -751,7 +751,7 @@
 
                             <h1>
                                 <field name="name" attrs="{'invisible':[('name', '=', '/'), ('posted_before', '=', False), ('quick_edit_mode', '=', False)],
-                                'readonly': [('state', '!=', 'draft')]}" placeholder="Draft"/>
+                                'readonly': [('state', '!=', 'draft')]}" placeholder="Draft" force_save="1"/>
 
                                 <span attrs="{'invisible': ['|', '|', ('state', '!=', 'draft'), ('name', '!=', '/'), ('quick_edit_mode', '=', True)]}">Draft</span>
                             </h1>
