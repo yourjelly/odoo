@@ -123,7 +123,7 @@ class Home(http.Controller):
     def _read_main(global_context_dict, specification, record: BaseModel, parent_raw: dict = None) -> dict:
         record_result_raw: dict = \
         record._read_format([field for field in specification if not field.startswith("__")], load=None)[0]
-        vals = {}
+        vals = {'id': record_result_raw['id']}
         local_context_dict = {
             'active_id': record['id'],
             **record_result_raw
