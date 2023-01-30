@@ -533,3 +533,36 @@ class TestLeadAssign(TestLeadAssignCommon):
         self.assertFalse(dupe_lead.exists())
         self.assertEqual(master_opp.team_id, self.sales_team_1, 'Opportunity: should keep its sales team')
         self.assertEqual(master_opp.user_id, self.user_sales_manager, 'Opportunity: should keep its salesman')
+
+    def test_merge_assign_keep_master_team_multy_company(self):
+        """ Check both opportunities is exist when team hase different company
+        than opportunities
+        """
+        company_1 = self.env['res.company'].create({
+            'name': 'New Test Company 1',
+        })
+
+        self._activate_multi_company()
+        master_opportunity = self.env['crm.lead'].create({
+            'name': 'Master',
+            'type': 'opportunity',
+            'email_from': 'test1@mail.com',
+            'probability': 50,
+            'partner_id': False,
+            'team_id': False,
+            'company_id': company_1.id,
+            'user_id': False,
+        })
+        dups = self.env['crm.lead'].create({
+            'name': 'Dupe',
+            'type': 'lead',
+            'email_from': 'test1@mail.com',
+            'probability': 10,
+            'team_id': False,
+            'user_id': False,
+            'company_id': company_1.id,
+        })
+
+        self.team_company2._action_assign_leads(work_days=2)
+        self.assertTrue(master_opportunity.exists())
+        self.assertTrue(dups.exists())
