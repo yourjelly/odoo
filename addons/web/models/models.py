@@ -7,7 +7,7 @@ import json
 
 from odoo import _, _lt, api, fields, models
 from odoo.osv.expression import AND, TRUE_DOMAIN, normalize_domain
-from odoo.tools import date_utils, lazy
+from odoo.tools import date_utils, lazy, safe_eval
 from odoo.tools.misc import get_lang
 from odoo.exceptions import UserError
 from collections import defaultdict
@@ -133,6 +133,90 @@ class Base(models.AbstractModel):
                                                        order=expand_orderby)
 
         return groups
+
+
+    @api.model
+    def unity_read(self, *specs: list):
+        result = []
+        for spec in specs:
+            if spec['method'] == 'read':
+                result.append(self._unity_read(spec['model'], spec['fields'], spec['ids']))
+            elif spec['method'] in ('search', 'search_read'):
+                result.append(self._unity_search(spec['model'], spec['fields'], spec['domain']))
+            else:
+                raise NotImplementedError(f"the method {spec['method']} is not supported by unity_read")
+        return result
+
+    def _unity_read(self, model, fields_spec,  ids):
+        records: models.BaseModel = self.env[model].browse(ids)
+
+        global_context_dict = {
+            'active_ids': ids,
+            'active_model': model,
+            'context': self._context,
+        }
+
+        return [self._read_main(global_context_dict, fields_spec, record) for record in records]
+
+    def _unity_search(self, model, fields_spec, domain):
+        records: models.BaseModel = self.env[model].search(domain)
+
+        global_context_dict = {
+            'active_ids': records._ids,
+            'active_model': model,
+            'context': self._context,
+        }
+
+        return [self._read_main(global_context_dict, fields_spec, record) for record in records]
+
+    def _read_x2many(self, global_context_dict, field_name, specification, record, record_raw, local_context_dict) -> list[dict]:
+        assert record["id"] == record_raw["id"]
+        if "__context" in specification:
+            evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict,
+                                                    local_context_dict)
+            print(
+                f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
+            x2many = record[field_name].with_context(**evaluated_context)
+        else:
+            x2many = record[field_name]
+        return [self._read_main(global_context_dict, specification, rec, record_raw) for rec in x2many]
+
+    def _read_many2one(self, global_context_dict, field_name, specification, record, local_context_dict) -> list:
+        if "__context" in specification:
+            evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict, local_context_dict)
+            print(f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
+
+            many2one_record = record[field_name].with_context(**evaluated_context)
+        else:
+            many2one_record = record[field_name]
+        return record._fields[field_name].convert_to_read(many2one_record, record, use_name_get=True)
+
+    def _read_main(self, global_context_dict, specification, record: "BaseModel", parent_raw: dict = None) -> dict:
+        record_result_raw: dict = \
+        record._read_format([field for field in specification if not field.startswith("__")], load=None)[0]
+        vals = {'id': record_result_raw['id']}
+        local_context_dict = {
+            'active_id': record['id'],
+            **record_result_raw
+        }
+        for field_name, field_spec in specification.items():
+            if field_name.startswith("__"):
+                continue
+            field = record._fields[field_name]
+            if field_spec == 1:
+                vals[field_name] = field.convert_to_read(record[field_name], record, use_name_get=True)
+            else:
+                if field.type == "many2one":
+                    vals[field_name] = self._read_many2one(global_context_dict, field_name, field_spec, record, local_context_dict) or False
+                else:
+                    assert field.type in ["many2many", "one2many"]
+                    if parent_raw:
+                        local_context_dict["parent"] = odoo.tools.DotDict(parent_raw)
+                    vals[field_name] = self._read_x2many(global_context_dict, field_name, field_spec, record, record_result_raw, local_context_dict)
+        return vals
+
+
+
 
     @api.model
     def read_progress_bar(self, domain, group_by, progress_bar):
