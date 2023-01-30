@@ -430,7 +430,7 @@ class AccountMove(models.Model):
                     return min(today, date_utils.get_month(invoice_date)[1])
                 elif number_reset == 'year':
                     return min(today, date_utils.end_of(invoice_date, 'year'))
-        else:
+        elif self.is_purchase_document(include_receipts=True):
             if not highest_name or number_reset == 'month':
                 if (today.year, today.month) > (invoice_date.year, invoice_date.month):
                     return date_utils.get_month(invoice_date)[1]
@@ -441,6 +441,11 @@ class AccountMove(models.Model):
                     return date(invoice_date.year, 12, 31)
                 else:
                     return max(invoice_date, today)
+        else:
+            if (today.year, today.month) > (invoice_date.year, invoice_date.month):
+                return date_utils.get_month(invoice_date)[1]
+            else:
+                return max(invoice_date, today)
         return invoice_date
 
     def _get_violated_lock_dates(self, invoice_date, has_tax):

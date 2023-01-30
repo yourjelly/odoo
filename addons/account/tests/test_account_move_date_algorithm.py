@@ -230,3 +230,52 @@ class TestAccountMoveDateAlgorithm(AccountTestInvoicingCommon):
             'date': fields.Date.from_string('2017-02-28'),
             'amount_total_signed': 440.0,
         }])
+
+
+    def test_caba_after_lock_date(self):
+        self.env.company.tax_exigibility = True
+
+        tax_waiting_account = self.env['account.account'].create({
+            'name': 'TAX_WAIT',
+            'code': 'TWAIT',
+            'user_type_id': self.env.ref('account.data_account_type_current_liabilities').id,
+            'reconcile': True,
+        })
+        tax = self.env['account.tax'].create({
+            'name': 'cash basis 10%',
+            'type_tax_use': 'sale',
+            'amount': 10,
+            'tax_exigibility': 'on_payment',
+            'cash_basis_transition_account_id': tax_waiting_account.id,
+        })
+
+        invoice = self._create_invoice(
+            'out_invoice', '2016-01-01',
+            currency_id=self.currency_data['currency'].id,
+            invoice_line_ids=[{'tax_ids': [Command.set(tax.ids)]}],
+        )
+        payment = self._create_payment('2016-02-01', amount=invoice.amount_total)
+        (invoice + payment.move_id).action_post()
+
+        self._set_lock_date('2017-01-03')
+
+        with freezegun.freeze_time('2017-01-12'):
+            (invoice + payment.move_id).line_ids\
+                .filtered(lambda x: x.account_id.internal_type == 'receivable')\
+                .reconcile()
+
+        caba_move = self.env['account.move'].search([('tax_cash_basis_origin_move_id', '=', invoice.id)])
+
+        self.assertRecordValues(caba_move, [{
+            'date': fields.Date.from_string('2017-01-12'),
+            'amount_total_signed': 440.0,
+        }])
+
+        with freezegun.freeze_time('2017-10-12'):
+            (invoice + payment.move_id).line_ids.remove_move_reconcile()
+
+        reverse_caba_move = self.env['account.move'].search([('ref', '=', 'Reversal of: %s' % caba_move.name)])
+        self.assertRecordValues(reverse_caba_move, [{
+            'date': fields.Date.from_string('2017-01-31'),
+            'amount_total_signed': 440.0,
+        }])
