@@ -884,7 +884,7 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
     @classmethod
     def setUpClass(cls):
         super(TestStockValuationChangeValuation, cls).setUpClass()
-        cls.stock_input_account, cls.stock_output_account, cls.stock_valuation_account, cls.expense_account, cls.stock_journal = _create_accounting_data(cls.env)
+        cls.stock_input_account, cls.stock_output_account, cls.stock_valuation_account, cls.expense_account, cls.production_account, cls.inventory_account, cls.stock_journal = _create_accounting_data(cls.env)
         cls.product1.categ_id.property_valuation = 'real_time'
         cls.product1.write({
             'property_account_expense_id': cls.expense_account.id,
@@ -893,6 +893,8 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
             'property_stock_account_input_categ_id': cls.stock_input_account.id,
             'property_stock_account_output_categ_id': cls.stock_output_account.id,
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
+            'property_stock_account_production_cost_id': cls.production_account.id,
+            'property_stock_account_inventory_loss_id': cls.inventory_account.id,
             'property_stock_journal': cls.stock_journal.id,
         })
         cls.env.company.write({

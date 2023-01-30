@@ -38,12 +38,24 @@ def _create_accounting_data(env):
         'account_type': 'expense',
         'reconcile': True,
     })
+    production_account = env['account.account'].create({
+        'name': 'Cost of Production',
+        'code': 'ProductionCost',
+        'account_type': 'liability_current',
+        'reconcile': True,
+    })
+    inventory_account = env['account.account'].create({
+        'name': 'Inventory Loss',
+        'code': 'InventoryLoss',
+        'account_type': 'asset_current',
+        'reconcile': True,
+    })
     stock_journal = env['account.journal'].create({
         'name': 'Stock Journal',
         'code': 'STJTEST',
         'type': 'general',
     })
-    return stock_input_account, stock_output_account, stock_valuation_account, expense_account, stock_journal
+    return stock_input_account, stock_output_account, stock_valuation_account, expense_account, production_account, inventory_account, stock_journal
 
 
 class TestStockValuation(TransactionCase):
@@ -76,7 +88,7 @@ class TestStockValuation(TransactionCase):
             'groups_id': [(6, 0, [cls.env.ref('stock.group_stock_user').id])]
         })
 
-        cls.stock_input_account, cls.stock_output_account, cls.stock_valuation_account, cls.expense_account, cls.stock_journal = _create_accounting_data(cls.env)
+        cls.stock_input_account, cls.stock_output_account, cls.stock_valuation_account, cls.expense_account, cls.production_account, cls.inventory_account, cls.stock_journal = _create_accounting_data(cls.env)
         cls.product1.categ_id.property_valuation = 'real_time'
         cls.product2.categ_id.property_valuation = 'real_time'
         cls.product1.write({
@@ -86,6 +98,8 @@ class TestStockValuation(TransactionCase):
             'property_stock_account_input_categ_id': cls.stock_input_account.id,
             'property_stock_account_output_categ_id': cls.stock_output_account.id,
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
+            'property_stock_account_production_cost_id': cls.production_account.id,
+            'property_stock_account_inventory_loss_id': cls.inventory_account.id,
             'property_stock_journal': cls.stock_journal.id,
         })
 

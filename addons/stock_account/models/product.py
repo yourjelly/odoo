@@ -87,6 +87,8 @@ class ProductTemplate(models.Model):
             'stock_input': res['stock_input'] or self.categ_id.property_stock_account_input_categ_id,
             'stock_output': res['stock_output'] or self.categ_id.property_stock_account_output_categ_id,
             'stock_valuation': self.categ_id.property_stock_valuation_account_id or False,
+            'production': self.categ_id.property_stock_account_production_cost_id or False,
+            'inventory': self.categ_id.property_stock_account_inventory_loss_id or False,
         })
         return accounts
 

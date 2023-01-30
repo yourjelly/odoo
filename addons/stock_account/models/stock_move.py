@@ -60,7 +60,12 @@ class StockMove(models.Model):
         :returns: a list of `valued_type`
         :rtype: list
         """
-        return ['in', 'out', 'dropshipped', 'dropshipped_returned']
+        return [
+            'in', 'out',
+            'dropshipped', 'dropshipped_returned',
+            # 'production', 'production_consumed',
+            # 'inventory_loss', 'inventory_gain',
+        ]
 
     def _get_in_move_lines(self):
         """ Returns the `stock.move.line` records of `self` considered as incoming. It is done thanks
@@ -138,6 +143,22 @@ class StockMove(models.Model):
         """
         self.ensure_one()
         return self.location_id.usage == 'customer' and self.location_dest_id.usage == 'supplier'
+
+    def _is_production(self):
+        self.ensure_one()
+        return self.location_id.usage == 'production' and self.location_dest_id._should_be_valued()
+
+    def _is_production_consumed(self):
+        self.ensure_one()
+        return self.location_id._should_be_valued() and self.location_dest_id.usage == 'production'
+
+    def _is_inventory_loss(self):
+        self.ensure_one()
+        return self.location_id._should_be_valued() and self.location_dest_id.usage == 'inventory'
+
+    def _is_inventory_gain(self):
+        self.ensure_one()
+        return self.location_id.usage == 'inventory' and self.location_dest_id._should_be_valued()
 
     def _prepare_common_svl_vals(self):
         """When a `stock.valuation.layer` is created from a `stock.move`, we can prepare a dict of
@@ -373,9 +394,17 @@ class StockMove(models.Model):
         return svl_vals_list
 
     def _get_src_account(self, accounts_data):
+        if self._is_production():
+            return accounts_data['production'].id
+        if self._is_inventory_gain():
+            return accounts_data['inventory'].id
         return self.location_id.valuation_out_account_id.id or accounts_data['stock_input'].id
 
     def _get_dest_account(self, accounts_data):
+        if self._is_production_consumed():
+            return accounts_data['production'].id
+        if self._is_inventory_loss():
+            return accounts_data['inventory'].id
         return self.location_dest_id.valuation_in_account_id.id or accounts_data['stock_output'].id
 
     def _prepare_account_move_line(self, qty, cost, credit_account_id, debit_account_id, svl_id, description):
