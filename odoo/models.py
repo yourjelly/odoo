@@ -2969,6 +2969,81 @@ class BaseModel(metaclass=MetaModel):
 
         return self._read_format(fnames=fields, load=load)
 
+
+    @api.model
+    def unity_read(self, *specs: list):
+        result = []
+        for spec in specs:
+            if spec['method'] == 'read':
+                result.append(self._unity_read(spec['model'], spec['fields'], spec['id']))
+            elif spec['method'] == 'search_read':
+                result.append(self._unity_search(spec['model'], spec['fields'], spec['id']))
+            else:
+                raise NotImplementedError(f"the method {spec['method']} is not supported by unity_read")
+        return result;
+
+    def _unity_read(self, model, fields,  ids):
+        records: odoo.models.BaseModel = env[model].with_context(context).browse(read_params["ids"])
+
+        global_context_dict = {
+            'active_ids': read_params["ids"],
+            'active_model': records._name,
+            'context': context,
+        }
+
+        return [Home._read_main(global_context_dict, fields_spec, record) for record in records]
+
+    @staticmethod
+    def _read_x2many(global_context_dict, field_name, specification, record, record_raw, local_context_dict) -> list[dict]:
+        assert record["id"] == record_raw["id"]
+        if "__context" in specification:
+            evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict,
+                                                    local_context_dict)
+            print(
+                f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
+            x2many = record[field_name].with_context(**evaluated_context)
+        else:
+            x2many = record[field_name]
+        return [Home._read_main(global_context_dict, specification, rec, record_raw) for rec in x2many]
+
+    @staticmethod
+    def _read_many2one(global_context_dict, field_name, specification, record, local_context_dict) -> list:
+        if "__context" in specification:
+            evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict, local_context_dict)
+            print(f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
+
+            many2one_record = record[field_name].with_context(**evaluated_context)
+        else:
+            many2one_record = record[field_name]
+        return record._fields[field_name].convert_to_read(many2one_record, record, use_name_get=True)
+
+    @staticmethod
+    def _read_main(global_context_dict, specification, record: "BaseModel", parent_raw: dict = None) -> dict:
+        record_result_raw: dict = \
+        record._read_format([field for field in specification if not field.startswith("__")], load=None)[0]
+        vals = {'id': record_result_raw['id']}
+        local_context_dict = {
+            'active_id': record['id'],
+            **record_result_raw
+        }
+        for field_name, field_spec in specification.items():
+            if field_name.startswith("__"):
+                continue
+            field = record._fields[field_name]
+            if field_spec == 1:
+                vals[field_name] = field.convert_to_read(record[field_name], record, use_name_get=True)
+            else:
+                if field.type == "many2one":
+                    vals[field_name] = Home._read_many2one(global_context_dict, field_name, field_spec, record, local_context_dict) or False
+                else:
+                    assert field.type in ["many2many", "one2many"]
+                    if parent_raw:
+                        local_context_dict["parent"] = odoo.tools.DotDict(parent_raw)
+                    vals[field_name] = Home._read_x2many(global_context_dict, field_name, field_spec, record, record_result_raw, local_context_dict)
+        return vals
+
+
+
     def update_field_translations(self, field_name, translations):
         """ Update the values of a translated field.
 

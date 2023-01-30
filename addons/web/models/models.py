@@ -123,7 +123,7 @@ class Base(models.AbstractModel):
 
         :returns: array of groups
         """
-        groups = self.read_group(domain, ["id:count"], groupby, offset=offset, limit=limit,
+        groups = self.read_group(domain, fields, groupby, offset=offset, limit=limit,
                                  orderby=orderby, lazy=lazy)
 
         if expand and len(groupby) == 1:
