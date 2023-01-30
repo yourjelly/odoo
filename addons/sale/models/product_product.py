@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import timedelta, time
+from odoo.exceptions import UserError
 from odoo import fields, models, _, api
 from odoo.tools.float_utils import float_round
 
@@ -9,6 +10,138 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     sales_count = fields.Float(compute='_compute_sales_count', string='Sold', digits='Product Unit of Measure')
+    sol_qty = fields.Float(string="Sale Order Quantity",
+                           compute='_compute_sol_qty',
+                           inverse='_inverse_sol_qty',
+                           search="_search_sol_qty")
+    price_unit = fields.Float(compute="_compute_price_unit")
+    sale_order_currency_id = fields.Many2one('res.currency',
+                                             compute='_compute_sale_order_currency_id')
+
+    def _compute_sol_qty(self):
+        sale_order = self.get_sale_order()
+        if sale_order:
+            for product in self:
+                sol = self.env['sale.order.line'].sudo().search([
+                    ('order_id', '=', sale_order.id), ('product_id', '=', product.id)
+                ])
+
+                # only show the quantity if there is only one sol and the uom is the same
+                # in the sol and the product
+                if sol and len(sol) == 1 and sol.product_uom == product.uom_id:
+                    product.sol_qty = sol.product_uom_qty
+
+    def _inverse_sol_qty(self):
+        self.ensure_one()
+        sale_order = self.get_sale_order()
+        if sale_order:
+            sale_order_line = self.env['sale.order.line'].sudo().search([
+                ('order_id', '=', sale_order.id), ('product_id', '=', self.id)
+            ])
+
+            if len(sale_order_line) > 1:
+                raise UserError(
+                    _("Cannot modify quantity: product present in several order lines.")
+                )
+
+            if sale_order_line.product_uom and sale_order_line.product_uom != self.uom_id:
+                raise UserError(
+                    _("Cannot modify quantity: UoM mismatch between sale order line and product.")
+                )
+
+            qty = float_round(self.sol_qty, precision_rounding=self.uom_id.rounding)
+            sale_order_is_not_readonly = sale_order.state in ['draft', 'sent']
+
+            if qty > 0 and not sale_order_line:  # positive quantity and no line -> create one
+                self.env['sale.order.line'].create({
+                    'name': self.name,
+                    'order_id': sale_order.id,
+                    'product_id': self.id,
+                    'product_uom_qty': qty,
+                    'product_uom': self.uom_id.id,
+                    'price_unit': self.lst_price
+                })
+            elif qty <= 0 and sale_order_line:  # remove existing line if possible, otherwise set to zero
+                if sale_order_is_not_readonly:
+                    sale_order_line.unlink()
+                else:
+                    sale_order_line.write({'product_uom_qty': 0})
+            elif qty > 0 and sale_order_line:
+                sale_order_line.write({'product_uom_qty': qty})
+
+    def _search_sol_qty(self, operator, value):
+        if operator not in ['>', '>=', '=', '!=', '<', '<='] or \
+           not isinstance(value, int) or \
+           value < 0:
+            raise UserError(_('Operation not supported'))
+
+        sale_order = self.get_sale_order()
+        if sale_order:
+            if value == 0 and operator in ['>', '!=']:
+                product_ids = self.env['sale.order.line'].sudo().search([
+                        ('order_id', '=', sale_order.id), ('product_uom_qty', '>', value),
+                    ]).mapped('product_id').mapped('id')
+                domain = [('id', 'in', product_ids)]
+            elif value == 0 and operator == '>=':
+                domain = []
+            elif value != 0:
+                product_ids = self.env['sale.order.line'].sudo().search([
+                        ('order_id', '=', sale_order.id), ('product_uom_qty', operator, value),
+                    ]).mapped('product_id').mapped('id')
+                domain = [('id', 'in', product_ids)]
+            else:
+                raise UserError(_('Operation not supported'))
+            return domain
+        else:
+            raise UserError(_('No Sale Order selected'))
+
+    @api.depends('sol_qty')
+    def _compute_price_unit(self):
+        self.price_unit = 0
+        sale_order = self.get_sale_order()
+        if sale_order:
+            for product in self:
+                # three options:
+                #   no line with the product in it: defaut computation
+                #   several lines with the product in it: default computation as the catalog action does not treat that case
+                #   only one line with the product in it: go get the price from the line
+
+                sale_order_line = self.env['sale.order.line'].sudo().search([
+                    ('order_id', '=', sale_order.id), ('product_id', '=', product.id)
+                ])
+
+                if len(sale_order_line) == 0 or len(sale_order_line) > 1:
+                    product.price_unit = product._get_tax_included_unit_price(
+                        sale_order.company_id,
+                        sale_order.currency_id,
+                        sale_order.date_order,
+                        'sale',
+                        product_price_unit=product.lst_price,
+                        fiscal_position=sale_order.fiscal_position_id,
+                        product_currency=product.currency_id,
+                    )
+                else:
+                    product.price_unit = sale_order_line.price_unit
+
+    def _compute_sale_order_currency_id(self):
+        self.sale_order_currency_id = self.env['res.currency']
+        sale_order = self.get_sale_order()
+
+        if sale_order:
+            self.sale_order_currency_id = sale_order.currency_id.id
+
+    def get_sale_order(self):
+        order_id = self.env.context.get('order_id')
+        return self.env['sale.order'].search([('id', '=', order_id)])
+
+    def set_sol_qty(self, qty=1, click_on_record=True):
+        self.ensure_one()
+        # specify if clicked on the buttons of '+' and '-' or somewhere
+        # else on the record
+        if click_on_record:
+            self.sol_qty += 1
+        else:
+            self.sol_qty = qty
 
     def _compute_sales_count(self):
         r = {}
@@ -53,6 +186,14 @@ class ProductProduct(models.Model):
             'search_default_filter_order_date': 1,
         }
         return action
+
+    def action_edit_template(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.template',
+            'res_id': self.product_tmpl_id.id,
+            'views': [(False, 'form')],
+        }
 
     def _get_invoice_policy(self):
         return self.invoice_policy

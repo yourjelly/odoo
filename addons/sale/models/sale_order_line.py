@@ -1149,3 +1149,29 @@ class SaleOrderLine(models.Model):
     def _is_not_sellable_line(self):
         # True if the line is a computed line (reward, delivery, ...) that user cannot add manually
         return False
+
+    def get_catalog_views_ids(self):
+        kanban_view = self.env.ref('sale.sale_product_catalog_kanban_view')
+        search_view = self.env.ref('sale.sale_product_catalog_search_view')
+
+        return kanban_view.id, search_view.id
+
+    def action_add_from_catalog(self):
+        order_id = self.env.context.get('order_id')
+        if not order_id:
+            raise UserError(_("Please save the sale order before adding from catalog."))
+
+        kanban_view_id, search_view_id = self.get_catalog_views_ids()
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Products'),
+            'res_model': 'product.product',
+            'views': [(kanban_view_id, 'kanban'), (False, 'form')],
+            'search_view_id': [search_view_id, 'search'],
+            'context': {
+                **self.env.context,
+                'order_id': order_id,
+                'search_default_consumable': True,
+            },
+        }
