@@ -7,7 +7,7 @@ import json
 
 from odoo import _, _lt, api, fields, models
 from odoo.osv.expression import AND, TRUE_DOMAIN, normalize_domain
-from odoo.tools import date_utils, lazy, safe_eval
+from odoo.tools import date_utils, lazy, safe_eval, DotDict
 from odoo.tools.misc import get_lang
 from odoo.exceptions import UserError
 from collections import defaultdict
@@ -211,7 +211,7 @@ class Base(models.AbstractModel):
                 else:
                     assert field.type in ["many2many", "one2many"]
                     if parent_raw:
-                        local_context_dict["parent"] = odoo.tools.DotDict(parent_raw)
+                        local_context_dict["parent"] = DotDict(parent_raw)
                     vals[field_name] = self._read_x2many(global_context_dict, field_name, field_spec, record, record_result_raw, local_context_dict)
         return vals
 
