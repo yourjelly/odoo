@@ -5,7 +5,14 @@
         <field name="arch" type="xml">
             <form>
                 <h1>Safety stock suggested</h1>
-                <field name="SS1"/>
+                <group>
+                    <field name="mean_sales"/>
+                    <field name="mean_lead_time"/>
+                </group>
+                <group>
+                    <field name="SS1"/>
+                    <field name="SS2"/>
+                </group>
                 <footer>
                     <button string="Close" class="btn-default" special="cancel" data-hotkey="z"/>
                 </footer>
