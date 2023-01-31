@@ -142,7 +142,7 @@ class TestAccountEdi(AccountEdiTestCommon, CronMixinCase):
     def test_cron_self_trigger(self):
         # Process single job by CRON call (and thus, disable the auto-commit).
         edi_cron = self.env.ref('account_edi.ir_cron_edi_network')
-        edi_cron.code = 'model._cron_process_documents_web_services(job_count=1)'
+        edi_cron.sudo().code = 'model._cron_process_documents_web_services(job_count=1)'
 
         invoice1 = self.init_invoice('out_invoice', products=self.product_a)
         invoice2 = self.init_invoice('out_invoice', products=self.product_a)
@@ -152,7 +152,7 @@ class TestAccountEdi(AccountEdiTestCommon, CronMixinCase):
              self.capture_triggers('account_edi.ir_cron_edi_network') as capt:
             (invoice1 + invoice2).action_post()
 
-            self.env.ref('account_edi.ir_cron_edi_network').method_direct_trigger()
+            self.env.ref('account_edi.ir_cron_edi_network').sudo().method_direct_trigger()
             self.assertEqual(
                 len(capt.records), 2,
                 "Not all records have been processed in this run, the cron should re-trigger itself to process some"

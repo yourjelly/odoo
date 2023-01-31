@@ -137,7 +137,7 @@ class TestUBLCommon(AccountEdiTestCommon):
         Create and post an account.move.
         """
         # Setup the seller.
-        self.env.company.write({
+        self.env.company.sudo().write({
             'partner_id': seller.id,
             'name': seller.name,
             'street': seller.street,
