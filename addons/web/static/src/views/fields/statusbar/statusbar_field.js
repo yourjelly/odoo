@@ -213,13 +213,14 @@ StatusBarField.legacySpecialData = "_fetchSpecialStatus";
 StatusBarField.specialData = ({ attrs, field }) => {
     if (field.type === "many2one") {
         const foldField = attrs.options.fold_field;
-        const fields = { display_name: "1" };
+        const fields = { display_name: 1 };
         if (foldField) {
-            fields[foldField] = "1";
+            fields[foldField] = 1;
         }
         return {
-            __method: "search_read",
-            domain: attrs.domain,
+            method: "search_read",
+            model: field.relation,
+            domain: [], //attrs.domain, FIXME: can't be evaluated
             fields,
         };
     }

@@ -1374,15 +1374,19 @@ export class RelationalModel extends Model {
                     subRequests: {},
                     result: false,
                 };
+                const specs = [];
+                const specialDataSpecs = [];
                 const getFieldsSpec = (fieldsInfo, resModel, fields, context, path = "") => {
                     console.log("getFieldsSpec " + path);
                     const fieldsSpec = {};
                     for (const fieldName in fieldsInfo) {
                         const subPath = path.length ? `${path},${fieldName}` : fieldName;
                         const fieldDescr = fieldsInfo[fieldName].__WOWL_FIELD_DESCR__ || {};
+                        const field = fields[fieldName];
                         const relatedFields =
                             fieldsInfo[fieldName].relatedFields || fieldDescr.relatedFields;
-                        const coModel = fieldsInfo[fieldName].relation || fieldDescr.relation;
+                        const coModel =
+                            fieldsInfo[fieldName].relation || fieldDescr.relation || field.relation;
                         const subContext = fieldsInfo[fieldName].context || fieldDescr.context;
                         const subView = fieldDescr.views && fieldDescr.views[fieldDescr.viewMode];
                         // always invisible
@@ -1393,7 +1397,7 @@ export class RelationalModel extends Model {
                         // specialData
                         if (fieldDescr.FieldComponent && fieldDescr.FieldComponent.specialData) {
                             const specialDataSpec = fieldDescr.FieldComponent.specialData({
-                                field: fields[fieldName],
+                                field,
                                 attrs: {
                                     ...fieldDescr.rawAttrs,
                                     options: fieldDescr.options,
@@ -1401,7 +1405,17 @@ export class RelationalModel extends Model {
                             });
                             // FIXME missing context (here or case by case?)
                             if (specialDataSpec) {
-                                fieldsSpec[fieldName] = specialDataSpec;
+                                this.unityRead.subRequests[subPath] = {
+                                    method: specialDataSpec.method,
+                                    resModel: specialDataSpec.model,
+                                    fieldNames: Object.keys(specialDataSpec.fields),
+                                    fields: {},
+                                    // domain: specialDataSpec.domain,
+                                    // context,
+                                    records: {},
+                                };
+                                specialDataSpecs.push({ path: subPath, spec: specialDataSpec });
+                                fieldsSpec[fieldName] = 1;
                                 continue;
                             }
                         }
@@ -1432,10 +1446,22 @@ export class RelationalModel extends Model {
                             );
                             continue;
                         }
-                        // many2one with context
+                        // many2one with always_reload
                         // FIXME: doesn't work for now, can't evaluate parent
-                        if (fields[fieldName].type === "many2one" && subContext !== "{}") {
+                        if (
+                            fields[fieldName].type === "many2one" &&
+                            fieldDescr.options &&
+                            fieldDescr.options.always_reload
+                        ) {
                             fieldsSpec[fieldName] = { __context: subContext };
+                            this.unityRead.subRequests[subPath] = {
+                                method: "name_get",
+                                resModel: coModel,
+                                parentPath: path,
+                                fieldName,
+                                // context,
+                                records: {},
+                            };
                             continue;
                         }
                         // all other cases
@@ -1455,22 +1481,24 @@ export class RelationalModel extends Model {
                     };
                     return fieldsSpec;
                 };
-                this.unityRead.result = await this.rpc(`/web/unity_read/${loadParams.modelName}`, {
-                    args: [],
-                    kwargs: {
-                        context: { ...loadParams.context, bin_size: true },
-                        model: loadParams.modelName,
-                        read: {
-                            ids: [loadParams.res_id],
-                        },
-                        fields: getFieldsSpec(
-                            loadParams.fieldsInfo.form,
-                            loadParams.modelName,
-                            loadParams.fields,
-                            loadParams.context
-                        ),
-                    },
+                specs.push({
+                    method: "read",
+                    model: loadParams.modelName,
+                    ids: [loadParams.res_id],
+                    context: { ...loadParams.context, bin_size: true },
+                    fields: getFieldsSpec(
+                        loadParams.fieldsInfo.form,
+                        loadParams.modelName,
+                        loadParams.fields,
+                        loadParams.context
+                    ),
                 });
+                specs.push(...specialDataSpecs.map((s) => s.spec));
+                this.unityRead.result = await this.orm.call(
+                    loadParams.modelName,
+                    "unity_read",
+                    specs
+                );
                 const populateResults = (result, path = "") => {
                     const request = this.unityRead.subRequests[path];
                     if (!request) {
@@ -1488,7 +1516,22 @@ export class RelationalModel extends Model {
                         request.records[record.id] = sanitize(record, request.fields);
                     }
                 };
-                populateResults(this.unityRead.result);
+                populateResults(this.unityRead.result[0]);
+                for (let i = 0; i < specialDataSpecs.length; i++) {
+                    populateResults(this.unityRead.result[i + 1], specialDataSpecs[i].path);
+                }
+                // retrieve name_gets performed by unity
+                for (const path in this.unityRead.subRequests) {
+                    if (this.unityRead.subRequests[path].method === "name_get") {
+                        const { parentPath, fieldName, records } = this.unityRead.subRequests[path];
+                        const parentRecords = this.unityRead.subRequests[parentPath].records;
+                        for (const rec of Object.values(parentRecords)) {
+                            if (rec[fieldName]) {
+                                records[rec[fieldName][0]] = rec[fieldName][1];
+                            }
+                        }
+                    }
+                }
             })()
         );
         // ----------------------- UNITY READ -----------------------
@@ -1512,19 +1555,31 @@ export class RelationalModel extends Model {
                 }
                 const prom = new Promise((resolve, reject) => {
                     // ----------------------- UNITY READ -----------------------
-                    const { method, model } = payload.args[1];
-                    if (method === "read") {
-                        const [resIds, fieldNames] = payload.args[1].args;
+                    const { method, model, args: _args, kwargs } = payload.args[1];
+                    if (method === "name_get") {
                         const request = Object.values(this.unityRead.subRequests).find((r) => {
-                            if (r.resModel === model) {
-                                return symmetricalDifference(r.fieldNames, fieldNames).length === 0;
-                                // TODO: also check context
-                            }
-                            return false;
+                            return r.method === "name_get" && r.resModel === model;
+                            // TODO: also check context
                         });
                         if (request) {
-                            resolve(resIds.map((resId) => request.records[resId]));
-                            return;
+                            const resId = _args[0];
+                            return resolve(request.records[resId]);
+                        }
+                    }
+                    const fieldNames = kwargs.fields || _args[1];
+                    const request = Object.values(this.unityRead.subRequests).find((r) => {
+                        if (r.method === method && r.resModel === model) {
+                            return symmetricalDifference(r.fieldNames, fieldNames).length === 0;
+                            // TODO: also check context (and domain for search_read)
+                        }
+                        return false;
+                    });
+                    if (request) {
+                        if (method === "read") {
+                            const resIds = _args[0];
+                            return resolve(resIds.map((resId) => request.records[resId]));
+                        } else if (method === "search_read") {
+                            return resolve(Object.values(request.records));
                         }
                     }
                     // ----------------------- UNITY READ -----------------------
