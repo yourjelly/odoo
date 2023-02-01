@@ -1,3 +1,5 @@
+import statistics
+
 from odoo import models, api, fields, _
 from odoo.fields import Datetime
 from datetime import datetime
@@ -80,12 +82,20 @@ class SafetyStockModel(models.Model):
 
     def _calculate_internal_lead_time(self, move):
         date_last_move = move.date
-        while move.location_usage != 'supplier':
-            if len(move.move_orig_ids) > 0:
-                move = move.move_orig_ids[0]
+        moves = [move]
+        origin_moves = set()
+        while len(moves) != 0:
+            current_move = moves.pop()
+            if current_move.location_usage != 'supplier':
+                moves.extend(current_move.move_orig_ids)
             else:
-                return 0.0
-        internal_lead_time = (date_last_move - move.date).days
+                origin_moves.add(current_move)
+        if len(origin_moves) > 0:
+            origin_mean_date = datetime.fromtimestamp(statistics.mean(
+                map(lambda x: datetime.timestamp(x.date), origin_moves)))
+        else:
+            origin_mean_date = date_last_move
+        internal_lead_time = (date_last_move - origin_mean_date).days
         return internal_lead_time
 
     def action_safety_stock_info(self):

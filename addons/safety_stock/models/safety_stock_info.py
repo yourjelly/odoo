@@ -2,7 +2,6 @@ from odoo import models, api, fields
 
 
 class StockReplenishmentInfo(models.TransientModel):
-
     _name = 'safety.stock.info'
 
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint')
@@ -15,7 +14,7 @@ class StockReplenishmentInfo(models.TransientModel):
     max_sales = fields.Integer(related='orderpoint_id.max_sales')
     max_lead_time = fields.Integer(related='orderpoint_id.max_lead_time')
 
-    Z = fields.Float(required=True, default=0.5, string="Z (Factor Service)")
+    Z = fields.Float(required=True, default=0.75, string="Z (Factor Service) in %")
 
     SS1 = fields.Integer(compute="_compute_ss1", string="SS1 = μsales × t =")
     SS2 = fields.Integer(compute="_compute_ss2", string="SS2 = (max(μLT)×max(sales))−(μLT ×μsales) =")
@@ -48,7 +47,8 @@ class StockReplenishmentInfo(models.TransientModel):
     def _compute_ss5(self):
         for record in self:
             record.SS5 = record.Z * pow((record.mean_lead_time * record.variance_sales) +
-                                        (pow(record.max_sales, 2) * record.variance_lead_time), 0.5)
+                                        (pow(record.max_sales, 2) * record.variance_lead_time),
+                                        0.5)
 
     @api.depends('mean_sales', 'variance_lead_time', 'variance_sales', 'Z', 'mean_lead_time')
     def _compute_ss6(self):
