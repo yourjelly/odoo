@@ -2,81 +2,91 @@ from odoo import models, api, fields, _
 from odoo.fields import Datetime
 from datetime import datetime
 
+
 class SafetyStockModel(models.Model):
     _inherit = "stock.warehouse.orderpoint"
 
-    mean_sales = fields.Integer(compute="_compute_mean_sales")  # mean nb sales per day
-    mean_lead_time = fields.Integer(compute="_compute_mean_lead_time")  # mean lead time in day
-    max_sales = fields.Integer(compute="_compute_mean_sales")  # max nb sales in one day
-    max_lead_time = fields.Integer(compute="_compute_mean_lead_time")  # max lead time in day
-
-    SS1 = fields.Integer(compute="_compute_ss1")
-    SS2 = fields.Integer(compute="_compute_ss2")
+    mean_sales = fields.Float(compute="_compute_stats_sales")  # mean nb sales per day
+    mean_lead_time = fields.Float(compute="_compute_stats_lead_time")  # mean lead time in day
+    max_sales = fields.Integer(compute="_compute_stats_sales")  # max nb sales in one day
+    max_lead_time = fields.Integer(compute="_compute_stats_lead_time")  # max lead time in day
+    variance_sales = fields.Float(compute="_compute_stats_sales")  # variance of sales
+    variance_lead_time = fields.Float(compute="_compute_stats_lead_time")  # variance of lead time
 
     @api.depends('product_id.stock_move_ids')
-    def _compute_mean_sales(self):
+    def _compute_stats_sales(self):
         for record in self:
             demand_per_time_period = dict()
             min_date = datetime.max
-            #max_date = datetime.min
+            # max_date = datetime.min
             for move in record.product_id.stock_move_ids:
                 for move_line in move.move_line_ids:
                     if move_line.location_usage in ['internal', 'transit'] \
                             and move_line.location_dest_usage not in ['internal', 'transit']:
                         move_date = Datetime.to_datetime(move_line.date)
-                        if move_date < min_date:
-                            min_date = move_date
-                        #elif move_date > max_date:
-                            #max_date = move_date
+                        min_date = min(min_date, move_date)
+                        # max_date = max(max_date, move_date)
                         move_date_str = move_date.strftime("%Y%m%d")
-                        if move_date_str in demand_per_time_period:
-                            demand_per_time_period[move_date_str] = demand_per_time_period[move_date_str] + move_line.qty_done
-                        else:
-                            demand_per_time_period[move_date_str] = move_line.qty_done
+                        demand_per_time_period[move_date_str] = demand_per_time_period[move_date_str] + move_line.qty_done \
+                            if move_date_str in demand_per_time_period else move_line.qty_done
             period = (datetime.today() - min_date).days
+            # compute sales mean and max
             if len(demand_per_time_period) != 0 and period != 0:
                 sum_qty = 0.0
                 for qty in demand_per_time_period.values():
                     sum_qty += qty
-                mean = sum_qty / period
-                record.mean_sales = mean
+                record.mean_sales = sum_qty / period
                 record.max_sales = max(demand_per_time_period.values())
             else:
                 record.mean_sales = 0.0
                 record.max_sales = 0.0
+            # compute sales variance
+            variance_sales_sum = 0.0
+            for qty in demand_per_time_period.values():
+                variance_sales_sum += pow(qty - record.mean_sales, 2)
+            if period - 1 > 0:
+                record.variance_sales = variance_sales_sum / (period - 1)
+            else:
+                record.variance_sales = 0.0
 
     @api.depends('product_id.stock_move_ids')
-    def _compute_mean_lead_time(self):
+    def _compute_stats_lead_time(self):
         for record in self:
-            sum_days = 0.0
-            nb_order = 0
-            max_ld = 0
+            supplier_delay = record.supplier_id.delay
+            lead_time_list = []
             for move in record.product_id.stock_move_ids:
-                order = move.purchase_line_id.order_id
-                if order:
-                    po_approve = Datetime.to_datetime(order.date_approve)
-                    po_deliver = Datetime.to_datetime(order.effective_date)
-                    diff_date = po_deliver - po_approve
-                    lead_time = max(diff_date.days, 1)
-                    sum_days += lead_time
-                    nb_order += 1
-                    max_ld = max(max_ld, lead_time)
-            if nb_order != 0:
-                record.mean_lead_time = sum_days / nb_order
+                if move.location_dest_usage == 'internal':
+                    lead_time = supplier_delay + self._calculate_internal_lead_time(move)
+                    lead_time_list.append(lead_time)
+            nb_lead_time = len(lead_time_list)
+
+            # compute mean
+            if nb_lead_time != 0:
+                record.mean_lead_time = sum(lead_time_list) / nb_lead_time
             else:
                 record.mean_lead_time = 0.0
-            record.max_lead_time = max_ld
 
-    @api.depends('mean_sales')
-    def _compute_ss1(self):
-        for record in self:
-            record.SS1 = record.mean_sales * 30
+            # compute max
+            record.max_lead_time = max(lead_time_list) if nb_lead_time > 0 else 0
 
-    @api.depends('mean_sales', 'mean_lead_time', 'max_sales', 'max_lead_time')
-    def _compute_ss2(self):
-        for record in self:
-            record.SS2 = (record.max_lead_time * record.max_sales) - (record.mean_lead_time * record.mean_sales)
+            # compute variance
+            variance_lead_time_sum = 0.0
+            for ld in lead_time_list:
+                variance_lead_time_sum += pow(ld - record.mean_lead_time, 2)
+            if nb_lead_time - 1 > 0:
+                record.variance_lead_time = variance_lead_time_sum / (nb_lead_time - 1)
+            else:
+                record.variance_lead_time = 0.0
 
+    def _calculate_internal_lead_time(self, move):
+        date_last_move = move.date
+        while move.location_usage != 'supplier':
+            if len(move.move_orig_ids) > 0:
+                move = move.move_orig_ids[0]
+            else:
+                return 0.0
+        internal_lead_time = (date_last_move - move.date).days
+        return internal_lead_time
 
     def action_safety_stock_info(self):
         self.ensure_one()

@@ -12,6 +12,11 @@
                 <group>
                     <field name="SS1"/>
                     <field name="SS2"/>
+                    <field name="Z"/>
+                    <field name="SS3"/>
+                    <field name="SS4"/>
+                    <field name="SS5"/>
+                    <field name="SS6"/>
                 </group>
                 <footer>
                     <button string="Close" class="btn-default" special="cancel" data-hotkey="z"/>
