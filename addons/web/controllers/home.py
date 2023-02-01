@@ -8,9 +8,8 @@ import odoo.modules.registry
 from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
-from odoo.models import BaseModel
 from odoo.service import security
-from odoo.tools import ustr, safe_eval
+from odoo.tools import ustr
 from odoo.tools.translate import _
 from .utils import ensure_db, _get_login_redirect_url, is_user_internal
 
@@ -60,117 +59,6 @@ class Home(http.Controller):
             return response
         except AccessError:
             return request.redirect('/web/login?error=access')
-
-    # UnityReadFieldSpec = dict[str, Union[bool, 'UnityReadFieldSpec']]
-
-    @http.route("/web/unity_read/<string:model>", type='json', auth='user')
-    def unity_read(self, *args, **kwargs):
-        env: odoo.api.Environment = request.env
-        context: dict = kwargs["kwargs"]["context"]
-        model: str = kwargs["model"]
-        fields_spec: dict = kwargs["kwargs"]["fields"]
-        read_params: dict = kwargs["kwargs"]["read"]
-        records: odoo.models.BaseModel = env[model].with_context(context).browse(read_params["ids"])
-        global_context_dict = {
-            'active_ids': read_params["ids"],
-            'active_model': records._name,
-            'context': context,
-        }
-
-        return [Home._read_main(global_context_dict, fields_spec, record) for record in records]
-
-    @http.route("/web/unity_search/<string:model>", type='json', auth='user')
-    def unity_search(self, *args, **kwargs):
-        env: odoo.api.Environment = request.env
-        context: dict = kwargs["kwargs"]["context"]
-        model: str = kwargs["model"]
-        fields_spec: dict = kwargs["kwargs"]["fields"]
-        read_params: dict = kwargs["kwargs"]["read"]
-        records: odoo.models.BaseModel = env[model].with_context(context).search(read_params["domain"])
-
-        global_context_dict = {
-            'active_ids': read_params["ids"],
-            'active_model': records._name,
-            'context': context,
-        }
-        return [Home._read_main(global_context_dict, fields_spec, record) for record in records]
-
-    @staticmethod
-    def _read_x2many(global_context_dict, field_name, specification, record, record_raw, local_context_dict):
-        assert record["id"] == record_raw["id"]
-        if "__context" in specification:
-            evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict,
-                                                    local_context_dict)
-            print(
-                f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
-            x2many = record[field_name].with_context(**evaluated_context)
-        else:
-            x2many = record[field_name]
-        return [Home._read_main(global_context_dict, specification, rec, record_raw) for rec in x2many]
-
-    @staticmethod
-    def _read_many2one(global_context_dict, field_name, specification, record, local_context_dict):
-        if "__context" in specification:
-            evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict, local_context_dict)
-            print(f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
-
-            many2one_record = record[field_name].with_context(**evaluated_context)
-        else:
-            many2one_record = record[field_name]
-        return record._fields[field_name].convert_to_read(many2one_record, record, use_name_get=True)
-
-    @staticmethod
-    def _read_main(global_context_dict, specification, record: BaseModel, parent_raw: dict = None):
-        record_result_raw: dict = \
-        record._read_format([field for field in specification if not field.startswith("__")], load=None)[0]
-        vals = {'id': record_result_raw['id']}
-        local_context_dict = {
-            'active_id': record['id'],
-            **record_result_raw
-        }
-        for field_name, field_spec in specification.items():
-            if field_name.startswith("__"):
-                continue
-            field = record._fields[field_name]
-            if field_spec == 1:
-                vals[field_name] = field.convert_to_read(record[field_name], record, use_name_get=True)
-            else:
-                if field.type == "many2one":
-                    vals[field_name] = Home._read_many2one(global_context_dict, field_name, field_spec, record, local_context_dict) or False
-                else:
-                    assert field.type in ["many2many", "one2many"]
-                    if parent_raw:
-                        local_context_dict["parent"] = odoo.tools.DotDict(parent_raw)
-                    vals[field_name] = Home._read_x2many(global_context_dict, field_name, field_spec, record, record_result_raw, local_context_dict)
-        return vals
-
-    def unity_group(self):
-        """
-        /web/untity_group/<string:model>
-
-        {
-            "model":str,
-            "context":context without evaluation
-                    {
-                        "active_id": single id
-                        "active_ids": multiple ids
-                        "params":{
-                            action_id: single id,
-                            active_id: single id,
-                            cids: "1,2,3" string of company ids
-                            id: single id, I don't know what this is
-                            menu_id:  single id, menu for the url
-                            model: string: the current model
-                            view_type: string: "form"
-                        }
-                        ...
-                    }
-            "domain" : domain, might have evaluation (like active ID)
-        }
-
-
-        """
-        pass
 
     @http.route('/web/webclient/load_menus/<string:unique>', type='http', auth='user', methods=['GET'])
     def web_load_menus(self, unique):
