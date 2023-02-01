@@ -13,7 +13,7 @@ import {
 import { ORM, x2ManyCommands } from "@web/core/orm_service";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
-import { unique } from "@web/core/utils/arrays";
+import { symmetricalDifference, unique } from "@web/core/utils/arrays";
 import { Deferred, KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { memoize } from "@web/core/utils/functions";
 import { escape } from "@web/core/utils/strings";
@@ -3560,11 +3560,18 @@ export class RelationalModel extends Model {
 
         const newRoot = this.createDataPoint(this.rootType, rootParams, state);
 
-        if (!rootParams.groupBy.length) {
+        const originalCall = this.orm.call.bind(this.orm);
+        if (!window.skipUnity && !rootParams.groupBy.length) {
             this.unityRead = await this.keepLast.add(this._fetchUnity(rootParams));
+            this.orm.call = (...args) => {
+                const result = this._getUnityResult(...args);
+                return result || originalCall(...args);
+            };
         }
         await this.keepLast.add(newRoot.load({ values: this.initialValues }));
+        window.unityRead = this.unityRead;
         this.unityRead = null;
+        this.orm.call = originalCall;
 
         this.root = newRoot;
         this.rootParams = rootParams;
@@ -3709,7 +3716,7 @@ export class RelationalModel extends Model {
                 fieldsSpec[fieldName] = 1;
             }
             unityRead.subRequests[path] = {
-                method: "web_search_read",
+                method: path === "" ? "web_search_read" : "read",
                 resModel,
                 fieldNames: Object.keys(fieldsSpec),
                 fields,
@@ -3718,21 +3725,24 @@ export class RelationalModel extends Model {
             };
             return fieldsSpec;
         };
+
         specs.push({
             method: "search_read", // FIXME: should be web_search_read
             model: params.resModel,
             domain: params.domain,
-            context: params.context,
+            context: { ...params.context, bin_size: true },
             fields: getFieldsSpec(
                 params.activeFields,
                 params.resModel,
                 params.fields,
-                params.context
+                params.context // can be removed as same as unity_read request
             ),
         });
 
         // fetch unity
-        unityRead.result = await this.orm.call(params.resModel, "unity_read", specs);
+        unityRead.result = await this.orm.call(params.resModel, "unity_read", specs, {
+            context: params.context,
+        });
 
         // process results to extract subrequest values
         const populateResults = (result, path = "") => {
@@ -3763,6 +3773,44 @@ export class RelationalModel extends Model {
                         records[rec[fieldName][0]] = rec[fieldName][1];
                     }
                 }
+            }
+        }
+
+        return unityRead;
+    }
+
+    _getUnityResult(model, method, args, kwargs) {
+        if (!this.unityRead) {
+            return;
+        }
+        if (method === "name_get") {
+            const request = Object.values(this.unityRead.subRequests).find((r) => {
+                return r.method === "name_get" && r.resModel === model;
+                // TODO: also check context
+            });
+            if (request) {
+                const resId = args[0];
+                return request.records[resId];
+            }
+        }
+        const fieldNames = kwargs.fields || args[1];
+        const request = Object.values(this.unityRead.subRequests).find((r) => {
+            if (r.method === method && r.resModel === model) {
+                return symmetricalDifference(r.fieldNames, fieldNames).length === 0;
+                // TODO: also check context (and domain for search_read)
+            }
+            return false;
+        });
+        if (request) {
+            if (method === "read") {
+                const resIds = args[0];
+                return resIds.map((resId) => request.records[resId]);
+            } else if (method === "web_search_read") {
+                const records = Object.values(request.records);
+                return {
+                    records,
+                    length: records.length, // FIXME: because currently, web_search_read isn't implemented
+                };
             }
         }
     }

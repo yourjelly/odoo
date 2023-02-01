@@ -96,7 +96,7 @@ class Home(http.Controller):
         return [Home._read_main(global_context_dict, fields_spec, record) for record in records]
 
     @staticmethod
-    def _read_x2many(global_context_dict, field_name, specification, record, record_raw, local_context_dict) -> list[dict]:
+    def _read_x2many(global_context_dict, field_name, specification, record, record_raw, local_context_dict):
         assert record["id"] == record_raw["id"]
         if "__context" in specification:
             evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict,
@@ -109,7 +109,7 @@ class Home(http.Controller):
         return [Home._read_main(global_context_dict, specification, rec, record_raw) for rec in x2many]
 
     @staticmethod
-    def _read_many2one(global_context_dict, field_name, specification, record, local_context_dict) -> list:
+    def _read_many2one(global_context_dict, field_name, specification, record, local_context_dict):
         if "__context" in specification:
             evaluated_context = safe_eval.safe_eval(specification["__context"], global_context_dict, local_context_dict)
             print(f"[{field_name}] with context: {specification['__context']} has been evaluated to {evaluated_context}")
@@ -120,7 +120,7 @@ class Home(http.Controller):
         return record._fields[field_name].convert_to_read(many2one_record, record, use_name_get=True)
 
     @staticmethod
-    def _read_main(global_context_dict, specification, record: BaseModel, parent_raw: dict = None) -> dict:
+    def _read_main(global_context_dict, specification, record: BaseModel, parent_raw: dict = None):
         record_result_raw: dict = \
         record._read_format([field for field in specification if not field.startswith("__")], load=None)[0]
         vals = {'id': record_result_raw['id']}
