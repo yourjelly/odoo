@@ -209,7 +209,7 @@ export class Message extends Component {
 
     get isAlignedRight() {
         return Boolean(
-            this.env.inChatWindow && this.user.partnerId === this.props.message.author.id
+            this.env.inChatWindow && this.user.partnerId === this.props.message.author?.id
         );
     }
 
