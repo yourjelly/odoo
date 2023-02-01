@@ -1156,15 +1156,6 @@ export class RelationalModel extends Model {
 
         this.onWillSaveRecord = params.onWillSaveRecord || (() => {});
         this.onRecordSaved = params.onRecordSaved || (() => {});
-
-        // // ----------------------- UNITY READ -----------------------
-        // this.unityReadResult = false;
-        // const originalRead = this.orm.read.bind(this.orm);
-        // this.orm.read = () => {
-        //     debugger;
-        //     originalRead();
-        // };
-        // // ----------------------- UNITY READ -----------------------
     }
 
     async duplicateDatapoint(record, params) {
@@ -1353,7 +1344,7 @@ export class RelationalModel extends Model {
             state
         );
 
-        if (loadParams.res_id) {
+        if (!window.skipUnity && loadParams.res_id) {
             this.unityRead = await this.keepLast.add(this._fetchUnity(loadParams));
         }
         await this.keepLast.add(nextRoot.load());
@@ -1376,11 +1367,9 @@ export class RelationalModel extends Model {
                     return payload.callback(new Promise(() => {}));
                 }
                 const prom = new Promise((resolve, reject) => {
-                    if (this.unityRead) {
-                        const result = this._getUnityResult(payload);
-                        if (result) {
-                            return resolve(result);
-                        }
+                    const result = this._getUnityResult(payload);
+                    if (result) {
+                        return resolve(result);
                     }
                     owl.Component.env.session
                         .rpc(...args)
@@ -1603,7 +1592,9 @@ export class RelationalModel extends Model {
         specs.push(...specialDataSpecs.map((s) => s.spec));
 
         // fetch unity
-        unityRead.result = await this.orm.call(params.modelName, "unity_read", specs);
+        unityRead.result = await this.orm.call(params.modelName, "unity_read", specs, {
+            context: params.context,
+        });
 
         // process results to extract subrequest values
         const populateResults = (result, path = "") => {
@@ -1642,18 +1633,21 @@ export class RelationalModel extends Model {
         return unityRead;
     }
     _getUnityResult(payload) {
-        const { method, model, args: _args, kwargs } = payload.args[1];
+        if (!this.unityRead) {
+            return;
+        }
+        const { method, model, args, kwargs } = payload.args[1];
         if (method === "name_get") {
             const request = Object.values(this.unityRead.subRequests).find((r) => {
                 return r.method === "name_get" && r.resModel === model;
                 // TODO: also check context
             });
             if (request) {
-                const resId = _args[0];
+                const resId = args[0];
                 return request.records[resId];
             }
         }
-        const fieldNames = kwargs.fields || _args[1];
+        const fieldNames = kwargs.fields || args[1];
         const request = Object.values(this.unityRead.subRequests).find((r) => {
             if (r.method === method && r.resModel === model) {
                 return symmetricalDifference(r.fieldNames, fieldNames).length === 0;
@@ -1663,7 +1657,7 @@ export class RelationalModel extends Model {
         });
         if (request) {
             if (method === "read") {
-                const resIds = _args[0];
+                const resIds = args[0];
                 return resIds.map((resId) => request.records[resId]);
             } else if (method === "search_read") {
                 return Object.values(request.records);
