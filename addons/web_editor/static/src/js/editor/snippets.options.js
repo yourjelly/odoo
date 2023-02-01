@@ -37,7 +37,12 @@ const {SIZES, MEDIAS_BREAKPOINTS} = require('@web/core/ui/ui_service');
 
 var qweb = core.qweb;
 var _t = core._t;
-const preserveCursor = OdooEditorLib.preserveCursor;
+const {
+    preserveCursor,
+    deduceURL,
+    splitURL,
+    descendants,
+} = OdooEditorLib;
 
 /**
  * @param {HTMLElement} el
@@ -4932,6 +4937,9 @@ registry.layout_column = SnippetOptionWidget.extend({
         let $row = this.$('> .row');
         if (!$row.length) {
             const restoreCursor = preserveCursor(this.$target[0].ownerDocument);
+            descendants(this.$target[0]).forEach(node => {
+                delete node.ouid;
+            });
             $row = this.$target.contents().wrapAll($('<div class="row"><div class="col-lg-12"/></div>')).parent().parent();
             restoreCursor();
         }
@@ -5329,13 +5337,12 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
             this.$target.trigger('href_changed');
             return;
         }
-        if (!url.startsWith('/') && !url.startsWith('#')
-                && !/^([a-zA-Z]*.):.+$/gm.test(url)) {
-            // We permit every protocol (http:, https:, ftp:, mailto:,...).
-            // If none is explicitly specified, we assume it is a http.
-            url = 'http://' + url;
-        }
-        linkEl.setAttribute('href', url);
+        [this.data.protocol, this.data.url] = deduceURL(url, {
+            allowRelativeUrl: true,
+            currentProtocol: this.data.protocol,
+            trustUserUrl: true,
+        });
+        linkEl.setAttribute('href', this.data.protocol + this.data.url);
         this.rerender = true;
         this.$target.trigger('href_changed');
     },
@@ -5386,7 +5393,8 @@ registry.ReplaceMedia = SnippetOptionWidget.extend({
             }
             case 'setUrl': {
                 let href = linkEl ? linkEl.getAttribute('href') : '';
-                return href || '';
+                [this.data.protocol, this.data.url] = splitURL(href);
+                return this.data.url;
             }
             case 'setNewWindow': {
                 const target = linkEl ? linkEl.getAttribute('target') : '';
@@ -6640,17 +6648,6 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
     /**
      * @override
      */
-    onBuilt() {
-        this._patchShape(this.$target[0]);
-    },
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
     updateUI() {
         if (this.rerender) {
             this.rerender = false;
@@ -7024,22 +7021,6 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         return _.pick(colors, defaultKeys);
     },
     /**
-     * @todo remove me in master, needed to patch errors on set-up shapes in
-     * themes.
-     *
-     * @param {HTMLElement} el
-     * @returns {Object}
-     */
-    _patchShape(el) {
-        const shapeData = this._getShapeData(el);
-        // Wrong shape data for s_picture in kea theme
-        if (shapeData.shape === 'web_editor/Origins/Wavy_03') {
-            shapeData.shape = 'web_editor/Wavy/03';
-            el.dataset.oeShapeData = JSON.stringify(shapeData);
-        }
-        return shapeData;
-    },
-    /**
      * Toggles whether there is a shape or not, to be called from bg toggler.
      *
      * @private
@@ -7054,8 +7035,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             const possibleShapes = shapeWidget.getMethodsParams('shape').possibleValues;
             let shapeToSelect;
             if (previousSibling) {
-                const shapeData = this._patchShape(previousSibling);
-                const previousShape = shapeData.shape;
+                const previousShape = this._getShapeData(previousSibling).shape;
                 shapeToSelect = possibleShapes.find((shape, i) => {
                     return possibleShapes[i - 1] === previousShape;
                 });
@@ -7679,20 +7659,6 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                 ]
             });
         });
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * TODO adapt in master, this option should only be instantiated for real
-     * snippets in the first place.
-     *
-     * @override
-     */
-    _computeVisibility() {
-        return this.$target[0].hasAttribute('data-snippet');
     },
 });
 
