@@ -1353,190 +1353,12 @@ export class RelationalModel extends Model {
             state
         );
 
-        // ----------------------- UNITY READ -----------------------
-        function isX2Many(field) {
-            return field && ["one2many", "many2many"].includes(field.type);
+        if (loadParams.res_id) {
+            this.unityRead = await this.keepLast.add(this._fetchUnity(loadParams));
         }
-        function sanitize(record, fields) {
-            const sanitized = {};
-            for (const fieldName in record) {
-                if (isX2Many(fields[fieldName])) {
-                    sanitized[fieldName] = record[fieldName].map((r) => r.id);
-                } else {
-                    sanitized[fieldName] = record[fieldName];
-                }
-            }
-            return sanitized;
-        }
-        await this.keepLast.add(
-            (async () => {
-                this.unityRead = {
-                    subRequests: {},
-                    result: false,
-                };
-                const specs = [];
-                const specialDataSpecs = [];
-                const getFieldsSpec = (fieldsInfo, resModel, fields, context, path = "") => {
-                    console.log("getFieldsSpec " + path);
-                    const fieldsSpec = {};
-                    for (const fieldName in fieldsInfo) {
-                        const subPath = path.length ? `${path},${fieldName}` : fieldName;
-                        const fieldDescr = fieldsInfo[fieldName].__WOWL_FIELD_DESCR__ || {};
-                        const field = fields[fieldName];
-                        const relatedFields =
-                            fieldsInfo[fieldName].relatedFields || fieldDescr.relatedFields;
-                        const coModel =
-                            fieldsInfo[fieldName].relation || fieldDescr.relation || field.relation;
-                        const subContext = fieldsInfo[fieldName].context || fieldDescr.context;
-                        const subView = fieldDescr.views && fieldDescr.views[fieldDescr.viewMode];
-                        // always invisible
-                        if (fieldDescr.alwaysInvisible) {
-                            fieldsSpec[fieldName] = 1;
-                            continue;
-                        }
-                        // specialData
-                        if (fieldDescr.FieldComponent && fieldDescr.FieldComponent.specialData) {
-                            const specialDataSpec = fieldDescr.FieldComponent.specialData({
-                                field,
-                                attrs: {
-                                    ...fieldDescr.rawAttrs,
-                                    options: fieldDescr.options,
-                                },
-                            });
-                            // FIXME missing context (here or case by case?)
-                            if (specialDataSpec) {
-                                this.unityRead.subRequests[subPath] = {
-                                    method: specialDataSpec.method,
-                                    resModel: specialDataSpec.model,
-                                    fieldNames: Object.keys(specialDataSpec.fields),
-                                    fields: {},
-                                    // domain: specialDataSpec.domain,
-                                    // context,
-                                    records: {},
-                                };
-                                specialDataSpecs.push({ path: subPath, spec: specialDataSpec });
-                                fieldsSpec[fieldName] = 1;
-                                continue;
-                            }
-                        }
-                        // x2many with list or kanban sub view
-                        if (subView) {
-                            fieldsSpec[fieldName] = {
-                                ...getFieldsSpec(
-                                    subView.activeFields,
-                                    coModel,
-                                    relatedFields,
-                                    subContext,
-                                    subPath
-                                ),
-                                __context: subContext,
-                            };
-                            continue;
-                        }
-                        const fieldsToFetch =
-                            fieldDescr.fieldsToFetch || fieldsInfo[fieldName].fieldsToFetch;
-                        // x2many with custom widget (e.g. many2manytags)
-                        if (fieldsToFetch && Object.keys(fieldsToFetch).length > 0) {
-                            fieldsSpec[fieldName] = getFieldsSpec(
-                                fieldsToFetch,
-                                coModel,
-                                relatedFields || fieldsToFetch,
-                                subContext,
-                                subPath
-                            );
-                            continue;
-                        }
-                        // many2one with always_reload
-                        // FIXME: doesn't work for now, can't evaluate parent
-                        if (
-                            fields[fieldName].type === "many2one" &&
-                            fieldDescr.options &&
-                            fieldDescr.options.always_reload
-                        ) {
-                            fieldsSpec[fieldName] = { __context: subContext };
-                            this.unityRead.subRequests[subPath] = {
-                                method: "name_get",
-                                resModel: coModel,
-                                parentPath: path,
-                                fieldName,
-                                // context,
-                                records: {},
-                            };
-                            continue;
-                        }
-                        // all other cases
-                        fieldsSpec[fieldName] = 1;
-                    }
-                    if (path === "" && !fieldsSpec.display_name) {
-                        // form view always fetch "display_name"
-                        fieldsSpec.display_name = 1;
-                    }
-                    this.unityRead.subRequests[path] = {
-                        method: "read",
-                        resModel,
-                        fieldNames: Object.keys(fieldsSpec),
-                        fields,
-                        context,
-                        records: {},
-                    };
-                    return fieldsSpec;
-                };
-                specs.push({
-                    method: "read",
-                    model: loadParams.modelName,
-                    ids: [loadParams.res_id],
-                    context: { ...loadParams.context, bin_size: true },
-                    fields: getFieldsSpec(
-                        loadParams.fieldsInfo.form,
-                        loadParams.modelName,
-                        loadParams.fields,
-                        loadParams.context
-                    ),
-                });
-                specs.push(...specialDataSpecs.map((s) => s.spec));
-                this.unityRead.result = await this.orm.call(
-                    loadParams.modelName,
-                    "unity_read",
-                    specs
-                );
-                const populateResults = (result, path = "") => {
-                    const request = this.unityRead.subRequests[path];
-                    if (!request) {
-                        return; // always invisible
-                    }
-                    for (const fieldName of request.fieldNames) {
-                        if (isX2Many(request.fields[fieldName])) {
-                            const subPath = path.length ? `${path},${fieldName}` : fieldName;
-                            for (const record of result) {
-                                populateResults(record[fieldName], subPath);
-                            }
-                        }
-                    }
-                    for (const record of result) {
-                        request.records[record.id] = sanitize(record, request.fields);
-                    }
-                };
-                populateResults(this.unityRead.result[0]);
-                for (let i = 0; i < specialDataSpecs.length; i++) {
-                    populateResults(this.unityRead.result[i + 1], specialDataSpecs[i].path);
-                }
-                // retrieve name_gets performed by unity
-                for (const path in this.unityRead.subRequests) {
-                    if (this.unityRead.subRequests[path].method === "name_get") {
-                        const { parentPath, fieldName, records } = this.unityRead.subRequests[path];
-                        const parentRecords = this.unityRead.subRequests[parentPath].records;
-                        for (const rec of Object.values(parentRecords)) {
-                            if (rec[fieldName]) {
-                                records[rec[fieldName][0]] = rec[fieldName][1];
-                            }
-                        }
-                    }
-                }
-            })()
-        );
-        // ----------------------- UNITY READ -----------------------
-
         await this.keepLast.add(nextRoot.load());
+        this.unityRead = null;
+
         this.root = nextRoot;
         this.__bm_load_params__ = loadParams;
         this.notify();
@@ -1554,35 +1376,12 @@ export class RelationalModel extends Model {
                     return payload.callback(new Promise(() => {}));
                 }
                 const prom = new Promise((resolve, reject) => {
-                    // ----------------------- UNITY READ -----------------------
-                    const { method, model, args: _args, kwargs } = payload.args[1];
-                    if (method === "name_get") {
-                        const request = Object.values(this.unityRead.subRequests).find((r) => {
-                            return r.method === "name_get" && r.resModel === model;
-                            // TODO: also check context
-                        });
-                        if (request) {
-                            const resId = _args[0];
-                            return resolve(request.records[resId]);
+                    if (this.unityRead) {
+                        const result = this._getUnityResult(payload);
+                        if (result) {
+                            return resolve(result);
                         }
                     }
-                    const fieldNames = kwargs.fields || _args[1];
-                    const request = Object.values(this.unityRead.subRequests).find((r) => {
-                        if (r.method === method && r.resModel === model) {
-                            return symmetricalDifference(r.fieldNames, fieldNames).length === 0;
-                            // TODO: also check context (and domain for search_read)
-                        }
-                        return false;
-                    });
-                    if (request) {
-                        if (method === "read") {
-                            const resIds = _args[0];
-                            return resolve(resIds.map((resId) => request.records[resId]));
-                        } else if (method === "search_read") {
-                            return resolve(Object.values(request.records));
-                        }
-                    }
-                    // ----------------------- UNITY READ -----------------------
                     owl.Component.env.session
                         .rpc(...args)
                         .then((value) => {
@@ -1658,6 +1457,218 @@ export class RelationalModel extends Model {
             },
         });
         return new this.constructor.Record(this, params, state);
+    }
+
+    async _fetchUnity(params) {
+        // helper functions
+        function isX2Many(field) {
+            return field && ["one2many", "many2many"].includes(field.type);
+        }
+        function sanitize(record, fields) {
+            const sanitized = {};
+            for (const fieldName in record) {
+                if (isX2Many(fields[fieldName])) {
+                    sanitized[fieldName] = record[fieldName].map((r) => r.id);
+                } else {
+                    sanitized[fieldName] = record[fieldName];
+                }
+            }
+            return sanitized;
+        }
+
+        // generate unity spec
+        const unityRead = {
+            subRequests: {},
+            result: false,
+        };
+        const specs = [];
+        const specialDataSpecs = [];
+        const getFieldsSpec = (fieldsInfo, resModel, fields, context, path = "") => {
+            console.log("getFieldsSpec " + path);
+            const fieldsSpec = {};
+            for (const fieldName in fieldsInfo) {
+                const subPath = path.length ? `${path},${fieldName}` : fieldName;
+                const fieldDescr = fieldsInfo[fieldName].__WOWL_FIELD_DESCR__ || {};
+                const field = fields[fieldName];
+                const relatedFields =
+                    fieldsInfo[fieldName].relatedFields || fieldDescr.relatedFields;
+                const coModel =
+                    fieldsInfo[fieldName].relation || fieldDescr.relation || field.relation;
+                const subContext = fieldsInfo[fieldName].context || fieldDescr.context;
+                const subView = fieldDescr.views && fieldDescr.views[fieldDescr.viewMode];
+                // always invisible
+                if (fieldDescr.alwaysInvisible) {
+                    fieldsSpec[fieldName] = 1;
+                    continue;
+                }
+                // specialData
+                if (fieldDescr.FieldComponent && fieldDescr.FieldComponent.specialData) {
+                    const specialDataSpec = fieldDescr.FieldComponent.specialData({
+                        field,
+                        attrs: {
+                            ...fieldDescr.rawAttrs,
+                            options: fieldDescr.options,
+                        },
+                    });
+                    // FIXME missing context (here or case by case?)
+                    if (specialDataSpec) {
+                        unityRead.subRequests[subPath] = {
+                            method: specialDataSpec.method,
+                            resModel: specialDataSpec.model,
+                            fieldNames: Object.keys(specialDataSpec.fields),
+                            fields: {},
+                            // domain: specialDataSpec.domain,
+                            // context,
+                            records: {},
+                        };
+                        specialDataSpecs.push({ path: subPath, spec: specialDataSpec });
+                        fieldsSpec[fieldName] = 1;
+                        continue;
+                    }
+                }
+                // x2many with list or kanban sub view
+                if (subView) {
+                    fieldsSpec[fieldName] = {
+                        ...getFieldsSpec(
+                            subView.activeFields,
+                            coModel,
+                            relatedFields,
+                            subContext,
+                            subPath
+                        ),
+                        __context: subContext,
+                    };
+                    continue;
+                }
+                const fieldsToFetch =
+                    fieldDescr.fieldsToFetch || fieldsInfo[fieldName].fieldsToFetch;
+                // x2many with custom widget (e.g. many2manytags)
+                if (fieldsToFetch && Object.keys(fieldsToFetch).length > 0) {
+                    fieldsSpec[fieldName] = getFieldsSpec(
+                        fieldsToFetch,
+                        coModel,
+                        relatedFields || fieldsToFetch,
+                        subContext,
+                        subPath
+                    );
+                    continue;
+                }
+                // many2one with always_reload
+                // FIXME: doesn't work for now, can't evaluate parent
+                if (
+                    fields[fieldName].type === "many2one" &&
+                    fieldDescr.options &&
+                    fieldDescr.options.always_reload
+                ) {
+                    fieldsSpec[fieldName] = { __context: subContext };
+                    unityRead.subRequests[subPath] = {
+                        method: "name_get",
+                        resModel: coModel,
+                        parentPath: path,
+                        fieldName,
+                        // context,
+                        records: {},
+                    };
+                    continue;
+                }
+                // all other cases
+                fieldsSpec[fieldName] = 1;
+            }
+            if (path === "" && !fieldsSpec.display_name) {
+                // form view always fetch "display_name"
+                fieldsSpec.display_name = 1;
+            }
+            unityRead.subRequests[path] = {
+                method: "read",
+                resModel,
+                fieldNames: Object.keys(fieldsSpec),
+                fields,
+                context,
+                records: {},
+            };
+            return fieldsSpec;
+        };
+        specs.push({
+            method: "read",
+            model: params.modelName,
+            ids: [params.res_id],
+            context: { ...params.context, bin_size: true },
+            fields: getFieldsSpec(
+                params.fieldsInfo.form,
+                params.modelName,
+                params.fields,
+                params.context
+            ),
+        });
+        specs.push(...specialDataSpecs.map((s) => s.spec));
+
+        // fetch unity
+        unityRead.result = await this.orm.call(params.modelName, "unity_read", specs);
+
+        // process results to extract subrequest values
+        const populateResults = (result, path = "") => {
+            const request = unityRead.subRequests[path];
+            if (!request) {
+                return; // always invisible
+            }
+            for (const fieldName of request.fieldNames) {
+                if (isX2Many(request.fields[fieldName])) {
+                    const subPath = path.length ? `${path},${fieldName}` : fieldName;
+                    for (const record of result) {
+                        populateResults(record[fieldName], subPath);
+                    }
+                }
+            }
+            for (const record of result) {
+                request.records[record.id] = sanitize(record, request.fields);
+            }
+        };
+        populateResults(unityRead.result[0]);
+        for (let i = 0; i < specialDataSpecs.length; i++) {
+            populateResults(unityRead.result[i + 1], specialDataSpecs[i].path);
+        }
+        // retrieve name_gets performed by unity
+        for (const path in unityRead.subRequests) {
+            if (unityRead.subRequests[path].method === "name_get") {
+                const { parentPath, fieldName, records } = unityRead.subRequests[path];
+                const parentRecords = unityRead.subRequests[parentPath].records;
+                for (const rec of Object.values(parentRecords)) {
+                    if (rec[fieldName]) {
+                        records[rec[fieldName][0]] = rec[fieldName][1];
+                    }
+                }
+            }
+        }
+        return unityRead;
+    }
+    _getUnityResult(payload) {
+        const { method, model, args: _args, kwargs } = payload.args[1];
+        if (method === "name_get") {
+            const request = Object.values(this.unityRead.subRequests).find((r) => {
+                return r.method === "name_get" && r.resModel === model;
+                // TODO: also check context
+            });
+            if (request) {
+                const resId = _args[0];
+                return request.records[resId];
+            }
+        }
+        const fieldNames = kwargs.fields || _args[1];
+        const request = Object.values(this.unityRead.subRequests).find((r) => {
+            if (r.method === method && r.resModel === model) {
+                return symmetricalDifference(r.fieldNames, fieldNames).length === 0;
+                // TODO: also check context (and domain for search_read)
+            }
+            return false;
+        });
+        if (request) {
+            if (method === "read") {
+                const resIds = _args[0];
+                return resIds.map((resId) => request.records[resId]);
+            } else if (method === "search_read") {
+                return Object.values(request.records);
+            }
+        }
     }
 }
 RelationalModel.services = ["action", "dialog", "notification", "rpc"];
