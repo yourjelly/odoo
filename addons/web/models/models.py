@@ -144,6 +144,7 @@ class Base(models.AbstractModel):
                     {
                         method: 'read'|'search'
                         ids|domain: if method = read: ids: [], else domain = [(...)]
+                        context: {'key': 3}
                         fields: FieldSpecifications : {
                             field1: 1   # will return the value for field1
                             field_X2Many: 1  # will return a list of ids for the x2many
@@ -155,7 +156,7 @@ class Base(models.AbstractModel):
                             }
                         }
                         __extra: {
-                            "extra1" : {
+                            "prout" : {
                                 model: str  # a model name
                                 method: 'read'|'search'
                                 ids|domain: if method = read: ids: [], else domain = str
