@@ -3654,7 +3654,9 @@ export class RelationalModel extends Model {
             const sanitized = {};
             for (const fieldName in record) {
                 if (isX2Many(fields[fieldName])) {
-                    sanitized[fieldName] = record[fieldName].map((r) => r.id);
+                    sanitized[fieldName] = record[fieldName].map(
+                        (r) => (typeof r === "object" ? r.id : r) // handle alwaysInvisible x2manys
+                    );
                 } else {
                     sanitized[fieldName] = record[fieldName];
                 }
@@ -3665,7 +3667,7 @@ export class RelationalModel extends Model {
         // generate unity spec
         const unityRead = {
             subRequests: {},
-            result: false,
+            response: false,
         };
         const getFieldsSpec = (activeFields, resModel, fields, context, path = "") => {
             console.log("getFieldsSpec " + path);
@@ -3720,25 +3722,24 @@ export class RelationalModel extends Model {
                 fieldNames: Object.keys(fieldsSpec),
                 fields,
                 context,
-                records: {},
             };
             return fieldsSpec;
         };
 
         const spec = {
-            method: "search_read", // FIXME: should be web_search_read
+            method: "search_read",
             domain: params.domain,
             context: { ...params.context, bin_size: true },
             fields: getFieldsSpec(
                 params.activeFields,
                 params.resModel,
                 params.fields,
-                params.context // can be removed as same as unity_read request
+                params.context
             ),
         };
 
         // fetch unity
-        unityRead.result = await this.orm.call(params.resModel, "unity_read", [], spec);
+        unityRead.response = await this.orm.call(params.resModel, "unity_read", [], spec);
 
         // process results to extract subrequest values
         const populateResults = (result, path = "") => {
@@ -3746,19 +3747,35 @@ export class RelationalModel extends Model {
             if (!request) {
                 return; // always invisible
             }
-            for (const fieldName of request.fieldNames) {
-                if (isX2Many(request.fields[fieldName])) {
-                    const subPath = path.length ? `${path},${fieldName}` : fieldName;
-                    for (const record of result) {
-                        populateResults(record[fieldName], subPath);
+            if (request.method === "web_search_read") {
+                for (const fieldName of request.fieldNames) {
+                    if (isX2Many(request.fields[fieldName])) {
+                        const subPath = path.length ? `${path},${fieldName}` : fieldName;
+                        for (const record of result.records) {
+                            populateResults(record[fieldName], subPath);
+                        }
                     }
                 }
-            }
-            for (const record of result) {
-                request.records[record.id] = sanitize(record, request.fields);
+                request.value = {
+                    length: result.length,
+                    records: result.records.map((r) => sanitize(r, request.fields)),
+                };
+            } else {
+                for (const fieldName of request.fieldNames) {
+                    if (isX2Many(request.fields[fieldName])) {
+                        const subPath = path.length ? `${path},${fieldName}` : fieldName;
+                        for (const record of result) {
+                            populateResults(record[fieldName], subPath);
+                        }
+                    }
+                }
+                request.records = request.records || {};
+                for (const record of result) {
+                    request.records[record.id] = sanitize(record, request.fields);
+                }
             }
         };
-        populateResults(unityRead.result[0]);
+        populateResults(unityRead.response[0]);
         // retrieve name_gets performed by unity
         for (const path in unityRead.subRequests) {
             if (unityRead.subRequests[path].method === "name_get") {
@@ -3802,11 +3819,7 @@ export class RelationalModel extends Model {
                 const resIds = args[0];
                 return resIds.map((resId) => request.records[resId]);
             } else if (method === "web_search_read") {
-                const records = Object.values(request.records);
-                return {
-                    records,
-                    length: records.length, // FIXME: because currently, web_search_read isn't implemented
-                };
+                return request.value;
             }
         }
     }
