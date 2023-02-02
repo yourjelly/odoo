@@ -1552,7 +1552,6 @@ export class RelationalModel extends Model {
                 // FIXME: doesn't work for now, can't evaluate parent
                 if (
                     fields[fieldName].type === "many2one" &&
-                    subContext !== "{}" &&
                     fieldDescr.options &&
                     fieldDescr.options.always_reload
                 ) {
