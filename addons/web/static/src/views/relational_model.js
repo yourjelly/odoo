@@ -3568,8 +3568,8 @@ export class RelationalModel extends Model {
                 return result || originalCall(...args);
             };
         }
-        await this.keepLast.add(newRoot.load({ values: this.initialValues }));
         window.unityRead = this.unityRead;
+        await this.keepLast.add(newRoot.load({ values: this.initialValues }));
         this.unityRead = null;
         this.orm.call = originalCall;
 
@@ -3747,28 +3747,21 @@ export class RelationalModel extends Model {
             if (!request) {
                 return; // always invisible
             }
-            if (request.method === "web_search_read") {
-                for (const fieldName of request.fieldNames) {
-                    if (isX2Many(request.fields[fieldName])) {
-                        const subPath = path.length ? `${path},${fieldName}` : fieldName;
-                        for (const record of result.records) {
-                            populateResults(record[fieldName], subPath);
-                        }
+            const records = request.method === "web_search_read" ? result.records : result;
+            for (const fieldName of request.fieldNames) {
+                if (isX2Many(request.fields[fieldName])) {
+                    const subPath = path.length ? `${path},${fieldName}` : fieldName;
+                    for (const record of records) {
+                        populateResults(record[fieldName], subPath);
                     }
                 }
+            }
+            if (request.method === "web_search_read") {
                 request.value = {
                     length: result.length,
                     records: result.records.map((r) => sanitize(r, request.fields)),
                 };
             } else {
-                for (const fieldName of request.fieldNames) {
-                    if (isX2Many(request.fields[fieldName])) {
-                        const subPath = path.length ? `${path},${fieldName}` : fieldName;
-                        for (const record of result) {
-                            populateResults(record[fieldName], subPath);
-                        }
-                    }
-                }
                 request.records = request.records || {};
                 for (const record of result) {
                     request.records[record.id] = sanitize(record, request.fields);

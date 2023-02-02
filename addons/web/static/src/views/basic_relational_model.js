@@ -1347,6 +1347,7 @@ export class RelationalModel extends Model {
         if (!window.skipUnity && loadParams.res_id) {
             this.unityRead = await this.keepLast.add(this._fetchUnity(loadParams));
         }
+        window.unityRead = this.unityRead;
         await this.keepLast.add(nextRoot.load());
         this.unityRead = null;
 
@@ -1457,7 +1458,9 @@ export class RelationalModel extends Model {
             const sanitized = {};
             for (const fieldName in record) {
                 if (isX2Many(fields[fieldName])) {
-                    sanitized[fieldName] = record[fieldName].map((r) => r.id);
+                    sanitized[fieldName] = record[fieldName].map(
+                        (r) => (typeof r === "object" ? r.id : r) // handle alwaysInvisible x2manys
+                    );
                 } else {
                     sanitized[fieldName] = record[fieldName];
                 }
@@ -1468,13 +1471,13 @@ export class RelationalModel extends Model {
         // generate unity spec
         const unityRead = {
             subRequests: {},
-            result: false,
+            response: false,
         };
-        const specs = [];
         const specialDataSpecs = [];
         const getFieldsSpec = (fieldsInfo, resModel, fields, context, path = "") => {
             console.log("getFieldsSpec " + path);
             const fieldsSpec = {};
+            const extraSpecs = {};
             for (const fieldName in fieldsInfo) {
                 const subPath = path.length ? `${path},${fieldName}` : fieldName;
                 const fieldDescr = fieldsInfo[fieldName].__WOWL_FIELD_DESCR__ || {};
@@ -1510,21 +1513,23 @@ export class RelationalModel extends Model {
                             // context,
                             records: {},
                         };
-                        specialDataSpecs.push({ path: subPath, spec: specialDataSpec });
                         fieldsSpec[fieldName] = 1;
+                        extraSpecs[subPath] = specialDataSpec;
+                        specialDataSpecs.push({ path: subPath, spec: specialDataSpec });
                         continue;
                     }
                 }
                 // x2many with list or kanban sub view
                 if (subView) {
+                    const { fieldsSpec: _fieldsSpec } = getFieldsSpec(
+                        subView.activeFields,
+                        coModel,
+                        relatedFields,
+                        subContext,
+                        subPath
+                    );
                     fieldsSpec[fieldName] = {
-                        ...getFieldsSpec(
-                            subView.activeFields,
-                            coModel,
-                            relatedFields,
-                            subContext,
-                            subPath
-                        ),
+                        ..._fieldsSpec,
                         __context: subContext,
                     };
                     continue;
@@ -1533,19 +1538,21 @@ export class RelationalModel extends Model {
                     fieldDescr.fieldsToFetch || fieldsInfo[fieldName].fieldsToFetch;
                 // x2many with custom widget (e.g. many2manytags)
                 if (fieldsToFetch && Object.keys(fieldsToFetch).length > 0) {
-                    fieldsSpec[fieldName] = getFieldsSpec(
+                    const { fieldsSpec: _fieldsSpec } = getFieldsSpec(
                         fieldsToFetch,
                         coModel,
                         relatedFields || fieldsToFetch,
                         subContext,
                         subPath
                     );
+                    fieldsSpec[fieldName] = _fieldsSpec;
                     continue;
                 }
                 // many2one with always_reload
                 // FIXME: doesn't work for now, can't evaluate parent
                 if (
                     fields[fieldName].type === "many2one" &&
+                    subContext !== "{}" &&
                     fieldDescr.options &&
                     fieldDescr.options.always_reload
                 ) {
@@ -1575,32 +1582,33 @@ export class RelationalModel extends Model {
                 context,
                 records: {},
             };
-            return fieldsSpec;
+            return { fieldsSpec, extraSpecs };
         };
-        specs.push({
+        const { fieldsSpec, extraSpecs } = getFieldsSpec(
+            params.fieldsInfo.form,
+            params.modelName,
+            params.fields,
+            params.context
+        );
+        const spec = {
             method: "read",
-            model: params.modelName,
             ids: [params.res_id],
             context: { ...params.context, bin_size: true },
-            fields: getFieldsSpec(
-                params.fieldsInfo.form,
-                params.modelName,
-                params.fields,
-                params.context
-            ),
-        });
-        specs.push(...specialDataSpecs.map((s) => s.spec));
+            fields: fieldsSpec,
+            __extra: extraSpecs,
+        };
 
         // fetch unity
-        unityRead.result = await this.orm.call(params.modelName, "unity_read", specs, {
-            context: params.context,
-        });
+        unityRead.response = await this.orm.call(params.modelName, "unity_read", [], spec);
 
         // process results to extract subrequest values
         const populateResults = (result, path = "") => {
             const request = unityRead.subRequests[path];
             if (!request) {
                 return; // always invisible
+            }
+            if (request.method === "search_read") {
+                result = result.records; // FIXME: for now, it always does a web_search_read
             }
             for (const fieldName of request.fieldNames) {
                 if (isX2Many(request.fields[fieldName])) {
@@ -1614,9 +1622,11 @@ export class RelationalModel extends Model {
                 request.records[record.id] = sanitize(record, request.fields);
             }
         };
-        populateResults(unityRead.result[0]);
+        populateResults(unityRead.response[0]);
+        const specialDataResponses = unityRead.response[1];
         for (let i = 0; i < specialDataSpecs.length; i++) {
-            populateResults(unityRead.result[i + 1], specialDataSpecs[i].path);
+            const path = specialDataSpecs[i].path;
+            populateResults(specialDataResponses[path], path);
         }
         // retrieve name_gets performed by unity
         for (const path in unityRead.subRequests) {

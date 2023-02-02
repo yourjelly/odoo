@@ -220,7 +220,8 @@ StatusBarField.specialData = ({ attrs, field }) => {
         return {
             method: "search_read",
             model: field.relation,
-            domain: [], //attrs.domain, FIXME: can't be evaluated
+            domain: attrs.domain,
+            context: attrs.context,
             fields,
         };
     }
