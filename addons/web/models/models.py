@@ -154,7 +154,7 @@ class Base(models.AbstractModel):
                                 # this is a recursive structure of FieldSpecifications
                             }
                         }
-                        __extra: [
+                        __extra: {
                             "extra1" : {
                                 model: str  # a model name
                                 method: 'read'|'search'
@@ -163,7 +163,7 @@ class Base(models.AbstractModel):
                                 context: str
                             },
                             ...
-                        ]
+                        }
                     }
 
                     if a domain or a context is of type str, it will be evaluated server side
@@ -197,8 +197,8 @@ class Base(models.AbstractModel):
             order: str | None = specs.get('order')
             count_limit: int | None = specs.get('count_limit', 0)
             if locals_dict:
-                domain_str = specs['domain']
-                domain = safe_eval.safe_eval(domain_str, globals_dict=None, locals_dict=locals_dict)
+                domain_str = specs.get('domain', "[]")
+                domain = safe_eval.safe_eval(domain_str, globals_dict={"uid": self  ._uid}, locals_dict=locals_dict)
             else:
                 domain = specs['domain']
             return self.search(domain, offset, limit, order)._unity_search(specs['fields'], domain, limit, offset, count_limit)
@@ -221,7 +221,7 @@ class Base(models.AbstractModel):
     def _unity_search(self, fields_spec, domain, limit=0, offset=0, count_limit=None):
         global_context_dict = {
             'active_model': self._name,
-            'context': self._context,
+            'context': DotDict(self._context),
         }
 
         if not self:
