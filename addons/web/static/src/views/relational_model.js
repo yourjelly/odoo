@@ -3667,7 +3667,6 @@ export class RelationalModel extends Model {
             subRequests: {},
             result: false,
         };
-        const specs = [];
         const getFieldsSpec = (activeFields, resModel, fields, context, path = "") => {
             console.log("getFieldsSpec " + path);
             const fieldsSpec = {};
@@ -3726,9 +3725,8 @@ export class RelationalModel extends Model {
             return fieldsSpec;
         };
 
-        specs.push({
+        const spec = {
             method: "search_read", // FIXME: should be web_search_read
-            model: params.resModel,
             domain: params.domain,
             context: { ...params.context, bin_size: true },
             fields: getFieldsSpec(
@@ -3737,12 +3735,10 @@ export class RelationalModel extends Model {
                 params.fields,
                 params.context // can be removed as same as unity_read request
             ),
-        });
+        };
 
         // fetch unity
-        unityRead.result = await this.orm.call(params.resModel, "unity_read", specs, {
-            context: params.context,
-        });
+        unityRead.result = await this.orm.call(params.resModel, "unity_read", [], spec);
 
         // process results to extract subrequest values
         const populateResults = (result, path = "") => {
