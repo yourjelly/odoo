@@ -192,13 +192,17 @@ class Base(models.AbstractModel):
         if specs['method'] == 'read':
             return self.browse(specs['ids'])._read_main({}, specs['fields'])
         elif specs['method'] in ('search', 'search_read'):
-            domain_str = specs['domain']
             offset: int | None = specs.get('offset', 0)
             limit: int | None = specs.get('limit', 0)
             order: str | None = specs.get('order')
             count_limit: int | None = specs.get('count_limit', 0)
-            domain = safe_eval.safe_eval(domain_str, globals_dict=None, locals_dict=locals_dict)
+            if locals_dict:
+                domain_str = specs['domain']
+                domain = safe_eval.safe_eval(domain_str, globals_dict=None, locals_dict=locals_dict)
+            else:
+                domain = specs['domain']
             return self.search(domain, offset, limit, order)._unity_search(specs['fields'], domain, limit, offset, count_limit)
+
 
         else:
             raise NotImplementedError(f"the method {specs['method']} is not supported by unity_read")

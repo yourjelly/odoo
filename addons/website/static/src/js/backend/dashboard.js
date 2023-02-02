@@ -93,7 +93,7 @@ var Dashboard = AbstractAction.extend({
         });
         prom.then(function (result) {
             self.data = result;
-            self.dashboards_data = result.dashboards;
+            self.m = result.dashboards;
             self.currency_id = result.currency_id;
             self.groups = result.groups;
             self.websites = result.websites;
