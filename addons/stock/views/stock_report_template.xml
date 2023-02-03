@@ -7,64 +7,49 @@
     <template id="search_template_date_filter">
         <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
             <span class="fa fa-fw fa-calendar" title="Dates" role="img" aria-label="Dates"/>
-            <!-- <t t-if="options['date'].get('string') and options['date'].get('filter') != 'custom'"><t t-out="options['date']['string']"/></t>
-            <t t-if="options['date'].get('filter') == 'custom'"> -->
-            Date: <span class="js_format_date" />
-                <!-- <t t-if="options['date']['mode'] == 'single'">Date: <span class="js_format_date"><t t-out="options['date']['date_to']"/></span></t> -->
-            From: <span class="js_format_date" /><br/>
-            <span class="o_reports_date_to">
-            to: <span class="js_format_date"></span></span>
-                <!-- <t t-if="options['date']['mode'] == 'range'">From: <span class="js_format_date"><t t-out="options['date']['date_from']"/></span> <br/><span class="o_reports_date_to">to: <span class="js_format_date"><t t-out="options['date']['date_to']"/></span></span></t> -->
-            <!-- </t> -->
+            <t t-if="options['date'].get('string') and options['date'].get('filter') != 'custom'"><t t-out="options['date']['string']"/></t>
+            <t t-if="options['date'].get('filter') == 'custom'">
+                <t t-if="options['date']['mode'] == 'single'">Date: <span class="js_format_date"><t t-out="options['date']['date_to']"/></span></t>
+                <t t-if="options['date']['mode'] == 'range'">From: <span class="js_format_date"><t t-out="options['date']['date_from']"/></span> <br/><span class="o_reports_date_to">to: <span class="js_format_date"><t t-out="options['date']['date_to']"/></span></span></t>
+            </t>
         </button>
         <div class="dropdown-menu o_filter_menu" role="menu">
-            <!-- <t t-if="options['date']['mode'] == 'single'"> -->
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="Today" data-filter="today">Today</a>
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="End of Last Month" data-filter="last_month">End of Last Month</a>
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="End of Last Quarter" data-filter="last_quarter">End of Last Quarter</a>
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="End of Last Financial Year" data-filter="last_year">End of Last Financial Year</a>
-
-
-            <!-- </t> -->
-            <!-- <t t-if="options['date']['mode'] == 'range'"> -->
-
-
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="This Month" data-filter="this_month">This Month</a>
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="This Quarter" data-filter="this_quarter">This Quarter</a>
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="This Financial Year" data-filter="this_year">This Financial Year</a>
-            <div role="separator" class="dropdown-divider"></div>
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="Last Month" data-filter="last_month">Last Month</a>
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="Last Quarter" data-filter="last_quarter">Last Quarter</a>
-            <a role="menuitem" class="dropdown-item js_account_report_date_filter" title="Last Financial Year" data-filter="last_year">Last Financial Year</a>
-
-
-            <!-- </t> -->
-
+            <t t-if="options['date']['mode'] == 'single'">
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="Today" data-filter="today">Today</a>
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="End of Last Month" data-filter="last_month">End of Last Month</a>
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="End of Last Quarter" data-filter="last_quarter">End of Last Quarter</a>
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="End of Last Financial Year" data-filter="last_year">End of Last Financial Year</a>
+            </t>
+            <t t-if="options['date']['mode'] == 'range'">
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="This Month" data-filter="this_month">This Month</a>
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="This Quarter" data-filter="this_quarter">This Quarter</a>
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="This Financial Year" data-filter="this_year">This Financial Year</a>
+                <div role="separator" class="dropdown-divider"></div>
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="Last Month" data-filter="last_month">Last Month</a>
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="Last Quarter" data-filter="last_quarter">Last Quarter</a>
+                <a role="menuitem" class="dropdown-item js_stock_report_date_filter" title="Last Financial Year" data-filter="last_year">Last Financial Year</a>
+            </t>
             <div role="separator" class="dropdown-divider"></div>
             <a role="menuitem" class="dropdown-item js_foldable_trigger o_closed_menu" data-filter='custom_filter_date'>Custom</a>
-            <div class="o_foldable_menu o_closed_menu o_account_report_search" data-filter='custom_filter_date'>
-                <!-- <t t-if="options['date']['mode'] == 'range'"> -->
-                <label class="custom-date" for="date_from">Start Date :</label>
-                <div class="mb-3 custom-date">
-                    <!-- <div class='o_datepicker js_account_reports_datetimepicker' t-att-data-default-value="options['date']['date_from']"> -->
-                    <div class='o_datepicker js_account_reports_datetimepicker'>
-                        <input type='text' class="o_datepicker_input" name="date_from" />
-                        <span class="o_datepicker_button"/>
+            <div class="o_foldable_menu o_closed_menu o_stock_report_search" data-filter='custom_filter_date'>
+                <t t-if="options['date']['mode'] == 'range'">
+                    <label class="custom-date" for="date_from">Start Date :</label>
+                    <div class="mb-3 custom-date">
+                        <div class='o_datepicker js_stock_reports_datetimepicker' t-att-data-default-value="options['date']['date_from']">
+                            <input type='text' class="o_datepicker_input" name="date_from" />
+                            <span class="o_datepicker_button"/>
+                        </div>
                     </div>
-                </div>
-                <label class="custom-date" for="date_to">End Date :</label>
-                <label class="custom-date" for="date_to">Date :</label>
-                <!-- </t> -->
-                <!-- <label class="custom-date" for="date_to" t-if="options['date']['mode'] == 'single'">End Date :</label>
-                <label class="custom-date" for="date_to" t-if="options['date']['mode'] == 'range'">Date :</label> -->
+                </t>
+                <label class="custom-date" for="date_to" t-if="options['date']['mode'] == 'single'">End Date :</label>
+                <label class="custom-date" for="date_to" t-if="options['date']['mode'] == 'range'">Date :</label>
                 <div class="mb-3custom-date">
-                    <!-- <div class='o_datepicker js_account_reports_datetimepicker' t-att-data-default-value="options['date']['date_to']"> -->
-                    <div class='o_datepicker js_account_reports_datetimepicker'>
+                    <div class='o_datepicker js_stock_reports_datetimepicker' t-att-data-default-value="options['date']['date_to']">
                         <input type='text' class="o_datepicker_input" name="date_to" />
                         <span class="o_datepicker_button"/>
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary js_account_report_date_filter">Apply</button>
+                <button type="button" class="btn btn-primary js_stock_report_date_filter" data-filter="custom">Apply</button>
             </div>
         </div>
     </template>
@@ -126,25 +111,30 @@
     </template>
 
     <template id="search_template_wh">
-        <!-- <button t-if="options.get('partner')" type="button" class="o-no-caret btn btn-secondary dropdown-toggle account_partner_filter" data-bs-toggle="dropdown"> -->
-        <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle account_partner_filter" data-bs-toggle="dropdown">
-            <span class="fa fa fa-home"/> San Franisco
-        </button>
-        <ul class="dropdown-menu o_filter_menu" role="menu">
-            <li class="o_account_report_search js_account_partner_m2m"/>
-        </ul>
+        <t t-if="options['available_warehouse']">
+            <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                <span class="fa fa-cubes"/>
+                <t t-set="selected_report" t-value="[opt for opt in options['available_warehouse'] if opt['id'] == options['warehouse_id']][0]"/>
+                <t t-out="selected_report['name']"/>
+            </button>
+            <div class="dropdown-menu o_filter_menu" role="menu">
+                <t t-foreach="options['available_warehouse']" t-as="variant">
+                    <a role="menuitem" class="dropdown-item js_stock_reports_one_choice_filter" t-att-title="variant['name']" t-att-data-warehouse_id="variant['id']" data-filter="warehouse_id">
+                        <t t-out="variant['name']"/>
+                    </a>
+                </t>
+            </div>
+        </t>
     </template>
 
     <template id="search_template_product">
-        <!-- <button t-if="options.get('partner')" type="button" class="o-no-caret btn btn-secondary dropdown-toggle account_partner_filter" data-bs-toggle="dropdown"> -->
-        <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle account_partner_filter" data-bs-toggle="dropdown">
+        <button t-if="options.get('product')" type="button" class="o-no-caret btn btn-secondary dropdown-toggle stock_product_filter" data-bs-toggle="dropdown">
             <span class="fa fa-folder-open"/> Products
         </button>
         <ul class="dropdown-menu o_filter_menu" role="menu">
-            <li class="o_account_report_search js_account_partner_m2m"/>
+            <li class="o_account_report_search js_stock_product_m2m"/>
         </ul>
     </template>
-
 
     <template id="search_template">
         <div class="btn-group dropdown o_stock_filter_quater">
