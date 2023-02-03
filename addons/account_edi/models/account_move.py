@@ -472,16 +472,22 @@ class AccountMoveLine(models.Model):
         }
         return res
 
-    def reconcile(self):
+    @api.model
+    def _reconcile_multi(self, amls_batches):
         # OVERRIDE
         # In some countries, the payments must be sent to the government under some condition. One of them could be
         # there is at least one reconciled invoice to the payment. Then, we need to update the state of the edi
         # documents during the reconciliation.
-        all_lines = self + self.matched_debit_ids.debit_move_id + self.matched_credit_ids.credit_move_id
+
+        all_amls = self.env['account.move.line']
+        for amls in amls_batches:
+            all_amls |= amls
+
+        all_lines = all_amls + all_amls.matched_debit_ids.debit_move_id + all_amls.matched_credit_ids.credit_move_id
         payments = all_lines.move_id.filtered(lambda move: move.payment_id or move.statement_line_id)
 
         invoices_per_payment_before = {pay: pay._get_reconciled_invoices() for pay in payments}
-        res = super().reconcile()
+        res = super()._reconcile_multi(amls_batches)
         invoices_per_payment_after = {pay: pay._get_reconciled_invoices() for pay in payments}
 
         changed_payments = self.env['account.move']
