@@ -85,6 +85,7 @@
         'views/report_stock_traceability.xml',
         'views/stock_template.xml',
         'views/stock_rule_views.xml',
+        'views/stock_report_template.xml',
         'views/stock_package_level_views.xml',
         'views/stock_package_type_view.xml',
     ],
