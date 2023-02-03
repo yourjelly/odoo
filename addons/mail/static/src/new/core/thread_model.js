@@ -131,6 +131,10 @@ export class Thread {
         return ["chat", "channel", "group"].includes(this.type);
     }
 
+    get allowCalls() {
+        return ["chat", "channel", "group"].includes(this.type);
+    }
+
     get displayName() {
         if (this.type === "chat" && this.chatPartnerId) {
             return (
