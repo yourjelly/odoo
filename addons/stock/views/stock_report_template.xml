@@ -152,29 +152,31 @@
     </template>
 
     <template id="stock_main_template">
-        <div class="container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">01/01/2023</th>
-                        <th scope="col">IN</th>
-                        <th scope="col">OUT</th>
-                        <th scope="col">31/03/2023</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <t t-foreach="product_data" t-as="product">
+        <div class='o_account_reports_body'>
+            <div class="o_account_reports_page o_account_reports_no_print">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td><span t-out="product['name']"/></td>
-                            <td><span t-out="product['qty_available']"/></td>
-                            <td><span t-out="in_qty.get(product['id'], 0)"/></td>
-                            <td>-<span t-out="out_qty.get(product['id'], 0)"/></td>
-                            <td><span t-out="product['qty_available_end']"/></td>
+                            <th scope="col">Name</th>
+                            <th scope="col">01/01/2023</th>
+                            <th scope="col">IN</th>
+                            <th scope="col">OUT</th>
+                            <th scope="col">31/03/2023</th>
                         </tr>
-                    </t>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="product_data" t-as="product">
+                            <tr>
+                                <td><span t-out="product['name']"/></td>
+                                <td><span t-out="product['qty_available']"/></td>
+                                <td><span t-out="in_qty.get(product['id'], 0)"/></td>
+                                <td>-<span t-out="out_qty.get(product['id'], 0)"/></td>
+                                <td><span t-out="product['qty_available_end']"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </template>
 

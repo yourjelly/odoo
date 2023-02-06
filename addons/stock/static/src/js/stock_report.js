@@ -156,7 +156,6 @@ const StockVariationReport = AbstractAction.extend({
     },
 
     render_template: function() {
-        // this.$('.o_content').html(this.search_template);
         this.$('.o_content').html(this.main_html);
     },
 
@@ -187,6 +186,13 @@ const StockVariationReport = AbstractAction.extend({
 
     render_searchview_buttons: function() {
         var self = this;
+
+        // fold all menu
+        this.$searchview_buttons.find('.js_foldable_trigger').click(function (event) {
+            $(this).toggleClass('o_closed_menu o_open_menu');
+            self.$searchview_buttons.find('.o_foldable_menu[data-filter="'+$(this).data('filter')+'"]').toggleClass('o_closed_menu');
+        });
+        
         // product filter
         if (this.report_options.product) {
             if (!this.products_m2m_filter) {
@@ -215,9 +221,39 @@ const StockVariationReport = AbstractAction.extend({
         }
 
         // events
+
+        // click events fore date
+        this.$searchview_buttons.find('.js_stock_report_date_filter').click(function (event) {
+            self.report_options.date.filter = $(this).data('filter');
+            var error = false;
+            if ($(this).data('filter') === 'custom') {
+                var date_from = self.$searchview_buttons.find('.o_datepicker_input[name="date_from"]');
+                var date_to = self.$searchview_buttons.find('.o_datepicker_input[name="date_to"]');
+                if (date_from.length > 0){
+                    error = date_from.val() === "" || date_to.val() === "";
+                    self.report_options.date.date_from = field_utils.parse.date(date_from.val());
+                    self.report_options.date.date_to = field_utils.parse.date(date_to.val());
+                }
+                else {
+                    error = date_to.val() === "";
+                    self.report_options.date.date_to = field_utils.parse.date(date_to.val());
+                }
+            }
+            if (error) {
+                new WarningDialog(self, {
+                    title: _t("Odoo Warning"),
+                }, {
+                    message: _t("Date cannot be empty")
+                }).open();
+            } else {
+                self.reload();
+            }
+        });
+
+        //click event for product
         this.$searchview_buttons.find('.js_stock_reports_one_choice_filter').click(function (event) {
             var warehouse_id = $(this).data('filter');
-            self.report_options[warehouse_id] = $(this).data('warehouse_id');
+            self.report_options[warehouse_id] = $(this).data('warehouse_id');debugger
             self.reload();
         });
     },
