@@ -3,59 +3,51 @@
 
 import re
 from babel.dates import get_quarter_names
-import datetime
-from odoo.tools import date_utils, config, date_utils, get_lang, float_compare, float_is_zero
-from odoo.tools.misc import format_date
+from datetime import datetime, timedelta
+
 from odoo import models, fields, api, _, osv, Command
+from odoo.osv.expression import AND
+from odoo.tools import date_utils, get_lang
+from odoo.tools.misc import format_date
 
 
 class StockReportNew(models.AbstractModel):
     _name = "stock.report.new"
-    _description = "Stock Report New"
+    _description = "New Stock Report"
 
     #  CORE ==========================================================================================================================================
 
-    def _get_options(self, previous_options=None):
-        # Create default options.
-        options = previous_options or {}
-
-        warehouse_data = self.env['stock.warehouse'].search_read([], fields=["id", "name"])
-
-        if 'available_warehouse' not in options:
-            options.update({
-                'name': warehouse_data[0]['name'],
-                'warehouse_id': warehouse_data[0]['id'],
-                'available_warehouse': warehouse_data,
-            })
-
-        options.update({
-            'product': True,
-            'product_ids': [],
-            'product_categories': [],
-        })
-
-        for initializer in self._get_options_initializers_in_sequence():
-            initializer(options, previous_options=previous_options)
-
-        return options
-
     def get_report_informations(self, previous_options=None):
         options = self._get_options(previous_options)
+        product_domain = []
+        move_domain = [
+            ('date', '>=', options['date']['date_from']),
+            ('date', '<=', options['date']['date_to']),
+            ('picking_code', 'in', ['incoming', 'outgoing']),
+        ]
 
-        lot_stock_id = self.env.ref('stock.warehouse0').lot_stock_id
-        moves_data = self.env['stock.move'].search_read(['&', '&', ('date', '>', '2023-01-01'), ('picking_code', 'in', ['incoming', 'outgoing']), '|', ('location_id', '=', lot_stock_id.id), ('location_dest_id', '=', lot_stock_id.id)], fields=['product_id', 'product_qty', 'picking_code'])
-        product_data = self.env['product.product'].with_context(to_date=datetime.datetime(2023,1,1)).search_read(
-            [
+        if options.get('product_ids'):
+            product_domain = AND([product_domain, [('id', 'in', options['product_ids'])]])
+        if options.get('product_categories_ids'):
+            product_domain = AND([product_domain, [('product_tmpl_id.categ_id', 'child_of', options['product_categories_ids'])]])
+        if options.get('selected_warehouse'):
+            lot_stock_id = self.env['stock.warehouse'].browse(options['selected_warehouse']).lot_stock_id.id
+            options['lot_stock_id'] = lot_stock_id
+            product_domain = AND([product_domain, [
                 '|',
-                ('stock_move_ids.location_id', '=', lot_stock_id.id),
-                ('stock_move_ids.location_dest_id', '=', lot_stock_id.id)
-            ], fields=['id', 'name', 'qty_available'])
-        to_product_data = self.env['product.product'].with_context(to_date=datetime.datetime(2023,3,31)).search_read(
-            [
+                ('stock_move_ids.location_id', '=', lot_stock_id),
+                ('stock_move_ids.location_dest_id', '=', lot_stock_id)
+            ]])
+            move_domain = AND([move_domain, [
                 '|',
-                ('stock_move_ids.location_id', '=', lot_stock_id.id),
-                ('stock_move_ids.location_dest_id', '=', lot_stock_id.id)
-            ], fields=['id', 'qty_available'])
+                ('location_id', '=', lot_stock_id),
+                ('location_dest_id', '=', lot_stock_id)
+            ]])
+
+        product_data = self.env['product.product'].with_context(to_date=datetime.strptime(options['date']['date_from'], '%Y-%m-%d')).search_read(product_domain, fields=['id', 'name', 'qty_available'])
+        to_product_data = self.env['product.product'].with_context(to_date=datetime.strptime(options['date']['date_to'], '%Y-%m-%d')).search_read(product_domain, fields=['id', 'qty_available'])
+
+        moves_data = self.env['stock.move'].search_read(move_domain, fields=['product_id', 'product_qty', 'picking_code'])
 
         in_qty = {}
         out_qty = {}
@@ -72,7 +64,13 @@ class StockReportNew(models.AbstractModel):
                 out_qty.setdefault(move['product_id'][0], 0)
                 out_qty[move['product_id'][0]] += move['product_qty']
 
-        main_html = self.env['ir.qweb']._render("stock.stock_main_template", {'product_data': product_data, 'in_qty': in_qty, 'out_qty': out_qty})
+        main_html = self.env['ir.qweb']._render("stock.stock_main_template", {
+            'options': options,
+            'product_data': product_data,
+            'in_qty': in_qty,
+            'out_qty': out_qty
+        })
+
         info = {
             'options': options,
             'main_html': main_html,
@@ -80,24 +78,18 @@ class StockReportNew(models.AbstractModel):
         }
         return info
 
-    def _get_options_initializers_in_sequence(self):
-        initializer_prefix = '_init_options_'
-        initializers = [
-            getattr(self, attr) for attr in dir(self)
-            if attr.startswith(initializer_prefix)
-        ]
+    def _get_options(self, previous_options=None):
+        # Create default options.
+        options = previous_options or {}
+        if 'product_ids' not in options:
+            options['product_ids'] = []
+        if 'product_categories_ids' not in options:
+            options['product_categories_ids'] = []
 
-        # Order them in a dependency-compliant way
-        forced_sequence_map = self._get_options_initializers_forced_sequence_map()
-        initializers.sort(key=lambda x: forced_sequence_map.get(x, forced_sequence_map.get('default')))
+        self._init_options_date(options, previous_options=previous_options)
+        self._init_options_warehouse(options, previous_options=previous_options)
 
-        return initializers
-
-    def _get_options_initializers_forced_sequence_map(self):
-        return {
-            self._init_options_date: 30,
-            'default': 200,
-        }
+        return options
 
     def _init_options_date(self, options, previous_options=None):
         """ Initialize the 'date' options key.
@@ -193,7 +185,7 @@ class StockReportNew(models.AbstractModel):
         period_type = period_vals['period_type']
         mode = period_vals['mode']
         date_from = fields.Date.from_string(period_vals['date_from'])
-        date_to = date_from - datetime.timedelta(days=1)
+        date_to = date_from - timedelta(days=1)
 
         if period_type in ('fiscalyear', 'today'):
             # Don't pass the period_type to _get_dates_period to be able to retrieve the account.fiscal.year record if
@@ -271,3 +263,42 @@ class StockReportNew(models.AbstractModel):
         date_from = fields.Date.from_string(options[dt_filter]['date_from'])
         date_to = fields.Date.from_string(options[dt_filter]['date_to'])
         return self._get_dates_period(date_from, date_to, options['date']['mode'])['string']
+
+    def _init_options_warehouse(self, options, previous_options=None):
+        warehouse_ids = self.env['stock.warehouse'].search([])
+        if 'selected_warehouse' not in options:
+            options['selected_warehouse'] = warehouse_ids[0].id
+
+        if not options.get('available_warehouses'):
+            for warehouse in warehouse_ids:
+                options.setdefault('available_warehouses', [])
+                options['available_warehouses'].append({
+                    'id': warehouse.id,
+                    'name': warehouse.name,
+                })
+
+    @api.model
+    def action_inventory_history(self, options, params):
+        action = {
+            'name': _('History'),
+            'view_mode': 'list,form',
+            'res_model': 'stock.move.line',
+            'views': [(self.env.ref('stock.view_move_line_tree').id, 'list'), (False, 'form')],
+            'type': 'ir.actions.act_window',
+            'context': {
+                'search_default_done': 1,
+                'search_default_product_id': params['product_id'],
+            },
+            'domain': [
+                '&',
+                '&',
+                '&',
+                    ('company_id', 'in', self._context['allowed_company_ids']),
+                    ('date', '>=', options['date']['date_from']),
+                    ('date', '<=', options['date']['date_to']),
+                '|',
+                    ('location_id', '=', options['lot_stock_id']),
+                    ('location_dest_id', '=', options['lot_stock_id']),
+            ],
+        }
+        return action

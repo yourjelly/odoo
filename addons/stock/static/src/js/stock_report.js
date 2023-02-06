@@ -117,11 +117,15 @@ var M2MFilters = Widget.extend(StandaloneFieldManagerMixin, {
 const StockVariationReport = AbstractAction.extend({
     hasControlPanel: true,
 
+    events: {
+        'click [action]': 'trigger_action',
+    },
+
     custom_events: {
         'product_filter_changed': function(ev) {
              var self = this;
              self.report_options.product_ids = ev.data.product_ids;
-             self.report_options.product_categories = ev.data.product_categories;
+             self.report_options.product_categories_ids = ev.data.product_categories_ids;
              return self.reload().then(function () {
                  self.$searchview_buttons.find('.stock_product_filter').click();
              });
@@ -137,11 +141,13 @@ const StockVariationReport = AbstractAction.extend({
         const parentPromise = this._super(...arguments);
         return Promise.all([reportsInfoPromise, parentPromise]);
     },
+
     parse_report_informations: function(values) {
         this.main_html = values.main_html;
         this.report_options = values.options;
         this.$searchview_buttons = $(values.searchview_html);
     },
+
     start: async function() {
         this.controlPanelProps.cp_content = {
             $searchview_buttons: this.$searchview_buttons,
@@ -194,30 +200,28 @@ const StockVariationReport = AbstractAction.extend({
         });
         
         // product filter
-        if (this.report_options.product) {
-            if (!this.products_m2m_filter) {
-                var fields = {};
-                if ('product_ids' in this.report_options) {
-                    fields['product_ids'] = {
-                        label: _t('Products'),
-                        modelName: 'product.product',
-                        value: this.report_options.product_ids.map(Number),
-                    };
-                }
-                if ('product_categories' in this.report_options) {
-                    fields['product_categories'] = {
-                        label: _t('Product Category'),
-                        modelName: 'product.category',
-                        value: this.report_options.product_categories.map(Number),
-                    };
-                }
-                if (!_.isEmpty(fields)) {
-                    this.products_m2m_filter = new M2MFilters(this, fields, 'product_filter_changed');
-                    this.products_m2m_filter.appendTo(this.$searchview_buttons.find('.js_stock_product_m2m'));
-                }
-            } else {
-                this.$searchview_buttons.find('.js_stock_product_m2m').append(this.products_m2m_filter.$el);
+        if (!this.products_m2m_filter) {
+            var fields = {};
+            if ('product_ids' in this.report_options) {
+                fields['product_ids'] = {
+                    label: _t('Products'),
+                    modelName: 'product.product',
+                    value: this.report_options.product_ids.map(Number),
+                };
             }
+            if ('product_categories_ids' in this.report_options) {
+                fields['product_categories_ids'] = {
+                    label: _t('Product Category'),
+                    modelName: 'product.category',
+                    value: this.report_options.product_categories_ids.map(Number),
+                };
+            }
+            if (!_.isEmpty(fields)) {
+                this.products_m2m_filter = new M2MFilters(this, fields, 'product_filter_changed');
+                this.products_m2m_filter.appendTo(this.$searchview_buttons.find('.js_stock_product_m2m'));
+            }
+        } else {
+            this.$searchview_buttons.find('.js_stock_product_m2m').append(this.products_m2m_filter.$el);
         }
 
         // events
@@ -252,9 +256,26 @@ const StockVariationReport = AbstractAction.extend({
 
         //click event for product
         this.$searchview_buttons.find('.js_stock_reports_one_choice_filter').click(function (event) {
-            var warehouse_id = $(this).data('filter');
-            self.report_options[warehouse_id] = $(this).data('warehouse_id');debugger
+            self.report_options['selected_warehouse'] = $(this).data('warehouse_id');
             self.reload();
+        });
+    },
+
+    trigger_action: function(e) {
+        e.stopPropagation();
+        var self = this;
+        var params = $(e.target).data();
+        var context = new Context(this.odoo_context, params.actionContext || {});
+
+        params = _.omit(params, 'actionContext');
+        return this._rpc({
+            model: 'stock.report.new',
+            method: 'action_inventory_history',
+            args: [this.report_options, params],
+            context: context.eval(),
+        })
+        .then(function(result){
+            return self.do_action(result);
         });
     },
 

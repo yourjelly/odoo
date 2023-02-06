@@ -71,7 +71,7 @@
             <a role="menuitem" title="No Comparison" data-filter="no_comparison" class="dropdown-item js_account_report_date_cmp_filter">No Comparison</a>
             <div role="separator" class="dropdown-divider"></div>
             <a role="menuitem" class="dropdown-item js_foldable_trigger o_closed_menu" data-filter='previous_period'>Previous Period</a>
-            <div class="o_foldable_menu o_closed_menu o_account_report_search" data-filter='previous_period'>
+            <div class="o_foldable_menu o_closed_menu" data-filter='previous_period'>
                 <label for="periods_number">Number of periods :</label><br />
                 <input type="number" name="periods_number" /><br />
                 <!-- <input type="number" name="periods_number" t-att-value="options['comparison'].get('number_period')"/><br /> -->
@@ -79,7 +79,7 @@
             </div>
             <div role="separator" class="dropdown-divider"></div>
             <a role="menuitem" class="dropdown-item js_foldable_trigger o_closed_menu" data-filter='same_last_year'>Same Period Last Year</a>
-            <li class="o_foldable_menu o_closed_menu o_account_report_search" data-filter='same_last_year'>
+            <li class="o_foldable_menu o_closed_menu" data-filter='same_last_year'>
                 <label for="periods_number">Number of periods :</label><br />
                 <input type="number" name="periods_number"/><br />
                 <!-- <input type="number" name="periods_number" t-att-value="options['comparison'].get('number_period')"/><br /> -->
@@ -87,7 +87,7 @@
             </li>
             <div role="separator" class="dropdown-divider"></div>
             <a role="menuitem" class="dropdown-item js_foldable_trigger o_closed_menu" data-filter='custom'>Custom</a>
-            <div class="o_foldable_menu o_closed_menu o_account_report_search" data-filter='custom'>
+            <div class="o_foldable_menu o_closed_menu" data-filter='custom'>
                 <!-- <t t-if="options['date']['mode'] == 'range'"> -->
                     <label class="custom-date" for="date_from_cmp">Start Date :</label>
                     <div class="mb-3custom-date">
@@ -110,17 +110,17 @@
         </div>
     </template>
 
-    <template id="search_template_wh">
-        <t t-if="options['available_warehouse']">
+    <template id="search_template_warehouse">
+        <t t-if="options['available_warehouses']">
             <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
                 <span class="fa fa-cubes"/>
-                <t t-set="selected_report" t-value="[opt for opt in options['available_warehouse'] if opt['id'] == options['warehouse_id']][0]"/>
-                <t t-out="selected_report['name']"/>
+                <t t-set="selected_warehouse" t-value="[opt for opt in options['available_warehouses'] if opt['id'] == options['selected_warehouse']][0]"/>
+                <t t-out="selected_warehouse['name']"/>
             </button>
             <div class="dropdown-menu o_filter_menu" role="menu">
-                <t t-foreach="options['available_warehouse']" t-as="variant">
-                    <a role="menuitem" class="dropdown-item js_stock_reports_one_choice_filter" t-att-title="variant['name']" t-att-data-warehouse_id="variant['id']" data-filter="warehouse_id">
-                        <t t-out="variant['name']"/>
+                <t t-foreach="options['available_warehouses']" t-as="warehouse">
+                    <a role="menuitem" class="dropdown-item js_stock_reports_one_choice_filter" t-att-title="warehouse['name']" t-att-data-warehouse_id="warehouse['id']">
+                        <t t-out="warehouse['name']"/>
                     </a>
                 </t>
             </div>
@@ -128,11 +128,11 @@
     </template>
 
     <template id="search_template_product">
-        <button t-if="options.get('product')" type="button" class="o-no-caret btn btn-secondary dropdown-toggle stock_product_filter" data-bs-toggle="dropdown">
+        <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle stock_product_filter" data-bs-toggle="dropdown">
             <span class="fa fa-folder-open"/> Products
         </button>
         <ul class="dropdown-menu o_filter_menu" role="menu">
-            <li class="o_account_report_search js_stock_product_m2m"/>
+            <li class="js_stock_product_m2m"/>
         </ul>
     </template>
 
@@ -144,7 +144,7 @@
             <t t-call="stock.search_template_comparison"/>
         </div>
         <div class="btn-group dropdown o_stock_filter_wh">
-            <t t-call="stock.search_template_wh"/>
+            <t t-call="stock.search_template_warehouse"/>
         </div>
         <div class="btn-group dropdown o_stock_filter_product">
             <t t-call="stock.search_template_product"/>
@@ -158,16 +158,27 @@
                     <thead>
                         <tr>
                             <th scope="col">Name</th>
-                            <th scope="col">01/01/2023</th>
+                            <th scope="col"><t t-out="options['date']['date_from']"/></th>
                             <th scope="col">IN</th>
                             <th scope="col">OUT</th>
-                            <th scope="col">31/03/2023</th>
+                            <th scope="col"><t t-out="options['date']['date_to']"/></th>
                         </tr>
                     </thead>
                     <tbody>
                         <t t-foreach="product_data" t-as="product">
                             <tr>
-                                <td><span t-out="product['name']"/></td>
+                                <td><span>
+                                        <span t-out="product['name']"/>
+                                        &amp;nbsp;<a t-att-data-product_id="product['id']"
+                                         t-att-data-warehouse_id="options['selected_warehouse']"
+                                         t-att-data-date_from="options['date']['date_from']"
+                                         t-att-data-date_to="options['date']['date_to']"
+                                         action="action_inventory_history"
+                                         class="stock_report_product_history">
+                                            ⇒ History
+                                        </a>
+                                    </span>
+                                </td>
                                 <td><span t-out="product['qty_available']"/></td>
                                 <td><span t-out="in_qty.get(product['id'], 0)"/></td>
                                 <td>-<span t-out="out_qty.get(product['id'], 0)"/></td>
@@ -181,7 +192,7 @@
     </template>
 
     <record id="action_stock_main_template" model="ir.actions.client">
-        <field name="name">Stock variation Report</field>
+        <field name="name">Stock Variation</field>
         <field name="tag">stock_report_new</field>
         <field name="context" eval="{'report_id': ref('stock.stock_main_template')}"/>
     </record>
