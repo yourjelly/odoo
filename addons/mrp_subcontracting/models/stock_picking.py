@@ -120,6 +120,9 @@ class StockPicking(models.Model):
     def _subcontracted_produce(self, subcontract_details):
         self.ensure_one()
         for move, bom in subcontract_details:
+            # do not create extra production for move that have their quantity updated
+            if move.move_orig_ids.production_id:
+                continue
             mo = self.env['mrp.production'].with_company(move.company_id).create(self._prepare_subcontract_mo_vals(move, bom))
             self.env['stock.move'].create(mo._get_moves_raw_values())
             self.env['stock.move'].create(mo._get_moves_finished_values())
