@@ -1916,6 +1916,94 @@ class AccountMoveLine(models.Model):
 
         return partials_vals_list, exchange_data
 
+    @api.model
+    def _prepare_reconciliation_partials_multi(self, *amls_batches):
+        ''' Prepare the partials on the current journal items to perform the reconciliation.
+        Note: The order of records in self is important because the journal items will be reconciled using this order.
+        :return: a tuple of 1) list of vals for partial reconciliation creation, 2) the list of vals for the exchange difference entries to be created
+        '''
+        amls_batch_iter = iter(amls_batches)
+        amls_batch = None
+
+        debit_vals_list = None
+        credit_vals_list = None
+        debit_vals = None
+        credit_vals = None
+
+        partials_vals_list = []
+        exchange_data = {}
+
+        while True:
+            # ==== Find the next available batch of lines ====
+            if not amls_batch:
+                amls_batch = next(amls_batch_iter, None)
+                if not amls_batch:
+                    break
+
+                amls_vals_list = [
+                    {
+                        'record': line,
+                        'balance': line.balance,
+                        'amount_currency': line.amount_currency,
+                        'amount_residual': line.amount_residual,
+                        'amount_residual_currency': line.amount_residual_currency,
+                        'company': line.company_id,
+                        'currency': line.currency_id,
+                        'date': line.date,
+                        'reconciled': line.reconciled,
+                    }
+                    for line in amls_batch
+                ]
+                debit_vals_list = iter([x for x in amls_vals_list if x['balance'] > 0.0 or x['amount_currency'] > 0.0])
+                credit_vals_list = iter([x for x in amls_vals_list if x['balance'] < 0.0 or x['amount_currency'] < 0.0])
+
+            # ==== Find the next available lines ====
+            # For performance reasons, the partials are created all at once meaning the residual amounts can't be
+            # trusted from one iteration to another. That's the reason why all residual amounts are kept as variables
+            # and reduced "manually" every time we append a dictionary to 'partials_vals_list'.
+
+            # Move to the next available debit line.
+            if not debit_vals:
+                debit_vals = next(debit_vals_list, None)
+                if not debit_vals:
+                    amls_batch = None
+                    continue
+
+            # Move to the next available credit line.
+            if not credit_vals:
+                credit_vals = next(credit_vals_list, None)
+                if not credit_vals:
+                    amls_batch = None
+                    continue
+
+            # ==== Compute the amounts to reconcile ====
+
+            res = self._prepare_reconciliation_single_partial(debit_vals, credit_vals)
+            if res.get('partial_vals'):
+                if res.get('exchange_vals'):
+                    exchange_data[len(partials_vals_list)] = res['exchange_vals']
+                partials_vals_list.append(res['partial_vals'])
+            if res['debit_vals'] is None:
+                debit_vals = None
+            if res['credit_vals'] is None:
+                credit_vals = None
+
+        return partials_vals_list, exchange_data
+
+    @api.model
+    def _create_reconciliation_partials_multi(self, *amls_batches):
+        '''create the partial reconciliation between all the records in self
+         :return: A recordset of account.partial.reconcile.
+        '''
+        partials_vals_list, exchange_data = self._prepare_reconciliation_partials_multi(*amls_batches)
+        partials = self.env['account.partial.reconcile'].create(partials_vals_list)
+
+        # ==== Create exchange difference moves ====
+        for index, exchange_vals in exchange_data.items():
+            partials[index].exchange_move_id = self._create_exchange_difference_move(exchange_vals)
+
+        return partials
+
     def _create_reconciliation_partials(self):
         '''create the partial reconciliation between all the records in self
          :return: A recordset of account.partial.reconcile.
@@ -2339,37 +2427,10 @@ class AccountMoveLine(models.Model):
         return results
 
     @api.model
-    def _reconcile_multi(self, amls_batches):
-        ''' Reconcile the current move lines all together.
-        :return: A list of dictionaries representing a summary of what has been done during the reconciliation:
-                * partials:             A recorset of all account.partial.reconcile created during the reconciliation.
-                * exchange_partials:    A recorset of all account.partial.reconcile created during the reconciliation
-                                        with the exchange difference journal entries.
-                * full_reconcile:       An account.full.reconcile record created when there is nothing left to reconcile
-                                        in the involved lines.
-                * tax_cash_basis_moves: An account.move recordset representing the tax cash basis journal entries.
-        '''
-        disable_partial_exchange_diff = bool(self.env['ir.config_parameter'].sudo().get_param('account.disable_partial_exchange_diff'))
-
-        all_amls = self.env['account.move.line']
+    def _optimize_reconciliation_batches(self, amls_batches):
+        amls_batches_map = {}
+        company = None
         for amls in amls_batches:
-            all_amls |= amls
-
-        not_paid_invoices = all_amls.move_id.filtered(lambda move:
-            move.is_invoice(include_receipts=True)
-            and move.payment_state not in ('paid', 'in_payment')
-        )
-
-        all_results = []
-        for amls in amls_batches:
-            results = {'exchange_partials': self.env['account.partial.reconcile']}
-
-            if not amls:
-                all_results.append(results)
-                continue
-
-            # ==== Check the lines can be reconciled together ====
-            company = None
             account = None
             for line in amls:
                 if line.reconciled:
@@ -2391,17 +2452,86 @@ class AccountMoveLine(models.Model):
                                     % (account.display_name, line.account_id.display_name))
 
             sorted_lines = amls.sorted(key=lambda line: (line.date_maturity or line.date, line.currency_id, line.amount_currency))
+            amls_batches_entry = amls_batches_map.setdefault(account.id, {
+                'amls': self.env['account.move.line'],
+                'amls_batches': [],
+                'account': account,
+            })
+            amls_batches_entry['amls'] |= sorted_lines
+            amls_batches_entry['amls_batches'].append(sorted_lines)
+
+        return amls_batches_map.values()
+
+    @api.model
+    def _reconcile_multi(self, amls_batch_list):
+        ''' Reconcile the current move lines all together.
+        :return: A list of dictionaries representing a summary of what has been done during the reconciliation:
+                * partials:             A recorset of all account.partial.reconcile created during the reconciliation.
+                * exchange_partials:    A recorset of all account.partial.reconcile created during the reconciliation
+                                        with the exchange difference journal entries.
+                * full_reconcile:       An account.full.reconcile record created when there is nothing left to reconcile
+                                        in the involved lines.
+                * tax_cash_basis_moves: An account.move recordset representing the tax cash basis journal entries.
+        '''
+        disable_partial_exchange_diff = bool(self.env['ir.config_parameter'].sudo().get_param('account.disable_partial_exchange_diff'))
+
+        amls_batches_map = defaultdict(list)
+        all_amls = self.env['account.move.line']
+
+        # ==== Check the lines can be reconciled together ====
+        company = None
+        for amls in amls_batch_list:
+            account = None
+            for line in amls:
+                if line.reconciled:
+                    raise UserError(_("You are trying to reconcile some entries that are already reconciled."))
+                if not line.account_id.reconcile and line.account_id.account_type not in ('asset_cash', 'liability_credit_card'):
+                    raise UserError(_("Account %s does not allow reconciliation. First change the configuration of this account to allow it.")
+                                    % line.account_id.display_name)
+                if line.move_id.state != 'posted':
+                    raise UserError(_('You can only reconcile posted entries.'))
+                if company is None:
+                    company = line.company_id
+                elif line.company_id != company:
+                    raise UserError(_("Entries doesn't belong to the same company: %s != %s")
+                                    % (company.display_name, line.company_id.display_name))
+                if account is None:
+                    account = line.account_id
+                elif line.account_id != account:
+                    raise UserError(_("Entries are not from the same account: %s != %s")
+                                    % (account.display_name, line.account_id.display_name))
+
+            sorted_lines = amls.sorted(key=lambda line: (line.date_maturity or line.date, line.currency_id, line.amount_currency))
+            amls_batches_map[account.id].append(sorted_lines)
+            all_amls |= sorted_lines
+
+        not_paid_invoices = all_amls.move_id.filtered(lambda move:
+            move.is_invoice(include_receipts=True)
+            and move.payment_state not in ('paid', 'in_payment')
+        )
+
+        all_results = []
+        for amls_batches in amls_batches_map.values():
+            amls = self.env['account.move.line']
+            for amls_batch in amls_batches:
+                amls |= amls_batch
+
+            results = {'exchange_partials': self.env['account.partial.reconcile']}
+
+            if not amls:
+                all_results.append(results)
+                continue
 
             # ==== Collect all involved lines through the existing reconciliation ====
 
-            involved_lines = sorted_lines._all_reconciled_lines()
+            involved_lines = amls._all_reconciled_lines()
             involved_partials = involved_lines.matched_credit_ids | involved_lines.matched_debit_ids
 
             # ==== Create partials ====
 
-            sorted_lines_ctx = sorted_lines\
+            sorted_lines_ctx = amls\
                 .with_context(no_exchange_difference=self._context.get('no_exchange_difference') or disable_partial_exchange_diff)
-            partials = sorted_lines_ctx._create_reconciliation_partials()
+            partials = sorted_lines_ctx._create_reconciliation_partials_multi(*amls_batches)
             results['partials'] = partials
             involved_partials += partials
             exchange_move_lines = partials.exchange_move_id.line_ids.filtered(lambda line: line.account_id == account)
@@ -2524,7 +2654,8 @@ class AccountMoveLine(models.Model):
                                         in the involved lines.
                 * tax_cash_basis_moves: An account.move recordset representing the tax cash basis journal entries.
         '''
-        return self._reconcile_multi([self])[0]
+        if self:
+            return self._reconcile_multi([self])[0]
 
     def remove_move_reconcile(self):
         """ Undo a reconciliation """
