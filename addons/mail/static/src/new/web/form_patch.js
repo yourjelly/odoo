@@ -89,6 +89,7 @@ patch(FormController.prototype, "mail/new", {
                 if (formSheetBgXml) {
                     hasAttachmentAndSheet = true;
                     const sheetChatter = rootT.cloneNode(true);
+                    formSheetBgXml.setAttribute("inlinechatter", "");
                     sheetChatter.setAttribute(
                         "class",
                         "o_FormRenderer_chatterContainer o-isInFormSheetBg"
@@ -168,9 +169,20 @@ patch(FormController.prototype, "mail/new", {
 });
 
 patch(FormCompiler.prototype, "mail/new", {
-    compileGenericNode(el, params) {
-        if (el.hasAttribute("chatter")) {
-            return el;
+    compileNode(el, params) {
+        if (el instanceof Element) {
+            if (el.hasAttribute("chatter")) {
+                // we don't want to the form compiler to interact with mail
+                // fields
+                return el;
+            }
+            if (el instanceof Element && el.hasAttribute("inlinechatter")) {
+                const chatter = el.lastChild;
+                chatter.remove();
+                const result = this._super(el, params);
+                result.appendChild(chatter);
+                return result;
+            }
         }
         return this._super(el, params);
     },
