@@ -3839,7 +3839,9 @@ X[]
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a[b<span>c</span>d]e</p>',
                 stepFunction: editor => editor.execCommand('applyColor', 'rgb(255, 0, 0)', 'color'),
-                contentAfter: '<p>a<font style="color: rgb(255, 0, 0);">[b<span>c</span>d]</font>e</p>',
+                contentAfter: '<p>a<font style="color: rgb(255, 0, 0);">[b</font>' +
+                '<span><font style="color: rgb(255, 0, 0);">c</font></span>' +
+                '<font style="color: rgb(255, 0, 0);">d]</font>e</p>',
             });
         });
         it('should distribute color to texts and to button separately', async () => {

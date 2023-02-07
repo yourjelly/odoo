@@ -559,7 +559,7 @@ export const editorCommands = {
                     font = [];
                 }
             } else if ((node.nodeType === Node.TEXT_NODE && isVisibleStr(node))
-                    || (node.nodeType === Node.ELEMENT_NODE &&
+                    || (node.nodeType === Node.ELEMENT_NODE && node.nodeName !== 'SPAN' &&
                         ['inline', 'inline-block'].includes(getComputedStyle(node).display) &&
                         isVisibleStr(node.textContent) &&
                         !node.classList.contains('btn') &&
