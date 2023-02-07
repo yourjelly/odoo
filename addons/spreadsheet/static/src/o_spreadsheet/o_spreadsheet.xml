@@ -329,7 +329,7 @@
   </t>
 
   <t t-name="o-spreadsheet-ChartJsComponent" owl="1">
-    <canvas class="o-figure-canvas" t-att-style="canvasStyle" t-ref="graphContainer"/>
+    <canvas class="o-figure-canvas w-100 h-100" t-att-style="canvasStyle" t-ref="graphContainer"/>
   </t>
 
   <t t-name="o-spreadsheet-ScorecardChart" owl="1">

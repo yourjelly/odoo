@@ -285,7 +285,7 @@
         ComponentsImportance[ComponentsImportance["Grid"] = 0] = "Grid";
         ComponentsImportance[ComponentsImportance["Highlight"] = 5] = "Highlight";
         ComponentsImportance[ComponentsImportance["Figure"] = 10] = "Figure";
-        ComponentsImportance[ComponentsImportance["Dropdown"] = 12] = "Dropdown";
+        ComponentsImportance[ComponentsImportance["Dropdown"] = 16] = "Dropdown";
         ComponentsImportance[ComponentsImportance["ScrollBar"] = 15] = "ScrollBar";
         ComponentsImportance[ComponentsImportance["Composer"] = 20] = "Composer";
         ComponentsImportance[ComponentsImportance["ColorPicker"] = 25] = "ColorPicker";
@@ -18811,7 +18811,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return token;
         const { xc, sheetName } = splitReference(token.value);
         const [left, right] = xc.split(":");
-        const sheetRef = sheetName ? `${sheetName}!` : "";
+        const sheetRef = sheetName ? `${getComposerSheetName(sheetName)}!` : "";
         const updatedLeft = getTokenNextReferenceType(left);
         const updatedRight = right ? `:${getTokenNextReferenceType(right)}` : "";
         return { ...token, value: sheetRef + updatedLeft + updatedRight };
@@ -20941,6 +20941,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.dnd.y = Math.max(dndInitialY + deltaY, minY);
             };
             const onMouseUp = (ev) => {
+                if (!this.dnd.figId) {
+                    return;
+                }
                 let { x, y } = this.screenCoordinatesToInternal(this.dnd);
                 this.dnd.figId = undefined;
                 this.env.model.dispatch("UPDATE_FIGURE", { sheetId, id: figure.id, x, y });
@@ -20971,6 +20974,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 }
             };
             const onMouseUp = (ev) => {
+                if (!this.dnd.figId) {
+                    return;
+                }
                 this.dnd.figId = undefined;
                 let { x, y } = this.screenCoordinatesToInternal(this.dnd);
                 const update = { x, y };
@@ -42390,8 +42396,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-02-06T07:28:33.361Z';
-    exports.__info__.hash = '66ca47d';
+    exports.__info__.date = '2023-02-07T07:01:08.030Z';
+    exports.__info__.hash = '389e3ec';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
