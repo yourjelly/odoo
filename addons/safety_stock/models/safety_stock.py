@@ -1,7 +1,6 @@
 import statistics
 
 from odoo import models, api, fields, _
-from odoo.fields import Datetime
 from datetime import datetime
 
 
@@ -18,34 +17,36 @@ class SafetyStockModel(models.Model):
     @api.depends('product_id.stock_move_ids')
     def _compute_stats_sales(self):
         for record in self:
-            demand_per_time_period = dict()
-            min_date = datetime.max
-            # max_date = datetime.min
-            for move in record.product_id.stock_move_ids:
-                for move_line in move.move_line_ids:
-                    if move_line.location_usage in ['internal', 'transit'] \
-                            and move_line.location_dest_usage not in ['internal', 'transit']:
-                        move_date = Datetime.to_datetime(move_line.date)
-                        min_date = min(min_date, move_date)
-                        # max_date = max(max_date, move_date)
-                        move_date_str = move_date.strftime("%Y%m%d")
-                        demand_per_time_period[move_date_str] = demand_per_time_period[move_date_str] + move_line.qty_done \
-                            if move_date_str in demand_per_time_period else move_line.qty_done
-            period = (datetime.today() - min_date).days
+            move_lines = self.env['stock.move.line'].read_group([
+                ('product_id', '=', record.product_id.id),
+                ('state', '=', 'done'),
+                ('location_id.usage', 'in', ['internal', 'transit']),
+                ('location_dest_id.usage', '=', 'customer')
+                ], ['qty_done:sum'], ['date:day'])
+            period = 0
+            if len(move_lines) != 0:
+                min_date = datetime.strptime(move_lines[0]['date:day'], '%d %b %Y')
+                period = (datetime.today() - min_date).days
+
             # compute sales mean and max
-            if len(demand_per_time_period) != 0 and period != 0:
+            if len(move_lines) != 0 and period != 0:
                 sum_qty = 0.0
-                for qty in demand_per_time_period.values():
-                    sum_qty += qty
+                max_qty = 0.0
+                for day_moves in move_lines:
+                    sum_qty += day_moves['qty_done']
+                    max_qty = max(max_qty, day_moves['qty_done'])
                 record.mean_sales = sum_qty / period
-                record.max_sales = max(demand_per_time_period.values())
+                record.max_sales = max_qty
             else:
                 record.mean_sales = 0.0
                 record.max_sales = 0.0
             # compute sales variance
             variance_sales_sum = 0.0
-            for qty in demand_per_time_period.values():
-                variance_sales_sum += pow(qty - record.mean_sales, 2)
+            for day_moves in move_lines:
+                variance_sales_sum += pow(day_moves['qty_done'] - record.mean_sales, 2)
+            mean_sales_square = pow(record.max_sales, 2)
+            # add days with no sales to the variance
+            variance_sales_sum += mean_sales_square * (period - len(move_lines))
             if period - 1 > 0:
                 record.variance_sales = variance_sales_sum / (period - 1)
             else:
@@ -54,22 +55,27 @@ class SafetyStockModel(models.Model):
     @api.depends('product_id.stock_move_ids')
     def _compute_stats_lead_time(self):
         for record in self:
-            supplier_delay = record.supplier_id.delay
+            basic_delay = 0.0
+            if record.supplier_id:
+                basic_delay = record.supplier_id.delay
+            elif record.product_id.product_tmpl_id.produce_delay:
+                # TODO calculate real lead time for manufacture
+                basic_delay = record.product_id.product_tmpl_id.produce_delay
             lead_time_list = []
             for move in record.product_id.stock_move_ids:
-                if move.location_dest_usage == 'internal':
-                    lead_time = supplier_delay + self._calculate_internal_lead_time(move)
+                if move.location_dest_id.usage == 'internal':
+                    lead_time = basic_delay + self._calculate_internal_lead_time(move)
                     lead_time_list.append(lead_time)
             nb_lead_time = len(lead_time_list)
 
-            # compute mean
+            # compute mean and max
             if nb_lead_time != 0:
                 record.mean_lead_time = sum(lead_time_list) / nb_lead_time
+                record.max_lead_time = max(lead_time_list)
             else:
-                record.mean_lead_time = 0.0
-
-            # compute max
-            record.max_lead_time = max(lead_time_list) if nb_lead_time > 0 else 0
+                # take the theoretic lead time
+                record.mean_lead_time = record.lead_days_date
+                record.max_lead_time = record.lead_days_date
 
             # compute variance
             variance_lead_time_sum = 0.0
@@ -86,7 +92,7 @@ class SafetyStockModel(models.Model):
         origin_moves = set()
         while len(moves) != 0:
             current_move = moves.pop()
-            if current_move.location_usage != 'supplier':
+            if current_move.location_id.usage != 'supplier':
                 moves.extend(current_move.move_orig_ids)
             else:
                 origin_moves.add(current_move)

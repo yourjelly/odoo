@@ -1,5 +1,7 @@
 from odoo import models, api, fields
 
+from statistics import NormalDist
+
 
 class StockReplenishmentInfo(models.TransientModel):
     _name = 'safety.stock.info'
@@ -14,7 +16,7 @@ class StockReplenishmentInfo(models.TransientModel):
     max_sales = fields.Integer(related='orderpoint_id.max_sales')
     max_lead_time = fields.Integer(related='orderpoint_id.max_lead_time')
 
-    Z = fields.Float(required=True, default=0.75, string="Z (Factor Service) in %")
+    Z = fields.Float(required=True, default=0.75, string="Z (Factor Service)")
 
     SS1 = fields.Integer(compute="_compute_ss1", string="SS1 = μsales × t =")
     SS2 = fields.Integer(compute="_compute_ss2", string="SS2 = (max(μLT)×max(sales))−(μLT ×μsales) =")
