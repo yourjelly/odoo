@@ -15,4 +15,20 @@
             </field>
         </field>
     </record>
+
+    <record id="action_safety_stock_report" model="ir.actions.server">
+        <field name="name">Generate SafetyStock report</field>
+        <field name="model_id" ref="model_stock_warehouse_orderpoint"/>
+        <field name="binding_model_id" ref="model_stock_warehouse_orderpoint"/>
+        <field name="state">code</field>
+        <field name="code">
+ctx = env.context
+action = {
+    'name': 'Safety Stock Report',
+    'type': 'ir.actions.client',
+    'tag': 'generate_safety_stock',
+    'context': ctx,
+}
+        </field>
+    </record>
 </odoo>

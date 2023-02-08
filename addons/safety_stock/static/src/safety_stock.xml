@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="stock.SafetyStock" owl="1">
+        <div>
+            <div class="container bg-white p-4 w-100 d-flex">
+                Display:
+                <div class="form-check">
+                    <CheckBox value="state.display.SS1" onChange.bind="(ev) => onDisplayChange(this,'SS1',ev)">
+                      SS1 = (max(μLT)×max(sales))−(μLT ×μsales)
+                    </CheckBox>
+                    <CheckBox value="state.display.SS2" onChange.bind="(ev) => onDisplayChange(this,'SS2',ev)">
+                      SS2 = Z × σsales × sqrt(μLT)
+                    </CheckBox>
+                    <CheckBox value="state.display.SS3" onChange.bind="(ev) => onDisplayChange(this,'SS3',ev)">
+                      SS3 = Z × μsales × σLT
+                    </CheckBox>
+                    <CheckBox value="state.display.SS4" onChange.bind="(ev) => onDisplayChange(this,'SS4',ev)">
+                      SS4 = Z × sqrt(μLT × σsales^2 + μsales^2 × σLT^2)
+                    </CheckBox>
+                    <CheckBox value="state.display.SS5" onChange.bind="(ev) => onDisplayChange(this,'SS5',ev)">
+                      SS5 = Z × (σsales × μLT + μsales × σLT)
+                    </CheckBox>
+                </div>
+                <div class="form-check">
+                    <CheckBox value="state.display.sales_stats" onChange.bind="(ev) => onDisplayChange(this,'sales_stats',ev)">
+                      Sales stats
+                    </CheckBox>
+                    <CheckBox value="state.display.ld_stats" onChange.bind="(ev) => onDisplayChange(this,'ld_stats',ev)">
+                      Lead time stats
+                    </CheckBox>
+                </div>
+                <div class="ms-auto">
+                    <span>Service Factor: </span>
+                    <input type="number" name="Z" t-on-change="updateZ" class="o_input form-control text-end" t-att-value="Z" step="0.01" min="0"/>
+                </div>
+            </div>
+            <div class="container bg-white p-4 my-4">
+            <div class="row my-3">
+                <div class="col-12">
+                    <h2>
+                        Safety Stock Report
+                    </h2>
+                </div>
+            </div>
+            <div class="row">
+                <div t-att-class="'text-center offset-4'">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th/>
+                                <th t-if="state.display.sales_stats" class="text-center" colspan="2" >Sales per day</th>
+                                <th t-if="state.display.ld_stats" class="text-center" colspan="2">Lead time in day</th>
+                                 <th/>
+                                <th class="text-center" colspan="5">Safety Stock</th>
+                            </tr>
+                            <tr>
+                                <th>Products</th>
+                                <th t-if="state.display.sales_stats" class="text-end">Mean sales</th>
+                                <th t-if="state.display.sales_stats" class="text-end">Variance sales</th>
+                                <th t-if="state.display.ld_stats" class="text-end">Mean LeadTime</th>
+                                <th t-if="state.display.ld_stats" class="text-end">Variance LeadTime</th>
+                                <th class="text-end">Current Min Qty</th>
+                                <th t-if="state.display.SS1" class="text-end">SS1</th>
+                                <th t-if="state.display.SS2" class="text-end">SS2</th>
+                                <th t-if="state.display.SS3" class="text-end">SS3</th>
+                                <th t-if="state.display.SS4" class="text-end">SS4</th>
+                                <th t-if="state.display.SS5" class="text-end">SS5</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="state.orderpoints" t-as="orderpoint" t-key="orderpoint['orderpoint_id']">
+                                <tr>
+                                    <td t-att-class="is_product_tmpl and 'fw-bold' or None">
+                                        <a t-if="is_html_type" href="#" class="o_action" t-att-data-model="is_product_tmpl and 'product.template' or 'product.product'" t-att-data-res-id="orderpoint['product_id']">
+                                            <t t-esc="orderpoint['product_name']"/>
+                                        </a>
+                                        <t t-else="">
+                                            <t t-esc="orderpoint['product_name']"/>
+                                        </t>
+                                    </td>
+                                    <td t-if="state.display.sales_stats" class="text-end"><t t-out="orderpoint['mean_sales']"/></td>
+                                    <td t-if="state.display.sales_stats" class="text-end"><t t-out="orderpoint['variance_sales']"/></td>
+                                    <td t-if="state.display.ld_stats" class="text-end"><t t-out="orderpoint['mean_lead_time']"/></td>
+                                    <td t-if="state.display.ld_stats" class="text-end"><t t-out="orderpoint['variance_lead_time']"/></td>
+                                    <td class="text-end"><t t-out="orderpoint['product_min_qty']"/></td>
+                                    <td t-if="state.display.SS1" class="text-end"><t t-out="orderpoint['SS1']"/></td>
+                                    <td t-if="state.display.SS2" class="text-end"><t t-out="orderpoint['SS2']"/></td>
+                                    <td t-if="state.display.SS3" class="text-end"><t t-out="orderpoint['SS3']"/></td>
+                                    <td t-if="state.display.SS4" class="text-end"><t t-out="orderpoint['SS4']"/></td>
+                                    <td t-if="state.display.SS5" class="text-end"><t t-out="orderpoint['SS5']"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div>
+    </t>
+</templates>

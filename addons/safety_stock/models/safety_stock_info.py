@@ -49,7 +49,7 @@ class StockReplenishmentInfo(models.TransientModel):
     def _compute_ss5(self):
         for record in self:
             record.SS5 = record.Z * pow((record.mean_lead_time * record.variance_sales) +
-                                        (pow(record.max_sales, 2) * record.variance_lead_time),
+                                        (pow(record.mean_sales, 2) * record.variance_lead_time),
                                         0.5)
 
     @api.depends('mean_sales', 'variance_lead_time', 'variance_sales', 'Z', 'mean_lead_time')

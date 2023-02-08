@@ -35,7 +35,7 @@ class SafetyStockModel(models.Model):
                 for day_moves in move_lines:
                     sum_qty += day_moves['qty_done']
                     max_qty = max(max_qty, day_moves['qty_done'])
-                record.mean_sales = sum_qty / period
+                record.mean_sales = round(sum_qty / period, 2)
                 record.max_sales = max_qty
             else:
                 record.mean_sales = 0.0
@@ -48,7 +48,7 @@ class SafetyStockModel(models.Model):
             # add days with no sales to the variance
             variance_sales_sum += mean_sales_square * (period - len(move_lines))
             if period - 1 > 0:
-                record.variance_sales = variance_sales_sum / (period - 1)
+                record.variance_sales = round(variance_sales_sum / (period - 1), 2)
             else:
                 record.variance_sales = 0.0
 
@@ -70,19 +70,23 @@ class SafetyStockModel(models.Model):
 
             # compute mean and max
             if nb_lead_time != 0:
-                record.mean_lead_time = sum(lead_time_list) / nb_lead_time
+                record.mean_lead_time = round(sum(lead_time_list) / nb_lead_time, 2)
                 record.max_lead_time = max(lead_time_list)
             else:
                 # take the theoretic lead time
-                record.mean_lead_time = record.lead_days_date
-                record.max_lead_time = record.lead_days_date
+                if record.lead_days_date:
+                    lead_days = (record.lead_days_date - fields.Date.today()).days
+                else:
+                    lead_days = 0
+                record.mean_lead_time = lead_days
+                record.max_lead_time = lead_days
 
             # compute variance
             variance_lead_time_sum = 0.0
             for ld in lead_time_list:
                 variance_lead_time_sum += pow(ld - record.mean_lead_time, 2)
             if nb_lead_time - 1 > 0:
-                record.variance_lead_time = variance_lead_time_sum / (nb_lead_time - 1)
+                record.variance_lead_time = round(variance_lead_time_sum / (nb_lead_time - 1), 2)
             else:
                 record.variance_lead_time = 0.0
 
@@ -114,3 +118,28 @@ class SafetyStockModel(models.Model):
         })
         action['res_id'] = res.id
         return action
+
+    @api.model
+    def get_safety_stock_stats(self, orderpoint_ids):
+        return self._serialize_stats(self.browse(orderpoint_ids))
+
+    @api.model
+    def _serialize_stats(self, orderpoint_ids):
+        res = {}
+        for orderpoint in orderpoint_ids:
+            data = {
+                'orderpoint_id': orderpoint.id,
+                'product_id': orderpoint.product_id.id,
+                'product_name': orderpoint.product_id.name,
+                'product_code': orderpoint.product_id.code,
+                'product_min_qty': orderpoint.product_min_qty,
+                'mean_sales': orderpoint.mean_sales,
+                'variance_sales': orderpoint.variance_sales,
+                'max_sales': orderpoint.max_sales,
+                'mean_lead_time': orderpoint.mean_lead_time,
+                'variance_lead_time': orderpoint.variance_lead_time,
+                'max_lead_time': orderpoint.max_lead_time,
+                'is_html_type': True
+            }
+            res[orderpoint.id] = data
+        return res
