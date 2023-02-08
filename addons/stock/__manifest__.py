@@ -114,6 +114,7 @@
             'stock/static/src/**/*.xml',
             'stock/static/src/scss/forecast_widget.scss',
             'stock/static/src/scss/stock_empty_screen.scss',
+            'stock/static/src/scss/stock_variation_report.scss',
             'stock/static/src/views/**/*',
         ],
         'web.assets_frontend': [

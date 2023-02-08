@@ -199,6 +199,13 @@ const StockVariationReport = AbstractAction.extend({
             self.$searchview_buttons.find('.o_foldable_menu[data-filter="'+$(this).data('filter')+'"]').toggleClass('o_closed_menu');
         });
         
+        // render filter (add selected class to the options that are selected)
+        _.each(self.report_options, function(k) {debugger
+            if (k!== null && k.filter !== undefined) {
+                self.$searchview_buttons.find('[data-filter="'+k.filter+'"]').addClass('selected');
+            }
+        });
+
         // product filter
         if (!this.products_m2m_filter) {
             var fields = {};

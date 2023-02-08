@@ -54,62 +54,6 @@
         </div>
     </template>
 
-    <template id="search_template_comparison">
-        <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-            <span class="fa fa-bar-chart"/> Comparison:
-            <!-- <t t-if="options['comparison'].get('string') and options['comparison'].get('filter') != 'custom'"><t t-out="options['comparison']['string']"/></t> -->
-            <!-- <t t-if="options['comparison'].get('filter') == 'custom'"> -->
-
-            <span class="o_reports_date_to"><span class="js_format_date">
-            </span></span> <span class="o_reports_date_to"> - <span class="js_format_date"></span></span>
-            Date: <span class="js_format_date"></span>
-                <!-- <t t-if="options['date']['mode'] == 'range'"><span class="o_reports_date_to"><span class="js_format_date"><t t-out="options['comparison']['date_from']"/></span></span> <span class="o_reports_date_to"> - <span class="js_format_date"><t t-out="options['comparison']['date_to']"/></span></span></t>
-                <t t-if="options['date']['mode'] == 'single'">Date: <span class="js_format_date"><t t-out="options['comparison']['date_to']"/></span></t> -->
-            <!-- </t> -->
-        </button>
-        <div class="dropdown-menu o_filter_menu" role="menu">
-            <a role="menuitem" title="No Comparison" data-filter="no_comparison" class="dropdown-item js_account_report_date_cmp_filter">No Comparison</a>
-            <div role="separator" class="dropdown-divider"></div>
-            <a role="menuitem" class="dropdown-item js_foldable_trigger o_closed_menu" data-filter='previous_period'>Previous Period</a>
-            <div class="o_foldable_menu o_closed_menu" data-filter='previous_period'>
-                <label for="periods_number">Number of periods :</label><br />
-                <input type="number" name="periods_number" /><br />
-                <!-- <input type="number" name="periods_number" t-att-value="options['comparison'].get('number_period')"/><br /> -->
-                <button type="button" class="btn btn-primary js_account_report_date_cmp_filter" data-filter='previous_period'>Apply</button>
-            </div>
-            <div role="separator" class="dropdown-divider"></div>
-            <a role="menuitem" class="dropdown-item js_foldable_trigger o_closed_menu" data-filter='same_last_year'>Same Period Last Year</a>
-            <li class="o_foldable_menu o_closed_menu" data-filter='same_last_year'>
-                <label for="periods_number">Number of periods :</label><br />
-                <input type="number" name="periods_number"/><br />
-                <!-- <input type="number" name="periods_number" t-att-value="options['comparison'].get('number_period')"/><br /> -->
-                <button type="button" class="btn btn-primary js_account_report_date_cmp_filter" data-filter='same_last_year'>Apply</button>
-            </li>
-            <div role="separator" class="dropdown-divider"></div>
-            <a role="menuitem" class="dropdown-item js_foldable_trigger o_closed_menu" data-filter='custom'>Custom</a>
-            <div class="o_foldable_menu o_closed_menu" data-filter='custom'>
-                <!-- <t t-if="options['date']['mode'] == 'range'"> -->
-                    <label class="custom-date" for="date_from_cmp">Start Date :</label>
-                    <div class="mb-3custom-date">
-                        <div class='o_datepicker js_account_reports_datetimepicker'>
-                            <input type='text' class="o_datepicker_input" name="date_from_cmp" />
-                            <span class="o_datepicker_button"/>
-                        </div>
-                    </div>
-                <!-- </t> -->
-                <label class="custom-date" for="date_to_cmp">End Date :</label>
-                <label class="custom-date" for="date_to_cmp">Date :</label>
-                <div class="mb-3custom-date">
-                    <div class='o_datepicker js_account_reports_datetimepicker'>
-                        <input type='text' class="o_datepicker_input" name="date_to_cmp" />
-                        <span class="o_datepicker_button"/>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-primary js_account_report_date_cmp_filter" data-filter='custom'>Apply</button>
-            </div>
-        </div>
-    </template>
-
     <template id="search_template_warehouse">
         <t t-if="options['available_warehouses']">
             <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
@@ -131,7 +75,7 @@
         <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle stock_product_filter" data-bs-toggle="dropdown">
             <span class="fa fa-folder-open"/> Products
         </button>
-        <ul class="dropdown-menu o_filter_menu" role="menu">
+        <ul class="dropdown-menu dropdown_product_search" role="menu">
             <li class="js_stock_product_m2m"/>
         </ul>
     </template>
@@ -139,9 +83,6 @@
     <template id="search_template">
         <div class="btn-group dropdown o_stock_filter_quater">
             <t t-call="stock.search_template_date_filter"/>
-        </div>
-        <div class="btn-group dropdown o_stock_filter_date_cmp">
-            <t t-call="stock.search_template_comparison"/>
         </div>
         <div class="btn-group dropdown o_stock_filter_wh">
             <t t-call="stock.search_template_warehouse"/>

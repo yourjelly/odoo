@@ -5,6 +5,7 @@ import re
 from babel.dates import get_quarter_names
 from datetime import datetime, timedelta
 
+from odoo.tools.misc import DEFAULT_SERVER_DATE_FORMAT
 from odoo import models, fields, api, _, osv, Command
 from odoo.osv.expression import AND
 from odoo.tools import date_utils, get_lang
@@ -91,6 +92,23 @@ class StockReportNew(models.AbstractModel):
 
         return options
 
+    def compute_fiscalyear_dates(self, current_date):
+        """Compute the start and end dates of the fiscal year where the given 'date' belongs to.
+
+        :param current_date: A datetime.date/datetime.datetime object.
+        :return: A dictionary containing:
+            * date_from
+            * date_to
+        """
+        date_str = current_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
+        first_day = current_date.replace(day = 1, month=1)
+        last_day = current_date.replace(day = 31, month=12)
+        return {
+            'date_from': first_day,
+            'date_to': last_day,
+        }
+
+
     def _init_options_date(self, options, previous_options=None):
         """ Initialize the 'date' options key.
 
@@ -113,7 +131,7 @@ class StockReportNew(models.AbstractModel):
 
             if previous_filter:
                 date_to = fields.Date.from_string(previous_date_to or previous_date_from)
-                date_from = self.env.company.compute_fiscalyear_dates(date_to)['date_from']
+                date_from = self.compute_fiscalyear_dates(date_to)['date_from']
                 options_filter = 'custom'
             else:
                 options_filter = default_filter
@@ -152,7 +170,7 @@ class StockReportNew(models.AbstractModel):
         if not date_from or not date_to:
             if options_filter == 'today':
                 date_to = fields.Date.context_today(self)
-                date_from = self.env.company.compute_fiscalyear_dates(date_to)['date_from']
+                date_from = self.compute_fiscalyear_dates(date_to)['date_from']
                 period_type = 'today'
             elif 'month' in options_filter:
                 date_from, date_to = date_utils.get_month(fields.Date.context_today(self))
@@ -161,7 +179,7 @@ class StockReportNew(models.AbstractModel):
                 date_from, date_to = date_utils.get_quarter(fields.Date.context_today(self))
                 period_type = 'quarter'
             elif 'year' in options_filter:
-                company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(fields.Date.context_today(self))
+                company_fiscalyear_dates = self.compute_fiscalyear_dates(fields.Date.context_today(self))
                 date_from = company_fiscalyear_dates['date_from']
                 date_to = company_fiscalyear_dates['date_to']
 
@@ -190,7 +208,7 @@ class StockReportNew(models.AbstractModel):
         if period_type in ('fiscalyear', 'today'):
             # Don't pass the period_type to _get_dates_period to be able to retrieve the account.fiscal.year record if
             # necessary.
-            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(date_to)
+            company_fiscalyear_dates = self.compute_fiscalyear_dates(date_to)
             return self._get_dates_period(company_fiscalyear_dates['date_from'], company_fiscalyear_dates['date_to'], mode)
         if period_type in ('month', 'custom'):
             return self._get_dates_period(*date_utils.get_month(date_to), mode, period_type='month')
@@ -207,9 +225,9 @@ class StockReportNew(models.AbstractModel):
 
         string = None
         # If no date_from or not date_to, we are unable to determine a period
+        date = date_to or date_from
         if not period_type or period_type == 'custom':
-            date = date_to or date_from
-            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(date)
+            company_fiscalyear_dates = self.compute_fiscalyear_dates(date)
             if match(company_fiscalyear_dates['date_from'], company_fiscalyear_dates['date_to']):
                 period_type = 'fiscalyear'
                 if company_fiscalyear_dates.get('record'):
@@ -226,13 +244,13 @@ class StockReportNew(models.AbstractModel):
                 period_type = 'custom'
         elif period_type == 'fiscalyear':
             date = date_to or date_from
-            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(date)
+            company_fiscalyear_dates = self.compute_fiscalyear_dates(date)
             record = company_fiscalyear_dates.get('record')
             string = record and record.name
 
         if not string:
-            fy_day = self.env.company.fiscalyear_last_day
-            fy_month = int(self.env.company.fiscalyear_last_month)
+            fy_day = self.compute_fiscalyear_dates(date).get("date_to").day
+            fy_month = int(self.compute_fiscalyear_dates(date).get("date_to").month)
             if mode == 'single':
                 string = _('As of %s') % (format_date(self.env, fields.Date.to_string(date_to)))
             elif period_type == 'year' or (

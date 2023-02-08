@@ -7,14 +7,10 @@
     }
 }
 
-.o_foldable_menu {
-    &.o_closed_menu {
-        display: none;
-    }
-    .o_open_menu {
-        display: block;
-    }
+.dropdown_product_search {
+    padding: 10px;
 }
+
 @mixin o-account-reports-i-fa-toggle {
     i.fa {
         visibility: hidden;
