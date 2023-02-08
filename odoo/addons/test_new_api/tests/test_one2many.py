@@ -374,8 +374,8 @@ class One2manyCase(TransactionCase):
         discussion = self.env['test_new_api.discussion'].new({
             'name': "turlututu",
             'messages': [
-                Command.create({})
-                for _i in range(10)
+                Command.create({'important': i % 2 == 0})
+                for i in range(10)
             ],
         })
 
@@ -383,11 +383,12 @@ class One2manyCase(TransactionCase):
 
         def _compute_name(messages):
             for message in messages:
-                message.name = str(nb_call_to_compute_name[0])
+                if message.important:
+                    message.name = "tsoin tsoin"
             nb_call_to_compute_name[0] += 1
 
         with patch('odoo.addons.test_new_api.models.test_new_api.Message._compute_name', new=_compute_name):
             for message in discussion.messages:
-                import pudb; pudb.set_trace()
-                print(message.name)
+                message.name
 
+        self.assertEqual(nb_call_to_compute_name[0], 1)
