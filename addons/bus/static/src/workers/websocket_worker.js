@@ -125,7 +125,8 @@ export class WebsocketWorker {
             case 'start':
                 return this._start();
             case 'stop':
-                return this._stop();
+                break;
+                // return this._stop();
             case 'leave':
                 return this._unregisterClient(client);
             case 'add_channel':
@@ -348,12 +349,7 @@ export class WebsocketWorker {
      * @param {any} message Message to send to the server.
      */
     _sendToServer(message) {
-        const payload = JSON.stringify(message);
-        if (!this._isWebsocketConnected()) {
-            this.messageWaitQueue.push(payload);
-        } else {
-            this.websocket.send(payload);
-        }
+        this.websocket.send(JSON.stringify(message));
     }
 
     /**

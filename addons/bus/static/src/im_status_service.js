@@ -3,7 +3,7 @@
 import { browser } from '@web/core/browser/browser';
 import { registry } from '@web/core/registry';
 
-export const UPDATE_BUS_PRESENCE_DELAY = 60000;
+export const UPDATE_BUS_PRESENCE_DELAY = 10000;
 /**
  * This service updates periodically the user presence in order for the
  * im_status to be up to date.
