@@ -219,4 +219,12 @@ export class Message {
     get failureNotifications() {
         return this.notifications.filter((notification) => notification.isFailure);
     }
+
+    get allowReplies() {
+        return (
+            this.originThread?.type !== "chatter" ||
+            (this._store.discuss.threadLocalId === this._store.discuss.inbox.localId &&
+                this._store.discuss.inbox.messageIds.includes(this.id))
+        );
+    }
 }

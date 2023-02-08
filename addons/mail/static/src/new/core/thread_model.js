@@ -153,10 +153,6 @@ export class Thread {
         return true;
     }
 
-    get allowReplies() {
-        return true;
-    }
-
     get displayName() {
         if (this.type === "chat" && this.chatPartnerId) {
             return (
