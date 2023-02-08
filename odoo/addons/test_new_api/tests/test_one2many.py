@@ -3,6 +3,8 @@ from odoo.tests.common import TransactionCase
 from odoo.exceptions import MissingError
 from odoo import Command
 
+from unittest.mock import patch
+
 
 class One2manyCase(TransactionCase):
     def setUp(self):
@@ -364,3 +366,28 @@ class One2manyCase(TransactionCase):
         self.assertEqual(len(parent.child_ids), 3)
         self.assertEqual(parent, parent.child_ids.parent_id)
         self.assertEqual(parent.child_ids.mapped('name'), ['C3', 'PO', 'R2D2'])
+
+    def test_new_one2many_compute_batching(self):
+        """ Create multiple 'new' records into a one2many and check the computed field is done
+        only once.
+        """
+        discussion = self.env['test_new_api.discussion'].new({
+            'name': "turlututu",
+            'messages': [
+                Command.create({})
+                for _i in range(10)
+            ],
+        })
+
+        nb_call_to_compute_name = [0]
+
+        def _compute_name(messages):
+            for message in messages:
+                message.name = str(nb_call_to_compute_name[0])
+            nb_call_to_compute_name[0] += 1
+
+        with patch('odoo.addons.test_new_api.models.test_new_api.Message._compute_name', new=_compute_name):
+            for message in discussion.messages:
+                import pudb; pudb.set_trace()
+                print(message.name)
+
