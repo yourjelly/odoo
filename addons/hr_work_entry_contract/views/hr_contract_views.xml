@@ -5,10 +5,10 @@
         <field name="model">hr.contract</field>
         <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@id='resource_calendar_warning']" position="after">
+            <group name="top_info_left" position="inside">
                 <!-- Makes no sense to display only one possibility -->
                 <field name="work_entry_source" widget="radio" invisible="1"/>
-            </xpath>
+            </group>
         </field>
     </record>
 </odoo>
