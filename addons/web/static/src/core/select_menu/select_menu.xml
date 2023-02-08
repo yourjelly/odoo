@@ -3,8 +3,8 @@
 
     <t t-name="web.SelectMenu" owl="1">
         <Dropdown
-            class="`o_select_menu border w-100 rounded-2 overflow-hidden ${props.class || ''}`"
-            togglerClass="`o_select_menu_toggler d-flex flex-row align-items-center flex-nowrap btn btn-secondary w-100 bg-light ${props.togglerClass || ''}`"
+            class="`o_select_menu border w-auto rounded-2 overflow-hidden ${props.class || ''}`"
+            togglerClass="`o_select_menu_toggler btn btn-secondary w-100 bg-light ${props.togglerClass || ''}`"
             menuClass="`o_select_menu_menu${props.searchable ? ' pt-0' : ''}`"
             position="'bottom-fit'"
             beforeOpen.bind="filterOptions"
@@ -12,7 +12,7 @@
             onScroll.bind="onScroll"
         >
             <t t-set-slot="toggler">
-                <span class="o_select_menu_toggler_slot text-start">
+                <span class="o_select_menu_toggler_slot text-start text-truncate">
                     <t t-if="!props.slots or !props.slots.default" t-esc="displayValue" />
                     <t t-else="" t-slot="default" />
                 </span>

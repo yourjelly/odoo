@@ -1,12 +1,21 @@
 .o_select_menu {
+    .o_select_menu_toggler {
+        display: grid;
+        grid-template-columns: auto 25px 25px;
+    }
+
     .o_select_menu_toggler_slot {
-        flex-grow: 2;
+        grid-column: 1;
     }
-    .o_select_menu_toggler_caret,
+
     .o_select_menu_toggler_clear {
-        width: 2rem;
-        flex-basis: 1;
+        grid-column: 2;
     }
+
+    .o_select_menu_toggler_caret {
+        grid-column: 3;
+    }
+
     .o_select_menu_toggler_clear:hover i {
         color: red;
     }
@@ -19,6 +28,7 @@
         .o_select_menu_input {
             background-color: $dropdown-bg;
         }
+
         .o_select_menu_group {
             top: 40px;
         }
