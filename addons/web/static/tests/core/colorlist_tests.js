@@ -48,12 +48,12 @@ QUnit.module("Components", () => {
         const secondBtn = target.querySelectorAll(".o_colorlist button")[1];
         assert.strictEqual(
             secondBtn.attributes.title.value,
-            "Fuchsia",
-            "second button color is Fuchsia"
+            "Raspberry",
+            "second button color is Raspberry"
         );
         assert.hasClass(
             secondBtn,
-            "o_colorlist_item_color_9",
+            "text-bg-9",
             "second button has the corresponding class"
         );
     });
@@ -93,7 +93,7 @@ QUnit.module("Components", () => {
         assert.containsOnce(target, ".o_colorlist");
         assert.hasClass(
             target.querySelector(".o_colorlist button"),
-            "o_colorlist_item_color_" + selectedColorId,
+            "text-bg-" + selectedColorId,
             "toggler has the right class"
         );
 

@@ -3,6 +3,60 @@ $o-webclient-background-color: $o-gray-200 !default;
 $o-list-footer-color: null !default;
 $o-list-group-header-color: lighten($o-brand-lightsecondary, 10%) !default;
 
+$o-tags-colors: ();
+$o-tags-colors: (
+    0 : (
+        'bg':  #DDE1E6,
+        'color': #343A3F,
+    ),
+    1 : (
+        'bg':  #FF9B9B,
+        'color': #2B0908,
+    ),
+    2 : (
+        'bg':  #F7C698,
+        'color': #2C1609,
+    ),
+
+    3 : (
+        'bg':  #FDE388,
+        'color': #2F2609,
+    ),
+    4 : (
+        'bg':  #BBD7F8,
+        'color': #061E5C,
+    ),
+    5 : (
+        'bg':  #D9A8CC,
+        'color': #4A0D3A,
+    ),
+    6 : (
+        'bg':  #F8D6C8,
+        'color': #431717,
+    ),
+    7 : (
+        'bg':  #89E1DB,
+        'color': #10414D,
+    ),
+    8 : (
+        'bg':  #97A6F9,
+        'color': #1A2146,
+    ),
+    9 : (
+        'bg':  #FF9ECC,
+        'color': #63122D,
+    ),
+    10 : (
+        'bg':  #B7EDBE,
+        'color': #1B421C,
+    ),
+    11 : (
+        'bg':  #E6DBFC,
+        'color': #2D195A,
+    ),
+);
+
+
 // UI custom colors for tags, kanban records' colors, ...)
 // Note: the first value is the old BS3 gray-light value
 $o-colors: lighten(#000, 46.7%), #F06050, #F4A460, #F7CD1F, #6CC1ED, #814968,

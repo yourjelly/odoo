@@ -55,6 +55,7 @@ kbd {
 //== Badges
 .badge {
   min-width: $o-badge-min-width;
+  line-height: 1.1;
 }
 
 //== Btn-link
@@ -294,6 +295,16 @@ select {
 //------------------------------------------------------------------------------
 // Misc.
 //------------------------------------------------------------------------------
+
+//== Backgrounds
+@each $-index, $-values in $o-tags-colors {
+  $-color-rgb: to-rgb(map-get($-values, 'bg'));
+
+  .text-bg-#{$-index} {
+    background-color: RGBA($-color-rgb, var(--bg-opacity, 1)) if($enable-important-utilities, !important, null);
+    color: map-get($-values, 'color') if($enable-important-utilities, !important, null);
+  }
+}
 
 // By default, <b> and <strong> are set to `$font-weight-bolder`.
 // Override with `$font-weight-bold` in order to ensure consistency with default
