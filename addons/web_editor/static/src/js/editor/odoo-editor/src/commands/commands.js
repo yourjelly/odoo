@@ -319,11 +319,14 @@ export const editorCommands = {
         const restoreCursor = preserveCursor(editor.document);
         const range = getDeepRange(editor.editable, { correctTripleClick: true });
         const selectedBlocks = [...new Set(getTraversedNodes(editor.editable, range).map(closestBlock))];
-        for (const block of selectedBlocks) {
+        for (let block of selectedBlocks) {
+            if (block.nodeName === 'TD') {
+                block = block.firstElementChild
+            }
             if (
                 ['P', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE'].includes(
                     block.nodeName,
-                )
+                ) && document.contains(block)
             ) {
                 setSelection(block, 0, block, nodeSize(block));
                 editor.historyPauseSteps();
