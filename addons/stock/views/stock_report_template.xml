@@ -120,9 +120,9 @@
                                         </a>
                                     </span>
                                 </td>
-                                <td><span t-out="product['qty_available']"/></td>
-                                <td><span t-out="in_qty.get(product['id'], 0)"/></td>
-                                <td>-<span t-out="out_qty.get(product['id'], 0)"/></td>
+                                <td><span t-out="product['qty_available_open']"/></td>
+                                <td><span t-out="product['in_qty']"/></td>
+                                <td><span t-out="product['out_qty']"/></td>
                                 <td><span t-out="product['qty_available_end']"/></td>
                             </tr>
                         </t>

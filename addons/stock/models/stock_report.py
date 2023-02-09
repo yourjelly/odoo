@@ -45,31 +45,43 @@ class StockReportNew(models.AbstractModel):
                 ('location_dest_id', '=', lot_stock_id)
             ]])
 
-        product_data = self.env['product.product'].with_context(to_date=datetime.strptime(options['date']['date_from'], '%Y-%m-%d')).search_read(product_domain, fields=['id', 'name', 'qty_available'])
-        to_product_data = self.env['product.product'].with_context(to_date=datetime.strptime(options['date']['date_to'], '%Y-%m-%d')).search_read(product_domain, fields=['id', 'qty_available'])
 
-        moves_data = self.env['stock.move'].search_read(move_domain, fields=['product_id', 'product_qty', 'picking_code'])
 
-        in_qty = {}
-        out_qty = {}
+        product_data = []
+        product_ids = self.env['product.product'].search(product_domain)
 
-        for data in product_data:
-            for to_data in to_product_data:
-                if to_data['id'] == data['id']:
-                    data['qty_available_end'] = to_data['qty_available']
-        for move in moves_data:
-            if move['picking_code'] == 'incoming':
-                in_qty.setdefault(move['product_id'][0], 0)
-                in_qty[move['product_id'][0]] += move['product_qty']
-            if move['picking_code'] == 'outgoing':
-                out_qty.setdefault(move['product_id'][0], 0)
-                out_qty[move['product_id'][0]] += move['product_qty']
+        move_domain = [
+            ('product_id', 'in', product_ids.ids),
+            ('date', '>=', datetime.strptime(options['date']['date_from'], '%Y-%m-%d')),
+            ('date', '<=', datetime.strptime(options['date']['date_to'], '%Y-%m-%d'))
+        ]
+        incoming_moves = self.env['stock.move'].read_group(
+            [('picking_type_id.code', '=', 'incoming')] + move_domain,
+            ['product_qty'],
+            ['product_id']
+        )
+        outgoing_moves = self.env['stock.move'].read_group(
+            [('picking_type_id.code', '=', 'outgoing')] + move_domain,
+            ['product_qty'],
+            ['product_id']
+        )
+        in_qty = {in_move['product_id'][0]: in_move['product_qty'] for in_move in incoming_moves}
+        out_qty = {out_move['product_id'][0]: out_move['product_qty'] for out_move in outgoing_moves}
+
+        for product in product_ids:
+            product_data.append(
+            {
+                'id': product.id,
+                'name': product.name,
+                'qty_available_open': product.with_context(to_date=datetime.strptime(options['date']['date_from'], '%Y-%m-%d')).qty_available,
+                'qty_available_end': product.with_context(to_date=datetime.strptime(options['date']['date_to'], '%Y-%m-%d')).qty_available,
+                'in_qty': in_qty.get(product.id, 0),
+                'out_qty': out_qty.get(product.id, 0) * -1,
+            })
 
         main_html = self.env['ir.qweb']._render("stock.stock_main_template", {
             'options': options,
             'product_data': product_data,
-            'in_qty': in_qty,
-            'out_qty': out_qty
         })
 
         info = {
