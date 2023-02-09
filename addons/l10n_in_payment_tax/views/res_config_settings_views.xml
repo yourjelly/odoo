@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit_l10n_in" model="ir.ui.view">
+        <field name="name">res.config.settings.form.inherit.l10n_in</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='default_accounts']/div[2]/div[2]/div" position="inside">
+                <div class="row mt8">
+                    <label for="account_advance_payment_tax_account_id" class="col-lg-5 o_light_label"/>
+                    <field name="account_advance_payment_tax_account_id"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
