@@ -25,13 +25,9 @@ const isActionOnly = (step) => "action" in step && !("trigger" in step);
  * TODO-JCB: Maybe it's better if jQuery is used internally, and methods that return jQuery element should just return normal Elements.
  * - Maybe partially 'hiding' our reliance to jQuery is a good thing?
  * TODO-JCB: Make sure all the comments are correct.
- * TODO-JCB: Should take into account the modals in pos. (But done with pos, so maybe later.)
- * TODO-JCB: IDEA: Would be nice to allow creation of step that checks whether a trigger is **NOT** there. Basically, only when not there that we continue on next step.
  * TODO-JCB: take into account use of _consume_tour.
  * TODO-JCB: IDEA: Ability to manually stepping into the next step. Something like: Tour starts in pause, then, the user can press "step button" to do the next step.
  * TODO-JCB: Uncaught (in promise)TypeError: Failed to fetch
- * TODO-JCB: If starting url (the url specified in the call to start_tour) is similar to the tour.url, just remove the tour.url because there is no need to redirect the page again.
- * TODO-JCB: Should not remove the url in the tour. It's used in running tour manually from the ui.
  */
 
 /**
@@ -326,13 +322,13 @@ function augmentStepAuto(macroDesc, [stepIndex, step], options) {
  * @returns
  */
 function augmentStepManual(macroDesc, [stepIndex, step], options) {
-    const { pointerMethods, intersection, mode, macroEngine } = options;
+    const { pointerMethods, mode, macroEngine } = options;
 
     if (shouldOmit(step, mode)) {
         return [];
     }
 
-    let proceedWith, stepEl, prevEl, consumeEvent, $anchorEl, currentAnchor;
+    let proceedWith, stepEl, prevEl, consumeEvent, $anchorEl;
     return [
         {
             ...step,
@@ -405,11 +401,7 @@ function augmentStepManual(macroDesc, [stepIndex, step], options) {
                     });
                 }
                 const newAnchor = stepEl && $anchorEl[0];
-                if (currentAnchor !== newAnchor) {
-                    intersection.set({ target: newAnchor });
-                }
-                pointerMethods.update(intersection, step, newAnchor);
-                currentAnchor = newAnchor;
+                pointerMethods.update(step, newAnchor);
             },
             action: () => {
                 // Clean up
@@ -417,7 +409,6 @@ function augmentStepManual(macroDesc, [stepIndex, step], options) {
                 stepEl = undefined;
                 consumeEvent = undefined;
                 $anchorEl = undefined;
-                currentAnchor = undefined;
                 options.pointerMethods.setState({ isVisible: false, mode: "bubble" });
                 tourState.set(macroDesc.name, "currentIndex", stepIndex + 1);
             },
@@ -463,14 +454,73 @@ function augmentMacro(macroDescription, augmenter, options) {
     };
 }
 
+class Intersection {
+    constructor() {
+        this.currentTarget = null;
+        this.rootBounds = null;
+        this._targetPosition = "unknown";
+        this._observer = new IntersectionObserver((observations) =>
+            this._handleObservations(observations)
+        );
+    }
+    _handleObservations(observations) {
+        if (observations.length < 1) {
+            return;
+        }
+        const observation = observations[observations.length - 1];
+        this.rootBounds = observation.rootBounds;
+        if (this.rootBounds && this.currentTarget) {
+            if (observation.isIntersecting) {
+                this._targetPosition = "in";
+            } else {
+                const targetBounds = this.currentTarget.getBoundingClientRect();
+                if (targetBounds.bottom < this.rootBounds.height / 2) {
+                    this._targetPosition = "out-above";
+                } else if (targetBounds.top > this.rootBounds.height / 2) {
+                    this._targetPosition = "out-below";
+                }
+            }
+        } else {
+            this._targetPosition = "unknown";
+        }
+    }
+    /**
+     * @returns {'in' | 'out-below' | 'out-above' | 'unknown'}
+     */
+    get targetPosition() {
+        if (!this.rootBounds) {
+            return this.currentTarget ? "in" : "unknown";
+        } else {
+            return this._targetPosition;
+        }
+    }
+    /**
+     * @param {Element} newTarget
+     */
+    setTarget(newTarget) {
+        if (this.currentTarget !== newTarget) {
+            if (this.currentTarget) {
+                this._observer.unobserve(this.currentTarget);
+            }
+            if (newTarget) {
+                this._observer.observe(newTarget);
+            }
+            this.currentTarget = newTarget;
+        }
+    }
+    stop() {
+        this._observer.disconnect();
+    }
+}
+
 /**
  * @param {*} param0
  * @returns {[state: { x, y, isVisible, position, content, mode, fixed }, methods: { update, setState }]}
  */
 function createPointerState({ x, y, isVisible, position, content, mode, fixed }) {
+    const intersection = new Intersection();
     const state = reactive({ x, y, isVisible, position, content, mode, fixed });
     const pointerSize = { width: 28, height: 28 };
-    let currentStep, currentAnchor;
 
     // TODO-JCB: Take into account the rtl config.
     function computeLocation(el, position) {
@@ -492,15 +542,13 @@ function createPointerState({ x, y, isVisible, position, content, mode, fixed })
         return [top, left];
     }
 
-    function updateOnIntersection(intersection) {
-        if (currentStep) {
-            update(intersection, currentStep, currentAnchor);
-        }
-    }
-
-    function update(intersection, step, anchor) {
+    function update(step, anchor) {
+        intersection.setTarget(anchor);
         if (anchor) {
-            if (intersection.isIntersecting) {
+            if (intersection.targetPosition === "unknown") {
+                // TODO-JCB: Maybe this targetPosition value is not needed.
+                console.warn("Something's wrong on the `Intersection` instance.")
+            } else if (intersection.targetPosition === "in") {
                 const position = step.position || "top";
                 const [top, left] = computeLocation(anchor, position);
                 setState({
@@ -510,123 +558,29 @@ function createPointerState({ x, y, isVisible, position, content, mode, fixed })
                     position,
                 });
             } else {
-                if (intersection.rootBounds) {
-                    let x = intersection.rootBounds.width / 2;
-                    let y, position, content;
-                    const targetBounds = anchor.getBoundingClientRect();
-                    if (targetBounds.bottom < intersection.rootBounds.height / 2) {
-                        // the target is above the viewport
-                        y = 80;
-                        position = "bottom";
-                        content = "Scroll up to reach the next step.";
-                    } else if (targetBounds.top > intersection.rootBounds.height / 2) {
-                        // the target is at the bottom of the viewport
-                        y = intersection.rootBounds.height - 80 - 28;
-                        position = "top";
-                        content = "Scroll down to reach the next step.";
-                    }
-                    setState({ x, y, content, position });
+                let x = intersection.rootBounds.width / 2;
+                let y, position, content;
+                if (intersection.targetPosition === "out-below") {
+                    y = intersection.rootBounds.height - 80 - 28;
+                    position = "top";
+                    content = "Scroll down to reach the next step.";
+                } else if (intersection.targetPosition === "out-above") {
+                    y = 80;
+                    position = "bottom";
+                    content = "Scroll up to reach the next step.";
                 }
+                setState({ x, y, content, position });
             }
         } else {
             setState({ isVisible: false });
         }
-        currentStep = step;
-        currentAnchor = anchor;
     }
 
     function setState(obj) {
         Object.assign(state, obj);
     }
 
-    return [state, { update, setState, updateOnIntersection }];
-}
-
-// TODO-JCB: This stinks. Refactor please.
-function intersectionService() {
-    let root, target, observer, _isIntersecting, _rootBounds;
-
-    function observe(newTarget) {
-        unobserve();
-        if (newTarget && observer) {
-            observer.observe(newTarget);
-        }
-        target = newTarget;
-    }
-
-    function unobserve() {
-        if (target && observer) {
-            observer.unobserve(target);
-        }
-        target = undefined;
-    }
-
-    function stop() {
-        unobserve();
-        if (observer) {
-            observer.disconnect();
-        }
-        root = undefined;
-        observer = undefined;
-    }
-
-    function start(startRoot, customCallback = () => {}) {
-        root = startRoot;
-        observer = new IntersectionObserver(
-            (observations, _observer) => {
-                for (const observation of observations) {
-                    const { rootBounds } = observation;
-                    _rootBounds = rootBounds;
-                    if (rootBounds) {
-                        _isIntersecting = observation.isIntersecting;
-                        customCallback(intersection);
-                    }
-                }
-            },
-            { root }
-        );
-    }
-    function set(elements) {
-        let sameRoot = true,
-            sameTarget = true;
-        if ("root" in elements) {
-            sameRoot = elements.root === root;
-        }
-        if ("target" in elements) {
-            sameTarget = elements.target === target;
-        }
-        if (observer) {
-            if (sameRoot) {
-                if (sameTarget) {
-                    // Do nothing
-                } else {
-                    observe(elements.target);
-                }
-            } else {
-                stop();
-                start();
-                if (sameTarget) {
-                    observe(target);
-                } else {
-                    observe(elements.target);
-                }
-            }
-        } else {
-            target = elements.target;
-        }
-    }
-    const intersection = {
-        start,
-        stop,
-        set,
-        get isIntersecting() {
-            return _isIntersecting;
-        },
-        get rootBounds() {
-            return _rootBounds;
-        },
-    };
-    return intersection;
+    return [state, { update, setState }];
 }
 
 function sanitizedRegisteredTours(tourMap) {
@@ -709,7 +663,6 @@ export const tourService = {
 
         const tourMap = sanitizedRegisteredTours({});
         const macroEngine = new MacroEngine(document);
-        const intersection = intersectionService();
 
         const [pointerState, pointerMethods] = createPointerState({
             content: "",
@@ -721,9 +674,8 @@ export const tourService = {
             fixed: false,
         });
 
-        intersection.start(null, pointerMethods.updateOnIntersection);
-
         /**
+         * TODO-JCB: `run` and `odoo.startTour` are just the same.
          * @param {string} tourName
          * @param {{ mode: "auto" | "manual" } | undefined} [options] - if provided, it means a force restart.
          */
@@ -756,7 +708,6 @@ export const tourService = {
                     macroEngine,
                     pointerMethods,
                     mode,
-                    intersection,
                     stepDelay,
                     watch,
                     hurray({ rainbowManMessage, fadeout }) {
