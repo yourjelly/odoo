@@ -50,12 +50,16 @@ export class KanbanMany2ManyTagsAvatarUserField extends ListKanbanMany2ManyTagsA
 
     get tags() {
         const recordFromId = (id) => this.props.value.records.find((rec) => rec.id === id);
-        return super.tags.map((tag) => ({
-            ...tag,
-            onImageClicked: () => {
-                this.openChat(recordFromId(tag.id).resId);
-            },
-        }));
+        return super.tags.map((tag) =>
+            tag.resId
+                ? {
+                      ...tag,
+                      onImageClicked: () => {
+                          this.openChat(recordFromId(tag.id).resId);
+                      },
+                  }
+                : tag
+        );
     }
 }
 KanbanMany2ManyTagsAvatarUserField.template = "mail.KanbanMany2ManyTagsAvatarUserField";
@@ -67,4 +71,6 @@ KanbanMany2ManyTagsAvatarUserField.additionalClasses = ["o_field_many2many_tags_
 
 registry.category("fields").add("kanban.many2many_avatar_user", KanbanMany2ManyTagsAvatarUserField);
 registry.category("fields").add("list.many2many_avatar_user", KanbanMany2ManyTagsAvatarUserField);
-registry.category("fields").add("activity.many2many_avatar_user", KanbanMany2ManyTagsAvatarUserField);
+registry
+    .category("fields")
+    .add("activity.many2many_avatar_user", KanbanMany2ManyTagsAvatarUserField);

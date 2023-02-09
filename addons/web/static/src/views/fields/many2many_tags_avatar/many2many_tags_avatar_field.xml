@@ -25,4 +25,12 @@
         </div>
     </t>
 
+    <t t-name="web.Many2ManyTagsAvatarPopover" owl="1">
+        <div class="o_field_many2many_selection d-inline-flex w-100" t-on-keydown="onAutoCompleteKeydown" t-ref="autoComplete">
+                <Many2XAutocomplete
+                    t-props="props.autocompleteProps"
+                />
+            </div>
+    </t>
+
 </templates>
