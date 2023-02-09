@@ -4,7 +4,7 @@ import { reactive, markup, whenReady } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { MacroEngine, callWithUnloadCheck } from "@web/core/macro";
 import { TourPointer } from "../tour_pointer/tour_pointer";
-import { browser } from "@web/core/browser/browser";
+import { tourState } from "./tour_state";
 import { session } from "@web/session";
 import { _t } from "@web/core/l10n/translation";
 
@@ -147,42 +147,6 @@ function findStepTriggers(step) {
 
     return { triggerEl, altTriggerEl, extraTriggerOkay, skipTriggerEl };
 }
-
-/**
- * Wrapper around localStorage for basic persistence of running tours.
- * Useful for resuming running tours when the page refreshed.
- * TODO-JCB: Maybe it's better if this is a Proxy.
- */
-const tourState = {
-    get(tourName, key) {
-        const prefixedName = `tour_${tourName}_${key}`;
-        const savedValue = browser.localStorage.getItem(prefixedName);
-        if (key === "done" || key === "watch") {
-            return savedValue === "true";
-        } else if (key === "currentIndex" || key === "stepDelay") {
-            return parseInt(savedValue, 10);
-        } else {
-            return savedValue;
-        }
-    },
-    set(tourName, key, value) {
-        const prefixedName = `tour_${tourName}_${key}`;
-        browser.localStorage.setItem(prefixedName, value);
-    },
-    getActiveTours() {
-        const activeTourNames = Object.keys(browser.localStorage)
-            .filter((key) => key.startsWith("tour_") && key.endsWith("_done"))
-            .map((key) => key.substring(5, key.length - 5));
-        return activeTourNames.filter((tourName) => !this.get(tourName, "done"));
-    },
-    reset(tourName, obj) {
-        for (const key in obj) {
-            this.set(tourName, key, obj[key]);
-        }
-        this.set(tourName, "currentIndex", 0);
-        this.set(tourName, "done", false);
-    },
-};
 
 function describeStep(step) {
     return step.content ? `${step.content} (trigger: ${step.trigger})` : step.trigger;
