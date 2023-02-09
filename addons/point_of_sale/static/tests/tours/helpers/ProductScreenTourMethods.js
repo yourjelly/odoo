@@ -2,7 +2,7 @@
 
 import { createTourMethods } from "@point_of_sale/../tests/tours/helpers/utils";
 import { TextAreaPopup } from "@point_of_sale/../tests/tours/helpers/TextAreaPopupTourMethods";
-import { numberBuffer } from "@point_of_sale/js/Misc/NumberBuffer";
+// import { numberBuffer } from "@point_of_sale/js/Misc/NumberBuffer";
 
 class Do {
     clickDisplayedProduct(name) {
@@ -79,14 +79,14 @@ class Do {
         }
         return [
             ...keys.split(" ").map(generateStep),
-            {
-                action: () => {
-                    // TODO-JCB: low-level use of macro. Should be replaced with `run` but kinda complicated.
-                    // So that immediately, the handler is triggered on the buffered keys
-                    // and the buffer is cleared.
-                    numberBuffer.capture();
-                },
-            },
+            // {
+            //     action: () => {
+            //         // TODO-JCB: low-level use of macro. Should be replaced with `run` but kinda complicated.
+            //         // So that immediately, the handler is triggered on the buffered keys
+            //         // and the buffer is cleared.
+            //         numberBuffer.capture();
+            //     },
+            // },
         ];
     }
 
