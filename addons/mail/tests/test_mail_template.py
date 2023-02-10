@@ -186,3 +186,23 @@ class TestMailTemplateReset(MailCommon):
 
         # subject is not there in the data file template, so it should be set to False
         self.assertFalse(mail_template.subject, "Subject should be set to False")
+
+@tagged('-at_install', 'post_install')
+class TestConfigRestrictEditor(MailCommon):
+
+    def test_switch_icp_value(self):
+        template_user = self.env.ref('base.default_user')
+
+        # Sanity check
+        self.assertTrue(self.user_employee.has_group('mail.group_mail_template_editor'))
+        self.assertTrue(template_user.has_group('mail.group_mail_template_editor'))
+        self.assertFalse(self.user_employee.has_group('base.group_system'))
+        self.assertFalse(template_user.has_group('base.group_system'))
+
+        self.env['ir.config_parameter'].set_param('mail.restrict.template.rendering', True)
+        self.assertFalse(self.user_employee.has_group('mail.group_mail_template_editor'))
+        self.assertFalse(template_user.has_group('mail.group_mail_template_editor'))
+
+        self.env['ir.config_parameter'].set_param('mail.restrict.template.rendering', False)
+        self.assertTrue(self.user_employee.has_group('mail.group_mail_template_editor'))
+        self.assertTrue(template_user.has_group('mail.group_mail_template_editor'))
