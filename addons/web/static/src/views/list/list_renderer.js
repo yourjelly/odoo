@@ -12,7 +12,7 @@ import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable";
 import { getTabableElements } from "@web/core/utils/ui";
-import { Field } from "@web/views/fields/field";
+import { Field, getPropertyFieldInfo } from "@web/views/fields/field";
 import { getTooltipInfo } from "@web/views/fields/field_tooltip";
 import { evalDomain, getClassNameFromDecoration } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -120,7 +120,11 @@ export class ListRenderer extends Component {
             this.allColumns = this.processAllColumn(nextProps.archInfo.columns, nextProps.list);
             this.state.columns = this.getActiveColumns(nextProps.list);
         });
-        onPatched(() => {
+        onPatched(async () => {
+            // HACK: we need to wait for the next tick to be sure that the Field components are patched.
+            // OWL don't wait the patch for the children components if the children trigger a patch by himself.
+            await Promise.resolve();
+
             const editedRecord = this.props.list.editedRecord;
             if (editedRecord && this.activeRowId !== editedRecord.id) {
                 if (this.cellToFocus && this.cellToFocus.record === editedRecord) {
@@ -186,7 +190,7 @@ export class ListRenderer extends Component {
             () => {
                 this.freezeColumnWidths();
             },
-            () => [this.state.columns, this.isEmpty]
+            () => [this.state.columns, this.isEmpty, this.props.list.offset, this.props.list.limit]
         );
         useExternalListener(window, "resize", () => {
             this.columnWidths = null;
@@ -236,21 +240,24 @@ export class ListRenderer extends Component {
     processAllColumn(allColumns, list) {
         return allColumns.flatMap((column) => {
             if (column.type === "field" && list.fields[column.name].type === "properties") {
-                return Object.values(list.activeFields)
+                return Object.values(list.fields)
                     .filter(
-                        (activeField) =>
-                            activeField.relatedPropertyField &&
-                            activeField.relatedPropertyField.fieldName === column.name
+                        (field) =>
+                            field.relatedPropertyField &&
+                            field.relatedPropertyField.fieldName === column.name
                     )
-                    .map((activeField) => ({
-                        ...activeField,
-                        id: `${column.id}_${activeField.name}`,
-                        classNames: column.classNames,
-                        optional: "hide",
-                        type: "field",
-                        hasLabel: true,
-                        label: activeField.string,
-                    }));
+                    .map((propertyField) => {
+                        return {
+                            ...getPropertyFieldInfo(propertyField),
+                            id: `${column.id}_${propertyField.name}`,
+                            classNames: column.classNames,
+                            optional: "hide",
+                            type: "field",
+                            hasLabel: true,
+                            label: propertyField.string,
+                            sortable: false,
+                        };
+                    });
             } else {
                 return [column];
             }
@@ -258,7 +265,7 @@ export class ListRenderer extends Component {
     }
 
     getFieldProps(record, column) {
-        if (this.isCellReadonly(column, record) || (this.props.activeActions?.edit === false && !record.isNew)) {
+        if (this.isCellReadonly(column, record) || this.isRecordReadonly(record)) {
             return {
                 readonly: true,
             };
@@ -392,8 +399,7 @@ export class ListRenderer extends Component {
         if (!this.props.list.canResequence()) {
             return false;
         }
-        const orderBy = this.props.list.orderBy;
-        const handleField = this.props.archInfo.handleField;
+        const { handleField, orderBy } = this.props.list;
         return !orderBy.length || (orderBy.length && orderBy[0].name === handleField);
     }
 
@@ -420,7 +426,30 @@ export class ListRenderer extends Component {
     }
 
     canUseFormatter(column, record) {
-        return !record.isInEdition && !column.widget;
+        if (column.widget) {
+            return false;
+        }
+        if (record.isInEdition && (record.model.multiEdit || this.isInlineEditable(record))) {
+            // in a x2many non editable list, a record is in edition when it is opened in a dialog,
+            // but in the list we want it to still be displayed in readonly.
+            return false;
+        }
+        return true;
+    }
+
+    isRecordReadonly(record) {
+        if (record.isNew) {
+            return false;
+        }
+        if (this.props.activeActions?.edit === false) {
+            return true;
+        }
+        if (record.isInEdition && !this.isInlineEditable(record) && !record.model.multiEdit) {
+            // in a x2many non editable list, a record is in edition when it is opened in a dialog,
+            // but in the list we want it to still be displayed in readonly.
+            return true;
+        }
+        return false;
     }
 
     focusCell(column, forward = true) {
@@ -494,7 +523,7 @@ export class ListRenderer extends Component {
 
     createKeyOptionalFields() {
         let keyParts = {
-            fields: this.props.list.fieldNames,
+            fields: this.props.list.fieldNames, // FIXME: use something else?
             model: this.props.list.resModel,
             viewMode: "list",
             viewId: this.env.config.viewId,
@@ -612,7 +641,7 @@ export class ListRenderer extends Component {
             let currencyId;
             if (type === "monetary" || widget === "monetary") {
                 const currencyField =
-                    this.props.list.activeFields[fieldName].options.currency_field ||
+                    column.options.currency_field ||
                     this.fields[fieldName].currency_field ||
                     "currency_id";
                 if (!(currencyField in this.props.list.activeFields)) {
@@ -802,7 +831,7 @@ export class ListRenderer extends Component {
             if (required && evalDomain(required, record.evalContext)) {
                 classNames.push("o_required_modifier");
             }
-            if (record.isInvalid(column.name)) {
+            if (record.isFieldInvalid(column.name)) {
                 classNames.push("o_invalid_cell");
             }
             if (this.isCellReadonly(column, record)) {
@@ -847,7 +876,10 @@ export class ListRenderer extends Component {
         // This is only necessary for some field types, as for the others, we hardcode
         // a minimum column width that should be enough to display the entire value.
         // Also, we don't set title for json fields, because it's not human readable anyway.
-        if (!(fieldType in FIXED_FIELD_COLUMN_WIDTHS) && !['json', 'one2many', 'many2many'].includes(fieldType)) {
+        if (
+            !(fieldType in FIXED_FIELD_COLUMN_WIDTHS) &&
+            !["json", "one2many", "many2many"].includes(fieldType)
+        ) {
             return this.getFormattedValue(column, record);
         }
     }
@@ -1034,11 +1066,11 @@ export class ListRenderer extends Component {
                 this.cellToFocus = null;
             } else {
                 await recordAfterResequence();
-                await record.switchMode("edit");
+                await this.props.list.enterEditMode(record);
                 this.cellToFocus = { column, record };
             }
         } else if (this.props.list.editedRecord && this.props.list.editedRecord !== record) {
-            this.props.list.unselectRecord(true);
+            this.props.list.leaveEditMode();
         } else if (!this.props.archInfo.noOpen) {
             this.props.openRecord(record);
         }
@@ -1048,8 +1080,8 @@ export class ListRenderer extends Component {
         this.keepColumnWidths = true;
         const editedRecord = this.props.list.editedRecord;
         if (editedRecord && editedRecord !== record) {
-            const unselected = await this.props.list.unselectRecord(true);
-            if (!unselected) {
+            const leaved = await this.props.list.leaveEditMode();
+            if (!leaved) {
                 return;
             }
         }
@@ -1255,7 +1287,7 @@ export class ListRenderer extends Component {
         let toFocus, futureRecord;
         const index = list.selection.indexOf(record);
         if (this.lastIsDirty && ["tab", "shift+tab", "enter"].includes(hotkey)) {
-            record.switchMode("readonly");
+            list.leaveEditMode();
             return true;
         }
 
@@ -1288,7 +1320,7 @@ export class ListRenderer extends Component {
 
             case "enter":
                 if (list.selection.length === 1) {
-                    record.switchMode("readonly");
+                    list.leaveEditMode();
                     return true;
                 }
                 futureRecord = list.selection[index + 1] || list.selection[0];
@@ -1296,7 +1328,7 @@ export class ListRenderer extends Component {
         }
 
         if (futureRecord) {
-            futureRecord.switchMode("edit");
+            list.enterEditMode(futureRecord);
             return true;
         }
         return false;
@@ -1306,7 +1338,7 @@ export class ListRenderer extends Component {
         const { editable } = this.props;
         const groupIndex = group.list.records.indexOf(record);
         const isLastOfGroup = groupIndex === group.list.records.length - 1;
-        const isDirty = record.isDirty || this.lastIsDirty;
+        const isDirty = record.dirty || this.lastIsDirty;
         const isEnterBehavior = hotkey === "enter" && (!record.canBeAbandoned || isDirty);
         const isTabBehavior = hotkey === "tab" && !record.canBeAbandoned && isDirty;
         if (
@@ -1379,8 +1411,8 @@ export class ListRenderer extends Component {
                 const lastIndex = topReCreate ? 0 : list.records.length - 1;
                 if (index === lastIndex) {
                     if (this.displayRowCreates) {
-                        if (record.isNew && !record.isDirty) {
-                            list.unselectRecord(true);
+                        if (record.isNew && !record.dirty) {
+                            list.leaveEditMode();
                             return false;
                         }
                         // add a line
@@ -1389,12 +1421,12 @@ export class ListRenderer extends Component {
                     } else if (
                         this.canCreate &&
                         !record.canBeAbandoned &&
-                        (record.isDirty || this.lastIsDirty)
+                        (record.dirty || this.lastIsDirty)
                     ) {
                         this.add({ group });
                     } else if (cycleOnTab) {
                         if (record.canBeAbandoned) {
-                            list.unselectRecord(true);
+                            list.leaveEditMode();
                         }
                         const futureRecord = list.records[0];
                         if (record === futureRecord) {
@@ -1402,14 +1434,14 @@ export class ListRenderer extends Component {
                             const toFocus = this.findNextFocusableOnRow(row);
                             this.focus(toFocus);
                         } else {
-                            futureRecord.switchMode("edit");
+                            list.enterEditMode(futureRecord);
                         }
                     } else {
                         return false;
                     }
                 } else {
                     const futureRecord = list.records[index + 1];
-                    futureRecord.switchMode("edit");
+                    list.enterEditMode(futureRecord);
                 }
                 break;
             }
@@ -1418,7 +1450,7 @@ export class ListRenderer extends Component {
                 if (index === 0) {
                     if (cycleOnTab) {
                         if (record.canBeAbandoned) {
-                            list.unselectRecord(true);
+                            list.leaveEditMode();
                         }
                         const futureRecord = list.records[list.records.length - 1];
                         if (record === futureRecord) {
@@ -1427,16 +1459,16 @@ export class ListRenderer extends Component {
                             this.focus(toFocus);
                         } else {
                             this.cellToFocus = { forward: false, record: futureRecord };
-                            futureRecord.switchMode("edit");
+                            list.enterEditMode(futureRecord);
                         }
                     } else {
-                        list.unselectRecord(true);
+                        list.leaveEditMode();
                         return false;
                     }
                 } else {
                     const futureRecord = list.records[index - 1];
                     this.cellToFocus = { forward: false, record: futureRecord };
-                    futureRecord.switchMode("edit");
+                    list.enterEditMode(futureRecord);
                 }
                 break;
             }
@@ -1452,19 +1484,22 @@ export class ListRenderer extends Component {
                 }
 
                 if (futureRecord) {
-                    futureRecord.switchMode("edit", { checkValidity: true });
+                    list.leaveEditMode({ validate: true }).then((canProceed) => {
+                        if (canProceed) {
+                            list.enterEditMode(futureRecord);
+                        }
+                    });
                 } else if (this.lastIsDirty || !record.canBeAbandoned || this.displayRowCreates) {
                     this.add({ group });
                 } else {
                     futureRecord = list.records.at(0);
-                    futureRecord.switchMode("edit", { checkValidity: true });
+                    list.enterEditMode(futureRecord);
                 }
                 break;
             }
             case "escape": {
                 // TODO this seems bad: refactor this
-                record.discard();
-                list.unselectRecord(true);
+                list.leaveEditMode({ discard: true });
                 const firstAddButton = this.tableRef.el.querySelector(
                     ".o_field_x2many_list_row_add a"
                 );
@@ -1615,7 +1650,7 @@ export class ListRenderer extends Component {
                         (c) => c.name === cell.getAttribute("name")
                     );
                     this.cellToFocus = { column, record };
-                    record.switchMode("edit");
+                    this.props.list.enterEditMode(record);
                     return true;
                 }
 
@@ -1807,7 +1842,7 @@ export class ListRenderer extends Component {
         if (ev.target.closest(".ui-autocomplete")) {
             return;
         }
-        this.props.list.unselectRecord(true);
+        this.props.list.leaveEditMode();
     }
 
     calculateColumnWidth(column) {
@@ -1974,13 +2009,11 @@ export class ListRenderer extends Component {
      * @param {HTMLElement} [params.previous]
      */
     async sortDrop(dataRowId, { element, previous }) {
-        if (this.props.list.editedRecord) {
-            this.props.list.unselectRecord(true);
-        }
+        this.props.list.leaveEditMode();
         element.classList.remove("o_row_draggable");
         const refId = previous ? previous.dataset.id : null;
         this.resequencePromise = this.props.list.resequence(dataRowId, refId, {
-            handleField: this.props.archInfo.handleField,
+            handleField: this.props.list.handleField,
         });
         await this.resequencePromise;
         element.classList.add("o_row_draggable");
