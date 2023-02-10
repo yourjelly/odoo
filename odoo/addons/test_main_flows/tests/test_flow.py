@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import odoo.tests
-
+import unittest
 class BaseTestUi(odoo.tests.HttpCase):
 
     def main_flow_tour(self):

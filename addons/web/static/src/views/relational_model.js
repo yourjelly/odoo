@@ -18,10 +18,11 @@ import { unique } from "@web/core/utils/arrays";
 import { Deferred, KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { pick } from "@web/core/utils/objects";
 import { escape } from "@web/core/utils/strings";
+import { orderByToString } from "@web/search/utils/order_by";
 import { session } from "@web/session";
 import { getFieldFromRegistry } from "@web/views/fields/field";
-import { Model } from "@web/views/model";
-import { evalDomain, isNumeric, isRelational, isX2Many, orderByToString } from "@web/views/utils";
+import { Model } from "@web/model/model";
+import { evalDomain, isNumeric, isRelational, isX2Many } from "@web/views/utils";
 
 const { DateTime } = luxon;
 
