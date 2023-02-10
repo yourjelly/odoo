@@ -18,12 +18,20 @@ const STRING = {
 };
 
 const ALLOWED_KEYS = {
+    // Whether the tour started in watch mode or not.
     watch: BOOLEAN,
+
+    // Whether the tour is done.
     done: BOOLEAN,
+
+    // Index of the current step.
     currentIndex: INTEGER,
+
+    // Global step delay that is specified before starting the tour.
     stepDelay: INTEGER,
+
+    // 'auto' | 'manual' - important that it's persisted because it's only specified during start of tour.
     mode: STRING,
-    navigated: BOOLEAN,
 };
 
 function getPrefixedName(tourName, key) {
