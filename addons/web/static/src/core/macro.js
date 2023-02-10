@@ -5,7 +5,7 @@ import { isVisible } from "@web/core/utils/ui";
 import { Mutex } from "@web/core/utils/concurrency";
 
 // TODO-JCB: Don't use legacy imports.
-import { findTrigger, findExtraTrigger } from "web_tour.utils";
+import { findTrigger } from "web_tour.utils";
 
 export const ACTION_HELPERS = {
     click(el, _step) {
@@ -63,7 +63,7 @@ function findIframe() {
 class TimeoutError extends Error {}
 
 class Macro {
-    constructor(descr, engine) {
+    constructor(descr) {
         this.name = descr.name || "anonymous";
         this.timeoutDuration = descr.timeout || 0;
         this.timeout = null;
@@ -74,7 +74,6 @@ class Macro {
         this.onStep = descr.onStep || (() => {});
         this.onError = descr.onError;
         this.onTimeout = descr.onTimeout;
-        this.engine = engine;
         this.setTimer();
     }
 
@@ -140,8 +139,7 @@ class Macro {
                 el = result;
             }
         } else if (typeof trigger === "string") {
-            // Need to use engine's findTrigger so that observer is properly paused when making a jquery.
-            el = this.engine.findTrigger(trigger, in_modal);
+            el = findTrigger(trigger, in_modal);
         }
         return { canContinue: Boolean(allowInvisible ? el : el && isVisible(el)), el };
     }
@@ -259,16 +257,6 @@ export class MacroEngine {
                 }
             }
         });
-    }
-
-    findTrigger(selector, inModal) {
-        const result = findTrigger(selector, inModal);
-        return result;
-    }
-
-    findExtraTrigger(selector) {
-        const result = findExtraTrigger(selector);
-        return result;
     }
 
     async activate(descr) {
