@@ -11,6 +11,7 @@ import { _t } from "@web/core/l10n/translation";
 // TODO-JCB: Replace the following import with the non-legacy version.
 import { device } from "web.config";
 import RunningTourActionHelper from "web_tour.RunningTourActionHelper";
+import { findTrigger, findExtraTrigger } from "web_tour.utils";
 
 const getEdition = () =>
     session.server_version_info.slice(-1)[0] === "e" ? "enterprise" : "community";
@@ -135,16 +136,14 @@ function shouldOmit(step, mode) {
     );
 }
 
-function findStepTriggers(step, macroEngine) {
-    const triggerEl = macroEngine.findTrigger(step.trigger, step.in_modal);
-    const altTriggerEl = macroEngine.findTrigger(step.alt_trigger, step.in_modal);
-    const skipTriggerEl = macroEngine.findTrigger(step.skip_trigger, step.in_modal);
+function findStepTriggers(step) {
+    const triggerEl = findTrigger(step.trigger, step.in_modal);
+    const altTriggerEl = findTrigger(step.alt_trigger, step.in_modal);
+    const skipTriggerEl = findTrigger(step.skip_trigger, step.in_modal);
 
     // `extraTriggerOkay` should be true when `step.extra_trigger` is undefined.
     // No need for it to be in the modal.
-    const extraTriggerOkay = step.extra_trigger
-        ? macroEngine.findExtraTrigger(step.extra_trigger)
-        : true;
+    const extraTriggerOkay = step.extra_trigger ? findExtraTrigger(step.extra_trigger) : true;
 
     return { triggerEl, altTriggerEl, extraTriggerOkay, skipTriggerEl };
 }
@@ -219,7 +218,7 @@ let tourTimeout;
  * @returns
  */
 function augmentStepAuto(macroDesc, [stepIndex, step], options) {
-    const { mode, stepDelay, watch, macroEngine } = options;
+    const { mode, stepDelay, watch } = options;
 
     if (shouldOmit(step, mode)) {
         return [];
@@ -259,7 +258,7 @@ function augmentStepAuto(macroDesc, [stepIndex, step], options) {
                     altTriggerEl,
                     extraTriggerOkay,
                     skipTriggerEl,
-                } = findStepTriggers(step, macroEngine);
+                } = findStepTriggers(step);
 
                 // [alt_trigger] - alternative to [trigger].
                 // [extra_trigger] - should also be present together with the [trigger].
@@ -296,7 +295,7 @@ function augmentStepAuto(macroDesc, [stepIndex, step], options) {
                     altTriggerEl,
                     extraTriggerOkay,
                     skipTriggerEl,
-                } = findStepTriggers(step, macroEngine);
+                } = findStepTriggers(step);
 
                 // [alt_trigger] - alternative to [trigger].
                 // [extra_trigger] - should also be present together with the [trigger].
@@ -388,7 +387,7 @@ function augmentStepManual(macroDesc, [stepIndex, step], options) {
                     altTriggerEl,
                     extraTriggerOkay,
                     skipTriggerEl,
-                } = findStepTriggers(step, macroEngine);
+                } = findStepTriggers(step);
 
                 // This callback can be called multiple times until it returns true.
                 // We should take into account the fact the element is not in the
