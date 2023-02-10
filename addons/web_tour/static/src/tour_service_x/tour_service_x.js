@@ -177,7 +177,7 @@ let tourTimeout;
  * @param {*} options
  * @returns
  */
-function augmentStepAuto(macroDesc, [stepIndex, step], options) {
+function stepCompilerAuto(macroDesc, [stepIndex, step], options) {
     const { mode, stepDelay, watch } = options;
 
     if (shouldOmit(step, mode)) {
@@ -321,7 +321,7 @@ function augmentStepAuto(macroDesc, [stepIndex, step], options) {
  * @param {*} options
  * @returns
  */
-function augmentStepManual(macroDesc, [stepIndex, step], options) {
+function stepCompilerManual(macroDesc, [stepIndex, step], options) {
     const { pointerMethods, mode, macroEngine } = options;
 
     if (shouldOmit(step, mode)) {
@@ -417,16 +417,17 @@ function augmentStepManual(macroDesc, [stepIndex, step], options) {
 }
 
 /**
- * @param {*} macroDescription
+ * @param {*} tour
  * @param {*} options
  * @returns
  */
-function augmentMacro(macroDescription, augmenter, options) {
-    const { pointerMethods, hurray } = options;
-    const currentStepIndex = tourState.get(macroDescription.name, "currentIndex");
+function compileTourToMacro(tour, stepCompiler, options) {
+    const { pointerMethods, hurray, checkDelay } = options;
+    const currentStepIndex = tourState.get(tour.name, "currentIndex");
     return {
-        ...macroDescription,
-        steps: macroDescription.steps
+        ...tour,
+        checkDelay,
+        steps: tour.steps
             .reduce((newSteps, step, i) => {
                 if (i < currentStepIndex) {
                     // Don't include the step because it's already done.
@@ -436,7 +437,7 @@ function augmentMacro(macroDescription, augmenter, options) {
                         ...newSteps,
                         ...(isActionOnly(step)
                             ? [step] // No need to augment action-only step.
-                            : augmenter(macroDescription, [i, step], options)),
+                            : stepCompiler(tour, [i, step], options)),
                     ];
                 }
             }, [])
@@ -445,9 +446,9 @@ function augmentMacro(macroDescription, augmenter, options) {
                     action: () => {
                         // Used by the test runner to assert the test tour is done.
                         console.log("test successful");
-                        tourState.set(macroDescription.name, "done", true);
+                        tourState.set(tour.name, "done", true);
                         pointerMethods.setState({ isVisible: false });
-                        hurray(macroDescription);
+                        hurray(tour);
                     },
                 },
             ]),
@@ -547,7 +548,7 @@ function createPointerState({ x, y, isVisible, position, content, mode, fixed })
         if (anchor) {
             if (intersection.targetPosition === "unknown") {
                 // TODO-JCB: Maybe this targetPosition value is not needed.
-                console.warn("Something's wrong on the `Intersection` instance.")
+                console.warn("Something's wrong on the `Intersection` instance.");
             } else if (intersection.targetPosition === "in") {
                 const position = step.position || "top";
                 const [top, left] = computeLocation(anchor, position);
@@ -674,74 +675,73 @@ export const tourService = {
             fixed: false,
         });
 
-        /**
-         * TODO-JCB: `run` and `odoo.startTour` are just the same.
-         * @param {string} tourName
-         * @param {{ mode: "auto" | "manual" } | undefined} [options] - if provided, it means a force restart.
-         */
-        function run(tourName, options) {
-            if (window.frameElement) {
-                // Don't run on iframe
-                return;
+        function getTour(name) {
+            const tour = tourMap[name];
+            if (!tour) {
+                throw new Error(`Tour '${name}' is not found.`);
             }
-            if (options) {
-                tourState.reset(tourName, options);
-                macroEngine.stopMacro(tourName);
-            }
-            const tourDesc = tourMap[tourName];
+            return tour;
+        }
 
-            // TODO-JCB: Correct this. This happens because run is called multiple times. It should only be called once.
-            if (!tourDesc) {
-                console.log(`${tourName} not found.`);
-                return;
-            }
-
-            const mode = tourState.get(tourName, "mode");
-            const stepDelay = tourState.get(tourName, "stepDelay");
-            const watch = tourState.get(tourName, "watch");
-            const augmentedMacro = augmentMacro(
-                Object.assign(tourDesc, {
-                    checkDelay: mode === "manual" ? 50 : tourDesc.checkDelay,
-                }),
-                mode === "manual" ? augmentStepManual : augmentStepAuto,
-                {
-                    macroEngine,
-                    pointerMethods,
-                    mode,
-                    stepDelay,
-                    watch,
-                    hurray({ rainbowManMessage, fadeout }) {
-                        let message = rainbowManMessage;
-                        if (message) {
-                            message =
-                                typeof message === "function"
-                                    ? message(registry.get("tourManager"))
-                                    : message;
-                        } else {
-                            message = markup(
-                                _t(
-                                    "<strong><b>Good job!</b> You went through all steps of this tour.</strong>"
-                                )
-                            );
-                        }
-                        effect.add({ type: "rainbow_man", message, fadeout });
-                    },
-                }
-            );
-
-            const willUnload = callWithUnloadCheck(() => {
-                if (tourDesc.url && !tourState.get(tourName, "navigated")) {
-                    tourState.set(tourName, "navigated", true);
-                    if (tourDesc.url !== options.url) {
-                        window.location.href = window.location.origin + tourDesc.url;
+        function convertToMacro(tour, { mode, stepDelay, watch }) {
+            // IMPROVEMENT : custom step compiler would be nice.
+            const stepCompiler = mode === "auto" ? stepCompilerAuto : stepCompilerManual;
+            const checkDelay = mode === "auto" ? tour.checkDelay : 50;
+            return compileTourToMacro(tour, stepCompiler, {
+                macroEngine,
+                pointerMethods,
+                mode,
+                stepDelay,
+                watch,
+                checkDelay,
+                hurray({ rainbowManMessage, fadeout }) {
+                    let message = rainbowManMessage;
+                    if (message) {
+                        message =
+                            typeof message === "function"
+                                ? message(registry.get("tourManager"))
+                                : message;
+                    } else {
+                        message = markup(
+                            _t(
+                                "<strong><b>Good job!</b> You went through all steps of this tour.</strong>"
+                            )
+                        );
                     }
+                    effect.add({ type: "rainbow_man", message, fadeout });
+                },
+            });
+        }
+
+        function startTour(tourName, options = {}) {
+            // set default options
+            options = Object.assign({ stepDelay: 0, watch: false, mode: "auto", url: "" }, options);
+            const tour = getTour(tourName);
+            tourState.set(tourName, "stepDelay", options.stepDelay);
+            tourState.set(tourName, "watch", options.watch);
+            tourState.set(tourName, "mode", options.mode);
+            tourState.set(tourName, "done", false);
+            const macro = convertToMacro(tour, options);
+            const willUnload = callWithUnloadCheck(() => {
+                if (tour.url && tour.url !== options.url) {
+                    window.location.href = window.location.origin + tour.url;
                 }
             });
-
             if (!willUnload) {
-                // The pointer points to the trigger and waits for the user to do the action.
-                macroEngine.activate(augmentedMacro);
+                macroEngine.activate(macro);
             }
+        }
+
+        /**
+         * Upon page reload, there might be a running tour. It should be automatically resumed.
+         */
+        function resumeTour(tourName) {
+            const tour = getTour(tourName);
+            const stepDelay = tourState.get(tourName, "stepDelay");
+            const watch = tourState.get(tourName, "watch");
+            const mode = tourState.get(tourName, "mode");
+            const macro = convertToMacro(tour, { stepDelay, watch, mode });
+            macroEngine.activate(macro);
         }
 
         registry.category("main_components").add("TourPointer", {
@@ -749,9 +749,11 @@ export const tourService = {
             props: { pointerState, setPointerState: pointerMethods.setState },
         });
 
-        // Resume active tours.
-        for (const tourName of tourState.getActiveTours()) {
-            run(tourName);
+        if (!window.frameElement) {
+            // Resume running tours.
+            for (const tourName of tourState.getActiveTours()) {
+                resumeTour(tourName);
+            }
         }
 
         // Checking whether the tour is ready is stateful so we use a higher order function.
@@ -773,11 +775,7 @@ export const tourService = {
             };
         }
 
-        odoo.startTour = (name, { stepDelay, watch, url }) => {
-            tourState.set(name, "stepDelay", stepDelay ?? 0);
-            tourState.set(name, "watch", watch);
-            run(name, { mode: "auto", url });
-        };
+        odoo.startTour = startTour;
         odoo.isTourReady = makeIsTourReady();
 
         const consumed_tours = [];
@@ -842,7 +840,7 @@ export const tourService = {
             running_tour: null,
         });
 
-        return { run, getOnboardingTours, getTestingTours, getActiveTours };
+        return { startTour, getOnboardingTours, getTestingTours, getActiveTours };
     },
 };
 

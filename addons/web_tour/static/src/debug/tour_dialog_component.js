@@ -24,7 +24,7 @@ export default class ToursDialog extends Component {
      * @param {MouseEvent} ev
      */
     _onStartTour(ev) {
-        this.tourService.run(ev.target.dataset.name, { mode: 'manual' });
+        this.tourService.startTour(ev.target.dataset.name, { mode: 'manual' });
         this.props.close();
     }
     /**
@@ -34,7 +34,7 @@ export default class ToursDialog extends Component {
      * @param {MouseEvent} ev
      */
     _onTestTour(ev) {
-        this.tourService.run(ev.target.dataset.name, { mode: 'auto', stepDelay: 500 });
+        this.tourService.startTour(ev.target.dataset.name, { mode: 'auto', stepDelay: 500 });
         this.props.close();
     }
 }
