@@ -196,3 +196,34 @@ class TestChartTemplate(SavepointCase):
 
         taxes_after = self.env['account.tax'].search([('name', '=', self.tax_template_1.name)])
         self.assertEqual(taxes_after.mapped('amount'), [self.tax_template_1.amount] * len(taxes_after))
+
+    def test_message_to_accountants(self):
+        # create 1 normal user, 2 accountants managers
+        accountant_manager_group = self.env.ref("account.group_account_manager")
+        advisor_users = self.env['res.users'].create([{
+            'name': 'AccountAdvisorTest1',
+            'login': 'aat1',
+            'password': 'aat1',
+            'groups_id': [(4, accountant_manager_group.id)],
+        }, {
+            'name': 'AccountAdvisorTest2',
+            'login': 'aat2',
+            'password': 'aat2',
+            'groups_id': [(4, accountant_manager_group.id)],
+        }])
+        normal_user = self.env['res.users'].create([{
+            'name': 'AccountUserTest1',
+            'login': 'aut1',
+            'password': 'aut1',
+            'groups_id': [(4, self.env.ref('account.group_account_user').id)],
+        }])
+        # create situation where we need to recreate the tax during update
+        self.tax_template_1.amount += 1
+        update_taxes_from_templates(self.env.cr, self.chart_template_xmlid)
+
+        # accountants received the message
+        message = self.env['mail.message'].search([('partner_ids', '=', advisor_users.partner_id.ids), ('body', 'like', f"%{self.tax_template_1.name}%")])
+        self.assertEqual(len(message), 1)
+        # normal user didn't
+        message = self.env['mail.message'].search([('partner_ids', '=', normal_user.partner_id.ids), ('body', 'like', f"%{self.tax_template_1.name}%")])
+        self.assertEqual(len(message), 0)
