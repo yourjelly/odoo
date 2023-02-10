@@ -78,9 +78,9 @@ patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
         this.dialog.add(ProductConfiguratorDialog, {
             productTemplateId: this.props.record.data.product_template_id[0],
             ptavIds: this.props.record.data.product_template_attribute_value_ids.records.map(
-                record => record.data.id
+                record => record.resId
             ).concat(this.props.record.data.product_no_variant_attribute_value_ids.records.map(
-                record => record.data.id
+                record => record.resId
             )),
             customAttributeValues: customAttributeValues.map(
                 data => {
@@ -101,7 +101,7 @@ patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
                 await this.props.record.update(mainProduct);
                 this._onProductUpdate();
                 for (const optionalProduct of optionalProducts) {
-                    const line = await saleOrderRecord.data.order_line.addNew({
+                    const line = await saleOrderRecord.data.order_line.addNewRecord({
                         position: 'bottom',
                     });
                     line.update(optionalProduct);
