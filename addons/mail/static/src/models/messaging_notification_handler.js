@@ -276,7 +276,7 @@ Model({
             // Fetch missing info from channel before going further. Inserting
             // a channel with incomplete info can lead to issues. This is in
             // particular the case with the `uuid` field that is assumed
-            // "required" by the rest of the code and is necessary for some
+            // "required" by the rest of the code and is necessary for some_handleNotificationChannelMessage
             // features such as chat windows.
             if (!channel) {
                 const res = await this.messaging.models["Thread"].performRpcChannelInfo({
