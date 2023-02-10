@@ -446,7 +446,7 @@ function compileTourToMacro(tour, stepCompiler, options) {
                     action: () => {
                         // Used by the test runner to assert the test tour is done.
                         console.log("test successful");
-                        tourState.set(tour.name, "done", true);
+                        tourState.clear(tour.name);
                         pointerMethods.setState({ isVisible: false });
                         hurray(tour);
                     },
@@ -659,7 +659,7 @@ function sanitizedRegisteredTours(tourMap) {
  */
 export const tourService = {
     dependencies: ["orm", "effect"],
-    start: async (_env, { orm: _orm, effect }) => {
+    start: async (_env, { orm, effect }) => {
         await whenReady();
 
         const tourMap = sanitizedRegisteredTours({});
@@ -675,14 +675,6 @@ export const tourService = {
             fixed: false,
         });
 
-        function getTour(name) {
-            const tour = tourMap[name];
-            if (!tour) {
-                throw new Error(`Tour '${name}' is not found.`);
-            }
-            return tour;
-        }
-
         function convertToMacro(tour, { mode, stepDelay, watch }) {
             // IMPROVEMENT : custom step compiler would be nice.
             const stepCompiler = mode === "auto" ? stepCompilerAuto : stepCompilerManual;
@@ -694,7 +686,7 @@ export const tourService = {
                 stepDelay,
                 watch,
                 checkDelay,
-                hurray({ rainbowManMessage, fadeout }) {
+                hurray({ name, rainbowManMessage, fadeout }) {
                     let message = rainbowManMessage;
                     if (message) {
                         message =
@@ -709,6 +701,9 @@ export const tourService = {
                         );
                     }
                     effect.add({ type: "rainbow_man", message, fadeout });
+                    if (mode === 'manual') {
+                        orm.call("web_tour.tour", "consume", [[name]]);
+                    }
                 },
             });
         }
@@ -716,11 +711,14 @@ export const tourService = {
         function startTour(tourName, options = {}) {
             // set default options
             options = Object.assign({ stepDelay: 0, watch: false, mode: "auto", url: "" }, options);
-            const tour = getTour(tourName);
+            const tour = tourMap[tourName];
+            if (!tour) {
+                throw new Error(`Tour '${tourName}' is not found.`);
+            }
+            tourState.set(tourName, "currentIndex", 0);
             tourState.set(tourName, "stepDelay", options.stepDelay);
             tourState.set(tourName, "watch", options.watch);
             tourState.set(tourName, "mode", options.mode);
-            tourState.set(tourName, "done", false);
             const macro = convertToMacro(tour, options);
             const willUnload = callWithUnloadCheck(() => {
                 if (tour.url && tour.url !== options.url) {
@@ -736,7 +734,7 @@ export const tourService = {
          * Upon page reload, there might be a running tour. It should be automatically resumed.
          */
         function resumeTour(tourName) {
-            const tour = getTour(tourName);
+            const tour = tourMap[tourName];
             const stepDelay = tourState.get(tourName, "stepDelay");
             const watch = tourState.get(tourName, "watch");
             const mode = tourState.get(tourName, "mode");
@@ -751,8 +749,14 @@ export const tourService = {
 
         if (!window.frameElement) {
             // Resume running tours.
-            for (const tourName of tourState.getActiveTours()) {
-                resumeTour(tourName);
+            for (const tourName of tourState.getActiveTourNames()) {
+                if (tourName in tourMap) {
+                    resumeTour(tourName);
+                } else {
+                    // If a tour found in the local storage is not found in the `tourMap`,
+                    // then it is an outdated tour state. It should be cleared.
+                    tourState.clear(tourName);
+                }
             }
         }
 
@@ -778,57 +782,14 @@ export const tourService = {
         odoo.startTour = startTour;
         odoo.isTourReady = makeIsTourReady();
 
-        const consumed_tours = [];
-
-        /**
-         * @private
-         * @returns {Object} All the active tours as a map
-         */
-        function _getActiveTourMap() {
-            return Object.fromEntries(
-                Object.entries(tourMap).filter(
-                    // TODO-JCB: fix consumed_tours
-                    ([key, _value]) => !consumed_tours.includes(key)
-                )
-            );
-        }
-
         /**
          * @private
          * @returns {Array} Takes an Object (map) of tours and returns all the values
          */
-        function _fromTourMapToArray(tourMap) {
+        function getSortedTours() {
             return Object.values(tourMap).sort((t1, t2) => {
                 return t1.sequence - t2.sequence || (t1.name < t2.name ? -1 : 1);
             });
-        }
-
-        /**
-         * @returns {Array} All the tours
-         */
-        function _getAllTours() {
-            return _fromTourMapToArray(tourMap);
-        }
-
-        /**
-         * @returns {Array} All the active tours
-         */
-        function getActiveTours() {
-            return _fromTourMapToArray(_getActiveTourMap());
-        }
-
-        /**
-         * @returns {Array} The onboarding tours
-         */
-        function getOnboardingTours() {
-            return _getAllTours().filter((t) => !t.test);
-        }
-
-        /**
-         * @returns {Array} The testing tours
-         */
-        function getTestingTours() {
-            return _getAllTours().filter((t) => t.test);
         }
 
         // TODO-JCB: Fix this patch.
@@ -840,7 +801,7 @@ export const tourService = {
             running_tour: null,
         });
 
-        return { startTour, getOnboardingTours, getTestingTours, getActiveTours };
+        return { startTour, getSortedTours };
     },
 };
 

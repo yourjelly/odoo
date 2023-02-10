@@ -21,9 +21,6 @@ const ALLOWED_KEYS = {
     // Whether the tour started in watch mode or not.
     watch: BOOLEAN,
 
-    // Whether the tour is done.
-    done: BOOLEAN,
-
     // Index of the current step.
     currentIndex: INTEGER,
 
@@ -46,7 +43,6 @@ function destructurePrefixedName(prefixedName) {
 /**
  * Wrapper around localStorage for basic persistence of running tours.
  * Useful for resuming running tours when the page refreshed.
- * TODO-JCB: Needs further cleanup. There might be keys that are not needed.
  */
 export const tourState = {
     get(tourName, key) {
@@ -64,20 +60,20 @@ export const tourState = {
         const prefixedName = getPrefixedName(tourName, key);
         browser.localStorage.setItem(prefixedName, ALLOWED_KEYS[key].toLocalStorage(value));
     },
-    getActiveTours() {
-        const activeTourNames = Object.keys(browser.localStorage)
-            .map((key) => destructurePrefixedName(key))
-            .filter((ds) => (ds ? ds[1] === "done" : false))
-            .map((ds) => ds[0]);
-        return activeTourNames.filter((tourName) => !this.get(tourName, "done"));
-    },
-    reset(tourName, obj) {
+    clear(tourName) {
         for (const key in ALLOWED_KEYS) {
-            if (key in obj) {
-                this.set(tourName, key, obj[key]);
+            const prefixedName = getPrefixedName(tourName, key);
+            browser.localStorage.removeItem(prefixedName);
+        }
+    },
+    getActiveTourNames() {
+        const tourNames = new Set();
+        for (const key of Object.keys(browser.localStorage)) {
+            const [tourName] = destructurePrefixedName(key) || [false];
+            if (tourName) {
+                tourNames.add(tourName);
             }
         }
-        this.set(tourName, "currentIndex", 0);
-        this.set(tourName, "done", false);
+        return [...tourNames];
     },
 };
