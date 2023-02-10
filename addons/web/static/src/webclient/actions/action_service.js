@@ -1099,7 +1099,9 @@ function makeActionManager(env) {
             env.services.ui.unblock();
         }
         const onClose = options.onClose;
-        if (action.close_on_report_download) {
+        if (action.anotherAction) {
+            return doAction(action.anotherAction);
+        } else if (action.close_on_report_download) {
             return doAction({ type: "ir.actions.act_window_close" }, { onClose });
         } else if (onClose) {
             onClose();

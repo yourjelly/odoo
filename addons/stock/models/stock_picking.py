@@ -76,6 +76,9 @@ class PickingType(models.Model):
     auto_show_reception_report = fields.Boolean(
         "Show Reception Report at Validation",
         help="If this checkbox is ticked, Odoo will automatically show the reception report (if there are moves to allocate to) when validating.")
+    auto_print_delivery_slip = fields.Boolean(
+        "Auto Print Delivery Slip",
+        help="If this checkbox is ticked, Odoo will automatically print the delivery slip of a picking when it is validated.")
 
     count_picking_draft = fields.Integer(compute='_compute_picking_count')
     count_picking_ready = fields.Integer(compute='_compute_picking_count')
@@ -266,6 +269,18 @@ class PickingType(models.Model):
 
     def get_stock_picking_action_picking_type(self):
         return self._get_action('stock.stock_picking_action_picking_type')
+
+    @api.model
+    def _chain_reports(self, report_actions):
+        """ Helper function to chain reports in multi-print situation
+        """
+        num_reports = len(report_actions)
+        for i, report_action in enumerate(report_actions, start=1):
+            if i != num_reports:
+                report_action.update({'anotherAction': report_actions[i]})
+            else:
+                report_action.update({'close_on_report_download': True})
+        return report_actions[0]
 
 
 class Picking(models.Model):
@@ -1075,6 +1090,10 @@ class Picking(models.Model):
         pickings_not_to_backorder.with_context(cancel_backorder=True)._action_done()
         pickings_to_backorder.with_context(cancel_backorder=False)._action_done()
 
+        report_actions = []
+        pickings_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_delivery_slip)
+        if pickings_to_print:
+            report_actions.append(self.env.ref("stock.action_report_delivery").report_action(pickings_to_print.ids))
         if self.user_has_groups('stock.group_reception_report') \
                 and self.picking_type_id.auto_show_reception_report:
             lines = self.move_ids.filtered(lambda m: m.product_id.type == 'product' and m.state != 'cancel' and m.quantity_done and not m.move_dest_ids)
@@ -1090,7 +1109,11 @@ class Picking(models.Model):
                         ('product_id', 'in', lines.product_id.ids)], limit=1):
                     action = self.action_view_reception_report()
                     action['context'] = {'default_picking_ids': self.ids}
-                    return action
+                    if not report_actions:
+                        return action
+                    report_actions[-1].update({'anotherAction': action})
+        if report_actions:
+            return self.picking_type_id._chain_reports(report_actions)
         return True
 
     def action_set_quantities_to_reservation(self):
