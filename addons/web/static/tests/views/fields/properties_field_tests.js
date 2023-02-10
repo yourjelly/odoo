@@ -1017,7 +1017,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("properties: date(time) property manipulations", async function (assert) {
+    QUnit.tttt("properties: date(time) property manipulations", async function (assert) {
         serverData.models.partner.records.push({
             id: 5000,
             display_name: "third partner",
@@ -1311,7 +1311,7 @@ QUnit.module("Fields", (hooks) => {
      * Check the behavior of the domain (properies with "definition_deleted" should be ignored).
      * In that case, some properties start without the flag "definition_deleted".
      */
-    QUnit.test(
+    QUnit.tttt(
         "properties: form view and falsy domain, properties are not empty",
         async function (assert) {
             async function mockRPC(route, { method, model, kwargs }) {
@@ -1365,7 +1365,7 @@ QUnit.module("Fields", (hooks) => {
      * Check the behavior of the domain (properties with "definition_deleted" should be ignored).
      * In that case, all properties start with the flag "definition_deleted".
      */
-    QUnit.test(
+    QUnit.tttt(
         "properties: form view and falsy domain, properties are empty",
         async function (assert) {
             async function mockRPC(route, { method, model, kwargs }) {

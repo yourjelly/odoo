@@ -255,11 +255,7 @@ QUnit.module("Fields", (hooks) => {
         });
 
         const textarea = target.querySelector("textarea");
-        assert.strictEqual(
-            textarea.rows,
-            4,
-            "rowCount should be the one set on the field",
-        );
+        assert.strictEqual(textarea.rows, 4, "rowCount should be the one set on the field");
     });
 
     QUnit.test(
@@ -282,8 +278,9 @@ QUnit.module("Fields", (hooks) => {
             });
 
             // ensure that autoresize is correctly done
-            let height = target.querySelector(".o_field_widget[name=text_field] textarea")
-                .offsetHeight;
+            let height = target.querySelector(
+                ".o_field_widget[name=text_field] textarea"
+            ).offsetHeight;
             // focus the field to manually trigger autoresize
             await triggerEvent(target, ".o_field_widget[name=text_field] textarea", "focus");
             assert.strictEqual(
@@ -352,8 +349,9 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelectorAll(".o_notebook .nav .nav-link")[2]);
         assert.hasClass(target.querySelectorAll(".o_notebook .nav .nav-link")[2], "active");
 
-        height = target.querySelector(".o_field_widget[name=text_field_empty] textarea")
-            .offsetHeight;
+        height = target.querySelector(
+            ".o_field_widget[name=text_field_empty] textarea"
+        ).offsetHeight;
         assert.strictEqual(height, 50, "empty textarea should have height of 50px");
     });
 

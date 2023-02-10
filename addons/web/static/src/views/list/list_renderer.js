@@ -186,7 +186,7 @@ export class ListRenderer extends Component {
             () => {
                 this.freezeColumnWidths();
             },
-            () => [this.state.columns, this.isEmpty]
+            () => [this.state.columns, this.isEmpty, this.props.list.offset, this.props.list.limit]
         );
         useExternalListener(window, "resize", () => {
             this.columnWidths = null;
@@ -490,7 +490,7 @@ export class ListRenderer extends Component {
 
     createKeyOptionalFields() {
         let keyParts = {
-            fields: this.props.list.fieldNames,
+            fields: this.props.list.fieldNames, // FIXME: use something else?
             model: this.props.list.resModel,
             viewMode: "list",
             viewId: this.env.config.viewId,
@@ -768,7 +768,7 @@ export class ListRenderer extends Component {
             if (required && evalDomain(required, record.evalContext)) {
                 classNames.push("o_required_modifier");
             }
-            if (record.isInvalid(column.name)) {
+            if (record.isFieldInvalid(column.name)) {
                 classNames.push("o_invalid_cell");
             }
             if (this.isCellReadonly(column, record)) {
@@ -998,11 +998,11 @@ export class ListRenderer extends Component {
                 this.cellToFocus = null;
             } else {
                 await recordAfterResequence();
-                await record.switchMode("edit");
+                await this.props.list.enterEditMode(record);
                 this.cellToFocus = { column, record };
             }
         } else if (this.props.list.editedRecord && this.props.list.editedRecord !== record) {
-            this.props.list.unselectRecord(true);
+            this.props.list.leaveEditMode();
         } else if (!this.props.archInfo.noOpen) {
             this.props.openRecord(record);
         }
@@ -1012,8 +1012,8 @@ export class ListRenderer extends Component {
         this.keepColumnWidths = true;
         const editedRecord = this.props.list.editedRecord;
         if (editedRecord && editedRecord !== record) {
-            const unselected = await this.props.list.unselectRecord(true);
-            if (!unselected) {
+            const leaved = await this.props.list.leaveEditMode();
+            if (!leaved) {
                 return;
             }
         }
@@ -1213,7 +1213,7 @@ export class ListRenderer extends Component {
         let toFocus, futureRecord;
         const index = list.selection.indexOf(record);
         if (this.lastIsDirty && ["tab", "shift+tab", "enter"].includes(hotkey)) {
-            record.switchMode("readonly");
+            list.leaveEditMode();
             return true;
         }
 
@@ -1246,7 +1246,7 @@ export class ListRenderer extends Component {
 
             case "enter":
                 if (list.selection.length === 1) {
-                    record.switchMode("readonly");
+                    list.leaveEditMode();
                     return true;
                 }
                 futureRecord = list.selection[index + 1] || list.selection[0];
@@ -1254,7 +1254,7 @@ export class ListRenderer extends Component {
         }
 
         if (futureRecord) {
-            futureRecord.switchMode("edit");
+            list.enterEditMode(futureRecord);
             return true;
         }
         return false;
@@ -1342,7 +1342,7 @@ export class ListRenderer extends Component {
                 if (index === lastIndex) {
                     if (this.displayRowCreates) {
                         if (record.isNew && !record.isDirty) {
-                            list.unselectRecord(true);
+                            list.leaveEditMode();
                             return false;
                         }
                         // add a line
@@ -1358,7 +1358,7 @@ export class ListRenderer extends Component {
                         this.add({ group });
                     } else if (cycleOnTab) {
                         if (record.canBeAbandoned) {
-                            list.unselectRecord(true);
+                            list.leaveEditMode();
                         }
                         const futureRecord = list.records[0];
                         if (record === futureRecord) {
@@ -1366,14 +1366,14 @@ export class ListRenderer extends Component {
                             const toFocus = this.findNextFocusableOnRow(row);
                             this.focus(toFocus);
                         } else {
-                            futureRecord.switchMode("edit");
+                            list.enterEditMode(futureRecord);
                         }
                     } else {
                         return false;
                     }
                 } else {
                     const futureRecord = list.records[index + 1];
-                    futureRecord.switchMode("edit");
+                    list.enterEditMode(futureRecord);
                 }
                 break;
             }
@@ -1382,7 +1382,7 @@ export class ListRenderer extends Component {
                 if (index === 0) {
                     if (cycleOnTab) {
                         if (record.canBeAbandoned) {
-                            list.unselectRecord(true);
+                            list.leaveEditMode();
                         }
                         const futureRecord = list.records[list.records.length - 1];
                         if (record === futureRecord) {
@@ -1391,16 +1391,16 @@ export class ListRenderer extends Component {
                             this.focus(toFocus);
                         } else {
                             this.cellToFocus = { forward: false, record: futureRecord };
-                            futureRecord.switchMode("edit");
+                            list.enterEditMode(futureRecord);
                         }
                     } else {
-                        list.unselectRecord(true);
+                        list.leaveEditMode();
                         return false;
                     }
                 } else {
                     const futureRecord = list.records[index - 1];
                     this.cellToFocus = { forward: false, record: futureRecord };
-                    futureRecord.switchMode("edit");
+                    list.enterEditMode(futureRecord);
                 }
                 break;
             }
@@ -1416,19 +1416,19 @@ export class ListRenderer extends Component {
                 }
 
                 if (futureRecord) {
-                    futureRecord.switchMode("edit", { checkValidity: true });
+                    list.enterEditMode(futureRecord);
                 } else if (this.lastIsDirty || !record.canBeAbandoned || this.displayRowCreates) {
                     this.add({ group });
                 } else {
                     futureRecord = list.records.at(0);
-                    futureRecord.switchMode("edit", { checkValidity: true });
+                    list.enterEditMode(futureRecord);
                 }
                 break;
             }
             case "escape": {
                 // TODO this seems bad: refactor this
                 record.discard();
-                list.unselectRecord(true);
+                list.leaveEditMode();
                 const firstAddButton = this.tableRef.el.querySelector(
                     ".o_field_x2many_list_row_add a"
                 );
@@ -1579,7 +1579,7 @@ export class ListRenderer extends Component {
                         (c) => c.name === cell.getAttribute("name")
                     );
                     this.cellToFocus = { column, record };
-                    record.switchMode("edit");
+                    this.props.list.enterEditMode(record);
                     return true;
                 }
 
@@ -1751,7 +1751,7 @@ export class ListRenderer extends Component {
         if (ev.target.closest(".ui-autocomplete")) {
             return;
         }
-        this.props.list.unselectRecord(true);
+        this.props.list.leaveEditMode();
     }
 
     calculateColumnWidth(column) {
@@ -1932,9 +1932,7 @@ export class ListRenderer extends Component {
      * @param {HTMLElement} [params.previous]
      */
     async sortDrop(dataRowId, { element, previous }) {
-        if (this.props.list.editedRecord) {
-            this.props.list.unselectRecord(true);
-        }
+        this.props.list.leaveEditMode();
         element.classList.remove("o_row_draggable");
         const refId = previous ? previous.dataset.id : null;
         this.resequencePromise = this.props.list.resequence(dataRowId, refId, {
