@@ -63,7 +63,7 @@
             </button>
             <div class="dropdown-menu o_filter_menu" role="menu">
                 <t t-foreach="options['available_warehouses']" t-as="warehouse">
-                    <a role="menuitem" class="dropdown-item js_stock_reports_one_choice_filter" t-att-title="warehouse['name']" t-att-data-warehouse_id="warehouse['id']">
+                    <a role="menuitem" class="dropdown-item js_stock_reports_one_choice_filter" t-att-title="warehouse['name']" t-att-data-warehouse_id="warehouse['id']" data-filter="selected_warehouse">
                         <t t-out="warehouse['name']"/>
                     </a>
                 </t>
@@ -106,7 +106,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <t t-foreach="product_data" t-as="product">
+                        <t t-foreach="products_data" t-as="product">
                             <tr>
                                 <td><span>
                                         <span t-out="product['name']"/>

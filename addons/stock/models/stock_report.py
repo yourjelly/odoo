@@ -20,48 +20,39 @@ class StockReportNew(models.AbstractModel):
 
     def get_report_informations(self, previous_options=None):
         options = self._get_options(previous_options)
-        product_domain = []
-        move_domain = [
-            ('date', '>=', options['date']['date_from']),
-            ('date', '<=', options['date']['date_to']),
-            ('picking_code', 'in', ['incoming', 'outgoing']),
-        ]
 
+        lot_stock_id = self.env['stock.warehouse'].browse(options['selected_warehouse']).lot_stock_id.id
+        options['lot_stock_id'] = lot_stock_id
+
+        product_domain = [
+            '|',
+            ('stock_move_ids.location_id', '=', lot_stock_id),
+            ('stock_move_ids.location_dest_id', '=', lot_stock_id)
+        ]
         if options.get('product_ids'):
             product_domain = AND([product_domain, [('id', 'in', options['product_ids'])]])
         if options.get('product_categories_ids'):
             product_domain = AND([product_domain, [('product_tmpl_id.categ_id', 'child_of', options['product_categories_ids'])]])
-        if options.get('selected_warehouse'):
-            lot_stock_id = self.env['stock.warehouse'].browse(options['selected_warehouse']).lot_stock_id.id
-            options['lot_stock_id'] = lot_stock_id
-            product_domain = AND([product_domain, [
-                '|',
-                ('stock_move_ids.location_id', '=', lot_stock_id),
-                ('stock_move_ids.location_dest_id', '=', lot_stock_id)
-            ]])
-            move_domain = AND([move_domain, [
-                '|',
-                ('location_id', '=', lot_stock_id),
-                ('location_dest_id', '=', lot_stock_id)
-            ]])
 
-
-
-        product_data = []
+        products_data = []
         product_ids = self.env['product.product'].search(product_domain)
 
         move_domain = [
             ('product_id', 'in', product_ids.ids),
-            ('date', '>=', datetime.strptime(options['date']['date_from'], '%Y-%m-%d')),
-            ('date', '<=', datetime.strptime(options['date']['date_to'], '%Y-%m-%d'))
+            ('date', '>=', options['date']['date_from']),
+            ('date', '<=', options['date']['date_to']),
+            ('state', '=', 'done'),
+            '|',
+            ('location_id', '=', lot_stock_id),
+            ('location_dest_id', '=', lot_stock_id)
         ]
         incoming_moves = self.env['stock.move'].read_group(
-            [('picking_type_id.code', '=', 'incoming')] + move_domain,
+            [('picking_code', '=', 'incoming')] + move_domain,
             ['product_qty'],
             ['product_id']
         )
         outgoing_moves = self.env['stock.move'].read_group(
-            [('picking_type_id.code', '=', 'outgoing')] + move_domain,
+            [('picking_code', '=', 'outgoing')] + move_domain,
             ['product_qty'],
             ['product_id']
         )
@@ -69,19 +60,19 @@ class StockReportNew(models.AbstractModel):
         out_qty = {out_move['product_id'][0]: out_move['product_qty'] for out_move in outgoing_moves}
 
         for product in product_ids:
-            product_data.append(
+            products_data.append(
             {
                 'id': product.id,
                 'name': product.name,
-                'qty_available_open': product.with_context(to_date=datetime.strptime(options['date']['date_from'], '%Y-%m-%d')).qty_available,
-                'qty_available_end': product.with_context(to_date=datetime.strptime(options['date']['date_to'], '%Y-%m-%d')).qty_available,
+                'qty_available_open': product.with_context(warehouse=options['selected_warehouse'], to_date=datetime.strptime(options['date']['date_from'], '%Y-%m-%d')).qty_available,
+                'qty_available_end': product.with_context(warehouse=options['selected_warehouse'], to_date=datetime.strptime(options['date']['date_to'], '%Y-%m-%d')).qty_available,
                 'in_qty': in_qty.get(product.id, 0),
                 'out_qty': out_qty.get(product.id, 0) * -1,
             })
 
         main_html = self.env['ir.qweb']._render("stock.stock_main_template", {
             'options': options,
-            'product_data': product_data,
+            'products_data': products_data,
         })
 
         info = {
@@ -322,8 +313,6 @@ class StockReportNew(models.AbstractModel):
             'domain': [
                 '&',
                 '&',
-                '&',
-                    ('company_id', 'in', self._context['allowed_company_ids']),
                     ('date', '>=', options['date']['date_from']),
                     ('date', '<=', options['date']['date_to']),
                 '|',

@@ -200,10 +200,16 @@ const StockVariationReport = AbstractAction.extend({
         });
         
         // render filter (add selected class to the options that are selected)
-        _.each(self.report_options, function(k) {debugger
+        _.each(self.report_options, function(k) {
             if (k!== null && k.filter !== undefined) {
                 self.$searchview_buttons.find('[data-filter="'+k.filter+'"]').addClass('selected');
             }
+        });
+
+        _.each(this.$searchview_buttons.find('.js_stock_reports_one_choice_filter'), function(k) {
+            let menu_data = $(k).data('warehouse_id');
+            let option_data = self.report_options[$(k).data('filter')];
+            $(k).toggleClass('selected', option_data == menu_data);
         });
 
         // product filter
