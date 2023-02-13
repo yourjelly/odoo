@@ -137,7 +137,7 @@ QUnit.module("mail", {}, function () {
                 "should have icon on clickable element in messaging menu"
             );
             assert.ok(
-                document.querySelector(`.o_MessagingMenu_icon`).classList.contains("fa-comments"),
+                document.querySelector(`.o_MessagingMenu_icon`).classList.contains("fa-comments-o"),
                 "should have 'comments' icon on clickable element in messaging menu"
             );
             assert.strictEqual(
