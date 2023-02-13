@@ -180,14 +180,44 @@ $o-border-radius-sm: .2rem !default;
 // touch
 $o-touch-btn-padding: 7px 14px !default;
 
-// Buttons
-$o-btn-secondary-bg: $o-white !default;
-$o-btn-secondary-hover-bg: $o-gray-100 !default;
-$o-btn-secondary-hover-border: $o-gray-200 !default;
 
-$o-btn-light-bg: $o-white !default;
-$o-btn-light-border: $o-btn-light-bg !default;
-$o-btn-light-background-hover: $o-gray-100 !default;
+// Buttons
+$o-btns: (
+    "primary": (
+        background: $o-brand-primary,
+        border: $o-brand-primary,
+        color: $o-white,
+
+        hover-background: darken($o-brand-primary, 10%),
+        hover-border: darken($o-brand-primary, 20%),
+        hover-color: $o-white,
+
+        active-background: darken($o-brand-primary, 20%),
+        active-border: darken($o-brand-primary, 20%),
+        active-color: $o-white,
+
+        disabled-background: rgba($o-brand-primary, 0.5),
+        disabled-border: transparent,
+        disabled-color: $o-white,
+    ),
+    "secondary": (
+        background: $o-white,
+        border: $o-white,
+        color: $o-gray-700,
+
+        hover-background: $o-gray-100,
+        hover-border: $o-gray-200,
+        hover-color: $o-gray-800,
+
+        active-background: mix($o-brand-primary, $o-white, 80%),
+        active-border:  $o-brand-primary,
+        active-color: $o-gray-900,
+
+        disabled-background: transparent,
+        disabled-border: transparent,
+        disabled-color: $o-main-color-muted,
+    ),
+) !default;
 
 // Avatar
 $o-avatar-size: 1.7145em !default;

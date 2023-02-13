@@ -182,6 +182,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/bootstrap/scss/_variables.scss',
 
             ('include', 'web._assets_bootstrap'),
+            'web/static/src/scss/bootstrap_review_backend.scss',
 
             'base/static/src/css/modules.css',
 
@@ -298,6 +299,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/luxon/luxon.js',
 
             ('include', 'web._assets_bootstrap'),
+            'web/static/src/scss/bootstrap_review_frontend.scss',
 
             'web/static/src/legacy/scss/tempusdominus_overridden.scss',
             'web/static/lib/tempusdominus/tempusdominus.scss',
