@@ -14,7 +14,9 @@
       t-att="dataAttributes"
       tabindex="0"
     >
-      <t t-slot="default" />
+      <span>
+        <t t-slot="default" />
+      </span>
     </t>
   </t>
 
