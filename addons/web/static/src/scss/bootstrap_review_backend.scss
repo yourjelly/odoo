@@ -1,0 +1,35 @@
+///
+/// This file regroups the CSS rules made to fix/extend bootstrap in the backend
+/// ==============================================================================
+
+// Generating bootstrap color buttons was disabled (see import_bootstrap.scss).
+// We do it ourself here generating each btn design individually.
+
+@each $-style, $-color in $theme-colors {
+    .btn-#{$-style} {
+        @if (map-has-key($o-btns, $-style)) {
+            $-colors: map-get($o-btns, $-style);
+
+            @include button-variant(
+                o-safe-get($-colors, background),
+                o-safe-get($-colors, border),
+                o-safe-get($-colors, color),
+                o-safe-get($-colors, hover-background),
+                o-safe-get($-colors, hover-border),
+                o-safe-get($-colors, hover-color),
+                o-safe-get($-colors, active-background),
+                o-safe-get($-colors, active-border),
+                o-safe-get($-colors, active-color),
+                o-safe-get($-colors, disabled-background),
+                o-safe-get($-colors, disabled-border),
+                o-safe-get($-colors, disabled-color),
+            );
+        } @else {
+            @include button-variant($-color, $-color);
+        }
+    }
+
+    .btn-outline-#{$-style} {
+        @include button-outline-variant($-color);
+    }
+}
