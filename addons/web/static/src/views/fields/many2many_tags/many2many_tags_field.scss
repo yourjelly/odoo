@@ -45,9 +45,7 @@
         }
 
         .o_badge_text, .o_tag_badge_text {
-            @include o-text-overflow(inline-block);
-            max-width: 200px;
-            color: inherit;
+            @include o-text-overflow;
             line-height: 1.1;
         }
 
