@@ -139,6 +139,10 @@
                                         </a>
                                     </div>
                                 </group>
+                                <group string='Print on "Put in Pack"'>
+                                    <field name="auto_print_package_label" string="Package Label"/>
+                                    <field name="package_label_to_print" attrs="{'invisible':[('auto_print_package_label', '=', False)]}"/>
+                                </group>
                             </group>
                         </page>
                     </notebook>
