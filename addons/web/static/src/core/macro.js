@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
-import { isVisible } from "@web/core/utils/ui";
 import { Mutex } from "@web/core/utils/concurrency";
 
 // TODO-JCB: Don't use legacy imports.
@@ -94,14 +93,8 @@ class Macro {
         }
         const step = this.steps[this.currentIndex];
         await this.waitForDelay(step);
-        const { canContinue, el } = this.checkTrigger(step);
-
-        const elIsInDocument = el ? el.ownerDocument.contains(el) : true;
-        // TODO: Should take into account .o_blockUI. Not included at the moment because of the tests in `knowledge`.
-        // > E.g. check `helpdesk_pick_file_as_attachment_from_knowledge`.
-        const isBlocked = document.body.classList.contains("o_ui_blocked");
-
-        if (elIsInDocument && !isBlocked && canContinue) {
+        const [proceedToAction, el] = this.checkTrigger(step);
+        if (proceedToAction) {
             const willUnload = await callWithUnloadCheck(() => this.performAction(el, step));
             if (!willUnload) {
                 this.currentIndex++;
@@ -126,35 +119,27 @@ class Macro {
     /**
      * Find the trigger and assess whether it can continue on performing the actions.
      * @param {Step} param0
-     * @returns {{ canContinue: boolean; el: Element | null }}
+     * @returns {[proceedToAction: boolean; el: Element | undefined]}
      */
-    checkTrigger({ trigger, in_modal, action, allowInvisible = false }) {
-        let el = null;
+    checkTrigger({ trigger, in_modal }) {
+        let el;
+
         if (!trigger) {
-            return { canContinue: Boolean(action), el };
+            return [true, el];
         }
+
         if (typeof trigger === "function") {
-            const result = this.safeCall(trigger);
-            if (this.isElement(result)) {
-                el = result;
-            }
+            el = this.safeCall(trigger);
         } else if (typeof trigger === "string") {
             el = findTrigger(trigger, in_modal);
-        }
-        return { canContinue: Boolean(allowInvisible ? el : el && isVisible(el)), el };
-    }
-
-    isElement(el) {
-        if (el) {
-            // Should take into account SVGElement
-            if (el instanceof Element) {
-                return true;
-            } else {
-                const currentIFrame = findIframe();
-                return currentIFrame && el instanceof currentIFrame.contentWindow.Element;
-            }
         } else {
-            return false;
+            throw new Error(`Trigger can only be string or function.`);
+        }
+
+        if (el) {
+            return [true, el];
+        } else {
+            return [false, el];
         }
     }
 

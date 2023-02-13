@@ -7,6 +7,7 @@ import { TourPointer } from "../tour_pointer/tour_pointer";
 import { tourState } from "./tour_state";
 import { session } from "@web/session";
 import { _t } from "@web/core/l10n/translation";
+import { isVisible } from "@web/core/utils/ui";
 
 // TODO-JCB: Replace the following import with the non-legacy version.
 import { device } from "web.config";
@@ -169,6 +170,13 @@ function describeFailedStep(step) {
         .trim();
 }
 
+function canContinue(el, allowInvisible) {
+    const isInDoc = el.ownerDocument.contains(el);
+    const isElement = el instanceof el.ownerDocument.defaultView.Element || el instanceof Element;
+    const isBlocked = document.body.classList.contains("o_ui_blocked");
+    return isInDoc && isElement && !isBlocked && (!allowInvisible ? isVisible(el) : true);
+}
+
 let tourTimeout;
 
 /**
@@ -205,51 +213,8 @@ function stepCompilerAuto(macroDesc, [stepIndex, step], options) {
             },
         },
         {
-            // find triggers
-            allowInvisible: step.allowInvisible,
             delay: stepDelay,
             trigger: () => {
-                // TODO-JCB: Remove this hook.
-                if (step.beforeFindTriggers) {
-                    step.beforeFindTriggers(step);
-                }
-                const {
-                    triggerEl,
-                    altTriggerEl,
-                    extraTriggerOkay,
-                    skipTriggerEl,
-                } = findStepTriggers(step);
-
-                // [alt_trigger] - alternative to [trigger].
-                // [extra_trigger] - should also be present together with the [trigger].
-                let stepEl = extraTriggerOkay && (triggerEl || altTriggerEl);
-
-                // If [skip_trigger] element is present, immediately return [stepEl] for potential
-                // consumption of this step.
-                if (skipTriggerEl) {
-                    skipAction = true;
-                    stepEl = skipTriggerEl;
-                }
-                // TODO-JCB: Show a simple pointer when in watch mode and there is step delay.
-                // > PoS doesn't have the css for the original tour pointer. We might to introduce a way to replace the tour pointer component while running the tour.
-                if (stepEl) {
-                    // TODO-JCB: Remove this. Temporarily used for debugging.
-                    if (step.onFindTriggers) {
-                        step.onFindTriggers(step, {
-                            triggerEl,
-                            altTriggerEl,
-                            extraTriggerOkay,
-                            skipTriggerEl,
-                        });
-                    }
-                }
-                return stepEl;
-            },
-        },
-        {
-            // Do action. But, should look for the trigger again because it might have been gone.
-            allowInvisible: step.allowInvisible,
-            trigger: () => {
                 const {
                     triggerEl,
                     altTriggerEl,
@@ -268,7 +233,11 @@ function stepCompilerAuto(macroDesc, [stepIndex, step], options) {
                     stepEl = skipTriggerEl;
                 }
 
-                return stepEl;
+                if (!stepEl) {
+                    return false;
+                }
+
+                return canContinue(stepEl, step.allowInvisible) && stepEl;
             },
             action: (stepEl) => {
                 tourState.set(macroDesc.name, "currentIndex", stepIndex + 1);
@@ -701,7 +670,7 @@ export const tourService = {
                         );
                     }
                     effect.add({ type: "rainbow_man", message, fadeout });
-                    if (mode === 'manual') {
+                    if (mode === "manual") {
                         orm.call("web_tour.tour", "consume", [[name]]);
                     }
                 },
