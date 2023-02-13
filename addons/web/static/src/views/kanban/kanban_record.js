@@ -4,6 +4,7 @@ import { ColorList } from "@web/core/colorlist/colorlist";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { registry } from "@web/core/registry";
 import { useTooltip } from "@web/core/tooltip/tooltip_hook";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
@@ -17,7 +18,7 @@ import { evalDomain } from "../utils";
 import {
     KANBAN_BOX_ATTRIBUTE,
     KANBAN_MENU_ATTRIBUTE,
-    KANBAN_TOOLTIP_ATTRIBUTE,
+    KANBAN_TOOLTIP_ATTRIBUTE
 } from "./kanban_arch_parser";
 import { KanbanCompiler } from "./kanban_compiler";
 import { KanbanCoverImageDialog } from "./kanban_cover_image_dialog";
@@ -25,6 +26,8 @@ import { KanbanDropdownMenuWrapper } from "./kanban_dropdown_menu_wrapper";
 
 import { Component, onMounted, onWillUpdateProps, useRef } from "@odoo/owl";
 const { COLORS } = ColorList;
+
+const formatters = registry.category("formatters");
 
 // These classes determine whether a click on a record should open it.
 export const CANCEL_GLOBAL_CLICK = ["a", ".dropdown", ".oe_kanban_action"].join(",");

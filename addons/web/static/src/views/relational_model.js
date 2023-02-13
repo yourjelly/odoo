@@ -26,7 +26,6 @@ import { archParseBoolean, evalDomain, isNumeric, isRelational, isX2Many } from 
 const { DateTime } = luxon;
 import { markRaw, markup, toRaw } from "@odoo/owl";
 
-const formatters = registry.category("formatters");
 const preloadedDataRegistry = registry.category("preloadedData");
 
 const { CREATE, UPDATE, DELETE, FORGET, LINK_TO, DELETE_ALL, REPLACE_WITH } = x2ManyCommands;
