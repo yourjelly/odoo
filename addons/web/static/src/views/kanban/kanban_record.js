@@ -59,6 +59,63 @@ function getColorName(value) {
 }
 
 /**
+ * Returns a "raw" version of the field value on a given record.
+ *
+ * @param {Record} record
+ * @param {string} fieldName
+ * @returns {any}
+ */
+export function getRawValue(record, fieldName) {
+    const field = record.fields[fieldName];
+    const value = record.data[fieldName];
+    switch (field.type) {
+        case "one2many":
+        case "many2many": {
+            return value.count ? value.currentIds : [];
+        }
+        case "many2one": {
+            return (value && value[0]) || false;
+        }
+        case "date":
+        case "datetime": {
+            return value && value.toISO();
+        }
+        default: {
+            return value;
+        }
+    }
+}
+
+/**
+ * Returns a formatted version of the field value on a given record.
+ *
+ * @param {Record} record
+ * @param {string} fieldName
+ * @returns {string}
+ */
+export function getValue(record, fieldName) {
+    const field = record.fields[fieldName];
+    const value = record.data[fieldName];
+    const formatter = formatters.get(field.type, String);
+    return formatter(value, { field, data: record.data });
+}
+
+export function getFormattedRecord(record) {
+    const formattedRecord = Object.create(record, Object.getOwnPropertyDescriptors(record));
+    for (const fieldName in record.activeFields) {
+        formattedRecord[fieldName] = {
+            get value() {
+                return getValue(record, fieldName)
+            },
+            get raw_value() {
+                return getRawValue(record, fieldName)
+            }
+        };
+    }
+    return formattedRecord;
+}
+
+/**
  * Returns the image URL of a given field on the record.
  *
  * @param {Record} record
@@ -132,7 +189,7 @@ export class KanbanRecord extends Component {
 
         if (KANBAN_TOOLTIP_ATTRIBUTE in templates) {
             useTooltip("root", {
-                info: { ...this, record: this.props.record.formattedRecord },
+                info: { ...this, record: getFormattedRecord(this.props.record) },
                 template: this.templates[KANBAN_TOOLTIP_ATTRIBUTE],
             });
         }
@@ -155,7 +212,7 @@ export class KanbanRecord extends Component {
         const { archInfo, list } = props;
         const { activeActions } = archInfo;
 
-        this.record = this.props.record.formattedRecord;
+        this.record = getFormattedRecord(this.props.record);
         // Widget
         const deletable = activeActions.delete && (!list.groupedBy || !list.groupedBy("m2m"));
         const editable = activeActions.edit;

@@ -172,17 +172,6 @@ export class Record extends DataPoint {
         return this.translatableFields.filter((f) => this.dirtyFields.includes(f));
     }
 
-    get formattedRecord() {
-        const record = Object.create(this, Object.getOwnPropertyDescriptors(this));
-        for (const fieldName in this.activeFields) {
-            record[fieldName] = {
-                value: getValue(this, fieldName),
-                raw_value: getRawValue(this, fieldName),
-            };
-        }
-        return record;
-    }
-
     get isInEdition() {
         return this.mode === "edit";
     }

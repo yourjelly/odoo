@@ -401,48 +401,6 @@ function clearObject(obj) {
     }
 }
 
-/**
- * Returns a "raw" version of the field value on a given record.
- *
- * @param {Record} record
- * @param {string} fieldName
- * @returns {any}
- */
-export function getRawValue(record, fieldName) {
-    const field = record.fields[fieldName];
-    const value = record.data[fieldName];
-    switch (field.type) {
-        case "one2many":
-        case "many2many": {
-            return value.count ? value.currentIds : [];
-        }
-        case "many2one": {
-            return (value && value[0]) || false;
-        }
-        case "date":
-        case "datetime": {
-            return value && value.toISO();
-        }
-        default: {
-            return value;
-        }
-    }
-}
-
-/**
- * Returns a formatted version of the field value on a given record.
- *
- * @param {Record} record
- * @param {string} fieldName
- * @returns {string}
- */
-export function getValue(record, fieldName) {
-    const field = record.fields[fieldName];
-    const value = record.data[fieldName];
-    const formatter = formatters.get(field.type, String);
-    return formatter(value, { field, data: record.data });
-}
-
 export class Record extends DataPoint {
     setup(params, state) {
         if ("resId" in params) {
@@ -577,17 +535,6 @@ export class Record extends DataPoint {
             return [];
         }
         return this._changes.map((change) => this.activeFields[change]);
-    }
-
-    get formattedRecord() {
-        const record = Object.create(this, Object.getOwnPropertyDescriptors(this));
-        for (const fieldName in this.activeFields) {
-            record[fieldName] = {
-                value: getValue(this, fieldName),
-                raw_value: getRawValue(this, fieldName),
-            };
-        }
-        return record;
     }
 
     get isInEdition() {

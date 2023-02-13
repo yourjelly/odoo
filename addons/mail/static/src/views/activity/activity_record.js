@@ -5,6 +5,7 @@ import { Component } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Field } from "@web/views/fields/field";
 import {
+    getFormattedRecord,
     getImageSrcFromRecordInfo,
     isHtmlEmpty,
 } from "@web/views/kanban/kanban_record";
@@ -40,7 +41,7 @@ export class ActivityRecord extends Component {
     getRenderingContext() {
         const { record } = this.props;
         return {
-            record: record.formattedRecord,
+            record: getFormattedRecord(record),
             activity_image: (...args) => getImageSrcFromRecordInfo(record, ...args),
             user_context: this.user.context,
             widget: this.widget,
