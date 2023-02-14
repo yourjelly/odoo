@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, RedirectWarning
+from odoo.tools import float_repr, float_round
 
 
 class AccountMove(models.Model):
@@ -98,3 +99,38 @@ class AccountMove(models.Model):
         # TO OVERRIDE
         self.ensure_one()
         return False
+
+    def _l10n_in_get_hsn_summary(self):
+        for move in self:
+            hsn_summary = {}
+
+            def grouping_key_generator(base_line, tax_values):
+                hsn = base_line['product'].l10n_in_hsn_code or ""
+                gst_tag_ids = self.env["account.account.tag"]
+                line_code = ""
+                tax_line_tag_ids = tax_values['tag_ids']
+                for gst in ["cgst", "sgst", "igst"]:
+                    gst_tag = self.env.ref("l10n_in.tax_tag_%s" % (gst))
+                    gst_tag_ids += gst_tag
+                    if gst_tag.id in tax_line_tag_ids:
+                        line_code = gst
+                cess_tag_ids = self.env.ref("l10n_in.tax_tag_cess") + self.env.ref("l10n_in.tax_tag_state_cess")
+                if any(tag.id in tax_line_tag_ids for tag in cess_tag_ids):
+                    line_code = "cess"
+                tax_ids = base_line['record'].tax_ids.flatten_taxes_hierarchy()
+                gst_tax_ids = tax_ids.filtered(
+                    lambda t: any(tag in gst_tag_ids for tag in t.invoice_repartition_line_ids.tag_ids))
+                gst_rate = float_repr(sum(gst_tax_ids.mapped('amount')), 0)
+                return {
+                    "hsn": hsn,
+                    "gst_rate": gst_rate,
+                    "line_code": line_code,
+                }
+            tax_summary = move._prepare_invoice_aggregated_taxes(grouping_key_generator=grouping_key_generator)
+            for value in tax_summary['tax_details'].values():
+                hsn_key = "%s-%s" % (value['hsn'], value['gst_rate'])
+                hsn_summary.setdefault(hsn_key, {'hsn': value['hsn'], 'gst_rate': value['gst_rate'], 'amount_sgst': 0.00,
+                                                 'amount_cgst': 0.00, 'amount_igst': 0.00, 'amount_cess': 0.00})
+                if value['line_code'] in ['cgst', 'sgst', 'igst', 'cess']:
+                    hsn_summary[hsn_key]['amount_%s' % value['line_code']] += round(value['tax_amount_currency'], 2)
+            return hsn_summary

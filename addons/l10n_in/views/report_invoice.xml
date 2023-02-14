@@ -42,6 +42,41 @@
             </h2>
         </xpath>
 
+        <xpath expr="//div[@name='payment_term']" position="before">
+            <t t-if="o.company_id.account_fiscal_country_id.code == 'IN'">
+                <t t-set="lines" t-value="o._l10n_in_get_hsn_summary().values()"/>
+                <t t-if="lines">
+                    <t t-set="display_gst" t-value="any(l.get('amount_sgst') for l in lines)"/>
+                    <t t-set="display_igst" t-value="any(l.get('amount_igst') for l in lines)"/>
+                    <t t-set="display_cess" t-value="any(l.get('amount_cess') for l in lines)"/>
+                    <div name="hsn_summary" class="col-6">
+                        <table class="table table-sm col-6" style="page-break-inside: avoid;">
+                            <thead>
+                                <th>HSN</th>
+                                <th>RATE</th>
+                                <t t-if="display_gst">
+                                    <th>SGST</th>
+                                    <th>CGST</th>
+                                </t>
+                                <th t-if="display_igst">IGST</th>
+                                <th t-if="display_cess">CESS</th>
+                            </thead>
+                            <tr t-foreach="lines" t-as="line">
+                                <td><span t-esc="line['hsn']"/></td>
+                                <td><span t-esc="line['gst_rate']"/></td>
+                                <t t-if="display_gst">
+                                    <td><span t-esc="line['amount_sgst']"/></td>
+                                    <td><span t-esc="line['amount_cgst']"/></td>
+                                </t>
+                                <td t-if="display_igst"><span t-esc="line['amount_igst']"/></td>
+                                <td t-if="display_cess"><span t-esc="line['amount_cess']"/></td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </xpath>
+
     </template>
 
 </odoo>
