@@ -548,11 +548,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         # create a valid and complete statement as the first lines (no statement before)
         line1 = self.create_bank_transaction(1, '2020-01-10')
         line2 = self.create_bank_transaction(2, '2020-01-11')
-        statement1 = self.env['account.bank.statement'].create({
-            'line_ids': [Command.set((line1 + line2).ids)],
-            'balance_start': 0,
-            'balance_end_real': 3,
-        })
+        statement1 = self.env['account.bank.statement'].with_context(st_line_id=line1.id, active_ids=[line1.id, line2.id]).create({})
         self.assertRecordValues(statement1, [{
             'is_complete': True,
             'is_valid': True,
@@ -629,7 +625,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             {'date': fields.Date.from_string('2020-01-13'), 'statement_id': statement1.id},
         ])
 
-        # changing statement 2 balance makes statement 1 valid,
+        # changing statement 2 balance makes statement 1 invalid,
         # but making statement 1 the first statement should make it valid again
         statement2.balance_end_real = 100
         statement2.flush_recordset(['balance_end_real'])

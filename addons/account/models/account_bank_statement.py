@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
+from xmlrpc.client import MAXINT
 
 
 class AccountBankStatement(models.Model):
@@ -14,12 +15,27 @@ class AccountBankStatement(models.Model):
         # EXTENDS base
         defaults = super().default_get(fields_list)
         # create statement on a saved statement line in the tree view
-        if self._context.get('st_line_id'):
+        active_ids = self._context.get('active_ids')
+        lines = None
+        if self._context.get('st_line_id') and len(active_ids) <= 1:
+            # single line edit
             st_line = self.env['account.bank.statement.line'].browse(self._context['st_line_id'])
             defaults['balance_start'] = st_line.running_balance - (st_line.amount if st_line.state == 'posted' else 0)
+            defaults['balance_end_real'] = st_line.running_balance
+            defaults['line_ids'] = [Command.set(st_line.ids)]
             return defaults
+        if self._context.get('st_line_id') and len(active_ids) > 1:
+            # multi edit
+            lines = self.env['account.bank.statement.line'].browse(active_ids) \
+                .filtered(lambda line: not line.statement_complete) \
+                .sorted()
+            if len(lines) != len(active_ids):
+                raise UserError(_("One or more selected lines already belong to a complete statement."))
+            if len(lines.journal_id) > 1:
+                raise UserError(_("A statement should only contain lines from the same journal."))
+
         # create statement from a new line in the tree view, not stored in the db yet
-        if self._context.get('st_line_date'):
+        if self._context.get('st_line_date') and not lines:
             defaults['balance_start'] = self.env['account.bank.statement.line'].search(
                 domain=[
                     ('date', '<=', self._context['st_line_date']),
@@ -28,8 +44,8 @@ class AccountBankStatement(models.Model):
                 order='internal_index desc',
                 limit=1
             ).running_balance
+            defaults['balance_end_real'] = defaults['balance_start'] + self._context.get('st_line_amount', 0.0)
             return defaults
-        lines = None
         # creating statements with split button
         if self._context.get('split_line_id'):
             current_st_line = self.env['account.bank.statement.line'].browse(self.env.context.get('split_line_id'))
@@ -53,12 +69,14 @@ class AccountBankStatement(models.Model):
             )
         # if it is called from the action menu, we can have both start and end balances and we filter out
         # completed statements, because it is probably due to a mistake from the user
-        elif self._context.get('active_model') == 'account.bank.statement.line' and self._context.get('active_ids'):
-            lines = self.env['account.bank.statement.line'].browse(self._context.get('active_ids')) \
+        elif self._context.get('active_model') == 'account.bank.statement.line' and active_ids:
+            lines = self.env['account.bank.statement.line'].browse(active_ids) \
                 .filtered(lambda line: not line.statement_complete) \
                 .sorted()
             if not lines:
                 raise UserError(_('One or more selected lines already belong to a complete statement.'))
+            if len(lines.journal_id) > 1:
+                raise UserError(_("A statement should only contain lines from the same journal."))
         if lines:
             defaults['line_ids'] = [Command.set(lines.ids)]
             defaults['balance_start'] = lines[-1:].running_balance - (
@@ -149,6 +167,10 @@ class AccountBankStatement(models.Model):
         search='_search_is_valid',
     )
 
+    problem_description = fields.Text(
+        compute='_compute_problem_description',
+    )
+
     attachment_ids = fields.Many2many(
         comodel_name='ir.attachment',
         string="Attachments",
@@ -184,16 +206,32 @@ class AccountBankStatement(models.Model):
     @api.depends('balance_end_real', 'balance_end')
     def _compute_is_complete(self):
         for stmt in self:
-            stmt.is_complete = stmt.line_ids.filtered(lambda l: l.state == 'posted') and stmt.currency_id.compare_amounts(
-                stmt.balance_end, stmt.balance_end_real) == 0
+            if not stmt.line_ids and isinstance(stmt.id, models.NewId):
+                stmt.is_complete = stmt.currency_id.compare_amounts(
+                    stmt.balance_start + self._context.get('st_line_amount', 0.0), stmt.balance_end_real) == 0
+            else:
+                stmt.is_complete = stmt.line_ids.filtered(lambda l: l.state == 'posted') and stmt.currency_id.compare_amounts(
+                    stmt.balance_end, stmt.balance_end_real) == 0
 
+    @api.depends('balance_end_real', 'balance_end')
     def _compute_is_valid(self):
         # we extract the invalid statements, the statements with no lines and the first statement are not in the query
         # because they don't have a previous statement, so they are excluded from the join, and we consider them valid.
         # if we have extracted the valid ones, we would have to mark above-mentioned statements valid manually
+        # The computation for a single record differs from a list of records
         invalids = self.filtered(lambda s: s.id in self._get_invalid_statement_ids())
         invalids.is_valid = False
         (self - invalids).is_valid = True
+
+    @api.depends('balance_end_real', 'balance_start')
+    def _compute_problem_description(self):
+        for stmt in self:
+            description = ""
+            if not stmt.is_valid:
+                description = _("The starting balance doesn't match the ending balance of the previous statement.")
+            elif not stmt.is_complete:
+                description = _("The starting balance + transaction values does not match the ending balance.")
+            stmt.problem_description = description
 
     def _search_is_valid(self, operator, value):
         if operator not in ('=', '!=', '<>'):
@@ -227,6 +265,17 @@ class AccountBankStatement(models.Model):
     # -------------------------------------------------------------------------
     def _get_invalid_statement_ids(self, all_statements=None):
         """ Returns the statements that are invalid for _compute and _search methods."""
+
+        if not all_statements and len(self) == 1:
+            # The statement or line may not be saved in the db
+            index = self.first_line_index or \
+                    f"{self._context.get('st_line_date', fields.Date.today().strftime('%Y%m%d')).replace('-','')}" \
+                    f"{MAXINT}{MAXINT}"
+            previous = self.env['account.bank.statement'].search([
+                    ('first_line_index', '<', index),
+                    ('journal_id', '=', self.journal_id.id)
+                ], limit=1, order='first_line_index DESC')
+            return [self.id] if previous and self.currency_id.compare_amounts(self.balance_start, previous.balance_end_real) != 0 else []
 
         self.env['account.bank.statement.line'].flush_model(['statement_id', 'internal_index'])
         self.env['account.bank.statement'].flush_model(['balance_start', 'balance_end_real', 'first_line_index'])
