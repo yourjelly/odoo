@@ -1740,6 +1740,8 @@ const Wysiwyg = Widget.extend({
         this.toolbar.$el.toggleClass('noarrow', isInMedia);
         // Unselect all media.
         this.$editable.find('.o_we_selected_image').removeClass('o_we_selected_image');
+        const linkNode = getInSelection(this.odooEditor.document, 'a');
+        this.toolbar.$el.find('#unlink').toggleClass('d-none', !linkNode);
         if (isInMedia) {
             this.odooEditor.automaticStepSkipStack();
             // Select the media in the DOM.
