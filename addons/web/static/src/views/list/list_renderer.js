@@ -663,15 +663,6 @@ export class ListRenderer extends Component {
         } else {
             classNames.push("cursor-default");
         }
-        const orderBy = this.props.list.orderBy;
-        if (
-            orderBy.length &&
-            column.widget !== "handle" &&
-            orderBy[0].name === column.name &&
-            column.hasLabel
-        ) {
-            classNames.push("table-active");
-        }
         if (this.isNumericColumn(column)) {
             classNames.push("o_list_number_th");
         }
@@ -1782,20 +1773,6 @@ export class ListRenderer extends Component {
             field: this.fields[column.name],
             fieldInfo: column,
         });
-    }
-
-    /**
-     * Handles the :hover effect on sortable column headers
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-    onHoverSortColumn(ev, column) {
-        if (this.props.list.orderBy.length && this.props.list.orderBy[0].name === column.name) {
-            return;
-        } else if (this.isSortable(column) && column.widget !== "handle") {
-            ev.target.classList.toggle("table-active", ev.type == "mouseenter");
-        }
     }
 
     onColumnTitleMouseUp() {
