@@ -170,9 +170,16 @@ function describeFailedStep(step) {
         .trim();
 }
 
+/**
+ * IMPROVEMENT: Consider disabled? Or transitioning (moving) elements?
+ * @param {Element} el
+ * @param {boolean} allowInvisible
+ * @returns {boolean}
+ */
 function canContinue(el, allowInvisible) {
     const isInDoc = el.ownerDocument.contains(el);
     const isElement = el instanceof el.ownerDocument.defaultView.Element || el instanceof Element;
+    // TODO: Take into account ".o_blockUI".
     const isBlocked = document.body.classList.contains("o_ui_blocked");
     return isInDoc && isElement && !isBlocked && (!allowInvisible ? isVisible(el) : true);
 }
@@ -195,11 +202,8 @@ function stepCompilerAuto(macroDesc, [stepIndex, step], options) {
     let skipAction = false;
     return [
         {
-            // log
             action: () => {
                 skipAction = false;
-                // Log the step that is currently being processed so that when debugging,
-                // the developer knows the current step that fails or that's taking time.
                 console.log(`Tour ${macroDesc.name}: ${describeStep(step)}`);
                 if (!watch) {
                     // TODO-JCB: This can just be a timeout callback on the macro.
@@ -222,12 +226,8 @@ function stepCompilerAuto(macroDesc, [stepIndex, step], options) {
                     skipTriggerEl,
                 } = findStepTriggers(step);
 
-                // [alt_trigger] - alternative to [trigger].
-                // [extra_trigger] - should also be present together with the [trigger].
                 let stepEl = extraTriggerOkay && (triggerEl || altTriggerEl);
 
-                // If [skip_trigger] element is present, immediately return [stepEl] for potential
-                // consumption of this step.
                 if (skipTriggerEl) {
                     skipAction = true;
                     stepEl = skipTriggerEl;
@@ -283,32 +283,72 @@ function stepCompilerAuto(macroDesc, [stepIndex, step], options) {
 }
 
 /**
- * Augments `step` of a tour for 'manual' (run) mode.
- * TODO-JCB: Describe the trick here. How does the macro engine able to wait for the user's action?
- * TODO-JCB: Improve the code.
  * @param {*} step
  * @param {*} options
  * @returns
  */
 function stepCompilerManual(macroDesc, [stepIndex, step], options) {
-    const { pointerMethods, mode, macroEngine } = options;
+    const { pointerMethods, mode } = options;
 
     if (shouldOmit(step, mode)) {
         return [];
     }
 
-    let proceedWith, stepEl, prevEl, consumeEvent, $anchorEl;
+    function getScrollParent(node) {
+        if (node == null) {
+            return null;
+        }
+        if (node.scrollHeight > node.clientHeight) {
+            return node;
+        } else {
+            return getScrollParent(node.parentNode);
+        }
+    }
+
+    function setupListeners({ $anchor, consumeEvent, onScroll, onConsume }) {
+        const anchorEl = $anchor[0];
+        const scrollEl = getScrollParent(anchorEl);
+
+        let timeout, removeScrollListener = () => {};
+
+        if (scrollEl) {
+            function scroll() {
+                clearTimeout(timeout);
+                timeout = setTimeout(onScroll, 50);
+            }
+            scrollEl.addEventListener("scroll", scroll);
+            removeScrollListener = () => scrollEl.removeEventListener("scroll", scroll);
+        }
+
+        $anchor.on(`${consumeEvent}.anchor`, onConsume);
+        $anchor.on("mouseenter.anchor", () => {
+            pointerMethods.setState({ mode: "info" });
+        });
+        $anchor.on("mouseleave.anchor", () => {
+            pointerMethods.setState({ mode: "bubble" });
+        });
+        const removeAnchorListeners = () => $anchor.off(".anchor");
+
+        return () => {
+            removeScrollListener();
+            removeAnchorListeners();
+        };
+    }
+
+    let proceedWith = null,
+        scrolled = false,
+        removeListeners = () => {};
+
     return [
         {
-            ...step,
-            ...{
-                action: () => {
-                    console.log(step.trigger);
-                },
+            action: () => {
+                console.log(step.trigger);
             },
         },
         {
             trigger: () => {
+                removeListeners();
+
                 if (proceedWith) return proceedWith;
 
                 const {
@@ -318,68 +358,51 @@ function stepCompilerManual(macroDesc, [stepIndex, step], options) {
                     skipTriggerEl,
                 } = findStepTriggers(step);
 
-                // This callback can be called multiple times until it returns true.
-                // We should take into account the fact the element is not in the
-                // dom. [update] takes into account whether [stepEl] is null or not.
-                prevEl = stepEl;
-                // [alt_trigger] - alternative to [trigger].
-                // [extra_trigger] - should also be present together with the [trigger].
-                stepEl = extraTriggerOkay && (triggerEl || altTriggerEl);
-                consumeEvent = step.consumeEvent || getConsumeEventType($(stepEl), step.run);
-                // If [skip_trigger] element is present, immediately return [stepEl] for potential
-                // consumption of this step.
-                if (stepEl && skipTriggerEl) {
-                    return stepEl;
+                if (skipTriggerEl) {
+                    return skipTriggerEl;
                 }
 
-                if (prevEl) {
-                    $anchorEl.off(".anchor");
+                const stepEl = extraTriggerOkay && (triggerEl || altTriggerEl);
+
+                if (stepEl && canContinue(stepEl, step.allowInvisible)) {
+                    const consumeEvent =
+                        step.consumeEvent || getConsumeEventType($(stepEl), step.run);
+                    const $anchor = getAnchorEl($(stepEl), consumeEvent);
+                    const anchorEl = $anchor[0];
+
+                    const updatePointer = () => {
+                        pointerMethods.setState({ isVisible: true });
+                        pointerMethods.update(step, anchorEl);
+                    };
+
+                    removeListeners = setupListeners({
+                        $anchor,
+                        consumeEvent,
+                        onScroll: updatePointer,
+                        onConsume: () => {
+                            proceedWith = stepEl;
+                            pointerMethods.setState({ isVisible: false });
+                        },
+                    });
+
+                    if (!scrolled) {
+                        scrolled = true;
+                        stepEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    }
+
+                    updatePointer();
+                } else {
+                    pointerMethods.setState({ isVisible: false });
                 }
-                if (stepEl) {
-                    $anchorEl = getAnchorEl($(stepEl), consumeEvent);
-                    // Start waiting for action, or automatically perform `step.run`.
-                    // Set `proceedWith` to a non-falsy value as a signal to proceed to the next step.
-                    pointerMethods.setState({ isVisible: true });
-                    $anchorEl.on(`${consumeEvent}.anchor`, async () => {
-                        // TODO-JCB: The following logic comes from _getAnchorAndCreateEvent and it might be important to take it into account.
-                        // $consumeEventAnchors.on(consumeEvent + ".anchor", (function (e) {
-                        //     if (e.type !== "mousedown" || e.which === 1) { // only left click
-                        //         if (this.info.consumeVisibleOnly && !this.isShown()) {
-                        //             // Do not consume non-displayed tips.
-                        //             return;
-                        //         }
-                        //         this.trigger("tip_consumed");
-                        //         this._unbind_anchor_events();
-                        //     }
-                        // }).bind(this));
-
-                        // stop waiting
-                        $anchorEl.off(".anchor");
-
-                        proceedWith = stepEl;
-
-                        // Finally, advance to the next step.
-                        // The following will call this `trigger` function which returns the `proceedWith`.
-                        macroEngine.advanceMacros();
-                    });
-                    $anchorEl.on("mouseenter.anchor", () => {
-                        pointerMethods.setState({ mode: "info" });
-                    });
-                    $anchorEl.on("mouseleave.anchor", () => {
-                        pointerMethods.setState({ mode: "bubble" });
-                    });
-                }
-                const newAnchor = stepEl && $anchorEl[0];
-                pointerMethods.update(step, newAnchor);
             },
             action: () => {
-                // Clean up
-                proceedWith = undefined;
-                stepEl = undefined;
-                consumeEvent = undefined;
-                $anchorEl = undefined;
-                options.pointerMethods.setState({ isVisible: false, mode: "bubble" });
+                pointerMethods.setState({ isVisible: false, mode: "bubble" });
                 tourState.set(macroDesc.name, "currentIndex", stepIndex + 1);
+
+                // Reset state variables.
+                proceedWith = null;
+                scrolled = false;
+                removeListeners = () => {};
             },
         },
     ];
@@ -649,7 +672,6 @@ export const tourService = {
             const stepCompiler = mode === "auto" ? stepCompilerAuto : stepCompilerManual;
             const checkDelay = mode === "auto" ? tour.checkDelay : 50;
             return compileTourToMacro(tour, stepCompiler, {
-                macroEngine,
                 pointerMethods,
                 mode,
                 stepDelay,
