@@ -18,7 +18,7 @@
             &:after {
                 @include o-position-absolute($left: 0, $right: 0);
                 height: map-get($spacers, 3);
-                border-top: $border-width solid $border-color;
+                border-top: $border-width solid var(--ListRenderer-thead-border-end-color);
                 background-image: var(--ListRenderer-thead-shadow);
                 transform: translateY(-#{$border-width}); // Compensate rendering misplacement
                 -moz-transform: translateY(0); // Firefox doesn't need rendering adjustments
