@@ -228,7 +228,7 @@ function addTwoAnswers() {
             trigger: "div[name=suggested_answer_ids] .o_field_x2many_list_row_add a",
             in_modal: true,
         }, {
-            trigger: 'tr.o_selected_row div[name=value] input',
+            trigger: 'tr:nth-child(2).o_selected_row div[name=value] input',
             run: 'text Answer B',
             in_modal: true,
         }
