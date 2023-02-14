@@ -33,8 +33,11 @@
 
     .o_kanban_record > div:not(.o_dropdown_kanban),
     .o_kanban_quick_create {
-        border: 1px solid $border-color;
         background-color: $o-view-background-color;
+
+        &:hover {
+            box-shadow: inset 0 0 0 $border-width rgba($border-color, .5);
+        }
     }
 
     .o_kanban_quick_create {
@@ -50,7 +53,7 @@
     .o_kanban_record {
         position: relative;
         min-width: 150px;
-        margin: 0 0 -1px;
+        margin: 0 0 $border-width * 2;
 
         > div:not(.o_dropdown_kanban) {
             padding: var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
@@ -58,16 +61,11 @@
             height: 100%;
         }
 
-        &:focus,
-        &:focus-within {
-            margin-bottom: 0; // show the shadow on top of the previous & next cards in grouped mode
-        }
-
         // ------- Kanban Record, v11 Layout -------
         // Records colours
         > div::after {
             content: "";
-            @include o-position-absolute($border-width * 2, auto, $border-width * 2, $border-width);
+            @include o-position-absolute($border-width, auto, $border-width, $border-width);
             width: $o-kanban-color-border-width;
         }
 
@@ -347,7 +345,7 @@
         &:focus,
         &:focus-within {
             @include global-click-selector {
-                outline: thin solid mix(map-get($theme-colors, "primary"), map-get($grays, "400"));
+                outline: thin solid mix($o-main-link-color, map-get($grays, "300"));
                 outline-offset: -1px;
 
                 &:after {
@@ -439,27 +437,25 @@
 
     // Kanban Grouped Layout
     &.o_kanban_grouped {
+        --KanbanGroup-width: calc(var(--KanbanRecord--small-width) + (2 * var(--KanbanGroup-padding-h)));
+
         min-height: 100%;
 
         @include media-breakpoint-down(md) {
+            --KanbanGroup-width: 90%; // don't take full width to give a hint of next/previous column on smaller screens
+
             min-height: initial;
             height: 100%;
             overflow: scroll hidden !important;
             scroll-snap-type: x mandatory;
         }
 
-        .o_kanban_record {
-            width: 100%;
+        @include media-breakpoint-up(lg) {
+            --KanbanGroup-width: calc(var(--KanbanRecord-width) + (2 * var(--KanbanGroup-padding-h)));
         }
 
-        --KanbanGroup-width: 90%; // don't take full width to give a hint of next/previous column on smaller screens
-
-        @include media-breakpoint-up(md) {
-            --KanbanGroup-width: calc(var(--KanbanRecord-width) + (2 * var(--KanbanGroup-padding-h)));
-
-            &.o_kanban_small_column {
-                --KanbanGroup-width: calc(var(--KanbanRecord--small-width) + (2 * var(--KanbanGroup-padding-h)));
-            }
+        .o_kanban_record {
+            width: 100%;
         }
 
         .o_kanban_group,
@@ -474,8 +470,6 @@
 
     // Kanban Grouped Layout - Column default
     .o_kanban_group {
-        padding: 0 var(--KanbanGroup-padding-h) var(--KanbanGroup-padding-bottom);
-
         .o_kanban_header > .o_kanban_header_title {
             &:hover .o_kanban_config,
             .o_kanban_config.show {
@@ -506,6 +500,10 @@
         }
     }
 
+    .o_kanban_group, .o_column_quick_create {
+        padding: 0 var(--KanbanGroup-padding-h) var(--KanbanGroup-padding-bottom);
+    }
+
     .o_kanban_group .o_kanban_header,
     .o_quick_create_folded {
         position: sticky; // keep it visible
@@ -513,8 +511,6 @@
     }
 
     .o_kanban_group:not(.o_column_folded) .o_kanban_header {
-        background-color: $o-webclient-background-color;
-
         .dropdown-item {
             max-width: calc(var(--KanbanRecord-width) * 0.75);
             text-overflow: ellipsis;
@@ -544,12 +540,15 @@
         }
         // don't visually fold on smaller screens (aka. mobile)
         @include media-breakpoint-up(md) {
-            @include o-kanban-slim-col;
-
-            background-color: var(--KanbanGroup-grouped-bg, #{$gray-200});
+            --KanbanGroup-padding-h: 0;
 
             & + .o_kanban_group.o_column_folded {
                 margin-left: 1px;
+            }
+
+            .o_kanban_header {
+                padding: 0 floor($o-kanban-group-padding * 0.7);
+                box-shadow: inset 0 ($border-width * 2) 0 $o-gray-200;
             }
 
             .o_kanban_header_title {

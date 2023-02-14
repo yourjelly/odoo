@@ -268,13 +268,6 @@
         }
     }
 }
-@mixin o-kanban-slim-col {
-    position: relative;
-    flex: 0 0 auto;
-    margin: 0;
-    padding: 0 floor($o-kanban-group-padding * 0.7);
-    cursor: pointer;
-}
 @mixin o-kanban-header-title {
     display: flex;
     align-items: center;
@@ -290,7 +283,7 @@
 }
 
 // ------- Kanban records mixins -------
-@mixin o-kanban-record-title($font-size: 1em) {
+@mixin o-kanban-record-title($font-size: $h5-font-size) {
     color: $headings-color;
     font-size: $font-size;
     font-weight: 500;
