@@ -66,4 +66,17 @@
 
         <menuitem id="project_config_settings_menu_action" name="Settings" parent="menu_project_config"
             sequence="0" action="project_config_settings_action" groups="base.group_system"/>
+
+        <record id="action_calculator" model="ir.actions.client">
+            <field name="name">Calculator</field>
+            <field name="tag">calculator_tag</field>
+            <field name="res_model">res.config.settings</field>
+        </record>
+
+        <menuitem id="menu_calculator"
+            name="Calculator"
+            action="action_calculator"
+            parent="mail.mail_menu_technical"
+            sequence="1"
+            groups="base.group_system"/>
 </odoo>

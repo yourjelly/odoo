@@ -59,6 +59,9 @@
     'post_init_hook': '_project_post_init',
     'assets': {
         'web.assets_backend': [
+            'project/static/src/calc/arithmetic_utils.js',
+            'project/static/src/calc/calculator.js',
+            'project/static/src/calc/calculator_template.xml',
             'project/static/src/css/project.css',
             'project/static/src/utils/**/*',
             'project/static/src/components/**/*',
@@ -70,6 +73,8 @@
             'project/static/src/js/project_rating_pivot_view.js',
             'project/static/src/js/project_task_kanban_examples.js',
             'project/static/src/js/tours/project.js',
+            'project/static/src/calc/arithmetic_scss.scss',
+            'project/static/src/calc/arithmetic_tour.js',
             'project/static/src/scss/project_dashboard.scss',
             'project/static/src/scss/project_form.scss',
             'project/static/src/scss/project_widgets.scss',
@@ -81,6 +86,7 @@
             'project/static/src/js/portal_rating.js',
         ],
         'web.qunit_suite_tests': [
+            'project/static/src/calc/test_arithmetic_utils.js',
             'project/static/tests/**/*.js',
         ],
         'web.assets_tests': [

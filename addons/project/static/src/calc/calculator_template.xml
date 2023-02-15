@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="project.calculator" owl="1">
+        <div class="calculator_row">
+            <div class="calculator">
+                <div class="input">
+                    <input type='text' id='result' class ='screen' style="text-align: right; font-weight: bold; font-size: 20px;"/>
+                </div>
+                  <div class="buttons">
+                    <div class="operators">
+                      <div><button type="button" value="+" class="calendar_btn btn btn-secoundry operator sum_operator" t-on-click="(ev)=>onDisplay(ev,'+')">+</button></div>
+                      <div> <button type="button" value="-" class="calendar_btn btn btn-secoundry operator sub_operator" t-on-click="(ev)=>onDisplay(ev,'-')">-</button></div>
+                      <div> <button type="button" value="*" class="calendar_btn btn btn-secoundry operator pro_operator" t-on-click="(ev)=>onDisplay(ev,'*')">*</button></div>
+                      <div> <button type="button" value="/" class="calendar_btn btn btn-secoundry operator div_operator" t-on-click="(ev)=>onDisplay(ev,'/')">/</button></div>
+                    </div>
+                    <div class="leftPanel">
+                      <div class="numbers">
+                        <div><button type="button" value="7" class="btn btn-secoundry seven" t-on-click="(ev)=>onDisplay(ev,'7')">7</button></div>
+                        <div><button type="button" value="8" class="btn btn-secoundry seven" t-on-click="(ev)=>onDisplay(ev,'8')">8</button></div>
+                        <div><button type="button" value="9" class="btn btn-secoundry nine" t-on-click="(ev)=>onDisplay(ev,'9')">9</button></div>
+                      </div>
+                      <div class="numbers">
+                        <div>   <button type="button" value="4" class="calendar_btn btn btn-secoundry four" t-on-click="(ev)=>onDisplay(ev,'4')">4</button></div>
+                        <div> <button type="button" value="5" class="calendar_btn btn btn-secoundry five" t-on-click="(ev)=>onDisplay(ev,'5')">5</button></div>
+                        <div>  <button type="button" value="6" class="calendar_btn btn btn-secoundry six" t-on-click="(ev)=>onDisplay(ev,'6')">6</button></div>
+                      </div>
+                      <div class="numbers">
+                        <div>  <button type="button" value="1" class="calendar_btn btn btn-secoundry one" t-on-click="(ev)=>onDisplay(ev,'1')">1</button></div>
+                        <div>  <button type="button" value="2" class="calendar_btn btn btn-secoundry two" t-on-click="(ev)=>onDisplay(ev,'2')">2</button></div>
+                        <div> <button type="button" value="3" class="calendar_btn btn btn-secoundry three" t-on-click="(ev)=>onDisplay(ev,'3')">3</button></div>
+                      </div>
+                      <div class="numbers">
+                        <div><button type="button" value="0" class="calendar_btn btn btn-secoundry zero" t-on-click="(ev)=>onDisplay(ev,'0')">0</button></div>
+                        <div><button type="button" value="." class="calendar_btn btn btn-secoundry dot" t-on-click="(ev)=>onDisplay(ev,'.')">.</button></div>
+                        <div id="clear"> <button type='button' value = 'C' t-on-click="onclearScreen" class=" calendar_btn btn btn-secoundry clear"> C</button></div>
+                      </div>
+                    </div>
+                    <div class="equal" id="result"><button type="button" value="=" class="calendar_btn btn btn-secoundry equal-sign" t-on-click="onEqualClick">=</button></div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
