@@ -30,7 +30,6 @@ class TestAddToCartSnippet(HttpCase):
             'redirect_form_view_id': redirect_form.id,
         })
 
-    # TODO-JCB: Infinite sizzle.
     def test_configure_product(self):
         # Reset the company country id, which ensure that no country dependant fields are blocking the address form.
         self.env.company.country_id = self.env.ref('base.us')

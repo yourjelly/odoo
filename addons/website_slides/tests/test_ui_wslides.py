@@ -135,7 +135,6 @@ class TestUi(TestUICommon):
 @tests.common.tagged('post_install', '-at_install')
 class TestUiPublisher(HttpCaseWithUserDemo):
 
-    # TODO-JCB: Flaky
     def test_course_publisher_elearning_manager(self):
         user_demo = self.user_demo
         user_demo.write({
@@ -162,7 +161,6 @@ class TestUiPublisherYoutube(HttpCaseWithUserDemo):
 
         self.start_tour('/slides', 'course_member_youtube', login=user_demo.login)
 
-    # TODO-JCB: Needs fixing because of infinite loop of sizzle.
     def test_course_publisher_elearning_manager(self):
         user_demo = self.user_demo
         user_demo.write({

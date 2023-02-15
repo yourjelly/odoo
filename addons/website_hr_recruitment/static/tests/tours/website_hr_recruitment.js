@@ -98,7 +98,6 @@ odoo.define('website_hr_recruitment.tour', function(require) {
         content: 'Go back to /jobs page after save',
         trigger: 'iframe body:not(.editor_enable)',
         run: () => {
-            // TODO-JCB: Fails here. It doesn't navigate to the provided url.
             window.location.href = wTourUtils.getClientActionUrl('/jobs');
         }
     }, {

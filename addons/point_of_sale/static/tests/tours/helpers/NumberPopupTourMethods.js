@@ -30,17 +30,7 @@ class Do {
                 trigger,
             };
         }
-        return [
-            ...keys.split(" ").map(generateStep),
-            // {
-            //     action: () => {
-            //         // TODO-JCB: low-level use of macro. Should be replaced with `run` but kinda complicated.
-            //         // So that immediately, the handler is triggered on the buffered keys
-            //         // and the buffer is cleared.
-            //         numberBuffer.capture();
-            //     },
-            // },
-        ];
+        return [...keys.split(" ").map(generateStep)];
     }
     clickConfirm() {
         return [
