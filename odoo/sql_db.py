@@ -595,14 +595,14 @@ class ConnectionPool(object):
         :param dict connection_info: dict of psql connection keywords
         :rtype: PsycoConnection
         """
-        # free dead and leaked connections
-        for i, (cnx, _, last_used) in tools.reverse_enumerate(self._connections):
+        # free idle, dead and leaked connections
+        for i, (cnx, used, last_used) in tools.reverse_enumerate(self._connections):
+            if not used and not cnx.closed and time.time() - last_used > MAX_IDLE_TIMEOUT:
+                self._debug('Close connection at index %d: %r', i, cnx.dsn)
+                cnx.close()
             if cnx.closed:
                 self._connections.pop(i)
                 self._debug('Removing closed connection at index %d: %r', i, cnx.dsn)
-                continue
-            if not used and not cnx.closed and time.time() - last_used > MAX_IDLE_TIMEOUT:
-                cnx.close()
                 continue
             if getattr(cnx, 'leaked', False):
                 delattr(cnx, 'leaked')
@@ -647,7 +647,7 @@ class ConnectionPool(object):
             _logger.info('Connection to the database failed')
             raise
         result._original_dsn = connection_info
-        self._connections.append((result, True))
+        self._connections.append((result, True, 0))
         self._debug('Create new connection backend PID %d', result.get_backend_pid())
         return result
 
@@ -671,7 +671,7 @@ class ConnectionPool(object):
     def close_all(self, dsn=None):
         count = 0
         last = None
-        for i, (cnx, used) in tools.reverse_enumerate(self._connections):
+        for i, (cnx, _, _) in tools.reverse_enumerate(self._connections):
             if dsn is None or cnx._original_dsn == dsn:
                 cnx.close()
                 last = self._connections.pop(i)[0]
