@@ -9,14 +9,6 @@ import { tourState } from "./tour_state";
 import { compileStepManual, compileStepAuto, compileTourToMacro } from "./tour_compilers";
 import { createPointerState } from "./tour_pointer_state";
 
-/**
- * TODO-JCB: Maybe it's better if jQuery is used internally, and methods that return jQuery element should just return normal Elements.
- * > Maybe partially 'hiding' our reliance to jQuery is a good thing?
- * TODO-JCB: Make sure all the comments are correct.
- * TODO-JCB: take into account use of _consume_tour.
- * TODO-JCB: Uncaught (in promise)TypeError: Failed to fetch
- */
-
 function extractRegisteredTours() {
     const tours = {};
     for (const [name, tour] of registry.category("web_tour.tours").getEntries()) {
@@ -203,7 +195,7 @@ export const tourService = {
     },
 };
 
-registry.category("services").add("tour_service_x", tourService);
+registry.category("services").add("tour_service", tourService);
 
 // TODO-JCB: Fix this patch.
 registry.add("tourManager", {
