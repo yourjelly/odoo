@@ -41,8 +41,6 @@ Odoo Web tours.
             '/web_tour/static/src/xml/tip.xml',
             'web_tour/static/src/tour_pointer/**/*',
             'web_tour/static/src/tour_service/**/*',
-
-            'web_tour/static/src/js/public/**/*',
         ],
         'web.qunit_suite_tests': [
             # TODO-JCB: Adapt unit tests.
