@@ -289,8 +289,8 @@
         ComponentsImportance[ComponentsImportance["Grid"] = 0] = "Grid";
         ComponentsImportance[ComponentsImportance["Highlight"] = 5] = "Highlight";
         ComponentsImportance[ComponentsImportance["Figure"] = 10] = "Figure";
-        ComponentsImportance[ComponentsImportance["Dropdown"] = 12] = "Dropdown";
         ComponentsImportance[ComponentsImportance["ScrollBar"] = 15] = "ScrollBar";
+        ComponentsImportance[ComponentsImportance["Dropdown"] = 16] = "Dropdown";
         ComponentsImportance[ComponentsImportance["GridComposer"] = 20] = "GridComposer";
         ComponentsImportance[ComponentsImportance["TopBarComposer"] = 21] = "TopBarComposer";
         ComponentsImportance[ComponentsImportance["ColorPicker"] = 25] = "ColorPicker";
@@ -301,28 +301,7 @@
     const DEFAULT_SHEETVIEW_SIZE = 1000;
     const MAXIMAL_FREEZABLE_RATIO = 0.85;
     const NEWLINE = "\n";
-
-    const fontSizes = [
-        { pt: 7.5, px: 10 },
-        { pt: 8, px: 11 },
-        { pt: 9, px: 12 },
-        { pt: 10, px: 13 },
-        { pt: 10.5, px: 14 },
-        { pt: 11, px: 15 },
-        { pt: 12, px: 16 },
-        { pt: 14, px: 18.7 },
-        { pt: 15, px: 20 },
-        { pt: 16, px: 21.3 },
-        { pt: 18, px: 24 },
-        { pt: 22, px: 29.3 },
-        { pt: 24, px: 32 },
-        { pt: 26, px: 34.7 },
-        { pt: 36, px: 48 },
-    ];
-    const fontSizeMap = {};
-    for (let font of fontSizes) {
-        fontSizeMap[font.pt] = font.px;
-    }
+    const FONT_SIZES = [6, 7, 8, 9, 10, 11, 12, 14, 18, 24, 36];
 
     // -----------------------------------------------------------------------------
     // Date Type
@@ -753,6 +732,9 @@
         context.restore();
         return textWidth;
     }
+    function fontSizeInPixels(fontSize) {
+        return Math.round((fontSize * 96) / 72);
+    }
     function computeTextFont(style) {
         const italic = style.italic ? "italic " : "";
         const weight = style.bold ? "bold" : DEFAULT_FONT_WEIGHT;
@@ -761,10 +743,7 @@
     }
     function computeTextFontSizeInPixels(style) {
         const sizeInPt = (style === null || style === void 0 ? void 0 : style.fontSize) || DEFAULT_FONT_SIZE;
-        if (!fontSizeMap[sizeInPt]) {
-            throw new Error("Size of the font is not supported");
-        }
-        return fontSizeMap[sizeInPt];
+        return fontSizeInPixels(sizeInPt);
     }
     /**
      * Return the font size that makes the width of a text match the given line width.
@@ -1487,7 +1466,7 @@
      *   formula, commas are used to separate arguments
      * - it does not support % symbol, in formulas % is an operator
      */
-    const formulaNumberRegexp = /^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+/;
+    const formulaNumberRegexp = /(^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+)(?!\w|!)/;
     const pIntegerAndDecimals = "(\\d+(,\\d{3,})*(\\.\\d*)?)"; // pattern that match integer number with or without decimal digits
     const pOnlyDecimals = "(\\.\\d+)"; // pattern that match only expression with decimal digits
     const pScientificFormat = "(e(\\+|-)?\\d+)?"; // pattern that match scientific format between zero and one time (should be placed before pPercentFormat)
@@ -3093,6 +3072,7 @@
     const LINE_HEIGHT = 1.2;
     css /* scss */ `
   div.o-scorecard {
+    font-family: ${DEFAULT_FONT};
     user-select: none;
     background-color: white;
     display: flex;
@@ -3147,20 +3127,6 @@
         constructor() {
             super(...arguments);
             this.ctx = document.createElement("canvas").getContext("2d");
-            this.state = owl.useState({ width: 0, height: 0 });
-        }
-        setup() {
-            this.chartRef = owl.useRef("chart");
-            const resizeObserver = new ResizeObserver(() => {
-                const { width, height } = this.chartRef.el.getBoundingClientRect();
-                this.state.width = width;
-                this.state.height = height;
-            });
-            owl.useEffect(() => {
-                const el = this.chartRef.el;
-                resizeObserver.observe(el);
-                return () => resizeObserver.unobserve(el);
-            }, () => [this.chartRef.el]);
         }
         get runtime() {
             return this.env.model.getters.getChartRuntime(this.props.figure.id);
@@ -3203,11 +3169,11 @@
             return cssPropertiesToCss({ height: `${this.getDrawableHeight()}px` });
         }
         get chartPadding() {
-            return this.state.width * CHART_PADDING_RATIO;
+            return this.props.figure.width * CHART_PADDING_RATIO;
         }
         getTextStyles() {
             // If the widest text overflows horizontally, scale it down, and apply the same scaling factors to all the other fonts.
-            const maxLineWidth = this.state.width * (1 - 2 * CHART_PADDING_RATIO);
+            const maxLineWidth = this.props.figure.width * (1 - 2 * CHART_PADDING_RATIO);
             const widestElement = this.getWidestElement();
             const baseFontSize = widestElement.getElementMaxFontSize(this.getDrawableHeight(), this);
             const fontSizeMatchingWidth = getFontSizeMatchingWidth(maxLineWidth, baseFontSize, (fontSize) => widestElement.getElementWidth(fontSize, this.ctx, this));
@@ -3252,7 +3218,7 @@
         /** Get the height of the chart minus all the vertical paddings */
         getDrawableHeight() {
             const verticalPadding = 2 * this.chartPadding;
-            let availableHeight = this.state.height - verticalPadding;
+            let availableHeight = this.props.figure.height - verticalPadding;
             availableHeight -= this.title ? TITLE_FONT_SIZE * LINE_HEIGHT : 0;
             return availableHeight;
         }
@@ -5465,7 +5431,7 @@
         validateChartDefinition: (validator, definition) => BarChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => BarChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => BarChart.getDefinitionFromContextCreation(context),
-        name: "Bar",
+        name: _lt("Bar"),
         sequence: 10,
     });
     chartRegistry.add("line", {
@@ -5475,7 +5441,7 @@
         validateChartDefinition: (validator, definition) => LineChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => LineChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => LineChart.getDefinitionFromContextCreation(context),
-        name: "Line",
+        name: _lt("Line"),
         sequence: 20,
     });
     chartRegistry.add("pie", {
@@ -5485,7 +5451,7 @@
         validateChartDefinition: (validator, definition) => PieChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => PieChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => PieChart.getDefinitionFromContextCreation(context),
-        name: "Pie",
+        name: _lt("Pie"),
         sequence: 30,
     });
     chartRegistry.add("scorecard", {
@@ -5495,7 +5461,7 @@
         validateChartDefinition: (validator, definition) => ScorecardChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => ScorecardChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => ScorecardChart.getDefinitionFromContextCreation(context),
-        name: "Scorecard",
+        name: _lt("Scorecard"),
         sequence: 40,
     });
     chartRegistry.add("gauge", {
@@ -5505,7 +5471,7 @@
         validateChartDefinition: (validator, definition) => GaugeChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => GaugeChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => GaugeChart.getDefinitionFromContextCreation(context),
-        name: "Gauge",
+        name: _lt("Gauge"),
         sequence: 50,
     });
     const chartComponentRegistry = new Registry();
@@ -7387,7 +7353,7 @@
         separator: true,
     })
         .add("unhide_columns", {
-        name: "Unhide columns",
+        name: _lt("Unhide columns"),
         sequence: 86,
         action: UNHIDE_COLUMNS_ACTION,
         isVisible: (env) => {
@@ -7475,7 +7441,7 @@
         separator: true,
     })
         .add("unhide_rows", {
-        name: "Unhide rows",
+        name: _lt("Unhide rows"),
         sequence: 86,
         action: UNHIDE_ROWS_ACTION,
         isVisible: (env) => {
@@ -7649,31 +7615,31 @@
     // -----------------------------------------------------------------------------
     css /* scss */ `
   .o-autofill {
-    height: 6px;
-    width: 6px;
-    border: 1px solid white;
     position: absolute;
+    height: ${AUTOFILL_EDGE_LENGTH}px;
+    width: ${AUTOFILL_EDGE_LENGTH}px;
+    border: 1px solid white;
+    box-sizing: border-box !important;
     background-color: #1a73e8;
+  }
 
-    .o-autofill-handler {
-      position: absolute;
-      height: ${AUTOFILL_EDGE_LENGTH}px;
-      width: ${AUTOFILL_EDGE_LENGTH}px;
-
-      &:hover {
-        cursor: crosshair;
-      }
+  .o-autofill-handler {
+    position: absolute;
+    height: ${AUTOFILL_EDGE_LENGTH}px;
+    width: ${AUTOFILL_EDGE_LENGTH}px;
+    &:hover {
+      cursor: crosshair;
     }
+  }
 
-    .o-autofill-nextvalue {
-      position: absolute;
-      background-color: #ffffff;
-      border: 1px solid black;
-      padding: 5px;
-      font-size: 12px;
-      pointer-events: none;
-      white-space: nowrap;
-    }
+  .o-autofill-nextvalue {
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid black;
+    padding: 5px;
+    font-size: 12px;
+    pointer-events: none;
+    white-space: nowrap;
   }
 `;
     class Autofill extends owl.Component {
@@ -7686,15 +7652,25 @@
         }
         get style() {
             const { left, top } = this.props.position;
-            return `top:${top}px;left:${left}px`;
+            return cssPropertiesToCss({
+                top: `${top}px`,
+                left: `${left}px`,
+                visibility: this.props.isVisible ? "visible" : "hidden",
+            });
         }
-        get styleHandler() {
-            let position = this.state.handler ? this.state.position : { left: 0, top: 0 };
-            return `top:${position.top}px;left:${position.left}px;`;
+        get handlerStyle() {
+            const { left, top } = this.state.handler ? this.state.position : this.props.position;
+            return cssPropertiesToCss({
+                top: `${top}px`,
+                left: `${left}px`,
+            });
         }
-        get styleNextvalue() {
-            let position = this.state.handler ? this.state.position : { left: 0, top: 0 };
-            return `top:${position.top + 5}px;left:${position.left + 15}px;`;
+        get styleNextValue() {
+            const { left, top } = this.state.position;
+            return cssPropertiesToCss({
+                top: `${top + 5}px`,
+                left: `${left + 15}px`,
+            });
         }
         getTooltip() {
             const tooltip = this.env.model.getters.getAutofillTooltip();
@@ -7705,27 +7681,22 @@
         }
         onMouseDown(ev) {
             this.state.handler = true;
-            this.state.position = { left: 0, top: 0 };
-            const { scrollY, scrollX } = this.env.model.getters.getActiveSheetScrollInfo();
-            const start = {
-                left: ev.clientX + scrollX,
-                top: ev.clientY + scrollY,
-            };
             let lastCol;
             let lastRow;
+            const start = {
+                left: ev.clientX - this.props.position.left,
+                top: ev.clientY - this.props.position.top,
+            };
             const onMouseUp = () => {
                 this.state.handler = false;
+                this.state.position = { ...this.props.position };
                 this.env.model.dispatch("AUTOFILL");
             };
-            const onMouseMove = (ev) => {
-                const position = gridOverlayPosition();
-                const { scrollY, scrollX } = this.env.model.getters.getActiveSheetScrollInfo();
+            const onMouseMove = (col, row, ev) => {
                 this.state.position = {
-                    left: ev.clientX - start.left + scrollX,
-                    top: ev.clientY - start.top + scrollY,
+                    left: ev.clientX - start.left,
+                    top: ev.clientY - start.top,
                 };
-                const col = this.env.model.getters.getColIndex(ev.clientX - position.left);
-                const row = this.env.model.getters.getRowIndex(ev.clientY - position.top);
                 if (lastCol !== col || lastRow !== row) {
                     const activeSheetId = this.env.model.getters.getActiveSheetId();
                     const numberOfCols = this.env.model.getters.getNumberCols(activeSheetId);
@@ -7737,7 +7708,7 @@
                     }
                 }
             };
-            startDnd(onMouseMove, onMouseUp);
+            dragAndDropBeyondTheViewport(this.env, onMouseMove, onMouseUp);
         }
         onDblClick() {
             this.env.model.dispatch("AUTOFILL_AUTO");
@@ -7746,6 +7717,7 @@
     Autofill.template = "o-spreadsheet-Autofill";
     Autofill.props = {
         position: Object,
+        isVisible: Boolean,
     };
     class TooltipComponent extends owl.Component {
     }
@@ -16068,7 +16040,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const color = (!isFormula && style.textColor) || "#000000";
             // font style
             const fontSize = (!isFormula && style.fontSize) || 10;
-            const fontWeight = !isFormula && style.bold ? "bold" : 500;
+            const fontWeight = !isFormula && style.bold ? "bold" : undefined;
             const fontStyle = !isFormula && style.italic ? "italic" : "normal";
             const textDecoration = !isFormula ? getTextDecoration(style) : "none";
             // align style
@@ -16089,8 +16061,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 "min-height": `${height + 1}px`,
                 background,
                 color,
-                "font-size": `${fontSizeMap[fontSize]}px`,
-                "font-weight": String(fontWeight),
+                "font-size": `${fontSizeInPixels(fontSize)}px`,
+                "font-weight": fontWeight,
                 "font-style": fontStyle,
                 "text-decoration": textDecoration,
                 "text-align": textAlign,
@@ -18056,17 +18028,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         separator: true,
     })
         .addChild("format_wrapping_overflow", ["format", "format_wrapping"], {
-        name: "Overflow",
+        name: _lt("Overflow"),
         sequence: 10,
         action: (env) => setStyle(env, { wrapping: "overflow" }),
     })
         .addChild("format_wrapping_wrap", ["format", "format_wrapping"], {
-        name: "Wrap",
+        name: _lt("Wrap"),
         sequence: 20,
         action: (env) => setStyle(env, { wrapping: "wrap" }),
     })
         .addChild("format_wrapping_clip", ["format", "format_wrapping"], {
-        name: "Clip",
+        name: _lt("Clip"),
         sequence: 30,
         action: (env) => setStyle(env, { wrapping: "clip" }),
     })
@@ -18096,11 +18068,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         isVisible: SELECTION_CONTAINS_FILTER,
     });
     // Font-sizes
-    for (let fs of fontSizes) {
-        topbarMenuRegistry.addChild(`format_font_size_${fs.pt}`, ["format", "format_font_size"], {
-            name: fs.pt.toString(),
-            sequence: fs.pt,
-            action: (env) => setStyle(env, { fontSize: fs.pt }),
+    for (let fs of FONT_SIZES) {
+        topbarMenuRegistry.addChild(`format_font_size_${fs}`, ["format", "format_font_size"], {
+            name: fs.toString(),
+            sequence: fs,
+            action: (env) => setStyle(env, { fontSize: fs }),
         });
     }
     function createFormulaFunctionMenuItems(fnNames) {
@@ -18430,10 +18402,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     position: absolute;
     top: calc(100% + 5px);
     z-index: ${ComponentsImportance.ColorPicker};
+    padding: ${PICKER_PADDING}px 0px;
     box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
     background-color: white;
-    padding: ${PICKER_PADDING}px 0px;
     line-height: 1.2;
+    overflow-y: auto;
+    overflow-x: hidden;
     width: ${GRADIENT_WIDTH + 2 * PICKER_PADDING}px;
 
     .o-color-picker-section-name {
@@ -18584,6 +18558,16 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 },
             });
         }
+        get colorPickerStyle() {
+            if (this.props.maxHeight === undefined)
+                return "";
+            if (this.props.maxHeight <= 0) {
+                return cssPropertiesToCss({ display: "none" });
+            }
+            return cssPropertiesToCss({
+                "max-height": `${this.props.maxHeight}px`,
+            });
+        }
         onColorClick(color) {
             if (color) {
                 this.props.onColorPicked(color);
@@ -18641,6 +18625,61 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         dropdownDirection: { type: String, optional: true },
         onColorPicked: Function,
         currentColor: { type: String, optional: true },
+        maxHeight: { type: Number, optional: true },
+    };
+
+    css /* scss */ `
+  .o-color-picker-widget {
+    display: inline-block;
+    position: relative;
+
+    .o-color-picker-button-style {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2px;
+      padding: 3px;
+      border-radius: 2px;
+      cursor: pointer;
+      &:not([disabled]):hover {
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+    }
+
+    .o-color-picker-button {
+      > span {
+        border-bottom: 4px solid;
+        height: 16px;
+        margin-top: 2px;
+      }
+
+      &[disabled] {
+        pointer-events: none;
+        opacity: 0.3;
+      }
+    }
+  }
+`;
+    class ColorPickerWidget extends owl.Component {
+        get iconStyle() {
+            return this.props.currentColor
+                ? `border-color: ${this.props.currentColor}`
+                : "border-bottom-style: hidden";
+        }
+    }
+    ColorPickerWidget.template = "o-spreadsheet-ColorPickerWidget";
+    ColorPickerWidget.components = { ColorPicker };
+    ColorPickerWidget.props = {
+        currentColor: { type: String, optional: true },
+        toggleColorPicker: Function,
+        showColorPicker: Boolean,
+        onColorPicked: Function,
+        icon: String,
+        dropdownDirection: { type: String, optional: true },
+        title: { type: String, optional: true },
+        disabled: { type: Boolean, optional: true },
+        dropdownMaxHeight: { type: Number, optional: true },
+        class: { type: String, optional: true },
     };
 
     class LineBarPieDesignPanel extends owl.Component {
@@ -18676,7 +18715,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     LineBarPieDesignPanel.template = "o-spreadsheet-LineBarPieDesignPanel";
-    LineBarPieDesignPanel.components = { ColorPicker };
+    LineBarPieDesignPanel.components = { ColorPickerWidget };
     LineBarPieDesignPanel.props = {
         figureId: String,
         definition: Object,
@@ -18770,6 +18809,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 sectionRuleDispatchResult: undefined,
             });
         }
+        setup() {
+            owl.useExternalListener(window, "click", this.closeMenus);
+        }
         get designErrorMessages() {
             var _a;
             const cancelledReasons = [...(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || [])];
@@ -18860,7 +18902,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     GaugeChartDesignPanel.template = "o-spreadsheet-GaugeChartDesignPanel";
-    GaugeChartDesignPanel.components = { ColorPicker };
+    GaugeChartDesignPanel.components = { ColorPickerWidget };
     GaugeChartDesignPanel.props = {
         figureId: String,
         definition: Object,
@@ -18958,6 +19000,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 openedColorPicker: undefined,
             });
         }
+        setup() {
+            owl.useExternalListener(window, "click", this.closeMenus);
+        }
         updateTitle(ev) {
             this.props.updateChart({
                 title: ev.target.value,
@@ -18966,8 +19011,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         updateBaselineDescr(ev) {
             this.props.updateChart({ baselineDescr: ev.target.value });
         }
-        openColorPicker(colorPickerId) {
-            this.state.openedColorPicker = colorPickerId;
+        toggleColorPicker(colorPickerId) {
+            if (this.state.openedColorPicker === colorPickerId) {
+                this.state.openedColorPicker = undefined;
+            }
+            else {
+                this.state.openedColorPicker = colorPickerId;
+            }
         }
         setColor(color, colorPickerId) {
             switch (colorPickerId) {
@@ -18981,11 +19031,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.props.updateChart({ baselineColorUp: color });
                     break;
             }
+            this.closeMenus();
+        }
+        closeMenus() {
             this.state.openedColorPicker = undefined;
         }
     }
     ScorecardChartDesignPanel.template = "o-spreadsheet-ScorecardChartDesignPanel";
-    ScorecardChartDesignPanel.components = { ColorPicker };
+    ScorecardChartDesignPanel.components = { ColorPickerWidget };
     ScorecardChartDesignPanel.props = {
         figureId: String,
         definition: Object,
@@ -19037,13 +19090,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         border-right: none;
       }
     }
-
-    .o-with-color-picker {
-      position: relative;
-    }
-    .o-with-color-picker > span {
-      border-bottom: 4px solid;
-    }
   }
 `;
     class ChartPanel extends owl.Component {
@@ -19054,10 +19100,41 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         get figureId() {
             return this.state.figureId;
         }
+<<<<<<< Updated upstream
         setup() {
             const selectedFigureId = this.env.model.getters.getSelectedFigureId();
             if (!selectedFigureId) {
                 throw new Error(_lt("Cannot open the chart side panel while no chart are selected"));
+=======
+        /**
+         * select the text at position start to end, no matter the children
+         */
+        selectRange(start, end) {
+            let selection = window.getSelection();
+            this.removeSelection();
+            let range = document.createRange();
+            if (start == end && start === 0) {
+                range.setStart(this.el, 0);
+                range.setEnd(this.el, 0);
+                selection.addRange(range);
+            }
+            else {
+                const textLength = this.getText().length;
+                if (start < 0 || end > textLength) {
+                    console.warn(`wrong selection asked start ${start}, end ${end}, text content length ${textLength}`);
+                    if (start < 0)
+                        start = 0;
+                    if (end > textLength)
+                        end = textLength;
+                    if (start > textLength)
+                        start = textLength;
+                }
+                let startNode = this.findChildAtCharacterIndex(start);
+                let endNode = this.findChildAtCharacterIndex(end);
+                range.setStart(startNode.node, startNode.offset);
+                selection.addRange(range);
+                selection.extend(endNode.node, endNode.offset);
+>>>>>>> Stashed changes
             }
             this.state = owl.useState({
                 panel: "configuration",
@@ -19244,6 +19321,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
     // TODO vsc: add ordering of rules
     css /* scss */ `
+<<<<<<< Updated upstream
   label {
     vertical-align: middle;
   }
@@ -19265,6 +19343,25 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       ::after,
       ::before {
         box-sizing: border-box;
+=======
+  .o-composer-container {
+    .o-composer {
+      overflow-y: auto;
+      overflow-x: hidden;
+      word-break: break-all;
+      padding-right: 2px;
+
+      box-sizing: border-box;
+      font-family: ${DEFAULT_FONT};
+
+      caret-color: black;
+      padding-left: 3px;
+      padding-right: 3px;
+      outline: none;
+
+      &.unfocusable {
+        pointer-events: none;
+>>>>>>> Stashed changes
       }
       margin-top: 10px;
       display: flex;
@@ -19406,14 +19503,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       margin-bottom: 5px;
       width: 96%;
     }
-    .o-color-picker {
+    .o-color-picker-widget .o-color-picker-button {
       pointer-events: all;
+      cursor: default;
     }
   }
   .o-cf-color-scale-editor {
     .o-threshold {
       display: flex;
-      flex-direction: horizontal;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
       select {
         width: 100%;
       }
@@ -19884,7 +19984,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     ConditionalFormattingPanel.template = "o-spreadsheet-ConditionalFormattingPanel";
-    ConditionalFormattingPanel.components = { SelectionInput, IconPicker, ColorPicker };
+    ConditionalFormattingPanel.components = { SelectionInput, IconPicker, ColorPickerWidget };
     ConditionalFormattingPanel.props = {
         selection: { type: Object, optional: true },
         onCloseSidePanel: Function,
@@ -20006,12 +20106,32 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
             return formatProposals;
         }
+<<<<<<< Updated upstream
         createFormatProposal(position, baseExample, formatBase, expression) {
             const formatExpression = "[$" + expression + "]";
             return {
                 example: position === "before" ? expression + baseExample : baseExample + expression,
                 format: position === "before" ? formatExpression + formatBase : formatBase + formatExpression,
             };
+=======
+        rangeColor(xc, sheetName) {
+            if (this.props.focus === "inactive") {
+                return undefined;
+            }
+            const highlights = this.env.model.getters.getHighlights();
+            const refSheet = sheetName
+                ? this.env.model.getters.getSheetIdByName(sheetName)
+                : this.env.model.getters.getCurrentEditedCell().sheetId;
+            const highlight = highlights.find((highlight) => {
+                if (highlight.sheetId !== refSheet)
+                    return false;
+                const range = this.env.model.getters.getRangeFromSheetXC(refSheet, xc);
+                let zone = range.zone;
+                zone = getZoneArea(zone) === 1 ? this.env.model.getters.expandZone(refSheet, zone) : zone;
+                return isEqual(zone, highlight.zone);
+            });
+            return highlight && highlight.color ? highlight.color : undefined;
+>>>>>>> Stashed changes
         }
         getCommonFormat() {
             const selectedZones = this.env.model.getters.getSelectedZones();
@@ -20215,16 +20335,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     height: 100%;
     user-select: none;
 
-    border: solid ${FIGURE_BORDER_COLOR};
     &:focus {
       outline: none;
     }
   }
 
-  div.o-active-figure-border {
+  div.o-figure-border {
     box-sizing: border-box;
     z-index: 1;
-    border: ${ACTIVE_BORDER_WIDTH}px solid ${SELECTION_BORDER_COLOR};
   }
 
   .o-figure-wrapper {
@@ -20282,12 +20400,49 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         display: flex;
       }
     }
+<<<<<<< Updated upstream
   }
 `;
     class FigureComponent extends owl.Component {
         constructor() {
             super(...arguments);
             this.figureRef = owl.useRef("figure");
+=======
+    function screenCoordinatesToInternal(getters, { x, y }) {
+        const { x: viewportX, y: viewportY } = getters.getMainViewportCoordinates();
+        const { scrollX, scrollY } = getters.getActiveSheetScrollInfo();
+        x = viewportX && x < viewportX ? x : x + scrollX;
+        y = viewportY && y < viewportY ? y : y + scrollY;
+        return { x, y };
+    }
+
+    function dragFigureForMove({ x: mouseX, y: mouseY }, { x: mouseInitialX, y: mouseInitialY }, initialFigure, { x: viewportX, y: viewportY }, { maxX, maxY }, { scrollX, scrollY }) {
+        const minX = viewportX ? 0 : -scrollX;
+        const minY = viewportY ? 0 : -scrollY;
+        const deltaX = mouseX - mouseInitialX;
+        const newX = clamp(initialFigure.x + deltaX, minX, maxX - initialFigure.width - scrollX);
+        const deltaY = mouseY - mouseInitialY;
+        const newY = clamp(initialFigure.y + deltaY, minY, maxY - initialFigure.height - scrollY);
+        return { ...initialFigure, x: newX, y: newY };
+    }
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+    function dragFigureForResize(initialFigure, dirX, dirY, { x: mouseX, y: mouseY }, { x: mouseInitialX, y: mouseInitialY }, keepRatio, minFigSize) {
+        let { x, y, width, height } = initialFigure;
+        if (keepRatio && dirX != 0 && dirY != 0) {
+            const deltaX = Math.min(dirX * (mouseInitialX - mouseX), initialFigure.width - minFigSize);
+            const deltaY = Math.min(dirY * (mouseInitialY - mouseY), initialFigure.height - minFigSize);
+            const fraction = Math.min(deltaX / initialFigure.width, deltaY / initialFigure.height);
+            width = initialFigure.width * (1 - fraction);
+            height = initialFigure.height * (1 - fraction);
+            if (dirX < 0) {
+                x = initialFigure.x + initialFigure.width * fraction;
+            }
+            if (dirY < 0) {
+                y = initialFigure.y + initialFigure.height * fraction;
+            }
+>>>>>>> Stashed changes
         }
         get isSelected() {
             return this.env.model.getters.getSelectedFigureId() === this.props.figure.id;
@@ -20296,10 +20451,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return figureRegistry;
         }
         getBorderWidth() {
-            return this.env.isDashboard() ? 0 : this.borderWidth;
+            if (this.env.isDashboard())
+                return 0;
+            return this.isSelected ? ACTIVE_BORDER_WIDTH : this.borderWidth;
         }
-        get figureStyle() {
-            return this.props.style + `border-width: ${this.getBorderWidth()}px;`;
+        get borderStyle() {
+            const borderWidth = this.getBorderWidth();
+            const borderColor = this.isSelected ? SELECTION_BORDER_COLOR : FIGURE_BORDER_COLOR;
+            return `border: ${borderWidth}px solid ${borderColor};`;
         }
         get wrapperStyle() {
             const { x, y, width, height } = this.props.figure;
@@ -20578,6 +20737,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return;
             }
             const sheetId = this.env.model.getters.getActiveSheetId();
+<<<<<<< Updated upstream
             const mouseInitialX = ev.clientX;
             const mouseInitialY = ev.clientY;
             const { x: dndInitialX, y: dndInitialY } = this.internalToScreenCoordinates(figure);
@@ -20597,8 +20757,30 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 const newY = ev.clientY;
                 let deltaY = newY - mouseInitialY;
                 this.dnd.y = Math.max(dndInitialY + deltaY, minY);
+=======
+            const initialMousePosition = { x: ev.clientX, y: ev.clientY };
+            const maxDimensions = {
+                maxX: this.env.model.getters.getColDimensions(sheetId, this.env.model.getters.getNumberCols(sheetId) - 1).end,
+                maxY: this.env.model.getters.getRowDimensions(sheetId, this.env.model.getters.getNumberRows(sheetId) - 1).end,
+            };
+            const { x, y } = internalFigureToScreen(this.env.model.getters, figure);
+            const initialFig = { ...figure, x, y };
+            const onMouseMove = (ev) => {
+                const getters = this.env.model.getters;
+                const currentMousePosition = { x: ev.clientX, y: ev.clientY };
+                const draggedFigure = dragFigureForMove(currentMousePosition, initialMousePosition, initialFig, this.env.model.getters.getMainViewportCoordinates(), maxDimensions, getters.getActiveSheetScrollInfo());
+                const otherFigures = this.getOtherFigures(figure.id);
+                const internalDragged = screenFigureToInternal(getters, draggedFigure);
+                const snapResult = snapForMove(getters, internalDragged, otherFigures);
+                this.dnd.draggedFigure = internalFigureToScreen(getters, snapResult.snappedFigure);
+                this.dnd.horizontalSnap = this.getSnap(snapResult.horizontalSnapLine);
+                this.dnd.verticalSnap = this.getSnap(snapResult.verticalSnapLine);
+>>>>>>> Stashed changes
             };
             const onMouseUp = (ev) => {
+                if (!this.dnd.figId) {
+                    return;
+                }
                 let { x, y } = this.screenCoordinatesToInternal(this.dnd);
                 this.dnd.figId = undefined;
                 this.env.model.dispatch("UPDATE_FIGURE", { sheetId, id: figure.id, x, y });
@@ -20649,6 +20831,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 };
             }
             const onMouseUp = (ev) => {
+                if (!this.dnd.figId) {
+                    return;
+                }
                 this.dnd.figId = undefined;
                 let { x, y } = this.screenCoordinatesToInternal(this.dnd);
                 const update = { x, y };
@@ -22135,7 +22320,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 top: rect.y + rect.height - AUTOFILL_EDGE_LENGTH / 2,
             };
         }
-        isAutoFillActive() {
+        get isAutofillVisible() {
             const zone = this.env.model.getters.getSelectedZone();
             const rect = this.env.model.getters.getVisibleRect({
                 left: zone.right,
@@ -22265,6 +22450,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
         }
         onInput(ev) {
+            // the user meant to paste in the sheet, not open the composer with the pasted content
+            if (!ev.isComposing && ev.inputType === "insertFromPaste") {
+                return;
+            }
             if (ev.data) {
                 // if the user types a character on the grid, it means he wants to start composing the selected cell with that
                 // character
@@ -23161,9 +23350,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 ? convertColor((_j = styleStruct.fillStyle) === null || _j === void 0 ? void 0 : _j.fgColor)
                 : convertColor((_k = styleStruct.fillStyle) === null || _k === void 0 ? void 0 : _k.bgColor),
             textColor: convertColor((_l = styleStruct.fontStyle) === null || _l === void 0 ? void 0 : _l.color),
-            fontSize: ((_m = styleStruct.fontStyle) === null || _m === void 0 ? void 0 : _m.size)
-                ? getClosestFontSize(styleStruct.fontStyle.size)
-                : undefined,
+            fontSize: (_m = styleStruct.fontStyle) === null || _m === void 0 ? void 0 : _m.size,
         };
     }
     function convertFormats(data, warningManager) {
@@ -23210,15 +23397,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         warningManager.generateNotSupportedWarning(WarningTypes.NumFmtIdNotSupported, format || `nmFmtId ${numFmtId}`);
         return undefined;
-    }
-    /**
-     * We currently only support only a set of font sizes, we cannot define new font sizes.
-     * This function adapts an arbitrary font size to the closest supported font size.
-     */
-    function getClosestFontSize(fontSize) {
-        const supportedSizes = Object.keys(fontSizeMap).map(Number);
-        const closest = supportedSizes.reduce((prev, curr) => Math.abs(curr - fontSize) < Math.abs(prev - fontSize) ? curr : prev);
-        return closest;
     }
     // ---------------------------------------------------------------------------
     // Warnings
@@ -27091,26 +27269,19 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         "<=": 10,
         "=": 10,
     };
-    const FUNCTION_BP = 6;
-    function bindingPower(token) {
-        switch (token.type) {
-            case "NUMBER":
-            case "SYMBOL":
-            case "REFERENCE":
-                return 0;
-            case "COMMA":
-                return 3;
-            case "LEFT_PAREN":
-                return 5;
-            case "RIGHT_PAREN":
-                return 5;
-            case "OPERATOR":
-                return OP_PRIORITY[token.value] || 15;
+    /**
+     * Parse the next operand in an arithmetic expression.
+     * e.g.
+     *  for 1+2*3, the next operand is 1
+     *  for (1+2)*3, the next operand is (1+2)
+     *  for SUM(1,2)+3, the next operand is SUM(1,2)
+     */
+    function parseOperand(tokens) {
+        var _a, _b, _c;
+        const current = tokens.shift();
+        if (!current) {
+            throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
         }
-        throw new BadExpressionError(_lt("Unknown token: %s", token.value));
-    }
-    function parsePrefix(current, tokens) {
-        var _a, _b, _c, _d;
         switch (current.type) {
             case "DEBUGGER":
                 const next = parseExpression(tokens, 1000);
@@ -27121,43 +27292,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             case "STRING":
                 return { type: "STRING", value: removeStringQuotes(current.value) };
             case "FUNCTION":
-                if (tokens.shift().type !== "LEFT_PAREN") {
-                    throw new BadExpressionError(_lt("Wrong function call"));
-                }
-                else {
-                    const args = [];
-                    if (tokens[0] && tokens[0].type !== "RIGHT_PAREN") {
-                        if (tokens[0].type === "COMMA") {
-                            args.push({ type: "UNKNOWN", value: "" });
-                        }
-                        else {
-                            args.push(parseExpression(tokens, FUNCTION_BP));
-                        }
-                        while (((_a = tokens[0]) === null || _a === void 0 ? void 0 : _a.type) === "COMMA") {
-                            tokens.shift();
-                            const token = tokens[0];
-                            if ((token === null || token === void 0 ? void 0 : token.type) === "RIGHT_PAREN") {
-                                args.push({ type: "UNKNOWN", value: "" });
-                                break;
-                            }
-                            else if ((token === null || token === void 0 ? void 0 : token.type) === "COMMA") {
-                                args.push({ type: "UNKNOWN", value: "" });
-                            }
-                            else {
-                                args.push(parseExpression(tokens, FUNCTION_BP));
-                            }
-                        }
-                    }
-                    const closingToken = tokens.shift();
-                    if (!closingToken || closingToken.type !== "RIGHT_PAREN") {
-                        throw new BadExpressionError(_lt("Wrong function call"));
-                    }
-                    return { type: "FUNCALL", value: current.value, args };
-                }
+                const args = parseFunctionArgs(tokens);
+                return { type: "FUNCALL", value: current.value, args };
             case "INVALID_REFERENCE":
                 throw new InvalidReferenceError();
             case "REFERENCE":
-                if (((_b = tokens[0]) === null || _b === void 0 ? void 0 : _b.value) === ":" && ((_c = tokens[1]) === null || _c === void 0 ? void 0 : _c.type) === "REFERENCE") {
+                if (((_a = tokens[0]) === null || _a === void 0 ? void 0 : _a.value) === ":" && ((_b = tokens[1]) === null || _b === void 0 ? void 0 : _b.type) === "REFERENCE") {
                     tokens.shift();
                     const rightReference = tokens.shift();
                     return {
@@ -27173,66 +27313,90 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 if (["TRUE", "FALSE"].includes(current.value.toUpperCase())) {
                     return { type: "BOOLEAN", value: current.value.toUpperCase() === "TRUE" };
                 }
-                else {
-                    if (current.value) {
-                        if (functionRegex.test(current.value) && ((_d = tokens[0]) === null || _d === void 0 ? void 0 : _d.type) === "LEFT_PAREN") {
-                            throw new UnknownFunctionError(current.value);
-                        }
-                        throw new BadExpressionError(_lt("Invalid formula"));
+                if (current.value) {
+                    if (functionRegex.test(current.value) && ((_c = tokens[0]) === null || _c === void 0 ? void 0 : _c.type) === "LEFT_PAREN") {
+                        throw new UnknownFunctionError(current.value);
                     }
-                    return { type: "STRING", value: current.value };
                 }
+                throw new BadExpressionError(_lt("Invalid formula"));
             case "LEFT_PAREN":
-                const result = parseExpression(tokens, 5);
-                if (!tokens.length || tokens[0].type !== "RIGHT_PAREN") {
-                    throw new BadExpressionError(_lt("Unmatched left parenthesis"));
-                }
-                tokens.shift();
+                const result = parseExpression(tokens);
+                consumeOrThrow(tokens, "RIGHT_PAREN", _lt("Missing closing parenthesis"));
                 return result;
-            default:
-                if (current.type === "OPERATOR" && UNARY_OPERATORS_PREFIX.includes(current.value)) {
+            case "OPERATOR":
+                const operator = current.value;
+                if (UNARY_OPERATORS_PREFIX.includes(operator)) {
                     return {
                         type: "UNARY_OPERATION",
-                        value: current.value,
-                        operand: parseExpression(tokens, OP_PRIORITY[current.value]),
+                        value: operator,
+                        operand: parseExpression(tokens, OP_PRIORITY[operator]),
                     };
                 }
                 throw new BadExpressionError(_lt("Unexpected token: %s", current.value));
+            default:
+                throw new BadExpressionError(_lt("Unexpected token: %s", current.value));
         }
     }
-    function parseInfix(left, current, tokens) {
-        if (current.type === "OPERATOR") {
-            const bp = bindingPower(current);
-            if (UNARY_OPERATORS_POSTFIX.includes(current.value)) {
-                return {
+    function parseFunctionArgs(tokens) {
+        var _a;
+        consumeOrThrow(tokens, "LEFT_PAREN", _lt("Missing opening parenthesis"));
+        const nextToken = tokens[0];
+        if ((nextToken === null || nextToken === void 0 ? void 0 : nextToken.type) === "RIGHT_PAREN") {
+            consumeOrThrow(tokens, "RIGHT_PAREN");
+            return [];
+        }
+        const args = [];
+        args.push(parseOneFunctionArg(tokens));
+        while (((_a = tokens[0]) === null || _a === void 0 ? void 0 : _a.type) !== "RIGHT_PAREN") {
+            consumeOrThrow(tokens, "COMMA", _lt("Wrong function call"));
+            args.push(parseOneFunctionArg(tokens));
+        }
+        consumeOrThrow(tokens, "RIGHT_PAREN");
+        return args;
+    }
+    function parseOneFunctionArg(tokens) {
+        const nextToken = tokens[0];
+        if ((nextToken === null || nextToken === void 0 ? void 0 : nextToken.type) === "COMMA" || (nextToken === null || nextToken === void 0 ? void 0 : nextToken.type) === "RIGHT_PAREN") {
+            // arg is empty: "sum(1,,2)" "sum(,1)" "sum(1,)"
+            return { type: "EMPTY", value: "" };
+        }
+        return parseExpression(tokens);
+    }
+    function consumeOrThrow(tokens, type, message = DEFAULT_ERROR_MESSAGE) {
+        const token = tokens.shift();
+        if (!token || token.type !== type) {
+            throw new BadExpressionError(message);
+        }
+    }
+    function parseExpression(tokens, parent_priority = 0) {
+        var _a;
+        if (tokens.length === 0) {
+            throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
+        }
+        let left = parseOperand(tokens);
+        // as long as we have operators with higher priority than the parent one,
+        // continue parsing the expression because it is a child sub-expression
+        while (((_a = tokens[0]) === null || _a === void 0 ? void 0 : _a.type) === "OPERATOR" && OP_PRIORITY[tokens[0].value] > parent_priority) {
+            const operator = tokens.shift().value;
+            if (UNARY_OPERATORS_POSTFIX.includes(operator)) {
+                left = {
                     type: "UNARY_OPERATION",
-                    value: current.value,
+                    value: operator,
                     operand: left,
                     postfix: true,
                 };
             }
             else {
-                const right = parseExpression(tokens, bp);
-                return {
+                const right = parseExpression(tokens, OP_PRIORITY[operator]);
+                left = {
                     type: "BIN_OPERATION",
-                    value: current.value,
+                    value: operator,
                     left,
                     right,
                 };
             }
         }
-        throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
-    }
-    function parseExpression(tokens, bp) {
-        const token = tokens.shift();
-        if (!token) {
-            throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
-        }
-        let expr = parsePrefix(token, tokens);
-        while (tokens[0] && bindingPower(tokens[0]) > bp) {
-            expr = parseInfix(expr, tokens.shift(), tokens);
-        }
-        return expr;
+        return left;
     }
     /**
      * Parse an expression (as a string) into an AST.
@@ -27242,10 +27406,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
     function parseTokens(tokens) {
         tokens = tokens.filter((x) => x.type !== "SPACE");
-        if (tokens[0].type === "OPERATOR" && tokens[0].value === "=") {
+        if (tokens[0].value === "=") {
             tokens.splice(0, 1);
         }
-        const result = parseExpression(tokens, 0);
+        const result = parseExpression(tokens);
         if (tokens.length) {
             throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
         }
@@ -27388,7 +27552,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (ast.type === "BIN_OPERATION" && ast.value === ":") {
                 throw new BadExpressionError(_lt("Invalid formula"));
             }
-            if (ast.type === "UNKNOWN") {
+            if (ast.type === "EMPTY") {
                 throw new BadExpressionError(_lt("Invalid formula"));
             }
             const compiledAST = compileAST(ast);
@@ -27531,7 +27695,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         code.append(`ctx.__lastFnCalled = '${fnName}';`);
                         return code.return(`ctx['${fnName}'](${left.returnExpression}, ${right.returnExpression})`);
                     }
-                    case "UNKNOWN":
+                    case "EMPTY":
                         return code.return("undefined");
                 }
             }
@@ -28743,7 +28907,72 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "DELETE_FIGURE":
                     this.removeFigure(cmd.id, cmd.sheetId);
                     break;
+                case "REMOVE_COLUMNS_ROWS":
+                    this.onRowColDelete(cmd.sheetId, cmd.dimension);
             }
+        }
+        getColRowOffset(dimension, referenceIndex, index, sheetId) {
+            if (index < referenceIndex) {
+                return -this.getColRowOffset(dimension, index, referenceIndex, sheetId);
+            }
+            let offset = 0;
+            for (let i = referenceIndex; i < index; i++) {
+                if (dimension === "COL"
+                    ? this.getters.isColHiddenByUser(sheetId, i)
+                    : this.getters.isRowHiddenByUser(sheetId, i)) {
+                    continue;
+                }
+                offset +=
+                    dimension === "COL"
+                        ? this.getters.getColSize(sheetId, i)
+                        : this.getters.getRowSize(sheetId, i);
+            }
+            return offset;
+        }
+        onRowColDelete(sheetId, dimension) {
+            const numCols = this.getters.getNumberCols(sheetId) - 1;
+            const numRows = this.getters.getNumberRows(sheetId) - 1;
+            const isCol = dimension === "COL";
+            const dimensions = isCol
+                ? this.getColDimensions(sheetId, numCols)
+                : this.getRowDimensions(sheetId, numRows);
+            const figures = this.getters.getFigures(sheetId);
+            for (const oldFigure of figures) {
+                const newFigure = { ...oldFigure }; // create a copy of the figure
+                if (!newFigure.id) {
+                    continue;
+                }
+                if ((isCol && newFigure.x > dimensions.end - newFigure.width) ||
+                    (!isCol && newFigure.y > dimensions.end - newFigure.height)) {
+                    if (isCol) {
+                        newFigure.x = dimensions.end - newFigure.width;
+                    }
+                    else {
+                        newFigure.y = dimensions.end - newFigure.height;
+                    }
+                    this.updateFigure(sheetId, newFigure);
+                }
+            }
+        }
+        getColDimensions(sheetId, col) {
+            const start = this.getColRowOffset("COL", 0, col, sheetId);
+            const size = this.getters.getColSize(sheetId, col);
+            const isColHidden = this.getters.isColHiddenByUser(sheetId, col);
+            return {
+                start,
+                size,
+                end: start + (isColHidden ? 0 : size),
+            };
+        }
+        getRowDimensions(sheetId, row) {
+            const start = this.getColRowOffset("ROW", 0, row, sheetId);
+            const size = this.getters.getRowSize(sheetId, row);
+            const isRowHidden = this.getters.isRowHiddenByUser(sheetId, row);
+            return {
+                start,
+                size: size,
+                end: start + (isRowHidden ? 0 : size),
+            };
         }
         updateFigure(sheetId, figure) {
             if (!("id" in figure)) {
@@ -34424,22 +34653,26 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * The change of the decimal quantity is done one by one, the sign of the step
          * variable indicates whether we are increasing or decreasing.
          *
-         * If several cells are in the zone, the format resulting from the change of the
-         * first cell (with number type) will be applied to the whole zone.
+         * If several cells are in the zone, each cell's format will be individually
+         * evaluated and updated with the number type.
          */
         setDecimal(sheetId, zones, step) {
-            // Find the first cell with a number value and get the format
-            const numberFormat = this.searchNumberFormat(sheetId, zones);
-            if (numberFormat !== undefined) {
-                // Depending on the step sign, increase or decrease the decimal representation
-                // of the format
-                const newFormat = changeDecimalPlaces(numberFormat, step);
-                // Apply the new format on the whole zone
-                this.dispatch("SET_FORMATTING", {
-                    sheetId,
-                    target: zones,
-                    format: newFormat,
-                });
+            // Find the each cell with a number value and get the format
+            for (const zone of zones) {
+                for (const position of positions(zone)) {
+                    const numberFormat = this.getCellNumberFormat({ sheetId, ...position });
+                    if (numberFormat !== undefined) {
+                        // Depending on the step sign, increase or decrease the decimal representation
+                        // of the format
+                        const newFormat = changeDecimalPlaces(numberFormat, step);
+                        // Apply the new format on the whole zone
+                        this.dispatch("SET_FORMATTING", {
+                            sheetId,
+                            target: [positionToZone(position)],
+                            format: newFormat,
+                        });
+                    }
+                }
             }
         }
         /**
@@ -34447,18 +34680,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * number value. Returns a default format if the cell hasn't format. Returns
          * undefined if no number value in the range.
          */
-        searchNumberFormat(sheetId, zones) {
+        getCellNumberFormat(position) {
             var _a;
-            for (let zone of zones) {
-                for (let row = zone.top; row <= zone.bottom; row++) {
-                    for (let col = zone.left; col <= zone.right; col++) {
-                        const cell = this.getters.getEvaluatedCell({ sheetId, col, row });
-                        if (cell.type === CellValueType.number &&
-                            !((_a = cell.format) === null || _a === void 0 ? void 0 : _a.match(DATETIME_FORMAT)) // reject dates
-                        ) {
-                            return cell.format || createDefaultFormat(cell.value);
-                        }
-                    }
+            for (const pos of [position]) {
+                const cell = this.getters.getEvaluatedCell(pos);
+                if (cell.type === CellValueType.number &&
+                    !((_a = cell.format) === null || _a === void 0 ? void 0 : _a.match(DATETIME_FORMAT)) // reject dates
+                ) {
+                    return cell.format || createDefaultFormat(cell.value);
                 }
             }
             return undefined;
@@ -37498,13 +37727,29 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          */
         paste(target) {
             const sheetId = this.getters.getActiveSheetId();
+            const { width, height } = this.copiedFigure;
+            const numCols = this.getters.getNumberCols(sheetId);
+            const numRows = this.getters.getNumberRows(sheetId);
+            const targetX = this.getters.getColDimensions(sheetId, target[0].left).start;
+            const targetY = this.getters.getRowDimensions(sheetId, target[0].top).start;
+            const maxX = this.getters.getColDimensions(sheetId, numCols - 1).end;
+            const maxY = this.getters.getRowDimensions(sheetId, numRows - 1).end;
+            const mainViewportRect = this.getters.getMainViewportRect();
+<<<<<<< Updated upstream
+            const position = mainViewportRect.width < width || mainViewportRect.height < height
+                ? { x: targetX, y: targetY }
+                : {
+                    x: maxX - (targetX + width) < 0 ? maxX - width : targetX,
+                    y: maxY - (targetY + height) < 0 ? maxY - height : targetY,
+                };
+=======
             const position = {
-                x: this.getters.getColDimensions(sheetId, target[0].left).start,
-                y: this.getters.getRowDimensions(sheetId, target[0].top).start,
+                x: mainViewportRect.width < width ? mainViewportRect.x : Math.min(targetX, maxX - width),
+                y: mainViewportRect.height < height ? mainViewportRect.y : Math.min(targetY, maxY - height),
             };
-            const size = { height: this.copiedFigure.height, width: this.copiedFigure.width };
+>>>>>>> Stashed changes
             const newId = new UuidGenerator().uuidv4();
-            this.copiedFigureContent.paste(sheetId, newId, position, size);
+            this.copiedFigureContent.paste(sheetId, newId, position, { height, width });
             if (this.operation === "CUT") {
                 this.dispatch("DELETE_FIGURE", {
                     sheetId: this.copiedFigureContent.sheetId,
@@ -37870,7 +38115,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return token;
         const { xc, sheetName } = splitReference(token.value);
         const [left, right] = xc.split(":");
-        const sheetRef = sheetName ? `${sheetName}!` : "";
+        const sheetRef = sheetName ? `${getComposerSheetName(sheetName)}!` : "";
         const updatedLeft = getTokenNextReferenceType(left);
         const updatedRight = right ? `:${getTokenNextReferenceType(right)}` : "";
         return { ...token, value: sheetRef + updatedLeft + updatedRight };
@@ -38128,9 +38373,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return this.getComposerContent(this.getters.getActivePosition());
             }
             return this.currentContent;
-        }
-        getEditionSheet() {
-            return this.sheetId;
         }
         getComposerSelection() {
             return {
@@ -38415,7 +38657,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         getZoneReference(zone, fixedParts = [{ colFixed: false, rowFixed: false }]) {
             const sheetId = this.getters.getActiveSheetId();
             let selectedXc = this.getters.zoneToXC(sheetId, zone, fixedParts);
-            if (this.getters.getEditionSheet() !== this.getters.getActiveSheetId()) {
+            if (this.getters.getCurrentEditedCell().sheetId !== this.getters.getActiveSheetId()) {
                 const sheetName = getComposerSheetName(this.getters.getSheetName(this.getters.getActiveSheetId()));
                 selectedXc = `${sheetName}!${selectedXc}`;
             }
@@ -38430,7 +38672,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 _fixedParts.pop();
             }
             const newRange = range.clone({ parts: _fixedParts });
-            return this.getters.getSelectionRangeString(newRange, this.getters.getEditionSheet());
+            return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell().sheetId);
         }
         /**
          * Replace the current selection by a new text.
@@ -38463,7 +38705,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return;
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const XCs = this.getReferencedRanges().map((range) => this.getters.getRangeString(range, editionSheetId));
             const colorsToKeep = {};
             for (const xc of XCs) {
@@ -38492,7 +38734,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return [];
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const rangeColor = (rangeString) => {
                 const colorIndex = this.colorIndexByRange[rangeString];
                 return colors$1[colorIndex % colors$1.length];
@@ -38510,7 +38752,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * Return ranges currently referenced in the composer
          */
         getReferencedRanges() {
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             return this.currentTokens
                 .filter((token) => token.type === "REFERENCE")
                 .map((token) => this.getters.getRangeFromSheetXC(editionSheetId, token.value));
@@ -38569,7 +38811,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         "isSelectingForComposer",
         "showSelectionIndicator",
         "getCurrentContent",
-        "getEditionSheet",
         "getComposerSelection",
         "getCurrentTokens",
         "getTokenAtCursor",
@@ -39661,22 +39902,32 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         constructor() {
             super(...arguments);
             this.selectedStatisticFn = "";
+            this.statisticFnResults = {};
+        }
+        setup() {
+            this.statisticFnResults = this.env.model.getters.getStatisticFnResults();
+            owl.onWillUpdateProps(() => {
+                const newStatisticFnResults = this.env.model.getters.getStatisticFnResults();
+                if (!deepEquals(newStatisticFnResults, this.statisticFnResults)) {
+                    this.props.closeContextMenu();
+                }
+                this.statisticFnResults = newStatisticFnResults;
+            });
         }
         getSelectedStatistic() {
-            const statisticFnResults = this.env.model.getters.getStatisticFnResults();
             // don't display button if no function has a result
-            if (Object.values(statisticFnResults).every((result) => result === undefined)) {
+            if (Object.values(this.statisticFnResults).every((result) => result === undefined)) {
                 return undefined;
             }
             if (this.selectedStatisticFn === "") {
-                this.selectedStatisticFn = Object.keys(statisticFnResults)[0];
+                this.selectedStatisticFn = Object.keys(this.statisticFnResults)[0];
             }
-            return this.getComposedFnName(this.selectedStatisticFn, statisticFnResults[this.selectedStatisticFn]);
+            return this.getComposedFnName(this.selectedStatisticFn, this.statisticFnResults[this.selectedStatisticFn]);
         }
         listSelectionStatistics(ev) {
             const registry = new MenuItemRegistry();
             let i = 0;
-            for (let [fnName, fnValue] of Object.entries(this.env.model.getters.getStatisticFnResults())) {
+            for (let [fnName, fnValue] of Object.entries(this.statisticFnResults)) {
                 registry.add(fnName, {
                     name: this.getComposedFnName(fnName, fnValue),
                     sequence: i,
@@ -39699,6 +39950,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     BottomBarStatistic.components = { Ripple };
     BottomBarStatistic.props = {
         openContextMenu: Function,
+        closeContextMenu: Function,
     };
 
     // -----------------------------------------------------------------------------
@@ -39840,6 +40092,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.menuState.menuId = undefined;
             this.menuState.menuItems = [];
             this.menuState.position = null;
+        }
+        closeContextMenuWithId(menuId) {
+            if (this.menuState.menuId === menuId) {
+                this.closeMenu();
+            }
         }
         onWheel(ev) {
             this.targetScroll = undefined;
@@ -40197,38 +40454,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       }
     }
 
-    .o-dropdown {
-      position: relative;
-      .o-dropdown-content {
-        position: absolute;
-        top: calc(100% + 5px);
-        left: 0;
-        z-index: ${ComponentsImportance.Dropdown};
-        box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
-        background-color: #f6f6f6;
-
-        .o-dropdown-item {
-          padding: 7px 10px;
-        }
-        .o-dropdown-item:hover {
-          background-color: rgba(0, 0, 0, 0.08);
-        }
-        .o-dropdown-line {
-          display: flex;
-          padding: 3px 6px;
-          .o-line-item {
-            width: 16px;
-            height: 16px;
-            margin: 1px 3px;
-            &:hover {
-              background-color: rgba(0, 0, 0, 0.08);
-            }
-          }
-        }
-      }
-    }
-
-    .o-tools {
+    .o-sidePanel-tools {
       color: #333;
       font-size: 13px;
       cursor: default;
@@ -40240,23 +40466,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         margin: 2px;
         padding: 0 3px;
         border-radius: 2px;
-      }
 
-      .o-tool.active,
-      .o-tool:not(.o-disabled):hover {
-        background-color: rgba(0, 0, 0, 0.08);
-      }
-
-      .o-with-color > span {
-        border-bottom: 4px solid;
-        height: 16px;
-        margin-top: 2px;
-      }
-      .o-with-color {
-        .o-line-item:hover {
-          outline: 1px solid gray;
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.08);
         }
       }
+
       .o-border {
         .o-line-item {
           padding: 4px;
@@ -40338,6 +40553,90 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     TopBarComposer.props = {
         focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
         onComposerContentFocused: Function,
+    };
+
+    // -----------------------------------------------------------------------------
+    // TopBar
+    // -----------------------------------------------------------------------------
+    css /* scss */ `
+  .o-font-size-editor {
+    input.o-font-size {
+      height: 20px;
+      width: 23px;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+  }
+`;
+    class FontSizeEditor extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.fontSizes = FONT_SIZES;
+            this.dropdown = owl.useState({ isOpen: false });
+            this.inputRef = owl.useRef("inputFontSize");
+            this.rootEditorRef = owl.useRef("FontSizeEditor");
+        }
+        setup() {
+            owl.useExternalListener(window, "click", this.onExternalClick, { capture: true });
+        }
+        onExternalClick(ev) {
+            if (!isChildEvent(this.rootEditorRef.el, ev)) {
+                this.closeFontList();
+            }
+        }
+        get currentFontSize() {
+            return this.env.model.getters.getCurrentStyle().fontSize || DEFAULT_FONT_SIZE;
+        }
+        toggleFontList() {
+            const isOpen = this.dropdown.isOpen;
+            if (!isOpen) {
+                this.props.onToggle();
+                this.inputRef.el.focus();
+            }
+            else {
+                this.closeFontList();
+            }
+        }
+        closeFontList() {
+            this.dropdown.isOpen = false;
+        }
+        setSize(fontSizeStr) {
+            const fontSize = clip(Math.floor(parseFloat(fontSizeStr)), 1, 400);
+            setStyle(this.env, { fontSize });
+            this.closeFontList();
+        }
+        setSizeFromInput(ev) {
+            this.setSize(ev.target.value);
+        }
+        setSizeFromList(fontSizeStr) {
+            this.setSize(fontSizeStr);
+        }
+        onInputFocused(ev) {
+            this.dropdown.isOpen = true;
+            ev.target.select();
+        }
+        onInputKeydown(ev) {
+            if (ev.key === "Enter" || ev.key === "Escape") {
+                this.closeFontList();
+                const target = ev.target;
+                // In the case of a ESCAPE key, we get the previous font size back
+                if (ev.key === "Escape") {
+                    target.value = `${this.currentFontSize}`;
+                }
+                this.props.onToggle();
+            }
+        }
+    }
+    FontSizeEditor.template = "o-spreadsheet-FontSizeEditor";
+    FontSizeEditor.components = {};
+    FontSizeEditor.props = {
+        onToggle: Function,
+        dropdownStyle: String,
     };
 
     const FORMATS = [
@@ -40488,18 +40787,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
           }
         }
 
-        .o-with-color > span {
-          border-bottom: 4px solid;
-          height: 16px;
-          margin-top: 2px;
-        }
-
-        .o-with-color {
-          .o-line-item:hover {
-            outline: 1px solid gray;
-          }
-        }
-
         .o-border-dropdown {
           padding: 4px;
         }
@@ -40541,6 +40828,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             position: absolute;
             top: 100%;
             left: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
             z-index: ${ComponentsImportance.Dropdown};
             box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
             background-color: white;
@@ -40609,11 +40898,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     class TopBar extends owl.Component {
         constructor() {
             super(...arguments);
-            this.DEFAULT_FONT_SIZE = DEFAULT_FONT_SIZE;
             this.commonFormats = FORMATS;
             this.customFormats = CUSTOM_FORMATS;
             this.currentFormatName = "automatic";
-            this.fontSizes = fontSizes;
             this.style = {};
             this.state = owl.useState({
                 menuState: { isOpen: false, position: null, menuItems: [] },
@@ -40629,6 +40916,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.fillColor = "#ffffff";
             this.textColor = "#000000";
             this.menus = [];
+        }
+        get dropdownStyle() {
+            return `max-height:${this.props.dropdownMaxHeight}px`;
         }
         setup() {
             owl.useExternalListener(window, "click", this.onExternalClick);
@@ -40803,11 +41093,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 target: this.env.model.getters.getSelectedZones(),
             });
         }
-        setSize(fontSizeStr) {
-            const fontSize = parseFloat(fontSizeStr);
-            setStyle(this.env, { fontSize });
-            this.onClick();
-        }
         doAction(action) {
             action(this.env);
             this.closeMenus();
@@ -40830,6 +41115,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (this.cannotCreateFilter) {
                 return;
             }
+            this.env.model.selection.selectTableAroundSelection();
             const sheetId = this.env.model.getters.getActiveSheetId();
             const selection = this.env.model.getters.getSelectedZones();
             interactiveAddFilter(this.env, sheetId, selection);
@@ -40842,11 +41128,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     TopBar.template = "o-spreadsheet-TopBar";
-    TopBar.components = { ColorPicker, Menu, TopBarComposer };
+    TopBar.components = { ColorPickerWidget, Menu, TopBarComposer, FontSizeEditor };
     TopBar.props = {
         onClick: Function,
         focusComposer: String,
         onComposerContentFocused: Function,
+        dropdownMaxHeight: Number,
     };
 
     function instantiateClipboard() {
@@ -40918,9 +41205,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       color: #333;
     }
 
-    * {
-      font-family: "Roboto", "RobotoDraft", Helvetica, Arial, sans-serif;
-    }
     &,
     *,
     *:before,
@@ -41147,6 +41431,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             else if (content) {
                 this.model.dispatch("SET_CURRENT_CONTENT", { content, selection });
             }
+        }
+        get gridHeight() {
+            const { height } = this.env.model.getters.getSheetViewDimension();
+            return height;
         }
     }
     Spreadsheet.template = "o-spreadsheet-Spreadsheet";
@@ -44357,7 +44645,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             owl.markRaw(this);
         }
         get handlers() {
-            return [this.range, ...this.corePlugins, ...this.allUIPlugins, this.history];
+            return [...this.coreHandlers, ...this.allUIPlugins, this.history];
+        }
+        get coreHandlers() {
+            return [this.range, ...this.corePlugins];
         }
         get allUIPlugins() {
             return [...this.statefulUIPlugins, ...this.coreViewsPlugins, ...this.featurePlugins];
@@ -44485,6 +44776,16 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * Check if the given command is allowed by all the plugins and the history.
          */
         checkDispatchAllowed(command) {
+            if (isCoreCommand(command)) {
+                return this.checkDispatchAllowedCoreCommand(command);
+            }
+            return this.checkDispatchAllowedLocalCommand(command);
+        }
+        checkDispatchAllowedCoreCommand(command) {
+            const results = this.coreHandlers.map((handler) => handler.allowDispatch(command));
+            return new DispatchResult(results.flat());
+        }
+        checkDispatchAllowedLocalCommand(command) {
             const results = this.handlers.map((handler) => handler.allowDispatch(command));
             return new DispatchResult(results.flat());
         }
@@ -44712,9 +45013,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
+<<<<<<< Updated upstream
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-02-06T07:29:38.294Z';
-    exports.__info__.hash = 'b1f3dd5';
+    exports.__info__.date = '2023-03-02T09:00:14.956Z';
+    exports.__info__.hash = '43a1550';
+=======
+
+    __info__.version = '16.3.0-alpha.2';
+    __info__.date = '2023-04-03T06:34:29.871Z';
+    __info__.hash = 'bdd51dd';
+
+>>>>>>> Stashed changes
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map

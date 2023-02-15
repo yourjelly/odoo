@@ -25,16 +25,16 @@
   </t>
 
   <t t-name="o-spreadsheet-Autofill" owl="1">
+    <div class="o-autofill" t-att-style="style"/>
     <div
-      class="o-autofill"
+      class="o-autofill-handler"
+      t-att-style="handlerStyle"
       t-on-mousedown="onMouseDown"
-      t-att-style="style"
-      t-on-dblclick="onDblClick">
-      <div class="o-autofill-handler" t-att-style="styleHandler"/>
-      <t t-set="tooltip" t-value="getTooltip()"/>
-      <div t-if="tooltip" class="o-autofill-nextvalue" t-att-style="styleNextvalue">
-        <t t-component="tooltip.component" t-props="tooltip.props"/>
-      </div>
+      t-on-dblclick="onDblClick"
+    />
+    <t t-set="tooltip" t-value="getTooltip()"/>
+    <div t-if="tooltip" class="o-autofill-nextvalue" t-att-style="styleNextValue">
+      <t t-component="tooltip.component" t-props="tooltip.props"/>
     </div>
   </t>
 
@@ -116,6 +116,7 @@
 
       <BottomBarStatistic
         openContextMenu="(x, y, registry) => this.openContextMenu(x, y, 'listSelectionStatistics', registry)"
+        closeContextMenu="() => this.closeContextMenuWithId('listSelectionStatistics')"
       />
 
       <Menu
@@ -180,7 +181,11 @@
   </t>
 
   <t t-name="o-spreadsheet-ColorPicker" owl="1">
-    <div class="o-color-picker" t-att-class="props.dropdownDirection || 'right'" t-on-click.stop="">
+    <div
+      class="o-color-picker"
+      t-att-class="props.dropdownDirection || 'right'"
+      t-on-click.stop=""
+      t-att-style="colorPickerStyle">
       <div class="o-color-picker-section-name">Standard</div>
       <div class="colors-grid">
         <div
@@ -251,6 +256,28 @@
       <div class="o-buttons">
         <button t-on-click="resetColor" class="o-cancel">Reset</button>
       </div>
+    </div>
+  </t>
+
+  <t t-name="o-spreadsheet-ColorPickerWidget" owl="1">
+    <div class="o-color-picker-widget">
+      <div
+        class="o-color-picker-button"
+        t-on-click.stop="props.toggleColorPicker"
+        t-att-title="props.title"
+        t-att-class="props.class ? props.class : 'o-color-picker-button-style'"
+        t-att-disabled="props.disabled">
+        <span t-att-style="iconStyle">
+          <t t-call="{{props.icon}}"/>
+        </span>
+      </div>
+      <ColorPicker
+        t-if="props.showColorPicker"
+        onColorPicked="props.onColorPicked"
+        currentColor="props.currentColor"
+        dropdownDirection="props.dropdownDirection"
+        maxHeight="props.dropdownMaxHeight"
+      />
     </div>
   </t>
 
@@ -448,7 +475,7 @@
   </t>
 
   <t t-name="o-spreadsheet-ChartJsComponent" owl="1">
-    <canvas class="o-figure-canvas" t-att-style="canvasStyle" t-ref="graphContainer"/>
+    <canvas class="o-figure-canvas w-100 h-100" t-att-style="canvasStyle" t-ref="graphContainer"/>
   </t>
 
   <t t-name="o-spreadsheet-ScorecardChart" owl="1">
@@ -489,7 +516,7 @@
         class="o-figure w-100 h-100"
         t-on-mousedown.stop="(ev) => this.onMouseDown(ev)"
         t-ref="figure"
-        t-att-style="figureStyle"
+        t-att-style="props.style"
         tabindex="0"
         t-on-keydown="(ev) => this.onKeyDown(ev)"
         t-on-keyup.stop="">
@@ -500,8 +527,8 @@
           figure="props.figure"
         />
       </div>
+      <div class="o-figure-border w-100 h-100 position-absolute pe-none" t-att-style="borderStyle"/>
       <t t-if="isSelected">
-        <div class="w-100 h-100 o-active-figure-border position-absolute pe-none"/>
         <div
           class="o-fig-anchor o-top"
           t-att-style="this.getResizerPosition('top')"
@@ -724,6 +751,39 @@
     </div>
   </t>
 
+  <t t-name="o-spreadsheet-FontSizeEditor" owl="1">
+    <div class="o-dropdown o-font-size-editor" t-ref="FontSizeEditor">
+      <input
+        type="number"
+        min="1"
+        max="400"
+        class="o-font-size bg-transparent border-0"
+        t-on-keydown="onInputKeydown"
+        t-on-click.stop=""
+        t-on-focus.stop="onInputFocused"
+        t-att-value="currentFontSize"
+        t-on-change="setSizeFromInput"
+        t-ref="inputFontSize"
+      />
+      <span title="Font Size" t-on-click="() => this.toggleFontList()">
+        <t t-call="o-spreadsheet-Icon.TRIANGLE_DOWN"/>
+      </span>
+      <div
+        class="o-dropdown-content o-text-options"
+        t-if="dropdown.isOpen"
+        t-att-style="props.dropdownStyle">
+        <t t-foreach="fontSizes" t-as="fontSize" t-key="fontSize">
+          <div
+            t-esc="fontSize"
+            t-att-data-size="fontSize"
+            class="o-dropdown-item"
+            t-on-click="() => this.setSizeFromList(fontSize)"
+          />
+        </t>
+      </div>
+    </div>
+  </t>
+
   <t t-name="o-spreadsheet-Grid" owl="1">
     <div
       class="o-grid"
@@ -782,8 +842,8 @@
         onMouseWheel.bind="onMouseWheel"
         onClosePopover.bind="onClosePopover"
       />
-      <t t-if="env.model.getters.getEditionMode() === 'inactive' and isAutoFillActive()">
-        <Autofill position="getAutofillPosition()"/>
+      <t t-if="env.model.getters.getEditionMode() === 'inactive'">
+        <Autofill position="getAutofillPosition()" isVisible="isAutofillVisible"/>
       </t>
       <t t-if="env.model.getters.getEditionMode() !== 'inactive'">
         <t t-foreach="env.model.getters.getHighlights()" t-as="highlight" t-key="highlight_index">
@@ -1608,16 +1668,21 @@
       <div class="o-section">
         <div class="o-section-title">Text</div>
         <div class="d-flex">
-          <input type="text" class="o-input flex-grow-1" t-model="link.label"/>
+          <input type="text" title="Link label" class="o-input flex-grow-1" t-model="link.label"/>
         </div>
 
         <div class="o-section-title mt-3">Link</div>
         <div class="o-link-url">
           <t t-if="link.isUrlEditable">
-            <input type="text" t-ref="urlInput" t-model="link.url"/>
+            <input type="text" title="Link URL" t-ref="urlInput" t-model="link.url"/>
           </t>
           <t t-else="">
-            <input type="text" t-att-value="getUrlRepresentation(link)" disabled="1"/>
+            <input
+              type="text"
+              title="Link URL"
+              t-att-value="getUrlRepresentation(link)"
+              disabled="1"
+            />
           </t>
           <button t-if="link.url" t-on-click="removeLink" class="o-remove-url">✖</button>
           <button t-if="!link.url" t-on-click.stop="openMenu" class="o-special-link">
@@ -1812,22 +1877,17 @@
 
   <t t-name="o-spreadsheet-BarChartDesignPanel" owl="1">
     <div>
-      <div class="o-section">
+      <div class="o-section o-chart-background-color">
         <div class="o-section-title">Background color</div>
-        <div class="o-with-color-picker">
-          Select a color...
-          <span
-            t-att-style="props.definition.background ? `border-color: ${props.definition.background}` : 'border-bottom-style: hidden'"
-            t-on-click.stop="toggleColorPicker">
-            <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-          </span>
-          <ColorPicker
-            t-if="state.fillColorTool"
-            onColorPicked="(color) => this.updateBackgroundColor(color)"
-            currentColor="props.definition.background"
-            t-key="backgroundColor"
-          />
-        </div>
+        Select a color...
+        <ColorPickerWidget
+          currentColor="props.definition.background"
+          toggleColorPicker="() => this.toggleColorPicker()"
+          showColorPicker="state.fillColorTool"
+          onColorPicked="(color) => this.updateBackgroundColor(color)"
+          title="env._t('Background Color')"
+          icon="'o-spreadsheet-Icon.FILL_COLOR'"
+        />
       </div>
       <div class="o-section o-chart-title">
         <div class="o-section-title">Title</div>
@@ -1888,23 +1948,17 @@
 
   <t t-name="o-spreadsheet-GaugeChartDesignPanel" owl="1">
     <div>
-      <div class="o-section">
+      <div class="o-section o-chart-background-color">
         <div class="o-section-title">Background color</div>
-        <div class="o-with-color-picker">
-          Select a color...
-          <span
-            title="Background Color"
-            t-att-style="props.definition.background ? `border-color: ${props.definition.background}` : 'border-bottom-style: hidden'"
-            t-on-click.stop="() => this.toggleMenu('backgroundColor', ev)">
-            <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-          </span>
-          <ColorPicker
-            t-if="state.openedMenu === 'backgroundColor'"
-            onColorPicked="(color) => this.updateBackgroundColor(color)"
-            currentColor="props.definition.background"
-            t-key="backgroundColor"
-          />
-        </div>
+        Select a color...
+        <ColorPickerWidget
+          currentColor="props.definition.background"
+          toggleColorPicker="() => this.toggleMenu('backgroundColor', ev)"
+          showColorPicker="state.openedMenu === 'backgroundColor'"
+          onColorPicked="(color) => this.updateBackgroundColor(color)"
+          title="env._t('Background Color')"
+          icon="'o-spreadsheet-Icon.FILL_COLOR'"
+        />
       </div>
 
       <div class="o-section o-chart-title">
@@ -1983,22 +2037,13 @@
 
         <tr>
           <td>
-            <div class="o-tools">
-              <div class="o-tool o-dropdown o-with-color">
-                <span
-                  title="Fill Color"
-                  t-attf-style="border-color:{{sectionRule.colors.upperColor}}"
-                  t-on-click.stop="(ev) => this.toggleMenu('sectionColor-upperColor', ev)">
-                  <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-                </span>
-                <ColorPicker
-                  t-if="state.openedMenu === 'sectionColor-upperColor'"
-                  onColorPicked="(color) => this.updateSectionColor('upperColor', color)"
-                  currentColor="sectionRule.colors.upperColor"
-                  dropdownDirection="'right'"
-                />
-              </div>
-            </div>
+            <ColorPickerWidget
+              currentColor="sectionRule.colors.upperColor"
+              toggleColorPicker="(ev) => this.toggleMenu('sectionColor-upperColor', ev)"
+              showColorPicker="state.openedMenu === 'sectionColor-upperColor'"
+              onColorPicked="(color) => this.updateSectionColor('upperColor', color)"
+              icon="'o-spreadsheet-Icon.FILL_COLOR'"
+            />
           </td>
           <td>Else</td>
           <td/>
@@ -2012,22 +2057,13 @@
   <t t-name="o-spreadsheet-GaugeChartColorSectionTemplateRow" owl="1">
     <tr>
       <td>
-        <div class="o-tools">
-          <div class="o-tool o-dropdown o-with-color">
-            <span
-              title="Fill Color"
-              t-attf-style="border-color:{{sectionColor}}"
-              t-on-click.stop="(ev) => this.toggleMenu('sectionColor-'+sectionType, ev)">
-              <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-            </span>
-            <ColorPicker
-              t-if="state.openedMenu === 'sectionColor-'+sectionType"
-              onColorPicked="(color) => this.updateSectionColor(sectionType, color)"
-              currentColor="sectionColor"
-              dropdownDirection="'right'"
-            />
-          </div>
-        </div>
+        <ColorPickerWidget
+          currentColor="sectionColor"
+          toggleColorPicker="(ev) => this.toggleMenu('sectionColor-'+sectionType, ev)"
+          showColorPicker="state.openedMenu === 'sectionColor-'+sectionType"
+          onColorPicked="(color) => this.updateSectionColor(sectionType, color)"
+          icon="'o-spreadsheet-Icon.FILL_COLOR'"
+        />
       </td>
       <td>When value is below</td>
       <td>
@@ -2104,22 +2140,17 @@
 
   <t t-name="o-spreadsheet-LineBarPieDesignPanel" owl="1">
     <div>
-      <div class="o-section">
+      <div class="o-section o-chart-background-color">
         <div class="o-section-title">Background color</div>
-        <div class="o-with-color-picker">
-          Select a color...
-          <span
-            t-att-style="props.definition.background ? `border-color: ${props.definition.background}` : 'border-bottom-style: hidden'"
-            t-on-click.stop="toggleColorPicker">
-            <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-          </span>
-          <ColorPicker
-            t-if="state.fillColorTool"
-            onColorPicked="(color) => this.updateBackgroundColor(color)"
-            currentColor="props.definition.background"
-            t-key="backgroundColor"
-          />
-        </div>
+        Select a color...
+        <ColorPickerWidget
+          currentColor="props.definition.background"
+          toggleColorPicker="() => this.toggleColorPicker()"
+          showColorPicker="state.fillColorTool"
+          onColorPicked="(color) => this.updateBackgroundColor(color)"
+          title="env._t('Background Color')"
+          icon="'o-spreadsheet-Icon.FILL_COLOR'"
+        />
       </div>
       <div class="o-section o-chart-title">
         <div class="o-section-title">Title</div>
@@ -2223,22 +2254,17 @@
 
   <t t-name="o-spreadsheet-LineChartDesignPanel" owl="1">
     <div>
-      <div class="o-section">
+      <div class="o-section o-chart-background-color">
         <div class="o-section-title">Background color</div>
-        <div class="o-with-color-picker">
-          Select a color...
-          <span
-            t-att-style="props.definition.background ? `border-color: ${props.definition.background}` : 'border-bottom-style: hidden'"
-            t-on-click.stop="toggleColorPicker">
-            <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-          </span>
-          <ColorPicker
-            t-if="state.fillColorTool"
-            onColorPicked="(color) => this.updateBackgroundColor(color)"
-            currentColor="props.definition.background"
-            t-key="backgroundColor"
-          />
-        </div>
+        Select a color...
+        <ColorPickerWidget
+          currentColor="props.definition.background"
+          toggleColorPicker="() => this.toggleColorPicker()"
+          showColorPicker="state.fillColorTool"
+          onColorPicked="(color) => this.updateBackgroundColor(color)"
+          title="env._t('Background Color')"
+          icon="'o-spreadsheet-Icon.FILL_COLOR'"
+        />
       </div>
       <div class="o-section o-chart-title">
         <div class="o-section-title">Title</div>
@@ -2376,23 +2402,17 @@
 
   <t t-name="o-spreadsheet-ScorecardChartDesignPanel" owl="1">
     <div>
-      <div class="o-section">
+      <div class="o-section o-chart-background-color">
         <div class="o-section-title">Background color</div>
-        <div class="o-with-color-picker">
-          Select a color...
-          <span
-            title="Background Color"
-            t-att-style="props.definition.background ? `border-color: ${props.definition.background}` : 'border-bottom-style: hidden'"
-            t-on-click.stop="() => this.openColorPicker('backgroundColor')">
-            <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-          </span>
-          <ColorPicker
-            t-if="state.openedColorPicker === 'backgroundColor'"
-            onColorPicked="(color) => this.setColor(color, 'backgroundColor')"
-            currentColor="props.definition.brackground"
-            t-key="backgroundColor"
-          />
-        </div>
+        Select a color...
+        <ColorPickerWidget
+          currentColor="props.definition.background"
+          toggleColorPicker="() => this.toggleColorPicker('backgroundColor')"
+          showColorPicker="state.openedColorPicker === 'backgroundColor'"
+          onColorPicked="(color) => this.setColor(color, 'backgroundColor')"
+          title="env._t('Background Color')"
+          icon="'o-spreadsheet-Icon.FILL_COLOR'"
+        />
       </div>
 
       <div class="o-section o-chart-title">
@@ -2415,39 +2435,29 @@
         />
       </div>
     </div>
-    <div class="o-section">
+    <div class="o-section o-chart-baseline-color">
       <div class="o-section-title">Baseline color</div>
-      <div class="o-with-color-picker">
-        Color on value increase
-        <span
-          title="Color Up"
-          t-attf-style="border-color:{{props.definition.baselineColorUp}}"
-          t-on-click.stop="() => this.openColorPicker('baselineColorUp')">
-          <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-        </span>
-        <ColorPicker
-          t-if="state.openedColorPicker === 'baselineColorUp'"
-          onColorPicked="(color) => this.setColor(color, 'baselineColorUp')"
-          currentColor="props.definition.baselineColorUp"
-          t-key="baselineColorUp"
-        />
-      </div>
+      Color on value increase
+      <ColorPickerWidget
+        currentColor="props.definition.baselineColorUp"
+        toggleColorPicker="() => this.toggleColorPicker('baselineColorUp')"
+        showColorPicker="state.openedColorPicker === 'baselineColorUp'"
+        onColorPicked="(color) => this.setColor(color, 'baselineColorUp')"
+        dropdownDirection="'center'"
+        title="env._t('Color Up')"
+        icon="'o-spreadsheet-Icon.FILL_COLOR'"
+      />
       <br/>
-      <div class="o-with-color-picker">
-        Color on value decrease
-        <span
-          title="Background Color"
-          t-attf-style="border-color:{{props.definition.baselineColorDown}}"
-          t-on-click.stop="() => this.openColorPicker('baselineColorDown')">
-          <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-        </span>
-        <ColorPicker
-          t-if="state.openedColorPicker === 'baselineColorDown'"
-          onColorPicked="(color) => this.setColor(color, 'baselineColorDown')"
-          currentColor="props.definition.baselineColorDown"
-          t-key="baselineColorDown"
-        />
-      </div>
+      Color on value decrease
+      <ColorPickerWidget
+        currentColor="props.definition.baselineColorDown"
+        toggleColorPicker="() => this.toggleColorPicker('baselineColorDown')"
+        showColorPicker="state.openedColorPicker === 'baselineColorDown'"
+        onColorPicked="(color) => this.setColor(color, 'baselineColorDown')"
+        dropdownDirection="'center'"
+        title="env._t('Color Down')"
+        icon="'o-spreadsheet-Icon.FILL_COLOR'"
+      />
     </div>
   </t>
 
@@ -2496,7 +2506,7 @@
       <t t-call="o-spreadsheet-CellIsRuleEditorPreview">
         <t t-set="currentStyle" t-value="rule.style"/>
       </t>
-      <div class="o-tools">
+      <div class="o-sidePanel-tools">
         <div
           class="o-tool"
           title="Bold"
@@ -2525,37 +2535,27 @@
           t-on-click="(ev) => this.toggleStyle('strikethrough', ev)">
           <t t-call="o-spreadsheet-Icon.STRIKE"/>
         </div>
-        <div class="o-tool o-dropdown o-with-color">
-          <span
-            title="TextColor"
-            t-attf-style="border-color:{{rule.style.textColor}}"
-            t-on-click.stop="(ev) => this.toggleMenu('cellIsRule-textColor', ev)">
-            <t t-call="o-spreadsheet-Icon.TEXT_COLOR"/>
-          </span>
-          <ColorPicker
-            t-if="state.openedMenu === 'cellIsRule-textColor'"
-            dropdownDirection="'center'"
-            onColorPicked="(color) => this.setColor('textColor', color)"
-            currentColor="rule.style.textColor"
-            t-key="textColor"
-          />
-        </div>
+        <ColorPickerWidget
+          currentColor="rule.style.textColor || '#000000'"
+          toggleColorPicker="(ev) => this.toggleMenu('cellIsRule-textColor', ev)"
+          showColorPicker="state.openedMenu === 'cellIsRule-textColor'"
+          onColorPicked="(color) => this.setColor('textColor', color)"
+          title="env._t('Text Color')"
+          icon="'o-spreadsheet-Icon.TEXT_COLOR'"
+          dropdownDirection="'center'"
+          class="'o-tool'"
+        />
         <div class="o-divider"/>
-        <div class="o-tool o-dropdown o-with-color">
-          <span
-            title="FillColor"
-            t-attf-style="border-color:{{rule.style.fillColor}}"
-            t-on-click.stop="(ev) => this.toggleMenu('cellIsRule-fillColor', ev)">
-            <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-          </span>
-          <ColorPicker
-            t-if="state.openedMenu === 'cellIsRule-fillColor'"
-            dropdownDirection="'center'"
-            onColorPicked="(color) => this.setColor('fillColor', color)"
-            currentColor="rule.style.fillColor"
-            t-key="fillColor"
-          />
-        </div>
+        <ColorPickerWidget
+          currentColor="rule.style.fillColor"
+          toggleColorPicker="(ev) => this.toggleMenu('cellIsRule-fillColor', ev)"
+          showColorPicker="state.openedMenu === 'cellIsRule-fillColor'"
+          onColorPicked="(color) => this.setColor('fillColor', color)"
+          title="env._t('Fill Color')"
+          dropdownDirection="'center'"
+          icon="'o-spreadsheet-Icon.FILL_COLOR'"
+          class="'o-tool'"
+        />
       </div>
     </div>
   </t>
@@ -2597,22 +2597,16 @@
         t-if="threshold !== undefined and threshold.type !== 'value'"
       />
       <input type="text" class="o-input o-threshold-value" t-else="" disabled="1"/>
-      <div class="o-tools">
-        <div class="o-tool o-dropdown o-with-color" t-att-disabled="threshold === undefined">
-          <span
-            title="Fill Color"
-            t-attf-style="border-color:{{getThresholdColor(threshold)}}"
-            t-on-click.stop="(ev) => this.toggleMenu('colorScale-'+thresholdType+'Color', ev)">
-            <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-          </span>
-          <ColorPicker
-            t-if="state.openedMenu === 'colorScale-'+thresholdType+'Color'"
-            dropdownDirection="'left'"
-            onColorPicked="(color) => this.setColorScaleColor(thresholdType, color)"
-            currentColor="getThresholdColor(threshold)"
-          />
-        </div>
-      </div>
+      <ColorPickerWidget
+        currentColor="getThresholdColor(threshold)"
+        toggleColorPicker="(ev) => this.toggleMenu('colorScale-'+thresholdType+'Color', ev)"
+        showColorPicker="state.openedMenu === 'colorScale-'+thresholdType+'Color'"
+        onColorPicked="(color) => this.setColorScaleColor(thresholdType, color)"
+        title="env._t('Fill Color')"
+        dropdownDirection="'left'"
+        icon="'o-spreadsheet-Icon.FILL_COLOR'"
+        disabled="threshold === undefined"
+      />
     </div>
   </t>
 
@@ -3132,6 +3126,7 @@
           onClick="() => this.focusGrid()"
           onComposerContentFocused="(selection) => this.onTopBarComposerFocused(selection)"
           focusComposer="focusTopBarComposer"
+          dropdownMaxHeight="gridHeight"
         />
         <Grid
           sidePanelIsOpen="sidePanel.isOpen"
@@ -3245,6 +3240,7 @@
               <div
                 class="o-dropdown-content o-text-options  o-format-tool "
                 t-if="state.activeTool === 'formatTool'"
+                t-att-style="dropdownStyle"
                 t-on-click.stop="">
                 <t t-foreach="commonFormats" t-as="commonFormat" t-key="commonFormat.name">
                   <div
@@ -3267,28 +3263,7 @@
               </div>
             </div>
             <div class="o-divider"/>
-            <div class="o-dropdown">
-              <div
-                class="o-tool o-dropdown-button o-text-icon"
-                title="Font Size"
-                t-on-click="(ev) => this.toggleDropdownTool('fontSizeTool', ev)">
-                <t t-esc="style.fontSize || DEFAULT_FONT_SIZE"/>
-                <t t-call="o-spreadsheet-Icon.TRIANGLE_DOWN"/>
-              </div>
-              <div
-                class="o-dropdown-content o-text-options "
-                t-if="state.activeTool === 'fontSizeTool'"
-                t-on-click.stop="">
-                <t t-foreach="fontSizes" t-as="font" t-key="font_index">
-                  <div
-                    t-esc="font.pt"
-                    t-att-data-size="font.pt"
-                    class="o-dropdown-item"
-                    t-on-click="() => this.setSize(font.pt)"
-                  />
-                </t>
-              </div>
-            </div>
+            <FontSizeEditor onToggle="() => this.onClick()" dropdownStyle="this.dropdownStyle"/>
             <div class="o-divider"/>
             <div
               class="o-tool"
@@ -3312,36 +3287,28 @@
               <t t-call="o-spreadsheet-Icon.STRIKE"/>
             </div>
             <div class="o-dropdown">
-              <div
-                class="o-tool o-dropdown-button o-with-color"
-                title="Text Color"
-                t-on-click="(ev) => this.toggleDropdownTool('textColorTool', ev)">
-                <span t-attf-style="border-color:{{textColor}}">
-                  <t t-call="o-spreadsheet-Icon.TEXT_COLOR"/>
-                </span>
-              </div>
-              <ColorPicker
-                t-if="state.activeTool === 'textColorTool'"
-                onColorPicked="(color) => this.setColor('textColor', color)"
+              <ColorPickerWidget
                 currentColor="textColor"
-                t-key="textColor"
+                toggleColorPicker="(ev) => this.toggleDropdownTool('textColorTool', ev)"
+                showColorPicker="state.activeTool === 'textColorTool'"
+                onColorPicked="(color) => this.setColor('textColor', color)"
+                title="env._t('Text Color')"
+                icon="'o-spreadsheet-Icon.TEXT_COLOR'"
+                dropdownMaxHeight="this.props.dropdownMaxHeight"
+                class="'o-tool o-dropdown-button'"
               />
             </div>
             <div class="o-divider"/>
-            <div class="o-dropdown ">
-              <div
-                class="o-tool o-dropdown-button o-with-color"
-                title="Fill Color"
-                t-on-click="(ev) => this.toggleDropdownTool('fillColorTool', ev)">
-                <span t-attf-style="border-color:{{fillColor}}">
-                  <t t-call="o-spreadsheet-Icon.FILL_COLOR"/>
-                </span>
-              </div>
-              <ColorPicker
-                t-if="state.activeTool === 'fillColorTool'"
-                onColorPicked="(color) => this.setColor('fillColor', color)"
+            <div class="o-dropdown">
+              <ColorPickerWidget
                 currentColor="fillColor"
-                t-key="fillColor"
+                toggleColorPicker="(ev) => this.toggleDropdownTool('fillColorTool', ev)"
+                showColorPicker="state.activeTool === 'fillColorTool'"
+                onColorPicked="(color) => this.setColor('fillColor', color)"
+                title="env._t('Fill Color')"
+                icon="'o-spreadsheet-Icon.FILL_COLOR'"
+                dropdownMaxHeight="this.props.dropdownMaxHeight"
+                class="'o-tool o-dropdown-button'"
               />
             </div>
             <div class="o-dropdown">
@@ -3356,6 +3323,7 @@
               <div
                 class="o-dropdown-content o-border-dropdown"
                 t-if="state.activeTool === 'borderTool'"
+                t-att-style="dropdownStyle"
                 t-on-click.stop="">
                 <div class="o-dropdown-line">
                   <span class="o-line-item" t-on-click="(ev) => this.setBorder('all')">
@@ -3422,6 +3390,7 @@
               <div
                 t-if="state.activeTool === 'horizontalAlignTool'"
                 class="o-dropdown-content"
+                t-att-style="dropdownStyle"
                 t-on-click.stop="">
                 <div
                   class="o-dropdown-item o-dropdown-align-item"
@@ -3461,6 +3430,7 @@
               <div
                 t-if="state.activeTool === 'verticalAlignTool'"
                 class="o-dropdown-content"
+                t-att-style="dropdownStyle"
                 t-on-click.stop="">
                 <div
                   class="o-dropdown-item o-dropdown-align-item"
@@ -3500,6 +3470,7 @@
               <div
                 t-if="state.activeTool === 'textWrappingTool'"
                 class="o-dropdown-content"
+                t-att-style="dropdownStyle"
                 t-on-click.stop="">
                 <div
                   class="o-dropdown-item o-dropdown-align-item"
@@ -3544,3 +3515,11 @@
     </div>
   </t>
 </odoo>
+<<<<<<< Updated upstream
+=======
+<!--
+  __info__.version = '16.3.0-alpha.2';
+  __info__.date = '2023-04-03T06:34:32.230Z';
+  __info__.hash = 'bdd51dd';
+-->
+>>>>>>> Stashed changes
