@@ -325,6 +325,18 @@
             <xpath expr="//filter[@name='my_leaves']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
+             <xpath expr="//filter[@name='active_employee']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='inactive']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='active_types']" position="attributes">
+                <attribute name="string">Archived Off Type</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='group_employee']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
         </field>
     </record>
 
@@ -435,7 +447,7 @@
                 Employees request allocations to Time Off Officers (e.g. recuperation days).
             </p>
         </field>
-        <field name="context">{}</field>
+        <field name="context">{'search_default_year': 1}</field>
         <field name="domain">[('employee_id.user_id', '=', uid)]</field>
     </record>
     <record id="hr_leave_allocation_action_my_view_tree" model="ir.actions.act_window.view">
