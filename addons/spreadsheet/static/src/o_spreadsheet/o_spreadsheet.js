@@ -289,8 +289,8 @@
         ComponentsImportance[ComponentsImportance["Grid"] = 0] = "Grid";
         ComponentsImportance[ComponentsImportance["Highlight"] = 5] = "Highlight";
         ComponentsImportance[ComponentsImportance["Figure"] = 10] = "Figure";
-        ComponentsImportance[ComponentsImportance["Dropdown"] = 12] = "Dropdown";
         ComponentsImportance[ComponentsImportance["ScrollBar"] = 15] = "ScrollBar";
+        ComponentsImportance[ComponentsImportance["Dropdown"] = 16] = "Dropdown";
         ComponentsImportance[ComponentsImportance["GridComposer"] = 20] = "GridComposer";
         ComponentsImportance[ComponentsImportance["TopBarComposer"] = 21] = "TopBarComposer";
         ComponentsImportance[ComponentsImportance["ColorPicker"] = 25] = "ColorPicker";
@@ -301,28 +301,7 @@
     const DEFAULT_SHEETVIEW_SIZE = 1000;
     const MAXIMAL_FREEZABLE_RATIO = 0.85;
     const NEWLINE = "\n";
-
-    const fontSizes = [
-        { pt: 7.5, px: 10 },
-        { pt: 8, px: 11 },
-        { pt: 9, px: 12 },
-        { pt: 10, px: 13 },
-        { pt: 10.5, px: 14 },
-        { pt: 11, px: 15 },
-        { pt: 12, px: 16 },
-        { pt: 14, px: 18.7 },
-        { pt: 15, px: 20 },
-        { pt: 16, px: 21.3 },
-        { pt: 18, px: 24 },
-        { pt: 22, px: 29.3 },
-        { pt: 24, px: 32 },
-        { pt: 26, px: 34.7 },
-        { pt: 36, px: 48 },
-    ];
-    const fontSizeMap = {};
-    for (let font of fontSizes) {
-        fontSizeMap[font.pt] = font.px;
-    }
+    const FONT_SIZES = [6, 7, 8, 9, 10, 11, 12, 14, 18, 24, 36];
 
     // -----------------------------------------------------------------------------
     // Date Type
@@ -753,6 +732,9 @@
         context.restore();
         return textWidth;
     }
+    function fontSizeInPixels(fontSize) {
+        return Math.round((fontSize * 96) / 72);
+    }
     function computeTextFont(style) {
         const italic = style.italic ? "italic " : "";
         const weight = style.bold ? "bold" : DEFAULT_FONT_WEIGHT;
@@ -761,10 +743,7 @@
     }
     function computeTextFontSizeInPixels(style) {
         const sizeInPt = (style === null || style === void 0 ? void 0 : style.fontSize) || DEFAULT_FONT_SIZE;
-        if (!fontSizeMap[sizeInPt]) {
-            throw new Error("Size of the font is not supported");
-        }
-        return fontSizeMap[sizeInPt];
+        return fontSizeInPixels(sizeInPt);
     }
     /**
      * Return the font size that makes the width of a text match the given line width.
@@ -3147,20 +3126,6 @@
         constructor() {
             super(...arguments);
             this.ctx = document.createElement("canvas").getContext("2d");
-            this.state = owl.useState({ width: 0, height: 0 });
-        }
-        setup() {
-            this.chartRef = owl.useRef("chart");
-            const resizeObserver = new ResizeObserver(() => {
-                const { width, height } = this.chartRef.el.getBoundingClientRect();
-                this.state.width = width;
-                this.state.height = height;
-            });
-            owl.useEffect(() => {
-                const el = this.chartRef.el;
-                resizeObserver.observe(el);
-                return () => resizeObserver.unobserve(el);
-            }, () => [this.chartRef.el]);
         }
         get runtime() {
             return this.env.model.getters.getChartRuntime(this.props.figure.id);
@@ -3203,11 +3168,11 @@
             return cssPropertiesToCss({ height: `${this.getDrawableHeight()}px` });
         }
         get chartPadding() {
-            return this.state.width * CHART_PADDING_RATIO;
+            return this.props.figure.width * CHART_PADDING_RATIO;
         }
         getTextStyles() {
             // If the widest text overflows horizontally, scale it down, and apply the same scaling factors to all the other fonts.
-            const maxLineWidth = this.state.width * (1 - 2 * CHART_PADDING_RATIO);
+            const maxLineWidth = this.props.figure.width * (1 - 2 * CHART_PADDING_RATIO);
             const widestElement = this.getWidestElement();
             const baseFontSize = widestElement.getElementMaxFontSize(this.getDrawableHeight(), this);
             const fontSizeMatchingWidth = getFontSizeMatchingWidth(maxLineWidth, baseFontSize, (fontSize) => widestElement.getElementWidth(fontSize, this.ctx, this));
@@ -3252,7 +3217,7 @@
         /** Get the height of the chart minus all the vertical paddings */
         getDrawableHeight() {
             const verticalPadding = 2 * this.chartPadding;
-            let availableHeight = this.state.height - verticalPadding;
+            let availableHeight = this.props.figure.height - verticalPadding;
             availableHeight -= this.title ? TITLE_FONT_SIZE * LINE_HEIGHT : 0;
             return availableHeight;
         }
@@ -16068,7 +16033,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const color = (!isFormula && style.textColor) || "#000000";
             // font style
             const fontSize = (!isFormula && style.fontSize) || 10;
-            const fontWeight = !isFormula && style.bold ? "bold" : 500;
+            const fontWeight = !isFormula && style.bold ? "bold" : undefined;
             const fontStyle = !isFormula && style.italic ? "italic" : "normal";
             const textDecoration = !isFormula ? getTextDecoration(style) : "none";
             // align style
@@ -16089,8 +16054,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 "min-height": `${height + 1}px`,
                 background,
                 color,
-                "font-size": `${fontSizeMap[fontSize]}px`,
-                "font-weight": String(fontWeight),
+                "font-size": `${fontSizeInPixels(fontSize)}px`,
+                "font-weight": fontWeight,
                 "font-style": fontStyle,
                 "text-decoration": textDecoration,
                 "text-align": textAlign,
@@ -18096,11 +18061,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         isVisible: SELECTION_CONTAINS_FILTER,
     });
     // Font-sizes
-    for (let fs of fontSizes) {
-        topbarMenuRegistry.addChild(`format_font_size_${fs.pt}`, ["format", "format_font_size"], {
-            name: fs.pt.toString(),
-            sequence: fs.pt,
-            action: (env) => setStyle(env, { fontSize: fs.pt }),
+    for (let fs of FONT_SIZES) {
+        topbarMenuRegistry.addChild(`format_font_size_${fs}`, ["format", "format_font_size"], {
+            name: fs.toString(),
+            sequence: fs,
+            action: (env) => setStyle(env, { fontSize: fs }),
         });
     }
     function createFormulaFunctionMenuItems(fnNames) {
@@ -18430,10 +18395,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     position: absolute;
     top: calc(100% + 5px);
     z-index: ${ComponentsImportance.ColorPicker};
+    padding: ${PICKER_PADDING}px 0px;
     box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
     background-color: white;
-    padding: ${PICKER_PADDING}px 0px;
     line-height: 1.2;
+    overflow-y: auto;
+    overflow-x: hidden;
     width: ${GRADIENT_WIDTH + 2 * PICKER_PADDING}px;
 
     .o-color-picker-section-name {
@@ -18584,6 +18551,16 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 },
             });
         }
+        get colorPickerStyle() {
+            if (this.props.maxHeight === undefined)
+                return "";
+            if (this.props.maxHeight <= 0) {
+                return cssPropertiesToCss({ display: "none" });
+            }
+            return cssPropertiesToCss({
+                "max-height": `${this.props.maxHeight}px`,
+            });
+        }
         onColorClick(color) {
             if (color) {
                 this.props.onColorPicked(color);
@@ -18641,6 +18618,61 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         dropdownDirection: { type: String, optional: true },
         onColorPicked: Function,
         currentColor: { type: String, optional: true },
+        maxHeight: { type: Number, optional: true },
+    };
+
+    css /* scss */ `
+  .o-color-picker-widget {
+    display: inline-block;
+    position: relative;
+
+    .o-color-picker-button-style {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2px;
+      padding: 3px;
+      border-radius: 2px;
+      cursor: pointer;
+      &:not([disabled]):hover {
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+    }
+
+    .o-color-picker-button {
+      > span {
+        border-bottom: 4px solid;
+        height: 16px;
+        margin-top: 2px;
+      }
+
+      &[disabled] {
+        pointer-events: none;
+        opacity: 0.6;
+      }
+    }
+  }
+`;
+    class ColorPickerWidget extends owl.Component {
+        get iconStyle() {
+            return this.props.currentColor
+                ? `border-color: ${this.props.currentColor}`
+                : "border-bottom-style: hidden";
+        }
+    }
+    ColorPickerWidget.template = "o-spreadsheet-ColorPickerWidget";
+    ColorPickerWidget.components = { ColorPicker };
+    ColorPickerWidget.props = {
+        currentColor: { type: String, optional: true },
+        toggleColorPicker: Function,
+        showColorPicker: Boolean,
+        onColorPicked: Function,
+        icon: String,
+        dropdownDirection: { type: String, optional: true },
+        title: { type: String, optional: true },
+        disabled: { type: Boolean, optional: true },
+        dropdownMaxHeight: { type: Number, optional: true },
+        class: { type: String, optional: true },
     };
 
     class LineBarPieDesignPanel extends owl.Component {
@@ -18676,7 +18708,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     LineBarPieDesignPanel.template = "o-spreadsheet-LineBarPieDesignPanel";
-    LineBarPieDesignPanel.components = { ColorPicker };
+    LineBarPieDesignPanel.components = { ColorPickerWidget };
     LineBarPieDesignPanel.props = {
         figureId: String,
         definition: Object,
@@ -18770,6 +18802,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 sectionRuleDispatchResult: undefined,
             });
         }
+        setup() {
+            owl.useExternalListener(window, "click", this.closeMenus);
+        }
         get designErrorMessages() {
             var _a;
             const cancelledReasons = [...(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || [])];
@@ -18860,7 +18895,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     GaugeChartDesignPanel.template = "o-spreadsheet-GaugeChartDesignPanel";
-    GaugeChartDesignPanel.components = { ColorPicker };
+    GaugeChartDesignPanel.components = { ColorPickerWidget };
     GaugeChartDesignPanel.props = {
         figureId: String,
         definition: Object,
@@ -18958,6 +18993,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 openedColorPicker: undefined,
             });
         }
+        setup() {
+            owl.useExternalListener(window, "click", this.closeMenus);
+        }
         updateTitle(ev) {
             this.props.updateChart({
                 title: ev.target.value,
@@ -18966,8 +19004,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         updateBaselineDescr(ev) {
             this.props.updateChart({ baselineDescr: ev.target.value });
         }
-        openColorPicker(colorPickerId) {
-            this.state.openedColorPicker = colorPickerId;
+        toggleColorPicker(colorPickerId) {
+            if (this.state.openedColorPicker === colorPickerId) {
+                this.state.openedColorPicker = undefined;
+            }
+            else {
+                this.state.openedColorPicker = colorPickerId;
+            }
         }
         setColor(color, colorPickerId) {
             switch (colorPickerId) {
@@ -18981,11 +19024,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.props.updateChart({ baselineColorUp: color });
                     break;
             }
+            this.closeMenus();
+        }
+        closeMenus() {
             this.state.openedColorPicker = undefined;
         }
     }
     ScorecardChartDesignPanel.template = "o-spreadsheet-ScorecardChartDesignPanel";
-    ScorecardChartDesignPanel.components = { ColorPicker };
+    ScorecardChartDesignPanel.components = { ColorPickerWidget };
     ScorecardChartDesignPanel.props = {
         figureId: String,
         definition: Object,
@@ -19036,13 +19082,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       .o-panel-element:last-child {
         border-right: none;
       }
-    }
-
-    .o-with-color-picker {
-      position: relative;
-    }
-    .o-with-color-picker > span {
-      border-bottom: 4px solid;
     }
   }
 `;
@@ -19406,14 +19445,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       margin-bottom: 5px;
       width: 96%;
     }
-    .o-color-picker {
+    .o-color-picker-widget .o-color-picker-button {
       pointer-events: all;
+      cursor: default;
     }
   }
   .o-cf-color-scale-editor {
     .o-threshold {
       display: flex;
-      flex-direction: horizontal;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
       select {
         width: 100%;
       }
@@ -19884,7 +19926,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     ConditionalFormattingPanel.template = "o-spreadsheet-ConditionalFormattingPanel";
-    ConditionalFormattingPanel.components = { SelectionInput, IconPicker, ColorPicker };
+    ConditionalFormattingPanel.components = { SelectionInput, IconPicker, ColorPickerWidget };
     ConditionalFormattingPanel.props = {
         selection: { type: Object, optional: true },
         onCloseSidePanel: Function,
@@ -20215,16 +20257,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     height: 100%;
     user-select: none;
 
-    border: solid ${FIGURE_BORDER_COLOR};
     &:focus {
       outline: none;
     }
   }
 
-  div.o-active-figure-border {
+  div.o-figure-border {
     box-sizing: border-box;
     z-index: 1;
-    border: ${ACTIVE_BORDER_WIDTH}px solid ${SELECTION_BORDER_COLOR};
   }
 
   .o-figure-wrapper {
@@ -20296,10 +20336,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return figureRegistry;
         }
         getBorderWidth() {
-            return this.env.isDashboard() ? 0 : this.borderWidth;
+            if (this.env.isDashboard())
+                return 0;
+            return this.isSelected ? ACTIVE_BORDER_WIDTH : this.borderWidth;
         }
-        get figureStyle() {
-            return this.props.style + `border-width: ${this.getBorderWidth()}px;`;
+        get borderStyle() {
+            const borderWidth = this.getBorderWidth();
+            const borderColor = this.isSelected ? SELECTION_BORDER_COLOR : FIGURE_BORDER_COLOR;
+            return `border: ${borderWidth}px solid ${borderColor};`;
         }
         get wrapperStyle() {
             const { x, y, width, height } = this.props.figure;
@@ -20599,6 +20643,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.dnd.y = Math.max(dndInitialY + deltaY, minY);
             };
             const onMouseUp = (ev) => {
+                if (!this.dnd.figId) {
+                    return;
+                }
                 let { x, y } = this.screenCoordinatesToInternal(this.dnd);
                 this.dnd.figId = undefined;
                 this.env.model.dispatch("UPDATE_FIGURE", { sheetId, id: figure.id, x, y });
@@ -20649,6 +20696,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 };
             }
             const onMouseUp = (ev) => {
+                if (!this.dnd.figId) {
+                    return;
+                }
                 this.dnd.figId = undefined;
                 let { x, y } = this.screenCoordinatesToInternal(this.dnd);
                 const update = { x, y };
@@ -23161,9 +23211,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 ? convertColor((_j = styleStruct.fillStyle) === null || _j === void 0 ? void 0 : _j.fgColor)
                 : convertColor((_k = styleStruct.fillStyle) === null || _k === void 0 ? void 0 : _k.bgColor),
             textColor: convertColor((_l = styleStruct.fontStyle) === null || _l === void 0 ? void 0 : _l.color),
-            fontSize: ((_m = styleStruct.fontStyle) === null || _m === void 0 ? void 0 : _m.size)
-                ? getClosestFontSize(styleStruct.fontStyle.size)
-                : undefined,
+            fontSize: (_m = styleStruct.fontStyle) === null || _m === void 0 ? void 0 : _m.size,
         };
     }
     function convertFormats(data, warningManager) {
@@ -23210,15 +23258,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         warningManager.generateNotSupportedWarning(WarningTypes.NumFmtIdNotSupported, format || `nmFmtId ${numFmtId}`);
         return undefined;
-    }
-    /**
-     * We currently only support only a set of font sizes, we cannot define new font sizes.
-     * This function adapts an arbitrary font size to the closest supported font size.
-     */
-    function getClosestFontSize(fontSize) {
-        const supportedSizes = Object.keys(fontSizeMap).map(Number);
-        const closest = supportedSizes.reduce((prev, curr) => Math.abs(curr - fontSize) < Math.abs(prev - fontSize) ? curr : prev);
-        return closest;
     }
     // ---------------------------------------------------------------------------
     // Warnings
@@ -27091,26 +27130,19 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         "<=": 10,
         "=": 10,
     };
-    const FUNCTION_BP = 6;
-    function bindingPower(token) {
-        switch (token.type) {
-            case "NUMBER":
-            case "SYMBOL":
-            case "REFERENCE":
-                return 0;
-            case "COMMA":
-                return 3;
-            case "LEFT_PAREN":
-                return 5;
-            case "RIGHT_PAREN":
-                return 5;
-            case "OPERATOR":
-                return OP_PRIORITY[token.value] || 15;
+    /**
+     * Parse the next operand in an arithmetic expression.
+     * e.g.
+     *  for 1+2*3, the next operand is 1
+     *  for (1+2)*3, the next operand is (1+2)
+     *  for SUM(1,2)+3, the next operand is SUM(1,2)
+     */
+    function parseOperand(tokens) {
+        var _a, _b, _c;
+        const current = tokens.shift();
+        if (!current) {
+            throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
         }
-        throw new BadExpressionError(_lt("Unknown token: %s", token.value));
-    }
-    function parsePrefix(current, tokens) {
-        var _a, _b, _c, _d;
         switch (current.type) {
             case "DEBUGGER":
                 const next = parseExpression(tokens, 1000);
@@ -27121,43 +27153,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             case "STRING":
                 return { type: "STRING", value: removeStringQuotes(current.value) };
             case "FUNCTION":
-                if (tokens.shift().type !== "LEFT_PAREN") {
-                    throw new BadExpressionError(_lt("Wrong function call"));
-                }
-                else {
-                    const args = [];
-                    if (tokens[0] && tokens[0].type !== "RIGHT_PAREN") {
-                        if (tokens[0].type === "COMMA") {
-                            args.push({ type: "UNKNOWN", value: "" });
-                        }
-                        else {
-                            args.push(parseExpression(tokens, FUNCTION_BP));
-                        }
-                        while (((_a = tokens[0]) === null || _a === void 0 ? void 0 : _a.type) === "COMMA") {
-                            tokens.shift();
-                            const token = tokens[0];
-                            if ((token === null || token === void 0 ? void 0 : token.type) === "RIGHT_PAREN") {
-                                args.push({ type: "UNKNOWN", value: "" });
-                                break;
-                            }
-                            else if ((token === null || token === void 0 ? void 0 : token.type) === "COMMA") {
-                                args.push({ type: "UNKNOWN", value: "" });
-                            }
-                            else {
-                                args.push(parseExpression(tokens, FUNCTION_BP));
-                            }
-                        }
-                    }
-                    const closingToken = tokens.shift();
-                    if (!closingToken || closingToken.type !== "RIGHT_PAREN") {
-                        throw new BadExpressionError(_lt("Wrong function call"));
-                    }
-                    return { type: "FUNCALL", value: current.value, args };
-                }
+                const args = parseFunctionArgs(tokens);
+                return { type: "FUNCALL", value: current.value, args };
             case "INVALID_REFERENCE":
                 throw new InvalidReferenceError();
             case "REFERENCE":
-                if (((_b = tokens[0]) === null || _b === void 0 ? void 0 : _b.value) === ":" && ((_c = tokens[1]) === null || _c === void 0 ? void 0 : _c.type) === "REFERENCE") {
+                if (((_a = tokens[0]) === null || _a === void 0 ? void 0 : _a.value) === ":" && ((_b = tokens[1]) === null || _b === void 0 ? void 0 : _b.type) === "REFERENCE") {
                     tokens.shift();
                     const rightReference = tokens.shift();
                     return {
@@ -27173,66 +27174,90 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 if (["TRUE", "FALSE"].includes(current.value.toUpperCase())) {
                     return { type: "BOOLEAN", value: current.value.toUpperCase() === "TRUE" };
                 }
-                else {
-                    if (current.value) {
-                        if (functionRegex.test(current.value) && ((_d = tokens[0]) === null || _d === void 0 ? void 0 : _d.type) === "LEFT_PAREN") {
-                            throw new UnknownFunctionError(current.value);
-                        }
-                        throw new BadExpressionError(_lt("Invalid formula"));
+                if (current.value) {
+                    if (functionRegex.test(current.value) && ((_c = tokens[0]) === null || _c === void 0 ? void 0 : _c.type) === "LEFT_PAREN") {
+                        throw new UnknownFunctionError(current.value);
                     }
-                    return { type: "STRING", value: current.value };
                 }
+                throw new BadExpressionError(_lt("Invalid formula"));
             case "LEFT_PAREN":
-                const result = parseExpression(tokens, 5);
-                if (!tokens.length || tokens[0].type !== "RIGHT_PAREN") {
-                    throw new BadExpressionError(_lt("Unmatched left parenthesis"));
-                }
-                tokens.shift();
+                const result = parseExpression(tokens);
+                consumeOrThrow(tokens, "RIGHT_PAREN", _lt("Missing closing parenthesis"));
                 return result;
-            default:
-                if (current.type === "OPERATOR" && UNARY_OPERATORS_PREFIX.includes(current.value)) {
+            case "OPERATOR":
+                const operator = current.value;
+                if (UNARY_OPERATORS_PREFIX.includes(operator)) {
                     return {
                         type: "UNARY_OPERATION",
-                        value: current.value,
-                        operand: parseExpression(tokens, OP_PRIORITY[current.value]),
+                        value: operator,
+                        operand: parseExpression(tokens, OP_PRIORITY[operator]),
                     };
                 }
                 throw new BadExpressionError(_lt("Unexpected token: %s", current.value));
+            default:
+                throw new BadExpressionError(_lt("Unexpected token: %s", current.value));
         }
     }
-    function parseInfix(left, current, tokens) {
-        if (current.type === "OPERATOR") {
-            const bp = bindingPower(current);
-            if (UNARY_OPERATORS_POSTFIX.includes(current.value)) {
-                return {
+    function parseFunctionArgs(tokens) {
+        var _a;
+        consumeOrThrow(tokens, "LEFT_PAREN", _lt("Missing opening parenthesis"));
+        const nextToken = tokens[0];
+        if ((nextToken === null || nextToken === void 0 ? void 0 : nextToken.type) === "RIGHT_PAREN") {
+            consumeOrThrow(tokens, "RIGHT_PAREN");
+            return [];
+        }
+        const args = [];
+        args.push(parseOneFunctionArg(tokens));
+        while (((_a = tokens[0]) === null || _a === void 0 ? void 0 : _a.type) !== "RIGHT_PAREN") {
+            consumeOrThrow(tokens, "COMMA", _lt("Wrong function call"));
+            args.push(parseOneFunctionArg(tokens));
+        }
+        consumeOrThrow(tokens, "RIGHT_PAREN");
+        return args;
+    }
+    function parseOneFunctionArg(tokens) {
+        const nextToken = tokens[0];
+        if ((nextToken === null || nextToken === void 0 ? void 0 : nextToken.type) === "COMMA" || (nextToken === null || nextToken === void 0 ? void 0 : nextToken.type) === "RIGHT_PAREN") {
+            // arg is empty: "sum(1,,2)" "sum(,1)" "sum(1,)"
+            return { type: "EMPTY", value: "" };
+        }
+        return parseExpression(tokens);
+    }
+    function consumeOrThrow(tokens, type, message = DEFAULT_ERROR_MESSAGE) {
+        const token = tokens.shift();
+        if (!token || token.type !== type) {
+            throw new BadExpressionError(message);
+        }
+    }
+    function parseExpression(tokens, parent_priority = 0) {
+        var _a;
+        if (tokens.length === 0) {
+            throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
+        }
+        let left = parseOperand(tokens);
+        // as long as we have operators with higher priority than the parent one,
+        // continue parsing the expression because it is a child sub-expression
+        while (((_a = tokens[0]) === null || _a === void 0 ? void 0 : _a.type) === "OPERATOR" && OP_PRIORITY[tokens[0].value] > parent_priority) {
+            const operator = tokens.shift().value;
+            if (UNARY_OPERATORS_POSTFIX.includes(operator)) {
+                left = {
                     type: "UNARY_OPERATION",
-                    value: current.value,
+                    value: operator,
                     operand: left,
                     postfix: true,
                 };
             }
             else {
-                const right = parseExpression(tokens, bp);
-                return {
+                const right = parseExpression(tokens, OP_PRIORITY[operator]);
+                left = {
                     type: "BIN_OPERATION",
-                    value: current.value,
+                    value: operator,
                     left,
                     right,
                 };
             }
         }
-        throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
-    }
-    function parseExpression(tokens, bp) {
-        const token = tokens.shift();
-        if (!token) {
-            throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
-        }
-        let expr = parsePrefix(token, tokens);
-        while (tokens[0] && bindingPower(tokens[0]) > bp) {
-            expr = parseInfix(expr, tokens.shift(), tokens);
-        }
-        return expr;
+        return left;
     }
     /**
      * Parse an expression (as a string) into an AST.
@@ -27242,10 +27267,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
     function parseTokens(tokens) {
         tokens = tokens.filter((x) => x.type !== "SPACE");
-        if (tokens[0].type === "OPERATOR" && tokens[0].value === "=") {
+        if (tokens[0].value === "=") {
             tokens.splice(0, 1);
         }
-        const result = parseExpression(tokens, 0);
+        const result = parseExpression(tokens);
         if (tokens.length) {
             throw new BadExpressionError(DEFAULT_ERROR_MESSAGE);
         }
@@ -27388,7 +27413,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (ast.type === "BIN_OPERATION" && ast.value === ":") {
                 throw new BadExpressionError(_lt("Invalid formula"));
             }
-            if (ast.type === "UNKNOWN") {
+            if (ast.type === "EMPTY") {
                 throw new BadExpressionError(_lt("Invalid formula"));
             }
             const compiledAST = compileAST(ast);
@@ -27531,7 +27556,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         code.append(`ctx.__lastFnCalled = '${fnName}';`);
                         return code.return(`ctx['${fnName}'](${left.returnExpression}, ${right.returnExpression})`);
                     }
-                    case "UNKNOWN":
+                    case "EMPTY":
                         return code.return("undefined");
                 }
             }
@@ -37870,7 +37895,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return token;
         const { xc, sheetName } = splitReference(token.value);
         const [left, right] = xc.split(":");
-        const sheetRef = sheetName ? `${sheetName}!` : "";
+        const sheetRef = sheetName ? `${getComposerSheetName(sheetName)}!` : "";
         const updatedLeft = getTokenNextReferenceType(left);
         const updatedRight = right ? `:${getTokenNextReferenceType(right)}` : "";
         return { ...token, value: sheetRef + updatedLeft + updatedRight };
@@ -39661,22 +39686,32 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         constructor() {
             super(...arguments);
             this.selectedStatisticFn = "";
+            this.statisticFnResults = {};
+        }
+        setup() {
+            this.statisticFnResults = this.env.model.getters.getStatisticFnResults();
+            owl.onWillUpdateProps(() => {
+                const newStatisticFnResults = this.env.model.getters.getStatisticFnResults();
+                if (!deepEquals(newStatisticFnResults, this.statisticFnResults)) {
+                    this.props.closeContextMenu();
+                }
+                this.statisticFnResults = newStatisticFnResults;
+            });
         }
         getSelectedStatistic() {
-            const statisticFnResults = this.env.model.getters.getStatisticFnResults();
             // don't display button if no function has a result
-            if (Object.values(statisticFnResults).every((result) => result === undefined)) {
+            if (Object.values(this.statisticFnResults).every((result) => result === undefined)) {
                 return undefined;
             }
             if (this.selectedStatisticFn === "") {
-                this.selectedStatisticFn = Object.keys(statisticFnResults)[0];
+                this.selectedStatisticFn = Object.keys(this.statisticFnResults)[0];
             }
-            return this.getComposedFnName(this.selectedStatisticFn, statisticFnResults[this.selectedStatisticFn]);
+            return this.getComposedFnName(this.selectedStatisticFn, this.statisticFnResults[this.selectedStatisticFn]);
         }
         listSelectionStatistics(ev) {
             const registry = new MenuItemRegistry();
             let i = 0;
-            for (let [fnName, fnValue] of Object.entries(this.env.model.getters.getStatisticFnResults())) {
+            for (let [fnName, fnValue] of Object.entries(this.statisticFnResults)) {
                 registry.add(fnName, {
                     name: this.getComposedFnName(fnName, fnValue),
                     sequence: i,
@@ -39699,6 +39734,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     BottomBarStatistic.components = { Ripple };
     BottomBarStatistic.props = {
         openContextMenu: Function,
+        closeContextMenu: Function,
     };
 
     // -----------------------------------------------------------------------------
@@ -39840,6 +39876,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.menuState.menuId = undefined;
             this.menuState.menuItems = [];
             this.menuState.position = null;
+        }
+        closeContextMenuWithId(menuId) {
+            if (this.menuState.menuId === menuId) {
+                this.closeMenu();
+            }
         }
         onWheel(ev) {
             this.targetScroll = undefined;
@@ -40197,38 +40238,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       }
     }
 
-    .o-dropdown {
-      position: relative;
-      .o-dropdown-content {
-        position: absolute;
-        top: calc(100% + 5px);
-        left: 0;
-        z-index: ${ComponentsImportance.Dropdown};
-        box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
-        background-color: #f6f6f6;
-
-        .o-dropdown-item {
-          padding: 7px 10px;
-        }
-        .o-dropdown-item:hover {
-          background-color: rgba(0, 0, 0, 0.08);
-        }
-        .o-dropdown-line {
-          display: flex;
-          padding: 3px 6px;
-          .o-line-item {
-            width: 16px;
-            height: 16px;
-            margin: 1px 3px;
-            &:hover {
-              background-color: rgba(0, 0, 0, 0.08);
-            }
-          }
-        }
-      }
-    }
-
-    .o-tools {
+    .o-sidePanel-tools {
       color: #333;
       font-size: 13px;
       cursor: default;
@@ -40240,23 +40250,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         margin: 2px;
         padding: 0 3px;
         border-radius: 2px;
-      }
 
-      .o-tool.active,
-      .o-tool:not(.o-disabled):hover {
-        background-color: rgba(0, 0, 0, 0.08);
-      }
-
-      .o-with-color > span {
-        border-bottom: 4px solid;
-        height: 16px;
-        margin-top: 2px;
-      }
-      .o-with-color {
-        .o-line-item:hover {
-          outline: 1px solid gray;
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.08);
         }
       }
+
       .o-border {
         .o-line-item {
           padding: 4px;
@@ -40339,6 +40338,86 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
         onComposerContentFocused: Function,
     };
+
+    // -----------------------------------------------------------------------------
+    // TopBar
+    // -----------------------------------------------------------------------------
+    css /* scss */ `
+  .o-font-size-editor {
+    input.o-font-size {
+      height: 20px;
+      width: 23px;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+  }
+`;
+    class FontSizeEditor extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.fontSizes = FONT_SIZES;
+            this.dropdown = owl.useState({ isOpen: false });
+            this.inputRef = owl.useRef("inputFontSize");
+            this.rootEditorRef = owl.useRef("FontSizeEditor");
+        }
+        setup() {
+            owl.useExternalListener(window, "click", this.onExternalClick, { capture: true });
+        }
+        onExternalClick(ev) {
+            if (!isChildEvent(this.rootEditorRef.el, ev)) {
+                this.closeFontList();
+            }
+        }
+        get currentFontSize() {
+            return this.env.model.getters.getCurrentStyle().fontSize || DEFAULT_FONT_SIZE;
+        }
+        toggleFontList() {
+            const isOpen = this.dropdown.isOpen;
+            if (!isOpen) {
+                this.props.onToggle();
+                this.inputRef.el.focus();
+            }
+            else {
+                this.closeFontList();
+            }
+        }
+        closeFontList() {
+            this.dropdown.isOpen = false;
+        }
+        setSize(fontSizeStr) {
+            const fontSize = clip(Math.floor(parseFloat(fontSizeStr)), 1, 400);
+            setStyle(this.env, { fontSize });
+            this.closeFontList();
+        }
+        setSizeFromInput(ev) {
+            this.setSize(ev.target.value);
+        }
+        setSizeFromList(fontSizeStr) {
+            this.setSize(fontSizeStr);
+        }
+        onInputFocused(ev) {
+            this.dropdown.isOpen = true;
+            ev.target.select();
+        }
+        onInputKeydown(ev) {
+            if (ev.key === "Enter" || ev.key === "Escape") {
+                this.closeFontList();
+                const target = ev.target;
+                // In the case of a ESCAPE key, we get the previous font size back
+                if (ev.key === "Escape") {
+                    target.value = `${this.currentFontSize}`;
+                }
+                this.props.onToggle();
+            }
+        }
+    }
+    FontSizeEditor.template = "o-spreadsheet-FontSizeEditor";
+    FontSizeEditor.components = {};
 
     const FORMATS = [
         { name: "automatic", text: NumberFormatTerms.Automatic },
@@ -40488,18 +40567,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
           }
         }
 
-        .o-with-color > span {
-          border-bottom: 4px solid;
-          height: 16px;
-          margin-top: 2px;
-        }
-
-        .o-with-color {
-          .o-line-item:hover {
-            outline: 1px solid gray;
-          }
-        }
-
         .o-border-dropdown {
           padding: 4px;
         }
@@ -40541,6 +40608,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             position: absolute;
             top: 100%;
             left: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
             z-index: ${ComponentsImportance.Dropdown};
             box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
             background-color: white;
@@ -40609,11 +40678,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     class TopBar extends owl.Component {
         constructor() {
             super(...arguments);
-            this.DEFAULT_FONT_SIZE = DEFAULT_FONT_SIZE;
             this.commonFormats = FORMATS;
             this.customFormats = CUSTOM_FORMATS;
             this.currentFormatName = "automatic";
-            this.fontSizes = fontSizes;
             this.style = {};
             this.state = owl.useState({
                 menuState: { isOpen: false, position: null, menuItems: [] },
@@ -40629,6 +40696,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.fillColor = "#ffffff";
             this.textColor = "#000000";
             this.menus = [];
+        }
+        get dropdownStyle() {
+            return `max-height:${this.props.dropdownMaxHeight}px`;
         }
         setup() {
             owl.useExternalListener(window, "click", this.onExternalClick);
@@ -40803,11 +40873,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 target: this.env.model.getters.getSelectedZones(),
             });
         }
-        setSize(fontSizeStr) {
-            const fontSize = parseFloat(fontSizeStr);
-            setStyle(this.env, { fontSize });
-            this.onClick();
-        }
         doAction(action) {
             action(this.env);
             this.closeMenus();
@@ -40830,6 +40895,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (this.cannotCreateFilter) {
                 return;
             }
+            this.env.model.selection.selectTableAroundSelection();
             const sheetId = this.env.model.getters.getActiveSheetId();
             const selection = this.env.model.getters.getSelectedZones();
             interactiveAddFilter(this.env, sheetId, selection);
@@ -40842,11 +40908,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     TopBar.template = "o-spreadsheet-TopBar";
-    TopBar.components = { ColorPicker, Menu, TopBarComposer };
+    TopBar.components = { ColorPickerWidget, Menu, TopBarComposer, FontSizeEditor };
     TopBar.props = {
         onClick: Function,
         focusComposer: String,
         onComposerContentFocused: Function,
+        dropdownMaxHeight: Number,
     };
 
     function instantiateClipboard() {
@@ -41147,6 +41214,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             else if (content) {
                 this.model.dispatch("SET_CURRENT_CONTENT", { content, selection });
             }
+        }
+        get gridHeight() {
+            const { height } = this.env.model.getters.getSheetViewDimension();
+            return height;
         }
     }
     Spreadsheet.template = "o-spreadsheet-Spreadsheet";
@@ -44713,8 +44784,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-02-06T07:29:38.294Z';
-    exports.__info__.hash = 'b1f3dd5';
+    exports.__info__.date = '2023-02-15T14:26:03.032Z';
+    exports.__info__.hash = '8cc3ac2';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
