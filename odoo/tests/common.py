@@ -1518,8 +1518,7 @@ which leads to stray network requests and inconsistencies."""))
             self._logger.runbot('Screenshot in: %s', full_path)
 
         self._logger.info('Asking for screenshot')
-        # TODO-JCB: Allow full page screenshot?
-        f = self._websocket_send('Page.captureScreenshot', params={"fullPage": True}, with_future=True)
+        f = self._websocket_send('Page.captureScreenshot', with_future=True)
         f.add_done_callback(handler)
         return f
 
