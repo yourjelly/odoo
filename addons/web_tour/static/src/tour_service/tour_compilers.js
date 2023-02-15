@@ -117,9 +117,10 @@ function describeFailedStep(stepIndex, tour) {
     let result = "";
     for (let i = start; i < end; i++) {
         const highlight = i === stepIndex;
-        result += `\n${highlight ? "----- FAILED STEP -----\n" : ""}${describeStepDetailed(tour.steps[i], highlight)}${
-            highlight ? "\n-----------------------" : ""
-        }`;
+        result += `\n${highlight ? "----- FAILED STEP -----\n" : ""}${describeStepDetailed(
+            tour.steps[i],
+            highlight
+        )}${highlight ? "\n-----------------------" : ""}`;
     }
     return result.trim();
 }
@@ -364,23 +365,11 @@ export function compileStepAuto(
                     $anchor: $anchorEl,
                 });
                 if (typeof step.run === "function") {
-                    try {
-                        // `this.$anchor` is expected in many `step.run`.
-                        step.run.call({ $anchor: $anchorEl }, actionHelper);
-                    } catch (e) {
-                        // TODO-JCB: What to do with the following console.error?
-                        // console.error(`Tour ${tour_name} failed at step ${self._describeTip(tip)}: ${e.message}`);
-                        throw e;
-                    }
+                    // `this.$anchor` is expected in many `step.run`.
+                    step.run.call({ $anchor: $anchorEl }, actionHelper);
                 } else if (step.run !== undefined) {
                     const m = step.run.match(/^([a-zA-Z0-9_]+) *(?:\(? *(.+?) *\)?)?$/);
-                    try {
-                        actionHelper[m[1]](m[2]);
-                    } catch (e) {
-                        // TODO-JCB: What to do with the following console.error?
-                        // console.error(`Tour ${tour_name} failed at step ${self._describeTip(tip)}: ${e.message}`);
-                        throw e;
-                    }
+                    actionHelper[m[1]](m[2]);
                 } else {
                     actionHelper.auto();
                 }
