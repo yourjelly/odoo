@@ -92,29 +92,36 @@ function findStepTriggers(step) {
     return { triggerEl, altTriggerEl, extraTriggerOkay, skipTriggerEl };
 }
 
-function describeStep(step) {
+function describeStepBasic(step) {
     return step.content ? `${step.content} (trigger: ${step.trigger})` : step.trigger;
 }
 
-function describeFailedStep(step) {
-    // TODO-JCB: properly describe failed step
-    // console.log("_check_for_tooltip");
-    // console.log("- modal_displayed: " + this.$modal_displayed.length);
-    // console.log("- trigger '" + tip.trigger + "': " + $trigger.length);
-    // console.log("- visible trigger '" + tip.trigger + "': " + $visible_trigger.length);
-    // if ($extra_trigger !== undefined) {
-    //     console.log("- extra_trigger '" + tip.extra_trigger + "': " + $extra_trigger.length);
-    //     console.log("- visible extra_trigger '" + tip.extra_trigger + "': " + extra_trigger);
-    // }
-    return ["content", "trigger", "alt_trigger", "extra_trigger", "skip_trigger", "run"]
-        .reduce((str, key) => {
-            if (key in step && typeof step[key] === "string") {
-                return `${str}\n${key}: ${step[key]}`;
+function describeStepDetailed(step) {
+    const str = JSON.stringify(
+        step,
+        (_key, value) => {
+            if (typeof value === "function") {
+                return "[function]";
             } else {
-                return str;
+                return value;
             }
-        }, "")
-        .trim();
+        },
+        2
+    );
+    return str;
+}
+
+function describeFailedStep(stepIndex, tour) {
+    const start = stepIndex - 4 >= 0 ? stepIndex - 4 : 0;
+    const end = stepIndex + 5 <= tour.steps.length ? stepIndex + 5 : tour.steps.length;
+    let result = "";
+    for (let i = start; i < end; i++) {
+        const highlight = i === stepIndex;
+        result += `\n${highlight ? "----- FAILED STEP -----\n" : ""}${describeStepDetailed(tour.steps[i], highlight)}${
+            highlight ? "\n-----------------------" : ""
+        }`;
+    }
+    return result.trim();
 }
 
 /**
@@ -300,14 +307,18 @@ export function compileStepAuto(
         {
             action: () => {
                 skipAction = false;
-                console.log(`Tour ${tour.name}: ${describeStep(step)}`);
+                if (odoo.debug) {
+                    console.log(`Tour ${tour.name}: ${describeStepDetailed(step, false)}`);
+                } else {
+                    console.log(`Tour ${tour.name}: ${describeStepBasic(step)}`);
+                }
                 if (!watch) {
                     // TODO-JCB: This can just be a timeout callback on the macro.
                     // console.error notifies the test runner that the tour failed.
                     // But don't do it in watch mode.
                     clearTimeout(tourTimeout);
                     tourTimeout = setTimeout(() => {
-                        console.error(describeFailedStep(step));
+                        console.error(describeFailedStep(stepIndex, tour));
                     }, (step.timeout || 10000) + stepDelay);
                 }
             },
