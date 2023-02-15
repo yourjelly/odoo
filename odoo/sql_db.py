@@ -49,6 +49,8 @@ re_into = re.compile('.* into "?([a-zA-Z_0-9]+)"? .*$')
 
 sql_counter = 0
 
+MAX_IDLE_TIMEOUT = 60 * 5
+
 
 class Savepoint:
     """ Reifies an active breakpoint, allows :meth:`BaseCursor.savepoint` users
@@ -594,18 +596,21 @@ class ConnectionPool(object):
         :rtype: PsycoConnection
         """
         # free dead and leaked connections
-        for i, (cnx, _) in tools.reverse_enumerate(self._connections):
+        for i, (cnx, _, last_used) in tools.reverse_enumerate(self._connections):
             if cnx.closed:
                 self._connections.pop(i)
                 self._debug('Removing closed connection at index %d: %r', i, cnx.dsn)
                 continue
+            if not used and not cnx.closed and time.time() - last_used > MAX_IDLE_TIMEOUT:
+                cnx.close()
+                continue
             if getattr(cnx, 'leaked', False):
                 delattr(cnx, 'leaked')
                 self._connections.pop(i)
-                self._connections.append((cnx, False))
+                self._connections.insert(0, (cnx, False, last_used))
                 _logger.info('%r: Free leaked connection to %r', self, cnx.dsn)
 
-        for i, (cnx, used) in enumerate(self._connections):
+        for i, (cnx, used, _) in enumerate(self._connections):
             if not used and cnx._original_dsn == connection_info:
                 try:
                     cnx.reset()
@@ -616,7 +621,7 @@ class ConnectionPool(object):
                         cnx.close()
                     continue
                 self._connections.pop(i)
-                self._connections.append((cnx, True))
+                self._connections.append((cnx, True, last_used))
                 self._debug('Borrow existing connection to %r at index %d', cnx.dsn, i)
 
                 return cnx
@@ -649,11 +654,11 @@ class ConnectionPool(object):
     @locked
     def give_back(self, connection, keep_in_pool=True):
         self._debug('Give back connection to %r', connection.dsn)
-        for i, (cnx, used) in enumerate(self._connections):
+        for i, (cnx, _, _) in enumerate(self._connections):
             if cnx is connection:
                 self._connections.pop(i)
                 if keep_in_pool:
-                    self._connections.append((cnx, False))
+                    self._connections.insert(0, (cnx, False, time.time()))
                     self._debug('Put connection to %r in pool', cnx.dsn)
                 else:
                     self._debug('Forgot connection to %r', cnx.dsn)
