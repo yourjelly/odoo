@@ -134,7 +134,6 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
         this.$anchor.trigger('input');
     },
 }, {
-    // TODO-JCB: Randomly fails in this step during watch mode.
     content: "click on input",
     trigger: 'iframe #wrap input:first',
     extra_trigger: 'iframe #wrap .o_dirty font:first:contains(translated Parseltongue text)',
@@ -206,7 +205,6 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     // See comment above.
     // extra_trigger: '#wrap.o_dirty p span[style*="text-decoration-line: underline;"]',
 }, {
-    // TODO-JCB: Always stops here.
     content: "click language dropdown (4)",
     trigger: 'iframe .js_language_selector .dropdown-toggle',
     extra_trigger: 'iframe body:not(.editor_enable)',

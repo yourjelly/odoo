@@ -80,13 +80,6 @@ class Macro {
         return step.delay || 0;
     }
 
-    /**
-     * TODO-JCB: The following note can be removed.
-     * > Finding the trigger element and performing the action and other misc operations should be connected.
-     * > We should only schedule advancing to the next step when the whole current step finished successfully.
-     * > Also, while "doing" the current step, we need to pause mutation observer such that any mutation should
-     * > not schedule a new "run" on the current step.
-     */
     async advance() {
         if (this.isComplete) {
             return;
@@ -284,9 +277,6 @@ export class MacroEngine {
     }
 
     delayedCheck() {
-        // NOTE: This check is introduced because of the use of jquery in finding the trigger.
-        // When jquery is completely unused, we can maybe remove this check.
-        // TODO-JCB: This check might not be needed pausing/resuming the mutation observer works.
         browser.clearTimeout(this.timeout);
 
         // TODO-JCB: Write tests for this use of mutex synchronization.

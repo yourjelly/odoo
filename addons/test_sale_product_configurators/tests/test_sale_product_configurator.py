@@ -95,7 +95,6 @@ class TestProductConfiguratorUi(HttpCase, TestProductConfiguratorCommon):
             "2 variants are created during the tour, with each 5 PAV, but only 8 distinct PAV."
         )
 
-    # TODO-JCB: tour to fix
     def test_03_product_configurator_edition(self):
         self.start_tour("/web", 'sale_product_configurator_edition_tour', login='salesman')
 
