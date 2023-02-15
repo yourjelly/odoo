@@ -415,9 +415,7 @@ export function compileTourToMacro(tour, options) {
             }, [])
             .concat([
                 {
-                    action: () => {
-                        // Used by the test runner to assert the test tour is done.
-                        console.log("test successful");
+                    action() {
                         tourState.clear(tour.name);
                         pointerMethods.setState({ isVisible: false });
                         onTourEnd(tour);
