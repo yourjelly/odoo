@@ -606,8 +606,7 @@ class ConnectionPool(object):
                 continue
             if getattr(cnx, 'leaked', False):
                 delattr(cnx, 'leaked')
-                self._connections.pop(i)
-                self._connections.insert(0, (cnx, False, last_used))
+                self._connections[i][1] = False
                 _logger.info('%r: Free leaked connection to %r', self, cnx.dsn)
 
         for i, (cnx, used, _) in enumerate(self._connections):
@@ -620,8 +619,7 @@ class ConnectionPool(object):
                     if not cnx.closed:
                         cnx.close()
                     continue
-                self._connections.pop(i)
-                self._connections.append((cnx, True, last_used))
+                self._connections[i][1] = True
                 self._debug('Borrow existing connection to %r at index %d', cnx.dsn, i)
 
                 return cnx
@@ -647,7 +645,7 @@ class ConnectionPool(object):
             _logger.info('Connection to the database failed')
             raise
         result._original_dsn = connection_info
-        self._connections.append((result, True, 0))
+        self._connections.append([result, True, 0])
         self._debug('Create new connection backend PID %d', result.get_backend_pid())
         return result
 
@@ -656,11 +654,12 @@ class ConnectionPool(object):
         self._debug('Give back connection to %r', connection.dsn)
         for i, (cnx, _, _) in enumerate(self._connections):
             if cnx is connection:
-                self._connections.pop(i)
                 if keep_in_pool:
-                    self._connections.insert(0, (cnx, False, time.time()))
+                    self._connections[i][1] = False
+                    self._connections[i][2] = time.time()
                     self._debug('Put connection to %r in pool', cnx.dsn)
                 else:
+                    self._connections.pop(i)
                     self._debug('Forgot connection to %r', cnx.dsn)
                     cnx.close()
                 break
