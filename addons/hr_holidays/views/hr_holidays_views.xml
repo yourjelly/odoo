@@ -116,7 +116,7 @@
     <menuitem
         id="hr_holidays_stress_day_menu_configuration"
         action="hr_leave_stress_day_action"
-        name="Stress Days"
+        name="Mandatory Days"
         parent="menu_hr_holidays_configuration"
         groups="hr_holidays.group_hr_holidays_manager"
         sequence="4"/>
