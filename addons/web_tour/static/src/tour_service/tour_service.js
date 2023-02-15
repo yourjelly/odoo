@@ -4,6 +4,7 @@ import { markup, whenReady } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { MacroEngine, callWithUnloadCheck } from "@web/core/macro";
 import { _t } from "@web/core/l10n/translation";
+import { session } from "@web/session";
 import { TourPointer } from "../tour_pointer/tour_pointer";
 import { tourState } from "./tour_state";
 import { compileStepManual, compileStepAuto, compileTourToMacro } from "./tour_compilers";
@@ -80,6 +81,7 @@ export const tourService = {
             mode: "bubble",
             fixed: false,
         });
+        const consumedTours = new Set(session.web_tours);
 
         function convertToMacro(tour, { mode, stepDelay, watch }) {
             // IMPROVEMENTS: Custom step compiler. Will probably require decoupling from `mode`.
@@ -93,12 +95,13 @@ export const tourService = {
                 watch,
                 checkDelay,
                 onTourEnd({ name, rainbowManMessage, fadeout }) {
-                    let message = rainbowManMessage;
-                    if (message) {
-                        message =
-                            typeof message === "function"
-                                ? message(registry.get("tourManager"))
-                                : message;
+                    let message;
+                    if (typeof rainbowManMessage === "function") {
+                        message = rainbowManMessage({
+                            isTourConsumed: (name) => consumedTours.has(name),
+                        });
+                    } else if (typeof rainbowManMessage === "string") {
+                        message = rainbowManMessage;
                     } else {
                         message = markup(
                             _t(
@@ -108,8 +111,11 @@ export const tourService = {
                     }
                     effect.add({ type: "rainbow_man", message, fadeout });
                     if (mode === "manual") {
+                        consumedTours.add(name);
                         orm.call("web_tour.tour", "consume", [[name]]);
                     }
+                    // Used to signal the python test runner that the tour finished without error.
+                    console.log("test successful");
                 },
             });
         }
@@ -196,12 +202,3 @@ export const tourService = {
 };
 
 registry.category("services").add("tour_service", tourService);
-
-// TODO-JCB: Fix this patch.
-registry.add("tourManager", {
-    _isTourConsumed() {},
-    _consume_tour(name, errorMessage) {
-        throw new Error(`Tour '${name}' failed. Error message: ${errorMessage}`);
-    },
-    running_tour: null,
-});
