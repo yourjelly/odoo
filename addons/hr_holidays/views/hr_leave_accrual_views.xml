@@ -75,6 +75,7 @@
         <field name="model">hr.leave.accrual.plan</field>
         <field name="arch" type="xml">
             <form string="Accrual Plan">
+                <field name="active" invisible="1"/>
                 <field name="show_transition_mode" invisible="1" />
                 <sheet>
                     <div class="oe_button_box" name="button_box" attrs="{'invisible': [('id', '=', False)]}">
