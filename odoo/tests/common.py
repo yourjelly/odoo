@@ -3132,6 +3132,15 @@ class TagsSelector(object):
             _logger.debug("Skipping test '%s' because no test_tag found.", test)
             return False
 
+        # TODO-JCB: Remove me.
+        if not isinstance(test, HttpCase):
+            return False
+        test_method = getattr(test, test._testMethodName)
+        import inspect
+        lines = inspect.getsource(test_method)
+        if not ('start_tour' in lines or 'web_tour.tour' in lines):
+            return False
+
         test_module = getattr(test, 'test_module', None)
         test_class = getattr(test, 'test_class', None)
         test_tags = test.test_tags | {test_module}  # module as test_tags deprecated, keep for retrocompatibility,
