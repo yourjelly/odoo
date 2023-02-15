@@ -3,7 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import ToursDialog from "@web_tour/debug/tour_dialog_component";
-import { tourState } from "../tour_service_x/tour_state";
+import { tourState } from "../tour_service/tour_state";
 
 export function disableTours({ env }) {
     if (!env.services.user.isSystem) {

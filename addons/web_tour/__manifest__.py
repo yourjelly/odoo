@@ -25,7 +25,7 @@ Odoo Web tours.
             'web_tour/static/src/js/tour_utils.js',
             '/web_tour/static/src/xml/tip.xml',
             'web_tour/static/src/tour_pointer/**/*',
-            'web_tour/static/src/tour_service_x/**/*',
+            'web_tour/static/src/tour_service/**/*',
         ],
         'web.assets_backend': [
             'web_tour/static/src/debug/debug_manager.js',
@@ -40,7 +40,7 @@ Odoo Web tours.
             'web_tour/static/src/js/tour_utils.js',
             '/web_tour/static/src/xml/tip.xml',
             'web_tour/static/src/tour_pointer/**/*',
-            'web_tour/static/src/tour_service_x/**/*',
+            'web_tour/static/src/tour_service/**/*',
 
             'web_tour/static/src/js/public/**/*',
         ],
