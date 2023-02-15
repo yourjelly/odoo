@@ -17,6 +17,10 @@
                             groups="account.group_account_user,account.group_account_readonly">
                         </button>
                 </xpath>
+                <xpath expr="//field[@name='invoice_date']" position="after">
+                    <field name="invoice_date" string="Bill Date" options="{'datepicker': {'warn_future': true}}"
+                        attrs="{'invisible': [('expense_sheet_id', '=', False), ('move_type', '!=', 'entry')]}"/>
+                </xpath>
             </field>
         </record>
     </data>
