@@ -50,15 +50,6 @@ export function callWithUnloadCheck(func, ...args) {
     }
 }
 
-function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// TODO-JCB: Should only find odoo iframe. Exclude iframe from different host.
-function findIframe() {
-    return document.body.getElementsByTagName("iframe")[0];
-}
-
 class TimeoutError extends Error {}
 
 class Macro {
@@ -105,7 +96,7 @@ class Macro {
     async waitForDelay(step) {
         const stepDelay = this.getStepDelay(step);
         if (stepDelay > 0) {
-            await sleep(stepDelay);
+            await new Promise((resolve) => setTimeout(resolve, stepDelay));
         }
     }
 
@@ -211,7 +202,7 @@ export class MacroEngine {
             this.delayedCheck();
         });
         this.iframeObserver = new MutationObserver(() => {
-            const iframeEl = findIframe();
+            const iframeEl = document.querySelector("iframe.o_iframe");
             if (iframeEl) {
                 iframeEl.addEventListener("load", () => {
                     if (iframeEl.contentDocument) {

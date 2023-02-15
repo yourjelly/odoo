@@ -2,7 +2,6 @@
 
 import { createTourMethods } from "@point_of_sale/../tests/tours/helpers/utils";
 import { TextAreaPopup } from "@point_of_sale/../tests/tours/helpers/TextAreaPopupTourMethods";
-// import { numberBuffer } from "@point_of_sale/js/Misc/NumberBuffer";
 
 class Do {
     clickDisplayedProduct(name) {

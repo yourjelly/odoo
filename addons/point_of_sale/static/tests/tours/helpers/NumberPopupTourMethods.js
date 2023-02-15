@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { createTourMethods } from "@point_of_sale/../tests/tours/helpers/utils";
-// import { numberBuffer } from "@point_of_sale/js/Misc/NumberBuffer";
 
 class Do {
     /**

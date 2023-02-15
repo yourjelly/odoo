@@ -205,7 +205,6 @@
 
             'project/static/src/project_sharing/search/favorite_menu/custom_favorite_item.xml',
             'project/static/src/project_sharing/**/*',
-
             'web/static/src/start.js',
             'web/static/src/legacy/legacy_setup.js',
         ],
