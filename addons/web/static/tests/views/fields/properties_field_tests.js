@@ -28,6 +28,7 @@ async function closePopover(target) {
 
 async function changeType(target, propertyType) {
     const TYPES_INDEX = {
+        char: 1,
         integer: 3,
         float: 4,
         datetime: 6,
@@ -35,6 +36,7 @@ async function changeType(target, propertyType) {
         tags: 8,
         many2one: 9,
         many2many: 10,
+        separator: 11,
     };
     const propertyTypeIndex = TYPES_INDEX[propertyType];
     await click(target, ".o_field_property_definition_type input");
@@ -43,6 +45,86 @@ async function changeType(target, propertyType) {
         target,
         `.o_field_property_definition_type .dropdown-item:nth-child(${propertyTypeIndex})`
     );
+}
+
+// -----------------------------------------
+// Separators tests utils
+// -----------------------------------------
+
+async function makePropertiesGroupView(properties) {
+    // mock random function to have predictable auto generated properties names
+    let counter = 1;
+    patchWithCleanup(window, {
+        crypto: {
+            getRandomValues: (array) => {
+                array[0] = counter;
+                counter++;
+            },
+        },
+    });
+
+    async function mockRPC(route, { method }) {
+        if (["check_access_rights", "check_access_rule"].includes(method)) {
+            return true;
+        }
+    }
+
+    const data = JSON.parse(JSON.stringify(serverData));
+    data.models.partner.records[1].properties = properties.map((isSeparator, index) => {
+        return {
+            name: `property_${index + 1}`,
+            string: isSeparator ? `Separator ${index + 1}` : `Property ${index + 1}`,
+            type: isSeparator ? "separator" : "char",
+        };
+    });
+
+    // unfold all separators
+    window.localStorage.setItem(
+        "properties.fold",
+        JSON.stringify({
+            "company,37": data.models.partner.records[1].properties
+                .filter((property) => property.type === "separator")
+                .map((property) => property.name),
+        })
+    );
+
+    return await makeView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        serverData: data,
+        arch: `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="properties" columns="2"/>
+                    </group>
+                </sheet>
+            </form>`,
+        mockRPC,
+    });
+}
+
+async function toggleSeparator(separatorName, isSeparator) {
+    await click(target, `[property-name="${separatorName}"] .o_field_property_open_popover`);
+    await changeType(target, isSeparator ? "separator" : "char");
+    await closePopover(target);
+}
+
+function getGroups() {
+    const propertiesField = target.querySelector(".o_field_properties .row");
+    const groups = propertiesField.querySelectorAll(".o_inner_group");
+    return [...groups].map((group) =>
+        [...group.querySelectorAll("[property-name]")].map((property) => [
+            property.innerText,
+            property.getAttribute("property-name"),
+        ])
+    );
+}
+
+function getLocalStorageFold() {
+    return JSON.parse(window.localStorage.getItem("properties.fold")) || {};
 }
 
 QUnit.module("Fields", (hooks) => {
@@ -422,12 +504,11 @@ QUnit.module("Fields", (hooks) => {
 
         await closePopover(target);
 
-        const properties = field.querySelectorAll(".o_property_field");
+        const properties = field.querySelectorAll(".o_field_property_label");
         assert.strictEqual(properties.length, 3);
 
         const newProperty = properties[2];
-        const newPropertyLabel = newProperty.querySelector(".o_field_property_label");
-        assert.strictEqual(newPropertyLabel.innerText, "Property 3");
+        assert.strictEqual(newProperty.innerText, "Property 3");
     });
 
     /**
@@ -1513,4 +1594,318 @@ QUnit.module("Fields", (hooks) => {
             assert.ok(target.querySelector(".o_test_properties_not_empty"));
         }
     );
+
+    // ---------------------------------------------------
+    // Test the properties groups
+    // ---------------------------------------------------
+
+    QUnit.test("properties: separators layout", async function (assert) {
+        await makePropertiesGroupView([false, false, false, false]);
+        await toggleSeparator("property_1", true);
+        assert.deepEqual(getGroups(), [
+            [
+                ["PROPERTY 1", "0600000000000000"],
+                ["Property 2", "property_2"],
+                ["Property 4", "property_4"],
+            ],
+            [
+                ["", "0600000000000000"],
+                ["Property 3", "property_3"],
+            ],
+        ]);
+
+        // fold the group
+        await click(
+            target,
+            ".o_field_properties .o_inner_group:first-child .o_field_property_label[property-name='0600000000000000']"
+        );
+        assert.deepEqual(getGroups(), [
+            [["PROPERTY 1", "0600000000000000"]],
+            [["", "0600000000000000"]],
+        ]);
+        await click(
+            target,
+            ".o_field_properties .o_inner_group:first-child .o_field_property_label[property-name='0600000000000000']"
+        );
+
+        await toggleSeparator("property_3", true);
+        assert.deepEqual(getGroups(), [
+            [
+                ["PROPERTY 1", "0600000000000000"],
+                ["Property 2", "property_2"],
+            ],
+            [
+                ["PROPERTY 3", "1200000000000000"],
+                ["Property 4", "property_4"],
+            ],
+        ]);
+
+        // fold the left group
+        await click(target, ".o_field_property_label[property-name='0600000000000000']");
+        assert.deepEqual(getGroups(), [
+            [["PROPERTY 1", "0600000000000000"]],
+            [
+                ["PROPERTY 3", "1200000000000000"],
+                ["Property 4", "property_4"],
+            ],
+        ]);
+        await click(target, ".o_field_property_label[property-name='0600000000000000']");
+
+        // create 3 new properties
+        await click(target, ".o_field_property_add button");
+        await click(target, ".o_field_property_add button");
+        await click(target, ".o_field_property_add button");
+        await nextTick();
+        await closePopover(target);
+        assert.deepEqual(getGroups(), [
+            [
+                ["PROPERTY 1", "0600000000000000"],
+                ["Property 2", "property_2"],
+            ],
+            [
+                ["PROPERTY 3", "1200000000000000"],
+                ["Property 4", "property_4"],
+                ["Property 5", "1b00000000000000"],
+                ["Property 6", "2200000000000000"],
+                ["Property 7", "2f00000000000000"],
+            ],
+        ]);
+
+        // Property 3 is not a separator anymore, should split in columns
+        await toggleSeparator("1200000000000000", false);
+        assert.deepEqual(getGroups(), [
+            [
+                ["PROPERTY 1", "0600000000000000"],
+                ["Property 2", "property_2"],
+                ["Property 4", "property_4"],
+                ["Property 6", "2200000000000000"],
+            ],
+            [
+                // invisible separator to fill the space
+                ["", "0600000000000000"],
+                ["Property 3", "property_3"],
+                ["Property 5", "1b00000000000000"],
+                ["Property 7", "2f00000000000000"],
+            ],
+        ]);
+
+        // Property 1 is not a separator anymore, there's no separator left,
+        // should go back to the original layout
+        await toggleSeparator("0600000000000000", false);
+        assert.deepEqual(getGroups(), [
+            [
+                ["Property 1", "property_1"],
+                ["Property 3", "property_3"],
+                ["Property 5", "1b00000000000000"],
+                ["Property 7", "2f00000000000000"],
+            ],
+            [
+                ["Property 2", "property_2"],
+                ["Property 4", "property_4"],
+                ["Property 6", "2200000000000000"],
+            ],
+        ]);
+    });
+
+    QUnit.test("properties: separators and local storage", async function (assert) {
+        await makePropertiesGroupView([false, false, false, false, true, false]);
+
+        // store the fold state of an other properties field to verify that it stay untouched
+        // and check that the property that doesn't exist is removed
+        const fold = getLocalStorageFold();
+        fold["fake.model,1337"] = ["a", "b", "c"];
+        fold["company,37"].push("fake_property");
+        window.localStorage.setItem("properties.fold", JSON.stringify(fold));
+
+        assert.deepEqual(getGroups(), [
+            [
+                ["Property 1", "property_1"],
+                ["Property 2", "property_2"],
+                ["Property 3", "property_3"],
+                ["Property 4", "property_4"],
+            ],
+            [
+                ["SEPARATOR 5", "property_5"],
+                ["Property 6", "property_6"],
+            ],
+        ]);
+
+        // fold the group
+        await click(target, ".o_field_property_label[property-name='property_5']");
+        assert.deepEqual(getGroups(), [
+            [
+                ["Property 1", "property_1"],
+                ["Property 2", "property_2"],
+                ["Property 3", "property_3"],
+                ["Property 4", "property_4"],
+            ],
+            [["SEPARATOR 5", "property_5"]],
+        ]);
+        assert.deepEqual(getLocalStorageFold(), {
+            "company,37": [],
+            "fake.model,1337": ["a", "b", "c"], // stay untouched
+        });
+
+        // unfold the group
+        await click(target, ".o_field_property_label[property-name='property_5']");
+        assert.deepEqual(getLocalStorageFold(), {
+            "company,37": ["property_5"],
+            "fake.model,1337": ["a", "b", "c"], // stay untouched
+        });
+    });
+
+    /**
+     * Test the behavior of the properties when we move them inside folded groups
+     */
+    QUnit.test("properties: separators move properties", async function (assert) {
+        await makePropertiesGroupView([false, true, true, false, true, true, false]);
+
+        // return true if the given separator is folded
+        const foldState = (separatorName) => {
+            return !target.querySelector(
+                `.o_field_property_label[property-name='${separatorName}'] .fa-caret-down`
+            );
+        };
+
+        const assertFolded = (values) => {
+            assert.strictEqual(values.length, 4);
+            assert.strictEqual(values[0], foldState("property_2"));
+            assert.strictEqual(values[1], foldState("property_3"));
+            assert.strictEqual(values[2], foldState("property_5"));
+            assert.strictEqual(values[3], foldState("property_6"));
+        };
+
+        // fold all groups
+        assertFolded([false, false, false, false]);
+        await click(target, ".o_field_property_label[property-name='property_2']");
+        await click(target, ".o_field_property_label[property-name='property_3']");
+        await click(target, ".o_field_property_label[property-name='property_5']");
+        await click(target, ".o_field_property_label[property-name='property_6']");
+        assertFolded([true, true, true, true]);
+
+        assert.deepEqual(getGroups(), [
+            [["Property 1", "property_1"]],
+            [["SEPARATOR 2", "property_2"]],
+            [["SEPARATOR 3", "property_3"]],
+            [["SEPARATOR 5", "property_5"]],
+            [["SEPARATOR 6", "property_6"]],
+        ]);
+
+        // move the first property down
+        await click(target, "[property-name='property_1'] .o_field_property_open_popover");
+        await click(target, ".o_field_property_definition .fa-chevron-down");
+
+        assert.deepEqual(getGroups(), [
+            [
+                ["SEPARATOR 2", "property_2"],
+                ["Property 1", "property_1"],
+            ],
+            [["SEPARATOR 3", "property_3"]],
+            [["SEPARATOR 5", "property_5"]],
+            [["SEPARATOR 6", "property_6"]],
+        ]);
+        assertFolded([false, true, true, true]);
+
+        await click(target, ".o_field_property_definition .fa-chevron-down");
+        assert.deepEqual(getGroups(), [
+            [["SEPARATOR 2", "property_2"]],
+            [
+                ["SEPARATOR 3", "property_3"],
+                ["Property 1", "property_1"],
+                ["Property 4", "property_4"],
+            ],
+            [["SEPARATOR 5", "property_5"]],
+            [["SEPARATOR 6", "property_6"]],
+        ]);
+        assertFolded([false, false, true, true]);
+
+        await click(target, ".o_field_property_definition .fa-chevron-down");
+        assert.deepEqual(getGroups(), [
+            [["SEPARATOR 2", "property_2"]],
+            [
+                ["SEPARATOR 3", "property_3"],
+                ["Property 4", "property_4"],
+                ["Property 1", "property_1"],
+            ],
+            [["SEPARATOR 5", "property_5"]],
+            [["SEPARATOR 6", "property_6"]],
+        ]);
+        assertFolded([false, false, true, true]);
+
+        await click(target, ".o_field_property_definition .fa-chevron-down");
+        assert.deepEqual(getGroups(), [
+            [["SEPARATOR 2", "property_2"]],
+            [
+                ["SEPARATOR 3", "property_3"],
+                ["Property 4", "property_4"],
+            ],
+            [
+                ["SEPARATOR 5", "property_5"],
+                ["Property 1", "property_1"],
+            ],
+            [["SEPARATOR 6", "property_6"]],
+        ]);
+        assertFolded([false, false, false, true]);
+
+        // fold  property 2 and 3
+        await closePopover(target);
+        await click(target, ".o_field_property_label[property-name='property_2']");
+        await click(target, ".o_field_property_label[property-name='property_3']");
+        assertFolded([true, true, false, true]);
+
+        // move the property up
+        await click(target, "[property-name='property_1'] .o_field_property_open_popover");
+        await click(target, ".o_field_property_definition .fa-chevron-up");
+        assert.deepEqual(getGroups(), [
+            [["SEPARATOR 2", "property_2"]],
+            [
+                ["SEPARATOR 3", "property_3"],
+                ["Property 4", "property_4"],
+                ["Property 1", "property_1"],
+            ],
+            [["SEPARATOR 5", "property_5"]],
+            [["SEPARATOR 6", "property_6"]],
+        ]);
+        assertFolded([true, false, false, true]);
+
+        await click(target, ".o_field_property_definition .fa-chevron-up");
+        await click(target, ".o_field_property_definition .fa-chevron-up");
+        assert.deepEqual(getGroups(), [
+            [
+                ["SEPARATOR 2", "property_2"],
+                ["Property 1", "property_1"],
+            ],
+            [
+                ["SEPARATOR 3", "property_3"],
+                ["Property 4", "property_4"],
+            ],
+            [["SEPARATOR 5", "property_5"]],
+            [["SEPARATOR 6", "property_6"]],
+        ]);
+        assertFolded([false, false, false, true]);
+
+        // now, create a new property, it must unfold the last group
+        await click(target, ".o_field_property_add button");
+        assert.deepEqual(getGroups(), [
+            [
+                ["SEPARATOR 2", "property_2"],
+                ["Property 1", "property_1"],
+            ],
+            [
+                ["SEPARATOR 3", "property_3"],
+                ["Property 4", "property_4"],
+            ],
+            [["SEPARATOR 5", "property_5"]],
+            [
+                ["SEPARATOR 6", "property_6"],
+                ["Property 7", "property_7"],
+                ["Property 8", "2f00000000000000"],
+            ],
+        ]);
+        assertFolded([false, false, false, false]);
+
+        assert.deepEqual(getLocalStorageFold(), {
+            "company,37": ["property_5", "property_3", "property_2", "property_6"],
+        });
+    });
 });

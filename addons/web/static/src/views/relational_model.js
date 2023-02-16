@@ -1051,6 +1051,8 @@ export class Record extends DataPoint {
                 }
             } else if (widget === "tags") {
                 widget = `property_tags`;
+            } else if (definition.type === "separator") {
+                continue;
             }
 
             const parent = this.data[propertiesField.definition_record];

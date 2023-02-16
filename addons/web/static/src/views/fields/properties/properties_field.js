@@ -48,12 +48,14 @@ export class PropertiesField extends Component {
         this.state = useState({
             canChangeDefinition: true,
             movedPropertyName: null,
+            unfoldedSeparators: [],
         });
 
         this._saveInitialPropertiesValues();
 
         const field = this.props.record.fields[this.props.name];
         this.definitionRecordField = field.definition_record;
+        this._updateFoldedSeparatorsState();
 
         onWillStart(async () => {
             await this._checkDefinitionAccess();
@@ -62,15 +64,18 @@ export class PropertiesField extends Component {
         useEffect(() => {
             this._movePopoverIfNeeded();
 
-            if (this.openLastPropertyDefinition) {
-                this.openLastPropertyDefinition = null;
-                const propertiesList = this.propertiesList;
-                const lastPropertyName = propertiesList[propertiesList.length - 1].name;
+            if (this.openPropertyDefinition) {
+                const propertyName = this.openPropertyDefinition;
                 const labels = this.propertiesRef.el.querySelectorAll(
-                    `.o_property_field[property-name="${lastPropertyName}"] .o_field_property_open_popover`
+                    `.o_property_field[property-name="${propertyName}"] .o_field_property_open_popover`
                 );
+                if (!labels.length) {
+                    // property still not in the DOM
+                    return;
+                }
+                this.openPropertyDefinition = null;
                 const lastLabel = labels[labels.length - 1];
-                this._openPropertyDefinition(lastLabel, lastPropertyName, true);
+                this._openPropertyDefinition(lastLabel, propertyName, true);
             }
         });
     }
@@ -78,6 +83,24 @@ export class PropertiesField extends Component {
     /* --------------------------------------------------------
      * Public methods / Getters
      * -------------------------------------------------------- */
+
+    /**
+     * Return the number of columns
+     *
+     * @returns {object}
+     */
+    get columns() {
+        return this.env.isSmall ? 1 : this.props.columns;
+    }
+
+    /**
+     * Return the current context
+     *
+     * @returns {object}
+     */
+    get context() {
+        return this.props.record.getFieldContext(this.props.name);
+    }
 
     /**
      * Return the current properties value.
@@ -101,13 +124,48 @@ export class PropertiesField extends Component {
      * @returns {Array<Array>}
      */
     get groupedPropertiesList() {
-        const columns = this.env.isSmall ? 1 : this.props.columns;
-        // If no properties, assure that the "Add Property" button is shown.
-        const res = [...Array(columns)].map((col) => []);
-        this.propertiesList.forEach((val, index) => {
-            res[index % columns].push(val);
+        const propertiesList = this.propertiesList;
+        propertiesList.push({ nextProperty: true }); // flag to know where will be inserted the next property
+
+        // default invisible group
+        const groupedProperties =
+            propertiesList[0].type !== "separator"
+                ? [{ title: null, name: null, elements: [], invisible: true }]
+                : [];
+
+        propertiesList.forEach((property) => {
+            if (property.type === "separator") {
+                groupedProperties.push({
+                    title: property.string,
+                    name: property.name,
+                    elements: [],
+                });
+            } else {
+                groupedProperties[groupedProperties.length - 1].elements.push(property);
+            }
         });
-        return res;
+
+        if (groupedProperties.length === 1) {
+            // only one group, split this group in the columns to take the entire width
+            const invisible = !groupedProperties[0].name;
+            groupedProperties[0].elements = [];
+            groupedProperties[0].invisible = invisible;
+            for (let col = 1; col < this.columns; ++col) {
+                groupedProperties.push({
+                    title: null,
+                    name: groupedProperties[0].name,
+                    elements: [],
+                    invisible,
+                });
+            }
+            propertiesList
+                .filter((property) => property.type !== "separator")
+                .forEach((property, index) => {
+                    groupedProperties[index % this.columns].elements.push(property);
+                });
+        }
+
+        return groupedProperties;
     }
 
     /**
@@ -192,9 +250,12 @@ export class PropertiesField extends Component {
         propertiesValues[targetIndex] = propertiesValues[propertyIndex];
         propertiesValues[propertyIndex] = prop;
         propertiesValues[propertyIndex].definition_changed = true;
+
+        this._unfoldPropertyGroup(targetIndex, propertiesValues);
+
         this.props.record.update({ [this.props.name]: propertiesValues }).then(() => {
             // move the popover once the DOM is updated
-            this.shouldUpdatePopoverPosition = true;
+            this.movePopoverToProperty = propertyName;
         });
     }
 
@@ -244,15 +305,36 @@ export class PropertiesField extends Component {
      */
     onPropertyDefinitionChange(propertyDefinition) {
         propertyDefinition["definition_changed"] = true;
+        if (propertyDefinition.type === "separator") {
+            // remove all other keys
+            propertyDefinition = {
+                name: propertyDefinition.name,
+                string: propertyDefinition.string,
+                definition_changed: propertyDefinition.definition_changed,
+                type: propertyDefinition.type,
+            };
+        }
         const propertiesValues = this.propertiesList;
         const propertyIndex = propertiesValues.findIndex(
             (property) => property.name === propertyDefinition.name
         );
 
+        const oldType = propertiesValues[propertyIndex].type;
+        const newType = propertyDefinition.type;
+
         this._regeneratePropertyName(propertyDefinition);
 
         propertiesValues[propertyIndex] = propertyDefinition;
         this.props.record.update({ [this.props.name]: propertiesValues });
+
+        if (newType === "separator" && oldType !== newType) {
+            // unfold automatically the new separator
+            this.onSeparatorClick(propertyDefinition.name, true);
+        }
+        if ([newType, oldType].includes("separator") && oldType !== newType) {
+            // layout has been changed, move the definition popover
+            this.movePopoverToProperty = propertyDefinition.name;
+        }
     }
 
     /**
@@ -306,16 +388,44 @@ export class PropertiesField extends Component {
             return;
         }
 
+        this._unfoldPropertyGroup(propertiesDefinitions.length - 1, propertiesDefinitions);
+
         this.propertiesRef.el.closest(".o_field_properties").classList.remove("o_field_invalid");
 
+        const newName = uuid();
         propertiesDefinitions.push({
-            name: uuid(),
+            name: newName,
             string: sprintf(_lt("Property %s"), propertiesDefinitions.length + 1),
             type: "char",
             definition_changed: true,
         });
-        this.openLastPropertyDefinition = true;
-        this.props.record.update({ [this.props.name]: propertiesDefinitions });
+        this.state.addButtonVisible = true;
+        this.openPropertyDefinition = newName;
+        await this.props.record.update({ [this.props.name]: propertiesDefinitions });
+    }
+
+    /**
+     * Fold / unfold the given separator property.
+     *
+     * @param {string} propertyName, Name of the separator property
+     * @param {boolean} forceUnfold, Always unfold
+     */
+    onSeparatorClick(propertyName, forceUnfold) {
+        if (!propertyName) {
+            return;
+        }
+
+        let [unfoldedSeparators, fold, key] = this._getFoldedSeparatorsState();
+        if (unfoldedSeparators.includes(propertyName)) {
+            if (!forceUnfold) {
+                unfoldedSeparators = unfoldedSeparators.filter((name) => name !== propertyName);
+            }
+        } else {
+            unfoldedSeparators.push(propertyName);
+        }
+        fold[key] = unfoldedSeparators;
+        window.localStorage.setItem("properties.fold", JSON.stringify(fold));
+        this.state.unfoldedSeparators = unfoldedSeparators;
     }
 
     /**
@@ -365,6 +475,31 @@ export class PropertiesField extends Component {
      * -------------------------------------------------------- */
 
     /**
+     * Read the local storage and return the fold state stored in it.
+     *
+     * We clean the dictionary state because a property might have been deleted,
+     * and so there's no reason to keep the corresponding key in the dict.
+     *
+     * @returns {array}
+     *      - The folded state
+     *      - The object storing all state for all definition record
+     *      - The key storing the folded state in the previous object
+     */
+    _getFoldedSeparatorsState() {
+        const fold = JSON.parse(window.localStorage.getItem("properties.fold")) || {};
+        const definitionRecordId = this.props.record.data[this.definitionRecordField][0];
+        const definitionRecordModel = this.props.record.fields[this.definitionRecordField].relation;
+        // store the fold / unfold information per definition record
+        // to clean the keys (to not keep information about removed separator)
+        const key = `${definitionRecordModel},${definitionRecordId}`;
+        const allPropertiesNames = this.propertiesList.map((property) => property.name);
+        let unfoldedSeparators = fold[key] || [];
+        // remove element that do not exist anymore (e.g. if we remove a separator)
+        unfoldedSeparators = unfoldedSeparators.filter((name) => allPropertiesNames.includes(name));
+        return [unfoldedSeparators, fold, key];
+    }
+
+    /**
      * Move the popover to the given property id.
      * Used when we change the position of the properties.
      *
@@ -372,17 +507,17 @@ export class PropertiesField extends Component {
      * because if we update it after changing the component properties,
      */
     _movePopoverIfNeeded() {
-        if (!this.shouldUpdatePopoverPosition) {
+        if (!this.movePopoverToProperty) {
             return;
         }
-        this.shouldUpdatePopoverPosition = false;
+        const propertyName = this.movePopoverToProperty;
+        this.movePopoverToProperty = null;
 
-        const propertyName = this.state.movedPropertyName;
         const popover = document
             .querySelector(".o_field_property_definition")
             .closest(".o_popover");
         const targetElement = document.querySelector(
-            `.o_property_field[property-name="${propertyName}"] .o_field_property_open_popover`
+            `*[property-name="${propertyName}"] .o_field_property_open_popover`
         );
 
         reposition(targetElement, popover, null, { position: "top", margin: 10 });
@@ -537,6 +672,30 @@ export class PropertiesField extends Component {
         // the popover, calling this function, but the value will be overwritten because of onPropertyCreate
         this.props.value = propertiesValues;
         this.props.record.update({ [this.props.name]: propertiesValues });
+    }
+
+    /**
+     * Read the fold states in the local storage,
+     * and update the state of the current component.
+     */
+    _updateFoldedSeparatorsState() {
+        const unfoldedSeparators = this._getFoldedSeparatorsState()[0];
+        this.state.unfoldedSeparators = unfoldedSeparators;
+    }
+
+    /**
+     * Unfold the group of the given property.
+     *
+     * @param {integer} targetIndex
+     * @param {object} propertiesValues
+     */
+    _unfoldPropertyGroup(targetIndex, propertiesValues) {
+        const separator = propertiesValues.findLast(
+            (property, index) => property.type === "separator" && index <= targetIndex
+        );
+        if (separator) {
+            this.onSeparatorClick(separator.name, true);
+        }
     }
 }
 
