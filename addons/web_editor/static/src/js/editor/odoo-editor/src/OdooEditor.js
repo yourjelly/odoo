@@ -1698,6 +1698,11 @@ export class OdooEditor extends EventTarget {
         this._collabSelectionsContainer.append(caretElement, ...indicators);
     }
 
+    multiselectionRemoveAll() {
+        this._collabSelectionInfos = new Map();
+        this._collabSelectionsContainer.querySelectorAll('.oe-collaboration-caret-avatar').forEach(avatar => avatar.remove());
+    }
+
     multiselectionRemove(clientId) {
         this._collabSelectionInfos.delete(clientId);
         this._multiselectionRemoveClient(clientId);

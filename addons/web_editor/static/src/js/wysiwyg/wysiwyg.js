@@ -2589,6 +2589,7 @@ const Wysiwyg = Widget.extend({
         this.odooEditor.collaborationSetClientId(this._currentClientId);
         this.setValue(value);
         this.odooEditor.historyReset();
+        this.odooEditor.multiselectionRemoveAll();
         this.setupCollaboration(collaborationChannel);
         // Wait until editor is focused to join the peer to peer network.
         this.$editable[0].addEventListener('focus', this._joinPeerToPeer);
