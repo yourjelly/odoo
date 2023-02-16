@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
-import { afterNextRender, start } from "@mail/../tests/helpers/test_utils";
-import { getFixture } from "@web/../tests/helpers/utils";
+import { Messaging } from "@mail/new/core/messaging_service";
+import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { getFixture, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 
 let target;
 QUnit.module("messaging", {
@@ -58,5 +59,43 @@ QUnit.test(
         // leaving discuss.
         await openFormView("res.partner", partnerId);
         assert.containsOnce(target, ".o-mail-chat-window-header:contains(Dumbledore)");
+    }
+);
+
+QUnit.test(
+    "'mail.channel/message' dispatched to every notification handler",
+    async function (assert) {
+        patchWithCleanup(Messaging.prototype, {
+            handleNotification(notifications) {
+                this._super(notifications);
+                if (notifications.map(({ type }) => type).includes("mail.channel/new_message")) {
+                    // mail.channel/new_message notification is received as well
+                    // as the other notification that was batched with it.
+                    assert.step("notifications - received");
+                    assert.strictEqual(notifications.length, 2);
+                }
+            },
+        });
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({ name: "General" });
+        const messageId = pyEnv["mail.message"].create({
+            body: "hello world",
+            model: "mail.channel",
+            res_id: channelId,
+        });
+        const { env } = await start();
+        const [message] = await env.services.orm.call("mail.message", "message_format", [
+            messageId,
+        ]);
+        pyEnv["bus.bus"]._sendmany([
+            [pyEnv.currentPartnerId, "mail.channel/new_message", { id: channelId, message }],
+            [
+                pyEnv.currentPartnerId,
+                "mail.message/toggle_star",
+                { messageIds: [messageId], starred: true },
+            ],
+        ]);
+        await nextTick();
+        assert.verifySteps(["notifications - received"]);
     }
 );
