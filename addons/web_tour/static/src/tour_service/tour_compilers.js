@@ -112,17 +112,18 @@ function describeStepDetailed(step) {
 }
 
 function describeFailedStep(stepIndex, tour) {
-    const start = stepIndex - 4 >= 0 ? stepIndex - 4 : 0;
-    const end = stepIndex + 5 <= tour.steps.length ? stepIndex + 5 : tour.steps.length;
+    const offset = 2;
+    const start = stepIndex - offset >= 0 ? stepIndex - offset : 0;
+    const end = stepIndex + offset + 1 <= tour.steps.length ? stepIndex + offset + 1 : tour.steps.length;
     let result = "";
     for (let i = start; i < end; i++) {
         const highlight = i === stepIndex;
-        result += `\n${highlight ? "----- FAILED STEP -----\n" : ""}${describeStepDetailed(
+        result += `\n${highlight ? "----- FAILING STEP -----\n" : ""}${describeStepDetailed(
             tour.steps[i],
             highlight
         )}${highlight ? "\n-----------------------" : ""}`;
     }
-    return result.trim();
+    return `TOUR FAILED. (name='${tour.name}')\n\n${result.trim()}`;
 }
 
 /**
