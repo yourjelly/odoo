@@ -1,30 +1,36 @@
 /** @odoo-module **/
 
 import { reactive } from "@odoo/owl";
-import { TourPointer } from "../tour_pointer/tour_pointer";
 
 /**
- * @typedef {"left" | "right" | "top" | "bottom"} Position
+ * @typedef {import("@web/core/position_hook").Direction} Direction
+ *
+ * @typedef {"in" | "out-below" | "out-above" | "unknown"} IntersectionPosition
+ *
+ * @typedef {import("./tour_service").TourStep} TourStep
  *
  * @typedef TourPointerState
+ * @property {HTMLElement} [anchor]
  * @property {string} [content]
  * @property {boolean} fixed
  * @property {boolean} [isOpen]
  * @property {boolean} isVisible
- * @property {Position} position
- * @property {number} x
- * @property {number} y
+ * @property {Direction} position
  */
 
 class Intersection {
     constructor() {
+        /** @type {Element | null} */
         this.currentTarget = null;
         this.rootBounds = null;
+        /** @type {IntersectionPosition} */
         this._targetPosition = "unknown";
         this._observer = new IntersectionObserver((observations) =>
             this._handleObservations(observations)
         );
     }
+
+    /** @type {IntersectionObserverCallback} */
     _handleObservations(observations) {
         if (observations.length < 1) {
             return;
@@ -46,9 +52,7 @@ class Intersection {
             this._targetPosition = "unknown";
         }
     }
-    /**
-     * @returns {'in' | 'out-below' | 'out-above' | 'unknown'}
-     */
+
     get targetPosition() {
         if (!this.rootBounds) {
             return this.currentTarget ? "in" : "unknown";
@@ -56,6 +60,7 @@ class Intersection {
             return this._targetPosition;
         }
     }
+
     /**
      * @param {Element} newTarget
      */
@@ -70,49 +75,13 @@ class Intersection {
             this.currentTarget = newTarget;
         }
     }
+
     stop() {
         this._observer.disconnect();
     }
 }
 
-/**
- * @param {Partial<TourPointerState>} params
- */
-export function createPointerState({ x, y, isVisible, position, content, isOpen, fixed }) {
-    // TODO-JCB: Take into account the rtl config.
-    /**
-     * @param {Element} el
-     * @param {Position} position
-     * @returns {[number, number]}
-     */
-    const computeLocation = (el, position) => {
-        const rect = el.getBoundingClientRect();
-        let { left, top } = rect;
-        switch (position) {
-            case "left": {
-                left -= TourPointer.size;
-                top += rect.height / 2 - TourPointer.size / 2;
-                break;
-            }
-            case "right": {
-                left += rect.width;
-                top += rect.height / 2 - TourPointer.size / 2;
-                break;
-            }
-            case "top": {
-                left += rect.width / 2 - TourPointer.size / 2;
-                top -= TourPointer.size;
-                break;
-            }
-            case "bottom": {
-                left += rect.width / 2 - TourPointer.size / 2;
-                top += rect.height;
-                break;
-            }
-        }
-        return [top, left];
-    };
-
+export function createPointerState() {
     /**
      * @param {Partial<TourPointerState>} newState
      */
@@ -121,37 +90,41 @@ export function createPointerState({ x, y, isVisible, position, content, isOpen,
     };
 
     /**
-     * @param {Step?} step
-     * @param {Element} [anchor]
+     * @param {TourStep} step
+     * @param {HTMLElement} [anchor]
      */
     const update = (step, anchor) => {
         intersection.setTarget(anchor);
         if (anchor) {
-            if (intersection.targetPosition === "unknown") {
-                // TODO-JCB: Maybe this targetPosition value is not needed.
-                console.warn("Something's wrong on the `Intersection` instance.");
-            } else if (intersection.targetPosition === "in") {
-                const position = step.position || "top";
-                const [top, left] = computeLocation(anchor, position);
-                setState({
-                    x: left,
-                    y: top,
-                    content: step.content || "",
-                    position,
-                });
-            } else {
-                let x = intersection.rootBounds.width / 2;
-                let y, position, content;
-                if (intersection.targetPosition === "out-below") {
-                    y = intersection.rootBounds.height - 80 - TourPointer.size;
-                    position = "top";
-                    content = "Scroll down to reach the next step.";
-                } else if (intersection.targetPosition === "out-above") {
-                    y = 80;
-                    position = "bottom";
-                    content = "Scroll up to reach the next step.";
+            switch (intersection.targetPosition) {
+                case "unknown": {
+                    // TODO-JCB: Maybe this targetPosition value is not needed.
+                    console.warn("Something's wrong on the `Intersection` instance.");
+                    break;
                 }
-                setState({ x, y, content, position });
+                case "in": {
+                    setState({
+                        anchor,
+                        content: step.content,
+                        position: step.position,
+                    });
+                    break;
+                }
+                default: {
+                    // TODO-JUM: give root element instead of position
+                    // let x = intersection.rootBounds.width / 2;
+                    // let y, position, content;
+                    // if (intersection.targetPosition === "out-below") {
+                    //     y = intersection.rootBounds.height - 80 - TourPointer.height;
+                    //     position = "top";
+                    //     content = "Scroll down to reach the next step.";
+                    // } else if (intersection.targetPosition === "out-above") {
+                    //     y = 80;
+                    //     position = "bottom";
+                    //     content = "Scroll up to reach the next step.";
+                    // }
+                    // setState({ x, y, content, position });
+                }
             }
         } else {
             setState({ isVisible: false });
@@ -159,7 +132,7 @@ export function createPointerState({ x, y, isVisible, position, content, isOpen,
     };
 
     /** @type {TourPointerState} */
-    const state = reactive({ x, y, isVisible, position, content, isOpen, fixed });
+    const state = reactive({});
     const intersection = new Intersection();
 
     return [state, { setState, update }];

@@ -3,6 +3,7 @@
     <t t-name="web_tour.TourPointer" owl="1">
         <div
             t-if="props.pointerState.isVisible"
+            t-ref="popper"
             t-attf-class="
                 o_tour_pointer
                 o_{{ props.pointerState.position }}
@@ -10,16 +11,18 @@
                 {{ props.pointerState.fixed ? 'position-fixed' : 'position-absolute' }}
             "
             t-attf-style="
-                --TourPointer__size: {{ constructor.size }}px;
-                left: {{ props.pointerState.x }}px;
-                top: {{ props.pointerState.y }}px;
+                --TourPointer__width: {{ constructor.width }}px;
+                --TourPointer__height: {{ constructor.height }}px;
             "
             t-on-mouseenter="() => state.isOpen = true"
             t-on-mouseleave="() => state.isOpen = false"
         >
             <div class="o_tour_pointer_tip position-absolute" />
-            <div t-if="isOpen" class="o_tour_pointer_content overflow-hidden px-3 py-2 position-relative">
-                <t t-out="props.pointerState.content" />
+            <div
+                class="o_tour_pointer_content overflow-hidden px-3 py-2 w-100 h-100 position-relative"
+                t-att-class="{ invisible: !this.isOpen }"
+            >
+                <t t-out="content" />
             </div>
         </div>
     </t>

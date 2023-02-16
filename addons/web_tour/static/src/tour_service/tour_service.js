@@ -11,43 +11,6 @@ import { compileStepManual, compileStepAuto, compileTourToMacro } from "./tour_c
 import { createPointerState } from "./tour_pointer_state";
 import { device } from "web.config";
 
-function extractRegisteredTours() {
-    const tours = {};
-    for (const [name, tour] of registry.category("web_tour.tours").getEntries()) {
-        tours[name] = {
-            name: tour.saveAs || name,
-            steps: tour.steps,
-            url: tour.url,
-            rainbowMan: tour.rainbowMan === undefined ? true : !!tour.rainbowMan,
-            rainbowManMessage: tour.rainbowManMessage,
-            fadeout: tour.fadeout || "medium",
-            sequence: tour.sequence || 1000,
-            test: tour.test,
-            wait_for: tour.wait_for || Promise.resolve(),
-            checkDelay: tour.checkDelay,
-        };
-    }
-    return tours;
-}
-
-/**
- * @param {*} step
- * @param {"manual" | "auto"} mode
- * @returns {boolean}
- */
-function shouldOmit(step, mode) {
-    const isDefined = (key, obj) => key in obj && obj[key] !== undefined;
-    const getEdition = () => session.server_version_info.slice(-1)[0] === "e" ? "enterprise" : "community";
-    const correctEdition = isDefined("edition", step) ? step.edition === getEdition() : true;
-    const correctDevice = isDefined("mobile", step) ? step.mobile === device.isMobile : true;
-    return (
-        !correctEdition ||
-        !correctDevice ||
-        // `step.auto = true` means omitting a step in a manual tour.
-        (mode === "manual" && step.auto)
-    );
-}
-
 /**
  * TODO-JCB: Not sure of this.
  * @typedef {string} Markup
@@ -71,7 +34,7 @@ function shouldOmit(step, mode) {
  * @property {JQuerySelector} [alt_trigger]
  * @property {JQuerySelector} [skip_trigger]
  * @property {Markup} [content]
- * @property {"left" | "top" | "right" | "bottom"} [position]
+ * @property {Direction} [position]
  * @property {"community" | "enterprise"} [edition]
  * @property {Runnable} [run]
  * @property {boolean} [auto]
@@ -84,6 +47,45 @@ function shouldOmit(step, mode) {
  * @property {boolean} [mobile]
  * @property {string} [title]
  */
+
+
+function extractRegisteredTours() {
+    const tours = {};
+    for (const [name, tour] of registry.category("web_tour.tours").getEntries()) {
+        tours[name] = {
+            name: tour.saveAs || name,
+            steps: tour.steps,
+            url: tour.url,
+            rainbowMan: tour.rainbowMan === undefined ? true : !!tour.rainbowMan,
+            rainbowManMessage: tour.rainbowManMessage,
+            fadeout: tour.fadeout || "medium",
+            sequence: tour.sequence || 1000,
+            test: tour.test,
+            wait_for: tour.wait_for || Promise.resolve(),
+            checkDelay: tour.checkDelay,
+        };
+    }
+    return tours;
+}
+
+/**
+ * @param {TourStep} step
+ * @param {"manual" | "auto"} mode
+ * @returns {boolean}
+ */
+function shouldOmit(step, mode) {
+    const isDefined = (key, obj) => key in obj && obj[key] !== undefined;
+    const getEdition = () => session.server_version_info.slice(-1)[0] === "e" ? "enterprise" : "community";
+    const correctEdition = isDefined("edition", step) ? step.edition === getEdition() : true;
+    const correctDevice = isDefined("mobile", step) ? step.mobile === device.isMobile : true;
+    return (
+        !correctEdition ||
+        !correctDevice ||
+        // `step.auto = true` means omitting a step in a manual tour.
+        (mode === "manual" && step.auto)
+    );
+}
+
 export const tourService = {
     dependencies: ["orm", "effect"],
     start: async (_env, { orm, effect }) => {
@@ -91,15 +93,7 @@ export const tourService = {
 
         const tours = extractRegisteredTours();
         const macroEngine = new MacroEngine(document);
-        const [pointerState, pointerMethods] = createPointerState({
-            content: "",
-            position: "top",
-            x: 0,
-            y: 0,
-            isVisible: false,
-            isOpen: false,
-            fixed: false,
-        });
+        const [pointerState, pointerMethods] = createPointerState();
         const consumedTours = new Set(session.web_tours);
 
         function convertToMacro(tour, { mode, stepDelay, watch }) {
