@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="web_editor.HtmlHistoryDialog" owl="1">
+        <Dialog size="size" title="title">
+            <div class="dialog-container html-history-dialog d-flex flex-row">
+                <div class="recent-history-list d-flex flex-column align-content-stretch">
+                    <t t-if="!state.latestHistoryDiffs.length">
+                        <div class="text-center w-100 pb-2 pt-0 px-0 fw-bolder">No history</div>
+                    </t>
+                    <t t-foreach="state.latestHistoryDiffs" t-as="rec" t-key="rec.id">
+                        <a type="object" href="#" role="button"
+                           t-attf-class="btn btn-outline-primary #{state.currentId === rec.id ? 'active' : ''}"
+                           t-on-click="() => this.updateCurrentComparisonHtml(rec.id)"
+                           title="Compare with current version">
+                            <strong><t t-esc="this.getDiffDateDayHour(rec)" /></strong><br/>
+                            <small><t t-esc="this.getDiffAuthor(rec)" /></small>
+                        </a>
+                    </t>
+                </div>
+                <div class="history-container o_notebook">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active"
+                                    id="history-tab-doc"
+                                    data-bs-toggle="tab" data-bs-target="#history-tab-doc-content"
+                                    type="button" role="tab"
+                                    aria-controls="doc" aria-selected="true">Document</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link"
+                                    id="history-tab-diff"
+                                    data-bs-toggle="tab" data-bs-target="#history-tab-diff-content"
+                                    type="button" role="tab"
+                                    aria-controls="diff" aria-selected="false">Changes</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="history-tab-doc-content" role="tabpanel" aria-labelledby="history-tab-doc">
+                            <t t-out="state.currentHtml" />
+                        </div>
+                        <div class="tab-pane fade" id="history-tab-diff-content" role="tabpanel" aria-labelledby="history-tab-diff">
+                            <t t-out="state.currentComparisonHtml" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-set-slot="footer" owl="1">
+                <button
+                        class="btn btn-primary"
+                        t-att-disabled="state.buttonDisabled"
+                        t-on-click="_onHistoryRestoreClick">
+                    restore history
+                </button>
+                <button
+                        class="btn btn-secondary"
+                        t-att-disabled="state.buttonDisabled"
+                        t-on-click="props.close">
+                    Cancel
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>
