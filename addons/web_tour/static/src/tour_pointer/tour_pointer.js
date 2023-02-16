@@ -1,81 +1,45 @@
 /** @odoo-module **/
 
-import { Component, markup, onPatched, xml, useRef, useState } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 
+/**
+ * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
+ *
+ * @typedef TourPointerProps
+ * @property {TourPointerState} pointerState
+ * @property {(pointerState: Partial<TourPointerState>) => void} setPointerState
+ */
+
+/** @extends {Component<TourPointerProps, any>} */
 export class TourPointer extends Component {
-    static template = xml`
-        <div t-ref="tooltip-ref"
-            class="o_tooltip"
-            t-att-class="extraClasses"
-            t-att-style="style"
-            t-on-mouseenter="() => props.setPointerState({ mode: 'info' })"
-            t-on-mouseleave="() => props.setPointerState({ mode: 'bubble' })">
-            <div t-if="props.pointerState.mode === 'info'" class="o_tooltip_content">
-                <t t-out="contentMarkup"/>
-            </div>
-        </div>
-    `;
     static props = {
         pointerState: {
             type: Object,
             shape: {
+                content: { type: String, optional: true },
+                fixed: Boolean,
+                isOpen: { type: Boolean, optional: true },
+                isVisible: Boolean,
+                position: [
+                    { value: "left" },
+                    { value: "right" },
+                    { value: "top" },
+                    { value: "bottom" },
+                ],
                 x: Number,
                 y: Number,
-                isVisible: Boolean,
-                position: {
-                    validate: (p) => ["top", "bottom", "left", "right"].includes(p),
-                },
-                content: { type: String, optional: true },
-                /**
-                 * "bubble": Just the pointer.
-                 * "info": The pointer becomes a callout showing the [content].
-                 */
-                mode: {
-                    validate: (m) => ["bubble", "info"].includes(m),
-                },
-                /**
-                 * Whether this component should be { display: "fixed" }.
-                 */
-                fixed: Boolean,
             },
         },
-        setPointerState: Function,
     };
+
+    static template = "web_tour.TourPointer";
+    static size = 28; // in pixels
+
     setup() {
-        this.tooltipRef = useRef("tooltip-ref");
-        this.state = useState({ height: false });
-        onPatched(() => {
-            const width = this.tooltipRef.el.offsetWidth;
-            if (width > 270) {
-                this.tooltipRef.el.style.width = "270px";
-            }
-        });
+        this.state = useState({ isOpen: false });
     }
-    get extraClasses() {
-        return {
-            [this.props.pointerState.mode === "bubble" ? "o_animated" : "active"]: true,
 
-            // TODO-JCB: Should be removed.
-            o_tooltip_visible: this.props.pointerState.isVisible,
-
-            [this.props.pointerState.position]: true,
-            o_tooltip_fixed: this.props.pointerState.fixed,
-        };
-    }
-    get contentMarkup() {
-        return this.props.pointerState.mode == "info" && this.props.pointerState.content
-            ? markup(this.props.pointerState.content)
-            : "";
-    }
-    get style() {
-        return Object.entries({
-            top: `${this.props.pointerState.y}px`,
-            left: `${this.props.pointerState.x}px`,
-            // Force the width when in bubble mode.
-            width: this.props.pointerState.mode === "bubble" && "28px",
-        })
-            .filter(([, v]) => v)
-            .map(([k, v]) => `${k}:${v}`)
-            .join(";");
+    get isOpen() {
+        return this.state.isOpen || this.props.pointerState.isOpen;
     }
 }

@@ -1,0 +1,139 @@
+@keyframes o-bounce-horizontal {
+    from {
+        transform: translateX(calc(var(--TourPointer__bounce-offset) * -1));
+    }
+    to {
+        transform: translateX(var(--TourPointer__bounce-offset));
+    }
+}
+
+@keyframes o-bounce-vertical {
+    from {
+        transform: translateY(calc(var(--TourPointer__bounce-offset) * -1));
+    }
+    to {
+        transform: translateY(var(--TourPointer__bounce-offset));
+    }
+}
+
+.o_tour_pointer {
+    --TourPointer__anchor-space: 0;
+    --TourPointer__bounce-offset: 3px;
+    --TourPointer__color: #{$o-enterprise-color};
+    --TourPointer__color-accent: #{lighten($o-enterprise-color, 7%)};
+    --TourPointer__border-width: 3px;
+    --TourPointer__border-color-rgb: 255, 255, 255;
+    --TourPointer__border-color: rgba(var(--TourPointer__border-color-rgb), 1);
+    --TourPointer__arrow-size: 12px;
+    --TourPointer__animation-duration: 0.5s;
+    --TourPointer__expand-duration: 0.2s;
+
+    width: 0;
+    z-index: 1000;
+    white-space: nowrap;
+    // transition: width var(--TourPointer__expand-duration) ease,
+    //     height var(--TourPointer__expand-duration) ease;
+
+    &.o_bouncing {
+        width: var(--TourPointer__size);
+        animation-duration: var(--TourPointer__animation-duration);
+        animation-timing-function: ease-in;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+
+        &.o_left,
+        &.o_right {
+            animation-name: o-bounce-horizontal;
+        }
+
+        &.o_top,
+        &.o_bottom {
+            animation-name: o-bounce-vertical;
+        }
+
+        .o_tour_pointer_tip {
+            width: var(--TourPointer__size);
+            height: var(--TourPointer__size);
+            border: var(--TourPointer__border-width) solid var(--TourPointer__border-color);
+            border-radius: 0 50% 50% 50%;
+            background-image: radial-gradient(
+                var(--TourPointer__color-accent),
+                var(--TourPointer__color)
+            );
+            box-shadow: 0 0 40px 2px rgba(var(--TourPointer__border-color-rgb), 0.5);
+        }
+    }
+
+    &.o_open {
+        animation: o-pointer-expand var(--TourPointer__expand-duration) linear;
+        border: var(--TourPointer__border-width) solid var(--TourPointer__color);
+        background-color: var(--TourPointer__border-color);
+        width: 270px;
+        white-space: normal;
+
+        &.o_left {
+            transform: translateX(calc(var(--TourPointer__size) - 100%));
+
+            .o_tour_pointer_tip {
+                transform: translateX(-50%) rotate(45deg);
+                right: calc(var(--TourPointer__arrow-size) * -1);
+                top: calc(var(--TourPointer__arrow-size) / 2);
+            }
+        }
+
+        &.o_right .o_tour_pointer_tip {
+            transform: translateX(50%) rotate(45deg);
+            left: calc(var(--TourPointer__arrow-size) * -1);
+            top: calc(var(--TourPointer__arrow-size) / 2);
+        }
+
+        &.o_top {
+            transform: translateY(-50%);
+
+            .o_tour_pointer_tip {
+                transform: translateY(-50%) rotate(45deg);
+                bottom: calc(var(--TourPointer__arrow-size) * -1);
+                left: calc(var(--TourPointer__arrow-size) / 2);
+            }
+        }
+
+        &.o_bottom .o_tour_pointer_tip {
+            transform: translateY(50%) rotate(45deg);
+            top: calc(var(--TourPointer__arrow-size) * -1);
+            left: calc(var(--TourPointer__arrow-size) / 2);
+        }
+
+        .o_tour_pointer_tip {
+            width: var(--TourPointer__arrow-size);
+            height: var(--TourPointer__arrow-size);
+            border: var(--TourPointer__border-width) solid var(--TourPointer__color);
+            background-color: var(--TourPointer__border-color);
+        }
+    }
+
+    &.o_top .o_tour_pointer_tip {
+        transform: rotate(180deg) scaleY(1.12) rotate(45deg);
+    }
+
+    &.o_right .o_tour_pointer_tip {
+        transform: rotate(270deg) scaleY(1.12) rotate(45deg);
+    }
+
+    &.o_bottom .o_tour_pointer_tip {
+        transform: rotate(0deg) scaleY(1.12) rotate(45deg);
+    }
+
+    &.o_left .o_tour_pointer_tip {
+        transform: rotate(90deg) scaleY(1.12) rotate(45deg);
+    }
+
+    .o_tour_pointer_content {
+        background-color: var(--TourPointer__border-color);
+    }
+}
+
+@media print {
+    .o_tour_pointer {
+        display: none !important;
+    }
+}

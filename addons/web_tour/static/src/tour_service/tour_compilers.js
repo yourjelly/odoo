@@ -1,4 +1,4 @@
-/* @odoo-module */
+/** @odoo-module **/
 
 import { session } from "@web/session";
 import { isVisible } from "@web/core/utils/ui";
@@ -8,6 +8,10 @@ import { tourState } from "./tour_state";
 import RunningTourActionHelper from "web_tour.RunningTourActionHelper";
 import { findTrigger, findExtraTrigger } from "web_tour.utils";
 import { device } from "web.config";
+
+/**
+ * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
+ */
 
 function isDefined(key, obj) {
     return key in obj && obj[key] !== undefined;
@@ -114,7 +118,8 @@ function describeStepDetailed(step) {
 function describeFailedStep(stepIndex, tour) {
     const offset = 2;
     const start = stepIndex - offset >= 0 ? stepIndex - offset : 0;
-    const end = stepIndex + offset + 1 <= tour.steps.length ? stepIndex + offset + 1 : tour.steps.length;
+    const end =
+        stepIndex + offset + 1 <= tour.steps.length ? stepIndex + offset + 1 : tour.steps.length;
     let result = "";
     for (let i = start; i < end; i++) {
         const highlight = i === stepIndex;
@@ -206,10 +211,10 @@ export function compileStepManual(
 
         $anchor.on(`${consumeEvent}.anchor`, onConsume);
         $anchor.on("mouseenter.anchor", () => {
-            pointerMethods.setState({ mode: "info" });
+            pointerMethods.setState({ isOpen: true });
         });
         $anchor.on("mouseleave.anchor", () => {
-            pointerMethods.setState({ mode: "bubble" });
+            pointerMethods.setState({ isOpen: false });
         });
         const removeAnchorListeners = () => $anchor.off(".anchor");
 
@@ -226,22 +231,18 @@ export function compileStepManual(
 
     return [
         {
-            action: () => {
-                console.log(step.trigger);
-            },
+            action: () => console.log(step.trigger),
         },
         {
             trigger: () => {
                 removeListeners();
 
-                if (proceedWith) return proceedWith;
+                if (proceedWith) {
+                    return proceedWith;
+                }
 
-                const {
-                    triggerEl,
-                    altTriggerEl,
-                    extraTriggerOkay,
-                    skipTriggerEl,
-                } = findStepTriggers(step);
+                const { triggerEl, altTriggerEl, extraTriggerOkay, skipTriggerEl } =
+                    findStepTriggers(step);
 
                 if (skipTriggerEl) {
                     return skipTriggerEl;
@@ -281,7 +282,7 @@ export function compileStepManual(
                 }
             },
             action: () => {
-                pointerMethods.setState({ isVisible: false, mode: "bubble" });
+                pointerMethods.setState({ isVisible: false, isOpen: false });
                 tourState.set(tour.name, "currentIndex", stepIndex + 1);
 
                 // Reset state variables.
@@ -328,12 +329,8 @@ export function compileStepAuto(
         {
             delay: stepDelay,
             trigger: () => {
-                const {
-                    triggerEl,
-                    altTriggerEl,
-                    extraTriggerOkay,
-                    skipTriggerEl,
-                } = findStepTriggers(step);
+                const { triggerEl, altTriggerEl, extraTriggerOkay, skipTriggerEl } =
+                    findStepTriggers(step);
 
                 let stepEl = extraTriggerOkay && (triggerEl || altTriggerEl);
 
