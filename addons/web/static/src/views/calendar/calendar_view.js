@@ -11,6 +11,7 @@ export const calendarView = {
 
     display_name: "Calendar",
     icon: "fa fa-calendar",
+    isMobileFriendly: true,
     multiRecord: true,
     searchMenuTypes: ["filter", "favorite"],
 
