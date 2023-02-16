@@ -96,39 +96,38 @@ function findStepTriggers(step) {
     return { triggerEl, altTriggerEl, extraTriggerOkay, skipTriggerEl };
 }
 
-function describeStepBasic(step) {
+function describeStep(step) {
     return step.content ? `${step.content} (trigger: ${step.trigger})` : step.trigger;
 }
 
-function describeStepDetailed(step) {
-    const str = JSON.stringify(
-        step,
-        (_key, value) => {
-            if (typeof value === "function") {
-                return "[function]";
-            } else {
-                return value;
-            }
-        },
-        2
-    );
-    return str;
+function describeFailedStepSimple(step, tour) {
+    return `Tour ${tour.name} failed at step ${describeStep(step)}`;
 }
 
-function describeFailedStep(stepIndex, tour) {
-    const offset = 2;
+function describeFailedStepDetailed(step, stepIndex, tour) {
+    const offset = 4;
     const start = stepIndex - offset >= 0 ? stepIndex - offset : 0;
     const end =
         stepIndex + offset + 1 <= tour.steps.length ? stepIndex + offset + 1 : tour.steps.length;
     let result = "";
     for (let i = start; i < end; i++) {
         const highlight = i === stepIndex;
-        result += `\n${highlight ? "----- FAILING STEP -----\n" : ""}${describeStepDetailed(
+        const stepString = JSON.stringify(
             tour.steps[i],
-            highlight
-        )}${highlight ? "\n-----------------------" : ""}`;
+            (_key, value) => {
+                if (typeof value === "function") {
+                    return "[function]";
+                } else {
+                    return value;
+                }
+            },
+            2
+        );
+        result += `\n${highlight ? "----- FAILING STEP -----\n" : ""}${stepString}${
+            highlight ? "\n-----------------------" : ""
+        }`;
     }
-    return `TOUR FAILED. (name='${tour.name}')\n\n${result.trim()}`;
+    return `${describeFailedStepSimple(step, tour)}\n\n${result.trim()}`;
 }
 
 /**
@@ -310,18 +309,15 @@ export function compileStepAuto(
         {
             action: () => {
                 skipAction = false;
-                if (odoo.debug) {
-                    console.log(`Tour ${tour.name}: ${describeStepDetailed(step, false)}`);
-                } else {
-                    console.log(`Tour ${tour.name}: ${describeStepBasic(step)}`);
-                }
+                console.log(`Tour ${tour.name}: '${describeStep(step)}' succeeded`);
                 if (!watch) {
                     // TODO-JCB: This can just be a timeout callback on the macro.
                     // console.error notifies the test runner that the tour failed.
                     // But don't do it in watch mode.
                     clearTimeout(tourTimeout);
                     tourTimeout = setTimeout(() => {
-                        console.error(describeFailedStep(stepIndex, tour));
+                        console.warn(describeFailedStepDetailed(step, stepIndex, tour));
+                        console.error(describeFailedStepSimple(step, tour));
                     }, (step.timeout || 10000) + stepDelay);
                 }
             },
