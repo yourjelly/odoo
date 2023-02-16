@@ -78,7 +78,7 @@ export const tourService = {
             x: 0,
             y: 0,
             isVisible: false,
-            mode: "bubble",
+            isOpen: false,
             fixed: false,
         });
         const consumedTours = new Set(session.web_tours);
@@ -156,7 +156,7 @@ export const tourService = {
 
         registry.category("main_components").add("TourPointer", {
             Component: TourPointer,
-            props: { pointerState, setPointerState: pointerMethods.setState },
+            props: { pointerState },
         });
 
         if (!window.frameElement) {

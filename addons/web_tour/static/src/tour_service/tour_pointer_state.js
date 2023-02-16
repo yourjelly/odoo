@@ -1,6 +1,20 @@
-/* @odoo-module */
+/** @odoo-module **/
 
 import { reactive } from "@odoo/owl";
+import { TourPointer } from "../tour_pointer/tour_pointer";
+
+/**
+ * @typedef {"left" | "right" | "top" | "bottom"} Position
+ *
+ * @typedef TourPointerState
+ * @property {string} [content]
+ * @property {boolean} fixed
+ * @property {boolean} [isOpen]
+ * @property {boolean} isVisible
+ * @property {Position} position
+ * @property {number} x
+ * @property {number} y
+ */
 
 class Intersection {
     constructor() {
@@ -62,35 +76,55 @@ class Intersection {
 }
 
 /**
- * @param {*} param0
- * @returns {[state: { x, y, isVisible, position, content, mode }, methods: { update, setState }]}
+ * @param {Partial<TourPointerState>} params
  */
-export function createPointerState({ x, y, isVisible, position, content, mode, fixed }) {
-    const intersection = new Intersection();
-    const state = reactive({ x, y, isVisible, position, content, mode, fixed });
-    const pointerSize = { width: 28, height: 28 };
-
+export function createPointerState({ x, y, isVisible, position, content, isOpen, fixed }) {
     // TODO-JCB: Take into account the rtl config.
-    function computeLocation(el, position) {
-        let top, left;
+    /**
+     * @param {Element} el
+     * @param {Position} position
+     * @returns {[number, number]}
+     */
+    const computeLocation = (el, position) => {
         const rect = el.getBoundingClientRect();
-        if (position == "top") {
-            top = rect.top - pointerSize.height;
-            left = rect.left + rect.width / 2 - pointerSize.width / 2;
-        } else if (position == "bottom") {
-            top = rect.top + rect.height;
-            left = rect.left + rect.width / 2 - pointerSize.width / 2;
-        } else if (position == "left") {
-            top = rect.top + rect.height / 2 - pointerSize.height / 2;
-            left = rect.left;
-        } else if (position == "right") {
-            top = rect.top + rect.height / 2 - pointerSize.height / 2;
-            left = rect.left + rect.width;
+        let { left, top } = rect;
+        switch (position) {
+            case "left": {
+                left -= TourPointer.size;
+                top += rect.height / 2 - TourPointer.size / 2;
+                break;
+            }
+            case "right": {
+                left += rect.width;
+                top += rect.height / 2 - TourPointer.size / 2;
+                break;
+            }
+            case "top": {
+                left += rect.width / 2 - TourPointer.size / 2;
+                top -= TourPointer.size;
+                break;
+            }
+            case "bottom": {
+                left += rect.width / 2 - TourPointer.size / 2;
+                top += rect.height;
+                break;
+            }
         }
         return [top, left];
-    }
+    };
 
-    function update(step, anchor) {
+    /**
+     * @param {Partial<TourPointerState>} newState
+     */
+    const setState = (newState) => {
+        Object.assign(state, newState);
+    };
+
+    /**
+     * @param {Step?} step
+     * @param {Element} [anchor]
+     */
+    const update = (step, anchor) => {
         intersection.setTarget(anchor);
         if (anchor) {
             if (intersection.targetPosition === "unknown") {
@@ -109,7 +143,7 @@ export function createPointerState({ x, y, isVisible, position, content, mode, f
                 let x = intersection.rootBounds.width / 2;
                 let y, position, content;
                 if (intersection.targetPosition === "out-below") {
-                    y = intersection.rootBounds.height - 80 - 28;
+                    y = intersection.rootBounds.height - 80 - TourPointer.size;
                     position = "top";
                     content = "Scroll down to reach the next step.";
                 } else if (intersection.targetPosition === "out-above") {
@@ -122,11 +156,11 @@ export function createPointerState({ x, y, isVisible, position, content, mode, f
         } else {
             setState({ isVisible: false });
         }
-    }
+    };
 
-    function setState(obj) {
-        Object.assign(state, obj);
-    }
+    /** @type {TourPointerState} */
+    const state = reactive({ x, y, isVisible, position, content, isOpen, fixed });
+    const intersection = new Intersection();
 
-    return [state, { update, setState }];
+    return [state, { setState, update }];
 }
