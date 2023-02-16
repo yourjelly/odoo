@@ -15,6 +15,7 @@ Odoo Web Editor widget.
         'data/editor_assets.xml',
         'views/editor.xml',
         'views/snippets.xml',
+        'views/field_html_history_views.xml',
     ],
     'assets': {
 
@@ -114,6 +115,8 @@ Odoo Web Editor widget.
             'web_editor/static/src/js/frontend/loader.js',
             'web_editor/static/src/js/backend/**/*',
             'web_editor/static/src/xml/backend.xml',
+
+            'web_editor/static/src/widgets/**/*',
         ],
         "web.dark_mode_assets_backend": [
             'web_editor/static/src/scss/odoo-editor/powerbox.dark.scss',

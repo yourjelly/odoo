@@ -1,0 +1,30 @@
+div.widget-one2manyhistorylist {
+    padding: 6px 6px 0;
+    width: 298px;
+
+    .avatar {
+        width: 36px;
+        height: 36px;
+        margin-right: 12px;
+        a {
+            display:none;
+        }
+    }
+    .widget-one2manyhistorylist-entry:hover .avatar {
+        img {
+            display: none;
+        }
+        a {
+            display: inline-block;
+            background-color: #f3f3f3;
+            border-radius: 20px;
+            line-height: 36px;
+            width: 36px;
+            height: 36px;
+            padding-left: 6px;
+            &:hover i {
+                transform: rotate(-20deg);
+            }
+        }
+    }
+}
