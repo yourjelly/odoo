@@ -57,7 +57,7 @@ $enable-negative-margins: true !default;
 $enable-cssgrid: true !default;
 
 // Spacing
-$spacer: 1rem !default;
+$spacer: $o-spacer !default;
 
 // Body
 //
