@@ -119,7 +119,7 @@ class StockQuant(models.Model):
         help="Next date the On Hand Quantity should be counted.")
     last_count_date = fields.Date(compute='_compute_last_count_date', help='Last time the Quantity was Updated')
     inventory_quantity_set = fields.Boolean(store=True, compute='_compute_inventory_quantity_set', readonly=False, default=False)
-    is_outdated = fields.Boolean('Quantity has been moved since last count', compute='_compute_is_outdated')
+    is_outdated = fields.Boolean('Quantity has been moved since last count', compute='_compute_is_outdated',store=True)
     user_id = fields.Many2one(
         'res.users', 'Assigned To', help="User assigned to do product count.")
 
@@ -496,6 +496,14 @@ class StockQuant(models.Model):
             quant.inventory_quantity = quant.quantity
         self.user_id = self.env.user.id
         self.inventory_quantity_set = True
+
+    def action_set_inventory_quantity_0(self):
+        for quant in self:
+            if quant.inventory_quantity == False:
+                quant.inventory_quantity = 0
+        self.user_id = self.env.user.id
+        self.inventory_quantity_set = True
+
 
     def action_reset(self):
         ctx = dict(self.env.context or {}, default_quant_ids=self.ids)

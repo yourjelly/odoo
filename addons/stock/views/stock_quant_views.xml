@@ -37,6 +37,7 @@
                     <filter name="to_apply" string="To Apply" domain="[('inventory_quantity_set', '=', True)]"/>
                     <filter name="priority_products" string="Starred Products" domain="[('priority', '=', 1)]"/>
                     <separator/>
+                    <filter name="conflicts" string="Conflicts" domain="[('is_outdated', '=', True)]"/>
                     <filter name="negative" string="Negative Stock" domain="[('quantity', '&lt;', 0.0)]"/>
                     <filter name="reserved" string="Reservations" domain="[('reserved_quantity', '&gt;', 0.0)]"/>
                     <separator/>
@@ -424,6 +425,19 @@
             action = records.action_set_inventory_quantity()
         </field>
     </record>
+
+    <record model="ir.actions.server" id="action_view_set_to_zero_quants_tree">
+        <field name="name">Set to 0</field>
+        <field name="model_id" ref="model_stock_quant"/>
+        <field name="binding_model_id" ref="stock.model_stock_quant"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="groups_id" eval="[(4, ref('stock.group_stock_user'))]"/>
+        <field name="code">
+            action = records.action_set_inventory_quantity_0()
+        </field>
+    </record>
+
 
     <menuitem id="menu_action_inventory_tree" name="Physical Inventory" parent="menu_stock_adjustments" sequence="10" action="action_view_inventory_tree"/>
     <menuitem id="menu_package" name="Packages" parent="menu_stock_inventory_control" action="action_package_view" groups="stock.group_tracking_lot" sequence="102"/>
