@@ -36,6 +36,7 @@ odoo.define("website_event_booth_exhibitor.tour", function (require) {
     }, {
         content: 'Wait for the first item to be properly selected before proceeding',
         trigger: 'label.d-block:has(input:checked) h5[name=booth_category_name]',
+        run() {},
     }, {
         content: 'Choose Premium Booths',
         trigger: 'img[alt="Premium Booth"]',

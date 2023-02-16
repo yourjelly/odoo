@@ -19,4 +19,4 @@ class TestWEventBoothExhibitorCommon(HttpCaseWithUserDemo, HttpCaseWithUserPorta
         })
         transfer_provider._transfer_ensure_pending_msg_is_set()
 
-        self.start_tour('/event?debug=assets', 'webooth_exhibitor_register', login='admin')
+        self.start_tour('/event', 'webooth_exhibitor_register', login='admin')
