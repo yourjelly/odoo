@@ -1,3 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_web_editor_converter_test,access_web_editor_converter_test,model_web_editor_converter_test,base.group_system,1,1,1,1
 access_web_editor_converter_test_sub,access_web_editor_converter_test_sub,model_web_editor_converter_test_sub,base.group_system,1,1,1,1
+access_web_editor_field_history_all,access.web.editor.field.history.all,model_field_html_history_revision,,0,0,0,0
+access_web_editor_field_history_system,access.web.editor.field.history.system,model_field_html_history_revision,base.group_system,1,0,1,0
+access_web_editor_field_history_user,access.web.editor.field.history.user,model_field_html_history_revision,base.group_user,1,0,0,0
