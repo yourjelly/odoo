@@ -250,7 +250,10 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
                     _logger.info("General failure when trying to fetch mail from %s server %s.", server.server_type, server.name, exc_info=True)
                 finally:
                     if pop_server:
-                        pop_server.quit()
+                        try:
+                            pop_server.quit()
+                        except Exception:
+                            _logger.info('Cannot Reach to the server %s.', server.name, exc_info=True)
             server.write({'date': fields.Datetime.now()})
         return True
 
