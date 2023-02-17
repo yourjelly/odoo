@@ -53,7 +53,7 @@ function compileChatter(node, params) {
         saveRecord: "() => __comp__.saveButtonClicked and __comp__.saveButtonClicked()",
     });
     const chatterContainerHookXml = createElement("div");
-    chatterContainerHookXml.classList.add("o_FormRenderer_chatterContainer");
+    chatterContainerHookXml.classList.add("o_FormRenderer_chatterContainer","bg-view");
     append(chatterContainerHookXml, chatterContainerXml);
     return chatterContainerHookXml;
 }
