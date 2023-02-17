@@ -55,8 +55,8 @@
             <field name="arch" type="xml">
                 <field name="uom_id" position="before">
                     <field name="show_on_hand_qty_status_button" invisible="1"/>
-                    <field name="qty_available" attrs="{'invisible':[('show_on_hand_qty_status_button', '=', False)]}" optional="show" decoration-danger="qty_available &lt; 0"/>
-                    <field name="virtual_available" attrs="{'invisible':[('show_on_hand_qty_status_button', '=', False)]}" optional="show" decoration-danger="virtual_available &lt; 0" decoration-bf="1"/>
+                    <field name="qty_available" attrs="{'invisible':[('show_on_hand_qty_status_button', '=', False)]}" string="On Hand" optional="show" decoration-danger="qty_available &lt; 0"/>
+                    <field name="virtual_available" attrs="{'invisible':[('show_on_hand_qty_status_button', '=', False)]}" string="Forecasted" optional="show" decoration-danger="virtual_available &lt; 0" decoration-bf="1"/>
                 </field>
                 <field name="default_code" position="after">
                     <field name="responsible_id" widget="many2one_avatar_user"/>

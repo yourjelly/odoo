@@ -170,6 +170,14 @@
                                     </div>
                                 </div>
                             </setting>
+                            <setting id="droppshipping_config" help="dropshipping for the inventory">
+                                <field name="module_stock_dropshipping"/>
+                                <!-- <div class="content-group">
+                                    <div class="mt8" attrs="{'invisible': [('group_stock_adv_location', '=', False)]}">
+                                        <button name="%(stock.action_warehouse_form)d" icon="fa-arrow-right" type="action" string="Set Warehouse Routes" class="btn-link"/>
+                                    </div> 
+                                </div>-->
+                            </setting>
                         </block>
                         <block title="Advanced Scheduling" id="schedule_info" invisible="1">
                             <div id="sale_security_lead"/>
