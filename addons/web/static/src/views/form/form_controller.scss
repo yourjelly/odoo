@@ -18,10 +18,6 @@
 @mixin o-form-sheet-negative-margin {
     margin-left: -$o-horizontal-padding;
     margin-right: -$o-horizontal-padding;
-    @include media-breakpoint-up(lg, $o-extra-grid-breakpoints) {
-        margin-left: -$o-horizontal-padding*2;
-        margin-right: -$o-horizontal-padding*2;
-    }
 }
 @mixin o-form-nosheet-negative-margin {
     margin-left: -$o-horizontal-padding;
@@ -66,8 +62,6 @@
 }
 
 .o_form_view {
-    background-color: $o-view-background-color;
-
     @include media-breakpoint-up(md) {
         display: flex;
         flex-flow: column nowrap;
@@ -256,28 +250,10 @@
 
     // Sheet
     .o_form_sheet_bg {
-        position: relative;
-        flex: 1 0 auto;
-        background-color: $o-webclient-background-color;
         border-bottom: 1px solid $border-color;
 
         > .o_form_sheet {
-            @include make-container();
-            @include make-container-max-widths();
-
             background-color: $o-view-background-color;
-            box-shadow: 0 5px 20px -15px rgba(#000, 0.4);
-            margin: $o-sheet-vpadding*0.2 auto;
-            @include media-breakpoint-up(md) {
-                margin: $o-sheet-vpadding*0.5 auto;
-            }
-            padding: $o-sheet-vpadding;
-            @include o-form-sheet-inner-right-padding;
-            @include o-form-sheet-inner-left-padding;
-
-            @include media-breakpoint-up(sm) {
-                border: 1px solid $border-color;
-            }
 
             // Selection
             > .o_selection {
@@ -514,11 +490,6 @@
 
         --notebook-margin-x: -#{$o-horizontal-padding};
         --notebook-padding-x: #{$o-horizontal-padding};
-
-        @include media-breakpoint-up(lg, $o-extra-grid-breakpoints) {
-            --notebook-margin-x: -#{$o-horizontal-padding * 2};
-            --notebook-padding-x: #{$o-horizontal-padding * 2};
-        }
 
         > .tab-content {
             border-bottom: 1px solid $border-color;
@@ -1123,20 +1094,10 @@
     }
 
     .o_form_sheet_bg {
-        flex: 1 1 auto; // Side chatter is disabled if this has to shrink but this was added for safety
-        padding: 0 $o-horizontal-padding;
         overflow: auto;
-        border-bottom: none;
-
-        > .o_form_statusbar, > .alert {
-            margin-left: -$o-horizontal-padding;
-            margin-right: -$o-horizontal-padding;
-        }
-
-        > .o_form_sheet {
-            width: 100%;
-            max-width: map-get($container-max-widths, xxl);
-        }
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto; // Side chatter is disabled if this has to shrink but this was added for safety
     }
 }
 
