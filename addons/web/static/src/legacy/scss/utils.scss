@@ -168,6 +168,41 @@
 }
 
 // ------------------------------------------------------------------
+// Scrollbar
+// ------------------------------------------------------------------
+// In some circumstances we want a scrollbar to do not displace the
+// content and/or to be styled in a subdle way.
+
+@mixin o-scrollbar($-thumb-color: $o-gray-400, $-track-color: $o-view-background-color, $-thin: false, $-overlay: true) {
+    scrollbar-color: $-thumb-color $-track-color;
+    scrollbar-width: if($-thin, thin, auto);
+
+    @if ($-overlay) {
+        overflow-y: scroll;
+        scrollbar-gutter: stable;
+        overflow-y: overlay;
+    }
+
+    &::-webkit-scrollbar {
+        width: if($-thin, 11px, auto);
+    }
+
+    &::-webkit-scrollbar-track {
+        background: $-track-color;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: $-thumb-color;
+
+        @if ($-thin) {
+            border-radius: 6px;
+            border: 3px solid $-track-color;
+        }
+    }
+}
+
+
+// ------------------------------------------------------------------
 // Mixin to define variations for btn-links and muted btn-links
 // ------------------------------------------------------------------
 @mixin o-btn-link-variant($color, $color-active) {
