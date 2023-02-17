@@ -1,7 +1,6 @@
 .o-form-buttonbox {
     --o-input-border-color: #{map-get($grays, '600')};
     margin-bottom: $o-sheet-vpadding;
-    margin-top: -$o-sheet-vpadding;
     @include o-form-sheet-negative-margin;
     // Use box-shadow instead of border-bottom because some button boxes are
     // empty in some cases and we do not want to see a floating border in
@@ -26,7 +25,7 @@
         border-left: none !important;
         box-shadow: -1px 0 0 $border-color;
     }
-    
+
     .btn.oe_stat_button {
         height: $o-statbutton-height;
 
