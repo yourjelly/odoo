@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+    <t t-name="hr_holidays.myAllocations.ListView.Buttons" t-inherit="web.ListView.Buttons" t-inherit-mode="primary" owl="1">
+        <!-- Replace string to Request instead of New -->
+        <xpath expr="//*[@class='btn btn-primary o_list_button_add']" position="replace">
+            <button type="button" class="btn btn-primary o_list_button_add" data-hotkey="c" t-on-click="onClickCreate" data-bounce-button="">
+                Request
+            </button>
+        </xpath>
+    </t>
+
+</templates>

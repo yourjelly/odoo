@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+
+    <t t-name="hr_holidays.employee.ListView.Buttons" t-inherit="web.ListView.Buttons" t-inherit-mode="primary" owl="1">
+        <!-- Replace string to `ADD EMPLOYEE TO PLAN` instead of New -->
+        <xpath expr="//*[@class='btn btn-primary o_list_button_add']" position="replace">
+            <button type="button" t-att-class="'o_list_button_add btn' + (this.props.context.is_accrual_plan ? ' btn-secondary ' : ' btn-primary')" data-hotkey="c" t-on-click="onClickCreate" data-bounce-button="">
+                add employee to plan
+            </button>
+        </xpath>
+    </t>
+</templates>

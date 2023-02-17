@@ -290,6 +290,9 @@
         <field name="mode">primary</field>
         <field name="priority">32</field>
         <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="js_class">my_allocations_list_view</attribute>
+            </xpath>
             <xpath expr="//field[@name='employee_id']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>

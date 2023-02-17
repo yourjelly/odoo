@@ -63,6 +63,7 @@ class AccrualPlan(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'kanban,tree,form',
             'res_model': 'hr.employee',
+            'context': {'is_accrual_plan': bool(self.allocation_ids)},
             'domain': [('id', 'in', self.allocation_ids.employee_id.ids)],
         }
 

@@ -116,6 +116,9 @@
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.hr_kanban_view_employees"/>
         <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="js_class">employee_kanban_view</attribute>
+            </xpath>
             <xpath expr="//templates" position="before">
                 <field name="current_leave_id"/>
                 <field name="current_leave_state"/>
@@ -228,6 +231,9 @@
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_tree"/>
         <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="js_class">employee_list_view</attribute>
+            </xpath>
             <xpath expr="//field[@name='work_location_id']" position="after">
                 <field name="leave_manager_id" optional="hide" string="Time Off Approver"/>
             </xpath>

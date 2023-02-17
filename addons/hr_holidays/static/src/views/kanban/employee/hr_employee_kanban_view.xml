@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+     <t t-name="hr_holidays.employee.KanbanView.Buttons" t-inherit="web.KanbanView.Buttons" t-inherit-mode="primary" owl="1">
+        <!-- Replace string to `ADD EMPLOYEE TO PLAN` instead of New -->
+        <xpath expr="//*[@class='btn btn-primary o-kanban-button-new']" position="replace">
+            <button type="button" t-att-class="'o-kanban-button-new btn' + (this.props.context.is_accrual_plan ? ' btn-secondary ' : ' btn-primary')" accesskey="c" t-on-click="() => this.createRecord(null)" data-bounce-button="">
+                add employee to plan
+            </button>
+        </xpath>
+    </t>
+</templates>
