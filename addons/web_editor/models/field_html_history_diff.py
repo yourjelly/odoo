@@ -2,11 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime
-from odoo import api, fields, models, _
-from odoo.tools.misc import _format_time_ago,clean_context
+from odoo import api, fields, models
+from odoo.tools.misc import _format_time_ago, clean_context
 from difflib import SequenceMatcher
 import json
-
 
 # ------------------------------------------------------------
 # History restoration methods
@@ -85,83 +84,22 @@ def _custom_diff(new_content_str, old_content_str):
             yield str(diff_string)
 
 
-class HtmlHistory(models.Model):
-    _name = "field.html.history"
-    _description = "Field html History"
-
-    history_diff_ids = fields.One2many(
-        "field.html.history.diff", "related_id", string="Body History",
-        copy=True)
-
-    def write(self, vals):
-        history_field_name = getattr(self, 'HTML_HISTORY_FIELD_NAME')
-        if history_field_name and history_field_name in vals:
-            new_body_str = vals[history_field_name]
-            """ Each change of body we need to create a diff for the history """
-            if self.id and isinstance(new_body_str, str):
-                old_body_str = getattr(self, history_field_name)
-                if isinstance(old_body_str, str) and new_body_str != old_body_str:
-                    diff = self.env['field.html.history.diff'].get_diff(new_body_str, old_body_str)
-                    self.env['field.html.history.diff'].create({"related_id": self.id,
-                                                                "related_model": self._name,
-                                                                "diff": diff})
-
-        return super().write(vals)
-
-    def unlink(self):
-        """ This override will delete all HtmlHistoryDiff related to this document """
-        self.env['field.html.history.diff'].search([('related_id', 'in', self.ids)]).unlink()
-        return super().unlink()
-
-    # ------------------------------------------------------------
-    # VIEW ACTIONS
-    # ------------------------------------------------------------
-
-    def action_related_history(self):
-        self.ensure_one()
-        return {
-            'name': _("Related History"),
-            'type': 'ir.actions.act_window',
-            'view_mode': 'tree,form',
-            'res_model': "field.html.history.diff",
-            'domain': [('id', 'in', self.history_diff_ids.ids)]
-        }
-    # ------------------------------------------------------------
-    # HISTORY Restoring
-    # ------------------------------------------------------------
-
-    def restore_history_to(self, diff_id):
-        """
-        Restore the current article to a previous version.
-        :param int diff_id: id of the version diff to restore to
-        """
-        self.ensure_one()
-        history_field_name = getattr(self, 'HTML_HISTORY_FIELD_NAME')
-
-        diff_to_restore = self.env['field.html.history.diff'].search(
-            [('related_id', '=', self.id),
-             ('related_model', '=', self._name),
-             ('id', '>=', diff_id)], order='id desc')
-        if len(diff_to_restore) > 0 and history_field_name:
-            restored_content = self.env['field.html.history.diff'].get_restored_version(
-                getattr(self, history_field_name), diff_to_restore)
-            self.write({history_field_name: restored_content})
-
-        return {
-            'name': _("Restored content"),
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': self._name,
-            'res_id': self.id
-        }
-
-
 class HtmlHistoryDiff(models.Model):
     _name = "field.html.history.diff"
     _description = "Field html History Diff"
 
-    related_model = fields.Char('Related Document Model Name', required=True, index=True)
-    related_id = fields.Many2oneReference('Related Document ID', index=True, model_field='related_model')
+    res_model_id = fields.Many2one(
+        'ir.model', 'Document Model',
+        index=True, ondelete='cascade', required=True)
+    res_model = fields.Char(
+        'Related Document Model',
+        index=True, related='res_model_id.model', compute_sudo=True, store=True, readonly=True)
+    res_id = fields.Many2oneReference(
+        string='Related Document ID',
+        index=True,
+        model_field='res_model',
+        required=True,
+        readonly=True)
 
     diff = fields.Text(string="Diff", readonly=True)
     diff_size = fields.Integer('Diff size', compute='_compute_diff_size')
@@ -186,6 +124,3 @@ class HtmlHistoryDiff(models.Model):
         for history in history_list:
             body = restore_one(body, json.loads(history.diff))
         return body
-
-    def action_restore_version(self):
-        return self.env[self.related_model].browse([self.related_id]).restore_history_to(self.id)
