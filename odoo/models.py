@@ -2296,6 +2296,8 @@ class BaseModel(metaclass=MetaModel):
 
         prefix_terms = lambda prefix, terms: (prefix + " " + ",".join(terms)) if terms else ''
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
+        if lazy and groupby_fields and self._fields[groupby_fields[0]].group_expand:
+            limit = None
 
         query = """
             SELECT min("%(table)s".id) AS id, count("%(table)s".id) AS "%(count_field)s" %(extra_fields)s
