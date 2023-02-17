@@ -41,6 +41,9 @@ class HolidaysAllocation(models.Model):
             return [('requires_allocation', '=', 'yes')]
         return [('employee_requests', '=', 'yes')]
 
+    def _default_is_accrual_plan(self):
+        return True if self.env['hr.leave.accrual.plan'].search([], limit=1) else False
+
     name = fields.Char('Description', compute='_compute_description', inverse='_inverse_description', search='_search_description', compute_sudo=False)
     name_validity = fields.Char('Description with validity', compute='_compute_description_validity')
     active = fields.Boolean(default=True)
@@ -133,6 +136,7 @@ class HolidaysAllocation(models.Model):
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
     is_officer = fields.Boolean(compute='_compute_is_officer')
     accrual_plan_id = fields.Many2one('hr.leave.accrual.plan', compute="_compute_from_holiday_status_id", store=True, readonly=False, domain="['|', ('time_off_type_id', '=', False), ('time_off_type_id', '=', holiday_status_id)]", tracking=True)
+    is_accrual_plan = fields.Boolean(default=_default_is_accrual_plan)
     max_leaves = fields.Float(compute='_compute_leaves')
     leaves_taken = fields.Float(compute='_compute_leaves', string='Time off Taken')
     taken_leave_ids = fields.One2many('hr.leave', 'holiday_allocation_id', domain="[('state', 'in', ['confirm', 'validate1', 'validate'])]")
