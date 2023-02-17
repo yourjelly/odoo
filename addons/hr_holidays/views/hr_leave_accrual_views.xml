@@ -25,7 +25,7 @@
                         </div>
                         <label for="frequency"/>
                         <div class="o_col">
-                            <field name="frequency"/>
+                            <field name="frequency" class="w-25"/>
                             <div class="o_row" attrs="{'invisible': [('frequency', '!=', 'weekly')]}">
                                 <label for="week_day" string="on"/><field name="week_day"/>
                             </div>
@@ -51,8 +51,8 @@
                                 <field name="added_value_type" nolabel="1" readonly="1" force_save="1"/>
                             </div>
                         </div>
-                        <field name="action_with_unused_accruals" style="width: 40%"/>
-                        <field name="postpone_max_days" attrs="{'invisible': [('action_with_unused_accruals', '!=', 'postponed')]}"/>
+                        <field name="action_with_unused_accruals" class="w-25"/>
+                        <field name="postpone_max_days" class="w-25" attrs="{'invisible': [('action_with_unused_accruals', '!=', 'postponed')]}"/>
                     </group>
                 </sheet>
             </form>
@@ -83,6 +83,7 @@
                             <field name="employees_count" widget="statinfo"/>
                         </button>
                     </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                     <group>
                         <group>
                             <field name="name"/>

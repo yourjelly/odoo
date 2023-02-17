@@ -529,6 +529,9 @@
             <xpath expr="//tree" position="attributes">
                 <attribute name="create">false</attribute>
             </xpath>
+            <xpath expr="//field[@name='all_employee_ids']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
             <xpath expr="//field[@name='employee_id']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
