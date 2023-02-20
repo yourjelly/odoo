@@ -59,11 +59,19 @@ def run_cmd(cmd, chdir=None, timeout=None):
     return subprocess.run(cmd, cwd=chdir, timeout=timeout)
 
 
-def _rpc_count_modules(addr='http://127.0.0.1', port=8069, dbname='mycompany'):
-    time.sleep(5)
-    uid = xmlrpclib.ServerProxy('%s:%s/xmlrpc/2/common' % (addr, port)).authenticate(
-        dbname, 'admin', 'admin', {}
-    )
+def _rpc_count_modules(addr='http://127.0.0.1', port=8069, dbname='mycompany', timeout=20):
+    connected = False
+    while timeout > 0:
+        try:
+            uid = xmlrpclib.ServerProxy('%s:%s/xmlrpc/2/common' % (addr, port)).authenticate(
+                dbname, 'admin', 'admin', {}
+            )
+            connected = True
+        except Exception:
+            time.spleep(1)
+            timeout -= 1
+    if not connected:
+        raise OdooTestError("Package test: FAILED. Cannot connect to Odoo server.")
     modules = xmlrpclib.ServerProxy('%s:%s/xmlrpc/2/object' % (addr, port)).execute(
         dbname, uid, 'admin', 'ir.module.module', 'search', [('state', '=', 'installed')]
     )
@@ -327,11 +335,10 @@ class DockerDeb(Docker):
         logging.info('Start testing debian package')
         cmds = [
             'service postgresql start',
-            'su postgres -s /bin/bash -c "createdb mycompany"',
             '/usr/bin/apt-get update -y',
             '/usr/bin/dpkg -i /data/src/odoo_%s.%s_all.deb ; /usr/bin/apt-get install -f -y' % (VERSION, TSTAMP),
-            'su odoo -s /bin/bash -c "odoo -d mycompany -i base --stop-after-init"',
-            'su odoo -s /bin/bash -c "odoo -d mycompany --pidfile=/data/src/odoo.pid"',
+            'service odoo start',
+            'su odoo -s /bin/bash -c "ln -s /var/run/odoo.pid /data/src/odoo.pid"',
         ]
         self.run(' && '.join(cmds), self.args.build_dir, 'odoo-deb-test-%s' % TSTAMP, user='root', detach=True, exposed_port=8069, timeout=300)
         self.test_odoo()
