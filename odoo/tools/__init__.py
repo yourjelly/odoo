@@ -9,6 +9,7 @@ from . import pycompat
 from . import win32
 from .barcode import *
 from .config import config
+from contextual_literal_eval import contextual_literal_eval
 from .date_utils import *
 from .debugger import *
 from .float_utils import *
