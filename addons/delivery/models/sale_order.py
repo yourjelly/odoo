@@ -7,13 +7,17 @@ from odoo.exceptions import UserError
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    carrier_id = fields.Many2one('delivery.carrier', string="Delivery Method", domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="Fill this field if you plan to invoice the shipping based on picking.")
+    carrier_id = fields.Many2one(
+        'delivery.carrier',
+        string="Delivery Method",
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        help="Fill this field if you plan to invoice the shipping based on picking."
+    )
     delivery_message = fields.Char(readonly=True, copy=False)
     delivery_rating_success = fields.Boolean(copy=False)
     delivery_set = fields.Boolean(compute='_compute_delivery_state')
     recompute_delivery_price = fields.Boolean('Delivery cost should be recomputed')
     is_all_service = fields.Boolean("Service Product", compute="_compute_is_service_products")
-    shipping_weight = fields.Float("Shipping Weight", compute="_compute_shipping_weight", store=True, readonly=False)
 
     @api.depends('order_line')
     def _compute_is_service_products(self):
@@ -69,10 +73,9 @@ class SaleOrder(models.Model):
             carrier = self.carrier_id
         else:
             name = _('Add a shipping method')
-            carrier = (
-                self.with_company(self.company_id).partner_shipping_id.property_delivery_carrier_id
-                or self.with_company(self.company_id).partner_shipping_id.commercial_partner_id.property_delivery_carrier_id
-            )
+            partner_shipping_id = self.with_company(self.company_id).partner_shipping_id
+            carrier = partner_shipping_id.property_delivery_carrier_id \
+                      or partner_shipping_id.commercial_partner_id.property_delivery_carrier_id
         return {
             'name': name,
             'type': 'ir.actions.act_window',
@@ -84,12 +87,10 @@ class SaleOrder(models.Model):
             'context': {
                 'default_order_id': self.id,
                 'default_carrier_id': carrier.id,
-                'default_total_weight': self._get_estimated_weight()
             }
         }
 
     def _create_delivery_line(self, carrier, price_unit):
-        SaleOrderLine = self.env['sale.order.line']
         context = {}
         if self.partner_id:
             # set delivery detail in the customer language
@@ -97,7 +98,9 @@ class SaleOrder(models.Model):
             carrier = carrier.with_context(lang=self.partner_id.lang)
 
         # Apply fiscal position
-        taxes = carrier.product_id.taxes_id.filtered(lambda t: t.company_id.id == self.company_id.id)
+        taxes = carrier.product_id.taxes_id.filtered(
+            lambda t: t.company_id.id == self.company_id.id
+        )
         taxes_ids = taxes.ids
         if self.partner_id and self.fiscal_position_id:
             taxes_ids = self.fiscal_position_id.map_tax(taxes).ids
@@ -112,22 +115,18 @@ class SaleOrder(models.Model):
         values = {
             'order_id': self.id,
             'name': so_description,
+            'price_unit': price_unit,
             'product_uom_qty': 1,
             'product_uom': carrier.product_id.uom_id.id,
             'product_id': carrier.product_id.id,
             'tax_id': [(6, 0, taxes_ids)],
             'is_delivery': True,
         }
-        if carrier.invoice_policy == 'real':
-            values['price_unit'] = 0
-            values['name'] += _(' (Estimated Cost: %s )', self._format_currency_amount(price_unit))
-        else:
-            values['price_unit'] = price_unit
-        if carrier.free_over and self.currency_id.is_zero(price_unit) :
+        if carrier.free_over and self.currency_id.is_zero(price_unit):
             values['name'] += '\n' + _('Free Shipping')
         if self.order_line:
             values['sequence'] = self.order_line[-1].sequence + 1
-        sol = SaleOrderLine.sudo().create(values)
+        sol = self.env['sale.order.line'].sudo().create(values)
         del context
         return sol
 
@@ -148,17 +147,3 @@ class SaleOrder(models.Model):
             order_lines = order.order_line.filtered(lambda x: not x.is_delivery and not x.is_downpayment and not x.display_type and x.invoice_status != 'invoiced')
             if all(line.product_id.invoice_policy == 'delivery' and line.invoice_status == 'no' for line in order_lines):
                 order.invoice_status = 'no'
-
-    @api.depends('order_line.product_uom_qty', 'order_line.product_uom')
-    def _compute_shipping_weight(self):
-        for order in self:
-            order.shipping_weight = order._get_estimated_weight()
-
-    def _get_estimated_weight(self):
-        self.ensure_one()
-        if self.delivery_set:
-            return self.shipping_weight
-        weight = 0.0
-        for order_line in self.order_line.filtered(lambda l: l.product_id.type in ['product', 'consu'] and not l.is_delivery and not l.display_type):
-            weight += order_line.product_qty * order_line.product_id.weight
-        return weight

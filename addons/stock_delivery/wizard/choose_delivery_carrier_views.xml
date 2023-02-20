@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="choose_delivery_carrier_view_form" model="ir.ui.view">
+        <field name="name">choose.delivery.carrier.form</field>
+        <field name="model">choose.delivery.carrier</field>
+        <field name="inherit_id" ref="deliverychoose_delivery_carrier_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='carrier_id']" position="after">
+                <label for="total_weight"/>
+                <div class="o_row">
+                    <field name="total_weight" />
+                    <field name="weight_uom_name" />
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
