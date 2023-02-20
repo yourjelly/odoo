@@ -856,8 +856,15 @@ class HrExpenseSheet(models.Model):
         'account.journal', string='Journal', states={'done': [('readonly', True)], 'post': [('readonly', True)]}, check_company=True, domain="[('type', '=', 'purchase'), ('company_id', '=', company_id)]",
         default=_default_journal_id, help="The journal used when the expense is paid by employee.")
     selectable_payment_method_line_ids = fields.Many2many('account.payment.method.line', compute='_compute_selectable_payment_method_line_ids')
-    payment_method_line_id = fields.Many2one('account.payment.method.line', string='Payment Method', states={'done': [('readonly', True)], 'post': [('readonly', True)]},
-        help="The payment method used when the expense is paid by the company.", domain="[('id', 'in', selectable_payment_method_line_ids)]", context={'show_payment_journal_id': True})
+    payment_method_line_id = fields.Many2one(
+        comodel_name='account.payment.method.line',
+        string="Payment Method",
+        domain="[('id', 'in', selectable_payment_method_line_ids)]",
+        compute='_compute_payment_method_line_id',
+        store=True,
+        readonly=False,
+        help="The payment method used when the expense is paid by the company.",
+    )
     accounting_date = fields.Date("Accounting Date")
     account_move_id = fields.Many2one('account.move', string='Journal Entry', ondelete='set null', copy=False, readonly=True)
     journal_id = fields.Many2one('account.journal', compute='_compute_journal_id', string="Expense Journal", store=True)
@@ -903,6 +910,11 @@ class HrExpenseSheet(models.Model):
         for sheet in self:
             sheet.selectable_payment_method_line_ids = sheet.company_id.company_expense_allowed_payment_method_line_ids\
                 or self.env['account.payment.method.line'].search([('payment_type', '=', 'outbound'), ('company_id', '=', sheet.company_id.id)])
+
+    @api.depends('selectable_payment_method_line_ids')
+    def _compute_payment_method_line_id(self):
+        for sheet in self:
+            sheet.payment_method_line_id = sheet.selectable_payment_method_line_ids._origin[:1]
 
     @api.depends('account_move_id', 'payment_state', 'approval_state')
     def _compute_state(self):
@@ -1016,6 +1028,10 @@ class HrExpenseSheet(models.Model):
     def read(self, fields=None, load='_classic_read'):
         # setting the context in the field on the view is not enough
         return super(HrExpenseSheet, self.with_context(show_payment_journal_id=True)).read(fields=fields, load=load)
+
+    def onchange(self, values, field_name, field_onchange):
+        self_ctx = self.with_context(show_payment_journal_id=True)
+        return super(HrExpenseSheet, self_ctx).onchange(values, field_name, field_onchange)
 
     @api.model_create_multi
     def create(self, vals_list):

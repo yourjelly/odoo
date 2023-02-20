@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, _
+from odoo.exceptions import UserError
 
 
 class AccountPayment(models.Model):
@@ -26,6 +27,14 @@ class AccountPayment(models.Model):
             # and update those entries later on.
             return
         return super()._synchronize_from_moves(changed_fields)
+
+    def _synchronize_to_moves(self, changed_fields):
+        if self.expense_sheet_id:
+            # Constraints bypass when entry is linked to an expense.
+            # Context is not enough, as we want to be able to delete
+            # and update those entries later on.
+            raise UserError(_("You cannot do this modification since the payment is linked to an expense report."))
+        return super()._synchronize_to_moves(changed_fields)
 
     def _creation_message(self):
         self.ensure_one()
