@@ -194,7 +194,7 @@ class ProductTemplate(models.Model):
                 'price_reduce': price_reduce
             }
             base_price = None
-            price_list_contains_template = price_reduce != base_sales_prices[template.id]
+            price_list_contains_template = price_reduce != taxes.compute_all(base_sales_prices[template.id], pricelist.currency_id, 1, template, partner_sudo)[tax_display]
 
             if template.compare_list_price:
                 # The base_price becomes the compare list price and the price_reduce becomes the price
