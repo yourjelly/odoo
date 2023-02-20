@@ -364,3 +364,22 @@ class One2manyCase(TransactionCase):
         self.assertEqual(len(parent.child_ids), 3)
         self.assertEqual(parent, parent.child_ids.parent_id)
         self.assertEqual(parent.child_ids.mapped('name'), ['C3', 'PO', 'R2D2'])
+
+    def test_nb_queries_o2m(self):
+        """ Test the number of queries to assign co-field when creating records having a one2many field. """
+        nb_queries0 = self.cr.sql_log_count
+        messages = self.env['test_new_api.message'].create([{'author': self.env.user.id}] * 1000)
+        # 10 create + 1 access rights
+        self.assertEqual(self.cr.sql_log_count - nb_queries0, 11)
+
+        nb_queries0 = self.cr.sql_log_count
+        self.env['test_new_api.discussion'].create([
+            {
+                'name': str(i),
+                'participants': [Command.set(self.env.user.ids)],
+                'messages': [Command.set(message.ids)],
+            }
+            for i, message in enumerate(messages)
+        ])
+        # 10 create + 1 access rights + 4*1000 not batched queries.
+        self.assertEqual(self.cr.sql_log_count - nb_queries0, 4011)
