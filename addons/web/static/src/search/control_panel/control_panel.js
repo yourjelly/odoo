@@ -12,6 +12,7 @@ import { SearchBar } from "../search_bar/search_bar";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useCommand } from "@web/core/commands/command_hook";
 import { sprintf } from "@web/core/utils/strings";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 import { Component, useState, onMounted, useExternalListener, useRef, useEffect } from "@odoo/owl";
 
@@ -101,19 +102,7 @@ export class ControlPanel extends Component {
      * @returns {Object}
      */
     get display() {
-        const display = Object.assign(
-            {
-                "top-left": true,
-                "top-right": true,
-                "bottom-left": true,
-                "bottom-left-buttons": true,
-                "bottom-right": true,
-            },
-            this.props.display
-        );
-        display.top = display["top-left"] || display["top-right"];
-        display.bottom = display["bottom-left"] || display["bottom-right"];
-        return display;
+        return this.props.display;
     }
 
     /**
@@ -220,6 +209,7 @@ ControlPanel.components = {
     Pager,
     SearchBar,
     Dropdown,
+    DropdownItem,
 };
 ControlPanel.template = "web.ControlPanel";
 ControlPanel.props = {
