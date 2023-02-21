@@ -151,6 +151,7 @@
         <record id="view_partner_form" model="ir.ui.view">
             <field name="name">res.partner.form</field>
             <field name="model">res.partner</field>
+            <!-- <field name="inherit_id" ref="web.Many2XAutocomplete"/> -->
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
                 <form string="Partners">
@@ -337,6 +338,17 @@
                                         <field name="lang" invisible="True"/>
                                         <field name="user_id" invisible="True"/>
                                     </sheet>
+                                    <!-- <xpath expr="//t[@t-set-slot='footer']/button[@classname='btn btn-secondary o_btn_remove']" position="attribute">
+                                        <attribute name="icon" value="fa-trash"></attribute>
+                                    </xpath> -->
+                                     
+                                    <!-- <xpath expr="//button[@classname='btn btn-secondary o_btn_remove']" position="before">
+                                        <i class="fa fa-trash" />
+                                    </xpath> --> 
+
+                                    <!-- <xpath expr="////t[@t-set-slot='footer']/button[@classname='btn btn-secondary o_btn_remove']" position="before">
+                                        <i class="fa fa-trash" />
+                                    </xpath> -->
                                 </form>
                             </field>
                         </page>
