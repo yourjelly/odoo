@@ -3,16 +3,40 @@
 
     <t t-name="web.ControlPanel" owl="1">
         <div class="o_control_panel" t-ref="root">
-            <t t-if="env.isSmall">
-                <t t-call="web.ControlPanel.Small" />
-            </t>
-            <t t-else="">
-                <t t-call="web.ControlPanel.Regular" />
-            </t>
+            <div class="o_control_panel_main grid px-2">
+                <div class="g-col-12 g-col-md-4 gap-2 d-flex align-items-center">
+                    <div class="o_control_panel_create_button">
+                        <t t-slot="control-panel-create-button"/>
+                    </div>
+                    <t t-if="!env.config.noBreadcrumbs" t-call="web.Breadcrumbs"/>
+                </div>
+
+                <div class="g-col-12 g-col-md-4 d-flex align-items-center">
+                    <t t-slot="layout-actions"/>
+                </div>
+
+                <div class="g-col-12 g-col-md-4 d-flex justify-content-end align-items-center">
+                    <div t-if="pagerProps and pagerProps.total > 0" class="o_cp_pager" role="search">
+                        <Pager t-props="pagerProps"/>
+                    </div>
+                    <nav t-if="env.config.viewSwitcherEntries?.length > 1" class="btn-group o_cp_switch_buttons">
+                        <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
+                            <button class="btn btn-light o_switch_view "
+                                t-attf-class="o_{{view.type}} {{view.icon}} {{view.active ? 'active' : ''}}"
+                                t-att-data-tooltip="view.name"
+                                t-on-click="() => this.onViewClicked(view.type)"
+                                />
+                        </t>
+                    </nav>
+                </div>
+            </div>
+            <div class="d-flex px-2">
+                <t t-slot="layout-buttons"/>
+            </div>
         </div>
     </t>
 
-    <t t-name="web.ControlPanel.Regular" owl="1">
+    <!-- <t t-name="web.ControlPanel.Regular" owl="1">
         <div t-if="display['top']" class="o_cp_top">
             <div class="o_cp_top_left">
                 <t t-slot="control-panel-top-left" t-if="display['top-left']">
@@ -56,9 +80,9 @@
                 </t>
             </div>
         </div>
-    </t>
+    </t> -->
 
-    <t t-name="web.ControlPanel.Small" owl="1">
+    <!-- <t t-name="web.ControlPanel.Small" owl="1">
         <t t-if="state.showMobileSearch">
             <t t-portal="'body'">
                 <div class="o_searchview o_mobile_search">
@@ -168,28 +192,48 @@
                 </div>
             </div>
         </t>
-    </t>
+    </t> -->
 
     <t t-name="web.Breadcrumbs" owl="1">
-        <ol class="breadcrumb">
-            <t t-foreach="breadcrumbs" t-as="breadcrumb" t-key="breadcrumb.jsId">
-                <t t-set="isPenultimate" t-value="breadcrumb_index === breadcrumbs.length - 2"/>
-                <li t-if="!breadcrumb_last" class="breadcrumb-item" t-att-data-hotkey="isPenultimate and 'b'" t-att-class="{ o_back_button: isPenultimate}" t-on-click.prevent="() => this.onBreadcrumbClicked(breadcrumb.jsId)">
-                    <a href="#">
-                        <t t-if="breadcrumb.name" t-esc="breadcrumb.name"/>
-                        <em t-else="" class="text-warning">Unnamed</em>
-                    </a>
+        <div class="d-flex flex-column">
+            <t t-set="currentBreadcrumbs" t-value="breadcrumbs.slice(-1)"/>
+            <t t-set="visiblePathBreadcrumbs" t-value="breadcrumbs.slice(-3, -1)"/>
+            <t t-set="collapsedBreadcrumbs" t-value="breadcrumbs.slice(0, -3)"/>
+            <ol class="breadcrumb fs-6">
+                <li t-if="collapsedBreadcrumbs.length" class="breadcrumb-item">
+                    <Dropdown togglerClass="'btn btn-light btn-sm p-0'">
+                        <t t-set-slot="toggler">
+                            <i class="fa fa-ellipsis-h"/>
+                        </t>
+                        <t t-foreach="collapsedBreadcrumbs" t-as="breadcrumb" t-key="breadcrumb.jsId">
+                            <DropdownItem onSelected="() => this.onBreadcrumbClicked(breadcrumb.jsId)">
+                                <t t-call="web.Breadcrumb.Name"/>
+                            </DropdownItem>
+                        </t> 
+                    </Dropdown>
                 </li>
-                <li t-else="" class="breadcrumb-item active d-flex align-items-center">
-                    <span class="text-truncate" t-if="breadcrumb.name" t-esc="breadcrumb.name"/>
-                    <em t-else="" class="text-warning">Unnamed</em>
-                    <t t-slot="control-panel-status-indicator" />
-                </li>
-            </t>
-        </ol>
+                <t t-foreach="visiblePathBreadcrumbs" t-as="breadcrumb" t-key="breadcrumb.jsId">
+                    <t t-set="isPenultimate" t-value="breadcrumb_index === breadcrumbs.length - 2"/>
+                    <li class="breadcrumb-item" t-att-data-hotkey="isPenultimate and 'b'" t-on-click.prevent="() => this.onBreadcrumbClicked(breadcrumb.jsId)">
+                        <a href="#"><t t-call="web.Breadcrumb.Name"/></a>
+                    </li>
+                </t>
+            </ol>
+            <div class="active d-flex gap-2 align-items-center text-truncate fs-4">
+                <t t-set="breadcrumb" t-value="currentBreadcrumbs[0] || {}"/>
+                <t t-call="web.Breadcrumb.Name"/>
+                <t t-slot="control-panel-additional-actions"/>
+                <t t-slot="control-panel-status-indicator" />
+            </div>
+        </div>
     </t>
 
-    <t t-name="web.Breadcrumbs.Small" owl="1">
+    <t t-name="web.Breadcrumb.Name" owl="1">
+        <t t-if="breadcrumb.name" t-out="breadcrumb.name"/>
+        <em t-else="" class="text-warning">Unnamed</em>
+    </t>
+
+    <!-- <t t-name="web.Breadcrumbs.Small" owl="1">
         <ol class="breadcrumb">
             <t t-if="breadcrumbs.length > 1">
                 <t t-set="breadcrumb" t-value="breadcrumbs[breadcrumbs.length - 2]" />
@@ -203,6 +247,6 @@
                 <em t-else="" class="text-warning">Unnamed</em>
             </li>
         </ol>
-    </t>
+    </t> -->
 
 </templates>
