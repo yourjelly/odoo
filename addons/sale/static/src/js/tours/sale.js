@@ -4,7 +4,7 @@ odoo.define('sale.tour', function(require) {
 const {_t} = require('web.core');
 const {Markup} = require('web.utils');
 const { registry } = require("@web/core/registry");
-const { stepUtils } = require('@web_tour/js/tour_step_utils');
+const { stepUtils } = require('@web_tour/tour_service/tour_utils');
 
 const { markup } = owl;
 

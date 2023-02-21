@@ -3,7 +3,7 @@ odoo.define('sale_timesheet.tour', function (require) {
 
 const {Markup} = require('web.utils');
 const { registry } = require("@web/core/registry");
-const { stepUtils } = require('@web_tour/js/tour_step_utils');
+const { stepUtils } = require('@web_tour/tour_service/tour_utils');
 
 registry.category("web_tour.tours").add('sale_timesheet_tour', {
     test: true,
