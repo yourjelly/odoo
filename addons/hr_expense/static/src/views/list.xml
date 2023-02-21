@@ -3,7 +3,7 @@
     <t t-name="hr_expense.ListButtons" t-inherit="web.ListView.Buttons" t-inherit-mode="primary" owl="1">
 
        <!-- hr.expense and hr.expense.sheet -->
-        <xpath expr="//button[hasclass('o_list_button_add')]" position="after">
+        <xpath expr="//div[hasclass('o_list_buttons')]" position="inside">
             <button type="button" class="d-none d-md-inline o_button_upload_expense btn btn-primary mx-1" t-on-click.prevent="uploadDocument">
                 Scan
             </button>
