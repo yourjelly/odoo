@@ -24,7 +24,7 @@
                 <field name="categ_id" optional="hide"/>
                 <field name="detailed_type" optional="hide" readonly="1"/>
                 <field name="type" invisible="1"/>
-                <field name="uom_id" readonly="1" optional="show" groups="uom.group_uom"/>
+                <field name="uom_id" readonly="1" optional="hide" groups="uom.group_uom"/>
                 <field name="active" invisible="1"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
             </tree>

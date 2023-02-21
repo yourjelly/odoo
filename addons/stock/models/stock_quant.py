@@ -497,14 +497,6 @@ class StockQuant(models.Model):
         self.user_id = self.env.user.id
         self.inventory_quantity_set = True
 
-    def action_set_inventory_quantity_0(self):
-        for quant in self:
-            if quant.inventory_quantity == False:
-                quant.inventory_quantity = 0
-        self.user_id = self.env.user.id
-        self.inventory_quantity_set = True
-
-
     def action_reset(self):
         ctx = dict(self.env.context or {}, default_quant_ids=self.ids)
         view = self.env.ref('stock.inventory_warning_reset_view', False)

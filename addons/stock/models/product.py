@@ -653,10 +653,10 @@ class ProductTemplate(models.Model):
     description_pickingout = fields.Text('Description on Delivery Orders', translate=True)
     description_pickingin = fields.Text('Description on Receptions', translate=True)
     qty_available = fields.Float(
-        'Quantity On Hand', compute='_compute_quantities', search='_search_qty_available',
+        'On Hand', compute='_compute_quantities', search='_search_qty_available',
         compute_sudo=False, digits='Product Unit of Measure')
     virtual_available = fields.Float(
-        'Forecasted Quantity', compute='_compute_quantities', search='_search_virtual_available',
+        'Forecasted', compute='_compute_quantities', search='_search_virtual_available',
         compute_sudo=False, digits='Product Unit of Measure')
     incoming_qty = fields.Float(
         'Incoming', compute='_compute_quantities', search='_search_incoming_qty',

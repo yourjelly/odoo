@@ -89,7 +89,7 @@ class ProductTemplate(models.Model):
     sale_ok = fields.Boolean('Can be Sold', default=True)
     purchase_ok = fields.Boolean('Can be Purchased', default=True)
     uom_id = fields.Many2one(
-        'uom.uom', 'Unit of Measure',
+        'uom.uom', 'Unit',
         default=_get_default_uom_id, required=True,
         help="Default unit of measure used for all stock operations.")
     uom_name = fields.Char(string='Unit of Measure Name', related='uom_id.name', readonly=True)
@@ -139,7 +139,7 @@ class ProductTemplate(models.Model):
         ('1', 'Favorite'),
     ], default='0', string="Favorite")
 
-    product_tag_ids = fields.Many2many('product.tag', 'product_tag_product_template_rel', string='Product Tags')
+    product_tag_ids = fields.Many2many('product.tag', 'product_tag_product_template_rel', string='Tags')
 
     def _compute_item_count(self):
         for template in self:
