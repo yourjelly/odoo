@@ -19,6 +19,9 @@ import { ViewButton } from "@web/views/view_button/view_button";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { ExportDataDialog } from "@web/views/view_dialogs/export_data_dialog";
 import { useSetupView } from "@web/views/view_hook";
+import { SearchBar } from "@web/search/search_bar/search_bar";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 import { Component, onMounted, onWillStart, useEffect, useRef, useSubEnv } from "@odoo/owl";
 
@@ -354,15 +357,12 @@ export class ListController extends Component {
     }
 
     get display() {
-        if (!this.env.isSmall) {
-            return this.props.display;
-        }
         const { controlPanel } = this.props.display;
         return {
             ...this.props.display,
             controlPanel: {
                 ...controlPanel,
-                "bottom-right": !this.nbSelected,
+                layoutActions: !this.nbSelected,
             },
         };
     }
@@ -513,7 +513,7 @@ export class ListController extends Component {
 }
 
 ListController.template = `web.ListView`;
-ListController.components = { ActionMenus, Layout, ViewButton, MultiRecordViewButton };
+ListController.components = { ActionMenus, Layout, ViewButton, MultiRecordViewButton, SearchBar, Dropdown, DropdownItem };
 ListController.props = {
     ...standardViewProps,
     allowSelectors: { type: Boolean, optional: true },
