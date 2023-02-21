@@ -23,7 +23,7 @@ export class Persona {
     country;
     /** @type {string} */
     email;
-    /** @type {Array | undefined} */
+    /** @type {Array | Object | undefined} */
     user;
     /** @type {ImStatus} */
     im_status;
