@@ -21,23 +21,20 @@ class SaleOrder(models.Model):
     timesheet_total_duration = fields.Integer("Timesheet Total Duration", compute='_compute_timesheet_total_duration', help="Total recorded duration, expressed in the encoding UoM, and rounded to the unit")
 
     def _compute_timesheet_ids(self):
-        timesheet_groups = self.env['account.analytic.line'].sudo().read_group(
+        timesheet_groups = self.env['account.analytic.line'].sudo()._read_group(
             [('so_line', 'in', self.mapped('order_line').ids), ('project_id', '!=', False)],
-            ['so_line', 'ids:array_agg(id)'],
-            ['so_line'])
-        timesheets_per_sol = {group['so_line'][0]: (group['ids'], group['so_line_count']) for group in timesheet_groups}
+            ['so_line'],
+            ['id:array_agg'])
+        timesheets_per_sol = {so_line.id: ids for so_line, ids in timesheet_groups}
 
         for order in self:
             timesheet_ids = []
-            timesheet_count = 0
             for sale_line_id in order.order_line.filtered('is_service').ids:
-                list_timesheet_ids, count = timesheets_per_sol.get(sale_line_id, ([], 0))
-                timesheet_ids.extend(list_timesheet_ids)
-                timesheet_count += count
+                timesheet_ids.extend(timesheets_per_sol.get(sale_line_id, []))
 
             order.update({
                 'timesheet_ids': self.env['account.analytic.line'].browse(timesheet_ids),
-                'timesheet_count': timesheet_count,
+                'timesheet_count': len(timesheet_ids),
             })
 
     @api.depends('company_id.project_time_mode_id', 'timesheet_ids', 'company_id.timesheet_encode_uom_id')
@@ -47,9 +44,9 @@ class SaleOrder(models.Model):
             return
         group_data = self.env['account.analytic.line'].sudo()._read_group([
             ('order_id', 'in', self.ids)
-        ], ['order_id', 'unit_amount'], ['order_id'])
+        ], ['order_id'], ['unit_amount:sum'])
         timesheet_unit_amount_dict = defaultdict(float)
-        timesheet_unit_amount_dict.update({data['order_id'][0]: data['unit_amount'] for data in group_data})
+        timesheet_unit_amount_dict.update({order.id: unit_amount for order, unit_amount in group_data})
         for sale_order in self:
             total_time = sale_order.company_id.project_time_mode_id._compute_quantity(timesheet_unit_amount_dict[sale_order.id], sale_order.timesheet_encode_uom_id)
             sale_order.timesheet_total_duration = round(total_time)
@@ -319,8 +316,8 @@ class SaleOrderLine(models.Model):
         timesheet_action = self.env.ref('sale_timesheet.timesheet_action_from_sales_order_item').id
         timesheet_ids_per_sol = {}
         if self.user_has_groups('hr_timesheet.group_hr_timesheet_user'):
-            timesheet_read_group = self.env['account.analytic.line']._read_group([('so_line', 'in', self.ids), ('project_id', '!=', False)], ['so_line', 'ids:array_agg(id)'], ['so_line'])
-            timesheet_ids_per_sol = {res['so_line'][0]: res['ids'] for res in timesheet_read_group}
+            timesheet_read_group = self.env['account.analytic.line']._read_group([('so_line', 'in', self.ids), ('project_id', '!=', False)], ['so_line'], ['id:array_agg'])
+            timesheet_ids_per_sol = {so_line.id: ids for so_line, ids in timesheet_read_group}
         for sol in self:
             timesheet_ids = timesheet_ids_per_sol.get(sol.id, [])
             if sol.is_service and len(timesheet_ids) > 0:

@@ -72,7 +72,8 @@ regex_alphanumeric = re.compile(r'^[a-z0-9_]+$')
 regex_order = re.compile(r'^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\.[a-z0-9]+)?(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
 regex_pg_name = re.compile(r'^[a-z_][a-z0-9_$]*$', re.I)
-regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')
+regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')  # For read_group
+regex_aggregate_spec = re.compile(r'(\w+)(?::(\w+))?$')  # For _read_group
 
 regex_aggregate_spec = re.compile(r'(\w+)(?::(\w+))?$')
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
@@ -80,10 +81,14 @@ AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
 INSERT_BATCH_SIZE = 100
 SQL_DEFAULT = psycopg2.extensions.AsIs("DEFAULT")
 
-def split_read_group_spec(spec: str) -> 'tuple[str]':
+def split_read_group_spec(spec: str) -> tuple:
     res_match = regex_aggregate_spec.match(spec)
     if not res_match:
-        raise ValueError(f'Invalid aggregate/groupby specification {spec!r}. Valid specification example: "field:agg"')
+        raise ValueError(
+            f'Invalid aggregate/groupby specification {spec!r}.\n'
+            '- Valid aggregate specification looks like "<field_name>:<agg>" example: "quantity:sum".\n'
+            '- Valid groupby specification looks like "<no_datish_field_name>" or "<datish_field_name>:<granularity>" example: "date:month".'
+        )
     return res_match.groups()
 
 def check_object_name(name):
@@ -301,7 +306,7 @@ MAGIC_COLUMNS = ['id'] + LOG_ACCESS_COLUMNS
 
 # valid SQL aggregation functions
 VALID_AGGREGATE_FUNCTIONS = {
-    'array_agg', 'count', 'count_distinct',
+    'array_agg', 'array_agg_distinct', 'count', 'count_distinct',
     'bool_and', 'bool_or', 'max', 'min', 'avg', 'sum',
 }
 
@@ -1773,11 +1778,8 @@ class BaseModel(metaclass=MetaModel):
     @api.model
     def _read_group_groupby(self, query, groupby_spec):
         """ return (<SQL expression>, [<fields name used in SQL expression>])"""
-        res_match = regex_aggregate_spec.match(groupby_spec)
-        if not res_match:
-            raise ValueError(f"Invalid groupby specification {groupby_spec!r}.")
+        fname, granularity = split_read_group_spec(groupby_spec)
 
-        fname, granularity = res_match.groups()
         if fname not in self:
             raise ValueError(f"Invalid field {fname!r} on model {self._name!r}")
 

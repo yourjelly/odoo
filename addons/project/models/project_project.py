@@ -51,18 +51,16 @@ class Project(models.Model):
 
     def _compute_task_count(self):
         domain = [('project_id', 'in', self.ids), ('is_closed', '=', False)]
-        fields = ['project_id', 'display_project_id:count']
-        groupby = ['project_id']
-        task_data = self.env['project.task']._read_group(domain, fields, groupby)
+        task_data = self.env['project.task']._read_group(domain, ['project_id'], ['__count', 'display_project_id:count'])
         result_wo_subtask = defaultdict(int)
         result_with_subtasks = defaultdict(int)
-        for data in task_data:
-            result_wo_subtask[data['project_id'][0]] += data['display_project_id']
-            result_with_subtasks[data['project_id'][0]] += data['project_id_count']
-        task_all_data = self.env['project.task'].with_context(active_test=False)._read_group(domain, fields, groupby)
+        for project, count, display_count in task_data:
+            result_wo_subtask[project.id] += display_count
+            result_with_subtasks[project.id] += count
+        task_all_data = self.env['project.task'].with_context(active_test=False)._read_group(domain, ['project_id'], ['display_project_id:count'])
         all_tasks_wo_subtasks = defaultdict(int)
-        for data in task_all_data:
-            all_tasks_wo_subtasks[data['project_id'][0]] += data['display_project_id']
+        for project, display_count in task_all_data:
+            all_tasks_wo_subtasks[project.id] += display_count
 
         for project in self:
             project.task_count = result_wo_subtask[project.id]
@@ -264,8 +262,8 @@ class Project(models.Model):
 
     @api.depends('milestone_ids')
     def _compute_milestone_count(self):
-        read_group = self.env['project.milestone']._read_group([('project_id', 'in', self.ids)], ['project_id'], ['project_id'])
-        mapped_count = {group['project_id'][0]: group['project_id_count'] for group in read_group}
+        read_group = self.env['project.milestone']._read_group([('project_id', 'in', self.ids)], ['project_id'], ['__count'])
+        mapped_count = {project.id: count for project, count in read_group}
         for project in self:
             project.milestone_count = mapped_count.get(project.id, 0)
 
@@ -274,9 +272,9 @@ class Project(models.Model):
         read_group = self.env['project.milestone']._read_group(
             [('project_id', 'in', self.ids), ('is_reached', '=', True)],
             ['project_id'],
-            ['project_id'],
+            ['__count'],
         )
-        mapped_count = {group['project_id'][0]: group['project_id_count'] for group in read_group}
+        mapped_count = {project.id: count for project, count in read_group}
         for project in self:
             project.milestone_count_reached = mapped_count.get(project.id, 0)
 
@@ -286,8 +284,8 @@ class Project(models.Model):
         read_group = self.env['project.milestone']._read_group([
             ('project_id', 'in', self.filtered('allow_milestones').ids),
             ('is_reached', '=', False),
-            ('deadline', '<=', today)], ['project_id'], ['project_id'])
-        mapped_count = {group['project_id'][0]: group['project_id_count'] for group in read_group}
+            ('deadline', '<=', today)], ['project_id'], ['__count'])
+        mapped_count = {project.id: count for project, count in read_group}
         for project in self:
             project.is_milestone_exceeded = bool(mapped_count.get(project.id, 0))
 
@@ -326,9 +324,9 @@ class Project(models.Model):
         collaborator_read_group = self.env['project.collaborator']._read_group(
             [('project_id', 'in', project_sharings.ids)],
             ['project_id'],
-            ['project_id'],
+            ['__count'],
         )
-        collaborator_count_by_project = {res['project_id'][0]: res['project_id_count'] for res in collaborator_read_group}
+        collaborator_count_by_project = {project.id: count for project, count in collaborator_read_group}
         for project in self:
             project.collaborator_count = collaborator_count_by_project.get(project.id, 0)
 
@@ -448,12 +446,10 @@ class Project(models.Model):
             projects_read_group = self.env['project.project']._read_group(
                 [('analytic_account_id', 'in', self.analytic_account_id.ids)],
                 ['analytic_account_id'],
-                ['analytic_account_id']
+                having=[('__count', '=', 1)],
             )
             analytic_account_to_update = self.env['account.analytic.account'].browse([
-                res['analytic_account_id'][0]
-                for res in projects_read_group
-                if res['analytic_account_id'] and res['analytic_account_id_count'] == 1
+                analytic_account.id for [analytic_account] in projects_read_group
             ])
             analytic_account_to_update.write({'name': self.name})
         return res
