@@ -41,6 +41,9 @@ class HolidaysAllocation(models.Model):
             return [('requires_allocation', '=', 'yes')]
         return [('employee_requests', '=', 'yes')]
 
+    def _default_is_accrual_plan(self):
+        return True if self.env['hr.leave.accrual.plan'].sudo().search([], limit=1) else False
+
     name = fields.Char('Description', compute='_compute_description', inverse='_inverse_description', search='_search_description', compute_sudo=False)
     name_validity = fields.Char('Description with validity', compute='_compute_description_validity')
     active = fields.Boolean(default=True)
@@ -136,7 +139,9 @@ class HolidaysAllocation(models.Model):
     max_leaves = fields.Float(compute='_compute_leaves')
     leaves_taken = fields.Float(compute='_compute_leaves', string='Time off Taken')
     taken_leave_ids = fields.One2many('hr.leave', 'holiday_allocation_id', domain="[('state', 'in', ['confirm', 'validate1', 'validate'])]")
-
+    is_allocation_type_accrual = fields.Boolean(string='Link to an Accrual plan', help='Accrual plans permit eligible employees to accrue time'
+        'on a defined  period of time, to use for vacation, sick leave or other reasons')
+    is_accrual_plan = fields.Boolean(default=_default_is_accrual_plan, store=False)
     _sql_constraints = [
         ('type_value',
          "CHECK( (holiday_type='employee' AND (employee_id IS NOT NULL OR multi_employee IS TRUE)) or "
@@ -176,7 +181,11 @@ class HolidaysAllocation(models.Model):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         for allocation in self:
             if is_officer or allocation.employee_id.user_id == self.env.user or allocation.employee_id.leave_manager_id == self.env.user:
-                allocation.sudo().private_name = allocation.name
+                if allocation.env.context.get('form_view_ref'):
+                    title = "[ %s ] Allocation Request ( [%s] %s)" % (allocation.holiday_status_id.name, allocation.number_of_days_display if allocation.type_request_unit != 'hour' else allocation.number_of_hours_display, allocation.type_request_unit)
+                    allocation.sudo().private_name = title
+                else:
+                    allocation.sudo().private_name = allocation.name
 
     def _search_description(self, operator, value):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')

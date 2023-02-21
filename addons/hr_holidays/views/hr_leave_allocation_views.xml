@@ -98,7 +98,7 @@
                         <group>
                             <field name="type_request_unit" invisible="1"/>
                             <field name="holiday_status_id" context="{'employee_id':employee_id, 'default_date_from':current_date, 'request_type':'allocation'}" options="{'always_reload': True}"/>
-                            <field name="allocation_type" invisible="1" widget="radio"
+                            <field name="allocation_type" widget="radio"
                                 attrs="{'readonly': ['|', ('is_officer', '=', False), ('state', 'not in', ('draft', 'confirm'))]}"/>
                             <field name="is_officer" invisible="1"/>
                             <field name="accrual_plan_id" attrs="{'invisible': [('allocation_type', '=', 'regular')], 'readonly': ['|', ('is_officer', '=', False), ('state', 'not in', ('draft', 'confirm'))]}"/>
@@ -208,6 +208,24 @@
             <xpath expr="//div[@id='no_limit_label']" position="replace">
                 <div id="no_limit_label" class="oe_read_only" attrs="{'invisible': ['|', ('id', '=', False), ('date_to', '!=', False)]}">No limit</div>
             </xpath>
+            <xpath expr="//field[@name='allocation_type']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='accrual_plan_id']" position="replace"/>
+            <xpath expr="//field[@name='holiday_status_id']" position="after">
+                    <div class="o_td_label" name="accrual_label">
+                        <label for="is_allocation_type_accrual" string="Link to an Accrual Plan"/>
+                    </div>
+                    <div class="o_row" name="accrual">
+                        <field name="is_accrual_plan" invisible="1"/>
+                        <field name="is_allocation_type_accrual" attrs="{'readonly': [('is_accrual_plan', '=', False)]}" widget="boolean"/>
+                        <button type="action" name="%(open_view_accrual_plans)d" string="Create an accrual Plan" class='btn-link' icon="fa-arrow-right"  attrs="{'invisible': [('is_accrual_plan', '=', True)]}"/>
+                        <field name="accrual_plan_id" attrs="{'invisible': [('allocation_type', '=', 'regular')], 'readonly': ['|', ('is_officer', '=', False), ('state', 'not in', ('draft', 'confirm'))]}"/>
+                    </div>
+            </xpath>
+            <xpath expr="//field[@name='accrual_plan_id']" position="attributes">
+                    <attribute name="attrs">{"invisible": [('is_allocation_type_accrual', '=', False)]}</attribute>
+            </xpath>
         </field>
     </record>
 
@@ -247,7 +265,16 @@
             <xpath expr="//header" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
+            <xpath expr="//field[@name='allocation_type']" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath>
             <div name="button_box" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </div>
+            <div name="accrual" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </div>
+            <div name="accrual_label" position="attributes">
                 <attribute name="invisible">1</attribute>
             </div>
         </field>
@@ -266,7 +293,7 @@
                 <field name="duration_display" string="Duration"/>
                 <field name="date_from" string="Validity Start" optional="hide"/>
                 <field name="date_to" string="Validity Stop" optional="hide"/>
-                <field name="allocation_type"/>
+                <field name="allocation_type" invisible="1"/>
                 <field name="message_needaction" invisible="1"/>
                 <field name="active_employee" invisible="1"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'confirm'" decoration-success="state == 'validate'"/>
