@@ -2,6 +2,11 @@
 /// This file regroups the CSS rules made to fix/extend bootstrap in the backend
 /// ==============================================================================
 
+.form-control:hover {
+    background-color: $input-focus-bg;
+    border-color: $o-input-hover-border-color;
+}
+
 // Generating bootstrap color buttons was disabled (see import_bootstrap.scss).
 // We do it ourself here generating each btn design individually.
 
