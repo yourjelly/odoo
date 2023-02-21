@@ -5,6 +5,7 @@ import { registry } from "@web/core/registry";
 import { MacroEngine } from "@web/core/macro";
 import { _t } from "@web/core/l10n/translation";
 import { session } from "@web/session";
+import { config as transitionConfig } from "@web/core/transition";
 import { TourPointer } from "../tour_pointer/tour_pointer";
 import { tourState } from "./tour_state";
 import { compileStepManual, compileStepAuto, compileTourToMacro } from "./tour_compilers";
@@ -106,11 +107,13 @@ export const tourService = {
                 filteredSteps,
                 stepCompiler,
                 pointerMethods,
-                mode,
                 stepDelay,
                 watch,
                 checkDelay,
                 onTourEnd({ name, rainbowManMessage, fadeout }) {
+                    if (mode === "auto") {
+                        transitionConfig.disabled = false;
+                    }
                     let message;
                     if (typeof rainbowManMessage === "function") {
                         message = rainbowManMessage({
@@ -136,6 +139,18 @@ export const tourService = {
             });
         }
 
+        /**
+         * Disable transition before starting an "auto" tour.
+         * @param {Macro} macro
+         * @param {'auto' | 'manual'} mode
+         */
+        function activateMacro(macro, mode) {
+            if (mode === "auto") {
+                transitionConfig.disabled = true;
+            }
+            macroEngine.activate(macro);
+        }
+
         function startTour(tourName, options = {}) {
             // set default options
             options = Object.assign({ stepDelay: 0, watch: false, mode: "auto", url: "" }, options);
@@ -154,7 +169,7 @@ export const tourService = {
                 }
             });
             if (!willUnload) {
-                macroEngine.activate(macro);
+                activateMacro(macro, options.mode);
             }
         }
 
@@ -167,7 +182,7 @@ export const tourService = {
             const watch = tourState.get(tourName, "watch");
             const mode = tourState.get(tourName, "mode");
             const macro = convertToMacro(tour, { stepDelay, watch, mode });
-            macroEngine.activate(macro);
+            activateMacro(macro, mode);
         }
 
         registry.category("main_components").add("TourPointer", {
