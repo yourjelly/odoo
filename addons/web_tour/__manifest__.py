@@ -31,8 +31,7 @@ Odoo Web tours.
             'web_tour/static/src/tour_service/**/*',
         ],
         'web.qunit_suite_tests': [
-            # TODO-JCB: Adapt unit tests.
-            # 'web_tour/static/tests/**/*',
+            'web_tour/static/tests/**/*',
         ],
     },
     'auto_install': True,
