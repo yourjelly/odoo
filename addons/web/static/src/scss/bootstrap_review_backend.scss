@@ -33,4 +33,8 @@
             @include button-variant($-color, $-color);
         }
     }
+
+    .btn-outline-#{$-style} {
+        @include button-outline-variant($-color);
+    }
 }
