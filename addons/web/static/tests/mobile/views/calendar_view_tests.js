@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
 import { CalendarCommonRenderer } from "@web/views/calendar/calendar_common/calendar_common_renderer";
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
@@ -25,6 +26,37 @@ QUnit.module("Views", ({ beforeEach }) => {
         setupViewRegistries();
 
         serverData = {
+            actions: {
+                1: {
+                    id: 1,
+                    name: "Event Action",
+                    res_model: "event",
+                    type: "ir.actions.act_window",
+                    views: [
+                        [false, "list"],
+                        [false, "calendar"],
+                        [false, "kanban"]
+                    ],
+                },
+            },
+            views: {
+                "event,false,list": '<tree><field name="name"/></tree>',
+                "event,false,calendar": `
+                <calendar date_start="start" date_stop="stop">
+                    <field name="name"/>
+                </calendar>`,
+                "event,false,kanban": `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <field name="name"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+                "event,false,search": '<search><field name="name" string="Event"/></search>',
+            },
             models: {
                 event: {
                     fields: {
@@ -78,6 +110,17 @@ QUnit.module("Views", ({ beforeEach }) => {
     });
 
     QUnit.module("CalendarView - Mobile");
+
+    QUnit.debug("uses a Calendar(first mobile-friendly) view by default", async function (assert) {
+        const webClient = await createWebClient({ serverData });
+        // should open Calendar(first mobile-friendly) view for action 1
+        await doAction(webClient, 1);
+
+        assert.containsNone(webClient, ".o_list_view");
+        assert.containsNone(webClient, ".o_kanban_view");
+        assert.containsOnce(webClient, ".o_calendar_view");
+
+    });
 
     QUnit.test("simple calendar rendering in mobile", async function (assert) {
         await makeView({
