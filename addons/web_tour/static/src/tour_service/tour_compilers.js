@@ -61,7 +61,7 @@ function describeFailedStepSimple(step, tour) {
 }
 
 function describeFailedStepDetailed(step, stepIndex, tour) {
-    const offset = 4;
+    const offset = 3;
     const start = stepIndex - offset >= 0 ? stepIndex - offset : 0;
     const end =
         stepIndex + offset + 1 <= tour.steps.length ? stepIndex + offset + 1 : tour.steps.length;
@@ -79,7 +79,7 @@ function describeFailedStepDetailed(step, stepIndex, tour) {
             },
             2
         );
-        result += `\n${highlight ? "----- FAILING STEP -----\n" : ""}${stepString}${
+        result += `\n${highlight ? "----- FAILING STEP -----\n" : ""}${stepString},${
             highlight ? "\n-----------------------" : ""
         }`;
     }
