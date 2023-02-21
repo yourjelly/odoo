@@ -7,13 +7,11 @@ import { Component, xml, useState, mount } from "@odoo/owl";
 
 let target, engine, mock;
 
-// TODO-JCB: Adapt this unit test.
-QUnit.module.skip(
+QUnit.module(
     "macros",
     {
         beforeEach() {
             target = getFixture();
-            engine = new MacroEngine(target);
             mock = mockTimeout();
         },
         afterEach() {
@@ -39,6 +37,10 @@ QUnit.module.skip(
 
         QUnit.test("simple use", async function (assert) {
             await mount(TestComponent, target);
+            engine = new MacroEngine({
+                target: target.querySelector(".counter"),
+                defaultCheckDelay: 500,
+            });
 
             const span = target.querySelector("span.value");
             assert.strictEqual(span.textContent, "0");
@@ -52,7 +54,6 @@ QUnit.module.skip(
                     },
                 ],
             });
-            // default interval is 500
             await mock.advanceTime(300);
             assert.strictEqual(span.textContent, "0");
             await mock.advanceTime(300);
@@ -61,6 +62,10 @@ QUnit.module.skip(
 
         QUnit.test("multiple steps", async function (assert) {
             await mount(TestComponent, target);
+            engine = new MacroEngine({
+                target: target.querySelector(".counter"),
+                defaultCheckDelay: 500,
+            });
 
             const span = target.querySelector("span.value");
             assert.strictEqual(span.textContent, "0");
@@ -93,13 +98,19 @@ QUnit.module.skip(
 
         QUnit.test("can use a function as action", async function (assert) {
             await mount(TestComponent, target);
+            engine = new MacroEngine({
+                target: target.querySelector(".counter"),
+                defaultCheckDelay: 500,
+            });
             let flag = false;
             engine.activate({
                 name: "test",
                 steps: [
                     {
                         trigger: "button.inc",
-                        action: () => (flag = true),
+                        action: () => {
+                            flag = true;
+                        },
                     },
                 ],
             });
@@ -110,7 +121,11 @@ QUnit.module.skip(
 
         QUnit.test("can input values", async function (assert) {
             await mount(TestComponent, target);
-            const input = target.querySelector("input");
+            engine = new MacroEngine({
+                target: target.querySelector(".counter"),
+                defaultCheckDelay: 500,
+            });
+            const input = engine.target.querySelector("input");
 
             engine.activate({
                 name: "test",
@@ -129,7 +144,11 @@ QUnit.module.skip(
 
         QUnit.test("a step can have no trigger", async function (assert) {
             await mount(TestComponent, target);
-            const input = target.querySelector("input");
+            engine = new MacroEngine({
+                target: target.querySelector(".counter"),
+                defaultCheckDelay: 500,
+            });
+            const input = engine.target.querySelector("input");
 
             engine.activate({
                 name: "test",
@@ -152,8 +171,11 @@ QUnit.module.skip(
 
         QUnit.test("onStep function is called at each step", async function (assert) {
             await mount(TestComponent, target);
-
-            const span = target.querySelector("span.value");
+            engine = new MacroEngine({
+                target: target.querySelector(".counter"),
+                defaultCheckDelay: 500,
+            });
+            const span = engine.target.querySelector("span.value");
             assert.strictEqual(span.textContent, "0");
 
             engine.activate({
@@ -178,8 +200,11 @@ QUnit.module.skip(
 
         QUnit.test("trigger can be a function returning an htmlelement", async function (assert) {
             await mount(TestComponent, target);
-
-            const span = target.querySelector("span.value");
+            engine = new MacroEngine({
+                target: target.querySelector(".counter"),
+                defaultCheckDelay: 500,
+            });
+            const span = engine.target.querySelector("span.value");
             assert.strictEqual(span.textContent, "0");
 
             engine.activate({
@@ -200,9 +225,12 @@ QUnit.module.skip(
 
         QUnit.test("macro does not click on invisible element", async function (assert) {
             await mount(TestComponent, target);
-
-            const span = target.querySelector("span.value");
-            const button = target.querySelector("button.inc");
+            engine = new MacroEngine({
+                target: target.querySelector(".counter"),
+                defaultCheckDelay: 500,
+            });
+            const span = engine.target.querySelector("span.value");
+            const button = engine.target.querySelector("button.inc");
             assert.strictEqual(span.textContent, "0");
 
             engine.activate({

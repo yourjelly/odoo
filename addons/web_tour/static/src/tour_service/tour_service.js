@@ -2,13 +2,14 @@
 
 import { markup, whenReady } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { MacroEngine, callWithUnloadCheck } from "@web/core/macro";
+import { MacroEngine } from "@web/core/macro";
 import { _t } from "@web/core/l10n/translation";
 import { session } from "@web/session";
 import { TourPointer } from "../tour_pointer/tour_pointer";
 import { tourState } from "./tour_state";
 import { compileStepManual, compileStepAuto, compileTourToMacro } from "./tour_compilers";
 import { createPointerState } from "./tour_pointer_state";
+import { callWithUnloadCheck } from "./tour_utils";
 import { device } from "web.config";
 
 /**
@@ -48,7 +49,6 @@ import { device } from "web.config";
  * @property {string} [title]
  */
 
-
 function extractRegisteredTours() {
     const tours = {};
     for (const [name, tour] of registry.category("web_tour.tours").getEntries()) {
@@ -75,7 +75,8 @@ function extractRegisteredTours() {
  */
 function shouldOmit(step, mode) {
     const isDefined = (key, obj) => key in obj && obj[key] !== undefined;
-    const getEdition = () => session.server_version_info.slice(-1)[0] === "e" ? "enterprise" : "community";
+    const getEdition = () =>
+        session.server_version_info.slice(-1)[0] === "e" ? "enterprise" : "community";
     const correctEdition = isDefined("edition", step) ? step.edition === getEdition() : true;
     const correctDevice = isDefined("mobile", step) ? step.mobile === device.isMobile : true;
     return (
@@ -92,7 +93,7 @@ export const tourService = {
         await whenReady();
 
         const tours = extractRegisteredTours();
-        const macroEngine = new MacroEngine(document);
+        const macroEngine = new MacroEngine({ target: document });
         const [pointerState, pointerMethods] = createPointerState();
         const consumedTours = new Set(session.web_tours);
 

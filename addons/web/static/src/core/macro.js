@@ -25,29 +25,6 @@ export const ACTION_HELPERS = {
 
 const mutex = new Mutex();
 
-/**
- * Calls the given func then returns/resolves to `true`
- * if it will result to unloading of the page.
- * @param {(...args: any[]) => void} func
- * @param  {any[]} args
- * @returns
- */
-export function callWithUnloadCheck(func, ...args) {
-    let willUnload = false;
-    const beforeunload = () => (willUnload = true);
-    window.addEventListener("beforeunload", beforeunload);
-    const result = func(...args);
-    if (result instanceof Promise) {
-        return result.then(() => {
-            window.removeEventListener("beforeunload", beforeunload);
-            return willUnload;
-        });
-    } else {
-        window.removeEventListener("beforeunload", beforeunload);
-        return willUnload;
-    }
-}
-
 class TimeoutError extends Error {}
 
 class Macro {
@@ -70,28 +47,21 @@ class Macro {
             return;
         }
         const step = this.steps[this.currentIndex];
-        await this.waitForDelay(step);
         const [proceedToAction, el] = this.checkTrigger(step);
         if (proceedToAction) {
-            const willUnload = await callWithUnloadCheck(() => this.performAction(el, step));
-            if (!willUnload) {
+            const actionResult = await this.performAction(el, step);
+            if (!actionResult) {
+                // If falsy action result, it means the action worked properly.
+                // So we can proceed to the next step.
                 this.currentIndex++;
                 if (this.currentIndex === this.steps.length) {
                     this.isComplete = true;
                     browser.clearTimeout(this.timeout);
                 } else {
-                    await new Promise((resolve) => setTimeout(resolve));
                     this.setTimer();
                     await this.advance();
                 }
             }
-        }
-    }
-
-    async waitForDelay(step) {
-        const stepDelay = step.delay || 0;
-        if (stepDelay > 0) {
-            await new Promise((resolve) => setTimeout(resolve, stepDelay));
         }
     }
 
@@ -130,11 +100,13 @@ class Macro {
     async performAction(el, step) {
         this.safeCall(this.onStep, el, step);
         const action = step.action;
+        let actionError;
         if (action in ACTION_HELPERS) {
-            ACTION_HELPERS[action](el, step);
+            actionError = ACTION_HELPERS[action](el, step);
         } else if (typeof action === "function") {
-            await this.safeCall(action, el);
+            actionError = await this.safeCall(action, el);
         }
+        return actionError;
     }
 
     safeCall(fn, ...args) {
@@ -180,11 +152,18 @@ class Macro {
 }
 
 export class MacroEngine {
-    constructor(target = document.body) {
+    constructor(params) {
+        const { target, defaultCheckDelay } = Object.assign(
+            {
+                target: document.body,
+                defaultCheckDelay: 750,
+            },
+            params
+        );
         this.isRunning = false;
         this.timeout = null;
         this.target = target;
-        this.defaultCheckDelay = 750;
+        this.defaultCheckDelay = defaultCheckDelay;
         this.macros = new Set();
         this.observerOptions = {
             attributes: true,

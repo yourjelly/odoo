@@ -170,8 +170,7 @@ QUnit.module("Barcodes", (hooks) => {
         assert.verifySteps([], "should not have saved");
     });
 
-    // TODO-JCB: Adapt unit tests. Do not skip this.
-    QUnit.skip("pager buttons", async function (assert) {
+    QUnit.test("pager buttons", async function (assert) {
         const mock = mockTimeout();
 
         await makeView({

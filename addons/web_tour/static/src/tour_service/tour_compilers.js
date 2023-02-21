@@ -2,6 +2,8 @@
 
 import { isVisible } from "@web/core/utils/ui";
 import { tourState } from "./tour_state";
+import { callWithUnloadCheck } from "./tour_utils";
+import { browser } from "@web/core/browser/browser";
 
 // TODO-JCB: Replace the following import with the non-legacy version.
 import RunningTourActionHelper from "web_tour.RunningTourActionHelper";
@@ -267,9 +269,17 @@ let tourTimeout;
 
 export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, pointerMethods: _pm }) {
     let skipAction = false;
+    stepDelay = stepDelay || 0;
     return [
         {
-            action: () => {
+            action: async () => {
+                // IMPROVEMENT: Find a way to remove this delay.
+                // Synthetic delay between finding the trigger. Important for making the current set of tests pass.
+                await new Promise((resolve) => browser.setTimeout(resolve));
+            },
+        },
+        {
+            action: async () => {
                 skipAction = false;
                 console.log(`Tour ${tour.name} on step: '${describeStep(step)}'`);
                 if (!watch) {
@@ -282,10 +292,12 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                         console.error(describeFailedStepSimple(step, tour));
                     }, (step.timeout || 10000) + stepDelay);
                 }
+                if (stepDelay > 0) {
+                    await new Promise((resolve) => browser.setTimeout(resolve, stepDelay));
+                }
             },
         },
         {
-            delay: stepDelay,
             trigger: () => {
                 const { triggerEl, altEl, extraTriggerOkay, skipEl } = findStepTriggers(step);
 
@@ -302,12 +314,14 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
 
                 return canContinue(stepEl, step.allowInvisible) && stepEl;
             },
-            action: (stepEl) => {
+            action: async (stepEl) => {
                 tourState.set(tour.name, "currentIndex", stepIndex + 1);
 
                 if (skipAction) {
                     return;
                 }
+
+                let result;
 
                 const consumeEvent = step.consumeEvent || getConsumeEventType($(stepEl), step.run);
                 // When in auto mode, we are not waiting for an event to be consumed, so the
@@ -321,13 +335,17 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                 });
                 if (typeof step.run === "function") {
                     // `this.$anchor` is expected in many `step.run`.
-                    step.run.call({ $anchor: $anchorEl }, actionHelper);
+                    const willUnload = await callWithUnloadCheck(() =>
+                        step.run.call({ $anchor: $anchorEl }, actionHelper)
+                    );
+                    result = willUnload && "will unload";
                 } else if (step.run !== undefined) {
                     const m = step.run.match(/^([a-zA-Z0-9_]+) *(?:\(? *(.+?) *\)?)?$/);
                     actionHelper[m[1]](m[2]);
                 } else {
                     actionHelper.auto();
                 }
+                return result;
             },
         },
     ];
