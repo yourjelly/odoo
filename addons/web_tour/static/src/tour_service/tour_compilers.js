@@ -40,9 +40,6 @@ function findExtraTrigger(selector) {
     return get_first_visible_element($el).get(0);
 }
 
-// TODO-JCB: Remove this. Temporarily used for debugging.
-window.findTrigger = findTrigger;
-
 function findStepTriggers(step) {
     const triggerEl = findTrigger(step.trigger, step.in_modal);
     const altEl = findTrigger(step.alt_trigger, step.in_modal);
