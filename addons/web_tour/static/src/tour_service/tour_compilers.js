@@ -2,64 +2,46 @@
 
 import { isVisible } from "@web/core/utils/ui";
 import { tourState } from "./tour_state";
-import { callWithUnloadCheck } from "./tour_utils";
+import {
+    callWithUnloadCheck,
+    get_first_visible_element,
+    get_jquery_element_from_selector,
+    getConsumeEventType,
+    RunningTourActionHelper,
+} from "./tour_utils";
 import { browser } from "@web/core/browser/browser";
-
-// TODO-JCB: Replace the following import with the non-legacy version.
-import RunningTourActionHelper from "web_tour.RunningTourActionHelper";
-import { findTrigger, findExtraTrigger } from "web_tour.utils";
-import { device } from "web.config";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
  */
 
 /**
- * TODO-JCB: How about converting this into registry? Something like the error registry.
- * @param {jQuery} $element
- * @param {Runnable} run
- * @returns {string}
+ * If `inModal` is not false (e.g. true or undefined),
+ * find `selector` from the top most visible modal.
+ * Otherwise, find `selector` from the whole document.
+ *
+ * @param {string} selector - any valid jquery selector
+ * @param {boolean} inModal
+ * @returns {Element | undefined}
  */
-function getConsumeEventType($element, run) {
-    if ($element.hasClass("o_field_many2one") || $element.hasClass("o_field_many2manytags")) {
-        return "autocompleteselect";
-    } else if (
-        $element.is("textarea") ||
-        $element.filter("input").is(function () {
-            const type = $(this).attr("type");
-            return !type || !!type.match(/^(email|number|password|search|tel|text|url)$/);
-        })
-    ) {
-        // FieldDateRange triggers a special event when using the widget
-        if ($element.hasClass("o_field_date_range")) {
-            return "apply.daterangepicker input";
-        }
-        if (
-            device.isMobile &&
-            $element.closest(".o_field_widget").is(".o_field_many2one, .o_field_many2many")
-        ) {
-            return "click";
-        }
-        return "input";
-    } else if ($element.hasClass("ui-draggable-handle")) {
-        return "drag";
-    } else if (typeof run === "string" && run.indexOf("drag_and_drop") === 0) {
-        // this is a heuristic: the element has to be dragged and dropped but it
-        // doesn't have class 'ui-draggable-handle', so we check if it has an
-        // ui-sortable parent, and if so, we conclude that its event type is 'sort'
-        if ($element.closest(".ui-sortable").length) {
-            return "sort";
-        }
-        if (
-            (run.indexOf("drag_and_drop_native") === 0 &&
-                $element.hasClass("o_record_draggable")) ||
-            $element.closest(".o_record_draggable").length
-        ) {
-            return "mousedown";
-        }
+function findTrigger(selector, inModal) {
+    const $visibleModal = $(".modal:visible").last();
+    let $el;
+    if (inModal !== false && $visibleModal.length) {
+        $el = $visibleModal.find(selector);
+    } else {
+        $el = get_jquery_element_from_selector(selector);
     }
-    return "click";
+    return get_first_visible_element($el).get(0);
 }
+
+function findExtraTrigger(selector) {
+    const $el = get_jquery_element_from_selector(selector);
+    return get_first_visible_element($el).get(0);
+}
+
+// TODO-JCB: Remove this. Temporarily used for debugging.
+window.findTrigger = findTrigger;
 
 function findStepTriggers(step) {
     const triggerEl = findTrigger(step.trigger, step.in_modal);
@@ -274,7 +256,7 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
         {
             action: async () => {
                 // IMPROVEMENT: Find a way to remove this delay.
-                // Synthetic delay between finding the trigger. Important for making the current set of tests pass.
+                // This delay is important for making the current set of tour tests pass.
                 await new Promise((resolve) => browser.setTimeout(resolve));
             },
         },
@@ -292,9 +274,7 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                         console.error(describeFailedStepSimple(step, tour));
                     }, (step.timeout || 10000) + stepDelay);
                 }
-                if (stepDelay > 0) {
-                    await new Promise((resolve) => browser.setTimeout(resolve, stepDelay));
-                }
+                await new Promise((resolve) => browser.setTimeout(resolve, stepDelay));
             },
         },
         {
