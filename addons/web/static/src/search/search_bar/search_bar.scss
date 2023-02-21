@@ -2,16 +2,45 @@
 // ============================================================================
 
 .o_searchview_facet {
-    cursor: default;
-    .o_facet_values {
-        border: $border-width solid var(--SearchBar-facet-background, #{$o-brand-odoo});
+    @keyframes animate {
+        from {
+            opacity: .5;
+            transform: translateY(20%);
+        }
     }
-    .o_searchview_facet_label {
-        background: var(--SearchBar-facet-background, #{$o-brand-odoo});
-        color: var(--SearchBar-facet-color, #{$o-white});
-    }
-    &.o_facet_with_domain:hover .o_searchview_facet_label {
-        cursor: pointer;
-        background: var(--SearchBar-facet-background, $primary);
-    }
+
+    animation: animate .25s ease-out;
+// <<<<<<< HEAD
+//     cursor: default;
+//     .o_facet_values {
+//         border: $border-width solid var(--SearchBar-facet-background, #{$o-brand-odoo});
+//     }
+//     .o_searchview_facet_label {
+//         background: var(--SearchBar-facet-background, #{$o-brand-odoo});
+//         color: var(--SearchBar-facet-color, #{$o-white});
+// ||||||| parent of 3d960d3bbe78 ([TMP][REF] web*: ControlPanel layout)
+//     .o_facet_values {
+//         border: $border-width solid var(--SearchBar-facet-background, #{$o-brand-odoo});
+//     }
+//     .o_searchview_facet_label {
+//         background: var(--SearchBar-facet-background, #{$o-brand-odoo});
+//         color: var(--SearchBar-facet-color, #{$o-white});
+// =======
+//     @keyframes animate {
+//         from {
+//             opacity: .5;
+//             transform: translateY(20%);
+//         }
+// >>>>>>> 3d960d3bbe78 ([TMP][REF] web*: ControlPanel layout)
+//     }
+// <<<<<<< HEAD
+//     &.o_facet_with_domain:hover .o_searchview_facet_label {
+//         cursor: pointer;
+//         background: var(--SearchBar-facet-background, $primary);
+//     }
+// ||||||| parent of 3d960d3bbe78 ([TMP][REF] web*: ControlPanel layout)
+// =======
+
+//     animation: animate .25s ease-out;
+// >>>>>>> 3d960d3bbe78 ([TMP][REF] web*: ControlPanel layout)
 }
