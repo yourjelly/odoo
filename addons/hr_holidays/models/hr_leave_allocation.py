@@ -42,7 +42,7 @@ class HolidaysAllocation(models.Model):
         return [('employee_requests', '=', 'yes')]
 
     def _default_is_accrual_plan(self):
-        return True if self.env['hr.leave.accrual.plan'].search([], limit=1) else False
+        return True if self.env['hr.leave.accrual.plan'].sudo().search([], limit=1) else False
 
     name = fields.Char('Description', compute='_compute_description', inverse='_inverse_description', search='_search_description', compute_sudo=False)
     name_validity = fields.Char('Description with validity', compute='_compute_description_validity')
