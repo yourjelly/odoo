@@ -12,18 +12,16 @@
                 <div class="o_kanban_header top-0 pb-3">
                     <div class="input-group">
                         <input type="text"
-                            class="form-control o_input bg-transparent fs-4"
+                            class="form-control bg-view"
                             t-attf-placeholder="{{ props.groupByFieldString }}..."
                             t-ref="autofocus"
                             t-model.trim="state.columnTitle"
                             t-on-focus="() => state.hasInputFocused = true"
                             t-on-blur="() => state.hasInputFocused = false"
                         />
-                        <span class="input-group-append">
-                            <button class="btn btn-primary o_kanban_add" type="button" t-on-click="validate">
-                                Add
-                            </button>
-                        </span>
+                        <button class="btn btn-primary o_kanban_add" type="button" t-on-click="validate">
+                            Add
+                        </button>
                     </div>
                     <small t-if="!env.isSmall and state.hasInputFocused" class="o_discard_msg text-muted float-end">
                         Esc to discard
