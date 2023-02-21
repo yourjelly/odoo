@@ -3,7 +3,7 @@
 import { _legacyIsVisible } from "@web/core/utils/ui";
 import { markup } from "@odoo/owl";
 import { device } from "web.config";
-import { _t, Class } from "web.core";
+import { _t } from "web.core";
 
 export class TourError extends Error {
     constructor(message, ...args) {
@@ -107,54 +107,53 @@ export function getConsumeEventType($element, run) {
     return "click";
 }
 
-// TODO-JCB: convert to normal object.
-export const RunningTourActionHelper = Class.extend({
-    init: function (tip_widget) {
+export class RunningTourActionHelper {
+    constructor(tip_widget) {
         this.tip_widget = tip_widget;
-    },
-    click: function (element) {
+    }
+    click(element) {
         this._click(this._get_action_values(element));
-    },
-    dblclick: function (element) {
+    }
+    dblclick(element) {
         this._click(this._get_action_values(element), 2);
-    },
-    tripleclick: function (element) {
+    }
+    tripleclick(element) {
         this._click(this._get_action_values(element), 3);
-    },
-    clicknoleave: function (element) {
+    }
+    clicknoleave(element) {
         this._click(this._get_action_values(element), 1, false);
-    },
-    text: function (text, element) {
+    }
+    text(text, element) {
         this._text(this._get_action_values(element), text);
-    },
+    }
     remove_text(text, element) {
         this._text(this._get_action_values(element), "\n");
-    },
-    text_blur: function (text, element) {
+    }
+    text_blur(text, element) {
         this._text_blur(this._get_action_values(element), text);
-    },
-    drag_and_drop: function (to, element) {
+    }
+    drag_and_drop(to, element) {
         this._drag_and_drop_jquery(this._get_action_values(element), to);
-    },
-    drag_and_drop_native: function (toSel, element) {
+    }
+    drag_and_drop_native(toSel, element) {
         const to = get_jquery_element_from_selector(toSel)[0];
         this._drag_and_drop(this._get_action_values(element).$element[0], to);
-    },
-    drag_move_and_drop: function (to, element) {
+    }
+    drag_move_and_drop(to, element) {
         this._drag_move_and_drop(this._get_action_values(element), to);
-    },
-    keydown: function (keyCodes, element) {
+    }
+    keydown(keyCodes, element) {
         this._keydown(this._get_action_values(element), keyCodes.split(/[,\s]+/));
-    },
-    auto: function (element) {
+    }
+    auto(element) {
         var values = this._get_action_values(element);
         if (values.consume_event === "input") {
             this._text(values);
         } else {
             this._click(values);
         }
-    },
-    _get_action_values: function (element) {
+    }
+    _get_action_values(element) {
         var $e = get_jquery_element_from_selector(element);
         var $element = element ? get_first_visible_element($e) : this.tip_widget.$anchor;
         if ($element.length === 0) {
@@ -165,8 +164,8 @@ export const RunningTourActionHelper = Class.extend({
             $element: $element,
             consume_event: consume_event,
         };
-    },
-    _click: function (values, nb, leave) {
+    }
+    _click(values, nb, leave) {
         trigger_mouse_event(values.$element, "mouseover");
         values.$element.trigger("mouseenter");
         for (var i = 1; i <= (nb || 1); i++) {
@@ -203,8 +202,8 @@ export const RunningTourActionHelper = Class.extend({
             );
             $element[0].dispatchEvent(e);
         }
-    },
-    _text: function (values, text) {
+    }
+    _text(values, text) {
         this._click(values);
 
         text = text || "Test";
@@ -239,13 +238,13 @@ export const RunningTourActionHelper = Class.extend({
             values.$element.trigger($.Event("keyup", { key: "_", keyCode: 95 }));
         }
         values.$element[0].dispatchEvent(new Event("change", { bubbles: true, cancelable: false }));
-    },
-    _text_blur: function (values, text) {
+    }
+    _text_blur(values, text) {
         this._text(values, text);
         values.$element.trigger("focusout");
         values.$element.trigger("blur");
-    },
-    _calculateCenter: function ($el, selector) {
+    }
+    _calculateCenter($el, selector) {
         const center = $el.offset();
         if (selector && selector.indexOf("iframe") !== -1) {
             const iFrameOffset = $("iframe").offset();
@@ -255,8 +254,8 @@ export const RunningTourActionHelper = Class.extend({
         center.left += $el.outerWidth() / 2;
         center.top += $el.outerHeight() / 2;
         return center;
-    },
-    _drag_and_drop_jquery: function (values, to) {
+    }
+    _drag_and_drop_jquery(values, to) {
         var $to;
         const elementCenter = this._calculateCenter(values.$element);
         if (to) {
@@ -297,8 +296,8 @@ export const RunningTourActionHelper = Class.extend({
         values.$element.trigger(
             $.Event("mouseup", { which: 1, pageX: toCenter.left, pageY: toCenter.top })
         );
-    },
-    _drag_and_drop: function (element, to) {
+    }
+    _drag_and_drop(element, to) {
         const elementCenter = this._calculateCenter($(element));
         const toCenter = this._calculateCenter($(to));
         element.dispatchEvent(new Event("mouseenter"));
@@ -331,8 +330,8 @@ export const RunningTourActionHelper = Class.extend({
                 which: 1,
             })
         );
-    },
-    _drag_move_and_drop: function (values, params) {
+    }
+    _drag_move_and_drop(values, params) {
         // Extract parameters from string: '[deltaX,deltaY]@from => actualTo'.
         const parts = /^\[(.+),(.+)\]@(.+) => (.+)/.exec(params);
         const initialMoveOffset = [parseInt(parts[1]), parseInt(parts[2])];
@@ -364,8 +363,8 @@ export const RunningTourActionHelper = Class.extend({
         values.$element.trigger(
             $.Event("mouseup", { which: 1, pageX: toCenter.left, pageY: toCenter.top })
         );
-    },
-    _keydown: function (values, keyCodes) {
+    }
+    _keydown(values, keyCodes) {
         while (keyCodes.length) {
             const eventOptions = {};
             const keyCode = keyCodes.shift();
@@ -393,8 +392,8 @@ export const RunningTourActionHelper = Class.extend({
             }
             values.$element.trigger(Object.assign({ type: "keyup" }, eventOptions));
         }
-    },
-});
+    }
+}
 
 export const stepUtils = {
     _getHelpMessage(functionName, ...args) {
