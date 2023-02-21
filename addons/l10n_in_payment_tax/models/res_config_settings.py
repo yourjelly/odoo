@@ -16,4 +16,10 @@ class ResConfigSettings(models.TransientModel):
         string="Advance Payment Tax Account",
         readonly=False,
         domain="[('deprecated', '=', False), ('company_id', '=', company_id)]")
+    account_advance_payment_tax_adjustment_journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        related="company_id.account_advance_payment_tax_adjustment_journal_id",
+        readonly=False,
+        domain="[('type', '=', 'general'), ('company_id', '=', company_id)]",
+        string='Advance Payment Tax Adjustment Journal')
 
