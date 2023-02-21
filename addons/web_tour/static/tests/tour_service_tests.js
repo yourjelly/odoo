@@ -1,19 +1,13 @@
 /** @odoo-module **/
 
+import { registry } from "@web/core/registry";
 import { tourService } from "@web_tour/tour_service/tour_service";
 import { rpcService } from "@web/core/network/rpc_service";
 import { userService } from "@web/core/user_service";
 import { ormService } from "@web/core/orm_service";
-import { registry } from "@web/core/registry";
+import { notificationService } from "@web/core/notifications/notification_service";
 import { effectService } from "@web/core/effects/effect_service";
-import {
-    getFixture,
-    nextTick,
-    mount,
-    mockTimeout,
-    editInput,
-    click,
-} from "@web/../tests/helpers/utils";
+import { getFixture, mount, mockTimeout, editInput, click } from "@web/../tests/helpers/utils";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { Component, useState, xml } from "@odoo/owl";
 
@@ -54,6 +48,7 @@ QUnit.module("Tour service", (hooks) => {
             .add("rpc", rpcService)
             .add("user", userService)
             .add("orm", ormService)
+            .add("notification", notificationService)
             .add("effect", effectService)
             .add("tour_service", tourService);
     });
