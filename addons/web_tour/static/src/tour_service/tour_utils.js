@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 import { _legacyIsVisible } from "@web/core/utils/ui";
+import { _t } from "@web/core/l10n/translation";
 import { markup } from "@odoo/owl";
-import { _t } from "web.core";
 
 export class TourError extends Error {
     constructor(message, ...args) {
