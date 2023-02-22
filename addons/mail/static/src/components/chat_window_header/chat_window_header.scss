@@ -21,7 +21,7 @@
 // ------------------------------------------------------------------
 
 .o_ChatWindowHeaderView {
-    background-color: var(--ChatWindowHeaderView-background-color, #{$o-brand-odoo});
+    background-color: var(--ChatWindowHeaderView-background-color, #{$o-gray-800});
     color: #FFFFFF;
 }
 
