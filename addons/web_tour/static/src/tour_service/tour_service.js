@@ -6,7 +6,6 @@ import { MacroEngine } from "@web/core/macro";
 import { _t } from "@web/core/l10n/translation";
 import { session } from "@web/session";
 import { config as transitionConfig } from "@web/core/transition";
-import { isMobileOS } from "@web/core/browser/feature_detection";
 import { TourPointer } from "../tour_pointer/tour_pointer";
 import { tourState } from "./tour_state";
 import { compileStepManual, compileStepAuto, compileTourToMacro } from "./tour_compilers";
@@ -70,14 +69,15 @@ function extractRegisteredTours() {
 /**
  * @param {TourStep} step
  * @param {"manual" | "auto"} mode
+ * @param {boolean} isMobile
  * @returns {boolean}
  */
-function shouldOmit(step, mode) {
+function shouldOmit(step, mode, isMobile) {
     const isDefined = (key, obj) => key in obj && obj[key] !== undefined;
     const getEdition = () =>
         session.server_version_info.slice(-1)[0] === "e" ? "enterprise" : "community";
     const correctEdition = isDefined("edition", step) ? step.edition === getEdition() : true;
-    const correctDevice = isDefined("mobile", step) ? step.mobile === isMobileOS() : true;
+    const correctDevice = isDefined("mobile", step) ? step.mobile === isMobile : true;
     return (
         !correctEdition ||
         !correctDevice ||
@@ -87,8 +87,8 @@ function shouldOmit(step, mode) {
 }
 
 export const tourService = {
-    dependencies: ["orm", "effect"],
-    start: async (_env, { orm, effect }) => {
+    dependencies: ["orm", "effect", "ui"],
+    start: async (_env, { orm, effect, ui }) => {
         await whenReady();
 
         const tours = extractRegisteredTours();
@@ -100,7 +100,7 @@ export const tourService = {
             // IMPROVEMENTS: Custom step compiler. Will probably require decoupling from `mode`.
             const stepCompiler = mode === "auto" ? compileStepAuto : compileStepManual;
             const checkDelay = mode === "auto" ? tour.checkDelay : 50;
-            const filteredSteps = tour.steps.filter((step) => !shouldOmit(step, mode));
+            const filteredSteps = tour.steps.filter((step) => !shouldOmit(step, mode, ui.isSmall));
             return compileTourToMacro(tour, {
                 filteredSteps,
                 stepCompiler,
@@ -108,6 +108,7 @@ export const tourService = {
                 stepDelay,
                 watch,
                 checkDelay,
+                isMobile: ui.isSmall,
                 onTourEnd({ name, rainbowManMessage, fadeout }) {
                     if (mode === "auto") {
                         transitionConfig.disabled = false;

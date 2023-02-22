@@ -131,7 +131,7 @@ function canContinue(el, allowInvisible) {
 export function compileStepManual(
     stepIndex,
     step,
-    { tour, stepDelay: _stepDelay, watch: _watch, pointerMethods }
+    { tour, stepDelay: _stepDelay, watch: _watch, pointerMethods, isMobile }
 ) {
     function getScrollParent(node) {
         if (node == null) {
@@ -202,7 +202,7 @@ export function compileStepManual(
 
                 if (stepEl && canContinue(stepEl, step.allowInvisible)) {
                     const consumeEvent =
-                        step.consumeEvent || getConsumeEventType($(stepEl), step.run);
+                        step.consumeEvent || getConsumeEventType($(stepEl), step.run, isMobile);
                     const $anchor = getAnchorEl($(stepEl), consumeEvent);
                     const anchorEl = $anchor[0];
 
@@ -246,7 +246,11 @@ export function compileStepManual(
 
 let tourTimeout;
 
-export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, pointerMethods: _pm }) {
+export function compileStepAuto(
+    stepIndex,
+    step,
+    { tour, stepDelay, watch, pointerMethods: _pm, isMobile }
+) {
     let skipAction = false;
     stepDelay = stepDelay || 0;
     return [
@@ -300,16 +304,20 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
 
                 let result;
 
-                const consumeEvent = step.consumeEvent || getConsumeEventType($(stepEl), step.run);
+                const consumeEvent =
+                    step.consumeEvent || getConsumeEventType($(stepEl), step.run, isMobile);
                 // When in auto mode, we are not waiting for an event to be consumed, so the
                 // anchor is just the step element.
                 const $anchorEl = $(stepEl);
 
                 // TODO: Delegate the following routine to the `ACTION_HELPERS` in the macro module.
-                const actionHelper = new RunningTourActionHelper({
-                    consume_event: consumeEvent,
-                    $anchor: $anchorEl,
-                });
+                const actionHelper = new RunningTourActionHelper(
+                    {
+                        consume_event: consumeEvent,
+                        $anchor: $anchorEl,
+                    },
+                    isMobile
+                );
                 if (typeof step.run === "function") {
                     // `this.$anchor` is expected in many `step.run`.
                     const willUnload = await callWithUnloadCheck(() =>
@@ -335,6 +343,7 @@ export function compileTourToMacro(tour, options) {
         pointerMethods,
         stepDelay,
         watch,
+        isMobile,
         checkDelay,
         onTourEnd,
     } = options;
@@ -355,6 +364,7 @@ export function compileTourToMacro(tour, options) {
                             stepDelay,
                             watch,
                             pointerMethods,
+                            isMobile,
                         }),
                     ];
                 }
