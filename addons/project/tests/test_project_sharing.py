@@ -291,7 +291,7 @@ class TestProjectSharing(TestProjectSharingCommon):
             [],
         )
         self.assertEqual(task_read_group[0]['__count'], 1, 'The task should be found with the read_group method containing a truly tuple.')
-        self.assertEqual(task_read_group[0]['id:min'], self.task_portal.id, 'The task should be found with the read_group method containing a truly tuple.')
+        self.assertEqual(task_read_group[0]['id:min'], self.task_portal, 'The task should be found with the read_group method containing a truly tuple.')
 
         task_read_group = self.env['project.task'].read_group(
             expression.AND([expression.FALSE_DOMAIN, domain]),
