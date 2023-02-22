@@ -58,6 +58,8 @@ class ChooseDeliveryCarrier(models.TransientModel):
 
     def _get_shipment_rate(self, carrier_with_context=None):
         carrier = carrier_with_context or self.carrier_id
+        if not carrier:
+            UserError(_("No carrier is set up. Please define your desired shipping method."))
         vals = carrier.rate_shipment(self.order_id)
         if vals.get('success'):
             self.delivery_message = vals.get('warning_message', False)
