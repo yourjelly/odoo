@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _legacyIsVisible } from "@web/core/utils/ui";
 import { markup } from "@odoo/owl";
 import { _t } from "web.core";
@@ -66,7 +65,7 @@ export function get_jquery_element_from_selector(selector) {
  * @param {Runnable} run
  * @returns {string}
  */
-export function getConsumeEventType($element, run) {
+export function getConsumeEventType($element, run, isMobile) {
     if ($element.hasClass("o_field_many2one") || $element.hasClass("o_field_many2manytags")) {
         return "autocompleteselect";
     } else if (
@@ -81,7 +80,7 @@ export function getConsumeEventType($element, run) {
             return "apply.daterangepicker input";
         }
         if (
-            isMobileOS() &&
+            isMobile &&
             $element.closest(".o_field_widget").is(".o_field_many2one, .o_field_many2many")
         ) {
             return "click";
@@ -108,8 +107,9 @@ export function getConsumeEventType($element, run) {
 }
 
 export class RunningTourActionHelper {
-    constructor(tip_widget) {
+    constructor(tip_widget, isMobile) {
         this.tip_widget = tip_widget;
+        this.isMobile = isMobile;
     }
     click(element) {
         this._click(this._get_action_values(element));
@@ -159,7 +159,9 @@ export class RunningTourActionHelper {
         if ($element.length === 0) {
             $element = $e.first();
         }
-        var consume_event = element ? getConsumeEventType($element) : this.tip_widget.consume_event;
+        var consume_event = element
+            ? getConsumeEventType($element, undefined, this.isMobile)
+            : this.tip_widget.consume_event;
         return {
             $element: $element,
             consume_event: consume_event,
