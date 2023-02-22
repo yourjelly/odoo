@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { isVisible } from "@web/core/utils/ui";
+import { browser } from "@web/core/browser/browser";
 import { tourState } from "./tour_state";
 import {
     callWithUnloadCheck,
@@ -9,7 +10,6 @@ import {
     getConsumeEventType,
     RunningTourActionHelper,
 } from "./tour_utils";
-import { browser } from "@web/core/browser/browser";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
