@@ -2,7 +2,6 @@
 
 import { registry } from "@web/core/registry";
 import { tourService } from "@web_tour/tour_service/tour_service";
-import { uiService } from "@web/core/ui/ui_service";
 import { rpcService } from "@web/core/network/rpc_service";
 import { userService } from "@web/core/user_service";
 import { ormService } from "@web/core/orm_service";
@@ -46,7 +45,6 @@ QUnit.module("Tour service", (hooks) => {
         delete registry.subRegistries["web_tour.tours"];
         registry
             .category("services")
-            .add("ui", uiService)
             .add("rpc", rpcService)
             .add("user", userService)
             .add("orm", ormService)
