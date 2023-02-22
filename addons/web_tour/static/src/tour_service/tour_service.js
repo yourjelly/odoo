@@ -94,7 +94,7 @@ export const tourService = {
 
         const tours = extractRegisteredTours();
         const macroEngine = new MacroEngine({ target: document });
-        const [pointerState, pointerMethods] = createPointerState();
+        const { state: pointerState, methods: pointerMethods } = createPointerState();
         const consumedTours = new Set(session.web_tours);
 
         function convertToMacro(tour, { mode, stepDelay, watch }) {

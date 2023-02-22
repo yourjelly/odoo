@@ -7,7 +7,7 @@ import { reactive } from "@odoo/owl";
  *
  * @typedef {"in" | "out-below" | "out-above" | "unknown"} IntersectionPosition
  *
- * @typedef {import("./tour_service").TourStep} TourStep
+ * @typedef {ReturnType<createPointerState>["methods"]} TourPointerMethods
  *
  * @typedef TourPointerState
  * @property {HTMLElement} [anchor]
@@ -16,6 +16,8 @@ import { reactive } from "@odoo/owl";
  * @property {boolean} [isOpen]
  * @property {boolean} isVisible
  * @property {Direction} position
+ *
+ * @typedef {import("./tour_service").TourStep} TourStep
  */
 
 class Intersection {
@@ -135,5 +137,5 @@ export function createPointerState() {
     const state = reactive({});
     const intersection = new Intersection();
 
-    return [state, { setState, update }];
+    return { state, methods: { setState, update } };
 }

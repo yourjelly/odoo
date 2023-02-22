@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
+import { debounce } from "@web/core/utils/timing";
 import { isVisible } from "@web/core/utils/ui";
 import { tourState } from "./tour_state";
 import {
@@ -12,7 +13,21 @@ import {
 } from "./tour_utils";
 
 /**
+ * @typedef {import("./tour_pointer_state").TourPointerMethods} TourPointerMethods
+ *
+ * @typedef {import("@web/core/macro").MacroDescriptor} MacroDescriptor
+ *
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
+ *
+ * @typedef {import("./tour_service").TourStep} TourStep
+ *
+ * @typedef {(stepIndex: number, step: TourStep, options: TourCompilerOptions) => MacroDescriptor[]} TourStepCompiler
+ *
+ * @typedef TourCompilerOptions
+ * @property {Tour} tour
+ * @property {number} stepDelay
+ * @property {watch} boolean
+ * @property {TourPointerMethods} pointerMethods
  */
 
 /**
@@ -50,6 +65,21 @@ function findStepTriggers(step) {
     const extraTriggerOkay = step.extra_trigger ? findExtraTrigger(step.extra_trigger) : true;
 
     return { triggerEl, altEl, extraTriggerOkay, skipEl };
+}
+
+/**
+ * @param {HTMLElement} element
+ * @returns {HTMLElement | null}
+ */
+function getScrollParent(element) {
+    if (element == null) {
+        return null;
+    }
+    if (element.scrollHeight > element.clientHeight) {
+        return element;
+    } else {
+        return getScrollParent(element.parentNode);
+    }
 }
 
 function describeStep(step) {
@@ -91,27 +121,30 @@ function describeFailedStepDetailed(step, stepIndex, tour) {
  * It doesn't necessarily mean the given element, e.g. when listening to drag
  * event, we have to do it to the closest .ui-draggable ancestor.
  *
- * @param {JQuery} $el
+ * @param {HTMLElement} el
  * @param {string} consumeEvent
- * @returns {JQuery}
  */
-function getAnchorEl($el, consumeEvent) {
-    let $consumeEventAnchors = $el;
+function getAnchorEl(el, consumeEvent) {
     if (consumeEvent === "drag") {
         // jQuery-ui draggable triggers 'drag' events on the .ui-draggable element,
         // but the tip is attached to the .ui-draggable-handle element which may
         // be one of its children (or the element itself)
-        $consumeEventAnchors = $el.closest(".ui-draggable");
-    } else if (consumeEvent === "input" && !$el.is("textarea, input")) {
-        $consumeEventAnchors = $el.closest("[contenteditable='true']");
-    } else if (consumeEvent.includes("apply.daterangepicker")) {
-        $consumeEventAnchors = $el.parent().children(".o_field_date_range");
-    } else if (consumeEvent === "sort") {
+        return el.closest(".ui-draggable, .o_draggable");
+    }
+    if (consumeEvent === "input" && !["textarea", "input"].includes(el.tagName.toLowerCase())) {
+        return el.closest("[contenteditable='true']");
+    }
+    if (consumeEvent.includes("apply.daterangepicker")) {
+        return [...el.parentElement.children].find((child) =>
+            child.classList.contains("o_field_date_range")
+        );
+    }
+    if (consumeEvent === "sort") {
         // when an element is dragged inside a sortable container (with classname
         // 'ui-sortable'), jQuery triggers the 'sort' event on the container
-        $consumeEventAnchors = $el.closest(".ui-sortable");
+        return el.closest(".ui-sortable, .o_sortable");
     }
-    return $consumeEventAnchors;
+    return el;
 }
 
 /**
@@ -128,53 +161,51 @@ function canContinue(el, allowInvisible) {
     return isInDoc && isElement && !isBlocked && (!allowInvisible ? isVisible(el) : true);
 }
 
+/**
+ * @param {Object} params
+ * @param {HTMLElement} params.anchorEl
+ * @param {string} params.consumeEvent
+ * @param {TourPointerMethods} params.pointerMethods
+ * @param {(ev: Event) => any} params.onScroll
+ * @param {(ev: Event) => any} params.onConsume
+ */
+function setupListeners({ anchorEl, consumeEvent, pointerMethods, onScroll, onConsume }) {
+    const onMouseEnter = () => pointerMethods.setState({ isOpen: true });
+
+    const onMouseLeave = () => pointerMethods.setState({ isOpen: false });
+
+    anchorEl.addEventListener(consumeEvent, onConsume);
+    anchorEl.addEventListener("mouseenter", onMouseEnter);
+    anchorEl.addEventListener("mouseleave", onMouseLeave);
+
+    const cleanups = [
+        () => {
+            anchorEl.removeEventListener(consumeEvent, onConsume);
+            anchorEl.removeEventListener("mouseenter", onMouseEnter);
+            anchorEl.removeEventListener("mouseleave", onMouseLeave);
+        },
+    ];
+
+    const scrollEl = getScrollParent(anchorEl);
+    if (scrollEl) {
+        const debouncedOnScroll = debounce(onScroll, 50);
+        scrollEl.addEventListener("scroll", debouncedOnScroll);
+        cleanups.push(() => scrollEl.removeEventListener("scroll", debouncedOnScroll));
+    }
+
+    return () => {
+        while (cleanups.length) {
+            cleanups.pop()();
+        }
+    };
+}
+
+/** @type {TourStepCompiler} */
 export function compileStepManual(
     stepIndex,
     step,
     { tour, stepDelay: _stepDelay, watch: _watch, pointerMethods }
 ) {
-    function getScrollParent(node) {
-        if (node == null) {
-            return null;
-        }
-        if (node.scrollHeight > node.clientHeight) {
-            return node;
-        } else {
-            return getScrollParent(node.parentNode);
-        }
-    }
-
-    function setupListeners({ $anchor, consumeEvent, onScroll, onConsume }) {
-        const anchorEl = $anchor[0];
-        const scrollEl = getScrollParent(anchorEl);
-
-        let timeout;
-        let removeScrollListener = () => {};
-
-        if (scrollEl) {
-            function scroll() {
-                clearTimeout(timeout);
-                timeout = setTimeout(onScroll, 50);
-            }
-            scrollEl.addEventListener("scroll", scroll);
-            removeScrollListener = () => scrollEl.removeEventListener("scroll", scroll);
-        }
-
-        $anchor.on(`${consumeEvent}.anchor`, onConsume);
-        $anchor.on("mouseenter.anchor", () => {
-            pointerMethods.setState({ isOpen: true });
-        });
-        $anchor.on("mouseleave.anchor", () => {
-            pointerMethods.setState({ isOpen: false });
-        });
-        const removeAnchorListeners = () => $anchor.off(".anchor");
-
-        return () => {
-            removeScrollListener();
-            removeAnchorListeners();
-        };
-    }
-
     // State variables.
     let proceedWith = null;
     let scrolled = false;
@@ -201,10 +232,8 @@ export function compileStepManual(
                 const stepEl = extraTriggerOkay && (triggerEl || altEl);
 
                 if (stepEl && canContinue(stepEl, step.allowInvisible)) {
-                    const consumeEvent =
-                        step.consumeEvent || getConsumeEventType($(stepEl), step.run);
-                    const $anchor = getAnchorEl($(stepEl), consumeEvent);
-                    const anchorEl = $anchor[0];
+                    const consumeEvent = step.consumeEvent || getConsumeEventType(stepEl, step.run);
+                    const anchorEl = getAnchorEl(stepEl, consumeEvent);
 
                     const updatePointer = () => {
                         pointerMethods.setState({ isVisible: true });
@@ -212,8 +241,9 @@ export function compileStepManual(
                     };
 
                     removeListeners = setupListeners({
-                        $anchor,
+                        anchorEl,
                         consumeEvent,
+                        pointerMethods,
                         onScroll: updatePointer,
                         onConsume: () => {
                             proceedWith = stepEl;
@@ -238,7 +268,6 @@ export function compileStepManual(
                 // Reset state variables.
                 proceedWith = null;
                 scrolled = false;
-                removeListeners = () => {};
             },
         },
     ];
@@ -246,6 +275,7 @@ export function compileStepManual(
 
 let tourTimeout;
 
+/** @type {TourStepCompiler} */
 export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, pointerMethods: _pm }) {
     let skipAction = false;
     stepDelay = stepDelay || 0;
@@ -298,8 +328,7 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                     return;
                 }
 
-                const consumeEvent = step.consumeEvent || getConsumeEventType($(stepEl), step.run);
-
+                const consumeEvent = step.consumeEvent || getConsumeEventType(stepEl, step.run);
                 // When in auto mode, we are not waiting for an event to be consumed, so the
                 // anchor is just the step element.
                 const $anchorEl = $(stepEl);
@@ -311,7 +340,6 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                 });
 
                 let result;
-
                 if (typeof step.run === "function") {
                     // `this.$anchor` is expected in many `step.run`.
                     const willUnload = await callWithUnloadCheck(() =>

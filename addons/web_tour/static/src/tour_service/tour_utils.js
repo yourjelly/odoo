@@ -71,44 +71,60 @@ export function getJQueryElementFromSelector(selector) {
  * @param {Runnable} [runCommand]
  * @returns {string}
  */
-export function getConsumeEventType($element, runCommand) {
-    if ($element.hasClass("o_field_many2one") || $element.hasClass("o_field_many2manytags")) {
+export function getConsumeEventType(element, runCommand) {
+    if (!element) {
+        return "click";
+    }
+    const { classList, tagName, type } = element;
+    const tag = tagName.toLowerCase();
+
+    // Many2one
+    if (classList.contains("o_field_many2one") || classList.contains("o_field_many2manytags")) {
         return "autocompleteselect";
-    } else if (
-        $element.is("textarea") ||
-        $element.filter("input").is(function () {
-            const type = $(this).attr("type");
-            return !type || !!type.match(/^(email|number|password|search|tel|text|url)$/);
-        })
+    }
+
+    // Inputs and textareas
+    if (
+        tag === "textarea" ||
+        (tag === "input" &&
+            (!type ||
+                ["email", "number", "password", "search", "tel", "text", "url"].includes(type)))
     ) {
         // FieldDateRange triggers a special event when using the widget
-        if ($element.hasClass("o_field_date_range")) {
+        if (classList.contains("o_field_date_range")) {
             return "apply.daterangepicker input";
         }
         if (
             isMobileOS() &&
-            $element.closest(".o_field_widget").is(".o_field_many2one, .o_field_many2many")
+            element.closest(".o_field_widget").matches(".o_field_many2one, .o_field_many2many")
         ) {
             return "click";
         }
         return "input";
-    } else if ($element.hasClass("ui-draggable-handle")) {
+    }
+
+    // jQuery draggable
+    if (classList.contains("ui-draggable-handle")) {
         return "drag";
-    } else if (typeof runCommand === "string" && runCommand.startsWith("drag_and_drop")) {
+    }
+
+    // Drag & drop run command
+    if (typeof runCommand === "string" && /^drag_and_drop/.test(runCommand)) {
         // this is a heuristic: the element has to be dragged and dropped but it
         // doesn't have class 'ui-draggable-handle', so we check if it has an
         // ui-sortable parent, and if so, we conclude that its event type is 'sort'
-        if ($element.closest(".ui-sortable").length) {
+        if (element.closest(".ui-sortable")) {
             return "sort";
         }
         if (
-            (runCommand.startsWith("drag_and_drop_native") &&
-                $element.hasClass("o_record_draggable")) ||
-            $element.closest(".o_record_draggable").length
+            (/^drag_and_drop_native/.test(runCommand) && classList.contains("o_draggable")) ||
+            element.closest(".o_draggable")
         ) {
             return "mousedown";
         }
     }
+
+    // Default: click
     return "click";
 }
 
@@ -164,7 +180,9 @@ export class RunningTourActionHelper {
         if ($element.length === 0) {
             $element = $e.first();
         }
-        var consume_event = element ? getConsumeEventType($element) : this.tip_widget.consume_event;
+        var consume_event = element
+            ? getConsumeEventType($element[0])
+            : this.tip_widget.consume_event;
         return {
             $element: $element,
             consume_event: consume_event,
