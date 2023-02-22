@@ -8,10 +8,10 @@
                 <i t-if="!messaging.isInitialized" class="o_MessagingMenu_loading fa fa-circle-o-notch fa-spin position-absolute bottom-50 end-0 small"/>
                 <span t-elif="counter > 0" class="o_MessagingMenu_counter badge rounded-pill" t-esc="counter"/>
             </a>
-            <div t-if="isOpen" class="o_MessagingMenu_dropdownMenu o-dropdown-menu dropdown-menu-end d-flex flex-column mt-0 py-0 bg-view overflow-auto" t-att-class="{ 'o-isDeviceSmall position-fixed bottom-0 start-0 end-0 flex-grow-1 w-100 m-0 border-0': messaging.device.isSmall, 'border': !messaging.device.isSmall, 'o-messaging-not-initialized align-items-center justify-content-center': !messaging.isInitialized }" role="menu">
+            <div t-if="isOpen" class="o_MessagingMenu_dropdownMenu o-dropdown-menu dropdown-menu-end d-flex flex-column mt-0 py-0 bg-view overflow-auto" t-att-class="{ 'o-isDeviceSmall position-fixed bottom-0 start-0 end-0 flex-grow-1 w-100 m-0': messaging.device.isSmall, 'o-messaging-not-initialized align-items-center justify-content-center': !messaging.isInitialized }" role="menu">
                 <span t-if="!messaging.isInitialized"><i class="o_MessagingMenu_dropdownLoadingIcon fa fa-circle-o-notch fa-spin me-1"/>Please wait...</span>
                 <t t-else="">
-                    <div class="o_MessagingMenu_dropdownMenuHeader border-bottom" t-attf-class="{{ messaging.device.isSmall ? 'o-isDeviceSmall p-2' : 'd-flex flex-shrink-0' }}">
+                    <div class="o_MessagingMenu_dropdownMenuHeader gap-1 p-2" t-attf-class="{{ messaging.device.isSmall ? 'o-isDeviceSmall' : 'd-flex flex-shrink-0' }}">
                         <MessagingMenuTabView t-if="allTab" record="allTab"/>
                         <MessagingMenuTabView t-if="chatTab" record="chatTab"/>
                         <MessagingMenuTabView t-if="channelTab" record="channelTab"/>
@@ -34,10 +34,8 @@
     </t>
 
     <t t-name="mail.MessagingMenu.newMessageButton" owl="1">
-        <button class="o_MessagingMenu_newMessageButton btn"
+        <button class="o_MessagingMenu_newMessageButton btn btn-primary"
             t-att-class="{
-                'btn-link': !messaging.device.isSmall,
-                'btn-secondary': messaging.device.isSmall,
                 'o-isDeviceSmall': messaging.device.isSmall,
             }" t-on-click="onClickNewMessage" type="button"
         >
