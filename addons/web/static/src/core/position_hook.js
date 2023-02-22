@@ -237,15 +237,16 @@ export function reposition(reference, popper, options) {
 
     // Get best positioning solution and apply it
     const position = getBestPosition(reference, popper, options);
+    const popperRect = popper.getBoundingClientRect();
     const { top, left, direction, variant } = position;
     if (direction === "top") {
-        popper.style.bottom = `${window.innerHeight - top - popper.offsetHeight}px`;
+        popper.style.bottom = `${window.innerHeight - top - popperRect.height}px`;
         popper.style.removeProperty("top");
     } else {
         popper.style.top = `${top}px`;
     }
     if (direction === "left") {
-        popper.style.right = `${window.innerWidth - left - popper.offsetWidth}px`;
+        popper.style.right = `${window.innerWidth - left - popperRect.width}px`;
         popper.style.removeProperty("left");
     } else {
         popper.style.left = `${left}px`;
