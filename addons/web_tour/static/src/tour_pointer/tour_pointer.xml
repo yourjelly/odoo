@@ -6,7 +6,7 @@
             t-ref="popper"
             t-attf-class="
                 o_tour_pointer
-                o_{{ props.pointerState.position }}
+                o_{{ position }}
                 {{ isOpen ? 'o_open' : 'o_bouncing' }}
                 {{ props.pointerState.fixed ? 'position-fixed' : 'position-absolute' }}
             "

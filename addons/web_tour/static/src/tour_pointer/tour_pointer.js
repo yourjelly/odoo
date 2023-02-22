@@ -57,13 +57,13 @@ export class TourPointer extends Component {
 
         const repositionPointer = () => {
             const { el } = rootRef;
-            const { anchor, position } = this.props.pointerState;
+            const { anchor } = this.props.pointerState;
             if (el && anchor) {
                 const { x, width } = anchor.getBoundingClientRect();
                 const wouldOverflow = window.innerWidth - x - width / 2 < this.dimensions?.width;
                 el.classList.toggle("o_expand_left", wouldOverflow);
 
-                reposition(anchor, el, { position: position || "top" });
+                reposition(anchor, el, { position: this.position });
             }
         };
 
@@ -114,5 +114,9 @@ export class TourPointer extends Component {
 
     get isOpen() {
         return this.state.isOpen || this.props.pointerState.isOpen;
+    }
+
+    get position() {
+        return this.props.pointerState.position || "top";
     }
 }
