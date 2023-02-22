@@ -86,6 +86,12 @@ Odoo Web Editor widget.
             'web_editor/static/src/xml/snippets.xml',
             'web_editor/static/src/xml/wysiwyg.xml',
             'web_editor/static/src/xml/wysiwyg_colorpicker.xml',
+
+            'bus/static/src/*.js',
+            'bus/static/src/services/**/*.js',
+            ('remove', 'bus/static/src/services/assets_watchdog_service.js'),
+            'bus/static/src/workers/websocket_worker.js',
+            'bus/static/src/workers/websocket_worker_utils.js',
         ],
         'web_editor.assets_media_dialog': [
             'web_editor/static/src/components/**/*',
