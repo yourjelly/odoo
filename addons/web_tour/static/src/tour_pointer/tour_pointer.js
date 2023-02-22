@@ -57,9 +57,13 @@ export class TourPointer extends Component {
 
         const repositionPointer = () => {
             const { el } = rootRef;
-            const { anchor } = this.props.pointerState;
+            const { anchor, position } = this.props.pointerState;
             if (el && anchor) {
-                reposition(anchor, el, this.repositionOptions);
+                const { x, width } = anchor.getBoundingClientRect();
+                const wouldOverflow = window.innerWidth - x - width / 2 < this.dimensions?.width;
+                el.classList.toggle("o_expand_left", wouldOverflow);
+
+                reposition(anchor, el, { position: position || "top" });
             }
         };
 
@@ -87,6 +91,7 @@ export class TourPointer extends Component {
                     if (this.isOpen) {
                         el.style.removeProperty("transition");
                     } else {
+                        // No transition if switching from open to closed
                         el.style.setProperty("transition", "none");
                     }
                     el.style.setProperty("width", `${width}px`);
@@ -95,8 +100,6 @@ export class TourPointer extends Component {
                     repositionPointer();
                 }
             }
-
-            console.log({ dimensions: this.dimensions });
         });
 
         const throttledUpdate = throttleForAnimation(repositionPointer);
@@ -111,9 +114,5 @@ export class TourPointer extends Component {
 
     get isOpen() {
         return this.state.isOpen || this.props.pointerState.isOpen;
-    }
-
-    get repositionOptions() {
-        return () => ({ position: this.props.pointerState.position || "top" });
     }
 }

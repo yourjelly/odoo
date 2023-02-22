@@ -42,6 +42,7 @@ $o-tour-pointer-size-delay-in: $o-tour-pointer-duration-in - $o-tour-pointer-siz
     --TourPointer__anchor-space: 0;
     --TourPointer__bounce-offset: 3px;
     --TourPointer__offset: 8px;
+    --TourPointer__scale: 1.12;
     --TourPointer__color: #{$o-enterprise-color};
     --TourPointer__color-accent: #{lighten($o-enterprise-color, 7%)};
     --TourPointer__border-width: 3px;
@@ -53,11 +54,15 @@ $o-tour-pointer-size-delay-in: $o-tour-pointer-duration-in - $o-tour-pointer-siz
     --TourPointer__text-color: black;
     --TourPointer__reveal-animation: o-tour-pointer-fade-in 400ms ease;
 
+    --TourPointer__translate-x: 0;
+    --TourPointer__translate-y: 0;
+
     z-index: $zindex-tooltip;
     max-width: 270px;
-
-    transition: width var(--TourPointer__expand-duration) ease,
-        height var(--TourPointer__expand-duration) ease;
+    border: var(--TourPointer__border-width) solid transparent;
+    transform: translate(var(--TourPointer__translate-x), var(--TourPointer__translate-y));
+    transition: width var(--TourPointer__expand-duration),
+        height var(--TourPointer__expand-duration);
 
     &.o_bouncing {
         &.o_left,
@@ -89,7 +94,8 @@ $o-tour-pointer-size-delay-in: $o-tour-pointer-duration-in - $o-tour-pointer-siz
 
     .o_tour_pointer_content {
         background-color: inherit;
-        color: var(--TourPointer__text-color);
+        color: transparent;
+        transition: color 0s ease var(--TourPointer__expand-duration);
 
         // Force style so that it does not depend on where the tooltip is attached
         line-height: $line-height-base;
@@ -113,28 +119,28 @@ $o-tour-pointer-size-delay-in: $o-tour-pointer-duration-in - $o-tour-pointer-siz
         }
     }
 
-    $-sqrt-2: 1.4142;
-    $-tip-scale: $o-tour-pointer-height / ((1 + $-sqrt-2) * $o-tour-pointer-width / 2);
-    $-tip-translate: ($-sqrt-2 * $-tip-scale - 1) * $o-tour-pointer-width / 2;
-
-    &.o_top .o_tour_pointer_tip {
-        transform: rotate(180deg) translateY($-tip-translate) scaleY($-tip-scale) rotate(45deg);
+    &.o_left .o_tour_pointer_tip {
+        transform: rotate(90deg) translateY(var(--TourPointer__offset))
+            scaleY(var(--TourPointer__scale)) rotate(45deg);
     }
 
     &.o_right .o_tour_pointer_tip {
-        transform: rotate(270deg) translateY($-tip-translate) scaleY($-tip-scale) rotate(45deg);
+        transform: rotate(270deg) translateY(var(--TourPointer__offset))
+            scaleY(var(--TourPointer__scale)) rotate(45deg);
+    }
+
+    &.o_top .o_tour_pointer_tip {
+        transform: rotate(180deg) translateY(var(--TourPointer__offset))
+            scaleY(var(--TourPointer__scale)) rotate(45deg);
     }
 
     &.o_bottom .o_tour_pointer_tip {
-        transform: rotate(0deg) translateY($-tip-translate) scaleY($-tip-scale) rotate(45deg);
-    }
-
-    &.o_left .o_tour_pointer_tip {
-        transform: rotate(90deg) translateY($-tip-translate) scaleY($-tip-scale) rotate(45deg);
+        transform: rotate(0deg) translateY(var(--TourPointer__offset))
+            scaleY(var(--TourPointer__scale)) rotate(45deg);
     }
 
     &.o_open {
-        border: var(--TourPointer__border-width) solid var(--TourPointer__color);
+        border-color: var(--TourPointer__color);
         background-color: var(--TourPointer__border-color);
         animation: var(--TourPointer__reveal-animation);
 
@@ -147,8 +153,12 @@ $o-tour-pointer-size-delay-in: $o-tour-pointer-duration-in - $o-tour-pointer-siz
             box-shadow: none;
         }
 
+        .o_tour_pointer_content {
+            color: var(--TourPointer__text-color);
+        }
+
         &.o_left {
-            transform: translateX(calc(var(--TourPointer__arrow-size) / -2));
+            --TourPointer__translate-x: calc(var(--TourPointer__arrow-size) / -2);
 
             .o_tour_pointer_tip {
                 transform: translateX(-50%) rotate(45deg);
@@ -160,7 +170,7 @@ $o-tour-pointer-size-delay-in: $o-tour-pointer-duration-in - $o-tour-pointer-siz
         }
 
         &.o_right {
-            transform: translateX(calc(var(--TourPointer__arrow-size) / 2));
+            --TourPointer__translate-x: calc(var(--TourPointer__arrow-size) / 2);
 
             .o_tour_pointer_tip {
                 transform: translateX(50%) rotate(45deg);
@@ -172,7 +182,7 @@ $o-tour-pointer-size-delay-in: $o-tour-pointer-duration-in - $o-tour-pointer-siz
         }
 
         &.o_top {
-            transform: translateY(calc(var(--TourPointer__arrow-size) / -2));
+            --TourPointer__translate-y: calc(var(--TourPointer__arrow-size) / -2);
 
             .o_tour_pointer_tip {
                 transform: translateY(-50%) rotate(45deg);
@@ -184,7 +194,7 @@ $o-tour-pointer-size-delay-in: $o-tour-pointer-duration-in - $o-tour-pointer-siz
         }
 
         &.o_bottom {
-            transform: translateY(calc(var(--TourPointer__arrow-size) / 2));
+            --TourPointer__translate-y: calc(var(--TourPointer__arrow-size) / 2);
 
             .o_tour_pointer_tip {
                 transform: translateY(50%) rotate(45deg);
@@ -195,44 +205,23 @@ $o-tour-pointer-size-delay-in: $o-tour-pointer-duration-in - $o-tour-pointer-siz
             }
         }
 
-        // TODO-JUM: is this useful?
-
-        &.o_inverse {
-            $-arrow-offset: ($o-tour-pointer-width - $o-tour-pointer-arrow-size) / 2 -
-                $o-tour-pointer-border-width;
-
-            &.o_left,
-            &.o_right {
-                .o_tour_pointer_tip {
-                    top: auto;
-                    bottom: $-arrow-offset;
-                }
-            }
-
+        // Exception for when the info bubble would overflow to the right:
+        // we offset the content to the left
+        &.o_expand_left {
             &.o_top,
             &.o_bottom {
+                --TourPointer__translate-x: calc(
+                    var(--TourPointer__width) + var(--TourPointer__border-width) - 100%
+                );
+
                 .o_tour_pointer_tip {
                     /*rtl:begin:ignore*/
-                    left: auto;
-                    right: $-arrow-offset;
+                    left: initial;
+                    right: calc(var(--TourPointer__arrow-size) / 2);
                     /*rtl:end:ignore*/
                 }
             }
         }
-
-        &.o_top .o_tour_pointer_tip {
-            transform: rotate(180deg) translateY(var(--TourPointer__offset)) scaleY(1.12)
-                rotate(45deg);
-        }
-
-        &.o_top .o_tour_pointer_tip {
-            transform: rotate(180deg) translateY(var(--TourPointer__offset)) scaleY(1.12)
-                rotate(45deg);
-        }
-    }
-
-    &.o_bottom .o_tour_pointer_tip {
-        transform: rotate(0deg) translateY(var(--TourPointer__offset)) scaleY(1.12) rotate(45deg);
     }
 }
 

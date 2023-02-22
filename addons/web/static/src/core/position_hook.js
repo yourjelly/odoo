@@ -68,7 +68,7 @@ const FIT_FLIP_ORDER = { top: "tb", right: "rl", bottom: "bt", left: "lr" };
 /** @type {Options} */
 const DEFAULTS = {
     popper: "popper",
-    margin: 0,
+    margin: 6,
     position: "bottom",
 };
 
@@ -237,11 +237,21 @@ export function reposition(reference, popper, options) {
 
     // Get best positioning solution and apply it
     const position = getBestPosition(reference, popper, options);
-    const { top, left } = position;
-    popper.style.top = `${top}px`;
-    popper.style.left = `${left}px`;
+    const { top, left, direction, variant } = position;
+    if (direction === "top") {
+        popper.style.bottom = `${window.innerHeight - top - popper.offsetHeight}px`;
+        popper.style.removeProperty("top");
+    } else {
+        popper.style.top = `${top}px`;
+    }
+    if (direction === "left") {
+        popper.style.right = `${window.innerWidth - left - popper.offsetWidth}px`;
+        popper.style.removeProperty("left");
+    } else {
+        popper.style.left = `${left}px`;
+    }
 
-    if (variantKey === "fit") {
+    if (variant === "fit") {
         const styleProperty = ["top", "bottom"].includes(directionKey) ? "width" : "height";
         popper.style[styleProperty] = reference.getBoundingClientRect()[styleProperty] + "px";
     }
