@@ -5430,7 +5430,7 @@
         validateChartDefinition: (validator, definition) => BarChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => BarChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => BarChart.getDefinitionFromContextCreation(context),
-        name: "Bar",
+        name: _lt("Bar"),
         sequence: 10,
     });
     chartRegistry.add("line", {
@@ -5440,7 +5440,7 @@
         validateChartDefinition: (validator, definition) => LineChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => LineChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => LineChart.getDefinitionFromContextCreation(context),
-        name: "Line",
+        name: _lt("Line"),
         sequence: 20,
     });
     chartRegistry.add("pie", {
@@ -5450,7 +5450,7 @@
         validateChartDefinition: (validator, definition) => PieChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => PieChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => PieChart.getDefinitionFromContextCreation(context),
-        name: "Pie",
+        name: _lt("Pie"),
         sequence: 30,
     });
     chartRegistry.add("scorecard", {
@@ -5460,7 +5460,7 @@
         validateChartDefinition: (validator, definition) => ScorecardChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => ScorecardChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => ScorecardChart.getDefinitionFromContextCreation(context),
-        name: "Scorecard",
+        name: _lt("Scorecard"),
         sequence: 40,
     });
     chartRegistry.add("gauge", {
@@ -5470,7 +5470,7 @@
         validateChartDefinition: (validator, definition) => GaugeChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => GaugeChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => GaugeChart.getDefinitionFromContextCreation(context),
-        name: "Gauge",
+        name: _lt("Gauge"),
         sequence: 50,
     });
     const chartComponentRegistry = new Registry();
@@ -7352,7 +7352,7 @@
         separator: true,
     })
         .add("unhide_columns", {
-        name: "Unhide columns",
+        name: _lt("Unhide columns"),
         sequence: 86,
         action: UNHIDE_COLUMNS_ACTION,
         isVisible: (env) => {
@@ -7440,7 +7440,7 @@
         separator: true,
     })
         .add("unhide_rows", {
-        name: "Unhide rows",
+        name: _lt("Unhide rows"),
         sequence: 86,
         action: UNHIDE_ROWS_ACTION,
         isVisible: (env) => {
@@ -7614,31 +7614,31 @@
     // -----------------------------------------------------------------------------
     css /* scss */ `
   .o-autofill {
-    height: 6px;
-    width: 6px;
-    border: 1px solid white;
     position: absolute;
+    height: ${AUTOFILL_EDGE_LENGTH}px;
+    width: ${AUTOFILL_EDGE_LENGTH}px;
+    border: 1px solid white;
+    box-sizing: border-box !important;
     background-color: #1a73e8;
+  }
 
-    .o-autofill-handler {
-      position: absolute;
-      height: ${AUTOFILL_EDGE_LENGTH}px;
-      width: ${AUTOFILL_EDGE_LENGTH}px;
-
-      &:hover {
-        cursor: crosshair;
-      }
+  .o-autofill-handler {
+    position: absolute;
+    height: ${AUTOFILL_EDGE_LENGTH}px;
+    width: ${AUTOFILL_EDGE_LENGTH}px;
+    &:hover {
+      cursor: crosshair;
     }
+  }
 
-    .o-autofill-nextvalue {
-      position: absolute;
-      background-color: #ffffff;
-      border: 1px solid black;
-      padding: 5px;
-      font-size: 12px;
-      pointer-events: none;
-      white-space: nowrap;
-    }
+  .o-autofill-nextvalue {
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid black;
+    padding: 5px;
+    font-size: 12px;
+    pointer-events: none;
+    white-space: nowrap;
   }
 `;
     class Autofill extends owl.Component {
@@ -7651,15 +7651,25 @@
         }
         get style() {
             const { left, top } = this.props.position;
-            return `top:${top}px;left:${left}px`;
+            return cssPropertiesToCss({
+                top: `${top}px`,
+                left: `${left}px`,
+                visibility: this.props.isVisible ? "visible" : "hidden",
+            });
         }
-        get styleHandler() {
-            let position = this.state.handler ? this.state.position : { left: 0, top: 0 };
-            return `top:${position.top}px;left:${position.left}px;`;
+        get handlerStyle() {
+            const { left, top } = this.state.handler ? this.state.position : this.props.position;
+            return cssPropertiesToCss({
+                top: `${top}px`,
+                left: `${left}px`,
+            });
         }
-        get styleNextvalue() {
-            let position = this.state.handler ? this.state.position : { left: 0, top: 0 };
-            return `top:${position.top + 5}px;left:${position.left + 15}px;`;
+        get styleNextValue() {
+            const { left, top } = this.state.position;
+            return cssPropertiesToCss({
+                top: `${top + 5}px`,
+                left: `${left + 15}px`,
+            });
         }
         getTooltip() {
             const tooltip = this.env.model.getters.getAutofillTooltip();
@@ -7670,27 +7680,22 @@
         }
         onMouseDown(ev) {
             this.state.handler = true;
-            this.state.position = { left: 0, top: 0 };
-            const { scrollY, scrollX } = this.env.model.getters.getActiveSheetScrollInfo();
-            const start = {
-                left: ev.clientX + scrollX,
-                top: ev.clientY + scrollY,
-            };
             let lastCol;
             let lastRow;
+            const start = {
+                left: ev.clientX - this.props.position.left,
+                top: ev.clientY - this.props.position.top,
+            };
             const onMouseUp = () => {
                 this.state.handler = false;
+                this.state.position = { ...this.props.position };
                 this.env.model.dispatch("AUTOFILL");
             };
-            const onMouseMove = (ev) => {
-                const position = gridOverlayPosition();
-                const { scrollY, scrollX } = this.env.model.getters.getActiveSheetScrollInfo();
+            const onMouseMove = (col, row, ev) => {
                 this.state.position = {
-                    left: ev.clientX - start.left + scrollX,
-                    top: ev.clientY - start.top + scrollY,
+                    left: ev.clientX - start.left,
+                    top: ev.clientY - start.top,
                 };
-                const col = this.env.model.getters.getColIndex(ev.clientX - position.left);
-                const row = this.env.model.getters.getRowIndex(ev.clientY - position.top);
                 if (lastCol !== col || lastRow !== row) {
                     const activeSheetId = this.env.model.getters.getActiveSheetId();
                     const numberOfCols = this.env.model.getters.getNumberCols(activeSheetId);
@@ -7702,7 +7707,7 @@
                     }
                 }
             };
-            startDnd(onMouseMove, onMouseUp);
+            dragAndDropBeyondTheViewport(this.env, onMouseMove, onMouseUp);
         }
         onDblClick() {
             this.env.model.dispatch("AUTOFILL_AUTO");
@@ -7711,6 +7716,7 @@
     Autofill.template = "o-spreadsheet-Autofill";
     Autofill.props = {
         position: Object,
+        isVisible: Boolean,
     };
     class TooltipComponent extends owl.Component {
     }
@@ -15483,7 +15489,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 let assistantStyle = {};
                 if (cellY > remainingHeight) {
                     // render top
-                    assistantStyle.top = `$-3px`;
+                    // We compensate 2 px of margin on the assistant style + 1px for design reasons
+                    assistantStyle.top = `-3px`;
                     assistantStyle.transform = `translate(0, -100%)`;
                 }
                 if (cellX + ASSISTANT_WIDTH > this.props.delimitation.width) {
@@ -17526,7 +17533,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             },
             action: (env) => env.model.dispatch("MOVE_SHEET", {
                 sheetId: env.model.getters.getActiveSheetId(),
-                direction: "right",
+                delta: 1,
             }),
         })
             .add("move_left", {
@@ -17538,7 +17545,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             },
             action: (env) => env.model.dispatch("MOVE_SHEET", {
                 sheetId: env.model.getters.getActiveSheetId(),
-                direction: "left",
+                delta: -1,
             }),
         })
             .add("hide_sheet", {
@@ -18021,17 +18028,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         separator: true,
     })
         .addChild("format_wrapping_overflow", ["format", "format_wrapping"], {
-        name: "Overflow",
+        name: _lt("Overflow"),
         sequence: 10,
         action: (env) => setStyle(env, { wrapping: "overflow" }),
     })
         .addChild("format_wrapping_wrap", ["format", "format_wrapping"], {
-        name: "Wrap",
+        name: _lt("Wrap"),
         sequence: 20,
         action: (env) => setStyle(env, { wrapping: "wrap" }),
     })
         .addChild("format_wrapping_clip", ["format", "format_wrapping"], {
-        name: "Clip",
+        name: _lt("Clip"),
         sequence: 30,
         action: (env) => setStyle(env, { wrapping: "clip" }),
     })
@@ -18167,6 +18174,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 isMissing: false,
                 mode: "select-range",
             });
+            this.focusedInput = owl.useRef("focusedInput");
         }
         get ranges() {
             const existingSelectionRange = this.env.model.getters.getSelectionInput(this.id);
@@ -18194,6 +18202,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return this.props.isInvalid || this.state.isMissing;
         }
         setup() {
+            owl.useEffect(() => { var _a; return (_a = this.focusedInput.el) === null || _a === void 0 ? void 0 : _a.focus(); }, () => [this.focusedInput.el]);
             owl.onMounted(() => this.enableNewSelectionInput());
             owl.onWillUnmount(async () => this.disableNewSelectionInput());
             owl.onPatched(() => this.checkChange());
@@ -18237,6 +18246,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     updateSelectionWithArrowKeys(ev, this.env.model.selection);
                 }
             }
+            else if (ev.key === "Enter") {
+                const target = ev.target;
+                target.blur();
+            }
         }
         focus(rangeId) {
             this.state.isMissing = false;
@@ -18262,7 +18275,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 rangeId,
                 value: target.value,
             });
-            target.blur();
             this.triggerChange();
         }
         disable() {
@@ -18621,6 +18633,60 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         maxHeight: { type: Number, optional: true },
     };
 
+    css /* scss */ `
+  .o-color-picker-widget {
+    display: inline-block;
+    position: relative;
+
+    .o-color-picker-button-style {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2px;
+      padding: 3px;
+      border-radius: 2px;
+      cursor: pointer;
+      &:not([disabled]):hover {
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+    }
+
+    .o-color-picker-button {
+      > span {
+        border-bottom: 4px solid;
+        height: 16px;
+        margin-top: 2px;
+      }
+
+      &[disabled] {
+        pointer-events: none;
+        opacity: 0.3;
+      }
+    }
+  }
+`;
+    class ColorPickerWidget extends owl.Component {
+        get iconStyle() {
+            return this.props.currentColor
+                ? `border-color: ${this.props.currentColor}`
+                : "border-bottom-style: hidden";
+        }
+    }
+    ColorPickerWidget.template = "o-spreadsheet-ColorPickerWidget";
+    ColorPickerWidget.components = { ColorPicker };
+    ColorPickerWidget.props = {
+        currentColor: { type: String, optional: true },
+        toggleColorPicker: Function,
+        showColorPicker: Boolean,
+        onColorPicked: Function,
+        icon: String,
+        dropdownDirection: { type: String, optional: true },
+        title: { type: String, optional: true },
+        disabled: { type: Boolean, optional: true },
+        dropdownMaxHeight: { type: Number, optional: true },
+        class: { type: String, optional: true },
+    };
+
     class LineBarPieDesignPanel extends owl.Component {
         constructor() {
             super(...arguments);
@@ -18654,7 +18720,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     LineBarPieDesignPanel.template = "o-spreadsheet-LineBarPieDesignPanel";
-    LineBarPieDesignPanel.components = { ColorPicker };
+    LineBarPieDesignPanel.components = { ColorPickerWidget };
     LineBarPieDesignPanel.props = {
         figureId: String,
         definition: Object,
@@ -18748,6 +18814,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 sectionRuleDispatchResult: undefined,
             });
         }
+        setup() {
+            owl.useExternalListener(window, "click", this.closeMenus);
+        }
         get designErrorMessages() {
             var _a;
             const cancelledReasons = [...(((_a = this.state.sectionRuleDispatchResult) === null || _a === void 0 ? void 0 : _a.reasons) || [])];
@@ -18838,7 +18907,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     GaugeChartDesignPanel.template = "o-spreadsheet-GaugeChartDesignPanel";
-    GaugeChartDesignPanel.components = { ColorPicker };
+    GaugeChartDesignPanel.components = { ColorPickerWidget };
     GaugeChartDesignPanel.props = {
         figureId: String,
         definition: Object,
@@ -18936,6 +19005,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 openedColorPicker: undefined,
             });
         }
+        setup() {
+            owl.useExternalListener(window, "click", this.closeMenus);
+        }
         updateTitle(ev) {
             this.props.updateChart({
                 title: ev.target.value,
@@ -18944,8 +19016,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         updateBaselineDescr(ev) {
             this.props.updateChart({ baselineDescr: ev.target.value });
         }
-        openColorPicker(colorPickerId) {
-            this.state.openedColorPicker = colorPickerId;
+        toggleColorPicker(colorPickerId) {
+            if (this.state.openedColorPicker === colorPickerId) {
+                this.state.openedColorPicker = undefined;
+            }
+            else {
+                this.state.openedColorPicker = colorPickerId;
+            }
         }
         setColor(color, colorPickerId) {
             switch (colorPickerId) {
@@ -18959,11 +19036,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.props.updateChart({ baselineColorUp: color });
                     break;
             }
+            this.closeMenus();
+        }
+        closeMenus() {
             this.state.openedColorPicker = undefined;
         }
     }
     ScorecardChartDesignPanel.template = "o-spreadsheet-ScorecardChartDesignPanel";
-    ScorecardChartDesignPanel.components = { ColorPicker };
+    ScorecardChartDesignPanel.components = { ColorPickerWidget };
     ScorecardChartDesignPanel.props = {
         figureId: String,
         definition: Object,
@@ -19014,13 +19094,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       .o-panel-element:last-child {
         border-right: none;
       }
-    }
-
-    .o-with-color-picker {
-      position: relative;
-    }
-    .o-with-color-picker > span {
-      border-bottom: 4px solid;
     }
   }
 `;
@@ -19384,14 +19457,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       margin-bottom: 5px;
       width: 96%;
     }
-    .o-color-picker {
+    .o-color-picker-widget .o-color-picker-button {
       pointer-events: all;
+      cursor: default;
     }
   }
   .o-cf-color-scale-editor {
     .o-threshold {
       display: flex;
-      flex-direction: horizontal;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
       select {
         width: 100%;
       }
@@ -19862,7 +19938,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     ConditionalFormattingPanel.template = "o-spreadsheet-ConditionalFormattingPanel";
-    ConditionalFormattingPanel.components = { SelectionInput, IconPicker, ColorPicker };
+    ConditionalFormattingPanel.components = { SelectionInput, IconPicker, ColorPickerWidget };
     ConditionalFormattingPanel.props = {
         selection: { type: Object, optional: true },
         onCloseSidePanel: Function,
@@ -21618,7 +21694,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return cssPropertiesToCss({
                 left: `${leftValue - AUTOFILL_EDGE_LENGTH / 2}px`,
                 top: `${topValue - AUTOFILL_EDGE_LENGTH / 2}px`,
-                backgroundColor: this.props.color,
+                "background-color": this.props.color,
             });
         }
         onMouseDown(ev) {
@@ -22121,7 +22197,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 top: rect.y + rect.height - AUTOFILL_EDGE_LENGTH / 2,
             };
         }
-        isAutoFillActive() {
+        get isAutofillVisible() {
             const zone = this.env.model.getters.getSelectedZone();
             const rect = this.env.model.getters.getVisibleRect({
                 left: zone.right,
@@ -22458,6 +22534,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         theme: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
         table: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/table",
         hyperlink: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+        image: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
     };
     const RELATIONSHIP_NSR = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
     const HEIGHT_FACTOR = 0.75; // 100px => 75 u
@@ -23481,12 +23558,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return "n";
         }
     }
-    /**
-     * For some reason, Excel will only take the devicePixelRatio (i.e. interface scale on Windows desktop)
-     * into account for the height.
-     */
     function convertHeightToExcel(height) {
-        return Math.round(HEIGHT_FACTOR * height * window.devicePixelRatio * 100) / 100;
+        return Math.round(HEIGHT_FACTOR * height * 100) / 100;
     }
     function convertWidthToExcel(width) {
         return Math.round(WIDTH_FACTOR * width * 100) / 100;
@@ -23625,6 +23698,19 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         if (xlsxId === -1) {
             chartIds.push(chartId);
             return chartIds.length;
+        }
+        return xlsxId + 1;
+    }
+    const imageIds = [];
+    /**
+     * Convert a image o-spreadsheet id to a xlsx id which
+     * are unsigned integers (starting from 1).
+     */
+    function convertImageId(imageId) {
+        const xlsxId = imageIds.findIndex((id) => id === imageId);
+        if (xlsxId === -1) {
+            imageIds.push(imageId);
+            return imageIds.length;
         }
         return xlsxId + 1;
     }
@@ -26352,6 +26438,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         return {
             ...createEmptySheet(sheetId, name),
             charts: [],
+            images: [],
         };
     }
     function createEmptyExcelWorkbookData() {
@@ -29616,6 +29703,24 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 }
             }
         }
+        exportForExcel(data) {
+            for (const sheet of data.sheets) {
+                const figures = this.getters.getFigures(sheet.id);
+                const images = [];
+                for (const figure of figures) {
+                    if ((figure === null || figure === void 0 ? void 0 : figure.tag) === "image") {
+                        const image = this.getImage(figure.id);
+                        if (image) {
+                            images.push({
+                                ...figure,
+                                data: deepCopy(image),
+                            });
+                        }
+                    }
+                }
+                sheet.images = images;
+            }
+        }
         getAllImages() {
             const images = [];
             for (const sheetId in this.images) {
@@ -30463,22 +30568,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     return this.checkValidations(cmd, this.checkSheetName, this.checkSheetPosition);
                 }
                 case "MOVE_SHEET":
-                    const currentIndex = this.orderedSheetIds.indexOf(cmd.sheetId);
-                    if (cmd.direction === "left") {
-                        const leftSheets = this.orderedSheetIds
-                            .slice(0, currentIndex)
-                            .map((id) => !this.isSheetVisible(id));
-                        return leftSheets.every((isHidden) => isHidden)
-                            ? 14 /* CommandResult.WrongSheetMove */
-                            : 0 /* CommandResult.Success */;
+                    try {
+                        const currentIndex = this.orderedSheetIds.findIndex((id) => id === cmd.sheetId);
+                        this.findIndexOfTargetSheet(currentIndex, cmd.delta);
+                        return 0 /* CommandResult.Success */;
                     }
-                    else {
-                        const rightSheets = this.orderedSheetIds
-                            .slice(currentIndex + 1)
-                            .map((id) => !this.isSheetVisible(id));
-                        return rightSheets.every((isHidden) => isHidden)
-                            ? 14 /* CommandResult.WrongSheetMove */
-                            : 0 /* CommandResult.Success */;
+                    catch (e) {
+                        return 14 /* CommandResult.WrongSheetMove */;
                     }
                 case "RENAME_SHEET":
                     return this.isRenameAllowed(cmd);
@@ -30517,7 +30613,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.history.update("sheetIdsMapName", sheet.name, sheet.id);
                     break;
                 case "MOVE_SHEET":
-                    this.moveSheet(cmd.sheetId, cmd.direction);
+                    this.moveSheet(cmd.sheetId, cmd.delta);
                     break;
                 case "RENAME_SHEET":
                     this.renameSheet(this.sheets[cmd.sheetId], cmd.name);
@@ -30862,37 +30958,33 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.history.update("sheets", Object.assign({}, sheets, { [sheet.id]: sheet }));
             return sheet;
         }
-        moveSheet(sheetId, direction) {
+        moveSheet(sheetId, delta) {
             const orderedSheetIds = this.orderedSheetIds.slice();
             const currentIndex = orderedSheetIds.findIndex((id) => id === sheetId);
             const sheet = orderedSheetIds.splice(currentIndex, 1);
-            let index = direction === "left"
-                ? this.findIndexOfPreviousVisibleSheet(currentIndex - 1, orderedSheetIds)
-                : this.findIndexOfNextVisibleSheet(currentIndex + 1, orderedSheetIds);
-            if (index === undefined) {
-                index = orderedSheetIds.length;
-            }
+            let index = this.findIndexOfTargetSheet(currentIndex, delta);
             orderedSheetIds.splice(index, 0, sheet[0]);
             this.history.update("orderedSheetIds", orderedSheetIds);
         }
-        findIndexOfPreviousVisibleSheet(current, orderedSheetIds) {
-            while (current >= 0 && !this.isSheetVisible(orderedSheetIds[current])) {
-                current--;
+        findIndexOfTargetSheet(currentIndex, deltaIndex) {
+            while (deltaIndex != 0 && 0 <= currentIndex && currentIndex <= this.orderedSheetIds.length) {
+                if (deltaIndex > 0) {
+                    currentIndex++;
+                    if (this.isSheetVisible(this.orderedSheetIds[currentIndex])) {
+                        deltaIndex--;
+                    }
+                }
+                else if (deltaIndex < 0) {
+                    currentIndex--;
+                    if (this.isSheetVisible(this.orderedSheetIds[currentIndex])) {
+                        deltaIndex++;
+                    }
+                }
             }
-            if (current === -1) {
-                throw new Error("There is no previous visible sheet");
+            if (deltaIndex === 0) {
+                return currentIndex;
             }
-            return current;
-        }
-        findIndexOfNextVisibleSheet(current, orderedSheetIds) {
-            while (current < orderedSheetIds.length && !this.isSheetVisible(orderedSheetIds[current])) {
-                current++;
-            }
-            if (current === orderedSheetIds.length - 1 &&
-                !this.isSheetVisible(orderedSheetIds[current - 1])) {
-                return undefined;
-            }
-            return current;
+            throw new Error(_lt("There is not enough visible sheets"));
         }
         checkSheetName(cmd) {
             const { orderedSheetIds, sheets } = this;
@@ -35230,7 +35322,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         this.focus(index);
                     }
                     if (index !== null) {
-                        const values = cmd.value.split(",").map((reference) => reference.trim());
+                        const valueWithoutLeadingComma = cmd.value.replace(/^,+/, "");
+                        const values = valueWithoutLeadingComma.split(",").map((reference) => reference.trim());
                         this.setRange(index, values);
                     }
                     break;
@@ -35317,10 +35410,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * Insert new inputs after the given index.
          */
         insertNewRange(index, values) {
+            const currentMaxId = Math.max(0, ...this.ranges.map((range) => Number(range.id)));
             this.ranges.splice(index, 0, ...values.map((xc, i) => ({
                 xc,
-                id: (this.ranges.length + i + 1).toString(),
-                color: colors$1[(this.ranges.length + i) % colors$1.length],
+                id: (currentMaxId + i + 1).toString(),
+                color: colors$1[(currentMaxId + 1 + i) % colors$1.length],
             })));
         }
         /**
@@ -39440,6 +39534,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     padding-right: 10px;
     height: ${BOTTOMBAR_HEIGHT}px;
     border-left: 1px solid #c1c1c1;
+    border-right: 1px solid #c1c1c1;
+    margin-left: -1px;
     cursor: pointer;
     &:hover {
       background-color: rgba(0, 0, 0, 0.08);
@@ -39513,8 +39609,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 this.stopEdition();
             }
         }
-        clickSheet() {
+        onMouseDown(ev) {
             this.activateSheet();
+            this.props.onMouseDown(ev);
         }
         activateSheet() {
             this.env.model.dispatch("ACTIVATE_SHEET", {
@@ -39599,9 +39696,15 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
     BottomBarSheet.template = "o-spreadsheet-BottomBarSheet";
     BottomBarSheet.components = { Ripple };
+    BottomBarSheet.defaultProps = {
+        onMouseDown: () => { },
+        style: "",
+    };
     BottomBarSheet.props = {
         sheetId: String,
         openContextMenu: Function,
+        style: { type: String, optional: true },
+        onMouseDown: { type: Function, optional: true },
     };
 
     // -----------------------------------------------------------------------------
@@ -39673,6 +39776,141 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         closeContextMenu: Function,
     };
 
+    class DOMDndHelper {
+        constructor(args) {
+            this.edgeScrollOffset = 0;
+            this.items = args.items.map((item) => ({ ...item, positionAtStart: item.position }));
+            this.draggedItemId = args.draggedItemId;
+            this.containerEl = args.containerEl;
+            this.onChange = args.onChange;
+            this.onCancel = args.onCancel;
+            this.onDragEnd = args.onDragEnd;
+            this.initialMousePosition = args.mouseX;
+            this.currentMousePosition = args.mouseX;
+            this.minPosition = this.items[0].position;
+            this.maxPosition =
+                this.items[this.items.length - 1].position + this.items[this.items.length - 1].size;
+            startDnd(this.onMouseMove.bind(this), this.onMouseUp.bind(this));
+        }
+        onMouseMove(ev) {
+            if (ev.button !== 0) {
+                this.onCancel();
+                return;
+            }
+            const mousePosition = ev.clientX;
+            if (mousePosition < this.containerRect.left || mousePosition > this.containerRect.right) {
+                this.startEdgeScroll(mousePosition < this.containerRect.left ? -1 : 1);
+                return;
+            }
+            else {
+                this.stopEdgeScroll();
+            }
+            this.moveDraggedItemToPosition(mousePosition + this.edgeScrollOffset);
+        }
+        moveDraggedItemToPosition(position) {
+            this.currentMousePosition = position;
+            const hoveredItemIndex = this.getHoveredItemIndex(position, this.items);
+            const draggedItemIndex = this.items.findIndex((item) => item.id === this.draggedItemId);
+            const draggedItem = this.items[draggedItemIndex];
+            if (this.deadZone && this.isInZone(position, this.deadZone)) {
+                this.onChange(this.getItemsPositions());
+                return;
+            }
+            else if (this.isInZone(position, {
+                start: draggedItem.position,
+                end: draggedItem.position + draggedItem.size,
+            })) {
+                this.deadZone = undefined;
+            }
+            if (draggedItemIndex === hoveredItemIndex) {
+                this.onChange(this.getItemsPositions());
+                return;
+            }
+            const leftIndex = Math.min(draggedItemIndex, hoveredItemIndex);
+            const rightIndex = Math.max(draggedItemIndex, hoveredItemIndex);
+            const direction = Math.sign(hoveredItemIndex - draggedItemIndex);
+            let draggedItemMoveSize = 0;
+            for (let i = leftIndex; i <= rightIndex; i++) {
+                if (i === draggedItemIndex) {
+                    continue;
+                }
+                this.items[i].position -= direction * draggedItem.size;
+                draggedItemMoveSize += this.items[i].size;
+            }
+            draggedItem.position += direction * draggedItemMoveSize;
+            this.items.sort((item1, item2) => item1.position - item2.position);
+            this.deadZone =
+                direction > 0
+                    ? { start: position, end: draggedItem.position }
+                    : { start: draggedItem.position + draggedItem.size, end: position };
+            this.onChange(this.getItemsPositions());
+        }
+        onMouseUp(ev) {
+            if (ev.button !== 0) {
+                this.onCancel();
+            }
+            const targetItemIndex = this.items.findIndex((item) => item.id === this.draggedItemId);
+            this.onDragEnd(this.draggedItemId, targetItemIndex);
+            this.stopEdgeScroll();
+        }
+        startEdgeScroll(direction) {
+            if (this.edgeScrollIntervalId)
+                return;
+            this.edgeScrollIntervalId = window.setInterval(() => {
+                const offset = direction * 3;
+                let newPosition = this.currentMousePosition + offset;
+                if (newPosition < this.minPosition) {
+                    newPosition = this.minPosition;
+                }
+                else if (newPosition > this.maxPosition) {
+                    newPosition = this.maxPosition;
+                }
+                this.edgeScrollOffset += newPosition - this.currentMousePosition;
+                this.moveDraggedItemToPosition(newPosition);
+                this.containerEl.scrollLeft += offset;
+            }, 5);
+        }
+        stopEdgeScroll() {
+            window.clearInterval(this.edgeScrollIntervalId);
+            this.edgeScrollIntervalId = undefined;
+        }
+        /**
+         * Get the index of the item the given mouse position is inside.
+         * If the mouse is outside the container, return the first or last item index.
+         */
+        getHoveredItemIndex(mousePosition, items) {
+            if (mousePosition <= this.minPosition)
+                return 0;
+            if (mousePosition >= this.maxPosition)
+                return items.length - 1;
+            return items.findIndex((item) => item.position + item.size >= mousePosition);
+        }
+        getItemsPositions() {
+            const positions = {};
+            for (let item of this.items) {
+                if (item.id !== this.draggedItemId) {
+                    positions[item.id] = item.position - item.positionAtStart;
+                    continue;
+                }
+                let mouseOffset = this.currentMousePosition - this.initialMousePosition;
+                let left = mouseOffset;
+                left = Math.max(this.minPosition - item.positionAtStart, left);
+                left = Math.min(this.maxPosition - item.positionAtStart - item.size, left);
+                positions[item.id] = left;
+            }
+            return positions;
+        }
+        get containerRect() {
+            return this.containerEl.getBoundingClientRect();
+        }
+        isInZone(position, zone) {
+            return position >= zone.start && position <= zone.end;
+        }
+        destroy() {
+            this.stopEdgeScroll();
+        }
+    }
+
     // -----------------------------------------------------------------------------
     // SpreadSheet
     // -----------------------------------------------------------------------------
@@ -39697,19 +39935,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
     .o-all-sheets {
       max-width: 70%;
-
       .o-bottom-bar-fade-out {
         background-image: linear-gradient(-90deg, #cfcfcf, transparent 1%);
       }
 
       .o-bottom-bar-fade-in {
         background-image: linear-gradient(90deg, #cfcfcf, transparent 1%);
-      }
-
-      &:after {
-        content: "";
-        border-right: 1px solid #c1c1c1;
-        height: 100%;
       }
     }
 
@@ -39751,11 +39982,30 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 position: null,
                 menuItems: [],
             });
+            this.sheetState = owl.useState({
+                sheetList: this.getVisibleSheets(),
+                isDnd: false,
+                sheetDndPositions: undefined,
+            });
         }
         setup() {
             owl.onWillUpdateProps(() => {
                 this.updateScrollState();
+                const visibleSheets = this.getVisibleSheets();
+                // Cancel sheet dragging when there is a change in the sheets
+                if (this.sheetState.isDnd && !deepEquals(this.sheetState.sheetList, visibleSheets)) {
+                    this.stopDragging();
+                }
+                this.sheetState.sheetList = visibleSheets;
             });
+            owl.onWillUnmount(() => {
+                var _a;
+                (_a = this.dndHelper) === null || _a === void 0 ? void 0 : _a.destroy();
+            });
+        }
+        isDragged(sheetId) {
+            var _a;
+            return this.sheetState.isDnd && ((_a = this.dndHelper) === null || _a === void 0 ? void 0 : _a.draggedItemId) === sheetId;
         }
         clickAddSheet(ev) {
             const activeSheetId = this.env.model.getters.getActiveSheetId();
@@ -39766,9 +40016,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.env.model.dispatch("ACTIVATE_SHEET", { sheetIdFrom: activeSheetId, sheetIdTo: sheetId });
         }
         getVisibleSheets() {
-            return this.env.model.getters
-                .getVisibleSheetIds()
-                .map((sheetId) => this.env.model.getters.getSheet(sheetId));
+            return this.env.model.getters.getVisibleSheetIds().map((sheetId) => {
+                const sheet = this.env.model.getters.getSheet(sheetId);
+                return { id: sheet.id, name: sheet.name };
+            });
+        }
+        getSheets() {
+            return this.sheetState.sheetList;
         }
         clickListSheets(ev) {
             const registry = new MenuItemRegistry();
@@ -39854,6 +40108,83 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return;
             this.targetScroll = scroll;
             this.sheetListRef.el.scrollTo({ top: 0, left: scroll, behavior: "smooth" });
+        }
+        onSheetMouseDown(sheetId, event) {
+            if (event.button !== 0)
+                return;
+            this.closeMenu();
+            const mouseX = event.clientX;
+            document.body.style.cursor = "move";
+            const visibleSheets = this.getVisibleSheets();
+            const sheetRects = this.getSheetItemRects();
+            const sheets = visibleSheets.map((sheet, index) => ({
+                id: sheet.id,
+                size: sheetRects[index].width,
+                position: sheetRects[index].x,
+            }));
+            this.dndHelper = new DOMDndHelper({
+                draggedItemId: sheetId,
+                mouseX,
+                items: sheets,
+                containerEl: this.sheetListRef.el,
+                onChange: (newPositions) => {
+                    this.sheetState.isDnd = true;
+                    this.sheetState.sheetDndPositions = newPositions;
+                },
+                onCancel: () => this.stopDragging(),
+                onDragEnd: (sheetId, finalIndex) => this.onDragEnd(sheetId, finalIndex),
+            });
+        }
+        onDragEnd(sheetId, finalIndex) {
+            const originalIndex = this.sheetState.sheetList.findIndex((sheet) => sheet.id === sheetId);
+            const delta = finalIndex - originalIndex;
+            if (sheetId && delta !== 0) {
+                this.env.model.dispatch("MOVE_SHEET", {
+                    sheetId: sheetId,
+                    delta: delta,
+                });
+            }
+            this.stopDragging();
+        }
+        getSheetStyle(sheetId) {
+            var _a;
+            const style = {};
+            if (this.sheetState.isDnd) {
+                style.position = "relative";
+                style.left = (((_a = this.sheetState.sheetDndPositions) === null || _a === void 0 ? void 0 : _a[sheetId]) || 0) + "px";
+                style.transition = "left 0.5s";
+                style.cursor = "move";
+            }
+            if (this.isDragged(sheetId)) {
+                style.transition = "left 0s";
+                style["z-index"] = "1000";
+            }
+            return cssPropertiesToCss(style);
+        }
+        stopDragging() {
+            document.body.style.cursor = "";
+            this.sheetState.sheetList = this.getVisibleSheets();
+            this.sheetState.isDnd = false;
+            this.sheetState.sheetDndPositions = undefined;
+            this.dndHelper = undefined;
+        }
+        getSheetItemRects() {
+            return Array.from(this.bottomBarRef.el.querySelectorAll(`.o-sheet`))
+                .map((sheetEl) => sheetEl.getBoundingClientRect())
+                .map((rect) => ({
+                x: rect.x,
+                width: rect.width - 1,
+                y: rect.y,
+                height: rect.height,
+            }));
+        }
+        getSheetClasses(sheetId) {
+            let classes = "";
+            if (this.isDragged(sheetId))
+                classes += "dragged ";
+            if (this.sheetState.isDnd)
+                classes += "dragging ";
+            return classes;
         }
         get sheetListCurrentScroll() {
             if (!this.sheetListRef.el)
@@ -40174,38 +40505,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
       }
     }
 
-    .o-dropdown {
-      position: relative;
-      .o-dropdown-content {
-        position: absolute;
-        top: calc(100% + 5px);
-        left: 0;
-        z-index: ${ComponentsImportance.Dropdown};
-        box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
-        background-color: #f6f6f6;
-
-        .o-dropdown-item {
-          padding: 7px 10px;
-        }
-        .o-dropdown-item:hover {
-          background-color: rgba(0, 0, 0, 0.08);
-        }
-        .o-dropdown-line {
-          display: flex;
-          padding: 3px 6px;
-          .o-line-item {
-            width: 16px;
-            height: 16px;
-            margin: 1px 3px;
-            &:hover {
-              background-color: rgba(0, 0, 0, 0.08);
-            }
-          }
-        }
-      }
-    }
-
-    .o-tools {
+    .o-sidePanel-tools {
       color: #333;
       font-size: 13px;
       cursor: default;
@@ -40217,23 +40517,12 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         margin: 2px;
         padding: 0 3px;
         border-radius: 2px;
-      }
 
-      .o-tool.active,
-      .o-tool:not(.o-disabled):hover {
-        background-color: rgba(0, 0, 0, 0.08);
-      }
-
-      .o-with-color > span {
-        border-bottom: 4px solid;
-        height: 16px;
-        margin-top: 2px;
-      }
-      .o-with-color {
-        .o-line-item:hover {
-          outline: 1px solid gray;
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.08);
         }
       }
+
       .o-border {
         .o-line-item {
           padding: 4px;
@@ -40396,6 +40685,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     }
     FontSizeEditor.template = "o-spreadsheet-FontSizeEditor";
     FontSizeEditor.components = {};
+    FontSizeEditor.props = {
+        onToggle: Function,
+        dropdownStyle: String,
+    };
 
     const FORMATS = [
         { name: "automatic", text: NumberFormatTerms.Automatic },
@@ -40542,18 +40835,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
           polygon,
           rect {
             fill: ${HOVERED_FG_COLOR};
-          }
-        }
-
-        .o-with-color > span {
-          border-bottom: 4px solid;
-          height: 16px;
-          margin-top: 2px;
-        }
-
-        .o-with-color {
-          .o-line-item:hover {
-            outline: 1px solid gray;
           }
         }
 
@@ -40898,7 +41179,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
     TopBar.template = "o-spreadsheet-TopBar";
-    TopBar.components = { ColorPicker, Menu, TopBarComposer, FontSizeEditor };
+    TopBar.components = { ColorPickerWidget, Menu, TopBarComposer, FontSizeEditor };
     TopBar.props = {
         onClick: Function,
         focusComposer: String,
@@ -43515,7 +43796,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
     }
 
-    function createDrawing(chartRelIds, sheet, figures) {
+    function createDrawing(drawingRelIds, sheet, figures) {
         const namespaces = [
             ["xmlns:xdr", NAMESPACE.drawing],
             ["xmlns:r", RELATIONSHIP_NSR],
@@ -43524,46 +43805,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         ];
         const figuresNodes = [];
         for (const [figureIndex, figure] of Object.entries(figures)) {
-            // position
-            const { from, to } = convertFigureData(figure, sheet);
-            const chartId = convertChartId(figure.id);
-            const cNvPrAttrs = [
-                ["id", chartId],
-                ["name", `Chart ${chartId}`],
-                ["title", "Chart"],
-            ];
-            figuresNodes.push(escapeXml /*xml*/ `
-      <xdr:twoCellAnchor>
-        <xdr:from>
-          <xdr:col>${from.col}</xdr:col>
-          <xdr:colOff>${from.colOff}</xdr:colOff>
-          <xdr:row>${from.row}</xdr:row>
-          <xdr:rowOff>${from.rowOff}</xdr:rowOff>
-        </xdr:from>
-        <xdr:to>
-          <xdr:col>${to.col}</xdr:col>
-          <xdr:colOff>${to.colOff}</xdr:colOff>
-          <xdr:row>${to.row}</xdr:row>
-          <xdr:rowOff>${to.rowOff}</xdr:rowOff>
-        </xdr:to>
-        <xdr:graphicFrame>
-          <xdr:nvGraphicFramePr>
-            <xdr:cNvPr ${formatAttributes(cNvPrAttrs)} />
-            <xdr:cNvGraphicFramePr />
-          </xdr:nvGraphicFramePr>
-          <xdr:xfrm>
-            <a:off x="0" y="0"/>
-            <a:ext cx="0" cy="0"/>
-          </xdr:xfrm>
-          <a:graphic>
-            <a:graphicData uri="${DRAWING_NS_C}">
-              <c:chart r:id="${chartRelIds[figureIndex]}" />
-            </a:graphicData>
-          </a:graphic>
-        </xdr:graphicFrame>
-        <xdr:clientData fLocksWithSheet="0"/>
-      </xdr:twoCellAnchor>
-    `);
+            switch (figure === null || figure === void 0 ? void 0 : figure.tag) {
+                case "chart":
+                    figuresNodes.push(createChartDrawing(figure, sheet, drawingRelIds[figureIndex]));
+                    break;
+                case "image":
+                    figuresNodes.push(createImageDrawing(figure, sheet, drawingRelIds[figureIndex]));
+                    break;
+            }
         }
         const xml = escapeXml /*xml*/ `
     <xdr:wsDr ${formatAttributes(namespaces)}>
@@ -43618,6 +43867,93 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             index: headers.length - 1,
             offset: convertDotValueToEMU(position - currentPosition + FIGURE_BORDER_SIZE),
         };
+    }
+    function createChartDrawing(figure, sheet, chartRelId) {
+        // position
+        const { from, to } = convertFigureData(figure, sheet);
+        const chartId = convertChartId(figure.id);
+        const cNvPrAttrs = [
+            ["id", chartId],
+            ["name", `Chart ${chartId}`],
+            ["title", "Chart"],
+        ];
+        return escapeXml /*xml*/ `
+    <xdr:twoCellAnchor>
+      <xdr:from>
+        <xdr:col>${from.col}</xdr:col>
+        <xdr:colOff>${from.colOff}</xdr:colOff>
+        <xdr:row>${from.row}</xdr:row>
+        <xdr:rowOff>${from.rowOff}</xdr:rowOff>
+      </xdr:from>
+      <xdr:to>
+        <xdr:col>${to.col}</xdr:col>
+        <xdr:colOff>${to.colOff}</xdr:colOff>
+        <xdr:row>${to.row}</xdr:row>
+        <xdr:rowOff>${to.rowOff}</xdr:rowOff>
+      </xdr:to>
+      <xdr:graphicFrame>
+        <xdr:nvGraphicFramePr>
+          <xdr:cNvPr ${formatAttributes(cNvPrAttrs)} />
+          <xdr:cNvGraphicFramePr />
+        </xdr:nvGraphicFramePr>
+        <xdr:xfrm>
+          <a:off x="0" y="0"/>
+          <a:ext cx="0" cy="0"/>
+        </xdr:xfrm>
+        <a:graphic>
+          <a:graphicData uri="${DRAWING_NS_C}">
+            <c:chart r:id="${chartRelId}" />
+          </a:graphicData>
+        </a:graphic>
+      </xdr:graphicFrame>
+      <xdr:clientData fLocksWithSheet="0"/>
+    </xdr:twoCellAnchor>
+  `;
+    }
+    function createImageDrawing(figure, sheet, imageRelId) {
+        // position
+        const { from, to } = convertFigureData(figure, sheet);
+        const imageId = convertImageId(figure.id);
+        const cNvPrAttrs = [
+            ["id", imageId],
+            ["name", `Image ${imageId}`],
+            ["title", "Image"],
+        ];
+        return escapeXml /*xml*/ `
+    <xdr:twoCellAnchor editAs="oneCell">
+      <xdr:from>
+        <xdr:col>${from.col}</xdr:col>
+        <xdr:colOff>${from.colOff}</xdr:colOff>
+        <xdr:row>${from.row}</xdr:row>
+        <xdr:rowOff>${from.rowOff}</xdr:rowOff>
+      </xdr:from>
+      <xdr:to>
+        <xdr:col>${to.col}</xdr:col>
+        <xdr:colOff>${to.colOff}</xdr:colOff>
+        <xdr:row>${to.row}</xdr:row>
+        <xdr:rowOff>${to.rowOff}</xdr:rowOff>
+      </xdr:to>
+      <xdr:pic>
+        <xdr:nvPicPr>
+          <xdr:cNvPr ${formatAttributes(cNvPrAttrs)}/>
+          <xdr:cNvPicPr preferRelativeResize="0"/>
+        </xdr:nvPicPr>
+        <xdr:blipFill>
+          <a:blip cstate="print" r:embed="${imageRelId}"/>
+          <a:stretch>
+            <a:fillRect/>
+          </a:stretch>
+        </xdr:blipFill>
+        <xdr:spPr>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+        </xdr:spPr>
+      </xdr:pic>
+      <xdr:clientData fLocksWithSheet="0"/>
+    </xdr:twoCellAnchor>
+  `;
     }
 
     function addNumberFormats(numFmts) {
@@ -44087,23 +44423,37 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             currentTableIndex += sheet.filterTables.length;
             // Figures and Charts
             let drawingNode = escapeXml ``;
+            const drawingRelIds = [];
             const charts = sheet.charts;
-            if (charts.length) {
-                const chartRelIds = [];
-                for (const chart of charts) {
-                    const xlsxChartId = convertChartId(chart.id);
-                    const chartRelId = addRelsToFile(construct.relsFiles, `xl/drawings/_rels/drawing${sheetIndex}.xml.rels`, {
-                        target: `../charts/chart${xlsxChartId}.xml`,
-                        type: XLSX_RELATION_TYPE.chart,
-                    });
-                    chartRelIds.push(chartRelId);
-                    files.push(createXMLFile(createChart(chart, sheetIndex, data), `xl/charts/chart${xlsxChartId}.xml`, "chart"));
-                }
+            for (const chart of charts) {
+                const xlsxChartId = convertChartId(chart.id);
+                const chartRelId = addRelsToFile(construct.relsFiles, `xl/drawings/_rels/drawing${sheetIndex}.xml.rels`, {
+                    target: `../charts/chart${xlsxChartId}.xml`,
+                    type: XLSX_RELATION_TYPE.chart,
+                });
+                drawingRelIds.push(chartRelId);
+                files.push(createXMLFile(createChart(chart, sheetIndex, data), `xl/charts/chart${xlsxChartId}.xml`, "chart"));
+            }
+            const images = sheet.images;
+            for (const image of images) {
+                const xlsxImageId = convertImageId(image.id);
+                const imageRelId = addRelsToFile(construct.relsFiles, `xl/drawings/_rels/drawing${sheetIndex}.xml.rels`, {
+                    target: `../media/image${xlsxImageId}`,
+                    type: XLSX_RELATION_TYPE.image,
+                });
+                drawingRelIds.push(imageRelId);
+                files.push({
+                    path: `xl/media/image${xlsxImageId}`,
+                    imagePath: image.data.path,
+                });
+            }
+            const drawings = [...charts, ...images];
+            if (drawings.length) {
                 const drawingRelId = addRelsToFile(construct.relsFiles, `xl/worksheets/_rels/sheet${sheetIndex}.xml.rels`, {
                     target: `../drawings/drawing${sheetIndex}.xml`,
                     type: XLSX_RELATION_TYPE.drawing,
                 });
-                files.push(createXMLFile(createDrawing(chartRelIds, sheet, charts), `xl/drawings/drawing${sheetIndex}.xml`, "drawing"));
+                files.push(createXMLFile(createDrawing(drawingRelIds, sheet, drawings), `xl/drawings/drawing${sheetIndex}.xml`, "drawing"));
                 drawingNode = escapeXml /*xml*/ `<drawing r:id="${drawingRelId}" />`;
             }
             const sheetXml = escapeXml /*xml*/ `
@@ -44217,7 +44567,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     function createContentTypes(files) {
         const overrideNodes = [];
         for (const file of files) {
-            if (file.contentType) {
+            if ("contentType" in file && file.contentType) {
                 overrideNodes.push(createOverride("/" + file.path, CONTENT_TYPES[file.contentType]));
             }
         }
@@ -44774,8 +45124,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-02-17T09:47:51.238Z';
-    exports.__info__.hash = '1b66725';
+    exports.__info__.date = '2023-02-22T10:45:42.318Z';
+    exports.__info__.hash = 'f019f4b';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
