@@ -172,9 +172,6 @@ export const tourService = {
             }
         }
 
-        /**
-         * Upon page reload, there might be a running tour. It should be automatically resumed.
-         */
         function resumeTour(tourName) {
             const tour = tours[tourName];
             const stepDelay = tourState.get(tourName, "stepDelay");
