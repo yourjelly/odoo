@@ -1,8 +1,15 @@
 /** @odoo-module **/
 
-import { _legacyIsVisible } from "@web/core/utils/ui";
-import { _t } from "@web/core/l10n/translation";
 import { markup } from "@odoo/owl";
+import { isMobileOS } from "@web/core/browser/feature_detection";
+import { _t } from "@web/core/l10n/translation";
+import { _legacyIsVisible } from "@web/core/utils/ui";
+
+/**
+ * TODO-JCB: what is [Actions]?
+ * @typedef {{ [key: string]: any }} Actions
+ * @typedef {string | (actions: Actions) => void | Promise<void>} RunCommand
+ */
 
 export class TourError extends Error {
     constructor(message, ...args) {
@@ -34,7 +41,7 @@ export function callWithUnloadCheck(func, ...args) {
     }
 }
 
-export function get_first_visible_element($elements) {
+export function getFirstVisibleElement($elements) {
     for (var i = 0; i < $elements.length; i++) {
         var $i = $elements.eq(i);
         if (_legacyIsVisible($i[0])) {
@@ -44,7 +51,7 @@ export function get_first_visible_element($elements) {
     return $();
 }
 
-export function get_jquery_element_from_selector(selector) {
+export function getJQueryElementFromSelector(selector) {
     const iframeSplit = _.isString(selector) && selector.match(/(.*\biframe[^ ]*)(.*)/);
     if (iframeSplit && iframeSplit[2]) {
         var $iframe = $(`${iframeSplit[1]}:not(.o_ignore_in_tour)`);
@@ -60,12 +67,11 @@ export function get_jquery_element_from_selector(selector) {
 }
 
 /**
- * IMPROVEMENT: This can be implemented as registry similar to how error registry works.
- * @param {jQuery} $element
- * @param {string} run
+ * @param {HTMLElement} [element]
+ * @param {Runnable} [runCommand]
  * @returns {string}
  */
-export function getConsumeEventType($element, run, isMobile) {
+export function getConsumeEventType($element, runCommand) {
     if ($element.hasClass("o_field_many2one") || $element.hasClass("o_field_many2manytags")) {
         return "autocompleteselect";
     } else if (
@@ -80,7 +86,7 @@ export function getConsumeEventType($element, run, isMobile) {
             return "apply.daterangepicker input";
         }
         if (
-            isMobile &&
+            isMobileOS() &&
             $element.closest(".o_field_widget").is(".o_field_many2one, .o_field_many2many")
         ) {
             return "click";
@@ -88,7 +94,7 @@ export function getConsumeEventType($element, run, isMobile) {
         return "input";
     } else if ($element.hasClass("ui-draggable-handle")) {
         return "drag";
-    } else if (typeof run === "string" && run.indexOf("drag_and_drop") === 0) {
+    } else if (typeof runCommand === "string" && runCommand.startsWith("drag_and_drop")) {
         // this is a heuristic: the element has to be dragged and dropped but it
         // doesn't have class 'ui-draggable-handle', so we check if it has an
         // ui-sortable parent, and if so, we conclude that its event type is 'sort'
@@ -96,7 +102,7 @@ export function getConsumeEventType($element, run, isMobile) {
             return "sort";
         }
         if (
-            (run.indexOf("drag_and_drop_native") === 0 &&
+            (runCommand.startsWith("drag_and_drop_native") &&
                 $element.hasClass("o_record_draggable")) ||
             $element.closest(".o_record_draggable").length
         ) {
@@ -107,9 +113,8 @@ export function getConsumeEventType($element, run, isMobile) {
 }
 
 export class RunningTourActionHelper {
-    constructor(tip_widget, isMobile) {
+    constructor(tip_widget) {
         this.tip_widget = tip_widget;
-        this.isMobile = isMobile;
     }
     click(element) {
         this._click(this._get_action_values(element));
@@ -136,7 +141,7 @@ export class RunningTourActionHelper {
         this._drag_and_drop_jquery(this._get_action_values(element), to);
     }
     drag_and_drop_native(toSel, element) {
-        const to = get_jquery_element_from_selector(toSel)[0];
+        const to = getJQueryElementFromSelector(toSel)[0];
         this._drag_and_drop(this._get_action_values(element).$element[0], to);
     }
     drag_move_and_drop(to, element) {
@@ -154,14 +159,12 @@ export class RunningTourActionHelper {
         }
     }
     _get_action_values(element) {
-        var $e = get_jquery_element_from_selector(element);
-        var $element = element ? get_first_visible_element($e) : this.tip_widget.$anchor;
+        var $e = getJQueryElementFromSelector(element);
+        var $element = element ? getFirstVisibleElement($e) : this.tip_widget.$anchor;
         if ($element.length === 0) {
             $element = $e.first();
         }
-        var consume_event = element
-            ? getConsumeEventType($element, undefined, this.isMobile)
-            : this.tip_widget.consume_event;
+        var consume_event = element ? getConsumeEventType($element) : this.tip_widget.consume_event;
         return {
             $element: $element,
             consume_event: consume_event,
@@ -261,7 +264,7 @@ export class RunningTourActionHelper {
         var $to;
         const elementCenter = this._calculateCenter(values.$element);
         if (to) {
-            $to = get_jquery_element_from_selector(to);
+            $to = getJQueryElementFromSelector(to);
         } else {
             $to = $(document.body);
         }
@@ -286,7 +289,7 @@ export class RunningTourActionHelper {
                     pageY: elementCenter.top,
                 })
             );
-            $to = get_jquery_element_from_selector(to);
+            $to = getJQueryElementFromSelector(to);
         }
 
         let toCenter = this._calculateCenter($to, to);
@@ -347,7 +350,7 @@ export class RunningTourActionHelper {
         );
         // Drag through "from".
         const fromCenter = this._calculateCenter(
-            get_jquery_element_from_selector(fromSelector),
+            getJQueryElementFromSelector(fromSelector),
             fromSelector
         );
         values.$element.trigger(
@@ -359,7 +362,7 @@ export class RunningTourActionHelper {
         );
         // Drop into "to".
         const toCenter = this._calculateCenter(
-            get_jquery_element_from_selector(toSelector),
+            getJQueryElementFromSelector(toSelector),
             toSelector
         );
         values.$element.trigger(

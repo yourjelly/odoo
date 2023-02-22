@@ -384,8 +384,8 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      *
      * @param {Object} tip
      * @param {String} tour_name
-     * @param {jQuery} $anchor
-     * @param {jQuery} $alt_trigger
+     * @param {JQuery} $anchor
+     * @param {JQuery} $alt_trigger
      * @private
      */
     _activate_tip: function(tip, tour_name, $anchor, $alt_trigger) {

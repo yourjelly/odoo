@@ -1,19 +1,21 @@
 /** @odoo-module **/
 
 import { markup, whenReady } from "@odoo/owl";
-import { registry } from "@web/core/registry";
-import { MacroEngine } from "@web/core/macro";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
-import { session } from "@web/session";
+import { MacroEngine } from "@web/core/macro";
+import { registry } from "@web/core/registry";
 import { config as transitionConfig } from "@web/core/transition";
+import { session } from "@web/session";
 import { TourPointer } from "../tour_pointer/tour_pointer";
-import { tourState } from "./tour_state";
-import { compileStepManual, compileStepAuto, compileTourToMacro } from "./tour_compilers";
+import { compileStepAuto, compileStepManual, compileTourToMacro } from "./tour_compilers";
 import { createPointerState } from "./tour_pointer_state";
+import { tourState } from "./tour_state";
 import { callWithUnloadCheck } from "./tour_utils";
 
 /**
  * @typedef {string} JQuerySelector
+ * @typedef {import("./tour_utils").RunCommand} RunCommand
  *
  * @typedef Tour
  * @property {string} url
@@ -35,7 +37,7 @@ import { callWithUnloadCheck } from "./tour_utils";
  * @property {string} [content]
  * @property {"top" | "botton" | "left" | "right"} [position]
  * @property {"community" | "enterprise"} [edition]
- * @property {string | (actionHelper: RunningTourActionHelper) => void | Promise<void>} [run]
+ * @property {RunCommand} [run]
  * @property {boolean} [auto]
  * @property {boolean} [in_modal]
  * @property {number} [width]
@@ -69,15 +71,14 @@ function extractRegisteredTours() {
 /**
  * @param {TourStep} step
  * @param {"manual" | "auto"} mode
- * @param {boolean} isMobile
  * @returns {boolean}
  */
-function shouldOmit(step, mode, isMobile) {
+function shouldOmit(step, mode) {
     const isDefined = (key, obj) => key in obj && obj[key] !== undefined;
     const getEdition = () =>
         session.server_version_info.slice(-1)[0] === "e" ? "enterprise" : "community";
     const correctEdition = isDefined("edition", step) ? step.edition === getEdition() : true;
-    const correctDevice = isDefined("mobile", step) ? step.mobile === isMobile : true;
+    const correctDevice = isDefined("mobile", step) ? step.mobile === isMobileOS() : true;
     return (
         !correctEdition ||
         !correctDevice ||
@@ -87,8 +88,8 @@ function shouldOmit(step, mode, isMobile) {
 }
 
 export const tourService = {
-    dependencies: ["orm", "effect", "ui"],
-    start: async (_env, { orm, effect, ui }) => {
+    dependencies: ["orm", "effect"],
+    start: async (_env, { orm, effect }) => {
         await whenReady();
 
         const tours = extractRegisteredTours();
@@ -100,7 +101,7 @@ export const tourService = {
             // IMPROVEMENTS: Custom step compiler. Will probably require decoupling from `mode`.
             const stepCompiler = mode === "auto" ? compileStepAuto : compileStepManual;
             const checkDelay = mode === "auto" ? tour.checkDelay : 50;
-            const filteredSteps = tour.steps.filter((step) => !shouldOmit(step, mode, ui.isSmall));
+            const filteredSteps = tour.steps.filter((step) => !shouldOmit(step, mode));
             return compileTourToMacro(tour, {
                 filteredSteps,
                 stepCompiler,
@@ -108,7 +109,6 @@ export const tourService = {
                 stepDelay,
                 watch,
                 checkDelay,
-                isMobile: ui.isSmall,
                 onTourEnd({ name, rainbowManMessage, fadeout }) {
                     if (mode === "auto") {
                         transitionConfig.disabled = false;

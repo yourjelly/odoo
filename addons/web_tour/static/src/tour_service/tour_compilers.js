@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
-import { isVisible } from "@web/core/utils/ui";
 import { browser } from "@web/core/browser/browser";
+import { isVisible } from "@web/core/utils/ui";
 import { tourState } from "./tour_state";
 import {
     callWithUnloadCheck,
-    get_first_visible_element,
-    get_jquery_element_from_selector,
     getConsumeEventType,
+    getFirstVisibleElement,
+    getJQueryElementFromSelector,
     RunningTourActionHelper,
 } from "./tour_utils";
 
@@ -30,14 +30,14 @@ function findTrigger(selector, inModal) {
     if (inModal !== false && $visibleModal.length) {
         $el = $visibleModal.find(selector);
     } else {
-        $el = get_jquery_element_from_selector(selector);
+        $el = getJQueryElementFromSelector(selector);
     }
-    return get_first_visible_element($el).get(0);
+    return getFirstVisibleElement($el).get(0);
 }
 
 function findExtraTrigger(selector) {
-    const $el = get_jquery_element_from_selector(selector);
-    return get_first_visible_element($el).get(0);
+    const $el = getJQueryElementFromSelector(selector);
+    return getFirstVisibleElement($el).get(0);
 }
 
 function findStepTriggers(step) {
@@ -91,9 +91,9 @@ function describeFailedStepDetailed(step, stepIndex, tour) {
  * It doesn't necessarily mean the given element, e.g. when listening to drag
  * event, we have to do it to the closest .ui-draggable ancestor.
  *
- * @param {jQuery} $el
+ * @param {JQuery} $el
  * @param {string} consumeEvent
- * @returns {jQuery}
+ * @returns {JQuery}
  */
 function getAnchorEl($el, consumeEvent) {
     let $consumeEventAnchors = $el;
@@ -131,7 +131,7 @@ function canContinue(el, allowInvisible) {
 export function compileStepManual(
     stepIndex,
     step,
-    { tour, stepDelay: _stepDelay, watch: _watch, pointerMethods, isMobile }
+    { tour, stepDelay: _stepDelay, watch: _watch, pointerMethods }
 ) {
     function getScrollParent(node) {
         if (node == null) {
@@ -202,7 +202,7 @@ export function compileStepManual(
 
                 if (stepEl && canContinue(stepEl, step.allowInvisible)) {
                     const consumeEvent =
-                        step.consumeEvent || getConsumeEventType($(stepEl), step.run, isMobile);
+                        step.consumeEvent || getConsumeEventType($(stepEl), step.run);
                     const $anchor = getAnchorEl($(stepEl), consumeEvent);
                     const anchorEl = $anchor[0];
 
@@ -246,11 +246,7 @@ export function compileStepManual(
 
 let tourTimeout;
 
-export function compileStepAuto(
-    stepIndex,
-    step,
-    { tour, stepDelay, watch, pointerMethods: _pm, isMobile }
-) {
+export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, pointerMethods: _pm }) {
     let skipAction = false;
     stepDelay = stepDelay || 0;
     return [
@@ -302,21 +298,17 @@ export function compileStepAuto(
                     return;
                 }
 
-                const consumeEvent =
-                    step.consumeEvent || getConsumeEventType($(stepEl), step.run, isMobile);
+                const consumeEvent = step.consumeEvent || getConsumeEventType($(stepEl), step.run);
 
                 // When in auto mode, we are not waiting for an event to be consumed, so the
                 // anchor is just the step element.
                 const $anchorEl = $(stepEl);
 
                 // TODO: Delegate the following routine to the `ACTION_HELPERS` in the macro module.
-                const actionHelper = new RunningTourActionHelper(
-                    {
-                        consume_event: consumeEvent,
-                        $anchor: $anchorEl,
-                    },
-                    isMobile
-                );
+                const actionHelper = new RunningTourActionHelper({
+                    consume_event: consumeEvent,
+                    $anchor: $anchorEl,
+                });
 
                 let result;
 
@@ -340,16 +332,8 @@ export function compileStepAuto(
 }
 
 export function compileTourToMacro(tour, options) {
-    const {
-        filteredSteps,
-        stepCompiler,
-        pointerMethods,
-        stepDelay,
-        watch,
-        isMobile,
-        checkDelay,
-        onTourEnd,
-    } = options;
+    const { filteredSteps, stepCompiler, pointerMethods, stepDelay, watch, checkDelay, onTourEnd } =
+        options;
     const currentStepIndex = tourState.get(tour.name, "currentIndex");
     return {
         ...tour,
@@ -367,7 +351,6 @@ export function compileTourToMacro(tour, options) {
                             stepDelay,
                             watch,
                             pointerMethods,
-                            isMobile,
                         }),
                     ];
                 }
