@@ -211,6 +211,9 @@
             throw new Error("Invalid name definition (should be a string", name);
         }
         if (name in factories) {
+            if (odoo.ignoreDuplicate) {
+                return;
+            }
             throw new Error("Service " + name + " already defined");
         }
 

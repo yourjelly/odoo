@@ -182,6 +182,7 @@ export const _getBundle = (assets.getBundle = memoize(async function getBundle(b
  * @returns {Promise}
  */
 export const _loadBundle = (assets.loadBundle = async function loadBundle(desc) {
+    odoo.ignoreDuplicate = (odoo.ignoreDuplicate || 0) + 1;
     // Load css in parallel
     const promiseCSS = Promise.all((desc.cssLibs || []).map(assets.loadCSS)).then(() => {
         if (desc.cssContents && desc.cssContents.length) {
@@ -230,6 +231,7 @@ export const _loadBundle = (assets.loadBundle = async function loadBundle(desc) 
             );
         }
     }
+    odoo.ignoreDuplicate--;
 });
 
 export const loadJS = function (url) {
