@@ -6,9 +6,7 @@ import { _t } from "@web/core/l10n/translation";
 import { _legacyIsVisible } from "@web/core/utils/ui";
 
 /**
- * TODO-JCB: what is [Actions]?
- * @typedef {{ [key: string]: any }} Actions
- * @typedef {string | (actions: Actions) => void | Promise<void>} RunCommand
+ * @typedef {string | (actions: RunningTourActionHelper) => void | Promise<void>} RunCommand
  */
 
 export class TourError extends Error {
