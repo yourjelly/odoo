@@ -148,3 +148,7 @@ ScrollSpy.prototype._activate = function (target) {
     }
     bootstrapSpyActivateFunction.apply(this, arguments);
 };
+
+Dropdown.prototype._detectNavbar = function () {
+    return false;
+};
