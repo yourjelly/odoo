@@ -34,7 +34,6 @@
                         classNameObj="{ 'o-isDeviceSmall p-2': messaging.device.isSmall }"
                         record="notificationView"
                     />
-                    <div t-if="!notificationView_last" class="o_NotificationListView_separator flex-shrink-0 w-100 border-bottom"/>
                 </t>
             </t>
         </div>

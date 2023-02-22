@@ -18,14 +18,13 @@
     overflow: hidden;
     position: relative;
     &:hover {
-        background-color: map-get($theme-colors, 'light');
+        background-color: $list-group-hover-bg;
+
         .o_ActivityMenuView_activityGroupName {
             color: $headings-color;
         }
     }
-    &:not(:last-child) {
-        border-bottom: 1px solid map-get($grays, '400');
-    }
+
     @include media-breakpoint-down(md) {
         padding: $o-mail-chatter-mobile-gap;
     }
