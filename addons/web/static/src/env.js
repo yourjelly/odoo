@@ -146,7 +146,7 @@ async function _startServices(env, toStart) {
         const names = [...toStart].map((s) => s.name);
         const missingDeps = new Set();
         [...toStart].forEach((s) =>
-            s.dependencies.forEach((dep) => {
+            (s.dependencies || []).forEach((dep) => {
                 if (!(dep in services) && !names.includes(dep)) {
                     missingDeps.add(dep);
                 }
