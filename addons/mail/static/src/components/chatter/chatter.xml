@@ -8,7 +8,7 @@
                 record="dropZoneView"
             />
             <div class="o_Chatter_fixedPanel">
-                <div t-if="hasTopBar" class="o_ChatterTopbar justify-content-between d-flex">
+                <div t-if="hasTopBar" class="o_ChatterTopbar justify-content-between d-flex overflow-x-auto">
                     <div class="o_ChatterTopbar_actions flex-fill d-flex border-transparent">
                         <div class="o_ChatterTopbar_controllers d-flex pe-2" t-if="threadView">
                             <button class="o_ChatterTopbar_button o_ChatterTopbar_buttonSendMessage btn text-nowrap me-2"
@@ -37,29 +37,20 @@
                                 Log note
                             </button>
                         </div>
-                        <div class="o_ChatterTopbar_tools position-relative d-flex flex-grow-1 border-bottom"
-                            t-att-class="{
-                                'border-start ps-2': hasActivities,
-                            }"
-                        >
+                        <div class="o_ChatterTopbar_tools position-relative d-flex flex-grow-1">
                             <button t-if="hasActivities" class="o_ChatterTopbar_button o_ChatterTopbar_buttonScheduleActivity btn btn-light text-nowrap" type="button" t-att-disabled="!isTemporary and !hasWriteAccess" t-on-click="onClickScheduleActivity" data-hotkey="shift+a">
                                 <i class="fa fa-clock-o me-1"/>
                                 <span>Activities</span>
                             </button>
-                            <div class="flex-grow-1 border-start pe-2"
-                                t-att-class="{
-                                    'ms-2': hasActivities,
-                                }"
-                            />
                             <div class="o_ChatterTopbar_rightSection flex-grow-1 flex-shrink-0 justify-content-end d-flex">
-                                <button t-if="thread.allAttachments.length === 0" class="o_ChatterTopbar_button o_ChatterTopbar_buttonAddAttachments btn btn-light btn-primary" type="button" t-att-disabled="!isTemporary and !hasWriteAccess" t-on-click="onClickButtonAddAttachments" >
-                                    <i class="fa fa-paperclip fa-lg me-1" role="img" aria-label="Attachments"/>
-                                    <i t-if="isShowingAttachmentsLoading" class="o_ChatterTopbar_buttonAttachmentsCountLoader fa fa-circle-o-notch fa-spin" aria-label="Attachment counter loading..."/>
+                                <button t-if="thread.allAttachments.length === 0" class="o_ChatterTopbar_button o_ChatterTopbar_buttonAddAttachments btn btn-light" type="button" t-att-disabled="!isTemporary and !hasWriteAccess" t-on-click="onClickButtonAddAttachments" >
+                                    <i class="fa fa-paperclip fa-lg" role="img" aria-label="Attachments"/>
+                                    <i t-if="isShowingAttachmentsLoading" class="o_ChatterTopbar_buttonAttachmentsCountLoader  fa fa-circle-o-notch fa-spin ms-1" aria-label="Attachment counter loading..."/>
                                 </button>
-                                <button t-if="thread.allAttachments.length > 0" class="o_ChatterTopbar_button o_ChatterTopbar_buttonToggleAttachments btn btn-light btn-primary" type="button" t-att-disabled="!isTemporary and !hasReadAccess" t-att-aria-expanded="attachmentBoxView ? 'true' : 'false'" t-on-click="onClickButtonToggleAttachments">
-                                    <i class="fa fa-paperclip fa-lg me-1" role="img" aria-label="Attachments"/>
-                                    <span t-if="!isShowingAttachmentsLoading" class="o_ChatterTopbar_buttonCount o_ChatterTopbar_buttonAttachmentsCount" t-esc="attachmentButtonText"/>
-                                    <i t-if="isShowingAttachmentsLoading" class="o_ChatterTopbar_buttonAttachmentsCountLoader fa fa-circle-o-notch fa-spin" aria-label="Attachment counter loading..."/>
+                                <button t-if="thread.allAttachments.length > 0" class="o_ChatterTopbar_button o_ChatterTopbar_buttonToggleAttachments btn btn-light" type="button" t-att-disabled="!isTemporary and !hasReadAccess" t-att-aria-expanded="attachmentBoxView ? 'true' : 'false'" t-on-click="onClickButtonToggleAttachments">
+                                    <i class="fa fa-paperclip fa-lg" role="img" aria-label="Attachments"/>
+                                    <span t-if="!isShowingAttachmentsLoading" class="o_ChatterTopbar_buttonCount o_ChatterTopbar_buttonAttachmentsCount ms-1" t-esc="attachmentButtonText"/>
+                                    <i t-if="isShowingAttachmentsLoading" class="o_ChatterTopbar_buttonAttachmentsCountLoader fa fa-circle-o-notch fa-spin ms-1" aria-label="Attachment counter loading..."/>
                                 </button>
                                 <t t-if="hasFollowers and thread">
                                     <FollowerListMenuView
