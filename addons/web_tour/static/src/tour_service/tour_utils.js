@@ -96,7 +96,7 @@ export function getConsumeEventType(element, runCommand) {
         }
         if (
             isMobileOS() &&
-            element.closest(".o_field_widget").matches(".o_field_many2one, .o_field_many2many")
+            element.closest(".o_field_widget")?.matches(".o_field_many2one, .o_field_many2many")
         ) {
             return "click";
         }

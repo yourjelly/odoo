@@ -1072,6 +1072,7 @@ class ChromeBrowser:
 
         self.window_size = test_class.browser_size
         self.touch_enabled = test_class.touch_enabled
+        self.user_agent = test_class.user_agent
         self.sigxcpu_handler = None
         self._chrome_start()
         self._find_websocket()
@@ -1219,6 +1220,9 @@ class ChromeBrowser:
             # enable Chrome's Touch mode, useful to detect touch capabilities using
             # "'ontouchstart' in window"
             switches['--touch-events'] = ''
+
+        if self.user_agent:
+            switches['--user-agent'] = self.user_agent
 
         cmd = [self.executable]
         cmd += ['%s=%s' % (k, v) if v else k for k, v in switches.items()]
@@ -1786,6 +1790,7 @@ class HttpCase(TransactionCase):
     browser_size = '1366x768'
     touch_enabled = False
     allow_end_on_form = False
+    user_agent = None
 
     _logger: logging.Logger = None
 
