@@ -30,9 +30,9 @@
             <div class="position-relative d-flex flex-shrink-0" t-att-class="{ 'flex-row-reverse': isInChatWindowAndIsAlignedRight }">
                 <div class="o_MessageView_sidebar d-flex flex-shrink-0" t-att-class="{ 'o-message-squashed align-items-start': isSquashed, 'justify-content-center': isInChatWindow }">
                     <div t-if="!isSquashed" class="o_MessageView_authorAvatarContainer o_MessageView_sidebarItem position-relative">
-                        <img class="o_MessageView_authorAvatar w-100 h-100 rounded-circle o_object_fit_cover" t-att-class="{ 'cursor-pointer': hasAuthorClickable, o_redirect: hasAuthorClickable }" t-att-src="message.avatarUrl" t-att-role="hasAuthorClickable ? 'button' : ''" t-att-tabindex="hasAuthorClickable ? '0' : ''" t-on-click="onClickAuthorAvatar" t-att-title="authorTitleText" t-att-alt="authorTitleText"/>
+                        <img class="o_MessageView_authorAvatar w-100 h-100 rounded o_object_fit_cover" t-att-class="{ 'cursor-pointer': hasAuthorClickable, o_redirect: hasAuthorClickable }" t-att-src="message.avatarUrl" t-att-role="hasAuthorClickable ? 'button' : ''" t-att-tabindex="hasAuthorClickable ? '0' : ''" t-on-click="onClickAuthorAvatar" t-att-title="authorTitleText" t-att-alt="authorTitleText"/>
                         <PersonaImStatusIconView t-if="personaImStatusIconView"
-                            className="'o_MessageView_personaImStatusIcon position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center text-white'"
+                            className="'o_MessageView_personaImStatusIcon position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center mb-n1 me-n1 text-white'"
                             classNameObj="{
                                 'o-message-selected': isSelected,
                                 'o_MessageView_personaImStatusIcon-mobile': messaging.device.isSmall,
