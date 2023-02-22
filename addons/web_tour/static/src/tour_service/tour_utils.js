@@ -103,7 +103,7 @@ export function getConsumeEventType(element, runCommand) {
 
     // jQuery draggable
     if (classList.contains("ui-draggable-handle")) {
-        return "drag";
+        return "mousedown";
     }
 
     // Drag & drop run command
