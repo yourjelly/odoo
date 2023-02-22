@@ -68,7 +68,7 @@ const FIT_FLIP_ORDER = { top: "tb", right: "rl", bottom: "bt", left: "lr" };
 /** @type {Options} */
 const DEFAULTS = {
     popper: "popper",
-    margin: 6,
+    margin: 0,
     position: "bottom",
 };
 
