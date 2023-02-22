@@ -256,8 +256,8 @@ export function compileStepAuto(
     return [
         {
             action: async () => {
-                // IMPROVEMENT: Find a way to remove this delay.
                 // This delay is important for making the current set of tour tests pass.
+                // IMPROVEMENT: Find a way to remove this delay.
                 await new Promise((resolve) => browser.setTimeout(resolve));
             },
         },
@@ -302,10 +302,9 @@ export function compileStepAuto(
                     return;
                 }
 
-                let result;
-
                 const consumeEvent =
                     step.consumeEvent || getConsumeEventType($(stepEl), step.run, isMobile);
+
                 // When in auto mode, we are not waiting for an event to be consumed, so the
                 // anchor is just the step element.
                 const $anchorEl = $(stepEl);
@@ -318,6 +317,9 @@ export function compileStepAuto(
                     },
                     isMobile
                 );
+
+                let result;
+
                 if (typeof step.run === "function") {
                     // `this.$anchor` is expected in many `step.run`.
                     const willUnload = await callWithUnloadCheck(() =>
@@ -330,6 +332,7 @@ export function compileStepAuto(
                 } else {
                     actionHelper.auto();
                 }
+
                 return result;
             },
         },
@@ -354,7 +357,7 @@ export function compileTourToMacro(tour, options) {
         steps: filteredSteps
             .reduce((newSteps, step, i) => {
                 if (i < currentStepIndex) {
-                    // Don't include the step because it's already done.
+                    // Don't include steps before the current index because they're already done.
                     return newSteps;
                 } else {
                     return [

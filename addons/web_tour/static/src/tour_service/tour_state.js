@@ -41,7 +41,7 @@ function destructurePrefixedName(prefixedName) {
 }
 
 /**
- * Wrapper around localStorage for basic persistence of running tours.
+ * Wrapper around localStorage for persistence of the running tours.
  * Useful for resuming running tours when the page refreshed.
  */
 export const tourState = {

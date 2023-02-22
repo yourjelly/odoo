@@ -12,11 +12,11 @@ export class TourError extends Error {
 }
 
 /**
- * Calls the given func then returns/resolves to `true`
+ * Calls the given `func` then returns/resolves to `true`
  * if it will result to unloading of the page.
  * @param {(...args: any[]) => void} func
  * @param  {any[]} args
- * @returns {boolean}
+ * @returns {boolean | Promise<boolean>}
  */
 export function callWithUnloadCheck(func, ...args) {
     let willUnload = false;
@@ -62,7 +62,7 @@ export function get_jquery_element_from_selector(selector) {
 /**
  * IMPROVEMENT: This can be implemented as registry similar to how error registry works.
  * @param {jQuery} $element
- * @param {Runnable} run
+ * @param {string} run
  * @returns {string}
  */
 export function getConsumeEventType($element, run, isMobile) {
