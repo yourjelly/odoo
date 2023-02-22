@@ -4,6 +4,15 @@ import { browser } from "@web/core/browser/browser";
 import { isVisible } from "@web/core/utils/ui";
 import { Mutex } from "@web/core/utils/concurrency";
 
+/**
+ * @typedef MacroStep
+ * @property {string} [trigger]
+ * - An action returning a "truthy" value means that the step isn't successful.
+ * - Current step index won't be incremented.
+ * @property {string | (el: Element, step: MacroStep) => undefined | string} [action]
+ * @property {*} [*] - any payload to the step.
+ */
+
 export const ACTION_HELPERS = {
     click(el, _step) {
         el.dispatchEvent(new MouseEvent("mouseover"));
@@ -49,6 +58,7 @@ class Macro {
         const step = this.steps[this.currentIndex];
         const [proceedToAction, el] = this.checkTrigger(step);
         if (proceedToAction) {
+            this.safeCall(this.onStep, el, step);
             const actionResult = await this.performAction(el, step);
             if (!actionResult) {
                 // If falsy action result, it means the action worked properly.
@@ -94,19 +104,19 @@ class Macro {
     }
 
     /**
+     * Calls the `step.action` expecting no return to be successful.
      * @param {Element} el
      * @param {Step} step
      */
     async performAction(el, step) {
-        this.safeCall(this.onStep, el, step);
         const action = step.action;
-        let actionError;
+        let actionResult;
         if (action in ACTION_HELPERS) {
-            actionError = ACTION_HELPERS[action](el, step);
+            actionResult = ACTION_HELPERS[action](el, step);
         } else if (typeof action === "function") {
-            actionError = await this.safeCall(action, el);
+            actionResult = await this.safeCall(action, el, step);
         }
-        return actionError;
+        return actionResult;
     }
 
     safeCall(fn, ...args) {

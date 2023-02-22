@@ -14,20 +14,18 @@ import { callWithUnloadCheck } from "./tour_utils";
 import { device } from "web.config";
 
 /**
- * TODO-JCB: Not sure of this.
- * @typedef {string} Markup
  * @typedef {string} JQuerySelector
- * TODO-JCB: what is [Actions]?
- * @typedef {string | (actions: Actions) => void | Promise<void>} Runnable
  *
- * @typedef TourMetadata
+ * @typedef Tour
  * @property {string} url
- * @property {string | () => Markup} [rainbowManMessage]
+ * @property {TourStep[]} steps
  * @property {boolean} [rainbowMan]
  * @property {number} [sequence]
  * @property {boolean} [test]
  * @property {Promise<any>} [wait_for]
  * @property {string} [saveAs]
+ * @property {string} [fadeout]
+ * @property {number} [checkDelay]
  *
  * @typedef TourStep
  * @property {string} [id]
@@ -35,10 +33,10 @@ import { device } from "web.config";
  * @property {JQuerySelector} [extra_trigger]
  * @property {JQuerySelector} [alt_trigger]
  * @property {JQuerySelector} [skip_trigger]
- * @property {Markup} [content]
- * @property {Direction} [position]
+ * @property {string} [content]
+ * @property {"top" | "botton" | "left" | "right"} [position]
  * @property {"community" | "enterprise"} [edition]
- * @property {Runnable} [run]
+ * @property {string | (actionHelper: RunningTourActionHelper) => void | Promise<void>} [run]
  * @property {boolean} [auto]
  * @property {boolean} [in_modal]
  * @property {number} [width]
