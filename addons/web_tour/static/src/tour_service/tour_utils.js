@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
+import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _legacyIsVisible } from "@web/core/utils/ui";
 import { markup } from "@odoo/owl";
-import { device } from "web.config";
 import { _t } from "web.core";
 
 export class TourError extends Error {
@@ -81,7 +81,7 @@ export function getConsumeEventType($element, run) {
             return "apply.daterangepicker input";
         }
         if (
-            device.isMobile &&
+            isMobileOS() &&
             $element.closest(".o_field_widget").is(".o_field_many2one, .o_field_many2many")
         ) {
             return "click";
