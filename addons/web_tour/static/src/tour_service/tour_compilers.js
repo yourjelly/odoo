@@ -192,9 +192,7 @@ export function compileStepManual(
     step,
     { tour, stepDelay: _stepDelay, watch: _watch, pointerMethods }
 ) {
-    // State variables.
     let proceedWith = null;
-    let scrolled = false;
     let removeListeners = () => {};
 
     return [
@@ -237,11 +235,6 @@ export function compileStepManual(
                         },
                     });
 
-                    if (!scrolled) {
-                        scrolled = true;
-                        stepEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                    }
-
                     updatePointer();
                 } else {
                     pointerMethods.setState({ isVisible: false, isOpen: false });
@@ -256,9 +249,7 @@ export function compileStepManual(
                     anchor: undefined,
                 });
 
-                // Reset state variables.
                 proceedWith = null;
-                scrolled = false;
             },
         },
     ];

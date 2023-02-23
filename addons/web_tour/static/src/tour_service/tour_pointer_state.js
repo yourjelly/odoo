@@ -116,11 +116,10 @@ export function createPointerState() {
                     break;
                 }
                 default: {
-                    const onClick = () =>
-                        anchor.scrollIntoView({
-                            behavior: "smooth",
-                            block: "nearest",
-                        });
+                    const onClick = () => {
+                        anchor.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    };
+
                     const scrollParent = getScrollParent(anchor);
                     if (!scrollParent) {
                         return;
