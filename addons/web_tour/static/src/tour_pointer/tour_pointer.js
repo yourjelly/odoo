@@ -1,15 +1,7 @@
 /** @odoo-module **/
 
-import {
-    Component,
-    onWillUnmount,
-    useEffect,
-    useExternalListener,
-    useRef,
-    useState,
-} from "@odoo/owl";
-import { reposition } from "@web/core/position_hook";
-import { throttleForAnimation } from "@web/core/utils/timing";
+import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { usePosition } from "@web/core/position_hook";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
@@ -39,6 +31,7 @@ export class TourPointer extends Component {
                     ],
                     optional: true,
                 },
+                rev: { type: Number, optional: true },
             },
         },
     };
@@ -54,18 +47,6 @@ export class TourPointer extends Component {
         this.state = useState({ isOpen: false });
         let lastMeasuredContent = null;
         let lastOpenState = this.isOpen;
-
-        const repositionPointer = () => {
-            const { el } = rootRef;
-            const { anchor } = this.props.pointerState;
-            if (el && anchor) {
-                const { x, width } = anchor.getBoundingClientRect();
-                const wouldOverflow = window.innerWidth - x - width / 2 < this.dimensions?.width;
-                el.classList.toggle("o_expand_left", wouldOverflow);
-
-                reposition(anchor, el, { position: this.position, margin: 6 });
-            }
-        };
 
         useEffect(() => {
             const { el } = rootRef;
@@ -96,16 +77,14 @@ export class TourPointer extends Component {
                     }
                     el.style.setProperty("width", `${width}px`);
                     el.style.setProperty("height", `${height}px`);
-
-                    repositionPointer();
                 }
             }
         });
 
-        const throttledUpdate = throttleForAnimation(repositionPointer);
-        useExternalListener(document, "scroll", throttledUpdate, { capture: true });
-        useExternalListener(window, "resize", throttledUpdate);
-        onWillUnmount(throttledUpdate.cancel);
+        usePosition(
+            () => this.props.pointerState.anchor,
+            () => ({ position: this.position, margin: 6 })
+        );
     }
 
     get content() {

@@ -19,6 +19,7 @@ import { getScrollParent } from "./tour_utils";
  * @property {boolean} [isOpen]
  * @property {boolean} isVisible
  * @property {Direction} position
+ * @property {number} rev
  *
  * @typedef {import("./tour_service").TourStep} TourStep
  */
@@ -91,7 +92,7 @@ export function createPointerState() {
      * @param {Partial<TourPointerState>} newState
      */
     const setState = (newState) => {
-        Object.assign(state, newState);
+        Object.assign(state, newState, { rev: currentRev++ });
     };
 
     /**
@@ -142,6 +143,7 @@ export function createPointerState() {
         }
     };
 
+    let currentRev = 1;
     /** @type {TourPointerState} */
     const state = reactive({});
     const intersection = new Intersection();
