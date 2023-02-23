@@ -17,11 +17,4 @@ patch(Persona.prototype, "website_livechat", {
             ? `/base/static/img/country_flags/${country.code.toLowerCase()}.png`
             : undefined;
     },
-
-    get displayName() {
-        if (this.partner) {
-            return this.partner.name || this.partner.displayName;
-        }
-        return this.name;
-    },
 });

@@ -24,6 +24,8 @@ patch(PersonaService.prototype, "website_livechat", {
                     type: "partner",
                 });
             }
+            persona.displayName =
+                persona.partner?.name ?? persona.partner?.displayName ?? persona.name;
         }
     },
 });
