@@ -155,11 +155,14 @@ function canContinue(el, allowInvisible) {
  * @param {(ev: Event) => any} params.onScroll
  * @param {(ev: Event) => any} params.onConsume
  */
-function setupListeners({ anchorEl, consumeEvent, pointerMethods, onScroll, onConsume }) {
-    const onMouseEnter = () => pointerMethods.setState({ isOpen: true });
-
-    const onMouseLeave = () => pointerMethods.setState({ isOpen: false });
-
+function setupListeners({
+    anchorEl,
+    consumeEvent,
+    onMouseEnter,
+    onMouseLeave,
+    onScroll,
+    onConsume,
+}) {
     anchorEl.addEventListener(consumeEvent, onConsume);
     anchorEl.addEventListener("mouseenter", onMouseEnter);
     anchorEl.addEventListener("mouseleave", onMouseLeave);
@@ -218,16 +221,23 @@ export function compileStepManual(
                 if (stepEl && canContinue(stepEl, step.allowInvisible)) {
                     const consumeEvent = step.consumeEvent || getConsumeEventType(stepEl, step.run);
                     const anchorEl = getAnchorEl(stepEl, consumeEvent);
+                    const toggleOpen = (isOpen) => pointerMethods.setState({ isOpen });
+                    const debouncedToggleOpen = debounce(toggleOpen, 50, true);
 
                     const updatePointer = () => {
-                        pointerMethods.setState({ isVisible: true });
+                        pointerMethods.setState({
+                            isVisible: true,
+                            onMouseEnter: () => debouncedToggleOpen(true),
+                            onMouseLeave: () => debouncedToggleOpen(false),
+                        });
                         pointerMethods.update(step, anchorEl);
                     };
 
                     removeListeners = setupListeners({
                         anchorEl,
                         consumeEvent,
-                        pointerMethods,
+                        onMouseEnter: () => toggleOpen(true),
+                        onMouseLeave: () => toggleOpen(false),
                         onScroll: updatePointer,
                         onConsume: () => {
                             proceedWith = stepEl;
@@ -247,6 +257,8 @@ export function compileStepManual(
                     isOpen: false,
                     content: undefined,
                     anchor: undefined,
+                    onMouseEnter: undefined,
+                    onMouseLeave: undefined,
                 });
 
                 proceedWith = null;

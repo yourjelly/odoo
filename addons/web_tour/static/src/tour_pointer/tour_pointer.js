@@ -2,7 +2,6 @@
 
 import { Component, useEffect, useRef, useState } from "@odoo/owl";
 import { reposition } from "@web/core/position_hook";
-import { debounce } from "@web/core/utils/timing";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
@@ -24,6 +23,8 @@ export class TourPointer extends Component {
                 isOpen: { type: Boolean, optional: true },
                 isVisible: { type: Boolean, optional: true },
                 onClick: { type: [Function, { value: null }], optional: true },
+                onMouseEnter: { type: [Function, { value: null }], optional: true },
+                onMouseLeave: { type: [Function, { value: null }], optional: true },
                 position: {
                     type: [
                         { value: "left" },
@@ -44,13 +45,10 @@ export class TourPointer extends Component {
 
     setup() {
         const rootRef = useRef("popper");
-        this.state = useState({ isOpen: false });
         /** @type {DOMREct | null} */
         let dimensions = null;
         let lastMeasuredContent = null;
         let lastOpenState = this.isOpen;
-
-        this.toggleOpen = debounce((isOpen) => (this.state.isOpen = isOpen), 50, true);
 
         useEffect(
             () => {
@@ -95,8 +93,6 @@ export class TourPointer extends Component {
                         }
                     }
                 } else {
-                    // Reset state variables when the pointer is not visible.
-                    this.state.isOpen = false;
                     lastMeasuredContent = null;
                     lastOpenState = false;
                     dimensions = null;
@@ -111,7 +107,7 @@ export class TourPointer extends Component {
     }
 
     get isOpen() {
-        return this.state.isOpen || this.props.pointerState.isOpen;
+        return this.props.pointerState.isOpen;
     }
 
     get position() {

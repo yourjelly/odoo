@@ -15,9 +15,9 @@
                 --TourPointer__width: {{ constructor.width }}px;
                 --TourPointer__height: {{ constructor.height }}px;
             "
-            t-on-mouseenter="() => toggleOpen(true)"
-            t-on-mouseleave="() => toggleOpen(false)"
-            t-on-click="props.pointerState.onClick || (() => {})"
+            t-on-mouseenter="props.pointerState.onMouseEnter or (() => {})"
+            t-on-mouseleave="props.pointerState.onMouseLeave or (() => {})"
+            t-on-click="props.pointerState.onClick or (() => {})"
         >
             <div class="o_tour_pointer_tip position-absolute" />
             <div
