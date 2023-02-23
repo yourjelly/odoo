@@ -68,7 +68,7 @@ export function getJQueryElementFromSelector(selector) {
 
 /**
  * @param {HTMLElement} [element]
- * @param {Runnable} [runCommand]
+ * @param {RunCommand} [runCommand]
  * @returns {string}
  */
 export function getConsumeEventType(element, runCommand) {
@@ -126,6 +126,21 @@ export function getConsumeEventType(element, runCommand) {
 
     // Default: click
     return "click";
+}
+
+/**
+ * @param {HTMLElement} element
+ * @returns {HTMLElement | null}
+ */
+export function getScrollParent(element) {
+    if (!element) {
+        return null;
+    }
+    if (element.scrollHeight > element.clientHeight) {
+        return element;
+    } else {
+        return getScrollParent(element.parentNode);
+    }
 }
 
 export class RunningTourActionHelper {

@@ -1,6 +1,9 @@
 /** @odoo-module **/
 
 import { reactive } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
+import { TourPointer } from "@web_tour/tour_pointer/tour_pointer";
+import { getScrollParent } from "./tour_utils";
 
 /**
  * @typedef {import("@web/core/position_hook").Direction} Direction
@@ -97,7 +100,8 @@ export function createPointerState() {
      */
     const update = (step, anchor) => {
         intersection.setTarget(anchor);
-        if (anchor) {
+        if (document.body.contains(anchor)) {
+            let { position, content } = step;
             switch (intersection.targetPosition) {
                 case "unknown": {
                     // TODO-JCB: Maybe this targetPosition value is not needed.
@@ -105,27 +109,32 @@ export function createPointerState() {
                     break;
                 }
                 case "in": {
-                    setState({
-                        anchor,
-                        content: step.content,
-                        position: step.position,
-                    });
+                    if (document.body.contains(floatingAnchor)) {
+                        floatingAnchor.remove();
+                    }
+                    setState({ anchor, content, position });
                     break;
                 }
                 default: {
-                    // TODO-JUM: give root element instead of position
-                    // let x = intersection.rootBounds.width / 2;
-                    // let y, position, content;
-                    // if (intersection.targetPosition === "out-below") {
-                    //     y = intersection.rootBounds.height - 80 - TourPointer.height;
-                    //     position = "top";
-                    //     content = "Scroll down to reach the next step.";
-                    // } else if (intersection.targetPosition === "out-above") {
-                    //     y = 80;
-                    //     position = "bottom";
-                    //     content = "Scroll up to reach the next step.";
-                    // }
-                    // setState({ x, y, content, position });
+                    const scrollParent = getScrollParent(anchor);
+                    if (!scrollParent) {
+                        debugger;
+                    }
+                    const { x, y, width, height } = scrollParent.getBoundingClientRect();
+                    floatingAnchor.style.left = `${x + width / 2}px`;
+                    if (intersection.targetPosition === "out-below") {
+                        position = "top";
+                        content = _t("Scroll down to reach the next step.");
+                        floatingAnchor.style.top = `${y + height - TourPointer.height}px`;
+                    } else if (intersection.targetPosition === "out-above") {
+                        position = "bottom";
+                        content = _t("Scroll up to reach the next step.");
+                        floatingAnchor.style.top = `${y + TourPointer.height}px`;
+                    }
+                    if (!document.contains(floatingAnchor)) {
+                        document.body.appendChild(floatingAnchor);
+                    }
+                    setState({ anchor: floatingAnchor, content, position });
                 }
             }
         } else {
@@ -136,6 +145,8 @@ export function createPointerState() {
     /** @type {TourPointerState} */
     const state = reactive({});
     const intersection = new Intersection();
+    const floatingAnchor = document.createElement("div");
+    floatingAnchor.className = "position-fixed";
 
     return { state, methods: { setState, update } };
 }

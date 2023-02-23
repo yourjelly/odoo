@@ -9,6 +9,7 @@ import {
     getConsumeEventType,
     getFirstVisibleElement,
     getJQueryElementFromSelector,
+    getScrollParent,
     RunningTourActionHelper,
 } from "./tour_utils";
 
@@ -65,21 +66,6 @@ function findStepTriggers(step) {
     const extraTriggerOkay = step.extra_trigger ? findExtraTrigger(step.extra_trigger) : true;
 
     return { triggerEl, altEl, extraTriggerOkay, skipEl };
-}
-
-/**
- * @param {HTMLElement} element
- * @returns {HTMLElement | null}
- */
-function getScrollParent(element) {
-    if (element == null) {
-        return null;
-    }
-    if (element.scrollHeight > element.clientHeight) {
-        return element;
-    } else {
-        return getScrollParent(element.parentNode);
-    }
 }
 
 function describeStep(step) {
