@@ -2,6 +2,7 @@
 
 import { Component, useEffect, useRef, useState } from "@odoo/owl";
 import { reposition } from "@web/core/position_hook";
+import { debounce } from "@web/core/utils/timing";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
@@ -22,6 +23,7 @@ export class TourPointer extends Component {
                 fixed: { type: Boolean, optional: true },
                 isOpen: { type: Boolean, optional: true },
                 isVisible: { type: Boolean, optional: true },
+                onClick: { type: [Function, { value: null }], optional: true },
                 position: {
                     type: [
                         { value: "left" },
@@ -47,6 +49,8 @@ export class TourPointer extends Component {
         this.state = useState({ isOpen: false });
         let lastMeasuredContent = null;
         let lastOpenState = this.isOpen;
+
+        this.debouncedToggleOpen = debounce((isOpen) => (this.state.isOpen = isOpen), 50, true);
 
         useEffect(
             () => {

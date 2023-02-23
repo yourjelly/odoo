@@ -113,10 +113,15 @@ export function createPointerState() {
                     if (document.body.contains(floatingAnchor)) {
                         floatingAnchor.remove();
                     }
-                    setState({ anchor, content, position });
+                    setState({ anchor, content, onClick: null, position });
                     break;
                 }
                 default: {
+                    const onClick = () =>
+                        anchor.scrollIntoView({
+                            behavior: "smooth",
+                            block: "nearest",
+                        });
                     const scrollParent = getScrollParent(anchor);
                     if (!scrollParent) {
                         debugger;
@@ -135,7 +140,7 @@ export function createPointerState() {
                     if (!document.contains(floatingAnchor)) {
                         document.body.appendChild(floatingAnchor);
                     }
-                    setState({ anchor: floatingAnchor, content, position });
+                    setState({ anchor: floatingAnchor, content, onClick, position });
                 }
             }
         } else {

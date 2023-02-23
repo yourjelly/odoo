@@ -9,13 +9,15 @@
                 o_{{ position }}
                 {{ isOpen ? 'o_open' : 'o_bouncing' }}
                 {{ props.pointerState.fixed ? 'position-fixed' : 'position-absolute' }}
+                {{ props.pointerState.onClick ? 'cursor-pointer' : '' }}
             "
             t-attf-style="
                 --TourPointer__width: {{ constructor.width }}px;
                 --TourPointer__height: {{ constructor.height }}px;
             "
-            t-on-mouseenter="() => state.isOpen = true"
-            t-on-mouseleave="() => state.isOpen = false"
+            t-on-mouseenter="() => debouncedToggleOpen(true)"
+            t-on-mouseleave="() => debouncedToggleOpen(false)"
+            t-on-click="props.pointerState.onClick"
         >
             <div class="o_tour_pointer_tip position-absolute" />
             <div
