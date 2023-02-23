@@ -5,7 +5,7 @@
         </xpath>
         <xpath expr="//t[@t-foreach='invoices']/tr/td[last()]" position="before">
             <td class="text-center">
-                <t t-set="tx_ids" t-value="invoice.transaction_ids.filtered(lambda tx: tx.state in ('pending', 'authorized', 'done'))"/>
+                <t t-set="tx_ids" t-value="invoice.sudo().transaction_ids.filtered(lambda tx: tx.state in ('pending', 'authorized', 'done'))"/>
                 <t t-set="pending_manual_txs" t-value="tx_ids.filtered(lambda tx: tx.state == 'pending' and tx.provider_code in ('none', 'custom'))"/>
                 <a t-if="invoice.state == 'posted' and invoice.payment_state in ('not_paid', 'partial') and invoice.amount_total and invoice.move_type == 'out_invoice' and (pending_manual_txs or not tx_ids or invoice.amount_paid &lt; invoice.amount_total)"
                     t-att-href="invoice.get_portal_url(anchor='portal_pay')" title="Pay Now" aria-label="Pay now" class="btn btn-sm btn-primary" role="button">
@@ -14,7 +14,7 @@
             </td>
         </xpath>
         <xpath expr="//t[@t-foreach='invoices']/tr/td[hasclass('tx_status')]" position="replace">
-            <t t-set="last_tx" t-value="invoice.get_portal_last_transaction()"/>
+            <t t-set="last_tx" t-value="invoice.sudo().get_portal_last_transaction()"/>
             <td class="tx_status text-center">
                 <t t-if="invoice.state == 'posted' and invoice.payment_state in ('not_paid', 'partial') and (last_tx.state not in ['pending', 'authorized', 'done', 'cancel'] or (last_tx.state == 'pending' and last_tx.provider_code in ('none', 'custom')))">
                     <span class="badge rounded-pill text-bg-info"><i class="fa fa-fw fa-clock-o"></i><span class="d-none d-md-inline"> Waiting for Payment</span></span>
