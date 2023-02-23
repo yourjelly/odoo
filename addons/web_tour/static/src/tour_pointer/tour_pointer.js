@@ -44,9 +44,9 @@ export class TourPointer extends Component {
 
     setup() {
         const rootRef = useRef("popper");
-        /** @type {DOMREct | null} */
-        this.dimensions = null;
         this.state = useState({ isOpen: false });
+        /** @type {DOMREct | null} */
+        let dimensions = null;
         let lastMeasuredContent = null;
         let lastOpenState = this.isOpen;
 
@@ -65,14 +65,14 @@ export class TourPointer extends Component {
                         lastMeasuredContent = this.content;
                         el.style.removeProperty("width");
                         el.style.removeProperty("height");
-                        this.dimensions = el.getBoundingClientRect();
+                        dimensions = el.getBoundingClientRect();
                     }
 
                     // If the content or the "is open" state changed: we must apply
                     // new width and height properties
                     if (hasContentChanged || hasOpenStateChanged) {
                         const [width, height] = this.isOpen
-                            ? [this.dimensions.width, this.dimensions.height]
+                            ? [dimensions.width, dimensions.height]
                             : [this.constructor.width, this.constructor.height];
                         if (this.isOpen) {
                             el.style.removeProperty("transition");
@@ -89,17 +89,17 @@ export class TourPointer extends Component {
                         if (anchor) {
                             const { x, width } = anchor.getBoundingClientRect();
                             const wouldOverflow =
-                                window.innerWidth - x - width / 2 < this.dimensions?.width;
+                                window.innerWidth - x - width / 2 < dimensions?.width;
                             el.classList.toggle("o_expand_left", wouldOverflow);
                             reposition(anchor, el, { position: this.position, margin: 6 });
                         }
                     }
                 } else {
                     // Reset state variables when the pointer is not visible.
-                    this.dimensions = null;
                     this.state.isOpen = false;
                     lastMeasuredContent = null;
                     lastOpenState = false;
+                    dimensions = null;
                 }
             },
             () => [this.props.pointerState.rev]
