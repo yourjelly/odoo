@@ -2,7 +2,6 @@
 
 import { Component, useEffect, useRef, useState } from "@odoo/owl";
 import { reposition } from "@web/core/position_hook";
-import { debounce } from "@web/core/utils/timing";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
