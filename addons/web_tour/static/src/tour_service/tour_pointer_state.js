@@ -124,7 +124,7 @@ export function createPointerState() {
                         });
                     const scrollParent = getScrollParent(anchor);
                     if (!scrollParent) {
-                        debugger;
+                        return;
                     }
                     const { x, y, width, height } = scrollParent.getBoundingClientRect();
                     floatingAnchor.style.left = `${x + width / 2}px`;
