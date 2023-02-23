@@ -100,7 +100,7 @@ export const tourService = {
         function convertToMacro(tour, { mode, stepDelay, watch }) {
             // IMPROVEMENTS: Custom step compiler. Will probably require decoupling from `mode`.
             const stepCompiler = mode === "auto" ? compileStepAuto : compileStepManual;
-            const checkDelay = mode === "auto" ? tour.checkDelay : 50;
+            const checkDelay = mode === "auto" ? tour.checkDelay : 100;
             const filteredSteps = tour.steps.filter((step) => !shouldOmit(step, mode));
             return compileTourToMacro(tour, {
                 filteredSteps,

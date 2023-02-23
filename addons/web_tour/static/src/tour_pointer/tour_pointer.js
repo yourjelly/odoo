@@ -94,6 +94,12 @@ export class TourPointer extends Component {
                             reposition(anchor, el, { position: this.position, margin: 6 });
                         }
                     }
+                } else {
+                    // Reset state variables when the pointer is not visible.
+                    this.dimensions = null;
+                    this.state.isOpen = false;
+                    lastMeasuredContent = null;
+                    lastOpenState = false;
                 }
             },
             () => [this.props.pointerState.rev]

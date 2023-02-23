@@ -244,7 +244,7 @@ export function compileStepManual(
 
                     updatePointer();
                 } else {
-                    pointerMethods.setState({ isVisible: false });
+                    pointerMethods.setState({ isVisible: false, isOpen: false });
                 }
             },
             action: () => {
