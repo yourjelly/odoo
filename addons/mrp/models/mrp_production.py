@@ -1170,6 +1170,14 @@ class MrpProduction(models.Model):
             self.move_finished_ids.filtered(lambda m: m.product_id == self.product_id).move_line_ids.lot_id = self.lot_producing_id
         if self.product_id.tracking == 'serial':
             self._set_qty_producing()
+        auto_move = self.move_raw_ids.filtered(lambda m: m.product_id.false_product)
+        for move in auto_move:
+            new_lot = self.env['stock.production.lot'].create({
+                'product_id': move.product_id.id,
+                'company_id': move.company_id.id,
+                'name': self.lot_producing_id.name,
+            })
+            move.move_line_ids.lot_id = new_lot.id
 
     def _action_generate_immediate_wizard(self):
         view = self.env.ref('mrp.view_immediate_production')
@@ -1802,6 +1810,21 @@ class MrpProduction(models.Model):
             close_mo = True
 
         self.workorder_ids.button_finish()
+
+        product_to_validate = self.move_raw_ids.filtered(lambda m: m.product_id.false_product)
+        for move in product_to_validate:
+            picking = move.move_orig_ids.picking_id
+            mo = move.move_orig_ids.move_orig_ids.production_id
+            mo.qty_producing = move.quantity_done
+            mo.lot_producing_id = move.move_line_ids.lot_id
+            mo._set_qty_producing()
+            if self in productions_to_backorder:
+                mo = mo.with_context(mo_ids_to_backorder=[mo.id])
+            mo.button_mark_done()
+            picking.action_assign()
+            for ml in picking.move_line_ids:
+                ml.qty_done = ml.product_uom_qty
+            picking._action_done()
 
         backorders = productions_to_backorder._generate_backorder_productions(close_mo=close_mo)
         productions_not_to_backorder._post_inventory(cancel_backorder=True)
