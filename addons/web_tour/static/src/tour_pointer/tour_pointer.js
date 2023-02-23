@@ -50,7 +50,7 @@ export class TourPointer extends Component {
         let lastMeasuredContent = null;
         let lastOpenState = this.isOpen;
 
-        this.debouncedToggleOpen = debounce((isOpen) => (this.state.isOpen = isOpen), 50, true);
+        this.toggleOpen = (isOpen) => (this.state.isOpen = isOpen);
 
         useEffect(
             () => {
