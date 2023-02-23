@@ -17,7 +17,7 @@
             "
             t-on-mouseenter="() => toggleOpen(true)"
             t-on-mouseleave="() => toggleOpen(false)"
-            t-on-click="props.pointerState.onClick"
+            t-on-click="props.pointerState.onClick || (() => {})"
         >
             <div class="o_tour_pointer_tip position-absolute" />
             <div
