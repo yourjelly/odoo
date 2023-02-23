@@ -2,6 +2,7 @@
 
 import { Component, useEffect, useRef, useState } from "@odoo/owl";
 import { reposition } from "@web/core/position_hook";
+import { debounce } from "@web/core/utils/timing";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
@@ -49,7 +50,7 @@ export class TourPointer extends Component {
         let lastMeasuredContent = null;
         let lastOpenState = this.isOpen;
 
-        this.toggleOpen = (isOpen) => (this.state.isOpen = isOpen);
+        this.toggleOpen = debounce((isOpen) => (this.state.isOpen = isOpen), 50, true);
 
         useEffect(
             () => {
