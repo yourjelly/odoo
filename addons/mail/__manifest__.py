@@ -118,6 +118,12 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/model.js',
             'mail/static/src/model/*.js',
             'mail/static/src/core_models/*.js',
+            'mail/static/src/new/utils/**/*',
+            'mail/static/src/new/core/**/*',
+            ('remove', 'mail/static/src/new/core/messaging_service.js'),
+            'mail/static/src/new/composer/**/*',
+            'mail/static/src/new/emoji_picker/**/*',
+            'mail/static/src/new/attachments/**/*',
         ],
         'mail.assets_messaging': [
             ('include', 'mail.assets_core_messaging'),

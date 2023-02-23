@@ -104,7 +104,7 @@ Model({
                     this.update({ sessionCookie });
                 }
             }
-
+            console.warn(this.chatbot.state);
             if (this.chatbot.state === 'init') {
                 // we landed on a website page where a channel rule is configured to run a chatbot.script
                 // -> initialize necessary state

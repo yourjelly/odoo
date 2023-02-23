@@ -841,6 +841,7 @@ export const threadService = {
         "mail.message",
     ],
     start(env, services) {
+        console.warn("==")
         return new ThreadService(env, services);
     },
 };

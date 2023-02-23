@@ -54,6 +54,7 @@ Help your customers with this chat, and analyse their feedback.
         ],
         'web.assets_frontend': [
             ('include', 'im_livechat.assets_public_livechat'),
+            'im_livechat/static/src/new_public/**/*',
             'im_livechat/static/src/public/main.js',
             'im_livechat/static/src/services/*.js',
             'im_livechat/static/src/legacy/public_livechat_chatbot.js',
