@@ -39,5 +39,4 @@ class TestHrHolidaysTour(HttpCase):
             'date_to': '2022-12-31',
         })
         allocation.action_validate()
-
         self.start_tour('/web', 'hr_holidays_tour', login="admin")

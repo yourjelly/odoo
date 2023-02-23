@@ -7,6 +7,7 @@ import { EmployeeListController } from "@hr/views/list_view";
 
 export const myAllocationsListView = {
     ...listView,
+    Controller: EmployeeListController,
     buttonTemplate: "hr_holidays.myAllocations.ListView.Buttons",
 };
 

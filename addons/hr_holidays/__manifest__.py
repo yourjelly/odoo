@@ -38,8 +38,8 @@ A synchronization with an internal agenda (Meetings of the CRM module) is also p
         'views/resource_views.xml',
         'views/hr_leave_views.xml',
         'views/hr_leave_type_views.xml',
-        'views/hr_leave_allocation_views.xml',
         'views/hr_leave_accrual_views.xml',
+        'views/hr_leave_allocation_views.xml',
         'views/hr_leave_stress_day_views.xml',
         'views/mail_activity_views.xml',
 
@@ -84,7 +84,6 @@ A synchronization with an internal agenda (Meetings of the CRM module) is also p
             'hr_holidays/static/src/tours/*.js',
             'hr_holidays/static/src/radio_image_field/*.js',
             'hr_holidays/static/src/radio_image_field/*.xml',
-
             # Don't include dark mode files in light mode
             ('remove', 'hr_holidays/static/src/views/**/*.dark.scss'),
             ('remove', 'hr_holidays/static/src/dashboard/**/*.dark.scss'),

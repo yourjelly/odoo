@@ -136,7 +136,9 @@ class HolidaysAllocation(models.Model):
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
     is_officer = fields.Boolean(compute='_compute_is_officer')
     accrual_plan_id = fields.Many2one('hr.leave.accrual.plan', compute="_compute_from_holiday_status_id", store=True, readonly=False, domain="['|', ('time_off_type_id', '=', False), ('time_off_type_id', '=', holiday_status_id)]", tracking=True)
-    is_accrual_plan = fields.Boolean(default=_default_is_accrual_plan)
+    is_accrual_plan = fields.Boolean(default=_default_is_accrual_plan, store=False)
+    is_allocation_type_accrual = fields.Boolean(string='Link to an Accrual plan', help='Accrual plans permit eligible employees to accrue time'
+        'on a defined  period of time, to use for vacation, sick leave or other reasons')
     max_leaves = fields.Float(compute='_compute_leaves')
     leaves_taken = fields.Float(compute='_compute_leaves', string='Time off Taken')
     taken_leave_ids = fields.One2many('hr.leave', 'holiday_allocation_id', domain="[('state', 'in', ['confirm', 'validate1', 'validate'])]")
@@ -180,7 +182,11 @@ class HolidaysAllocation(models.Model):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         for allocation in self:
             if is_officer or allocation.employee_id.user_id == self.env.user or allocation.employee_id.leave_manager_id == self.env.user:
-                allocation.sudo().private_name = allocation.name
+                if allocation.env.context.get('form_view_ref'):
+                    title = "[ %s ] Allocation Request ( [%s] %s)" % (allocation.holiday_status_id.name, allocation.number_of_days_display if allocation.type_request_unit != 'hour' else allocation.number_of_hours_display, allocation.type_request_unit)
+                    allocation.sudo().private_name = title
+                else:
+                    allocation.sudo().private_name = allocation.name
 
     def _search_description(self, operator, value):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
