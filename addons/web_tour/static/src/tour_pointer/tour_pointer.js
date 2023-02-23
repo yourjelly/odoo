@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Component, useEffect, useRef, useState } from "@odoo/owl";
-import { usePosition } from "@web/core/position_hook";
+import { reposition } from "@web/core/position_hook";
 
 /**
  * @typedef {import("../tour_service/tour_pointer_state").TourPointerState} TourPointerState
@@ -48,42 +48,51 @@ export class TourPointer extends Component {
         let lastMeasuredContent = null;
         let lastOpenState = this.isOpen;
 
-        useEffect(() => {
-            const { el } = rootRef;
-            if (el) {
-                const hasContentChanged = lastMeasuredContent !== this.content;
-                const hasOpenStateChanged = lastOpenState !== this.isOpen;
-                lastOpenState = this.isOpen;
+        useEffect(
+            () => {
+                const { el } = rootRef;
+                if (el) {
+                    const hasContentChanged = lastMeasuredContent !== this.content;
+                    const hasOpenStateChanged = lastOpenState !== this.isOpen;
+                    lastOpenState = this.isOpen;
 
-                // Content changed: we must re-measure the dimensions of the text.
-                if (hasContentChanged) {
-                    lastMeasuredContent = this.content;
-                    el.style.removeProperty("width");
-                    el.style.removeProperty("height");
-                    this.dimensions = el.getBoundingClientRect();
-                }
-
-                // If the content or the "is open" state changed: we must apply
-                // new width and height properties
-                if (hasContentChanged || hasOpenStateChanged) {
-                    const [width, height] = this.isOpen
-                        ? [this.dimensions.width, this.dimensions.height]
-                        : [this.constructor.width, this.constructor.height];
-                    if (this.isOpen) {
-                        el.style.removeProperty("transition");
-                    } else {
-                        // No transition if switching from open to closed
-                        el.style.setProperty("transition", "none");
+                    // Content changed: we must re-measure the dimensions of the text.
+                    if (hasContentChanged) {
+                        lastMeasuredContent = this.content;
+                        el.style.removeProperty("width");
+                        el.style.removeProperty("height");
+                        this.dimensions = el.getBoundingClientRect();
                     }
-                    el.style.setProperty("width", `${width}px`);
-                    el.style.setProperty("height", `${height}px`);
-                }
-            }
-        });
 
-        usePosition(
-            () => this.props.pointerState.anchor,
-            () => ({ position: this.position, margin: 6 })
+                    // If the content or the "is open" state changed: we must apply
+                    // new width and height properties
+                    if (hasContentChanged || hasOpenStateChanged) {
+                        const [width, height] = this.isOpen
+                            ? [this.dimensions.width, this.dimensions.height]
+                            : [this.constructor.width, this.constructor.height];
+                        if (this.isOpen) {
+                            el.style.removeProperty("transition");
+                        } else {
+                            // No transition if switching from open to closed
+                            el.style.setProperty("transition", "none");
+                        }
+                        el.style.setProperty("width", `${width}px`);
+                        el.style.setProperty("height", `${height}px`);
+                    }
+
+                    if (!this.isOpen) {
+                        const { anchor } = this.props.pointerState;
+                        if (anchor) {
+                            const { x, width } = anchor.getBoundingClientRect();
+                            const wouldOverflow =
+                                window.innerWidth - x - width / 2 < this.dimensions?.width;
+                            el.classList.toggle("o_expand_left", wouldOverflow);
+                            reposition(anchor, el, { position: this.position, margin: 6 });
+                        }
+                    }
+                }
+            },
+            () => [this.props.pointerState.rev]
         );
     }
 
