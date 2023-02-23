@@ -101,7 +101,7 @@ export function createPointerState() {
      */
     const update = (step, anchor) => {
         intersection.setTarget(anchor);
-        if (document.body.contains(anchor)) {
+        if (anchor) {
             let { position, content } = step;
             switch (intersection.targetPosition) {
                 case "unknown": {
