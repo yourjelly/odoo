@@ -249,6 +249,12 @@ export function compileStepManual(
             },
             action: () => {
                 tourState.set(tour.name, "currentIndex", stepIndex + 1);
+                pointerMethods.setState({
+                    isVisible: false,
+                    isOpen: false,
+                    content: undefined,
+                    anchor: undefined,
+                });
 
                 // Reset state variables.
                 proceedWith = null;
@@ -345,8 +351,15 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
 }
 
 export function compileTourToMacro(tour, options) {
-    const { filteredSteps, stepCompiler, pointerMethods, stepDelay, watch, checkDelay, onTourEnd } =
-        options;
+    const {
+        filteredSteps,
+        stepCompiler,
+        pointerMethods,
+        stepDelay,
+        watch,
+        checkDelay,
+        onTourEnd,
+    } = options;
     const currentStepIndex = tourState.get(tour.name, "currentIndex");
     return {
         ...tour,
