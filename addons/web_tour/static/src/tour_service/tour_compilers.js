@@ -233,7 +233,7 @@ export function compileStepManual(
                         onScroll: updatePointer,
                         onConsume: () => {
                             proceedWith = stepEl;
-                            pointerMethods.setState({ isVisible: false });
+                            pointerMethods.setState({ isVisible: false, isOpen: false });
                         },
                     });
 
@@ -248,7 +248,6 @@ export function compileStepManual(
                 }
             },
             action: () => {
-                pointerMethods.setState({ isVisible: false, isOpen: false });
                 tourState.set(tour.name, "currentIndex", stepIndex + 1);
 
                 // Reset state variables.

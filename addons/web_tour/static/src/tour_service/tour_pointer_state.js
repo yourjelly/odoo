@@ -105,8 +105,7 @@ export function createPointerState() {
             let { position, content } = step;
             switch (intersection.targetPosition) {
                 case "unknown": {
-                    // TODO-JCB: Maybe this targetPosition value is not needed.
-                    console.warn("Something's wrong on the `Intersection` instance.");
+                    // Do nothing for unknown target position.
                     break;
                 }
                 case "in": {
