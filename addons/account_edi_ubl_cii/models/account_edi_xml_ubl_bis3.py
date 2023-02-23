@@ -102,6 +102,10 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
     def _get_partner_party_vals(self, partner, role):
         # EXTENDS account.edi.xml.ubl_21
         vals = super()._get_partner_party_vals(partner, role)
+        if 'account_peppol_eas_code' in partner._fields and partner.account_peppol_eas_code and partner.account_peppol_participant_code:
+            vals['endpoint_id'] = partner.account_peppol_participant_code
+            vals['endpoint_id_attrs'] = {'schemeID': partner.account_peppol_eas_code}
+            return vals
 
         vals['endpoint_id'] = partner.vat
         vals['endpoint_id_attrs'] = {'schemeID': COUNTRY_EAS.get(partner.country_id.code)}
