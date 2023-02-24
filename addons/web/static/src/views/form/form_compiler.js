@@ -63,9 +63,11 @@ export class FormCompiler extends ViewCompiler {
         );
     }
 
-    compile() {
+    compile(key, params = {}) {
         const compiled = super.compile(...arguments);
-        compiled.children[0].setAttribute("t-ref", "compiled_view_root");
+        if (!params.isSubView) {
+            compiled.children[0].setAttribute("t-ref", "compiled_view_root");
+        }
         return compiled;
     }
 
@@ -153,11 +155,12 @@ export class FormCompiler extends ViewCompiler {
                     "oe_stat_button",
                     "btn-light",
                     "flex-shrink-0",
-                    "mb-0",
-                    "py-0",
-                    "border-0",
-                    "border-start",
-                    "border-bottom",
+                    // "mb-0",
+                    // "py-0",
+                    // "border-0",
+                    // "border-start",
+                    // "border-bottom",
+                    "border",
                     "rounded-0",
                     "text-start",
                     "text-nowrap",
@@ -649,7 +652,7 @@ export class FormCompiler extends ViewCompiler {
         append(sheetBG, sheetFG);
         for (const child of el.childNodes) {
             const compiled = this.compileNode(child, params);
-            if (!compiled) {
+            if (!compiled || compiled.nodeName === "ButtonBox") {
                 continue;
             }
             if (getTag(child, true) === "field") {
