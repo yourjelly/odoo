@@ -11,7 +11,6 @@ import { patch } from "@web/core/utils/patch";
 import { useDebounced } from "@web/core/utils/timing";
 import { FormController } from "@web/views/form/form_controller";
 import { useViewCompiler } from "@web/views/view_compiler";
-import { evalDomain } from "@web/views/utils";
 
 import { MailFormCompiler } from "./form_compiler";
 
@@ -76,9 +75,6 @@ patch(FormController.prototype, "mail", {
             type: "chatter",
         });
         return this.messagingState.thread.attachmentsInWebClientView.length > 0;
-    },
-    evalDomainFromRecord(record, expr) {
-        return evalDomain(expr, record.evalContext);
     },
 });
 
