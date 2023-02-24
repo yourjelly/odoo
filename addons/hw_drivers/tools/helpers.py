@@ -283,6 +283,7 @@ def download_iot_handlers(auto=True):
             _logger.error('Could not reach configured server')
             _logger.error('A error encountered : %s ' % e)
 
+# coucou je suis le changement
 def load_iot_handlers():
     """
     This method loads local files: 'odoo/addons/hw_drivers/iot_handlers/drivers' and
