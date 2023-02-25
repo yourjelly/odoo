@@ -85,16 +85,16 @@ QUnit.module("Tour service", (hooks) => {
         });
         const env = await makeTestEnv({});
 
-        const { Component: TourPointer, props: tourPointerProps } = registry
+        const { Component: TourPointerContainer, props: tourPointerProps } = registry
             .category("main_components")
-            .get("TourPointer");
+            .get("TourPointerContainer");
 
         class Root extends Component {
-            static components = { TourPointer, Counter };
+            static components = { TourPointerContainer, Counter };
             static template = xml/*html*/ `
                 <t>
                     <Counter />
-                    <TourPointer t-props="props.tourPointerProps" />
+                    <TourPointerContainer t-props="props.tourPointerProps" />
                 </t>
             `;
         }
@@ -122,16 +122,16 @@ QUnit.module("Tour service", (hooks) => {
         });
         const env = await makeTestEnv({});
 
-        const { Component: TourPointer, props: tourPointerProps } = registry
+        const { Component: TourPointerContainer, props: tourPointerProps } = registry
             .category("main_components")
-            .get("TourPointer");
+            .get("TourPointerContainer");
 
         class Root extends Component {
-            static components = { TourPointer, Counter };
+            static components = { TourPointerContainer, Counter };
             static template = xml/*html*/ `
                 <t>
                     <Counter />
-                    <TourPointer t-props="props.tourPointerProps" />
+                    <TourPointerContainer t-props="props.tourPointerProps" />
                 </t>
             `;
         }

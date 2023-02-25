@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { markup, whenReady } from "@odoo/owl";
+import { markup, whenReady, reactive } from "@odoo/owl";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
 import { MacroEngine } from "@web/core/macro";
@@ -8,6 +8,7 @@ import { registry } from "@web/core/registry";
 import { config as transitionConfig } from "@web/core/transition";
 import { session } from "@web/session";
 import { TourPointer } from "../tour_pointer/tour_pointer";
+import { TourPointerContainer } from "./tour_pointer_container";
 import { compileStepAuto, compileStepManual, compileTourToMacro } from "./tour_compilers";
 import { createPointerState } from "./tour_pointer_state";
 import { tourState } from "./tour_state";
@@ -94,10 +95,36 @@ export const tourService = {
 
         const tours = extractRegisteredTours();
         const macroEngine = new MacroEngine({ target: document });
-        const { state: pointerState, methods: pointerMethods } = createPointerState();
         const consumedTours = new Set(session.web_tours);
 
-        function convertToMacro(tour, { mode, stepDelay, watch }) {
+        const pointers = reactive({});
+        let pointerId = 0;
+
+        registry.category("main_components").add("TourPointerContainer", {
+            Component: TourPointerContainer,
+            props: { pointers },
+        });
+
+        function createPointer(config) {
+            const id = pointerId++;
+            const { state: pointerState, methods } = createPointerState();
+            return {
+                start() {
+                    pointers[id] = {
+                        id,
+                        component: TourPointer,
+                        props: { pointerState, ...config },
+                    };
+                },
+                stop() {
+                    delete pointers[id];
+                    methods.destroy();
+                },
+                ...methods,
+            };
+        }
+
+        function convertToMacro(tour, pointer, { mode, stepDelay, watch }) {
             // IMPROVEMENTS: Custom step compiler. Will probably require decoupling from `mode`.
             const stepCompiler = mode === "auto" ? compileStepAuto : compileStepManual;
             const checkDelay = mode === "auto" ? tour.checkDelay : 100;
@@ -105,7 +132,7 @@ export const tourService = {
             return compileTourToMacro(tour, {
                 filteredSteps,
                 stepCompiler,
-                pointerMethods,
+                pointer,
                 stepDelay,
                 watch,
                 checkDelay,
@@ -132,6 +159,7 @@ export const tourService = {
                         consumedTours.add(name);
                         orm.call("web_tour.tour", "consume", [[name]]);
                     }
+                    pointer.stop();
                     // Used to signal the python test runner that the tour finished without error.
                     console.log("test successful");
                 },
@@ -161,13 +189,15 @@ export const tourService = {
             tourState.set(tourName, "stepDelay", options.stepDelay);
             tourState.set(tourName, "watch", options.watch);
             tourState.set(tourName, "mode", options.mode);
-            const macro = convertToMacro(tour, options);
+            const pointer = createPointer({ bounce: !(options.mode === "auto" && options.watch) });
+            const macro = convertToMacro(tour, pointer, options);
             const willUnload = callWithUnloadCheck(() => {
                 if (tour.url && tour.url !== options.url) {
                     window.location.href = window.location.origin + tour.url;
                 }
             });
             if (!willUnload) {
+                pointer.start();
                 activateMacro(macro, options.mode);
             }
         }
@@ -177,14 +207,11 @@ export const tourService = {
             const stepDelay = tourState.get(tourName, "stepDelay");
             const watch = tourState.get(tourName, "watch");
             const mode = tourState.get(tourName, "mode");
-            const macro = convertToMacro(tour, { stepDelay, watch, mode });
+            const pointer = createPointer({ bounce: !(mode === "auto" && watch) });
+            const macro = convertToMacro(tour, pointer, { stepDelay, watch, mode });
+            pointer.start();
             activateMacro(macro, mode);
         }
-
-        registry.category("main_components").add("TourPointer", {
-            Component: TourPointer,
-            props: { pointerState },
-        });
 
         if (!window.frameElement) {
             // Resume running tours.

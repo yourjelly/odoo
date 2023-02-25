@@ -99,7 +99,7 @@ export function createPointerState() {
      * @param {TourStep} step
      * @param {HTMLElement} [anchor]
      */
-    const update = (step, anchor) => {
+    const pointTo = (anchor, step) => {
         intersection.setTarget(anchor);
         if (anchor) {
             let { position, content } = step;
@@ -112,7 +112,7 @@ export function createPointerState() {
                     if (document.body.contains(floatingAnchor)) {
                         floatingAnchor.remove();
                     }
-                    setState({ anchor, content, onClick: null, position });
+                    setState({ anchor, content, onClick: null, position, isVisible: true });
                     break;
                 }
                 default: {
@@ -122,6 +122,7 @@ export function createPointerState() {
 
                     const scrollParent = getScrollParent(anchor);
                     if (!scrollParent) {
+                        setState({ anchor, content, onClick: null, position, isVisible: true });
                         return;
                     }
                     const { x, y, width, height } = scrollParent.getBoundingClientRect();
@@ -138,13 +139,34 @@ export function createPointerState() {
                     if (!document.contains(floatingAnchor)) {
                         document.body.appendChild(floatingAnchor);
                     }
-                    setState({ anchor: floatingAnchor, content, onClick, position });
+                    setState({
+                        anchor: floatingAnchor,
+                        content,
+                        onClick,
+                        position,
+                        isVisible: true,
+                    });
                 }
             }
         } else {
-            setState({ isVisible: false });
+            hide();
         }
     };
+
+    function hide() {
+        setState({ content: "", isVisible: false, isOpen: false });
+    }
+
+    function showContent(isOpen) {
+        setState({ isOpen });
+    }
+
+    function destroy() {
+        intersection.stop();
+        if (document.body.contains(floatingAnchor)) {
+            floatingAnchor.remove();
+        }
+    }
 
     let currentRev = 1;
     /** @type {TourPointerState} */
@@ -153,5 +175,5 @@ export function createPointerState() {
     const floatingAnchor = document.createElement("div");
     floatingAnchor.className = "position-fixed";
 
-    return { state, methods: { setState, update } };
+    return { state, methods: { setState, showContent, pointTo, hide, destroy } };
 }

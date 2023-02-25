@@ -246,7 +246,7 @@ export class MacroEngine {
         return [...this.macros]
             .map((m) => m.checkDelay)
             .filter((delay) => delay > 0)
-            .reduce(Math.max, 0);
+            .reduce((m, v) => Math.max(m, v), 0);
     }
 
     async advanceMacros() {

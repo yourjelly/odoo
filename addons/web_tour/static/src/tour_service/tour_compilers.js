@@ -13,6 +13,8 @@ import {
     RunningTourActionHelper,
 } from "./tour_utils";
 
+const SHOW_POINTER_DURATION = 0; // ms
+
 /**
  * @typedef {import("./tour_pointer_state").TourPointerMethods} TourPointerMethods
  *
@@ -28,7 +30,7 @@ import {
  * @property {Tour} tour
  * @property {number} stepDelay
  * @property {watch} boolean
- * @property {TourPointerMethods} pointerMethods
+ * @property {TourPointerMethods} pointer
  */
 
 /**
@@ -151,7 +153,7 @@ function canContinue(el, allowInvisible) {
  * @param {Object} params
  * @param {HTMLElement} params.anchorEl
  * @param {string} params.consumeEvent
- * @param {TourPointerMethods} params.pointerMethods
+ * @param {TourPointerMethods} params.pointer
  * @param {(ev: Event) => any} params.onScroll
  * @param {(ev: Event) => any} params.onConsume
  */
@@ -193,7 +195,7 @@ function setupListeners({
 export function compileStepManual(
     stepIndex,
     step,
-    { tour, stepDelay: _stepDelay, watch: _watch, pointerMethods }
+    { tour, stepDelay: _stepDelay, watch: _watch, pointer }
 ) {
     let proceedWith = null;
     let removeListeners = () => {};
@@ -221,46 +223,36 @@ export function compileStepManual(
                 if (stepEl && canContinue(stepEl, step.allowInvisible)) {
                     const consumeEvent = step.consumeEvent || getConsumeEventType(stepEl, step.run);
                     const anchorEl = getAnchorEl(stepEl, consumeEvent);
-                    const toggleOpen = (isOpen) => pointerMethods.setState({ isOpen });
-                    const debouncedToggleOpen = debounce(toggleOpen, 50, true);
+                    const debouncedToggleOpen = debounce(pointer.showContent, 50, true);
 
                     const updatePointer = () => {
-                        pointerMethods.setState({
-                            isVisible: true,
+                        pointer.setState({
                             onMouseEnter: () => debouncedToggleOpen(true),
                             onMouseLeave: () => debouncedToggleOpen(false),
                         });
-                        pointerMethods.update(step, anchorEl);
+                        pointer.pointTo(anchorEl, step);
                     };
 
                     removeListeners = setupListeners({
                         anchorEl,
                         consumeEvent,
-                        onMouseEnter: () => toggleOpen(true),
-                        onMouseLeave: () => toggleOpen(false),
+                        onMouseEnter: () => pointer.showContent(true),
+                        onMouseLeave: () => pointer.showContent(false),
                         onScroll: updatePointer,
                         onConsume: () => {
                             proceedWith = stepEl;
-                            pointerMethods.setState({ isVisible: false, isOpen: false });
+                            pointer.hide();
                         },
                     });
 
                     updatePointer();
                 } else {
-                    pointerMethods.setState({ isVisible: false, isOpen: false });
+                    pointer.hide();
                 }
             },
             action: () => {
                 tourState.set(tour.name, "currentIndex", stepIndex + 1);
-                pointerMethods.setState({
-                    isVisible: false,
-                    isOpen: false,
-                    content: undefined,
-                    anchor: undefined,
-                    onMouseEnter: undefined,
-                    onMouseLeave: undefined,
-                });
-
+                pointer.hide();
                 proceedWith = null;
             },
         },
@@ -270,7 +262,7 @@ export function compileStepManual(
 let tourTimeout;
 
 /** @type {TourStepCompiler} */
-export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, pointerMethods: _pm }) {
+export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, pointer }) {
     let skipAction = false;
     stepDelay = stepDelay || 0;
     return [
@@ -327,6 +319,13 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                 // anchor is just the step element.
                 const $anchorEl = $(stepEl);
 
+                if (watch && SHOW_POINTER_DURATION > 0) {
+                    // When in watch mode, briefly point to the anchor element.
+                    pointer.pointTo($anchorEl.get(0), step);
+                    await new Promise((r) => browser.setTimeout(r, SHOW_POINTER_DURATION));
+                    pointer.hide();
+                }
+
                 // TODO: Delegate the following routine to the `ACTION_HELPERS` in the macro module.
                 const actionHelper = new RunningTourActionHelper({
                     consume_event: consumeEvent,
@@ -357,7 +356,7 @@ export function compileTourToMacro(tour, options) {
     const {
         filteredSteps,
         stepCompiler,
-        pointerMethods,
+        pointer,
         stepDelay,
         watch,
         checkDelay,
@@ -379,7 +378,7 @@ export function compileTourToMacro(tour, options) {
                             tour,
                             stepDelay,
                             watch,
-                            pointerMethods,
+                            pointer,
                         }),
                     ];
                 }
@@ -388,7 +387,6 @@ export function compileTourToMacro(tour, options) {
                 {
                     action() {
                         tourState.clear(tour.name);
-                        pointerMethods.setState({ isVisible: false });
                         onTourEnd(tour);
                     },
                 },

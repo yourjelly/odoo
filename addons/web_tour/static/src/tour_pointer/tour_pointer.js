@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, useEffect, useRef } from "@odoo/owl";
 import { reposition } from "@web/core/position_hook";
 
 /**
@@ -37,6 +37,11 @@ export class TourPointer extends Component {
                 rev: { type: Number, optional: true },
             },
         },
+        bounce: { type: Boolean, optional: true },
+    };
+
+    static defaultProps = {
+        bounce: true,
     };
 
     static template = "web_tour.TourPointer";
