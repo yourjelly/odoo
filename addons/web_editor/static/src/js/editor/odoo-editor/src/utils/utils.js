@@ -298,6 +298,19 @@ export function closestElement(node, selector) {
 }
 
 /**
+ * Returns the closest HTMLElement which has the `data-oe-protected` attribute
+ * set. (values can be "false", "true", "blackbox").
+ * Ignores "" value.
+ * @see isProtected for the documentation and use cases of such a node.
+ *
+ * @param {Node} node
+ * @returns {HTMLElement}
+ */
+export function closestProtected(node) {
+    return closestElement(node, '[data-oe-protected]:not([data-oe-protected=""])');
+}
+
+/**
  * Returns a list of all the ancestors nodes of the provided node.
  *
  * @param {Node} node
@@ -1352,6 +1365,24 @@ export function isMediaElement(node) {
         (node.classList &&
             (node.classList.contains('o_image') || node.classList.contains('media_iframe_video')))
     );
+}
+/**
+ * A "protected" node will have its mutations filtered and not be registered
+ * in an history step. Some editor features like selection handling, command
+ * hint, toolbar, tooltip, etc. are also disabled. Protected roots have their
+ * data-oe-protected attribute set to either "true" or "blackbox". If the
+ * closest parent with a data-oe-protected attribute has the value "false", it
+ * is not protected. "" value is ignored, unknown values are not supported.
+ *
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isProtected(node) {
+    const closestProtectedElement = closestProtected(node);
+    if (closestProtectedElement) {
+        return closestProtectedElement.dataset.oeProtected !== "false";
+    }
+    return false;
 }
 export function isVoidElement(node) {
     return isMediaElement(node) || node.tagName === 'HR';

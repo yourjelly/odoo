@@ -18,11 +18,13 @@ export function serializeNode(node, nodesToStripFromChildren = new Set()) {
             result.attributes[node.attributes[i].name] = node.attributes[i].value;
         }
         let child = node.firstChild;
-        while (child) {
-            if (!nodesToStripFromChildren.has(child.oid)) {
-                result.children.push(serializeNode(child, nodesToStripFromChildren));
+        if (node.dataset.oeProtected !== "blackbox") {
+            while (child) {
+                if (!nodesToStripFromChildren.has(child.oid)) {
+                    result.children.push(serializeNode(child, nodesToStripFromChildren));
+                }
+                child = child.nextSibling;
             }
-            child = child.nextSibling;
         }
     }
     return result;

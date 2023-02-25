@@ -32,6 +32,7 @@ import {
     startPos,
     toggleClass,
     closestElement,
+    closestProtected,
     isVisible,
     isHtmlContentSupported,
     rgbToHex,
@@ -70,6 +71,7 @@ import {
     splitTextNode,
     isEditorTab,
     isMacOS,
+    isProtected,
     isVoidElement,
     cleanZWS,
     isZWS,
@@ -953,11 +955,25 @@ export class OdooEditor extends EventTarget {
                     continue;
                 }
             }
-            if (record.target && [Node.TEXT_NODE, Node.ELEMENT_NODE].includes(record.target.nodeType)) {
-                const closestProtected = closestElement(record.target, '[data-oe-protected="true"]');
-                if (closestProtected && closestProtected.nodeType === Node.ELEMENT_NODE &&
-                    record.target !== closestProtected) {
-                    continue;
+            const closestProtectedElement = closestProtected(record.target);
+            if (closestProtectedElement) {
+                const protectedValue = closestProtectedElement.dataset.oeProtected;
+                switch (protectedValue) {
+                    case "blackbox":
+                    case "true":
+                        if (record.type !== "attributes") {
+                            this.idSet(record.target);
+                            continue;
+                        } else if (record.target !== closestProtectedElement || isProtected(closestProtectedElement.parentElement)) {
+                            continue;
+                        }
+                        break;
+                    case "false":
+                        if (record.target === closestProtectedElement && record.type === "attributes" &&
+                            isProtected(closestProtectedElement.parentElement)) {
+                            continue;
+                        }
+                        break;
                 }
             }
             filteredRecords.push(record);
@@ -2244,7 +2260,7 @@ export class OdooEditor extends EventTarget {
         const selection = this.document.getSelection();
         // Selection could be gone if the document comes from an iframe that has been removed.
         const anchorNode = selection && selection.rangeCount && selection.getRangeAt(0) && selection.anchorNode;
-        if (anchorNode && (closestElement(anchorNode, '[data-oe-protected="true"]') || !ancestors(anchorNode).includes(this.editable))) {
+        if (isProtected(anchorNode) || !ancestors(anchorNode).includes(this.editable)) {
             return false;
         }
         this.deselectTable();
@@ -3599,7 +3615,7 @@ export class OdooEditor extends EventTarget {
             return;
         }
         const anchorNode = selection.anchorNode;
-        if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {
+        if (isProtected(anchorNode)) {
             return;
         }
 
@@ -3796,7 +3812,7 @@ export class OdooEditor extends EventTarget {
         }
 
         // Clean all protected nodes because they are not sanitized
-        const protectedNodes = element.querySelectorAll('[data-oe-protected="true"]');
+        const protectedNodes = element.querySelectorAll('[data-oe-protected="blackbox"]');
         for (const node of protectedNodes) {
             node.replaceChildren();
         }
@@ -3832,7 +3848,7 @@ export class OdooEditor extends EventTarget {
     _handleCommandHint() {
         const selection = this.document.getSelection();
         const anchorNode = selection.anchorNode;
-        if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {
+        if (isProtected(anchorNode)) {
             return;
         }
 
@@ -3907,7 +3923,7 @@ export class OdooEditor extends EventTarget {
     _fixSelectionOnContenteditableFalse() {
         const selection = this.document.getSelection();
         const anchorNode = selection.anchorNode;
-        if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {
+        if (isProtected(anchorNode)) {
             return;
         }
         // When the browser set the selection inside a node that is

@@ -5859,14 +5859,33 @@ X[]
                 `),
             });
         });
-        it('should not sanitize protected elements children', async () => {
+        it('should not ignore oe-protected="false" elements children mutations', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                <div><p>a[]</p></div>
+                <div data-oe-protected="true"><div data-oe-protected="false"><p>a</p></div></div>
+                `),
+                stepFunction: async editor => {
+                    await insertText(editor, 'bc');
+                    const unProtectedParagraph = editor.editable.querySelector('[data-oe-protected="false"] > p');
+                    setSelection(unProtectedParagraph, 1);
+                    await insertText(editor, 'bc');
+                    editor.historyUndo();
+                },
+                contentAfterEdit: unformat(`
+                <div><p>abc</p></div>
+                <div data-oe-protected="true"><div data-oe-protected="false"><p>ab[]</p></div></div>
+                `),
+            });
+        });
+        it('should not sanitize "blackbox" protected elements children', async () => {
             await testEditor(BasicEditor, {
                 contentBefore: unformat(`
                 <div>
                     <p><i class="fa"></i></p>
                     <ul><li><p><br></p></li></ul>
                 </div>
-                <div data-oe-protected="true">
+                <div data-oe-protected="blackbox">
                     <p><i class="fa"></i></p>
                     <ul><li><p><br></p></li></ul>
                 </div>
@@ -5877,17 +5896,17 @@ X[]
                     <p><i class="fa" contenteditable="false">\u200B</i></p>
                     <ul><li><br></li></ul>
                 </div>
-                <div data-oe-protected="true">
+                <div data-oe-protected="blackbox">
                     <p><i class="fa"></i></p>
                     <ul><li><p><br></p></li></ul>
                 </div>
                 `),
             });
         });
-        it('should remove protected elements children during cleaning', async () => {
+        it('should remove "blackbox" protected elements children during cleaning', async () => {
             await testEditor(BasicEditor, {
-                contentBefore: '<div><p>a[]</p></div><div data-oe-protected="true"><p>a</p></div>',
-                contentAfter: '<div><p>a[]</p></div><div data-oe-protected="true"></div>',
+                contentBefore: '<div><p>a[]</p></div><div data-oe-protected="blackbox"><p>a</p></div>',
+                contentAfter: '<div><p>a[]</p></div><div data-oe-protected="blackbox"></div>',
             });
         });
     });
