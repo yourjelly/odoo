@@ -31,6 +31,7 @@ const QWeb = core.qweb;
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getInSelection = OdooEditorLib.getInSelection;
+const isProtected = OdooEditorLib.isProtected;
 const isBlock = OdooEditorLib.isBlock;
 const rgbToHex = OdooEditorLib.rgbToHex;
 const preserveCursor = OdooEditorLib.preserveCursor;
@@ -305,7 +306,7 @@ const Wysiwyg = Widget.extend({
 
                 const selection = self.odooEditor.document.getSelection();
                 const anchorNode = selection.anchorNode;
-                if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {
+                if (isProtected(anchorNode)) {
                     return;
                 }
 
@@ -1837,7 +1838,7 @@ const Wysiwyg = Widget.extend({
     _updateEditorUI: function (e) {
         let selection = this.odooEditor.document.getSelection();
         const anchorNode = selection.anchorNode;
-        if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {
+        if (isProtected(anchorNode)) {
             return;
         }
 
