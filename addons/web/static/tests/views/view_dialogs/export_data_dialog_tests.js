@@ -98,7 +98,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                 },
                 {
                     children: false,
-                    field_type: "char",
+                    field_type: "boolean",
                     id: "bar",
                     relation_field: null,
                     required: false,

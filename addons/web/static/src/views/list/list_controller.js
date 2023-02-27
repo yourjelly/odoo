@@ -4,6 +4,7 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { download } from "@web/core/network/download";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { DynamicRecordList } from "@web/views/relational_model";
+import { unique } from "@web/core/utils/arrays";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { ActionMenus } from "@web/search/action_menus/action_menus";
@@ -356,9 +357,17 @@ export class ListController extends Component {
         });
     }
 
-    async getDefaultExportList() {
-        const fields = await this.getExportedFields(this.props.resModel);
-        return fields.filter((e) => this.props.archInfo.columns.find((i) => i.name === e.id));
+    get defaultExportList() {
+        return unique(
+            this.props.archInfo.columns
+                .filter((col) => col.type === "field")
+                .map((col) => {
+                    const field = this.props.fields[col.name];
+                    field.id = field.name;
+                    return field;
+                })
+                .filter((field) => field.exportable !== false)
+        );
     }
 
     async getExportedFields(model, import_compat, parentParams) {
@@ -375,10 +384,9 @@ export class ListController extends Component {
      * @private
      */
     async onExportData() {
-        const defaultExportList = await this.getDefaultExportList();
         const dialogProps = {
             context: this.props.context,
-            defaultExportList,
+            defaultExportList: this.defaultExportList,
             download: this.downloadExport.bind(this),
             getExportedFields: this.getExportedFields.bind(this),
             root: this.model.root,
@@ -391,8 +399,7 @@ export class ListController extends Component {
      * @private
      */
     async onDirectExportData() {
-        const defaultExportList = await this.getDefaultExportList();
-        await this.downloadExport(defaultExportList, false, "xlsx");
+        await this.downloadExport(this.defaultExportList, false, "xlsx");
     }
     /**
      * Called when clicking on 'Archive' or 'Unarchive' in the sidebar.

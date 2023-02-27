@@ -71,6 +71,7 @@ export class ExportDataDialog extends Component {
         this.expandedFields = {};
         this.availableFormats = [];
         this.templates = [];
+        this.defaultExportList = this.props.defaultExportList;
 
         this.state = useState({
             exportList: [],
@@ -197,6 +198,7 @@ export class ExportDataDialog extends Component {
             model: this.props.root.resModel,
             export_id: Number(value),
         });
+        debugger
         this.state.exportList = fields;
     }
 
@@ -229,6 +231,9 @@ export class ExportDataDialog extends Component {
             field.parent = parentField;
             if (!this.knownFields[field.id]) {
                 this.knownFields[field.id] = field;
+            }
+            if (field.default_export && !this.defaultExportList[field.id]) {
+                this.defaultExportList[field.id] = field;
             }
         }
         if (id) {
@@ -349,10 +354,11 @@ export class ExportDataDialog extends Component {
     }
 
     setDefaultExportList() {
+        debugger
         if (this.state.isCompatible) {
             this.state.exportList = this.state.exportList.filter(({ id }) => this.knownFields[id]);
         } else {
-            this.state.exportList = this.props.defaultExportList;
+            this.state.exportList = Object.values(this.defaultExportList);
         }
     }
 
