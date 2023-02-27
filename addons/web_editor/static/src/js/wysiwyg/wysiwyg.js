@@ -1747,7 +1747,6 @@ const Wysiwyg = Widget.extend({
             // race condition could generate a wrong selection later.
             const first = coloredElements[0];
             const last = coloredElements[coloredElements.length - 1];
-
             const sel = this.odooEditor.document.getSelection();
             sel.removeAllRanges();
             const range = new Range();
