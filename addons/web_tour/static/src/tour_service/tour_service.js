@@ -233,22 +233,7 @@ export const tourService = {
         }
 
         odoo.startTour = startTour;
-        // Allow caching of result of `isTourReady(tourName)`.
-        odoo.isTourReady = (function makeIsTourReady() {
-            const isTourReadyCache = {};
-            const isWaiting = {};
-            return (tourName) => {
-                if (!isWaiting[tourName]) {
-                    isWaiting[tourName] = true;
-                    const tourDesc = tours[tourName];
-                    tourDesc.wait_for.then(() => {
-                        isTourReadyCache[tourName] = true;
-                    });
-                } else {
-                    return isTourReadyCache[tourName];
-                }
-            };
-        })();
+        odoo.isTourReady = (tourName) => tours[tourName].wait_for.then(() => true);
 
         return {
             startTour,
