@@ -578,9 +578,23 @@ export const editorCommands = {
             return font;
         });
         // Color the selected <font>s and remove uncolored fonts.
+
+      /*
+      Before:
+       The 'if' block was something like this:
+        if (!hasColor(font, mode) && !font.hasAttribute('style'))
+        
+      This =>  window.getComputedStyle(body).colorScheme !== 'dark'
+        checks weather the odoo app is in the dark mode or not.
+
+      If the condition is true, then it resctricts it from executing from the code inside the block.
+      Hence, the content inside the font tag is not removed and it is passed as it is.
+
+      Also, now we are getting correct values in first and last variable in wysiwyg.js file where we are setting the range.
+      */
         for (const font of new Set(fonts)) {
             colorElement(font, color, mode);
-            if (!hasColor(font, mode) && !font.hasAttribute('style')) {
+            if (!hasColor(font, mode) && !font.hasAttribute('style') && window.getComputedStyle(body).colorScheme !== 'dark') {
                 for (const child of [...font.childNodes]) {
                     font.parentNode.insertBefore(child, font);
                 }
