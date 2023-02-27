@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 from odoo.osv.expression import AND
 from dateutil.relativedelta import relativedelta
 
@@ -12,6 +13,33 @@ class StockPicking(models.Model):
     purchase_id = fields.Many2one(
         'purchase.order', related='move_ids.purchase_line_id.order_id',
         string="Purchase Orders", readonly=True)
+    invoice_number = fields.Char(string="Invoice Number", copy=False)
+
+    def _action_done(self):
+        res = super()._action_done()
+        if self.invoice_number:
+            next_pickings = self.env['stock.picking']
+            next_moves = self.move_ids.move_dest_ids
+            while next_moves:
+                next_pickings |= next_moves.picking_id
+                next_moves = next_moves.move_dest_ids
+            next_pickings = next_pickings.filtered(lambda n: n.state != 'done')
+            next_pickings.filtered(lambda n: not n.invoice_number).invoice_number = self.invoice_number
+            for next_picking in next_pickings - next_pickings.filtered(lambda n: self.invoice_number in n.invoice_number):
+                next_picking.invoice_number += "," + self.invoice_number
+        return res
+
+    @api.constrains('invoice_number')
+    def _check_reconcile(self):
+        for record in self:
+            has_same_invoice_number = self.env['stock.picking'].search([
+                ('id', '!=', record.id),
+                ('partner_id', '=', record.partner_id.id),
+                ('location_id.usage', '=', 'supplier'),
+                ('invoice_number', 'ilike', record.invoice_number),
+            ], limit=1)
+            if has_same_invoice_number:
+                raise ValidationError(_("Invoice Number is already used for this vendor(%s).", record.partner_id.name))
 
 
 class StockWarehouse(models.Model):
