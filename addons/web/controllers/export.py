@@ -348,7 +348,7 @@ class Export(http.Controller):
                       'field_type': field.get('type'),
                       'required': field.get('required'),
                       'relation_field': field.get('relation_field'),
-                      'default_export': import_compat and field.get('default_export_compatible')}
+                      'default_export': True}#import_compat and field.get('default_export_compatible')}
             records.append(record)
 
             if len(ident.split('/')) < 3 and 'relation' in field:
