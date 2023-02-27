@@ -292,9 +292,6 @@ export class KanbanRenderer extends Component {
         if (!this.env.isSmall && group.isFolded) {
             classes.push("o_column_folded", "flex-basis-0", "bg-view", "cursor-pointer");
         }
-        if (!group.isFolded) {
-            classes.push("bg-200");
-        }
         if (group.progressBars.length) {
             classes.push("o_kanban_has_progressbar");
             if (!group.isFolded && group.hasActiveProgressValue) {

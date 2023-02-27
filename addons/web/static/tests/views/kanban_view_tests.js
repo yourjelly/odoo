@@ -400,7 +400,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("basic grouped rendering", async (assert) => {
-        assert.expect(14);
+        assert.expect(13);
 
         await makeView({
             type: "kanban",
@@ -427,11 +427,6 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.hasClass(
-            target.querySelector(".o_kanban_group"),
-            "bg-200",
-            "o_kanban_group should have a background"
-        );
         assert.hasClass(target.querySelector(".o_kanban_renderer"), "o_kanban_grouped");
         assert.hasClass(target.querySelector(".o_kanban_renderer"), "o_kanban_test");
         assert.containsN(target, ".o_kanban_group", 2);

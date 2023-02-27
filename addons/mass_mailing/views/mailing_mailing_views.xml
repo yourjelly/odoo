@@ -389,7 +389,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//form" position="attributes">
                     <attribute name="js_class">mailing_mailing_view_form_full_width</attribute>
-                    <attribute name="class">o_form_view o_mass_mailing_mailing_form o_mass_mailing_form_full_width</attribute>
+                    <attribute name="class">o_form_view o_mass_mailing_mailing_form o_mass_mailing_form_full_width bg-view</attribute>
                 </xpath>
                 <field name="state" position="before">
                     <xpath expr="//div[hasclass('alert-info')]" position="move"/>
