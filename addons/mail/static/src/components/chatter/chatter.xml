@@ -16,7 +16,7 @@
                                 t-att-class="{
                                     'o-active btn-primary': composerView and !composerView.composer.isLog,
                                     'btn-primary': !composerView,
-                                    'btn-light': composerView and composerView.composer.isLog,
+                                    'btn-secondary': composerView and composerView.composer.isLog,
                                 }"
                                 t-att-disabled="!isTemporary and !hasWriteAccess"
                                 data-hotkey="m"
@@ -28,7 +28,7 @@
                                 type="button"
                                 t-att-class="{
                                     'o-active btn-primary': composerView and composerView.composer.isLog,
-                                    'btn-light': composerView and !composerView.composer.isLog or !composerView,
+                                    'btn-secondary': composerView and !composerView.composer.isLog or !composerView,
                                 }"
                                 t-att-disabled="!isTemporary and !hasWriteAccess"
                                 t-on-click="onClickLogNote"
