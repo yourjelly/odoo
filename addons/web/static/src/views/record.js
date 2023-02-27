@@ -5,7 +5,7 @@ import { useModel } from "@web/views/model";
 import { RelationalModel } from "@web/views/relational_model";
 import { Component, xml, onWillStart, onWillUpdateProps } from "@odoo/owl";
 
-class _Record extends Component {
+export class _Record extends Component {
     setup() {
         const activeFields =
             this.props.info.activeFields ||
@@ -13,7 +13,7 @@ class _Record extends Component {
                 this.props.info.fieldNames.map((f) => [f, { attrs: {}, options: {}, domain: "[]" }])
             );
 
-        this.model = useModel(RelationalModel, {
+        this.model = useModel(this.relationalModelClass(), {
             resId: this.props.info.resId,
             resModel: this.props.info.resModel,
             fields: this.props.fields,
@@ -29,6 +29,10 @@ class _Record extends Component {
                 mode: nextProps.info.mode,
             });
         });
+    }
+
+    relationalModelClass(){
+        return RelationalModel;
     }
 }
 _Record.template = xml`<t t-slot="default" record="model.root"/>`;

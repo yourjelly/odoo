@@ -18,7 +18,7 @@ const fieldRegistry = registry.category("fields");
 class DefaultField extends Component {}
 DefaultField.template = xml``;
 
-function getFieldClassFromRegistry(fieldType, widget, viewType, jsClass) {
+export function getFieldClassFromRegistry(fieldType, widget, viewType, jsClass) {
     if (jsClass && widget) {
         const name = `${jsClass}.${widget}`;
         if (fieldRegistry.contains(name)) {
