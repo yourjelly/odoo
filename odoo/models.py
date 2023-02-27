@@ -3043,6 +3043,10 @@ class BaseModel(metaclass=MetaModel):
 
         field = self._fields[field_name]
 
+        if field.translate_value_name:
+            field_name = field.translate_value_name
+            field = self._fields[field_name]
+
         if not field.translate:
             return False  # or raise error
 
@@ -3119,6 +3123,9 @@ class BaseModel(metaclass=MetaModel):
         """
         self.ensure_one()
         field = self._fields[field_name]
+        if field.translate_value_name:
+            field_name = field.translate_value_name
+            field = self._fields[field_name]
         # We don't forbid reading inactive/non-existing languages,
         langs = set(langs or [l[0] for l in self.env['res.lang'].get_installed()])
         val_en = self.with_context(lang='en_US')[field_name]

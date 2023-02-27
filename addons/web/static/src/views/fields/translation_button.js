@@ -69,8 +69,12 @@ export class TranslationButton extends Component {
     get isMultiLang() {
         return localization.multiLang;
     }
+
     get lang() {
-        return this.user.lang.split("_")[0].toUpperCase();
+        const isTranslateBaseField = Boolean(
+            this.props.record.fields[this.props.fieldName]["translate_value_name"]
+        );
+        return isTranslateBaseField ? this.user.lang.split("_")[0].toUpperCase() : "EN";
     }
 
     onClick() {

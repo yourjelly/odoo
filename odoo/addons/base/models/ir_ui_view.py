@@ -599,6 +599,16 @@ actual arch.
             default = dict(default or {}, key=new_key)
         return super(View, self).copy(default)
 
+    def _update_field_translations(self, field_name, translations, digest=None):
+        if field_name == 'arch_base':
+            field_name = 'arch_db_base'
+        return super()._update_field_translations(field_name, translations, digest=digest)
+
+    def get_field_translations(self, field_name, langs=None):
+        if field_name == 'arch_base':
+            field_name = 'arch_db_base'
+        return super().get_field_translations(field_name, langs=langs)
+
     # default view selection
     @api.model
     def default_view(self, model, view_type):

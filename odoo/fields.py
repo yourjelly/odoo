@@ -1632,7 +1632,7 @@ class _String(Field):
     _related_translate = property(attrgetter('translate'))
 
     def _description_translate(self, env):
-        return bool(self.translate)
+        return bool(self.translate or self.translate_value_name)
 
     def _convert_db_column(self, model, column):
         # specialized implementation for converting from/to translated fields

@@ -7,6 +7,7 @@ import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { formatText } from "../formatters";
 import { standardFieldProps } from "../standard_field_props";
+import { TranslationButton } from "../translation_button";
 
 import { Component, onWillStart, onWillUpdateProps, useEffect, useRef } from "@odoo/owl";
 
@@ -111,9 +112,13 @@ export class AceField extends Component {
 }
 
 AceField.template = "web.AceField";
+AceField.components = {
+    TranslationButton,
+};
 AceField.props = {
     ...standardFieldProps,
     mode: { type: String, optional: true },
+    isTranslatable: { type: Boolean, optional: true },
 };
 AceField.defaultProps = {
     mode: "qweb",
@@ -122,9 +127,10 @@ AceField.defaultProps = {
 AceField.displayName = _lt("Ace Editor");
 AceField.supportedTypes = ["text"];
 
-AceField.extractProps = ({ attrs }) => {
+AceField.extractProps = ({ attrs, field }) => {
     return {
         mode: attrs.options.mode,
+        isTranslatable: field.translate,
     };
 };
 

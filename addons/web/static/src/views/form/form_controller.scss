@@ -672,29 +672,6 @@
         }
     }
 
-    .oe_no_translation_content {
-        // hide content but show the translate button
-        height: 0px;
-
-        div{
-            :not(.btn) {
-                display: none;
-            }
-
-            .btn {
-                width: 100% !important;
-                margin-left: 0px;
-                visibility: hidden;
-            }
-
-            .btn:after {
-                // force the the translate button to EN
-                content: 'EN';
-                visibility: visible;
-            }
-        }
-    }
-
     iframe.wysiwyg_iframe + .o_field_translate {
         right: 30px !important;
         top: 7px !important;
