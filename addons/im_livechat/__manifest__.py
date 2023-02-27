@@ -120,6 +120,7 @@ Help your customers with this chat, and analyse their feedback.
             'web/static/src/core/dialog/dialog.js',
             'web/static/src/core/errors/error_dialogs.js',
             'web/static/src/core/effects/**/*.js',
+
             'web/static/src/core/hotkeys/hotkey_service.js',
             'web/static/src/core/hotkeys/hotkey_hook.js',
             'web/static/src/core/l10n/dates.js',

@@ -29,7 +29,7 @@ class Do {
                 trigger,
             };
         }
-        return keys.split(" ").map(generateStep);
+        return [...keys.split(" ").map(generateStep)];
     }
     clickConfirm() {
         return [

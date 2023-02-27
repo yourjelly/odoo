@@ -17,14 +17,6 @@ ProductScreen.do.clickHomeCategory();
 ProductScreen.do.clickDisplayedProduct("Configurable Chair");
 ProductConfigurator.check.isShown();
 
-// Cancel configuration, not product should be in order
-ProductConfigurator.do.cancelAttributes();
-ProductScreen.check.orderIsEmpty();
-
-// Click on Configurable Chair product
-ProductScreen.do.clickDisplayedProduct("Configurable Chair");
-ProductConfigurator.check.isShown();
-
 // Pick Color
 ProductConfigurator.do.pickColor("Red");
 
@@ -73,5 +65,27 @@ ProductScreen.check.selectedOrderlineHas(
     "1.0",
     "10.0"
 );
+
+// Move the check of cancelling the popup here.
+// But first, remove the orderlines before doing the check.
+ProductScreen.do.pressNumpad("Backspace Backspace");
+ProductScreen.check.selectedOrderlineHas(
+    "Configurable Chair (Red, Metal, Other: Custom Fabric)",
+    "2.0",
+    "22.0"
+);
+ProductScreen.do.pressNumpad("Backspace Backspace");
+ProductScreen.check.orderIsEmpty();
+
+ProductScreen.do.clickDisplayedProduct("Configurable Chair");
+ProductConfigurator.check.isShown();
+
+// Cancel configuration, not product should be in order
+ProductConfigurator.do.cancelAttributes();
+ProductScreen.check.orderIsEmpty();
+
+// Click on Configurable Chair product
+ProductScreen.do.clickDisplayedProduct("Configurable Chair");
+ProductConfigurator.check.isShown();
 
 registry.category("web_tour.tours").add("ProductConfiguratorTour", { test: true, url: "/pos/ui", steps: getSteps() });
