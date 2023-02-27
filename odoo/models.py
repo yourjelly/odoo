@@ -2632,6 +2632,43 @@ class BaseModel(metaclass=MetaModel):
             else:
                 self.pool.post_constraint(tools.add_constraint, cr, self._table, conname, definition)
 
+    @api.model
+    def _add_translate_base_fields(self):
+        if self._abstract:
+            return
+
+        new_base_fields = [
+            (field.translate_base_name or f'{field_name}_base', field)
+            for field_name, field in self._fields.items()
+            if (callable(field.translate) or field.translate_base_name) and
+               field.translate_base_name not in self._fields
+        ]
+
+        for translate_base_name, field in new_base_fields:
+            field.translate_base_name = translate_base_name
+            self._add_field(translate_base_name, field.new(
+                translate_value_name=field.name,
+                compute='_compute_translate_base',
+                inverse='_inverse_translate_base',
+            ))
+
+    @api.depends(lambda self: (field_name for field_name, field in self._fields.items() if field.translate_base_name))
+    def _compute_translate_base(self):
+        env_en = self.with_context(lang='en_US').env
+        for field_name, field in self._fields.items():
+            if field.translate_base_name and self._fields[field.translate_base_name].compute == '_compute_translate_base':
+                for record in self.with_env(env_en):
+                    record[field.translate_base_name] = record[field_name]
+
+    def _inverse_translate_base(self):
+        langs = self.env['res.lang'].get_installed()
+        env = self.with_context(lang=langs[0][0] if len(langs) == 1 else 'en_US').env
+        for field_name, field in self._fields.items():
+            if field.translate_value_name:
+                for record in self.with_env(env):
+                    record[field.translate_value_name]  # fetch field value in cache
+                    record[field.translate_value_name] = record[field.translate_base_name]
+
     #
     # Update objects that use this one to update their _inherits fields
     #
@@ -2761,6 +2798,8 @@ class BaseModel(metaclass=MetaModel):
         for parent in self._inherits:
             self.env[parent]._setup_base()
         self._add_inherited_fields()
+
+        self._add_translate_base_fields()
 
         # 4. initialize more field metadata
         cls._setup_done = True

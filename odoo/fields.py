@@ -254,6 +254,8 @@ class Field(MetaField('DummyField', (object,), {})):
     type = None                         # type of the field (string)
     relational = False                  # whether the field is a relational one
     translate = False                   # whether the field is translated
+    translate_base_name = None          # name of the field which returns its en_US value when callable(field.translate)
+    translate_value_name = None         # name of the field whose translate_base_name == field.name
 
     column_type = None                  # database column type (ident, spec)
     write_sequence = 0                  # field ordering for write()
@@ -1624,6 +1626,7 @@ class _String(Field):
         # translate is either True, False, or a callable
         if 'translate' in kwargs and not callable(kwargs['translate']):
             kwargs['translate'] = bool(kwargs['translate'])
+
         super(_String, self).__init__(string=string, **kwargs)
 
     _related_translate = property(attrgetter('translate'))
