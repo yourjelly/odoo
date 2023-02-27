@@ -5550,7 +5550,7 @@
         separator: true,
     })
         .add("unhide_columns", {
-        name: "Unhide columns",
+        name: _lt("Unhide columns"),
         sequence: 86,
         action: UNHIDE_COLUMNS_ACTION,
         isVisible: (env) => {
@@ -5638,7 +5638,7 @@
         separator: true,
     })
         .add("unhide_rows", {
-        name: "Unhide rows",
+        name: _lt("Unhide rows"),
         sequence: 86,
         action: UNHIDE_ROWS_ACTION,
         isVisible: (env) => {
@@ -6200,17 +6200,17 @@
         separator: true,
     })
         .addChild("format_wrapping_overflow", ["format", "format_wrapping"], {
-        name: "Overflow",
+        name: _lt("Overflow"),
         sequence: 10,
         action: (env) => setStyle(env, { wrapping: "overflow" }),
     })
         .addChild("format_wrapping_wrap", ["format", "format_wrapping"], {
-        name: "Wrap",
+        name: _lt("Wrap"),
         sequence: 20,
         action: (env) => setStyle(env, { wrapping: "wrap" }),
     })
         .addChild("format_wrapping_clip", ["format", "format_wrapping"], {
-        name: "Clip",
+        name: _lt("Clip"),
         sequence: 30,
         action: (env) => setStyle(env, { wrapping: "clip" }),
     })
@@ -7051,7 +7051,7 @@
         validateChartDefinition: (validator, definition) => BarChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => BarChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => BarChart.getDefinitionFromContextCreation(context),
-        name: "Bar",
+        name: _lt("Bar"),
     });
     class BarChart extends AbstractChart {
         constructor(definition, sheetId, getters) {
@@ -7280,7 +7280,7 @@
         validateChartDefinition: (validator, definition) => GaugeChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => GaugeChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => GaugeChart.getDefinitionFromContextCreation(context),
-        name: "Gauge",
+        name: _lt("Gauge"),
     });
     function isDataRangeValid(definition) {
         return definition.dataRange && !rangeReference.test(definition.dataRange)
@@ -7675,7 +7675,7 @@
         validateChartDefinition: (validator, definition) => LineChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => LineChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => LineChart.getDefinitionFromContextCreation(context),
-        name: "Line",
+        name: _lt("Line"),
     });
     class LineChart extends AbstractChart {
         constructor(definition, sheetId, getters) {
@@ -7932,7 +7932,7 @@
         validateChartDefinition: (validator, definition) => PieChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => PieChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => PieChart.getDefinitionFromContextCreation(context),
-        name: "Pie",
+        name: _lt("Pie"),
     });
     class PieChart extends AbstractChart {
         constructor(definition, sheetId, getters) {
@@ -8078,7 +8078,7 @@
         validateChartDefinition: (validator, definition) => ScorecardChart$1.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => ScorecardChart$1.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => ScorecardChart$1.getDefinitionFromContextCreation(context),
-        name: "Scorecard",
+        name: _lt("Scorecard"),
     });
     function checkKeyValue(definition) {
         return definition.keyValue && !rangeReference.test(definition.keyValue)
@@ -38128,6 +38128,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.state.menuState.parentMenu = menu;
             this.isSelectingMenu = true;
             this.openedEl = ev.target;
+            this.env.model.dispatch("STOP_EDITION");
         }
         closeMenus() {
             this.state.activeTool = "";
@@ -42407,8 +42408,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
     exports.__info__.version = '2.0.0';
-    exports.__info__.date = '2023-02-17T09:46:03.434Z';
-    exports.__info__.hash = 'c96ce8d';
+    exports.__info__.date = '2023-02-27T09:18:29.036Z';
+    exports.__info__.hash = 'b5fe787';
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
 //# sourceMappingURL=o_spreadsheet.js.map
