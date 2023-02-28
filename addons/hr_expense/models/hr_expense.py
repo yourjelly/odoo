@@ -576,14 +576,16 @@ class HrExpense(models.Model):
             'name': self.employee_id.name + ': ' + self.name.split('\n')[0][:64],
             'account_id': self.account_id.id,
             'quantity': self.quantity or 1,
-            'price_unit': self.unit_amount if self.unit_amount != 0 else self.total_amount,
+            # 'unit_amount' is there when the product selected has a cost defined.
+            # This cost will always be in company currency.
+            'price_unit': self.unit_amount if self.unit_amount != 0 else self.total_amount_company,
             'product_id': self.product_id.id,
             'product_uom_id': self.product_uom_id.id,
             'analytic_distribution': self.analytic_distribution,
             'expense_id': self.id,
             'partner_id': False if self.payment_mode == 'company_account' else self.employee_id.sudo().address_home_id.commercial_partner_id.id,
             'tax_ids': [Command.set(self.tax_ids.ids)],
-            'currency_id': self.currency_id.id,
+            'currency_id': self.company_currency_id.id,
         }
 
     @api.model
