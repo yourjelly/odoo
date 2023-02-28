@@ -724,9 +724,10 @@ export class Record extends DataPoint {
                     : false;
             } else if (fieldType === "reference") {
                 const value = changes[fieldName];
-                changes[fieldName] = value && value.resModel && value.resId
-                    ? `${value.resModel},${value.resId}`
-                    : (value || false);
+                changes[fieldName] =
+                    value && value.resModel && value.resId
+                        ? `${value.resModel},${value.resId}`
+                        : value || false;
             }
         }
 
@@ -1047,13 +1048,12 @@ export class Record extends DataPoint {
     _createStaticList(fieldName) {
         const field = this.fields[fieldName];
         const activeField = this.activeFields[fieldName];
-        const { fieldsToFetch, relatedFields = {}, views = {}, viewMode } = activeField;
+        const { relatedFields, views = {}, viewMode } = activeField;
         const fields = {
             ...relatedFields,
-            ...fieldsToFetch,
         };
         const activeFields = (views[viewMode] && views[viewMode].activeFields) || {
-            ...fieldsToFetch,
+            ...relatedFields,
         };
         for (const fieldName in relatedFields) {
             if (relatedFields[fieldName].active) {
