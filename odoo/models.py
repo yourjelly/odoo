@@ -2637,28 +2637,28 @@ class BaseModel(metaclass=MetaModel):
         if self._abstract:
             return
 
+        existing_base_fields = set(field.translate_value_name for field in self._fields.values() if field.translate_value_name)
+
         new_base_fields = [
-            (field.translate_base_name or f'{field_name}_base', field)
+            (f'{field_name}_base', field)
             for field_name, field in self._fields.items()
-            if (callable(field.translate) or field.translate_base_name) and
-               field.translate_base_name not in self._fields
+            if callable(field.translate) and field_name not in existing_base_fields
         ]
 
-        for translate_base_name, field in new_base_fields:
-            field.translate_base_name = translate_base_name
-            self._add_field(translate_base_name, field.new(
+        for field_name, field in new_base_fields:
+            self._add_field(field_name, field.new(
                 translate_value_name=field.name,
                 compute='_compute_translate_base',
                 inverse='_inverse_translate_base',
             ))
 
-    @api.depends(lambda self: (field_name for field_name, field in self._fields.items() if field.translate_base_name))
+    @api.depends(lambda self: (field.translate_value_name for field in self._fields.values() if field.translate_value_name))
     def _compute_translate_base(self):
         env_en = self.with_context(lang='en_US').env
         for field_name, field in self._fields.items():
-            if field.translate_base_name and self._fields[field.translate_base_name].compute == '_compute_translate_base':
+            if field.translate_value_name and field.compute == '_compute_translate_base':
                 for record in self.with_env(env_en):
-                    record[field.translate_base_name] = record[field_name]
+                    record[field_name] = record[field.translate_value_name]
 
     def _inverse_translate_base(self):
         langs = self.env['res.lang'].get_installed()

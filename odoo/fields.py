@@ -254,8 +254,7 @@ class Field(MetaField('DummyField', (object,), {})):
     type = None                         # type of the field (string)
     relational = False                  # whether the field is a relational one
     translate = False                   # whether the field is translated
-    translate_base_name = None          # name of the field which returns its en_US value when callable(field.translate)
-    translate_value_name = None         # name of the field whose translate_base_name == field.name
+    translate_value_name = None         # name of the field which has all translations of this field
 
     column_type = None                  # database column type (ident, spec)
     write_sequence = 0                  # field ordering for write()

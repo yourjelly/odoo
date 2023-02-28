@@ -242,7 +242,6 @@ class View(models.Model):
                              ('search', 'Search'),
                              ('qweb', 'QWeb')], string='View Type')
     arch = fields.Text(compute='_compute_arch', inverse='_inverse_arch', string='View Architecture',
-                       translate_base_name='arch_base',
                        help="""This field should be used when accessing view arch. It will use translation.
                                Note that it will read `arch_db` or `arch_fs` if in dev-xml mode.""")
     arch_base = fields.Text(compute='_compute_arch_base', inverse='_inverse_arch_base', string='Base View Architecture',
