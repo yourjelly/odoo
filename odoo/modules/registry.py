@@ -674,6 +674,9 @@ class Registry(Mapping):
 
     def _clear_cache(self):
         """ Clear the cache and mark it as invalidated. """
+        #print('clearing cache')
+        #import traceback
+        #traceback.print_stack()
         self.__cache.clear()
         self.cache_invalidated = True
 

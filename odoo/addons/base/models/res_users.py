@@ -714,6 +714,7 @@ class Users(models.Model):
 
     @tools.ormcache('self.id')
     def _get_company_ids(self):
+        _logger.info(f'Computing companies for {self.id}')
         # use search() instead of `self.company_ids` to avoid extra query for `active_test`
         domain = [('active', '=', True), ('user_ids', 'in', self.id)]
         return self.env['res.company'].search(domain)._ids

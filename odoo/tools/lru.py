@@ -39,6 +39,10 @@ class LRU(object):
     def __setitem__(self, obj, val):
         self.d[obj] = val
         self.d.move_to_end(obj, last=False)
+        current_thread = threading.current_thread()
+        for hook in getattr(current_thread, 'cache_hooks', ()):
+            hook(self, 'set', obj, val)
+
         while len(self.d) > self.count:
             self.d.popitem(last=True)
 
@@ -51,9 +55,15 @@ class LRU(object):
         return len(self.d)
 
     @locked
-    def pop(self,key):
+    def pop(self, key):
+        current_thread = threading.current_thread()
+        for hook in getattr(current_thread, 'cache_hooks', ()):
+            hook(self, 'set', key)
         return self.d.pop(key)
 
     @locked
     def clear(self):
         self.d.clear()
+        current_thread = threading.current_thread()
+        for hook in getattr(current_thread, 'cache_hooks', ()):
+            hook(self, 'clear')

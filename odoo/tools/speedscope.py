@@ -31,6 +31,10 @@ class Speedscope:
                 query = entry['query']
                 full_query = entry['full_query']
                 entry['stack'].append((f'sql({shorten(query)})', full_query, None))
+            elif 'operation' in entry:
+                operation = entry['operation']
+                more = entry['more']
+                entry['stack'].append((f'({operation})', more, None))
         self.profiles_raw[key] = profile
 
     def convert_stack(self, stack):
@@ -93,7 +97,9 @@ class Speedscope:
             if sql:
                 self.add_output([key], hide_gaps=True, display_name=f'{key} (no gap)')
                 self.add_output([key], continuous=False, complete=False, display_name=f'{key} (density)')
-
+                self.add_output([key], hide_gaps=True, constant_time=True, display_name=f'{key} (determinisim)')
+            elif key == 'cache':
+                self.add_output([key], hide_gaps=True, constant_time=True, display_name=f'{key} (determinisim)')
             else:
                 self.add_output([key], display_name=key)
         return self

@@ -164,6 +164,27 @@ class SQLCollector(Collector):
         })
 
 
+class CacheCollector(Collector):
+    """
+    Saves all executed cache_operation in the current thread with the call stack.
+    """
+    name = 'cache'
+
+    def start(self):
+        init_thread = self.profiler.init_thread
+        if not hasattr(init_thread, 'cache_hooks'):
+            init_thread.cache_hooks = []
+        init_thread.cache_hooks.append(self.hook)
+
+    def stop(self):
+        self.profiler.init_thread.cache_hooks.remove(self.hook)
+
+    def hook(self, LRU, operation, key=None, value=None):
+        self.add({
+            'operation': f'cache {operation}',
+            'more': str(key or ''),
+        })
+
 class PeriodicCollector(Collector):
     """
     Record execution frames asynchronously at most every `interval` seconds.
