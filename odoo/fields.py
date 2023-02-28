@@ -4755,7 +4755,10 @@ class Many2many(_RelationalMulti):
                 self.read(records.browse(missing_ids))
 
         # determine new relation {x: ys}
-        old_relation = {record.id: set(record[self.name]._ids) for record in records}
+        old_relation = {
+            record.id: set(record[self.name]._ids)
+            for record in records.with_context(active_test=False)
+        }
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
 
         # operations on new relation
@@ -4906,7 +4909,11 @@ class Many2many(_RelationalMulti):
 
         # determine old and new relation {x: ys}
         set = OrderedSet
-        old_relation = {record.id: set(record[self.name]._ids) for records, _ in records_commands_list for record in records}
+        old_relation = {
+            record.id: set(record[self.name]._ids)
+            for records, _ in records_commands_list
+            for record in records.with_context(active_test=False)
+        }
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
         ids = set(old_relation.keys())
 

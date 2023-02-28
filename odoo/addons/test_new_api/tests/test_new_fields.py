@@ -2989,6 +2989,46 @@ class TestX2many(common.TransactionCase):
         for line in lines:
             self.assertEqual(len(line.tags), 3)
 
+    def test_write_many2many_active(self):
+        tagA = self.env['test_new_api.multi.tag'].create({'name': 'A'})
+        tagB = self.env['test_new_api.multi.tag'].create({'name': 'B', 'active': False})
+        rec = self.env['test_new_api.multi.line'].create({})
+        rec_all = rec.with_context(active_test=False)
+        self.assertFalse(rec.tags)
+        self.assertFalse(rec_all.tags)
+
+        rec.write({'tags': [Command.link(tagA.id)]})
+        self.assertEqual(rec.tags, tagA)
+        self.assertEqual(rec_all.tags, tagA)
+
+        rec.write({'tags': [Command.link(tagB.id)]})
+        self.assertEqual(rec.tags, tagA)
+        self.assertEqual(rec_all.tags, tagA + tagB)
+
+        rec.write({'tags': [Command.unlink(tagA.id)]})
+        self.assertFalse(rec.tags)
+        self.assertEqual(rec_all.tags, tagB)
+
+        rec.write({'tags': [Command.link(tagA.id)]})
+        self.assertEqual(rec.tags, tagA)
+        self.assertEqual(rec_all.tags, tagA + tagB)
+
+        rec.write({'tags': [Command.unlink(tagB.id)]})
+        self.assertEqual(rec.tags, tagA)
+        self.assertEqual(rec_all.tags, tagA)
+
+        rec.write({'tags': [Command.clear()]})
+        self.assertFalse(rec.tags)
+        self.assertFalse(rec_all.tags)
+
+        rec.write({'tags': [Command.set((tagA + tagB).ids)]})
+        self.assertEqual(rec.tags, tagA)
+        self.assertEqual(rec_all.tags, tagA + tagB)
+
+        rec.write({'tags': [Command.set(tagA.ids)]})
+        self.assertEqual(rec.tags, tagA)
+        self.assertEqual(rec_all.tags, tagA)
+
     def test_custom_m2m(self):
         model_id = self.env['ir.model']._get_id('res.partner')
         field = self.env['ir.model.fields'].create({
