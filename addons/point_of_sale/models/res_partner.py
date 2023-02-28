@@ -13,6 +13,7 @@ class ResPartner(models.Model):
         groups="point_of_sale.group_pos_user",
     )
     pos_order_ids = fields.One2many('pos.order', 'partner_id', readonly=True)
+    pos_config_origin_id = fields.Many2one('pos.config', string="Original PoS configuration", default=None, help="PoS config where the contact has been created.")
 
     def _compute_pos_order(self):
         # retrieve all children partners and prefetch 'parent_id' on them

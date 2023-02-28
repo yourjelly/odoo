@@ -157,6 +157,7 @@ export class PartnerListScreen extends Component {
         this.activateEditMode();
     }
     async saveChanges(processedChanges) {
+        processedChanges['pos_config_origin_id'] = this.env.pos.config.id;
         const partnerId = await this.rpc({
             model: "res.partner",
             method: "create_from_ui",
