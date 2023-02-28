@@ -31,6 +31,13 @@ class MailTestSimple(models.Model):
         headers['X-Custom'] = 'Done'
         return headers
 
+class MailTestNonThread(models.Model):
+    """ A very simple model not inheriting from mail.thread
+    when only messaging and notifications are necessary. """
+    _description = 'Simple Chatterless Model'
+    _name = 'mail.test.nonthread'
+
+    name = fields.Char()
 
 class MailTestGateway(models.Model):
     """ A very simple model only inheriting from mail.thread to test pure mass
