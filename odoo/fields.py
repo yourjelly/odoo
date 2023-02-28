@@ -4800,7 +4800,21 @@ class Many2many(_RelationalMulti):
                 elif command[0] in (Command.CLEAR, Command.SET):
                     # new lines must no longer be linked to records
                     to_create = [(set(ids) - set(recs._ids), vals) for (ids, vals) in to_create]
-                    relation_set(recs._ids, command[2] if command[0] == Command.SET else ())
+
+                    new_ids = command[2] if command[0] == Command.SET else ()
+                    if comodel._active_name and model.env.context.get('active_test', True):
+                        # apply changes to active corecords only
+                        corecords = comodel.browse(set(
+                            y for id_ in recs._ids for y in new_relation[id_]
+                        ))
+                        inactive_ids = set(
+                            (corecords - corecords.filtered(comodel._active_name))._ids
+                        )
+                        for id_ in recs._ids:
+                            old_ids = new_relation[id_]
+                            new_relation[id_] = set(new_ids) | (old_ids & inactive_ids)
+                    else:
+                        relation_set(recs._ids, new_ids)
 
             if to_create:
                 # create lines in batch, and link them
@@ -4943,11 +4957,22 @@ class Many2many(_RelationalMulti):
                     for line_ids in new_relation.values():
                         line_ids.add(line_id)
                 elif command[0] in (Command.CLEAR, Command.SET):
-                    # new lines must no longer be linked to records
-                    line_ids = command[2] if command[0] == Command.SET else ()
-                    line_ids = set(new(line_id) for line_id in line_ids)
-                    for id_ in recs._ids:
-                        new_relation[id_] = set(line_ids)
+                    new_ids = command[2] if command[0] == Command.SET else ()
+                    new_ids = [new(line_id) for line_id in new_ids]
+                    if comodel._active_name and model.env.context.get('active_test', True):
+                        # apply changes to active corecords only
+                        corecords = comodel.browse(set(
+                            y for id_ in recs._ids for y in new_relation[id_]
+                        ))
+                        inactive_ids = set(
+                            (corecords - corecords.filtered(comodel._active_name))._ids
+                        )
+                        for id_ in recs._ids:
+                            old_ids = new_relation[id_]
+                            new_relation[id_] = set(new_ids) | (old_ids & inactive_ids)
+                    else:
+                        for id_ in recs._ids:
+                            new_relation[id_] = set(new_ids)
 
         if new_relation == old_relation:
             return records.browse()

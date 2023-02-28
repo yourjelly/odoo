@@ -3017,17 +3017,18 @@ class TestX2many(common.TransactionCase):
         self.assertEqual(rec.tags, tagA)
         self.assertEqual(rec_all.tags, tagA)
 
-        rec.write({'tags': [Command.clear()]})
-        self.assertFalse(rec.tags)
-        self.assertFalse(rec_all.tags)
-
+        # these commands are applied to the active part of the value
         rec.write({'tags': [Command.set((tagA + tagB).ids)]})
         self.assertEqual(rec.tags, tagA)
         self.assertEqual(rec_all.tags, tagA + tagB)
 
+        rec.write({'tags': [Command.clear()]})
+        self.assertFalse(rec.tags)
+        self.assertEqual(rec_all.tags, tagB)
+
         rec.write({'tags': [Command.set(tagA.ids)]})
         self.assertEqual(rec.tags, tagA)
-        self.assertEqual(rec_all.tags, tagA)
+        self.assertEqual(rec_all.tags, tagA + tagB)
 
     def test_custom_m2m(self):
         model_id = self.env['ir.model']._get_id('res.partner')
