@@ -2667,7 +2667,7 @@ class BaseModel(metaclass=MetaModel):
             if field.translate_value_name:
                 for record in self.with_env(env):
                     record[field.translate_value_name]  # fetch field value in cache
-                    record[field.translate_value_name] = record[field.translate_base_name]
+                    record[field.translate_value_name] = record[field_name]
 
     #
     # Update objects that use this one to update their _inherits fields
