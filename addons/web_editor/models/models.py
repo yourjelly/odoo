@@ -22,8 +22,8 @@ class BaseModel(models.AbstractModel):
     def update_field_translations_sha(self, fname, translations):
         field = self._fields[fname]
         if field.translate_value_name:
-            field_name = field.translate_value_name
-            field = self._fields[field_name]
+            fname = field.translate_value_name
+            field = self._fields[fname]
         if callable(field.translate):
             for translation in translations.values():
                 for key, value in translation.items():

@@ -585,10 +585,17 @@ actual arch.
         return super(View, self).unlink()
 
     def _update_field_translations(self, fname, translations, digest=None):
+        if fname == 'arch_base':
+            fname = 'arch_db_base'
         res = super()._update_field_translations(fname, translations, digest)
         if fname == 'arch_db' and 'install_filename' not in self._context:
             self.write({'arch_updated': True})
         return res
+
+    def get_field_translations(self, fname, langs=None):
+        if fname == 'arch_base':
+            fname = 'arch_db_base'
+        return super().get_field_translations(fname, langs=langs)
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
@@ -597,16 +604,6 @@ actual arch.
             new_key = self.key + '_%s' % str(uuid.uuid4())[:6]
             default = dict(default or {}, key=new_key)
         return super(View, self).copy(default)
-
-    def _update_field_translations(self, field_name, translations, digest=None):
-        if field_name == 'arch_base':
-            field_name = 'arch_db_base'
-        return super()._update_field_translations(field_name, translations, digest=digest)
-
-    def get_field_translations(self, field_name, langs=None):
-        if field_name == 'arch_base':
-            field_name = 'arch_db_base'
-        return super().get_field_translations(field_name, langs=langs)
 
     # default view selection
     @api.model
