@@ -29,8 +29,8 @@ class AccountBankStatement(models.Model):
             lines = self.env['account.bank.statement.line'].browse(active_ids) \
                 .filtered(lambda line: not line.statement_complete) \
                 .sorted()
-            if len(lines) != len(active_ids):
-                raise UserError(_("One or more selected lines already belong to a complete statement."))
+            # if len(lines) != len(active_ids):
+            #     raise UserError(_("One or more selected lines already belong to a complete statement."))
             if len(lines.journal_id) > 1:
                 raise UserError(_("A statement should only contain lines from the same journal."))
 
