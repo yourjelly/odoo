@@ -17,7 +17,13 @@
                         </t>
                     </t>
 
-                    <t t-set-slot="control-panel-action-menu">
+                    <t t-set-slot="layout-actions">
+                        <t t-if="buttonBoxTemplate">
+                            <t t-call="{{ buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
+                        </t>
+                    </t>
+
+                    <t t-set-slot="control-panel-additional-actions">
                         <t t-if="props.info.actionMenus">
                             <ActionMenus
                                 getActiveIds="() => model.root.isNew ? [] : [model.root.resId]"
