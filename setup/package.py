@@ -34,7 +34,6 @@ VERSION = version.split('-')[0].replace('saas~', '')
 GPGPASSPHRASE = os.getenv('GPGPASSPHRASE')
 GPGID = os.getenv('GPGID')
 DOCKERVERSION = VERSION.replace('+', '')
-INSTALL_TIMEOUT = 600
 
 DOCKERUSER = """
 RUN mkdir /var/lib/odoo && \
@@ -68,7 +67,7 @@ def _rpc_count_modules(addr='http://127.0.0.1', port=8069, dbname='mycompany', t
             )
             connected = True
         except Exception:
-            time.spleep(1)
+            time.sleep(1)
             timeout -= 1
     if not connected:
         raise OdooTestError("Package test: FAILED. Cannot connect to Odoo server.")
@@ -262,19 +261,10 @@ class Docker():
 
     def test_odoo(self):
         logging.info('Starting to test Odoo install test')
-        start_time = time.time()
-        while self.is_running() and (time.time() - start_time) < INSTALL_TIMEOUT:
-            time.sleep(5)
-            if os.path.exists(os.path.join(args.build_dir, 'odoo.pid')):
-                try:
-                    _rpc_count_modules(port=self.exposed_port)
-                finally:
-                    self.stop()
-                return
-        if self.is_running():
+        try:
+            _rpc_count_modules(port=self.exposed_port)
+        finally:
             self.stop()
-            raise OdooTestTimeoutError('Odoo pid file never appeared after %s sec' % INSTALL_TIMEOUT)
-        raise OdooTestError('Error while installing/starting Odoo after %s sec.\nSee testlogs.txt in build dir' % int(time.time() - start_time))
 
     def build(self):
         """To be overriden by specific builder"""
