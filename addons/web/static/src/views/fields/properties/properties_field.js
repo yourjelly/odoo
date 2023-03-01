@@ -29,6 +29,7 @@ export class PropertiesField extends Component {
         ...standardFieldProps,
         context: { type: Object, optional: true },
         columns: { type: Number, optional: true },
+        hideAddButton: { type: Boolean, optional: true },
         hideKanbanOption: { type: Boolean, optional: true },
     };
 
@@ -49,6 +50,7 @@ export class PropertiesField extends Component {
             canChangeDefinition: true,
             movedPropertyName: null,
             unfoldedSeparators: [],
+            hideAddButton: this.props.hideAddButton,
         });
 
         this._saveInitialPropertiesValues();
@@ -373,6 +375,7 @@ export class PropertiesField extends Component {
             });
             return;
         }
+
         const propertiesDefinitions = this.propertiesList || [];
 
         if (
@@ -399,7 +402,7 @@ export class PropertiesField extends Component {
             type: "char",
             definition_changed: true,
         });
-        this.state.addButtonVisible = true;
+        this.state.hideAddButton = false;
         this.openPropertyDefinition = newName;
         await this.props.record.update({ [this.props.name]: propertiesDefinitions });
     }
@@ -707,9 +710,22 @@ export const propertiesField = {
         return {
             context: dynamicInfo.context,
             columns: parseInt(attrs.columns || "1"),
+            hideAddButton: archParseBoolean(attrs.hideAddButton),
             hideKanbanOption: archParseBoolean(attrs.hideKanbanOption),
         };
     },
 };
 
 registry.category("fields").add("properties", propertiesField);
+
+async function actionAddProperty(env) {
+    const addProperty = document.querySelector(".o_field_property_add button");
+    if (addProperty) {
+        addProperty.click();
+    } else {
+        const message = sprintf(env._t("You can not create a new property."));
+        env.services.notification.add(message, { type: "danger" });
+    }
+}
+
+registry.category("actions").add("action_configure_properties_field", actionAddProperty);

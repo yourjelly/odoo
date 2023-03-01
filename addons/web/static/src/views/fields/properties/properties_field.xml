@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="web.PropertiesField" owl="1">
-        <div t-ref="properties" class="row align-items-start">
+        <div t-ref="properties" class="row align-items-start"
+            t-att-class="{'d-none': propertiesList.length === 0 and state.hideAddButton}">
             <t t-set="unfoldedSeparators" t-value="state.unfoldedSeparators"/>
             <t t-foreach="groupedPropertiesList" t-as="propertiesListGroup" t-key="propertiesListGroup_index">
                 <t t-set="foldable" t-value="!!propertiesListGroup.title"/>
@@ -27,7 +28,8 @@
                         t-as="propertyConfiguration"
                         t-key="propertyConfiguration.name"
                         t-if="!isFolded || propertyConfiguration.nextProperty"
-                        class="o_property_field d-sm-contents mb-3"
+                        class="o_property_field mb-3"
+                        t-att-class="propertyConfiguration.nextProperty and state.hideAddButton ? 'd-none': 'd-sm-contents'"
                         t-att-property-name="propertyConfiguration.name">
                         <div
                             t-if="propertyConfiguration.nextProperty"
