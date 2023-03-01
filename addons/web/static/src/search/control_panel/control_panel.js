@@ -91,7 +91,10 @@ export class ControlPanel extends Component {
      * @returns {Object}
      */
     get display() {
-        return this.props.display;
+        return {
+            layoutActions: true,
+            ...this.props.display,
+        };
     }
 
     /**
