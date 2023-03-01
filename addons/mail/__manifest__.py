@@ -224,7 +224,6 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/tests/models/*.js',
         ],
         'web.qunit_suite_tests': [
-            'mail/static/tests/qunit_suite_tests/**/*.js',
             'mail/static/tests/new/**/*.js',
         ],
         # new bundles
