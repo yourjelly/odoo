@@ -6,6 +6,7 @@ import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
 import { fuzzyTest } from "@web/core/utils/search";
+import { SearchBarMenu } from "../search_bar_menu/search_bar_menu";
 
 import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 const parsers = registry.category("parsers");
@@ -543,4 +544,7 @@ export class SearchBar extends Component {
 }
 
 SearchBar.template = "web.SearchBar";
+SearchBar.components = {
+    SearchBarMenu,
+};
 SearchBar.props = {};
