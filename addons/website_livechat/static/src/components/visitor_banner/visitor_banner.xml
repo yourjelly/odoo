@@ -7,7 +7,7 @@
                 <div class="o_VisitorBannerView_avatarContainer">
                     <img class="o_VisitorBannerView_avatar rounded-circle" t-att-src="visitor.avatarUrl" alt="Avatar"/>
                     <t t-if="visitor.is_connected">
-                        <i class="o_VisitorBannerView_onlineStatusIcon fa fa-circle" title="Online" role="img" aria-label="Visitor is online"/>
+                        <i class="o_VisitorBannerView_onlineStatusIcon fa fa-circle text-primary" title="Online" role="img" aria-label="Visitor is online"/>
                     </t>
                 </div>
             </div>
