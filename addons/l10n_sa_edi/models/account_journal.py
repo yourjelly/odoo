@@ -14,9 +14,9 @@ from cryptography.hazmat.primitives.serialization import Encoding, load_pem_priv
 from odoo.modules.module import get_module_resource
 
 ZATCA_API_URLS = {
-    "sandbox": "https://gw-apic-gov.gazt.gov.sa/e-invoicing/developer-portal",
-    "preprod": "https://gw-apic-gov.gazt.gov.sa/e-invoicing/simulation",
-    "prod": "https://gw-apic-gov.gazt.gov.sa/e-invoicing/core",
+    "sandbox": "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal",
+    "preprod": "https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation",
+    "prod": "https://gw-fatoora.zatca.gov.sa/e-invoicing/core",
     "apis": {
         "ccsid": "/compliance",
         "pcsid": "/production/csids",
