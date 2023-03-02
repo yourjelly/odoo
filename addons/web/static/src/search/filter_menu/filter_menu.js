@@ -11,6 +11,9 @@ import { Component } from "@odoo/owl";
 export class FilterMenu extends Component {
     setup() {
         this.icon = FACET_ICONS.filter;
+        this.dropdownProps = Object.keys(this.props)
+            .filter((key) => key in Dropdown.props)
+            .reduce((obj, key) => ({ ...obj, [key]: this.props[key] }), {});
 
         useBus(this.env.searchModel, "update", this.render);
     }
@@ -41,5 +44,5 @@ export class FilterMenu extends Component {
 FilterMenu.components = { CustomFilterItem, Dropdown, SearchDropdownItem };
 FilterMenu.template = "web.FilterMenu";
 FilterMenu.props = {
-    class: { type: String, optional: true },
+    ...Dropdown.props,
 };

@@ -14,6 +14,9 @@ export class FavoriteMenu extends Component {
     setup() {
         this.icon = FACET_ICONS.favorite;
         this.dialogService = useService("dialog");
+        this.dropdownProps = Object.keys(this.props)
+            .filter((key) => key in Dropdown.props)
+            .reduce((obj, key) => ({ ...obj, [key]: this.props[key] }), {});
 
         useBus(this.env.searchModel, "update", this.render);
     }
@@ -65,4 +68,6 @@ export class FavoriteMenu extends Component {
 }
 FavoriteMenu.template = "web.FavoriteMenu";
 FavoriteMenu.components = { Dropdown, SearchDropdownItem };
-FavoriteMenu.props = {};
+FavoriteMenu.props = {
+    ...Dropdown.props,
+};

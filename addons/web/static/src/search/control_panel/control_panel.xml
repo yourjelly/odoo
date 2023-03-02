@@ -64,7 +64,7 @@
                 <div class="o_mobile_search  position-fixed bottom-0 start-0 end-0 w-100 d-flex flex-column p-0 overflow-auto bg-view border-0">
                     <div class="o_mobile_search_content">
                         <t t-if="display['top-right']">
-                            <t t-slot="control-panel-top-right d-flex">
+                            <t t-slot="control-panel-top-right">
                                 <button type="button" class="o_enable_searchview o_mobile_search_back btn btn-link fa fa-arrow-left position-absolute start-0 z-index-1" t-on-click="() => state.showMobileSearch = false"/>
                                 <SearchBar/>
                             </t>
@@ -82,7 +82,7 @@
                             <t t-slot="control-panel-bottom-right">
                                 <div class="o_mobile_search_filter o_search_options position-relative d-flex w-100">
                                     <t t-foreach="searchMenus" t-as="menu" t-key="menu.key">
-                                        <t t-component="menu.Component"/>
+                                        <t t-component="menu.Component" startOpen="menu_first"/>
                                     </t>
                                 </div>
                             </t>
