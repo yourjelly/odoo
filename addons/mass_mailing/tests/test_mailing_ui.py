@@ -33,3 +33,37 @@ class TestUi(HttpCaseWithUserDemo):
 
     def test_04_mass_mailing_snippets_menu_hide(self):
         self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar', login="demo")
+
+    #TODO REMOVE
+    def test_20_mass_mailing_snippets_toolbar_mobile_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar_new_mailing_mobile', login="demo")
+    def test_21_mass_mailing_snippets_toolbar_mobile_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar_new_mailing_mobile', login="demo")
+    def test_22_mass_mailing_snippets_toolbar_mobile_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar_new_mailing_mobile', login="demo")
+    def test_23_mass_mailing_snippets_toolbar_mobile_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar_new_mailing_mobile', login="demo")
+    def test_24_mass_mailing_snippets_toolbar_mobile_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar_new_mailing_mobile', login="demo")
+    def test_25_mass_mailing_snippets_toolbar_mobile_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar_new_mailing_mobile', login="demo")
+    def test_26_mass_mailing_snippets_toolbar_mobile_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar_new_mailing_mobile', login="demo")
+    def test_27_mass_mailing_snippets_toolbar_mobile_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar_new_mailing_mobile', login="demo")
+    def test_28_mass_mailing_snippets_toolbar_mobile_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar_new_mailing_mobile', login="demo")
+    def test_05_mass_mailing_snippets_menu_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar', login="demo")
+    def test_06_mass_mailing_snippets_menu_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar', login="demo")
+    def test_07_mass_mailing_snippets_menu_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar', login="demo")
+    def test_08_mass_mailing_snippets_menu_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar', login="demo")
+    def test_09_mass_mailing_snippets_menu_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar', login="demo")
+    def test_10_mass_mailing_snippets_menu_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar', login="demo")
+    def test_11_mass_mailing_snippets_menu_hide(self):
+        self.start_tour("/web", 'mass_mailing_snippets_menu_toolbar', login="demo")
