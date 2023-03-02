@@ -15,12 +15,12 @@
                                 <span class="o_form_label">Advnace Payment Tax Adjustment:</span>
                             </div>
                             <div class="row mt8">
-                                <label for="currency_exchange_journal_id" class="col-lg-4 o_light_label" string="Journal"/>
-                                <field name="currency_exchange_journal_id"/>
+                                <label for="account_advance_payment_tax_adjustment_journal_id" class="col-lg-4 o_light_label" string="Journal"/>
+                                <field name="account_advance_payment_tax_adjustment_journal_id"/>
                             </div>
                             <div class="row mt8">
-                                <label for="income_currency_exchange_account_id" class="col-lg-4 o_light_label" string="Account"/>
-                                <field name="income_currency_exchange_account_id"/>
+                                <label for="account_advance_payment_tax_account_id" class="col-lg-4 o_light_label" string="Account"/>
+                                <field name="account_advance_payment_tax_account_id"/>
                             </div>
                         </div>
                     </div>

@@ -39,17 +39,18 @@ class AccountMoveLine(models.Model):
     @api.model
     def _get_payment_tax_reverse_moves_vals(self, partial_line, payment_line_with_tax):
         return {
+            'move_type': 'entry',
             'ref': 'Advanced Payment Tax Adjustment agains reconcile of %s - %s'%(partial_line.credit_move_id.name, partial_line.debit_move_id.name),
             'journal_id': partial_line.company_id.account_advance_payment_tax_adjustment_journal_id.id
             'line_ids': _get_payment_tax_reverse_moves_line_vals(partial_line),
-            'tax_cash_basis_origin_move_id': payment_line_with_tax.payment_id.id,
+            'l10n_in_advanced_payment_tax_origin_move_id': payment_line_with_tax.payment_id.id,
         }
 
     def reconcile(self):
         result = super().reconcile()
         for line in result['partials']:
             reconcile_lines = line.credit_move_id + line.debit_move_id
-            payment_line_with_tax = reconcile_lines.filtered(lambda l: l.payment_id.l10n_in_tax_ids)
+            payment_line_with_tax = reconcile_lines.filtered(lambda l: l.payment_id.l10n_in_tax_ids and not sum(l.payment_id.l10n_in_tax_ids.flatten_taxes_hierarchy().mapped('amount')) < 0)
             reconcile_with_invoice_or_bill = reconcile_lines.filtered(lambda l: move_id.is_invoice(include_receipts=True)).move_id
             if payment_with_tax and reconcile_with_invoice_or_bill:
                 result.setdefault('advanced_tax_adjustments', {})
