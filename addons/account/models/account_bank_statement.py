@@ -62,11 +62,7 @@ class AccountBankStatement(models.Model):
         # multi edit or action menu
         elif context_active_model == 'account.bank.statement.line' and active_ids or \
             context_st_line_id and len(active_ids) > 1:
-            lines = self.env['account.bank.statement.line'].browse(active_ids) \
-                .filtered(lambda line: not line.statement_complete) \
-                .sorted()
-            if len(lines) < len(active_ids):
-                raise UserError(_("One or more selected lines already belong to a complete statement."))
+            lines = self.env['account.bank.statement.line'].browse(active_ids).sorted()
             if len(lines.journal_id) > 1:
                 raise UserError(_("A statement should only contain lines from the same journal."))
 

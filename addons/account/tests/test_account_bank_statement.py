@@ -1228,13 +1228,18 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             'is_complete': True,
         }])
 
-        # multi line edit, error due to line with statement
+        # multi line edit, one line with statement
         context = {
             'active_ids': [line.id for line in lines[:3]],
             'st_line_id': lines[2].id,
         }
-        with self.assertRaises(UserError):
-            self.env['account.bank.statement'].with_context(context).create({})
+        self.assertRecordValues(self.env['account.bank.statement'].with_context(context).new({}), [{
+            'balance_start': 0.0,
+            'balance_end_real': 45.0,
+            'is_valid': True,
+            'is_complete': True,
+            'line_ids': [lines[0].id, lines[1].id, lines[2].id],
+        }])
 
         # multi line edit, skip lines
         context = {
