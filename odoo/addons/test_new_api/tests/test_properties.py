@@ -1099,7 +1099,7 @@ class PropertiesCase(TransactionCase):
             ]
 
     @mute_logger('odoo.fields')
-    def test_properties_field_onchange(self):
+    def test_properties_field_onchange_change_parent(self):
         """If we change the definition record, the onchange of the properties field must be triggered."""
         message_form = Form(self.env['test_new_api.message'])
 
@@ -1274,6 +1274,48 @@ class PropertiesCase(TransactionCase):
         self.assertEqual(
             message.attributes,
             [{'name': 'new_property', 'type': 'char', 'value': 'test value'}])
+
+    @mute_logger('odoo.fields')
+    def test_properties_field_onchange_compute(self):
+        """Test a computed field that depends on the properties."""
+        self.message_1.discussion.attributes_definition = []
+        self.assertTrue(self.message_1.is_attributes_empty)
+        onchange_values = self.message_1.onchange(
+            values={
+                'attributes': [{
+                    'name': 'test',
+                    'type': 'char',
+                    'default': 'Default',
+                    'value': 'Test',
+                    'definition_changed': True,
+                }],
+                'is_attributes_empty': True,
+            },
+            field_name='attributes',
+            field_onchange={'attributes': '1', 'is_attributes_empty': ''},
+        )
+        self.assertFalse(
+            onchange_values['value'].get('is_attributes_empty', True),
+            msg="Should have computed is_attributes_empty")
+
+        onchange_values = self.message_1.onchange(
+            values={
+                'attributes': [{
+                    'name': 'test',
+                    'type': 'char',
+                    'default': 'Default',
+                    'value': 'Test',
+                    'definition_deleted': True,
+                }],
+                'is_attributes_empty': True,
+            },
+            field_name='attributes',
+            field_onchange={'attributes': '1', 'is_attributes_empty': ''},
+        )
+        self.assertNotIn(
+            'is_attributes_empty',
+            onchange_values['value'],
+            msg="Should have ignored the change because of definition_deleted")
 
     @mute_logger('odoo.fields')
     def test_properties_field_definition_update(self):
