@@ -632,6 +632,7 @@ class Websocket:
                 raise SessionExpiredException()
             # Mark the notification request as processed.
             self._notif_sock_r.recv(1)
+            env.registry._clear_cache()
             notifications = env['bus.bus']._poll(self._channels, self._last_notif_sent_id)
         if not notifications:
             return
