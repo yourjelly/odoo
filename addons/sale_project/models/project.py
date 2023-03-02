@@ -537,7 +537,8 @@ class Project(models.Model):
         return buttons
 
     def action_open_project_vendor_bills(self):
-        query = self.env['account.move.line']._search([('move_id.move_type', 'in', ['in_invoice', 'in_refund'])])
+        move_type = self.env['account.move'].get_purchase_types(include_receipts=True)
+        query = self.env['account.move.line']._search([('move_id.move_type', 'in', move_type)])
         query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
         query.order = None
         query_string, query_param = query.select('DISTINCT move_id')

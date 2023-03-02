@@ -85,7 +85,7 @@ class AccountAnalyticAccount(models.Model):
 
     def action_view_vendor_bill(self):
         self.ensure_one()
-        query = self.env['account.move.line']._search([('move_id.move_type', 'in', self.env['account.move'].get_purchase_types())])
+        query = self.env['account.move.line']._search([('move_id.move_type', 'in', self.env['account.move'].get_purchase_types(include_receipts=True))])
         query.order = None
         query.add_where('analytic_distribution ? %s', [str(self.id)])
         query_string, query_param = query.select('DISTINCT move_id')
