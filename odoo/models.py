@@ -42,6 +42,7 @@ from collections.abc import MutableMapping
 from contextlib import closing
 from inspect import getmembers, currentframe
 from operator import attrgetter, itemgetter
+from typing import TypedDict
 
 import babel
 import babel.dates
@@ -3005,8 +3006,94 @@ class BaseModel(metaclass=MetaModel):
         :meth:`_fetch_query` and :meth:`_read_format`.
         """
         fields = self.check_field_access_rights('read', fields)
-        self.fetch(fields)
-        return self._read_format(fnames=fields, load=load)
+        #self.fetch(fields)
+        return self._read_main(fields)
+
+    @api.model
+    def unity_read(self, **specs: dict):
+        """
+        :param specs: dict
+                    {
+                        method: 'read'|'search'
+                        ids|domain: if method = read: ids: [], else domain = [(...)]
+                        context: {'key': 3}
+                        fields: FieldSpecifications : {
+                            field1: {}   # will return the value for field1
+                            field_X2Many: {}  # will return a list of ids for the x2many
+                            field_many2one : {}  # will return the [id, display_name] for this field
+                            another_many2one: {context: dict }, # will return the [id, display_name evaluated with the context]
+                            another_X2Many: {
+                                fields: FieldSpecifications  # this is a recursive structure of FieldSpecifications
+                                context: dict  # will return the fields read with the context
+                                offset: int,
+                                limit: int,
+                                count_limit: int,
+                            }
+                        }
+                    }
+
+                    All domains arrive on the server as a dict, to be used directly (no need to evaluate them)
+
+        :return: list[records]
+        """
+        if specs['method'] == 'read':
+            return self.browse(specs['ids'])._read_main(specs['fields'])
+        elif specs['method'] in ('search', 'search_read'):
+            offset: int | None = specs.get('offset', 0)
+            limit: int | None = specs.get('limit', 0)
+            order: str | None = specs.get('order')
+            count_limit: int | None = specs.get('count_limit', 0)
+            domain = specs.get('domain', [])
+            return self.search(domain, offset, limit, order)._unity_search(specs['fields'], domain, limit, offset, count_limit)
+        else:
+            raise NotImplementedError(f"the method {specs['method']} is not supported by unity_read")
+
+    def _unity_search(self, fields_spec, domain, limit=0, offset=0, count_limit=None):
+        if not self:
+            return {
+                'length': 0,
+                'records': []
+            }
+        if limit and (len(self) == limit or self.env.context.get('force_search_count')):
+            length = self.search_count(domain, limit=count_limit)
+        else:
+            length = len(self) + offset
+
+        read_main = self._read_main(fields_spec)
+        return {'length': length,
+                'records': read_main}
+
+
+    def _read_main(self, specification) -> list[dict]:
+        fields_to_read = specification.keys()
+        self.browse(self._prefetch_ids).fetch(fields_to_read)
+        # todo vsc: replace _read_format
+        #  and remove load=_classic_read : the specification should be able to support it correctly
+        records = []
+        for record in self:
+            vals = {'id': record['id']}
+            for field_name, field_spec in specification.items():
+                field = record._fields[field_name]
+
+                if field_spec == {}:
+                    vals[field_name] = field.convert_to_read(record[field_name], record, use_name_get=True)
+                else:
+                    if "context" in field_spec:
+                        relational_record = record[field_name].with_context(**field_spec["context"])
+                    else:
+                        relational_record = record[field_name]
+
+                    if field.type == "many2one":
+                        vals[field_name] = self._fields[field_name].convert_to_read(relational_record, self, use_name_get=True) or Fasle
+                    else:
+                        assert field.type in ["many2many", "one2many"]
+                        vals[field_name] = {
+                            'ids': record[field_name]._ids,
+                            'values': relational_record._read_main(field_spec["fields"])
+                        }
+            records.append(vals)
+        return records
+
 
     def update_field_translations(self, field_name, translations):
         """ Update the values of a translated field.
@@ -3137,7 +3224,7 @@ class BaseModel(metaclass=MetaModel):
 
         return translations, context
 
-    def _read_format(self, fnames, load='_classic_read'):
+    def _read_format(self, fnames: list, load='_classic_read') -> list[dict]:
         """Returns a list of dictionaries mapping field names to their values,
         with one dictionary per record that exists.
 
