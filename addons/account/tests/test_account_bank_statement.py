@@ -1212,6 +1212,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             'is_valid': True,
             'is_complete': True,
         }])
+        self.assertEqual(lines[0].statement_id, st1)
 
         self.assertRecordValues(self.env['account.bank.statement'].with_context(contexts[2]).new(), [{
             'balance_start': 25.0,
@@ -1227,18 +1228,13 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             'is_complete': True,
         }])
 
-        # multi line edit, ignore line with statement
+        # multi line edit, error due to line with statement
         context = {
             'active_ids': [line.id for line in lines[:3]],
             'st_line_id': lines[2].id,
         }
-        self.assertRecordValues(self.env['account.bank.statement'].with_context(context).new({}), [{
-            'balance_start': 10.0,
-            'balance_end_real': 45.0,
-            'is_valid': True,
-            'is_complete': True,
-            'line_ids': [lines[1].id, lines[2].id],
-        }])
+        with self.assertRaises(UserError):
+            self.env['account.bank.statement'].with_context(context).create({})
 
         # multi line edit, skip lines
         context = {
@@ -1262,7 +1258,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             'line_ids': [lines[1].id, lines[2].id, lines[3].id],
         }]
         context = {
-            'active_ids': [line.id for line in lines[0:4]],
+            'active_ids': [line.id for line in lines[1:4]],
             'st_line_id': lines[3].id,
         }
         self.assertRecordValues(self.env['account.bank.statement'].with_context(context).new({}), expected_st_vals)
@@ -1273,7 +1269,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
 
         # action menu
         context = {
-            'active_ids': [line.id for line in lines[0:4]],
+            'active_ids': [line.id for line in lines[1:4]],
             'active_model': 'account.bank.statement.line',
         }
         st = self.env['account.bank.statement'].with_context(context).new({})

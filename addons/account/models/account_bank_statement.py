@@ -14,31 +14,15 @@ class AccountBankStatement(models.Model):
     def default_get(self, fields_list):
         # EXTENDS base
         defaults = super().default_get(fields_list)
-        # create statement on a saved statement line in the tree view
-        active_ids = self._context.get('active_ids')
-        lines = None
-        if self._context.get('st_line_id') and len(active_ids) <= 1:
-            # single line edit
-            st_line = self.env['account.bank.statement.line'].browse(self._context['st_line_id'])
-            defaults['balance_start'] = st_line.running_balance - (st_line.amount if st_line.state == 'posted' else 0)
-            defaults['balance_end_real'] = st_line.running_balance
-            defaults['line_ids'] = [Command.set(st_line.ids)]
-            return defaults
-        if self._context.get('st_line_id') and len(active_ids) > 1:
-            # multi edit
-            lines = self.env['account.bank.statement.line'].browse(active_ids) \
-                .filtered(lambda line: not line.statement_complete) \
-                .sorted()
-            # if len(lines) != len(active_ids):
-            #     raise UserError(_("One or more selected lines already belong to a complete statement."))
-            if len(lines.journal_id) > 1:
-                raise UserError(_("A statement should only contain lines from the same journal."))
 
-        # create statement from a new line in the tree view, not stored in the db yet
-        if self._context.get('st_line_date') and not lines:
+        context_st_line_id = self._context.get('st_line_id')
+        context_st_line_date = self._context.get('st_line_date')
+
+        # create statement from a new line not stored in the db yet
+        if context_st_line_date and not context_st_line_id:
             defaults['balance_start'] = self.env['account.bank.statement.line'].search(
                 domain=[
-                    ('date', '<=', self._context['st_line_date']),
+                    ('date', '<=', context_st_line_date),
                     ('journal_id', '=', self._context.get('st_line_journal_id')),
                 ],
                 order='internal_index desc',
@@ -46,9 +30,14 @@ class AccountBankStatement(models.Model):
             ).running_balance
             defaults['balance_end_real'] = defaults['balance_start'] + self._context.get('st_line_amount', 0.0)
             return defaults
+
+        active_ids = self._context.get('active_ids')
+        context_split_line_id = self._context.get('split_line_id')
+        context_active_model = self._context.get('active_model')
+        lines = None
         # creating statements with split button
-        if self._context.get('split_line_id'):
-            current_st_line = self.env['account.bank.statement.line'].browse(self.env.context.get('split_line_id'))
+        if context_split_line_id:
+            current_st_line = self.env['account.bank.statement.line'].browse(context_split_line_id)
             line_before = self.env['account.bank.statement.line'].search(
                 domain=[
                     ('internal_index', '<', current_st_line.internal_index),
@@ -67,16 +56,20 @@ class AccountBankStatement(models.Model):
                 ],
                 order='internal_index desc',
             )
-        # if it is called from the action menu, we can have both start and end balances and we filter out
-        # completed statements, because it is probably due to a mistake from the user
-        elif self._context.get('active_model') == 'account.bank.statement.line' and active_ids:
+        # single line edit
+        elif context_st_line_id and len(active_ids) <= 1:
+            lines = self.env['account.bank.statement.line'].browse(context_st_line_id)
+        # multi edit or action menu
+        elif context_active_model == 'account.bank.statement.line' and active_ids or \
+            context_st_line_id and len(active_ids) > 1:
             lines = self.env['account.bank.statement.line'].browse(active_ids) \
                 .filtered(lambda line: not line.statement_complete) \
                 .sorted()
-            if not lines:
-                raise UserError(_('One or more selected lines already belong to a complete statement.'))
+            if len(lines) < len(active_ids):
+                raise UserError(_("One or more selected lines already belong to a complete statement."))
             if len(lines.journal_id) > 1:
                 raise UserError(_("A statement should only contain lines from the same journal."))
+
         if lines:
             defaults['line_ids'] = [Command.set(lines.ids)]
             defaults['balance_start'] = lines[-1:].running_balance - (
