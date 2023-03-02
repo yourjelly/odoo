@@ -4,6 +4,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { usePosition } from "../position_hook";
 import { useDropdownNavigation } from "./dropdown_navigation_hook";
 import { localization } from "../l10n/localization";
+import { hasNoHoveringCapability } from "@web/core/browser/feature_detection";
 
 import {
     Component,
@@ -285,6 +286,9 @@ export class Dropdown extends Component {
      * NB: only if its siblings dropdown group is opened and if not a sub dropdown.
      */
     onTogglerMouseEnter() {
+        if (hasNoHoveringCapability()) {
+            return;
+        }
         if (this.state.groupIsOpen && !this.state.open) {
             this.togglerRef.el.focus();
             this.open();
