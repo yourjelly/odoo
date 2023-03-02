@@ -189,9 +189,42 @@ class TestChartTemplate(SavepointCase):
         chart_template_xml_id = self.chart_template.get_external_id()[self.chart_template.id]
         template_vals = self.tax_1_template._get_tax_vals_complete(self.company_1)
         template_vals['amount'] = 20
-        self.chart_template.create_record_with_xmlid(self.company_1, self.tax_1_template, "account.tax", template_vals)
+        self.chart_template.create_record_with_xmlid(self.company_1, self.tax_1_template, 'account.tax', template_vals)
         update_taxes_from_templates(self.env.cr, chart_template_xml_id)
         tax_1_old = self.env['account.tax'].search([('company_id', '=', self.company_1.id), ('name', '=', "[old] " + self.tax_1_template.name)])
         tax_1_new = self.env['account.tax'].search([('company_id', '=', self.company_1.id), ('name', '=', self.tax_1_template.name)])
         self.assertEqual(len(tax_1_old), 1, "Old tax still exists but with a different name.")
         self.assertEqual(len(tax_1_new), 1, "New tax have been created with the original name.")
+
+    def test_message_to_accountants(self):
+        # create 1 normal user, 2 accountants managers
+        accountant_manager_group = self.env.ref('account.group_account_manager')
+        advisor_users = self.env['res.users'].create([{
+            'name': 'AccountAdvisorTest1',
+            'login': 'aat1',
+            'password': 'aat1aat1',
+            'groups_id': [(4, accountant_manager_group.id)],
+        }, {
+            'name': 'AccountAdvisorTest2',
+            'login': 'aat2',
+            'password': 'aat2aat2',
+            'groups_id': [(4, accountant_manager_group.id)],
+        }])
+        normal_user = self.env['res.users'].create([{
+            'name': 'AccountUserTest1',
+            'login': 'aut1',
+            'password': 'aut1aut1',
+            'groups_id': [(4, self.env.ref('account.group_account_user').id)],
+        }])
+        # create situation where we need to recreate the tax during update to get notification(s) sent
+        self.tax_template_1.amount += 1
+        update_taxes_from_templates(self.env.cr, self.chart_template_xmlid)
+
+        # accountants received the message
+        message = self.env['mail.message'].search(
+            [('partner_ids', '=', advisor_users.partner_id.ids), ('body', 'like', f"%{self.tax_template_1.name}%")])
+        self.assertEqual(len(message), 1)
+        # normal user didn't
+        message = self.env['mail.message'].search(
+            [('partner_ids', '=', normal_user.partner_id.ids), ('body', 'like', f"%{self.tax_template_1.name}%")])
+        self.assertEqual(len(message), 0)
