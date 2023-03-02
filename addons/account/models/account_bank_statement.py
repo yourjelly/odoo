@@ -160,10 +160,6 @@ class AccountBankStatement(models.Model):
         search='_search_is_valid',
     )
 
-    problem_description = fields.Text(
-        compute='_compute_problem_description',
-    )
-
     attachment_ids = fields.Many2many(
         comodel_name='ir.attachment',
         string="Attachments",
@@ -215,16 +211,6 @@ class AccountBankStatement(models.Model):
         invalids = self.filtered(lambda s: s.id in self._get_invalid_statement_ids())
         invalids.is_valid = False
         (self - invalids).is_valid = True
-
-    @api.depends('balance_end_real', 'balance_start')
-    def _compute_problem_description(self):
-        for stmt in self:
-            description = ""
-            if not stmt.is_valid:
-                description = _("The starting balance doesn't match the ending balance of the previous statement.")
-            elif not stmt.is_complete:
-                description = _("The starting balance + transaction values does not match the ending balance.")
-            stmt.problem_description = description
 
     def _search_is_valid(self, operator, value):
         if operator not in ('=', '!=', '<>'):
