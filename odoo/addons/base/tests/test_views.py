@@ -3356,8 +3356,19 @@ class TestViewTranslations(common.TransactionCase):
         # check whether translations have been reset
         self.assertEqual(view.with_env(env_nolang).arch, archf % terms_en)
         self.assertEqual(view.with_env(env_en).arch, archf % terms_en)
-        self.assertEqual(view.with_env(env_fr).arch, archf % terms_en)
-        self.assertEqual(view.with_env(env_nl).arch, archf % terms_en)
+        self.assertEqual(view.with_env(env_fr).arch, archf % terms_fr)
+        self.assertEqual(view.with_env(env_nl).arch, archf % terms_nl)
+
+        # modify source term in view (actual text change) + xml structure change
+        terms_en = ('Bread <span style="font-weight:bold">and</span> meat',)
+        archf2 = archf % ('<div/>%s',)
+        view.with_env(env_en).write({'arch': archf2 % terms_en})
+
+        # check whether translations have been reset
+        self.assertEqual(view.with_env(env_nolang).arch, archf2 % terms_en)
+        self.assertEqual(view.with_env(env_en).arch, archf2 % terms_en)
+        self.assertEqual(view.with_env(env_fr).arch, archf2 % terms_en)
+        self.assertEqual(view.with_env(env_nl).arch, archf2 % terms_en)
 
     def test_sync_update(self):
         """ Check translations after major changes in source terms. """

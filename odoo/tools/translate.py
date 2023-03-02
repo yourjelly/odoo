@@ -1604,10 +1604,10 @@ def _get_translation_upgrade_queries(cr, field):
             #  the upgrade of modules; prefer those terms over the ones from
             #  the out-of-date 'translations' dict
             src_value = old_values.pop('en_US')
-            src_terms = field.get_trans_terms(src_value)
+            src_terms = field.get_trans_terms(src_value)[0]
             for lang, dst_value in old_values.items():
                 terms_mapping = translations.setdefault(lang, {})
-                dst_terms = field.get_trans_terms(dst_value)
+                dst_terms = field.get_trans_terms(dst_value)[0]
                 for src_term, dst_term in zip(src_terms, dst_terms):
                     if src_term != dst_term:
                         terms_mapping[src_term] = dst_term

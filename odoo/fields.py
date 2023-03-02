@@ -44,7 +44,7 @@ DATE_LENGTH = len(date.today().strftime(DATE_FORMAT))
 DATETIME_LENGTH = len(datetime.now().strftime(DATETIME_FORMAT))
 
 # hacky-ish way to prevent access to a field through the ORM (except for sudo mode)
-NO_ACCESS='.'
+NO_ACCESS = '.'
 
 IR_MODELS = (
     'ir.model', 'ir.model.data', 'ir.model.fields', 'ir.model.fields.selection',
@@ -55,7 +55,7 @@ _logger = logging.getLogger(__name__)
 _schema = logging.getLogger(__name__[:-7] + '.schema')
 
 NoneType = type(None)
-Default = object()                      # default value for __init__() methods
+Default = object()  # default value for __init__() methods
 
 
 def first(records):
@@ -251,62 +251,62 @@ class Field(MetaField('DummyField', (object,), {})):
         .. seealso:: :ref:`Advanced fields/Related fields <reference/fields/related>`
     """
 
-    type = None                         # type of the field (string)
-    relational = False                  # whether the field is a relational one
-    translate = False                   # whether the field is translated
+    type = None  # type of the field (string)
+    relational = False  # whether the field is a relational one
+    translate = False  # whether the field is translated
 
-    column_type = None                  # database column type (ident, spec)
-    write_sequence = 0                  # field ordering for write()
+    column_type = None  # database column type (ident, spec)
+    write_sequence = 0  # field ordering for write()
 
-    args = None                         # the parameters given to __init__()
-    _module = None                      # the field's module name
-    _modules = None                     # modules that define this field
-    _setup_done = True                  # whether the field is completely set up
-    _sequence = None                    # absolute ordering of the field
-    _base_fields = ()                   # the fields defining self, in override order
-    _extra_keys = ()                    # unknown attributes set on the field
-    _direct = False                     # whether self may be used directly (shared)
-    _toplevel = False                   # whether self is on the model's registry class
+    args = None  # the parameters given to __init__()
+    _module = None  # the field's module name
+    _modules = None  # modules that define this field
+    _setup_done = True  # whether the field is completely set up
+    _sequence = None  # absolute ordering of the field
+    _base_fields = ()  # the fields defining self, in override order
+    _extra_keys = ()  # unknown attributes set on the field
+    _direct = False  # whether self may be used directly (shared)
+    _toplevel = False  # whether self is on the model's registry class
 
-    automatic = False                   # whether the field is automatically created ("magic" field)
-    inherited = False                   # whether the field is inherited (_inherits)
-    inherited_field = None              # the corresponding inherited field
+    automatic = False  # whether the field is automatically created ("magic" field)
+    inherited = False  # whether the field is inherited (_inherits)
+    inherited_field = None  # the corresponding inherited field
 
-    name = None                         # name of the field
-    model_name = None                   # name of the model of this field
-    comodel_name = None                 # name of the model of values (if relational)
+    name = None  # name of the field
+    model_name = None  # name of the model of this field
+    comodel_name = None  # name of the model of values (if relational)
 
-    store = True                        # whether the field is stored in database
-    index = None                        # how the field is indexed in database
-    manual = False                      # whether the field is a custom field
-    copy = True                         # whether the field is copied over by BaseModel.copy()
-    _depends = None                     # collection of field dependencies
-    _depends_context = None             # collection of context key dependencies
-    recursive = False                   # whether self depends on itself
-    compute = None                      # compute(recs) computes field on recs
-    compute_sudo = False                # whether field should be recomputed as superuser
-    precompute = False                  # whether field has to be computed before creation
-    inverse = None                      # inverse(recs) inverses field on recs
-    search = None                       # search(recs, operator, value) searches on self
-    related = None                      # sequence of field names, for related fields
-    company_dependent = False           # whether ``self`` is company-dependent (property field)
-    default = None                      # default(recs) returns the default value
+    store = True  # whether the field is stored in database
+    index = None  # how the field is indexed in database
+    manual = False  # whether the field is a custom field
+    copy = True  # whether the field is copied over by BaseModel.copy()
+    _depends = None  # collection of field dependencies
+    _depends_context = None  # collection of context key dependencies
+    recursive = False  # whether self depends on itself
+    compute = None  # compute(recs) computes field on recs
+    compute_sudo = False  # whether field should be recomputed as superuser
+    precompute = False  # whether field has to be computed before creation
+    inverse = None  # inverse(recs) inverses field on recs
+    search = None  # search(recs, operator, value) searches on self
+    related = None  # sequence of field names, for related fields
+    company_dependent = False  # whether ``self`` is company-dependent (property field)
+    default = None  # default(recs) returns the default value
 
-    string = None                       # field label
-    help = None                         # field tooltip
-    invisible = False                   # whether the field is invisible
-    readonly = False                    # whether the field is readonly
-    required = False                    # whether the field is required
-    states = None                       # set readonly and required depending on state
-    groups = None                       # csv list of group xml ids
-    change_default = False              # whether the field may trigger a "user-onchange"
+    string = None  # field label
+    help = None  # field tooltip
+    invisible = False  # whether the field is invisible
+    readonly = False  # whether the field is readonly
+    required = False  # whether the field is required
+    states = None  # set readonly and required depending on state
+    groups = None  # csv list of group xml ids
+    change_default = False  # whether the field may trigger a "user-onchange"
 
-    related_field = None                # corresponding related field
-    group_operator = None               # operator for aggregating values
-    group_expand = None                 # name of method to expand groups in read_group()
-    prefetch = True                     # the prefetch group (False means no group)
+    related_field = None  # corresponding related field
+    group_operator = None  # operator for aggregating values
+    group_expand = None  # name of method to expand groups in read_group()
+    prefetch = True  # the prefetch group (False means no group)
 
-    default_export_compatible = False   # whether the field must be exported by default in an import-compatible export
+    default_export_compatible = False  # whether the field must be exported by default in an import-compatible export
     exportable = True
 
     def __init__(self, string=Default, **kwargs):
@@ -987,16 +987,16 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # optimization for computing simple related fields like 'foo_id.bar'
         if (
-            not column
-            and self.related and self.related.count('.') == 1
-            and self.related_field.store and not self.related_field.compute
-            and not (self.related_field.type == 'binary' and self.related_field.attachment)
-            and self.related_field.type not in ('one2many', 'many2many')
+                not column
+                and self.related and self.related.count('.') == 1
+                and self.related_field.store and not self.related_field.compute
+                and not (self.related_field.type == 'binary' and self.related_field.attachment)
+                and self.related_field.type not in ('one2many', 'many2many')
         ):
             join_field = model._fields[self.related.split('.')[0]]
             if (
-                join_field.type == 'many2one'
-                and join_field.store and not join_field.compute
+                    join_field.type == 'many2one'
+                    and join_field.store and not join_field.compute
             ):
                 model.pool.post_init(self.update_db_related, model)
                 # discard the "classical" computation
@@ -1119,7 +1119,7 @@ class Field(MetaField('DummyField', (object,), {})):
     def __get__(self, record, owner):
         """ return the value of field ``self`` on ``record`` """
         if record is None:
-            return self         # the field is accessed through the owner class
+            return self  # the field is accessed through the owner class
 
         if not record._ids:
             # null record -> return the null value for this field
@@ -1465,7 +1465,7 @@ class Float(Field):
     """
 
     type = 'float'
-    _digits = None                      # digits argument passed to class initializer
+    _digits = None  # digits argument passed to class initializer
     group_operator = 'sum'
 
     def __init__(self, string=Default, digits=Default, **kwargs):
@@ -1479,7 +1479,7 @@ class Float(Field):
         # FLOAT8 type is still the default when there is no precision because it
         # is faster for most operations (sums, etc.)
         return ('numeric', 'numeric') if self._digits is not None else \
-               ('float8', 'double precision')
+            ('float8', 'double precision')
 
     def get_digits(self, env):
         if isinstance(self._digits, str):
@@ -1617,7 +1617,7 @@ class Monetary(Field):
 
 class _String(Field):
     """ Abstract class for string fields. """
-    translate = False                   # whether the field is translated
+    translate = False  # whether the field is translated
     unaccent = True
 
     def __init__(self, string=Default, **kwargs):
@@ -1639,12 +1639,13 @@ class _String(Field):
             sql.convert_column(model._cr, model._table, self.name, self.column_type[1])
 
     def get_trans_terms(self, value):
-        """ Return the sequence of terms to translate found in `value`. """
+        """ Return the sequence of terms to translate found in `value`.
+        And the structure of the value with all terms filled with 'x'"""
         if not callable(self.translate):
-            return [value] if value else []
+            return [value] if value else [], None
         terms = []
-        self.translate(terms.append, value)
-        return terms
+        structure = self.translate(lambda t: terms.append(t) or 'x', value)
+        return terms, structure
 
     def get_text_content(self, term):
         """ Return the textual content for the given term. """
@@ -1678,13 +1679,15 @@ class _String(Field):
             return False
         if callable(self.translate) and record.env.context.get('edit_translations'):
             value_en = record.with_context(edit_translations=None, lang='en_US')[self.name]
-            terms_en = self.get_trans_terms(value_en)
-            terms = self.get_trans_terms(value)
-            term_to_state = {term: "translated" if term_en != term else "to_translate" for term, term_en in zip(terms, terms_en)}
+            terms_en = self.get_trans_terms(value_en)[0]
+            terms = self.get_trans_terms(value)[0]
+            term_to_state = {term: "translated" if term_en != term else "to_translate" for term, term_en in
+                             zip(terms, terms_en)}
             # use a wrapper to let the frontend js code identify each term and its metadata in the 'edit_translations' context
             # pylint: disable=not-callable
             value = self.translate(
-                lambda term: f'''<span data-oe-model="{record._name}" data-oe-id="{record.id}" data-oe-field="{self.name}" data-oe-translation-state="{term_to_state[term]}" data-oe-translation-initial-sha="{sha256(term.encode()).hexdigest()}">{term}</span>''',
+                lambda
+                    term: f'''<span data-oe-model="{record._name}" data-oe-id="{record.id}" data-oe-field="{self.name}" data-oe-translation-state="{term_to_state[term]}" data-oe-translation-initial-sha="{sha256(term.encode()).hexdigest()}">{term}</span>''',
                 value
             )
         return value
@@ -1704,7 +1707,8 @@ class _String(Field):
         vals_en2lang = zip(records.with_context(lang='en_US').mapped(self.name),
                            records.with_context(lang=lang).mapped(self.name))
         translation_dictionaries = dict(
-            zip(records.ids, [self.get_translation_dictionary(val_en, {lang: val_lang}) for val_en, val_lang in vals_en2lang]))
+            zip(records.ids,
+                [self.get_translation_dictionary(val_en, {lang: val_lang}) for val_en, val_lang in vals_en2lang]))
         if callable(self.translate):
             def translate(record_id, value):
                 translation_dictionary = translation_dictionaries[record_id]
@@ -1725,11 +1729,11 @@ class _String(Field):
         :rtype: dict
         """
 
-        from_lang_terms = self.get_trans_terms(from_lang_value)
+        from_lang_terms = self.get_trans_terms(from_lang_value)[0]
         dictionary = defaultdict(lambda: defaultdict(dict))
 
         for lang, to_lang_value in to_lang_values.items():
-            to_lang_terms = self.get_trans_terms(to_lang_value)
+            to_lang_terms = self.get_trans_terms(to_lang_value)[0]
             if len(from_lang_terms) != len(to_lang_terms):
                 for from_lang_term in from_lang_terms:
                     dictionary[from_lang_term][lang] = from_lang_term
@@ -1785,7 +1789,8 @@ class _String(Field):
         new_translations_list = []
         # pylint: disable=not-callable
         cache_value = self.translate(lambda t: None, cache_value)
-        new_terms = set(self.get_trans_terms(cache_value))
+        new_terms, new_structure = self.get_trans_terms(cache_value)
+        new_terms = set(new_terms)
         for record in records:
             # shortcut when no term needs to be translated
             if not new_terms:
@@ -1798,6 +1803,10 @@ class _String(Field):
                 new_translations_list.append({'en_US': cache_value, lang: cache_value})
                 continue
             from_lang_value = old_translations.get(lang, old_translations.get('en_US'))
+            if new_structure == self.get_trans_terms(from_lang_value)[1]:
+                old_translations[lang] = cache_value
+                new_translations_list.append(old_translations)
+                continue
             translation_dictionary = self.get_translation_dictionary(from_lang_value, old_translations)
             text2terms = defaultdict(list)
             for term in new_terms:
@@ -1840,14 +1849,14 @@ class Char(_String):
     :type translate: bool or callable
     """
     type = 'char'
-    size = None                         # maximum size of values (deprecated)
-    trim = True                         # whether value is trimmed (only by web client)
+    size = None  # maximum size of values (deprecated)
+    trim = True  # whether value is trimmed (only by web client)
 
     def _setup_attrs(self, model_class, name):
         super()._setup_attrs(model_class, name)
         assert self.size is None or isinstance(self.size, int), \
             "Char field %s with non-integer size %r" % (self, self.size)
-        assert not(self.translate and self.size), \
+        assert not (self.translate and self.size), \
             "Translated field %s cannot have size %r" % (self, self.size)
 
     @property
@@ -1856,9 +1865,9 @@ class Char(_String):
 
     def update_db_column(self, model, column):
         if (
-            column and self.column_type[0] == 'varchar' and
-            column['udt_name'] == 'varchar' and column['character_maximum_length'] and
-            (self.size is None or column['character_maximum_length'] < self.size)
+                column and self.column_type[0] == 'varchar' and
+                column['udt_name'] == 'varchar' and column['character_maximum_length'] and
+                (self.size is None or column['character_maximum_length'] < self.size)
         ):
             # the column's varchar size does not match self.size; convert it
             sql.convert_column(model._cr, model._table, self.name, self.column_type[1])
@@ -1922,14 +1931,14 @@ class Html(_String):
     """
     type = 'html'
 
-    sanitize = True                     # whether value must be sanitized
-    sanitize_overridable = False        # whether the sanitation can be bypassed by the users part of the `base.group_sanitize_override` group
-    sanitize_tags = True                # whether to sanitize tags (only a white list of attributes is accepted)
-    sanitize_attributes = True          # whether to sanitize attributes (only a white list of attributes is accepted)
-    sanitize_style = False              # whether to sanitize style attributes
-    sanitize_form = True                # whether to sanitize forms
-    strip_style = False                 # whether to strip style attributes (removed and therefore not sanitized)
-    strip_classes = False               # whether to strip classes attributes
+    sanitize = True  # whether value must be sanitized
+    sanitize_overridable = False  # whether the sanitation can be bypassed by the users part of the `base.group_sanitize_override` group
+    sanitize_tags = True  # whether to sanitize tags (only a white list of attributes is accepted)
+    sanitize_attributes = True  # whether to sanitize attributes (only a white list of attributes is accepted)
+    sanitize_style = False  # whether to sanitize style attributes
+    sanitize_form = True  # whether to sanitize forms
+    strip_style = False  # whether to strip style attributes (removed and therefore not sanitized)
+    strip_classes = False  # whether to strip classes attributes
 
     def _get_attrs(self, model_class, name):
         # called by _setup_attrs(), working together with _String._setup_attrs()
@@ -1991,8 +2000,8 @@ class Html(_String):
                 original_value_normalized = html_normalize(original_value)
 
                 if (
-                    not original_value_sanitized  # sanitizer could empty it
-                    or original_value_normalized != original_value_sanitized
+                        not original_value_sanitized  # sanitizer could empty it
+                        or original_value_normalized != original_value_sanitized
                 ):
                     # The field contains element(s) that would be removed if
                     # sanitized. It means that someone who was part of a group
@@ -2022,7 +2031,8 @@ class Html(_String):
 
     def get_trans_terms(self, value):
         # ensure the translation terms are stringified, otherwise we can break the PO file
-        return list(map(str, super().get_trans_terms(value)))
+        terms, structure = super().get_trans_terms(value)
+        return list(map(str, terms)), structure
 
 
 class Date(Field):
@@ -2194,7 +2204,7 @@ class Datetime(Field):
             return datetime.combine(value, time.min)
 
         # TODO: fix data files
-        return datetime.strptime(value, DATETIME_FORMAT[:len(value)-2])
+        return datetime.strptime(value, DATETIME_FORMAT[:len(value) - 2])
 
     # kept for backwards compatibility, but consider `from_string` as deprecated, will probably
     # be removed after V12
@@ -2226,6 +2236,7 @@ class Datetime(Field):
         assert record, 'Record expected'
         return Datetime.to_string(Datetime.context_timestamp(record, Datetime.from_string(value)))
 
+
 # http://initd.org/psycopg/docs/usage.html#binary-adaptation
 # Received data is returned as buffer (in Python 2) or memoryview (in Python 3).
 _BINARY = memoryview
@@ -2239,9 +2250,9 @@ class Binary(Field):
     """
     type = 'binary'
 
-    prefetch = False                    # not prefetched by default
-    _depends_context = ('bin_size',)    # depends on context (content or size)
-    attachment = True                   # whether value is stored in attachment
+    prefetch = False  # not prefetched by default
+    _depends_context = ('bin_size',)  # depends on context (content or size)
+    attachment = True  # whether value is stored in attachment
 
     @property
     def column_type(self):
@@ -2364,13 +2375,13 @@ class Binary(Field):
             env['ir.attachment'].sudo().with_context(
                 binary_field_real_user=env.user,
             ).create([{
-                    'name': self.name,
-                    'res_model': self.model_name,
-                    'res_field': self.name,
-                    'res_id': record.id,
-                    'type': 'binary',
-                    'datas': value,
-                }
+                'name': self.name,
+                'res_model': self.model_name,
+                'res_field': self.name,
+                'res_id': record.id,
+                'type': 'binary',
+                'datas': value,
+            }
                 for record, value in record_values
                 if value
             ])
@@ -2412,13 +2423,13 @@ class Binary(Field):
                 missing = (real_records - atts_records)
                 if missing:
                     atts.create([{
-                            'name': self.name,
-                            'res_model': record._name,
-                            'res_field': self.name,
-                            'res_id': record.id,
-                            'type': 'binary',
-                            'datas': value,
-                        }
+                        'name': self.name,
+                        'res_model': record._name,
+                        'res_field': self.name,
+                        'res_id': record.id,
+                        'type': 'binary',
+                        'datas': value,
+                    }
                         for record in missing
                     ])
             else:
@@ -2486,9 +2497,9 @@ class Image(Binary):
         except:
             raise UserError(_("Image is not encoded in base64."))
         return base64.b64encode(image_process(img,
-            size=(self.max_width, self.max_height),
-            verify_resolution=self.verify_resolution,
-        ) or b'') or False
+                                              size=(self.max_width, self.max_height),
+                                              verify_resolution=self.verify_resolution,
+                                              ) or b'') or False
 
     def _process_related(self, value):
         """Override to resize the related value before saving it on self."""
@@ -2545,9 +2556,9 @@ class Selection(Field):
     type = 'selection'
     column_type = ('varchar', pg_varchar())
 
-    selection = None            # [(value, string), ...], function or method name
-    validate = True             # whether validating upon write
-    ondelete = None             # {value: policy} (what to do when value is deleted)
+    selection = None  # [(value, string), ...], function or method name
+    validate = True  # whether validating upon write
+    ondelete = None  # {value: policy} (what to do when value is deleted)
 
     def __init__(self, selection=Default, string=Default, **kwargs):
         super(Selection, self).__init__(selection=selection, string=string, **kwargs)
@@ -2589,7 +2600,8 @@ class Selection(Field):
                 selection = field.args['selection']
                 if isinstance(selection, list):
                     if values is not None and values != [kv[0] for kv in selection]:
-                        _logger.warning("%s: selection=%r overrides existing selection; use selection_add instead", self, selection)
+                        _logger.warning("%s: selection=%r overrides existing selection; use selection_add instead",
+                                        self, selection)
                     values = [kv[0] for kv in selection]
                     labels = dict(selection)
                     self.ondelete = {}
@@ -2628,15 +2640,15 @@ class Selection(Field):
                         continue
                     if val == 'set default':
                         assert self.default is not None, (
-                            "%r: ondelete policy of type 'set default' is invalid for this field "
-                            "as it does not define a default! Either define one in the base "
-                            "field, or change the chosen ondelete policy" % self
+                                "%r: ondelete policy of type 'set default' is invalid for this field "
+                                "as it does not define a default! Either define one in the base "
+                                "field, or change the chosen ondelete policy" % self
                         )
                     elif val.startswith('set '):
                         assert val[4:] in values, (
-                            "%s: ondelete policy of type 'set %%' must be either 'set null', "
-                            "'set default', or 'set value' where value is a valid selection value."
-                        ) % self
+                                                      "%s: ondelete policy of type 'set %%' must be either 'set null', "
+                                                      "'set default', or 'set value' where value is a valid selection value."
+                                                  ) % self
                     else:
                         raise ValueError(
                             "%r: ondelete policy %r for selection value %r is not a valid ondelete"
@@ -2781,8 +2793,8 @@ class Reference(Selection):
 class _Relational(Field):
     """ Abstract class for relational fields. """
     relational = True
-    domain = []                         # domain for searching values
-    context = {}                        # context for searching values
+    domain = []  # domain for searching values
+    context = {}  # context for searching values
     check_company = False
 
     def __get__(self, records, owner):
@@ -2871,9 +2883,9 @@ class Many2one(_Relational):
     type = 'many2one'
     column_type = ('int4', 'int4')
 
-    ondelete = None                     # what to do when value is deleted
-    auto_join = False                   # whether joins are generated upon search
-    delegate = False                    # whether self implements delegation
+    ondelete = None  # what to do when value is deleted
+    auto_join = False  # whether joins are generated upon search
+    delegate = False  # whether self implements delegation
 
     def __init__(self, comodel_name=Default, string=Default, **kwargs):
         super(Many2one, self).__init__(comodel_name=comodel_name, string=string, **kwargs)
@@ -3221,7 +3233,7 @@ class Properties(Field):
     column_type = ('jsonb', 'jsonb')
     copy = False
     prefetch = False
-    write_sequence = 10              # because it must be written after the definition field
+    write_sequence = 10  # because it must be written after the definition field
 
     # the field is computed editable by design (see the compute method below)
     store = True
@@ -3229,8 +3241,8 @@ class Properties(Field):
     precompute = True
 
     definition = None
-    definition_record = None         # field on the current model that point to the definition record
-    definition_record_field = None   # field on the definition record which defined the Properties field definition
+    definition_record = None  # field on the current model that point to the definition record
+    definition_record_field = None  # field on the definition record which defined the Properties field definition
 
     _description_definition_record = property(attrgetter('definition_record'))
     _description_definition_record_field = property(attrgetter('definition_record_field'))
@@ -3248,7 +3260,7 @@ class Properties(Field):
             self.definition_record, self.definition_record_field = self.definition.rsplit('.', 1)
 
             # make the field computed, and set its dependencies
-            self._depends = (self.definition_record, )
+            self._depends = (self.definition_record,)
             self.compute = self._compute
 
     # Database/cache format: a value is either None, or a dict mapping property
@@ -3748,7 +3760,7 @@ class PropertiesDefinition(Field):
     definition. """
     type = 'properties_definition'
     column_type = ('jsonb', 'jsonb')
-    copy = True                         # containers may act like templates, keep definitions to ease usage
+    copy = True  # containers may act like templates, keep definitions to ease usage
     readonly = False
     prefetch = True
 
@@ -3908,7 +3920,7 @@ class PropertiesDefinition(Field):
             property_selection = property_definition.get('selection')
             if property_selection:
                 if (not is_list_of(property_selection, (list, tuple))
-                   or not all(len(selection) == 2 for selection in property_selection)):
+                        or not all(len(selection) == 2 for selection in property_selection)):
                     raise ValueError(f'Wrong options {property_selection!r}.')
 
                 all_options = [option[0] for option in property_selection]
@@ -3919,7 +3931,7 @@ class PropertiesDefinition(Field):
             property_tags = property_definition.get('tags')
             if property_tags:
                 if (not is_list_of(property_tags, (list, tuple))
-                   or not all(len(tag) == 3 and isinstance(tag[2], int) for tag in property_tags)):
+                        or not all(len(tag) == 3 and isinstance(tag[2], int) for tag in property_tags)):
                     raise ValueError(f'Wrong tags definition {property_tags!r}.')
 
                 all_tags = [tag[0] for tag in property_tags]
@@ -4139,8 +4151,8 @@ class _RelationalMulti(_Relational):
         Comodel = record.pool[self.comodel_name]
         corecords = Comodel(record.env, value, prefetch_ids)
         if (
-            Comodel._active_name
-            and self.context.get('active_test', record.env.context.get('active_test', True))
+                Comodel._active_name
+                and self.context.get('active_test', record.env.context.get('active_test', True))
         ):
             corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
         return corecords
@@ -4152,8 +4164,8 @@ class _RelationalMulti(_Relational):
         ids = tuple(unique(id_ for ids in values for id_ in ids))
         corecords = Comodel(records.env, ids, prefetch_ids)
         if (
-            Comodel._active_name
-            and self.context.get('active_test', records.env.context.get('active_test', True))
+                Comodel._active_name
+                and self.context.get('active_test', records.env.context.get('active_test', True))
         ):
             corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
         return corecords
@@ -4281,9 +4293,9 @@ class One2many(_RelationalMulti):
     """
     type = 'one2many'
 
-    inverse_name = None                 # name of the inverse field
-    auto_join = False                   # whether joins are generated upon search
-    copy = False                        # o2m are not copied by default
+    inverse_name = None  # name of the inverse field
+    auto_join = False  # whether joins are generated upon search
+    copy = False  # o2m are not copied by default
 
     def __init__(self, comodel_name=Default, inverse_name=Default, string=Default, **kwargs):
         super(One2many, self).__init__(
@@ -4372,9 +4384,9 @@ class One2many(_RelationalMulti):
 
         if self.store:
             inverse = self.inverse_name
-            to_create = []                  # line vals to create
-            to_delete = []                  # line ids to delete
-            to_link = defaultdict(set)      # {record: line_ids}
+            to_create = []  # line vals to create
+            to_delete = []  # line ids to delete
+            to_link = defaultdict(set)  # {record: line_ids}
             allow_full_delete = not create
 
             def unlink(lines):
@@ -4426,7 +4438,7 @@ class One2many(_RelationalMulti):
                         # assign the given lines to the last record only
                         lines = comodel.browse(line_ids)
                         domain = self.get_domain_list(model) + \
-                            [(inverse, 'in', recs.ids), ('id', 'not in', lines.ids)]
+                                 [(inverse, 'in', recs.ids), ('id', 'not in', lines.ids)]
                         unlink(comodel.search(domain))
                         lines[inverse] = recs[-1]
 
@@ -4585,12 +4597,12 @@ class Many2many(_RelationalMulti):
     """
     type = 'many2many'
 
-    _explicit = True                    # whether schema is explicitly given
-    relation = None                     # name of table
-    column1 = None                      # column of table referring to model
-    column2 = None                      # column of table referring to comodel
-    auto_join = False                   # whether joins are generated upon search
-    ondelete = 'cascade'                # optional ondelete for the column2 fkey
+    _explicit = True  # whether schema is explicitly given
+    relation = None  # name of table
+    column1 = None  # column of table referring to model
+    column2 = None  # column of table referring to comodel
+    auto_join = False  # whether joins are generated upon search
+    ondelete = 'cascade'  # optional ondelete for the column2 fkey
 
     def __init__(self, comodel_name=Default, relation=Default, column1=Default,
                  column2=Default, string=Default, **kwargs):
@@ -4643,13 +4655,13 @@ class Many2many(_RelationalMulti):
             # check whether other fields use the same schema
             fields = m2m[(self.relation, self.column1, self.column2)]
             for field in fields:
-                if (    # same model: relation parameters must be explicit
-                    self.model_name == field.model_name and
-                    self.comodel_name == field.comodel_name and
-                    self._explicit and field._explicit
+                if (  # same model: relation parameters must be explicit
+                        self.model_name == field.model_name and
+                        self.comodel_name == field.comodel_name and
+                        self._explicit and field._explicit
                 ) or (  # different models: one model must be _auto=False
-                    self.model_name != field.model_name and
-                    not (model._auto and model.env[field.model_name]._auto)
+                        self.model_name != field.model_name and
+                        not (model._auto and model.env[field.model_name]._auto)
                 ):
                     continue
                 msg = "Many2many fields %s and %s use the same table and columns"
@@ -4679,7 +4691,8 @@ class Many2many(_RelationalMulti):
                 CREATE INDEX ON "{rel}" ("{id2}","{id1}");
             """.format(rel=self.relation, id1=self.column1, id2=self.column2)
             cr.execute(query, ['RELATION BETWEEN %s AND %s' % (model._table, comodel._table)])
-            _schema.debug("Create table %r: m2m relation between %r and %r", self.relation, model._table, comodel._table)
+            _schema.debug("Create table %r: m2m relation between %r and %r", self.relation, model._table,
+                          comodel._table)
             model.pool.post_init(self.update_db_foreign_keys, model)
             return True
 
@@ -4906,7 +4919,8 @@ class Many2many(_RelationalMulti):
 
         # determine old and new relation {x: ys}
         set = OrderedSet
-        old_relation = {record.id: set(record[self.name]._ids) for records, _ in records_commands_list for record in records}
+        old_relation = {record.id: set(record[self.name]._ids) for records, _ in records_commands_list for record in
+                        records}
         new_relation = {x: set(ys) for x, ys in old_relation.items()}
         ids = set(old_relation.keys())
 
@@ -5019,11 +5033,11 @@ class Id(Field):
     prefetch = False
 
     def update_db(self, model, columns):
-        pass                            # this column is created with the table
+        pass  # this column is created with the table
 
     def __get__(self, record, owner):
         if record is None:
-            return self         # the field is accessed through the class owner
+            return self  # the field is accessed through the class owner
 
         # the code below is written to make record.id as quick as possible
         ids = record._ids
