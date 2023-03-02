@@ -5,7 +5,10 @@ import { uuidv4, batched } from "@point_of_sale/js/utils";
 import core from "web.core";
 import { Printer } from "@point_of_sale/js/printers";
 import { patch } from "@web/core/utils/patch";
+import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";
+
 const QWeb = core.qweb;
+var _t = core._t;
 
 patch(PosGlobalState.prototype, "pos_restaurant.PosGlobalState", {
     setup() {
@@ -295,6 +298,20 @@ patch(Order.prototype, "pos_restaurant.Order", {
             this.printedResume = json.multiprint_resume && JSON.parse(json.multiprint_resume);
             this.printingChanges = json.printing_changes && JSON.parse(json.printing_changes);
         }
+    },
+    async submitOrder() {
+        if (this.pos.unwatched.printers.length) {
+            if (this.hasChangesToPrint()) {
+                const isPrintSuccessful = await this.printChanges();
+                if (!isPrintSuccessful) {
+                    this.pos.env.services.popup.add(ErrorPopup, {
+                        title: _t("Printing failed"),
+                        body: _t("Failed in printing the changes in the order"),
+                    });
+                }
+            }
+        }
+        this.updatePrintedResume();
     },
     //@override
     export_for_printing() {
