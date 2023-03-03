@@ -24,15 +24,12 @@ export class KEProxyDialog extends Component {
     };
 
     doReload() {
-        this.action.doAction({
-            type: "ir.actions.client",
-            tag: "reload",
-        });
+        this.props.close();
     }
 
     closeAndReload() {
         if (this.state.reloadRequired) {
-            this.doReload();
+            return this.props.close();
         } else {
             return this.props.close();
         }

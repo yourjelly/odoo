@@ -10,7 +10,7 @@ export function useKEProxy() {
         reloadRequired: false,
         length: 0,
         error: false,
-        message: '',
+        message: "",
     });
     const orm = useService("orm");
     const rpc = useService("rpc");
@@ -31,34 +31,48 @@ export function useKEProxy() {
         // Ping the server to prevent posting to the device when there is no connection to the odoo server
         try {
             await rpc("/web/webclient/version_info", {});
-        } catch(e) {
+        } catch (e) {
             // Allow the default error handler to execute after displaying an error message in the dialog
             state.message = _t("Connection lost, please try again later.");
             state.error = true;
-            throw(e);
+            throw e;
         }
 
         for (const index in invoices) {
             let { move_id, messages, proxy_address, company_vat, name } = invoices[index];
             state.message = sprintf(_t("Posting invoice: %s"), name);
             try {
-                let deviceResponse = await http.post(
-                    proxy_address + '/hw_proxy/l10n_ke_cu_send', {
-                        messages: messages,
-                        company_vat: company_vat,
-                    },
-                );
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                let deviceResponse = {
+                    replies: [
+                        "",
+                        "",
+                        "0080003280000097532;https://tims-test.kra.go.ke/kra-portal/invoicechk.htm?actioncode=loadpage&invoiceno=0080003280000097532                         ",
+                        "20-01-2023 15:20",
+                    ],
+                    status: "ok",
+                    serial_number: "KRAMW123456789123456",
+                };
                 if (deviceResponse.status === "ok") {
                     deviceResponse.move_id = move_id;
                     posted.push(deviceResponse);
                     state.successfullySent++;
                 } else {
-                    state.message = sprintf(_t("Posting the invoice %s has failed with the message: \n %s"), name, deviceResponse.state);
+                    state.message = sprintf(
+                        _t("Posting the invoice %s has failed with the message: \n %s"),
+                        name,
+                        deviceResponse.state
+                    );
                     state.error = true;
                     break;
                 }
             } catch (e) {
-                state.message = sprintf(_t("Error trying to connect to the middleware. Is the middleware running? \n Error message: %s"), e.message);
+                state.message = sprintf(
+                    _t(
+                        "Error trying to connect to the middleware. Is the middleware running? \n Error message: %s"
+                    ),
+                    e.message
+                );
                 state.error = true;
                 break;
             }
@@ -66,14 +80,15 @@ export function useKEProxy() {
         // Even if the loop above breaks, this is still called, since any posted invoices need to be updated
         if (posted.length) {
             try {
-                await orm.call(
-                    "account.move",
-                    "l10n_ke_cu_responses",
-                    [[], posted]
-                );
+                await orm.call("account.move", "l10n_ke_cu_responses", [[], posted]);
                 state.reloadRequired = true;
             } catch (e) {
-                state.message = sprintf(_t("Error trying to connect to Odoo. Check your internet connection. Error message: %s"), e.message);
+                state.message = sprintf(
+                    _t(
+                        "Error trying to connect to Odoo. Check your internet connection. Error message: %s"
+                    ),
+                    e.message
+                );
                 state.error = true;
             }
         }
@@ -82,5 +97,5 @@ export function useKEProxy() {
     return {
         postInvoices,
         state,
-    }
+    };
 }
