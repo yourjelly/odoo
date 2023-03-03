@@ -1,7 +1,24 @@
-<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M52 48C52 50.2091 50.2091 52 48 52L14 52L14 22C14 17.5817 17.5817 14 22 14L52 14L52 48Z" fill="var(--o-icons-blue-100, #1ACAF0)"/>
-<path d="M56 48C56 52.4183 52.4183 56 48 56L18 56L18 22C18 19.7909 19.7909 18 22 18L56 18L56 48Z" fill="var(--o-icons-orange-200, #FC803D)"/>
-<path d="M48 52C50.2091 52 52 50.2091 52 48L52 18L22 18C19.7909 18 18 19.7909 18 22L18 52L48 52Z" fill="var(--o-icons-blue-400, #251B85)"/>
-<circle cx="34" cy="29" r="6" fill="var(--o-icons-orange-100, #FBA82E)"/>
-<path d="M44 38H34C29.0294 38 25 42.0294 25 47H35C39.9706 47 44 42.9706 44 38Z" fill="var(--o-icons-orange-100, #FBA82E)"/>
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M42 38C42 40.2091 40.2091 42 38 42L4 42L4 12C4 7.58172 7.58173 4 12 4L42 4L42 38Z" fill="var(--o-icons-teal-pure, #00CEB3)"/>
+<path d="M42 38C42 40.2091 40.2091 42 38 42L4 42L4 12C4 7.58172 7.58173 4 12 4L42 4L42 38Z" fill="url(#white_gradient_1)" fill-opacity="0.3"/>
+<path d="M46 38C46 42.4183 42.4183 46 38 46L8 46L8 12C8 9.79086 9.79086 8 12 8L46 8L46 38Z" fill="var(--o-icons-purple-pure, #7933F3)"/>
+<path d="M46 38C46 42.4183 42.4183 46 38 46L8 46L8 12C8 9.79086 9.79086 8 12 8L46 8L46 38Z" fill="url(#white_gradient_2)" fill-opacity="0.3"/>
+<path d="M38 42C40.2091 42 42 40.2091 42 38L42 8L12 8C9.79086 8 8 9.79086 8 12L8 42L38 42Z" fill="var(--o-icons-purple-teal, #0028A3)"/>
+<path d="M38 42C40.2091 42 42 40.2091 42 38L42 8L12 8C9.79086 8 8 9.79086 8 12L8 42L38 42Z" fill="url(#white_gradient_3)" fill-opacity="0.3"/>
+<path d="M30 19C30 22.3137 27.3137 25 24 25C20.6863 25 18 22.3137 18 19C18 15.6863 20.6863 13 24 13C27.3137 13 30 15.6863 30 19Z" fill="white"/>
+<path d="M34 28H24C19.0294 28 15 32.0294 15 37H25C29.9706 37 34 32.9706 34 28Z" fill="white"/>
+<defs>
+<linearGradient id="white_gradient_1" x1="4" y1="4" x2="48.7059" y2="15.1765" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="white_gradient_2" x1="8" y1="8" x2="52.7059" y2="19.1765" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="white_gradient_3" x1="8" y1="8" x2="48" y2="18" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+</defs>
 </svg>

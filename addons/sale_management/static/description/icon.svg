@@ -1,7 +1,34 @@
-<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M14 35.1816C14 32.9725 15.7909 31.1816 18 31.1816H33.0909V51.9998C33.0909 54.209 31.3 55.9998 29.0909 55.9998H14V35.1816Z" fill="var(--o-icons-orange-300, #F84C31)"/>
-<path d="M36.9092 18C36.9092 15.7909 38.7 14 40.9092 14H56.0001V52C56.0001 54.2091 54.2092 56 52.0001 56H36.9092V18Z" fill="var(--o-icons-orange-100, #FBA82E)"/>
-<path d="M25.4546 27.5449C25.4546 25.3358 27.2455 23.5449 29.4546 23.5449H44.5455V51.9995C44.5455 54.2086 42.7546 55.9995 40.5455 55.9995H25.4546V27.5449Z" fill="var(--o-icons-orange-200, #FC803D)"/>
-<path d="M36.9092 55.9995V23.5449H44.5456V51.9995C44.5456 54.2086 42.7548 55.9995 40.5456 55.9995H36.9092Z" fill="var(--o-icons-orange-300, #F84C31)"/>
-<path d="M25.4546 55.9998V31.1816H33.0909V51.9998C33.0909 54.209 31.3 55.9998 29.0909 55.9998H25.4546Z" fill="var(--o-icons-red-300, #D61A1A)"/>
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 25C4 22.7909 5.79086 21 8 21H24V42C24 44.2091 22.2091 46 20 46H4V25Z" fill="var(--o-icons-purple-pure, #7933F3)"/>
+<path d="M4 25C4 22.7909 5.79086 21 8 21H24V42C24 44.2091 22.2091 46 20 46H4V25Z" fill="url(#white_gradient_1)" fill-opacity="0.3"/>
+<path d="M26 8C26 5.79086 27.8761 4 30.1905 4H46V42C46 44.2091 44.1239 46 41.8095 46H26V8Z" fill="var(--o-icons-yellow-pure, #FBB130)"/>
+<path d="M26 8C26 5.79086 27.8761 4 30.1905 4H46V42C46 44.2091 44.1239 46 41.8095 46H26V8Z" fill="url(#white_gradient_2)" fill-opacity="0.2"/>
+<path d="M15 17.0672C15 14.821 16.8761 13 19.1905 13H35V41.9328C35 44.179 33.1239 46 30.8095 46H15V17.0672Z" fill="var(--o-icons-magenta-pure, #FF689E)"/>
+<path d="M15 17.0672C15 14.821 16.8761 13 19.1905 13H35V41.9328C35 44.179 33.1239 46 30.8095 46H15V17.0672Z" fill="url(#white_gradient_3)" fill-opacity="0.4"/>
+<path d="M26 46H30.8095C33.1239 46 35 44.179 35 41.9328V13H26V46Z" fill="var(--o-icons-magenta-yellow, #FB481E)"/>
+<path d="M26 46H30.8095C33.1239 46 35 44.179 35 41.9328V13H26V46Z" fill="url(#white_gradient_4)" fill-opacity="0.3"/>
+<path d="M15 46H20.0039C22.2113 45.9979 24 44.2078 24 42V21H15V46Z" fill="var(--o-icons-purple-magenta, #791597)"/>
+<path d="M15 46H20.0039C22.2113 45.9979 24 44.2078 24 42V21H15V46Z" fill="url(#white_gradient_5)" fill-opacity="0.3"/>
+<defs>
+<linearGradient id="white_gradient_1" x1="4" y1="21" x2="28.0385" y2="25.8077" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="white_gradient_2" x1="26" y1="4" x2="50.6506" y2="6.9346" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="white_gradient_3" x1="15" y1="13" x2="39.439" y2="16.7029" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="white_gradient_4" x1="26" y1="13" x2="37.1979" y2="13.7635" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="white_gradient_5" x1="15" y1="21" x2="26.1596" y2="22.0044" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+</defs>
 </svg>

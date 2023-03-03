@@ -1,5 +1,22 @@
-<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M35 55C46.0457 55 55 46.0457 55 35C55 23.9543 46.0457 15 35 15C23.9543 15 15 23.9543 15 35C15 46.0457 23.9543 55 35 55ZM35 60C48.8071 60 60 48.8071 60 35C60 21.1929 48.8071 10 35 10C21.1929 10 10 21.1929 10 35C10 48.8071 21.1929 60 35 60Z" fill="var(--o-icons-purple-100, #FF92CB)"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M35 46C41.0751 46 46 41.0751 46 35C46 28.9249 41.0751 24 35 24C28.9249 24 24 28.9249 24 35C24 41.0751 28.9249 46 35 46ZM35 51C43.8366 51 51 43.8366 51 35C51 26.1634 43.8366 19 35 19C26.1634 19 19 26.1634 19 35C19 43.8366 26.1634 51 35 51Z" fill="var(--o-icons-purple-200, #CA498D)"/>
-<circle cx="35" cy="35" r="6" fill="var(--o-icons-purple-300, #82209C)"/>
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M25 45C36.0457 45 45 36.0457 45 25C45 13.9543 36.0457 5 25 5C13.9543 5 5 13.9543 5 25C5 36.0457 13.9543 45 25 45ZM25 50C38.8071 50 50 38.8071 50 25C50 11.1929 38.8071 0 25 0C11.1929 0 0 11.1929 0 25C0 38.8071 11.1929 50 25 50Z" fill="var(--o-icons-magenta-pure, #FF689E)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M25 45C36.0457 45 45 36.0457 45 25C45 13.9543 36.0457 5 25 5C13.9543 5 5 13.9543 5 25C5 36.0457 13.9543 45 25 45ZM25 50C38.8071 50 50 38.8071 50 25C50 11.1929 38.8071 0 25 0C11.1929 0 0 11.1929 0 25C0 38.8071 11.1929 50 25 50Z" fill="url(#white_gradient_1)" fill-opacity="0.4"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M25 36C31.0751 36 36 31.0751 36 25C36 18.9249 31.0751 14 25 14C18.9249 14 14 18.9249 14 25C14 31.0751 18.9249 36 25 36ZM25 41C33.8366 41 41 33.8366 41 25C41 16.1634 33.8366 9 25 9C16.1634 9 9 16.1634 9 25C9 33.8366 16.1634 41 25 41Z" fill="var(--o-icons-magenta-magenta, #FF2A62)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M25 36C31.0751 36 36 31.0751 36 25C36 18.9249 31.0751 14 25 14C18.9249 14 14 18.9249 14 25C14 31.0751 18.9249 36 25 36ZM25 41C33.8366 41 41 33.8366 41 25C41 16.1634 33.8366 9 25 9C16.1634 9 9 16.1634 9 25C9 33.8366 16.1634 41 25 41Z" fill="url(#white_gradient_2)" fill-opacity="0.3"/>
+<path d="M31 25C31 28.3137 28.3137 31 25 31C21.6863 31 19 28.3137 19 25C19 21.6863 21.6863 19 25 19C28.3137 19 31 21.6863 31 25Z" fill="var(--o-icons-purple-magenta, #791597)"/>
+<path d="M31 25C31 28.3137 28.3137 31 25 31C21.6863 31 19 28.3137 19 25C19 21.6863 21.6863 19 25 19C28.3137 19 31 21.6863 31 25Z" fill="url(#white_gradient_3)" fill-opacity="0.3"/>
+<defs>
+<linearGradient id="white_gradient_1" x1="0" y1="0" x2="58.8235" y2="14.7059" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="white_gradient_2" x1="9" y1="9" x2="46.6471" y2="18.4118" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="white_gradient_3" x1="19" y1="19" x2="33.1176" y2="22.5294" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+</defs>
 </svg>
