@@ -37,6 +37,18 @@ $o-bg-colors-custom: map-merge($o-bg-colors-custom, $o-grays);
     }
 }
 
+// "Odoo Colors" classes generation
+// ==============================================================================
+// Mainly used for tags.
+@each $-name, $-values in $o-tags-colors {
+    $-i: index(($o-tags-colors), ($-name $-values)) - 1;
+
+    .text-bg-#{$-i} {
+        background-color: RGBA(to-rgb(map-get($-values, 'bg')), var(--bg-opacity, 1)) !important;
+        color: map-get($-values, 'color') !important, null;
+    }
+}
+
 // Bootstrap (legacy) black and white opacity-classes generation
 // ==============================================================================
 // Generate 'bg-white-x' and 'bg-black-x' classes
