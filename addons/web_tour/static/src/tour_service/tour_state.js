@@ -18,8 +18,11 @@ const STRING = {
 };
 
 const ALLOWED_KEYS = {
-    // Whether the tour started in watch mode or not.
-    watch: BOOLEAN,
+    // Don't close the 'watch' browser when the tour failed.
+    keepWatchBrowser: BOOLEAN,
+
+    // Duration at which the pointer is shown in auto mode.
+    showPointerDuration: INTEGER,
 
     // Index of the current step.
     currentIndex: INTEGER,

@@ -34,7 +34,7 @@ export default class ToursDialog extends Component {
      * @param {MouseEvent} ev
      */
     _onTestTour(ev) {
-        this.tourService.startTour(ev.target.dataset.name, { mode: 'auto', stepDelay: 500, watch: true });
+        this.tourService.startTour(ev.target.dataset.name, { mode: 'auto', stepDelay: 500, showPointerDuration: 250 });
         this.props.close();
     }
 }

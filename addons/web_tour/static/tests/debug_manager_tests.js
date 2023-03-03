@@ -37,11 +37,13 @@ QUnit.module("Tours", (hooks) => {
         const fakeLocalStorage = {
             tour__sampletour1__currentIndex: "0",
             tour__sampletour1__stepDelay: "0",
-            tour__sampletour1__watch: "0",
+            tour__sampletour1__keepWatchBrowser: "0",
+            tour__sampletour1__showPointerDuration: "0",
             tour__sampletour1__mode: "manual",
             tour__sampletour2__currentIndex: "0",
             tour__sampletour2__stepDelay: "0",
-            tour__sampletour2__watch: "0",
+            tour__sampletour2__keepWatchBrowser: "0",
+            tour__sampletour2__showPointerDuration: "0",
             tour__sampletour2__mode: "manual",
         };
 

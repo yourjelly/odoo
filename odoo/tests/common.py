@@ -1744,9 +1744,12 @@ class HttpCase(TransactionCase):
         """Wrapper for `browser_js` to start the given `tour_name` with the
         optional delay between steps `step_delay`. Other arguments from
         `browser_js` can be passed as keyword arguments."""
-        step_delay = step_delay if step_delay else 0
-        watch = "true" if kwargs.get("watch") else "false"
-        code = kwargs.pop('code', "odoo.startTour('%s', { stepDelay: %s, watch: %s, url: '%s' })" % (tour_name, step_delay, watch, url_path))
+        options = {
+            'stepDelay': step_delay if step_delay else 0,
+            'keepWatchBrowser': kwargs.get('watch', False),
+            'url': url_path,
+        }
+        code = kwargs.pop('code', "odoo.startTour('%s', %s)" % (tour_name, json.dumps(options)))
         ready = kwargs.pop('ready', "odoo.isTourReady('%s')" % tour_name)
         return self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
 

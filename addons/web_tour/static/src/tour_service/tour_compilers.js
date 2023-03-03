@@ -13,9 +13,6 @@ import {
     RunningTourActionHelper,
 } from "./tour_utils";
 
-// Set this to more than 0 to see the pointer when watching the tour.
-const SHOW_POINTER_DURATION = 0; // ms
-
 /**
  * @typedef {import("@web/core/macro").MacroDescriptor} MacroDescriptor
  *
@@ -28,7 +25,8 @@ const SHOW_POINTER_DURATION = 0; // ms
  * @typedef TourCompilerOptions
  * @property {Tour} tour
  * @property {number} stepDelay
- * @property {watch} boolean
+ * @property {keepWatchBrowser} boolean
+ * @property {showPointerDuration} number
  * @property {*} pointer - used for controlling the pointer of the tour
  */
 
@@ -201,11 +199,8 @@ function setupListeners({
 }
 
 /** @type {TourStepCompiler} */
-export function compileStepManual(
-    stepIndex,
-    step,
-    { tour, stepDelay: _stepDelay, watch: _watch, pointer }
-) {
+export function compileStepManual(stepIndex, step, options) {
+    const { tour, pointer } = options;
     let proceedWith = null;
     let removeListeners = () => {};
 
@@ -271,9 +266,9 @@ export function compileStepManual(
 let tourTimeout;
 
 /** @type {TourStepCompiler} */
-export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, pointer }) {
+export function compileStepAuto(stepIndex, step, options) {
+    const { tour, pointer, stepDelay, keepWatchBrowser, showPointerDuration } = options;
     let skipAction = false;
-    stepDelay = stepDelay || 0;
     return [
         {
             action: async () => {
@@ -286,7 +281,7 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
             action: async () => {
                 skipAction = false;
                 console.log(`Tour ${tour.name} on step: '${describeStep(step)}'`);
-                if (!watch) {
+                if (!keepWatchBrowser) {
                     clearTimeout(tourTimeout);
                     tourTimeout = setTimeout(() => {
                         // The logged text shows the relative position of the failed step.
@@ -328,10 +323,10 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                 // anchor is just the step element.
                 const $anchorEl = $(stepEl);
 
-                if (watch && SHOW_POINTER_DURATION > 0) {
-                    // When in watch mode, briefly point to the anchor element.
+                if (showPointerDuration > 0) {
+                    // Useful in watch mode.
                     pointer.pointTo($anchorEl.get(0), step);
-                    await new Promise((r) => browser.setTimeout(r, SHOW_POINTER_DURATION));
+                    await new Promise((r) => browser.setTimeout(r, showPointerDuration));
                     pointer.hide();
                 }
 
@@ -368,7 +363,8 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
  * @param {TourStepCompiler} options.stepCompiler
  * @param {*} options.pointer
  * @param {number} options.stepDelay
- * @param {boolean} options.watch
+ * @param {boolean} options.keepWatchBrowser
+ * @param {number} options.showPointerDuration
  * @param {number} options.checkDelay
  * @param {(import("./tour_service").Tour) => void} options.onTourEnd
  */
@@ -378,7 +374,8 @@ export function compileTourToMacro(tour, options) {
         stepCompiler,
         pointer,
         stepDelay,
-        watch,
+        keepWatchBrowser,
+        showPointerDuration,
         checkDelay,
         onTourEnd,
     } = options;
@@ -396,9 +393,10 @@ export function compileTourToMacro(tour, options) {
                         ...newSteps,
                         ...stepCompiler(i, step, {
                             tour,
-                            stepDelay,
-                            watch,
                             pointer,
+                            stepDelay,
+                            keepWatchBrowser,
+                            showPointerDuration,
                         }),
                     ];
                 }

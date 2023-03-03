@@ -136,9 +136,19 @@ export const tourService = {
         /**
          * @param {Tour} tour
          * @param {ReturnType<typeof createPointer>} pointer
-         * @param {{ mode: TourMode, stepDelay: number, watch: boolean}} options
+         * @param {Object} options
+         * @param {TourMode} options.mode
+         * @param {number} options.stepDelay
+         * @param {boolean} options.keepWatchBrowser - do not close watch browser when the tour failed
+         * @param {number} options.showPointerDuration
+         * - Useful when watching auto tour.
+         * - Show the pointer for some duration before performing calling the run method.
          */
-        function convertToMacro(tour, pointer, { mode, stepDelay, watch }) {
+        function convertToMacro(
+            tour,
+            pointer,
+            { mode, stepDelay, keepWatchBrowser, showPointerDuration }
+        ) {
             // IMPROVEMENTS: Custom step compiler. Will probably require decoupling from `mode`.
             const stepCompiler = mode === "auto" ? compileStepAuto : compileStepManual;
             const checkDelay = mode === "auto" ? tour.checkDelay : 100;
@@ -148,7 +158,8 @@ export const tourService = {
                 stepCompiler,
                 pointer,
                 stepDelay,
-                watch,
+                keepWatchBrowser,
+                showPointerDuration,
                 checkDelay,
                 onTourEnd({ name, rainbowManMessage, fadeout }) {
                     if (mode === "auto") {
@@ -193,18 +204,26 @@ export const tourService = {
         }
 
         function startTour(tourName, options = {}) {
-            options = Object.assign({ stepDelay: 0, watch: false, mode: "auto", url: "" }, options);
+            const defaultOptions = {
+                stepDelay: 0,
+                keepWatchBrowser: false,
+                mode: "auto",
+                url: "",
+                showPointerDuration: 0,
+            };
+            options = Object.assign(defaultOptions, options);
             const tour = tours[tourName];
             if (!tour) {
                 throw new Error(`Tour '${tourName}' is not found.`);
             }
             tourState.set(tourName, "currentIndex", 0);
             tourState.set(tourName, "stepDelay", options.stepDelay);
-            tourState.set(tourName, "watch", options.watch);
+            tourState.set(tourName, "keepWatchBrowser", options.keepWatchBrowser);
+            tourState.set(tourName, "showPointerDuration", options.showPointerDuration);
             tourState.set(tourName, "mode", options.mode);
             tourState.set(tourName, "sequence", tour.sequence);
             const pointer = createPointer(tourName, {
-                bounce: !(options.mode === "auto" && options.watch),
+                bounce: !(options.mode === "auto" && options.keepWatchBrowser),
             });
             const macro = convertToMacro(tour, pointer, options);
             const willUnload = callWithUnloadCheck(() => {
@@ -221,10 +240,18 @@ export const tourService = {
         function resumeTour(tourName) {
             const tour = tours[tourName];
             const stepDelay = tourState.get(tourName, "stepDelay");
-            const watch = tourState.get(tourName, "watch");
+            const keepWatchBrowser = tourState.get(tourName, "keepWatchBrowser");
+            const showPointerDuration = tourState.get(tourName, "showPointerDuration");
             const mode = tourState.get(tourName, "mode");
-            const pointer = createPointer(tourName, { bounce: !(mode === "auto" && watch) });
-            const macro = convertToMacro(tour, pointer, { stepDelay, watch, mode });
+            const pointer = createPointer(tourName, {
+                bounce: !(mode === "auto" && keepWatchBrowser),
+            });
+            const macro = convertToMacro(tour, pointer, {
+                mode,
+                stepDelay,
+                keepWatchBrowser,
+                showPointerDuration,
+            });
             pointer.start();
             activateMacro(macro, mode);
         }
