@@ -100,44 +100,35 @@ export const tourService = {
         const consumedTours = new Set(session.web_tours);
 
         const pointers = reactive({});
-        let shownPointerId = -1;
-        let pointerId = 0;
 
         registry.category("main_components").add("TourPointerContainer", {
             Component: TourPointerContainer,
             props: { pointers },
         });
 
-        function createPointer(config) {
-            const id = pointerId++;
+        function createPointer(tourName, config) {
             const { state: pointerState, methods } = createPointerState();
             return {
                 start() {
-                    shownPointerId = -1;
-                    pointers[id] = {
-                        id,
+                    pointers[tourName] = {
+                        id: tourName,
                         component: TourPointer,
                         props: { pointerState, ...config },
                     };
                 },
                 stop() {
-                    delete pointers[id];
-                    shownPointerId = -1;
+                    delete pointers[tourName];
                     methods.destroy();
                 },
                 ...methods,
                 pointTo(anchor, step) {
-                    // If the pointer shown is this pointer,
-                    // we should still call pointTo to it for update.
-                    if (shownPointerId > -1 && shownPointerId !== id) {
-                        return;
+                    // `first` = first visible pointer.
+                    const [first] = Object.values(pointers).filter(
+                        (p) => p.props.pointerState.isVisible
+                    );
+                    if (!first || (first && first.id === tourName)) {
+                        methods.pointTo(anchor, step);
                     }
-                    shownPointerId = id;
-                    return methods.pointTo(anchor, step);
-                },
-                hide() {
-                    shownPointerId = -1;
-                    return methods.hide();
                 },
             };
         }
@@ -211,7 +202,10 @@ export const tourService = {
             tourState.set(tourName, "stepDelay", options.stepDelay);
             tourState.set(tourName, "watch", options.watch);
             tourState.set(tourName, "mode", options.mode);
-            const pointer = createPointer({ bounce: !(options.mode === "auto" && options.watch) });
+            tourState.set(tourName, "sequence", tour.sequence);
+            const pointer = createPointer(tourName, {
+                bounce: !(options.mode === "auto" && options.watch),
+            });
             const macro = convertToMacro(tour, pointer, options);
             const willUnload = callWithUnloadCheck(() => {
                 if (tour.url && tour.url !== options.url) {
@@ -229,7 +223,7 @@ export const tourService = {
             const stepDelay = tourState.get(tourName, "stepDelay");
             const watch = tourState.get(tourName, "watch");
             const mode = tourState.get(tourName, "mode");
-            const pointer = createPointer({ bounce: !(mode === "auto" && watch) });
+            const pointer = createPointer(tourName, { bounce: !(mode === "auto" && watch) });
             const macro = convertToMacro(tour, pointer, { stepDelay, watch, mode });
             pointer.start();
             activateMacro(macro, mode);

@@ -29,6 +29,9 @@ const ALLOWED_KEYS = {
 
     // 'auto' | 'manual' - important that it's persisted because it's only specified during start of tour.
     mode: STRING,
+
+    // Used to order the tours.
+    sequence: INTEGER,
 };
 
 function getPrefixedName(tourName, key) {
@@ -74,6 +77,6 @@ export const tourState = {
                 tourNames.add(tourName);
             }
         }
-        return [...tourNames];
+        return [...tourNames].sort((a, b) => this.get(a, "sequence") - this.get(b, "sequence"));
     },
 };
