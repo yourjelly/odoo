@@ -16,7 +16,7 @@ QUnit.test("Message model properties", async function (assert) {
     });
     /** @type {import("@mail/new/core/message_model").Message} */
     const message = env.services["mail.message"].insert({
-        attachment_ids: [
+        attachments: [
             {
                 filename: "test.txt",
                 id: 750,
@@ -44,7 +44,6 @@ QUnit.test("Message model properties", async function (assert) {
     assert.strictEqual(message.id, 4000);
     assert.ok(store.discuss.inbox.messages.find((m) => m.id === message.id));
     assert.ok(store.discuss.starred.messages.find((m) => m.id === message.id));
-
     assert.ok(message.attachments);
     assert.strictEqual(message.attachments[0].name, "test.txt");
 

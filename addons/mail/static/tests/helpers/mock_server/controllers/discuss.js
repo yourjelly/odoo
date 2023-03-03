@@ -106,7 +106,7 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
                 Message: {
                     id: args.message_id,
                     body: args.body,
-                    attachment_ids: this._mockIrAttachment_attachmentFormat(args.attachment_ids),
+                    attachments: this._mockIrAttachment_attachmentFormat(args.attachment_ids),
                 },
             });
             return args;

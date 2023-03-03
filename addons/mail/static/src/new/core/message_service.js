@@ -214,7 +214,7 @@ export class MessageService {
      */
     _update(message, data, fromFetch = false) {
         const {
-            attachment_ids: attachments = message.attachments,
+            attachments = message.attachments,
             default_subject: defaultSubject = message.defaultSubject,
             is_discussion: isDiscussion = message.isDiscussion,
             is_note: isNote = message.isNote,

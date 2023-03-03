@@ -92,7 +92,7 @@
 
                         <div class="o_portal_chatter_attachments">
                             <t t-call="portal.Chatter.Attachments">
-                                <t t-set="attachments" t-value="message.attachment_ids"/>
+                                <t t-set="attachments" t-value="message.attachments"/>
                             </t>
                         </div>
                     </div>

@@ -252,7 +252,7 @@ patch(MockServer.prototype, "mail/models/mail_message", {
                 });
             }
             const response = Object.assign({}, message, {
-                attachment_ids: formattedAttachments,
+                attachments: formattedAttachments,
                 author: formattedAuthor,
                 history_partner_ids: historyPartnerIds,
                 default_subject: message.model && message.res_id &&

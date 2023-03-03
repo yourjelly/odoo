@@ -44,7 +44,7 @@ class TestImLivechatMessage(TransactionCase):
             rating_id=record_rating.id,
         )
         self.assertEqual(message.message_format(), [{
-            'attachment_ids': [],
+            'attachments': [],
             'author': {
                 'id': self.users[1].partner_id.id,
                 'name': "test1",

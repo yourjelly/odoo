@@ -32,7 +32,7 @@
                         </div>
                         <t t-out="message.body"/>
                         <div class="o_portal_chatter_attachments">
-                            <ChatterAttachmentsViewer attachments="message.attachment_ids"/>
+                            <ChatterAttachmentsViewer attachments="message.attachments"/>
                         </div>
                     </div>
                 </div>
