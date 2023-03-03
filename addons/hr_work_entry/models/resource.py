@@ -25,6 +25,7 @@ class ResourceCalendarLeave(models.Model):
 
     work_entry_type_id = fields.Many2one(
         'hr.work.entry.type', 'Work Entry Type',
+        default=lambda self: self.ref('work_entry_type_bank_holiday') if not self.resource_id else False,
         groups="hr.group_hr_user")
 
     def _copy_leave_vals(self):
