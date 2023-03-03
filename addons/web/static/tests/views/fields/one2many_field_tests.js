@@ -12200,7 +12200,7 @@ QUnit.module("Fields", (hooks) => {
         const getElementTextContent = (name) =>
             [
                 ...document.querySelectorAll(
-                    `.o_field_many2many_tags[name="${name}"] .badge.o_tag_color_0 > .o_tag_badge_text`
+                    `.o_field_many2many_tags[name="${name}"] .o_tag > .o_tag_badge_text`
                 ),
             ].map((x) => x.textContent);
         assert.deepEqual(

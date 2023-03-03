@@ -61,7 +61,7 @@ QUnit.module("Fields", (hooks) => {
 
             assert.hasClass(
                 target.querySelectorAll(".o_field_color_picker button"),
-                "o_colorlist_item_color_0",
+                "text-bg-0",
                 "The default no color value does have the right class"
             );
 
@@ -69,16 +69,16 @@ QUnit.module("Fields", (hooks) => {
 
             assert.hasClass(
                 target.querySelectorAll(".o_field_color_picker button"),
-                "o_colorlist_item_color_0",
+                "text-bg-0",
                 "The no color item does have the right class in the list"
             );
 
-            await click(target, ".o_field_color_picker .o_colorlist_item_color_3");
+            await click(target, ".o_field_color_picker .text-bg-3");
             await click(target, ".o_field_color_picker button");
 
             assert.hasClass(
                 target.querySelectorAll(".o_field_color_picker button"),
-                "o_colorlist_item_color_0",
+                "text-bg-0",
                 "The no color item still have the right class in the list"
             );
         }
@@ -107,7 +107,7 @@ QUnit.module("Fields", (hooks) => {
             "there should be more color elements when the component is opened"
         );
 
-        await click(target, ".o_field_color_picker .o_colorlist_item_color_3");
+        await click(target, ".o_field_color_picker .text-bg-3");
 
         assert.strictEqual(
             target.querySelectorAll(".o_field_color_picker button").length,
@@ -184,7 +184,7 @@ QUnit.module("Fields", (hooks) => {
 
         await click(
             target,
-            ".o_data_row:nth-child(1) .o_field_color_picker .o_colorlist_item_color_6"
+            ".o_data_row:nth-child(1) .o_field_color_picker .text-bg-6"
         );
         assert.containsN(
             target,
