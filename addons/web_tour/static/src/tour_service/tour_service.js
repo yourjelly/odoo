@@ -208,7 +208,7 @@ export const tourService = {
                 stepDelay: 0,
                 keepWatchBrowser: false,
                 mode: "auto",
-                url: "",
+                startUrl: "",
                 showPointerDuration: 0,
             };
             options = Object.assign(defaultOptions, options);
@@ -227,7 +227,7 @@ export const tourService = {
             });
             const macro = convertToMacro(tour, pointer, options);
             const willUnload = callWithUnloadCheck(() => {
-                if (tour.url && tour.url !== options.url) {
+                if (tour.url && tour.url !== options.startUrl) {
                     window.location.href = window.location.origin + tour.url;
                 }
             });

@@ -1747,7 +1747,7 @@ class HttpCase(TransactionCase):
         options = {
             'stepDelay': step_delay if step_delay else 0,
             'keepWatchBrowser': kwargs.get('watch', False),
-            'url': url_path,
+            'startUrl': url_path,
         }
         code = kwargs.pop('code', "odoo.startTour('%s', %s)" % (tour_name, json.dumps(options)))
         ready = kwargs.pop('ready', "odoo.isTourReady('%s')" % tour_name)
