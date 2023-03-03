@@ -1,0 +1,71 @@
+///
+/// This file regroups the CSS rules made to fix/extend bootstrap in the backend
+/// ==============================================================================
+
+
+// Bootstrap default text-color classes generation
+// ==============================================================================
+// Define a map of 'text-x' colors to generate.
+$o-contextual-text-colors: map-merge($theme-colors, $o-theme-text-colors);
+
+@each $-name, $-value in $o-contextual-text-colors {
+    @include text-emphasis-variant(".text-#{$-name}", $-value);
+}
+
+// Odoo custom text/bg colors classes generation
+// ==============================================================================
+// Extend custom colors adding Bootstrap's grays
+// Note: the card-body rule below needs those grays utilities to be defined
+// before so that the related o-bg-color text-muted rules work.
+$o-text-colors-custom: map-merge($o-text-colors-custom, $o-grays);
+$o-bg-colors-custom: map-merge($o-bg-colors-custom, $o-grays);
+
+// Generate custom 'text-x' contextual classes
+@each $-color, $-value in $o-text-colors-custom {
+    @include text-emphasis-variant(".text-#{$-color}", $-value);
+}
+
+// Generate custom 'bg-x' and 'text-bg-x' contextual classes
+@each $-color, $-value in map-merge($o-bg-colors-custom, $o-grays) {
+    .bg-#{$-color} {
+        background-color: RGBA(to-rgb($-value), var(--bg-opacity, 1)) !important;
+    }
+
+    .text-bg-#{$-color} {
+        color: color-contrast($-value) !important;
+        background-color: RGBA(to-rgb($-value), var(--bg-opacity, 1)) !important;
+    }
+}
+
+// Bootstrap (legacy) black and white opacity-classes generation
+// ==============================================================================
+// Generate 'bg-white-x' and 'bg-black-x' classes
+$o-grayscale-opacities: map-remove($o-opacities, 0, 100);
+@each $-name, $-value in $o-grayscale-opacities {
+    .bg-white-#{$-name} {
+        --bg-opacity: #{$-value};
+        background-color: RGBA(to-rgb($o-white), var(--bg-opacity, 1)) !important;
+    }
+    .bg-black-#{$-name} {
+        --bg-opacity: #{$-value};
+        background-color: RGBA(to-rgb($o-black), var(--bg-opacity, 1)) !important;
+    }
+}
+
+// Generate 'text-white-x' and 'text-black-x' classes
+@each $-name, $-value in $o-grayscale-opacities {
+    .text-white-#{$-name} {
+        --text-opacity: #{$-value};
+        color: RGBA(to-rgb($o-white), var(--text-opacity, 1)) !important;
+    }
+    .text-black-#{$-name} {
+        --text-opacity: #{$-value};
+        color: RGBA(to-rgb($o-black), var(--text-opacity, 1)) !important;
+    }
+}
+
+// Cards
+// ==============================================================================
+.card-body {
+    @extend %-card-body-reviewed; // See bootstrap_review.scss
+}
