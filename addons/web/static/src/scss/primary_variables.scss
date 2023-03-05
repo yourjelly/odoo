@@ -88,11 +88,22 @@ $o-opacities: (
     muted: $o-opacity-muted,
 ) !default;
 
+@font-face {
+    font-family: iAWriterQuattroV;
+    src: url("../../fonts/iAWriterQuattroV.ttf");
+    font-style: normal;
+}
+@font-face {
+    font-family: iAWriterQuattroV;
+    src: url("../../fonts/iAWriterQuattroV-Italic.ttf");
+    font-style: italic;
+}
+
 // Font families
-$o-font-family-sans-serif: o-add-unicode-support-font($o-system-fonts) !default;
+$o-font-family-sans-serif: "iAWriterQuattroV", serif ;// o-add-unicode-support-font($o-system-fonts) !default;
 $o-font-family-monospace: o-add-unicode-support-font((SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace)) !default;
 
-$o-headings-font-family: o-add-unicode-support-font(("SF Pro Display", $o-system-fonts)) !default;
+$o-headings-font-family: $o-font-family-sans-serif; //o-add-unicode-support-font(("SF Pro Display", $o-system-fonts)) !default;
 
 // Font colors
 $o-main-text-color: $o-gray-700 !default;
