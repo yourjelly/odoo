@@ -12,7 +12,7 @@
                 <button class="btn btn-primary o_kanban_add me-1 text_truncate" t-on-click="() => this.validate('add')">
                     Add
                 </button>
-                <button class="btn btn-primary o_kanban_edit me-1 text_truncate" t-on-click="() => this.validate('edit')">
+                <button class="btn btn-secondary o_kanban_edit me-1 text_truncate" t-on-click="() => this.validate('edit')">
                     Edit
                 </button>
                 <button class="btn btn-secondary o_kanban_cancel ms-auto text-600" t-on-click="() => this.cancel(true)">
