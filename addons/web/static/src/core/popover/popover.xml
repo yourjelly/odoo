@@ -2,13 +2,13 @@
 <templates xml:space="preserve">
 
     <t t-name="web.PopoverWowl" owl="1">
-        <div role="tooltip" class="o_popover popover mw-100 shadow-sm"
+        <div role="tooltip" class="o_popover popover mw-100"
             t-att-class="props.popoverClass"
             t-ref="popper"
             t-att-popover-id="props.id"
         >
-            <div class="popover-arrow"/>
             <t t-slot="default" />
+            <div class="popover-arrow"/>
         </div>
     </t>
 
