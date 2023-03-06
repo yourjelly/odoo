@@ -15,7 +15,7 @@ import {
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { ListRenderer } from "@web/views/list/list_renderer";
-import { evalDomain } from "@web/views/utils";
+import { evalDomain, getFieldDomain } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
 
 import { Component } from "@odoo/owl";
@@ -27,6 +27,7 @@ export class X2ManyField extends Component {
         ...standardFieldProps,
         addLabel: { type: String, optional: true },
         editable: { type: String, optional: true },
+        domain: { type: String, optional: true },
     };
 
     setup() {
@@ -224,7 +225,7 @@ export class X2ManyField extends Component {
 
     async onAdd({ context, editable } = {}) {
         const record = this.props.record;
-        const domain = record.getFieldDomain(this.props.name).toList();
+        const domain = getFieldDomain(record, this.props.name, this.props.domain).toList();
         context = makeContext([record.getFieldContext(this.props.name), context]);
         if (this.isMany2Many) {
             const { string } = this.props.record.activeFields[this.props.name];
@@ -258,8 +259,9 @@ export const x2ManyField = {
     displayName: _lt("Relational table"),
     supportedTypes: ["one2many", "many2many"],
     useSubView: true,
-    extractProps: ({ attrs }) => ({
+    extractProps: ({ attrs, domain }) => ({
         addLabel: attrs["add-label"],
+        domain: domain,
     }),
 };
 

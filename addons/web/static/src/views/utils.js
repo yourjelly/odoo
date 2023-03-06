@@ -2,6 +2,7 @@
 
 import { Domain } from "@web/core/domain";
 import { _t } from "@web/core/l10n/translation";
+import { evaluateExpr } from "@web/core/py_js/py";
 
 export const X2M_TYPES = ["one2many", "many2many"];
 const RELATIONAL_TYPES = [...X2M_TYPES, "many2one"];
@@ -308,4 +309,14 @@ export function uuid() {
     window.crypto.getRandomValues(array);
     // Uint8Array to hex
     return [...array].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export function getFieldDomain(record, fieldName, domain) {
+    const rawDomains = [
+        record._domains[fieldName] || [],
+        domain || record.fields[fieldName].domain || [],
+    ];
+    return Domain.and(
+        rawDomains.map((d) => (typeof d === "string" ? evaluateExpr(d, record.evalContext) : d))
+    );
 }

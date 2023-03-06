@@ -1,20 +1,21 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ColorList } from "@web/core/colorlist/colorlist";
 import { Domain } from "@web/core/domain";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { _lt } from "@web/core/l10n/translation";
+import { usePopover } from "@web/core/popover/popover_hook";
+import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
 import {
     Many2XAutocomplete,
     useActiveActions,
     useX2ManyCrud,
 } from "@web/views/fields/relational_utils";
-import { registry } from "@web/core/registry";
+import { getFieldDomain } from "@web/views/utils";
 import { standardFieldProps } from "../standard_field_props";
 import { TagsList } from "./tags_list";
-import { usePopover } from "@web/core/popover/popover_hook";
-import { useService } from "@web/core/utils/hooks";
 
 import { Component, useRef } from "@odoo/owl";
 
@@ -41,6 +42,7 @@ export class Many2ManyTagsField extends Component {
         createDomain: { type: [Array, Boolean], optional: true },
         placeholder: { type: String, optional: true },
         nameCreateField: { type: String, optional: true },
+        domain: { type: String, optional: true },
     };
     static defaultProps = {
         canCreate: true,
@@ -103,7 +105,7 @@ export class Many2ManyTagsField extends Component {
         return this.props.record.fields[this.props.name].relation;
     }
     get domain() {
-        return this.props.record.getFieldDomain(this.props.name);
+        return getFieldDomain(this.props.record, this.props.name, this.props.domain);
     }
     get context() {
         return this.props.record.getFieldContext(this.props.name);
@@ -362,6 +364,7 @@ export const many2ManyTagsFieldColorEditable = {
     extractProps: (fieldInfo) => ({
         ...many2ManyTagsField.extractProps(fieldInfo),
         canEditColor: !fieldInfo.options.no_edit_color && !!fieldInfo.options.color_field,
+        domain: fieldInfo.domain,
     }),
 };
 
