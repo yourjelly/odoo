@@ -64,11 +64,11 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             // document element, etc.
             setEditableWindow(this.websiteService.contentWindow);
             this.switchableRelatedViews = Promise.resolve(switchableRelatedViews);
+            this.$editable.on('click.odoo-website-editor', '*', this, this._preventDefault);
         });
 
         useEffect(() => {
             const initWysiwyg = async () => {
-                this.$editable.on('click.odoo-website-editor', '*', this, this._preventDefault);
                 // Disable OdooEditor observer's while setting up classes
                 this.widget.odooEditor.observerUnactive();
                 this._addEditorMessages();
@@ -99,9 +99,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
 
             initWysiwyg();
 
-            return () => {
-                this.$editable.off('click.odoo-website-editor', '*');
-            };
+            return () => {};
         }, () => []);
 
         useEffect(() => {
@@ -134,6 +132,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
                 this.dummyWidgetEl.remove();
                 document.body.classList.remove('editor_has_dummy_snippets');
                 setEditableWindow(window);
+                this.$editable.off('click.odoo-website-editor', '*');
             }
         });
     }
