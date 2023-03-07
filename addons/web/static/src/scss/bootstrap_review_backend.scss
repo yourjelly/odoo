@@ -3,6 +3,57 @@
 /// ==============================================================================
 
 
+// Buttons
+// ============================================================================
+// Generating bootstrap color buttons was disabled (see import_bootstrap.scss).
+// We do it ourself here generating each btn design type individually.
+
+// 1. Render "filled-button" designs defined by the '$o-btns-custom' map.
+@each $-name, $-value in $o-btns-custom {
+    .btn-#{$-name} {
+        @include button-variant(
+            o-safe-get($-value, background),
+            o-safe-get($-value, border),
+            o-safe-get($-value, color),
+            o-safe-get($-value, hover-background),
+            o-safe-get($-value, hover-border),
+            o-safe-get($-value, hover-color),
+            o-safe-get($-value, active-background),
+            o-safe-get($-value, active-border),
+            o-safe-get($-value, active-color),
+            o-safe-get($-value, disabled-background),
+            o-safe-get($-value, disabled-border),
+            o-safe-get($-value, disabled-color),
+        );
+    }
+}
+
+// 2. Render filled '$theme-colors' buttons excluding the ones already
+//    generated using the custom map.
+@each $-name, $-color in $theme-colors {
+    @if (not map-get($o-btns-custom, $-name)) {
+        .btn-#{$-name} {
+            @include button-variant($-color, $-color);
+        }
+    }
+
+// 3. Render outline buttons. For this set we always use '$theme-colors'
+//    values.
+    .btn-outline-#{$-name} {
+        @include button-outline-variant($-color);
+    }
+}
+
+// Button group
+// ============================================================================
+.btn-group .btn {
+    // Ensure that active buttons will always be rendered on top, including
+    // hovered ones.
+    &:active, &.active, &:active:hover, &.active:hover {
+        z-index: 2;
+    }
+}
+
 // Bootstrap '$theme-colors' text-x and bg-x classes generation
 // ============================================================================
 // Bootstrap's default behavior is to generate classes directly from its
