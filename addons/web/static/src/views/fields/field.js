@@ -121,13 +121,23 @@ export class Field extends Component {
 
             const modifiers = fieldInfo.modifiers || {};
             readonlyFromModifiers = evalDomain(modifiers.readonly, evalContext);
-
             if (this.props.attrs) {
                 fieldInfo = {
                     ...fieldInfo,
                     attrs: { ...fieldInfo.attrs, ...this.props.attrs },
                 };
             }
+            const fieldName = this.props.name;
+            fieldInfo = {
+                ...fieldInfo,
+                get domain() {
+                    const rawDomain = modifiers.domain || record.fields[fieldName].domain || [];
+                    return typeof rawDomain === "string"
+                        ? evaluateExpr(rawDomain, record.evalContext)
+                        : rawDomain;
+                },
+                canEdit: !readonlyFromModifiers,
+            };
             propsFromNode = this.field.extractProps ? this.field.extractProps(fieldInfo) : {};
         }
 

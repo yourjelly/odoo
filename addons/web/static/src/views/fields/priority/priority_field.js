@@ -4,7 +4,6 @@ import { useCommand } from "@web/core/commands/command_hook";
 import { registry } from "@web/core/registry";
 import { _lt } from "@web/core/l10n/translation";
 import { standardFieldProps } from "../standard_field_props";
-
 import { Component, useState } from "@odoo/owl";
 
 export class PriorityField extends Component {
@@ -62,9 +61,6 @@ export class PriorityField extends Component {
             ? this.state.index
             : this.options.findIndex((o) => o[0] === this.props.record.data[this.props.name]);
     }
-    get isReadonly() {
-        return this.props.record.isReadonly(this.props.name);
-    }
 
     getTooltip(value) {
         return this.tooltipLabel && this.tooltipLabel !== value
@@ -100,8 +96,9 @@ export const priorityField = {
     component: PriorityField,
     displayName: _lt("Priority"),
     supportedTypes: ["selection"],
-    extractProps: ({ viewType }) => ({
+    extractProps: ({ viewType, canEdit }) => ({
         withCommand: viewType === "form",
+        readonly: !canEdit,
     }),
 };
 
