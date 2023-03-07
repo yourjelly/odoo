@@ -592,6 +592,38 @@
         }
         return yearsEnd - yearsStart;
     }
+    /**
+     * Get the number of whole months between two dates.
+     * e.g.
+     *  2002/01/01 -> 2002/02/01 = 1 month,
+     *  2002/01/01 -> 2003/02/01 = 13 months
+     * @param startDate
+     * @param endDate
+     * @returns
+     */
+    function getTimeDifferenceInWholeMonths(startDate, endDate) {
+        const months = (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+            endDate.getMonth() -
+            startDate.getMonth();
+        return startDate.getDate() > endDate.getDate() ? months - 1 : months;
+    }
+    function getTimeDifferenceInWholeDays(startDate, endDate) {
+        const startUtc = startDate.getTime();
+        const endUtc = endDate.getTime();
+        return Math.floor((endUtc - startUtc) / MS_PER_DAY);
+    }
+    function getTimeDifferenceInWholeYears(startDate, endDate) {
+        const years = endDate.getFullYear() - startDate.getFullYear();
+        const monthStart = startDate.getMonth();
+        const monthEnd = endDate.getMonth();
+        const dateStart = startDate.getDate();
+        const dateEnd = endDate.getDate();
+        const isEndMonthDateBigger = monthEnd > monthStart || (monthEnd === monthStart && dateEnd >= dateStart);
+        return isEndMonthDateBigger ? years : years - 1;
+    }
+    function areTwoDatesWithinOneYear(startDate, endDate) {
+        return getYearFrac(startDate, endDate, 1) < 1;
+    }
 
     //------------------------------------------------------------------------------
     /**
@@ -2026,10 +2058,10 @@
             if (right !== undefined && bottom !== undefined)
                 return { left, top, right, bottom };
             else if (bottom === undefined && right !== undefined) {
-                return { right, top, left, bottom: this.getSheetSize(this.sheetId).height - 1 };
+                return { right, top, left, bottom: this.getSheetSize(this.sheetId).numberOfRows - 1 };
             }
             else if (right === undefined && bottom !== undefined) {
-                return { bottom, left, top, right: this.getSheetSize(this.sheetId).width - 1 };
+                return { bottom, left, top, right: this.getSheetSize(this.sheetId).numberOfCols - 1 };
             }
             throw new Error(_lt("Bad zone format"));
         }
@@ -2652,13 +2684,13 @@
     }
     function zoneToDimension(zone) {
         return {
-            height: zone.bottom - zone.top + 1,
-            width: zone.right - zone.left + 1,
+            numberOfRows: zone.bottom - zone.top + 1,
+            numberOfCols: zone.right - zone.left + 1,
         };
     }
     function isOneDimensional(zone) {
-        const { width, height } = zoneToDimension(zone);
-        return width === 1 || height === 1;
+        const { numberOfCols, numberOfRows } = zoneToDimension(zone);
+        return numberOfCols === 1 || numberOfRows === 1;
     }
     /**
      * Array of all positions in the zone.
@@ -3745,11 +3777,11 @@
         const labelZone = (_a = ds.labelCell) === null || _a === void 0 ? void 0 : _a.zone;
         let dataZone = ds.dataRange.zone;
         if (labelZone) {
-            const { height, width } = zoneToDimension(dataZone);
-            if (height === 1) {
+            const { numberOfRows, numberOfCols } = zoneToDimension(dataZone);
+            if (numberOfRows === 1) {
                 dataZone = { ...dataZone, left: dataZone.left + 1 };
             }
-            else if (width === 1) {
+            else if (numberOfCols === 1) {
                 dataZone = { ...dataZone, top: dataZone.top + 1 };
             }
         }
@@ -7924,6 +7956,11 @@
     // FORMAT FUNCTIONS
     // -----------------------------------------------------------------------------
     const expectNumberValueError = (value) => _lt("The function [[FUNCTION_NAME]] expects a number value, but '%s' is a string, and cannot be coerced to a number.", value);
+    const expectNumberRangeError = (lowerBound, upperBound, value) => _lt("The function [[FUNCTION_NAME]] expects a number value between %s and %s inclusive, but receives %s.", lowerBound.toString(), upperBound.toString(), value.toString());
+    const expectStringSetError = (stringSet, value) => {
+        const stringSetString = stringSet.map((str) => `'${str}'`).join(", ");
+        return _lt("The function [[FUNCTION_NAME]] has an argument with value '%s'. It should be one of: %s.", value, stringSetString);
+    };
     function toNumber(value) {
         switch (typeof value) {
             case "number":
@@ -7948,6 +7985,12 @@
             throw new Error(expectNumberValueError(value));
         }
         return toNumber(value);
+    }
+    function strictToInteger(value) {
+        return Math.trunc(strictToNumber(value));
+    }
+    function assertNumberGreaterThanOrEqualToOne(value) {
+        assert(() => value >= 1, _lt("The function [[FUNCTION_NAME]] expects a number value to be greater than or equal to 1, but receives %s.", value.toString()));
     }
     function toString(value) {
         switch (typeof value) {
@@ -8008,6 +8051,64 @@
     }
     function toJsDate(value) {
         return numberToJsDate(toNumber(value));
+    }
+    var ABSOLUTE_RELATIVE_MODE;
+    (function (ABSOLUTE_RELATIVE_MODE) {
+        ABSOLUTE_RELATIVE_MODE[ABSOLUTE_RELATIVE_MODE["ROW_ABSOLUTE_COL_ABSOLUTE"] = 1] = "ROW_ABSOLUTE_COL_ABSOLUTE";
+        ABSOLUTE_RELATIVE_MODE[ABSOLUTE_RELATIVE_MODE["ROW_ABSOLUTE_COL_RELATIVE"] = 2] = "ROW_ABSOLUTE_COL_RELATIVE";
+        ABSOLUTE_RELATIVE_MODE[ABSOLUTE_RELATIVE_MODE["ROW_RELATIVE_COL_ABSOLUTE"] = 3] = "ROW_RELATIVE_COL_ABSOLUTE";
+        ABSOLUTE_RELATIVE_MODE[ABSOLUTE_RELATIVE_MODE["ROW_RELATIVE_COL_RELATIVE"] = 4] = "ROW_RELATIVE_COL_RELATIVE";
+    })(ABSOLUTE_RELATIVE_MODE || (ABSOLUTE_RELATIVE_MODE = {}));
+    function toA1Notation(rowNumber, colNumber, absoluteRelativeMode = ABSOLUTE_RELATIVE_MODE.ROW_ABSOLUTE_COL_ABSOLUTE) {
+        const colIndex = colNumber - 1;
+        const rowIndex = rowNumber - 1;
+        let rangePart;
+        switch (absoluteRelativeMode) {
+            case ABSOLUTE_RELATIVE_MODE.ROW_ABSOLUTE_COL_RELATIVE:
+                rangePart = {
+                    rowFixed: true,
+                    colFixed: false,
+                };
+                break;
+            case ABSOLUTE_RELATIVE_MODE.ROW_RELATIVE_COL_ABSOLUTE:
+                rangePart = {
+                    rowFixed: false,
+                    colFixed: true,
+                };
+                break;
+            case ABSOLUTE_RELATIVE_MODE.ROW_RELATIVE_COL_RELATIVE:
+                rangePart = {
+                    rowFixed: false,
+                    colFixed: false,
+                };
+                break;
+            case ABSOLUTE_RELATIVE_MODE.ROW_ABSOLUTE_COL_ABSOLUTE:
+                rangePart = {
+                    rowFixed: true,
+                    colFixed: true,
+                };
+                break;
+        }
+        const cellReference = toXC(colIndex, rowIndex, rangePart);
+        return cellReference;
+    }
+    function toR1C1Notation(rowNumber, colNumber, absoluteRelativeMode = ABSOLUTE_RELATIVE_MODE.ROW_ABSOLUTE_COL_ABSOLUTE) {
+        let cellReference = "";
+        switch (absoluteRelativeMode) {
+            case ABSOLUTE_RELATIVE_MODE.ROW_ABSOLUTE_COL_RELATIVE:
+                cellReference = `R${rowNumber}C[${colNumber}]`;
+                break;
+            case ABSOLUTE_RELATIVE_MODE.ROW_RELATIVE_COL_ABSOLUTE:
+                cellReference = `R[${rowNumber}]C${colNumber}`;
+                break;
+            case ABSOLUTE_RELATIVE_MODE.ROW_RELATIVE_COL_RELATIVE:
+                cellReference = `R[${rowNumber}]C[${colNumber}]`;
+                break;
+            case ABSOLUTE_RELATIVE_MODE.ROW_ABSOLUTE_COL_ABSOLUTE:
+                cellReference = `R${rowNumber}C${colNumber}`;
+                break;
+        }
+        return cellReference;
     }
     // -----------------------------------------------------------------------------
     // VISIT FUNCTIONS
@@ -10745,6 +10846,15 @@
 
     const DEFAULT_TYPE = 1;
     const DEFAULT_WEEKEND = 1;
+    var TIME_UNIT;
+    (function (TIME_UNIT) {
+        TIME_UNIT["WHOLE_YEARS"] = "Y";
+        TIME_UNIT["WHOLE_MONTHS"] = "M";
+        TIME_UNIT["WHOLE_DAYS"] = "D";
+        TIME_UNIT["DAYS_WITHOUT_WHOLE_MONTHS"] = "MD";
+        TIME_UNIT["MONTH_WITHOUT_WHOLE_YEARS"] = "YM";
+        TIME_UNIT["DAYS_BETWEEN_NO_MORE_THAN_ONE_YEAR"] = "YD";
+    })(TIME_UNIT || (TIME_UNIT = {}));
     // -----------------------------------------------------------------------------
     // DATE
     // -----------------------------------------------------------------------------
@@ -10771,6 +10881,63 @@
             const result = jsDateToRoundNumber(jsDate);
             assert(() => result >= 0, _lt(`The function [[FUNCTION_NAME]] result must be greater than or equal 01/01/1900.`));
             return result;
+        },
+        isExported: true,
+    };
+    // -----------------------------------------------------------------------------
+    // DATEDIF
+    // -----------------------------------------------------------------------------
+    const DATEDIF = {
+        description: _lt("Calculates the number of days, months, or years between two dates."),
+        args: [
+            arg("start_date (date)", _lt("The start date to consider in the calculation. Must be a reference to a cell containing a DATE, a function returning a DATE type, or a number.")),
+            arg("end_date (date)", _lt("The end date to consider in the calculation. Must be a reference to a cell containing a DATE, a function returning a DATE type, or a number.")),
+            arg("unit (string)", _lt(`A text abbreviation for unit of time. Accepted values are "Y" (the number of whole years between start_date and end_date), "M" (the number of whole months between start_date and end_date), "D" (the number of days between start_date and end_date), "MD" (the number of days between start_date and end_date after subtracting whole months), "YM" (the number of whole months between start_date and end_date after subtracting whole years), "YD" (the number of days between start_date and end_date, assuming start_date and end_date were no more than one year apart).`)),
+        ],
+        returns: ["NUMBER"],
+        compute: function (startDate, endDate, unit) {
+            const _unit = toString(unit).toUpperCase();
+            assert(() => Object.values(TIME_UNIT).includes(_unit), expectStringSetError(Object.values(TIME_UNIT), toString(unit)));
+            const _startDate = Math.trunc(toNumber(startDate));
+            const _endDate = Math.trunc(toNumber(endDate));
+            const jsStartDate = numberToJsDate(_startDate);
+            const jsEndDate = numberToJsDate(_endDate);
+            assert(() => _endDate >= _startDate, _lt("start_date (%s) should be on or before end_date (%s).", jsStartDate.toLocaleDateString(), jsEndDate.toLocaleDateString()));
+            switch (_unit) {
+                case TIME_UNIT.WHOLE_YEARS:
+                    return getTimeDifferenceInWholeYears(jsStartDate, jsEndDate);
+                case TIME_UNIT.WHOLE_MONTHS:
+                    return getTimeDifferenceInWholeMonths(jsStartDate, jsEndDate);
+                case TIME_UNIT.WHOLE_DAYS: {
+                    return getTimeDifferenceInWholeDays(jsStartDate, jsEndDate);
+                }
+                case TIME_UNIT.MONTH_WITHOUT_WHOLE_YEARS: {
+                    return (getTimeDifferenceInWholeMonths(jsStartDate, jsEndDate) -
+                        getTimeDifferenceInWholeYears(jsStartDate, jsEndDate) * 12);
+                }
+                case TIME_UNIT.DAYS_WITHOUT_WHOLE_MONTHS:
+                    // Using "MD" may get incorrect result in Excel
+                    // See: https://support.microsoft.com/en-us/office/datedif-function-25dba1a4-2812-480b-84dd-8b32a451b35c
+                    let days = jsEndDate.getDate() - jsStartDate.getDate();
+                    if (days < 0) {
+                        const monthBeforeEndMonth = new Date(jsEndDate.getFullYear(), jsEndDate.getMonth() - 1, 1);
+                        const daysInMonthBeforeEndMonth = getDaysInMonth(monthBeforeEndMonth);
+                        days = daysInMonthBeforeEndMonth - Math.abs(days);
+                    }
+                    return days;
+                case TIME_UNIT.DAYS_BETWEEN_NO_MORE_THAN_ONE_YEAR: {
+                    if (areTwoDatesWithinOneYear(_startDate, _endDate)) {
+                        return getTimeDifferenceInWholeDays(jsStartDate, jsEndDate);
+                    }
+                    const endDateWithinOneYear = new Date(jsStartDate.getFullYear(), jsEndDate.getMonth(), jsEndDate.getDate());
+                    let days = getTimeDifferenceInWholeDays(jsStartDate, endDateWithinOneYear);
+                    if (days < 0) {
+                        endDateWithinOneYear.setFullYear(jsStartDate.getFullYear() + 1);
+                        days = getTimeDifferenceInWholeDays(jsStartDate, endDateWithinOneYear);
+                    }
+                    return days;
+                }
+            }
         },
         isExported: true,
     };
@@ -11453,6 +11620,7 @@
     var date = /*#__PURE__*/Object.freeze({
         __proto__: null,
         DATE: DATE,
+        DATEDIF: DATEDIF,
         DATEVALUE: DATEVALUE,
         DAY: DAY,
         DAYS: DAYS,
@@ -13942,6 +14110,41 @@
         }
     }
     // -----------------------------------------------------------------------------
+    // ADDRESS
+    // -----------------------------------------------------------------------------
+    const ADDRESS = {
+        description: _lt("Returns a cell reference as a string. "),
+        args: [
+            arg("row (number)", _lt("The row number of the cell reference. ")),
+            arg("column (number)", _lt("The column number (not name) of the cell reference. A is column number 1. ")),
+            arg(`absolute_relative_mode (number, default=${ABSOLUTE_RELATIVE_MODE.ROW_ABSOLUTE_COL_ABSOLUTE})`, _lt("An indicator of whether the reference is row/column absolute. 1 is row and column absolute (e.g. $A$1), 2 is row absolute and column relative (e.g. A$1), 3 is row relative and column absolute (e.g. $A1), and 4 is row and column relative (e.g. A1).")),
+            arg("use_a1_notation (boolean, default=TRUE)", _lt("A boolean indicating whether to use A1 style notation (TRUE) or R1C1 style notation (FALSE).")),
+            arg("sheet (string, optional)", _lt("A string indicating the name of the sheet into which the address points.")),
+        ],
+        returns: ["STRING"],
+        compute: function (row, column, absoluteRelativeMode = ABSOLUTE_RELATIVE_MODE.ROW_ABSOLUTE_COL_ABSOLUTE, useA1Notation = true, sheet) {
+            const rowNumber = strictToInteger(row);
+            const colNumber = strictToInteger(column);
+            assertNumberGreaterThanOrEqualToOne(rowNumber);
+            assertNumberGreaterThanOrEqualToOne(colNumber);
+            const _absoluteRelativeMode = strictToInteger(absoluteRelativeMode);
+            assert(() => Object.values(ABSOLUTE_RELATIVE_MODE).includes(_absoluteRelativeMode), expectNumberRangeError(1, 4, _absoluteRelativeMode));
+            const _useA1Notation = toBoolean(useA1Notation);
+            let cellReference;
+            if (_useA1Notation) {
+                cellReference = toA1Notation(rowNumber, colNumber, _absoluteRelativeMode);
+            }
+            else {
+                cellReference = toR1C1Notation(rowNumber, colNumber, _absoluteRelativeMode);
+            }
+            if (sheet !== undefined) {
+                return `${getComposerSheetName(toString(sheet))}!${cellReference}`;
+            }
+            return cellReference;
+        },
+        isExported: true,
+    };
+    // -----------------------------------------------------------------------------
     // COLUMN
     // -----------------------------------------------------------------------------
     const COLUMN = {
@@ -14190,6 +14393,7 @@
 
     var lookup = /*#__PURE__*/Object.freeze({
         __proto__: null,
+        ADDRESS: ADDRESS,
         COLUMN: COLUMN,
         COLUMNS: COLUMNS,
         HLOOKUP: HLOOKUP,
@@ -15720,8 +15924,7 @@
                     return false;
                 const range = this.env.model.getters.getRangeFromSheetXC(refSheet, xc);
                 let zone = range.zone;
-                const { height, width } = zoneToDimension(zone);
-                zone = height * width === 1 ? this.env.model.getters.expandZone(refSheet, zone) : zone;
+                zone = getZoneArea(zone) === 1 ? this.env.model.getters.expandZone(refSheet, zone) : zone;
                 return isEqual(zone, highlight.zone);
             });
             return highlight && highlight.color ? highlight.color : undefined;
@@ -28959,7 +29162,7 @@
                     filters.push(new Filter(filter.id, filterZone));
                 }
                 // Add filters for new columns
-                if (filters.length < zoneToDimension(zone).width) {
+                if (filters.length < zoneToDimension(zone).numberOfCols) {
                     for (let col = zone.left; col <= zone.right; col++) {
                         if (!filters.find((filter) => filter.col === col)) {
                             filters.push(new Filter(this.uuidGenerator.uuidv4(), { ...zone, left: col, right: col }));
@@ -29807,8 +30010,8 @@
             if (merge) {
                 return isEqual(zone, merge);
             }
-            const { width, height } = zoneToDimension(zone);
-            return width === 1 && height === 1;
+            const { numberOfCols, numberOfRows } = zoneToDimension(zone);
+            return numberOfCols === 1 && numberOfRows === 1;
         }
         // ---------------------------------------------------------------------------
         // Merges
@@ -29976,8 +30179,8 @@
                             this.removeMerge(sheetId, currentZone);
                             break;
                         default:
-                            const { width, height } = zoneToDimension(result.range.zone);
-                            if (width === 1 && height === 1) {
+                            const { numberOfCols, numberOfRows } = zoneToDimension(result.range.zone);
+                            if (numberOfCols === 1 && numberOfRows === 1) {
                                 this.removeMerge(sheetId, currentZone);
                             }
                             else {
@@ -30736,8 +30939,8 @@
         }
         getSheetSize(sheetId) {
             return {
-                height: this.getNumberRows(sheetId),
-                width: this.getNumberCols(sheetId),
+                numberOfRows: this.getNumberRows(sheetId),
+                numberOfCols: this.getNumberCols(sheetId),
             };
         }
         getSheetZone(sheetId) {
@@ -32386,7 +32589,7 @@
                     const tableZone = toZone(tableData.range);
                     const filters = [];
                     const headerNames = [];
-                    for (const i of range(0, zoneToDimension(tableZone).width)) {
+                    for (const i of range(0, zoneToDimension(tableZone).numberOfCols)) {
                         const position = {
                             sheetId: sheetData.id,
                             col: tableZone.left + i,
@@ -33897,7 +34100,7 @@
         dimensionsToSum(sheetId, zone) {
             const dimensions = new Set();
             if (isOneDimensional(zone)) {
-                dimensions.add(zoneToDimension(zone).width === 1 ? "COL" : "ROW");
+                dimensions.add(zoneToDimension(zone).numberOfCols === 1 ? "COL" : "ROW");
                 return dimensions;
             }
             if (this.lastColIsEmpty(sheetId, zone)) {
@@ -34485,8 +34688,8 @@
                 x.zone.bottom < this.getters.getNumberRows(x.sheetId) &&
                 x.zone.right < this.getters.getNumberCols(x.sheetId))
                 .map((highlight) => {
-                const { height, width } = zoneToDimension(highlight.zone);
-                const zone = height * width === 1
+                const { numberOfRows, numberOfCols } = zoneToDimension(highlight.zone);
+                const zone = numberOfRows * numberOfCols === 1
                     ? this.getters.expandZone(highlight.sheetId, highlight.zone)
                     : highlight.zone;
                 return {
@@ -36393,7 +36596,7 @@
             const merges = this.getters.getMerges(sheetId).filter((merge) => overlap(merge, zone));
             /*Test the presence of merges of different sizes*/
             const mergeDimension = zoneToDimension(merges[0]);
-            let [widthFirst, heightFirst] = [mergeDimension.width, mergeDimension.height];
+            let [widthFirst, heightFirst] = [mergeDimension.numberOfCols, mergeDimension.numberOfRows];
             if (!merges.every((merge) => {
                 let [widthCurrent, heightCurrent] = [
                     merge.right - merge.left + 1,
@@ -37526,9 +37729,9 @@
             const values = this.values;
             const pasteZone = this.getPasteZone(target);
             const { left: activeCol, top: activeRow } = pasteZone;
-            const { width, height } = zoneToDimension(pasteZone);
+            const { numberOfCols, numberOfRows } = zoneToDimension(pasteZone);
             const sheetId = this.getters.getActiveSheetId();
-            this.addMissingDimensions(width, height, activeCol, activeRow);
+            this.addMissingDimensions(numberOfCols, numberOfRows, activeCol, activeRow);
             for (let i = 0; i < values.length; i++) {
                 for (let j = 0; j < values[i].length; j++) {
                     this.dispatch("UPDATE_CELL", {
@@ -37542,8 +37745,8 @@
             const zone = {
                 left: activeCol,
                 top: activeRow,
-                right: activeCol + width - 1,
-                bottom: activeRow + height - 1,
+                right: activeCol + numberOfCols - 1,
+                bottom: activeRow + numberOfRows - 1,
             };
             this.selection.selectZone({ cell: { col: activeCol, row: activeRow }, zone });
         }
@@ -43940,7 +44143,7 @@
     function addFilterColumns(table) {
         const tableZone = toZone(table.range);
         const columns = [];
-        for (const i of range(0, zoneToDimension(tableZone).width)) {
+        for (const i of range(0, zoneToDimension(tableZone).numberOfCols)) {
             const filter = table.filters[i];
             if (!filter || !filter.filteredValues.length) {
                 continue;
@@ -43966,7 +44169,7 @@
         var _a;
         const tableZone = toZone(table.range);
         const columns = [];
-        for (const i of range(0, zoneToDimension(tableZone).width)) {
+        for (const i of range(0, zoneToDimension(tableZone).numberOfCols)) {
             const colHeaderXc = toXC(tableZone.left + i, tableZone.top);
             const colName = ((_a = sheetData.cells[colHeaderXc]) === null || _a === void 0 ? void 0 : _a.content) || `col${i}`;
             const colAttributes = [
@@ -44903,8 +45106,8 @@
 
 
     __info__.version = '16.2.0-alpha.3';
-    __info__.date = '2023-03-06T07:35:02.317Z';
-    __info__.hash = 'ec749cf';
+    __info__.date = '2023-03-07T08:52:29.848Z';
+    __info__.hash = '145ddde';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
