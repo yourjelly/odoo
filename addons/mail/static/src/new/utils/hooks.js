@@ -65,13 +65,23 @@ export function useHover(refName, callback = () => {}) {
     useExternalListener(
         () => ref.el,
         "mouseenter",
-        () => onHover(true),
+        (ev) => {
+            if (ref.el.contains(ev.relatedTarget)) {
+                return;
+            }
+            onHover(true);
+        },
         true
     );
     useExternalListener(
         () => ref.el,
         "mouseleave",
-        () => onHover(false),
+        (ev) => {
+            if (ref.el.contains(ev.relatedTarget)) {
+                return;
+            }
+            onHover(false);
+        },
         true
     );
     return state;
