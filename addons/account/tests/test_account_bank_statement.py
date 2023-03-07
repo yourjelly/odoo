@@ -552,13 +552,20 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         self.assertRecordValues(statement1, [{
             'is_complete': True,
             'is_valid': True,
+            'balance_start': 0,
+            'balance_end': 3,
+            'balance_end_real': 3,
         }])
         # remove the first line, so not complete but it is still valid because there is no statement before
         line1.statement_id = False
-        statement1.invalidate_recordset(['is_valid'])
+        # import wdb; wdb.set_trace()
+        # statement1.invalidate_recordset(['is_valid'])
         self.assertRecordValues(statement1, [{
             'is_complete': False,
             'is_valid': True,
+            'balance_start': 0,
+            'balance_end': 2,
+            'balance_end_real': 3,
         }])
         # create a new line in the statement to make it complete again. Starting value does not match the last line
         # but it is still valid because the previous line has no statement
@@ -744,7 +751,8 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
 
         # Put line2 -> line4 inside a statement with a wrong balance_end_real.
         (line2 + line3 + line4).statement_id = statement1 = \
-            self.env['account.bank.statement'].create({'balance_end_real': 9})
+            self.env['account.bank.statement'].create({'balance_start': 20, 'balance_end_real': 29})
+        
         self.assertRecordValues(statement1, [{
             'is_complete': True,
         }])
@@ -897,9 +905,10 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             'balance_end': 15,
             'balance_start': 0,
         }])
-        self.assertRecordValues(line7 + line8, [
+        self.assertRecordValues(line7 + line8 + line6, [
             {'amount': 7, 'statement_id': statement1.id},
             {'amount': 8, 'statement_id': statement1.id},
+            {'amount': 6, 'statement_id': False},
         ])
 
         # Split on a line adjutant to another statement
@@ -910,6 +919,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             'balance_end_real': 15,
             'balance_start': 0,
         }])
+
         self.assertRecordValues(statement2, [{
             'is_complete': True,
             'balance_end_real': 21,
@@ -1293,18 +1303,4 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             'balance_end_real': 165.0,
             'is_valid': True,
             'is_complete': True,
-        }])
-
-        # simulate statement from unsaved line
-        st_from_new_line = self.env['account.bank.statement'].with_context({
-                'st_line_date': '20190106',
-                'st_line_amount': 35.0,
-                'st_line_journal_id': self.bank_journal_2.id,
-            }).new({'journal_id': self.bank_journal_2.id})
-        self.assertRecordValues(st_from_new_line, [{
-            'balance_start': 165.0,
-            'balance_end_real': 200.0,
-            'is_valid': True,
-            'is_complete': True,
-            'line_ids': [],
         }])

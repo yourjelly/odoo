@@ -1,79 +1,13 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
-from xmlrpc.client import MAXINT
-
+from odoo.tools.misc import formatLang
 
 class AccountBankStatement(models.Model):
     _name = "account.bank.statement"
     _description = "Bank Statement"
     _order = "first_line_index desc"
     _check_company_auto = True
-
-    @api.model
-    def default_get(self, fields_list):
-        # EXTENDS base
-        defaults = super().default_get(fields_list)
-
-        context_st_line_id = self._context.get('st_line_id')
-        context_st_line_date = self._context.get('st_line_date')
-
-        # create statement from a new line not stored in the db yet
-        if context_st_line_date and not context_st_line_id:
-            defaults['balance_start'] = self.env['account.bank.statement.line'].search(
-                domain=[
-                    ('date', '<=', context_st_line_date),
-                    ('journal_id', '=', self._context.get('st_line_journal_id')),
-                ],
-                order='internal_index desc',
-                limit=1
-            ).running_balance
-            defaults['balance_end_real'] = defaults['balance_start'] + self._context.get('st_line_amount', 0.0)
-            return defaults
-
-        active_ids = self._context.get('active_ids')
-        context_split_line_id = self._context.get('split_line_id')
-        context_active_model = self._context.get('active_model')
-        lines = None
-        # creating statements with split button
-        if context_split_line_id:
-            current_st_line = self.env['account.bank.statement.line'].browse(context_split_line_id)
-            line_before = self.env['account.bank.statement.line'].search(
-                domain=[
-                    ('internal_index', '<', current_st_line.internal_index),
-                    ('journal_id', '=', current_st_line.journal_id.id),
-                    ('statement_id', '!=', current_st_line.statement_id.id),
-                    ('statement_id', '!=', False),
-                ],
-                order='internal_index desc',
-                limit=1,
-            )
-            lines = self.env['account.bank.statement.line'].search(
-                domain=[
-                    ('internal_index', '<=', current_st_line.internal_index),
-                    ('internal_index', '>', line_before.internal_index or ''),
-                    ('journal_id', '=', current_st_line.journal_id.id),
-                ],
-                order='internal_index desc',
-            )
-        # single line edit
-        elif context_st_line_id and len(active_ids) <= 1:
-            lines = self.env['account.bank.statement.line'].browse(context_st_line_id)
-        # multi edit or action menu
-        elif context_active_model == 'account.bank.statement.line' and active_ids or \
-            context_st_line_id and len(active_ids) > 1:
-            lines = self.env['account.bank.statement.line'].browse(active_ids).sorted()
-            if len(lines.journal_id) > 1:
-                raise UserError(_("A statement should only contain lines from the same journal."))
-
-        if lines:
-            defaults['line_ids'] = [Command.set(lines.ids)]
-            defaults['balance_start'] = lines[-1:].running_balance - (
-                lines[-1:].amount if lines[-1:].state == 'posted' else 0
-            )
-            defaults['balance_end_real'] = lines[:1].running_balance
-
-        return defaults
 
     name = fields.Char(
         string='Reference',
@@ -101,7 +35,7 @@ class AccountBankStatement(models.Model):
 
     balance_start = fields.Monetary(
         string='Starting Balance',
-        default=0.0,
+        compute='_compute_balance_start', store=True, readonly=False,
     )
 
     # Balance end is calculated based on the statement line amounts and real starting balance.
@@ -112,7 +46,7 @@ class AccountBankStatement(models.Model):
 
     balance_end_real = fields.Monetary(
         string='Ending Balance',
-        default=0.0,
+        compute='_compute_balance_end_real', store=True, readonly=False,
     )
 
     company_id = fields.Many2one(
@@ -140,7 +74,7 @@ class AccountBankStatement(models.Model):
 
     # A statement assumed to be complete when the sum of encoded lines is equal to the difference between initial and
     # ending balances. In other words, a statement is complete when there are enough lines to fill the value between
-    # initial and final balances. When the user reaches this point, the statement is not autofilled on the new lines.
+    # initial and final balances. When the user reaches this point, the statement is not autofilled on the new lines?
     is_complete = fields.Boolean(
         compute='_compute_is_complete', store=True,
     )
@@ -154,6 +88,10 @@ class AccountBankStatement(models.Model):
     is_valid = fields.Boolean(
         compute='_compute_is_valid',
         search='_search_is_valid',
+    )
+
+    problem_description = fields.Text(
+        compute='_compute_problem_description',
     )
 
     attachment_ids = fields.Many2many(
@@ -171,7 +109,32 @@ class AccountBankStatement(models.Model):
             stmt.first_line_index = sorted_lines[:1].internal_index
             stmt.date = sorted_lines.filtered(lambda l: l.state == 'posted')[-1:].date
 
-    @api.depends('balance_start', 'line_ids.amount', 'line_ids.state')
+    @api.depends('line_ids')
+    def _compute_balance_start(self):
+        for stmt in self:
+            # only compute once
+            if stmt.balance_start:
+                stmt.balance_start = stmt.balance_start
+                # print('start stays:', stmt.balance_start)
+            else: 
+                lines = stmt.line_ids.filtered(lambda l: l.state == 'posted').sorted()
+                stmt.balance_start = lines[-1:].running_balance - (
+                    lines[-1:].amount if lines[-1:].state == 'posted' else 0
+                )
+                # print('computed start:', stmt.balance_start)
+
+    @api.depends('line_ids')
+    def _compute_balance_end_real(self):
+        for stmt in self:
+            # only compute once
+            if stmt.balance_end_real:
+                stmt.balance_end_real = stmt.balance_end_real
+                print('end real stays:', stmt.balance_end_real)
+            else:
+                stmt.balance_end_real = stmt.line_ids.filtered(lambda l: l.state == 'posted').sorted()[:1].running_balance
+                print('computed end real:', stmt.balance_end_real)
+
+    @api.depends('balance_start', 'line_ids.amount', 'line_ids.state', 'line_ids')
     def _compute_balance_end(self):
         for statement in self:
             statement.balance_end = statement.balance_start + sum(
@@ -191,12 +154,8 @@ class AccountBankStatement(models.Model):
     @api.depends('balance_end_real', 'balance_end')
     def _compute_is_complete(self):
         for stmt in self:
-            if not stmt.line_ids and isinstance(stmt.id, models.NewId):
-                stmt.is_complete = stmt.currency_id.compare_amounts(
-                    stmt.balance_start + self._context.get('st_line_amount', 0.0), stmt.balance_end_real) == 0
-            else:
-                stmt.is_complete = stmt.line_ids.filtered(lambda l: l.state == 'posted') and stmt.currency_id.compare_amounts(
-                    stmt.balance_end, stmt.balance_end_real) == 0
+            stmt.is_complete = stmt.line_ids.filtered(lambda l: l.state == 'posted') and stmt.currency_id.compare_amounts(
+                stmt.balance_end, stmt.balance_end_real) == 0
 
     @api.depends('balance_end_real', 'balance_end')
     def _compute_is_valid(self):
@@ -207,6 +166,16 @@ class AccountBankStatement(models.Model):
         invalids = self.filtered(lambda s: s.id in self._get_invalid_statement_ids())
         invalids.is_valid = False
         (self - invalids).is_valid = True
+
+    @api.depends('balance_end_real', 'balance_end')
+    def _compute_problem_description(self):
+        for stmt in self:
+            description = ""
+            if not stmt.is_valid:
+                description = _("The starting balance doesn't match the ending balance of the previous statement, or an earlier statement is missing.")
+            elif not stmt.is_complete:
+                description = _("The starting balance and transaction values (%s) don't add up to the ending balance.", formatLang(self.env, stmt.balance_end, currency_obj=stmt.currency_id))
+            stmt.problem_description = description
 
     def _search_is_valid(self, operator, value):
         if operator not in ('=', '!=', '<>'):
@@ -242,12 +211,8 @@ class AccountBankStatement(models.Model):
         """ Returns the statements that are invalid for _compute and _search methods."""
 
         if not all_statements and len(self) == 1:
-            # The statement or line may not be saved in the db
-            index = self.first_line_index or \
-                    f"{self._context.get('st_line_date', fields.Date.today().strftime('%Y%m%d')).replace('-','')}" \
-                    f"{MAXINT}{MAXINT}"
             previous = self.env['account.bank.statement'].search([
-                    ('first_line_index', '<', index),
+                    ('first_line_index', '<', self.first_line_index),
                     ('journal_id', '=', self.journal_id.id)
                 ], limit=1, order='first_line_index DESC')
             return [self.id] if previous and self.currency_id.compare_amounts(self.balance_start, previous.balance_end_real) != 0 else []
@@ -273,3 +238,57 @@ class AccountBankStatement(models.Model):
         })
         res = self.env.cr.fetchall()
         return [r[0] for r in res]
+    
+    # -------------------------------------------------------------------------
+    # LOW-LEVEL METHODS
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def default_get(self, fields_list):
+        # EXTENDS base
+        defaults = super().default_get(fields_list)
+
+        if 'line_ids' not in fields_list:
+            return defaults
+    
+        active_ids = self._context.get('active_ids')
+        context_split_line_id = self._context.get('split_line_id')
+        context_st_line_id = self._context.get('st_line_id')
+        context_active_model = self._context.get('active_model')
+        lines = None
+        # creating statements with split button
+        if context_split_line_id:
+            current_st_line = self.env['account.bank.statement.line'].browse(context_split_line_id)
+            line_before = self.env['account.bank.statement.line'].search(
+                domain=[
+                    ('internal_index', '<', current_st_line.internal_index),
+                    ('journal_id', '=', current_st_line.journal_id.id),
+                    ('statement_id', '!=', current_st_line.statement_id.id),
+                    ('statement_id', '!=', False),
+                ],
+                order='internal_index desc',
+                limit=1,
+            )
+            lines = self.env['account.bank.statement.line'].search(
+                domain=[
+                    ('internal_index', '<=', current_st_line.internal_index),
+                    ('internal_index', '>', line_before.internal_index or ''),
+                    ('journal_id', '=', current_st_line.journal_id.id),
+                ],
+                order='internal_index desc',
+            )
+        # single line edit
+        elif context_st_line_id and len(active_ids) <= 1:
+            lines = self.env['account.bank.statement.line'].browse(context_st_line_id)
+        # multi edit or action menu
+        elif context_active_model == 'account.bank.statement.line' and active_ids or \
+            context_st_line_id and len(active_ids) > 1:
+            lines = self.env['account.bank.statement.line'].browse(active_ids).sorted()
+            if len(lines.journal_id) > 1:
+                raise UserError(_("A statement should only contain lines from the same journal."))
+
+        if lines:
+            defaults['line_ids'] = [Command.set(lines.ids)]
+
+        print(lines)
+        return defaults
