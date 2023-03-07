@@ -590,14 +590,28 @@ class expression(object):
         HIERARCHY_FUNCS = {'child_of': child_of_domain,
                            'parent_of': parent_of_domain}
 
+        operators = ['&']
+
         def pop():
             """ Pop a leaf to process. """
+            operators.pop()
             return stack.pop()
 
         def push(leaf, model, alias, internal=False):
             """ Push a leaf to be processed right after. """
             leaf = normalize_leaf(leaf)
             check_leaf(leaf, internal)
+            if len(leaf) == 3 and leaf[1] == 'in' and isinstance(leaf[2], Query):
+                # Before append, check neighbor
+                iter_operators = iter(reversed(operators))
+                current_operator = next(iter_operators, '&')
+                
+
+            elif leaf == '!':
+                operators.append(leaf)
+            elif leaf in ('|', '&'):
+                operators.append(leaf)
+                operators.append(leaf)
             stack.append((leaf, model, alias))
 
         def pop_result():
@@ -611,6 +625,8 @@ class expression(object):
         stack = []
         for leaf in self.expression:
             push(leaf, self.root_model, self.root_alias)
+
+        print(stack)
 
         # stack of SQL expressions in the form: (expr, params)
         result_stack = []
