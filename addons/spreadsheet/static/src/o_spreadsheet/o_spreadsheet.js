@@ -2026,10 +2026,10 @@
             if (right !== undefined && bottom !== undefined)
                 return { left, top, right, bottom };
             else if (bottom === undefined && right !== undefined) {
-                return { right, top, left, bottom: this.getSheetSize(this.sheetId).height - 1 };
+                return { right, top, left, bottom: this.getSheetSize(this.sheetId).numberOfRows - 1 };
             }
             else if (right === undefined && bottom !== undefined) {
-                return { bottom, left, top, right: this.getSheetSize(this.sheetId).width - 1 };
+                return { bottom, left, top, right: this.getSheetSize(this.sheetId).numberOfCols - 1 };
             }
             throw new Error(_lt("Bad zone format"));
         }
@@ -2652,13 +2652,13 @@
     }
     function zoneToDimension(zone) {
         return {
-            height: zone.bottom - zone.top + 1,
-            width: zone.right - zone.left + 1,
+            numberOfRows: zone.bottom - zone.top + 1,
+            numberOfCols: zone.right - zone.left + 1,
         };
     }
     function isOneDimensional(zone) {
-        const { width, height } = zoneToDimension(zone);
-        return width === 1 || height === 1;
+        const { numberOfCols, numberOfRows } = zoneToDimension(zone);
+        return numberOfCols === 1 || numberOfRows === 1;
     }
     /**
      * Array of all positions in the zone.
@@ -2829,6 +2829,25 @@
             }
         }
         return set;
+    }
+    /** Get the unbounded version of a zone. */
+    function zoneToUnboundedZone(zone, sheetSize) {
+        const unboundedZone = {
+            ...zone,
+        };
+        if (zone.bottom === sheetSize.numberOfRows - 1) {
+            unboundedZone.bottom = undefined;
+            if (zone.top >= 1) {
+                unboundedZone.hasHeader = true;
+            }
+        }
+        if (zone.right === sheetSize.numberOfCols - 1 && unboundedZone.bottom !== undefined) {
+            unboundedZone.right = undefined;
+            if (zone.left >= 1) {
+                unboundedZone.hasHeader = true;
+            }
+        }
+        return unboundedZone;
     }
 
     class ChartJsComponent extends owl.Component {
@@ -3745,11 +3764,11 @@
         const labelZone = (_a = ds.labelCell) === null || _a === void 0 ? void 0 : _a.zone;
         let dataZone = ds.dataRange.zone;
         if (labelZone) {
-            const { height, width } = zoneToDimension(dataZone);
-            if (height === 1) {
+            const { numberOfRows, numberOfCols } = zoneToDimension(dataZone);
+            if (numberOfRows === 1) {
                 dataZone = { ...dataZone, left: dataZone.left + 1 };
             }
-            else if (width === 1) {
+            else if (numberOfCols === 1) {
                 dataZone = { ...dataZone, top: dataZone.top + 1 };
             }
         }
@@ -15720,8 +15739,7 @@
                     return false;
                 const range = this.env.model.getters.getRangeFromSheetXC(refSheet, xc);
                 let zone = range.zone;
-                const { height, width } = zoneToDimension(zone);
-                zone = height * width === 1 ? this.env.model.getters.expandZone(refSheet, zone) : zone;
+                zone = getZoneArea(zone) === 1 ? this.env.model.getters.expandZone(refSheet, zone) : zone;
                 return isEqual(zone, highlight.zone);
             });
             return highlight && highlight.color ? highlight.color : undefined;
@@ -21596,8 +21614,9 @@
             const mouseMove = (col, row) => {
                 if (lastCol !== col || lastRow !== row) {
                     const activeSheetId = this.env.model.getters.getActiveSheetId();
-                    lastCol = clip(col === -1 ? lastCol : col, 0, this.env.model.getters.getNumberCols(activeSheetId) - 1);
-                    lastRow = clip(row === -1 ? lastRow : row, 0, this.env.model.getters.getNumberRows(activeSheetId) - 1);
+                    const activeSheetSize = this.env.model.getters.getSheetSize(activeSheetId);
+                    lastCol = clip(col === -1 ? lastCol : col, 0, activeSheetSize.numberOfCols - 1);
+                    lastRow = clip(row === -1 ? lastRow : row, 0, activeSheetSize.numberOfRows - 1);
                     let newZone = {
                         left: Math.min(pivotCol, lastCol),
                         top: Math.min(pivotRow, lastRow),
@@ -21607,7 +21626,7 @@
                     newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
                         this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeDataFromZone(activeSheet.id, newZone),
+                            range: this.env.model.getters.getRangeDataFromZone(activeSheet.id, zoneToUnboundedZone(newZone, activeSheetSize)),
                         });
                         currentZone = newZone;
                     }
@@ -21627,6 +21646,7 @@
             const z = this.props.zone;
             const position = gridOverlayPosition();
             const activeSheetId = this.env.model.getters.getActiveSheetId();
+            const activeSheetSize = this.env.model.getters.getSheetSize(activeSheetId);
             const initCol = this.env.model.getters.getColIndex(clientX - position.left);
             const initRow = this.env.model.getters.getRowIndex(clientY - position.top);
             const deltaColMin = -z.left;
@@ -21654,7 +21674,7 @@
                     newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
                         this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeDataFromZone(activeSheetId, newZone),
+                            range: this.env.model.getters.getRangeDataFromZone(activeSheetId, zoneToUnboundedZone(newZone, activeSheetSize)),
                         });
                         currentZone = newZone;
                     }
@@ -28959,7 +28979,7 @@
                     filters.push(new Filter(filter.id, filterZone));
                 }
                 // Add filters for new columns
-                if (filters.length < zoneToDimension(zone).width) {
+                if (filters.length < zoneToDimension(zone).numberOfCols) {
                     for (let col = zone.left; col <= zone.right; col++) {
                         if (!filters.find((filter) => filter.col === col)) {
                             filters.push(new Filter(this.uuidGenerator.uuidv4(), { ...zone, left: col, right: col }));
@@ -29807,8 +29827,8 @@
             if (merge) {
                 return isEqual(zone, merge);
             }
-            const { width, height } = zoneToDimension(zone);
-            return width === 1 && height === 1;
+            const { numberOfCols, numberOfRows } = zoneToDimension(zone);
+            return numberOfCols === 1 && numberOfRows === 1;
         }
         // ---------------------------------------------------------------------------
         // Merges
@@ -29976,8 +29996,8 @@
                             this.removeMerge(sheetId, currentZone);
                             break;
                         default:
-                            const { width, height } = zoneToDimension(result.range.zone);
-                            if (width === 1 && height === 1) {
+                            const { numberOfCols, numberOfRows } = zoneToDimension(result.range.zone);
+                            if (numberOfCols === 1 && numberOfRows === 1) {
                                 this.removeMerge(sheetId, currentZone);
                             }
                             else {
@@ -30313,6 +30333,7 @@
                     ...expandedZone,
                     bottom: rangeImpl.isFullCol ? undefined : expandedZone.bottom,
                     right: rangeImpl.isFullRow ? undefined : expandedZone.right,
+                    hasHeader: rangeImpl.unboundedZone.hasHeader,
                 },
             });
             return this.getRangeString(expandedRange, forSheetId);
@@ -30736,8 +30757,8 @@
         }
         getSheetSize(sheetId) {
             return {
-                height: this.getNumberRows(sheetId),
-                width: this.getNumberCols(sheetId),
+                numberOfRows: this.getNumberRows(sheetId),
+                numberOfCols: this.getNumberCols(sheetId),
             };
         }
         getSheetZone(sheetId) {
@@ -32386,7 +32407,7 @@
                     const tableZone = toZone(tableData.range);
                     const filters = [];
                     const headerNames = [];
-                    for (const i of range(0, zoneToDimension(tableZone).width)) {
+                    for (const i of range(0, zoneToDimension(tableZone).numberOfCols)) {
                         const position = {
                             sheetId: sheetData.id,
                             col: tableZone.left + i,
@@ -33897,7 +33918,7 @@
         dimensionsToSum(sheetId, zone) {
             const dimensions = new Set();
             if (isOneDimensional(zone)) {
-                dimensions.add(zoneToDimension(zone).width === 1 ? "COL" : "ROW");
+                dimensions.add(zoneToDimension(zone).numberOfCols === 1 ? "COL" : "ROW");
                 return dimensions;
             }
             if (this.lastColIsEmpty(sheetId, zone)) {
@@ -34485,8 +34506,8 @@
                 x.zone.bottom < this.getters.getNumberRows(x.sheetId) &&
                 x.zone.right < this.getters.getNumberCols(x.sheetId))
                 .map((highlight) => {
-                const { height, width } = zoneToDimension(highlight.zone);
-                const zone = height * width === 1
+                const { numberOfRows, numberOfCols } = zoneToDimension(highlight.zone);
+                const zone = numberOfRows * numberOfCols === 1
                     ? this.getters.expandZone(highlight.sheetId, highlight.zone)
                     : highlight.zone;
                 return {
@@ -36393,7 +36414,7 @@
             const merges = this.getters.getMerges(sheetId).filter((merge) => overlap(merge, zone));
             /*Test the presence of merges of different sizes*/
             const mergeDimension = zoneToDimension(merges[0]);
-            let [widthFirst, heightFirst] = [mergeDimension.width, mergeDimension.height];
+            let [widthFirst, heightFirst] = [mergeDimension.numberOfCols, mergeDimension.numberOfRows];
             if (!merges.every((merge) => {
                 let [widthCurrent, heightCurrent] = [
                     merge.right - merge.left + 1,
@@ -37526,9 +37547,9 @@
             const values = this.values;
             const pasteZone = this.getPasteZone(target);
             const { left: activeCol, top: activeRow } = pasteZone;
-            const { width, height } = zoneToDimension(pasteZone);
+            const { numberOfCols, numberOfRows } = zoneToDimension(pasteZone);
             const sheetId = this.getters.getActiveSheetId();
-            this.addMissingDimensions(width, height, activeCol, activeRow);
+            this.addMissingDimensions(numberOfCols, numberOfRows, activeCol, activeRow);
             for (let i = 0; i < values.length; i++) {
                 for (let j = 0; j < values[i].length; j++) {
                     this.dispatch("UPDATE_CELL", {
@@ -37542,8 +37563,8 @@
             const zone = {
                 left: activeCol,
                 top: activeRow,
-                right: activeCol + width - 1,
-                bottom: activeRow + height - 1,
+                right: activeCol + numberOfCols - 1,
+                bottom: activeRow + numberOfRows - 1,
             };
             this.selection.selectZone({ cell: { col: activeCol, row: activeRow }, zone });
         }
@@ -43940,7 +43961,7 @@
     function addFilterColumns(table) {
         const tableZone = toZone(table.range);
         const columns = [];
-        for (const i of range(0, zoneToDimension(tableZone).width)) {
+        for (const i of range(0, zoneToDimension(tableZone).numberOfCols)) {
             const filter = table.filters[i];
             if (!filter || !filter.filteredValues.length) {
                 continue;
@@ -43966,7 +43987,7 @@
         var _a;
         const tableZone = toZone(table.range);
         const columns = [];
-        for (const i of range(0, zoneToDimension(tableZone).width)) {
+        for (const i of range(0, zoneToDimension(tableZone).numberOfCols)) {
             const colHeaderXc = toXC(tableZone.left + i, tableZone.top);
             const colName = ((_a = sheetData.cells[colHeaderXc]) === null || _a === void 0 ? void 0 : _a.content) || `col${i}`;
             const colAttributes = [
@@ -44903,8 +44924,8 @@
 
 
     __info__.version = '16.2.0-alpha.3';
-    __info__.date = '2023-03-06T07:35:02.317Z';
-    __info__.hash = 'ec749cf';
+    __info__.date = '2023-03-07T08:48:42.575Z';
+    __info__.hash = 'e4f911a';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
