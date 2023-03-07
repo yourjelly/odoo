@@ -37,7 +37,7 @@ class ResourceCalendarLeaves(models.Model):
     company_id = fields.Many2one(
         'res.company', string="Company", readonly=True, store=True,
         default=lambda self: self.env.company, compute='_compute_company_id')
-    calendar_id = fields.Many2one('resource.calendar', 'Working Hours', domain="[('company_id', 'in', [company_id, False])]", check_company=True, index=True)
+    calendar_ids = fields.Many2many('resource.calendar', string='Working Hours', domain="[('company_id', 'in', [company_id, False])]", check_company=True, index=True)
     date_from = fields.Datetime('Start Date', required=True)
     date_to = fields.Datetime('End Date', compute="_compute_date_to", readonly=False, required=True, store=True)
     resource_id = fields.Many2one(
@@ -46,10 +46,13 @@ class ResourceCalendarLeaves(models.Model):
     time_type = fields.Selection([('leave', 'Time Off'), ('other', 'Other')], default='leave',
                                  help="Whether this should be computed as a time off or as work time (eg: formation)")
 
-    @api.depends('calendar_id')
+    @api.depends('calendar_ids')
     def _compute_company_id(self):
         for leave in self:
-            leave.company_id = leave.calendar_id.company_id or self.env.company
+            if len(leave.calendar_ids.company_id) == 1:
+                leave.company_id = leave.calendar_ids.company_id
+            else:
+                leave.company_id = self.env.company
 
     @api.depends('date_from')
     def _compute_date_to(self):
@@ -66,7 +69,7 @@ class ResourceCalendarLeaves(models.Model):
     @api.onchange('resource_id')
     def onchange_resource(self):
         if self.resource_id:
-            self.calendar_id = self.resource_id.calendar_id
+            self.calendar_ids = self.resource_id.calendar_id
 
     def _copy_leave_vals(self):
         self.ensure_one()

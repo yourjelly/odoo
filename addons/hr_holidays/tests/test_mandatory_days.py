@@ -53,7 +53,7 @@ class TestHrLeaveMandatoryDays(TransactionCase):
             'start_date': datetime(2021, 11, 2),
             'end_date': datetime(2021, 11, 2),
             'color': 1,
-            'resource_calendar_id': cls.default_calendar.id,
+            'resource_calendar_ids': [cls.default_calendar.id],
         })
         cls.mandatory_week = cls.env['hr.leave.mandatory.day'].create({
             'name': 'Super Event End Of Week',
@@ -61,7 +61,7 @@ class TestHrLeaveMandatoryDays(TransactionCase):
             'start_date': datetime(2021, 11, 8),
             'end_date': datetime(2021, 11, 12),
             'color': 2,
-            'resource_calendar_id': cls.default_calendar.id,
+            'resource_calendar_ids': [cls.default_calendar.id],
         })
 
     @freeze_time('2021-10-15')
@@ -152,7 +152,7 @@ class TestHrLeaveMandatoryDays(TransactionCase):
             'start_date': datetime(2021, 11, 3),
             'end_date': datetime(2021, 11, 3),
             'color': 1,
-            'resource_calendar_id': self.default_calendar.id,
+            'resource_calendar_ids': self.default_calendar.ids,
             'department_ids': [production_department.id],
         })
         self.env['hr.leave.mandatory.day'].create({
@@ -161,7 +161,7 @@ class TestHrLeaveMandatoryDays(TransactionCase):
             'start_date': datetime(2021, 11, 4),
             'end_date': datetime(2021, 11, 4),
             'color': 1,
-            'resource_calendar_id': self.default_calendar.id,
+            'resource_calendar_ids': self.default_calendar.ids,
             'department_ids': [post_production_department.id],
         })
         self.env['hr.leave.mandatory.day'].create({
@@ -170,7 +170,7 @@ class TestHrLeaveMandatoryDays(TransactionCase):
             'start_date': datetime(2021, 11, 5),
             'end_date': datetime(2021, 11, 5),
             'color': 1,
-            'resource_calendar_id': self.default_calendar.id,
+            'resource_calendar_ids': self.default_calendar.ids,
             'department_ids': [deployment_department.id],
         })
 

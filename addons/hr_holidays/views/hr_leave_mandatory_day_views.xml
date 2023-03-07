@@ -32,6 +32,7 @@
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <field name="color" widget="color_picker"/>
+                <field name="resource_calendar_ids" widget="many2many_tags" optional="hide"/>
             </tree>
         </field>
     </record>
@@ -60,5 +61,16 @@
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="hr_leave_mandatory_day_view_search"/>
         <field name="context">{'search_default_filter_date': True}</field>
+    </record>
+
+    <record model="ir.actions.server" id="action_mandatory_day_duplicate">
+        <field name="name">Duplicate</field>
+        <field name="model_id" ref="model_hr_leave_mandatory_day"/>
+        <field name="binding_model_id" ref="model_hr_leave_mandatory_day" />
+        <field name="state">code</field>
+        <field name="code">
+            if records:
+                records.copy()
+        </field>
     </record>
 </odoo>

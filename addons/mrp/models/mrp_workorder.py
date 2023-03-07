@@ -251,7 +251,7 @@ class MrpWorkorder(models.Model):
             elif wo.date_start and wo.date_finished:
                 wo.leave_id = wo.env['resource.calendar.leaves'].create({
                     'name': wo.display_name,
-                    'calendar_id': wo.workcenter_id.resource_calendar_id.id,
+                    'calendar_ids': wo.workcenter_id.resource_calendar_id.ids,
                     'date_from': wo.date_start,
                     'date_to': wo.date_finished,
                     'resource_id': wo.workcenter_id.resource_id.id,
@@ -526,7 +526,7 @@ class MrpWorkorder(models.Model):
         # Create leave on chosen workcenter calendar
         leave = self.env['resource.calendar.leaves'].create({
             'name': self.display_name,
-            'calendar_id': best_workcenter.resource_calendar_id.id,
+            'calendar_ids': best_workcenter.resource_calendar_id.ids,
             'date_from': best_date_start,
             'date_to': best_date_finished,
             'resource_id': best_workcenter.resource_id.id,
@@ -610,7 +610,7 @@ class MrpWorkorder(models.Model):
             if not wo.leave_id:
                 leave = self.env['resource.calendar.leaves'].create({
                     'name': wo.display_name,
-                    'calendar_id': wo.workcenter_id.resource_calendar_id.id,
+                    'calendar_ids': wo.workcenter_id.resource_calendar_id.ids,
                     'date_from': date_start,
                     'date_to': date_start + relativedelta(minutes=wo.duration_expected),
                     'resource_id': wo.workcenter_id.resource_id.id,

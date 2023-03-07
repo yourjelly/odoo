@@ -205,7 +205,7 @@ class TestWorkeEntryHolidaysWorkEntry(TestWorkEntryHolidaysBase):
             'name': 'Public Holiday',
             'date_from': datetime(2023, 2, 6, 0, 0, 0),
             'date_to': datetime(2023, 2, 7, 23, 59, 59),
-            'calendar_id': self.richard_emp.resource_calendar_id.id,
+            'calendar_ids': [self.richard_emp.resource_calendar_id.id],
             'work_entry_type_id': work_entry_type_holiday.id,
         })
         leave = self.env['hr.leave'].create({

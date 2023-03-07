@@ -61,7 +61,7 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
             'name': 'Global Time Off',
             'date_from': date(2022, 3, 8),
             'date_to': date(2022, 3, 8),
-            'calendar_id': cls.calendar_1.id,
+            'calendar_ids': [cls.calendar_1.id],
         })
 
     def test_leave_on_global_leave(self):
@@ -70,7 +70,7 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
                 'name': 'Wrong Time Off',
                 'date_from': date(2022, 3, 7),
                 'date_to': date(2022, 3, 7),
-                'calendar_id': self.calendar_1.id,
+                'calendar_ids': [self.calendar_1.id],
             })
 
         with self.assertRaises(ValidationError):
@@ -85,7 +85,7 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
                 'name': 'Correct Time Off',
                 'date_from': date(2022, 3, 8),
                 'date_to': date(2022, 3, 8),
-                'calendar_id': self.calendar_2.id,
+                'calendar_ids': [self.calendar_2.id],
             })
 
         with self.assertRaises(ValidationError):
@@ -100,7 +100,7 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
                 'name': 'Wrong Time Off',
                 'date_from': date(2022, 3, 8),
                 'date_to': date(2022, 3, 8),
-                'calendar_id': self.calendar_1.id,
+                'calendar_ids': [self.calendar_1.id],
             })
 
     @freeze_time('2023-05-12')
@@ -120,7 +120,7 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
             'name': 'Public holiday',
             'date_from': "2023-05-15 06:00:00", # utc from 8:00:00 for Europe/Brussels (UTC +02:00)
             'date_to': "2023-05-15 15:00:00", # utc from 17:00:00 for Europe/Brussels (UTC +02:00)
-            'calendar_id': calendar_asia.id,
+            'calendar_ids': calendar_asia.ids,
         })
         # Expectation:
         # 6:00:00 in UTC (data from the browser) --> 8:00:00 for Europe/Brussel (UTC +02:00)

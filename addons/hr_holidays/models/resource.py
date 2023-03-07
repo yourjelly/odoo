@@ -12,7 +12,7 @@ class CalendarLeaves(models.Model):
 
     holiday_id = fields.Many2one("hr.leave", string='Time Off Request')
 
-    @api.constrains('date_from', 'date_to', 'calendar_id')
+    @api.constrains('date_from', 'date_to', 'calendar_ids')
     def _check_compare_dates(self):
         all_existing_leaves = self.env['resource.calendar.leaves'].search([
             ('resource_id', '=', False),
@@ -27,8 +27,8 @@ class CalendarLeaves(models.Model):
                         and record['company_id'] == leave['company_id']
                         and record['date_from'] <= leave['date_to']
                         and record['date_to'] >= leave['date_from'])
-                if record.calendar_id:
-                    existing_leaves = existing_leaves.filtered(lambda l: not l.calendar_id or l.calendar_id == record.calendar_id)
+                if record.calendar_ids:
+                    existing_leaves = existing_leaves.filtered(lambda l: not l.calendar_ids or l.calendar_ids in record.calendar_ids)
                 if existing_leaves:
                     raise ValidationError(_('Two public holidays cannot overlap each other for the same working hours.'))
 
@@ -111,22 +111,23 @@ class CalendarLeaves(models.Model):
         else:
             return None
 
-    def _prepare_public_holidays_values(self, vals_list):
+    def _prepare_public_holidays_values(self, vals_list):  # TODO BEDO: ask for solution for timezone issue
         for vals in vals_list:
             # Manage the case of create a Public Time Off in another timezone
             # The datetime created has to be in UTC for the calendar's timezone
-            if not vals.get('calendar_id') or vals.get('resource_id') or \
+            if not vals.get('calendar_ids') or vals.get('resource_id') or \
                 not isinstance(vals.get('date_from'), (datetime, str)) or \
                 not isinstance(vals.get('date_to'), (datetime, str)):
                 continue
             user_tz = pytz.timezone(self.env.user.tz) if self.env.user.tz else pytz.utc
-            calendar_tz = pytz.timezone(self.env['resource.calendar'].browse(vals['calendar_id']).tz)
-            if user_tz != calendar_tz:
+            calendars = self.env['resource.calendar'].browse(vals['calendar_ids'])
+            calendar_tzs = list(map(lambda calendar: pytz.timezone(calendar.tz), calendars))
+            if user_tz not in calendar_tzs:
                 datetime_from = self._ensure_datetime(vals['date_from'], '%Y-%m-%d %H:%M:%S')
                 datetime_to = self._ensure_datetime(vals['date_to'], '%Y-%m-%d %H:%M:%S')
                 if datetime_from and datetime_to:
-                    vals['date_from'] = self._convert_timezone(datetime_from, user_tz, calendar_tz)
-                    vals['date_to'] = self._convert_timezone(datetime_to, user_tz, calendar_tz)
+                    vals['date_from'] = self._convert_timezone(datetime_from, user_tz, calendar_tzs[0])  # TODO BEDO
+                    vals['date_to'] = self._convert_timezone(datetime_to, user_tz, calendar_tzs[0])
         return vals_list
 
     @api.model_create_multi
@@ -159,11 +160,11 @@ class ResourceCalendar(models.Model):
 
     def _compute_associated_leaves_count(self):
         leaves_read_group = self.env['resource.calendar.leaves']._read_group(
-            [('resource_id', '=', False), ('calendar_id', 'in', [False, *self.ids])],
-            ['calendar_id'],
+            [('resource_id', '=', False), ('calendar_ids', 'in', [False, *self.ids])],
+            ['calendar_ids'],
             ['__count'],
         )
-        result = {calendar.id if calendar else 'global': count for calendar, count in leaves_read_group}
+        result = {calendars.ids if calendars else 'global': count for calendars, count in leaves_read_group}
         global_leave_count = result.get('global', 0)
         for calendar in self:
             calendar.associated_leaves_count = result.get(calendar.id, 0) + global_leave_count

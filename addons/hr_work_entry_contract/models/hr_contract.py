@@ -69,7 +69,7 @@ class HrContract(models.Model):
         return self.env.ref('hr_work_entry_contract.work_entry_type_leave')
 
     def _get_sub_leave_domain(self):
-        return [('calendar_id', 'in', [False] + self.resource_calendar_id.ids)]
+        return [('calendar_ids', 'in', [False] + self.resource_calendar_id.ids)]
 
     def _get_leave_domain(self, start_dt, end_dt):
         domain = [
@@ -156,7 +156,7 @@ class HrContract(models.Model):
             for leave in itertools.chain(leaves_by_resource[False], leaves_by_resource[resource.id]):
                 for resource in resources_list:
                     # Global time off is not for this calendar, can happen with multiple calendars in self
-                    if resource and leave.calendar_id and leave.calendar_id != calendar and not leave.resource_id:
+                    if resource and leave.calendar_ids and calendar not in leave.calendar_ids and not leave.resource_id:
                         continue
                     tz = tz if tz else pytz.timezone((resource or contract).tz)
                     if (tz, start_dt) in tz_dates:

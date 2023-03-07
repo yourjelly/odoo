@@ -158,7 +158,7 @@ class TestTimesheetHolidays(TestCommonTimesheet):
         # Create a public holiday
         self.env['resource.calendar.leaves'].create({
             'name': 'Test',
-            'calendar_id': self.employee_working_calendar.id,
+            'calendar_ids': [self.employee_working_calendar.id],
             'date_from': datetime(2022, 1, 26, 7, 0, 0, 0),  # This is Wednesday and India Independence
             'date_to': datetime(2022, 1, 26, 18, 0, 0, 0),
         })

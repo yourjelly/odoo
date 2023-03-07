@@ -332,8 +332,8 @@ class HrEmployee(models.Model):
         if not self._is_leave_user():
             domain += [
                 '|',
-                ('calendar_id', '=', False),
-                ('calendar_id', '=', self.resource_calendar_id.id),
+                ('calendar_ids', '=', False),
+                ('calendar_ids', 'in', self.resource_calendar_id.id),
             ]
 
         return self.env['resource.calendar.leaves'].search(domain)
@@ -364,8 +364,8 @@ class HrEmployee(models.Model):
         if not self._is_leave_user():
             domain += [
                 '|',
-                ('resource_calendar_id', '=', False),
-                ('resource_calendar_id', '=', self.resource_calendar_id.id),
+                ('resource_calendar_ids', '=', False),
+                ('resource_calendar_ids', 'in', self.resource_calendar_id.id),
             ]
             if self.department_id:
                 domain += [

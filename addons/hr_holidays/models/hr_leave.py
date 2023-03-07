@@ -508,8 +508,8 @@ class HolidaysRequest(models.Model):
                     ('start_date', '<=', leave.date_to.date()),
                     ('end_date', '>=', leave.date_from.date()),
                     '|',
-                        ('resource_calendar_id', '=', False),
-                        ('resource_calendar_id', '=', leave.resource_calendar_id.id),
+                        ('resource_calendar_ids', '=', False),
+                        ('resource_calendar_ids', 'in', leave.resource_calendar_id.id),
                 ]
 
                 if leave.holiday_status_id.company_id:
@@ -1001,7 +1001,7 @@ Attempting to double-book your time off won't magically make your vacation 2x be
             'holiday_id': self.id,
             'date_to': self.date_to,
             'resource_id': self.employee_id.resource_id.id,
-            'calendar_id': self.resource_calendar_id.id,
+            'calendar_ids': [self.resource_calendar_id.id],
             'time_type': self.holiday_status_id.time_type,
         }
 

@@ -13,8 +13,8 @@ class ResourceCalendarLeaves(models.Model):
     timesheet_ids = fields.One2many('account.analytic.line', 'global_leave_id', string="Analytic Lines")
 
     def _get_resource_calendars(self):
-        leaves_with_calendar = self.filtered('calendar_id')
-        calendars = leaves_with_calendar.calendar_id
+        leaves_with_calendar = self.filtered('calendar_ids')
+        calendars = leaves_with_calendar.calendar_ids
         leaves_wo_calendar = self - leaves_with_calendar
         if leaves_wo_calendar:
             calendars += self.env['resource.calendar'].search([('company_id', 'in', leaves_wo_calendar.company_id.ids)])
@@ -43,10 +43,10 @@ class ResourceCalendarLeaves(models.Model):
         resource_calendars = resource_calendars or self._get_resource_calendars()
         leaves_read_group = self.env['resource.calendar.leaves']._read_group(
             [('id', 'in', self.ids)],
-            ['calendar_id'],
+            ['calendar_ids'],
             ['id:recordset', 'resource_id:recordset', 'date_from:min', 'date_to:max'],
         )
-        # dict of keys: calendar_id
+        # dict of keys: calendar_ids
         #   and values : { 'date_from': datetime, 'date_to': datetime, resources: self.env['resource.resource'] }
         cal_attendance_intervals_dict = {}
         for calendar, leaves, resources, date_from_min, date_to_max in leaves_read_group:
@@ -89,7 +89,7 @@ class ResourceCalendarLeaves(models.Model):
         return results
 
     def _timesheet_create_lines(self):
-        """ Create timesheet leaves for each employee using the same calendar containing in self.calendar_id
+        """ Create timesheet leaves for each employee using the same calendar containing in self.calendar_ids
 
             If the employee has already a time off in the same day then no timesheet should be created.
         """
@@ -171,7 +171,7 @@ class ResourceCalendarLeaves(models.Model):
             'company_id': employee_id.company_id.id,
         }
 
-    def _generate_timesheeets(self):
+    def _generate_timesheets(self):
         results_with_leave_timesheet = self.filtered(lambda r: not r.resource_id and r.company_id.internal_project_id and r.company_id.leave_timesheet_task_id)
         if results_with_leave_timesheet:
             results_with_leave_timesheet._timesheet_create_lines()
@@ -179,18 +179,18 @@ class ResourceCalendarLeaves(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         results = super(ResourceCalendarLeaves, self).create(vals_list)
-        results._generate_timesheeets()
+        results._generate_timesheets()
         return results
 
     def write(self, vals):
-        date_from, date_to, calendar_id = vals.get('date_from'), vals.get('date_to'), vals.get('calendar_id')
+        date_from, date_to, calendar_ids = vals.get('date_from'), vals.get('date_to'), vals.get('calendar_ids')
         global_time_off_updated = self.env['resource.calendar.leaves']
-        if date_from or date_to or 'calendar_id' in vals:
-            global_time_off_updated = self.filtered(lambda r: (date_from is not None and r.date_from != date_from) or (date_to is not None and r.date_to != date_to) or (calendar_id is None or r.calendar_id.id != calendar_id))
+        if date_from or date_to or 'calendar_ids' in vals:
+            global_time_off_updated = self.filtered(lambda r: (date_from is not None and r.date_from != date_from) or (date_to is not None and r.date_to != date_to) or (calendar_ids is None or calendar_ids not in r.calendar_ids.ids))
             timesheets = global_time_off_updated.sudo().timesheet_ids
             if timesheets:
                 timesheets.write({'global_leave_id': False})
                 timesheets.unlink()
         result = super(ResourceCalendarLeaves, self).write(vals)
-        global_time_off_updated and global_time_off_updated.sudo()._generate_timesheeets()
+        global_time_off_updated and global_time_off_updated.sudo()._generate_timesheets()
         return result
