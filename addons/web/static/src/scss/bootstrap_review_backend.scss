@@ -2,6 +2,55 @@
 /// This file regroups the CSS rules made to fix/extend bootstrap in the backend
 /// ==============================================================================
 
+// Buttons
+// ==============================================================================
+// Generating bootstrap color buttons was disabled (see import_bootstrap.scss).
+// We do it ourself here generating each btn design individually.
+
+$o-btns-custom: () !default;
+$o-btns: map-merge($theme-colors, $o-btns-custom);
+
+@each $-name, $-value in $o-btns {
+    @if (type-of($-value) == map) {
+        .btn-#{$-name} {
+            @include button-variant(
+                o-safe-get($-value, background),
+                o-safe-get($-value, border),
+                o-safe-get($-value, color),
+                o-safe-get($-value, hover-background),
+                o-safe-get($-value, hover-border),
+                o-safe-get($-value, hover-color),
+                o-safe-get($-value, active-background),
+                o-safe-get($-value, active-border),
+                o-safe-get($-value, active-color),
+                o-safe-get($-value, disabled-background),
+                o-safe-get($-value, disabled-border),
+                o-safe-get($-value, disabled-color),
+            );
+        }
+        .btn-outline-#{$-name} {
+            @include button-outline-variant(o-safe-get($-value, border));
+        }
+
+    } @else {
+        .btn-#{$-name} {
+            @include button-variant($-value, $-value);
+        }
+        .btn-outline-#{$-name} {
+            @include button-outline-variant($-value);
+        }
+    }
+}
+
+// Button group
+// ==============================================================================
+.btn-group .btn {
+    // Ensure that active buttons will always be rendered on top, including
+    // hovered ones.
+    &:active, &.active, &:active:hover, &.active:hover {
+        z-index: 2;
+    }
+}
 
 // Bootstrap '$theme-colors' text-x and bg-x classes generation
 // ============================================================================
