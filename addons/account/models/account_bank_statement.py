@@ -109,37 +109,40 @@ class AccountBankStatement(models.Model):
             stmt.first_line_index = sorted_lines[:1].internal_index
             stmt.date = sorted_lines.filtered(lambda l: l.state == 'posted')[-1:].date
 
-    @api.depends('line_ids')
+    @api.depends('create_date')
     def _compute_balance_start(self):
-        for stmt in self:
-            # only compute once
-            if stmt.balance_start:
-                stmt.balance_start = stmt.balance_start
-                # print('start stays:', stmt.balance_start)
-            else: 
-                lines = stmt.line_ids.filtered(lambda l: l.state == 'posted').sorted()
-                stmt.balance_start = lines[-1:].running_balance - (
-                    lines[-1:].amount if lines[-1:].state == 'posted' else 0
-                )
-                # print('computed start:', stmt.balance_start)
+        for stmt in self.sorted(lambda x: x.first_line_index or '0'):
+            lines_in_between_domain = [
+                ('internal_index', '<', stmt.first_line_index),
+                ('journal_id', '=', stmt.journal_id.id),
+                ('state', '=', 'posted'),
+            ]
 
-    @api.depends('line_ids')
+            previous_line_with_statement = self.env['account.bank.statement.line'].search([
+                ('internal_index', '<', stmt.first_line_index),
+                ('journal_id', '=', stmt.journal_id.id),
+                ('state', '=', 'posted'),
+                ('statement_id', '!=', False),
+            ], limit=1)
+            balance_start = previous_line_with_statement.statement_id.balance_end_real
+            if previous_line_with_statement:
+                lines_in_between_domain.append(('internal_index', '>', previous_line_with_statement.internal_index))
+
+            lines_in_between = self.env['account.bank.statement.line'].search(lines_in_between_domain)
+            balance_start += sum(lines_in_between.mapped('amount'))
+
+            stmt.balance_start = balance_start
+
+    @api.depends('balance_start', 'line_ids.amount')
+    def _compute_balance_end(self):
+        for stmt in self:
+            lines = stmt.line_ids.filtered(lambda x: x.state == 'posted')
+            stmt.balance_end = stmt.balance_start + sum(lines.mapped('amount'))
+
+    @api.depends('balance_start')
     def _compute_balance_end_real(self):
         for stmt in self:
-            # only compute once
-            if stmt.balance_end_real:
-                stmt.balance_end_real = stmt.balance_end_real
-                print('end real stays:', stmt.balance_end_real)
-            else:
-                stmt.balance_end_real = stmt.line_ids.filtered(lambda l: l.state == 'posted').sorted()[:1].running_balance
-                print('computed end real:', stmt.balance_end_real)
-
-    @api.depends('balance_start', 'line_ids.amount', 'line_ids.state', 'line_ids')
-    def _compute_balance_end(self):
-        for statement in self:
-            statement.balance_end = statement.balance_start + sum(
-                statement.line_ids.filtered(lambda l: l.state == 'posted').mapped('amount')
-            )
+            stmt.balance_end_real = stmt.balance_end
 
     @api.depends('journal_id')
     def _compute_currency_id(self):
@@ -186,37 +189,10 @@ class AccountBankStatement(models.Model):
         return [('id', 'not in', invalid_ids)]
 
     # -------------------------------------------------------------------------
-    # CRUD
-    # -------------------------------------------------------------------------
-    @api.model_create_multi
-    def create(self, vals_list):
-        # EXTENDS base
-        # If we are doing a split, we have to correct the split statement's balance to keep both original and new
-        # statements valid.
-        if self._context.get('split_line_id'):
-            old_statement = self.env['account.bank.statement.line'].browse(self._context.get('split_line_id')).statement_id
-            old_lines = old_statement.line_ids
-        statements = super().create(vals_list)
-        if self._context.get('split_line_id'):
-            statements.ensure_one()
-            if old_statement:
-                net_change = sum((statements.line_ids & old_lines).filtered(lambda l: l.state == 'posted').mapped('amount'))
-                old_statement.balance_start += net_change
-        return statements
-
-    # -------------------------------------------------------------------------
     # BUSINESS METHODS
     # -------------------------------------------------------------------------
     def _get_invalid_statement_ids(self, all_statements=None):
         """ Returns the statements that are invalid for _compute and _search methods."""
-
-        if not all_statements and len(self) == 1:
-            previous = self.env['account.bank.statement'].search([
-                    ('first_line_index', '<', self.first_line_index),
-                    ('journal_id', '=', self.journal_id.id)
-                ], limit=1, order='first_line_index DESC')
-            return [self.id] if previous and self.currency_id.compare_amounts(self.balance_start, previous.balance_end_real) != 0 else []
-
         self.env['account.bank.statement.line'].flush_model(['statement_id', 'internal_index'])
         self.env['account.bank.statement'].flush_model(['balance_start', 'balance_end_real', 'first_line_index'])
 
