@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_partner_form_inherited" model="ir.ui.view">
+        <field name="name">res.partner.form.inherited</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account.view_partner_property_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='fiscal_information']" position="inside">
+                <field name="endpoint_ids" groups="base.group_no_one">
+                    <tree editable="bottom">
+                        <field name="sequence" widget="handle"/>
+                        <field name="code_eas"/>
+                        <field name="endpoint_value"/>
+                    </tree>
+                </field>
+            </xpath>
+        </field>
+    </record>
+</odoo>

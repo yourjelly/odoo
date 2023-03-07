@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+account_edi_ubl_cii.access_account_endpoint,access_account_endpoint,account_edi_ubl_cii.model_account_endpoint,base.group_user,1,1,1,1
