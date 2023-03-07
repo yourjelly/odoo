@@ -169,6 +169,15 @@ Odoo Web Editor widget.
 
             'web_editor/static/tests/**/*',
         ],
+        'web_editor.mocha_tests': [
+            'web/static/src/legacy/js/promise_extension.js',
+            'web/static/src/boot.js',
+            'web/static/src/core/utils/concurrency.js',
+
+            'web_editor/static/src/js/editor/odoo-editor/src/**/*js',
+            'web_editor/static/src/js/editor/odoo-editor/test/spec/*js',
+            'web_editor/static/src/js/editor/odoo-editor/test/*js',
+        ],
     },
     'auto_install': True,
     'license': 'LGPL-3',

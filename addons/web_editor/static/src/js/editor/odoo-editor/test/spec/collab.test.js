@@ -1,3 +1,5 @@
+/** @odoo-module */
+
 import { OdooEditor } from '../../src/OdooEditor.js';
 import {
     insertCharsAt,
@@ -27,7 +29,7 @@ const applyConcurentActions = (clientInfos, concurentActions) => {
     }
 };
 
-const mergeClientsSteps = clientInfos => {
+const mergeClientsSteps = async clientInfos => {
     const clientInfosList = Object.values(clientInfos);
     for (const clientInfoA of clientInfosList) {
         for (const clientInfoB of clientInfosList) {
@@ -35,7 +37,7 @@ const mergeClientsSteps = clientInfos => {
                 continue;
             }
             for (const step of clientInfoB.recordedHistorySteps) {
-                clientInfoA.editor.onExternalHistorySteps([JSON.parse(JSON.stringify(step))]);
+                await clientInfoA.editor.onExternalHistorySteps([JSON.parse(JSON.stringify(step))]);
             }
         }
     }
@@ -70,7 +72,7 @@ const testSameHistory = clientInfos => {
     }
 };
 
-const testMultiEditor = spec => {
+const testMultiEditor = async spec => {
     const clientInfos = {};
     const concurentActions = spec.concurentActions || [];
     const clientIds = spec.clientIds || Object.keys(concurentActions);
@@ -130,7 +132,7 @@ const testMultiEditor = spec => {
                     clientInfo.recordedHistorySteps.push(step);
                 }
             },
-            onHistoryMissingParentSteps: ({ step, fromStepId }) => {
+            onHistoryMissingParentSteps: async ({ step, fromStepId }) => {
                 const missingSteps = clientInfos[step.clientId].editor.historyGetMissingSteps({
                     fromStepId,
                     toStepId: step.id,
@@ -138,7 +140,7 @@ const testMultiEditor = spec => {
                 if (missingSteps === -1 || !missingSteps.length) {
                     throw new Error('Impossible to get the missing steps.');
                 }
-                clientInfo.editor.onExternalHistorySteps(missingSteps.concat([step]));
+                await clientInfo.editor.onExternalHistorySteps(missingSteps.concat([step]));
             },
         });
         clientInfo.editor.keyboardType = 'PHYSICAL';
@@ -160,7 +162,7 @@ const testMultiEditor = spec => {
     OdooEditor.prototype._generateId = () => 'fake_concurent_id_' + concurentNextId++;
 
     if (spec.afterCreate) {
-        spec.afterCreate(clientInfos);
+        await spec.afterCreate(clientInfos);
     }
 
     shouldListenSteps = false;
@@ -220,7 +222,7 @@ const testMultiEditor = spec => {
         }
     }
     if (spec.afterCursorInserted) {
-        spec.afterCursorInserted(clientInfos);
+        await spec.afterCursorInserted(clientInfos);
     }
     for (const clientInfo of clientInfosList) {
         clientInfo.editor.destroy();
@@ -234,7 +236,7 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2', 'c3'],
                 contentBefore: '<p><x>a[c1}{c1]</x><y>e[c2}{c2]</y><z>i[c3}{c3]</z></p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     applyConcurentActions(clientInfos, {
                         c1: editor => {
                             editor.execCommand('insert', 'b');
@@ -252,7 +254,7 @@ describe('Collaboration', () => {
                             editor.execCommand('insert', 'l');
                         },
                     });
-                    mergeClientsSteps(clientInfos);
+                    await mergeClientsSteps(clientInfos);
                     testSameHistory(clientInfos);
                 },
                 contentAfter: '<p><x>abcd[c1}{c1]</x><y>efgh[c2}{c2]</y><z>ijkl[c3}{c3]</z></p>',
@@ -262,7 +264,7 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p>ab[c1}{c1]</p><p>cd[c2}{c2]</p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     applyConcurentActions(clientInfos, {
                         c1: editor => {
                             editor.execCommand('insert', 'e');
@@ -271,7 +273,7 @@ describe('Collaboration', () => {
                             editor.execCommand('insert', 'f');
                         },
                     });
-                    mergeClientsSteps(clientInfos);
+                    await mergeClientsSteps(clientInfos);
                     testSameHistory(clientInfos);
                 },
                 contentAfter: '<p>abe[c1}{c1]</p><p>cdf[c2}{c2]</p>',
@@ -281,7 +283,7 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p>ab[c1}{c1]</p><p>cd[c2}{c2]</p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     applyConcurentActions(clientInfos, {
                         c1: editor => {
                             editor.execCommand('insert', 'e');
@@ -292,7 +294,7 @@ describe('Collaboration', () => {
                             editor.execCommand('insert', 'h');
                         },
                     });
-                    mergeClientsSteps(clientInfos);
+                    await mergeClientsSteps(clientInfos);
                     testSameHistory(clientInfos);
                 },
                 contentAfter: '<p>abef[c1}{c1]</p><p>cdgh[c2}{c2]</p>',
@@ -302,7 +304,7 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p>ab[c1}{c1][c2}{c2]c</p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     applyConcurentActions(clientInfos, {
                         c1: editor => {
                             editor.execCommand('insert', 'd');
@@ -311,7 +313,7 @@ describe('Collaboration', () => {
                             editor.execCommand('oDeleteBackward');
                         },
                     });
-                    mergeClientsSteps(clientInfos);
+                    await mergeClientsSteps(clientInfos);
                     testSameHistory(clientInfos);
                 },
                 contentAfter: '<p>a[c2}{c2]c[c1}{c1]dc</p>',
@@ -321,7 +323,7 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p>ab[c1}{c1][c2}{c2]c</p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     applyConcurentActions(clientInfos, {
                         c1: editor => {
                             editor.execCommand('insert', 'd');
@@ -332,7 +334,7 @@ describe('Collaboration', () => {
                             editor.execCommand('oDeleteBackward');
                         },
                     });
-                    mergeClientsSteps(clientInfos);
+                    await mergeClientsSteps(clientInfos);
                     testSameHistory(clientInfos);
                 },
                 contentAfter: '<p>[c2}{c2]cd[c1}{c1]ec</p>',
@@ -343,13 +345,13 @@ describe('Collaboration', () => {
         testMultiEditor({
             clientIds: ['c1', 'c2'],
             contentBefore: '<p>a[c1}{c1]</p>',
-            afterCreate: clientInfos => {
+            afterCreate: async clientInfos => {
                 clientInfos.c1.editor.execCommand('insert', 'b');
                 clientInfos.c1.editor._historyMakeSnapshot();
                 // Insure the snapshot is considered to be older than 30 seconds.
                 clientInfos.c1.editor._historySnapshots[0].time = 1;
                 const { steps } = clientInfos.c1.editor.historyGetSnapshotSteps();
-                clientInfos.c2.editor.historyResetFromSteps(steps);
+                await clientInfos.c2.editor.historyResetFromSteps(steps);
 
                 chai.expect(clientInfos.c2.editor._historySteps.map(x => x.id)).to.deep.equal([
                     'fake_concurent_id_2',
@@ -366,20 +368,20 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2', 'c3'],
                 contentBefore: '<p><x>a[c1}{c1]</x><y>b[c2}{c2]</y><z>c[c3}{c3]</z></p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     clientInfos.c1.editor.execCommand('insert', 'd');
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[1],
                     ]);
                     clientInfos.c2.editor.execCommand('insert', 'e');
-                    clientInfos.c1.editor.onExternalHistorySteps([
+                    await clientInfos.c1.editor.onExternalHistorySteps([
                         clientInfos.c2.editor._historySteps[2],
                     ]);
-                    clientInfos.c3.editor.onExternalHistorySteps([
+                    await clientInfos.c3.editor.onExternalHistorySteps([
                         clientInfos.c2.editor._historySteps[2],
                     ]);
                     // receive step 1 after step 2
-                    clientInfos.c3.editor.onExternalHistorySteps([
+                    await clientInfos.c3.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[1],
                     ]);
                     testSameHistory(clientInfos);
@@ -391,9 +393,9 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2', 'c3'],
                 contentBefore: '<p><i>a[c1}{c1]</i><b>b[c2}{c2]</b></p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     clientInfos.c1.editor.execCommand('insert', 'c');
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[1],
                     ]);
 
@@ -404,24 +406,24 @@ describe('Collaboration', () => {
                     // older than 30 seconds.
                     clientInfos.c1.editor._historySnapshots[0].time = 1;
                     const { steps } = clientInfos.c1.editor.historyGetSnapshotSteps();
-                    clientInfos.c3.editor.historyResetFromSteps(steps);
+                    await clientInfos.c3.editor.historyResetFromSteps(steps);
 
                     // In the meantime client 2 send the step to client 1
                     clientInfos.c2.editor.execCommand('insert', 'd');
                     clientInfos.c2.editor.execCommand('insert', 'e');
-                    clientInfos.c1.editor.onExternalHistorySteps([
+                    await clientInfos.c1.editor.onExternalHistorySteps([
                         clientInfos.c2.editor._historySteps[2],
                     ]);
-                    clientInfos.c1.editor.onExternalHistorySteps([
+                    await clientInfos.c1.editor.onExternalHistorySteps([
                         clientInfos.c2.editor._historySteps[3],
                     ]);
 
                     // Now client 2 is connected to client 3 and client 2 make a new step.
                     clientInfos.c2.editor.execCommand('insert', 'f');
-                    clientInfos.c1.editor.onExternalHistorySteps([
+                    await clientInfos.c1.editor.onExternalHistorySteps([
                         clientInfos.c2.editor._historySteps[4],
                     ]);
-                    clientInfos.c3.editor.onExternalHistorySteps([
+                    await clientInfos.c3.editor.onExternalHistorySteps([
                         clientInfos.c2.editor._historySteps[4],
                     ]);
                 },
@@ -434,13 +436,13 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p><x>a</x></p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     const script = document.createElement('script');
                     script.innerHTML = 'console.log("xss")';
                     clientInfos.c1.editable.append(script);
                     clientInfos.c1.editor.historyStep();
                     window.chai.expect(clientInfos.c1.editor._historySteps[1]).is.not.undefined;
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[1],
                     ]);
                     window.chai
@@ -449,16 +451,16 @@ describe('Collaboration', () => {
                 },
             });
         });
-        it('should sanitize when adding a script as descendant', async () => {
+        it('should sanitize when adding a script as descendant', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p>a[c1}{c1][c2}{c2]</p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     const i = document.createElement('i');
                     i.innerHTML = '<b>b</b><script>alert("c");</script>';
                     clientInfos.c1.editable.appendChild(i);
                     clientInfos.c1.editor.historyStep();
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[1],
                     ]);
                 },
@@ -473,12 +475,12 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p>a<img></p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     const img = clientInfos.c1.editable.childNodes[0].childNodes[1];
                     img.setAttribute('class', 'b');
                     img.setAttribute('onerror', 'console.log("xss")');
                     clientInfos.c1.editor.historyStep();
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[1],
                     ]);
                     window.chai
@@ -495,19 +497,19 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p>a</p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     const script = document.createElement('script');
                     script.innerHTML = 'console.log("xss")';
                     clientInfos.c1.editable.append(script);
                     clientInfos.c1.editor.historyStep();
                     script.remove();
                     clientInfos.c1.editor.historyStep();
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[1],
                     ]);
                     // Change the client in order to be undone from client 2
                     clientInfos.c1.editor._historySteps[2].clientId = 'c2';
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[2],
                     ]);
                     clientInfos.c2.editor.historyUndo();
@@ -521,19 +523,19 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p>a</p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     const div = document.createElement('div');
                     div.innerHTML = '<i>b</i><script>console.log("xss")</script>';
                     clientInfos.c1.editable.append(div);
                     clientInfos.c1.editor.historyStep();
                     div.remove();
                     clientInfos.c1.editor.historyStep();
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[1],
                     ]);
                     // Change the client in order to be undone from client 2
                     clientInfos.c1.editor._historySteps[2].clientId = 'c2';
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[2],
                     ]);
                     clientInfos.c2.editor.historyUndo();
@@ -547,7 +549,7 @@ describe('Collaboration', () => {
             testMultiEditor({
                 clientIds: ['c1', 'c2'],
                 contentBefore: '<p>a<img></p>',
-                afterCreate: clientInfos => {
+                afterCreate: async clientInfos => {
                     const img = clientInfos.c1.editable.childNodes[0].childNodes[1];
                     img.setAttribute('class', 'b');
                     img.setAttribute('onerror', 'console.log("xss")');
@@ -555,12 +557,12 @@ describe('Collaboration', () => {
                     img.setAttribute('class', '');
                     img.setAttribute('onerror', '');
                     clientInfos.c1.editor.historyStep();
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[1],
                     ]);
                     // Change the client in order to be undone from client 2
                     clientInfos.c1.editor._historySteps[2].clientId = 'c2';
-                    clientInfos.c2.editor.onExternalHistorySteps([
+                    await clientInfos.c2.editor.onExternalHistorySteps([
                         clientInfos.c1.editor._historySteps[2],
                     ]);
                     clientInfos.c2.editor.historyUndo();

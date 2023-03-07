@@ -1,6 +1,8 @@
 /** @odoo-module **/
 'use strict';
 
+import { Mutex } from '@web/core/utils/concurrency';
+
 import './commands/deleteBackward.js';
 import './commands/deleteForward.js';
 import './commands/enter.js';
@@ -317,6 +319,9 @@ export class OdooEditor extends EventTarget {
 
         this._collabClientId = this.options.collaborationClientId;
         this._collabClientAvatarUrl = this.options.collaborationClientAvatarUrl;
+
+        // Allow executing async processes in between external steps during collaboration
+        this._collabSyncMutex = new Mutex();
 
         // Collaborator selection and caret display.
         this._collabSelectionInfos = new Map();
@@ -1041,23 +1046,25 @@ export class OdooEditor extends EventTarget {
 
         return { steps, historyIds: this.historyGetBranchIds() };
     }
-    historyResetFromSteps(steps, historyIds) {
-        this._historyIds = historyIds;
-        this.observerUnactive();
-        for (const node of [...this.editable.childNodes]) {
-            node.remove();
-        }
-        this._historyClean();
-        for (const step of steps) {
-            this.historyApply(step.mutations);
-        }
-        this._historySnapshots = [{ step: steps[0] }];
-        this._historySteps = steps;
+    async historyResetFromSteps(steps, historyIds) {
+        return this.execCollabSyncTask(() => {
+            this._historyIds = historyIds;
+            this.observerUnactive();
+            for (const node of [...this.editable.childNodes]) {
+                node.remove();
+            }
+            this._historyClean();
+            for (const step of steps) {
+                this.historyApply(step.mutations);
+            }
+            this._historySnapshots = [{ step: steps[0] }];
+            this._historySteps = steps;
 
-        this._handleCommandHint();
-        this.multiselectionRefresh();
-        this.observerActive();
-        this.dispatchEvent(new Event('historyResetFromSteps'));
+            this._handleCommandHint();
+            this.multiselectionRefresh();
+            this.observerActive();
+            this.dispatchEvent(new Event('historyResetFromSteps'));
+        });
     }
     historyGetMissingSteps({fromStepId, toStepId}) {
         const fromIndex = this._historySteps.findIndex(x => x.id === fromStepId);
@@ -1445,7 +1452,7 @@ export class OdooEditor extends EventTarget {
     /**
      * Insert a step from another collaborator.
      */
-    _historyAddExternalStep(newStep) {
+    async _historyAddExternalStep(newStep) {
         let index = this._historySteps.length - 1;
         while (index >= 0 && this._historySteps[index].id !== newStep.previousStepId) {
             // Skip steps that are already in the list.
@@ -1476,7 +1483,7 @@ export class OdooEditor extends EventTarget {
                     index--;
                 }
                 const fromStepId = historySteps[index].id;
-                this.options.onHistoryMissingParentSteps({
+                await this.options.onHistoryMissingParentSteps({
                     step: newStep,
                     fromStepId: fromStepId,
                 });
@@ -1518,19 +1525,34 @@ export class OdooEditor extends EventTarget {
         this._collabClientId = id;
     }
 
-    onExternalHistorySteps(newSteps) {
-        this.observerUnactive();
-        this._computeHistorySelection();
+    async onExternalHistorySteps(newSteps) {
+        return this.execCollabSyncTask(async () => {
+            this.observerUnactive();
+            this._computeHistorySelection();
 
-        for (const newStep of newSteps) {
-            this._historyAddExternalStep(newStep);
-        }
+            for (const newStep of newSteps) {
+                await this._historyAddExternalStep(newStep);
+            }
 
-        this.observerActive();
-        this.historyResetLatestComputedSelection();
-        this._handleCommandHint();
-        this.multiselectionRefresh();
-        this.dispatchEvent(new Event('onExternalHistorySteps'));
+            this.observerActive();
+            this.historyResetLatestComputedSelection();
+            this._handleCommandHint();
+            this.multiselectionRefresh();
+            this.dispatchEvent(new Event('onExternalHistorySteps'));
+        });
+    }
+
+    /**
+     * Execute an action through the mutex used by collaborative external steps.
+     * This means that extenal steps won't be applied until the provided action
+     * promise is resolved.
+     *
+     * @param {() => (void | Promise<void>)} action a function which may return
+     *                                       a Promise
+     * @returns {Promise<void>}
+     */
+    async execCollabSyncTask(action) {
+        return this._collabSyncMutex.exec(action);
     }
 
     // Multi selection

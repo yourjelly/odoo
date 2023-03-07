@@ -552,7 +552,7 @@ const Wysiwyg = Widget.extend({
                                         return false;
                                     }
                                     historySyncAtLeastOnce = true;
-                                    this.odooEditor.historyResetFromSteps(steps, historyIds);
+                                    await this.odooEditor.historyResetFromSteps(steps, historyIds);
                                     const remoteSelection = await this.ptp.requestClient(fromClientId, 'get_collaborative_selection', undefined, { transport: 'rtc' });
                                     if (remoteSelection) {
                                         this.odooEditor.onExternalMultiselectionUpdate(remoteSelection);
@@ -574,7 +574,7 @@ const Wysiwyg = Widget.extend({
                             // Avoid race condition where the step is received
                             // before the history has synced at least once.
                             if (historySyncFinished) {
-                                this.odooEditor.onExternalHistorySteps([notificationPayload]);
+                                await this.odooEditor.onExternalHistorySteps([notificationPayload]);
                             }
                             break;
                         case 'oe_history_set_selection': {
@@ -676,7 +676,7 @@ const Wysiwyg = Widget.extend({
                     console.warn('Editor get_missing_steps result is erroneous.');
                     return;
                 }
-                this.ptp && this.odooEditor.onExternalHistorySteps(missingSteps.concat([step]));
+                this.ptp && await this.odooEditor.onExternalHistorySteps(missingSteps.concat([step]));
             },
         };
         return editorCollaborationOptions;
