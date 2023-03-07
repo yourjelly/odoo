@@ -57,7 +57,7 @@ export function useAssignUserCommand() {
 
     const provide = async (env, options) => {
         const value = options.searchValue.trim();
-        let domain = component.props.record.getFieldDomain(component.props.name);
+        let domain = component.props.getDomain();
         const context = component.props.record.getFieldContext(component.props.name);
         if (type === "many2many") {
             const selectedUserIds = getCurrentIds();

@@ -17,6 +17,7 @@ export class Many2ManyTagsAvatarField extends Many2ManyTagsField {
     static props = {
         ...Many2ManyTagsField.props,
         withCommand: { type: Boolean, optional: true },
+        getDomain: { type: Function },
     };
 
     get tags() {
@@ -34,6 +35,7 @@ export const many2ManyTagsAvatarField = {
     extractProps: (fieldInfo) => ({
         ...many2ManyTagsField.extractProps(fieldInfo),
         withCommand: fieldInfo.viewType === "form",
+        getDomain: fieldInfo.getDomain,
     }),
 };
 

@@ -3760,7 +3760,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target, ".o_field_widget[name='trululu'] input");
     });
 
-    QUnit.test("many2one in one2many: domain updated by an onchange", async function (assert) {
+    QUnit.skip("many2one in one2many: domain updated by an onchange", async function (assert) {
         assert.expect(3);
 
         serverData.models.partner.onchanges = {

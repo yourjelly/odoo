@@ -9,6 +9,7 @@ import {
     X2M_TYPES,
 } from "@web/views/utils";
 import { getTooltipInfo } from "./field_tooltip";
+import { Domain } from "@web/core/domain";
 
 import { Component, xml } from "@odoo/owl";
 
@@ -130,11 +131,16 @@ export class Field extends Component {
             const fieldName = this.props.name;
             fieldInfo = {
                 ...fieldInfo,
-                get domain() {
-                    const rawDomain = modifiers.domain || record.fields[fieldName].domain || [];
-                    return typeof rawDomain === "string"
-                        ? evaluateExpr(rawDomain, record.evalContext)
-                        : rawDomain;
+                getDomain() {
+                    const rawDomains = [
+                        record._domains[fieldName] || [],
+                        fieldInfo.domain || record.fields[fieldName].domain || [],
+                    ];
+                    return Domain.and(
+                        rawDomains.map((d) =>
+                            typeof d === "string" ? evaluateExpr(d, evalContext) : d
+                        )
+                    );
                 },
                 canEdit: !readonlyFromModifiers,
             };

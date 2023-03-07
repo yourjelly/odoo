@@ -11,6 +11,7 @@ import { useAssignUserCommand } from "@mail/views/fields/assign_user_command_hoo
 export class Many2OneAvatarUserField extends Many2OneAvatarField {
     static props = {
         ...Many2OneAvatarField.props,
+        getDomain: { type: Function, optional: true },
         withCommand: { type: Boolean, optional: true },
     };
 
@@ -35,6 +36,7 @@ export const many2OneAvatarUserField = {
     additionalClasses: ["o_field_many2one_avatar"],
     extractProps: (fieldInfo) => ({
         ...many2OneAvatarField.extractProps(fieldInfo),
+        getDomain: fieldInfo.getDomain,
         withCommand: fieldInfo.viewType === "form",
     }),
 };

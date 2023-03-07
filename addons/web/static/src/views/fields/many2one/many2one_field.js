@@ -52,6 +52,7 @@ export class Many2OneField extends Component {
         canWrite: { type: Boolean, optional: true },
         canQuickCreate: { type: Boolean, optional: true },
         canCreateEdit: { type: Boolean, optional: true },
+        getDomain: { type: Function, optional: true },
         nameCreateField: { type: String, optional: true },
         searchLimit: { type: Number, optional: true },
         relation: { type: String, optional: true },
@@ -154,9 +155,6 @@ export class Many2OneField extends Component {
     get context() {
         return this.props.record.getFieldContext(this.props.name);
     }
-    get domain() {
-        return this.props.record.getFieldDomain(this.props.name);
-    }
     get hasExternalButton() {
         return this.props.canOpen && !!this.value && !this.state.isFloating;
     }
@@ -203,7 +201,8 @@ export class Many2OneField extends Component {
         };
     }
     getDomain() {
-        return this.domain.toList(this.context);
+        const { getDomain } = this.props;
+        return getDomain ? getDomain().toList(this.context) : [];
     }
     async openAction() {
         const action = await this.orm.call(this.relation, "get_formview_action", [[this.resId]], {
@@ -299,7 +298,7 @@ export const many2OneField = {
     component: Many2OneField,
     displayName: _lt("Many2one"),
     supportedTypes: ["many2one"],
-    extractProps: ({ attrs, options, string }) => {
+    extractProps: ({ attrs, getDomain, options, string }) => {
         const canCreate =
             attrs.can_create && Boolean(JSON.parse(attrs.can_create)) && !options.no_create;
         return {
@@ -309,6 +308,7 @@ export const many2OneField = {
             canWrite: attrs.can_write && Boolean(JSON.parse(attrs.can_write)),
             canQuickCreate: canCreate && !options.no_quick_create,
             canCreateEdit: canCreate && !options.no_create_edit,
+            getDomain: getDomain,
             nameCreateField: options.create_name_field,
             canScanBarcode: !!options.can_scan_barcode,
             string,

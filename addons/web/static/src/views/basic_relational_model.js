@@ -68,7 +68,7 @@ class DataPoint {
 
     get evalContext() {
         const datapoint = this.model.__bm__.localData[this.__bm_handle__];
-        return this.model.__bm__._getLazyEvalContext(datapoint);
+        return this.model.__bm__._getLazyEvalContext(datapoint, true);
     }
 
     get fieldNames() {

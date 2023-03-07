@@ -39,6 +39,7 @@ export class Many2ManyTagsField extends Component {
         canCreateEdit: { type: Boolean, optional: true },
         colorField: { type: String, optional: true },
         createDomain: { type: [Array, Boolean], optional: true },
+        getDomain: { type: Function },
         placeholder: { type: String, optional: true },
         nameCreateField: { type: String, optional: true },
         string: { type: String, optional: true },
@@ -106,9 +107,6 @@ export class Many2ManyTagsField extends Component {
     get relation() {
         return this.props.record.fields[this.props.name].relation;
     }
-    get domain() {
-        return this.props.record.getFieldDomain(this.props.name);
-    }
     get context() {
         return this.props.record.getFieldContext(this.props.name);
     }
@@ -152,7 +150,7 @@ export class Many2ManyTagsField extends Component {
 
     getDomain() {
         return Domain.and([
-            this.domain,
+            this.props.getDomain(),
             Domain.not([["id", "in", this.props.record.data[this.props.name].currentIds]]),
         ]).toList(this.context);
     }
@@ -267,7 +265,7 @@ export const many2ManyTagsField = {
         }
         return relatedFields;
     },
-    extractProps: ({ attrs, options, string }) => {
+    extractProps: ({ attrs, getDomain, options, string }) => {
         const noCreate = Boolean(options.no_create);
         const canCreate = attrs.can_create && Boolean(JSON.parse(attrs.can_create)) && !noCreate;
         const noQuickCreate = Boolean(options.no_quick_create);
@@ -279,6 +277,7 @@ export const many2ManyTagsField = {
             canQuickCreate: canCreate && !noQuickCreate,
             canCreateEdit: canCreate && !noCreateEdit,
             createDomain: options.create,
+            getDomain: getDomain,
             placeholder: attrs.placeholder,
             string,
         };
