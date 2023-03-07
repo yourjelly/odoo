@@ -52,8 +52,13 @@ class StockMoveLine(models.Model):
     def _compute_sale_price(self):
         for move_line in self:
             if move_line.move_id.sale_line_id:
-                unit_price = move_line.move_id.sale_line_id.price_reduce_taxinc
+                price_unit = move_line.move_id.sale_line_id.price_unit
+                discount = ((move_line.move_id.sale_line_id.discount * price_unit) / 100)
+                price_subtotal = move_line.move_id.sale_line_id.price_subtotal
+                reward = -(move_line.move_id.sale_line_id.order_id.reward_amount)
+                price_untaxed = move_line.move_id.sale_line_id.order_id.amount_untaxed + reward
                 qty = move_line.product_uom_id._compute_quantity(move_line.qty_done, move_line.move_id.sale_line_id.product_uom)
+                unit_price = (price_unit - (discount if discount else 0) - ((price_subtotal / price_untaxed) * reward if reward else 0) / qty) / qty
             else:
                 unit_price = move_line.product_id.list_price
                 qty = move_line.product_uom_id._compute_quantity(move_line.qty_done, move_line.product_id.uom_id)
