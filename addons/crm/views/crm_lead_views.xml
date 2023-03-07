@@ -195,7 +195,7 @@
                             <group name="lead_info" attrs="{'invisible': [('type', '=', 'opportunity')]}">
                                 <label for="contact_name"/>
                                 <div class="o_row">
-                                    <field name="contact_name"/>
+                                    <field name="contact_name" placeholder="e.g. John Smith"/>
                                     <field name="title" placeholder="Title" domain="[]" options='{"no_open": True}'/>
                                 </div>
                                 <field name="is_blacklisted" invisible="1"/>
@@ -305,7 +305,7 @@
                                     <group class="mt48">
                                         <label for="contact_name_page_lead"/>
                                         <div class="o_row">
-                                            <field name="contact_name" id="contact_name_page_lead"/>
+                                            <field name="contact_name" placeholder="e.g. John Smith" id="contact_name_page_lead"/>
                                             <field name="title" placeholder="Title" domain="[]" options='{"no_open": True}'/>
                                         </div>
                                         <field name="function"/>

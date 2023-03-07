@@ -65,7 +65,7 @@
                             </tree>
                         </field>
 
-                        <div class="oe_edit_only">
+                        <div>
                             <separator string="Example"/>
                             <field name="example_invalid" invisible="1"/>
                             <div attrs="{'invisible': [('example_invalid', '=', False)]}">
@@ -73,9 +73,9 @@
                             </div>
                             <div attrs="{'invisible': [('example_invalid', '=', True)]}" class="d-flex" >
                                 For any invoice of
-                                <span class="mx-1"/> <field name="example_amount" /> <span class="mx-1"/>
+                                <span class="mx-1"/> <field name="example_amount" class="o_field_highlight oe_inline" /> <span class="mx-1"/>
                                 dated
-                                <span class="mx-1"/> <field name="example_date" class="oe_inline" style="color: #704A66; font-weight: bold"/>,
+                                <span class="mx-1"/> <field name="example_date" class="o_field_highlight oe_inline"/>,
                                 the due date(s) and amount(s) will be:
                             </div>
                             <field name="example_preview" attrs="{'invisible': [('example_invalid', '=', True)]}"/>
