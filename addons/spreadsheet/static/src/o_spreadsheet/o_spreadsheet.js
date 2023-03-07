@@ -10036,7 +10036,7 @@
             return this.runtime.fontColor;
         }
         get secondaryFontColor() {
-            return relativeLuminance(this.primaryFontColor) <= 0.3 ? "#757575" : "#bbbbbb";
+            return relativeLuminance(this.primaryFontColor) <= 0.3 ? "#525252" : "#C8C8C8";
         }
         get figure() {
             return this.props.figure;
@@ -42455,8 +42455,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.2';
-    __info__.date = '2023-03-06T07:33:47.060Z';
-    __info__.hash = '6b4d816';
+    __info__.date = '2023-03-07T09:42:26.944Z';
+    __info__.hash = 'f9f45e4';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
