@@ -153,7 +153,8 @@ class ResCompany(models.Model):
     @api.depends('country_id')
     def compute_account_tax_fiscal_country(self):
         for record in self:
-            record.account_tax_fiscal_country_id = record.country_id
+            if not record.account_tax_fiscal_country_id:
+                record.account_tax_fiscal_country_id = record.country_id
 
     def get_and_update_account_invoice_onboarding_state(self):
         """ This method is called on the controller rendering method and ensures that the animations
