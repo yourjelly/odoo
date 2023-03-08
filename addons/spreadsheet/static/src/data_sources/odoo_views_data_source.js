@@ -30,7 +30,7 @@ export class OdooViewsDataSource extends LoadableDataSource {
         this._initialSearchParams = JSON.parse(JSON.stringify(params.searchParams));
         this._initialSearchParams.context = omit(
             this._initialSearchParams.context || {},
-            ...Object.keys(this._orm.user.context)
+            ...Object.keys(this._serverData.orm.user.context)
         );
         /** @private */
         this._customDomain = this._initialSearchParams.domain;
@@ -48,7 +48,7 @@ export class OdooViewsDataSource extends LoadableDataSource {
 
     async loadMetadata() {
         if (!this._metaData.fields) {
-            this._metaData.fields = await this._metadataRepository.fieldsGet(
+            this._metaData.fields = await this._serverData.metaData.fieldsGet(
                 this._metaData.resModel
             );
         }
@@ -110,6 +110,6 @@ export class OdooViewsDataSource extends LoadableDataSource {
      * @returns {Promise<string>} Display name of the model
      */
     getModelLabel() {
-        return this._metadataRepository.modelDisplayName(this._metaData.resModel);
+        return this._serverData.metaData.modelDisplayName(this._metaData.resModel);
     }
 }

@@ -3,7 +3,7 @@ import { camelToSnakeObject, toServerDateString } from "@spreadsheet/helpers/hel
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 
-import { ServerData } from "@spreadsheet/data_sources/server_data";
+import { BatchedCachedRequestMaker } from "@spreadsheet/data/batched_cached_request_maker";
 
 /**
  * @typedef {import("./accounting_functions").DateRange} DateRange
@@ -11,7 +11,7 @@ import { ServerData } from "@spreadsheet/data_sources/server_data";
 
 export class AccountingDataSource {
     constructor(services) {
-        this.serverData = new ServerData(services.orm, {
+        this.serverData = new BatchedCachedRequestMaker(services.orm, {
             whenDataIsFetched: () => services.notify(),
         });
     }

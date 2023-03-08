@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { ServerData } from "../data_sources/server_data";
+import { BatchedCachedRequestMaker } from "../data/batched_cached_request_maker";
 
 /**
  * @typedef Currency
@@ -13,7 +13,7 @@ import { ServerData } from "../data_sources/server_data";
  */
 export class CurrencyDataSource {
     constructor(services) {
-        this.serverData = new ServerData(services.orm, {
+        this.serverData = new BatchedCachedRequestMaker(services.orm, {
             whenDataIsFetched: () => services.notify(),
         });
     }

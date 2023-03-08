@@ -1,13 +1,11 @@
 /** @odoo-module */
 
 import { LoadableDataSource } from "./data_source";
-import { MetadataRepository } from "./metadata_repository";
 
 import { EventBus } from "@odoo/owl";
 
 /** *
  * @typedef {object} DataSourceServices
- * @property {MetadataRepository} metadataRepository
  * @property {import("@web/core/orm_service")} orm
  * @property {() => void} notify
  *
@@ -15,11 +13,12 @@ import { EventBus } from "@odoo/owl";
  */
 
 export class DataSources extends EventBus {
-    constructor(orm) {
+    constructor(serverData) {
         super();
-        this._orm = orm.silent;
-        this._metadataRepository = new MetadataRepository(orm);
-        this._metadataRepository.addEventListener("labels-fetched", () => this.notify());
+        this._orm = serverData.orm;
+        this._serverData = serverData;
+        this._serverData.addEventListener("data-fetched", () => this.notify());
+
         /** @type {Object.<string, any>} */
         this._dataSources = {};
     }
@@ -36,7 +35,7 @@ export class DataSources extends EventBus {
         return new cls(
             {
                 orm: this._orm,
-                metadataRepository: this._metadataRepository,
+                serverData: this._serverData,
                 notify: () => this.notify(),
             },
             params

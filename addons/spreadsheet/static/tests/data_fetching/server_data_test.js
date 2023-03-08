@@ -2,7 +2,10 @@
 
 import { nextTick } from "@web/../tests/helpers/utils";
 import { LoadingDataError } from "@spreadsheet/o_spreadsheet/errors";
-import BatchEndpoint, { Request, ServerData } from "@spreadsheet/data_sources/server_data";
+import BatchEndpoint, {
+    Request,
+    BatchedCachedRequestMaker,
+} from "@spreadsheet/data/batched_cached_request_maker";
 
 QUnit.module("spreadsheet server data", {}, () => {
     QUnit.test("simple synchronous get", async (assert) => {
@@ -12,7 +15,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         assert.throws(
@@ -33,7 +36,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 throw new Error("error while fetching data");
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         assert.throws(
@@ -54,7 +57,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         const result = await serverData.fetch("partner", "get_something", [5]);
@@ -71,7 +74,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 throw new Error("error while fetching data");
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         assert.rejects(serverData.fetch("partner", "get_something", [5]));
@@ -87,7 +90,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         const [result1, result2] = await Promise.all([
@@ -107,7 +110,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         assert.throws(
@@ -128,7 +131,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         assert.throws(
@@ -158,7 +161,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         assert.throws(
@@ -199,7 +202,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         const promise = serverData.fetch("partner", "get_something", [5]);
@@ -222,7 +225,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         assert.throws(() => serverData.get("partner", "get_something", [5]), LoadingDataError);
@@ -243,7 +246,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         assert.throws(() => serverData.batch.get("partner", "get_something", 5), LoadingDataError);
@@ -265,7 +268,7 @@ QUnit.module("spreadsheet server data", {}, () => {
                 return args[0];
             },
         };
-        const serverData = new ServerData(orm, {
+        const serverData = new BatchedCachedRequestMaker(orm, {
             whenDataIsFetched: () => assert.step("data-fetched-notification"),
         });
         assert.throws(() => serverData.batch.get("partner", "get_something", 5), LoadingDataError);

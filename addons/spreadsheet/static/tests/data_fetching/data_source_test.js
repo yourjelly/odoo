@@ -2,6 +2,7 @@
 
 import { nextTick } from "@web/../tests/helpers/utils";
 import { LoadableDataSource } from "@spreadsheet/data_sources/data_source";
+import { SpreadsheetServerDataService } from "@spreadsheet/data/data_service";
 import { Deferred } from "@web/core/utils/concurrency";
 import { RPCError } from "@web/core/network/rpc_service";
 
@@ -30,8 +31,10 @@ QUnit.module("spreadsheet data source", {}, () => {
                     this.data = "something";
                 }
             }
+            const serverData = new SpreadsheetServerDataService({});
             const dataSource = new TestDataSource({
                 notify: () => {},
+                serverData,
             });
             dataSource.load();
             dataSource.load({ reload: true });
@@ -56,15 +59,17 @@ QUnit.module("spreadsheet data source", {}, () => {
             }
         }
 
+        const serverData = new SpreadsheetServerDataService({
+            call: () => {
+                const error = new RPCError();
+                error.data = { message: "Ya done!" };
+                throw error;
+            },
+        });
+
         const dataSource = new TestDataSource({
             notify: () => {},
-            orm: {
-                call: () => {
-                    const error = new RPCError();
-                    error.data = { message: "Ya done!" };
-                    throw error;
-                },
-            },
+            serverData,
         });
         await dataSource.load();
         assert.ok(dataSource._isFullyLoaded);

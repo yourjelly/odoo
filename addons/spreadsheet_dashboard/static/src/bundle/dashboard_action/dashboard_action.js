@@ -25,13 +25,10 @@ export class SpreadsheetDashboardAction extends Component {
         };
         this.orm = useService("orm");
         this.router = useService("router");
-        // Use the non-protected orm service (`this.env.services.orm` instead of `useService("orm")`)
-        // because spreadsheets models are preserved across multiple components when navigating
-        // with the breadcrumb
-        // TODO write a test
+        this.serverData = useService("spreadsheet_server_data");
         /** @type {DashboardLoader}*/
         this.loader = useState(
-            new DashboardLoader(this.env, this.env.services.orm, this._fetchDashboardData)
+            new DashboardLoader(this.env, this.orm, this.serverData, this._fetchDashboardData)
         );
         onWillStart(async () => {
             await loadSpreadsheetDependencies();

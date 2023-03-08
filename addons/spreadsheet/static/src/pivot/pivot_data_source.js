@@ -15,6 +15,19 @@ export default class PivotDataSource extends OdooViewsDataSource {
      */
     constructor(services, params) {
         super(services, params);
+        this._orm = {
+            ...this._orm,
+            readGroup: this._cachedReadGroup.bind(this),
+        };
+    }
+
+    async _cachedReadGroup(model, domain, fields, groupby, kwargs = {}) {
+        return this._metadataRepository.serverData.fetch(model, "read_group", [], {
+            ...kwargs,
+            domain,
+            fields,
+            groupby,
+        });
     }
 
     async _load() {
@@ -27,8 +40,8 @@ export default class PivotDataSource extends OdooViewsDataSource {
                 searchParams: this._searchParams,
             },
             {
-                orm: this._orm,
-                metadataRepository: this._metadataRepository,
+                serverData: this._serverData,
+                orm: this._serverData.orm,
             }
         );
         await this._model.load(this._searchParams);
@@ -43,8 +56,8 @@ export default class PivotDataSource extends OdooViewsDataSource {
                 searchParams: this._initialSearchParams,
             },
             {
-                orm: this._orm,
-                metadataRepository: this._metadataRepository,
+                serverData: this._serverData,
+                orm: this._serverData.orm,
             }
         );
         await model.load(this._initialSearchParams);

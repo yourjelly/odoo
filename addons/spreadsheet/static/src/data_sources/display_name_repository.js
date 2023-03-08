@@ -2,7 +2,9 @@
 
 import { Deferred } from "@web/core/utils/concurrency";
 import { LoadingDataError } from "../o_spreadsheet/errors";
-import BatchEndpoint, { Request } from "./server_data";
+import BatchEndpoint, { Request } from "../data/batched_cached_request_maker";
+import { _t } from "@web/core/l10n/translation";
+import { sprintf } from "@web/core/utils/strings";
 
 /**
  * @typedef PendingDisplayName
@@ -110,7 +112,12 @@ export class DisplayNameRepository {
         }
         switch (displayNameResult.state) {
             case "ERROR":
-                throw displayNameResult.error;
+                if (displayNameResult.error instanceof LoadingDataError) {
+                    throw displayNameResult.error;
+                }
+                throw new Error(
+                    sprintf(_t("Unable to fetch the label of %s of model %s"), id, model)
+                );
             case "COMPLETED":
                 return displayNameResult.value;
             default:

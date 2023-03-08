@@ -15,6 +15,7 @@ const { DateTime } = luxon;
  * @returns {Array} intersection between a and b
  */
 export function intersect(a, b) {
+    //TODOPRO Replace with intersection from web
     return a.filter((x) => b.includes(x));
 }
 

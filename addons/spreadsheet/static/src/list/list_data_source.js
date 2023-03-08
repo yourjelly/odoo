@@ -55,7 +55,7 @@ export default class ListDataSource extends OdooViewsDataSource {
             return;
         }
         const { domain, orderBy, context } = this._searchParams;
-        this.data = await this._orm.searchRead(
+        this.data = await this._serverData.orm.searchRead(
             this._metaData.resModel,
             domain,
             this._getFieldsToFetch(),
@@ -140,7 +140,7 @@ export default class ListDataSource extends OdooViewsDataSource {
             case "one2many":
             case "many2many": {
                 const labels = record[fieldName]
-                    .map((id) => this._metadataRepository.getRecordDisplayName(field.relation, id))
+                    .map((id) => this._serverData.displayNames.get(field.relation, id))
                     .filter((value) => value !== undefined);
                 return labels.join(", ");
             }

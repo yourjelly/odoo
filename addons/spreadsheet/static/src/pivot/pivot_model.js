@@ -8,6 +8,7 @@ import { computeReportMeasures } from "@web/views/utils";
 import { session } from "@web/session";
 
 import { FORMATS } from "../helpers/constants";
+import { SpreadsheetPivotModel2 } from "./new_pivot_model";
 
 import spreadsheet from "../o_spreadsheet/o_spreadsheet_extended";
 import { formatDate } from "./pivot_helpers";
@@ -17,9 +18,16 @@ import { SpreadsheetPivotTable } from "@spreadsheet/pivot/pivot_table";
 const { toString, toNumber, toBoolean } = spreadsheet.helpers;
 
 /**
- * @typedef {import("@spreadsheet/data_sources/metadata_repository").Field} Field
+ * TODOPRO Check to move types in a separate file
+ * TODOPRO Check to move helpers in a separate file
+ * TODOPRO There is an error with filters, check the Partner Spreadsheet Test
+ * TODOPRO Change groupBy from an array of string to an array of Fields
+ */
+
+/**
  * @typedef {import("@spreadsheet/pivot/pivot_table").Row} Row
  * @typedef {import("@spreadsheet/pivot/pivot_table").Column} Column
+ * @typedef {import("@spreadsheet/helpers/fields_helpers").Field} Field
  *
  * @typedef {Object} PivotMetaData
  * @property {Array<string>} colGroupBys
@@ -34,6 +42,22 @@ const { toString, toNumber, toBoolean } = spreadsheet.helpers;
  * @property {Array<string>} orderBy
  * @property {Object} domain
  * @property {Object} context
+ *
+ * @typedef {Object} PivotModelParams
+ * @property {PivotMetaData} metaData
+ * @property {PivotSearchParams} searchParams
+ *
+ * @typedef {Object} PivotModelServices
+ * @property {import("@spreadsheet/data/data_service").SpreadsheetServerDataService} serverData
+ * @property {import("@web/core/orm_service").ORM} orm
+ *
+ * @typedef {string|number|boolean} ReadGroupValue //TODOPRO Check that we cannot have another return type. Perhaps undefined ?
+ * @typedef {Record<string, [number, ReadGroupValue]|ReadGroupValue>} ReadGroupResult
+ *
+ * @typedef {Object} PivotNode
+ * @property {ReadGroupValue|"ROOT"} value
+ * @property {Array<PivotNode>} [children]
+ *
  */
 
 /**
@@ -61,6 +85,7 @@ function parseGroupField(allFields, groupFieldString) {
     };
 }
 
+//TODOPRO With property fields, should we consider inverse this logic, to have a list of supported fields?
 const UNSUPPORTED_FIELD_TYPES = ["one2many", "binary", "html"];
 export const NO_RECORD_AT_THIS_POSITION = Symbol("NO_RECORD_AT_THIS_POSITION");
 
@@ -68,6 +93,10 @@ function isNotSupported(fieldType) {
     return UNSUPPORTED_FIELD_TYPES.includes(fieldType);
 }
 
+/**
+ *
+ * @param {Field} field
+ */
 function throwUnsupportedFieldError(field) {
     throw new Error(
         sprintf(_t("Field %s is not supported because of its type (%s)"), field.string, field.type)
@@ -88,6 +117,7 @@ export function parsePivotFormulaFieldValue(field, groupValue) {
             ? toString(groupValue).toLocaleLowerCase()
             : toString(groupValue);
     if (isNotSupported(field.type)) {
+        //TODOPRO I think we can remove this, it will be handled by the switch
         throwUnsupportedFieldError(field);
     }
     // represents a field which is not set (=False server side)
@@ -125,13 +155,13 @@ export class SpreadsheetPivotModel extends PivotModel {
      * @param {PivotMetaData} params.metaData
      * @param {PivotSearchParams} params.searchParams
      * @param {Object} services
-     * @param {import("../data_sources/metadata_repository").MetadataRepository} services.metadataRepository
+     * //TODOPRO Update all the docstrings
      */
     setup(params, services) {
         // fieldAttrs is required, but not needed in Spreadsheet, so we define it as empty
         (params.metaData.fieldAttrs = {}), super.setup(params);
 
-        this.metadataRepository = services.metadataRepository;
+        this._serverData = services.serverData;
 
         /**
          * Contains the domain of the values used during the evaluation of the formula =Pivot(...)
@@ -149,6 +179,10 @@ export class SpreadsheetPivotModel extends PivotModel {
          * Display name of the model
          */
         this._modelLabel = params.metaData.modelLabel;
+
+        this._pro = new SpreadsheetPivotModel2(this.env, params, services);
+        //TODOPRO Remove this
+        this._pro.load().then(() => (window.pro = this._pro));
     }
 
     //--------------------------------------------------------------------------
@@ -285,10 +319,16 @@ export class SpreadsheetPivotModel extends PivotModel {
      * Get the value of the given domain for the given measure
      */
     getPivotCellValue(measure, domain) {
-        const { cols, rows } = this._getColsRowsValuesFromDomain(domain);
-        const group = JSON.stringify([rows, cols]);
-        const values = this.data.measurements[group];
-        return (values && values[0][measure]) || "";
+        // if (domain.filter((x) => x.includes("#")).length) {
+        //     debugger;
+        // }
+        //TODOPRO Make it works with pivot.position
+        return this._pro.getPivotCellValue(measure, domain);
+        // return 0;
+        // const { cols, rows } = this._getColsRowsValuesFromDomain(domain);
+        // const group = JSON.stringify([rows, cols]);
+        // const values = this.data.measurements[group];
+        // return (values && values[0][measure]) || "";
     }
 
     /**
@@ -319,13 +359,13 @@ export class SpreadsheetPivotModel extends PivotModel {
             return formatDate(aggregateOperator, value);
         }
         if (field.relation) {
-            const label = this.metadataRepository.getRecordDisplayName(field.relation, value);
+            const label = this._serverData.displayNames.get(field.relation, value);
             if (!label) {
                 return undef;
             }
             return label;
         }
-        const label = this.metadataRepository.getLabel(this.metaData.resModel, field.name, value);
+        const label = this._serverData.labels.get(this.metaData.resModel, field.name, value);
         if (!label) {
             return undef;
         }
@@ -404,7 +444,7 @@ export class SpreadsheetPivotModel extends PivotModel {
         const prune = false;
         await super._loadData(config, prune);
 
-        const metadataRepository = this.metadataRepository;
+        const serverData = this._serverData;
 
         const registerLabels = (tree, groupBys) => {
             const group = tree.root;
@@ -412,14 +452,14 @@ export class SpreadsheetPivotModel extends PivotModel {
                 for (let i = 0; i < group.values.length; i++) {
                     const { field } = this.parseGroupField(groupBys[i]);
                     if (!field.relation) {
-                        metadataRepository.registerLabel(
+                        serverData.labels.set(
                             config.metaData.resModel,
                             field.name,
                             group.values[i],
                             group.labels[i]
                         );
                     } else {
-                        metadataRepository.setDisplayName(
+                        serverData.displayNames.set(
                             field.relation,
                             group.values[i],
                             group.labels[i]

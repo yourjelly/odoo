@@ -12,6 +12,7 @@ import { getDashboardServerData } from "../utils/data";
 
 import { waitForDataSourcesLoaded } from "@spreadsheet/../tests/utils/model";
 import { getCellValue } from "@spreadsheet/../tests/utils/getters";
+import { spreadsheetServerDataService } from "@spreadsheet/data/data_service";
 
 /**
  * @param {object} [params]
@@ -21,18 +22,24 @@ import { getCellValue } from "@spreadsheet/../tests/utils/getters";
  */
 async function createDashboardLoader(params = {}) {
     registry.category("services").add("orm", ormService);
+    registry.category("services").add("spreadsheet_server_data", spreadsheetServerDataService);
     const env = await makeTestEnv({
         serverData: params.serverData || getDashboardServerData(),
         mockRPC: params.mockRPC,
     });
-    return new DashboardLoader(env, env.services.orm, async (dashboardId) => {
-        const [record] = await env.services.orm.read(
-            "spreadsheet.dashboard",
-            [dashboardId],
-            ["spreadsheet_data"]
-        );
-        return { data: JSON.parse(record.spreadsheet_data), revisions: [] };
-    });
+    return new DashboardLoader(
+        env,
+        env.services.orm,
+        env.services.spreadsheet_server_data,
+        async (dashboardId) => {
+            const [record] = await env.services.orm.read(
+                "spreadsheet.dashboard",
+                [dashboardId],
+                ["spreadsheet_data"]
+            );
+            return { data: JSON.parse(record.spreadsheet_data), revisions: [] };
+        }
+    );
 }
 
 QUnit.module("spreadsheet_dashboard > Dashboard loader");

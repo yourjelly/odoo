@@ -10,8 +10,8 @@ import { _t } from "@web/core/l10n/translation";
 const { Model } = spreadsheet;
 
 async function downloadSpreadsheet(env, action) {
-    const { orm, name, data, stateUpdateMessages } = action.params;
-    const dataSources = new DataSources(orm);
+    const { name, data, stateUpdateMessages } = action.params;
+    const dataSources = new DataSources(env.services.spreadsheet_server_data);
     const model = new Model(migrate(data), { custom: { dataSources } }, stateUpdateMessages);
     await waitForDataLoaded(model);
     const { files } = model.exportXLSX();

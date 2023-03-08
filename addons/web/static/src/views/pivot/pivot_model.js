@@ -338,6 +338,8 @@ export class PivotModel extends Model {
      * @param {Object} [params.data] previously exported data
      */
     setup(params) {
+        //TODOPRO Remove this
+        window.pivot = this;
         // concurrency management
         this.keepLast = new KeepLast();
         this.race = new Race();
@@ -1482,6 +1484,7 @@ export class PivotModel extends Model {
         });
 
         if (metaData.sortedColumn) {
+            //TODOPRO Check here to sort
             this._sortRows(metaData.sortedColumn, config);
         }
     }

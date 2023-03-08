@@ -44,19 +44,24 @@ export const Status = {
  * @typedef {import("@web/env").OdooEnv} OdooEnv
  *
  * @typedef {import("@web/core/orm_service").ORM} ORM
+ *
+ * @typedef {import("@spreadsheet/data/data_service").SpreadsheetServerDataService} SpreadsheetServerDataService
  */
 
 export class DashboardLoader {
     /**
      * @param {OdooEnv} env
      * @param {ORM} orm
+     * @param {SpreadsheetServerDataService} serverData
      * @param {FetchDashboardData} fetchDashboardData
      */
-    constructor(env, orm, fetchDashboardData) {
+    constructor(env, orm, serverData, fetchDashboardData) {
         /** @private */
         this.env = env;
         /** @private */
         this.orm = orm;
+        /** @private */
+        this.serverData = serverData;
         /** @private @type {Array<DashboardGroupData>} */
         this.groups = [];
         /** @private @type {Object<number, Dashboard>} */
@@ -179,6 +184,7 @@ export class DashboardLoader {
             dashboard.model = this._createSpreadsheetModel(data, revisions);
             dashboard.status = Status.Loaded;
         } catch (error) {
+            console.log(error);
             dashboard.error = error;
             dashboard.status = Status.Error;
         }
@@ -207,7 +213,7 @@ export class DashboardLoader {
      * @returns {Model}
      */
     _createSpreadsheetModel(data, revisions = []) {
-        const dataSources = new DataSources(this.orm);
+        const dataSources = new DataSources(this.serverData);
         const model = new Model(
             migrate(data),
             {

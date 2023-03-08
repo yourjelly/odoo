@@ -8,6 +8,7 @@ import { nextTick } from "@web/../tests/helpers/utils";
 import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
 import { DataSources } from "@spreadsheet/data_sources/data_sources";
 import { getBasicServerData } from "./data";
+import { spreadsheetServerDataService } from "@spreadsheet/data/data_service";
 
 const { Model } = spreadsheet;
 
@@ -33,6 +34,9 @@ export function setupDataSourceEvaluation(model) {
  */
 export async function createModelWithDataSource(params = {}) {
     registry.category("services").add("orm", ormService, { force: true });
+    registry
+        .category("services")
+        .add("spreadsheet_server_data", spreadsheetServerDataService, { force: true });
     const env = await makeTestEnv({
         serverData: params.serverData || getBasicServerData(),
         mockRPC: params.mockRPC,
@@ -40,7 +44,7 @@ export async function createModelWithDataSource(params = {}) {
     const model = new Model(params.spreadsheetData, {
         custom: {
             env,
-            dataSources: new DataSources(env.services.orm),
+            dataSources: new DataSources(env.services.spreadsheet_server_data),
         },
     });
     setupDataSourceEvaluation(model);
