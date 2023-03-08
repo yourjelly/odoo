@@ -113,6 +113,7 @@ Finally, to instruct OpenERP to really use the unaccent function, you have to
 start the server specifying the ``--unaccent`` flag.
 
 """
+from collections import defaultdict
 import collections.abc
 import logging
 import reprlib
@@ -396,6 +397,73 @@ def check_leaf(element, internal=False):
         raise ValueError("Invalid leaf %s" % str(element))
 
 
+def optimize_domain(domain, model):
+    # Integrated with normalize ??
+
+    # TODO: |, <many2one> ilike x, <many2one> ilike y -> <many2one> ilike [x, y]
+    # TODO: |, <many2one> = x, <many2one> = y -> <many2one> in [x, y]
+    # TODO: |, <many2one> in [x, z], <many2one> in [y, u] -> <many2one> in [x, z, y, u]
+    # TODO: |, <many2one>.<field_x> <op> v, <many2one>.<field_y> <op> v -> <many2one> in <many2one_model>._search()
+
+    merging_stack = defaultdict(list)
+    replacement_list = []  # [(index, to_replace -> None to remove)]
+
+    def apply_merging_stack(current_operator):
+        print(merging_stack)
+        for (type_leaf, info), info_leafs in merging_stack.items():
+            if len(info_leafs) < 2:
+                continue
+            if type_leaf == 'many2one':
+                field = model._fields[info]
+                comodel = model.env[field.comodel_name]
+                method_operator = AND if info_leafs[0][1] == '&' else OR
+                comodel_domain = method_operator([
+                    [(leaf[0].partition('.')[-1], leaf[1], leaf[2])]
+                    for (i_op, op, i_leaf, leaf) in info_leafs
+                ])
+                new_leaf = [('id', 'in', comodel._search(comodel_domain, order='id'))]
+                replacements = [(new_leaf)] + [None] * (info_leafs - 1)
+            elif type_leaf == '=/in':
+                all_value = []
+                for i_op, op, i_leaf, leaf in info_leafs:
+                    left, op, right = leaf
+
+        merging_stack.clear()
+
+    operator_stack = [(-1, '&')]
+    current_operator = '&'
+
+    for i_leaf, leaf in enumerate(domain):
+        if leaf == '!':
+            operator_stack.append((i_leaf, leaf))
+        elif leaf in ('|', '&'):
+            operator_stack.append((i_leaf, leaf))
+            operator_stack.append((i_leaf, leaf))
+        else:
+            i_op, op = operator_stack.pop()
+            if op != current_operator:
+                print(f'Apply {op} != {current_operator}')
+                apply_merging_stack(op)
+                current_operator = op
+
+            left, operator, right = leaf
+            path0, dot, __ = left.partition('.')
+
+            field = model._fields.get(path0)
+            if field.type != 'many2one':
+                continue
+
+            if dot:
+                merging_stack[('many2one', field.name)].append((i_op, op, i_leaf, leaf))
+            elif operator in ('=', 'in'):
+                merging_stack[('=/in', None)].append((i_op, op, i_leaf, leaf))
+            elif 'like' in operator:
+                merging_stack[('like', operator)].append((i_op, op, i_leaf, leaf))
+
+    apply_merging_stack(op)
+
+
+
 # --------------------------------------------------
 # SQL utils
 # --------------------------------------------------
@@ -439,6 +507,7 @@ class expression(object):
 
         # normalize and prepare the expression for parsing
         self.expression = distribute_not(normalize_domain(domain))
+        # self.expression = optimize_domain(distribute_not(normalize_domain(domain)), model)
 
         # this object handles all the joins
         self.query = Query(model.env.cr, model._table, model._table_query) if query is None else query

@@ -1484,6 +1484,47 @@ class TestMany2one(TransactionCase):
         ''']):
             self.Partner.search([('company_id', 'not like', "blablabla")])
 
+    def test_optimize_domain(self):
+        Model = self.env['ir.actions.actions']
+        domains = [
+            ['|', ('binding_model_id', 'ilike', 'one'), ('binding_model_id', 'ilike', 'two')],
+            [('binding_model_id', 'ilike', 'one'), ('binding_model_id', 'ilike', 'two')],
+            ['|', ('binding_model_id', '=', 'one'), ('binding_model_id', '=', 'two')],
+            [('binding_model_id', '=', 'one'), ('binding_model_id', '=', 'two')],
+            ['|', ('binding_model_id', 'in', ['one', 'two']), ('binding_model_id', '=', 'three')],
+            ['|', ('binding_model_id', 'in', ['one', 'two']), ('binding_model_id', 'in', ['three', 'four'])],
+            [('binding_model_id.name', '=', 'one'), ('binding_model_id.model', '=', 'two')],
+            ['|', ('binding_model_id.name', '=', 'one'), ('binding_model_id.model', '=', 'two')],
+        ]
+        expected_domains = [
+            [('binding_model_id', 'ilike', ['one', 'two'])],
+            [('binding_model_id', 'ilike', 'one'), ('binding_model_id', 'ilike', 'two')],
+            [('binding_model_id', '=', ['one', 'two'])],
+            [False],  # Pas correct because override ??
+            [('binding_model_id', 'in', ['one', 'two', 'three'])],
+            [('binding_model_id', 'in', ['one', 'two', 'three', 'four'])],
+            [('binding_model_id', 'in', self.env['ir.model']._search([('name', '=', 'one'), ('model', '=', 'two')]))],
+            [('binding_model_id', 'in', self.env['ir.model']._search(['|', ('name', '=', 'one'), ('model', '=', 'two')]))],
+        ]
+
+        for domain, expected in zip(domains, expected_domains):
+            d = expression.distribute_not(expression.normalize_domain(domain))
+            print(d)
+            print(expression.optimize_domain(d, Model))
+
+        domain_without_opt = [
+            [('name', 'ilike', 'one')],
+            [('type', '=', 'one'), ('name', 'ilike', 'one')],
+        ]
+
+        for domain in domain_without_opt:
+            d = expression.distribute_not(expression.normalize_domain(domain))
+            print(d)
+            print(expression.optimize_domain(d, Model))
+
+        
+
+
 
 class TestOne2many(TransactionCase):
     def setUp(self):
