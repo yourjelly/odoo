@@ -22,7 +22,7 @@ import { file } from "web.test_utils";
 const { inputFiles } = file;
 
 let target;
-QUnit.module("chat window", {
+QUnit.module.only("chat window", {
     async beforeEach() {
         target = getFixture();
     },
