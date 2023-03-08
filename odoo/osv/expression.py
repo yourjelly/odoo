@@ -960,6 +960,11 @@ class expression(object):
                         expr, params = self.__leaf_to_sql(leaf, model, alias)
                         push_result(expr, params)
 
+                # Manage multiple value for like-like operator
+                elif 'like' in operator and isinstance(right, (list, tuple)) and all(isinstance(item, str) for item in right):
+                    for leaf in OR([[(left, operator, item)] for item in right]):
+                        push(leaf, model, alias)
+
                 elif field.translate and isinstance(right, str):
                     sql_operator = {'=like': 'like', '=ilike': 'ilike'}.get(operator, operator)
                     expr = ''
