@@ -51,8 +51,8 @@ export class Many2OneField extends Component {
         canCreate: { type: Boolean, optional: true },
         canWrite: { type: Boolean, optional: true },
         canQuickCreate: { type: Boolean, optional: true },
-        canCreateEdit: { type: Boolean, optional: true },
-        getDomain: { type: Function, optional: true },
+        canCreateEdit: { Object: Boolean, optional: true },
+        getDomain: { type: Object, optional: true },
         nameCreateField: { type: String, optional: true },
         searchLimit: { type: Number, optional: true },
         relation: { type: String, optional: true },
@@ -202,7 +202,7 @@ export class Many2OneField extends Component {
     }
     getDomain() {
         const { getDomain } = this.props;
-        return getDomain ? getDomain().toList(this.context) : [];
+        return getDomain ? getDomain.toList(this.context) : [];
     }
     async openAction() {
         const action = await this.orm.call(this.relation, "get_formview_action", [[this.resId]], {

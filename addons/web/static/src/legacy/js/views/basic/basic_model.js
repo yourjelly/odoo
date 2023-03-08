@@ -3771,6 +3771,7 @@ var BasicModel = AbstractModel.extend({
 
         if (element.parentID) {
             var parent = this.localData[element.parentID];
+            debugger
             if (parent.type === 'list' && parent.parentID) {
                 parent = this.localData[parent.parentID];
             }

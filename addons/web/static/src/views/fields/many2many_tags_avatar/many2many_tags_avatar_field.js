@@ -17,7 +17,7 @@ export class Many2ManyTagsAvatarField extends Many2ManyTagsField {
     static props = {
         ...Many2ManyTagsField.props,
         withCommand: { type: Boolean, optional: true },
-        getDomain: { type: Function },
+        getDomain: { type: Object },
     };
 
     get tags() {

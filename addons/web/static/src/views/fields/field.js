@@ -131,7 +131,7 @@ export class Field extends Component {
             const fieldName = this.props.name;
             fieldInfo = {
                 ...fieldInfo,
-                getDomain() {
+                get getDomain() {
                     const rawDomains = [
                         record._domains[fieldName] || [],
                         fieldInfo.domain || record.fields[fieldName].domain || [],

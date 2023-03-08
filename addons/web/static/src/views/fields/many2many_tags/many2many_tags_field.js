@@ -39,7 +39,7 @@ export class Many2ManyTagsField extends Component {
         canCreateEdit: { type: Boolean, optional: true },
         colorField: { type: String, optional: true },
         createDomain: { type: [Array, Boolean], optional: true },
-        getDomain: { type: Function },
+        getDomain: { type: Object },
         placeholder: { type: String, optional: true },
         nameCreateField: { type: String, optional: true },
         string: { type: String, optional: true },
@@ -150,7 +150,7 @@ export class Many2ManyTagsField extends Component {
 
     getDomain() {
         return Domain.and([
-            this.props.getDomain(),
+            this.props.getDomain,
             Domain.not([["id", "in", this.props.record.data[this.props.name].currentIds]]),
         ]).toList(this.context);
     }
