@@ -3,13 +3,13 @@
 
     <t t-name="sale.SaleProductCatalogQuantity" t-inherit="web.IntegerField" t-inherit-mode="primary" owl="1">
         <xpath expr="input" position="attributes">
-            <attribute name="class" separator=" " add="text-center"></attribute>
+            <attribute name="class" separator=" " add="form-control border-0 text-center"></attribute>
             <attribute name="t-on-input">onInput</attribute>
-       </xpath>
+        </xpath>
         <xpath expr="span" position="before">
             <button
                 name="sale_product_catalog_remove_quantity"
-                class="m-1 btn d-flex align-items-center justify-content-center btn-secondary" 
+                class="btn btn-outline-secondary" 
                 t-att-disabled="props.value === 0"
                 t-on-click.prevent="removeQuantity">
                 <i class="fa fa-minus center"/>
@@ -18,7 +18,7 @@
         <xpath expr="input" position="after">
             <button
                 name="sale_product_catalog_add_quantity"
-                class="m-1 btn d-flex align-items-center justify-content-center btn-secondary"
+                class="btn btn-outline-secondary"
                 t-on-click.prevent="addQuantity">
                 <i class="fa fa-plus"/>
             </button>

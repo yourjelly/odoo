@@ -18,86 +18,68 @@
                 <field name="default_code"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <t t-set="font_color" t-value="(record.sol_qty.raw_value != 0) ? 'color: white' : ''"/>
-                        <div class="d-flex flex-column justify-content-between my-0 ps-2"
-                             t-attf-class="{{(record.sol_qty.raw_value != 0) ? 'bg-primary' : ''}}">
-                            <div class="d-flex">
-                                <div class="o_kanban_image">
-                                    <img t-att-src="kanban_image('product.product', 'image_128', record.id.raw_value)"
-                                         class="o_image_64_contain"
-                                         alt="Product"/>
-                               </div>
-                                <div class="oe_kanban_details p-2 d-flex flex-column">
-                                    <div class="o_kanban_record_top flex-column w-100 justify-content-between">
-                                        <div class="o_kanban_record_title" t-attf-style="{{ font_color }}">
-                                            <strong><field name="name"/></strong>
-                                        </div>
-                                        <div class="o_kanban_product_details" t-attf-style="{{ font_color }}">
-                                           <div class="o_kanban_deault_code" t-if="record.default_code.value">
-                                                [<field name="default_code"/>]
-                                            </div>
-                                            <div class="o_kanban_price">
-                                                <span>Unit price: </span>
-                                                <field name="price_unit"/>
-                                            </div>
-                                        </div>
-                                        <div class="o_kanban_tags_section" t-attf-style="{{ font_color }}">
-                                            <field name="product_template_attribute_value_ids"
-                                                   widget="many2many_tags"
-                                                   groups="product.group_product_variant"
-                                                   options="{'color_field': 'color'}"/>
-                                        </div>
+                        <div class="my-0" t-attf-class="{{(record.sol_qty.raw_value != 0) ? 'text-bg-primary' : ''}}">
+                            <div class="o_kanban_sale_main d-flex flex-column h-100">
+                                <div class="o_kanban_sale_content d-flex flex-grow-1">
+                                    <div class="o_kanban_image">
+                                        <img t-att-src="kanban_image('product.product', 'image_128', record.id.raw_value)" class="o_image_64_contain" alt="Product"/>
                                     </div>
-                                </div>
-                                <div class="o_catalog_settings d-flex flex-column">
-                                    <div class="d-flex justify-content-end">
-                                        <div>
-                                        <field class="me-1 text-end pt-2" name="priority" widget="priority"/>
- 
-                                        </div>
-                                        <div class="o_dropdown_kanban dropdown">
-                                            <a role="button"
-                                               title="Dropdown menu"
-                                               class="dropdown-toggle o-no-caret btn"
-                                               data-bs-toggle="dropdown"
-                                               data-bs-display="static"
-                                               href="#">
-                                                <span class="fa fa-ellipsis-v"/>
-                                            </a>
-                                            <div class="dropdown-menu" role="menu">
-                                                <a role="menuitem"
-                                                   class="dropdown-item"
-                                                   type="object"
-                                                   name="action_edit_template"
-                                                   groups="sales_team.group_sale_manager">Edit</a>
+                                    <div class="oe_kanban_details p-2 d-flex">
+                                        <div class="o_kanban_record_top flex-column m-0">
+                                            <div class="d-flex">
+                                                <field class="me-2 text-white" name="priority" widget="priority"/>
+                                                <h4 class="o_kanban_record_title text-reset">
+                                                    <strong><field name="name"/></strong>
+                                                </h4>
+                                            </div>
+                                            <div class="o_kanban_product_details">
+                                                <div class="o_kanban_deault_code" t-if="record.default_code.value">
+                                                    [<field name="default_code"/>]
+                                                </div>
+                                                <div class="o_kanban_price">
+                                                    <span>Unit price: </span>
+                                                    <field name="price_unit"/>
+                                                </div>
+                                            </div>
+                                            <div class="o_kanban_tags_section">
+                                                <field name="product_template_attribute_value_ids" widget="many2many_tags" groups="product.group_product_variant" options="{'color_field': 'color'}"/>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="o_catalog_control d-flex flex-column">
-                                    <div class="mt-auto">
-                                        <t t-if="record.sol_qty.raw_value != 0">
-                                            <div class="pt-1 border bg-light">
-                                                <field name="sol_qty"
-                                                       class="o_sale_product_catalog_quantity w-100"
-                                                       widget="sale_product_catalog_quantity"
-                                                       options="{'type': 'number'}"/>
-                                            </div>
-                                            <div>
-                                                <button string="Remove"
+                                <div class="o_kanban_sale_bottom my-2 pt-3 border-top">
+                                    <div class="o_catalog_control text-dark">
+                                        <div class="mt-auto d-flex justify-content-end">
+                                            <t t-if="record.sol_qty.raw_value != 0">
+                                                <div class="bg-light w-50">
+                                                    <field name="sol_qty" class="o_sale_product_catalog_quantity d-flex input-group" widget="sale_product_catalog_quantity" options="{'type': 'number'}"/>
+                                                </div>
+                                                <div class="ms-auto">
+                                                    <button string="Remove"
+                                                            type="object"
+                                                            name="remove_from_order"
+                                                            class="btn-light rounded"/>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <button string="Add to the order"
                                                         type="object"
-                                                        name="remove_from_order"
-                                                        class="btn-primary rounded"/>
-                                            </div>
-                                        </t>
-                                        <t t-else="">
-                                            <button string="Add to the order"
-                                                    type="object"
-                                                    name="set_sol_qty"
-                                                    class="btn-primary rounded">
-                                                <i title="Add" class="fa fa-shopping-cart"/>
-                                            </button>
-                                        </t>
+                                                        name="set_sol_qty"
+                                                        class="btn btn-primary rounded">
+                                                    <i title="Add" class="fa fa-shopping-cart"/>
+                                                </button>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_catalog_settings position-absolute top-0 end-0 d-flex flex-column">
+                                <div class="o-dropdown dropdown o_dropdown_kanban bg-transparent o-dropdown--no-caret">
+                                    <a role="button" title="Dropdown menu" class="dropdown-toggle btn o-no-caret mt-0" data-bs-toggle="dropdown" data-bs-display="static" href="#">
+                                        <span class="fa fa-ellipsis-v"/>
+                                    </a>
+                                    <div class="dropdown-menu" role="menu">
+                                        <a role="menuitem" class="dropdown-item border-top-0" type="object" name="action_edit_template" groups="sales_team.group_sale_manager">Edit</a>
                                     </div>
                                 </div>
                             </div>
@@ -113,9 +95,7 @@
         <field name="model">product.product</field>
         <field name="arch" type="xml">
             <search string="Product">
-                <field name="name"
-                       string="Product"
-                       filter_domain="['|', '|', ('default_code', 'ilike', self), ('name', 'ilike', self), ('barcode', 'ilike', self)]"/>
+                <field name="name" string="Product" filter_domain="['|', '|', ('default_code', 'ilike', self), ('name', 'ilike', self), ('barcode', 'ilike', self)]"/>
                 <field name="categ_id" filter_domain="[('categ_id', 'child_of', raw_value)]"/>
                 <field name="product_template_attribute_value_ids" groups="product.group_product_variant"/>
                 <field name="product_tmpl_id" string="Product Template"/>
@@ -131,12 +111,7 @@
                 </group>
                 <searchpanel>
                     <field name="categ_id" string="Product Category" icon="fa-th-list" enable_counters="1"/>
-                    <field name="product_template_attribute_value_ids"
-                           widget="sale_attribute_category"
-                           string="Attributes"
-                           icon="fa-th-list"
-                           enable_counters="1"
-                           select="multi"/>
+                    <field name="product_template_attribute_value_ids" widget="sale_attribute_category" string="Attributes" icon="fa-th-list" enable_counters="1" select="multi"/>
                 </searchpanel>
             </search>
         </field>
