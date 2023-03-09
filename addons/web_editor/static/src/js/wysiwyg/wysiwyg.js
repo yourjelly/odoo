@@ -558,6 +558,7 @@ const Wysiwyg = Widget.extend({
                                     if (remoteSelection) {
                                         this.odooEditor.onExternalMultiselectionUpdate(remoteSelection);
                                     }
+                                    this._onHistoryResetFromSteps();
                                 }
                                 // In case there are steps received in the meantime, process them.
                                 if (historyStepsBuffer.length) {
@@ -652,6 +653,7 @@ const Wysiwyg = Widget.extend({
             }
             this._iceServers = iceServers;
 
+            this._onHistoryResetFromSteps = () => {};
             this.ptp = this._getNewPtp();
 
             resolve();
@@ -2566,6 +2568,7 @@ const Wysiwyg = Widget.extend({
     },
     _stopPeerToPeer: function () {
         this.ptp && this.ptp.stop();
+        this._onHistoryResetFromSteps = () => {};
         this._collaborationStopBus && this._collaborationStopBus();
     },
     _joinPeerToPeer: function () {
