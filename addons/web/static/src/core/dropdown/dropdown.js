@@ -234,7 +234,7 @@ export class Dropdown extends Component {
      * @param {DropdownStateChangedPayload} args
      */
     onDropdownStateChanged(args) {
-        if (this.rootRef.el.contains(args.emitter.rootRef.el)) {
+        if (!this.rootRef.el || this.rootRef.el.contains(args.emitter.rootRef.el)) {
             // Do not listen to events emitted by self or children
             return;
         }
