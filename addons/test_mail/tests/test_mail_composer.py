@@ -1025,6 +1025,51 @@ class TestComposerResultsComment(TestMailComposer):
         self.assertEqual(self.user_employee_2.lang, 'en_US')
 
     @users('employee')
+    def test_mail_composer_default_subject(self):
+        """ Make sure the default subject is applied in the composer. """
+        nonthread_record = self.env['mail.test.nothread'].create({'name': 'TestNoThread'})
+        simple_record = self.env['mail.test.simple'].create({'name': 'TestSimple'})
+        ticket_record = self.env['mail.test.ticket'].create({'name': 'TestTicket'})
+
+        # default behavior: use record name
+        _, message = self.env['mail.compose.message'].with_context(
+            self._get_web_context(simple_record, add_web=False, composition_mode='comment')
+        ).create({
+            'body': '<p>Test Body</p>',
+        })._action_send_mail()
+        self.assertEqual(message.subject, simple_record.name)
+
+        # default behavior without thread: use record name
+        non_thread_composer = self.env['mail.compose.message'].with_context(
+                self._get_web_context(nonthread_record, add_web=False, composition_mode='comment')
+            ).create({
+                'body': '<p>Test Body</p>',
+                'partner_ids': self.env.user.partner_id.ids,
+            })
+        with self.mock_mail_gateway(mail_unlink_sent=True), self.mock_mail_app():
+           non_thread_composer._action_send_mail()
+        message = self._new_msgs
+        self.assertEqual(message.subject, nonthread_record.name)
+
+        # overridden in model
+        _, message = self.env['mail.compose.message'].with_context(
+            self._get_web_context(ticket_record, add_web=False, composition_mode='comment')
+        ).create({
+            'body': '<p>Test Body</p>',
+        })._action_send_mail()
+        self.assertEqual(message.subject, ticket_record._message_compute_subject())
+        self.assertIn(f'Ticket for {ticket_record.name}', message.subject)
+
+        # forced value
+        _, message = self.env['mail.compose.message'].with_context(
+            self._get_web_context(ticket_record, add_web=False, composition_mode='comment')
+        ).create({
+            'body': '<p>Test Body</p>',
+            'subject': 'Forced Subject',
+        })._action_send_mail()
+        self.assertEqual(message.subject, 'Forced Subject',)
+
+    @users('employee')
     @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_mail_composer_notifications_delete(self):
         """ Notifications are correctly deleted once sent """
