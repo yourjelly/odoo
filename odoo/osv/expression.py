@@ -410,7 +410,7 @@ def optimize_domain(domain, model):
 
     def apply_merging_stack(current_operator):
         print(merging_stack)
-        for (type_leaf, info), info_leafs in merging_stack.items():
+        for (type_leaf, field_name, maybe_operator), info_leafs in merging_stack.items():
             if len(info_leafs) < 2:
                 continue
             if type_leaf == 'many2one':
@@ -430,35 +430,35 @@ def optimize_domain(domain, model):
 
         merging_stack.clear()
 
-    operator_stack = [(-1, '&')]
     current_operator = '&'
+    operator_stack = [(-1, current_operator)]
 
-    for i_leaf, leaf in enumerate(domain):
+    for leaf_no, leaf in enumerate(domain):
         if leaf == '!':
-            operator_stack.append((i_leaf, leaf))
+            operator_stack.append((leaf_no, leaf))
         elif leaf in ('|', '&'):
-            operator_stack.append((i_leaf, leaf))
-            operator_stack.append((i_leaf, leaf))
-        else:
-            i_op, op = operator_stack.pop()
+            operator_stack.append((leaf_no, leaf))
+            operator_stack.append((leaf_no, leaf))
+        else:  # (left, op, right)
+            op_no, op = operator_stack.pop()
             if op != current_operator:
                 print(f'Apply {op} != {current_operator}')
                 apply_merging_stack(op)
                 current_operator = op
 
             left, operator, right = leaf
-            path0, dot, __ = left.partition('.')
+            field_name, dot, __ = left.partition('.')
 
-            field = model._fields.get(path0)
+            field = model._fields[field_name]
             if field.type != 'many2one':
                 continue
 
             if dot:
-                merging_stack[('many2one', field.name)].append((i_op, op, i_leaf, leaf))
+                merging_stack[('many2one', field_name, None)].append((op_no, op, leaf_no, leaf))
             elif operator in ('=', 'in'):
-                merging_stack[('=/in', None)].append((i_op, op, i_leaf, leaf))
+                merging_stack[('=/in', field_name, None)].append((op_no, op, leaf_no, leaf))
             elif 'like' in operator:
-                merging_stack[('like', operator)].append((i_op, op, i_leaf, leaf))
+                merging_stack[('like', field_name, operator)].append((op_no, op, leaf_no, leaf))
 
     apply_merging_stack(op)
 
