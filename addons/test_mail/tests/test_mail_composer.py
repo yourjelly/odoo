@@ -1185,6 +1185,7 @@ class TestComposerResultsComment(TestMailComposer, CronMixinCase):
     @users('employee')
     def test_mail_composer_default_subject(self):
         """ Make sure the default subject is applied in the composer. """
+        nonthread_record = self.env['mail.test.nothread'].create({'name': 'TestNoThread'})
         simple_record = self.env['mail.test.simple'].create({'name': 'TestSimple'})
         ticket_record = self.env['mail.test.ticket'].create({'name': 'TestTicket'})
 
@@ -1195,6 +1196,15 @@ class TestComposerResultsComment(TestMailComposer, CronMixinCase):
             'body': '<p>Test Body</p>',
         })._action_send_mail()
         self.assertEqual(message.subject, simple_record.name)
+
+        # default behavior without thread: use record name
+        _, message = self.env['mail.compose.message'].with_context(
+            self._get_web_context(nonthread_record, add_web=False, composition_mode='comment')
+        ).create({
+            'body': '<p>Test Body</p>',
+            'partner_ids': self.env.user.partner_id.ids,
+        })._action_send_mail()
+        self.assertEqual(message.subject, nonthread_record.name)
 
         # overridden in model
         _, message = self.env['mail.compose.message'].with_context(

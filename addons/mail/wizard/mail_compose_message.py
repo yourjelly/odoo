@@ -208,8 +208,11 @@ class MailComposer(models.TransientModel):
                 if (not subject and composer.model and
                     composer.composition_mode == 'comment' and
                     not composer.composition_batch):
-                    res_ids = composer._evaluate_res_ids()
-                    subject = self.env[composer.model].browse(res_ids)._message_compute_subject()
+                    res_ids = self.env[composer.model].browse(composer._evaluate_res_ids())
+                    if composer.model_is_thread:
+                        subject = res_ids._message_compute_subject()
+                    else:
+                        subject = res_ids.display_name
                 composer.subject = subject
 
     @api.depends('composition_mode', 'model', 'res_domain', 'res_ids',
