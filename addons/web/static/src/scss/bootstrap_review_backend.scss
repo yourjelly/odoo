@@ -10,9 +10,25 @@
 $o-btns-custom: () !default;
 $o-btns: map-merge($theme-colors, $o-btns-custom);
 
+@mixin o-print-btn-colors($-data) {
+    @if (type-of($-data) == map) {
+        $-hover-bg: if(alpha(o-safe-get($-data, hover-background)) == 0, $o-view-background-color, o-safe-get($-data, hover-background));
+
+        --btn-hover-background: #{$-hover-bg};
+        --btn-hover-color: #{o-safe-get($-data, hover-color)};
+        --btn-hover-color-blend: #{mix($-hover-bg, o-safe-get($-data, hover-color))};
+    } @else {
+        --btn-hover-background: #{$-data};
+        --btn-hover-color: #{color-contrast($-data)};
+        --btn-hover-color-blend: #{mix($-data, color-contrast($-data))};
+    }
+}
+
 @each $-name, $-value in $o-btns {
     @if (type-of($-value) == map) {
         .btn-#{$-name} {
+            @include o-print-btn-colors($-value);
+
             @include button-variant(
                 o-safe-get($-value, background),
                 o-safe-get($-value, border),
@@ -29,14 +45,17 @@ $o-btns: map-merge($theme-colors, $o-btns-custom);
             );
         }
         .btn-outline-#{$-name} {
+            @include o-print-btn-colors(o-safe-get($-value, border));
             @include button-outline-variant(o-safe-get($-value, border));
         }
 
     } @else {
         .btn-#{$-name} {
+            @include o-print-btn-colors($-value);
             @include button-variant($-value, $-value);
         }
         .btn-outline-#{$-name} {
+            @include o-print-btn-colors($-value);
             @include button-outline-variant($-value);
         }
     }
