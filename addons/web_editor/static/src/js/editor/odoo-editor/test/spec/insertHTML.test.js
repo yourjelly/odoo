@@ -1,4 +1,7 @@
-import { parseHTML } from '../../src/utils/utils.js';
+import {
+    parseHTML,
+    setCursorEnd,
+} from '../../src/utils/utils.js';
 import { BasicEditor, testEditor, unformat } from '../utils.js';
 
 const span = text => {
@@ -88,6 +91,21 @@ describe('insert HTML', () => {
                     await editor.execCommand('insert', parseHTML('<pre>def</pre>'));
                 },
                 contentAfter: '<pre>abcdef[]<br>ghi</pre>',
+            });
+        });
+        it('should unpack elements from a lone paragraph', async () => {
+            // TODO remove this test if/when the execCommand ends up not
+            // unpacking content of a paragraph or from the first and last
+            // inserted elements (in case there are more than one). Don't forget
+            // to update the appendBehaviorBlueprint method in Knowledge
+            // wysiwyg.js at that point.
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>[]<br></p>',
+                stepFunction: async editor => {
+                    setCursorEnd(editor.editable);
+                    await editor.execCommand('insert', parseHTML('<p><div>content</div><p><br></p></p>'));
+                },
+                contentAfter: '<p><br></p><div>content</div><p><br>[]</p>',
             });
         });
     });
