@@ -3,187 +3,174 @@
 
 """ Modules dependency graph. """
 
-import itertools
 import logging
+# Deprecated since version 3.9:
+# https://docs.python.org/3.9/library/typing.html#typing.Iterable
+from typing import List, Set, Dict, Iterable
+from collections import defaultdict
 
 import odoo
 import odoo.tools as tools
 
 _logger = logging.getLogger(__name__)
 
-class Graph(dict):
-    """ Modules dependency graph.
 
-    The graph is a mapping from module name to Nodes.
+class Package:
+    def __init__(self, name: str, manifest: dict) -> None:
+        # manifest data
+        self.name = name
+        self.manifest = manifest
 
-    """
+        # ir_module_module data             # column_name
+        self.id = None                         # id
+        self.state = 'uninstalled'          # state
+        self.dbdemo = False                 # demo
+        self.installed_version = None       # latest_version
 
-    def add_node(self, name, info):
-        max_depth, father = 0, None
-        for d in info['depends']:
-            n = self.get(d) or Node(d, self, None)  # lazy creation, do not use default value for get()
-            if n.depth >= max_depth:
-                father = n
-                max_depth = n.depth
-        if father:
-            return father.add_child(name, info)
-        else:
-            return Node(name, self, info)
+        # info for upgrade
+        self.upgrade_end = False            # if the package is need to upgrade end-xxx
+        self.old_version = None             # the version when added to graph
 
-    def update_from_db(self, cr):
-        if not len(self):
+        # dependency
+        self.parents: List[Package] = []
+        self.children: List[Package] = []
+        self.depth = -1                     # the longest distance to the 'base' module
+
+    def demo_installable(self) -> bool:
+        return all(p.dbdemo for p in self.parents)
+
+
+class Graph:
+
+    def __init__(self) -> None:
+        self._packages: Dict[str, Package] = {}
+        self._unsorted_packages: List[Package] = []
+
+    def __contains__(self, key: str) -> bool:
+        return key in self._packages
+
+    def __getitem__(self, item: str) -> Package:
+        return self._packages[item]
+
+    def __iter__(self) -> Iterable[Package]:
+        if self._unsorted_packages:
+            self._update_edges(self._unsorted_packages)
+            for package in self._unsorted_packages:
+                self._update_depth(package)
+            self._packages = dict(sorted(self._packages.items(), key=lambda item: (item[1].depth, item[1].name)))
+            self._unsorted_packages = []
+        return iter(self._packages.values())
+
+    def __len__(self) -> int:
+        return len(self._packages)
+
+    def __bool__(self) -> bool:
+        return bool(self._packages)
+
+    def _update_edges(self, packages: Iterable[Package]) -> None:
+        for package in packages:
+            for dep in package.manifest['depends']:
+                parent = self[dep]
+                package.parents.append(parent)
+                parent.children.append(package)
+
+    def _update_depth(self, package: Package) -> None:
+        if any(parent.depth == -1 for parent in package.parents):
             return
-        # update the graph with values from the database (if exist)
-        ## First, we set the default values for each package in graph
-        additional_data = {key: {'id': 0, 'state': 'uninstalled', 'dbdemo': False, 'installed_version': None} for key in self.keys()}
-        ## Then we get the values from the database
-        cr.execute('SELECT name, id, state, demo AS dbdemo, latest_version AS installed_version'
-                   '  FROM ir_module_module'
-                   ' WHERE name IN %s',(tuple(additional_data),)
-                   )
+        depth_offset = max((parent.depth for parent in package.parents), default=-1) + 1
+        path: Set[Package] = set()
 
-        ## and we update the default values with values from the database
-        additional_data.update((x['name'], x) for x in cr.dictfetchall())
+        # DFS
+        def visit(node: Package) -> None:
+            if node.name not in self._packages:
+                return
+            if node in path:  # depends loop detected
+                self._del_package(node.name)
+                return
+            path.add(node)
+            for child in node.children:
+                if len(path) + depth_offset > child.depth:
+                    visit(child)
+            path.remove(node)
+            node.depth = max(node.depth, len(path) + depth_offset)
 
-        for package in self.values():
-            for k, v in additional_data[package.name].items():
-                setattr(package, k, v)
+        visit(package)
 
-    def add_module(self, cr, module, force=None):
-        self.add_modules(cr, [module], force)
+    def _del_package(self, name: str) -> None:
+        if name not in self._packages:
+            return
+        package = self._packages.pop(name)
+        for parent in package.parents:
+            parent.children.remove(package)
+        for child in package.children:
+            self._del_package(child.name)
 
-    def add_modules(self, cr, module_list, force=None):
-        if force is None:
-            force = []
-        packages = []
-        len_graph = len(self)
-        for module in module_list:
-            info = odoo.modules.module.get_manifest(module)
-            if info and info['installable']:
-                packages.append((module, info)) # TODO directly a dict, like in get_modules_with_version
+    def _add_package(self, name: str, manifest: dict) -> None:
+        new_package = Package(name, manifest)
+        self._unsorted_packages.append(new_package)
+        self._packages[name] = new_package
+
+    def add_modules(self, cr, modules: Iterable[str]) -> int:
+        manifests: Dict[str, dict] = {}
+        for module in modules:
+            manifest = odoo.modules.module.get_manifest(module)
+            if manifest and manifest['installable']:
+                manifests[module] = manifest
             elif module != 'studio_customization':
                 _logger.warning('module %s: not installable, skipped', module)
 
-        dependencies = dict([(p, info['depends']) for p, info in packages])
-        current, later = set([p for p, info in packages]), set()
+        missing_modules = {
+            dep
+            for module, manifest in manifests.items()
+            for dep in manifest['depends'] if dep not in self and dep not in manifests
+        }
+        if missing_modules:
+            unmet_modules = set()
+            children = defaultdict(list)
+            for module, manifest in manifests.items():
+                for dep in manifest['depends']:
+                    children[dep].append(module)
 
-        while packages and current > later:
-            package, info = packages[0]
-            deps = info['depends']
+            # BFS
+            def visit(module_: str) -> None:
+                if module_ not in unmet_modules:
+                    unmet_modules.add(module_)
+                    del manifests[module_]
+                    for child_ in children[module_]:
+                        visit(child_)
 
-            # if all dependencies of 'package' are already in the graph, add 'package' in the graph
-            if all(dep in self for dep in deps):
-                if not package in current:
-                    packages.pop(0)
-                    continue
-                later.clear()
-                current.remove(package)
-                node = self.add_node(package, info)
-                for kind in ('init', 'demo', 'update'):
-                    if package in tools.config[kind] or 'all' in tools.config[kind] or kind in force:
-                        setattr(node, kind, True)
-            else:
-                later.add(package)
-                packages.append((package, info))
-            packages.pop(0)
+            for module in missing_modules:
+                for child in children[module]:
+                    visit(child)
 
-        self.update_from_db(cr)
+            _logger.info(
+                'modules %s cannot be added to the Graph because their dependent modules %s are not added',
+                ', '.join(unmet_modules), ', '.join(missing_modules)
+            )
 
-        for package in later:
-            unmet_deps = [p for p in dependencies[package] if p not in self]
-            _logger.info('module %s: Unmet dependencies: %s', package, ', '.join(unmet_deps))
+        # unmet_modules have been removed from manifests in the BFS
+        for module, manifest in manifests.items():
+            self._add_package(module, manifest)
 
-        return len(self) - len_graph
+        self.update_from_db(cr, manifests)
 
+        return len(manifests)
 
-    def __iter__(self):
-        level = 0
-        done = set(self.keys())
-        while done:
-            level_modules = sorted((name, module) for name, module in self.items() if module.depth==level)
-            for name, module in level_modules:
-                done.remove(name)
-                yield module
-            level += 1
+    def update_from_db(self, cr, modules: Iterable[str]) -> None:
+        if not modules:
+            return
+        # update the graph with values from the database (if exist)
+        cr.execute('''
+            SELECT name, id, state, demo, latest_version AS installed_version
+            FROM ir_module_module
+            WHERE name IN %s
+        ''', (tuple(modules),))
 
-    def __str__(self):
-        return '\n'.join(str(n) for n in self if n.depth == 0)
-
-class Node(object):
-    """ One module in the modules dependency graph.
-
-    Node acts as a per-module singleton. A node is constructed via
-    Graph.add_module() or Graph.add_modules(). Some of its fields are from
-    ir_module_module (set by Graph.update_from_db()).
-
-    """
-    def __new__(cls, name, graph, info):
-        if name in graph:
-            inst = graph[name]
-        else:
-            inst = object.__new__(cls)
-            graph[name] = inst
-        return inst
-
-    def __init__(self, name, graph, info):
-        self.name = name
-        self.graph = graph
-        self.info = info or getattr(self, 'info', {})
-        if not hasattr(self, 'children'):
-            self.children = []
-        if not hasattr(self, 'depth'):
-            self.depth = 0
-
-    @property
-    def data(self):
-        return self.info
-
-    def add_child(self, name, info):
-        node = Node(name, self.graph, info)
-        node.depth = self.depth + 1
-        if node not in self.children:
-            self.children.append(node)
-        for attr in ('init', 'update', 'demo'):
-            if hasattr(self, attr):
-                setattr(node, attr, True)
-        self.children.sort(key=lambda x: x.name)
-        return node
-
-    def __setattr__(self, name, value):
-        super(Node, self).__setattr__(name, value)
-        if name in ('init', 'update', 'demo'):
-            tools.config[name][self.name] = 1
-            for child in self.children:
-                setattr(child, name, value)
-        if name == 'depth':
-            for child in self.children:
-                setattr(child, name, value + 1)
-
-    def __iter__(self):
-        return itertools.chain(
-            self.children,
-            itertools.chain.from_iterable(self.children)
-        )
-
-    def __str__(self):
-        return self._pprint()
-
-    def _pprint(self, depth=0):
-        s = '%s\n' % self.name
-        for c in self.children:
-            s += '%s`-> %s' % ('   ' * depth, c._pprint(depth+1))
-        return s
-
-    def should_have_demo(self):
-        return (hasattr(self, 'demo') or (self.dbdemo and self.state != 'installed')) and all(p.dbdemo for p in self.parents)
-
-    @property
-    def parents(self):
-        if self.depth == 0:
-            return []
-
-        return (
-            node for node in self.graph.values()
-            if node.depth < self.depth
-            if self in node.children
-        )
+        for name, id_, state, demo, installed_version in cr.fetchall():
+            package = self[name]
+            package.id = id_
+            package.state = state
+            package.dbdemo = demo
+            package.installed_version = installed_version
+            package.old_version = installed_version
+            package.upgrade_end = package.state == 'to upgrade'
