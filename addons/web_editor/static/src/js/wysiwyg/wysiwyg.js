@@ -35,6 +35,7 @@ const preserveCursor = OdooEditorLib.preserveCursor;
 const closestElement = OdooEditorLib.closestElement;
 const setSelection = OdooEditorLib.setSelection;
 const endPos = OdooEditorLib.endPos;
+const isZWS = OdooEditorLib.isZWS;
 
 var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
@@ -1606,19 +1607,16 @@ const Wysiwyg = Widget.extend({
             color = (eventName === "foreColor" ? 'text-' : 'bg-') + color;
         }
         const fonts = this.odooEditor.execCommand('applyColor', color, eventName === 'foreColor' ? 'color' : 'backgroundColor', this.lastMediaClicked);
-
-        if (!this.lastMediaClicked) {
+        if (!fonts) {
+            return;
+        }
+        if (!this.lastMediaClicked && fonts.length) {
             // Ensure the selection in the fonts tags, otherwise an undetermined
             // race condition could generate a wrong selection later.
             const first = fonts[0];
             const last = fonts[fonts.length - 1];
 
-            const sel = this.odooEditor.document.getSelection();
-            sel.removeAllRanges();
-            const range = new Range();
-            range.setStart(first, 0);
-            range.setEnd(...endPos(last));
-            sel.addRange(range);
+            OdooEditorLib.setSelection(first, 0, ...endPos(last), isZWS(first));
         }
 
         const hexColor = this._colorToHex(color);
