@@ -47,10 +47,12 @@ const BOOLEAN_ORDER = [true, false, undefined];
  * @property {import("@web/core/orm_service").ORM} orm
  *
  * @typedef {string|number|boolean} ReadGroupValue //TODOPRO Check that we cannot have another return type. Perhaps undefined ?
- * @typedef {Record<string, [number, ReadGroupValue]|ReadGroupValue>} ReadGroupResult
+ * @typedef {Record<string, [number, ReadGroupValue]|ReadGroupValue>} Aggregate
+ * @typedef {Array<Aggregate>} ReadGroupResult
  *
  * @typedef {Object} PivotNode
  * @property {ReadGroupValue|"ROOT"} value
+ * @property {string|"ROOT"} groupBy
  * @property {Array<PivotNode>} [children]
  *
  * @typedef {Object} PivotGroupField
@@ -154,20 +156,20 @@ function binarySearch(sortedArray, value) {
  * date or datetime field. In that case, it will return the formatted date.
  * (not localized)
  *
- * @param {ReadGroupResult} readGroupResult
+ * @param {Aggregate} aggregate
  * @param {PivotGroupField} groupField
  *
  * @returns {ReadGroupValue}
  */
-function extractValueFromReadGroupRequest(readGroupResult, groupField) {
+function extractValueFromReadGroupRequest(aggregate, groupField) {
     const { field, aggregateOperator, groupBy } = groupField;
-    const value = readGroupResult[groupBy];
+    const value = aggregate[groupBy];
     if (Array.isArray(value)) {
         return value[0];
     }
     if (fields.isDate(field)) {
         //TODOPRO Check if we could do it directly from getDateStartingDay, instead of exporting from luxon, then create a moment then export if the date is valid.
-        const dateValue = getDateStartingDay(readGroupResult, field, aggregateOperator);
+        const dateValue = getDateStartingDay(aggregate, field, aggregateOperator);
         if (!dateValue) {
             return false;
         }
@@ -183,19 +185,19 @@ function extractValueFromReadGroupRequest(readGroupResult, groupField) {
  * This function returns the starting day of a date or datetime field.
  * (local to the timezone)
  *
- * @param {ReadGroupResult} readGroupResult
+ * @param {Aggregate} aggregate
  * @param {Field} field
  * @param {string} aggregateOperator
  *
  * @returns {string | undefined}
  */
-function getDateStartingDay(readGroupResult, field, aggregateOperator) {
+function getDateStartingDay(aggregate, field, aggregateOperator) {
     const fieldNameWithAggregate = `${field.name}:${aggregateOperator}`;
-    if (!readGroupResult["__range"] || !readGroupResult["__range"][fieldNameWithAggregate]) {
+    if (!aggregate["__range"] || !aggregate["__range"][fieldNameWithAggregate]) {
         //TODOPRO Check if we could throw an error here
         return undefined;
     }
-    const sqlValue = readGroupResult["__range"][fieldNameWithAggregate].from;
+    const sqlValue = aggregate["__range"][fieldNameWithAggregate].from;
     if (field.type === "date") {
         return sqlValue;
     }
@@ -270,9 +272,11 @@ export class SpreadsheetPivotModel2 {
         this._searchParams = params.searchParams;
         this._serverData = services.serverData;
 
-        this.data = {};
+        this.aggregates = [];
+        // Used for performance reasons
+        this.aggregateIds = [];
+        this.aggregateMapping = {};
         this.orderedValues = {};
-        this.dataKeys = [];
         this._tableStructure = undefined;
     }
 
@@ -303,7 +307,7 @@ export class SpreadsheetPivotModel2 {
      * However, search read RPCs are generally faster/lighter than read group RPCs.
      *
      * @private
-     * @returns {Promise<ReadGroupResult[]>}
+     * @returns {Promise<ReadGroupResult>}
      */
     async _readGroup() {
         const { activeMeasures, resModel } = this._metaData;
@@ -325,9 +329,9 @@ export class SpreadsheetPivotModel2 {
      * @private
      */
     _initializeDataStructure() {
-        this.data = {};
+        this.aggregateMapping = {};
         for (const gb of this.groupBys) {
-            this.data[gb.groupBy] = {};
+            this.aggregateMapping[gb.groupBy] = {};
         }
     }
 
@@ -337,8 +341,8 @@ export class SpreadsheetPivotModel2 {
         }
         this._initializeDataStructure();
         const requests = await this._readGroup();
-        this.requests = requests;
-        this.dataKeys = Array(requests.length)
+        this.aggregates = requests;
+        this.aggregateIds = Array(requests.length)
             .fill(0)
             .map((_, index) => toString(index));
         for (const index in requests) {
@@ -346,58 +350,55 @@ export class SpreadsheetPivotModel2 {
             for (const gb of this.groupBys) {
                 const groupBy = gb.groupBy;
                 const value = extractValueFromReadGroupRequest(request, gb);
-                if (!(toString(value) in this.data[groupBy])) {
-                    this.data[groupBy][toString(value)] = [];
+                if (!(toString(value) in this.aggregateMapping[groupBy])) {
+                    this.aggregateMapping[groupBy][toString(value)] = [];
                 }
-                this.data[groupBy][toString(value)].push(index);
+                this.aggregateMapping[groupBy][toString(value)].push(index);
             }
         }
         for (const gb of this.groupBys) {
-            const values = Object.keys(this.data[gb.groupBy]);
+            const values = Object.keys(this.aggregateMapping[gb.groupBy]);
             await this._orderGroupByValues(gb, values);
         }
-        const cols = this._createColumnTree();
+        const cols = this._createGroupTree(this._metaData.colGroupBys);
+        const rows = this._createGroupTree(this._metaData.rowGroupBys);
         console.log(cols);
+        console.log(rows);
+        debugger;
         // this._tableStructure = lazy(() => {
         //     // Create cols and rows trees
         // });
         // console.log(this.getTableStructure());
     }
 
-    _createColumnTree() {
-        /** @type PivotNode */
-        const cols = { value: "ROOT" };
-        const requestIds = this.dataKeys;
-        cols.children = this._computeChildren(this._metaData.colGroupBys, requestIds);
-        return cols;
+    _createGroupTree(groupBys) {
+        const groupTree = new GroupByTree();
+        this._computeChildren(groupTree, groupBys, this.aggregateIds);
+        return groupTree;
     }
 
     /**
      *
+     * @param {Node} parent
      * @param {Array<string>} groupBys
      * @param {Array<string>} requestIds To be used with intersection
      *
      * @private
-     * @returns {Array<PivotNode>|undefined}
      */
-    _computeChildren(groupBys, requestIds) {
+    _computeChildren(parent, groupBys, requestIds) {
         if (groupBys.length === 0) {
-            return undefined;
+            return;
         }
-        /** @type {Array<PivotNode>} */
-        const children = [];
         const { groupBy } = groupBys[0];
-        debugger;
         for (const value of this.orderedValues[groupBy]) {
-            const ids = this.data[groupBy][toString(value)];
+            const ids = this.aggregateMapping[groupBy][toString(value)];
             const intersection = requestIds.filter((id) => ids.includes(id));
             if (ids && intersection.length > 0) {
-                const child = { value, children: [] };
-                children.push(child);
-                child.children = this._computeChildren(groupBys.slice(1), intersection);
+                const child = new Node(value, groupBy);
+                parent.add(child);
+                this._computeChildren(child, groupBys.slice(1), intersection);
             }
         }
-        return children;
     }
 
     /**
@@ -480,14 +481,14 @@ export class SpreadsheetPivotModel2 {
 
     //TODOPRO Change this fucking domain representation
     getRequestsIndexes(domain) {
-        let indexes = this.dataKeys;
+        let indexes = this.aggregateIds;
         for (let i = 0; i < domain.length; i += 2) {
             const fieldName = domain[i];
             //TODOPRO We should simplify this, and integrate it in the new domain representation
             const { field } = parseGroupField(this._metaData.fields, fieldName);
             const value = toString(parsePivotFormulaFieldValue(field, domain[i + 1]));
             //TODOPRO I assume here that the domain is valid and exist in the data
-            const groupBysIndexes = this.data[field.name][value];
+            const groupBysIndexes = this.aggregateMapping[field.name][value];
             if (!groupBysIndexes) {
                 return [];
             }
@@ -508,7 +509,7 @@ export class SpreadsheetPivotModel2 {
             return "";
         }
         //TODOPRO Here the measure is not checked
-        const values = indexes.map((index) => this.requests[index][measure]);
+        const values = indexes.map((index) => this.aggregates[index][measure]);
         //TODOPRO This only works for sum
         return values.reduce((acc, value) => acc + value, 0);
     }
@@ -560,24 +561,30 @@ class RelationalField {
 }
 
 class Node {
-    constructor(value) {
+    constructor(value, groupBy) {
         this.value = value;
+        this.groupBy = groupBy;
         this.children = [];
     }
 
-    add(value) {
-        this.children.push(new Node(value));
-    }
-
-    //TODOPRO I think it's useless for us. Should be removed
-    remove(value) {
-        this.children = this.children.filter((child) => child.value !== value);
+    /**
+     * @param {Node} node
+     */
+    add(node) {
+        this.children.push(node);
     }
 }
 
 class GroupByTree {
 
     constructor() {
-        this.root = new Node();
+        this.root = new Node("ROOT", "ROOT");
+    }
+
+    /**
+     * @param {Node} node
+     */
+    add(node) {
+        this.root.add(node);
     }
 }
