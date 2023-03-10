@@ -765,11 +765,11 @@ export class OdooEditor extends EventTarget {
     }
 
     serializeNode(node, mutatedNodes) {
-        return this._collabClientId ? serializeNode(node, mutatedNodes) : node;
+        return serializeNode(node, mutatedNodes);
     }
 
-    unserializeNode(node) {
-        return this._collabClientId ? unserializeNode(node) : node;
+    unserializeNode(node, idToNodeMap) {
+        return unserializeNode(node, idToNodeMap);
     }
 
     automaticStepActive(label) {
@@ -813,6 +813,8 @@ export class OdooEditor extends EventTarget {
             });
         }
         this.dispatchEvent(new Event('preObserverActive'));
+        this.idSet(this.editable);
+        this._serializedEditable = this.serializeNode(this.editable);
         this.observer.observe(this.editable, {
             childList: true,
             subtree: true,
@@ -825,24 +827,31 @@ export class OdooEditor extends EventTarget {
     }
 
     observerApply(records) {
+        const idToNodeMap = new Map();
+        this.unserializeNode(this._serializedEditable, idToNodeMap);
+        this.idSet(this.editable);
         // There is a case where node A is added and node B is a descendant of
         // node A where node B was not in the observed tree) then node B is
         // added into another node. In that case, we need to keep track of node
         // B so when serializing node A, we strip node B from the node A tree to
-        // avoid the duplication of node A.
-        const mutatedNodes = new Set();
+        // avoid the duplication of node B.
+        const mutatedAddedNodes = new Map();
+        const mutatedRemovedNodes = new Map();
         for (const record of records) {
             if (record.type === 'childList') {
+                if (!mutatedAddedNodes.has(record.target.oid)) {
+                    mutatedAddedNodes.set(record.target.oid, new Set());
+                    mutatedRemovedNodes.set(record.target.oid, new Set());
+                }
                 for (const node of record.addedNodes) {
                     this.idSet(node, this._checkStepUnbreakable);
-                    mutatedNodes.add(node.oid);
                 }
                 for (const node of record.removedNodes) {
                     this.idSet(node, this._checkStepUnbreakable);
-                    mutatedNodes.delete(node.oid);
                 }
             }
         }
+        const addRecords = [];
         for (const record of records) {
             switch (record.type) {
                 case 'characterData': {
@@ -865,6 +874,12 @@ export class OdooEditor extends EventTarget {
                     break;
                 }
                 case 'childList': {
+                    record.removedNodes.forEach(removed => {
+                        mutatedRemovedNodes.get(record.target.oid).add(removed.oid);
+                    });
+                    if (record.addedNodes.length) {
+                        addRecords.push([]);
+                    }
                     record.addedNodes.forEach(added => {
                         this._toRollback =
                             this._toRollback ||
@@ -872,30 +887,23 @@ export class OdooEditor extends EventTarget {
                         const mutation = {
                             'type': 'add',
                         };
-                        if (!record.nextSibling && record.target.oid) {
-                            mutation.append = record.target.oid;
-                        } else if (record.nextSibling && record.nextSibling.oid) {
-                            mutation.before = record.nextSibling.oid;
-                        } else if (!record.previousSibling && record.target.oid) {
-                            mutation.prepend = record.target.oid;
-                        } else if (record.previousSibling && record.previousSibling.oid) {
-                            mutation.after = record.previousSibling.oid;
-                        } else {
-                            return false;
-                        }
                         mutation.id = added.oid;
-                        mutation.node = this.serializeNode(added, mutatedNodes);
+                        mutation.node = added;
+                        mutatedRemovedNodes.get(record.target.oid).delete(added.oid);
+                        addRecords.at(-1).push(mutation);
                         this._currentStep.mutations.push(mutation);
                     });
                     record.removedNodes.forEach(removed => {
                         if (!this._toRollback && containsUnremovable(removed)) {
                             this._toRollback = UNREMOVABLE_ROLLBACK_CODE;
                         }
+                        const removedBefore = idToNodeMap.get(removed.oid);
+                        const serializedNode = (removedBefore) ? this.serializeNode(removedBefore, mutatedRemovedNodes.get(removedBefore.oid)) : this.serializeNode(removed);
                         this._currentStep.mutations.push({
                             'type': 'remove',
                             'id': removed.oid,
                             'parentId': record.target.oid,
-                            'node': this.serializeNode(removed),
+                            'node': serializedNode,
                             'nextId': record.nextSibling ? record.nextSibling.oid : undefined,
                             'previousId': record.previousSibling
                                 ? record.previousSibling.oid
@@ -906,6 +914,32 @@ export class OdooEditor extends EventTarget {
                 }
             }
         }
+        for (const record of records.slice().reverse()) {
+            if (record.type === 'childList') {
+                record.addedNodes.forEach(added => {
+                    mutatedAddedNodes.get(record.target.oid).add(added.oid);
+                });
+                record.removedNodes.forEach(removed => {
+                    mutatedAddedNodes.get(record.target.oid).delete(removed.oid);
+                });
+                const addMutations = (record.addedNodes.length) ? addRecords.pop() : [];
+                addMutations.forEach(mutation => {
+                    if (!record.nextSibling && record.target.oid) {
+                        mutation.append = record.target.oid;
+                    } else if (record.nextSibling && record.nextSibling.oid) {
+                        mutation.before = record.nextSibling.oid;
+                    } else if (!record.previousSibling && record.target.oid) {
+                        mutation.prepend = record.target.oid;
+                    } else if (record.previousSibling && record.previousSibling.oid) {
+                        mutation.after = record.previousSibling.oid;
+                    } else {
+                        return false;
+                    }
+                    mutation.node = this.serializeNode(mutation.node, mutatedAddedNodes.get(mutation.node.oid));
+                });
+            }
+        }
+        this._serializedEditable = this.serializeNode(this.editable);
         if (records.length) {
             this.dispatchEvent(new Event('observerApply'));
         }
@@ -1116,7 +1150,7 @@ export class OdooEditor extends EventTarget {
                     toremove.remove();
                 }
             } else if (record.type === 'add') {
-                let node = this.idFind(record.oid) || this.unserializeNode(record.node);
+                let node = this.unserializeNode(record.node);
                 if (this._collabClientId) {
                     const fakeNode = document.createElement('fake-el');
                     fakeNode.appendChild(node);
@@ -1260,9 +1294,8 @@ export class OdooEditor extends EventTarget {
                     break;
                 }
                 case 'remove': {
-                    let nodeToRemove = this.idFind(mutation.id);
-                    if (!nodeToRemove) {
-                        nodeToRemove = this.unserializeNode(mutation.node);
+                    let nodeToRemove = this.unserializeNode(mutation.node);
+                    if (this._collabClientId) {
                         const fakeNode = document.createElement('fake-el');
                         fakeNode.appendChild(nodeToRemove);
                         DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
@@ -1270,8 +1303,8 @@ export class OdooEditor extends EventTarget {
                         if (!nodeToRemove) {
                             continue;
                         }
-                        this.idSet(nodeToRemove);
                     }
+                    this.idSet(nodeToRemove);
                     if (mutation.nextId && this.idFind(mutation.nextId)) {
                         const node = this.idFind(mutation.nextId);
                         node && node.before(nodeToRemove);
@@ -1915,7 +1948,15 @@ export class OdooEditor extends EventTarget {
             !(next.previousSibling && next.previousSibling === joinWith) &&
             this.editable.contains(next)
         ) {
-            const restore = preserveCursor(this.document);
+            const sel = this.document.getSelection();
+            let cursorPos;
+            if (sel.anchorNode) {
+                // Keeps track of the selection anchor and focus nodes oids,
+                // because if a historyRollback occur during the following
+                // operation, the selection has to be restored in the
+                // unserialized instances of those nodes
+                cursorPos = [sel.anchorNode.oid, sel.anchorOffset, sel.focusNode.oid, sel.focusOffset];
+            }
             this.observerFlush();
             const res = this._protect(() => {
                 next.oDeleteBackward();
@@ -1925,8 +1966,10 @@ export class OdooEditor extends EventTarget {
                     next = firstLeaf(next);
                 }
             }, this._currentStep.mutations.length);
-            if ([UNBREAKABLE_ROLLBACK_CODE, UNREMOVABLE_ROLLBACK_CODE].includes(res)) {
-                restore();
+            if ([UNBREAKABLE_ROLLBACK_CODE, UNREMOVABLE_ROLLBACK_CODE].includes(res) && cursorPos) {
+                // Restores the selection in the current instances of the
+                // selection nodes
+                setSelection(this.idFind(cursorPos[0]), cursorPos[1], this.idFind(cursorPos[2]), cursorPos[3]);
                 break;
             }
         }

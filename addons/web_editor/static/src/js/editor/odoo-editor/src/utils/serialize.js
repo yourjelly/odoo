@@ -28,7 +28,7 @@ export function serializeNode(node, nodesToStripFromChildren = new Set()) {
     return result;
 }
 
-export function unserializeNode(obj) {
+export function unserializeNode(obj, idToNodeMap) {
     let result = undefined;
     if (obj.nodeType === Node.TEXT_NODE) {
         result = document.createTextNode(obj.textValue);
@@ -37,11 +37,14 @@ export function unserializeNode(obj) {
         for (const key in obj.attributes) {
             result.setAttribute(key, obj.attributes[key]);
         }
-        obj.children.forEach(child => result.append(unserializeNode(child)));
+        obj.children.forEach(child => result.append(unserializeNode(child, idToNodeMap)));
     } else {
         console.warn('unknown node type');
     }
     result.oid = obj.oid;
+    if (idToNodeMap) {
+        idToNodeMap.set(result.oid, result);
+    }
     return result;
 }
 
