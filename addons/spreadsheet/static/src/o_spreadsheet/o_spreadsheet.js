@@ -3900,6 +3900,12 @@
       .o-icon {
         width: 10px;
       }
+      &.o-menu-item.active::before {
+        left: 5px;
+        content: "✓";
+        font-weight: bold;
+        position: absolute;
+      }
 
       &:not(.disabled) {
         &:hover,
@@ -3926,6 +3932,8 @@
                 position: null,
                 scrollOffset: 0,
                 menuItems: [],
+                currentFontSize: this.props.currentFontSize,
+                currentFormatName: this.props.currentFormatName,
             });
             this.menuRef = owl.useRef("menu");
             this.position = useAbsolutePosition(this.menuRef);
@@ -38078,6 +38086,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 }
               }
             }
+            &.o-font-size {
+              .active {
+                background-color: #efefef;
+              }
+            }
           }
         }
       }
@@ -38101,10 +38114,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.DEFAULT_FONT_SIZE = DEFAULT_FONT_SIZE;
             this.commonFormats = FORMATS;
             this.customFormats = CUSTOM_FORMATS;
-            this.currentFormatName = "automatic";
             this.fontSizes = fontSizes;
             this.style = {};
             this.state = owl.useState({
+                currentFontSize: 10,
+                currentFormatName: "automatic",
                 menuState: { isOpen: false, position: null, menuItems: [] },
                 activeTool: "",
             });
@@ -38210,10 +38224,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const cell = this.env.model.getters.getActiveCell();
             if (cell && cell.format) {
                 const currentFormat = this.commonFormats.find((f) => f.value === cell.format);
-                this.currentFormatName = currentFormat ? currentFormat.name : "";
+                this.state.currentFormatName = currentFormat ? currentFormat.name : "";
             }
             else {
-                this.currentFormatName = "automatic";
+                this.state.currentFormatName = "automatic";
+            }
+            if (cell && cell.style && cell.style.fontSize) {
+                const currentFont = this.fontSizes.find((f) => f.pt === cell.style.fontSize);
+                this.state.currentFontSize = currentFont ? currentFont.pt : 10;
+            }
+            else {
+                this.state.currentFontSize;
             }
             this.style = { ...this.env.model.getters.getCurrentStyle() };
             this.style.align = this.style.align || (cell === null || cell === void 0 ? void 0 : cell.defaultAlign);
@@ -42455,8 +42476,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.2';
-    __info__.date = '2023-03-06T07:33:47.060Z';
-    __info__.hash = '6b4d816';
+    __info__.date = '2023-03-13T05:16:55.320Z';
+    __info__.hash = '399db99';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

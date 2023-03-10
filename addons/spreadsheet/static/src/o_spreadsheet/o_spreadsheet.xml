@@ -1492,7 +1492,7 @@
             t-on-click="() => this.onClickMenu(menuItem, menuItem_index)"
             t-on-mouseover="() => this.onMouseOver(menuItem, menuItem_index)"
             class="o-menu-item"
-            t-att-class="{ 'o-menu-root': isMenuRoot, 'disabled': !isMenuEnabled, 'o-menu-item-active': isParentMenu(subMenu, menuItem)}"
+            t-att-class="{ 'o-menu-root': isMenuRoot, 'disabled': !isMenuEnabled, 'o-menu-item-active': isParentMenu(subMenu, menuItem), 'active': getName(menuItem).toLowerCase() === subMenu.currentFormatName or +getName(menuItem) === subMenu.currentFontSize}"
             t-att-style="getColor(menuItem)">
             <span class="o-menu-item-name" t-esc="getName(menuItem)"/>
             <span
@@ -1518,6 +1518,8 @@
         onMenuClicked="props.onMenuClicked"
         onClose="() => this.close()"
         menuId="props.menuId"
+        currentFontSize="subMenu.currentFontSize"
+        currentFormatName="subMenu.currentFormatName"
       />
     </Popover>
   </t>
@@ -2973,6 +2975,8 @@
             position="state.menuState.position"
             menuItems="state.menuState.menuItems"
             onClose="() => this.closeMenus()"
+            currentFontSize="state.currentFontSize"
+            currentFormatName="state.currentFormatName"
           />
         </div>
         <div class="o-topbar-topright">
@@ -3050,7 +3054,7 @@
               <t t-foreach="commonFormats" t-as="commonFormat" t-key="commonFormat.name">
                 <div
                   t-att-data-format="commonFormat.name"
-                  t-att-class="{active: currentFormatName === commonFormat.name}">
+                  t-att-class="{active: state.currentFormatName === commonFormat.name}">
                   <t t-esc="commonFormat.text"/>
                   <span class="float-end text-muted" t-esc="commonFormat.description"/>
                 </div>
@@ -3072,12 +3076,16 @@
               <t t-call="o-spreadsheet-Icon.TRIANGLE_DOWN"/>
             </div>
             <div
-              class="o-dropdown-content o-text-options "
+              class="o-dropdown-content o-text-options o-font-size"
               t-att-style="dropdownStyle"
               t-if="state.activeTool === 'fontSizeTool'"
               t-on-click="setSize">
               <t t-foreach="fontSizes" t-as="font" t-key="font_index">
-                <div t-esc="font.pt" t-att-data-size="font.pt"/>
+                <div
+                  t-esc="font.pt"
+                  t-att-data-size="font.pt"
+                  t-att-class="{active: state.currentFontSize === font.pt}"
+                />
               </t>
             </div>
           </div>
@@ -3246,3 +3254,8 @@
     </div>
   </t>
 </odoo>
+<!--
+  __info__.version = '16.0.2';
+  __info__.date = '2023-03-13T05:16:57.465Z';
+  __info__.hash = '399db99';
+-->
