@@ -15,7 +15,7 @@ import {
     rankInterval,
     yearSelected,
 } from "./utils/dates";
-import { FACET_ICONS } from "./utils/misc";
+import { FACET_ICONS, FACET_COLORS } from "./utils/misc";
 
 import { EventBus, toRaw } from "@odoo/owl";
 const { DateTime } = luxon;
@@ -1605,6 +1605,7 @@ export class SearchModel extends EventBus {
                 facet.title = title;
             } else {
                 facet.icon = FACET_ICONS[type];
+                facet.color = FACET_COLORS[type];
             }
             facets.push(facet);
         }
@@ -1616,6 +1617,7 @@ export class SearchModel extends EventBus {
                 type,
                 values: [facetLabel],
                 icon: FACET_ICONS[type],
+                color: FACET_COLORS[type],
             });
         }
 
