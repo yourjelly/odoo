@@ -1,6 +1,6 @@
 @mixin o-avatar-image-hover {
-    cursor: pointer;
-    filter: brightness(0.8);
+    cursor: context-menu;
+    filter: sepia(1) hue-rotate(105deg) contrast(0.8)  brightness(.8); // Emulate Primary Color
 }
 
 .o_field_many2one_avatar_user,
@@ -13,7 +13,6 @@
 .o_field_many2many_avatar_user,
 .o_field_many2manytags.avatar.o_clickable_m2x_avatar {
     img.o_m2m_avatar {
-        margin-right: 2px;
         &:hover {
             @include o-avatar-image-hover;
         }
