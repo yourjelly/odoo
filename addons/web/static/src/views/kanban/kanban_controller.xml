@@ -34,7 +34,7 @@
     </t>
 
     <t t-name="web.KanbanView.Buttons" owl="1">
-        <div t-if="props.showButtons" class="o_cp_buttons d-flex align-items-baseline" role="toolbar" aria-label="Main actions">
+        <div t-if="props.showButtons &amp;&amp; headerButtons.length != 0" class="o_cp_buttons d-flex align-items-baseline" role="toolbar" aria-label="Main actions">
             <t t-foreach="headerButtons" t-as="button" t-key="button.id">
                 <MultiRecordViewButton
                     t-if="button.display === 'always'"
