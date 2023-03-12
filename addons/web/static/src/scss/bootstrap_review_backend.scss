@@ -205,6 +205,19 @@ $-o-bg-colors-custom: map-merge($o-bg-colors-custom, $o-grays);
 $-o-text-colors-custom: null;
 $-o-bg-colors-custom: null;
 
+
+// Tags 'text-bg-x' classes
+// ============================================================================
+@each $-name, $-values in $o-tags-colors {
+    $-i: index(($o-tags-colors), ($-name $-values)) - 1;
+
+    .text-bg-#{$-i} {
+        @include o-print-color(map-get($-values, 'bg'), background-color, bg-opacity);
+        @include o-print-color(map-get($-values, 'color'), color, text-opacity);
+    }
+}
+
+
 // Cards
 // ============================================================================
 .card-body {
