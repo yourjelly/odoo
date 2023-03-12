@@ -2,9 +2,8 @@
     border-bottom: var(--ControlPanel-border-bottom, #{$o-control-panel-border-bottom});
     background-color: $o-control-panel-background-color;
 
-    .o_control_panel_main {
-        // FIXME: breadcrumb height + vertical padding
-        min-height: calc(#{$h6-font-size * $line-height-base} + #{$h4-font-size * $line-height-base} + #{2 * map-get($spacers, 2)});
+    .o_control_panel_breadcrumbs {
+        min-width: 200px;
     }
 
     @include media-breakpoint-down(md) {
@@ -12,99 +11,23 @@
             @include o-position-sticky();
             z-index: 10;
         }
-
-//         .o_cp_action_menus {
-//             .o_dropdown_title {
-//                 @include visually-hidden;
-//             }
-
-//             .o_dropdown_chevron, .o_dropdown_caret {
-//                 display: none;
-//             }
-//         }
-
-//         .o_cp_searchview {
-//             min-height: 35px;
-
-//             &.o_searchview_quick {
-//                 display: flex;
-//                 align-items: flex-start;
-//                 width: 100%;
-
-//                 > .o_searchview {
-//                     display: flex;
-//                     flex: 1 1 auto;
-//                     align-items: center;
-//                     border-bottom: 1px solid $o-brand-secondary;
-
-//                     > .o_searchview_input_container {
-//                         flex: 1 1 auto;
-//                     }
-//                     > .o_enable_searchview {
-//                         margin: 0;
-//                         padding-left: 0;
-//                         &, &:hover {
-//                             color: $gray-600;
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-
-//         .o_cp_switch_buttons {
-//             &.show > .dropdown-menu {
-//                 display: inline-flex;
-//                 min-width: 0px;
-//             }
-//         }
     }
 
-//     .breadcrumb {
-//         font-size: 18px;
-//         min-width: 0;
+    @include media-breakpoint-up(lg) {
+        .o_control_panel_breadcrumbs, .o_control_panel_navigation {
+            flex: 1
+        }
 
-//         > li {
-//             @include o-text-overflow();
-//         }
+        .o_control_panel_actions {
+            min-width: MIN(500px, 33%);
+        }
+    }
 
-//         @include media-breakpoint-down(md) {
-//             width: 100%;
-//             overflow: hidden;
-//             flex-wrap: nowrap;
-
-//             > li {
-//                 margin: 0;
-
-//                 &:before {
-//                     display: none;
-//                 }
-
-//                 &.o_back_button {
-//                     flex-shrink: 0;
-//                     &, & ~ li {
-//                         margin: auto 0;
-//                     }
-
-//                     &:before {
-//                         font-family: FontAwesome;
-//                         content: ""; // fa-arrow-left
-//                         display: inline-block;
-
-//                         padding: 0; // override bootstrap
-//                         color: inherit;
-//                     }
-
-//                     &.btn {
-//                         padding: $o-cp-button-sm-no-border-padding;
-//                     }
-
-//                     > a {
-//                         display: none;
-//                     }
-//                 }
-//             }
-//         }
-//     }
+    @include media-breakpoint-up(xl) {
+        .o_control_panel_actions {
+            min-width: MIN(600px, 33%);
+        }
+    }
 }
 
 .o_x2m_control_panel {
