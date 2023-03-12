@@ -181,7 +181,7 @@ $o-modal-md: 650px !default;
 // Different required cancel paddings between web and web_enterprise
 $o-sheet-cancel-tpadding: 0px !default;
 
-$o-avatar-size: 90px !default;
+$o-form-picture-size: 90px !default;
 
 $o-statusbar-height: 33px !default;
 
@@ -197,7 +197,7 @@ $o-list-group-active-bg: lighten(saturate(adjust-hue($o-info, 15), 1.8), 50) !de
 // == Badges
 
 // Define a minimum width. This value is arbitrary and strictly font-related.
-$o-badge-min-width: 2.5ch !default;
+$o-badge-min-width: 3ch !default;
 
 $o-nb-calendar-colors: 24 !default;
 
