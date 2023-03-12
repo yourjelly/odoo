@@ -7,7 +7,7 @@
                 <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
                     <t t-set-slot="control-panel-create-button">
                         <t t-if="canCreate">
-                            <button type="button" class="btn btn-outline-primary o_form_button_create" data-hotkey="c" t-on-click.stop="create" t-att-disabled="state.isDisabled">New</button>
+                            <button type="button" class="btn btn-secondary o_form_button_create" data-hotkey="c" t-on-click.stop="create" t-att-disabled="state.isDisabled">New</button>
                         </t>
                     </t>
 
@@ -17,7 +17,13 @@
                         </t>
                     </t>
 
-                    <t t-set-slot="control-panel-action-menu">
+                    <t t-set-slot="layout-actions">
+                        <t t-if="buttonBoxTemplate">
+                            <t t-call="{{ buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
+                        </t>
+                    </t>
+
+                    <t t-set-slot="control-panel-additional-actions">
                         <t t-if="props.info.actionMenus">
                             <ActionMenus
                                 getActiveIds="() => model.root.isNew ? [] : [model.root.resId]"
