@@ -61,6 +61,7 @@ export class Dropdown extends Component {
             useExternalListener(window, "click", this.onWindowClicked, { capture: true });
             // Listen to all dropdowns state changes
             useBus(Dropdown.bus, "state-changed", ({ detail }) =>
+                console.log('dropdownstatechanged', this.__owl__.status);
                 this.onDropdownStateChanged(detail)
             );
         }
@@ -234,7 +235,11 @@ export class Dropdown extends Component {
      * @param {DropdownStateChangedPayload} args
      */
     onDropdownStateChanged(args) {
-        if (!this.rootRef.el || this.rootRef.el.contains(args.emitter.rootRef.el)) {
+        if (!this.rootRef.el) {
+            console.log('dropdownstatechanged', this.__owl__.status);
+            return;
+        }
+        if (this.rootRef.el.contains(args.emitter.rootRef.el)) {
             // Do not listen to events emitted by self or children
             return;
         }
