@@ -1,7 +1,12 @@
 /** @odoo-module **/
 
-import { BranchDomainNode, LeafDomainNode } from "@web/core/domain_selector/domain_selector_nodes";
+import {
+    BranchDomainNode,
+    DomainValueExpr,
+    LeafDomainNode,
+} from "@web/core/domain_selector/domain_selector_nodes";
 import { findOperator, parseOperator } from "@web/core/domain_selector/domain_selector_operators";
+import { formatAST } from "@web/core/py_js/py_utils";
 
 export class DomainTreeBuilder {
     build(domain, fieldDefs) {
@@ -34,14 +39,11 @@ export class DomainTreeBuilder {
 
     /** @private */
     buildLeaf(parent, rawNode, fieldDefs) {
-        const field = this.getLeafFieldName(rawNode);
-        const operatorInfo = this.getLeafOperatorInfo(rawNode, fieldDefs[field].type);
-        const value = this.isLeafValueArray(rawNode)
-            ? this.getLeafValue(rawNode).map((v) => v.value)
-            : this.getLeafValue(rawNode);
-        parent.add(
-            new LeafDomainNode({ ...fieldDefs[field], name: field.toString() }, operatorInfo, value)
-        );
+        const fieldName = this.getLeafFieldName(rawNode);
+        const operatorInfo = this.getLeafOperatorInfo(rawNode, fieldDefs[fieldName]?.type);
+        const value = this.getLeafValue(rawNode);
+        const field = { ...fieldDefs[fieldName], name: fieldName };
+        parent.add(new LeafDomainNode(field, operatorInfo, value));
     }
 
     /** @private */
@@ -75,13 +77,13 @@ export class DomainTreeBuilder {
 
     /** @private */
     getLeafFieldName(rawNode) {
-        return rawNode.value[0].value;
+        return rawNode.value[0].value.toString();
     }
 
     /** @private */
     getLeafOperatorInfo(rawNode, fieldType) {
         const rawOperator = rawNode.value[1].value;
-        if (fieldType === "boolean") {
+        if (fieldType && fieldType === "boolean") {
             return findOperator(rawOperator === "=" ? "is" : "is_not");
         } else if (rawNode.value[2].type === 2) {
             return findOperator(rawOperator === "!=" ? "set" : "not_set");
@@ -92,11 +94,22 @@ export class DomainTreeBuilder {
 
     /** @private */
     getLeafValue(rawNode) {
-        return rawNode.value[2].value;
+        if (this.isLeafValueArray(rawNode)) {
+            return rawNode.value[2].value.map((v) => v.value);
+        } else if (this.isLeafValueLiteral(rawNode)) {
+            return rawNode.value[2].value;
+        } else {
+            return new DomainValueExpr(formatAST(rawNode.value[2]));
+        }
     }
 
     /** @private */
     isLeafValueArray(rawNode) {
         return [4, 10].includes(rawNode.value[2].type);
+    }
+
+    /** @private */
+    isLeafValueLiteral(rawNode) {
+        return [0, 1, 2, 3].includes(rawNode.value[2].type);
     }
 }

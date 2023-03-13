@@ -11,7 +11,7 @@ import {
     getEditorInfo,
     getOperatorsInfo,
 } from "@web/core/domain_selector/domain_selector_fields";
-import { BranchDomainNode } from "@web/core/domain_selector/domain_selector_nodes";
+import { BranchDomainNode, DomainValueExpr } from "@web/core/domain_selector/domain_selector_nodes";
 import { findOperator } from "@web/core/domain_selector/domain_selector_operators";
 import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
 import { useService } from "@web/core/utils/hooks";
@@ -148,6 +148,10 @@ export class DomainSelector extends Component {
         this.notifyChanges();
     }
 
+    isExprValue(node) {
+        return node.value instanceof DomainValueExpr;
+    }
+
     updateBranchOperator(node, operator) {
         node.operator = operator;
         this.notifyChanges();
@@ -190,6 +194,10 @@ export class DomainSelector extends Component {
     updateLeafValue(node, value) {
         node.value = value;
         this.notifyChanges();
+    }
+
+    removeExprValue(node) {
+        this.updateLeafValue(node, getDefaultFieldValue(node.field));
     }
 
     onDebugValueChange(value) {

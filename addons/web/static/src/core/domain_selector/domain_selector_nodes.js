@@ -2,6 +2,12 @@
 
 import { Domain } from "@web/core/domain";
 
+export class DomainValueExpr {
+    constructor(expr) {
+        this.expr = expr;
+    }
+}
+
 class DomainNode {
     static nextId = 0;
 
@@ -57,7 +63,13 @@ export class LeafDomainNode extends DomainNode {
     }
 
     toDomain() {
-        return new Domain([[this.field.name, this.operator.symbol, this.value]]);
+        if (this.value instanceof DomainValueExpr) {
+            return new Domain(
+                `[("${this.field.name}", "${this.operator.symbol}", ${this.value.expr})]`
+            );
+        } else {
+            return new Domain([[this.field.name, this.operator.symbol, this.value]]);
+        }
     }
 
     clone() {

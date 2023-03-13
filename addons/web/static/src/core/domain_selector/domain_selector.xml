@@ -170,8 +170,19 @@
 
         <t t-if="node.operator.valueMode !== 'none'">
             <div class="o_ds_value_cell">
-                <t t-set="editor" t-value="getEditorInfo(node)" />
-                <t t-component="editor.component" t-props="editor.props({ value: node.value, update: (value) => this.updateLeafValue(node, value), field: node.field })" />
+                <t t-if="isExprValue(node)">
+                    <div class="o_ds_expr_value o_input d-flex align-items-center p-0" data-tooltip="Expressions are not supported">
+                        <span class="ms-2" t-esc="node.value.expr" />
+                        <i role="alert" class="ms-auto fa fa-exclamation-triangle text-warning" title="Invalid rule value" />
+                        <button class="btn btn-link p-1" t-on-click="() => this.removeExprValue(node)">
+                            <i class="fa fa-times" />
+                        </button>
+                    </div>
+                </t>
+                <t t-else="">
+                    <t t-set="editor" t-value="getEditorInfo(node)" />
+                    <t t-component="editor.component" t-props="editor.props({ value: node.value, update: (value) => this.updateLeafValue(node, value), field: node.field })" />
+                </t>
             </div>
         </t>
     </t>

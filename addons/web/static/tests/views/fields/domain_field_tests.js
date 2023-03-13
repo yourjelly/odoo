@@ -9,6 +9,7 @@ import {
     getFixture,
     makeDeferred,
     nextTick,
+    patchDate,
     patchWithCleanup,
     triggerEvent,
 } from "@web/../tests/helpers/utils";
@@ -99,7 +100,7 @@ QUnit.module("Fields", (hooks) => {
         "The domain editor should not crash the view when given a dynamic filter",
         async function (assert) {
             // dynamic filters (containing variables, such as uid, parent or today)
-            // are not handled by the domain editor, but it shouldn't crash the view
+            // are handled by the domain editor
             serverData.models.partner.records[0].foo = `[("int_field", "=", uid)]`;
 
             await makeView({
@@ -115,9 +116,9 @@ QUnit.module("Fields", (hooks) => {
             });
 
             assert.strictEqual(
-                target.querySelector(".o_edit_mode").textContent,
-                "This domain is not supported.",
-                "The widget should not crash the view, but gracefully admit its failure."
+                target.querySelector(".o_ds_value_cell").textContent,
+                "uid",
+                "The widget should show the dynamic filter."
             );
         }
     );
@@ -213,7 +214,7 @@ QUnit.module("Fields", (hooks) => {
         // The popover should contain the list of partner_type fields and so
         // there should be the "Color index" field
         assert.strictEqual(
-            document.body.querySelector(".o_field_selector_item").textContent,
+            document.body.querySelector(".o_field_selector_item_name").textContent,
             "Color index",
             "field selector popover should contain 'Color index' field"
         );
@@ -777,6 +778,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("domain field: edit through selector (dynamic content)", async function (assert) {
         patchWithCleanup(odoo, { debug: true });
+        patchDate(2020, 8, 5, 0, 0, 0);
 
         let rawDomain = `[("date", ">=", context_today())]`;
         serverData.models.partner.records[0].foo = rawDomain;
@@ -815,7 +817,12 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["/web/action/load", "get_views", "read", "search_count"]);
 
         assert.strictEqual(target.querySelector(".o_domain_debug_input").value, rawDomain);
+        assert.containsOnce(target, ".o_ds_expr_value", "there should be an expression");
+
+        await click(target, ".o_ds_expr_value button");
+        rawDomain = `[("date", ">=", "2020-09-05")]`;
         assert.containsOnce(target, ".o_datepicker", "there should be a datepicker");
+        assert.verifySteps(["search_count"]);
 
         // Open and close the datepicker
         await click(target, ".o_datepicker_input");
