@@ -7,7 +7,7 @@ import {
     Many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { TagsList } from "../many2many_tags/tags_list";
-import { onMounted, useState } from "@odoo/owl";
+import { onMounted } from "@odoo/owl";
 import { AvatarMany2XAutocomplete } from "@web/views/fields/relational_utils";
 
 export class Many2ManyTagsAvatarField extends Many2ManyTagsField {
@@ -55,18 +55,18 @@ export class Many2ManyTagsAvatarFieldPopover extends Many2ManyTagsAvatarField {
     static props = {
         ...Many2ManyTagsAvatarField.props,
         close: { type: Function },
-        updateTag: { type: Function },
     };
 
     setup() {
         super.setup();
-        this.state = useState({ tags: this.tags });
+        const originalUpdate = this.update;
         this.update = async (recordList) => {
-            const updatedVal = await this.props.updateTag(recordList);
-            this.state.tags = updatedVal.map((tag) => {
-                delete tag.onDelete;
-                return tag;
-            });
+            await originalUpdate(recordList);
+            await this.props.record.save({ noReload: true });
+            // manual render to dirty record
+            this.render();
+            // update dropdown
+            this.autoCompleteRef.el.querySelector("input").click();
         };
         onMounted(() => {
             this.autoCompleteRef.el.querySelector("input").focus();
@@ -146,13 +146,7 @@ export class KanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
         return {
             ...this.props,
             readonly: this.isFieldReadonly,
-            updateTag: this.updateTag.bind(this),
         };
-    }
-    async updateTag(recordList) {
-        await this.update(recordList);
-        await this.props.record.save({ noReload: true });
-        return this.tags;
     }
 }
 
