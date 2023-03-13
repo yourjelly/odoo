@@ -290,7 +290,7 @@ export class KanbanRenderer extends Component {
                 name = this.env._t("None");
             }
         }
-        return !this.env.isSmall && isFolded ? `${name} (${count})` : name;
+        return !this.env.isSmall && isFolded ? [name, count] : name;
     }
 
     /**
@@ -307,10 +307,7 @@ export class KanbanRenderer extends Component {
             classes.push("o_kanban_no_records");
         }
         if (!this.env.isSmall && group.isFolded) {
-            classes.push("o_column_folded");
-        }
-        if (!group.isFolded) {
-            classes.push("bg-100");
+            classes.push("o_column_folded", "flex-basis-0");
         }
         if (group.progressBars.length) {
             classes.push("o_kanban_has_progressbar");
