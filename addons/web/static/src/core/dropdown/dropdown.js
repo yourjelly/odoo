@@ -174,8 +174,10 @@ export class Dropdown extends Component {
      * @param {Partial<DropdownState>} stateSlice
      */
     async changeStateAndNotify(stateSlice) {
+        console.log("in changestateandnotify", this.__owl__.status);
         if (stateSlice.open && this.props.beforeOpen) {
             await this.props.beforeOpen();
+            console.log("in changestateandnotify, after await", this.__owl__.status);
         }
         // Update the state
         Object.assign(this.state, stateSlice);
