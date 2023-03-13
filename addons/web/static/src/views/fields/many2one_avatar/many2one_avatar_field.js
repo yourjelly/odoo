@@ -44,7 +44,12 @@ export class Many2OneFieldPopover extends Many2OneField {
         super.setup();
         onMounted(() => this.focusInput());
     }
-
+    get Many2XAutocompleteProps() {
+        return {
+            ...super.Many2XAutocompleteProps,
+            dropdown: false,
+        };
+    }
     async updateRecord(value) {
         const updatedValue = await super.updateRecord(...arguments);
         await this.props.record.save();
@@ -93,6 +98,7 @@ export class KanbanMany2OneAvatarField extends Many2OneAvatarField {
                 canCreate: false,
                 canCreateEdit: false,
                 canQuickCreate: false,
+                placeholder: this.env._t("Search user..."),
             },
             {
                 position: "bottom",

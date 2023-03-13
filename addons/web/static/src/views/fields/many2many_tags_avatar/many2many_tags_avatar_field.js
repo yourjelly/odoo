@@ -121,6 +121,7 @@ export class KanbanMany2ManyTagsAvatarFieldTagsList extends TagsList {
                 canCreate: false,
                 canCreateEdit: false,
                 canQuickCreate: false,
+                placeholder: this.env._t("Search users..."),
             },
             {
                 position: "bottom",
