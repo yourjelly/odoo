@@ -73,7 +73,7 @@ export class KanbanHeader extends Component {
     }
 
     get groupName() {
-        const { groupByField, count, displayName, isFolded } = this.group;
+        const { groupByField, displayName } = this.group;
         let name = displayName;
         if (groupByField.type === "boolean") {
             name = name ? this.env._t("Yes") : this.env._t("No");
@@ -87,7 +87,7 @@ export class KanbanHeader extends Component {
                 name = this.env._t("None");
             }
         }
-        return !this.env.isSmall && isFolded ? `${name} (${count})` : name;
+        return name;
     }
 
     get groupAggregate() {
