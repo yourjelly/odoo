@@ -339,7 +339,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("widget many2one_avatar in kanban view", async function (assert) {
-        assert.expect(4);
+        assert.expect(3);
 
         await makeView({
             type: "kanban",
@@ -393,23 +393,6 @@ QUnit.module("Fields", (hooks) => {
             ).dataset.src,
             "/web/image/user/17/avatar_128",
             "should have correct avatar image"
-        );
-        // check delete
-        await triggerEvent(
-            target.querySelector(".o_kanban_record:nth-child(4) .o_field_many2one_avatar"),
-            null,
-            "mouseover"
-        );
-        await click(
-            target.querySelector(".o_kanban_record:nth-child(4) .o_field_many2one_avatar"),
-            ".o_delete"
-        );
-        assert.strictEqual(
-            target.querySelector(
-                ".o_kanban_record:nth-child(4) .o_field_many2one_avatar .o_m2o_avatar > img"
-            ).dataset.src,
-            "/web/static/img/user_menu_avatar.png",
-            "should have empty avatar image"
         );
     });
 });

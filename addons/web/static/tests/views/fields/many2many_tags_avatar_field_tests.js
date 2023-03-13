@@ -1,12 +1,6 @@
 /** @odoo-module **/
 
-import {
-    click,
-    clickSave,
-    getFixture,
-    triggerEvent,
-    selectDropdownItem,
-} from "@web/../tests/helpers/utils";
+import { click, clickSave, getFixture, selectDropdownItem } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { triggerHotkey } from "../../helpers/utils";
 
@@ -279,7 +273,7 @@ QUnit.module("Fields", (hooks) => {
     );
 
     QUnit.test("widget many2many_tags_avatar in kanban view", async function (assert) {
-        assert.expect(16);
+        assert.expect(13);
 
         const records = [];
         for (let id = 5; id <= 15; id++) {
@@ -401,36 +395,15 @@ QUnit.module("Fields", (hooks) => {
             "should have 9+ in o_m2m_avatar_empty"
         );
 
-        // check delete
-        const firstTag = target.querySelector(
-            ".o_kanban_record:nth-child(2) .o_field_many2many_tags_avatar .o_tag"
-        );
-        await triggerEvent(firstTag, null, "mouseover");
-        await click(firstTag, ".o_delete");
-        assert.containsN(
-            target,
-            ".o_kanban_record:nth-child(2) .o_field_many2many_tags_avatar .o_tag",
-            2,
-            "should have 2 record"
-        );
-
         const o_kanban_record = target.querySelector(".o_kanban_record:nth-child(2)");
-        await click(o_kanban_record, ".o_field_tags > img.o_m2m_avatar", true);
+        await click(o_kanban_record, ".o_field_tags > .o_m2m_avatar_empty", true);
         const popover = document.querySelector(".o_popover_container");
-        assert.strictEqual(popover.querySelectorAll(".o_tag").length, 2, "Should have 2 tags");
-        // delete inside the popover
-        await click(popover.querySelector(".o_tag .o_delete"));
-        assert.strictEqual(popover.querySelectorAll(".o_tag").length, 1, "Should have 1 tag");
-        assert.strictEqual(
-            o_kanban_record.querySelectorAll(".o_tag").length,
-            1,
-            "Should have 1 tags"
-        );
+        assert.strictEqual(popover.querySelectorAll(".o_tag").length, 3, "Should have 3 tags");
         // select input
         await click(popover.querySelector(".o_field_many2many_selection input"));
         // select first input
         await click(popover.querySelector(".o-autocomplete--dropdown-item"));
-        assert.strictEqual(popover.querySelectorAll(".o_tag").length, 2, "Should have 2 tags");
+        assert.strictEqual(popover.querySelectorAll(".o_tag").length, 4, "Should have 4 tags");
         assert.strictEqual(
             o_kanban_record.querySelectorAll(".o_tag").length,
             2,

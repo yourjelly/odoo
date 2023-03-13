@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { isMobileOS } from "@web/core/browser/feature_detection";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { many2OneField, Many2OneField } from "../many2one/many2one_field";
 
@@ -99,17 +98,6 @@ export class KanbanMany2OneAvatarField extends Many2OneAvatarField {
                 position: "bottom",
             }
         );
-    }
-
-    get canDisplayDelete() {
-        return !this.isFieldReadonly && this.props.record.data[this.props.name] && !isMobileOS();
-    }
-    async remove(ev) {
-        if (this.isFieldReadonly) {
-            return;
-        }
-        await this.props.record.update({ [this.props.name]: false });
-        await this.props.record.save();
     }
 }
 

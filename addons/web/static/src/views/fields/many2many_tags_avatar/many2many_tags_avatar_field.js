@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { isMobileOS } from "@web/core/browser/feature_detection";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { registry } from "@web/core/registry";
 import {
@@ -56,7 +55,6 @@ export class Many2ManyTagsAvatarFieldPopover extends Many2ManyTagsAvatarField {
     static props = {
         ...Many2ManyTagsAvatarField.props,
         close: { type: Function },
-        deleteTag: { type: Function },
         updateTag: { type: Function },
     };
 
@@ -65,21 +63,20 @@ export class Many2ManyTagsAvatarFieldPopover extends Many2ManyTagsAvatarField {
         this.state = useState({ tags: this.tags });
         this.update = async (recordList) => {
             const updatedVal = await this.props.updateTag(recordList);
-            this.state.tags = updatedVal.map((tag) => ({
-                ...tag,
-                onDelete: () => this.deleteTag(tag.id),
-            }));
+            this.state.tags = updatedVal.map((tag) => {
+                delete tag.onDelete;
+                return tag;
+            });
         };
         onMounted(() => {
             this.autoCompleteRef.el.querySelector("input").focus();
         });
     }
-    async deleteTag(id) {
-        const updatedVal = await this.props.deleteTag(id);
-        this.state.tags = updatedVal.map((tag) => ({
-            ...tag,
-            onDelete: () => this.deleteTag(tag.id),
-        }));
+    deleteTag(id) {}
+    getTagProps(record) {
+        const tagProps = super.getTagProps(record);
+        delete tagProps.onDelete;
+        return tagProps;
     }
 }
 
@@ -130,10 +127,6 @@ export class KanbanMany2ManyTagsAvatarFieldTagsList extends TagsList {
             }
         );
     }
-
-    get canDisplayDelete() {
-        return !this.props.readonly && !isMobileOS();
-    }
 }
 
 export class KanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
@@ -152,26 +145,13 @@ export class KanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
         return {
             ...this.props,
             readonly: this.isFieldReadonly,
-            deleteTag: this.deleteTag.bind(this),
             updateTag: this.updateTag.bind(this),
         };
-    }
-    async deleteTag(id) {
-        super.deleteTag(id);
-        await this.props.record.save({ noReload: true });
-        return this.tags;
     }
     async updateTag(recordList) {
         await this.update(recordList);
         await this.props.record.save({ noReload: true });
         return this.tags;
-    }
-
-    getTagProps(record) {
-        return {
-            ...super.getTagProps(record),
-            onDelete: () => this.deleteTag(record.id),
-        };
     }
 }
 
