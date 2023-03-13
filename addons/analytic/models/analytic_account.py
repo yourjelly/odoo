@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
+import itertools
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
@@ -131,22 +132,29 @@ class AccountAnalyticAccount(models.Model):
         return super().copy_data(default)
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        """
-            Override read_group to calculate the sum of the non-stored fields that depend on the user context
-        """
-        res = super(AccountAnalyticAccount, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
-        accounts = self.env['account.analytic.account']
-        for line in res:
-            if '__domain' in line:
-                accounts = self.search(line['__domain'])
-            if 'balance' in fields:
-                line['balance'] = sum(accounts.mapped('balance'))
-            if 'debit' in fields:
-                line['debit'] = sum(accounts.mapped('debit'))
-            if 'credit' in fields:
-                line['credit'] = sum(accounts.mapped('credit'))
-        return res
+    def _read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):
+        """ Override _read_group to aggregate no-store compute: balance/debit/credit """
+        aggregate_accepted = {'balance:sum', 'debit:sum', 'credit:sum'}
+        if aggregate_accepted.isdisjoint(aggregates):
+            return super()._read_group(domain, groupby, aggregates, having, offset, limit, order)
+
+        new_aggregates = tuple(agg for agg in aggregates if agg not in aggregate_accepted) + ('id:array_agg',)
+        res = super()._read_group(domain, groupby, new_aggregates, having, offset, limit, order)
+
+        all_ids = tuple(id_ for *__, ids in res for id_ in ids)
+
+        new_result = []
+        for *other, ids in res:
+            records = self.browse(ids).with_prefetch(all_ids)
+
+            for i, spec in enumerate(itertools.chain(groupby, aggregates)):
+                if spec not in aggregate_accepted:
+                    continue
+                field_name = spec.split(':')[0]
+                other.insert(i, sum(records.mapped(field_name)))
+
+            new_result.append(other)
+        return new_result
 
     @api.depends('line_ids.amount')
     def _compute_debit_credit_balance(self):
