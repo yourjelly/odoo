@@ -127,24 +127,6 @@ export class Record extends DataPoint {
         return this.model.__bm__.canBeAbandoned(this.__bm_handle__);
     }
 
-    /**
-     * Since the ORM can support both `active` and `x_active` fields for
-     * the archiving mechanism, check if any such field exists and prioritize
-     * them. The `active` field should always take priority over its custom
-     * version.
-     *
-     * @returns {boolean} true iff the field is active or there is no `active`
-     *   or `x_active` field on the model
-     */
-    get isActive() {
-        if ("active" in this.activeFields) {
-            return this.data.active;
-        } else if ("x_active" in this.activeFields) {
-            return this.data.x_active;
-        }
-        return true;
-    }
-
     get isDirty() {
         return this.model.__bm__.isDirty(this.__bm_handle__);
     }
