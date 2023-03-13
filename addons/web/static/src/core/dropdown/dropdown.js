@@ -60,10 +60,10 @@ export class Dropdown extends Component {
             // Close on outside click listener
             useExternalListener(window, "click", this.onWindowClicked, { capture: true });
             // Listen to all dropdowns state changes
-            useBus(Dropdown.bus, "state-changed", ({ detail }) =>
+            useBus(Dropdown.bus, "state-changed", ({ detail }) => {
                 console.log('dropdownstatechanged', this.__owl__.status);
-                this.onDropdownStateChanged(detail)
-            );
+                this.onDropdownStateChanged(detail);
+            });
         }
 
         // Set up UI active element related behavior ---------------------------
