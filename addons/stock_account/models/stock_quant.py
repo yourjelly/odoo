@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import itertools
 from odoo import api, fields, models, _
 from odoo.tools.float_utils import float_is_zero
 from odoo.tools.misc import groupby
@@ -37,19 +38,32 @@ class StockQuant(models.Model):
             quant.value = quant.quantity * quant.product_id.with_company(quant.company_id).value_svl / quantity
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+    def _read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):
         """ This override is done in order for the grouped list view to display the total value of
         the quants inside a location. This doesn't work out of the box because `value` is a computed
         field.
         """
-        if 'value' not in fields:
-            return super(StockQuant, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
-        res = super(StockQuant, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
-        for group in res:
-            if group.get('__domain'):
-                quants = self.search(group['__domain'])
-                group['value'] = sum(quant.value for quant in quants)
-        return res
+        aggregate_accepted = {'value:sum'}
+        if aggregate_accepted.isdisjoint(aggregates):
+            return super()._read_group(domain, groupby, aggregates, having, offset, limit, order)
+
+        new_aggregates = tuple(agg for agg in aggregates if agg not in aggregate_accepted) + ('id:array_agg',)
+        res = super()._read_group(domain, groupby, new_aggregates, having, offset, limit, order)
+
+        all_ids = tuple(id_ for *__, ids in res for id_ in ids)
+
+        new_result = []
+        for *other, ids in res:
+            records = self.browse(ids).with_prefetch(all_ids)
+
+            for i, spec in enumerate(itertools.chain(groupby, aggregates)):
+                if spec not in aggregate_accepted:
+                    continue
+                field_name = spec.split(':')[0]
+                other.insert(i, sum(records.mapped(field_name)))
+
+            new_result.append(other)
+        return new_result
 
     def _apply_inventory(self):
         for accounting_date, inventory_ids in groupby(self, key=lambda q: q.accounting_date):
