@@ -9,10 +9,12 @@
     'category': 'Accounting/Localizations',
     'depends': ['l10n_in'],
     'data': [
+        'data/account.account.template.csv',
         'views/account_payment_views.xml',
         'views/account_move_views.xml',
         'views/res_config_settings_views.xml',
     ],
+    'post_init_hook': '_generate_account_post_init',
     'auto_install': True,
     'license': 'LGPL-3',
 }

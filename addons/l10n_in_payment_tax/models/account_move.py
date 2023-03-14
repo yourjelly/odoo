@@ -12,6 +12,8 @@ class AccountMove(models.Model):
 
     l10n_in_advanced_payment_tax_origin_move_id = fields.Many2one('account.move', string="Advanced payment tax origin move")
     l10n_in_advanced_payment_tax_created_move_ids = fields.One2many('account.move', 'l10n_in_advanced_payment_tax_origin_move_id', string="Advanced payment tax created moves")
+    tax_advanced_adjust_rec_id = fields.Many2one('account.partial.reconcile', string="Tax Advance Adjust")
+
 
     def l10n_in_open_advanced_payment_entries(self):
         self.ensure_one()
@@ -31,8 +33,15 @@ class AccountMove(models.Model):
                 # don't want to allow setting the Advanced Payment Tax entry to draft
                 # (it'll have been reversed automatically, so no manual intervention is required),
                 raise UserError(_('You cannot reset to draft a Advanced Payment Tax journal entry.'))
-            not_canceled_advanced_payment_tax_move_ids = move.l10n_in_advanced_payment_tax_created_move_ids.filtered(lambda m: m.state != 'cancel')
-            if not_canceled_advanced_payment_tax_move_ids:
-                not_canceled_advanced_payment_tax_move_ids.button_cancel()
         return res
 
+    def _post(self, soft=True):
+        res = super()._post(soft)
+        for payment_move in self.filtered(lambda m: m.payment_id and m.payment_id.l10n_in_tax_ids):
+            reduced_liquidity_lines = payment_move.line_ids.filtered(lambda l: l.account_id == payment_move.payment_id.outstanding_account_id)
+            if len(reduced_liquidity_lines) > 1:
+                reduced_liquidity_lines.reconcile()
+            reduced_counterpart_lines = payment_move.line_ids.filtered(lambda l: l.account_id == payment_move.payment_id.destination_account_id)
+            if len(reduced_counterpart_lines) > 1:
+                reduced_counterpart_lines.reconcile()
+        return res
