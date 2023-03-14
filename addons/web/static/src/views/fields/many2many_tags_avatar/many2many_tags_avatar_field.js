@@ -139,7 +139,7 @@ export class KanbanMany2ManyTagsAvatarFieldTagsList extends TagsList {
 export class KanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
     static template = "web.KanbanMany2ManyTagsAvatarField";
     static components = {
-        ...Many2ManyTagsAvatarField.component,
+        ...Many2ManyTagsAvatarField.components,
         TagsList: KanbanMany2ManyTagsAvatarFieldTagsList,
     };
     itemsVisible = 2;
