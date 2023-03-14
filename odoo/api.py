@@ -694,6 +694,12 @@ class Environment(Mapping):
         # because 'env.lang' may be injected in SQL queries
         return lang if lang and self['res.lang']._lang_get_id(lang) else None
 
+    @lazy_property
+    def decimal_precision(self):
+        # we use a cache on the environment itself in order to avoid the lock
+        # used by the ormcache's LRU dict, which is more costly than expected
+        return self['decimal.precision']._get_all_decimal_precision()
+
     def clear(self):
         """ Clear all record caches, and discard all fields to recompute.
             This may be useful when recovering from a failed ORM operation.

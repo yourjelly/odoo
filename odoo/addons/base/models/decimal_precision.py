@@ -27,17 +27,12 @@ class DecimalPrecision(models.Model):
 
     @api.model
     def precision_get(self, application):
-        # use a cache on the environment itself in order to avoid the lock used
-        # by the ormcache's LRU dict, which is more costly than expected
-        try:
-            precision_digits = self.env.precision_digits
-        except AttributeError:
-            precision_digits = self.env.precision_digits = self._get_all_precision()
-
-        return precision_digits.get(application, 2)
+        # we use a cache on the environment itself in order to avoid the lock
+        # used by the ormcache's LRU dict, which is more costly than expected
+        return self.env.decimal_precision.get(application, 2)
 
     @tools.ormcache()
-    def _get_all_precision(self):
+    def _get_all_decimal_precision(self):
         self.flush_model()
         self.env.cr.execute('SELECT name, digits FROM decimal_precision')
         return dict(self.env.cr.fetchall())
