@@ -804,6 +804,18 @@ const ButtonUserValueWidget = UserValueWidget.extend({
         if (!ev._innerButtonClicked) {
             this._onUserValueChange(ev);
         }
+
+        const image = this.$target[0];
+
+        if (ev.currentTarget.classList.contains('active')) return;
+
+        if (ev.currentTarget.classList.contains('o_we_inline')) {
+            this.inline(image);
+        } else if (ev.currentTarget.classList.contains('o_we_wrap')) {
+            this.wrap(image);
+        } else if (ev.currentTarget.classList.contains('o_we_break')) {
+            this.break(image);
+        }
     },
     /**
      * @private
@@ -812,6 +824,46 @@ const ButtonUserValueWidget = UserValueWidget.extend({
         // Cannot just stop propagation as the click needs to be propagated to
         // potential parent widgets for event delegation on those inner buttons.
         ev._innerButtonClicked = true;
+    },
+    inline: function(image) {
+        if ( !(image.classList.contains('float-start') || image.classList.contains('float-end') || image.classList.contains('mx-auto'))) {
+            image.classList.toggle('align-bottom');
+        }
+    },
+    wrap: function(image) {
+        if (image.classList.contains('align-bottom') || image.classList.contains('me-auto')
+            || image.classList.contains('float-start') || image.classList.contains('mx-auto')) {
+            image.classList.remove('mx-auto', 'd-flex', 'me-4', 'align-bottom');
+            image.classList.toggle('float-start');
+        } else if (image.classList.contains('float-end') || image.classList.contains('ms-auto') ) {
+            image.classList.remove('d-flex', 'ms-4')
+            image.classList.toggle('float-end');
+        }
+    },
+    break: function(image) {
+        let classesToAdd = [];
+        let classesToRemove = [];
+
+        switch (true) {
+          case image.classList.contains('float-start'):
+            classesToAdd = ['d-flex'];
+            classesToRemove = ['float-start'];
+            break;
+          case image.classList.contains('float-end'):
+            classesToAdd = ['d-flex'];
+            classesToRemove = ['float-end'];
+            break;
+          case image.classList.contains('mx-auto'):
+          case image.classList.contains('align-bottom'):
+            classesToAdd = ['mx-auto','d-block'];
+            classesToRemove = ['d-flex'];
+            break;
+          default:
+            return;
+        }
+
+        classesToAdd.forEach(className => image.classList.add(className));
+        classesToRemove.forEach(className => image.classList.remove(className));
     },
 });
 

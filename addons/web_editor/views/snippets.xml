@@ -655,6 +655,12 @@
 
         <t t-call="web_editor.snippet_options_image_optimization_widgets"/>
 
+        <we-button-group class="text-wrapping" string="Text Wrapping">
+            <we-button class="o_we_inline" data-dependencies="Unalign" title="Inline"><i class="oi oi-text-inline"/></we-button>
+            <we-button class="o_we_wrap" data-dependencies="alignLeft,alignRight" title="Wrap Text"><i class="oi oi-text-wrap"/></we-button>
+            <we-button class="o_we_break" data-dependencies="alignLeft,alignRight,alignCenter" title="Break Text"><i class="oi oi-text-break"/></we-button>
+        </we-button-group>
+
         <we-row string="Transform">
             <we-button class="fa fa-fw fa-crop" data-crop="true" data-no-preview="true" title="Crop Image"/>
             <we-button class="ms-0 border-start-0" data-reset-crop="" data-no-preview="true" title="Reset crop">
@@ -676,10 +682,10 @@
 
     <div data-selector="span.fa, i.fa, img" data-exclude="[data-oe-type='image'] > img, [data-oe-xpath]" class="o_we_image_options">
         <we-select string="Alignment" data-state-to-first-class="true">
-            <we-button data-select-class="" title="Unalign">None</we-button>
-            <we-button data-select-class="me-auto float-start" title="Align Left">Left</we-button>
-            <we-button data-select-class="mx-auto d-block" title="Align Center">Center</we-button>
-            <we-button data-select-class="ms-auto float-end" title="Align Right">Right</we-button>
+            <we-button data-select-class="align-bottom" data-name="Unalign" title="Unalign">None</we-button>
+            <we-button data-select-class="me-auto float-start" data-name="alignLeft" title="Align Left">Left</we-button>
+            <we-button data-select-class="mx-auto d-block" data-name="alignCenter" title="Align Center">Center</we-button>
+            <we-button data-select-class="ms-auto float-end" data-name="alignRight" title="Align Right">Right</we-button>
         </we-select>
 
         <we-row string="Style">

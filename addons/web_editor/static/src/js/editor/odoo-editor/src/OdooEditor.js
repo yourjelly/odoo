@@ -150,6 +150,7 @@ export const CLIPBOARD_WHITELISTS = {
         'd-block',
         'mx-auto',
         'img-fluid',
+        'align-bottom',
         'img-thumbnail',
         'rounded',
         'rounded-circle',
@@ -4341,7 +4342,7 @@ export class OdooEditor extends EventTarget {
         for (const imageFile of imageFiles) {
             const imageNode = document.createElement('img');
             imageNode.style.width = '100%';
-            imageNode.classList.add('img-fluid');
+            imageNode.classList.add('img-fluid','align-bottom');
             imageNode.dataset.fileName = imageFile.name;
             promises.push(getImageUrl(imageFile).then(url => {
                 imageNode.src = url;

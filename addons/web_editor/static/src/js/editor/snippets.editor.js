@@ -3445,6 +3445,22 @@ var SnippetsMenu = Widget.extend({
         this.$('#snippets_menu button').removeClass('active');
         this.$('.o_we_add_snippet_btn').toggleClass('active', this._currentTab === this.tabs.BLOCKS);
         this.$('.o_we_customize_snippet_btn').toggleClass('active', this._currentTab === this.tabs.OPTIONS);
+
+        if (this.options.wysiwyg.lastMediaClicked) {
+            const buttons = this.el.querySelectorAll('.o_we_user_value_widget.text-wrapping we-button');
+            const image = this.options.wysiwyg.lastMediaClicked;
+            if (image.classList.length) {
+                const inline = image.classList.contains('d-inline-block') || image.classList.contains('align-bottom');
+                const wrapText = image.classList.contains('float-start') || image.classList.contains('float-end');
+                const breakText = image.classList.contains('mx-auto') || !inline && !wrapText;
+
+                if (buttons.length) {
+                    buttons[0].classList.toggle('active', inline);
+                    buttons[1].classList.toggle('active', wrapText);
+                    buttons[2].classList.toggle('active', breakText);
+                }
+            }
+        }
     },
     /**
      * Scrolls to given snippet.

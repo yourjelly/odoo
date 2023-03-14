@@ -330,7 +330,7 @@ export class ImageSelector extends FileSelector {
     }
 }
 
-ImageSelector.mediaSpecificClasses = ['img', 'img-fluid', 'o_we_custom_image'];
+ImageSelector.mediaSpecificClasses = ['img', 'img-fluid', 'o_we_custom_image', 'align-bottom'];
 ImageSelector.mediaSpecificStyles = [];
 ImageSelector.mediaExtraClasses = [
     'rounded-circle', 'rounded', 'img-thumbnail', 'shadow',

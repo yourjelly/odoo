@@ -1579,6 +1579,37 @@ const Wysiwyg = Widget.extend({
             }
             this._updateMediaJustifyButton(justifyBtn.id);
         });
+        $toolbar.find('#inline').click(e => {
+            const $image = $(this.lastMediaClicked);
+            $($image).removeClass('float-start mx-auto me-4');
+            $($image).addClass('align-bottom');
+        });
+        $toolbar.find('#wrap-text').click(e => {
+            const $image = $(this.lastMediaClicked);
+            $($image).removeClass('mx-auto align-bottom');
+            $($image).addClass('float-start me-4');
+        });
+        $toolbar.find('#break-text').click(e => {
+            const $image = $(this.lastMediaClicked);
+            $($image).removeClass('float-start me-4 align-bottom');
+            $($image).addClass('mx-auto d-block');
+        });
+        const $textWrappingButtons = $toolbar.find('#text-wrapping div');
+        $textWrappingButtons.click(e => {
+            const image =  $(this.lastMediaClicked)[0];
+
+            if (image.classList.length) {
+                const inline = image.classList.contains('d-inline-block') || image.classList.contains('align-bottom');
+                const wrapText = image.classList.contains('float-start') || image.classList.contains('float-end');
+                const breakText = image.classList.contains('mx-auto') || !inline && !wrapText
+
+                if ($textWrappingButtons.length) {
+                    $textWrappingButtons[0].classList.toggle('active', inline);
+                    $textWrappingButtons[1].classList.toggle('active', wrapText);
+                    $textWrappingButtons[2].classList.toggle('active', breakText);
+                }
+            }
+        });
         $toolbar.find('#image-crop').click(e => {
             if (!this.lastMediaClicked) {
                 return;
@@ -1896,6 +1927,7 @@ const Wysiwyg = Widget.extend({
             '#image-transform',
             '#image-crop',
             '#media-description',
+            '#text-wrapping',
         ].join(',')).toggleClass('d-none', !$target.is('img'));
         this.lastMediaClicked = isInMedia && e.target;
         this.lastElement = $target[0];
@@ -1958,6 +1990,19 @@ const Wysiwyg = Widget.extend({
             }
             for (const button of this.toolbar.$el.find('#image-width div')) {
                 button.classList.toggle('active', e.target.style.width === button.id);
+            }
+            const buttons = this.toolbar.$el.find('#text-wrapping div');
+            const image = this.lastMediaClicked;
+            if (image.classList.length) {
+                const inline = image.classList.contains('d-inline-block') || image.classList.contains('align-bottom');
+                const wrapText = image.classList.contains('float-start') || image.classList.contains('float-end');
+                const breakText = image.classList.contains('mx-auto') || !inline && !wrapText
+
+                if (buttons.length) {
+                    buttons[0].classList.toggle('active', inline);
+                    buttons[1].classList.toggle('active', wrapText);
+                    buttons[2].classList.toggle('active', breakText);
+                }
             }
             this._updateMediaJustifyButton();
             this._updateFaResizeButtons();
