@@ -226,7 +226,7 @@ $o-touch-btn-padding: 7px 14px !default;
 // here, the relative values will take priority over default BS ones.
 // Notice: each map's entry is passed directly to the Bootstrap mixin, meaning
 // that all states must be defined, there can't be omissions.
-$o-btns-custom: ()!default;
+$o-btns-custom: () !default;
 $o-btns-custom: map-merge((
     "primary": (
         background: $o-brand-primary,
@@ -240,10 +240,6 @@ $o-btns-custom: map-merge((
         active-background: darken($o-brand-primary, 20%),
         active-border: darken($o-brand-primary, 20%),
         active-color: $o-white,
-
-        disabled-background: rgba($o-brand-primary, 0.5),
-        disabled-border: transparent,
-        disabled-color: $o-white,
     ),
     "secondary": (
         background: $o-gray-300,
@@ -257,10 +253,6 @@ $o-btns-custom: map-merge((
         active-background: mix($o-action, $o-gray-100, 20%),
         active-border:  $o-action,
         active-color: $o-gray-900,
-
-        disabled-background: $o-gray-300,
-        disabled-border: $o-gray-300,
-        disabled-color: $o-main-color-muted,
     ),
     "light": (
         background: $o-white,
@@ -274,10 +266,6 @@ $o-btns-custom: map-merge((
         active-background: mix($o-action, $o-gray-100, 20%),
         active-border:  $o-action,
         active-color: $o-gray-900,
-
-        disabled-background: transparent,
-        disabled-border: transparent,
-        disabled-color: $o-main-color-muted,
     ),
     "text": (
         background: transparent,
@@ -291,12 +279,13 @@ $o-btns-custom: map-merge((
         active-background: transparent,
         active-border:  transparent,
         active-color: $o-gray-900,
-
-        disabled-background: transparent,
-        disabled-border: transparent,
-        disabled-color: $o-main-color-muted,
     ),
 ), $o-btns-custom);
+
+$o-btns-outline-custom: () !default;
+
+// Avatar
+$o-avatar-size: 1.7145em !default;
 
 
 // Generate Bootstrap, BS-legacy and custom text/bg classes in a consistent
