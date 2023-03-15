@@ -57,7 +57,6 @@
     </t>
 
     <t t-name="loyalty.LoyaltyCardListView.buttons" owl="1" t-inherit-mode="primary" t-inherit="web.ListView.Buttons">
-        <!-- <xpath expr="//button[hasclass('o_list_button_add')]" position="replace"/> -->
         <xpath expr="//div[hasclass('o_list_buttons')]" position="inside">
             <t t-set="supportedProgramTypes" t-value="['coupons', 'gift_card', 'ewallet']"/>
             <button t-if="supportedProgramTypes.includes(props.context.program_type)" type="button" class="btn btn-primary o_loyalty_card_list_button_generate" t-attf-data-tooltip="Generate {{props.context.program_item_name}}"
