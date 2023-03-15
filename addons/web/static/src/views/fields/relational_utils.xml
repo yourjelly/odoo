@@ -53,6 +53,7 @@
             onInput.bind="onInput"
             onChange.bind="onChange"
             dropdown="props.dropdown"
+            autofocus="props.autofocus"
         />
         <a role="button" class="o_dropdown_button" draggable="false" />
     </div>

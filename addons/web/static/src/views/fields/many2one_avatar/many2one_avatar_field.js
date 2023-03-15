@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { many2OneField, Many2OneField } from "../many2one/many2one_field";
 
-import { Component, onMounted } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import { AvatarMany2XAutocomplete } from "@web/views/fields/relational_utils";
 
 export class Many2OneAvatarField extends Component {
@@ -40,14 +40,11 @@ export class Many2OneFieldPopover extends Many2OneField {
     static components = {
         Many2XAutocomplete: AvatarMany2XAutocomplete,
     };
-    setup() {
-        super.setup();
-        onMounted(() => this.focusInput());
-    }
     get Many2XAutocompleteProps() {
         return {
             ...super.Many2XAutocompleteProps,
             dropdown: false,
+            autofocus: true,
         };
     }
     async updateRecord(value) {

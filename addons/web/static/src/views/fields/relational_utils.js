@@ -376,6 +376,7 @@ Many2XAutocomplete.props = {
     isToMany: { type: Boolean, optional: true },
     autocomplete_container: { type: Function, optional: true },
     dropdown: { type: Boolean, optional: true },
+    autofocus: { type: Boolean, optional: true },
 };
 Many2XAutocomplete.defaultProps = {
     searchLimit: 7,

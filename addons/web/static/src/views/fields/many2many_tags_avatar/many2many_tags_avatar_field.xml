@@ -52,6 +52,7 @@
         <Many2XAutocomplete position="attributes">
             <attribute name="dropdown">false</attribute>
             <attribute name="placeholder">props.placeholder</attribute>
+            <attribute name="autofocus">true</attribute>
         </Many2XAutocomplete>
     </t>
 
