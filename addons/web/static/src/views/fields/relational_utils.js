@@ -739,9 +739,9 @@ export function useX2ManyCrud(getList, isMany2Many) {
             const currentIds = list.currentIds;
             let resIds;
             if (Array.isArray(object)) {
-                resIds = [...currentIds, ...object];
+                resIds = [...object, ...currentIds];
             } else if (object.resId) {
-                resIds = [...currentIds, object.resId];
+                resIds = [object.resId, ...currentIds];
             } else {
                 return list.add(object, { isM2M: isMany2Many });
             }
