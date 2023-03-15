@@ -265,7 +265,9 @@ QUnit.test("activity info layout change at midnight", async (assert) => {
     assert.containsOnce($, ".o-mail-Activity:contains('Tomorrow:')");
 
     patchDate(2023, 11, 8, 0, 0, 1); // OXP is coming!
-    await mock.advanceTime(2000);
+    await afterNextRender(() => {
+        mock.execRegisteredTimeouts();
+    });
     assert.containsOnce($, ".o-mail-Activity");
     assert.containsOnce($, ".o-mail-Activity .text-warning");
     assert.containsOnce($, ".o-mail-Activity:contains('Today:')");
