@@ -8,6 +8,7 @@ import {
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { TagsList } from "../many2many_tags/tags_list";
 import { AvatarMany2XAutocomplete } from "@web/views/fields/relational_utils";
+import { checkPopoverClose } from "@web/views/fields/properties/properties_field";
 
 export class Many2ManyTagsAvatarField extends Many2ManyTagsField {
     static template = "web.Many2ManyTagsAvatarField";
@@ -121,6 +122,8 @@ export class KanbanMany2ManyTagsAvatarFieldTagsList extends TagsList {
             },
             {
                 position: "bottom",
+                popoverClass: "o_m2m_tags_avatar_field_popover",
+                preventClose: checkPopoverClose,
             }
         );
     }

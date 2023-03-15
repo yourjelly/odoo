@@ -17,6 +17,47 @@ import { archParseBoolean } from "@web/views/utils";
 
 import { Component, useRef, useState, useEffect, onWillStart } from "@odoo/owl";
 
+/**
+ * Return false if we should not close the popover containing the
+ * properties definition based on the event received.
+ *
+ * If we edit the datetime, it will open a popover with the date picker
+ * component, but this component won't be a child of the current popover.
+ * So when we will click on it to select a date, it will close the definition
+ * popover. It's the same for other similar components (many2one modal, etc).
+ *
+ * @param {event} event
+ * @returns {boolean}
+ */
+export function checkPopoverClose(event) {
+    if (document.activeElement.closest(".o_field_property_definition")) {
+        // the focus is still on an element of the definition
+        return true;
+    }
+
+    if (event.target.closest(".bootstrap-datetimepicker-widget")) {
+        // selected a datetime, do not close the definition popover
+        return true;
+    }
+
+    if (event.target.closest(".modal")) {
+        // close a many2one modal
+        return true;
+    }
+
+    if (event.target.closest(".o_tag_popover")) {
+        // tag color popover
+        return true;
+    }
+
+    if (event.target.closest(".o_field_selector_popover")) {
+        // domain selector
+        return true;
+    }
+
+    return false;
+}
+
 export class PropertiesField extends Component {
     static template = "web.PropertiesField";
     static components = {
@@ -111,47 +152,6 @@ export class PropertiesField extends Component {
             res[index % columns].push(val);
         });
         return res;
-    }
-
-    /**
-     * Return false if we should not close the popover containing the
-     * properties definition based on the event received.
-     *
-     * If we edit the datetime, it will open a popover with the date picker
-     * component, but this component won't be a child of the current popover.
-     * So when we will click on it to select a date, it will close the definition
-     * popover. It's the same for other similar components (many2one modal, etc).
-     *
-     * @param {event} event
-     * @returns {boolean}
-     */
-    checkPopoverClose(event) {
-        if (document.activeElement.closest(".o_field_property_definition")) {
-            // the focus is still on an element of the definition
-            return true;
-        }
-
-        if (event.target.closest(".bootstrap-datetimepicker-widget")) {
-            // selected a datetime, do not close the definition popover
-            return true;
-        }
-
-        if (event.target.closest(".modal")) {
-            // close a many2one modal
-            return true;
-        }
-
-        if (event.target.closest(".o_tag_popover")) {
-            // tag color popover
-            return true;
-        }
-
-        if (event.target.closest(".o_field_selector_popover")) {
-            // domain selector
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -487,7 +487,7 @@ export class PropertiesField extends Component {
                 hideKanbanOption: this.props.hideKanbanOption,
             },
             {
-                preventClose: this.checkPopoverClose,
+                preventClose: checkPopoverClose,
                 popoverClass: "o_property_field_popover",
                 position: "top",
                 onClose: () => {

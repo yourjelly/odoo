@@ -6,6 +6,7 @@ import { many2OneField, Many2OneField } from "../many2one/many2one_field";
 
 import { Component } from "@odoo/owl";
 import { AvatarMany2XAutocomplete } from "@web/views/fields/relational_utils";
+import { checkPopoverClose } from "@web/views/fields/properties/properties_field";
 
 export class Many2OneAvatarField extends Component {
     static template = "web.Many2OneAvatarField";
@@ -99,6 +100,8 @@ export class KanbanMany2OneAvatarField extends Many2OneAvatarField {
             },
             {
                 position: "bottom",
+                popoverClass: "o_m2o_tags_avatar_field_popover",
+                preventClose: checkPopoverClose,
             }
         );
     }

@@ -1,6 +1,9 @@
-.o_popover > .o_field_many2one_selection {
-    padding: 0.25rem;
-    .o-autocomplete--dropdown-menu {
-        width: 178px;
+.o_m2o_tags_avatar_field_popover {
+    z-index: initial;
+    > .o_field_many2one_selection {
+        padding: 0.25rem;
+        .o-autocomplete--dropdown-menu {
+            width: 178px;
+        }
     }
 }
