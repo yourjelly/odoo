@@ -34,7 +34,15 @@ class Package:
         # dependency
         self.parents: List[Package] = []
         self.children: List[Package] = []
-        self.depth = -1                     # the longest distance to the 'base' module
+        self.graph = None
+
+    @tools.lazy_property
+    def depth(self):
+        try:
+            return max((package.depth for package in self.parents), default=-1) + 1
+        except RecursionError as e:  # depends loop detected
+            self.graph._del_package(self.name)
+            return -1
 
     def demo_installable(self) -> bool:
         return all(p.dbdemo for p in self.parents)
@@ -55,9 +63,8 @@ class Graph:
     def __iter__(self) -> Iterable[Package]:
         if self._unsorted_packages:
             self._update_edges(self._unsorted_packages)
-            for package in self._unsorted_packages:
-                self._update_depth(package)
-            self._packages = dict(sorted(self._packages.items(), key=lambda item: (item[1].depth, item[1].name)))
+            module_package = sorted(self._packages.items(), key=lambda item: (item[1].depth, item[1].name))
+            self._packages = dict((module, package) for module, package in module_package if module in self._packages)
             self._unsorted_packages = []
         return iter(self._packages.values())
 
@@ -73,28 +80,6 @@ class Graph:
                 parent = self[dep]
                 package.parents.append(parent)
                 parent.children.append(package)
-
-    def _update_depth(self, package: Package) -> None:
-        if any(parent.depth == -1 for parent in package.parents):
-            return
-        depth_offset = max((parent.depth for parent in package.parents), default=-1) + 1
-        path: Set[Package] = set()
-
-        # DFS
-        def visit(node: Package) -> None:
-            if node.name not in self._packages:
-                return
-            if node in path:  # depends loop detected
-                self._del_package(node.name)
-                return
-            path.add(node)
-            for child in node.children:
-                if len(path) + depth_offset > child.depth:
-                    visit(child)
-            path.remove(node)
-            node.depth = max(node.depth, len(path) + depth_offset)
-
-        visit(package)
 
     def _del_package(self, name: str) -> None:
         if name not in self._packages:
@@ -151,6 +136,7 @@ class Graph:
         # unmet_modules have been removed from manifests in the BFS
         for module, manifest in manifests.items():
             self._add_package(module, manifest)
+            self[module].graph = self
 
         self.update_from_db(cr, manifests)
 
