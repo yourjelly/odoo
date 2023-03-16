@@ -693,6 +693,9 @@ const Wysiwyg = Widget.extend({
                 this.ptp && this.odooEditor.onExternalHistorySteps(missingSteps.concat([step]));
             },
         };
+        if (this.options.checkForExtraRendering) {
+            editorCollaborationOptions.checkForExtraRendering = this.options.checkForExtraRendering;
+        }
         return editorCollaborationOptions;
     },
     /**

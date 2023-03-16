@@ -239,6 +239,35 @@ export class OdooEditor extends EventTarget {
                 preHistoryUndo: () => {},
                 isHintBlacklisted: () => false,
                 filterMutationRecords: (records) => records,
+                /**
+                 * Checks whether an element contains nodes that need extra
+                 * rendering, which may be asynchronous (i.e. OWL Component).
+                 * This check will be done when receiving external steps from
+                 * the collaboration, and will buffer further external steps
+                 * during the rendering to avoid a situation where the editor
+                 * tries to apply mutations inside a node that is currently
+                 * being rendered (not ready).
+                 *
+                 * @param {Object} [options]
+                 * @param {HTMLElement} [option.element] Html element to check
+                 *                      for nodes that need an extra rendering
+                 * @param {boolean} [option.inPlace] Whether the rendering will
+                 *                  be done in place or not.
+                 *                  If true, it is the responsibility of the
+                 *                  owner of the callback to put rendered nodes
+                 *                  in the dom.
+                 *                  If false, the step which added nodes in need
+                 *                  of an extra rendering will be reverted by
+                 *                  the editor, and the rendered node will be
+                 *                  inserted by the editor when re-applying
+                 *                  that step when the promise is resolved.
+                 *
+                 * @returns {Promise|null} Promise that will be resolved when
+                 *          the rendering is done, or null if there is no
+                 *          rendering to do. The editor will buffer new external
+                 *          steps (collaborative) until the promise is resolved.
+                 */
+                checkForExtraRendering: () => null,
                 onPostSanitize: () => {},
                 direction: 'ltr',
                 _t: string => string,
@@ -286,6 +315,9 @@ export class OdooEditor extends EventTarget {
         // Map that from an node id to the dom node.
         this._idToNodeMap = new Map();
 
+        // Set of rendered nodes. @see addRenderedNode
+        this._renderedNodes = new Set();
+
         // Instanciate plugins.
         this._plugins = [];
         for (const plugin of this.options.plugins) {
@@ -324,6 +356,11 @@ export class OdooEditor extends EventTarget {
         this._collabSelectionsContainer = this.document.createElement('div');
         this._collabSelectionsContainer.classList.add('oe-collaboration-selections-container');
         this.editable.before(this._collabSelectionsContainer);
+
+        // Buffer for external steps (active when the editor is waiting for
+        // nodes to be rendered)
+        this._externalStepsBuffer = [];
+        this._externalStepsBufferActive = false;
 
         this.idSet(editable);
         this._historyStepsActive = true;
@@ -765,6 +802,22 @@ export class OdooEditor extends EventTarget {
         return this._idToNodeMap.get(id);
     }
 
+    /**
+     * Add a rendered node. Rendered nodes are provided externally from
+     * the editor and don't need to be sanitized because they are the result
+     * of a local rendering (i.e. OWL Component). They are also considered
+     * as a closed entity (meaning that the editor shouldn't try to merge
+     * them with other nodes). This means that their actual value can be
+     * used when applying/reverting mutations instead of a serialized one
+     * (this is mandatory because an OWL Component becomes corrupted if its
+     * rendered nodes are modified/removed).
+     *
+     * @param {HTMLElement} node
+     */
+    addRenderedNode(node) {
+        this._renderedNodes.add(node);
+    }
+
     serializeNode(node, mutatedNodes) {
         return serializeNode(node, mutatedNodes);
     }
@@ -1103,10 +1156,16 @@ export class OdooEditor extends EventTarget {
         this._historySnapshots = [{ step: steps[0] }];
         this._historySteps = steps;
 
+        const extraRenderingPromise = this.options.checkForExtraRendering({element: this.editable, inPlace: true});
+
         this._handleCommandHint();
         this.multiselectionRefresh();
         this.observerActive();
-        this.dispatchEvent(new Event('historyResetFromSteps'));
+
+        if (extraRenderingPromise) {
+            // Enable external steps buffering during the rendering
+            this._processExternalStepsBuffer(extraRenderingPromise);
+        }
     }
     historyGetMissingSteps({fromStepId, toStepId}) {
         const fromIndex = this._historySteps.findIndex(x => x.id === fromStepId);
@@ -1180,8 +1239,11 @@ export class OdooEditor extends EventTarget {
                     toremove.remove();
                 }
             } else if (record.type === 'add') {
-                let node = this.unserializeNode(record.node);
-                if (this._collabClientId) {
+                let node = this.idFind(record.id);
+                const isRendered = this._renderedNodes.has(node);
+                node = (isRendered) ? node : this.unserializeNode(record.node);
+                // A rendered node was already sanitized with DOMPurify
+                if (!isRendered && this._collabClientId) {
                     const fakeNode = document.createElement('fake-el');
                     fakeNode.appendChild(node);
                     DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
@@ -1324,8 +1386,11 @@ export class OdooEditor extends EventTarget {
                     break;
                 }
                 case 'remove': {
-                    let nodeToRemove = this.unserializeNode(mutation.node);
-                    if (this._collabClientId) {
+                    let nodeToRemove = this.idFind(mutation.id);
+                    const isRendered = this._renderedNodes.has(nodeToRemove);
+                    nodeToRemove = (isRendered) ? nodeToRemove : this.unserializeNode(mutation.node);
+                    // A rendered node was already sanitized with DOMPurify
+                    if (!isRendered && this._collabClientId) {
                         const fakeNode = document.createElement('fake-el');
                         fakeNode.appendChild(nodeToRemove);
                         DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
@@ -1492,6 +1557,10 @@ export class OdooEditor extends EventTarget {
     }
     /**
      * Insert a step from another collaborator.
+     *
+     * @returns {Promise|undefined} If some nodes added by the step need to
+     *          be rendered, the step will be reverted and this function will
+     *          return the promise resolved when they are.
      */
     _historyAddExternalStep(newStep) {
         let index = this._historySteps.length - 1;
@@ -1556,29 +1625,62 @@ export class OdooEditor extends EventTarget {
         for (const stepToRevert of stepsAfterNewStep.slice().reverse()) {
             this.historyRevert(stepToRevert, { sideEffect: false });
         }
+
         this.historyApply(newStep.mutations);
-        this._historySteps.splice(index, 0, newStep);
+        const extraRenderingPromise = this.options.checkForExtraRendering({element: this.editable, inPlace: false});
+        if (extraRenderingPromise) {
+            // That step can only be applied when some of the nodes that it
+            // adds finish being rendered.
+            this.historyRevert(newStep, {sideEffect: false});
+        } else {
+            this._historySteps.splice(index, 0, newStep);
+        }
+
         for (const stepToApply of stepsAfterNewStep) {
             this.historyApply(stepToApply.mutations);
+        }
+        if (extraRenderingPromise) {
+            return extraRenderingPromise;
         }
     }
     collaborationSetClientId(id) {
         this._collabClientId = id;
     }
 
+    /**
+     * Apply external steps coming from the collaboration. Buffer them if the
+     * _externalStepsBuffer is active and they come from a collaborator.
+     *
+     * @param {Object} newSteps External steps to be applied
+     * @returns {undefined}
+     */
     onExternalHistorySteps(newSteps) {
+        if (this._currentPromise) {
+            this._buffer.push(...newSteps);
+        }
         this.observerUnactive();
         this._computeHistorySelection();
 
+        let i = 0;
         for (const newStep of newSteps) {
-            this._historyAddExternalStep(newStep);
+            i++;
+            this._currentPromise = this._historyAddExternalStep(newStep);
+
+
+            if (this._currentPromise) {
+                this._currentPromise.then(()=> {
+                    this._currentPromise = undefined;
+                    this.onExternalHistorySteps(this._buffer);
+                });
+                this._buffer = newSteps.slice(i);
+                break;
+            }
         }
 
         this.observerActive();
         this.historyResetLatestComputedSelection();
         this._handleCommandHint();
         this.multiselectionRefresh();
-        this.dispatchEvent(new Event('onExternalHistorySteps'));
     }
 
     // Multi selection
