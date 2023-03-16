@@ -20,7 +20,8 @@ class TestUBLNL(TestUBLCommon):
             'email': 'info@outlook.nl',
             'country_id': cls.env.ref('base.nl').id,
             'bank_ids': [(0, 0, {'acc_number': 'NL000099998B57'})],
-            'l10n_nl_kvk': '77777677',
+            'eas_code': '0106',
+            'endpoint_value': '77777677',
             'ref': 'ref_partner_1',
         })
 
@@ -32,7 +33,8 @@ class TestUBLNL(TestUBLCommon):
             'vat': 'NL41452B11',
             'country_id': cls.env.ref('base.nl').id,
             'bank_ids': [(0, 0, {'acc_number': 'NL93999574162167'})],
-            'l10n_nl_kvk': '1234567',
+            'eas_code': '0106',
+            'endpoint_value': '1234567',
             'ref': 'ref_partner_2',
         })
 
@@ -114,7 +116,7 @@ class TestUBLNL(TestUBLCommon):
             ],
         )
         attachment = self._assert_invoice_attachment(
-            invoice.ubl_xml_id,
+            invoice.xml_id,
             xpaths=f'''
                 <xpath expr="./*[local-name()='ID']" position="replace">
                     <ID>___ignore___</ID>
@@ -172,7 +174,7 @@ class TestUBLNL(TestUBLCommon):
             ],
         )
         attachment = self._assert_invoice_attachment(
-            refund.ubl_xml_id,
+            refund.xml_id,
             xpaths=f'''
                 <xpath expr="./*[local-name()='ID']" position="replace">
                     <ID>___ignore___</ID>

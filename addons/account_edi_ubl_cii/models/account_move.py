@@ -5,27 +5,15 @@ from odoo import api, fields, models
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    ubl_xml_id = fields.Many2one(
+    xml_id = fields.Many2one(
         comodel_name='ir.attachment',
-        string="UBL Attachment",
-        compute=lambda self: self._compute_linked_attachment_id('ubl_xml_id', 'ubl_xml_file'),
-        depends=['ubl_xml_file']
+        string="Attachment",
+        compute=lambda self: self._compute_linked_attachment_id('xml_id', 'xml_file'),
+        depends=['xml_file']
     )
-    ubl_xml_file = fields.Binary(
+    xml_file = fields.Binary(
         attachment=True,
-        string="UBL File",
-        copy=False,
-    )
-
-    cii_xml_id = fields.Many2one(
-        comodel_name='ir.attachment',
-        string="CII Attachment",
-        compute=lambda self: self._compute_linked_attachment_id('cii_xml_id', 'cii_xml_file'),
-        depends=['cii_xml_file']
-    )
-    cii_xml_file = fields.Binary(
-        comodel_name='ir.attachment',
-        string="CII File",
+        string="File",
         copy=False,
     )
 
