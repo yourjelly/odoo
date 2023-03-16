@@ -1401,9 +1401,8 @@ class Root(object):
         if not explicit_session and hasattr(response, 'set_cookie'):
             response.set_cookie(
                 'session_id', httprequest.session.sid, max_age=90 * 24 * 60 * 60, httponly=True)
-
-        headers = response.headers
-        headers['Strict-Transport-Security'] = 'max-age=31536000'
+        if hasattr(response, 'headers'):
+            response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         return response
 
 
