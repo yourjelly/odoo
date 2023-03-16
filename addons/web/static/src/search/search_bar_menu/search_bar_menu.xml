@@ -2,17 +2,17 @@
 <templates xml:space="preserve">
 
     <t t-name="web.SearchBarMenu" owl="1">
-        <Dropdown togglerClass="'o_searchview_dropdown_toggler d-print-none btn btn-secondary o-no-caret border-start h-100'"
-                  menuClass="'d-flex'"
+        <Dropdown togglerClass="'o_searchview_dropdown_toggler d-print-none btn btn-outline-secondary o-no-caret rounded-start-0 h-100'"
+                  menuClass="'o_search_bar_menu d-flex flex-wrap flex-lg-nowrap mt-2 py-3'"
                   position="'bottom-end'">
             <t t-set-slot="toggler" t-slot-scope="scope">
-                <i class="fa" t-att-class="{'fa-caret-down': !scope.open, 'fa-caret-up': scope.open}" aria-hidden="true"/>
+                <i class="fa fa-caret-down" aria-hidden="true"/>
             </t>
             <!-- Filter -->
-            <div class="o_dropdown_container o_filter_menu py-3">
+            <div class="o_dropdown_container o_filter_menu w-100 w-lg-auto px-3 mb-4 mb-lg-0">
                 <div class="px-3 fs-5 mb-2">
                     <i class="me-2 text-primary" t-att-class="facet_icons.filter"/>
-                    <span class="o_dropdown_title">Filters</span>
+                    <h5 class="o_dropdown_title d-inline">Filters</h5>
                 </div>
                 <t t-set="currentGroup" t-value="null"/>
                 <t t-foreach="filterItems" t-as="item" t-key="item.id">
@@ -55,10 +55,10 @@
                 <CustomFilterItem/>
             </div>
             <!-- GroupBy -->
-            <div class="o_dropdown_container o_group_by_menu py-3 border-start">
+            <div class="o_dropdown_container o_group_by_menu w-100 w-lg-auto px-3 mb-4 mb-lg-0 border-start border-end">
                 <div class="px-3 fs-5 mb-2">
                     <i class="me-2 text-action" t-att-class="facet_icons.groupBy"/>
-                    <span class="o_dropdown_title">Group By</span>
+                    <h5 class="o_dropdown_title d-inline">Group By</h5>
                 </div>
                 <t t-set="currentGroup" t-value="null"/>
                 <t t-foreach="groupByItems" t-as="item" t-key="item.id">
@@ -101,10 +101,10 @@
                 </t>
             </div>
             <!-- Comparison -->
-            <div class="o_dropdown_container o_comparison_menu py-3 border-start" t-if="showComparisonMenu">
+            <div class="o_dropdown_container o_comparison_menu w-100 w-lg-auto px-3 border-end" t-if="showComparisonMenu">
                 <div class="px-3 fs-5 mb-2">
                     <i class="me-2 text-danger" t-att-class="facet_icons.comparison"/>
-                    <span class="o_dropdown_title">Comparison</span>
+                    <h5 class="o_dropdown_title d-inline">Comparison</h5>
                 </div>
                 <t t-foreach="comparisonItems" t-as="item" t-key="item.id">
                     <SearchDropdownItem class="{ o_menu_item: true, selected: item.isActive }"
@@ -116,10 +116,10 @@
                 </t>
             </div>
             <!-- Favorite -->
-            <div class="o_dropdown_container o_favorite_menu py-3 border-start">
+            <div class="o_dropdown_container o_favorite_menu w-100 w-lg-auto px-3">
                 <div class="px-3 fs-5 mb-2">
                     <i class="me-2 text-favourite" t-att-class="facet_icons.favorite"/>
-                    <span class="o_dropdown_title">Favorites</span>
+                    <h5 class="o_dropdown_title d-inline">Favorites</h5>
                 </div>
                 <t t-set="currentGroup" t-value="null"/>
                 <t t-foreach="favoriteItems" t-as="item" t-key="item.id or item.key">
