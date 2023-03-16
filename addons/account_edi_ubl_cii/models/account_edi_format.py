@@ -44,7 +44,7 @@ class AccountEdiFormat(models.Model):
                 return self.env['account.edi.xml.ubl_20']
             if ubl_version.text == '2.1':
                 return self.env['account.edi.xml.ubl_21']
-        return
+        return self.env['account.edi.xml.ubl_21']
 
     def _get_xml_builder(self, company):
         # see https://communaute.chorus-pro.gouv.fr/wp-content/uploads/2017/08/20170630_Solution-portail_Dossier_Specifications_Fournisseurs_Chorus_Facture_V.1.pdf
@@ -67,6 +67,7 @@ class AccountEdiFormat(models.Model):
             return self.env['account.edi.xml.ubl_efff']
         if self.code == 'ubl_a_nz' and company.country_id.code in ['AU', 'NZ']:
             return self.env['account.edi.xml.ubl_a_nz']
+        return self.env['account.edi.xml.ubl_bis3']
 
     def _is_ubl_cii_available(self, company):
         """
