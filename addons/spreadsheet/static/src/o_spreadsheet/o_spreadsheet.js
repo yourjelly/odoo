@@ -6164,6 +6164,10 @@
             });
             return registry;
         }
+        onDoubleClick() {
+            this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
+            this.env.openSidePanel("ChartPanel");
+        }
         get chartType() {
             return this.env.model.getters.getChartType(this.props.figure.id);
         }
