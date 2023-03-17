@@ -663,7 +663,6 @@ export class ListRenderer extends Component {
         } else {
             classNames.push("cursor-default");
         }
-        const orderBy = this.props.list.orderBy;
         if (this.isNumericColumn(column)) {
             classNames.push("o_list_number_th");
         }
