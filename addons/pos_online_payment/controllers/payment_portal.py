@@ -172,6 +172,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
         if not partner_sudo:
             return self._redirect_login()
 
+        self._validate_transaction_kwargs(kwargs)
         if kwargs.get('is_validation'):
             raise UserError(
                 _("A validation payment cannot be used for a Point of Sale online payment."))
@@ -179,7 +180,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
         if 'partner_id' in kwargs and kwargs['partner_id'] != partner_sudo.id:
             raise UserError(
                 _("The provided partner_id is different than expected."))
-
+        kwargs['partner_id'] = partner_sudo.id
         # Don't allow passing arbitrary create values and avoid tokenization for
         # the public user.
         kwargs['custom_create_values'] = {

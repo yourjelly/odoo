@@ -211,13 +211,12 @@ class PaymentHttpCommon(PaymentCommon, HttpCase):
             'flow': flow,
         }
 
-    def _portal_transaction(self, **route_kwargs):
+    def _portal_transaction(self, tx_route='/payment/transaction', **route_kwargs):
         """/payment/transaction feedback
 
         :return: The response to the json request
         """
-        uri = '/payment/transaction'
-        url = self._build_url(uri)
+        url = self._build_url(tx_route)
         return self.make_jsonrpc_request(url, route_kwargs)
 
     def _get_processing_values(self, **route_kwargs):
