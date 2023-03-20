@@ -4981,14 +4981,6 @@
             }
         }
     }
-    function getElementScrollTop(el) {
-        return (el === null || el === void 0 ? void 0 : el.scrollTop) || 0;
-    }
-    function setElementScrollTop(el, scroll) {
-        if (!el)
-            return;
-        el.scrollTop = scroll;
-    }
     function getOpenedMenus() {
         return Array.from(document.querySelectorAll(".o-spreadsheet .o-menu"));
     }
@@ -19392,12 +19384,23 @@
          */
         selectRange(start, end) {
             let selection = window.getSelection();
-            this.removeSelection();
-            let range = document.createRange();
+            const { start: currentStart, end: currentEnd } = this.getCurrentSelection();
+            if (currentStart === start && currentEnd === end) {
+                return;
+            }
+            const currentRange = selection.getRangeAt(0);
+            let range;
+            if (this.el.contains(currentRange.startContainer)) {
+                range = currentRange;
+            }
+            else {
+                range = document.createRange();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
             if (start == end && start === 0) {
                 range.setStart(this.el, 0);
                 range.setEnd(this.el, 0);
-                selection.addRange(range);
             }
             else {
                 const textLength = this.getText().length;
@@ -19411,7 +19414,6 @@
                 let startNode = this.findChildAtCharacterIndex(start);
                 let endNode = this.findChildAtCharacterIndex(end);
                 range.setStart(startNode.node, startNode.offset);
-                selection.addRange(range);
                 selection.extend(endNode.node, endNode.offset);
             }
         }
@@ -19451,26 +19453,58 @@
             return { node: previous, offset: usedCharacters };
         }
         /**
-         * Sets (or Replaces all) the text inside the root element in the form of distinctive
+         * Sets (or Replaces all) the text inside the root element in the form of distinctive paragraphs and
          * span for each element provided in `contents`.
          *
+         * The function will apply the diff between the current content and the new content to avoid the systematic
+         * destruction of DOM elements which interferes with IME[1]
+         *
+         * Each line of text will be encapsulated in a paragraph element.
          * Each span will have its own fontcolor and specific class if provided in the HtmlContent object.
+         *
+         * [1] https://developer.mozilla.org/en-US/docs/Glossary/Input_method_editor
          */
         setText(contents) {
-            this.el.innerHTML = "";
             if (contents.length === 0) {
+                this.removeAll();
                 return;
             }
-            for (const line of contents) {
-                const p = document.createElement("p");
-                // Empty line
-                if (line.length === 0 || line.every((content) => !content.value && !content.class)) {
-                    p.appendChild(document.createElement("br"));
-                    this.el.appendChild(p);
-                    continue;
+            function compareContentToElement(content, node) {
+                var _a;
+                if (!node)
+                    return false;
+                if (node instanceof Text) {
+                    return false;
                 }
-                for (const content of line) {
+                const sameTag = node.tagName === "SPAN";
+                const sameColor = toHex(((_a = node.style) === null || _a === void 0 ? void 0 : _a.color) || "") === toHex(content.color || "");
+                const sameClass = deepEquals([content.class], [...node.classList]);
+                const sameContent = node.innerText === content.value;
+                return sameTag && sameColor && sameClass && sameContent;
+            }
+            const divChildren = Array.from(this.el.childNodes);
+            const contentLength = contents.length;
+            for (let i = 0; i < contentLength; i++) {
+                const line = contents[i];
+                const divChild = divChildren[i];
+                let p;
+                if (divChild && divChild.nodeName === "P") {
+                    p = divChild;
+                }
+                else {
+                    p = document.createElement("p");
+                }
+                const lineLength = line.length;
+                const existingChildren = Array.from(p.childNodes);
+                for (let j = 0; j < lineLength; j++) {
+                    const content = line[j];
+                    const child = existingChildren[j];
+                    if (compareContentToElement(content, child)) {
+                        continue;
+                    }
                     if (!content.value && !content.class) {
+                        if (child)
+                            p.removeChild(child);
                         continue;
                     }
                     const span = document.createElement("span");
@@ -19479,9 +19513,36 @@
                     if (content.class) {
                         span.classList.add(content.class);
                     }
+                    if (child) {
+                        p.replaceChild(span, child);
+                    }
+                    else {
+                        p.appendChild(span);
+                    }
+                }
+                if (existingChildren.length > lineLength) {
+                    for (let i = lineLength; i < existingChildren.length; i++) {
+                        p.removeChild(existingChildren[i]);
+                    }
+                }
+                // Empty line
+                if (!p.hasChildNodes()) {
+                    const span = document.createElement("span");
+                    span.appendChild(document.createElement("br"));
                     p.appendChild(span);
                 }
-                this.el.appendChild(p);
+                // replace p if necessary
+                if (divChild && p !== divChild) {
+                    this.el.replaceChild(p, divChild);
+                }
+                else if (!divChild) {
+                    this.el.appendChild(p);
+                }
+            }
+            if (divChildren.length > contentLength) {
+                for (let i = contentLength; i < divChildren.length; i++) {
+                    this.el.removeChild(divChildren[i]);
+                }
             }
         }
         scrollSelectionIntoView() {
@@ -19491,13 +19552,6 @@
                 return;
             const element = focusedNode instanceof HTMLElement ? focusedNode : focusedNode.parentElement;
             element === null || element === void 0 ? void 0 : element.scrollIntoView({ block: "nearest" });
-        }
-        /**
-         * remove the current selection of the user
-         * */
-        removeSelection() {
-            let selection = window.getSelection();
-            selection.removeAllRanges();
         }
         removeAll() {
             if (this.el) {
@@ -19705,13 +19759,6 @@
       pointer-events: none;
     }
   }
-
-  .o-topbar-composer .o-composer:empty:not(:focus)::before {
-    /* svg free of use from https://uxwing.com/formula-fx-icon/ */
-    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 121.8 122.9' width='16' height='16' focusable='false'%3E%3Cpath d='m28 34-4 5v2h10l-6 40c-4 22-6 28-7 30-2 2-3 3-5 3-3 0-7-2-9-4H4c-2 2-4 4-4 7s4 6 8 6 9-2 15-8c8-7 13-17 18-39l7-35 13-1 3-6H49c4-23 7-27 11-27 2 0 5 2 8 6h4c1-1 4-4 4-7 0-2-3-6-9-6-5 0-13 4-20 10-6 7-9 14-11 24h-8zm41 16c4-5 7-7 8-7s2 1 5 9l3 12c-7 11-12 17-16 17l-3-1-2-1c-3 0-6 3-6 7s3 7 7 7c6 0 12-6 22-23l3 10c3 9 6 13 10 13 5 0 11-4 18-15l-3-4c-4 6-7 8-8 8-2 0-4-3-6-10l-5-15 8-10 6-4 3 1 3 2c2 0 6-3 6-7s-2-7-6-7c-6 0-11 5-21 20l-2-6c-3-9-5-14-9-14-5 0-12 6-18 15l3 3z' fill='%23BDBDBD' /%3E%3C/svg%3E");
-    position: relative;
-    top: 20%;
-  }
 `;
     class Composer extends owl.Component {
         constructor() {
@@ -19733,7 +19780,6 @@
                 functionDescription: {},
                 argToFocus: 0,
             });
-            this.isKeyStillDown = false;
             this.compositionActive = false;
             // we can't allow input events to be triggered while we remove and add back the content of the composer in processContent
             this.shouldProcessInputEvents = false;
@@ -19748,6 +19794,7 @@
                 F2: () => console.warn("Not implemented"),
                 F4: this.processF4Key,
                 Tab: (ev) => this.processTabKey(ev),
+                " ": (ev) => this.processSpaceKey(ev),
             };
         }
         get assistantStyle() {
@@ -19774,17 +19821,13 @@
             owl.onMounted(() => {
                 const el = this.composerRef.el;
                 this.contentHelper.updateEl(el);
-                this.processContent();
-                this.contentHelper.scrollSelectionIntoView();
             });
             owl.onWillUnmount(() => {
                 var _a, _b;
                 (_b = (_a = this.props).onComposerUnmounted) === null || _b === void 0 ? void 0 : _b.call(_a);
             });
-            owl.onPatched(() => {
-                if (!this.isKeyStillDown) {
-                    this.processContent();
-                }
+            owl.useEffect(() => {
+                this.processContent();
             });
         }
         // ---------------------------------------------------------------------------
@@ -19838,35 +19881,28 @@
                     return;
                 }
             }
-            else {
-                // when completing with tab, if there is no value to complete, the active cell will be moved to the right.
-                // we can't let the model think that it is for a ref selection.
-                // todo: check if this can be removed someday
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-            }
             const direction = ev.shiftKey ? "left" : "right";
             this.env.model.dispatch("STOP_EDITION");
             this.env.model.selection.moveAnchorCell(direction, 1);
         }
+        processSpaceKey(ev) {
+            if (ev.ctrlKey) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                this.showAutocomplete("");
+                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
+            }
+        }
         processEnterKey(ev) {
-            var _a;
+            var _a, _b;
             ev.preventDefault();
             ev.stopPropagation();
             if (ev.altKey || ev.ctrlKey) {
-                const selection = this.contentHelper.getCurrentSelection();
-                const currentContent = this.env.model.getters.getCurrentContent();
-                const content = currentContent.slice(0, selection.start) + NEWLINE + currentContent.slice(selection.end);
-                this.env.model.dispatch("SET_CURRENT_CONTENT", {
-                    content,
-                    selection: { start: selection.start + 1, end: selection.start + 1 },
-                });
-                this.processContent();
-                this.contentHelper.scrollSelectionIntoView();
+                (_a = this.composerRef.el) === null || _a === void 0 ? void 0 : _a.dispatchEvent(new InputEvent("input", { inputType: "insertParagraph", bubbles: true, isComposing: false }));
                 return;
             }
-            this.isKeyStillDown = false;
             if (this.autoCompleteState.showProvider) {
-                const autoCompleteValue = (_a = this.autoCompleteState.values[this.autoCompleteState.selectedIndex]) === null || _a === void 0 ? void 0 : _a.text;
+                const autoCompleteValue = (_b = this.autoCompleteState.values[this.autoCompleteState.selectedIndex]) === null || _b === void 0 ? void 0 : _b.text;
                 if (autoCompleteValue) {
                     this.autoComplete(autoCompleteValue);
                     return;
@@ -19897,54 +19933,37 @@
             else {
                 ev.stopPropagation();
             }
-            const { start, end } = this.contentHelper.getCurrentSelection();
-            if (!this.env.model.getters.isSelectingForComposer() &&
-                !(ev.key === "Enter" && (ev.altKey || ev.ctrlKey))) {
-                this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", { start, end });
-                this.isKeyStillDown = true;
-            }
         }
         /*
          * Triggered automatically by the content-editable between the keydown and key up
          * */
-        onInput() {
+        onInput(ev) {
             if (this.props.focus === "inactive" || !this.shouldProcessInputEvents) {
                 return;
             }
+            let content = this.contentHelper.getText();
+            let selection = this.contentHelper.getCurrentSelection();
+            if (ev.inputType === "insertParagraph") {
+                const start = Math.min(selection.start, selection.end);
+                const end = Math.max(selection.start, selection.end);
+                content = content.slice(0, start) + NEWLINE + content.slice(end);
+                selection = { start: start + 1, end: start + 1 };
+            }
             this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
             this.env.model.dispatch("SET_CURRENT_CONTENT", {
-                content: this.contentHelper.getText(),
-                selection: this.contentHelper.getCurrentSelection(),
+                content,
+                selection,
             });
-        }
-        onKeyup(ev) {
-            this.isKeyStillDown = false;
-            if (this.props.focus === "inactive" ||
-                ["Control", "Alt", "Shift", "Tab", "Enter", "F4"].includes(ev.key)) {
-                return;
-            }
-            if (this.autoCompleteState.showProvider && ["ArrowUp", "ArrowDown"].includes(ev.key)) {
-                return; // already processed in keydown
-            }
-            if (this.env.model.getters.isSelectingForComposer() &&
-                ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(ev.key)) {
-                return; // already processed in keydown
-            }
-            ev.preventDefault();
-            ev.stopPropagation();
-            this.autoCompleteState.showProvider = false;
-            if (ev.ctrlKey && ev.key === " ") {
-                this.showAutocomplete("");
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-                return;
-            }
-            const { start: oldStart, end: oldEnd } = this.env.model.getters.getComposerSelection();
-            const { start, end } = this.contentHelper.getCurrentSelection();
-            if (start !== oldStart || end !== oldEnd) {
-                this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", this.contentHelper.getCurrentSelection());
-            }
             this.processTokenAtCursor();
-            this.processContent();
+        }
+        onKeyup() {
+            if (this.contentHelper.el === document.activeElement) {
+                const { start: oldStart, end: oldEnd } = this.env.model.getters.getComposerSelection();
+                const { start, end } = this.contentHelper.getCurrentSelection();
+                if (start !== oldStart || end !== oldEnd) {
+                    this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", { start, end });
+                }
+            }
         }
         showAutocomplete(searchTerm) {
             this.autoCompleteState.showProvider = true;
@@ -19966,13 +19985,6 @@
             this.autoCompleteState.values = values.slice(0, 10);
             this.autoCompleteState.selectedIndex = 0;
         }
-        onMousedown(ev) {
-            if (ev.button > 0) {
-                // not main button, probably a context menu
-                return;
-            }
-            this.contentHelper.removeSelection();
-        }
         onClick() {
             if (this.env.model.getters.isReadonly()) {
                 return;
@@ -19985,9 +19997,6 @@
             this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", newSelection);
             this.processTokenAtCursor();
         }
-        onBlur() {
-            this.isKeyStillDown = false;
-        }
         // ---------------------------------------------------------------------------
         // Private
         // ---------------------------------------------------------------------------
@@ -19995,22 +20004,19 @@
             if (this.compositionActive) {
                 return;
             }
-            const oldScroll = getElementScrollTop(this.composerRef.el);
-            this.contentHelper.removeAll(); // removes the content of the composer, to be added just after
             this.shouldProcessInputEvents = false;
             if (this.props.focus !== "inactive") {
                 this.contentHelper.el.focus();
-                this.contentHelper.selectRange(0, 0); // move the cursor inside the composer at 0 0.
             }
             const content = this.getContentLines();
+            this.contentHelper.setText(content);
             if (content.length !== 0 && content.length[0] !== 0) {
-                this.contentHelper.setText(content);
-                const { start, end } = this.env.model.getters.getComposerSelection();
                 if (this.props.focus !== "inactive") {
                     // Put the cursor back where it was before the rendering
+                    const { start, end } = this.env.model.getters.getComposerSelection();
                     this.contentHelper.selectRange(start, end);
                 }
-                setElementScrollTop(this.composerRef.el, oldScroll);
+                this.contentHelper.scrollSelectionIntoView();
             }
             this.shouldProcessInputEvents = true;
         }
@@ -20263,8 +20269,8 @@
                     height: el.clientHeight,
                 };
                 this.composerState.delimitation = {
-                    width: el.parentElement.clientWidth,
-                    height: el.parentElement.clientHeight,
+                    width: this.props.gridDims.width,
+                    height: this.props.gridDims.height,
                 };
             });
             owl.onWillUpdateProps(() => {
@@ -40588,6 +40594,11 @@
     margin-top: -1px;
     border: 1px solid;
     z-index: ${ComponentsImportance.TopBarComposer};
+
+    .o-composer:empty:not(:focus)::before {
+      /* svg free of use from https://uxwing.com/formula-fx-icon/ */
+      content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 121.8 142.9' width='24' height='24' focusable='false'%3E%3Cpath d='m28 34-4 5v2h10l-6 40c-4 22-6 28-7 30-2 2-3 3-5 3-3 0-7-2-9-4H4c-2 2-4 4-4 7s4 6 8 6 9-2 15-8c8-7 13-17 18-39l7-35 13-1 3-6H49c4-23 7-27 11-27 2 0 5 2 8 6h4c1-1 4-4 4-7 0-2-3-6-9-6-5 0-13 4-20 10-6 7-9 14-11 24h-8zm41 16c4-5 7-7 8-7s2 1 5 9l3 12c-7 11-12 17-16 17l-3-1-2-1c-3 0-6 3-6 7s3 7 7 7c6 0 12-6 22-23l3 10c3 9 6 13 10 13 5 0 11-4 18-15l-3-4c-4 6-7 8-8 8-2 0-4-3-6-10l-5-15 8-10 6-4 3 1 3 2c2 0 6-3 6-7s-2-7-6-7c-6 0-11 5-21 20l-2-6c-3-9-5-14-9-14-5 0-12 6-18 15l3 3z' fill='%23BDBDBD' /%3E%3C/svg%3E");
+    }
   }
 `;
     class TopBarComposer extends owl.Component {
@@ -45078,8 +45089,8 @@
 
 
     __info__.version = '16.3.0-alpha.1';
-    __info__.date = '2023-03-16T12:15:48.320Z';
-    __info__.hash = 'f41d64a';
+    __info__.date = '2023-03-20T13:38:28.580Z';
+    __info__.hash = 'd86385f';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
