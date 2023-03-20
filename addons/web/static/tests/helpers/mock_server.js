@@ -1953,12 +1953,12 @@ export class MockServer {
     }
 
     mockSearchController(params) {
-        const model = this.models[params.model];
-        let fieldNames = params.fields;
+        // const model = this.models[params.model];
+        let fieldNames = params.fields || [];
         const offset = params.offset || 0;
-        if (!fieldNames || !fieldNames.length) {
-            fieldNames = Object.keys(model.fields);
-        }
+        // if (!fieldNames || !fieldNames.length) {
+        //     fieldNames = Object.keys(model.fields);
+        // }
         fieldNames = [...new Set(fieldNames.concat(["id"]))];
         const { context } = params;
         const active_test = context && "active_test" in context ? context.active_test : true;
