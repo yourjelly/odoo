@@ -1978,6 +1978,11 @@ class BaseModel(metaclass=MetaModel):
         return map(get_convert_method(), raw_values)
 
     @api.model
+    def _read_group_check_field_access_rights(self, field_names):
+        # TODO: should have a general hook (not only for read_group) for this kind of stuff
+        self.check_field_access_rights('read', field_names)
+
+    @api.model
     def _read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):
         """ Get fields aggregations specify by ``aggregates`` grouped by the given ``groupby`` 
         fields where record are filtered by the ``domain``.
@@ -2022,8 +2027,7 @@ class BaseModel(metaclass=MetaModel):
             order = ','.join(groupby)
             order_traverse_many2one = False
 
-        query = self._where_calc(domain)
-        self._apply_ir_rules(query, 'read')
+        query = self._search(domain)
 
         fnames_to_flush = OrderedSet()
         groupby_terms = []  # [<SQL expression>,]
@@ -2067,7 +2071,7 @@ class BaseModel(metaclass=MetaModel):
 
         self._flush_search(domain, fnames_to_flush)
         if fnames_to_flush:
-            self.check_field_access_rights('read', fnames_to_flush)
+            self._read_group_check_field_access_rights(fnames_to_flush)
 
         self.env.cr.execute('\n' + '\n'.join(query_parts), query_params)
 
