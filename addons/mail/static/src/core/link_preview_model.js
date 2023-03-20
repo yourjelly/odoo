@@ -1,6 +1,8 @@
 /* @odoo-module */
 
-export class LinkPreview {
+import { Model } from "./model";
+
+export class LinkPreview extends Model {
     /** @type {number} */
     id;
     /** @type {Object} */
@@ -25,7 +27,8 @@ export class LinkPreview {
      * @returns {LinkPreview}
      */
     constructor(data) {
-        Object.assign(this, data);
+        super();
+        this.assign(data, this.fields);
     }
 
     get imageUrl() {

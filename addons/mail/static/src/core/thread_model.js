@@ -5,6 +5,7 @@ import { sprintf } from "@web/core/utils/strings";
 
 import { ScrollPosition } from "@mail/core/scroll_position_model";
 import { createLocalId } from "../utils/misc";
+import { Model } from "./model";
 
 /**
  * @typedef SeenInfo
@@ -19,7 +20,7 @@ import { createLocalId } from "../utils/misc";
  * @property {boolean} checked
  */
 
-export class Thread {
+export class Thread extends Model {
     /** @type {number} */
     id;
     /** @type {string} */
@@ -32,8 +33,6 @@ export class Thread {
     attachments = [];
     /** @type {integer} */
     activeRtcSessionId;
-    /** @type {object|undefined} */
-    channel;
     /** @type {import("@mail/core/channel_member_model").ChannelMember[]} */
     channelMembers = [];
     /** @type {RtcSession{}} */
@@ -74,8 +73,6 @@ export class Thread {
     scrollPosition = new ScrollPosition();
     showOnlyVideo = false;
     typingMemberIds = [];
-    /** @type {import("@mail/core/store_service").Store} */
-    _store;
     /** @type {string} */
     defaultDisplayMode;
     /** @type {SeenInfo[]} */
@@ -89,12 +86,9 @@ export class Thread {
     last_interest_dt;
 
     constructor(store, data) {
-        Object.assign(this, {
-            id: data.id,
-            model: data.model,
-            type: data.type,
-            _store: store,
-        });
+        super();
+        this.assign(data, this.fields);
+        this._store = store;
         if (this.type === "channel") {
             this._store.discuss.channels.threads.push(this.localId);
         } else if (this.type === "chat" || this.type === "group") {

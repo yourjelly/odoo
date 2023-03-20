@@ -460,13 +460,15 @@ export class ThreadService {
      * @param {Object} data
      */
     update(thread, data) {
-        const { attachments, serverData, ...remainingData } = data;
+        const { serverData, ...remainingData } = data;
         assignDefined(thread, remainingData);
-        if (attachments) {
+        thread.assign(data, thread.fields);
+
+        if (thread.attachments) {
             // smart process to avoid triggering reactives when there is no change between the 2 arrays
             replaceArrayWithCompare(
                 thread.attachments,
-                attachments.map((attachment) => this.attachmentsService.insert(attachment)),
+                thread.attachments.map((attachment) => this.attachmentsService.insert(attachment)),
                 (a1, a2) => a1.id === a2.id
             );
         }
