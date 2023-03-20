@@ -1526,7 +1526,7 @@ class AccountMove(models.Model):
             ('res_model', '=', self._name),
             ('res_id', 'in', self.ids),
             ('res_field', '=', binary_field)
-        ])
+        ], order='create_date desc')
         move_vals = {att.res_id: att for att in attachments}
         for move in self:
             move[attachment_field] = move_vals.get(move.id, False)

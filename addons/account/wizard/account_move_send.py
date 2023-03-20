@@ -21,6 +21,7 @@ class AccountMoveSend(models.Model):
         readonly=False,
         store=True,
     )
+    warning_message = fields.Html(readonly=True)
 
     # == PRINT ==
     enable_download = fields.Boolean(compute='_compute_enable_download')
@@ -383,11 +384,15 @@ class AccountMoveSend(models.Model):
                     .with_context(no_new_invoice=True)\
                     .message_post(body=error)
             else:
-                raise UserError(error)
+                self.warning_message = error
+                return move
 
     def _link_document(self, invoice, prepared_data):
         """ Link prepared_data to the record
         """
+        # delete previous record if any (M2O)
+        if invoice.invoice_pdf_report_file: # TODO: best way to regenerate?
+            invoice.invoice_pdf_report_id.unlink()
         # create an attachment that will become 'invoice_pdf_report_file'
         # note: Binary is used for security reason
         self.env['ir.attachment'].create(prepared_data['pdf_attachment_values'])
@@ -455,7 +460,12 @@ class AccountMoveSend(models.Model):
             success_moves, errors = self._generate_documents(self.move_ids, from_cron)
 
             self._generate_documents_success_hook(success_moves, from_cron)
-            self._generate_documents_failed_hook(errors, from_cron)
+            move_warning = self._generate_documents_failed_hook(errors, from_cron)
+
+            if move_warning:
+                action = move_warning.action_send_and_print()
+                action.update({'res_id': self.id})
+                return action
 
             self.mode = 'done'
 

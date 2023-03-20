@@ -719,7 +719,6 @@ class AccountChartTemplate(models.AbstractModel):
     def _parse_csv(self, template_code, model, module=None):
         Model = self.env[model]
         model_fields = Model._fields
-
         if module is None:
             module = self._get_chart_template_mapping().get(template_code)['module']
         assert re.fullmatch(r"[a-z0-9_]+", module)

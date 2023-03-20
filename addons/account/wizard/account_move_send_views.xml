@@ -40,8 +40,9 @@
                 <div name="warnings">
                     <div class="alert alert-warning"
                         role="alert"
-                        attrs="{'invisible': [('send_mail_warning_message', '=', False)]}">
+                        attrs="{'invisible': [('send_mail_warning_message', '=', False), ('warning_message', '=', False)]}">
                         <field name="send_mail_warning_message"/>
+                        <field name="warning_message"/>
                     </div>
                 </div>
 
