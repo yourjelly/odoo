@@ -815,6 +815,10 @@ class AccountMoveLine(models.Model):
         for line in self:
             line.sequence = seq_map.get(line.display_type, 100)
 
+    def _compute_tax_for_line(self, *args, **kwargs):
+        """ This wraps tax computation for clean overriding by tax calculation modules (e.g. account_avatax). """
+        return self.tax_ids.compute_all(*args, **kwargs)
+
     @api.depends('quantity', 'discount', 'price_unit', 'tax_ids', 'currency_id')
     def _compute_totals(self):
         for line in self:
@@ -826,7 +830,7 @@ class AccountMoveLine(models.Model):
 
             # Compute 'price_total'.
             if line.tax_ids:
-                taxes_res = line.tax_ids.compute_all(
+                taxes_res = line._compute_tax_for_line(
                     line_discount_price_unit,
                     quantity=line.quantity,
                     currency=line.currency_id,
@@ -937,7 +941,7 @@ class AccountMoveLine(models.Model):
                 amount_currency = line.amount_currency
                 handle_price_include = False
                 quantity = 1
-            compute_all_currency = line.tax_ids.compute_all(
+            compute_all_currency = line._compute_tax_for_line(
                 amount_currency,
                 currency=line.currency_id,
                 quantity=quantity,
