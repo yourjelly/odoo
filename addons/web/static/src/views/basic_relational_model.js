@@ -574,6 +574,9 @@ export class Record extends DataPoint {
      * @returns {Promise<boolean>}
      */
     async save(options = {}) {
+        if (this.model.__bm__.localData[this.__bm_handle__].parentID) {
+            throw new Error("can't save an x2many record");
+        }
         options = Object.assign(
             {
                 stayInEdition: true,
