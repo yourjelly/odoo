@@ -86,7 +86,7 @@ class AccountBankStatementLine(models.Model):
     # here these values correspond to occurrence order (the reality) and they should match the bank report but in
     # the move lines, it corresponds to the recognition order. Also, the statements act as checkpoints on this field
     running_balance = fields.Monetary(
-        compute='_compute_running_balance'
+        compute='_compute_running_balance', group_operator='last',
     )
     foreign_currency_id = fields.Many2one(
         comodel_name='res.currency',
@@ -372,18 +372,12 @@ class AccountBankStatementLine(models.Model):
         return res
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+    def read_group(self, domain, groupby=(), aggregates=(), offset=0, limit=None, order=False, lazy=False):
         # Add latest running_balance in the read_group
-        result = super(AccountBankStatementLine, self).read_group(
-            domain, fields, groupby, offset=offset,
-            limit=limit, orderby=orderby, lazy=lazy)
-        show_running_balance = False
-        # We loop over the content of groupby because the groupby date is in the form of "date:granularity"
-        for el in groupby:
-            if (el == 'statement_id' or el == 'journal_id' or el.startswith('date')) and 'running_balance' in fields:
-                show_running_balance = True
-                break
-        if show_running_balance:
+        real_aggregates = [agg for agg in aggregates if agg != 'running_balance:last']
+        result = super().read_group(domain, groupby, real_aggregates, offset, limit, order, lazy)
+
+        if 'running_balance:last' in aggregates and any(el in ('statement_id', 'journal_id') or el.startswith('date') for el in groupby):
             for group_line in result:
                 group_line['running_balance'] = self.search(group_line.get('__domain'), limit=1).running_balance or 0.0
         return result

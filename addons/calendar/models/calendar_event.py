@@ -616,9 +616,9 @@ class Meeting(models.Model):
         return shown_names + obfuscated_names
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+    def read_group(self, domain, groupby=(), aggregates=(), offset=0, limit=None, order=False, lazy=False):
         groupby = [groupby] if isinstance(groupby, str) else groupby
-        grouped_fields = {group_field.split(':')[0] for group_field in groupby + (fields or list(self._fields))}
+        grouped_fields = {group_field.split(':')[0] for group_field in groupby + aggregates}
         private_fields = grouped_fields - self._get_public_fields()
         if not self.env.su and private_fields:
             # display public and confidential events
@@ -627,8 +627,8 @@ class Meeting(models.Model):
                 'title': _('Private Event Excluded'),
                 'message': _('Grouping by %s is not allowed on private events.', ', '.join([self._fields[field_name].string for field_name in private_fields]))
             })
-            return super(Meeting, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
-        return super(Meeting, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+            return super().read_group(domain, groupby, aggregates, offset, limit, order, lazy)
+        return super().read_group(domain, groupby, aggregates, offset, limit, order, lazy)
 
     def unlink(self):
         if not self:

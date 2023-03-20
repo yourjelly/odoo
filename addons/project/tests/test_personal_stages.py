@@ -61,7 +61,7 @@ class TestPersonalStages(TestProjectCommon):
         #Makes sure the personal stage for project manager is saved in the database
         self.env.flush_all()
         read_group_user = self.env['project.task'].with_user(self.user_projectuser).read_group(
-            [('user_ids', '=', self.user_projectuser.id)], fields=['sequence:avg'], groupby=['personal_stage_type_ids'])
+            [('user_ids', '=', self.user_projectuser.id)], aggregates=['sequence:avg'], groupby=['personal_stage_type_ids'])
         # Check that the result is at least a bit coherent
         self.assertEqual(len(self.user_stages), len(read_group_user),
             'read_group should return %d groups' % len(self.user_stages))
@@ -72,7 +72,7 @@ class TestPersonalStages(TestProjectCommon):
         self.assertEqual(1, total,
             'read_group should not have returned more tasks than the user is assigned to.')
         read_group_manager = self.env['project.task'].with_user(self.user_projectmanager).read_group(
-            [('user_ids', '=', self.user_projectmanager.id)], fields=['sequence:avg'], groupby=['personal_stage_type_ids'])
+            [('user_ids', '=', self.user_projectmanager.id)], aggregates=['sequence:avg'], groupby=['personal_stage_type_ids'])
         self.assertEqual(len(self.manager_stages), len(read_group_manager),
             'read_group should return %d groups' % len(self.user_stages))
         total = 0

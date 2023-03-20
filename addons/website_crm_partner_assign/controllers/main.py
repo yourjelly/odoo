@@ -229,14 +229,13 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage):
         if country:
             grade_domain += [('country_id', '=', country.id)]
         grades = partner_obj.sudo().read_group(
-            grade_domain, ["id", "grade_id"],
-            groupby="grade_id")
+            grade_domain, groupby="grade_id")
         grades_partners = partner_obj.sudo().search_count(grade_domain)
         # flag active grade
         for grade_dict in grades:
             grade_dict['active'] = grade and grade_dict['grade_id'][0] == grade.id
         grades.insert(0, {
-            'grade_id_count': grades_partners,
+            '__count': grades_partners,
             'grade_id': (0, _("All Categories")),
             'active': bool(grade is None),
         })
@@ -246,14 +245,13 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage):
         if grade:
             country_domain += [('grade_id', '=', grade.id)]
         countries = partner_obj.sudo().read_group(
-            country_domain, ["id", "country_id"],
-            groupby="country_id", orderby="country_id")
+            country_domain, groupby="country_id")
         countries_partners = partner_obj.sudo().search_count(country_domain)
         # flag active country
         for country_dict in countries:
             country_dict['active'] = country and country_dict['country_id'] and country_dict['country_id'][0] == country.id
         countries.insert(0, {
-            'country_id_count': countries_partners,
+            '__count': countries_partners,
             'country_id': (0, _("All Countries")),
             'active': bool(country is None),
         })

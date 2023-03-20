@@ -30,11 +30,11 @@ class TestDateRange(common.TransactionCase):
             '__domain': [('date', '=', False)],
             '__range': {'date': False},
             'date': False,
-            'date_count': 1,
-            'value': 1
+            '__count': 1,
+            'value:sum': 1
         }]
 
-        groups = self.Model.read_group([], fields=['value'], groupby=['date'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['date:month'])
         self.assertEqual(groups, expected)
 
     def test_lazy_with_multiple_granularities(self):
@@ -50,11 +50,11 @@ class TestDateRange(common.TransactionCase):
             '__context': {'group_by': ['date:day']},
             '__range': {'date:quarter': {'from': '1916-01-01', 'to': '1916-04-01'}},
             'date:quarter': 'Q1 1916',
-            'date_count': 1,
+            '__count': 1,
             'value:sum': 1
         }]
 
-        groups = self.Model.read_group([], fields=['value:sum'], groupby=['date:quarter', 'date:day'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['date:quarter', 'date:day'])
         self.assertEqual(groups, expected)
 
         expected = [{
@@ -62,11 +62,11 @@ class TestDateRange(common.TransactionCase):
             '__context': {'group_by': ['date:quarter']},
             '__range': {'date:day': {'from': '1916-02-11', 'to': '1916-02-12'}},
             'date:day': '11 Feb 1916',
-            'date_count': 1,
+            '__count': 1,
             'value:sum': 1
         }]
 
-        groups = self.Model.read_group([], fields=['value:sum'], groupby=['date:day', 'date:quarter'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['date:day', 'date:quarter'])
         self.assertEqual(groups, expected)
 
     def test_not_lazy_with_multiple_granularities(self):
@@ -91,5 +91,5 @@ class TestDateRange(common.TransactionCase):
             'value:sum': 1
         }]
 
-        groups = self.Model.read_group([], fields=['value:sum'], groupby=['date:quarter', 'date:day'], lazy=False)
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['date:quarter', 'date:day'], lazy=False)
         self.assertEqual(groups, expected)

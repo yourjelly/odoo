@@ -15,7 +15,7 @@ class TestGBF(common.TransactionCase):
         tm_ids = [TM.create({'many2one': subs_ids[i]}).id for i in range(3)]
 
         domain = [('id', 'in', tuple(tm_ids))]
-        rg = TM.read_group(domain, fields=['many2one'], groupby=['many2one'])
+        rg = TM.read_group(domain, groupby=['many2one'])
 
         self.assertEqual(len(rg), len(subs_ids))
         rg_subs = sorted(g['many2one'][0] for g in rg)

@@ -115,8 +115,8 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
         po.flush_model()
         report = self.env['purchase.report'].read_group(
             [('order_id', '=', po.id)],
-            ['order_id', 'delay', 'delay_pass'],
             ['order_id'],
+            ['delay:sum', 'delay_pass:sum'],
         )
-        self.assertEqual(round(report[0]['delay']), -10, msg="The PO has been confirmed 10 days in advance")
-        self.assertEqual(round(report[0]['delay_pass']), 5, msg="There are 5 days between the order date and the planned date")
+        self.assertEqual(round(report[0]['delay:sum']), -10, msg="The PO has been confirmed 10 days in advance")
+        self.assertEqual(round(report[0]['delay_pass:sum']), 5, msg="There are 5 days between the order date and the planned date")

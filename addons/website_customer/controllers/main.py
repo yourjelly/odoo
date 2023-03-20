@@ -62,7 +62,7 @@ class WebsiteCustomer(http.Controller):
             domain += [('website_tag_ids', 'in', tag_id)]
 
         # group by industry, based on customers found with the search(domain)
-        industries = Partner.sudo().read_group(domain, ["id", "industry_id"], groupby="industry_id", orderby="industry_id")
+        industries = Partner.sudo().read_group(domain, groupby="industry_id")
         partners_count = Partner.sudo().search_count(domain)
 
         if industry:
@@ -70,19 +70,19 @@ class WebsiteCustomer(http.Controller):
             if industry.id not in (x['industry_id'][0] for x in industries if x['industry_id']):
                 if industry.exists():
                     industries.append({
-                        'industry_id_count': 0,
+                        '__count': 0,
                         'industry_id': (industry.id, industry.name)
                     })
 
         industries.sort(key=lambda d: (d.get('industry_id') or (0, ''))[1])
 
         industries.insert(0, {
-            'industry_id_count': partners_count,
+            '__count': partners_count,
             'industry_id': (0, _("All Industries"))
         })
 
         # group by country, based on customers found with the search(domain)
-        countries = Partner.sudo().read_group(domain, ["id", "country_id"], groupby="country_id", orderby="country_id")
+        countries = Partner.sudo().read_group(domain, groupby="country_id")
         country_count = Partner.sudo().search_count(domain)
 
         if country:
@@ -90,13 +90,13 @@ class WebsiteCustomer(http.Controller):
             if country.id not in (x['country_id'][0] for x in countries if x['country_id']):
                 if country.exists():
                     countries.append({
-                        'country_id_count': 0,
+                        '__count': 0,
                         'country_id': (country.id, country.name)
                     })
                     countries.sort(key=lambda d: (d['country_id'] or (0, ""))[1])
 
         countries.insert(0, {
-            'country_id_count': country_count,
+            '__count': country_count,
             'country_id': (0, _("All Countries"))
         })
 

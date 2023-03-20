@@ -25,9 +25,9 @@ class TestGroupbyWeek(common.TransactionCase):
         """ fr_BE - first day of the week = Monday """
         self.env['res.lang']._activate_lang('fr_BE')
         groups = self.Model.with_context(lang='fr_BE').read_group(
-            [('id', 'in', self.records.ids)], fields=['date', 'name'], groupby=['date:week'])
+            [('id', 'in', self.records.ids)], groupby=['date:week'])
         self.assertDictEqual(
-            {week['date:week']: week['date_count'] for week in groups if week['date:week']},
+            {week['date:week']: week['__count'] for week in groups if week['date:week']},
             {
                 'W21 2022': 3,
                 'W22 2022': 1,
@@ -41,9 +41,9 @@ class TestGroupbyWeek(common.TransactionCase):
         """ ar_SY - first day of the week = Saturday """
         self.env['res.lang']._activate_lang('ar_SY')
         groups = self.Model.with_context(lang='ar_SY').read_group(
-            [('id', 'in', self.records.ids)], fields=['date', 'name'], groupby=['date:week'])
+            [('id', 'in', self.records.ids)], groupby=['date:week'])
         self.assertDictEqual(
-            {week['date:week']: week['date_count'] for week in groups if week['date:week']},
+            {week['date:week']: week['__count'] for week in groups if week['date:week']},
             {
                 'W21 2022': 1,
                 'W22 2022': 3,
@@ -55,9 +55,9 @@ class TestGroupbyWeek(common.TransactionCase):
     def test_united_states(self):
         """ en_US - first day of the week = Sunday """
         groups = self.Model.with_context(lang='en_US').read_group(
-            [('id', 'in', self.records.ids)], fields=['date', 'name'], groupby=['date:week'])
+            [('id', 'in', self.records.ids)], groupby=['date:week'])
         self.assertDictEqual(
-            {week['date:week']: week['date_count'] for week in groups if week['date:week']},
+            {week['date:week']: week['__count'] for week in groups if week['date:week']},
             {
                 'W22 2022': 2,
                 'W23 2022': 2,

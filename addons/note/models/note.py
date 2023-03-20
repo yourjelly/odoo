@@ -93,7 +93,8 @@ class Note(models.Model):
         return self.create({'memo': name}).name_get()[0]
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+    def read_group(self, domain, groupby=(), aggregates=(), offset=0, limit=None, order=False, lazy=False):
+        groupby = [groupby] if isinstance(groupby, str) else groupby
         if groupby and groupby[0] == "stage_id" and (len(groupby) == 1 or lazy):
             stages = self.env['note.stage'].search([('user_id', '=', self.env.uid)])
             if stages:
@@ -106,7 +107,6 @@ class Note(models.Model):
                         '__context': {'group_by': groupby[1:]},
                         '__domain': domain + [('stage_ids.id', '=', stage.id)],
                         'stage_id': (stage.id, stage.name),
-                        'stage_id_count': nb_stage_counts,
                         '__count': nb_stage_counts,
                         '__fold': stage.fold,
                     })
@@ -118,7 +118,6 @@ class Note(models.Model):
                     if result and result[0]['stage_id'][0] == stages[0].id:
                         dom_in = result[0]['__domain'].pop()
                         result[0]['__domain'] = domain + ['|', dom_in, dom_not_in]
-                        result[0]['stage_id_count'] += nb_notes_ws
                         result[0]['__count'] += nb_notes_ws
                     else:
                         # add the first stage column
@@ -126,7 +125,6 @@ class Note(models.Model):
                             '__context': {'group_by': groupby[1:]},
                             '__domain': domain + [dom_not_in],
                             'stage_id': (stages[0].id, stages[0].name),
-                            'stage_id_count': nb_notes_ws,
                             '__count': nb_notes_ws,
                             '__fold': stages[0].name,
                         }] + result
@@ -137,13 +135,12 @@ class Note(models.Model):
                         '__context': {'group_by': groupby[1:]},
                         '__domain': domain,
                         'stage_id': False,
-                        'stage_id_count': nb_notes_ws,
                         '__count': nb_notes_ws
                     }]
                 else:
                     result = []
             return result
-        return super(Note, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        return super().read_group(domain, groupby, aggregates, offset, limit, order, lazy)
 
     def action_close(self):
         return self.write({'open': False, 'date_done': fields.date.today()})

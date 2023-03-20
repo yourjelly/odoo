@@ -90,17 +90,15 @@ class TestFields(TransactionCaseWithUserDemo):
             cat.read(['zzz'])
 
         with self.assertRaisesRegex(ValueError, 'Invalid field'):
-            cat.read_group([('zzz', '=', 42)], fields=['color'], groupby=['parent'])
+            cat.read_group([('zzz', '=', 42)], aggregates=['color:sum'], groupby=['parent'])
         with self.assertRaisesRegex(ValueError, 'Invalid field'):
-            cat.read_group([], fields=['zzz'], groupby=['parent'])
+            cat.read_group([], aggregates=['zzz:sum'], groupby=['parent'])
         with self.assertRaisesRegex(ValueError, 'Invalid field'):
-            cat.read_group([], fields=['zzz:sum'], groupby=['parent'])
-        with self.assertRaisesRegex(ValueError, 'Invalid field'):
-            cat.read_group([], fields=['color'], groupby=['zzz'])
+            cat.read_group([], aggregates=['color:sum'], groupby=['zzz'])
         with self.assertRaisesRegex(ValueError, 'is not a valid aggregate'):
-            cat.read_group([], fields=['color'], groupby=['parent'], orderby='zzz')
+            cat.read_group([], aggregates=['color:sum'], groupby=['parent'], order='zzz')
         # exception: accept '__count' as field to aggregate
-        cat.read_group([], fields=['__count'], groupby=['parent'])
+        cat.read_group([], aggregates=['__count'], groupby=['parent'])
 
         with self.assertRaisesRegex(ValueError, 'Invalid field'):
             cat.create({'name': 'Foo', 'zzz': 42})

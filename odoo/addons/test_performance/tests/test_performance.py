@@ -578,8 +578,8 @@ class TestPerformance(SavepointCaseWithUserDemo):
         return [{
             '__domain': [('partner_id', '=', partner.id)],
             'partner_id': (partner.id, partner.display_name),
-            'partner_id_count': len(groups[partner.id]),
-            'value': sum(groups[partner.id]),
+            '__count': len(groups[partner.id]),
+            'value:sum': sum(groups[partner.id]),
         } for partner in partners]
 
     @users('__system__', 'demo')
@@ -589,7 +589,7 @@ class TestPerformance(SavepointCaseWithUserDemo):
         # use read_group and check the expected result
         with self.assertQueryCount(__system__=2, demo=2):
             self.env.invalidate_all()
-            result = model.read_group([], ['partner_id', 'value'], ['partner_id'])
+            result = model.read_group([], ['partner_id'], ['value:sum'])
             self.assertEqual(result, expected)
 
 @tagged('bacon_and_eggs')

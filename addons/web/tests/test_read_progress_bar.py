@@ -42,7 +42,7 @@ class TestReadProgressBar(common.TransactionCase):
         }
 
         groups = self.Model.with_context(context).read_group(
-            [('name', "like", "testWeekGrouping%")], fields=['date', 'name'], groupby=[groupby])
+            [('name', "like", "testWeekGrouping%")], groupby=[groupby])
         progressbars = self.Model.with_context(context).read_progress_bar(
             [('name', "like", "testWeekGrouping%")], group_by=groupby, progress_bar=progress_bar)
         self.assertEqual(len(groups), 2)

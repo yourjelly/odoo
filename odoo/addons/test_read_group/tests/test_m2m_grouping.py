@@ -38,25 +38,25 @@ class TestM2MGrouping(common.TransactionCase):
         # group users
         user_by_tasks = self.users.read_group(
             domain=[],
-            fields=['name:array_agg'],
+            aggregates=['name:array_agg'],
             groupby=['task_ids'],
         )
         self.assertEqual(user_by_tasks, [
             {   # first task: both users
                 'task_ids': (self.tasks[0].id, "Super Mario Bros."),
-                'task_ids_count': 2,
+                '__count': 2,
                 'name:array_agg': ['Mario', 'Luigi'],
                 '__domain': [('task_ids', '=', self.tasks[0].id)],
             },
             {   # second task: Mario only
                 'task_ids': (self.tasks[1].id, "Paper Mario"),
-                'task_ids_count': 1,
+                '__count': 1,
                 'name:array_agg': ['Mario'],
                 '__domain': [('task_ids', '=', self.tasks[1].id)],
             },
             {   # third task: Luigi only
                 'task_ids': (self.tasks[2].id, "Luigi's Mansion"),
-                'task_ids_count': 1,
+                '__count': 1,
                 'name:array_agg': ['Luigi'],
                 '__domain': [('task_ids', '=', self.tasks[2].id)],
             },
@@ -66,19 +66,19 @@ class TestM2MGrouping(common.TransactionCase):
         # consider the simplest case first: one task with two users
         task_by_users = self.tasks.read_group(
             domain=[('id', '=', self.tasks[0].id)],
-            fields=['name:array_agg'],
+            aggregates=['name:array_agg'],
             groupby=['user_ids'],
         )
         self.assertEqual(task_by_users, [
             {   # task of Mario
                 'user_ids': (self.users[0].id, "Mario"),
-                'user_ids_count': 1,
+                '__count': 1,
                 'name:array_agg': ["Super Mario Bros."],
                 '__domain': ['&', ('id', '=', self.tasks[0].id), ('user_ids', '=', self.users[0].id)],
             },
             {   # task of Luigi
                 'user_ids': (self.users[1].id, "Luigi"),
-                'user_ids_count': 1,
+                '__count': 1,
                 'name:array_agg': ["Super Mario Bros."],
                 '__domain': ['&', ('id', '=', self.tasks[0].id), ('user_ids', '=', self.users[1].id)],
             },
@@ -87,25 +87,25 @@ class TestM2MGrouping(common.TransactionCase):
         # now consider the full case: all tasks, with all user combinations
         task_by_users = self.tasks.read_group(
             domain=[],
-            fields=['name:array_agg'],
+            aggregates=['name:array_agg'],
             groupby=['user_ids'],
         )
         self.assertEqual(task_by_users, [
             {   # tasks of Mario
                 'user_ids': (self.users[0].id, "Mario"),
-                'user_ids_count': 2,
+                '__count': 2,
                 'name:array_agg': ["Super Mario Bros.", "Paper Mario"],
                 '__domain': [('user_ids', '=', self.users[0].id)],
             },
             {   # tasks of Luigi
                 'user_ids': (self.users[1].id, "Luigi"),
-                'user_ids_count': 2,
+                '__count': 2,
                 'name:array_agg': ["Super Mario Bros.", "Luigi's Mansion"],
                 '__domain': [('user_ids', '=', self.users[1].id)],
             },
             {   # tasks of nobody
                 'user_ids': False,
-                'user_ids_count': 1,
+                '__count': 1,
                 'name:array_agg': ["Donkey Kong"],
                 '__domain': [('user_ids', '=', False)],
             },
@@ -133,7 +133,7 @@ class TestM2MGrouping(common.TransactionCase):
         # warmup
         as_admin = self.tasks.read_group(
             domain=[],
-            fields=['name:array_agg'],
+            aggregates=['name:array_agg'],
             groupby=['user_ids'],
         )
 
@@ -151,25 +151,25 @@ class TestM2MGrouping(common.TransactionCase):
         with self.assertQueries([expected]):
             as_admin = self.tasks.read_group(
                 domain=[],
-                fields=['name:array_agg'],
+                aggregates=['name:array_agg'],
                 groupby=['user_ids'],
             )
         self.assertEqual(as_admin, [
             {   # tasks of Mario
                 'user_ids': (self.users[0].id, "Mario"),
-                'user_ids_count': 2,
+                '__count': 2,
                 'name:array_agg': ["Super Mario Bros.", "Paper Mario"],
                 '__domain': [('user_ids', '=', self.users[0].id)],
             },
             {   # tasks of Luigi
                 'user_ids': (self.users[1].id, "Luigi"),
-                'user_ids_count': 2,
+                '__count': 2,
                 'name:array_agg': ["Super Mario Bros.", "Luigi's Mansion"],
                 '__domain': [('user_ids', '=', self.users[1].id)],
             },
             {   # tasks of nobody
                 'user_ids': False,
-                'user_ids_count': 1,
+                '__count': 1,
                 'name:array_agg': ["Donkey Kong"],
                 '__domain': [('user_ids', '=', False)],
             },
@@ -179,7 +179,7 @@ class TestM2MGrouping(common.TransactionCase):
         tasks = self.tasks.with_user(self.browse_ref('base.user_demo'))
 
         # warming up various caches; this avoids extra queries
-        tasks.read_group(domain=[], fields=['name:array_agg'], groupby=['user_ids'])
+        tasks.read_group(domain=[], aggregates=['name:array_agg'], groupby=['user_ids'])
 
         expected = """
             SELECT
@@ -202,19 +202,19 @@ class TestM2MGrouping(common.TransactionCase):
         with self.assertQueries([expected]):
             as_demo = tasks.read_group(
                 domain=[],
-                fields=['name:array_agg'],
+                aggregates=['name:array_agg'],
                 groupby=['user_ids'],
             )
         self.assertEqual(as_demo, [
             {   # tasks of Mario
                 'user_ids': (self.users[0].id, "Mario"),
-                'user_ids_count': 2,
+                '__count': 2,
                 'name:array_agg': ['Super Mario Bros.', 'Paper Mario'],
                 '__domain': [('user_ids', '=', self.users[0].id)],
             },
             {   # tasks of Luigi and no user
                 'user_ids': False,
-                'user_ids_count': 2,
+                '__count': 2,
                 'name:array_agg': ["Luigi's Mansion", 'Donkey Kong'],
                 '__domain': [('user_ids', '=', False)],
             },

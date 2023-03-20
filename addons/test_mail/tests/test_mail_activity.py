@@ -94,9 +94,8 @@ class TestActivityRights(TestActivityCommon):
         read_group_result = self.env['mail.activity'].with_user(self.user_employee).read_group(
             [('id', '=', test_activity.id)],
             ['summary'],
-            ['summary'],
         )
-        self.assertEqual(1, read_group_result[0]['summary_count'])
+        self.assertEqual(1, read_group_result[0]['__count'])
         self.assertEqual('Summary', read_group_result[0]['summary'])
 
         # cannot read_group activities if no access to the document
@@ -104,7 +103,6 @@ class TestActivityRights(TestActivityCommon):
             with self.assertRaises(exceptions.AccessError):
                 self.env['mail.activity'].with_user(self.user_employee).read_group(
                     [('id', '=', test_activity.id)],
-                    ['summary'],
                     ['summary'],
                 )
 
@@ -743,7 +741,7 @@ class TestReadProgressBar(tests.TransactionCase):
         }
 
         # call read_group to compute group names
-        groups = model.read_group(domain, fields=['date'], groupby=[groupby])
+        groups = model.read_group(domain, groupby=[groupby])
         progressbars = model.read_progress_bar(domain, group_by=groupby, progress_bar=progress_bar)
         self.assertEqual(len(groups), 3)
         self.assertEqual(len(progressbars), 3)

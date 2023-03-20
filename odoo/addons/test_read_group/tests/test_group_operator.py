@@ -11,8 +11,8 @@ class TestGroupBooleans(common.TransactionCase):
     def test_no_value(self):
         groups = self.Model.read_group(
             domain=[],
-            fields=['key', 'bool_and', 'bool_or', 'bool_array'],
             groupby=['key'],
+            aggregates=['bool_and:bool_and', 'bool_or:bool_or', 'bool_array:array_agg'],
         )
 
         self.assertEqual([], groups)
@@ -36,42 +36,36 @@ class TestGroupBooleans(common.TransactionCase):
 
         groups = self.Model.read_group(
             domain=[],
-            fields=['key', 'bool_and'],
+            aggregates=['bool_and:bool_and'],
             groupby=['key'],
         )
 
         self.assertEqual([
             {
-                'key_count': 2,
+                '__count': 2,
                 '__domain': [('key', '=', 1)],
                 'key': 1,
-                'bool_and': True
+                'bool_and:bool_and': True
             },
             {
-                'key_count': 2,
+                '__count': 2,
                 '__domain': [('key', '=', 2)],
                 'key': 2,
-                'bool_and': False
+                'bool_and:bool_and': False
             },
             {
-                'key_count': 2,
+                '__count': 2,
                 '__domain': [('key', '=', 3)],
                 'key': 3,
-                'bool_and': False
+                'bool_and:bool_and': False
             },
         ], groups)
 
 
     def test_agg_or(self):
         # or(true, true)
-        self.Model.create({
-            'key': 1,
-            'bool_or': True
-        })
-        self.Model.create({
-            'key': 1,
-            'bool_or': True
-        })
+        self.Model.create({'key': 1, 'bool_or': True})
+        self.Model.create({'key': 1, 'bool_or': True})
         # or(true, false)
         self.Model.create({'key': 2, 'bool_or': True})
         self.Model.create({'key': 2, 'bool_or': False})
@@ -81,41 +75,35 @@ class TestGroupBooleans(common.TransactionCase):
 
         groups = self.Model.read_group(
             domain=[],
-            fields=['key', 'bool_or'],
+            aggregates=['bool_or:bool_or'],
             groupby=['key'],
         )
 
         self.assertEqual([
             {
-                'key_count': 2,
+                '__count': 2,
                 '__domain': [('key', '=', 1)],
                 'key': 1,
-                'bool_or': True
+                'bool_or:bool_or': True
             },
             {
-                'key_count': 2,
+                '__count': 2,
                 '__domain': [('key', '=', 2)],
                 'key': 2,
-                'bool_or': True
+                'bool_or:bool_or': True
             },
             {
-                'key_count': 2,
+                '__count': 2,
                 '__domain': [('key', '=', 3)],
                 'key': 3,
-                'bool_or': False
+                'bool_or:bool_or': False
             },
         ], groups)
 
     def test_agg_array(self):
         # array(true, true)
-        self.Model.create({
-            'key': 1,
-            'bool_array': True
-        })
-        self.Model.create({
-            'key': 1,
-            'bool_array': True
-        })
+        self.Model.create({'key': 1, 'bool_array': True})
+        self.Model.create({'key': 1, 'bool_array': True})
         # array(true, false)
         self.Model.create({'key': 2, 'bool_array': True})
         self.Model.create({'key': 2, 'bool_array': False})
@@ -125,28 +113,28 @@ class TestGroupBooleans(common.TransactionCase):
 
         groups = self.Model.read_group(
             domain=[],
-            fields=['key', 'bool_array'],
+            aggregates=['bool_array:array_agg'],
             groupby=['key'],
         )
 
         self.assertEqual([
             {
-                'key_count': 2,
+                '__count': 2,
                 '__domain': [('key', '=', 1)],
                 'key': 1,
-                'bool_array': [True, True]
+                'bool_array:array_agg': [True, True]
             },
             {
-                'key_count': 2,
+                '__count': 2,
                 '__domain': [('key', '=', 2)],
                 'key': 2,
-                'bool_array': [True, False]
+                'bool_array:array_agg': [True, False]
             },
             {
-                'key_count': 2,
+                '__count': 2,
                 '__domain': [('key', '=', 3)],
                 'key': 3,
-                'bool_array': [False, False]
+                'bool_array:array_agg': [False, False]
             },
         ], groups)
 
@@ -160,7 +148,7 @@ class TestGroupBooleans(common.TransactionCase):
 
         groups = self.Model.read_group(
             domain=[],
-            fields=['key', 'bool_and', 'bool_array'],
+            aggregates=['bool_array:array_agg'],
             groupby=['bool_and', 'key'],
             lazy=False
         )
@@ -169,14 +157,14 @@ class TestGroupBooleans(common.TransactionCase):
             {
                 'bool_and': False,
                 'key': 1,
-                'bool_array': [True],
+                'bool_array:array_agg': [True],
                 '__count': 1,
                 '__domain': ['&', ('bool_and', '=', False), ('key', '=', 1)]
             },
             {
                 'bool_and': False,
                 'key': 2,
-                'bool_array': [True, True],
+                'bool_array:array_agg': [True, True],
                 '__count': 2,
                 '__domain': ['&', ('bool_and', '=', False), ('key', '=', 2)]
 
@@ -184,14 +172,14 @@ class TestGroupBooleans(common.TransactionCase):
             {
                 'bool_and': True,
                 'key': 2,
-                'bool_array': [True],
+                'bool_array:array_agg': [True],
                 '__count': 1,
                 '__domain': ['&', ('bool_and', '=', True), ('key', '=', 2)]
             },
             {
                 'bool_and': True,
                 'key': 3,
-                'bool_array': [True, True],
+                'bool_array:array_agg': [True, True],
                 '__count': 2,
                 '__domain': ['&', ('bool_and', '=', True), ('key', '=', 3)]
             }
@@ -213,70 +201,70 @@ class TestAggregate(common.TransactionCase):
 
     def test_agg_default(self):
         """ test default aggregation on fields """
-        fields = ['key', 'value', 'partner_id']
-        groups = self.Model.read_group([], fields, ['key'])
+        fields = ['value', 'partner_id']
+        groups = self.Model.read_group([], ['key'], fields)
         self.assertEqual(groups, [{
             'key': 1,
             'value': 10,
-            'key_count': 4,
+            '__count': 4,
             '__domain': [('key', '=', 1)],
         }])
 
     def test_agg_explicit(self):
         """ test explicit aggregation on fields """
-        fields = ['key', 'value:max', 'partner_id']
-        groups = self.Model.read_group([], fields, ['key'])
+        fields = ['value:max', 'partner_id']
+        groups = self.Model.read_group([], ['key'], fields)
         self.assertEqual(groups, [{
             'key': 1,
             'value:max': 4,
-            'key_count': 4,
+            '__count': 4,
             '__domain': [('key', '=', 1)],
         }])
-        fields = ['key', 'value', 'partner_id:array_agg']
-        groups = self.Model.read_group([], fields, ['key'])
+        fields = ['value:sum', 'partner_id:array_agg']
+        groups = self.Model.read_group([], ['key'], fields)
         self.assertEqual(groups, [{
             'key': 1,
-            'value': 10,
+            'value:sum': 10,
             'partner_id:array_agg': [None, self.foo.id, self.foo.id, self.bar.id],
-            'key_count': 4,
+            '__count': 4,
             '__domain': [('key', '=', 1)],
         }])
-        fields = ['key', 'value', 'partner_id:count']
-        groups = self.Model.read_group([], fields, ['key'])
+        fields = ['value:sum', 'partner_id:count']
+        groups = self.Model.read_group([], ['key'], fields)
         self.assertEqual(groups, [{
             'key': 1,
-            'value': 10,
+            'value:sum': 10,
             'partner_id:count': 3,
-            'key_count': 4,
+            '__count': 4,
             '__domain': [('key', '=', 1)],
         }])
-        fields = ['key', 'value', 'partner_id:count_distinct']
-        groups = self.Model.read_group([], fields, ['key'])
+        fields = ['value:sum', 'partner_id:count_distinct']
+        groups = self.Model.read_group([], ['key'], fields)
         self.assertEqual(groups, [{
             'key': 1,
-            'value': 10,
+            'value:sum': 10,
             'partner_id:count_distinct': 2,
-            'key_count': 4,
+            '__count': 4,
             '__domain': [('key', '=', 1)],
         }])
 
     def test_agg_multi(self):
         """ test multiple aggregation on fields """
-        fields = ['key', 'value:min', 'value:max', 'partner_id']
-        groups = self.Model.read_group([], fields, ['key'])
+        fields = ['value:min', 'value:max', 'partner_id']
+        groups = self.Model.read_group([], ['key'], fields)
         self.assertEqual(groups, [{
             'key': 1,
             'value:min': 1,
             'value:max': 4,
-            'key_count': 4,
+            '__count': 4,
             '__domain': [('key', '=', 1)],
         }])
 
-        fields = ['key', 'id:array_agg']
-        groups = self.Model.read_group([], fields, ['key'])
+        fields = ['id:array_agg']
+        groups = self.Model.read_group([], ['key'], fields)
         self.assertEqual(groups, [{
             'key': 1,
             'id:array_agg': self.Model.search([]).ids,
-            'key_count': 4,
+            '__count': 4,
             '__domain': [('key', '=', 1)],
         }])

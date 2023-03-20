@@ -27,42 +27,41 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1916-08-01'), ('date', '<', '1916-09-01')],
             '__range': {'date': {'from': '1916-08-01', 'to': '1916-09-01'}},
-            'date': 'August 1916',
-            'date_count': 1,
-            'value': 2
+            'date:month': 'August 1916',
+            '__count': 1,
+            'value:sum': 2
         }, {
             '__domain': ['&', ('date', '>=', '1916-09-01'), ('date', '<', '1916-10-01')],
             '__range': {'date': {'from': '1916-09-01', 'to': '1916-10-01'}},
-            'date': 'September 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'September 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-10-01'), ('date', '<', '1916-11-01')],
             '__range': {'date': {'from': '1916-10-01', 'to': '1916-11-01'}},
-            'date': 'October 1916',
-            'date_count': 1,
-            'value': 3
+            'date:month': 'October 1916',
+            '__count': 1,
+            'value:sum': 3
         }, {
             '__domain': ['&', ('date', '>=', '1916-11-01'), ('date', '<', '1916-12-01')],
             '__range': {'date': {'from': '1916-11-01', 'to': '1916-12-01'}},
-            'date': 'November 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'November 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-12-01'), ('date', '<', '1917-01-01')],
             '__range': {'date': {'from': '1916-12-01', 'to': '1917-01-01'}},
-            'date': 'December 1916',
-            'date_count': 1,
-            'value': 5
+            'date:month': 'December 1916',
+            '__count': 1,
+            'value:sum': 5
         }]
 
-        groups = self.Model.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['date:month'])
 
-        self.assertEqual(groups, [group for group in expected if group['date_count']])
+        self.assertEqual(groups, [group for group in expected if group['__count']])
 
         model_fill = self.Model.with_context(fill_temporal=True)
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
-
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
         self.assertEqual(groups, expected)
 
     def test_date_range_with_context_timezone(self):
@@ -82,81 +81,81 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1915-01-01'), ('date', '<', '1915-02-01')],
             '__range': {'date': {'from': '1915-01-01', 'to': '1915-02-01'}},
-            'date': 'January 1915',
-            'date_count': 1,
-            'value': 3
+            'date:month': 'January 1915',
+            '__count': 1,
+            'value:sum': 3
         }, {
             '__domain': ['&', ('date', '>=', '1915-02-01'), ('date', '<', '1915-03-01')],
             '__range': {'date': {'from': '1915-02-01', 'to': '1915-03-01'}},
-            'date': 'February 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'February 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-03-01'), ('date', '<', '1915-04-01')],
             '__range': {'date': {'from': '1915-03-01', 'to': '1915-04-01'}},
-            'date': 'March 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'March 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-04-01'), ('date', '<', '1915-05-01')],
             '__range': {'date': {'from': '1915-04-01', 'to': '1915-05-01'}},
-            'date': 'April 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'April 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-05-01'), ('date', '<', '1915-06-01')],
             '__range': {'date': {'from': '1915-05-01', 'to': '1915-06-01'}},
-            'date': 'May 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'May 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-06-01'), ('date', '<', '1915-07-01')],
             '__range': {'date': {'from': '1915-06-01', 'to': '1915-07-01'}},
-            'date': 'June 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'June 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-07-01'), ('date', '<', '1915-08-01')],
             '__range': {'date': {'from': '1915-07-01', 'to': '1915-08-01'}},
-            'date': 'July 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'July 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-08-01'), ('date', '<', '1915-09-01')],
             '__range': {'date': {'from': '1915-08-01', 'to': '1915-09-01'}},
-            'date': 'August 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'August 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-09-01'), ('date', '<', '1915-10-01')],
             '__range': {'date': {'from': '1915-09-01', 'to': '1915-10-01'}},
-            'date': 'September 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'September 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-10-01'), ('date', '<', '1915-11-01')],
             '__range': {'date': {'from': '1915-10-01', 'to': '1915-11-01'}},
-            'date': 'October 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'October 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-11-01'), ('date', '<', '1915-12-01')],
             '__range': {'date': {'from': '1915-11-01', 'to': '1915-12-01'}},
-            'date': 'November 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'November 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1915-12-01'), ('date', '<', '1916-01-01')],
             '__range': {'date': {'from': '1915-12-01', 'to': '1916-01-01'}},
-            'date': 'December 1915',
-            'date_count': 0,
-            'value': False
+            'date:month': 'December 1915',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-01-01'), ('date', '<', '1916-02-01')],
             '__range': {'date': {'from': '1916-01-01', 'to': '1916-02-01'}},
-            'date': 'January 1916',
-            'date_count': 1,
-            'value': 5
+            'date:month': 'January 1916',
+            '__count': 1,
+            'value:sum': 5
         }]
 
         # Time Zone                      UTC     UTC DST
@@ -166,7 +165,7 @@ class TestFillTemporal(common.TransactionCase):
 
         for tz in tzs:
             model_fill = self.Model.with_context(tz=tz, fill_temporal=True)
-            groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+            groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
             self.assertEqual(groups, expected)
 
     def test_only_with_only_null_date(self):
@@ -177,15 +176,15 @@ class TestFillTemporal(common.TransactionCase):
 
         expected = [{'__domain': [('date', '=', False)],
                      '__range': {'date': False},
-                     'date_count': 3,
+                     '__count': 3,
                      'value': 41,
                      'date': False}]
 
-        groups = self.Model.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['date:month'])
         self.assertEqual(groups, expected)
 
         model_fill = self.Model.with_context(fill_temporal=True)
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
         self.assertEqual(groups, expected)
 
     def test_date_range_and_null_date(self):
@@ -200,35 +199,35 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1916-08-01'), ('date', '<', '1916-09-01')],
             '__range': {'date': {'from': '1916-08-01', 'to': '1916-09-01'}},
-            'date': 'August 1916',
-            'date_count': 2,
-            'value': 7
+            'date:month': 'August 1916',
+            '__count': 2,
+            'value:sum': 7
         }, {
             '__domain': ['&', ('date', '>=', '1916-09-01'), ('date', '<', '1916-10-01')],
             '__range': {'date': {'from': '1916-09-01', 'to': '1916-10-01'}},
-            'date': 'September 1916',
-            'date_count': 0,
-            'value': 0
+            'date:month': 'September 1916',
+            '__count': 0,
+            'value:sum': 0
         }, {
             '__domain': ['&', ('date', '>=', '1916-10-01'), ('date', '<', '1916-11-01')],
             '__range': {'date': {'from': '1916-10-01', 'to': '1916-11-01'}},
-            'date': 'October 1916',
-            'date_count': 2,
-            'value': 9
+            'date:month': 'October 1916',
+            '__count': 2,
+            'value:sum': 9
         }, {
             '__domain': [('date', '=', False)],
             '__range': {'date': False},
-            'date': False,
-            'date_count': 2,
-            'value': 24
+            'date:month': False,
+            '__count': 2,
+            'value:sum': 24
         }]
 
-        groups = self.Model.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['date:month'])
 
-        self.assertEqual(groups, [group for group in expected if group['date_count']])
+        self.assertEqual(groups, [group for group in expected if group['__count']])
 
         model_fill = self.Model.with_context(fill_temporal=True)
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
 
         self.assertEqual(groups, expected)
 
@@ -247,40 +246,40 @@ class TestFillTemporal(common.TransactionCase):
             '__domain': ['&', ('date', '>=', '1916-08-13'), ('date', '<', '1916-08-20')],
             '__range': {'date:week': {'from': '1916-08-13', 'to': '1916-08-20'}},
             'date:week': 'W34 1916',
-            'date_count': 2,
-            'value': 7,
+            '__count': 2,
+            'value:sum': 7,
         }, {
             '__domain': ['&', ('date', '>=', '1916-08-20'), ('date', '<', '1916-08-27')],
             '__range': {'date:week': {'from': '1916-08-20', 'to': '1916-08-27'}},
             'date:week': 'W35 1916',
-            'date_count': 1,
-            'value': 13,
+            '__count': 1,
+            'value:sum': 13,
         }, {
             '__domain': ['&', ('date', '>=', '1916-08-27'), ('date', '<', '1916-09-03')],
             '__range': {'date:week': {'from': '1916-08-27', 'to': '1916-09-03'}},
             'date:week': 'W36 1916',
-            'date_count': 0,
-            'value': 0,
+            '__count': 0,
+            'value:sum': 0,
         }, {
             '__domain': ['&', ('date', '>=', '1916-09-03'), ('date', '<', '1916-09-10')],
             '__range': {'date:week': {'from': '1916-09-03', 'to': '1916-09-10'}},
             'date:week': 'W37 1916',
-            'date_count': 0,
-            'value': 0,
+            '__count': 0,
+            'value:sum': 0,
         }, {
             '__domain': ['&', ('date', '>=', '1916-09-10'), ('date', '<', '1916-09-17')],
             '__range': {'date:week': {'from': '1916-09-10', 'to': '1916-09-17'}},
             'date:week': 'W38 1916',
-            'date_count': 3,
-            'value': 20,
+            '__count': 3,
+            'value:sum': 20,
         }]
 
-        groups = self.Model.read_group([], fields=['date', 'value'], groupby=['date:week'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['date:week'])
 
-        self.assertEqual(groups, [group for group in expected if group['date_count']])
+        self.assertEqual(groups, [group for group in expected if group['__count']])
 
         model_fill = self.Model.with_context(fill_temporal=True)
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date:week'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:week'])
 
         self.assertEqual(groups, expected)
 
@@ -295,28 +294,28 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1916-08-01'), ('date', '<', '1916-09-01')],
             '__range': {'date': {'from': '1916-08-01', 'to': '1916-09-01'}},
-            'date': 'August 1916',
-            'date_count': 2,
-            'value': 7
+            'date:month': 'August 1916',
+            '__count': 2,
+            'value:sum': 7
         }, {
             '__domain': ['&', ('date', '>=', '1916-09-01'), ('date', '<', '1916-10-01')],
             '__range': {'date': {'from': '1916-09-01', 'to': '1916-10-01'}},
-            'date': 'September 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'September 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-10-01'), ('date', '<', '1916-11-01')],
             '__range': {'date': {'from': '1916-10-01', 'to': '1916-11-01'}},
-            'date': 'October 1916',
-            'date_count': 2,
-            'value': 9
+            'date:month': 'October 1916',
+            '__count': 2,
+            'value:sum': 9
         }]
 
-        groups = self.Model.read_group([], fields=['date', 'value'], groupby=['date'])
-        self.assertEqual(groups, [group for group in expected if group['date_count']])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['date:month'])
+        self.assertEqual(groups, [group for group in expected if group['__count']])
 
         model_fill = self.Model.with_context(fill_temporal=True)
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
         self.assertEqual(groups, expected)
 
     def test_timestamp_without_timezone(self):
@@ -338,39 +337,39 @@ class TestFillTemporal(common.TransactionCase):
                       ('datetime', '>=', '1916-08-01 00:00:00'),
                       ('datetime', '<', '1916-09-01 00:00:00')],
             '__range': {'datetime': {'from': '1916-08-01 00:00:00', 'to': '1916-09-01 00:00:00'}},
-            'datetime': 'August 1916',
-            'datetime_count': 2,
-            'value': 10
+            'datetime:month': 'August 1916',
+            '__count': 2,
+            'value:sum': 10
         }, {
             '__domain': ['&',
                       ('datetime', '>=', '1916-09-01 00:00:00'),
                       ('datetime', '<', '1916-10-01 00:00:00')],
             '__range': {'datetime': {'from': '1916-09-01 00:00:00', 'to': '1916-10-01 00:00:00'}},
-            'datetime': 'September 1916',
-            'datetime_count': 0,
-            'value': False
+            'datetime:month': 'September 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                       ('datetime', '>=', '1916-10-01 00:00:00'),
                       ('datetime', '<', '1916-11-01 00:00:00')],
             '__range': {'datetime': {'from': '1916-10-01 00:00:00', 'to': '1916-11-01 00:00:00'}},
-            'datetime': 'October 1916',
-            'datetime_count': 3,
-            'value': 26
+            'datetime:month': 'October 1916',
+            '__count': 3,
+            'value:sum': 26
         }, {
             '__domain': [('datetime', '=', False)],
             '__range': {'datetime': False},
-            'datetime': False,
-            'datetime_count': 2,
-            'value': 24
+            'datetime:month': False,
+            '__count': 2,
+            'value:sum': 24
         }]
 
-        groups = self.Model.read_group([], fields=['datetime', 'value'], groupby=['datetime'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['datetime:month'])
 
-        self.assertEqual(groups, [group for group in expected if group['datetime_count']])
+        self.assertEqual(groups, [group for group in expected if group['__count']])
 
         model_fill = self.Model.with_context(fill_temporal=True)
-        groups = model_fill.read_group([], fields=['datetime', 'value'], groupby=['datetime'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['datetime:month'])
 
         self.assertEqual(groups, expected)
 
@@ -392,188 +391,188 @@ class TestFillTemporal(common.TransactionCase):
                          ('datetime', '<', '1916-01-01 02:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 01:00:00', 'to': '1916-01-01 02:00:00'}},
             'datetime:hour': '01:00 01 Jan',
-            'datetime_count': 2,
-            'value': 10
+            '__count': 2,
+            'value:sum': 10
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 02:00:00'),
                          ('datetime', '<', '1916-01-01 03:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 02:00:00', 'to': '1916-01-01 03:00:00'}},
             'datetime:hour': '02:00 01 Jan',
-            'datetime_count': 1,
-            'value': 3
+            '__count': 1,
+            'value:sum': 3
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 03:00:00'),
                          ('datetime', '<', '1916-01-01 04:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 03:00:00', 'to': '1916-01-01 04:00:00'}},
             'datetime:hour': '03:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 04:00:00'),
                          ('datetime', '<', '1916-01-01 05:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 04:00:00', 'to': '1916-01-01 05:00:00'}},
             'datetime:hour': '04:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 05:00:00'),
                          ('datetime', '<', '1916-01-01 06:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 05:00:00', 'to': '1916-01-01 06:00:00'}},
             'datetime:hour': '05:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 06:00:00'),
                          ('datetime', '<', '1916-01-01 07:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 06:00:00', 'to': '1916-01-01 07:00:00'}},
             'datetime:hour': '06:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 07:00:00'),
                          ('datetime', '<', '1916-01-01 08:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 07:00:00', 'to': '1916-01-01 08:00:00'}},
             'datetime:hour': '07:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 08:00:00'),
                          ('datetime', '<', '1916-01-01 09:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 08:00:00', 'to': '1916-01-01 09:00:00'}},
             'datetime:hour': '08:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 09:00:00'),
                          ('datetime', '<', '1916-01-01 10:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 09:00:00', 'to': '1916-01-01 10:00:00'}},
             'datetime:hour': '09:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 10:00:00'),
                          ('datetime', '<', '1916-01-01 11:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 10:00:00', 'to': '1916-01-01 11:00:00'}},
             'datetime:hour': '10:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 11:00:00'),
                          ('datetime', '<', '1916-01-01 12:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 11:00:00', 'to': '1916-01-01 12:00:00'}},
             'datetime:hour': '11:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 12:00:00'),
                          ('datetime', '<', '1916-01-01 13:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 12:00:00', 'to': '1916-01-01 13:00:00'}},
             'datetime:hour': '12:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 13:00:00'),
                          ('datetime', '<', '1916-01-01 14:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 13:00:00', 'to': '1916-01-01 14:00:00'}},
             'datetime:hour': '01:00 01 Jan',
-            'datetime_count': 1,
-            'value': 5
+            '__count': 1,
+            'value:sum': 5
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 14:00:00'),
                          ('datetime', '<', '1916-01-01 15:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 14:00:00', 'to': '1916-01-01 15:00:00'}},
             'datetime:hour': '02:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 15:00:00'),
                          ('datetime', '<', '1916-01-01 16:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 15:00:00', 'to': '1916-01-01 16:00:00'}},
             'datetime:hour': '03:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 16:00:00'),
                          ('datetime', '<', '1916-01-01 17:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 16:00:00', 'to': '1916-01-01 17:00:00'}},
             'datetime:hour': '04:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 17:00:00'),
                          ('datetime', '<', '1916-01-01 18:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 17:00:00', 'to': '1916-01-01 18:00:00'}},
             'datetime:hour': '05:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 18:00:00'),
                          ('datetime', '<', '1916-01-01 19:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 18:00:00', 'to': '1916-01-01 19:00:00'}},
             'datetime:hour': '06:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 19:00:00'),
                          ('datetime', '<', '1916-01-01 20:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 19:00:00', 'to': '1916-01-01 20:00:00'}},
             'datetime:hour': '07:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 20:00:00'),
                          ('datetime', '<', '1916-01-01 21:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 20:00:00', 'to': '1916-01-01 21:00:00'}},
             'datetime:hour': '08:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 21:00:00'),
                          ('datetime', '<', '1916-01-01 22:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 21:00:00', 'to': '1916-01-01 22:00:00'}},
             'datetime:hour': '09:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 22:00:00'),
                          ('datetime', '<', '1916-01-01 23:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 22:00:00', 'to': '1916-01-01 23:00:00'}},
             'datetime:hour': '10:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 23:00:00'),
                          ('datetime', '<', '1916-01-02 00:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 23:00:00', 'to': '1916-01-02 00:00:00'}},
             'datetime:hour': '11:00 01 Jan',
-            'datetime_count': 1,
-            'value': 7
+            '__count': 1,
+            'value:sum': 7
         }]
 
         model_fill = self.Model.with_context(fill_temporal=True)
-        groups = model_fill.read_group([], fields=['datetime', 'value'], groupby=['datetime:hour'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['datetime:hour'])
 
         self.assertEqual(groups, expected)
 
@@ -592,52 +591,52 @@ class TestFillTemporal(common.TransactionCase):
                          ('datetime', '<', '1915-12-31 23:00:00')],
             '__range': {'datetime:hour': {'from': '1915-12-31 22:00:00', 'to': '1915-12-31 23:00:00'}},
             'datetime:hour': '04:00 01 Jan',
-            'datetime_count': 1,
-            'value': 2
+            '__count': 1,
+            'value:sum': 2
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1915-12-31 23:00:00'),
                          ('datetime', '<', '1916-01-01 00:00:00')],
             '__range': {'datetime:hour': {'from': '1915-12-31 23:00:00', 'to': '1916-01-01 00:00:00'}},
             'datetime:hour': '05:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 00:00:00'),
                          ('datetime', '<', '1916-01-01 01:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 00:00:00', 'to': '1916-01-01 01:00:00'}},
             'datetime:hour': '06:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 01:00:00'),
                          ('datetime', '<', '1916-01-01 02:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 01:00:00', 'to': '1916-01-01 02:00:00'}},
             'datetime:hour': '07:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 02:00:00'),
                          ('datetime', '<', '1916-01-01 03:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 02:00:00', 'to': '1916-01-01 03:00:00'}},
             'datetime:hour': '08:00 01 Jan',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                          ('datetime', '>=', '1916-01-01 03:00:00'),
                          ('datetime', '<', '1916-01-01 04:00:00')],
             '__range': {'datetime:hour': {'from': '1916-01-01 03:00:00', 'to': '1916-01-01 04:00:00'}},
             'datetime:hour': '09:00 01 Jan',
-            'datetime_count': 1,
-            'value': 3
+            '__count': 1,
+            'value:sum': 3
         }]
 
         model_fill = self.Model.with_context(tz='Asia/Hovd', fill_temporal=True)
-        groups = model_fill.read_group([], fields=['datetime', 'value'],
+        groups = model_fill.read_group([], aggregates=['value:sum'],
                                        groupby=['datetime:hour'])
 
         self.assertEqual(groups, expected)
@@ -656,36 +655,36 @@ class TestFillTemporal(common.TransactionCase):
                 ('datetime', '<', '2016-03-31 16:00:00')],
             '__range': {'datetime:quarter': {'from': '2015-12-31 17:00:00', 'to': '2016-03-31 16:00:00'}},
             'datetime:quarter': 'Q1 2016',
-            'datetime_count': 1,
-            'value': 2
+            '__count': 1,
+            'value:sum': 2
         }, {
             '__domain': ['&',
                        ('datetime', '>=', '2016-03-31 16:00:00'),
                        ('datetime', '<', '2016-06-30 16:00:00')],
             '__range': {'datetime:quarter': {'from': '2016-03-31 16:00:00', 'to': '2016-06-30 16:00:00'}},
             'datetime:quarter': 'Q2 2016',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                        ('datetime', '>=', '2016-06-30 16:00:00'),
                        ('datetime', '<', '2016-09-30 17:00:00')],
             '__range': {'datetime:quarter': {'from': '2016-06-30 16:00:00', 'to': '2016-09-30 17:00:00'}},
             'datetime:quarter': 'Q3 2016',
-            'datetime_count': 0,
-            'value': False
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&',
                        ('datetime', '>=', '2016-09-30 17:00:00'),
                        ('datetime', '<', '2016-12-31 17:00:00')],
             '__range': {'datetime:quarter': {'from': '2016-09-30 17:00:00', 'to': '2016-12-31 17:00:00'}},
             'datetime:quarter': 'Q4 2016',
-            'datetime_count': 1,
-            'value': 3
+            '__count': 1,
+            'value:sum': 3
         }]
 
         model_fill = self.Model.with_context(tz='Asia/Hovd', fill_temporal=True)
-        groups = model_fill.read_group([], fields=['datetime', 'value'],
+        groups = model_fill.read_group([], aggregates=['value:sum'],
                                        groupby=['datetime:quarter'])
 
         self.assertEqual(groups, expected)
@@ -710,13 +709,13 @@ class TestFillTemporal(common.TransactionCase):
                          ('datetime', '>=', '2017-12-31 17:00:00'),
                          ('datetime', '<', '2018-01-31 17:00:00')],
             '__range': {'datetime': {'from': '2017-12-31 17:00:00', 'to': '2018-01-31 17:00:00'}},
-            'datetime': 'January 2018',
-            'datetime_count': 1,
-            'value': 42
+            'datetime:month': 'January 2018',
+            '__count': 1,
+            'value:sum': 42
         }]
 
         model_fill = self.Model.with_context(tz='Asia/Hovd', fill_temporal=True)
-        groups = model_fill.read_group([], fields=['datetime', 'value'], groupby=['datetime'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['datetime:month'])
 
         self.assertEqual(groups, expected)
 
@@ -737,43 +736,43 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1916-02-01'), ('date', '<', '1916-03-01')],
             '__range': {'date': {'from': '1916-02-01', 'to': '1916-03-01'}},
-            'date': 'February 1916',
-            'date_count': 1,
-            'value': 1
+            'date:month': 'February 1916',
+            '__count': 1,
+            'value:sum': 1
         }, {
             '__domain': ['&', ('date', '>=', '1916-05-01'), ('date', '<', '1916-06-01')],
             '__range': {'date': {'from': '1916-05-01', 'to': '1916-06-01'}},
-            'date': 'May 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'May 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-06-01'), ('date', '<', '1916-07-01')],
             '__range': {'date': {'from': '1916-06-01', 'to': '1916-07-01'}},
-            'date': 'June 1916',
-            'date_count': 1,
-            'value': 2
+            'date:month': 'June 1916',
+            '__count': 1,
+            'value:sum': 2
         }, {
             '__domain': ['&', ('date', '>=', '1916-07-01'), ('date', '<', '1916-08-01')],
             '__range': {'date': {'from': '1916-07-01', 'to': '1916-08-01'}},
-            'date': 'July 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'July 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-08-01'), ('date', '<', '1916-09-01')],
             '__range': {'date': {'from': '1916-08-01', 'to': '1916-09-01'}},
-            'date': 'August 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'August 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-11-01'), ('date', '<', '1916-12-01')],
             '__range': {'date': {'from': '1916-11-01', 'to': '1916-12-01'}},
-            'date': 'November 1916',
-            'date_count': 1,
-            'value': 3
+            'date:month': 'November 1916',
+            '__count': 1,
+            'value:sum': 3
         }]
 
         model_fill = self.Model.with_context(fill_temporal={"fill_from": '1916-05-15', "fill_to": '1916-08-15'})
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
 
         self.assertEqual(groups, expected)
 
@@ -788,25 +787,25 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1916-02-01'), ('date', '<', '1916-03-01')],
             '__range': {'date': {'from': '1916-02-01', 'to': '1916-03-01'}},
-            'date': 'February 1916',
-            'date_count': 1,
-            'value': 1
+            'date:month': 'February 1916',
+            '__count': 1,
+            'value:sum': 1
         }, {
             '__domain': ['&', ('date', '>=', '1916-03-01'), ('date', '<', '1916-04-01')],
             '__range': {'date': {'from': '1916-03-01', 'to': '1916-04-01'}},
-            'date': 'March 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'March 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-04-01'), ('date', '<', '1916-05-01')],
             '__range': {'date': {'from': '1916-04-01', 'to': '1916-05-01'}},
-            'date': 'April 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'April 1916',
+            '__count': 0,
+            'value:sum': False
         }]
 
         model_fill = self.Model.with_context(fill_temporal={"fill_to": '1916-04-15'})
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
 
         self.assertEqual(groups, expected)
 
@@ -821,25 +820,25 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1916-02-01'), ('date', '<', '1916-03-01')],
             '__range': {'date': {'from': '1916-02-01', 'to': '1916-03-01'}},
-            'date': 'February 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'February 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-03-01'), ('date', '<', '1916-04-01')],
             '__range': {'date': {'from': '1916-03-01', 'to': '1916-04-01'}},
-            'date': 'March 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'March 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-04-01'), ('date', '<', '1916-05-01')],
             '__range': {'date': {'from': '1916-04-01', 'to': '1916-05-01'}},
-            'date': 'April 1916',
-            'date_count': 1,
-            'value': 1
+            'date:month': 'April 1916',
+            '__count': 1,
+            'value:sum': 1
         }]
 
         model_fill = self.Model.with_context(fill_temporal={"fill_from": '1916-02-15'})
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
 
         self.assertEqual(groups, expected)
 
@@ -854,25 +853,25 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1916-02-01'), ('date', '<', '1916-03-01')],
             '__range': {'date': {'from': '1916-02-01', 'to': '1916-03-01'}},
-            'date': 'February 1916',
-            'date_count': 1,
-            'value': 1
+            'date:month': 'February 1916',
+            '__count': 1,
+            'value:sum': 1
         }, {
             '__domain': ['&', ('date', '>=', '1916-03-01'), ('date', '<', '1916-04-01')],
             '__range': {'date': {'from': '1916-03-01', 'to': '1916-04-01'}},
-            'date': 'March 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'March 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-04-01'), ('date', '<', '1916-05-01')],
             '__range': {'date': {'from': '1916-04-01', 'to': '1916-05-01'}},
-            'date': 'April 1916',
-            'date_count': 1,
-            'value': 2
+            'date:month': 'April 1916',
+            '__count': 1,
+            'value:sum': 2
         }]
 
         model_fill = self.Model.with_context(fill_temporal={})
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
 
         self.assertEqual(groups, expected)
 
@@ -887,19 +886,19 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1916-02-01'), ('date', '<', '1916-03-01')],
             '__range': {'date': {'from': '1916-02-01', 'to': '1916-03-01'}},
-            'date': 'February 1916',
-            'date_count': 1,
-            'value': 1
+            'date:month': 'February 1916',
+            '__count': 1,
+            'value:sum': 1
         }, {
             '__domain': ['&', ('date', '>=', '1916-03-01'), ('date', '<', '1916-04-01')],
             '__range': {'date': {'from': '1916-03-01', 'to': '1916-04-01'}},
-            'date': 'March 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'March 1916',
+            '__count': 0,
+            'value:sum': False
         }]
 
         model_fill = self.Model.with_context(fill_temporal={"min_groups": 2})
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
 
         self.assertEqual(groups, expected)
 
@@ -921,42 +920,42 @@ class TestFillTemporal(common.TransactionCase):
         expected = [{
             '__domain': ['&', ('date', '>=', '1916-02-01'), ('date', '<', '1916-03-01')],
             '__range': {'date': {'from': '1916-02-01', 'to': '1916-03-01'}},
-            'date': 'February 1916',
-            'date_count': 1,
-            'value': 1
+            'date:month': 'February 1916',
+            '__count': 1,
+            'value:sum': 1
         }, {
             '__domain': ['&', ('date', '>=', '1916-05-01'), ('date', '<', '1916-06-01')],
             '__range': {'date': {'from': '1916-05-01', 'to': '1916-06-01'}},
-            'date': 'May 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'May 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-06-01'), ('date', '<', '1916-07-01')],
             '__range': {'date': {'from': '1916-06-01', 'to': '1916-07-01'}},
-            'date': 'June 1916',
-            'date_count': 1,
-            'value': 2
+            'date:month': 'June 1916',
+            '__count': 1,
+            'value:sum': 2
         }, {
             '__domain': ['&', ('date', '>=', '1916-07-01'), ('date', '<', '1916-08-01')],
             '__range': {'date': {'from': '1916-07-01', 'to': '1916-08-01'}},
-            'date': 'July 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'July 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-08-01'), ('date', '<', '1916-09-01')],
             '__range': {'date': {'from': '1916-08-01', 'to': '1916-09-01'}},
-            'date': 'August 1916',
-            'date_count': 0,
-            'value': False
+            'date:month': 'August 1916',
+            '__count': 0,
+            'value:sum': False
         }, {
             '__domain': ['&', ('date', '>=', '1916-11-01'), ('date', '<', '1916-12-01')],
             '__range': {'date': {'from': '1916-11-01', 'to': '1916-12-01'}},
-            'date': 'November 1916',
-            'date_count': 1,
-            'value': 3
+            'date:month': 'November 1916',
+            '__count': 1,
+            'value:sum': 3
         }]
 
         model_fill = self.Model.with_context(fill_temporal={"fill_from": '1916-05-15', "fill_to": '1916-07-15', "min_groups": 4})
-        groups = model_fill.read_group([], fields=['date', 'value'], groupby=['date'])
+        groups = model_fill.read_group([], aggregates=['value:sum'], groupby=['date:month'])
 
         self.assertEqual(groups, expected)

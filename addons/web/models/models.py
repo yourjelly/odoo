@@ -121,8 +121,8 @@ class Base(models.AbstractModel):
 
         :returns: array of groups
         """
-        groups = self.read_group(domain, fields, groupby, offset=offset, limit=limit,
-                                 orderby=orderby, lazy=lazy)
+        groups = self.read_group(domain, groupby, fields, offset=offset, limit=limit,
+                                 order=orderby, lazy=lazy)
 
         if expand and len(groupby) == 1:
             for group in groups:
@@ -174,7 +174,7 @@ class Base(models.AbstractModel):
         """
         try:
             fname = progress_bar['field']
-            return self.read_group(domain, [fname], [group_by, fname], lazy=False)
+            return self.read_group(domain, [group_by, fname], lazy=False)
         except ValueError:
             # possibly failed because of grouping on or aggregating non-stored
             # field; fallback on alternative implementation
@@ -299,7 +299,7 @@ class Base(models.AbstractModel):
             domain,
             [(field_name, '!=', False)],
         ])
-        groups = self.read_group(domain, [field_name], [field_name], limit=limit)
+        groups = self.read_group(domain, [field_name], limit=limit)
 
         domain_image = {}
         for group in groups:
@@ -309,7 +309,7 @@ class Base(models.AbstractModel):
                 'display_name': display_name,
             }
             if set_count:
-                values['__count'] = group[field_name + '_count']
+                values['__count'] = group['__count']
             domain_image[id] = values
 
         return domain_image

@@ -12,24 +12,24 @@ class TestGroupOnSelection(common.TransactionCase):
         self.Model.create({'value': 2})
         self.Model.create({'value': 3})
 
-        groups = self.Model.read_group([], fields=['state', 'value'], groupby=['state'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['state'])
         self.assertEqual(groups, [
             {
                 'state': 'a',
-                'state_count': 0,
-                'value': False,
+                '__count': 0,
+                'value:sum': False,
                 '__domain': [('state', '=', 'a')],
             },
             {
                 'state': 'b',
-                'state_count': 0,
-                'value': False,
+                '__count': 0,
+                'value:sum': False,
                 '__domain': [('state', '=', 'b')],
             },
             {
                 'state': False,
-                'state_count': 3,
-                'value': 6,
+                '__count': 3,
+                'value:sum': 6,
                 '__domain': [('state', '=', False)],
             },
         ])
@@ -39,24 +39,24 @@ class TestGroupOnSelection(common.TransactionCase):
         self.Model.create({'state': 'a', 'value': 2})
         self.Model.create({'value': 3})
 
-        groups = self.Model.read_group([], fields=['state', 'value'], groupby=['state'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['state'])
         self.assertEqual(groups, [
             {
                 'state': 'a',
-                'state_count': 2,
-                'value': 3,
+                '__count': 2,
+                'value:sum': 3,
                 '__domain': [('state', '=', 'a')],
             },
             {
                 'state': 'b',
-                'state_count': 0,
-                'value': False,
+                '__count': 0,
+                'value:sum': False,
                 '__domain': [('state', '=', 'b')],
             },
             {
                 'state': False,
-                'state_count': 1,
-                'value': 3,
+                '__count': 1,
+                'value:sum': 3,
                 '__domain': [('state', '=', False)],
             },
         ])
@@ -66,24 +66,24 @@ class TestGroupOnSelection(common.TransactionCase):
         self.Model.create({'state': 'b', 'value': 2})
         self.Model.create({'value': 3})
 
-        groups = self.Model.read_group([], fields=['state', 'value'], groupby=['state'])
+        groups = self.Model.read_group([], aggregates=['value:sum'], groupby=['state'])
         self.assertEqual(groups, [
             {
                 'state': 'a',
-                'state_count': 1,
-                'value': 1,
+                '__count': 1,
+                'value:sum': 1,
                 '__domain': [('state', '=', 'a')],
             },
             {
                 'state': 'b',
-                'state_count': 1,
-                'value': 2,
+                '__count': 1,
+                'value:sum': 2,
                 '__domain': [('state', '=', 'b')],
             },
             {
                 'state': False,
-                'state_count': 1,
-                'value': 3,
+                '__count': 1,
+                'value:sum': 3,
                 '__domain': [('state', '=', False)],
             },
         ])
@@ -113,32 +113,32 @@ class TestSelectionReadGroup(common.TransactionCase):
 
         groups = self.Model.read_group(
             [],
-            fields=["static_expand", "value"],
+            aggregates=["value:sum"],
             groupby=["static_expand"],
         )
         self.assertEqual(groups, [
             {
                 'static_expand': 'c',
-                'static_expand_count': 1,
-                'value': 2,
+                '__count': 1,
+                'value:sum': 2,
                 '__domain': [('static_expand', '=', 'c')],
             },
             {
                 'static_expand': 'b',
-                'static_expand_count': 0,
-                'value': 0,
+                '__count': 0,
+                'value:sum': 0,
                 '__domain': [('static_expand', '=', 'b')],
             },
             {
                 'static_expand': 'a',
-                'static_expand_count': 1,
-                'value': 1,
+                '__count': 1,
+                'value:sum': 1,
                 '__domain': [('static_expand', '=', 'a')],
             },
             {
                 'static_expand': False,
-                'static_expand_count': 1,
-                'value': 3,
+                '__count': 1,
+                'value:sum': 3,
                 '__domain': [('static_expand', '=', False)],
             },
         ])
@@ -155,33 +155,33 @@ class TestSelectionReadGroup(common.TransactionCase):
 
         groups = self.Model.read_group(
             [],
-            fields=["dynamic_expand", "value"],
+            aggregates=["value:sum"],
             groupby=["dynamic_expand"],
         )
 
         self.assertEqual(groups, [
             {
                 'dynamic_expand': 'c',
-                'dynamic_expand_count': 1,
-                'value': 2,
+                '__count': 1,
+                'value:sum': 2,
                 '__domain': [('dynamic_expand', '=', 'c')],
             },
             {
                 'dynamic_expand': 'b',
-                'dynamic_expand_count': 0,
-                'value': 0,
+                '__count': 0,
+                'value:sum': 0,
                 '__domain': [('dynamic_expand', '=', 'b')],
             },
             {
                 'dynamic_expand': 'a',
-                'dynamic_expand_count': 1,
-                'value': 1,
+                '__count': 1,
+                'value:sum': 1,
                 '__domain': [('dynamic_expand', '=', 'a')],
             },
             {
                 'dynamic_expand': False,
-                'dynamic_expand_count': 1,
-                'value': 3,
+                '__count': 1,
+                'value:sum': 3,
                 '__domain': [('dynamic_expand', '=', False)],
             },
         ])
@@ -197,27 +197,27 @@ class TestSelectionReadGroup(common.TransactionCase):
 
         groups = self.Model.read_group(
             [],
-            fields=["no_expand", "value"],
+            aggregates=["value:sum"],
             groupby=["no_expand"],
         )
 
         self.assertEqual(groups, [
             {
                 'no_expand': 'a',
-                'no_expand_count': 1,
-                'value': 1,
+                '__count': 1,
+                'value:sum': 1,
                 '__domain': [('no_expand', '=', 'a')],
             },
             {
                 'no_expand': 'c',
-                'no_expand_count': 1,
-                'value': 2,
+                '__count': 1,
+                'value:sum': 2,
                 '__domain': [('no_expand', '=', 'c')],
             },
             {
                 'no_expand': False,
-                'no_expand_count': 1,
-                'value': 3,
+                '__count': 1,
+                'value:sum': 3,
                 '__domain': [('no_expand', '=', False)],
             },
         ])

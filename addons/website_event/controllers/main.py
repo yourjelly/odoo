@@ -83,10 +83,9 @@ class WebsiteEventController(http.Controller):
                 date[3] = Event.search_count(expression.AND(no_date_domain) + domain_search + date[2])
 
         no_country_domain = event_details['no_country_domain']
-        countries = Event.read_group(expression.AND(no_country_domain) + domain_search, ["id", "country_id"],
-            groupby="country_id", orderby="country_id")
+        countries = Event.read_group(expression.AND(no_country_domain) + domain_search, groupby="country_id")
         countries.insert(0, {
-            'country_id_count': sum([int(country['country_id_count']) for country in countries]),
+            '__count': sum(country['__count'] for country in countries),
             'country_id': ("all", _("All Countries"))
         })
 

@@ -177,7 +177,7 @@ class TestBurndownChart(TestBurndownChartCommon):
     def check_read_group_results(self, domain, expected_results_dict):
         stages_dict = {stage.id: stage.name for stage in self.stages}
         read_group_result = self.env['project.task.burndown.chart.report'].read_group(
-            domain, ['date', 'stage_id'], ['date:month', 'stage_id'], lazy=False)
+            domain, ['date:month', 'stage_id'], lazy=False)
         read_group_result_dict = self.map_read_group_result(read_group_result)
         for (month, stage_id), __count in read_group_result_dict.items():
             expected_count = expected_results_dict.get((month, stage_id), 100000)

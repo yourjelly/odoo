@@ -71,17 +71,17 @@ class StockReplenishmentInfo(models.TransientModel):
             ]
             quantity_by_month_out = self.env['stock.move'].read_group(
                 AND([domain, [('location_dest_id.usage', '=', 'customer')]]),
-                ['product_qty'], ['date:month'])
+                ['date:month'], ['product_qty:sum'])
             quantity_by_month_returned = self.env['stock.move'].read_group(
                 AND([domain, [('location_id.usage', '=', 'customer')]]),
-                ['product_qty'], ['date:month'])
+                ['date:month'], ['product_qty:sum'])
             quantity_by_month_returned = {
-                g['date:month']: g['product_qty'] for g in quantity_by_month_returned}
+                g['date:month']: g['product_qty:sum'] for g in quantity_by_month_returned}
             for group in quantity_by_month_out:
                 month = group['date:month']
                 replenishment_history.append({
                     'name': month,
-                    'quantity': group['product_qty'] - quantity_by_month_returned.get(month, 0),
+                    'quantity': group['product_qty:sum'] - quantity_by_month_returned.get(month, 0),
                     'uom_name': replenishment_report.product_id.uom_id.display_name,
                 })
             replenishment_report.json_replenishment_history = dumps({

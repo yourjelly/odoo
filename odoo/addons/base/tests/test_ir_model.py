@@ -295,19 +295,18 @@ class TestIrModel(TransactionCase):
     def test_group_expansion(self):
         """Check that the basic custom group expansion works."""
         groups = self.env['x_bananas'].read_group(domain=[],
-                                                  fields=['x_ripeness_id'],
                                                   groupby=['x_ripeness_id'])
         expected = [{
             'x_ripeness_id': self.ripeness_green,
-            'x_ripeness_id_count': 3,
+            '__count': 3,
             '__domain': [('x_ripeness_id', '=', self.ripeness_green[0])],
         }, {
             'x_ripeness_id': self.ripeness_okay,
-            'x_ripeness_id_count': 0,
+            '__count': 0,
             '__domain': [('x_ripeness_id', '=', self.ripeness_okay[0])],
         }, {
             'x_ripeness_id': self.ripeness_gone,
-            'x_ripeness_id_count': 0,
+            '__count': 0,
             '__domain': [('x_ripeness_id', '=', self.ripeness_gone[0])],
         }]
         self.assertEqual(groups, expected, 'should include 2 empty ripeness stages')

@@ -2396,7 +2396,7 @@ class BaseModel(metaclass=MetaModel):
                 row['__domain'] = expression.AND([row['__domain'], additional_domain])
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+    def read_group(self, domain, groupby=(), aggregates=(), offset=0, limit=None, order=False, lazy=False):
         """Get the list of records in list view grouped by the given ``groupby`` fields.
 
         :param list domain: :ref:`A search domain <reference/orm/domains>`. Use an empty
@@ -2435,64 +2435,15 @@ class BaseModel(metaclass=MetaModel):
         """
 
         groupby = [groupby] if isinstance(groupby, str) else groupby
+        if '__count' not in aggregates:
+            aggregates = [*aggregates, '__count']
+
         lazy_groupby = groupby[:1] if lazy else groupby
 
-        # Compatibility layer with _read_group, it should be remove in the second part of the refactoring
-        # - Modify `groupby` default value 'month' into specifique groupby specification
-        # - Modify `fields` into aggregates specification of _read_group
-        # - Modify the order to be compatible with the _read_group specification
+        rows = self._read_group(domain, lazy_groupby, aggregates, offset=offset, limit=limit, order=order)
 
-        annoted_groupby = {}  # Key as the name in the result, value as the explicit groupby specification
-        for group_spec in lazy_groupby:
-            field_name, granularity = split_read_group_spec(group_spec)
-            if field_name not in self._fields:
-                raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
-            field = self._fields[field_name]
-            if field.type in ('date', 'datetime'):
-                annoted_groupby[group_spec] = f"{field_name}:{granularity or 'month'}"
-            else:
-                annoted_groupby[group_spec] = group_spec
-
-        annoted_aggregates = {  # Key as the name in the result, value as the explicit aggregate specification
-            f"{lazy_groupby[0].split(':')[0]}_count" if lazy and len(lazy_groupby) == 1 else '__count': '__count',
-        }
-        for field_spec in fields:
-            if field_spec == '__count':
-                continue
-            match = regex_field_agg.match(field_spec)
-            if not match:
-                raise ValueError(f"Invalid field specification {field_spec!r}.")
-            name, func, fname = match.groups()
-
-            if fname:  # Manage this kind of specification : "field_min:min(field)"
-                annoted_aggregates[name] = f"{fname}:{func}"
-                continue
-            if func:  # Manage this kind of specification : "field:min"
-                annoted_aggregates[name] = f"{name}:{func}"
-                continue
-
-            if name not in self._fields:
-                raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
-            field = self._fields[name]
-            if field.base_field.store and field.base_field.column_type and field.group_operator and field_spec not in annoted_groupby:
-                annoted_aggregates[name] = f"{name}:{field.group_operator}"
-
-        # Modify order to match the spec of _read_group
-        if orderby:
-            new_terms = []
-            for order_term in orderby.split(','):
-                order_term: str = order_term.strip()
-                for key_name, annoted in itertools.chain(annoted_groupby.items(), annoted_aggregates.items()):
-                    if order_term.startswith(key_name):
-                        order_term = order_term.replace(key_name, annoted)
-                new_terms.append(order_term)
-            orderby = ','.join(new_terms)
-        else:
-            orderby = ','.join(annoted_groupby.values())
-
-        rows = self._read_group(domain, annoted_groupby.values(), annoted_aggregates.values(), offset=offset, limit=limit, order=orderby)
         rows_dict = [
-            dict(zip(itertools.chain(annoted_groupby, annoted_aggregates), row))
+            dict(zip(itertools.chain(lazy_groupby, aggregates), row))
             for row in rows
         ]
 
@@ -2503,11 +2454,8 @@ class BaseModel(metaclass=MetaModel):
             # want to display empty columns anyway, so we should apply the fill_temporal logic
             if not isinstance(fill_temporal, dict):
                 fill_temporal = {}
-            # TODO Shouldn't be possible with a limit
-            rows_dict = self._read_group_fill_temporal(
-                rows_dict, lazy_groupby,
-                annoted_aggregates, **fill_temporal,
-            )
+            # TODO Shouldn't be possible with a limit or the limit should be in account
+            rows_dict = self._read_group_fill_temporal(rows_dict, lazy_groupby, aggregates, **fill_temporal)
 
         if lazy_groupby and lazy:
             # Right now, read_group only fill results in lazy mode (by default).
@@ -2517,7 +2465,7 @@ class BaseModel(metaclass=MetaModel):
             # TODO Shouldn't be possible with a limit or the limit should be in account
             rows_dict = self._read_group_fill_results(
                 domain, lazy_groupby[0],
-                annoted_aggregates, rows_dict, read_group_order=orderby,
+                aggregates, rows_dict, read_group_order=order,
             )
 
         for row in rows_dict:

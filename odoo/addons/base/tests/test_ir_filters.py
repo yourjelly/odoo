@@ -292,7 +292,7 @@ class TestReadGroup(TransactionCase):
         filter_b = Filters.create(dict(name="Filter_B", model_id="ir.filters"))
         filter_b.write(dict(user_id=False))
 
-        res = Filters.read_group([], ['name', 'user_id'], ['user_id'])
+        res = Filters.read_group([], ['user_id'])
         self.assertTrue(any(val['user_id'] == False for val in res), "At least one group must contain val['user_id'] == False.")
 
 
@@ -301,7 +301,7 @@ class TestAllFilters(TransactionCase):
     def check_filter(self, name, model, domain, fields, groupby, order, context):
         if groupby:
             try:
-                self.env[model].with_context(context).read_group(domain, fields, groupby, orderby=order)
+                self.env[model].with_context(context).read_group(domain, fields, groupby, order=order)
             except ValueError as e:
                 raise self.failureException("Test filter '%s' failed: %s" % (name, e)) from None
             except KeyError as e:

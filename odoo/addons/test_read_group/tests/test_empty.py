@@ -15,14 +15,14 @@ class TestEmptyDate(common.TransactionCase):
         self.Model.create({'value': 2})
         self.Model.create({'value': 3})
 
-        gb = self.Model.read_group([], ['date', 'value'], ['date'], lazy=False)
+        gb = self.Model.read_group([], ['date:month'], ['value:sum'], lazy=False)
 
         self.assertEqual(gb, [{
             '__count': 3,
             '__domain': [('date', '=', False)],
-            '__range': {'date': False},
-            'date': False,
-            'value': 6
+            '__range': {'date:month': False},
+            'date:month': False,
+            'value:sum': 6
         }])
 
     def test_empty_by_span(self):
@@ -30,14 +30,14 @@ class TestEmptyDate(common.TransactionCase):
         self.Model.create({'value': 2})
         self.Model.create({'value': 3})
 
-        gb = self.Model.read_group([], ['date', 'value'], ['date:quarter'], lazy=False)
+        gb = self.Model.read_group([], ['date:quarter'], ['value:sum'], lazy=False)
 
         self.assertEqual(gb, [{
             '__count': 3,
             '__domain': [('date', '=', False)],
             '__range': {'date:quarter': False},
             'date:quarter': False,
-            'value': 6
+            'value:sum': 6
         }])
 
     def test_mixed(self):
@@ -46,18 +46,18 @@ class TestEmptyDate(common.TransactionCase):
         self.Model.create({'date': '1916-12-18', 'value': 3})
         self.Model.create({'date': '1916-12-18', 'value': 4})
 
-        gb = self.Model.read_group([], ['date', 'value'], ['date'], lazy=False)
+        gb = self.Model.read_group([], ['date:month'], ['value:sum'], lazy=False)
 
-        self.assertSequenceEqual(sorted(gb, key=lambda r: r['date'] or ''), [{
+        self.assertSequenceEqual(sorted(gb, key=lambda r: r['date:month'] or ''), [{
             '__count': 2,
             '__domain': [('date', '=', False)],
-            '__range': {'date': False},
-            'date': False,
-            'value': 3,
+            '__range': {'date:month': False},
+            'date:month': False,
+            'value:sum': 3,
         }, {
             '__count': 2,
             '__domain': ['&', ('date', '>=', '1916-12-01'), ('date', '<', '1917-01-01')],
-            '__range': {'date': {'from': '1916-12-01', 'to': '1917-01-01'}},
-            'date': 'December 1916',
-            'value': 7,
+            '__range': {'date:month': {'from': '1916-12-01', 'to': '1917-01-01'}},
+            'date:month': 'December 1916',
+            'value:sum': 7,
         }])
