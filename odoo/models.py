@@ -74,10 +74,17 @@ regex_object_name = re.compile(r'^[a-z0-9_.]+$')
 regex_pg_name = re.compile(r'^[a-z_][a-z0-9_$]*$', re.I)
 regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')
 
+regex_aggregate_spec = re.compile(r'(\w+)(?::(\w+))?$')
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
 
 INSERT_BATCH_SIZE = 100
 SQL_DEFAULT = psycopg2.extensions.AsIs("DEFAULT")
+
+def split_read_group_spec(spec: str) -> 'tuple[str]':
+    res_match = regex_aggregate_spec.match(spec)
+    if not res_match:
+        raise ValueError(f'Invalid aggregate/groupby specification {spec!r}. Valid specification example: "field:agg"')
+    return res_match.groups()
 
 def check_object_name(name):
     """ Check if the given name is a valid model name.
@@ -1761,6 +1768,313 @@ class BaseModel(metaclass=MetaModel):
         cls.pool._clear_cache()
 
     @api.model
+    def _read_group_select(self, query, aggregate_spec):
+        """ return (<SQL expression>, [<fields name used in SQL expression>])"""
+        if aggregate_spec == '__count':
+            return 'COUNT(*)', []
+
+        fname, func = split_read_group_spec(aggregate_spec)
+
+        if fname not in self:
+            raise ValueError(f"Invalid field {fname!r} on model {self._name!r} for {aggregate_spec!r}.")
+        if func not in VALID_AGGREGATE_FUNCTIONS:
+            raise ValueError(f"Invalid aggregate method {func!r} for {aggregate_spec!r}.")
+
+        field_expression = self._inherits_join_calc(self._table, fname, query)
+
+        func = func.upper()
+        distinct = ''
+        if func.endswith('_DISTINCT'):
+            distinct = 'DISTINCT '
+            func = func[:-len('_DISTINCT')]
+
+        if func == 'ARRAY_AGG' and not distinct:
+            # ORDER BY to force the determinism of result for array_agg
+            # array_agg_distinct doesn't have this particularity because we cannot order on distinct aggregate:
+            # in an aggregate with DISTINCT, ORDER BY expressions must appear in argument list
+            expression = f'ARRAY_AGG({field_expression} ORDER BY {self._inherits_join_calc(self._table, "id", query)})'
+        else:
+            expression = f'{func}({distinct}{field_expression})'
+
+        return expression, [fname]
+
+    @api.model
+    def _read_group_groupby(self, query, groupby_spec):
+        """ return (<SQL expression>, [<fields name used in SQL expression>])"""
+        res_match = regex_aggregate_spec.match(groupby_spec)
+        if not res_match:
+            raise ValueError(f"Invalid groupby specification {groupby_spec!r}.")
+
+        fname, granularity = res_match.groups()
+        if fname not in self:
+            raise ValueError(f"Invalid field {fname!r} on model {self._name!r}")
+
+        field = self._fields[fname]
+
+        if granularity and field.type not in ('datetime', 'date'):
+            raise ValueError(f"Granularity set on a no-datetime field: {groupby_spec!r}")
+
+        if not field.store and not field.inherited:  # TODO: should be manage by _inherits_join_calc
+            raise ValueError(f"Groupby on no-store field: {groupby_spec!r}")
+
+        field_expression = self._inherits_join_calc(self._table, fname, query)
+        if field.type == 'datetime' and self.env.context.get('tz') in pytz.all_timezones_set:
+            # TODO: '{self._context.get('tz')}' should be passed as args
+            field_expression = f"timezone('{self.env.context.get('tz')}', timezone('UTC', {field_expression}))"
+
+        if field.type in ('datetime', 'date'):
+            if not granularity:
+                raise ValueError(f"Granularity not set on a date(time) field: {groupby_spec!r}")
+            if granularity not in TIME_GRANULARITY_AGGREGATION:
+                raise ValueError(f"Granularity specification isn't correct: {granularity!r}")
+
+            # TODO: '{granularity}' should be passed as args
+            if granularity == 'week':
+                # first_week_day: 0=Monday, 1=Tuesday, ...
+                first_week_day = int(get_lang(self.env).week_start) - 1
+                days_offset = first_week_day and 7 - first_week_day
+                field_expression = f"(date_trunc('week', {field_expression}::timestamp - INTERVAL '-{days_offset} DAY') + INTERVAL '-{days_offset} DAY')"
+            else:
+                field_expression = f"date_trunc('{granularity}', {field_expression}::timestamp)"
+            if field.type == 'date':
+                field_expression += '::date'
+        elif field.type == 'boolean':
+            field_expression = f"COALESCE({field_expression}, FALSE)"
+
+        return field_expression, [fname]
+
+    @api.model
+    def _read_group_having(self, query, having_domain):
+        fnames_used = []
+        having_params = []
+        stack_op = []
+
+        def pop_next_condition():
+            stack_leaf = stack_op.pop()
+            if isinstance(stack_leaf, str):
+                return stack_leaf
+
+            aggragate_spec, ope, value = stack_leaf
+            having_params.append(value)
+            select_term, select_fnames_used = self._read_group_select(query, aggragate_spec)
+            fnames_used.extend(select_fnames_used)
+            return f'{select_term} {ope} %s'
+
+        for leaf in reversed(having_domain):
+            if leaf == '!':
+                condition_1 = pop_next_condition()
+                stack_op.append(f'(NOT {condition_1})')
+            elif leaf in ('&', '|'):
+                condition_1 = pop_next_condition()
+                condition_2 = pop_next_condition()
+
+                op = 'AND' if leaf == '&' else 'OR'
+                stack_op.append(f'({condition_1} {op} {condition_2})')
+            elif isinstance(leaf, (list, tuple)):
+                __, operator, __ = leaf
+                if operator not in ('in', 'not in', '<', '>', '<=', '>=', '=', '!='):
+                    raise ValueError(f"Having clause {leaf!r} only accept ('in', 'not in', '<', '>', '<=', '>=', '=', '!=') operators")
+                stack_op.append(leaf)
+            else:
+                raise ValueError(f"Invalid having clause {leaf!r}. It should be a domain-like value")
+
+        while len(stack_op) > 1:
+            condition_1 = pop_next_condition()
+            condition_2 = pop_next_condition()
+            stack_op.append(f'({condition_1} AND {condition_2})')
+
+        return pop_next_condition() if stack_op else "", having_params, fnames_used
+
+    @api.model
+    def _read_group_orderby(self, query, groupby, order, order_traverse_many2one):
+        orderby_terms = []
+        extra_groupby_terms = []
+        fnames_used = []
+        if not order:
+            return orderby_terms, extra_groupby_terms, fnames_used
+
+        for order_term in order.split(','):
+            order_term = order_term.strip()
+            order_field, __, order_orientation = order_term.partition(' ')
+            if not order_orientation:
+                order_orientation = "ASC"
+            else:
+                order_orientation = order_orientation.upper()
+
+            if order_orientation not in ('ASC', 'DESC'):
+                raise ValueError(f"Order orientation {order_orientation!r} is not correct. It should be 'ASC' or 'DESC'")
+
+            if order_field not in groupby:
+                try:
+                    sql_expression, fnames_used_select = self._read_group_select(query, order_field)
+                    fnames_used.extend(fnames_used_select)
+                    orderby_terms.append(f'{sql_expression} {order_orientation}')
+                    continue
+                except ValueError as e:
+                    raise ValueError(f"Order term {order_term!r} is not a valid aggregate nor valid groupby") from e
+
+            if order_traverse_many2one and order_field in self and self._fields[order_field].type == 'many2one':
+                # It will generated extra clause to add in the group by.
+                extra_order = self._generate_order_by(f'{order_field} {order_orientation}', query)
+                extra_order = extra_order.replace(' ORDER BY ', '')
+                orderby_terms.extend(order.strip() for order in extra_order.split(",") if order.strip())
+                extra_groupby_terms.extend(order.strip().split()[0] for order in extra_order.split(",") if order.strip())
+            else:
+                sql_expression, __ = self._read_group_groupby(query, order_field)
+                orderby_terms.append(f'{sql_expression} {order_orientation}')
+
+        return orderby_terms, extra_groupby_terms, fnames_used
+
+    @api.model
+    def _read_group_empty_value(self, spec):
+        if spec == '__count':
+            return 0
+        fname, func = split_read_group_spec(spec)  # func is either None, granularity or an aggregate
+        if func in ('count', 'count_distinct'):
+            return 0
+        if func in ('array_agg', 'array_agg_distinct'):
+            return []
+        field = self._fields[fname]
+        if not func and (field.relational or fname == 'id'):
+            return self.env[field.comodel_name] if field.relational else self.env[self._name]
+        return False
+
+    @api.model
+    def _read_group_postprocess(self, spec, raw_values):
+        """ Return format function the specific _read_group ``spec`` (groupby and aggregate).
+
+        This format is for the backend point of view. Rules are:
+        - ``spec`` related to a Relational field is converted to recordset with correct prefetch
+        - ``spec`` related to a Datetime field is localized with the context tz
+        - Other ``spec`` is only change None value by False
+        """
+        def get_convert_method():
+            empty_value = self._read_group_empty_value(spec)
+            if spec == '__count':
+                return lambda value: value if value is not None else empty_value
+
+            fname, func = split_read_group_spec(spec)
+            field = self._fields[fname]
+
+            if field.type == 'datetime' and self._context.get('tz') in pytz.all_timezones_set:
+                tz = pytz.timezone(self._context['tz'])
+                if func and func in ('array_agg', 'array_agg_distinct'):
+                    return lambda values: [tz.localize(value) for value in values if value] if values else empty_value
+                return lambda value: tz.localize(value) if value is not None else empty_value
+
+            if func and func in ('array_agg', 'array_agg_distinct'):
+                return lambda value: value if value is not None else empty_value
+
+            if not func and (field.relational or fname == 'id'):
+                Model = self.pool[field.comodel_name] if field.relational else self.pool[self._name]
+                prefetch_ids = tuple(raw_value for raw_value in raw_values if raw_value)
+                browse_partial = functools.partial(Model, env=self.env, prefetch_ids=prefetch_ids)
+                return lambda value: browse_partial(ids=(value,)) if value else empty_value
+
+            return lambda value: value if value is not None else empty_value
+
+        return map(get_convert_method(), raw_values)
+
+    @api.model
+    def _read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):
+        """ Get fields aggregations specify by ``aggregates`` grouped by the given ``groupby`` 
+        fields where record are filtered by the ``domain``.
+
+        :param list domain: :ref:`A search domain <reference/orm/domains>`. Use an empty
+                list to match all records.
+        :param list groupby: list of groupby descriptions by which the records will be grouped.
+                A groupby description is either a field (then it will be grouped by that field)
+                or a string 'field:granularity'. Right now, the only supported granularities
+                are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for
+                date/datetime fields.
+        :param list aggregates: list of aggregates specification.
+                Each element is 'field:agg' (aggregate field with aggregation function 'agg').
+                The possible aggregation functions are the ones provided by
+                `PostgreSQL <https://www.postgresql.org/docs/current/static/functions-aggregate.html>`_
+                and 'count_distinct'/'array_agg_distinct', with the expected meaning.
+        :param list having: A domain-like list but the left operand supported only
+                aggregates specification.
+        :param int offset: optional number of groups to skip
+        :param int limit: optional max number of groups to return
+        :param str order: optional ``order by`` specification, for
+                overriding the natural sort ordering of the groups,
+                see also :py:meth:`~osv.osv.osv.search`.
+            :return: list of tuple containing in the order the groups values and aggregates values (flatten).
+                    If group is related field, the value of it will be a recordset (with a correct prefetch set).
+
+        :rtype: [(groupby_1_value, ... , aggregate_1_value_aggregate, ...), ...]
+        :raise AccessError: if user is not allowed to access requested information """
+
+        self.check_access_rights('read')
+
+        groupby = [groupby] if isinstance(groupby, str) else groupby
+        aggregates = [aggregates] if isinstance(aggregates, str) else aggregates
+
+        if expression.is_false(self, domain):
+            if not groupby:  # If there is no group postgresql always return a row
+                return [tuple(self._read_group_empty_value(spec) for spec in itertools.chain(groupby, aggregates))]
+            return []
+
+        order_traverse_many2one = True
+        if not order:
+            order = ','.join(groupby)
+            order_traverse_many2one = False
+
+        query = self._where_calc(domain)
+        self._apply_ir_rules(query, 'read')
+
+        fnames_to_flush = OrderedSet()
+        groupby_terms = []  # [<SQL expression>,]
+        for spec in groupby:
+            sql_expression, fnames_used = self._read_group_groupby(query, spec)
+            fnames_to_flush.update(fnames_used)
+            groupby_terms.append(sql_expression)
+
+        select_terms = []  # [<SQL expression>,]
+        for spec in aggregates:
+            sql_expression, fnames_used = self._read_group_select(query, spec)
+            fnames_to_flush.update(fnames_used)
+            select_terms.append(sql_expression)
+
+        having_expression, having_params, fnames_used = self._read_group_having(query, having)
+        fnames_to_flush.update(fnames_used)
+
+        orderby_terms, extra_groupby_terms, fnames_used = self._read_group_orderby(query, groupby, order, order_traverse_many2one)
+        fnames_to_flush.update(fnames_used)
+
+        from_clause, where_clause, query_params = query.get_sql()
+        query_parts = [
+            f"SELECT {', '.join(groupby_terms + select_terms)}",
+            f"FROM {from_clause}",
+        ]
+        if where_clause:
+            query_parts.append(f"WHERE {where_clause}")
+        if groupby_terms:
+            query_parts.append(f"GROUP BY {', '.join(groupby_terms + extra_groupby_terms)}")
+        if having_expression:
+            query_parts.append(f"HAVING {having_expression}")
+            query_params.extend(having_params)
+        if orderby_terms:
+            query_parts.append(f"ORDER BY {', '.join(orderby_terms)}")
+        if limit:
+            query_parts.append("LIMIT %s")
+            query_params.append(limit)
+        if offset:
+            query_parts.append("OFFSET %s")
+            query_params.append(offset)
+
+        self._flush_search(domain, fnames_to_flush)
+        if fnames_to_flush:
+            self.check_field_access_rights('read', fnames_to_flush)
+
+        self.env.cr.execute('\n' + '\n'.join(query_parts), query_params)
+
+        return list(zip(*(
+            self._read_group_postprocess(spec, values)
+            for spec, values in zip(itertools.chain(groupby, aggregates), zip(*self.env.cr.fetchall()))
+        )))
+
+    @api.model
     def _read_group_expand_full(self, groups, domain, order):
         """Extend the group to include all target records by default."""
         return groups.search([], order=order)
@@ -2208,24 +2522,6 @@ class BaseModel(metaclass=MetaModel):
         del data['id']
         return data
 
-    @api.model
-    def _read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        """
-        Executes exactly what the public read_group() does, except it doesn't
-        order many2one fields on their comodel's order but on their ID instead.
-        """
-        if not orderby:
-            if isinstance(groupby, str):
-                groupby = [groupby]
-            groupby_list = groupby[:1] if lazy else groupby
-            order_list = []
-            for order_spec in groupby_list:
-                field_name = order_spec.split(":")[0]  # field name could be formatted like "field:group_func"
-                if self._fields[field_name].type == 'many2one':
-                    order_spec = f"{field_name}.id"  # do not order by comodel's order
-                order_list.append(order_spec)
-            orderby = ','.join(order_list)
-        return self.read_group(domain, fields, groupby, offset, limit, orderby, lazy)
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
