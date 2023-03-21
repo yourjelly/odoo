@@ -692,7 +692,8 @@
       childHeight="cellPopover.Component.size.height"
       flipHorizontalOffset="cellPopover.cellWidth"
       flipVerticalOffset="cellPopover.cellHeight"
-      onMouseWheel="props.onMouseWheel">
+      onMouseWheel="props.onMouseWheel"
+      zIndex="zIndex">
       <t
         t-component="cellPopover.Component"
         t-props="{...cellPopover.props, onClosed : () => props.onClosePopover()}"
@@ -3248,6 +3249,6 @@
 </odoo>
 <!--
   __info__.version = '16.0.4';
-  __info__.date = '2023-03-16T12:14:58.080Z';
-  __info__.hash = 'ebbb1f0';
+  __info__.date = '2023-03-21T05:45:47.663Z';
+  __info__.hash = '58dc1f8';
 -->
