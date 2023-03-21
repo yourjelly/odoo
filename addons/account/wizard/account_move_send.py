@@ -404,7 +404,8 @@ class AccountMoveSend(models.Model):
         """
         self.ensure_one()
 
-        content, _report_format = self.env['ir.actions.report']._render('account.account_invoices', invoice.ids)
+        content, _report_format = self.env['ir.actions.report']\
+            .with_context(skip_add_facturx=True)._render('account.account_invoices', invoice.ids)
 
         prepared_data['pdf_attachment_values'] = {
             'raw': content,
