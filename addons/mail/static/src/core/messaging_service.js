@@ -126,6 +126,7 @@ export class Messaging {
             this.insertCannedResponse(code);
         });
         this.store.hasLinkPreviewFeature = data.hasLinkPreviewFeature;
+        this.store.hasTenorFeature = data.hasTenorFeature;
         this.isReady.resolve();
         this.store.isMessagingReady = true;
     }

@@ -870,7 +870,11 @@ export class ThreadService {
      * @param {Thread} thread
      * @param {string} body
      */
-    async post(thread, body, { attachments = [], isNote = false, parentId, rawMentions }) {
+    async post(
+        thread,
+        body,
+        { attachments = [], isNote = false, parentId, rawMentions = "" } = {}
+    ) {
         const command = this.store.user
             ? this.messageService.getCommandFromText(thread, body)
             : undefined;

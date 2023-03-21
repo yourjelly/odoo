@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="mail.GifPicker" owl="1">
+        <div class="o-mail-gif-picker p-2">
+            <div class="d-flex align-items-center">
+                <i t-if="!state.showCategories" t-on-click="openCategories" class="fa fa-arrow-left cursor-pointer p-2 fs-5"/>
+                <input class="form-control border-0 flex-grow-1" placeholder="Search for a gif" t-on-input="onInput" t-model="state.searchTerm" t-ref="autofocus" />
+                <i class="oi oi-search p-2 fs-5" title="Search..." role="img" aria-label="Search..."></i>
+            </div>
+            <div class="o-mail-gif-scroller overflow-y-auto overflow-x-hidden" t-ref="scroller">
+                <div t-if="state.loadingError" class="text-center">
+                    <span class="o-mail-gif-error d-block">😵‍💫</span>
+                    <span class="fs-5 text-muted d-block">Failed to load gifs...</span>
+                </div>
+                <t t-if="state.showCategories">
+                    <div t-if="!state.loadingError" class="o-mail-gif-categories row row-cols-2 gy-2 gx-2">
+                        <div t-if="!store.guest" class="col">
+                            <div class="o-mail-gif-category position-relative ratio ratio-16x9" t-on-click="onClickFavoriteCategory">
+                                <img
+                                    t-if="state.favorites.length > 0"
+                                    class="o-mail-gif-category"
+                                    t-att-src="state.favorites[0].media_formats.tinygif.url"
+                                    loading="lazy"
+                                />
+                                <div class="position-absolute w-100 h-100 top-0 start-0 text-center text-white align-middle fs-2 bg-dark bg-opacity-50">
+                                    Favorites
+                                </div>
+                            </div>
+                        </div>
+                        <t t-foreach="state.categories" t-as="category" t-key="category.name">
+                            <div class="col">
+                                <div class="o-mail-gif-category position-relative ratio ratio-16x9" t-on-click="() => this.onClickCategory(category)">
+                                    <img class="o-mail-gif-category-img img-fluid" t-att-src="category.image" loading="lazy"/>
+                                    <div class="position-absolute w-100 h-100 top-0 start-0 text-center text-white align-middle fs-2 bg-dark bg-opacity-50">
+                                        <t t-out="category.name"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+                <t t-if="state.gifs and !state.showCategories">
+                    <div class="d-flex gap-1">
+                        <div>
+                            <t t-foreach="evenGif" t-as="gif" t-key="gif_index">
+                                <t t-call="mail.Gif"/>
+                            </t>
+                        </div>
+                        <div>
+                            <t t-foreach="oddGif" t-as="gif" t-key="gif_index">
+                                <t t-call="mail.Gif"/>
+                            </t>
+                        </div>
+                    </div>
+                    <div t-if="state.loadingGif" class="text-center fs-6">
+                        <i class="fa fa-spin fa-circle-o-notch"/>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="mail.Gif" owl="1">
+        <div class="o-mail-gif position-relative mt-1 fs-5">
+            <i
+                t-if="!store.guest"
+                class="position-absolute top-0 end-0 me-3 mt-3 p-2 bg-dark bg-opacity-75 fa cursor-pointer"
+                t-att-class="{ 'text-white fa-star-o': !isFavorite(gif), 'fa-star o-mail-Gif-starred': isFavorite(gif) }"
+                t-on-click="() => this.onClickFavorite(gif)"
+            />
+            <img
+                class="img-fluid"
+                t-att-src="gif.media_formats.tinygif.url"
+                t-on-click="() => this.onClickGif(gif)"
+                loading="lazy"
+            />
+        </div>
+    </t>
+</templates>

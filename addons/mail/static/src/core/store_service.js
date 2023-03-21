@@ -83,6 +83,7 @@ export class Store {
     ringingThreads = null;
 
     hasLinkPreviewFeature = true;
+    hasTenorFeature = false;
 
     // messaging menu
     menu = {

@@ -109,6 +109,7 @@ class TestDiscussFullPerformance(TransactionCase):
         """
         return {
             'hasLinkPreviewFeature': True,
+            'hasTenorFeature': False,
             'needaction_inbox_counter': 1,
             'starred_counter': 1,
             'channels': [

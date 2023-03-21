@@ -37,6 +37,7 @@ from . import mail_template
 from . import mail_channel_member
 from . import mail_channel_rtc_session
 from . import mail_channel
+from . import mail_gif_favorite
 from . import mail_guest
 from . import mail_ice_server
 from . import mail_shortcode

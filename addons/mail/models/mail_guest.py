@@ -114,6 +114,7 @@ class MailGuest(models.Model):
             'current_user_id': False,
             'current_user_settings': False,
             'hasLinkPreviewFeature': self.env['mail.link.preview']._is_link_preview_enabled(),
+            'hasTenorFeature': bool(self.env["ir.config_parameter"].sudo().get_param("mail.tenor_api_key")),
             'menu_id': False,
             'needaction_inbox_counter': False,
             'odoobot': {

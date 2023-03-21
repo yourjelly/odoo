@@ -167,6 +167,93 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
                 limit
             );
         }
+        if (route === "/discuss/gif/favorites") {
+            return { results: [], offset: 20 };
+        }
+        if (route === "/discuss/gif/search") {
+            return {
+                results: [
+                    {
+                        id: "16925131306449801434",
+                        title: "",
+                        media_formats: {
+                            tinygif: {
+                                url: "https://media.tenor.com/6uIlQAHIkNoAAAAM/cry.gif",
+                                duration: 0,
+                                preview: "",
+                                dims: [220, 190],
+                                size: 1007885,
+                            },
+                        },
+                        created: 1654414453.782169,
+                        content_description: "Cry GIF",
+                        itemurl: "https://tenor.com/view/cry-gif-25866484",
+                        url: "https://tenor.com/bUHdw.gif",
+                        tags: ["cry"],
+                        flags: [],
+                        hasaudio: false,
+                    },
+                    {
+                        id: "11429640401266091247",
+                        title: "",
+                        media_formats: {
+                            tinygif: {
+                                url: "https://media.tenor.com/np49Y1vrJO8AAAAM/crying-cry.gif",
+                                duration: 0,
+                                preview: "",
+                                dims: [220, 220],
+                                size: 145353,
+                            },
+                        },
+                        created: 1612455937.558013,
+                        content_description: "Crying Crying Face GIF",
+                        itemurl: "https://tenor.com/view/crying-cry-crying-face-gif-20235014",
+                        url: "https://tenor.com/bw4dm.gif",
+                        tags: ["crying", "cry", "Crying Face"],
+                        flags: [],
+                        hasaudio: false,
+                    },
+                ],
+                next: "CAgQpIGj_8WN_gIaHgoKAD-_xMQ20dMU_xIQ1MVHUnSAQxC98Y6VAAAAADAI",
+            };
+        }
+        if (route === "/discuss/gif/categories") {
+            return {
+                locale: "en",
+                tags: [
+                    {
+                        searchterm: "cry",
+                        path: "/v2/search?q=cry&locale=en&component=categories&contentfilter=low",
+                        image: "https://media.tenor.com/6uIlQAHIkNoAAAAM/cry.gif",
+                        name: "#cry",
+                    },
+                    {
+                        searchterm: "yes",
+                        path: "/v2/search?q=yes&locale=en&component=categories&contentfilter=low",
+                        image: "https://media.tenor.com/UVmpVqlpVhQAAAAM/yess-yes.gif",
+                        name: "#yes",
+                    },
+                    {
+                        searchterm: "no",
+                        path: "/v2/search?q=no&locale=en&component=categories&contentfilter=low",
+                        image: "https://media.tenor.com/aeswYw-86k8AAAAM/no-nooo.gif",
+                        name: "#no",
+                    },
+                    {
+                        searchterm: "lol",
+                        path: "/v2/search?q=lol&locale=en&component=categories&contentfilter=low",
+                        image: "https://media.tenor.com/BiseY2UXovAAAAAM/lmfao-laughing.gif",
+                        name: "#lol",
+                    },
+                ],
+            };
+        }
+        if (route === "/discuss/gif/set_favorite") {
+            return;
+        }
+        if (route === "/discuss/gif/remove_favorite") {
+            return;
+        }
         return this._super(route, args);
     },
     /**

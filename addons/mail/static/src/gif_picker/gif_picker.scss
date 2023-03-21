@@ -1,0 +1,20 @@
+.o-mail-gif-picker {
+    height: 400px;
+    width: 310px;
+}
+.o-mail-gif-scroller {
+    height: 360px;
+    width: 100%;
+}
+
+.o-mail-gif-category-img {
+    object-fit: cover;
+}
+
+.o-mail-gif-error {
+    font-size: 5rem;
+}
+
+.o-mail-Gif-starred {
+    color: $o-main-favorite-color !important;
+}

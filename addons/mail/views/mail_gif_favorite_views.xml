@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="mail_gif_favorite_view_form" model="ir.ui.view">
+        <field name="name">mail.gif.favorite.form</field>
+        <field name="model">mail.gif.favorite</field>
+        <field name="arch" type="xml">
+            <form string="Gifs favorite">
+                <sheet>
+                    <group>
+                        <field name="tenor_gif_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="mail_gif_favorite_view_tree" model="ir.ui.view">
+        <field name="name">mail.gif.favorite.tree</field>
+        <field name="model">mail.gif.favorite</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+            <tree string="Gif favorite">
+                <field name="id"/>
+                <field name="tenor_gif_id"/>
+                <field name="create_uid"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="mail_gif_favorite_action" model="ir.actions.act_window">
+        <field name="name">Gif favorite</field>
+        <field name="res_model">mail.gif.favorite</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

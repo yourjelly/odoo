@@ -313,6 +313,7 @@ class Users(models.Model):
             'odoobot': odoobot.sudo().mail_partner_format().get(odoobot),
             'shortcodes': self.env['mail.shortcode'].sudo().search_read([], ['source', 'substitution']),
             'starred_counter': self.env['mail.message'].search_count([('starred_partner_ids', 'in', self.partner_id.ids)]),
+            'hasTenorFeature': bool(self.env["ir.config_parameter"].sudo().get_param("mail.tenor_api_key"))
         }
         return values
 

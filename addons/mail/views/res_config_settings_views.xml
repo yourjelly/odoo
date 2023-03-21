@@ -77,6 +77,18 @@
                         <setting id="restrict_template_rendering_setting" help="Restrict mail templates edition and QWEB placeholders usage.">
                             <field name="restrict_template_rendering"/>
                         </setting>
+                        <setting id="tenor_url" string="Tenor API url" help="">
+                            <field name="tenor_url"/>
+                        </setting>
+                        <setting id="tenor_api_key" string="Tenor API key" help="Add a tenor api key to enable gifs support." documentation="https://developers.google.com/tenor/guides/quickstart#setup">
+                            <field name="tenor_api_key" placeholder="Past your API key"/>
+                        </setting>
+                        <setting id="tenor_content_filter" string="Tenor content filter" help="Select the content filter used for filtering gifs" documentation="https://developers.google.com/tenor/guides/content-filtering">
+                            <field name="tenor_content_filter"/>
+                        </setting>
+                        <setting id="tenor_gif_limit" string="Tenor gif limits" help="Fetch up to the specified number of gif.">
+                            <field name="tenor_gif_limit"/>
+                        </setting>
                     </block>
                 </div>
                 <setting id="document_layout_setting" position="after">

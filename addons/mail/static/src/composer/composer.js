@@ -21,6 +21,7 @@ import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { MessageConfirmDialog } from "../core_ui/message_confirm_dialog";
+import { useGifPicker } from "../gif_picker/gif_picker_hook";
 
 export const SHORT_TYPING = 5000;
 export const LONG_TYPING = 50000;
@@ -72,6 +73,7 @@ export class Composer extends Component {
         /** @type {import("@mail/core/thread_service").ThreadService} */
         this.threadService = useService("mail.thread");
         this.ref = useRef("textarea");
+        this.gifRef = useRef("gif");
         this.fakeTextarea = useRef("fakeTextarea");
         this.typingNotified = false;
         this.state = useState({
@@ -115,6 +117,9 @@ export class Composer extends Component {
         }
         if (this.props.messageEdition) {
             this.props.messageEdition.composerOfThread = this;
+        }
+        if (this.store.hasTenorFeature) {
+            this.gifPicker = useGifPicker(this.gifRef, this.props.composer.thread);
         }
         useChildSubEnv({
             inComposer: true,
@@ -401,6 +406,10 @@ export class Composer extends Component {
 
     onClickAddEmoji(ev) {
         markEventHandled(ev, "composer.clickOnAddEmoji");
+    }
+
+    onClickAddGif() {
+        this.gifPicker.toggle();
     }
 
     isEventTrusted(ev) {

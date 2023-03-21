@@ -88,6 +88,28 @@ export function useHover(refName, callback = () => {}) {
     return state;
 }
 
+/**
+ * Hook that execute the callback function when the scrollable element hit the
+ * bottom.
+ *
+ * @param {string} refName scrollable t-ref name to observe
+ * @param {function} callback function to execute when scroll hit the bottom
+ */
+export function useOnBottomScrolled(refName, callback) {
+    const ref = useRef(refName);
+    function onScroll() {
+        if (Math.abs(ref.el.scrollTop + ref.el.clientHeight - ref.el.scrollHeight) < 1) {
+            callback();
+        }
+    }
+    onMounted(() => {
+        ref.el.addEventListener("scroll", onScroll);
+    });
+    onWillUnmount(() => {
+        ref.el.removeEventListener("scroll", onScroll);
+    });
+}
+
 export function useAutoScroll(refName, shouldScrollPredicate = () => true) {
     const ref = useRef(refName);
     let el = null;
