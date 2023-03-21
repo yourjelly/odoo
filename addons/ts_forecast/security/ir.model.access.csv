@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ts_forecast_model,access_ts_forecast_model,model_ts_forecast_model,,1,1,1,1
+access_ts_forecast_parameter,access_ts_forecast_parameter,model_ts_forecast_parameter,,1,1,1,1
