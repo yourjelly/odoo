@@ -580,7 +580,7 @@ export const editorCommands = {
         // Color the selected <font>s and remove uncolored fonts.
         for (const font of new Set(fonts)) {
             colorElement(font, color, mode);
-            if (!hasColor(font, mode) && !font.hasAttribute('style')) {
+            if (!hasColor(font, mode) && !font.hasAttribute('style') && window.getComputedStyle(document.body).colorScheme !== 'dark') {
                 for (const child of [...font.childNodes]) {
                     font.parentNode.insertBefore(child, font);
                 }

@@ -3551,6 +3551,13 @@ var SnippetsMenu = Widget.extend({
             });
             return;
         }
+        const selection = this.options.wysiwyg.odooEditor.document.getSelection();
+        if ($target[0].querySelector('.oe_unremovable')) {
+            const parEle = selection.anchorNode && selection.anchorNode.parentElement
+            if(parEle){
+                $target = $(parEle);
+            }
+        }
         this._activateSnippet($target);
     },
     /**
@@ -4179,7 +4186,11 @@ var SnippetsMenu = Widget.extend({
             this.options.wysiwyg.lastMediaClicked && $(this.options.wysiwyg.lastMediaClicked).is('.fa, img')) ||
             (this.options.wysiwyg.lastElement && !this.options.wysiwyg.lastElement.isContentEditable)
         ) {
-            $toolbarContainer.hide();
+            if(selection.anchorNode && (selection.anchorNode.textContent || selection.focusNode.textContent)){
+                return
+            }else{
+                $toolbarContainer.hide();
+            }
         } else {
             $toolbarContainer.show();
         }
