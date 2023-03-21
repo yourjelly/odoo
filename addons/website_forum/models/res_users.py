@@ -22,8 +22,5 @@ class Users(models.Model):
 
     def get_gamification_redirection_data(self):
         res = super(Users, self).get_gamification_redirection_data()
-        res.append({
-            'url': '/forum',
-            'label': 'See our Forum'
-        })
+        res.append({'url': '/forum', 'label': 'See our Forum'})
         return res

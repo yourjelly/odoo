@@ -14,10 +14,7 @@ class Attachment(models.Model):
         # will be bound to this model's record).
         res_model = attachment_data['res_model']
         res_id = attachment_data.get('res_id')
-        if (
-            res_model == 'forum.post' and res_id
-            and self.env['forum.post'].browse(res_id).can_use_full_editor
-        ):
+        if res_model == 'forum.post' and res_id and self.env['forum.post'].browse(res_id).can_use_full_editor:
             return True
 
         return super()._can_bypass_rights_on_media_dialog(**attachment_data)

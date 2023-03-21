@@ -17,9 +17,7 @@ class Vote(models.Model):
     forum_id = fields.Many2one('forum.forum', string='Forum', related="post_id.forum_id", store=True, readonly=False)
     recipient_id = fields.Many2one('res.users', string='To', related="post_id.create_uid", store=True, readonly=False)
 
-    _sql_constraints = [
-        ('vote_uniq', 'unique (post_id, user_id)', "Vote already exists !"),
-    ]
+    _sql_constraints = [('vote_uniq', 'unique (post_id, user_id)', "Vote already exists !")]
 
     def _get_karma_value(self, old_vote, new_vote, up_karma, down_karma):
         """Return the karma to add / remove based on the old vote and on the new vote."""
@@ -64,9 +62,9 @@ class Vote(models.Model):
         for vote in self:
             vote._check_general_rights(values)
             if 'vote' in values:
-                if (values['vote'] == '1' or vote.vote == '-1' and values['vote'] == '0'):
+                if values['vote'] == '1' or vote.vote == '-1' and values['vote'] == '0':
                     upvote = True
-                elif (values['vote'] == '-1' or vote.vote == '1' and values['vote'] == '0'):
+                elif values['vote'] == '-1' or vote.vote == '1' and values['vote'] == '0':
                     upvote = False
                 vote._check_karma_rights(upvote)
 
@@ -100,16 +98,12 @@ class Vote(models.Model):
     def _vote_update_karma(self, old_vote, new_vote):
         if self.post_id.parent_id:
             karma, reason = self._get_karma_value(
-                old_vote,
-                new_vote,
-                self.forum_id.karma_gen_answer_upvote,
-                self.forum_id.karma_gen_answer_downvote)
+                old_vote, new_vote, self.forum_id.karma_gen_answer_upvote, self.forum_id.karma_gen_answer_downvote
+            )
             source = _('Answer %s', reason)
         else:
             karma, reason = self._get_karma_value(
-                old_vote,
-                new_vote,
-                self.forum_id.karma_gen_question_upvote,
-                self.forum_id.karma_gen_question_downvote)
+                old_vote, new_vote, self.forum_id.karma_gen_question_upvote, self.forum_id.karma_gen_question_downvote
+            )
             source = _('Question %s', reason)
         self.recipient_id.sudo()._add_karma(karma, self.post_id, source)

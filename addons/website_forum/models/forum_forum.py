@@ -9,29 +9,24 @@ from odoo.addons.http_routing.models.ir_http import slug
 class Forum(models.Model):
     _name = 'forum.forum'
     _description = 'Forum'
-    _inherit = [
-        'mail.thread',
-        'image.mixin',
-        'website.seo.metadata',
-        'website.multi.mixin',
-        'website.searchable.mixin',
-    ]
+    _inherit = ['mail.thread', 'image.mixin', 'website.seo.metadata', 'website.multi.mixin', 'website.searchable.mixin']
     _order = "sequence"
 
     # description and use
     name = fields.Char('Forum Name', required=True, translate=True)
     sequence = fields.Integer('Sequence', default=1)
-    mode = fields.Selection([
-        ('questions', 'Questions (1 answer)'),
-        ('discussions', 'Discussions (multiple answers)')],
-        string='Mode', required=True, default='questions',
-        help='Questions mode: only one answer allowed\n Discussions mode: multiple answers allowed')
-    privacy = fields.Selection([
-        ('public', 'Public'),
-        ('connected', 'Signed In'),
-        ('private', 'Some users')],
+    mode = fields.Selection(
+        [('questions', 'Questions (1 answer)'), ('discussions', 'Discussions (multiple answers)')],
+        string='Mode',
+        required=True,
+        default='questions',
+        help='Questions mode: only one answer allowed\n Discussions mode: multiple answers allowed',
+    )
+    privacy = fields.Selection(
+        [('public', 'Public'), ('connected', 'Signed In'), ('private', 'Some users')],
         help="Public: Forum is public\nSigned In: Forum is visible for signed in users\nSome users: Forum and their content are hidden for non members of selected group",
-        default='public')
+        default='public',
+    )
     authorized_group_id = fields.Many2one('res.groups', 'Authorized Group')
     menu_id = fields.Many2one('website.menu', 'Menu', copy=False)
     active = fields.Boolean(default=True)
@@ -59,24 +54,40 @@ class Forum(models.Model):
                         </div>
                     </section>""",
         sanitize_attributes=False,
-        sanitize_form=False)
-    default_order = fields.Selection([
-        ('create_date desc', 'Newest'),
-        ('write_date desc', 'Last Updated'),
-        ('vote_count desc', 'Most Voted'),
-        ('relevancy desc', 'Relevance'),
-        ('child_count desc', 'Answered')],
-        string='Default', required=True, default='write_date desc')
-    relevancy_post_vote = fields.Float('First Relevance Parameter', default=0.8, help="This formula is used in order to sort by relevance. The variable 'votes' represents number of votes for a post, and 'days' is number of days since the post creation")
+        sanitize_form=False,
+    )
+    default_order = fields.Selection(
+        [
+            ('create_date desc', 'Newest'),
+            ('write_date desc', 'Last Updated'),
+            ('vote_count desc', 'Most Voted'),
+            ('relevancy desc', 'Relevance'),
+            ('child_count desc', 'Answered'),
+        ],
+        string='Default',
+        required=True,
+        default='write_date desc',
+    )
+    relevancy_post_vote = fields.Float(
+        'First Relevance Parameter',
+        default=0.8,
+        help="This formula is used in order to sort by relevance. The variable 'votes' represents number of votes for a post, and 'days' is number of days since the post creation",
+    )
     relevancy_time_decay = fields.Float('Second Relevance Parameter', default=1.8)
-    allow_bump = fields.Boolean('Allow Bump', default=True,
-                                help='Check this box to display a popup for posts older than 10 days '
-                                     'without any given answer. The popup will offer to share it on social '
-                                     'networks. When shared, a question is bumped at the top of the forum.')
-    allow_share = fields.Boolean('Sharing Options', default=True,
-                                 help='After posting the user will be proposed to share its question '
-                                      'or answer on social networks, enabling social network propagation '
-                                      'of the forum content.')
+    allow_bump = fields.Boolean(
+        'Allow Bump',
+        default=True,
+        help='Check this box to display a popup for posts older than 10 days '
+        'without any given answer. The popup will offer to share it on social '
+        'networks. When shared, a question is bumped at the top of the forum.',
+    )
+    allow_share = fields.Boolean(
+        'Sharing Options',
+        default=True,
+        help='After posting the user will be proposed to share its question '
+        'or answer on social networks, enabling social network propagation '
+        'of the forum content.',
+    )
     # posts statistics
     post_ids = fields.One2many('forum.post', 'forum_id', string='Posts')
     last_post_id = fields.Many2one('forum.post', compute='_compute_last_post')
@@ -84,7 +95,9 @@ class Forum(models.Model):
     total_views = fields.Integer('# Views', compute='_compute_forum_statistics')
     total_answers = fields.Integer('# Answers', compute='_compute_forum_statistics')
     total_favorites = fields.Integer('# Favorites', compute='_compute_forum_statistics')
-    count_posts_waiting_validation = fields.Integer(string="Number of posts waiting for validation", compute='_compute_count_posts_waiting_validation')
+    count_posts_waiting_validation = fields.Integer(
+        string="Number of posts waiting for validation", compute='_compute_count_posts_waiting_validation'
+    )
     count_flagged_posts = fields.Integer(string='Number of flagged posts', compute='_compute_count_flagged_posts')
     # karma generation
     karma_gen_question_new = fields.Integer(string='Asking a question', default=2)
@@ -117,9 +130,12 @@ class Forum(models.Model):
     karma_comment_unlink_own = fields.Integer(string='Unlink own comments', default=50)
     karma_comment_unlink_all = fields.Integer(string='Unlink all comments', default=500)
     karma_flag = fields.Integer(string='Flag a post as offensive', default=500)
-    karma_dofollow = fields.Integer(string='Nofollow links', help='If the author has not enough karma, a nofollow attribute is added to links', default=500)
-    karma_editor = fields.Integer(string='Editor Features: image and links',
-                                  default=30)
+    karma_dofollow = fields.Integer(
+        string='Nofollow links',
+        help='If the author has not enough karma, a nofollow attribute is added to links',
+        default=500,
+    )
+    karma_editor = fields.Integer(string='Editor Features: image and links', default=30)
     karma_user_bio = fields.Integer(string='Display detailed user biography', default=750)
     karma_post = fields.Integer(string='Ask questions without validation', default=100)
     karma_moderate = fields.Integer(string='Moderate posts', default=1000)
@@ -127,7 +143,11 @@ class Forum(models.Model):
     @api.depends('post_ids')
     def _compute_last_post(self):
         for forum in self:
-            forum.last_post_id = forum.post_ids.search([('forum_id', '=', forum.id), ('parent_id', '=', False), ('state', '=', 'active')], order='create_date desc', limit=1)
+            forum.last_post_id = forum.post_ids.search(
+                [('forum_id', '=', forum.id), ('parent_id', '=', False), ('state', '=', 'active')],
+                order='create_date desc',
+                limit=1,
+            )
 
     @api.depends('description')
     def _compute_teaser(self):
@@ -154,7 +174,8 @@ class Forum(models.Model):
             [('forum_id', 'in', self.ids), ('state', 'in', ('active', 'close')), ('parent_id', '=', False)],
             ['forum_id', 'views', 'child_count', 'favourite_count'],
             groupby=['forum_id'],
-            lazy=False)
+            lazy=False,
+        )
         for res_group in read_group_res:
             cid = res_group['forum_id'][0]
             result[cid]['total_posts'] += res_group.get('__count', 0)
@@ -181,10 +202,7 @@ class Forum(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        forums = super(
-            Forum,
-            self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)
-        ).create(vals_list)
+        forums = super(Forum, self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)).create(vals_list)
         forums._set_default_faq()  # will trigger a write and call update_website_count
         return forums
 
@@ -202,7 +220,9 @@ class Forum(models.Model):
         res = super(Forum, self).write(vals)
         if 'active' in vals:
             # archiving/unarchiving a forum does it on its posts, too
-            self.env['forum.post'].with_context(active_test=False).search([('forum_id', 'in', self.ids)]).write({'active': vals['active']})
+            self.env['forum.post'].with_context(active_test=False).search([('forum_id', 'in', self.ids)]).write(
+                {'active': vals['active']}
+            )
 
         if 'active' in vals or 'website_id' in vals:
             self._update_website_count()
