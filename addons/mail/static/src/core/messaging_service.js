@@ -362,6 +362,10 @@ export class Messaging {
                     if (seenInfo) {
                         seenInfo.lastSeenMessage = { id: last_message_id };
                     }
+                    const message = this.store.messages[last_message_id];
+                    if (message) {
+                        message.temporary = false;
+                    }
                     break;
                 }
 
@@ -485,6 +489,7 @@ export class Messaging {
             ...data,
             res_id: channel.id,
             model: channel.model,
+            temporary: true,
         });
         if (channel.chatPartnerId !== this.store.partnerRoot?.id) {
             if (!this.presence.isOdooFocused() && channel.isChatChannel) {
@@ -498,12 +503,14 @@ export class Messaging {
             }
         }
         if (
-            channel.composer.isFocused &&
+            (channel.composer.isFocused || message.isSelfAuthored) &&
             channel.mostRecentNonTransientMessage &&
             !this.store.guest &&
             channel.mostRecentNonTransientMessage === channel.mostRecentMsg
         ) {
             this.threadService.markAsRead(channel);
+        } else {
+            message.temporary = false;
         }
     }
 

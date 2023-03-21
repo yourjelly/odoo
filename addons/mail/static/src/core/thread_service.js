@@ -701,6 +701,7 @@ export class ThreadService {
                 attachments: attachments,
                 res_id: thread.id,
                 model: "mail.channel",
+                temporary: true,
             };
             if (this.store.user) {
                 tmpData.author = this.store.self;
@@ -724,9 +725,13 @@ export class ThreadService {
                 ? markup(data.parentMessage.body)
                 : data.parentMessage.body;
         }
+        const alreadyKnown = data.id in this.store.messages;
         const message = this.messageService.insert(
             Object.assign(data, { body: markup(data.body) })
         );
+        if (!alreadyKnown) {
+            message.temporary = true;
+        }
         if (!message.isEmpty) {
             this.rpc("/mail/link_preview", { message_id: data.id }, { silent: true });
         }
@@ -811,7 +816,7 @@ export class ThreadService {
             if (message.id <= thread.serverLastSeenMsgBySelf) {
                 continue;
             }
-            if (message.isTransient) {
+            if (message.temporary || message.isTransient) {
                 lastSeenMessageId = message.id;
                 continue;
             }
