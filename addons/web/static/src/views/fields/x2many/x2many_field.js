@@ -277,11 +277,13 @@ export const x2ManyField = {
             addLabel: attrs["add-label"],
             context: dynamicInfo.context,
             domain: dynamicInfo.domain,
-            viewMode,
             views,
             crudOptions: options,
             string,
         };
+        if (viewMode) {
+            props.viewMode = viewMode;
+        }
         if (widget) {
             props.widget = widget;
         }
