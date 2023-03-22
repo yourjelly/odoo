@@ -19,9 +19,6 @@
     <t t-name="web.PivotView" owl="1">
         <div t-att-class="props.className" t-ref="root">
             <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="props.display">
-                <t t-set-slot="layout-buttons">
-                    <t t-call="{{ props.buttonTemplate }}"/>
-                </t>
                 <t t-set-slot="layout-actions">
                     <SearchBar/>
                 </t>
@@ -38,7 +35,7 @@
                     <t t-else="" t-call="web.NoContentHelper"/>
                 </t>
                 <t t-if="model.hasData() and model.metaData.activeMeasures.length">
-                    <t t-component="props.Renderer" model="model" onCellClicked="cell => this.onOpenView(cell)"/>
+                    <t t-component="props.Renderer" model="model"/>
                 </t>
             </Layout>
         </div>
