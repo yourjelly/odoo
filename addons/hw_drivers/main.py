@@ -52,7 +52,7 @@ class Manager(Thread):
                     'type': iot_devices[device].device_type,
                     'manufacturer': iot_devices[device].device_manufacturer,
                     'connection': iot_devices[device].device_connection,
-                }
+                    }
             data = {'params': {'iot_box': iot_box, 'devices': devices_list,}}
             # disable certifiacte verification
             urllib3.disable_warnings()
