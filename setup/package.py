@@ -58,8 +58,9 @@ def run_cmd(cmd, chdir=None, timeout=None):
     return subprocess.run(cmd, cwd=chdir, timeout=timeout)
 
 
-def _rpc_count_modules(addr='http://127.0.0.1', port=8069, dbname='mycompany', timeout=20):
+def _rpc_count_modules(addr='http://127.0.0.1', port=8069, dbname='mycompany', timeout=180):
     connected = False
+    delay = 1
     while timeout > 0:
         try:
             uid = xmlrpclib.ServerProxy('%s:%s/xmlrpc/2/common' % (addr, port)).authenticate(
@@ -67,8 +68,9 @@ def _rpc_count_modules(addr='http://127.0.0.1', port=8069, dbname='mycompany', t
             )
             connected = True
         except Exception:
-            time.sleep(1)
-            timeout -= 1
+            time.sleep(delay)
+            timeout -= delay
+            delay += 1
     if not connected:
         raise OdooTestError("Package test: FAILED. Cannot connect to Odoo server.")
     modules = xmlrpclib.ServerProxy('%s:%s/xmlrpc/2/object' % (addr, port)).execute(
