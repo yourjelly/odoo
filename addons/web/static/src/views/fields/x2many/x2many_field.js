@@ -277,11 +277,13 @@ export const x2ManyField = {
     extractProps: ({ attrs, viewMode, views, widget, options, string }) => {
         const props = {
             addLabel: attrs["add-label"],
-            viewMode,
             views,
             crudOptions: options,
             string,
         };
+        if (viewMode) {
+            props.viewMode = viewMode;
+        }
         if (widget) {
             props.widget = widget;
         }
