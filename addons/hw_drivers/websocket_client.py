@@ -1,10 +1,14 @@
-import websocket
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import json
 import logging
 import time
-import urllib3
-
 from threading import Thread
+import urllib.parse
+import urllib3
+import websocket
+
 from odoo.addons.hw_drivers import main
 from odoo.addons.hw_drivers.tools import helpers
 
@@ -61,21 +65,23 @@ class WebsocketClient(Thread):
             When the client is setup, this function send a message to subscribe to the iot websocket channel
         """
         ws.send(
-            '{"event_name":"subscribe","data":{"channels":["' + self.iot_channel + '"],"last":0}}'
+            json.dumps({'event_name': 'subscribe', 'data': {'channels':[self.iot_channel], 'last': 0}})
         )
 
     def __init__(self, url):
         if url:
-            self.url = url.replace("http", "ws")
+            url_parsed = urllib.parse.urlparse(url)
+            self.url =  url_parsed._replace(scheme=url_parsed.scheme.replace("http", "ws", 1), path=url_parsed.path + "/websocket").geturl()
             Thread.__init__(self)
+            self.ws = ""
 
     def start_client(self):
-        self.ws = websocket.WebSocketApp(self.url + "/websocket",
-                                         on_open=self.on_open, on_message=on_message,
-                                         on_error=on_error)
+        self.ws = websocket.WebSocketApp(self.url,
+            on_open=self.on_open, on_message=on_message,
+            on_error=on_error)
         while 1:
             self.ws.run_forever()
-            time.sleep(10)
+            time.sleep(10) # Wait 10 seconds before each attempt to connect
 
     def run(self):
         self.start_client()
