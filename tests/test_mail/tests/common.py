@@ -1,13 +1,24 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.tools import mute_logger
+from odoo.tools.translate import code_translations
+
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.tests.common import TransactionCase
 
 
 class TestMailCommon(MailCommon):
-    """ Main entry point for functional tests. Kept to ease backward
-    compatibility. """
+    @classmethod
+    def _activate_multi_lang(cls, lang_code='es_ES', layout_arch_db=None, test_record=False, test_template=False):
+        super()._activate_multi_lang(lang_code=lang_code, layout_arch_db=layout_arch_db, test_record=test_record, test_template=test_template)
+
+        with mute_logger("odoo.addons.base.models.ir_module", "odoo.tools.translate"):
+            cls.env.ref('base.module_test_mail')._update_translations([lang_code])
+            code_translations.get_python_translations('test_mail', lang_code)
+
+        code_translations.python_translations[('test_mail', 'es_ES')]['NotificationButtonTitle'] = 'SpanishButtonTitle'
+        cls.addClassCleanup(code_translations.python_translations[('test_mail', 'es_ES')].pop, 'NotificationButtonTitle')
 
 
 class TestRecipients(TransactionCase):

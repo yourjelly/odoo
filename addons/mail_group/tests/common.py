@@ -2,15 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import Command, tools
-from odoo.addons.mail.tests.common import mail_new_test_user
-from odoo.addons.test_mail.tests.common import TestMailCommon
+from odoo.addons.mail.tests.common import mail_new_test_user, MailCommon
 
 
-class TestMailListCommon(TestMailCommon):
+class TestMailListCommon(MailCommon):
 
     @classmethod
     def setUpClass(cls):
-        super(TestMailListCommon, cls).setUpClass()
+        super().setUpClass()
 
         # Test credentials / from
         cls.email_from_unknown = tools.formataddr(("Bob Lafrite", "bob.email@test.example.com"))
