@@ -1,0 +1,8 @@
+.o_control_panel_mrp {
+
+    @include media-breakpoint-up(md) {
+        .o_cp_top_left, .o_cp_top_middle, .o_cp_top_right {
+            width: 33%;
+        }
+    }
+}

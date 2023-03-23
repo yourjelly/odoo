@@ -603,6 +603,21 @@
             </field>
         </record>
 
+        <record id="mrp_production_view_mrp_display" model="ir.ui.view">
+            <field name="name">"mrp.production.view.mrp_display"</field>
+            <field name="model">mrp.production</field>
+            <field name="mode">primary</field>
+            <field name="inherit_id" ref="mrp.view_mrp_production_filter"/>
+            <field name="priority">1000</field>
+            <field name="arch" type="xml">
+                <xpath expr="//group" position="after">
+                    <searchpanel>
+                        <field name="picking_type_id" icon="fa-bars" string="Routing" enable_counters="1"/>
+                    </searchpanel>
+                </xpath>
+            </field>
+        </record>
+
         <record id="mrp_production_action" model="ir.actions.act_window">
             <field name="name">Manufacturing Orders</field>
             <field name="res_model">mrp.production</field>

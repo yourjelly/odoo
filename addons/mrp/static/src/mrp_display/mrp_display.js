@@ -24,8 +24,11 @@ export class MrpDisplay extends Component {
 
     setup() {
         this.viewService = useService("view");
-
-        this.display = { ...this.props.display };
+        this.display = {
+            ...this.props.display,
+            controlPanel: { "bottom-right": false, "bottom-left": false },
+            searchPanel: true,
+        };
 
         this.model = useModel(RelationalModel, {
             resModel: this.props.resModel,

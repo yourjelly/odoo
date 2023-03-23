@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mrp.MrpDisplayControlPanel" owl="1">
+        <div class="o_control_panel_mrp o_control_panel" t-ref="root">
+            <t t-if="env.isSmall">
+                <t t-call="web.ControlPanel.Small" />
+            </t>
+            <t t-else="">
+                <t t-call="mrp.MrpDisplayControlPanel.Regular" />
+            </t>
+        </div>
+    </t>
+
+    <t t-name="mrp.MrpDisplayControlPanel.Regular" t-inherit="web.ControlPanel.Regular" t-inherit-mode="primary" owl="1">
+        <xpath expr="//div[@class='o_cp_top_left']" position="after">
+            <div class="o_cp_top_middle">
+                <t t-slot="control-panel-top-middle" t-if="display['top-midlle']"/>
+            </div>
+        </xpath>
+    </t>
+</templates>
