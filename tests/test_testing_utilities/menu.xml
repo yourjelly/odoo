@@ -1,5 +1,6 @@
 <odoo>
-    <menuitem id="menu_ssf" parent="base.menu_tests" name="Server-side form"/>
+    <menuitem id="menu_tests" name="Tests" sequence="1000" web_icon="test_testing_utilities,static/description/icon.svg"/>
+    <menuitem id="menu_ssf" parent="menu_tests" name="Server-side form"/>
 
     <record id="action_test_o2m_onchange" model="ir.actions.act_window">
         <field name="name">Test o2m onchange thing</field>

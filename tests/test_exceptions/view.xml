@@ -90,7 +90,7 @@
             <field name="target">new</field>
         </record>
 
-        <menuitem id="menu_test_exceptions" parent="base.menu_tests" name="Test exceptions"/>
+        <menuitem id="menu_test_exceptions" parent="test_testing_utilities.menu_tests" name="Test exceptions"/>
 
         <menuitem id="menu_test_exceptions_leaf"
             name="Test exceptions"

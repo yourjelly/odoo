@@ -6,7 +6,7 @@
     'version': '1.0',
     'category': 'Hidden/Tests',
     'description': """A module to test the API.""",
-    'depends': ['base', 'web', 'web_tour'],
+    'depends': ['base', 'web', 'web_tour', 'test_testing_utilities'],
     'installable': True,
     'data': [
         'security/ir.model.access.csv',
