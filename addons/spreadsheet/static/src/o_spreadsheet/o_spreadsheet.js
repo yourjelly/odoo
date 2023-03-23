@@ -20125,7 +20125,7 @@
             const highlights = this.env.model.getters.getHighlights();
             const refSheet = sheetName
                 ? this.env.model.getters.getSheetIdByName(sheetName)
-                : this.env.model.getters.getEditionSheet();
+                : this.env.model.getters.getCurrentEditedCell().sheetId;
             const highlight = highlights.find((highlight) => {
                 if (highlight.sheetId !== refSheet)
                     return false;
@@ -20882,9 +20882,6 @@
             });
             owl.onMounted(() => {
                 resizeObserver.observe(this.gridOverlayEl);
-            });
-            owl.onWillUnmount(() => {
-                resizeObserver.disconnect();
             });
             useTouchMove(this.gridOverlay, this.props.onGridMoved, () => {
                 const { scrollY } = this.env.model.getters.getActiveSheetDOMScrollInfo();
@@ -38232,9 +38229,6 @@
             }
             return this.currentContent;
         }
-        getEditionSheet() {
-            return this.sheetId;
-        }
         getComposerSelection() {
             return {
                 start: this.selectionStart,
@@ -38518,7 +38512,7 @@
         getZoneReference(zone, fixedParts = [{ colFixed: false, rowFixed: false }]) {
             const sheetId = this.getters.getActiveSheetId();
             let selectedXc = this.getters.zoneToXC(sheetId, zone, fixedParts);
-            if (this.getters.getEditionSheet() !== this.getters.getActiveSheetId()) {
+            if (this.getters.getCurrentEditedCell().sheetId !== this.getters.getActiveSheetId()) {
                 const sheetName = getComposerSheetName(this.getters.getSheetName(this.getters.getActiveSheetId()));
                 selectedXc = `${sheetName}!${selectedXc}`;
             }
@@ -38533,7 +38527,7 @@
                 _fixedParts.pop();
             }
             const newRange = range.clone({ parts: _fixedParts });
-            return this.getters.getSelectionRangeString(newRange, this.getters.getEditionSheet());
+            return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell().sheetId);
         }
         /**
          * Replace the current selection by a new text.
@@ -38566,7 +38560,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return;
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const XCs = this.getReferencedRanges().map((range) => this.getters.getRangeString(range, editionSheetId));
             const colorsToKeep = {};
             for (const xc of XCs) {
@@ -38595,7 +38589,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return [];
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const rangeColor = (rangeString) => {
                 const colorIndex = this.colorIndexByRange[rangeString];
                 return colors$1[colorIndex % colors$1.length];
@@ -38613,7 +38607,7 @@
          * Return ranges currently referenced in the composer
          */
         getReferencedRanges() {
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             return this.currentTokens
                 .filter((token) => token.type === "REFERENCE")
                 .map((token) => this.getters.getRangeFromSheetXC(editionSheetId, token.value));
@@ -38672,7 +38666,6 @@
         "isSelectingForComposer",
         "showSelectionIndicator",
         "getCurrentContent",
-        "getEditionSheet",
         "getComposerSelection",
         "getCurrentTokens",
         "getTokenAtCursor",
@@ -45081,8 +45074,8 @@
 
 
     __info__.version = '16.3.0-alpha.1';
-    __info__.date = '2023-03-16T12:15:48.320Z';
-    __info__.hash = 'f41d64a';
+    __info__.date = '2023-03-23T09:40:01.515Z';
+    __info__.hash = '187ae06';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
