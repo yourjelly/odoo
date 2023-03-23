@@ -2244,8 +2244,8 @@ export function enforceWhitespace(el, offset, direction, rule) {
                 }
             }
             break;
-        } else if (node.nodeType === Node.TEXT_NODE && !isInPre(node)) {
-            if (expr.test(node.nodeValue)) {
+        } else if (node.nodeType === Node.TEXT_NODE) {
+            if (expr.test(node.nodeValue) && !isInPre(node)) {
                 // If we hit spaces going in the direction, either they are in a
                 // visible text node and we have to change the visibility of
                 // those spaces, or it is in an invisible text node. In that

@@ -766,6 +766,15 @@ X[]
                         contentAfter: '<pre>ab[]</pre>',
                     });
                 });
+                it('should delete a trailing character in a pre', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: '<pre>ab<br>c[]d</pre>',
+                        stepFunction: async BasicEditor => {
+                            await deleteForward(BasicEditor);
+                        },
+                        contentAfter: '<pre>ab<br>c[]</pre>',
+                    });
+                });
             });
             describe('Formats', () => {
                 it('should delete a character after a format node', async () => {
