@@ -5,6 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { WithSearch } from "@web/search/with_search/with_search";
 import { MrpDisplay } from "@mrp/mrp_display/mrp_display";
 import { MrpDisplayControlPanel } from "@mrp/mrp_display/control_panel";
+import { fieldsStructure } from "@mrp/mrp_display/fields_structure";
 
 const { Component, onWillStart } = owl;
 
@@ -22,19 +23,22 @@ export class MrpDisplayAction extends Component {
         this.viewService = useService("view");
         this.orm = useService("orm");
         this.resModel = "mrp.production";
-
-        this.fieldsName = ["name", "product_id"];
+        this.models = {};
 
         // TODO Maybe it should be in MrpDisplay directly
         this.env.config.ControlPanel = MrpDisplayControlPanel;
 
         onWillStart(async () => {
-            this.fields = await this.viewService.loadFields(this.resModel, {
-                fieldNames: this.fieldsName,
-            });
-            for (const [fName, fInfo] of Object.entries(this.fields)) {
-                this.fields[fName] = { ...defaultActiveField, ...fInfo };
+            for (const [model, fieldsName] of Object.entries(fieldsStructure)) {
+                const fields = await this.viewService.loadFields(model, {
+                    fieldNames: fieldsName,
+                });
+                for (const [fName, fInfo] of Object.entries(fields)) {
+                    fields[fName] = { ...defaultActiveField, ...fInfo };
+                }
+                this.models[model] = fields;
             }
+
             const viewId = await this.orm.search("ir.ui.view", [
                 ["model_data_id", "=", "mrp_production_view_mrp_display"],
             ]);

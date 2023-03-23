@@ -2,10 +2,10 @@
 
 import { Layout } from "@web/search/layout";
 import { useService } from "@web/core/utils/hooks";
-import { useModel } from "@web/views/model";
 import { RelationalModel } from "@web/views/relational_model";
+import { useModel } from "@mrp/mrp_display/model";
 
-const { Component } = owl;
+const { Component, useSubEnv } = owl;
 
 export class MrpDisplay extends Component {
     static template = "mrp.MrpDisplay";
@@ -14,7 +14,7 @@ export class MrpDisplay extends Component {
         resModel: String,
         action: { type: Object, optional: true },
         comparison: { validate: () => true },
-        fields: { type: Object },
+        models: { type: Object },
         domain: { type: Array },
         display: { type: Object, optional: true },
         context: { type: Object, optional: true },
@@ -29,12 +29,18 @@ export class MrpDisplay extends Component {
             controlPanel: { "bottom-right": false, "bottom-left": false },
             searchPanel: true,
         };
-
-        this.model = useModel(RelationalModel, {
-            resModel: this.props.resModel,
-            fields: this.props.fields,
-            rootType: "list",
-            activeFields: this.props.fields,
-        });
+        for (const [resModel, fields] of Object.entries(this.props.models)) {
+            const resModelName = resModel.replaceAll(".", "_");
+            const model = useModel(RelationalModel, {
+                resModel: resModel,
+                fields: fields,
+                rootType: "list",
+                activeFields: fields,
+            });
+            if (resModel == this.props.resModel) {
+                useSubEnv({ [resModelName]: model });
+            }
+            this[resModelName] = model;
+        }
     }
 }

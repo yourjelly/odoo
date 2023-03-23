@@ -3,7 +3,7 @@
     <t t-name="mrp.MrpDisplayAction" owl="1">
         <WithSearch t-props="withSearchProps" t-slot-scope="search">
             <MrpDisplay
-            fields="fields"
+            models="models"
             resModel="resModel"
             action="props.action"
             context="search.context"
