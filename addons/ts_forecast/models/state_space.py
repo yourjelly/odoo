@@ -209,7 +209,7 @@ class StateSpace:
                 'param': [0.1, 0.1, 0.1],
                 'w': lambda x: x[0] + x[1] + x[2],
                 'r': lambda x: 1,
-                'f': lambda x, t: [x[0] + x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else x,
+                'f': lambda x, t: [x[0] + x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] + x[1]] + [x[i] for i in range(1, len(x))],
                 'g': lambda x, param: [param[0], param[1], param[2]] + [0 for _ in range(self.m - 1)],
                 'forecast': lambda x, h: x[0] + x[1] * h + x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
             }
@@ -219,9 +219,40 @@ class StateSpace:
                 'param': [0.1, 0.1, 0.1],
                 'w': lambda x: x[0] * x[1] + x[2],
                 'r': lambda x: 1,
-                'f': lambda x, t: [x[0] * x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else x,
+                'f': lambda x, t: [x[0] * x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] * x[1]] + [x[i] for i in range(1, len(x))],
                 'g': lambda x, param: [param[0], param[1]/x[0], param[2]] + [0 for _ in range(self.m - 1)],
-                'forecast': lambda x, h: x[0] + x[1] * h + x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
+                'forecast': lambda x, h: x[0] * pow(x[1], h) + x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
+            }
+        elif self.error == 'A' and self.trend == 'N' and self.season == 'M':
+            self.state = {
+                'x': [0 for _ in range(1 + self.m)],
+                'param': [0.1, 0.1],
+                'w': lambda x: x[0] * x[1],
+                'r': lambda x: 1,
+                'f': lambda x, t: [x[0]] + [x[1 + i] for i in range(1, self.m)] + [x[1]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else x,
+                'g': lambda x, param: [param[0]/x[1], param[1]/x[0]] + [0 for _ in range(self.m - 1)],
+                'forecast': lambda x, h: x[0] * x[1 + ((h - 1) // self.get_modulo_period()) % self.m]
+            }
+
+        elif self.error == 'A' and self.trend == 'A' and self.season == 'M':
+            self.state = {
+                'x': [0 for _ in range(1 + self.m)],
+                'param': [0.1, 0.1, 0.1],
+                'w': lambda x: (x[0] + x[1]) * x[2],
+                'r': lambda x: 1,
+                'f': lambda x, t: [x[0] + x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] + x[1]] + [x[i] for i in range(1, len(x))],
+                'g': lambda x, param: [param[0]/x[2], param[1]/x[2], param[2]/(x[0]+x[1])] + [0 for _ in range(self.m - 1)],
+                'forecast': lambda x, h: (x[0] + x[1] * h) * x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
+            }
+        elif self.error == 'A' and self.trend == 'M' and self.season == 'M':
+            self.state = {
+                'x': [0 for _ in range(1 + self.m)],
+                'param': [0.1, 0.1, 0.1],
+                'w': lambda x: x[0] * x[1] * x[2],
+                'r': lambda x: 1,
+                'f': lambda x, t: [x[0] * x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] * x[1]] + [x[i] for i in range(1, len(x))],
+                'g': lambda x, param: [param[0]/x[2], param[1]/(x[0]*x[2]), param[2]/(x[0]*x[1])] + [0 for _ in range(self.m - 1)],
+                'forecast': lambda x, h: x[0] * pow(x[1], h) * x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
             }
 
             """MULTIPLICATIVE ERROR"""
@@ -263,11 +294,14 @@ class StateSpace:
         return [
             ('A', 'N', 'N'),
             ('A', 'A', 'N'),
-            #('A', 'M', 'N'),
+            ('A', 'M', 'N'),
             ('A', 'N', 'A'),
             ('A', 'A', 'A'),
-            #('A', 'M', 'A'),
-            #('M', 'N', 'N'),
-            #('M', 'A', 'N'),
-            #('M', 'M', 'N'),
+            ('A', 'M', 'A'),
+            ('A', 'N', 'M'),
+            ('A', 'A', 'M'),
+            ('A', 'M', 'M'),
+            ('M', 'N', 'N'),
+            ('M', 'A', 'N'),
+            ('M', 'M', 'N'),
         ]
