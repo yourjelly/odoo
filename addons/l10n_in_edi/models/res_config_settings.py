@@ -17,6 +17,8 @@ class ResConfigSettings(models.TransientModel):
     )
 
     def l10n_in_edi_test(self):
+        if not self.company_id.vat:
+            raise UserError("Please enter a GST number in company")
         self.env["account.edi.format"]._l10n_in_edi_authenticate(self.company_id)
         if not self.company_id.sudo()._l10n_in_edi_token_is_valid():
             raise UserError(_("Incorrect username or password, or the GST number on company does not match."))
