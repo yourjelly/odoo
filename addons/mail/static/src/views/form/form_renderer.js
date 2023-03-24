@@ -24,7 +24,7 @@ patch(FormRenderer.props, "mail", {
     saveButtonClicked: { type: Function, optional: true },
 });
 
-Object.assign(FormRenderer.components, {
+patch(FormRenderer.components, "mail", {
     AttachmentView,
     Chatter,
 });

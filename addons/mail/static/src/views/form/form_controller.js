@@ -82,7 +82,7 @@ patch(FormController.prototype, "mail", {
     },
 });
 
-Object.assign(FormController.components, {
+patch(FormController.components, "mail", {
     AttachmentView,
     Chatter,
 });

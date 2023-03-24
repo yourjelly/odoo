@@ -2,5 +2,6 @@
 
 import { Thread } from "@mail/core_ui/thread";
 import { ImStatus } from "@mail/discuss/im_status";
+import { patch } from "@web/core/utils/patch";
 
-Object.assign(Thread.components, { ImStatus });
+patch(Thread.components, "mail", { ImStatus });
