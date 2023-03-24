@@ -20731,9 +20731,6 @@
             owl.onMounted(() => {
                 resizeObserver.observe(this.gridOverlayEl);
             });
-            owl.onWillUnmount(() => {
-                resizeObserver.disconnect();
-            });
             useTouchMove(this.gridOverlay, this.props.onGridMoved, () => {
                 const { scrollY } = this.env.model.getters.getActiveSheetDOMScrollInfo();
                 return scrollY > 0;
@@ -27978,6 +27975,7 @@
             if (!content.startsWith("=")) {
                 return this.createLiteralCell(id, content, format, style);
             }
+            content = content.replace(/\n/g, ""); //to evaluate formula in a single line
             try {
                 return this.createFormulaCell(id, content, format, style, sheetId);
             }
@@ -30090,7 +30088,6 @@
                             }
                             else if (range.zone[start] >= min && range.zone[end] <= max) {
                                 changeType = "REMOVE";
-                                newRange = range.clone({ ...this.getInvalidRange() });
                             }
                             else if (range.zone[start] <= max && range.zone[end] >= max) {
                                 const toRemove = max - range.zone[start] + 1;
@@ -30156,10 +30153,8 @@
                             return { changeType: "NONE" };
                         }
                         const invalidSheetName = this.getters.getSheetName(cmd.sheetId);
-                        range = range.clone({
-                            ...this.getInvalidRange(),
-                            invalidSheetName,
-                        });
+                        const sheetId = "";
+                        range = range.clone({ sheetId, invalidSheetName });
                         return { changeType: "REMOVE", range };
                     }, cmd.sheetId);
                     break;
@@ -30418,15 +30413,6 @@
                 str = colFixed + col + rowFixed + row;
             }
             return str;
-        }
-        getInvalidRange() {
-            return {
-                parts: [],
-                prefixSheet: false,
-                zone: { left: -1, top: -1, right: -1, bottom: -1 },
-                sheetId: "",
-                invalidXc: INCORRECT_RANGE_STRING,
-            };
         }
     }
     RangeAdapter.getters = [
@@ -40908,7 +40894,6 @@
             this.state.menuState.parentMenu = menu;
             this.isSelectingMenu = true;
             this.openedEl = ev.target;
-            this.env.model.dispatch("STOP_EDITION");
         }
         closeMenus() {
             this.state.activeTool = "";
@@ -44992,9 +44977,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.2.1';
-    __info__.date = '2023-03-23T11:46:56.858Z';
-    __info__.hash = 'd1e5470';
+    __info__.version = '16.2.0';
+    __info__.date = '2023-03-24T12:51:45.958Z';
+    __info__.hash = 'a6bb7fc';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
