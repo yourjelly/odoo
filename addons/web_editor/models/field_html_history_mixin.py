@@ -4,8 +4,8 @@
 from odoo import fields, models, _
 
 
-class HtmlHistory(models.Model):
-    _name = "field.html.history"
+class HtmlHistory(models.AbstractModel):
+    _name = "field.html.history.mixin"
     _description = "Field html History"
 
     history_diff_ids = fields.One2many(
