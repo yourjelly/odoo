@@ -2,7 +2,24 @@
 <templates xml:space="preserve">
     <t t-name="mrp.MrpDisplay" owl="1">
         <Layout display="display">
-            Coucou
+            <t t-set-slot="control-panel-top-middle">
+                <t t-call="{{ constructor.buttonTemplate }}"/>
+            </t>
+            <t t-foreach="mrp_production.root.records" t-as="record" t-key="record.id">
+                <t t-esc="record.data.display_name"/>
+                <br/>
+            </t>
         </Layout>
+    </t>
+
+    <t t-name="mrp.MrpDisplayButtonTemplate" owl="1">
+        <button class="btn btn-secnodary">
+            ALL
+        </button>
+        <t t-foreach="workcenterButtons" t-as="workcenter" t-key="workcenter[0]">
+            <button class="btn btn-secnodary">
+                <t t-esc="workcenter[0]"/> <t t-esc="workcenter[1]"/>
+            </button>
+        </t>
     </t>
 </templates>

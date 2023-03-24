@@ -10,6 +10,7 @@ const { Component, useSubEnv } = owl;
 export class MrpDisplay extends Component {
     static template = "mrp.MrpDisplay";
     static components = { Layout };
+    static buttonTemplate = "mrp.MrpDisplayButtonTemplate";
     static props = {
         resModel: String,
         action: { type: Object, optional: true },
@@ -26,7 +27,7 @@ export class MrpDisplay extends Component {
         this.viewService = useService("view");
         this.display = {
             ...this.props.display,
-            controlPanel: { "bottom-right": false, "bottom-left": false },
+            controlPanel: { "bottom-right": false, "bottom-left": false, "top-middle": true },
             searchPanel: true,
         };
         for (const [resModel, fields] of Object.entries(this.props.models)) {
@@ -42,5 +43,19 @@ export class MrpDisplay extends Component {
             }
             this[resModelName] = model;
         }
+    }
+
+    get workorders() {
+        return this.mrp_workorder.root.records;
+    }
+
+    get workcenterButtons() {
+        // Problème du moment. Ca ne se refresh pas
+        const countByWorkcenter = this.workorders.reduce((workcenterButtons, workorder) => {
+            const name = workorder.data.workcenter_id[1];
+            workcenterButtons[name] = (workcenterButtons[name] || 0) + 1;
+            return workcenterButtons;
+        }, {});
+        return Object.entries(countByWorkcenter);
     }
 }

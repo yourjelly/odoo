@@ -14,7 +14,7 @@
     <t t-name="mrp.MrpDisplayControlPanel.Regular" t-inherit="web.ControlPanel.Regular" t-inherit-mode="primary" owl="1">
         <xpath expr="//div[@class='o_cp_top_left']" position="after">
             <div class="o_cp_top_middle">
-                <t t-slot="control-panel-top-middle" t-if="display['top-midlle']"/>
+                <t t-slot="control-panel-top-middle" t-if="display['top-middle']"/>
             </div>
         </xpath>
     </t>
