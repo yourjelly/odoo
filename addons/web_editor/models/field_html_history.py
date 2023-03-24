@@ -93,8 +93,12 @@ class HtmlHistory(models.Model):
         "field.html.history.diff", "related_id", string="Body History",
         copy=True)
 
+    def _get_html_history_field_name(self):
+        """ This method should be overriden to return the name of the field to track """
+        return False
+
     def write(self, vals):
-        history_field_name = getattr(self, 'HTML_HISTORY_FIELD_NAME')
+        history_field_name = self._get_html_history_field_name()
         if history_field_name and history_field_name in vals:
             new_body_str = vals[history_field_name]
             """ Each change of body we need to create a diff for the history """
@@ -136,7 +140,7 @@ class HtmlHistory(models.Model):
         :param int diff_id: id of the version diff to restore to
         """
         self.ensure_one()
-        history_field_name = getattr(self, 'HTML_HISTORY_FIELD_NAME')
+        history_field_name = self._get_html_history_field_name()
 
         diff_to_restore = self.env['field.html.history.diff'].search(
             [('related_id', '=', self.id),
