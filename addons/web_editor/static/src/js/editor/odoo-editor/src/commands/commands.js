@@ -118,6 +118,9 @@ function hasColor(element, mode) {
     const style = element.style;
     const parent = element.parentNode;
     const classRegex = mode === 'color' ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;
+    if (getComputedStyle(element)[mode] === getComputedStyle(parent)[mode]) {
+        return true;
+    }
     if (isColorGradient(style['background-image'])) {
         if (element.classList.contains('text-gradient')) {
             if (mode === 'color') {
