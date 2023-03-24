@@ -78,6 +78,7 @@ class AccountJournal(models.Model):
             ('cash', 'Cash'),
             ('bank', 'Bank'),
             ('general', 'Miscellaneous'),
+            ('hidden', 'Hidden'),
         ], required=True,
         inverse='_inverse_type',
         help="Select 'Sale' for customer invoices journals.\n"\
