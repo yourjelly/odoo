@@ -2662,6 +2662,12 @@
     }
 
     class Component {
+        static get components() {
+            return this.__components__;
+        }
+        static set components(newComps) {
+            this.__components__ = Object.assign(Object.create(this.__components__ || null), newComps);
+        }
         constructor(props, env, node) {
             this.props = props;
             this.env = env;
