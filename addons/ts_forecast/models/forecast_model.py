@@ -41,13 +41,15 @@ class TsForecastModel(models.AbstractModel):
     def train_model(self, time_series, period):
         if len(time_series) <= 1:
             return False
-        time_series.pop()
+        time_series.pop()  # remove the current not finished data
         states = []
+        # take all different state and try to optimise the parameters of each
         for s in StateSpace.get_all_states():
             state = StateSpace(time_series, s[0], s[1], s[2], period)
             state.optimize_state_parameters()
             states.append(state)
 
+        # try to choose the best state
         state_selection = StateSelection(states)
         best_state, cv = state_selection.select_best_state()
         self.update_model(best_state, period)

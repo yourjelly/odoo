@@ -12,10 +12,11 @@ class StateSpace:
 
     def __init__(self, y, error, trend, season, period):
         self.y = y  # time series
-        self.error = error
-        self.trend = trend
-        self.season = season
-        self.period = period
+        # 'N' -> None / 'A' -> Additive / 'M' -> Multiplicative
+        self.error = error  # 'A' or 'M'
+        self.trend = trend   # 'N' or 'A' or 'M'
+        self.season = season  # 'N' or 'A' or 'M'
+        self.period = period  # 'day' or 'week' or 'month'
         self.m = 12  # number of seasonal components
         self.m_unit = 'month'  # duration of a seasonal components
         self.m_tot = 'year'  # duration of a season
@@ -31,8 +32,8 @@ class StateSpace:
         beta = []
         sigma = []
         current_sum = 0.0
-        for i in range(99):
-            current_sum += 0.01
+        for i in range(39):
+            current_sum += 0.025
             alpha.append(current_sum)
             if self.trend != 'N':
                 beta.append(current_sum)
@@ -161,132 +162,94 @@ class StateSpace:
     """ compute the state dict {x, param, w, r, f, g} """
     def compute_state(self):
 
-        """ADDITIVE ERROR"""
-        if self.error == 'A' and self.trend == 'N' and self.season == 'N':
+        if self.trend == 'N' and self.season == 'N':
             self.state = {
                 'x': [0],
                 'param': [0.1],
                 'w': lambda x: x[0],
-                'r': lambda x: 1,
                 'f': lambda x, t: [x[0]],
                 'g': lambda x, param: [param[0]],
                 'forecast': lambda x, h: x[0]
             }
-        elif self.error == 'A' and self.trend == 'A' and self.season == 'N':
+        elif self.trend == 'A' and self.season == 'N':
             self.state = {
                 'x': [0, 0],
-                'param': [0.3, 0.1],
+                'param': [0.1, 0.1],
                 'w': lambda x: x[0] + x[1],
-                'r': lambda x: 1,
                 'f': lambda x, t: [x[0] + x[1], x[1]],
                 'g': lambda x, param: [param[0], param[1]],
                 'forecast': lambda x, h: x[0] + h * x[1]
             }
-        elif self.error == 'A' and self.trend == 'M' and self.season == 'N':
+        elif self.trend == 'M' and self.season == 'N':
             self.state = {
                 'x': [0, 0],
                 'param': [0.1, 0.1],
                 'w': lambda x: x[0] * x[1],
-                'r': lambda x: 1,
                 'f': lambda x, t: [x[0] * x[1], x[1]],
                 'g': lambda x, param: [param[0], param[1] / x[0]],
                 'forecast': lambda x, h: x[0] * pow(x[1], h)
             }
-        elif self.error == 'A' and self.trend == 'N' and self.season == 'A':
+        elif self.trend == 'N' and self.season == 'A':
             self.state = {
                 'x': [0 for _ in range(1 + self.m)],
                 'param': [0.1, 0.1],
                 'w': lambda x: x[0] + x[1],
-                'r': lambda x: 1,
                 'f': lambda x, t: [x[0]] + [x[1 + i] for i in range(1,self.m)] + [x[1]] if t % self.get_modulo_period() == self.get_modulo_period()-1 else x,
                 'g': lambda x, param: [param[0], param[1]] + [0 for _ in range(self.m-1)],
                 'forecast': lambda x, h: x[0] + x[1 + ((h-1) // self.get_modulo_period()) % self.m]
             }
 
-        elif self.error == 'A' and self.trend == 'A' and self.season == 'A':
+        elif self.trend == 'A' and self.season == 'A':
             self.state = {
                 'x': [0 for _ in range(1 + self.m)],
                 'param': [0.1, 0.1, 0.1],
                 'w': lambda x: x[0] + x[1] + x[2],
-                'r': lambda x: 1,
                 'f': lambda x, t: [x[0] + x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] + x[1]] + [x[i] for i in range(1, len(x))],
                 'g': lambda x, param: [param[0], param[1], param[2]] + [0 for _ in range(self.m - 1)],
                 'forecast': lambda x, h: x[0] + x[1] * h + x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
             }
-        elif self.error == 'A' and self.trend == 'M' and self.season == 'A':
+        elif self.trend == 'M' and self.season == 'A':
             self.state = {
                 'x': [0 for _ in range(1 + self.m)],
                 'param': [0.1, 0.1, 0.1],
                 'w': lambda x: x[0] * x[1] + x[2],
-                'r': lambda x: 1,
                 'f': lambda x, t: [x[0] * x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] * x[1]] + [x[i] for i in range(1, len(x))],
                 'g': lambda x, param: [param[0], param[1]/x[0], param[2]] + [0 for _ in range(self.m - 1)],
                 'forecast': lambda x, h: x[0] * pow(x[1], h) + x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
             }
-        elif self.error == 'A' and self.trend == 'N' and self.season == 'M':
+        elif self.trend == 'N' and self.season == 'M':
             self.state = {
                 'x': [0 for _ in range(1 + self.m)],
                 'param': [0.1, 0.1],
                 'w': lambda x: x[0] * x[1],
-                'r': lambda x: 1,
                 'f': lambda x, t: [x[0]] + [x[1 + i] for i in range(1, self.m)] + [x[1]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else x,
                 'g': lambda x, param: [param[0]/x[1], param[1]/x[0]] + [0 for _ in range(self.m - 1)],
                 'forecast': lambda x, h: x[0] * x[1 + ((h - 1) // self.get_modulo_period()) % self.m]
             }
 
-        elif self.error == 'A' and self.trend == 'A' and self.season == 'M':
+        elif self.trend == 'A' and self.season == 'M':
             self.state = {
                 'x': [0 for _ in range(1 + self.m)],
                 'param': [0.1, 0.1, 0.1],
                 'w': lambda x: (x[0] + x[1]) * x[2],
-                'r': lambda x: 1,
                 'f': lambda x, t: [x[0] + x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] + x[1]] + [x[i] for i in range(1, len(x))],
                 'g': lambda x, param: [param[0]/x[2], param[1]/x[2], param[2]/(x[0]+x[1])] + [0 for _ in range(self.m - 1)],
                 'forecast': lambda x, h: (x[0] + x[1] * h) * x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
             }
-        elif self.error == 'A' and self.trend == 'M' and self.season == 'M':
+        elif self.trend == 'M' and self.season == 'M':
             self.state = {
                 'x': [0 for _ in range(1 + self.m)],
                 'param': [0.1, 0.1, 0.1],
                 'w': lambda x: x[0] * x[1] * x[2],
-                'r': lambda x: 1,
                 'f': lambda x, t: [x[0] * x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] * x[1]] + [x[i] for i in range(1, len(x))],
                 'g': lambda x, param: [param[0]/x[2], param[1]/(x[0]*x[2]), param[2]/(x[0]*x[1])] + [0 for _ in range(self.m - 1)],
                 'forecast': lambda x, h: x[0] * pow(x[1], h) * x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
             }
 
-            """MULTIPLICATIVE ERROR"""
-        elif self.error == 'M' and self.trend == 'N' and self.season == 'N':
-            self.state = {
-                'x': [0],
-                'param': [0.1],
-                'w': lambda x: x[0],
-                'r': lambda x: x[0],
-                'f': lambda x, t: [x[0]],
-                'g': lambda x, param: [param[0] * x[0]],
-                'forecast': lambda x, h: x[0]
-
-            }
-        elif self.error == 'M' and self.trend == 'A' and self.season == 'N':
-            self.state = {
-                'x': [0, 0],
-                'param': [0.1, 0.1],
-                'w': lambda x: x[0] + x[1],
-                'r': lambda x: x[0] + x[1],
-                'f': lambda x, t: [x[0] + x[1], x[1]],
-                'g': lambda x, param: [(x[0] + x[1]) * param[0], (x[0] + x[1]) * param[1]],
-                'forecast': lambda x, h: x[0] + h * x[1]
-            }
-        elif self.error == 'M' and self.trend == 'M' and self.season == 'N':
-            self.state = {
-                'x': [0, 0],
-                'param': [0.1, 0.1],
-                'w': lambda x: x[0] * x[1],
-                'r': lambda x: x[0] * x[1],
-                'f': lambda x, t: [x[0] * x[1], x[1]],
-                'g': lambda x, param: [x[0] * x[1] * param[0], x[1] * param[1]],
-                'forecast': lambda x, h: x[0] * pow(x[1], h)
-            }
+        if self.error == 'A':
+            self.state['r'] = lambda x: 1
+        elif self.error == 'M':
+            self.state['r'] = self.state['w']
 
     """ return all possible model """
     @staticmethod
@@ -304,4 +267,10 @@ class StateSpace:
             ('M', 'N', 'N'),
             ('M', 'A', 'N'),
             ('M', 'M', 'N'),
+            ('M', 'N', 'A'),
+            ('M', 'A', 'A'),
+            ('M', 'M', 'A'),
+            ('M', 'N', 'M'),
+            ('M', 'A', 'M'),
+            ('M', 'M', 'M'),
         ]

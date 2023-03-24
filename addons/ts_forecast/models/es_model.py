@@ -10,7 +10,6 @@ class ESModel:
 
     def __init__(self, y, state):
         self.y = copy.deepcopy(y)
-        self.y_est = []
         self.w = state.state['w']
         self.r = state.state['r']
         self.f = state.state['f']
@@ -20,7 +19,7 @@ class ESModel:
         self.param = copy.deepcopy(state.state['param'])
         self.forecast_f = state.state['forecast']
         self.state = state
-        self.e_t = []
+        self.e_t = []  # error at each step t
         self.mean_e_t = 0
         self.stdev_e_t = 0
 
@@ -32,7 +31,6 @@ class ESModel:
         for i in range(len(self.y)):
             try:
                 y_est_t = self.w(self.x)
-                self.y_est.append(y_est_t)
 
                 e_t = (self.y[i] - y_est_t) / self.r(self.x)
                 if save_e_t:  # save the error made by the model
