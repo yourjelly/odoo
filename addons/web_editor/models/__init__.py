@@ -7,7 +7,8 @@ from . import ir_ui_view
 from . import ir_http
 from . import ir_websocket
 from . import models
-from . import field_html_history
+from . import field_html_history_diff
+from . import field_html_history_mixin
 
 from . import assets
 
