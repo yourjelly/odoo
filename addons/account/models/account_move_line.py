@@ -186,8 +186,9 @@ class AccountMoveLine(models.Model):
         ondelete='restrict',
         help="Indicates that this journal item is a tax line")
     tax_group_id = fields.Many2one(  # used in the widget tax-group-custom-field
+        comodel_name="account.tax.group",
         string='Originator tax group',
-        related='tax_line_id.tax_group_id', store=True, precompute=True,
+        compute='_compute_tax_group_id', store=True, precompute=True,
     )
     tax_base_amount = fields.Monetary(
         string="Base Amount",
@@ -936,7 +937,7 @@ class AccountMoveLine(models.Model):
                     'move_id': line.move_id.id,
                     'display_type': line.display_type,
                 }): {
-                    'name': tax['name'] + (' ' + _('(Discount)') if line.display_type == 'epd' else ''),
+                    'name': tax['tax_repartition_line_name'] or tax['name'] + (' ' + _('(Discount)') if line.display_type == 'epd' else ''),
                     'balance': tax['amount'] / rate,
                     'amount_currency': tax['amount'],
                     'tax_base_amount': tax['base'] / rate * (-1 if line.tax_tag_invert else 1),
@@ -1058,6 +1059,11 @@ class AccountMoveLine(models.Model):
                     "company_id": line.company_id.id,
                 })
                 line.analytic_distribution = distribution or line.analytic_distribution
+
+    @api.depends('tax_repartition_line_id', 'tax_line_id')
+    def _compute_tax_group_id(self):
+        for line in self:
+            line.tax_group_id = line.tax_repartition_line_id.tax_group_id.id or line.tax_line_id.tax_group_id.id
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS

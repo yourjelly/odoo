@@ -1626,6 +1626,8 @@ class PosSession(models.Model):
         loaded_data['units_by_id'] = {unit['id']: unit for unit in loaded_data['uom.uom']}
 
         loaded_data['taxes_by_id'] = {tax['id']: tax for tax in loaded_data['account.tax']}
+
+        loaded_data['tax_line_by_id'] = {tax_line['id']: tax_line for tax_line in loaded_data['account.tax.repartition.line']}
         for tax in loaded_data['taxes_by_id'].values():
             tax['children_tax_ids'] = [loaded_data['taxes_by_id'][id] for id in tax['children_tax_ids']]
 
@@ -1652,6 +1654,7 @@ class PosSession(models.Model):
             'res.country',
             'res.lang',
             'account.tax',
+            'account.tax.repartition.line',
             'pos.session',
             'pos.config',
             'pos.printer',
@@ -1770,6 +1773,12 @@ class PosSession(models.Model):
 
     def _get_pos_ui_pos_session(self, params):
         return self.env['pos.session'].search_read(**params['search_params'])[0]
+
+    def _get_pos_ui_account_tax_repartition_line(self, params):
+        return self.env['account.tax.repartition.line'].search_read(**params['search_params'])
+
+    def _loader_params_account_tax_repartition_line(self):
+        return {'search_params': {'domain': [], 'fields': []}}
 
     def _loader_params_pos_config(self):
         return {'search_params': {'domain': [('id', '=', self.config_id.id)], 'fields': []}}

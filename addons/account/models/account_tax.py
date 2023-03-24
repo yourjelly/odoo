@@ -268,6 +268,9 @@ class AccountTax(models.Model):
         base_line = lines.filtered(lambda x: x.repartition_type == 'base')
         if len(base_line) != 1:
             raise ValidationError(_("Invoice and credit note distribution should each contain exactly one line for the base."))
+        tax_line = lines.filtered(lambda x: x.repartition_type == 'tax')
+        if not (all(obj.invoice_label is False and not obj.tax_group_id for obj in tax_line) or all(obj.invoice_label is not False and obj.tax_group_id for obj in tax_line)):
+            raise ValidationError(_("All distribution lines either have values or don't have values for both Label on Invoices and Tax Group."))
 
     @api.constrains('invoice_repartition_line_ids', 'refund_repartition_line_ids')
     def _validate_repartition_lines(self):
@@ -753,6 +756,7 @@ class AccountTax(models.Model):
                     'price_include': price_include,
                     'tax_exigibility': tax.tax_exigibility,
                     'tax_repartition_line_id': repartition_line.id,
+                    'tax_repartition_line_name': partner and repartition_line.with_context(lang=partner.lang).invoice_label or partner and tax.with_context(lang=partner.lang).name or repartition_line.invoice_label or tax.name,
                     'group': groups_map.get(tax),
                     'tag_ids': (repartition_line_tags + subsequent_tags).ids + product_tag_ids,
                     'tax_ids': subsequent_taxes.ids,
@@ -1224,6 +1228,8 @@ class AccountTax(models.Model):
             to_process.append((base_line, to_update_vals, tax_values_list))
 
         def grouping_key_generator(base_line, tax_values):
+            if tax_values['tax_repartition_line'].tax_group_id:
+                return {'tax_group': tax_values['tax_repartition_line'].tax_group_id}
             source_tax = tax_values['tax_repartition_line'].tax_id
             return {'tax_group': source_tax.tax_group_id}
 
@@ -1245,7 +1251,7 @@ class AccountTax(models.Model):
                 matched_tax_lines = [
                     x
                     for x in tax_lines
-                    if x['tax_repartition_line'].tax_id.tax_group_id == tax_detail['tax_group']
+                    if (x['group_tax'] or x['tax_repartition_line'].tax_group_id and x['tax_repartition_line'] or x['tax_repartition_line'].tax_id).tax_group_id == tax_detail['tax_group']
                 ]
                 if matched_tax_lines:
                     tax_group_vals['tax_amount'] = sum(x['tax_amount'] for x in matched_tax_lines)
@@ -1365,6 +1371,12 @@ class AccountTaxRepartitionLine(models.Model):
         string="Tax Closing Entry",
         compute='_compute_use_in_tax_closing', store=True, readonly=False, precompute=True,
     )
+
+    tax_group_id = fields.Many2one(
+        comodel_name='account.tax.group',
+        string="Tax Group",
+        domain="[('country_id', 'in', (parent.country_id, False))]")
+    invoice_label = fields.Char(string='Label on Invoices')
 
     tag_ids_domain = fields.Binary(string="tag domain", help="Dynamic domain used for the tag that can be set on tax", compute="_compute_tag_ids_domain")
 

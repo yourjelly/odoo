@@ -153,6 +153,7 @@ export class PosGlobalState extends PosModel {
         this.user = null;
         this.partners = [];
         this.taxes = [];
+        this.tax_lines = [];
         this.pos_session = null;
         this.config = null;
         this.units = [];
@@ -256,6 +257,8 @@ export class PosGlobalState extends PosModel {
         this.langs = loadedData["res.lang"];
         this.taxes = loadedData["account.tax"];
         this.taxes_by_id = loadedData["taxes_by_id"];
+        this.tax_lines = loadedData["account.tax.repartition.line"];
+        this.tax_line_by_id = loadedData["tax_line_by_id"];
         this.pos_session = loadedData["pos.session"];
         this._loadPosSession();
         this.config = loadedData["pos.config"];
@@ -1403,12 +1406,36 @@ export class PosGlobalState extends PosModel {
                 cumulated_tax_included_amount += factorized_tax_amount;
             }
 
-            taxes_vals.push({
-                id: tax.id,
-                name: tax.name,
-                amount: sign * factorized_tax_amount,
-                base: sign * round_pr(tax_base_amount, currency_rounding),
-            });
+            var tax_line_ids = self.tax_lines.filter((pm) => pm.tax_id[0] == tax.id && pm.document_type == "invoice" && pm.repartition_type == "tax" && pm.invoice_label)
+            if (tax_line_ids.length) {
+                tax_line_ids.reverse()
+                var tax_amount_rem = tax_amount
+                tax_line_ids.forEach(async (line) => {
+                    var line_factorized_tax_amount = round_pr(
+                        tax_amount * line.factor,
+                        currency_rounding
+                    );
+                    taxes_vals.push({
+                        id: tax.id,
+                        repartion_line_id: line.id,
+                        name: line.invoice_label,
+                        amount: sign * line_factorized_tax_amount,
+                        base: sign * round_pr(tax_base_amount, currency_rounding),
+                    })
+                    tax_amount_rem -= (sign * line_factorized_tax_amount);
+                });
+                if (tax_amount_rem){
+                    taxes_vals[tax_line_ids.length - 1]["amount"] += round_pr(tax_amount_rem, currency_rounding);
+                }
+            }
+            else {
+                taxes_vals.push({
+                    id: tax.id,
+                    name: tax.name,
+                    amount: sign * factorized_tax_amount,
+                    base: sign * round_pr(tax_base_amount, currency_rounding),
+                 });
+            }
 
             if (tax.include_base_amount) {
                 base += factorized_tax_amount;
@@ -2425,7 +2452,15 @@ export class Orderline extends PosModel {
         );
         _(all_taxes.taxes).each(function (tax) {
             taxtotal += tax.amount;
-            taxdetail[tax.id] = tax.amount;
+            if (tax.repartion_line_id) {
+                if (taxdetail[tax.id]) {
+                    taxdetail[tax.id][tax.repartion_line_id] = tax.amount + (taxdetail[tax.id][tax.repartion_line_id] || 0)
+                } else {
+                    taxdetail[tax.id] = {[tax.repartion_line_id]: tax.amount}
+                }
+            } else {
+                taxdetail[tax.id] = tax.amount;
+            }
         });
 
         return {
@@ -3644,7 +3679,7 @@ export class Order extends PosModel {
                     if (!(taxId in groupTaxes)) {
                         groupTaxes[taxId] = 0;
                     }
-                    groupTaxes[taxId] += taxDetails[taxId];
+                    groupTaxes[taxId] += (typeof taxDetails[taxId] === 'object') ? Object.values(taxDetails[taxId]).reduce((a, b) => a + b, 0) : taxDetails[taxId];
                 }
             });
 
@@ -3681,9 +3716,18 @@ export class Order extends PosModel {
 
         this.orderlines.forEach(function (line) {
             var ldetails = line.get_tax_details();
-            for (var id in ldetails) {
-                if (Object.hasOwnProperty.call(ldetails, id)) {
-                    details[id] = (details[id] || 0) + ldetails[id];
+            for (const [id, obj] of Object.entries(ldetails)) {
+                if (typeof obj === 'object') {
+                    for (const [re_line_id, amount] of Object.entries(obj)) {
+                        const key = `${id}-${re_line_id}`;
+                        if (details.hasOwnProperty(key)) {
+                            details[key].amount += amount;
+                        } else {
+                            details[key] = {tax_id: id, re_line_id, amount};
+                        }
+                    }
+                } else {
+                    details[id] = {tax_id: id, amount: obj};
                 }
             }
         });
@@ -3691,13 +3735,23 @@ export class Order extends PosModel {
         for (var id in details) {
             if (Object.hasOwnProperty.call(details, id)) {
                 fulldetails.push({
-                    amount: details[id],
-                    tax: this.pos.taxes_by_id[id],
-                    name: this.pos.taxes_by_id[id].name,
+                    amount: details[id]["amount"],
+                    tax: details[id]['re_line_id'] ? this.pos.tax_line_by_id[details[id]['re_line_id']] : this.pos.taxes_by_id[id],
+                    name: details[id]['re_line_id'] ? this.pos.tax_line_by_id[details[id]['re_line_id']].invoice_label : this.pos.taxes_by_id[id].name,
                 });
             }
         }
 
+        fulldetails = fulldetails.reduce((result, {name, amount}) => {
+            const existingdetail = result.findIndex(item => item.name === name);
+            if (existingdetail !== -1) {
+                result[existingdetail].amount += amount;
+            } else {
+                result.push({name, amount});
+            }
+            return result;
+        }, []);
+        fulldetails.sort((a, b) => b.amount - a.amount);
         return fulldetails;
     }
     // Returns a total only for the orderlines with products belonging to the category

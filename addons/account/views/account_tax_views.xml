@@ -48,6 +48,8 @@
                     <field name="use_in_tax_closing"
                            optional="hidden"
                            attrs="{'invisible': [('repartition_type', '=', 'base')]}"/>
+                    <field name="invoice_label"/>
+                    <field name="tax_group_id"/>
                     <field name="company_id" invisible="1"/>
                     <field name="tag_ids_domain" invisible="1"/>
                 </tree>
