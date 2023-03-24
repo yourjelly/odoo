@@ -38,23 +38,23 @@ class TsForecastModel(models.AbstractModel):
             return model
 
     """ train the model for a time series """
-    def train_model(self, time_series):
+    def train_model(self, time_series, period):
         if len(time_series) <= 1:
             return False
         time_series.pop()
         states = []
         for s in StateSpace.get_all_states():
-            state = StateSpace(time_series, s[0], s[1], s[2], self.env.company.manufacturing_period)
+            state = StateSpace(time_series, s[0], s[1], s[2], period)
             state.optimize_state_parameters()
             states.append(state)
 
         state_selection = StateSelection(states)
         best_state, cv = state_selection.select_best_state()
-        self.update_model(best_state)
+        self.update_model(best_state, period)
         return True
 
     """ save the new best model in memory """
-    def update_model(self, new_state):
+    def update_model(self, new_state, period):
         for record in self:
             record.demand_error = new_state.error
             record.demand_trend = new_state.trend
@@ -63,5 +63,5 @@ class TsForecastModel(models.AbstractModel):
                 [{'value': param} for param in list(new_state.state['param']) + list(new_state.state['x'])])
             record.nb_parameters = len(new_state.state['param'])
             record.is_trained = True
-            record.period_trained = record.env.company.manufacturing_period
+            record.period_trained = period
             record.date_last_training = datetime.now()
