@@ -9,17 +9,21 @@ import { browser } from '@web/core/browser/browser';
 export class One2ManyHistoryList extends Component {
     setup() {
         this.orm = useService("orm");
-        this.latestRecords = this.props.value.records.reverse().slice(0, 8);
-        onWillUpdateProps((newProps) => {
-            this.latestRecords = newProps.value.records.reverse().slice(0, 8);
-        });
+
+        this.updateLatestHistoryDiffs(this.props);
+        onWillUpdateProps(this.updateLatestHistoryDiffs.bind(this));
+    }
+
+    updateLatestHistoryDiffs(props) {
+        this.historyDiffs = props.record.data["history_diff_ids"];
+        this.latestHistoryDiffs = [...this.historyDiffs.records].reverse().slice(0, 8);
     }
 
     get avatarUrl() {
-        return '/web/image?model=res.users&field=avatar_128&id=' + this.rec.data.create_uid[0];
+        return '/web/image?model=res.users&field=avatar_128&id=' + this.props.record.data.create_uid[0];
     }
     get userName() {
-        return this.rec.data.create_uid[1];
+        return this.props.record.data.create_uid[1];
     }
 
     async restoreVersion(historyDiffId) {
@@ -40,7 +44,7 @@ One2ManyHistoryList.supportedTypes = ["one2many"];
 export const one2ManyHistoryList = {
     component: One2ManyHistoryList,
     supportedTypes: ["one2many"],
-    fieldsToFetch: [
+    relatedFields: [
         { name: "id", type: "int" },
         { name: "diff_size", type: "int" },
         { name: "time_ago", type: "text" },
