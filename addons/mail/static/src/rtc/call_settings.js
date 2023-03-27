@@ -10,8 +10,10 @@ export class CallSettings extends Component {
     static props = ["thread", "className?"];
 
     setup() {
-        this.userSettings = useState(useService("mail.user_settings"));
-        this.rtc = useRtc();
+        this.services = {
+            "mail.user_settings": useState(useService("mail.user_settings")),
+            "mail.rtc": useRtc(),
+        };
         this.state = useState({
             userDevices: [],
         });
@@ -23,50 +25,51 @@ export class CallSettings extends Component {
     }
 
     get pushToTalkKeyText() {
-        const { shiftKey, ctrlKey, altKey, key } = this.userSettings.pushToTalkKeyFormat();
+        const { shiftKey, ctrlKey, altKey, key } =
+            this.services["mail.user_settings"].pushToTalkKeyFormat();
         const f = (k, name) => (k ? name : "");
         return `${f(ctrlKey, "Ctrl + ")}${f(altKey, "Alt + ")}${f(shiftKey, "Shift + ")}${key}`;
     }
 
     _onKeyDown(ev) {
-        if (!this.userSettings.isRegisteringKey) {
+        if (!this.services["mail.user_settings"].isRegisteringKey) {
             return;
         }
         ev.stopPropagation();
         ev.preventDefault();
-        this.userSettings.setPushToTalkKey(ev);
+        this.services["mail.user_settings"].setPushToTalkKey(ev);
     }
 
     _onKeyUp(ev) {
-        if (!this.userSettings.isRegisteringKey) {
+        if (!this.services["mail.user_settings"].isRegisteringKey) {
             return;
         }
         ev.stopPropagation();
         ev.preventDefault();
-        this.userSettings.isRegisteringKey = false;
+        this.services["mail.user_settings"].isRegisteringKey = false;
     }
 
     onChangeLogRtcCheckbox(ev) {
-        this.userSettings.logRtc = ev.target.checked;
+        this.services["mail.user_settings"].logRtc = ev.target.checked;
     }
 
     onChangeSelectAudioInput(ev) {
-        this.userSettings.setAudioInputDevice(ev.target.value);
+        this.services["mail.user_settings"].setAudioInputDevice(ev.target.value);
     }
 
     onChangePushToTalk() {
-        if (this.userSettings.usePushToTalk) {
-            this.userSettings.isRegisteringKey = false;
+        if (this.services["mail.user_settings"].usePushToTalk) {
+            this.services["mail.user_settings"].isRegisteringKey = false;
         }
-        this.userSettings.togglePushToTalk();
+        this.services["mail.user_settings"].togglePushToTalk();
     }
 
     onClickDownloadLogs() {
-        const data = JSON.stringify(Object.fromEntries(this.rtc.state.logs));
+        const data = JSON.stringify(Object.fromEntries(this.services["mail.rtc"].state.logs));
         const blob = new Blob([data], { type: "application/json" });
         const downloadLink = document.createElement("a");
-        const channelId = this.rtc.state.logs.get("channelId");
-        const sessionId = this.rtc.state.logs.get("selfSessionId");
+        const channelId = this.services["mail.rtc"].state.logs.get("channelId");
+        const sessionId = this.services["mail.rtc"].state.logs.get("selfSessionId");
         const now = luxon.DateTime.now().toFormat("yyyy-ll-dd_HH-mm");
         downloadLink.download = `RtcLogs_Channel_${channelId}_Session_${sessionId}_${now}.json`;
         const url = URL.createObjectURL(blob);
@@ -76,19 +79,20 @@ export class CallSettings extends Component {
     }
 
     onClickRegisterKeyButton() {
-        this.userSettings.isRegisteringKey = !this.userSettings.isRegisteringKey;
+        this.services["mail.user_settings"].isRegisteringKey =
+            !this.services["mail.user_settings"].isRegisteringKey;
     }
 
     onChangeDelay(ev) {
-        this.userSettings.setDelayValue(ev.target.value);
+        this.services["mail.user_settings"].setDelayValue(ev.target.value);
     }
 
     onChangeThreshold(ev) {
-        this.userSettings.setThresholdValue(parseFloat(ev.target.value));
+        this.services["mail.user_settings"].setThresholdValue(parseFloat(ev.target.value));
     }
 
     onChangeBlur(ev) {
-        this.userSettings.useBlur = ev.target.checked;
+        this.services["mail.user_settings"].useBlur = ev.target.checked;
     }
 
     onChangeVideoFilterCheckbox(ev) {
@@ -101,10 +105,10 @@ export class CallSettings extends Component {
     }
 
     onChangeBackgroundBlurAmount(ev) {
-        this.userSettings.backgroundBlurAmount = Number(ev.target.value);
+        this.services["mail.user_settings"].backgroundBlurAmount = Number(ev.target.value);
     }
 
     onChangeEdgeBlurAmount(ev) {
-        this.userSettings.edgeBlurAmount = Number(ev.target.value);
+        this.services["mail.user_settings"].edgeBlurAmount = Number(ev.target.value);
     }
 }

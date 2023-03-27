@@ -23,14 +23,16 @@ export class Sidebar extends Component {
     static props = [];
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = useState(useService("mail.thread"));
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": useService("mail.thread"),
+            "mail.user_settings": useService("mail.user_settings"),
+            "mail.rtc": useRtc(),
+        };
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
-        this.userSettings = useService("mail.user_settings");
-        this.rtc = useRtc();
         this.orm = useService("orm");
         this.state = useState({
             editing: false,
@@ -43,7 +45,7 @@ export class Sidebar extends Component {
 
     openThread(ev, thread) {
         markEventHandled(ev, "sidebar.openThread");
-        this.threadService.setDiscussThread(thread);
+        this.services["mail.thread"].setDiscussThread(thread);
     }
 
     async toggleCategory(category) {
@@ -51,7 +53,7 @@ export class Sidebar extends Component {
         await this.orm.call(
             "res.users.settings",
             "set_res_users_settings",
-            [[this.userSettings.id]],
+            [[this.services["mail.user_settings"].id]],
             {
                 new_settings: {
                     [category.serverStateKey]: category.isOpen,
@@ -108,7 +110,7 @@ export class Sidebar extends Component {
                 )
             );
         }
-        this.threadService.leaveChannel(thread);
+        this.services["mail.thread"].leaveChannel(thread);
     }
 
     askConfirmation(body) {
@@ -123,7 +125,7 @@ export class Sidebar extends Component {
 
     get hasQuickSearch() {
         return (
-            Object.values(this.store.threads).filter(
+            Object.values(this.services["mail.store"].threads).filter(
                 (thread) => thread.is_pinned && thread.model === "mail.channel"
             ).length > 19
         );
@@ -131,7 +133,7 @@ export class Sidebar extends Component {
 
     filteredThreads(category) {
         return category.threads.filter((threadLocalId) => {
-            const thread = this.store.threads[threadLocalId];
+            const thread = this.services["mail.store"].threads[threadLocalId];
             return (
                 (thread.is_pinned || thread.group_based_subscription) &&
                 (!this.state.quickSearchVal || thread.name.includes(this.state.quickSearchVal))
@@ -140,10 +142,10 @@ export class Sidebar extends Component {
     }
 
     async onClickStartMeeting() {
-        const thread = await this.threadService.createGroupChat({
+        const thread = await this.services["mail.thread"].createGroupChat({
             default_display_mode: "video_full_screen",
-            partners_to: [this.store.self.id],
+            partners_to: [this.services["mail.store"].self.id],
         });
-        await this.rtc.toggleCall(thread, { video: true });
+        await this.services["mail.rtc"].toggleCall(thread, { video: true });
     }
 }

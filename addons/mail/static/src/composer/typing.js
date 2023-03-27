@@ -22,7 +22,9 @@ export class Typing extends Component {
     static template = "mail.Typing";
 
     setup() {
-        this.messaging = useMessaging();
+        this.services = {
+            "mail.messaging": useMessaging(),
+        };
     }
 
     /** @returns {boolean|string} */

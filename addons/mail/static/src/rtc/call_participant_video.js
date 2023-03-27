@@ -8,7 +8,9 @@ export class CallParticipantVideo extends Component {
     static template = "mail.CallParticipantVideo";
 
     setup() {
-        this.rtc = useRtc();
+        this.services = {
+            "mail.rtc": useRtc(),
+        };
         this.root = useRef("root");
         onMounted(() => this._update());
         onPatched(() => this._update());

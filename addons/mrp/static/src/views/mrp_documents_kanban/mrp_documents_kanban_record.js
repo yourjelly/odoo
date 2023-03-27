@@ -7,7 +7,9 @@ import { useAttachmentViewer } from "@mail/attachments/attachment_viewer_hook";
 export class MrpDocumentsKanbanRecord extends KanbanRecord {
     setup() {
         super.setup();
-        this.attachmentService = useService("mail.attachment");
+        this.services = {
+            "mail.attachment": useService("mail.attachment"),
+        };
         this.attachmentViewer = useAttachmentViewer();
     }
     /**
@@ -23,7 +25,7 @@ export class MrpDocumentsKanbanRecord extends KanbanRecord {
             window.location = `/web/content/mrp.document/${this.props.record.resId}/datas?download=true`;
             return;
         } else if (ev.target.closest(".o_kanban_previewer")) {
-            const attachment = this.attachmentService.insert({
+            const attachment = this.services["mail.attachment"].insert({
                 id: this.props.record.data.ir_attachment_id[0],
                 filename: this.props.record.data.name,
                 name: this.props.record.data.name,

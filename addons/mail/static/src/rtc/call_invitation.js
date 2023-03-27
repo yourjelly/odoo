@@ -8,26 +8,28 @@ export class CallInvitation extends Component {
     static template = "mail.CallInvitation";
 
     setup() {
-        this.threadService = useService("mail.thread");
-        this.rtc = useService("mail.rtc");
+        this.services = {
+            "mail.thread": useService("mail.thread"),
+            "mail.rtc": useService("mail.rtc"),
+        };
     }
 
     async onClickAccept(ev) {
-        this.threadService.open(this.props.thread);
-        if (this.rtc.state.hasPendingRequest) {
+        this.services["mail.thread"].open(this.props.thread);
+        if (this.services["mail.rtc"].state.hasPendingRequest) {
             return;
         }
-        await this.rtc.toggleCall(this.props.thread);
+        await this.services["mail.rtc"].toggleCall(this.props.thread);
     }
 
     onClickAvatar(ev) {
-        this.threadService.open(this.props.thread);
+        this.services["mail.thread"].open(this.props.thread);
     }
 
     onClickRefuse(ev) {
-        if (this.rtc.state.hasPendingRequest) {
+        if (this.services["mail.rtc"].state.hasPendingRequest) {
             return;
         }
-        this.rtc.leaveCall(this.props.thread);
+        this.services["mail.rtc"].leaveCall(this.props.thread);
     }
 }

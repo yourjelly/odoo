@@ -9,11 +9,13 @@ export class CallActionList extends Component {
     static template = "mail.CallActionList";
 
     setup() {
-        this.rtc = useRtc();
+        this.services = {
+            "mail.rtc": useRtc(),
+        };
     }
 
     get isOfActiveCall() {
-        return Boolean(this.props.thread.id === this.rtc.state?.channel?.id);
+        return Boolean(this.props.thread.id === this.services["mail.rtc"].state?.channel?.id);
     }
 
     get isSmall() {
@@ -28,10 +30,10 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     async onClickDeafen(ev) {
-        if (this.rtc.state.selfSession.isDeaf) {
-            this.rtc.undeafen();
+        if (this.services["mail.rtc"].state.selfSession.isDeaf) {
+            this.services["mail.rtc"].undeafen();
         } else {
-            this.rtc.deafen();
+            this.services["mail.rtc"].deafen();
         }
     }
 
@@ -39,15 +41,15 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     onClickMicrophone(ev) {
-        if (this.rtc.state.selfSession.isMute) {
-            if (this.rtc.state.selfSession.isSelfMuted) {
-                this.rtc.unmute();
+        if (this.services["mail.rtc"].state.selfSession.isMute) {
+            if (this.services["mail.rtc"].state.selfSession.isSelfMuted) {
+                this.services["mail.rtc"].unmute();
             }
-            if (this.rtc.state.selfSession.isDeaf) {
-                this.rtc.undeafen();
+            if (this.services["mail.rtc"].state.selfSession.isDeaf) {
+                this.services["mail.rtc"].undeafen();
             }
         } else {
-            this.rtc.mute();
+            this.services["mail.rtc"].mute();
         }
     }
 
@@ -55,16 +57,16 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     async onClickRejectCall(ev) {
-        if (this.rtc.state.hasPendingRequest) {
+        if (this.services["mail.rtc"].state.hasPendingRequest) {
             return;
         }
-        await this.rtc.leaveCall(this.props.thread);
+        await this.services["mail.rtc"].leaveCall(this.props.thread);
     }
 
     /**
      * @param {MouseEvent} ev
      */
     async onClickToggleAudioCall(ev) {
-        await this.rtc.toggleCall(this.props.thread);
+        await this.services["mail.rtc"].toggleCall(this.props.thread);
     }
 }

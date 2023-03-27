@@ -17,33 +17,31 @@ import { DEFAULT_AVATAR } from "@mail/core/persona_service";
 import { loadEmoji } from "@mail/emoji_picker/emoji_picker";
 import { browser } from "@web/core/browser/browser";
 
-const FETCH_MSG_LIMIT = 30;
-
 export class ThreadService {
-    nextId = 0;
-
     constructor(env, services) {
         this.setup(env, services);
     }
 
     setup(env, services) {
         this.env = env;
-        /** @type {import("@mail/core/channel_member_service").ChannelMemberService} */
-        this.channelMemberService = services["mail.channel.member"];
-        /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
-        this.attachmentsService = services["mail.attachment"];
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = services["mail.store"];
+        this.services = {
+            /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
+            "mail.attachment": services["mail.attachment"],
+            /** @type {import("@mail/core/channel_member_service").ChannelMemberService} */
+            "mail.channel.member": services["mail.channel.member"],
+            /** @type {import("@mail/core/persona_service").PersonaService} */
+            "mail.persona": services["mail.persona"],
+            /** @type {import("@mail/core/message_service").MessageService} */
+            "mail.message": services["mail.message"],
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": services["mail.store"],
+        };
         this.orm = services.orm;
         this.rpc = services.rpc;
         this.notificationService = services.notification;
         this.router = services.router;
-        /** @type {import("@mail/core/persona_service").PersonaService} */
-        this.personaService = services["mail.persona"];
-        /** @type {import("@mail/core/message_service").MessageService} */
-        this.messageService = services["mail.message"];
         // FIXME this prevents cyclic dependencies between mail.thread and mail.message
-        this.env.bus.addEventListener("MESSAGE-SERVICE:INSERT_THREAD", ({ detail }) => {
+        this.env.bus.addEventListener("mail.thread/insert", ({ detail }) => {
             const model = detail.model;
             const id = detail.id;
             const type = detail.type;
@@ -61,7 +59,8 @@ export class ThreadService {
         const type = channel.channel_type;
         const channelType = serverData.channel.channel_type;
         const isAdmin =
-            channelType !== "group" && serverData.create_uid === this.store.user?.user?.id;
+            channelType !== "group" &&
+            serverData.create_uid === this.services["mail.store"].user?.user?.id;
         const thread = this.insert({
             id,
             model: "mail.channel",
@@ -74,28 +73,6 @@ export class ThreadService {
             authorizedGroupFullName,
         });
         return thread;
-    }
-
-    async fetchChannelMembers(thread) {
-        const known_member_ids = thread.channelMembers.map((channelMember) => channelMember.id);
-        const results = await this.rpc("/mail/channel/members", {
-            channel_id: thread.id,
-            known_member_ids: known_member_ids,
-        });
-        let channelMembers = [];
-        if (
-            results["channelMembers"] &&
-            results["channelMembers"][0] &&
-            results["channelMembers"][0][1]
-        ) {
-            channelMembers = results["channelMembers"][0][1];
-        }
-        thread.memberCount = results["memberCount"];
-        for (const channelMember of channelMembers) {
-            if (channelMember.persona || channelMember.partner) {
-                this.channelMemberService.insert({ ...channelMember, threadId: thread.id });
-            }
-        }
     }
 
     /**
@@ -139,114 +116,10 @@ export class ThreadService {
         await this.orm.silent.call("mail.channel", "channel_fetched", [[thread.id]]);
     }
 
-    /**
-     * @param {Thread} thread
-     * @param {{min: Number, max: Number}}
-     */
-    async fetchMessages(thread, { min, max } = {}) {
-        thread.status = "loading";
-        if (thread.type === "chatter" && !thread.id) {
-            return [];
-        }
-        const route = (() => {
-            if (thread.model === "mail.channel") {
-                return "/mail/channel/messages";
-            }
-            switch (thread.type) {
-                case "chatter":
-                    return "/mail/thread/messages";
-                case "mailbox":
-                    return `/mail/${thread.id}/messages`;
-                default:
-                    throw new Error(`Unknown thread type: ${thread.type}`);
-            }
-        })();
-        const params = (() => {
-            if (thread.model === "mail.channel") {
-                return { channel_id: thread.id };
-            }
-            if (thread.type === "chatter") {
-                return {
-                    thread_id: thread.id,
-                    thread_model: thread.model,
-                };
-            }
-            return {};
-        })();
-        try {
-            const rawMessages = await this.rpc(route, {
-                ...params,
-                limit: FETCH_MSG_LIMIT,
-                max_id: max,
-                min_id: min,
-            });
-            const messages = rawMessages.reverse().map((data) => {
-                if (data.parentMessage) {
-                    data.parentMessage.body = data.parentMessage.body
-                        ? markup(data.parentMessage.body)
-                        : data.parentMessage.body;
-                }
-                return this.messageService.insert(
-                    Object.assign(data, { body: data.body ? markup(data.body) : data.body }),
-                    true
-                );
-            });
-            this.update(thread, { isLoaded: true });
-            return messages;
-        } catch (e) {
-            thread.hasLoadingFailed = true;
-            throw e;
-        } finally {
-            thread.status = "ready";
-        }
-    }
-
-    /**
-     * @param {Thread} thread
-     */
-    async fetchNewMessages(thread) {
-        if (thread.status === "loading" || (thread.isLoaded && thread.model === "mail.channel")) {
-            return;
-        }
-        const min = thread.isLoaded ? thread.mostRecentNonTransientMessage?.id : undefined;
-        try {
-            const fetchedMsgs = await this.fetchMessages(thread, { min });
-            Object.assign(thread, {
-                loadMore:
-                    min === undefined && fetchedMsgs.length === FETCH_MSG_LIMIT
-                        ? true
-                        : min === undefined && fetchedMsgs.length !== FETCH_MSG_LIMIT
-                        ? false
-                        : thread.loadMore,
-            });
-        } catch {
-            // handled in fetchMessages
-        }
-    }
-
-    /**
-     * @param {Thread} thread
-     */
-    async fetchMoreMessages(thread) {
-        if (thread.status === "loading") {
-            return;
-        }
-        try {
-            const fetchedMsgs = await this.fetchMessages(thread, {
-                max: thread.oldestNonTransientMessage?.id,
-            });
-            if (fetchedMsgs.length < FETCH_MSG_LIMIT) {
-                thread.loadMore = false;
-            }
-        } catch {
-            // handled in fetchMessages
-        }
-    }
-
     async createChannel(name) {
         const data = await this.orm.call("mail.channel", "channel_create", [
             name,
-            this.store.internalUserGroupId,
+            this.services["mail.store"].internalUserGroupId,
         ]);
         const channel = this.createChannelThread(data);
         this.sortChannels();
@@ -261,7 +134,7 @@ export class ThreadService {
     }
 
     pin(thread) {
-        if (thread.model !== "mail.channel" || this.store.guest) {
+        if (thread.model !== "mail.channel" || this.services["mail.store"].guest) {
             return;
         }
         thread.is_pinned = true;
@@ -269,14 +142,14 @@ export class ThreadService {
     }
 
     sortChannels() {
-        this.store.discuss.channels.threads.sort((id1, id2) => {
-            const thread1 = this.store.threads[id1];
-            const thread2 = this.store.threads[id2];
+        this.services["mail.store"].discuss.channels.threads.sort((id1, id2) => {
+            const thread1 = this.services["mail.store"].threads[id1];
+            const thread2 = this.services["mail.store"].threads[id2];
             return String.prototype.localeCompare.call(thread1.name, thread2.name);
         });
-        this.store.discuss.chats.threads.sort((localId_1, localId_2) => {
-            const thread1 = this.store.threads[localId_1];
-            const thread2 = this.store.threads[localId_2];
+        this.services["mail.store"].discuss.chats.threads.sort((localId_1, localId_2) => {
+            const thread1 = this.services["mail.store"].threads[localId_1];
+            const thread2 = this.services["mail.store"].threads[localId_2];
             return thread2.lastInterestDateTime.ts - thread1.lastInterestDateTime.ts;
         });
     }
@@ -298,10 +171,10 @@ export class ThreadService {
 
     async getChat({ userId, partnerId }) {
         if (userId) {
-            let user = this.store.users[userId];
+            let user = this.services["mail.store"].users[userId];
             if (!user) {
-                this.store.users[userId] = { id: userId };
-                user = this.store.users[userId];
+                this.services["mail.store"].users[userId] = { id: userId };
+                user = this.services["mail.store"].users[userId];
             }
             if (!user.partner_id) {
                 const [userData] = await this.orm.silent.read(
@@ -327,7 +200,7 @@ export class ThreadService {
 
         if (partnerId) {
             const localId = createLocalId("partner", partnerId);
-            let user = this.store.personas[localId]?.user;
+            let user = this.services["mail.store"].personas[localId]?.user;
             if (!user) {
                 [user] = await this.orm.silent.searchRead(
                     "res.users",
@@ -345,7 +218,7 @@ export class ThreadService {
             }
         }
 
-        let chat = Object.values(this.store.threads).find(
+        let chat = Object.values(this.services["mail.store"].threads).find(
             (thread) => thread.type === "chat" && thread.chatPartnerId === partnerId
         );
         if (!chat || !chat.is_pinned) {
@@ -363,7 +236,7 @@ export class ThreadService {
 
     async joinChannel(id, name) {
         await this.orm.call("mail.channel", "add_members", [[id]], {
-            partner_ids: [this.store.user.id],
+            partner_ids: [this.services["mail.store"].user.id],
         });
         const thread = this.insert({
             id,
@@ -417,9 +290,11 @@ export class ThreadService {
         await this.orm.call("mail.channel", "action_unfollow", [channel.id]);
         this.remove(channel);
         this.setDiscussThread(
-            this.store.discuss.channels.threads[0]
-                ? this.store.threads[this.store.discuss.channels.threads[0]]
-                : this.store.discuss.inbox
+            this.services["mail.store"].discuss.channels.threads[0]
+                ? this.services["mail.store"].threads[
+                      this.services["mail.store"].discuss.channels.threads[0]
+                  ]
+                : this.services["mail.store"].discuss.inbox
         );
     }
 
@@ -428,10 +303,10 @@ export class ThreadService {
      * @param {boolean} pushState
      */
     setDiscussThread(thread, pushState = true) {
-        this.store.discuss.threadLocalId = thread.localId;
+        this.services["mail.store"].discuss.threadLocalId = thread.localId;
         const activeId =
             typeof thread.id === "string" ? `mail.box_${thread.id}` : `mail.channel_${thread.id}`;
-        this.store.discuss.activeTab = !this.store.isSmall
+        this.services["mail.store"].discuss.activeTab = !this.services["mail.store"].isSmall
             ? "all"
             : thread.model === "mail.box"
             ? "mailbox"
@@ -455,9 +330,9 @@ export class ThreadService {
     }
 
     remove(thread) {
-        removeFromArray(this.store.discuss.chats.threads, thread.localId);
-        removeFromArray(this.store.discuss.channels.threads, thread.localId);
-        delete this.store.threads[thread.localId];
+        removeFromArray(this.services["mail.store"].discuss.chats.threads, thread.localId);
+        removeFromArray(this.services["mail.store"].discuss.channels.threads, thread.localId);
+        delete this.services["mail.store"].threads[thread.localId];
     }
 
     /**
@@ -471,7 +346,9 @@ export class ThreadService {
             // smart process to avoid triggering reactives when there is no change between the 2 arrays
             replaceArrayWithCompare(
                 thread.attachments,
-                attachments.map((attachment) => this.attachmentsService.insert(attachment)),
+                attachments.map((attachment) =>
+                    this.services["mail.attachment"].insert(attachment)
+                ),
                 (a1, a2) => a1.id === a2.id
             );
         }
@@ -502,29 +379,29 @@ export class ThreadService {
                 thread.serverLastSeenMsgBySelf = serverData.seen_message_id;
             }
             if ("rtc_inviting_session" in serverData) {
-                this.env.bus.trigger("THREAD-SERVICE:UPDATE_RTC_SESSIONS", {
+                this.env.bus.trigger("mail.rtc/updateSessions", {
                     thread,
                     record: serverData.rtc_inviting_session,
                 });
                 thread.invitingRtcSessionId = serverData.rtc_inviting_session.id;
-                if (!this.store.ringingThreads.includes(thread.localId)) {
-                    this.store.ringingThreads.push(thread.localId);
+                if (!this.services["mail.store"].ringingThreads.includes(thread.localId)) {
+                    this.services["mail.store"].ringingThreads.push(thread.localId);
                 }
             }
             if ("rtcInvitingSession" in serverData) {
                 if (Array.isArray(serverData.rtcInvitingSession)) {
                     if (serverData.rtcInvitingSession[0][0] === "unlink") {
                         thread.invitingRtcSessionId = undefined;
-                        removeFromArray(this.store.ringingThreads, thread.localId);
+                        removeFromArray(this.services["mail.store"].ringingThreads, thread.localId);
                     }
                     return;
                 }
-                this.env.bus.trigger("THREAD-SERVICE:UPDATE_RTC_SESSIONS", {
+                this.env.bus.trigger("mail.rtc/updateSessions", {
                     thread,
                     record: serverData.rtcInvitingSession,
                 });
                 thread.invitingRtcSessionId = serverData.rtcInvitingSession.id;
-                this.store.ringingThreads.push(thread.localId);
+                this.services["mail.store"].ringingThreads.push(thread.localId);
             }
             if (thread.type === "chat" && serverData.channel) {
                 thread.customName = serverData.channel.custom_channel_name;
@@ -533,14 +410,17 @@ export class ThreadService {
                 for (const [command, membersData] of serverData.channel.channelMembers) {
                     const members = Array.isArray(membersData) ? membersData : [membersData];
                     for (const memberData of members) {
-                        const member = this.channelMemberService.insert([command, memberData]);
+                        const member = this.services["mail.channel.member"].insert([
+                            command,
+                            memberData,
+                        ]);
                         if (thread.type !== "chat") {
                             continue;
                         }
                         if (
-                            member.persona.id !== thread._store.user?.id ||
+                            member.persona.id !== this.services["mail.store"].user?.id ||
                             (serverData.channel.channelMembers[0][1].length === 1 &&
-                                member.persona.id === thread._store.user?.id)
+                                member.persona.id === this.services["mail.store"].user?.id)
                         ) {
                             thread.chatPartnerId = member.persona.id;
                         }
@@ -549,7 +429,7 @@ export class ThreadService {
             }
             if ("rtcSessions" in serverData) {
                 // FIXME this prevents cyclic dependencies between mail.thread and mail.rtc
-                this.env.bus.trigger("THREAD-SERVICE:UPDATE_RTC_SESSIONS", {
+                this.env.bus.trigger("mail.rtc/updateSessions", {
                     thread,
                     commands: serverData.rtcSessions,
                 });
@@ -565,7 +445,7 @@ export class ThreadService {
                     case "insert":
                         if (members) {
                             for (const member of members) {
-                                const record = this.channelMemberService.insert(member);
+                                const record = this.services["mail.channel.member"].insert(member);
                                 thread.invitedMemberIds.add(record.id);
                             }
                         }
@@ -584,12 +464,12 @@ export class ThreadService {
                     ({ fetched_message_id, partner_id, seen_message_id }) => {
                         return {
                             lastFetchedMessage: fetched_message_id
-                                ? this.messageService.insert({ id: fetched_message_id })
+                                ? this.services["mail.persona"].insert({ id: fetched_message_id })
                                 : undefined,
                             lastSeenMessage: seen_message_id
-                                ? this.messageService.insert({ id: seen_message_id })
+                                ? this.services["mail.persona"].insert({ id: seen_message_id })
                                 : undefined,
-                            partner: this.personaService.insert({
+                            partner: this.services["mail.persona"].insert({
                                 id: partner_id,
                                 type: "partner",
                             }),
@@ -612,20 +492,25 @@ export class ThreadService {
             throw new Error("Cannot insert thread: model is missing in data");
         }
         const localId = createLocalId(data.model, data.id);
-        if (localId in this.store.threads) {
-            const thread = this.store.threads[localId];
+        if (localId in this.services["mail.store"].threads) {
+            const thread = this.services["mail.store"].threads[localId];
             this.update(thread, data);
             return thread;
         }
-        let thread = new Thread(this.store, data);
+        let thread = new Thread(this.services["mail.store"], data);
         onChange(thread, "isLoaded", () => thread.isLoadedDeferred.resolve());
-        onChange(thread, "channelMembers", () => this.store.updateBusSubscription());
+        onChange(thread, "channelMembers", () =>
+            this.services["mail.store"].updateBusSubscription()
+        );
         onChange(thread, "is_pinned", () => {
-            if (!thread.is_pinned && this.store.discuss.threadLocalId === thread.localId) {
-                this.store.discuss.threadLocalId = null;
+            if (
+                !thread.is_pinned &&
+                this.services["mail.store"].discuss.threadLocalId === thread.localId
+            ) {
+                this.services["mail.store"].discuss.threadLocalId = null;
             }
         });
-        thread = this.store.threads[thread.localId] = thread;
+        thread = this.services["mail.store"].threads[thread.localId] = thread;
         this.update(thread, data);
         this.insertComposer({ thread });
         return thread;
@@ -642,7 +527,7 @@ export class ThreadService {
         }
         let composer = (thread ?? message)?.composer;
         if (!composer) {
-            composer = new Composer(this.store, data);
+            composer = new Composer(this.services["mail.store"], data);
         }
         if ("textInputContent" in data) {
             composer.textInputContent = data.textInputContent;
@@ -658,8 +543,8 @@ export class ThreadService {
      * @param {string} body
      */
     async post(thread, body, { attachments = [], isNote = false, parentId, rawMentions }) {
-        const command = this.store.user
-            ? this.messageService.getCommandFromText(thread, body)
+        const command = this.services["mail.store"].user
+            ? this.services["mail.message"].getCommandFromText(thread, body)
             : undefined;
         if (command) {
             await this.executeCommand(thread, command, body);
@@ -667,8 +552,8 @@ export class ThreadService {
         }
         let tmpMsg;
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
-        const validMentions = this.store.user
-            ? this.messageService.getMentionsFromText(rawMentions, body)
+        const validMentions = this.services["mail.store"].user
+            ? this.services["mail.message"].getMentionsFromText(rawMentions, body)
             : undefined;
         const partner_ids = validMentions?.partners.map((partner) => partner.id);
         if (!isNote) {
@@ -677,7 +562,7 @@ export class ThreadService {
                 .map((recipient) => recipient.persona.id);
             partner_ids?.push(...recipientIds);
         }
-        const lastMessageId = this.messageService.getLastMessageId();
+        const lastMessageId = this.services["mail.message"].getLastMessageId();
         const tmpId = lastMessageId + 0.01;
         const params = {
             context: {
@@ -706,14 +591,14 @@ export class ThreadService {
                 res_id: thread.id,
                 model: "mail.channel",
             };
-            if (this.store.user) {
-                tmpData.author = this.store.self;
+            if (this.services["mail.store"].user) {
+                tmpData.author = this.services["mail.store"].self;
             }
-            if (this.store.guest) {
-                tmpData.guestAuthor = this.store.self;
+            if (this.services["mail.store"].guest) {
+                tmpData.guestAuthor = this.services["mail.store"].self;
             }
             if (parentId) {
-                tmpData.parentMessage = this.store.messages[parentId];
+                tmpData.parentMessage = this.services["mail.store"].messages[parentId];
             }
             const prettyContent = await prettifyMessageContent(body, validMentions);
             const { emojis } = await loadEmoji();
@@ -729,7 +614,7 @@ export class ThreadService {
                 }
             }
             browser.localStorage.setItem("mail.emoji.frequent", JSON.stringify(recentEmojis));
-            tmpMsg = this.messageService.insert({
+            tmpMsg = this.services["mail.message"].insert({
                 ...tmpData,
                 body: markup(prettyContent),
                 res_id: thread.id,
@@ -743,10 +628,10 @@ export class ThreadService {
                 ? markup(data.parentMessage.body)
                 : data.parentMessage.body;
         }
-        if (data.id in this.store.messages) {
+        if (data.id in this.services["mail.store"].messages) {
             data.temporary_id = null;
         }
-        const message = this.messageService.insert(
+        const message = this.services["mail.message"].insert(
             Object.assign(data, { body: markup(data.body) })
         );
         if (!message.isEmpty) {
@@ -754,7 +639,7 @@ export class ThreadService {
         }
         if (thread.type !== "chatter") {
             removeFromArrayWithPredicate(thread.messages, ({ id }) => id === tmpMsg.id);
-            delete this.store.messages[tmpMsg.id];
+            delete this.services["mail.store"].messages[tmpMsg.id];
         }
         return message;
     }
@@ -843,14 +728,17 @@ export class ThreadService {
     }
 
     getDiscussCategoryCounter(categoryId) {
-        return this.store.discuss[categoryId].threads.reduce((acc, threadLocalId) => {
-            const channel = this.store.threads[threadLocalId];
-            if (categoryId === "channels") {
-                return channel.message_needaction_counter > 0 ? acc + 1 : acc;
-            } else {
-                return this.localMessageUnreadCounter(channel) > 0 ? acc + 1 : acc;
-            }
-        }, 0);
+        return this.services["mail.store"].discuss[categoryId].threads.reduce(
+            (acc, threadLocalId) => {
+                const channel = this.services["mail.store"].threads[threadLocalId];
+                if (categoryId === "channels") {
+                    return channel.message_needaction_counter > 0 ? acc + 1 : acc;
+                } else {
+                    return this.localMessageUnreadCounter(channel) > 0 ? acc + 1 : acc;
+                }
+            },
+            0
+        );
     }
 
     /**
@@ -915,8 +803,8 @@ export class ThreadService {
 
 export const threadService = {
     dependencies: [
-        "mail.channel.member",
         "mail.attachment",
+        "mail.channel.member",
         "mail.store",
         "orm",
         "rpc",

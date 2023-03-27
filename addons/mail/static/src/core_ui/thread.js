@@ -37,11 +37,15 @@ export class Thread extends Component {
     static template = "mail.Thread";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
         this.state = useState({ isReplyingTo: false });
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = useState(useService("mail.thread"));
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": useService("mail.thread"),
+            /** @type {import("@mail/core/thread_message_fetch_service").ThreadMessageFetchService} */
+            "mail.thread.message_fetch": useService("mail.thread.message_fetch"),
+        };
         if (!this.env.inChatter || this.props.hasMessageScrollAdjustInChatter) {
             useAutoScroll("messages", () => {
                 if (
@@ -59,7 +63,7 @@ export class Thread extends Component {
         this.messagesRef = useRef("messages");
         this.loadMoreState = useVisible("load-more", () => {
             if (this.loadMoreState.isVisible) {
-                this.threadService.fetchMoreMessages(this.props.thread);
+                this.services["mail.thread.message_fetch"].fetchMoreMessages(this.props.thread);
             }
         });
         this.oldestNonTransientMessageId = null;
@@ -94,15 +98,15 @@ export class Thread extends Component {
             }
         });
         onWillStart(() => {
-            this.threadService.fetchNewMessages(this.props.thread);
+            this.services["mail.thread.message_fetch"].fetchNewMessages(this.props.thread);
         });
         onWillUpdateProps((nextProps) => {
-            this.threadService.fetchNewMessages(nextProps.thread);
+            this.services["mail.thread.message_fetch"].fetchNewMessages(nextProps.thread);
         });
     }
 
     onClickLoadMore() {
-        this.threadService.fetchMoreMessages(this.props.thread);
+        this.services["mail.thread.message_fetch"].fetchMoreMessages(this.props.thread);
     }
 
     isSquashed(msg, prevMsg) {

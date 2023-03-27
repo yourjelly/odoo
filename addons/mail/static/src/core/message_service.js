@@ -5,10 +5,7 @@ import { Message } from "./message_model";
 import { removeFromArrayWithPredicate } from "../utils/arrays";
 import { convertBrToLineBreak, prettifyMessageContent } from "../utils/format";
 import { registry } from "@web/core/registry";
-import { MessageReactions } from "./message_reactions_model";
-import { Notification } from "./notification_model";
 import { LinkPreview } from "./link_preview_model";
-import { NotificationGroup } from "./notification_group_model";
 import { assignDefined, createLocalId } from "../utils/misc";
 
 const commandRegistry = registry.category("mail.channel_commands");
@@ -18,15 +15,56 @@ const { DateTime } = luxon;
 export class MessageService {
     constructor(env, services) {
         this.env = env;
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = services["mail.store"];
         this.rpc = services.rpc;
         this.orm = services.orm;
         this.userService = services.user;
-        /** @type {import("@mail/core/persona_service").PersonaService} */
-        this.personaService = services["mail.persona"];
-        /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
-        this.attachmentService = services["mail.attachment"];
+        this.services = {
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": services["mail.store"],
+            /** @type {import("@mail/core/persona_service").PersonaService} */
+            "mail.persona": services["mail.persona"],
+            /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
+            "mail.attachment": services["mail.attachment"],
+        };
+        this.env.bus.addEventListener(
+            "mail.messaging/notification",
+            ({ detail: { notification } }) => {
+                switch (notification.type) {
+                    case "mail.message/delete": {
+                        for (const messageId of notification.payload.message_ids) {
+                            const message = this.services["mail.store"].messages[messageId];
+                            if (!message) {
+                                continue;
+                            }
+                            if (message.isNeedaction) {
+                                removeFromArrayWithPredicate(
+                                    this.services["mail.store"].discuss.inbox.messages,
+                                    ({ id }) => id === message.id
+                                );
+                                this.services["mail.store"].discuss.inbox.counter--;
+                            }
+                            if (message.isStarred) {
+                                removeFromArrayWithPredicate(
+                                    this.services["mail.store"].discuss.starred.messages,
+                                    ({ id }) => id === message.id
+                                );
+                                this.services["mail.store"].discuss.starred.counter--;
+                            }
+                            delete this.services["mail.store"].messages[messageId];
+                            if (message.originThread) {
+                                removeFromArrayWithPredicate(
+                                    message.originThread.messages,
+                                    ({ id }) => id === message.id
+                                );
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        );
     }
 
     async update(message, body, attachments = [], rawMentions) {
@@ -47,9 +85,9 @@ export class MessageService {
 
     async delete(message) {
         if (message.isStarred) {
-            this.store.discuss.starred.counter--;
+            this.services["mail.store"].discuss.starred.counter--;
             removeFromArrayWithPredicate(
-                this.store.discuss.starred.messages,
+                this.services["mail.store"].discuss.starred.messages,
                 ({ id }) => id === message.id
             );
         }
@@ -78,14 +116,14 @@ export class MessageService {
      * @returns {number}
      */
     getLastMessageId() {
-        return Object.values(this.store.messages).reduce(
+        return Object.values(this.services["mail.store"].messages).reduce(
             (lastMessageId, message) => Math.max(lastMessageId, message.id),
             0
         );
     }
 
     getMentionsFromText(rawMentions, body) {
-        if (!this.store.user) {
+        if (!this.services["mail.store"].user) {
             // mentions are not supported for guests
             return {};
         }
@@ -95,7 +133,8 @@ export class MessageService {
         const rawMentionedPartnerIds = rawMentions.partnerIds || [];
         const rawMentionedThreadIds = rawMentions.threadIds || [];
         for (const partnerId of rawMentionedPartnerIds) {
-            const partner = this.store.personas[createLocalId("partner", partnerId)];
+            const partner =
+                this.services["mail.store"].personas[createLocalId("partner", partnerId)];
             const index = body.indexOf(`@${partner.name}`);
             if (index === -1) {
                 continue;
@@ -103,7 +142,8 @@ export class MessageService {
             partners.push(partner);
         }
         for (const threadId of rawMentionedThreadIds) {
-            const thread = this.store.threads[createLocalId("mail.channel", threadId)];
+            const thread =
+                this.services["mail.store"].threads[createLocalId("mail.channel", threadId)];
             const index = body.indexOf(`#${thread.displayName}`);
             if (index === -1) {
                 continue;
@@ -126,7 +166,7 @@ export class MessageService {
         const { body, res_id, model } = data;
         const lastMessageId = this.getLastMessageId();
         this.insert({
-            author: this.store.partnerRoot,
+            author: this.services["mail.store"].partnerRoot,
             body,
             id: lastMessageId + 0.01,
             is_note: true,
@@ -136,59 +176,8 @@ export class MessageService {
         });
     }
 
-    async toggleStar(message) {
-        await this.orm.silent.call("mail.message", "toggle_message_starred", [[message.id]]);
-    }
-
     async setDone(message) {
         await this.orm.silent.call("mail.message", "set_message_done", [[message.id]]);
-    }
-
-    async unstarAll() {
-        // apply the change immediately for faster feedback
-        this.store.discuss.starred.counter = 0;
-        this.store.discuss.starred.messages = [];
-        await this.orm.call("mail.message", "unstar_all");
-    }
-
-    async react(message, content) {
-        const messageData = await this.rpc(
-            "/mail/message/add_reaction",
-            {
-                content,
-                message_id: message.id,
-            },
-            { silent: true }
-        );
-        this.insert(messageData);
-    }
-
-    async removeReaction(reaction) {
-        const messageData = await this.rpc(
-            "/mail/message/remove_reaction",
-            {
-                content: reaction.content,
-                message_id: reaction.messageId,
-            },
-            { silent: true }
-        );
-        this.insert(messageData);
-    }
-
-    updateStarred(message, isStarred) {
-        message.isStarred = isStarred;
-        if (isStarred) {
-            this.store.discuss.starred.counter++;
-            if (this.store.discuss.starred.messages.length > 0) {
-                this.store.discuss.starred.messages.push(message);
-            }
-        } else {
-            this.store.discuss.starred.counter--;
-            removeFromArrayWithPredicate(
-                this.store.discuss.starred.messages,
-                ({ id }) => id === message.id
-            );
-        }
     }
 
     /**
@@ -200,20 +189,19 @@ export class MessageService {
         let message;
         if (data.res_id) {
             // FIXME this prevents cyclic dependencies between mail.thread and mail.message
-            this.env.bus.trigger("MESSAGE-SERVICE:INSERT_THREAD", {
+            this.env.bus.trigger("mail.thread/insert", {
                 model: data.model,
                 id: data.res_id,
             });
         }
-        if (data.id in this.store.messages) {
-            message = this.store.messages[data.id];
+        if (data.id in this.services["mail.store"].messages) {
+            message = this.services["mail.store"].messages[data.id];
         } else {
             message = new Message();
-            message._store = this.store;
-            message = this.store.messages[data.id] = message;
+            message._store = this.services["mail.store"];
+            message = this.services["mail.store"].messages[data.id] = message;
         }
         this._update(message, data, fromFetch);
-        this.updateNotifications(message);
         // return reactive version
         return message;
     }
@@ -240,13 +228,13 @@ export class MessageService {
         assignDefined(message, remainingData);
         assignDefined(message, {
             attachments: attachments.map((attachment) =>
-                this.attachmentService.insert({ message, ...attachment })
+                this.services["mail.attachment"].insert({ message, ...attachment })
             ),
             defaultSubject,
             isDiscussion,
             isNote,
-            isStarred: this.store.user
-                ? message.starred_partner_ids.includes(this.store.user.id)
+            isStarred: this.services["mail.store"].user
+                ? message.starred_partner_ids.includes(this.services["mail.store"].user.id)
                 : false,
             isTransient,
             linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
@@ -263,13 +251,13 @@ export class MessageService {
             message.author = undefined;
         }
         if (data.author?.id) {
-            message.author = this.personaService.insert({
+            message.author = this.services["mail.persona"].insert({
                 ...data.author,
                 type: "partner",
             });
         }
         if (data.guestAuthor?.id) {
-            message.author = this.personaService.insert({
+            message.author = this.services["mail.persona"].insert({
                 ...data.guestAuthor,
                 type: "guest",
                 channelId: message.originThread.id,
@@ -277,7 +265,7 @@ export class MessageService {
         }
         if (data.recipients) {
             message.recipients = data.recipients.map((recipient) =>
-                this.personaService.insert({ ...recipient, type: "partner" })
+                this.services["mail.persona"].insert({ ...recipient, type: "partner" })
             );
         }
         if (data.record_name) {
@@ -286,192 +274,38 @@ export class MessageService {
         if (data.res_model_name) {
             message.originThread.modelName = data.res_model_name;
         }
-        this._updateReactions(message, data.messageReactionGroups);
         if (message.originThread && !message.originThread.messages.includes(message)) {
             message.originThread.messages.push(message);
             this.sortMessages(message.originThread);
         }
-        if (message.isNeedaction && !this.store.discuss.inbox.messages.includes(message)) {
+        if (
+            message.isNeedaction &&
+            !this.services["mail.store"].discuss.inbox.messages.includes(message)
+        ) {
             if (!fromFetch) {
-                this.store.discuss.inbox.counter++;
+                this.services["mail.store"].discuss.inbox.counter++;
                 if (message.originThread) {
                     message.originThread.message_needaction_counter++;
                 }
             }
-            this.store.discuss.inbox.messages.push(message);
-            this.sortMessages(this.store.discuss.inbox);
+            this.services["mail.store"].discuss.inbox.messages.push(message);
+            this.sortMessages(this.services["mail.store"].discuss.inbox);
         }
-        if (message.isStarred && !this.store.discuss.starred.messages.includes(message)) {
-            this.store.discuss.starred.messages.push(message);
-            this.sortMessages(this.store.discuss.starred);
+        if (
+            message.isStarred &&
+            !this.services["mail.store"].discuss.starred.messages.includes(message)
+        ) {
+            this.services["mail.store"].discuss.starred.messages.push(message);
+            this.sortMessages(this.services["mail.store"].discuss.starred);
         }
-        if (message.isHistory && !this.store.discuss.history.messages.includes(message)) {
-            this.store.discuss.history.messages.push(message);
-            this.sortMessages(this.store.discuss.history);
+        if (
+            message.isHistory &&
+            !this.services["mail.store"].discuss.history.messages.includes(message)
+        ) {
+            this.services["mail.store"].discuss.history.messages.push(message);
+            this.sortMessages(this.services["mail.store"].discuss.history);
         }
-    }
-
-    updateNotifications(message) {
-        message.notifications = message.notifications.map((notification) =>
-            this.insertNotification({ ...notification, messageId: message.id })
-        );
-    }
-
-    _updateReactions(message, reactionGroups = []) {
-        const reactionContentToUnlink = new Set();
-        const reactionsToInsert = [];
-        for (const rawReaction of reactionGroups) {
-            const [command, reactionData] = Array.isArray(rawReaction)
-                ? rawReaction
-                : ["insert", rawReaction];
-            const reaction = this.insertReactions(reactionData);
-            if (command === "insert") {
-                reactionsToInsert.push(reaction);
-            } else {
-                reactionContentToUnlink.add(reaction.content);
-            }
-        }
-        message.reactions = message.reactions.filter(
-            ({ content }) => !reactionContentToUnlink.has(content)
-        );
-        reactionsToInsert.forEach((reaction) => {
-            const idx = message.reactions.findIndex(({ content }) => reaction.content === content);
-            if (idx !== -1) {
-                message.reactions[idx] = reaction;
-            } else {
-                message.reactions.push(reaction);
-            }
-        });
-    }
-
-    /**
-     * @param {Object} data
-     * @returns {MessageReactions}
-     */
-    insertReactions(data) {
-        let reaction = this.store.messages[data.message.id]?.reactions.find(
-            ({ content }) => content === data.content
-        );
-        if (!reaction) {
-            reaction = new MessageReactions();
-            reaction._store = this.store;
-        }
-        const personasToUnlink = new Set();
-        const alreadyKnownPersonaIds = new Set(reaction.personaLocalIds);
-        for (const rawPartner of data.partners) {
-            const [command, partnerData] = Array.isArray(rawPartner)
-                ? rawPartner
-                : ["insert", rawPartner];
-            const persona = this.personaService.insert({ ...partnerData, type: "partner" });
-            if (command === "insert" && !alreadyKnownPersonaIds.has(persona.localId)) {
-                reaction.personaLocalIds.push(persona.localId);
-            } else if (command !== "insert") {
-                personasToUnlink.add(persona.localId);
-            }
-        }
-        Object.assign(reaction, {
-            count: data.count,
-            content: data.content,
-            messageId: data.message.id,
-            personaLocalIds: reaction.personaLocalIds.filter(
-                (localId) => !personasToUnlink.has(localId)
-            ),
-        });
-        return reaction;
-    }
-
-    /**
-     * @param {Object} data
-     * @returns {Notification}
-     */
-    insertNotification(data) {
-        let notification;
-        if (data.id in this.store.notifications) {
-            notification = this.store.notifications[data.id];
-            this.updateNotification(notification, data);
-            return notification;
-        }
-        notification = new Notification(this.store, data);
-        this.updateNotification(notification, data);
-        // return reactive version
-        return this.store.notifications[data.id];
-    }
-
-    updateNotification(notification, data) {
-        Object.assign(notification, {
-            messageId: data.messageId,
-            notification_status: data.notification_status,
-            notification_type: data.notification_type,
-            failure_type: data.failure_type,
-            persona: data.res_partner_id
-                ? this.personaService.insert({
-                      id: data.res_partner_id[0],
-                      displayName: data.res_partner_id[1],
-                      type: "partner",
-                  })
-                : undefined,
-        });
-        if (notification.message.author !== this.store.self) {
-            return;
-        }
-        const thread = notification.message.originThread;
-        this.insertNotificationGroups({
-            modelName: thread?.modelName,
-            resId: thread?.id,
-            resModel: thread?.model,
-            status: notification.notification_status,
-            type: notification.notification_type,
-            notifications: [
-                [notification.isFailure ? "insert" : "insert-and-unlink", notification],
-            ],
-        });
-    }
-
-    insertNotificationGroups(data) {
-        let group = this.store.notificationGroups.find((group) => {
-            return (
-                group.resModel === data.resModel &&
-                group.type === data.type &&
-                (group.resModel !== "mail.channel" || group.resIds.has(data.resId))
-            );
-        });
-        if (!group) {
-            group = new NotificationGroup(this.store);
-        }
-        this.updateNotificationGroup(group, data);
-        if (group.notifications.length === 0) {
-            removeFromArrayWithPredicate(this.store.notificationGroups, (gr) => gr.id === group.id);
-        }
-        return group;
-    }
-
-    updateNotificationGroup(group, data) {
-        Object.assign(group, {
-            modelName: data.modelName ?? group.modelName,
-            resModel: data.resModel ?? group.resModel,
-            type: data.type ?? group.type,
-            status: data.status ?? group.status,
-        });
-        const notifications = data.notifications ?? [];
-        const alreadyKnownNotifications = new Set(group.notifications.map(({ id }) => id));
-        const notificationIdsToRemove = new Set();
-        for (const [commandName, notification] of notifications) {
-            if (commandName === "insert" && !alreadyKnownNotifications.has(notification.id)) {
-                group.notifications.push(notification);
-            } else if (commandName === "insert-and-unlink") {
-                notificationIdsToRemove.add(notification.id);
-            }
-        }
-        group.notifications = group.notifications.filter(
-            ({ id }) => !notificationIdsToRemove.has(id)
-        );
-        group.lastMessageId = group.notifications[0]?.message.id;
-        for (const notification of group.notifications) {
-            if (group.lastMessageId < notification.message.id) {
-                group.lastMessageId = notification.message.id;
-            }
-        }
-        group.resIds.add(data.resId);
+        this.env.bus.trigger("mail.message/updating", { message, data });
     }
 
     /**

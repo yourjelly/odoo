@@ -14,8 +14,11 @@ export class MessageReactions extends Component {
     setup() {
         this.user = useService("user");
         this.messaging = useService("mail.messaging");
-        this.store = useStore();
-        this.messageService = useState(useService("mail.message"));
+        this.services = {
+            "mail.store": useStore(),
+            "mail.message": useState(useService("mail.message")),
+            "mail.message.reaction": useService("mail.message.reaction"),
+        };
     }
 
     getReactionSummary(reaction) {
@@ -61,14 +64,14 @@ export class MessageReactions extends Component {
     }
 
     hasSelfReacted(reaction) {
-        return reaction.personas.includes(this.store.self);
+        return reaction.personas.includes(this.services["mail.store"].self);
     }
 
     onClickReaction(reaction) {
         if (this.hasSelfReacted(reaction)) {
-            this.messageService.removeReaction(reaction);
+            this.services["mail.message.reaction"].remove(reaction);
         } else {
-            this.messageService.react(this.props.message, reaction.content);
+            this.services["mail.message.reaction"].add(this.props.message, reaction.content);
         }
     }
 }

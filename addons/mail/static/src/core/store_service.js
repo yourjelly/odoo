@@ -67,7 +67,7 @@ export class Store {
     notifications = {};
     notificationGroups = [];
 
-    /** @type {Object.<number, import("@mail/core/follower_model").Follower>} */
+    /** @type {Object.<number, import("@mail/web/follower_model").Follower>} */
     followers = {};
 
     /**

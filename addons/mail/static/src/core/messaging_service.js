@@ -25,52 +25,62 @@ export class Messaging {
 
     setup(env, services) {
         this.env = env;
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = services["mail.store"];
         this.rpc = services.rpc;
         this.orm = services.orm;
-        /** @type {import("@mail/core/channel_member_service").ChannelMemberService} */
-        this.channelMemberService = services["mail.channel.member"];
-        /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
-        this.attachmentService = services["mail.attachment"];
+        this.services = {
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": services["mail.store"],
+            /** @type {import("@mail/core/channel_member_service").ChannelMemberService} */
+            "mail.channel.member": services["mail.channel.member"],
+            /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
+            "mail.attachment": services["mail.attachment"],
+            /** @type {import("@mail/core/sound_effects_service").SoundEffects} */
+            "mail.sound_effects": services["mail.sound_effects"],
+            /** @type {import("@mail/core/user_settings_service").UserSettings} */
+            "mail.user_settings": services["mail.user_settings"],
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": services["mail.thread"],
+            /** @type {import("@mail/core/thread_message_fetch_service").ThreadMessageFetchService} */
+            "mail.thread.message_fetch": services["mail.thread.message_fetch"],
+            /** @type {import("@mail/core/message_service").MessageService} */
+            "mail.message": services["mail.message"],
+            /** @type {import("@mail/core/message_star_service").MessageStarService} */
+            "mail.message.star": services["mail.message.star"],
+            /** @type {import("@mail/core/persona_service").PersonaService} */
+            "mail.persona": services["mail.persona"],
+            /** @type {import("@mail/core/out_of_focus_service").OutOfFocusService} */
+            "mail.out_of_focus": services["mail.out_of_focus"],
+            /** @type {import("@mail/rtc/rtc_service").Rtc} */
+            "mail.rtc": services["mail.rtc"],
+        };
         this.notificationService = services.notification;
-        /** @type {import("@mail/core/sound_effects_service").SoundEffects} */
-        this.soundEffectsService = services["mail.sound_effects"];
-        /** @type {import("@mail/core/user_settings_service").UserSettings} */
-        this.userSettingsService = services["mail.user_settings"];
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = services["mail.thread"];
-        /** @type {import("@mail/core/message_service").MessageService} */
-        this.messageService = services["mail.message"];
-        /** @type {import("@mail/core/persona_service").PersonaService} */
-        this.personaService = services["mail.persona"];
-        /** @type {import("@mail/core/out_of_focus_service").OutOfFocusService} */
-        this.outOfFocusService = services["mail.out_of_focus"];
-        /** @type {import("@mail/rtc/rtc_service").Rtc} */
-        this.rtc = services["mail.rtc"];
         this.router = services.router;
         this.bus = services.bus_service;
         this.presence = services.presence;
         this.isReady = new Deferred();
         this.imStatusService = services.im_status;
         const user = services.user;
-        this.personaService.insert({ id: user.partnerId, type: "partner", isAdmin: user.isAdmin });
+        this.services["mail.persona"].insert({
+            id: user.partnerId,
+            type: "partner",
+            isAdmin: user.isAdmin,
+        });
         this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
-        this.store.registeredImStatusPartners = this.registeredImStatusPartners;
-        this.store.discuss.inbox = this.threadService.insert({
+        this.services["mail.store"].registeredImStatusPartners = this.registeredImStatusPartners;
+        this.services["mail.store"].discuss.inbox = this.services["mail.thread"].insert({
             id: "inbox",
             model: "mail.box",
             name: _t("Inbox"),
             type: "mailbox",
         });
-        this.store.discuss.starred = this.threadService.insert({
+        this.services["mail.store"].discuss.starred = this.services["mail.thread"].insert({
             id: "starred",
             model: "mail.box",
             name: _t("Starred"),
             type: "mailbox",
             counter: 0,
         });
-        this.store.discuss.history = this.threadService.insert({
+        this.services["mail.store"].discuss.history = this.services["mail.thread"].insert({
             id: "history",
             model: "mail.box",
             name: _t("History"),
@@ -91,58 +101,62 @@ export class Messaging {
 
     initMessagingCallback(data) {
         if (data.current_partner) {
-            this.store.user = this.personaService.insert({
+            this.services["mail.store"].user = this.services["mail.persona"].insert({
                 ...data.current_partner,
                 type: "partner",
             });
         }
         if (data.currentGuest) {
-            this.store.guest = this.personaService.insert({
+            this.services["mail.store"].guest = this.services["mail.persona"].insert({
                 ...data.currentGuest,
                 type: "guest",
                 channelId: data.channels[0]?.id,
             });
         }
-        this.store.partnerRoot = this.personaService.insert({
+        this.services["mail.store"].partnerRoot = this.services["mail.persona"].insert({
             ...data.partner_root,
             type: "partner",
         });
         for (const channelData of data.channels) {
-            this.threadService.createChannelThread(channelData);
+            this.services["mail.thread"].createChannelThread(channelData);
         }
-        this.threadService.sortChannels();
+        this.services["mail.thread"].sortChannels();
         const settings = data.current_user_settings;
-        this.userSettingsService.updateFromCommands(settings);
-        this.userSettingsService.id = settings.id;
-        this.store.companyName = data.companyName;
-        this.store.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
-        this.store.discuss.chats.isOpen = settings.is_discuss_sidebar_category_chat_open;
-        this.store.discuss.inbox.counter = data.needaction_inbox_counter;
-        this.store.internalUserGroupId = data.internalUserGroupId;
-        this.store.discuss.starred.counter = data.starred_counter;
-        this.store.discuss.isActive =
+        this.services["mail.user_settings"].updateFromCommands(settings);
+        this.services["mail.user_settings"].id = settings.id;
+        this.services["mail.store"].companyName = data.companyName;
+        this.services["mail.store"].discuss.channels.isOpen =
+            settings.is_discuss_sidebar_category_channel_open;
+        this.services["mail.store"].discuss.chats.isOpen =
+            settings.is_discuss_sidebar_category_chat_open;
+        this.services["mail.store"].discuss.inbox.counter = data.needaction_inbox_counter;
+        this.services["mail.store"].internalUserGroupId = data.internalUserGroupId;
+        this.services["mail.store"].discuss.starred.counter = data.starred_counter;
+        this.services["mail.store"].discuss.isActive =
             data.menu_id === this.router.current.hash?.menu_id ||
             this.router.hash?.action === "mail.action_discuss";
         (data.shortcodes ?? []).forEach((code) => {
             this.insertCannedResponse(code);
         });
         this.isReady.resolve();
-        this.store.isMessagingReady = true;
+        this.services["mail.store"].isMessagingReady = true;
     }
 
     loadFailures() {
         this.rpc("/mail/load_message_failures", {}, { silent: true }).then((messages) => {
             messages.map((messageData) =>
-                this.messageService.insert({
+                this.services["mail.message"].insert({
                     ...messageData,
                     body: messageData.body ? markup(messageData.body) : messageData.body,
                     // implicit: failures are sent by the server at
                     // initialization only if the current partner is
                     // author of the message
-                    author: this.store.user,
+                    author: this.services["mail.store"].user,
                 })
             );
-            this.store.notificationGroups.sort((n1, n2) => n2.lastMessage.id - n1.lastMessage.id);
+            this.services["mail.store"].notificationGroups.sort(
+                (n1, n2) => n2.lastMessage.id - n1.lastMessage.id
+            );
         });
     }
 
@@ -171,15 +185,8 @@ export class Messaging {
             }, [])
         );
         for (const notif of notifications) {
+            this.env.bus.trigger("mail.messaging/notification", { notification: notif });
             switch (notif.type) {
-                case "mail.activity/updated":
-                    if (notif.payload.activity_created) {
-                        this.store.activityCounter++;
-                    }
-                    if (notif.payload.activity_deleted) {
-                        this.store.activityCounter--;
-                    }
-                    break;
                 case "mail.channel/new_message":
                     if (channelsLeft.has(notif.payload.id)) {
                         // Do not handle new message notification if the channel
@@ -193,13 +200,13 @@ export class Messaging {
                     break;
                 case "mail.channel/leave":
                     {
-                        const thread = this.threadService.insert({
+                        const thread = this.services["mail.thread"].insert({
                             ...notif.payload,
                             model: "mail.channel",
                         });
-                        this.threadService.remove(thread);
-                        if (thread.localId === this.store.discuss.threadLocalId) {
-                            this.store.discuss.threadLocalId = undefined;
+                        this.services["mail.thread"].remove(thread);
+                        if (thread.localId === this.services["mail.store"].discuss.threadLocalId) {
+                            this.services["mail.store"].discuss.threadLocalId = undefined;
                         }
                         this.notificationService.add(
                             sprintf(_t("You unsubscribed from %s."), thread.displayName),
@@ -220,7 +227,7 @@ export class Messaging {
                     break;
                 case "mail.channel/joined": {
                     const { channel, invited_by_user_id: invitedByUserId } = notif.payload;
-                    const thread = this.threadService.insert({
+                    const thread = this.services["mail.thread"].insert({
                         ...channel,
                         model: "mail.channel",
                         rtcSessions: undefined,
@@ -234,7 +241,7 @@ export class Messaging {
                     const command = rtcSessions[0][0];
                     this._updateRtcSessions(thread.id, sessionsData, command);
 
-                    if (invitedByUserId !== this.store.user?.user.id) {
+                    if (invitedByUserId !== this.services["mail.store"].user?.user.id) {
                         this.notificationService.add(
                             sprintf(_t("You have been invited to #%s"), thread.displayName),
                             { type: "info" }
@@ -243,7 +250,7 @@ export class Messaging {
                     break;
                 }
                 case "mail.channel/legacy_insert":
-                    this.threadService.insert({
+                    this.services["mail.thread"].insert({
                         id: notif.payload.channel.id,
                         model: "mail.channel",
                         serverData: notif.payload,
@@ -251,51 +258,21 @@ export class Messaging {
                     });
                     break;
                 case "mail.channel/transient_message":
-                    return this.messageService.createTransient(
+                    return this.services["mail.message"].createTransient(
                         Object.assign(notif.payload, { body: markup(notif.payload.body) })
                     );
                 case "mail.link.preview/delete":
                     {
                         const { id, message_id } = notif.payload;
-                        const index = this.store.messages[message_id].linkPreviews.findIndex(
-                            (linkPreview) => linkPreview.id === id
-                        );
-                        delete this.store.messages[message_id].linkPreviews[index];
+                        const index = this.services["mail.store"].messages[
+                            message_id
+                        ].linkPreviews.findIndex((linkPreview) => linkPreview.id === id);
+                        delete this.services["mail.store"].messages[message_id].linkPreviews[index];
                     }
                     break;
                 case "mail.message/inbox": {
                     const data = Object.assign(notif.payload, { body: markup(notif.payload.body) });
-                    this.messageService.insert(data);
-                    break;
-                }
-                case "mail.message/delete": {
-                    for (const messageId of notif.payload.message_ids) {
-                        const message = this.store.messages[messageId];
-                        if (!message) {
-                            continue;
-                        }
-                        if (message.isNeedaction) {
-                            removeFromArrayWithPredicate(
-                                this.store.discuss.inbox.messages,
-                                ({ id }) => id === message.id
-                            );
-                            this.store.discuss.inbox.counter--;
-                        }
-                        if (message.isStarred) {
-                            removeFromArrayWithPredicate(
-                                this.store.discuss.starred.messages,
-                                ({ id }) => id === message.id
-                            );
-                            this.store.discuss.starred.counter--;
-                        }
-                        delete this.store.messages[messageId];
-                        if (message.originThread) {
-                            removeFromArrayWithPredicate(
-                                message.originThread.messages,
-                                ({ id }) => id === message.id
-                            );
-                        }
-                    }
+                    this.services["mail.message"].insert(data);
                     break;
                 }
                 case "mail.message/mark_as_read": {
@@ -306,7 +283,7 @@ export class Messaging {
                         // Furthermore, server should not send back all messageIds marked as read
                         // but something like last read messageId or something like that.
                         // (just imagine you mark 1000 messages as read ... )
-                        const message = this.store.messages[messageId];
+                        const message = this.services["mail.store"].messages[messageId];
                         if (!message) {
                             continue;
                         }
@@ -317,43 +294,40 @@ export class Messaging {
                         }
                         // move messages from Inbox to history
                         const partnerIndex = message.needaction_partner_ids.find(
-                            (p) => p === this.store.user.id
+                            (p) => p === this.services["mail.store"].user.id
                         );
                         removeFromArray(message.needaction_partner_ids, partnerIndex);
                         removeFromArrayWithPredicate(
-                            this.store.discuss.inbox.messages,
+                            this.services["mail.store"].discuss.inbox.messages,
                             ({ id }) => id === messageId
                         );
-                        if (this.store.discuss.history.messages.length > 0) {
-                            this.store.discuss.history.messages.push(message);
+                        if (this.services["mail.store"].discuss.history.messages.length > 0) {
+                            this.services["mail.store"].discuss.history.messages.push(message);
                         }
                     }
-                    this.store.discuss.inbox.counter = needaction_inbox_counter;
+                    this.services["mail.store"].discuss.inbox.counter = needaction_inbox_counter;
                     if (
-                        this.store.discuss.inbox.counter > this.store.discuss.inbox.messages.length
+                        this.services["mail.store"].discuss.inbox.counter >
+                        this.services["mail.store"].discuss.inbox.messages.length
                     ) {
-                        this.threadService.fetchMessages(this.store.discuss.inbox);
-                    }
-                    break;
-                }
-                case "mail.message/toggle_star": {
-                    const { message_ids: messageIds, starred } = notif.payload;
-                    for (const messageId of messageIds) {
-                        const message = this.messageService.insert({ id: messageId });
-                        this.messageService.updateStarred(message, starred);
-                        this.messageService.sortMessages(this.store.discuss.starred);
+                        this.services["mail.thread.message_fetch"].fetchMessages(
+                            this.services["mail.store"].discuss.inbox
+                        );
                     }
                     break;
                 }
                 case "mail.channel.member/seen": {
                     const { channel_id, last_message_id, partner_id } = notif.payload;
-                    const channel = this.store.threads[createLocalId("mail.channel", channel_id)];
+                    const channel =
+                        this.services["mail.store"].threads[
+                            createLocalId("mail.channel", channel_id)
+                        ];
                     if (!channel) {
                         // for example seen from another browser, the current one has no
                         // knowledge of the channel
                         continue;
                     }
-                    if (this.store.user.id === partner_id) {
+                    if (this.services["mail.store"].user.id === partner_id) {
                         channel.serverLastSeenMsgBySelf = last_message_id;
                     }
                     const seenInfo = channel.seenInfos.find(
@@ -367,7 +341,10 @@ export class Messaging {
 
                 case "mail.channel.member/fetched": {
                     const { channel_id, last_message_id, partner_id } = notif.payload;
-                    const channel = this.store.threads[createLocalId("mail.channel", channel_id)];
+                    const channel =
+                        this.services["mail.store"].threads[
+                            createLocalId("mail.channel", channel_id)
+                        ];
                     if (!channel) {
                         return;
                     }
@@ -382,12 +359,14 @@ export class Messaging {
                 case "mail.channel.member/typing_status": {
                     const isTyping = notif.payload.isTyping;
                     const channel =
-                        this.store.threads[createLocalId("mail.channel", notif.payload.channel.id)];
+                        this.services["mail.store"].threads[
+                            createLocalId("mail.channel", notif.payload.channel.id)
+                        ];
                     if (!channel) {
                         return;
                     }
-                    const member = this.channelMemberService.insert(notif.payload);
-                    if (member.persona === this.store.self) {
+                    const member = this.services["mail.channel.member"].insert(notif.payload);
+                    if (member.persona === this.services["mail.store"].self) {
                         return;
                     }
                     if (isTyping) {
@@ -407,7 +386,9 @@ export class Messaging {
                 }
                 case "mail.channel/unpin": {
                     const thread =
-                        this.store.threads[createLocalId("mail.channel", notif.payload.id)];
+                        this.services["mail.store"].threads[
+                            createLocalId("mail.channel", notif.payload.id)
+                        ];
                     if (!thread) {
                         return;
                     }
@@ -421,13 +402,13 @@ export class Messaging {
                 case "mail.message/notification_update":
                     {
                         notif.payload.elements.map((message) => {
-                            this.messageService.insert({
+                            this.services["mail.message"].insert({
                                 ...message,
                                 body: markup(message.body),
                                 // implicit: failures are sent by the server at
                                 // initialization only if the current partner is
                                 // author of the message
-                                author: this.store.self,
+                                author: this.services["mail.store"].self,
                             });
                         });
                     }
@@ -435,14 +416,7 @@ export class Messaging {
                 case "mail.channel/last_interest_dt_changed":
                     this._handleNotificationLastInterestDtChanged(notif);
                     break;
-                case "ir.attachment/delete":
-                    {
-                        const attachment = this.store.attachments[notif.payload.id];
-                        if (!attachment) {
-                            return;
-                        }
-                        this.attachmentService.remove(attachment);
-                    }
+                default:
                     break;
             }
         }
@@ -450,21 +424,21 @@ export class Messaging {
 
     _handleNotificationLastInterestDtChanged(notif) {
         const { id, last_interest_dt } = notif.payload;
-        const channel = this.store.threads[createLocalId("mail.channel", id)];
+        const channel = this.services["mail.store"].threads[createLocalId("mail.channel", id)];
         if (channel) {
-            this.threadService.update(channel, { serverData: { last_interest_dt } });
+            this.services["mail.thread"].update(channel, { serverData: { last_interest_dt } });
         }
         if (["chat", "group"].includes(channel?.type)) {
-            this.threadService.sortChannels();
+            this.services["mail.thread"].sortChannels();
         }
     }
 
     async _handleNotificationNewMessage(notif) {
         const { id, message: messageData } = notif.payload;
-        let channel = this.store.threads[createLocalId("mail.channel", id)];
+        let channel = this.services["mail.store"].threads[createLocalId("mail.channel", id)];
         if (!channel) {
             const [channelData] = await this.orm.call("mail.channel", "channel_info", [id]);
-            channel = this.threadService.insert({
+            channel = this.services["mail.thread"].insert({
                 id: channelData.id,
                 model: "mail.channel",
                 type: channelData.channel.channel_type,
@@ -472,11 +446,11 @@ export class Messaging {
             });
         }
         if (!channel.is_pinned) {
-            this.threadService.pin(channel);
+            this.services["mail.thread"].pin(channel);
         }
 
         removeFromArrayWithPredicate(channel.messages, ({ id }) => id === messageData.temporary_id);
-        delete this.store.messages[messageData.temporary_id];
+        delete this.services["mail.store"].messages[messageData.temporary_id];
         messageData.temporary_id = null;
         if ("parentMessage" in messageData && messageData.parentMessage.body) {
             messageData.parentMessage.body = markup(messageData.parentMessage.body);
@@ -484,36 +458,36 @@ export class Messaging {
         const data = Object.assign(messageData, {
             body: markup(messageData.body),
         });
-        const message = this.messageService.insert({
+        const message = this.services["mail.message"].insert({
             ...data,
             res_id: channel.id,
             model: channel.model,
         });
-        if (channel.chatPartnerId !== this.store.partnerRoot?.id) {
+        if (channel.chatPartnerId !== this.services["mail.store"].partnerRoot?.id) {
             if (!this.presence.isOdooFocused() && channel.isChatChannel) {
-                this.outOfFocusService.notify(message, channel);
+                this.services["mail.out_of_focus"].notify(message, channel);
             }
 
-            if (channel.type !== "channel" && !this.store.guest) {
+            if (channel.type !== "channel" && !this.services["mail.store"].guest) {
                 // disabled on non-channel threads and
                 // on "channel" channels for performance reasons
-                this.threadService.markAsFetched(channel);
+                this.services["mail.thread"].markAsFetched(channel);
             }
         }
         if (
             !message.isSelfAuthored &&
             channel.composer.isFocused &&
             channel.mostRecentNonTransientMessage &&
-            !this.store.guest &&
+            !this.services["mail.store"].guest &&
             channel.mostRecentNonTransientMessage === channel.mostRecentMsg
         ) {
-            this.threadService.markAsRead(channel);
+            this.services["mail.thread"].markAsRead(channel);
         }
     }
 
     _handleNotificationRecordInsert(notif) {
         if (notif.payload.Thread) {
-            this.threadService.insert({
+            this.services["mail.thread"].insert({
                 id: notif.payload.Thread.id,
                 model: notif.payload.Thread.model,
                 serverData: notif.payload.Thread,
@@ -521,7 +495,7 @@ export class Messaging {
         }
 
         if (notif.payload.Channel) {
-            this.threadService.insert({
+            this.services["mail.thread"].insert({
                 id: notif.payload.Channel.id,
                 model: "mail.channel",
                 serverData: {
@@ -533,7 +507,7 @@ export class Messaging {
             });
         }
         if (notif.payload.RtcSession) {
-            this.rtc.insertSession(notif.payload.RtcSession);
+            this.services["mail.rtc"].insertSession(notif.payload.RtcSession);
         }
         if (notif.payload.Partner) {
             const partners = Array.isArray(notif.payload.Partner)
@@ -541,7 +515,7 @@ export class Messaging {
                 : [notif.payload.Partner];
             for (const partner of partners) {
                 if (partner.im_status) {
-                    this.personaService.insert({ ...partner, type: "partner" });
+                    this.services["mail.persona"].insert({ ...partner, type: "partner" });
                 }
             }
         }
@@ -550,45 +524,47 @@ export class Messaging {
                 ? notif.payload.Guest
                 : [notif.payload.Guest];
             for (const guest of guests) {
-                this.personaService.insert({ ...guest, type: "guest" });
+                this.services["mail.persona"].insert({ ...guest, type: "guest" });
             }
         }
         const { LinkPreview: linkPreviews } = notif.payload;
         if (linkPreviews) {
             for (const linkPreview of linkPreviews) {
-                this.store.messages[linkPreview.message.id].linkPreviews.push(
+                this.services["mail.store"].messages[linkPreview.message.id].linkPreviews.push(
                     new LinkPreview(linkPreview)
                 );
             }
         }
         const { Message: messageData } = notif.payload;
         if (messageData) {
-            const isStarred = this.store.messages[messageData.id]?.isStarred;
-            const message = this.messageService.insert({
+            const isStarred = this.services["mail.store"].messages[messageData.id]?.isStarred;
+            const message = this.services["mail.message"].insert({
                 ...messageData,
                 body: messageData.body ? markup(messageData.body) : messageData.body,
             });
             if (isStarred && message.isEmpty) {
-                this.messageService.updateStarred(message, false);
+                this.services["mail.message.star"].updateStarred(message, false);
             }
         }
         const { "res.users.settings": settings } = notif.payload;
         if (settings) {
-            this.userSettingsService.updateFromCommands(settings);
-            this.store.discuss.chats.isOpen =
-                settings.is_discuss_sidebar_category_chat_open ?? this.store.discuss.chats.isOpen;
-            this.store.discuss.channels.isOpen =
+            this.services["mail.user_settings"].updateFromCommands(settings);
+            this.services["mail.store"].discuss.chats.isOpen =
+                settings.is_discuss_sidebar_category_chat_open ??
+                this.services["mail.store"].discuss.chats.isOpen;
+            this.services["mail.store"].discuss.channels.isOpen =
                 settings.is_discuss_sidebar_category_channel_open ??
-                this.store.discuss.channels.isOpen;
+                this.services["mail.store"].discuss.channels.isOpen;
         }
         const { "res.users.settings.volumes": volumeSettings } = notif.payload;
         if (volumeSettings) {
-            this.userSettingsService.setVolumes(volumeSettings);
+            this.services["mail.user_settings"].setVolumes(volumeSettings);
         }
     }
 
     _updateRtcSessions(channelId, sessionsData, command) {
-        const channel = this.store.threads[createLocalId("mail.channel", channelId)];
+        const channel =
+            this.services["mail.store"].threads[createLocalId("mail.channel", channelId)];
         if (!channel) {
             return;
         }
@@ -596,20 +572,20 @@ export class Messaging {
         switch (command) {
             case "insert-and-unlink":
                 for (const sessionData of sessionsData) {
-                    this.rtc.deleteSession(sessionData.id);
+                    this.services["mail.rtc"].deleteSession(sessionData.id);
                 }
                 break;
             case "insert":
                 for (const sessionData of sessionsData) {
-                    const session = this.rtc.insertSession(sessionData);
+                    const session = this.services["mail.rtc"].insertSession(sessionData);
                     channel.rtcSessions[session.id] = session;
                 }
                 break;
         }
         if (Object.keys(channel.rtcSessions).length > oldCount) {
-            this.soundEffectsService.play("channel-join");
+            this.services["mail.sound_effects"].play("channel-join");
         } else if (Object.keys(channel.rtcSessions).length < oldCount) {
-            this.soundEffectsService.play("member-leave");
+            this.services["mail.sound_effects"].play("member-leave");
         }
     }
 
@@ -619,7 +595,7 @@ export class Messaging {
 
     fetchPreviews = memoize(async () => {
         const ids = [];
-        for (const thread of Object.values(this.store.threads)) {
+        for (const thread of Object.values(this.services["mail.store"].threads)) {
             if (["channel", "group", "chat"].includes(thread.type)) {
                 ids.push(thread.id);
             }
@@ -627,11 +603,16 @@ export class Messaging {
         if (ids.length) {
             const previews = await this.orm.call("mail.channel", "channel_fetch_preview", [ids]);
             for (const preview of previews) {
-                const thread = this.store.threads[createLocalId("mail.channel", preview.id)];
+                const thread =
+                    this.services["mail.store"].threads[createLocalId("mail.channel", preview.id)];
                 const data = Object.assign(preview.last_message, {
                     body: markup(preview.last_message.body),
                 });
-                this.messageService.insert({ ...data, res_id: thread.id, model: thread.model });
+                this.services["mail.message"].insert({
+                    ...data,
+                    res_id: thread.id,
+                    model: thread.model,
+                });
             }
         }
     });
@@ -639,8 +620,8 @@ export class Messaging {
     async searchPartners(searchStr = "", limit = 10) {
         let partners = [];
         const searchTerm = cleanTerm(searchStr);
-        for (const localId in this.store.personas) {
-            const persona = this.store.personas[localId];
+        for (const localId in this.services["mail.store"].personas) {
+            const persona = this.services["mail.store"].personas[localId];
             if (persona.type !== "partner") {
                 continue;
             }
@@ -660,7 +641,7 @@ export class Messaging {
                 limit,
             ]);
             partners = partnersData.map((data) =>
-                this.personaService.insert({ ...data, type: "partner" })
+                this.services["mail.persona"].insert({ ...data, type: "partner" })
             );
         }
         return partners;
@@ -676,10 +657,10 @@ export class Messaging {
     }
 
     insertCannedResponse(data) {
-        let cannedResponse = this.store.cannedResponses[data.id];
+        let cannedResponse = this.services["mail.store"].cannedResponses[data.id];
         if (!cannedResponse) {
-            this.store.cannedResponses[data.id] = new CannedResponse();
-            cannedResponse = this.store.cannedResponses[data.id];
+            this.services["mail.store"].cannedResponses[data.id] = new CannedResponse();
+            cannedResponse = this.services["mail.store"].cannedResponses[data.id];
         }
         Object.assign(cannedResponse, {
             id: data.id,
@@ -706,7 +687,9 @@ export const messagingService = {
         "mail.sound_effects",
         "mail.user_settings",
         "mail.thread",
+        "mail.thread.message_fetch",
         "mail.message",
+        "mail.message.star",
         "mail.persona",
         "mail.rtc",
         "mail.out_of_focus",

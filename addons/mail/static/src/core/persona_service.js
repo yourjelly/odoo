@@ -14,8 +14,10 @@ export class PersonaService {
     setup(env, services) {
         this.env = env;
         this.rpc = services.rpc;
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = services["mail.store"];
+        this.services = {
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": services["mail.store"],
+        };
     }
 
     async updateGuestName(guest, name) {
@@ -31,16 +33,16 @@ export class PersonaService {
      */
     insert(data) {
         const localId = createLocalId(data.type, data.id);
-        let persona = this.store.personas[localId];
+        let persona = this.services["mail.store"].personas[localId];
         if (!persona) {
             persona = new Persona();
-            persona._store = this.store;
+            persona._store = this.services["mail.store"];
             persona.localId = localId;
-            this.store.personas[localId] = persona;
+            this.services["mail.store"].personas[localId] = persona;
         }
         this.update(persona, data);
         // return reactive version
-        return this.store.personas[localId];
+        return this.services["mail.store"].personas[localId];
     }
 
     update(persona, data) {
@@ -50,9 +52,9 @@ export class PersonaService {
             persona.type === "partner" &&
             persona.im_status !== "im_partner" &&
             !persona.is_public &&
-            !this.store.registeredImStatusPartners?.includes(persona.id)
+            !this.services["mail.store"].registeredImStatusPartners?.includes(persona.id)
         ) {
-            this.store.registeredImStatusPartners?.push(persona.id);
+            this.services["mail.store"].registeredImStatusPartners?.push(persona.id);
         }
     }
 }

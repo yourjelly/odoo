@@ -22,14 +22,18 @@ export class MessagingMenu extends Component {
     static template = "mail.MessagingMenu";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
         this.hasTouch = hasTouch;
-        this.notification = useState(useService("mail.notification.permission"));
-        /** @type {import('@mail/web/chat_window/chat_window_service').ChatWindowService} */
-        this.chatWindowService = useState(useService("mail.chat_window"));
-        /** @type {import('@mail/core/thread_service').ThreadService} */
-        this.threadService = useState(useService("mail.thread"));
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            "mail.notification.permission": useState(useService("mail.notification.permission")),
+            /** @type {import('@mail/web/chat_window/chat_window_service').ChatWindowService} */
+            "mail.chat_window": useService("mail.chat_window"),
+            /** @type {import('@mail/core/thread_service').ThreadService} */
+            "mail.thread": useService("mail.thread"),
+            /** @type {import('@mail/core/thread_message_fetch_service').ThreadMessageFetchService} */
+            "mail.thread.message_fetch": useService("mail.thread.message_fetch"),
+        };
         this.action = useService("action");
         this.state = useState({
             addingChat: false,
@@ -42,13 +46,16 @@ export class MessagingMenu extends Component {
     }
 
     beforeOpen() {
-        this.messaging.fetchPreviews();
+        this.services["mail.messaging"].fetchPreviews();
         if (
-            !this.store.discuss.inbox.isLoaded &&
-            this.store.discuss.inbox.status !== "loading" &&
-            this.store.discuss.inbox.counter !== this.store.discuss.inbox.messages.length
+            !this.services["mail.store"].discuss.inbox.isLoaded &&
+            this.services["mail.store"].discuss.inbox.status !== "loading" &&
+            this.services["mail.store"].discuss.inbox.counter !==
+                this.services["mail.store"].discuss.inbox.messages.length
         ) {
-            this.threadService.fetchMessages(this.store.discuss.inbox);
+            this.services["mail.thread.message_fetch"].fetchMessages(
+                this.services["mail.store"].discuss.inbox
+            );
         }
     }
 
@@ -64,9 +71,9 @@ export class MessagingMenu extends Component {
     markAsRead(preview) {
         const { thread, isNeedaction } = preview;
         if (isNeedaction) {
-            this.threadService.markAllMessagesAsRead(thread);
+            this.services["mail.thread"].markAllMessagesAsRead(thread);
         } else {
-            this.threadService.markAsRead(thread);
+            this.services["mail.thread"].markAsRead(thread);
         }
     }
 
@@ -85,31 +92,40 @@ export class MessagingMenu extends Component {
     get hasPreviews() {
         return (
             this.displayedPreviews.length > 0 ||
-            (this.store.notificationGroups.length > 0 && this.store.discuss.activeTab === "all") ||
-            (this.notification.permission === "prompt" && this.store.discuss.activeTab === "all")
+            (this.services["mail.store"].notificationGroups.length > 0 &&
+                this.services["mail.store"].discuss.activeTab === "all") ||
+            (this.services["mail.notification.permission"].permission === "prompt" &&
+                this.services["mail.store"].discuss.activeTab === "all")
         );
     }
 
     get notificationRequest() {
         return {
             body: _t("Enable desktop notifications to chat"),
-            displayName: sprintf(_t("%s has a request"), this.store.partnerRoot.name),
-            iconSrc: this.threadService.avatarUrl(this.store.partnerRoot),
-            partner: this.store.partnerRoot,
+            displayName: sprintf(
+                _t("%s has a request"),
+                this.services["mail.store"].partnerRoot.name
+            ),
+            iconSrc: this.services["mail.thread"].avatarUrl(
+                this.services["mail.store"].partnerRoot
+            ),
+            partner: this.services["mail.store"].partnerRoot,
             isLast:
-                this.displayedPreviews.length === 0 && this.store.notificationGroups.length === 0,
+                this.displayedPreviews.length === 0 &&
+                this.services["mail.store"].notificationGroups.length === 0,
             isShown:
-                this.store.discuss.activeTab === "all" && this.notification.permission === "prompt",
+                this.services["mail.store"].discuss.activeTab === "all" &&
+                this.services["mail.notification.permission"].permission === "prompt",
         };
     }
 
     get displayedPreviews() {
         /** @type {import("@mail/core/thread_model").Thread[]} **/
-        let threads = Object.values(this.store.threads).filter(
+        let threads = Object.values(this.services["mail.store"].threads).filter(
             (thread) =>
                 thread.is_pinned || (thread.hasNeedactionMessages && thread.type !== "mailbox")
         );
-        const tab = this.store.discuss.activeTab;
+        const tab = this.services["mail.store"].discuss.activeTab;
         if (tab !== "all") {
             threads = threads.filter(({ type }) => this.tabToThreadType(tab).includes(type));
         }
@@ -131,9 +147,9 @@ export class MessagingMenu extends Component {
                 const message = mostRecentMsg;
                 previews.push({
                     id: `preview-${thread.localId}`,
-                    count: this.threadService.localMessageUnreadCounter(thread),
+                    count: this.services["mail.thread"].localMessageUnreadCounter(thread),
                     imgUrl: thread.imgUrl,
-                    hasMarkAsReadButton: this.threadService.isUnread(thread),
+                    hasMarkAsReadButton: this.services["mail.thread"].isUnread(thread),
                     message,
                     thread,
                     isNeedaction: false,
@@ -199,15 +215,15 @@ export class MessagingMenu extends Component {
     }
 
     openDiscussion(thread) {
-        this.threadService.open(thread);
+        this.services["mail.thread"].open(thread);
         this.close();
     }
 
     onClickNewMessage() {
-        if (this.store.isSmall && this.env.inDiscussApp) {
+        if (this.services["mail.store"].isSmall && this.env.inDiscussApp) {
             this.state.addingChat = true;
         } else {
-            this.chatWindowService.openNewMessage();
+            this.services["mail.chat_window"].openNewMessage();
         }
         this.close();
     }
@@ -230,7 +246,7 @@ export class MessagingMenu extends Component {
     }
 
     openThread(thread) {
-        if (this.store.discuss.isActive) {
+        if (this.services["mail.store"].discuss.isActive) {
             this.action.doAction({
                 type: "ir.actions.act_window",
                 res_model: thread.model,
@@ -239,9 +255,9 @@ export class MessagingMenu extends Component {
             });
             // Close the related chat window as having both the form view
             // and the chat window does not look good.
-            this.store.chatWindows.find(({ thr }) => thr === thread)?.close();
+            this.services["mail.store"].chatWindows.find(({ thr }) => thr === thread)?.close();
         } else {
-            this.threadService.open(thread);
+            this.services["mail.thread"].open(thread);
         }
         this.close();
     }
@@ -279,35 +295,39 @@ export class MessagingMenu extends Component {
     }
 
     onClickNavTab(tabId) {
-        if (this.store.discuss.activeTab === tabId) {
+        if (this.services["mail.store"].discuss.activeTab === tabId) {
             return;
         }
-        this.store.discuss.activeTab = tabId;
+        this.services["mail.store"].discuss.activeTab = tabId;
         if (
-            this.store.discuss.activeTab === "mailbox" &&
-            (!this.store.discuss.threadLocalId ||
-                this.store.threads[this.store.discuss.threadLocalId].type !== "mailbox")
+            this.services["mail.store"].discuss.activeTab === "mailbox" &&
+            (!this.services["mail.store"].discuss.threadLocalId ||
+                this.services["mail.store"].threads[
+                    this.services["mail.store"].discuss.threadLocalId
+                ].type !== "mailbox")
         ) {
-            this.threadService.setDiscussThread(
-                Object.values(this.store.threads).find((thread) => thread.id === "inbox")
+            this.services["mail.thread"].setDiscussThread(
+                Object.values(this.services["mail.store"].threads).find(
+                    (thread) => thread.id === "inbox"
+                )
             );
         }
-        if (this.store.discuss.activeTab !== "mailbox") {
-            this.store.discuss.threadLocalId = null;
+        if (this.services["mail.store"].discuss.activeTab !== "mailbox") {
+            this.services["mail.store"].discuss.threadLocalId = null;
         }
     }
 
     get counter() {
         let value =
-            this.store.discuss.inbox.counter +
-            Object.values(this.store.threads).filter(
-                (thread) => thread.is_pinned && this.threadService.isUnread(thread)
+            this.services["mail.store"].discuss.inbox.counter +
+            Object.values(this.services["mail.store"].threads).filter(
+                (thread) => thread.is_pinned && this.services["mail.thread"].isUnread(thread)
             ).length +
-            Object.values(this.store.notificationGroups).reduce(
+            Object.values(this.services["mail.store"].notificationGroups).reduce(
                 (acc, ng) => acc + parseInt(Object.values(ng.notifications).length),
                 0
             );
-        if (this.notification.permission === "prompt") {
+        if (this.services["mail.notification.permission"].permission === "prompt") {
             value++;
         }
         return value;

@@ -12,7 +12,6 @@ import {
     Component,
     onWillStart,
     useExternalListener,
-    useState,
     onMounted,
     useRef,
     useEffect,
@@ -42,15 +41,17 @@ export class ChatWindowContainer extends Component {
     }
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
-        this.chatWindowService = useState(useService("mail.chat_window"));
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            "mail.chat_window": useService("mail.chat_window"),
+        };
         this.hiddenMenuRef = useRef("hiddenMenu");
         useEffect(
             () => this.setHiddenMenuOffset(),
-            () => [this.chatWindowService.hidden]
+            () => [this.services["mail.chat_window"].hidden]
         );
-        onWillStart(() => this.messaging.isReady);
+        onWillStart(() => this.services["mail.messaging"].isReady);
         onMounted(() => this.setHiddenMenuOffset());
 
         this.onResize();
@@ -65,29 +66,36 @@ export class ChatWindowContainer extends Component {
         const offsetFrom = textDirection === "rtl" ? "left" : "right";
         const visibleOffset =
             CHAT_WINDOW_END_GAP_WIDTH +
-            this.chatWindowService.maxVisible * (CHAT_WINDOW_WIDTH + CHAT_WINDOW_END_GAP_WIDTH);
+            this.services["mail.chat_window"].maxVisible *
+                (CHAT_WINDOW_WIDTH + CHAT_WINDOW_END_GAP_WIDTH);
         const oppositeFrom = offsetFrom === "right" ? "left" : "right";
         this.hiddenMenuRef.el.style = `${offsetFrom}: ${visibleOffset}px; ${oppositeFrom}: auto`;
     }
 
     onResize() {
-        while (this.chatWindowService.visible.length > this.chatWindowService.maxVisible) {
-            this.chatWindowService.hide(
-                this.chatWindowService.visible[this.chatWindowService.visible.length - 1]
+        while (
+            this.services["mail.chat_window"].visible.length >
+            this.services["mail.chat_window"].maxVisible
+        ) {
+            this.services["mail.chat_window"].hide(
+                this.services["mail.chat_window"].visible[
+                    this.services["mail.chat_window"].visible.length - 1
+                ]
             );
         }
         while (
-            this.chatWindowService.visible.length < this.chatWindowService.maxVisible &&
-            this.chatWindowService.hidden.length > 0
+            this.services["mail.chat_window"].visible.length <
+                this.services["mail.chat_window"].maxVisible &&
+            this.services["mail.chat_window"].hidden.length > 0
         ) {
-            this.chatWindowService.show(this.chatWindowService.hidden[0]);
+            this.services["mail.chat_window"].show(this.services["mail.chat_window"].hidden[0]);
         }
         this.setHiddenMenuOffset();
     }
 
     get unread() {
         let unreadCounter = 0;
-        for (const chatWindow of this.chatWindowService.hidden) {
+        for (const chatWindow of this.services["mail.chat_window"].hidden) {
             unreadCounter += chatWindow.thread.message_unread_counter;
         }
         return unreadCounter;

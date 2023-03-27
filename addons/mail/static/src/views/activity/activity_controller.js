@@ -37,8 +37,10 @@ export class ActivityController extends Component {
 
         this.dialog = useService("dialog");
         this.action = useService("action");
-        this.messaging = useMessaging();
-        this.activity = useService("mail.activity");
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.activity": useService("mail.activity"),
+        };
     }
 
     scheduleActivity() {
@@ -50,7 +52,7 @@ export class ActivityController extends Component {
             multiSelect: false,
             context: this.props.context,
             onSelected: async (resIds) => {
-                await this.activity.schedule(this.props.resModel, resIds[0]);
+                await this.services["mail.activity"].schedule(this.props.resModel, resIds[0]);
                 this.model.load();
             },
         });

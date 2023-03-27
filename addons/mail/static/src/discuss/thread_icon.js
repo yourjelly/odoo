@@ -22,10 +22,14 @@ export class ThreadIcon extends Component {
     };
 
     setup() {
-        this.store = useStore();
+        this.services = {
+            "mail.store": useStore(),
+        };
     }
 
     get chatPartner() {
-        return this.store.personas[createLocalId("partner", this.props.thread.chatPartnerId)];
+        return this.services["mail.store"].personas[
+            createLocalId("partner", this.props.thread.chatPartnerId)
+        ];
     }
 }

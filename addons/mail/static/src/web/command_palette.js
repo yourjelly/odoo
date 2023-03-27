@@ -29,15 +29,18 @@ DialogCommand.template = xml`
 commandProviderRegistry.add("mail.partner", {
     namespace: "@",
     async provide(env, options) {
-        /** @type {import("@mail/core/messaging_service").Messaging} */
-        const messaging = env.services["mail.messaging"];
-        const threadService = env.services["mail.thread"];
-        const results = await messaging.searchPartners(options.searchValue);
+        const services = {
+            /** @type {import("@mail/core/messaging_service").Messaging} */
+            "mail.messaging": env.services["mail.messaging"],
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": env.services["mail.thread"],
+        };
+        const results = await services["mail.messaging"].searchPartners(options.searchValue);
         return results.map(function (partner) {
             return {
                 Component: DialogCommand,
                 action() {
-                    threadService.openChat({ partnerId: partner.id });
+                    services["mail.thread"].openChat({ partnerId: partner.id });
                 },
                 name: partner.name,
                 props: { email: partner.email },
@@ -60,14 +63,17 @@ commandSetupRegistry.add("#", {
 commandProviderRegistry.add("mail.channel", {
     namespace: "#",
     async provide(env, options) {
-        /** @type {import("@mail/core/messaging_service").Messaging} */
-        const messaging = env.services["mail.messaging"];
-        const threadService = env.services["mail.thread"];
+        const services = {
+            /** @type {import("@mail/core/messaging_service").Messaging} */
+            "mail.messaging": env.services["mail.messaging"],
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": env.services["mail.thread"],
+        };
         const domain = [
             ["channel_type", "=", "channel"],
             ["name", "ilike", cleanTerm(options.searchValue)],
         ];
-        const channelsData = await messaging.orm.searchRead(
+        const channelsData = await services["mail.messaging"].orm.searchRead(
             "mail.channel",
             domain,
             ["channel_type", "name"],
@@ -75,8 +81,8 @@ commandProviderRegistry.add("mail.channel", {
         );
         return channelsData.map((data) => ({
             async action() {
-                const channel = await threadService.joinChannel(data.id, data.name);
-                threadService.open(channel);
+                const channel = await services["mail.thread"].joinChannel(data.id, data.name);
+                services["mail.thread"].open(channel);
             },
             // todo: handle displayname in a way (seems like "group" channels
             // do not have a name

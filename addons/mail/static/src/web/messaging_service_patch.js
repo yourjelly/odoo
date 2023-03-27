@@ -7,15 +7,17 @@ import { patch } from "@web/core/utils/patch";
 patch(Messaging.prototype, "mail/web", {
     setup(env, services, initialThreadLocalId) {
         this._super(env, services, initialThreadLocalId);
-        /** @type {import("@mail/chat/chat_window_service").ChatWindow} */
-        this.chatWindowService = services["mail.chat_window"];
+        Object.assign(this.services, {
+            /** @type {import("@mail/chat/chat_window_service").ChatWindow} */
+            "mail.chat_window": services["mail.chat_window"],
+        });
     },
     initMessagingCallback(data) {
         this.loadFailures();
         for (const channelData of data.channels) {
-            const thread = this.threadService.createChannelThread(channelData);
+            const thread = this.services["mail.thread"].createChannelThread(channelData);
             if (channelData.is_minimized && channelData.state !== "closed") {
-                this.chatWindowService.insert({
+                this.services["mail.chat_window"].insert({
                     autofocus: 0,
                     folded: channelData.state === "folded",
                     thread,
@@ -26,8 +28,9 @@ patch(Messaging.prototype, "mail/web", {
     },
     async _handleNotificationNewMessage(notif) {
         await this._super(notif);
-        const channel = this.store.threads[createLocalId("mail.channel", notif.payload.id)];
-        this.chatWindowService.insert({ thread: channel });
+        const channel =
+            this.services["mail.store"].threads[createLocalId("mail.channel", notif.payload.id)];
+        this.services["mail.chat_window"].insert({ thread: channel });
     },
 });
 

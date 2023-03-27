@@ -12,8 +12,10 @@ export class CallInvitations extends Component {
     static template = "mail.CallInvitations";
 
     setup() {
-        this.rtc = useRtc();
-        this.store = useStore();
+        this.services = {
+            "mail.rtc": useRtc(),
+            "mail.store": useStore(),
+        };
     }
 }
 

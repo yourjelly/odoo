@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { useMessaging } from "@mail/core/messaging_hook";
-import { Component, onMounted, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, useExternalListener, useRef } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 export class ActivityMarkAsDone extends Component {
@@ -16,8 +16,12 @@ export class ActivityMarkAsDone extends Component {
     }
 
     setup() {
-        this.messaging = useMessaging();
-        this.threadService = useState(useService("mail.thread"));
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.chatter": useService("mail.chatter"),
+            "mail.thread": useService("mail.thread"),
+            "mail.thread.message_fetch": useService("mail.thread.message_fetch"),
+        };
         this.textArea = useRef("textarea");
         onMounted(() => {
             this.textArea.el.focus();
@@ -33,17 +37,17 @@ export class ActivityMarkAsDone extends Component {
 
     async onClickDone() {
         const { res_id: resId, res_model: resModel } = this.props.activity;
-        const thread = this.threadService.getThread(resModel, resId);
+        const thread = this.services["mail.chatter"].getThread(resModel, resId);
         await this.env.services["mail.activity"].markAsDone(this.props.activity);
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities"]);
         }
-        await this.threadService.fetchNewMessages(thread);
+        await this.services["mail.thread.message_fetch"].fetchNewMessages(thread);
     }
 
     async onClickDoneAndScheduleNext() {
         const { res_id: resId, res_model: resModel } = this.props.activity;
-        const thread = this.threadService.getThread(resModel, resId);
+        const thread = this.services["mail.chatter"].getThread(resModel, resId);
         if (this.props.onClickDoneAndScheduleNext) {
             this.props.onClickDoneAndScheduleNext();
         }
@@ -58,7 +62,7 @@ export class ActivityMarkAsDone extends Component {
                 feedback: this.props.activity.feedback,
             }
         );
-        this.threadService.fetchNewMessages(thread);
+        this.services["mail.thread.message_fetch"].fetchNewMessages(thread);
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities", "attachments"]);
         }

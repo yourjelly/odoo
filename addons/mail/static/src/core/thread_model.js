@@ -51,7 +51,7 @@ export class Thread {
     customName;
     /** @type {string} */
     description;
-    /** @type {import("@mail/core/follower_model").Follower[]} */
+    /** @type {import("@mail/web/follower_model").Follower[]} */
     followers = [];
     isAdmin = false;
     loadMore = false;
@@ -211,7 +211,7 @@ export class Thread {
     }
 
     /**
-     * @returns {import("@mail/core/follower_model").Follower}
+     * @returns {import("@mail/web/follower_model").Follower}
      */
     get followerOfSelf() {
         return this.followers.find((f) => f.partner === this._store.self);

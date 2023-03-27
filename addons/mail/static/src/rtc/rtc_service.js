@@ -89,20 +89,20 @@ function hasTurn(iceServers) {
 export class Rtc {
     constructor(env, services) {
         this.env = env;
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = services["mail.store"];
         this.notification = services.notification;
         this.rpc = services.rpc;
-        /** @type {import("@mail/core/channel_member_service").ChannelMemberService} */
-        this.channelMemberService = services["mail.channel.member"];
-        /** @type {import("@mail/core/sound_effects_service").SoundEffects} */
-        this.soundEffectsService = services["mail.sound_effects"];
-        /** @type {import("@mail/core/user_settings_service").UserSettings} */
-        this.userSettingsService = services["mail.user_settings"];
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = services["mail.thread"];
-        /** @type {import("@mail/core/persona_service").PersonaService} */
-        this.personaService = services["mail.persona"];
+        this.services = {
+            /** @type {import("@mail/core/channel_member_service").ChannelMemberService} */
+            "mail.channel.member": services["mail.channel.member"],
+            /** @type {import("@mail/core/sound_effects_service").SoundEffects} */
+            "mail.sound_effects": services["mail.sound_effects"],
+            /** @type {import("@mail/core/user_settings_service").UserSettings} */
+            "mail.user_settings": services["mail.user_settings"],
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": services["mail.thread"],
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": services["mail.store"],
+        };
         this.state = reactive({
             hasPendingRequest: false,
             selfSession: undefined,
@@ -139,35 +139,36 @@ export class Rtc {
         this.blurManager = undefined;
         this.ringingThreads = reactive([], () => this.onRingingThreadsChange());
         void this.ringingThreads.length;
-        this.store.ringingThreads = this.ringingThreads;
-        onChange(this.userSettingsService, "useBlur", () => {
+        this.services["mail.store"].ringingThreads = this.ringingThreads;
+        onChange(this.services["mail.user_settings"], "useBlur", () => {
             if (this.state.sendCamera) {
                 this.toggleVideo("camera", true);
             }
         });
-        onChange(this.userSettingsService, "edgeBlurAmount", () => {
+        onChange(this.services["mail.user_settings"], "edgeBlurAmount", () => {
             if (this.blurManager) {
-                this.blurManager.edgeBlur = this.userSettingsService.edgeBlurAmount;
+                this.blurManager.edgeBlur = this.services["mail.user_settings"].edgeBlurAmount;
             }
         });
-        onChange(this.userSettingsService, "backgroundBlurAmount", () => {
+        onChange(this.services["mail.user_settings"], "backgroundBlurAmount", () => {
             if (this.blurManager) {
-                this.blurManager.backgroundBlur = this.userSettingsService.backgroundBlurAmount;
+                this.blurManager.backgroundBlur =
+                    this.services["mail.user_settings"].backgroundBlurAmount;
             }
         });
-        onChange(this.userSettingsService, "voiceActivationThreshold", async () => {
+        onChange(this.services["mail.user_settings"], "voiceActivationThreshold", async () => {
             await this.linkVoiceActivation();
         });
-        onChange(this.userSettingsService, "usePushToTalk", async () => {
+        onChange(this.services["mail.user_settings"], "usePushToTalk", async () => {
             await this.linkVoiceActivation();
         });
-        onChange(this.userSettingsService, "audioInputDeviceId", async () => {
+        onChange(this.services["mail.user_settings"], "audioInputDeviceId", async () => {
             if (this.state.selfSession) {
                 await this.resetAudioTrack({ force: true });
             }
         });
         this.env.bus.addEventListener(
-            "THREAD-SERVICE:UPDATE_RTC_SESSIONS",
+            "mail.rtc/updateSessions",
             ({ detail: { commands = [], record, thread } }) => {
                 if (record) {
                     const session = this.insertSession(record);
@@ -195,33 +196,35 @@ export class Rtc {
         browser.addEventListener("keydown", (ev) => {
             if (
                 !this.state.channel ||
-                this.userSettingsService.isRegisteringKey ||
-                !this.userSettingsService.usePushToTalk ||
-                !this.userSettingsService.isPushToTalkKey(ev)
+                this.services["mail.user_settings"].isRegisteringKey ||
+                !this.services["mail.user_settings"].usePushToTalk ||
+                !this.services["mail.user_settings"].isPushToTalkKey(ev)
             ) {
                 return;
             }
             browser.clearTimeout(this.state.pttReleaseTimeout);
             if (!this.state.selfSession.isTalking && !this.state.selfSession.isMute) {
-                this.soundEffectsService.play("push-to-talk-on", { volume: 0.3 });
+                this.services["mail.sound_effects"].play("push-to-talk-on", { volume: 0.3 });
             }
             this.setTalking(true);
         });
         browser.addEventListener("keyup", (ev) => {
             if (
                 !this.state.channel ||
-                !this.userSettingsService.usePushToTalk ||
-                !this.userSettingsService.isPushToTalkKey(ev, { ignoreModifiers: true }) ||
+                !this.services["mail.user_settings"].usePushToTalk ||
+                !this.services["mail.user_settings"].isPushToTalkKey(ev, {
+                    ignoreModifiers: true,
+                }) ||
                 !this.state.selfSession.isTalking
             ) {
                 return;
             }
             if (!this.state.selfSession.isMute) {
-                this.soundEffectsService.play("push-to-talk-off", { volume: 0.3 });
+                this.services["mail.sound_effects"].play("push-to-talk-off", { volume: 0.3 });
             }
             this.state.pttReleaseTimeout = browser.setTimeout(
                 () => this.setTalking(false),
-                this.userSettingsService.voiceActiveDuration || 0
+                this.services["mail.user_settings"].voiceActiveDuration || 0
             );
         });
 
@@ -272,21 +275,21 @@ export class Rtc {
         channel.rtcInvitingSessionId = undefined;
         if (this.state.channel === channel) {
             this.clear();
-            this.soundEffectsService.play("channel-leave");
+            this.services["mail.sound_effects"].play("channel-leave");
         }
     }
 
     onRingingThreadsChange() {
         if (this.ringingThreads.length > 0) {
-            this.soundEffectsService.play("incoming-call", { loop: true });
+            this.services["mail.sound_effects"].play("incoming-call", { loop: true });
         } else {
-            this.soundEffectsService.stop("incoming-call");
+            this.services["mail.sound_effects"].stop("incoming-call");
         }
     }
 
     async deafen() {
         await this.setDeaf(true);
-        this.soundEffectsService.play("deafen");
+        this.services["mail.sound_effects"].play("deafen");
     }
 
     async handleNotification(sessionId, content) {
@@ -432,7 +435,7 @@ export class Rtc {
 
     async mute() {
         await this.setMute(true);
-        this.soundEffectsService.play("mute");
+        this.services["mail.sound_effects"].play("mute");
     }
 
     /**
@@ -465,7 +468,7 @@ export class Rtc {
 
     async undeafen() {
         await this.setDeaf(false);
-        this.soundEffectsService.play("undeafen");
+        this.services["mail.sound_effects"].play("undeafen");
     }
 
     async unmute() {
@@ -474,7 +477,7 @@ export class Rtc {
         } else {
             await this.resetAudioTrack({ force: true });
         }
-        this.soundEffectsService.play("unmute");
+        this.services["mail.sound_effects"].play("unmute");
     }
 
     //----------------------------------------------------------------------
@@ -491,7 +494,7 @@ export class Rtc {
      */
     log(session, entry, { error, step, state, ...data } = {}) {
         session.logStep = entry;
-        if (!this.userSettingsService.logRtc) {
+        if (!this.services["mail.user_settings"].logRtc) {
             return;
         }
         if (!this.state.logs.has(session.id)) {
@@ -684,13 +687,13 @@ export class Rtc {
         this.clear();
         this.state.logs.clear();
         this.state.channel = channel;
-        this.threadService.update(this.state.channel, {
+        this.services["mail.thread"].update(this.state.channel, {
             serverData: {
                 rtcSessions,
                 invitedMembers,
             },
         });
-        this.state.selfSession = this.store.rtcSessions[sessionId];
+        this.state.selfSession = this.services["mail.store"].rtcSessions[sessionId];
         this.state.iceServers = iceServers || DEFAULT_ICE_SERVERS;
         this.state.logs.set("channelId", this.state.channel?.id);
         this.state.logs.set("selfSessionId", this.state.selfSession?.id);
@@ -738,7 +741,7 @@ export class Rtc {
         );
         this.state.channel.rtcInvitingSessionId = undefined;
         this.call();
-        this.soundEffectsService.play("channel-join");
+        this.services["mail.sound_effects"].play("channel-join");
         await this.resetAudioTrack({ force: true });
         if (video) {
             await this.toggleVideo("camera");
@@ -836,7 +839,7 @@ export class Rtc {
                 ) {
                     return;
                 }
-                if (this.userSettingsService.logRtc) {
+                if (this.services["mail.user_settings"].logRtc) {
                     let stats;
                     try {
                         const iterableStats = await peerConnection.getStats();
@@ -909,7 +912,7 @@ export class Rtc {
     }
 
     clear() {
-        for (const session of Object.values(this.store.rtcSessions)) {
+        for (const session of Object.values(this.services["mail.store"].rtcSessions)) {
             this.disconnect(session);
         }
         for (const timeoutId of this.state.recoverTimeouts.values()) {
@@ -1102,7 +1105,7 @@ export class Rtc {
         };
         if (!activateVideo) {
             if (type === "screen") {
-                this.soundEffectsService.play("screen-sharing");
+                this.services["mail.sound_effects"].play("screen-sharing");
             }
             stopVideo();
             return;
@@ -1122,7 +1125,7 @@ export class Rtc {
                 sourceStream = await browser.navigator.mediaDevices.getDisplayMedia({
                     video: VIDEO_CONFIG,
                 });
-                this.soundEffectsService.play("screen-sharing");
+                this.services["mail.sound_effects"].play("screen-sharing");
             }
         } catch {
             const str =
@@ -1134,11 +1137,11 @@ export class Rtc {
             return;
         }
         let videoStream = sourceStream;
-        if (this.userSettingsService.useBlur && type === "camera") {
+        if (this.services["mail.user_settings"].useBlur && type === "camera") {
             try {
                 this.blurManager = new BlurManager(sourceStream, {
-                    backgroundBlur: this.userSettingsService.backgroundBlurAmount,
-                    edgeBlur: this.userSettingsService.edgeBlurAmount,
+                    backgroundBlur: this.services["mail.user_settings"].backgroundBlurAmount,
+                    edgeBlur: this.services["mail.user_settings"].edgeBlurAmount,
                 });
                 videoStream = await this.blurManager.stream;
             } catch (_e) {
@@ -1149,7 +1152,7 @@ export class Rtc {
                     }),
                     { type: "warning" }
                 );
-                this.userSettingsService.useBlur = false;
+                this.services["mail.user_settings"].useBlur = false;
             }
         }
         const track = videoStream ? videoStream.getVideoTracks()[0] : undefined;
@@ -1216,7 +1219,7 @@ export class Rtc {
             let audioTrack;
             try {
                 const audioStream = await browser.navigator.mediaDevices.getUserMedia({
-                    audio: this.userSettingsService.audioConstraints,
+                    audio: this.services["mail.user_settings"].audioConstraints,
                 });
                 audioTrack = audioStream.getAudioTracks()[0];
             } catch {
@@ -1266,7 +1269,7 @@ export class Rtc {
             return;
         }
         if (
-            this.userSettingsService.usePushToTalk ||
+            this.services["mail.user_settings"].usePushToTalk ||
             !this.state.channel ||
             !this.state.audioTrack
         ) {
@@ -1279,7 +1282,7 @@ export class Rtc {
                 onThreshold: async (isAboveThreshold) => {
                     this.setTalking(isAboveThreshold);
                 },
-                volumeThreshold: this.userSettingsService.voiceActivationThreshold,
+                volumeThreshold: this.services["mail.user_settings"].voiceActivationThreshold,
             });
         } catch {
             /**
@@ -1301,11 +1304,11 @@ export class Rtc {
      */
     insertSession(data) {
         let session;
-        if (this.store.rtcSessions[data.id]) {
-            session = this.store.rtcSessions[data.id];
+        if (this.services["mail.store"].rtcSessions[data.id]) {
+            session = this.services["mail.store"].rtcSessions[data.id];
         } else {
             session = new RtcSession();
-            session._store = this.store;
+            session._store = this.services["mail.store"];
         }
         const { channelMember, ...remainingData } = data;
         for (const key in remainingData) {
@@ -1315,31 +1318,32 @@ export class Rtc {
             session.channelId = channelMember.channel.id;
         }
         if (channelMember) {
-            const channelMemberRecord = this.channelMemberService.insert(channelMember);
+            const channelMemberRecord = this.services["mail.channel.member"].insert(channelMember);
             session.channelMemberId = channelMemberRecord.id;
             if (channelMemberRecord.thread) {
                 channelMemberRecord.thread.rtcSessions[session.id] = session;
             }
         }
-        this.store.rtcSessions[session.id] = session;
+        this.services["mail.store"].rtcSessions[session.id] = session;
         // return reactive version
-        return this.store.rtcSessions[session.id];
+        return this.services["mail.store"].rtcSessions[session.id];
     }
 
     /**
      * @param {import("@mail/rtc/rtc_session_model").id} id
      */
     deleteSession(id) {
-        const session = this.store.rtcSessions[id];
+        const session = this.services["mail.store"].rtcSessions[id];
         if (session) {
             if (this.state.selfSession && session.id === this.state.selfSession.id) {
                 this.endCall();
             }
-            delete this.store.threads[createLocalId("mail.channel", session.channelId)]
-                ?.rtcSessions[id];
+            delete this.services["mail.store"].threads[
+                createLocalId("mail.channel", session.channelId)
+            ]?.rtcSessions[id];
             this.disconnect(session);
         }
-        delete this.store.rtcSessions[id];
+        delete this.services["mail.store"].rtcSessions[id];
     }
 
     /**
@@ -1360,7 +1364,7 @@ export class Rtc {
             }
             audioElement.load();
             audioElement.muted = mute;
-            audioElement.volume = this.userSettingsService.getVolume(session);
+            audioElement.volume = this.services["mail.user_settings"].getVolume(session);
             // Using both autoplay and play() as safari may prevent play() outside of user interactions
             // while some browsers may not support or block autoplay.
             audioElement.autoplay = true;

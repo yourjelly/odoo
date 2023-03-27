@@ -9,14 +9,16 @@ const commandRegistry = registry.category("mail.channel_commands");
 class SuggestionService {
     constructor(env, services) {
         this.orm = services.orm;
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = services["mail.store"];
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = services["mail.thread"];
-        /** @type {import("@mail/core/persona_service").PersonaService} */
-        this.personaService = services["mail.persona"];
-        /** @type {import("@mail/new/core/channel_member_service").ChannelMemberService} */
-        this.channelMemberService = services["mail.channel.member"];
+        this.services = {
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": services["mail.store"],
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": services["mail.thread"],
+            /** @type {import("@mail/core/persona_service").PersonaService} */
+            "mail.persona": services["mail.persona"],
+            /** @type {import("@mail/new/core/channel_member_service").ChannelMemberService} */
+            "mail.channel.member": services["mail.channel.member"],
+        };
     }
 
     async fetchSuggestions({ delimiter, term }, { thread, onFetched } = {}) {
@@ -53,9 +55,9 @@ class SuggestionService {
             kwargs
         );
         suggestedPartners.map((data) => {
-            this.personaService.insert({ ...data, type: "partner" });
+            this.services["mail.persona"].insert({ ...data, type: "partner" });
             if (data.persona?.channelMembers) {
-                this.channelMemberService.insert(...data.persona.channelMembers);
+                this.services["mail.channel.member"].insert(...data.persona.channelMembers);
             }
         });
     }
@@ -68,7 +70,7 @@ class SuggestionService {
             { search: term }
         );
         suggestedThreads.map((data) => {
-            this.threadService.insert({
+            this.services["mail.thread"].insert({
                 model: "mail.channel",
                 ...data,
             });
@@ -182,14 +184,14 @@ class SuggestionService {
                 .map((member) => member.persona)
                 .filter((persona) => persona.type === "partner");
         } else {
-            partners = Object.values(this.store.personas).filter(
+            partners = Object.values(this.services["mail.store"].personas).filter(
                 (persona) => persona.type === "partner"
             );
         }
         const mainSuggestionList = [];
         const extraSuggestionList = [];
         for (const partner of partners) {
-            if (partner === this.store.partnerRoot) {
+            if (partner === this.services["mail.store"].partnerRoot) {
                 // ignore archived partners (except OdooBot)
                 continue;
             }
@@ -286,7 +288,7 @@ class SuggestionService {
     }
 
     searchCannedResponseSuggestions(cleanedSearchTerm, sort) {
-        const cannedResponses = this.store.cannedResponses
+        const cannedResponses = this.services["mail.store"].cannedResponses
             .filter((cannedResponse) => {
                 return cleanTerm(cannedResponse.name).includes(cleanedSearchTerm);
             })
@@ -341,7 +343,7 @@ class SuggestionService {
             // channel.
             threads = [thread];
         } else {
-            threads = Object.values(this.store.threads);
+            threads = Object.values(this.services["mail.store"].threads);
         }
         const suggestionList = threads.filter(
             (thread) =>

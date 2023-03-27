@@ -10,11 +10,13 @@ export class WelcomePage extends Component {
     static template = "mail.WelcomePage";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
         this.rpc = useService("rpc");
-        /** @type {import('@mail/core/persona_service').PersonaService} */
-        this.personaService = useService("mail.persona");
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            /** @type {import('@mail/core/persona_service').PersonaService} */
+            "mail.persona": useService("mail.persona"),
+        };
         this.state = useState({
             userName: "Guest",
             audioStream: null,
@@ -31,8 +33,11 @@ export class WelcomePage extends Component {
     }
 
     async joinChannel() {
-        if (this.store.guest) {
-            await this.personaService.updateGuestName(this.store.self, this.state.userName.trim());
+        if (this.services["mail.store"].guest) {
+            await this.services["mail.persona"].updateGuestName(
+                this.services["mail.store"].self,
+                this.state.userName.trim()
+            );
         }
         if (this.props.data?.discussPublicViewData.addGuestAsMemberOnJoin) {
             await this.rpc("/mail/channel/add_guest_as_member", {

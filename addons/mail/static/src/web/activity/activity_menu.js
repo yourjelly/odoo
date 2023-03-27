@@ -14,8 +14,10 @@ export class ActivityMenu extends Component {
     static template = "mail.ActivityMenu";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+        };
         this.action = useService("action");
         this.userId = useService("user").userId;
         this.fetchSystrayActivities();
@@ -27,13 +29,13 @@ export class ActivityMenu extends Component {
         for (const group of groups) {
             total += group.total_count;
         }
-        this.store.activityCounter = total;
-        this.store.activityGroups = groups;
+        this.services["mail.store"].activityCounter = total;
+        this.services["mail.store"].activityGroups = groups;
         this.sortActivityGroups();
     }
 
     sortActivityGroups() {
-        this.store.activityGroups.sort((g1, g2) => g1.id - g2.id);
+        this.services["mail.store"].activityGroups.sort((g1, g2) => g1.id - g2.id);
     }
 
     onBeforeOpen() {

@@ -19,7 +19,7 @@ patch(Message.prototype, "mail/web", {
 
     onClickAuthor(ev) {
         if (this.message.author && !this.hasAuthorClickable && !this.hasOpenChatFeature) {
-            this.messaging.openDocument({
+            this.services["mail.messaging"].openDocument({
                 model: "res.partner",
                 id: this.message.author.id,
             });
@@ -36,7 +36,7 @@ patch(Message.prototype, "mail/web", {
 
     openRecord() {
         if (this.message.resModel === "mail.channel") {
-            this.threadService.open(this.message.originThread);
+            this.services["mail.thread"].open(this.message.originThread);
         } else {
             this.action.doAction({
                 type: "ir.actions.act_window",

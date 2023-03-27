@@ -8,9 +8,28 @@ import { registry } from "@web/core/registry";
 export class ActivityService {
     constructor(env, services) {
         this.env = env;
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = services["mail.store"];
+        this.services = {
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": services["mail.store"],
+        };
         this.orm = services.orm;
+        this.env.bus.addEventListener(
+            "mail.messaging/notification",
+            ({ detail: { notification } }) => {
+                switch (notification.type) {
+                    case "mail.activity/updated":
+                        if (notification.payload.activity_created) {
+                            this.services["mail.store"].activityCounter++;
+                        }
+                        if (notification.payload.activity_deleted) {
+                            this.services["mail.store"].activityCounter--;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        );
     }
 
     /**
@@ -54,7 +73,9 @@ export class ActivityService {
      * @returns {import("./activity_model").Activity}
      */
     insert(data) {
-        const activity = this.store.activities[data.id] ?? new Activity(this.store, data.id);
+        const activity =
+            this.services["mail.store"].activities[data.id] ??
+            new Activity(this.services["mail.store"], data.id);
         if (data.request_partner_id) {
             data.request_partner_id = data.request_partner_id[0];
         }
@@ -63,7 +84,7 @@ export class ActivityService {
     }
 
     delete(activity) {
-        delete this.store.activities[activity.id];
+        delete this.services["mail.store"].activities[activity.id];
     }
 }
 

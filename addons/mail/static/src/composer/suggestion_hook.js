@@ -5,7 +5,9 @@ import { useService } from "@web/core/utils/hooks";
 
 export function useSuggestion() {
     const comp = useComponent();
-    const suggestionService = useService("mail.suggestion");
+    const services = {
+        "mail.suggestion": useService("mail.suggestion"),
+    };
     const self = {
         clearRawMentions() {
             self.rawMentions.partnerIds.length = 0;
@@ -119,7 +121,7 @@ export function useSuggestion() {
             if (!self.search.delimiter || !comp.props.composer.thread) {
                 return;
             }
-            const suggestions = suggestionService.searchSuggestions(
+            const suggestions = services["mail.suggestion"].searchSuggestions(
                 self.search,
                 { thread: comp.props.composer.thread },
                 true
@@ -149,7 +151,7 @@ export function useSuggestion() {
                 if (!comp.props.composer.thread) {
                     return;
                 }
-                await suggestionService.fetchSuggestions(self.search, {
+                await services["mail.suggestion"].fetchSuggestions(self.search, {
                     thread: comp.props.composer.thread,
                     onFetched() {
                         if (owl.status(comp) === "destroyed") {

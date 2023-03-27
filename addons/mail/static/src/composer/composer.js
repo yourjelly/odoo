@@ -59,8 +59,6 @@ export class Composer extends Component {
     static template = "mail.Composer";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
         if (this.allowUpload) {
             this.attachmentUploader = useAttachmentUploader(
                 this.props.messageToReplyTo?.message?.originThread ??
@@ -69,9 +67,13 @@ export class Composer extends Component {
                 { composer: this.props.composer }
             );
         }
-        this.messageService = useState(useService("mail.message"));
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = useService("mail.thread");
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            "mail.message": useService("mail.message"),
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": useService("mail.thread"),
+        };
         this.ref = useRef("textarea");
         this.fakeTextarea = useRef("fakeTextarea");
         this.typingNotified = false;
@@ -99,7 +101,7 @@ export class Composer extends Component {
                 );
             },
         });
-        this.suggestion = this.store.user ? useSuggestion() : undefined;
+        this.suggestion = this.services["mail.store"].user ? useSuggestion() : undefined;
         if (this.props.dropzoneRef && this.allowUpload) {
             useDropzone(
                 this.props.dropzoneRef,
@@ -387,7 +389,9 @@ export class Composer extends Component {
             onClose: () => {
                 this.clear();
                 if (this.props.composer.thread) {
-                    this.threadService.fetchNewMessages(this.props.composer.thread);
+                    this.services["mail.thread.message_fetch"].fetchNewMessages(
+                        this.props.composer.thread
+                    );
                 }
             },
         };
@@ -396,7 +400,7 @@ export class Composer extends Component {
 
     clear() {
         this.attachmentUploader?.clear();
-        this.threadService.clearComposer(this.props.composer);
+        this.services["mail.thread"].clearComposer(this.props.composer);
     }
 
     onClickAddEmoji(ev) {
@@ -447,7 +451,7 @@ export class Composer extends Component {
                 rawMentions: this.suggestion ? this.suggestion.rawMentions : [],
                 parentId: this.props.messageToReplyTo?.message?.id,
             };
-            const message = await this.threadService.post(thread, value, postData);
+            const message = await this.services["mail.thread"].post(thread, value, postData);
             if (this.props.composer.thread.type === "mailbox") {
                 this.env.services.notification.add(
                     sprintf(_t('Message posted on "%s"'), message.originThread.displayName),
@@ -470,7 +474,7 @@ export class Composer extends Component {
      */
     notifyIsTyping(is_typing = true) {
         if (["chat", "channel", "group"].includes(this.thread?.type)) {
-            this.messaging.rpc(
+            this.services["mail.messaging"].rpc(
                 "/mail/channel/notify_typing",
                 {
                     channel_id: this.thread.id,
@@ -484,7 +488,7 @@ export class Composer extends Component {
     async editMessage() {
         if (this.ref.el.value || this.props.composer.message.attachments.length > 0) {
             await this.processMessage(async (value) =>
-                this.messageService.update(
+                this.services["mail.message"].update(
                     this.props.composer.message,
                     value,
                     this.props.composer.attachments,
@@ -512,7 +516,7 @@ export class Composer extends Component {
     onFocusin() {
         this.props.composer.isFocused = true;
         if (this.props.composer.thread) {
-            this.threadService.markAsRead(this.props.composer.thread);
+            this.services["mail.thread"].markAsRead(this.props.composer.thread);
         }
     }
 }

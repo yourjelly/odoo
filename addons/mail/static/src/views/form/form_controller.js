@@ -25,7 +25,9 @@ patch(FormController.prototype, "mail", {
             thread: undefined,
         });
         if (this.env.services["mail.thread"]) {
-            this.threadService = useService("mail.thread");
+            this.services = {
+                "mail.thread": useService("mail.thread"),
+            };
         }
         this.uiService = useService("ui");
         this.hasAttachmentViewerInArch = false;
@@ -63,14 +65,14 @@ patch(FormController.prototype, "mail", {
      */
     hasAttachmentViewer() {
         if (
-            !this.threadService ||
+            !this.services?.["mail.thread"] ||
             this.uiService.size < SIZES.XXL ||
             !this.hasAttachmentViewerInArch ||
             !this.model.root.resId
         ) {
             return false;
         }
-        this.messagingState.thread = this.threadService.insert({
+        this.messagingState.thread = this.services["mail.thread"].insert({
             id: this.model.root.resId,
             model: this.model.root.resModel,
             type: "chatter",

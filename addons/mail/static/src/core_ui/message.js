@@ -86,15 +86,21 @@ export class Message extends Component {
         this.root = useRef("root");
         this.hasTouch = hasTouch;
         this.messageBody = useRef("body");
-        this.messaging = useMessaging();
-        this.store = useStore();
         this.rpc = useService("rpc");
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = useState(useService("mail.thread"));
-        /** @type {import("@mail/core/message_service").MessageService} */
-        this.messageService = useState(useService("mail.message"));
-        /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
-        this.attachmentService = useService("mail.attachment");
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": useService("mail.thread"),
+            /** @type {import("@mail/core/message_service").MessageService} */
+            "mail.message": useState(useService("mail.message")),
+            /** @type {import("@mail/core/message_star_service").MessageStarService} */
+            "mail.message.star": useService("mail.message.star"),
+            /** @type {import("@mail/core/message_reaction_service").MessageReactionService} */
+            "mail.message.reaction": useService("mail.message.reaction"),
+            /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
+            "mail.attachment": useService("mail.attachment"),
+        };
         this.user = useService("user");
         useChildSubEnv({
             alignedRight: this.isAlignedRight,
@@ -132,10 +138,10 @@ export class Message extends Component {
                     const reaction = this.message.reactions.find(
                         ({ content, personas }) =>
                             content === emoji &&
-                            personas.find((persona) => persona === this.store.self)
+                            personas.find((persona) => persona === this.services["mail.store"].self)
                     );
                     if (!reaction) {
-                        this.messageService.react(this.message, emoji);
+                        this.services["mail.message.reaction"].react(this.message, emoji);
                     }
                 },
             });
@@ -160,7 +166,10 @@ export class Message extends Component {
         ) {
             return url("/mail/static/src/img/email_icon.png");
         }
-        return this.threadService.avatarUrl(this.message.author, this.props.message.originThread);
+        return this.services["mail.thread"].avatarUrl(
+            this.message.author,
+            this.props.message.originThread
+        );
     }
 
     get message() {
@@ -233,7 +242,7 @@ export class Message extends Component {
         if (this.message.isSelfAuthored) {
             return false;
         }
-        if (this.store.inPublicPage) {
+        if (this.services["mail.store"].inPublicPage) {
             return false;
         }
         if (this.message.author.type === "guest") {
@@ -308,7 +317,7 @@ export class Message extends Component {
     }
 
     async onClickAttachmentUnlink(attachment) {
-        await this.attachmentService.delete(attachment);
+        await this.services["mail.attachment"].delete(attachment);
     }
 
     onClickAuthor(ev) {
@@ -320,7 +329,10 @@ export class Message extends Component {
     onClickMarkAsUnread() {
         const previousMessageId =
             this.message.originThread.getPreviousMessage(this.message)?.id ?? false;
-        if (this.threadService.lastSeenBySelfMessageId(this.props.thread) === previousMessageId) {
+        if (
+            this.services["mail.thread"].lastSeenBySelfMessageId(this.props.thread) ===
+            previousMessageId
+        ) {
             return;
         }
         return this.rpc("/mail/channel/set_last_seen_message", {
@@ -339,7 +351,7 @@ export class Message extends Component {
         if (!this.hasOpenChatFeature) {
             return;
         }
-        this.threadService.openChat({ partnerId: this.message.author.id });
+        this.services["mail.thread"].openChat({ partnerId: this.message.author.id });
     }
 
     /**
@@ -350,15 +362,15 @@ export class Message extends Component {
         const id = Number(ev.target.dataset.oeId);
         if (ev.target.closest(".o_channel_redirect")) {
             ev.preventDefault();
-            const thread = this.threadService.insert({ model, id });
-            this.threadService.open(thread);
+            const thread = this.services["mail.thread"].insert({ model, id });
+            this.services["mail.thread"].open(thread);
             return;
         }
         if (ev.target.closest(".o_mail_redirect")) {
             ev.preventDefault();
             const partnerId = Number(ev.target.dataset.oeId);
             if (this.user.partnerId !== partnerId) {
-                this.threadService.openChat({ partnerId });
+                this.services["mail.thread"].openChat({ partnerId });
             }
             return;
         }
@@ -399,7 +411,7 @@ export class Message extends Component {
 
     enterEditMode() {
         const messageContent = convertBrToLineBreak(this.props.message.body);
-        this.threadService.insertComposer({
+        this.services["mail.thread"].insertComposer({
             message: this.props.message,
             textInputContent: messageContent,
             selection: {

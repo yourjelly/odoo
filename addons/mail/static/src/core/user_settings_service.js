@@ -8,7 +8,9 @@ export class UserSettings {
 
     constructor(env, services) {
         this.orm = services.orm;
-        this.store = services["mail.store"];
+        this.services = {
+            "mail.store": services["mail.store"],
+        };
         this.hasCanvasFilterSupport =
             typeof document.createElement("canvas").getContext("2d").filter !== "undefined";
         this._loadLocalSettings();
@@ -117,7 +119,7 @@ export class UserSettings {
      * @param {number} param0.volume
      */
     async saveVolumeSetting({ partnerId, guestId, volume }) {
-        if (this.store.self?.type === "guest") {
+        if (this.services["mail.store"].self?.type === "guest") {
             return;
         }
         const key = `${partnerId}_${guestId}`;
@@ -240,7 +242,7 @@ export class UserSettings {
      * @private
      */
     async _saveSettings() {
-        if (this.store.self?.type === "guest") {
+        if (this.services["mail.store"].self?.type === "guest") {
             return;
         }
         browser.clearTimeout(this.globalSettingsTimeout);

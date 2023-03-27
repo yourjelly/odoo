@@ -12,11 +12,13 @@ export class MessageInReply extends Component {
     static template = "mail.MessageInReply";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
         this.user = useService("user");
-        /** @type {import('@mail/core/thread_service').ThreadService} */
-        this.threadService = useService("mail.thread");
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            /** @type {import('@mail/core/thread_service').ThreadService} */
+            "mail.thread": useService("mail.thread"),
+        };
     }
 
     get authorAvatarUrl() {
@@ -26,6 +28,9 @@ export class MessageInReply extends Component {
         ) {
             return url("/mail/static/src/img/email_icon.png");
         }
-        return this.threadService.avatarUrl(this.message.author, this.props.message.originThread);
+        return this.services["mail.thread"].avatarUrl(
+            this.message.author,
+            this.props.message.originThread
+        );
     }
 }

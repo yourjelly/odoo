@@ -24,12 +24,14 @@ let nextId = -1;
 export function useAttachmentUploader(thread, { composer, onFileUploaded } = {}) {
     const { bus, upload } = useService("file_upload");
     const notificationService = useService("notification");
-    /** @type {import("@mail/core/store_service").Store} */
-    const store = useService("mail.store");
-    /** @type {import("@mail/core/thread_service").ThreadService} */
-    const threadService = useService("mail.thread");
-    /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
-    const attachmentService = useService("mail.attachment");
+    const services = {
+        /** @type {import("@mail/core/store_service").Store} */
+        "mail.store": useService("mail.store"),
+        /** @type {import("@mail/core/thread_service").ThreadService} */
+        "mail.thread": useService("mail.thread"),
+        /** @type {import("@mail/attachments/attachment_service").AttachmentService} */
+        "mail.attachment": useService("mail.attachment"),
+    };
     const abortByAttachmentId = new Map();
     const deferredByAttachmentId = new Map();
     const uploadingAttachmentIds = new Set();
@@ -68,7 +70,7 @@ export function useAttachmentUploader(thread, { composer, onFileUploaded } = {})
             }
             abortByAttachmentId.delete(attachment.id);
             deferredByAttachmentId.delete(attachment.id);
-            await attachmentService.delete(attachment);
+            await services["mail.attachment"].delete(attachment);
         },
         clear() {
             abortByAttachmentId.clear();
@@ -84,9 +86,9 @@ export function useAttachmentUploader(thread, { composer, onFileUploaded } = {})
         const threadId = parseInt(upload.data.get("thread_id"));
         const threadModel = upload.data.get("thread_model");
         const tmpUrl = upload.data.get("tmp_url");
-        const originThread = threadService.insert({ model: threadModel, id: threadId });
+        const originThread = services["mail.thread"].insert({ model: threadModel, id: threadId });
         abortByAttachmentId.set(tmpId, upload.xhr.abort.bind(upload.xhr));
-        const attachment = attachmentService.insert({
+        const attachment = services["mail.attachment"].insert({
             filename: upload.title,
             id: tmpId,
             mimetype: upload.type,
@@ -122,8 +124,8 @@ export function useAttachmentUploader(thread, { composer, onFileUploaded } = {})
         }
         const threadId = parseInt(upload.data.get("thread_id"));
         const threadModel = upload.data.get("thread_model");
-        const originThread = store.threads[createLocalId(threadModel, threadId)];
-        const attachment = attachmentService.insert({
+        const originThread = services["mail.store"].threads[createLocalId(threadModel, threadId)];
+        const attachment = services["mail.attachment"].insert({
             ...response,
             extension: upload.title.split(".").pop(),
             originThread: composer ? undefined : originThread,
@@ -137,7 +139,7 @@ export function useAttachmentUploader(thread, { composer, onFileUploaded } = {})
             }
         }
         const def = deferredByAttachmentId.get(tmpId);
-        state.unlink(store.attachments[tmpId]);
+        state.unlink(services["mail.store"].attachments[tmpId]);
         if (def) {
             def.resolve(attachment);
             deferredByAttachmentId.delete(tmpId);

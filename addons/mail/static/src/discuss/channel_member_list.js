@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { Component, onWillUpdateProps, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillUpdateProps, onWillStart } from "@odoo/owl";
 import { useMessaging, useStore } from "@mail/core/messaging_hook";
 import { ImStatus } from "./im_status";
 import { useService } from "@web/core/utils/hooks";
@@ -11,22 +11,27 @@ export class ChannelMemberList extends Component {
     static template = "mail.ChannelMemberList";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
-        this.threadService = useState(useService("mail.thread"));
-        onWillStart(() => this.threadService.fetchChannelMembers(this.props.thread));
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            /** @type {import("@mail/core/channel_member_service").ChannelMemberService} */
+            "mail.channel.member": useService("mail.channel.member"),
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": useService("mail.thread"),
+        };
+        onWillStart(() => this.services["mail.channel.member"].fetchMembers(this.props.thread));
         onWillUpdateProps((nextProps) => {
             if (nextProps.thread.channelMembers.length === 0) {
-                this.threadService.fetchChannelMembers(nextProps.thread);
+                this.services["mail.channel.member"].fetchMembers(nextProps.thread);
             }
         });
     }
 
     canOpenChatWith(member) {
-        if (this.store.inPublicPage) {
+        if (this.services["mail.store"].inPublicPage) {
             return false;
         }
-        if (member.persona === this.store.self) {
+        if (member.persona === this.services["mail.store"].self) {
             return false;
         }
         if (member.persona.type === "guest") {
@@ -39,6 +44,6 @@ export class ChannelMemberList extends Component {
         if (!this.canOpenChatWith(member)) {
             return;
         }
-        this.threadService.openChat({ partnerId: member.persona.id });
+        this.services["mail.thread"].openChat({ partnerId: member.persona.id });
     }
 }

@@ -13,13 +13,15 @@ export const CHAT_WINDOW_HIDDEN_WIDTH = 55;
 export class ChatWindowService {
     constructor(env, services) {
         this.env = env;
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = services["mail.store"];
+        this.services = {
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": services["mail.store"],
+        };
         this.orm = services.orm;
     }
 
     openNewMessage() {
-        if (this.store.chatWindows.some(({ thread }) => !thread)) {
+        if (this.services["mail.store"].chatWindows.some(({ thread }) => !thread)) {
             // New message chat window is already opened.
             return;
         }
@@ -27,27 +29,29 @@ export class ChatWindowService {
     }
 
     closeNewMessage() {
-        const newMessageChatWindow = this.store.chatWindows.find(({ thread }) => !thread);
+        const newMessageChatWindow = this.services["mail.store"].chatWindows.find(
+            ({ thread }) => !thread
+        );
         if (newMessageChatWindow) {
             this.close(newMessageChatWindow);
         }
     }
 
     get visible() {
-        return this.store.chatWindows.filter((chatWindow) => !chatWindow.hidden);
+        return this.services["mail.store"].chatWindows.filter((chatWindow) => !chatWindow.hidden);
     }
 
     get hidden() {
-        return this.store.chatWindows.filter((chatWindow) => chatWindow.hidden);
+        return this.services["mail.store"].chatWindows.filter((chatWindow) => chatWindow.hidden);
     }
 
     get maxVisible() {
-        const startGap = this.store.isSmall
+        const startGap = this.services["mail.store"].isSmall
             ? 0
             : this.hidden.length > 0
             ? CHAT_WINDOW_END_GAP_WIDTH + CHAT_WINDOW_HIDDEN_WIDTH
             : CHAT_WINDOW_END_GAP_WIDTH;
-        const endGap = this.store.isSmall ? 0 : CHAT_WINDOW_END_GAP_WIDTH;
+        const endGap = this.services["mail.store"].isSmall ? 0 : CHAT_WINDOW_END_GAP_WIDTH;
         const available = browser.innerWidth - startGap - endGap;
         const maxAmountWithoutHidden = Math.floor(
             available / (CHAT_WINDOW_WIDTH + CHAT_WINDOW_INBETWEEN_WIDTH)
@@ -71,36 +75,36 @@ export class ChatWindowService {
      * @returns {ChatWindow}
      */
     insert(data = {}) {
-        const chatWindow = this.store.chatWindows.find(
+        const chatWindow = this.services["mail.store"].chatWindows.find(
             (c) => c.threadLocalId === data.thread?.localId
         );
         if (!chatWindow) {
-            const chatWindow = new ChatWindow(this.store, data);
+            const chatWindow = new ChatWindow(this.services["mail.store"], data);
             assignDefined(chatWindow, data);
             let index;
             if (!data.replaceNewMessageChatWindow) {
-                if (this.maxVisible <= this.store.chatWindows.length) {
+                if (this.maxVisible <= this.services["mail.store"].chatWindows.length) {
                     const swaped = this.visible[this.visible.length - 1];
                     index = this.visible.length - 1;
                     this.hide(swaped);
                 } else {
-                    index = this.store.chatWindows.length;
+                    index = this.services["mail.store"].chatWindows.length;
                 }
             } else {
-                const newMessageChatWindowIndex = this.store.chatWindows.findIndex(
+                const newMessageChatWindowIndex = this.services["mail.store"].chatWindows.findIndex(
                     (chatWindow) => !chatWindow.thread
                 );
                 index =
                     newMessageChatWindowIndex !== -1
                         ? newMessageChatWindowIndex
-                        : this.store.chatWindows.length;
+                        : this.services["mail.store"].chatWindows.length;
             }
-            this.store.chatWindows.splice(
+            this.services["mail.store"].chatWindows.splice(
                 index,
                 data.replaceNewMessageChatWindow ? 1 : 0,
                 chatWindow
             );
-            return this.store.chatWindows[index]; // return reactive version
+            return this.services["mail.store"].chatWindows[index]; // return reactive version
         }
         assignDefined(chatWindow, data);
         return chatWindow;
@@ -137,7 +141,7 @@ export class ChatWindowService {
     }
 
     async close(chatWindow, { escape = false } = {}) {
-        if (this.store.isSmall && !this.store.discuss.isActive) {
+        if (this.services["mail.store"].isSmall && !this.services["mail.store"].discuss.isActive) {
             // If we are in mobile and discuss is not open, it means the
             // chat window was opened from the messaging menu. In that
             // case it should be re-opened to simulate it was always
@@ -146,21 +150,21 @@ export class ChatWindowService {
             // ensure messaging menu is opened before chat window is closed
             await Promise.resolve();
         }
-        if (this.maxVisible < this.store.chatWindows.length) {
+        if (this.maxVisible < this.services["mail.store"].chatWindows.length) {
             const swaped = this.hidden[0];
             swaped.hidden = false;
             swaped.folded = false;
         }
-        const index = this.store.chatWindows.findIndex((c) => c === chatWindow);
+        const index = this.services["mail.store"].chatWindows.findIndex((c) => c === chatWindow);
         if (index > -1) {
-            this.store.chatWindows.splice(index, 1);
+            this.services["mail.store"].chatWindows.splice(index, 1);
         }
         const thread = chatWindow.thread;
         if (thread) {
             thread.state = "closed";
         }
-        if (escape && this.store.chatWindows.length > 0) {
-            this.focus(this.store.chatWindows[index - 1]);
+        if (escape && this.services["mail.store"].chatWindows.length > 0) {
+            this.focus(this.services["mail.store"].chatWindows[index - 1]);
         }
     }
 }

@@ -8,22 +8,43 @@ import { removeFromArrayWithPredicate } from "../utils/arrays";
 export class AttachmentService {
     constructor(env, services) {
         this.env = env;
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = services["mail.store"];
+        this.services = {
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": services["mail.store"],
+        };
         this.rpc = services["rpc"];
+        this.env.bus.addEventListener(
+            "mail.messaging/notification",
+            ({ detail: { notification } }) => {
+                switch (notification.type) {
+                    case "ir.attachment/delete":
+                        {
+                            const attachment =
+                                this.services["mail.store"].attachments[notification.payload.id];
+                            if (!attachment) {
+                                return;
+                            }
+                            this.remove(attachment);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        );
     }
 
     insert(data) {
         if (!("id" in data)) {
             throw new Error("Cannot insert attachment: id is missing in data");
         }
-        if (data.id in this.store.attachments) {
-            const attachment = this.store.attachments[data.id];
+        if (data.id in this.services["mail.store"].attachments) {
+            const attachment = this.services["mail.store"].attachments[data.id];
             this.update(attachment, data);
             return attachment;
         }
-        const attachment = (this.store.attachments[data.id] = new Attachment());
-        Object.assign(attachment, { _store: this.store, id: data.id });
+        const attachment = (this.services["mail.store"].attachments[data.id] = new Attachment());
+        Object.assign(attachment, { _store: this.services["mail.store"], id: data.id });
         this.update(attachment, data);
         return attachment;
     }
@@ -50,12 +71,13 @@ export class AttachmentService {
                 ? data.originThread[0][1]
                 : data.originThread;
             // FIXME this prevents cyclic dependencies between mail.thread and mail.message
-            this.env.bus.trigger("MESSAGE-SERVICE:INSERT_THREAD", {
+            this.env.bus.trigger("mail.thread/insert", {
                 model: threadData.model,
                 id: threadData.id,
             });
             attachment.originThreadLocalId = createLocalId(threadData.model, threadData.id);
-            const originThread = this.store.threads[attachment.originThreadLocalId];
+            const originThread =
+                this.services["mail.store"].threads[attachment.originThreadLocalId];
             if (!originThread.attachments.some((a) => a.id === attachment.id)) {
                 originThread.attachments.push(attachment);
             }
@@ -68,14 +90,14 @@ export class AttachmentService {
      * @param {Attachment} attachment
      */
     remove(attachment) {
-        delete this.store.attachments[attachment.id];
+        delete this.services["mail.store"].attachments[attachment.id];
         if (attachment.originThread) {
             removeFromArrayWithPredicate(
                 attachment.originThread.attachments,
                 ({ id }) => id === attachment.id
             );
         }
-        for (const message of Object.values(this.store.messages)) {
+        for (const message of Object.values(this.services["mail.store"].messages)) {
             removeFromArrayWithPredicate(message.attachments, ({ id }) => id === attachment.id);
             if (message.composer) {
                 removeFromArrayWithPredicate(
@@ -84,7 +106,7 @@ export class AttachmentService {
                 );
             }
         }
-        for (const thread of Object.values(this.store.threads)) {
+        for (const thread of Object.values(this.services["mail.store"].threads)) {
             removeFromArrayWithPredicate(
                 thread.composer.attachments,
                 ({ id }) => id === attachment.id

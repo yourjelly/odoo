@@ -37,6 +37,10 @@ import { notificationPermissionService } from "@mail/core/notification_permissio
 import { session } from "@web/session";
 import { channelMemberService } from "@mail/core/channel_member_service";
 import { contextService } from "@mail/web/discuss/context_service";
+import { chatterService } from "@mail/web/chatter_service";
+import { messageStarService } from "@mail/core/message_star_service";
+import { messageReactionService } from "@mail/core/message_reaction_service";
+import { threadMessageFetchService } from "@mail/core/thread_message_fetch_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
@@ -120,6 +124,7 @@ export const setupManager = {
             im_status: imStatusService,
             effect: effectService,
             "mail.channel.member": channelMemberService,
+            "mail.chatter": chatterService,
             "mail.context": contextService,
             "mail.notification.permission": notificationPermissionService,
             "mail.suggestion": suggestionService,
@@ -127,7 +132,10 @@ export const setupManager = {
             "mail.activity": activityService,
             "mail.attachment": attachmentService,
             "mail.thread": threadService,
+            "mail.thread.message_fetch": threadMessageFetchService,
             "mail.message": messageService,
+            "mail.message.star": messageStarService,
+            "mail.message.reaction": messageReactionService,
             "mail.chat_window": chatWindowService,
             "mail.messaging": messagingService,
             "mail.rtc": rtcService,

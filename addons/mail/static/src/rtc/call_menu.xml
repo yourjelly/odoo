@@ -3,19 +3,19 @@
 
     <t t-name="mail.CallMenu" owl="1">
         <div class="dropdown" t-attf-class="{{ className }}" t-ref="root">
-            <button t-if="rtc.state.channel" class="px-3 user-select-none dropdown-toggle o-no-caret o-dropdown--narrow" t-att-title="buttonTitle" role="button" t-on-click="() => this.threadService.open(this.rtc.state.channel)">
+            <button t-if="services['mail.rtc'].state.channel" class="px-3 user-select-none dropdown-toggle o-no-caret o-dropdown--narrow" t-att-title="buttonTitle" role="button" t-on-click="() => this.services['mail.thread'].open(this.rtc.state.channel)">
                 <div class="o-mail-CallMenu-buttonContent d-flex align-items-center">
                     <span class="position-relative me-2">
                         <i class="fa me-2" t-att-class="{
-                            'fa-microphone': !rtc.state.sendCamera and !rtc.state.sendScreen,
-                            'fa-video-camera': rtc.state.sendCamera,
-                            'fa-desktop': rtc.state.sendScreen,
+                            'fa-microphone': !services['mail.rtc'].state.sendCamera and !services['mail.rtc'].state.sendScreen,
+                            'fa-video-camera': services['mail.rtc'].state.sendCamera,
+                            'fa-desktop': services['mail.rtc'].state.sendScreen,
                         }"/>
                         <small class="position-absolute top-0 end-0 bottom-0 mt-n3 pt-1">
                             <i class="o-mail-CallMenu-dot fa fa-circle text-warning small"/>
                         </small>
                     </span>
-                    <em class="text-truncate" t-esc="rtc.state.channel.displayName"/>
+                    <em class="text-truncate" t-esc="services['mail.rtc'].state.channel.displayName"/>
                 </div>
             </button>
         </div>

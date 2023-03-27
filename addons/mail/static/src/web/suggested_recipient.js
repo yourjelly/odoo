@@ -18,8 +18,10 @@ export class SuggestedRecipient extends Component {
 
     setup() {
         this.dialogService = useService("dialog");
-        /** @type {import("@mail/core/thread_service").ThreadService)}*/
-        this.threadService = useService("mail.thread");
+        this.services = {
+            /** @type {import("@mail/web/chatter_service").ChatterService)}*/
+            "mail.chatter": useService("mail.chatter"),
+        };
     }
 
     get titleText() {
@@ -51,7 +53,9 @@ export class SuggestedRecipient extends Component {
                     ref: "compound_context",
                 },
                 onRecordSaved: () =>
-                    this.threadService.fetchData(this.props.thread, ["suggestedRecipients"]),
+                    this.services["mail.chatter"].fetchData(this.props.thread, [
+                        "suggestedRecipients",
+                    ]),
                 resModel: "res.partner",
                 title: _t("Please complete customer's information"),
             });

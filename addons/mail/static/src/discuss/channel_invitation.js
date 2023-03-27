@@ -13,11 +13,13 @@ export class ChannelInvitation extends Component {
     static template = "mail.ChannelInvitation";
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
         this.notification = useService("notification");
-        this.threadService = useState(useService("mail.thread"));
-        this.personaService = useService("mail.persona");
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            "mail.thread": useService("mail.thread"),
+            "mail.persona": useService("mail.persona"),
+        };
         this.inputRef = useRef("input");
         this.searchStr = "";
         this.state = useState({
@@ -26,28 +28,29 @@ export class ChannelInvitation extends Component {
             searchResultCount: 0,
         });
         onWillStart(() => {
-            if (this.store.user) {
+            if (this.services["mail.store"].user) {
                 this.fetchPartnersToInvite();
             }
         });
         onMounted(() => {
-            if (this.store.user) {
+            if (this.services["mail.store"].user) {
                 this.inputRef.el.focus();
             }
         });
     }
 
     async fetchPartnersToInvite() {
-        const results = await this.messaging.orm.call("res.partner", "search_for_channel_invite", [
-            this.searchStr,
-            this.props.thread.id,
-        ]);
+        const results = await this.services["mail.messaging"].orm.call(
+            "res.partner",
+            "search_for_channel_invite",
+            [this.searchStr, this.props.thread.id]
+        );
         const Partners = results["partners"];
         const selectablePartners = [];
         for (const selectablePartner of Partners) {
             const partnerId = selectablePartner.id;
             const name = selectablePartner.name;
-            const newPartner = this.personaService.insert({
+            const newPartner = this.services["mail.persona"].insert({
                 id: partnerId,
                 name: name,
                 type: "partner",
@@ -91,15 +94,20 @@ export class ChannelInvitation extends Component {
     async onClickInvite() {
         if (this.props.thread.type === "chat") {
             const partners_to = [
-                this.store.self.id,
+                this.services["mail.store"].self.id,
                 this.props.thread.chatPartnerId,
                 ...this.state.selectedPartners.map((partner) => partner.id),
             ];
-            await this.threadService.createGroupChat({ partners_to });
+            await this.services["mail.thread"].createGroupChat({ partners_to });
         } else if (["channel", "group"].includes(this.props.thread.type)) {
-            await this.messaging.orm.call("mail.channel", "add_members", [[this.props.thread.id]], {
-                partner_ids: this.state.selectedPartners.map((partner) => partner.id),
-            });
+            await this.services["mail.messaging"].orm.call(
+                "mail.channel",
+                "add_members",
+                [[this.props.thread.id]],
+                {
+                    partner_ids: this.state.selectedPartners.map((partner) => partner.id),
+                }
+            );
         }
         if (this.env.isSmall) {
             this.props.chatState.activeMode = "";

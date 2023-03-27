@@ -13,7 +13,7 @@ const ActivityPatch = {
             [[this.props.data.res_id]],
             { partner_id: this.props.data.request_partner_id }
         );
-        this.activityService.delete(this.props.data);
+        this.services["mail.activity"].delete(this.props.data);
         this.props.reloadParentView();
     },
     async onRefuseAccess() {
@@ -23,7 +23,7 @@ const ActivityPatch = {
             [[this.props.data.res_id]],
             { partner_id: this.props.data.request_partner_id }
         );
-        this.activityService.delete(this.props.data);
+        this.services["mail.activity"].delete(this.props.data);
         this.props.reloadParentView();
     },
 };

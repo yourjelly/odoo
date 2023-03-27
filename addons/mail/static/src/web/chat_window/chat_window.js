@@ -37,12 +37,14 @@ export class ChatWindow extends Component {
     static template = "mail.ChatWindow";
 
     setup() {
-        this.store = useStore();
-        /** @type {import("@mail/web/chat_window/chat_window_service").ChatWindowService} */
-        this.chatWindowService = useState(useService("mail.chat_window"));
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = useState(useService("mail.thread"));
-        this.rtc = useRtc();
+        this.services = {
+            "mail.store": useStore(),
+            /** @type {import("@mail/web/chat_window/chat_window_service").ChatWindowService} */
+            "mail.chat_window": useService("mail.chat_window"),
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": useService("mail.thread"),
+            "mail.rtc": useRtc(),
+        };
         this.messageEdition = useMessageEdition();
         this.messageHighlight = useMessageHighlight();
         this.messageToReplyTo = useMessageToReplyTo();
@@ -68,7 +70,7 @@ export class ChatWindow extends Component {
     get style() {
         const textDirection = localization.direction;
         const offsetFrom = textDirection === "rtl" ? "left" : "right";
-        const visibleOffset = this.store.isSmall ? 0 : this.props.right;
+        const visibleOffset = this.services["mail.store"].isSmall ? 0 : this.props.right;
         const oppositeFrom = offsetFrom === "right" ? "left" : "right";
         return `${offsetFrom}: ${visibleOffset}px; ${oppositeFrom}: auto`;
     }
@@ -87,14 +89,15 @@ export class ChatWindow extends Component {
                 this.close({ escape: true });
                 break;
             case "Tab": {
-                const index = this.chatWindowService.visible.findIndex(
+                const index = this.services["mail.chat_window"].visible.findIndex(
                     (cw) => cw === this.props.chatWindow
                 );
                 if (index === 0) {
-                    this.chatWindowService.visible[this.chatWindowService.visible.length - 1]
-                        .autofocus++;
+                    this.services["mail.chat_window"].visible[
+                        this.services["mail.chat_window"].visible.length - 1
+                    ].autofocus++;
                 } else {
-                    this.chatWindowService.visible[index - 1].autofocus++;
+                    this.services["mail.chat_window"].visible[index - 1].autofocus++;
                 }
                 break;
             }
@@ -103,11 +106,11 @@ export class ChatWindow extends Component {
 
     toggleFold() {
         if (this.props.chatWindow.hidden) {
-            this.chatWindowService.makeVisible(this.props.chatWindow);
+            this.services["mail.chat_window"].makeVisible(this.props.chatWindow);
         } else {
-            this.chatWindowService.toggleFold(this.props.chatWindow);
+            this.services["mail.chat_window"].toggleFold(this.props.chatWindow);
         }
-        this.chatWindowService.notifyState(this.props.chatWindow);
+        this.services["mail.chat_window"].notifyState(this.props.chatWindow);
     }
 
     toggleSettings() {
@@ -130,10 +133,10 @@ export class ChatWindow extends Component {
                 res_model: this.thread.model,
                 views: [[false, "form"]],
             });
-            this.chatWindowService.close(this.props.chatWindow);
+            this.services["mail.chat_window"].close(this.props.chatWindow);
             return;
         }
-        this.threadService.setDiscussThread(this.thread);
+        this.services["mail.thread"].setDiscussThread(this.thread);
         this.action.doAction(
             {
                 type: "ir.actions.client",
@@ -144,7 +147,7 @@ export class ChatWindow extends Component {
     }
 
     close(options) {
-        this.chatWindowService.close(this.props.chatWindow, options);
-        this.chatWindowService.notifyState(this.props.chatWindow);
+        this.services["mail.chat_window"].close(this.props.chatWindow, options);
+        this.services["mail.chat_window"].notifyState(this.props.chatWindow);
     }
 }

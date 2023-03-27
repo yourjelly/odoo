@@ -78,12 +78,16 @@ export class Chatter extends Component {
 
     setup() {
         this.action = useService("action");
-        this.messaging = useMessaging();
-        /** @type {import("@mail/activity/activity_service").ActivityService} */
-        this.activityService = useState(useService("mail.activity"));
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = useService("mail.thread");
-        this.store = useStore();
+        this.services = {
+            "mail.messaging": useMessaging(),
+            /** @type {import("@mail/web/chatter_service").ChatterService} */
+            "mail.chatter": useService("mail.chatter"),
+            /** @type {import("@mail/activity/activity_service").ActivityService} */
+            "mail.activity": useState(useService("mail.activity")),
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": useService("mail.thread"),
+            "mail.store": useStore(),
+        };
         this.orm = useService("orm");
         this.rpc = useService("rpc");
         this.state = useState({
@@ -94,7 +98,7 @@ export class Chatter extends Component {
         });
         this.unfollowHover = useHover("unfollow");
         this.attachmentUploader = useAttachmentUploader(
-            this.threadService.getThread(this.props.threadModel, this.props.threadId)
+            this.services["mail.chatter"].getThread(this.props.threadModel, this.props.threadId)
         );
         this.scrollPosition = useScrollPosition("scrollable", undefined, "top");
         this.rootRef = useRef("root");
@@ -124,7 +128,7 @@ export class Chatter extends Component {
         onPatched(this.scrollPosition.restore);
         onWillStart(() => {
             if (this.props.threadId) {
-                this.state.thread = this.threadService.insert({
+                this.state.thread = this.services["mail.thread"].insert({
                     id: this.props.threadId,
                     model: this.props.threadModel,
                     name: this.props.webRecord?.data?.display_name || undefined,
@@ -141,7 +145,7 @@ export class Chatter extends Component {
             if (nextProps.threadId === false) {
                 this.state.thread.composer.type = false;
             }
-            this.attachmentUploader.thread = this.threadService.getThread(
+            this.attachmentUploader.thread = this.services["mail.chatter"].getThread(
                 nextProps.threadModel,
                 nextProps.threadId
             );
@@ -206,7 +210,7 @@ export class Chatter extends Component {
         requestList = ["followers", "attachments", "messages", "suggestedRecipients"]
     ) {
         const { threadModel } = this.props;
-        this.state.thread = this.threadService.getThread(threadModel, threadId);
+        this.state.thread = this.services["mail.chatter"].getThread(threadModel, threadId);
         this.scrollPosition.model = this.state.thread.scrollPosition;
         if (!threadId) {
             return;
@@ -214,7 +218,7 @@ export class Chatter extends Component {
         if (this.props.hasActivities && !requestList.includes("activities")) {
             requestList.push("activities");
         }
-        this.threadService.fetchData(this.state.thread, requestList);
+        this.services["mail.chatter"].fetchData(this.state.thread, requestList);
     }
 
     onClickAddFollowers() {
@@ -242,13 +246,16 @@ export class Chatter extends Component {
     }
 
     onClickDetails(ev, follower) {
-        this.messaging.openDocument({ id: follower.partner.id, model: "res.partner" });
+        this.services["mail.messaging"].openDocument({
+            id: follower.partner.id,
+            model: "res.partner",
+        });
         document.body.click(); // hack to close dropdown
     }
 
     /**
      * @param {MouseEvent} ev
-     * @param {import("@mail/core/follower_model").Follower} follower
+     * @param {import("@mail/web/follower_model").Follower} follower
      */
     async onClickEdit(ev, follower) {
         this.env.services.dialog.add(FollowerSubtypeDialog, {
@@ -260,23 +267,23 @@ export class Chatter extends Component {
 
     async onClickFollow() {
         await this.orm.call(this.props.threadModel, "message_subscribe", [[this.props.threadId]], {
-            partner_ids: [this.store.self.id],
+            partner_ids: [this.services["mail.store"].self.id],
         });
         this.onFollowerChanged();
     }
 
     /**
      * @param {MouseEvent} ev
-     * @param {import("@mail/core/follower_model").Follower} follower
+     * @param {import("@mail/web/follower_model").Follower} follower
      */
     async onClickRemove(ev, follower) {
-        await this.threadService.removeFollower(follower);
+        await this.services["mail.chatter"].removeFollower(follower);
         this.onFollowerChanged();
         document.body.click(); // hack to close dropdown
     }
 
     async onClickUnfollow() {
-        await this.threadService.removeFollower(this.state.thread.followerOfSelf);
+        await this.services["mail.chatter"].removeFollower(this.state.thread.followerOfSelf);
         this.onFollowerChanged();
     }
 
@@ -335,7 +342,7 @@ export class Chatter extends Component {
 
     async scheduleActivity() {
         const schedule = async (threadId) => {
-            await this.activityService.schedule(this.props.threadModel, threadId);
+            await this.services["mail.activity"].schedule(this.props.threadModel, threadId);
             this.load(this.props.threadId, ["activities"]);
         };
         if (this.props.threadId) {

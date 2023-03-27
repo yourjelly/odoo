@@ -11,8 +11,10 @@ export class CallMenu extends Component {
     static props = [];
     static template = "mail.CallMenu";
     setup() {
-        this.threadService = useService("mail.thread");
-        this.rtc = useRtc();
+        this.services = {
+            "mail.thread": useService("mail.thread"),
+            "mail.rtc": useRtc(),
+        };
     }
 }
 

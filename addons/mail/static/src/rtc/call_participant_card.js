@@ -22,14 +22,16 @@ export class CallParticipantCard extends Component {
         this.contextMenuAnchorRef = useRef("contextMenuAnchor");
         this.popover = usePopover();
         this.rpc = useService("rpc");
-        this.rtc = useRtc();
-        this.store = useStore();
-        this.threadService = useService("mail.thread");
+        this.services = {
+            "mail.store": useStore(),
+            "mail.rtc": useRtc(),
+            "mail.thread": useService("mail.thread"),
+        };
         onMounted(() => {
             if (!this.rtcSession) {
                 return;
             }
-            this.rtc.updateVideoDownload(this.rtcSession, {
+            this.services["mail.rtc"].updateVideoDownload(this.rtcSession, {
                 viewCountIncrement: 1,
             });
         });
@@ -37,7 +39,7 @@ export class CallParticipantCard extends Component {
             if (!this.rtcSession) {
                 return;
             }
-            this.rtc.updateVideoDownload(this.rtcSession, {
+            this.services["mail.rtc"].updateVideoDownload(this.rtcSession, {
                 viewCountIncrement: -1,
             });
         });
@@ -47,7 +49,7 @@ export class CallParticipantCard extends Component {
         if (!this.rtcSession) {
             return false;
         }
-        return this.rtcSession?.id !== this.rtc.state.selfSession?.id;
+        return this.rtcSession?.id !== this.services["mail.rtc"].state.selfSession?.id;
     }
 
     get rtcSession() {
@@ -59,13 +61,19 @@ export class CallParticipantCard extends Component {
     }
 
     get isOfActiveCall() {
-        return Boolean(this.rtcSession && this.rtcSession.channelId === this.rtc.state.channel?.id);
+        return Boolean(
+            this.rtcSession &&
+                this.rtcSession.channelId === this.services["mail.rtc"].state.channel?.id
+        );
     }
 
     get showConnectionState() {
         return Boolean(
             this.isOfActiveCall &&
-                !(this.rtcSession.channelMember?.persona.localId === this.store.self?.localId) &&
+                !(
+                    this.rtcSession.channelMember?.persona.localId ===
+                    this.services["mail.store"].self?.localId
+                ) &&
                 !HIDDEN_CONNECTION_STATES.has(this.rtcSession.connectionState)
         );
     }
@@ -99,7 +107,7 @@ export class CallParticipantCard extends Component {
             channel_id: this.props.thread.id,
             member_ids: [this.channelMember.id],
         });
-        this.threadService.update(this.props.thread, {
+        this.services["mail.thread"].update(this.props.thread, {
             serverData: {
                 invitedMembers: channelData.invitedMembers,
             },

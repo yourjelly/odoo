@@ -47,12 +47,14 @@ export class Discuss extends Component {
     });
 
     setup() {
-        this.messaging = useMessaging();
-        this.store = useStore();
-        this.threadService = useState(useService("mail.thread"));
-        this.messageService = useState(useService("mail.message"));
-        this.personaService = useService("mail.persona");
-        this.rtc = useRtc();
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.store": useStore(),
+            "mail.thread": useService("mail.thread"),
+            "mail.message": useService("mail.message"),
+            "mail.persona": useService("mail.persona"),
+            "mail.rtc": useRtc(),
+        };
         this.messageHighlight = useMessageHighlight();
         this.messageEdition = useMessageEdition();
         this.messageToReplyTo = useMessageToReplyTo();
@@ -66,14 +68,14 @@ export class Discuss extends Component {
         });
         this.orm = useService("orm");
         this.effect = useService("effect");
-        this.prevInboxCounter = this.store.discuss.inbox.counter;
+        this.prevInboxCounter = this.services["mail.store"].discuss.inbox.counter;
         useChildSubEnv({ inDiscussApp: true });
         useEffect(
             () => {
                 if (
                     this.thread?.id === "inbox" &&
-                    this.prevInboxCounter !== this.store.discuss.inbox.counter &&
-                    this.store.discuss.inbox.counter === 0
+                    this.prevInboxCounter !== this.services["mail.store"].discuss.inbox.counter &&
+                    this.services["mail.store"].discuss.inbox.counter === 0
                 ) {
                     this.effect.add({
                         message: _t("Congratulations, your inbox is empty!"),
@@ -81,13 +83,13 @@ export class Discuss extends Component {
                         fadeout: "fast",
                     });
                 }
-                this.prevInboxCounter = this.store.discuss.inbox.counter;
+                this.prevInboxCounter = this.services["mail.store"].discuss.inbox.counter;
             },
-            () => [this.store.discuss.inbox.counter]
+            () => [this.services["mail.store"].discuss.inbox.counter]
         );
-        onWillStart(() => this.messaging.isReady);
-        onMounted(() => (this.store.discuss.isActive = true));
-        onWillUnmount(() => (this.store.discuss.isActive = false));
+        onWillStart(() => this.services["mail.messaging"].isReady);
+        onMounted(() => (this.services["mail.store"].discuss.isActive = true));
+        onWillUnmount(() => (this.services["mail.store"].discuss.isActive = false));
     }
 
     markAllAsRead() {
@@ -95,7 +97,9 @@ export class Discuss extends Component {
     }
 
     get thread() {
-        return this.store.threads[this.store.discuss.threadLocalId];
+        return this.services["mail.store"].threads[
+            this.services["mail.store"].discuss.threadLocalId
+        ];
     }
 
     toggleInviteForm() {
@@ -133,7 +137,7 @@ export class Discuss extends Component {
                 this.thread.type === "chat" ||
                 this.thread.type === "group")
         ) {
-            await this.threadService.notifyThreadNameToServer(this.thread, newName);
+            await this.services["mail.thread"].notifyThreadNameToServer(this.thread, newName);
         }
     }
 
@@ -143,14 +147,20 @@ export class Discuss extends Component {
             return;
         }
         if (newDescription !== this.thread.description) {
-            await this.threadService.notifyThreadDescriptionToServer(this.thread, newDescription);
+            await this.services["mail.thread"].notifyThreadDescriptionToServer(
+                this.thread,
+                newDescription
+            );
         }
     }
 
     async renameGuest({ value: name }) {
         const newName = name.trim();
-        if (this.store.guest?.name !== newName) {
-            await this.personaService.updateGuestName(this.store.self, newName);
+        if (this.services["mail.store"].guest?.name !== newName) {
+            await this.services["mail.persona"].updateGuestName(
+                this.services["mail.store"].self,
+                newName
+            );
         }
     }
 }

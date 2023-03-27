@@ -27,9 +27,7 @@ export class Call extends Component {
 
     setup() {
         this.grid = useRef("grid");
-        this.messaging = useMessaging();
         this.notification = useService("notification");
-        this.rtc = useRtc();
         this.state = useState({
             isFullscreen: false,
             sidebar: false,
@@ -38,8 +36,12 @@ export class Call extends Component {
             columnCount: 0,
             overlay: false,
         });
-        this.store = useStore();
-        this.userSettings = useState(useService("mail.user_settings"));
+        this.services = {
+            "mail.messaging": useMessaging(),
+            "mail.rtc": useRtc(),
+            "mail.user_settings": useState(useService("mail.user_settings")),
+            "mail.store": useStore(),
+        };
         onMounted(() => {
             this.resizeObserver = new ResizeObserver(() => this.arrangeTiles());
             this.resizeObserver.observe(this.grid.el);
@@ -57,7 +59,10 @@ export class Call extends Component {
         if (this.state.isFullscreen || this.props.compact || this.props.thread.activeRtcSession) {
             return false;
         }
-        if (this.rtc.state.channel !== this.props.thread || this.props.thread.videoCount === 0) {
+        if (
+            this.services["mail.rtc"].state.channel !== this.props.thread ||
+            this.props.thread.videoCount === 0
+        ) {
             return true;
         }
         return false;
@@ -65,7 +70,8 @@ export class Call extends Component {
 
     get visibleCards() {
         const cards = [];
-        const filterVideos = this.userSettings.showOnlyVideo && this.props.thread.videoCount > 0;
+        const filterVideos =
+            this.services["mail.user_settings"].showOnlyVideo && this.props.thread.videoCount > 0;
         for (const session of Object.values(this.props.thread.rtcSessions)) {
             if (!filterVideos || session.videoStream) {
                 cards.push({
@@ -78,7 +84,7 @@ export class Call extends Component {
             for (const memberId of this.props.thread.invitedMemberIds) {
                 cards.push({
                     key: "member_" + memberId,
-                    member: this.store.channelMembers[memberId],
+                    member: this.services["mail.store"].channelMembers[memberId],
                 });
             }
         }

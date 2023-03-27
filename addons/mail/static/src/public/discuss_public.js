@@ -13,25 +13,29 @@ export class DiscussPublic extends Component {
     static template = "mail.DiscussPublic";
 
     setup() {
-        this.messaging = useMessaging();
-        /** @type {import('@mail/core/thread_service').ThreadService} */
-        this.threadService = useService("mail.thread");
-        this.rtc = useService("mail.rtc");
-        this.store = useStore();
+        this.services = {
+            "mail.messaging": useMessaging(),
+            /** @type {import('@mail/core/channel_member_service').ChannelMemberService} */
+            "mail.channel.member": useService("mail.channel.member"),
+            /** @type {import('@mail/core/thread_service').ThreadService} */
+            "mail.thread": useService("mail.thread"),
+            "mail.store": useStore(),
+            "mail.rtc": useService("mail.rtc"),
+        };
         this.state = useState({
             welcome: this.props.data.discussPublicViewData.shouldDisplayWelcomeViewInitially,
         });
         useEffect(
             (welcome) => {
                 if (!welcome) {
-                    this.threadService.setDiscussThread(this.thread, false);
-                    this.threadService.fetchChannelMembers(this.thread);
+                    this.services["mail.thread"].setDiscussThread(this.thread, false);
+                    this.services["mail.channel.member"].fetchMembers(this.thread);
                     const video = browser.localStorage.getItem("mail_call_preview_join_video");
                     const mute = browser.localStorage.getItem("mail_call_preview_join_mute");
                     if (this.thread.defaultDisplayMode === "video_full_screen") {
-                        this.rtc.toggleCall(this.thread, { video }).then(() => {
+                        this.services["mail.rtc"].toggleCall(this.thread, { video }).then(() => {
                             if (mute) {
-                                this.rtc.toggleMicrophone();
+                                this.services["mail.rtc"].toggleMicrophone();
                             }
                         });
                     }
@@ -50,7 +54,7 @@ export class DiscussPublic extends Component {
     }
 
     get thread() {
-        return this.threadService.insert({
+        return this.services["mail.thread"].insert({
             id: this.props.data.channelData.id,
             model: "mail.channel",
             type: this.props.data.channelData.channel.channel_type,

@@ -17,8 +17,10 @@ export class AttachmentView extends Component {
     static props = ["threadId", "threadModel"];
 
     setup() {
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = useService("mail.thread");
+        this.services = {
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": useService("mail.thread"),
+        };
         this.iframeViewerPdfRef = useRef("iframeViewerPdf");
         this.state = useState({
             /** @type {import("@mail/core/thread_model").Thread} */
@@ -37,7 +39,7 @@ export class AttachmentView extends Component {
         const index = this.state.thread.attachmentsInWebClientView.findIndex(
             (attachment) => attachment.id === this.state.thread.mainAttachment.id
         );
-        this.threadService.setMainAttachmentFromIndex(
+        this.services["mail.thread"].setMainAttachmentFromIndex(
             this.state.thread,
             index === this.state.thread.attachmentsInWebClientView.length - 1 ? 0 : index + 1
         );
@@ -47,14 +49,14 @@ export class AttachmentView extends Component {
         const index = this.state.thread.attachmentsInWebClientView.findIndex(
             (attachment) => attachment.id === this.state.thread.mainAttachment.id
         );
-        this.threadService.setMainAttachmentFromIndex(
+        this.services["mail.thread"].setMainAttachmentFromIndex(
             this.state.thread,
             index === 0 ? this.state.thread.attachmentsInWebClientView.length - 1 : index - 1
         );
     }
 
     updateFromProps(props) {
-        this.state.thread = this.threadService.insert({
+        this.state.thread = this.services["mail.thread"].insert({
             id: props.threadId,
             model: props.threadModel,
         });

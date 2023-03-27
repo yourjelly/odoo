@@ -16,7 +16,7 @@ patch(Messaging.prototype, "im_livechat", {
         this._super(notif);
         const channel = this.store.threads[createLocalId("mail.channel", notif.payload.id)];
         if (channel?.type === "livechat") {
-            this.threadService.sortChannels();
+            this.services["mail.thread"].sortChannels();
         }
     },
 

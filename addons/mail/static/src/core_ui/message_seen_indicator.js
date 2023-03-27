@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { Component } from "@odoo/owl";
-import { useStore } from "../core/messaging_hook";
 
 /**
  * @typedef {Object} Props
@@ -12,10 +11,6 @@ import { useStore } from "../core/messaging_hook";
 export class MessageSeenIndicator extends Component {
     static template = "mail.MessageSeenIndicator";
     static props = ["message", "thread", "className?"];
-
-    setup() {
-        this.store = useStore();
-    }
 
     get hasEveryoneSeen() {
         const otherDidNotSee = [...this.props.thread.seenInfos].filter((seenInfo) => {

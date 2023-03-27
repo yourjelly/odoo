@@ -32,11 +32,17 @@ export class Activity extends Component {
     closePopover;
 
     setup() {
-        this.messaging = useMessaging();
-        /** @type {import("@mail/web/activity/activity_service").ActivityService} */
-        this.activityService = useService("mail.activity");
-        /** @type {import("@mail/core/thread_service").ThreadService} */
-        this.threadService = useService("mail.thread");
+        this.services = {
+            "mail.messaging": useMessaging(),
+            /** @type {import("@mail/web/activity/activity_service").ActivityService} */
+            "mail.activity": useService("mail.activity"),
+            /** @type {import("@mail/web/chatter_service").ChatterService} */
+            "mail.chatter": useService("mail.chatter"),
+            /** @type {import("@mail/core/thread_service").ThreadService} */
+            "mail.thread": useService("mail.thread"),
+            /** @type {import("@mail/core/thread_message_fetch_service").ThreadMessageFetchService} */
+            "mail.thread.message_fetch": useService("mail.thread.message_fetch"),
+        };
         this.state = useState({
             showDetails: false,
             delay: computeDelay(this.props.data.date_deadline),
@@ -89,9 +95,9 @@ export class Activity extends Component {
 
     async onFileUploaded(data) {
         const { id: attachmentId } = await this.attachmentUploader.uploadData(data);
-        await this.activityService.markAsDone(this.props.data, [attachmentId]);
+        await this.services["mail.activity"].markAsDone(this.props.data, [attachmentId]);
         this.props.onUpdate();
-        await this.threadService.fetchNewMessages(this.thread);
+        await this.services["mail.thread.message_fetch"].fetchNewMessages(this.thread);
     }
 
     async edit() {
@@ -101,12 +107,15 @@ export class Activity extends Component {
     }
 
     async unlink() {
-        this.activityService.delete(this.props.data);
+        this.services["mail.activity"].delete(this.props.data);
         await this.env.services.orm.unlink("mail.activity", [this.props.data.id]);
         this.props.onUpdate();
     }
 
     get thread() {
-        return this.threadService.getThread(this.props.data.res_model, this.props.data.res_id);
+        return this.services["mail.chatter"].getThread(
+            this.props.data.res_model,
+            this.props.data.res_id
+        );
     }
 }

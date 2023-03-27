@@ -13,7 +13,7 @@
                     'o-hasSelfAvatar px-3': !env.inChatWindow and thread,
                 }" t-attf-class="{{ props.className }}">
             <div class="o-mail-Composer-sidebarMain flex-shrink-0" t-if="!compact">
-                <img class="o-mail-Composer-avatar mt-1 rounded-circle" t-att-src="threadService.avatarUrl(store.self, props.composer.thread)" alt="Avatar of user"/>
+                <img class="o-mail-Composer-avatar mt-1 rounded-circle" t-att-src="services['mail.thread'].avatarUrl(services['mail.store'].self, props.composer.thread)" alt="Avatar of user"/>
             </div>
             <div class="o-mail-Composer-coreHeader text-truncate small p-2" t-if="props.composer.thread and props.messageToReplyTo?.thread === props.composer.thread">
                 <span class="cursor-pointer" t-on-click="() => props.highlightReplyTo and props.highlightReplyTo(props.messageToReplyTo.message.id)">
@@ -75,14 +75,14 @@
                         <button t-if="thread and thread.type === 'chatter'" class="btn btn-light fa fa-expand mx-1 border-0 rounded-pill" title="Full composer" aria-label="Full composer" type="button" t-on-click="onClickFullComposer"/>
                     </div>
                 </div>
-                <button t-if="!compact or store.isSmall" class="o-mail-Composer-send btn btn-primary o-last border-start-0"
+                <button t-if="!compact or services['mail.store'].isSmall" class="o-mail-Composer-send btn btn-primary o-last border-start-0"
                     t-att-class="{'mt-2': extended, 'rounded-0 rounded-end-3': !extended and !compact, 'align-self-stretch': !extended}"
                     t-on-click="sendMessage"
                     type="button"
                     t-att-disabled="isSendButtonDisabled"
                     aria-label="Send"
                 >
-                    <t t-if="store.isSmall"><i class="fa fa-paper-plane-o"/></t>
+                    <t t-if="services['mail.store'].isSmall"><i class="fa fa-paper-plane-o"/></t>
                     <t t-else="">Send</t>
                 </button>
             </div>

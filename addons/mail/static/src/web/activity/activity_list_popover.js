@@ -32,19 +32,21 @@ export class ActivityListPopover extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.messaging = useMessaging();
         this.user = useService("user");
-        /** @type {import("@mail/web/activity/activity_service").ActivityService} */
-        this.activity = useService("mail.activity");
-        /** @type {import("@mail/core/store_service").Store} */
-        this.store = useStore();
+        this.services = {
+            "mail.messaging": useMessaging(),
+            /** @type {import("@mail/web/activity/activity_service").ActivityService} */
+            "mail.activity": useService("mail.activity"),
+            /** @type {import("@mail/core/store_service").Store} */
+            "mail.store": useStore(),
+        };
         this.updateFromProps(this.props);
         onWillUpdateProps((props) => this.updateFromProps(props));
     }
 
     get activities() {
         /** @type {import("./activity_model").Activity[]} */
-        const allActivities = Object.values(this.store.activities);
+        const allActivities = Object.values(this.services["mail.store"].activities);
         return allActivities
             .filter((activity) => this.props.activityIds.includes(activity.id))
             .sort(function (a, b) {
@@ -89,7 +91,7 @@ export class ActivityListPopover extends Component {
             }
         );
         for (const activityData of activitiesData) {
-            this.activity.insert(activityData);
+            this.services["mail.activity"].insert(activityData);
         }
     }
 }

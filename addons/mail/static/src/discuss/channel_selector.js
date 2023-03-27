@@ -17,9 +17,11 @@ export class ChannelSelector extends Component {
     static template = "mail.ChannelSelector";
 
     setup() {
-        this.store = useStore();
-        this.threadService = useState(useService("mail.thread"));
-        this.personaService = useService("mail.persona");
+        this.services = {
+            "mail.store": useStore(),
+            "mail.thread": useService("mail.thread"),
+            "mail.persona": useService("mail.persona"),
+        };
         this.orm = useService("orm");
         this.state = useState({
             value: "",
@@ -65,18 +67,18 @@ export class ChannelSelector extends Component {
                     this.state.selectedPartners,
                 ]);
                 const suggestions = results.map((data) => {
-                    this.personaService.insert({ ...data, type: "partner" });
+                    this.services["mail.persona"].insert({ ...data, type: "partner" });
                     return {
                         classList: "o-mail-ChannelSelector-suggestion",
                         label: data.name,
                         partner: data,
                     };
                 });
-                if (this.store.self.name.includes(cleanedTerm)) {
+                if (this.services["mail.store"].self.name.includes(cleanedTerm)) {
                     suggestions.push({
                         classList: "o-mail-ChannelSelector-suggestion",
-                        label: this.store.self.name,
-                        partner: this.store.self,
+                        label: this.services["mail.store"].self.name,
+                        partner: this.services["mail.store"].self,
                     });
                 }
                 return suggestions;
@@ -88,9 +90,9 @@ export class ChannelSelector extends Component {
     onSelect(option) {
         if (this.props.category.id === "channels") {
             if (option.channelId === "__create__") {
-                this.threadService.createChannel(option.label);
+                this.services["mail.thread"].createChannel(option.label);
             } else {
-                this.threadService.joinChannel(option.channelId, option.label);
+                this.services["mail.thread"].joinChannel(option.channelId, option.label);
             }
             this.onValidate();
         }
@@ -112,12 +114,14 @@ export class ChannelSelector extends Component {
                 return;
             }
             if (selectedPartners.length === 1) {
-                await this.threadService
+                await this.services["mail.thread"]
                     .joinChat(selectedPartners[0])
-                    .then((chat) => this.threadService.open(chat, this.env.inChatWindow));
+                    .then((chat) => this.services["mail.thread"].open(chat, this.env.inChatWindow));
             } else {
-                const partners_to = [...new Set([this.store.self.id, ...selectedPartners])];
-                await this.threadService.createGroupChat({ partners_to });
+                const partners_to = [
+                    ...new Set([this.services["mail.store"].self.id, ...selectedPartners]),
+                ];
+                await this.services["mail.thread"].createGroupChat({ partners_to });
             }
         }
         if (this.props.onValidate) {
@@ -162,7 +166,8 @@ export class ChannelSelector extends Component {
     get tagsList() {
         const res = [];
         for (const partnerId of this.state.selectedPartners) {
-            const partner = this.store.personas[createLocalId("partner", partnerId)];
+            const partner =
+                this.services["mail.store"].personas[createLocalId("partner", partnerId)];
             res.push({
                 id: partner.id,
                 text: partner.name,

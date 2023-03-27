@@ -3,7 +3,7 @@
 
     <t t-name="mail.ChannelInvitation" owl="1">
         <div class="o-mail-ChannelInvitation d-flex flex-column" t-attf-class="{{ className }}" t-ref="root">
-            <t t-if="store.user">
+            <t t-if="services['mail.store'].user">
                 <h3 class="mx-3 mt-3 mb-2">Invite people</h3>
                 <div class="mx-3 my-2">
                     <input class="o-mail-ChannelInvitation-search form-control" t-ref="input" placeholder="Type the name of a person" t-on-input="onInput"/>
@@ -14,7 +14,7 @@
                             <div class="d-flex align-items-center p-2">
                                 <div class="o-mail-ChannelInvitation-avatar position-relative d-flex flex-shrink-0 bg-100">
                                     <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
-                                         t-att-src="threadService.avatarUrl(selectablePartner, props.thread)"/>
+                                         t-att-src="services['mail.thread'].avatarUrl(selectablePartner, props.thread)"/>
                                     <ImStatus className="'position-absolute bottom-0 end-0'" persona="selectablePartner"/>
                                 </div>
                             </div>
