@@ -52,6 +52,7 @@ export class MrpDisplayAction extends Component {
                 searchViewId: searchViews.views.search.id,
                 searchViewFields: searchViews.fields,
                 context: this.props.action.context,
+                domain: [["state", "in", ["confirmed", "progress", "to_close"]]],
             };
         });
     }

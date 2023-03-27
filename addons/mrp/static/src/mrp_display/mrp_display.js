@@ -5,12 +5,13 @@ import { useService } from "@web/core/utils/hooks";
 import { RelationalModel } from "@web/views/relational_model";
 import { useModels } from "@mrp/mrp_display/model";
 import { ControlPanelButtons } from "@mrp/mrp_display/control_panel";
+import { MrpDisplayRecord } from "./mrp_display_record";
 
 const { Component } = owl;
 
 export class MrpDisplay extends Component {
     static template = "mrp.MrpDisplay";
-    static components = { Layout, ControlPanelButtons };
+    static components = { Layout, ControlPanelButtons, MrpDisplayRecord };
     static buttonTemplate = "mrp.MrpDisplayButtonTemplate";
     static props = {
         resModel: String,
@@ -52,5 +53,13 @@ export class MrpDisplay extends Component {
 
     get workorders() {
         return this.mrp_workorder.root.records;
+    }
+
+    getRawMoves(record) {
+        return this.stock_move.root.records.filter(move => move.data.raw_material_production_id?.[0] === record.resId);
+    }
+
+    getWorkorders(record) {
+        return this.workorders.filter(wo => record.data.workorder_ids.currentIds.includes(wo.resId));
     }
 }

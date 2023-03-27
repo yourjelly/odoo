@@ -5,10 +5,11 @@
             <t t-set-slot="control-panel-top-middle">
                 <t t-call="{{ constructor.buttonTemplate }}"/>
             </t>
-            <t t-foreach="mrp_production.root.records" t-as="record" t-key="record.id">
-                <t t-esc="record.data.display_name"/>
-                <br/>
-            </t>
+            <div class="d-flex flex-row flex-wrap">
+                <t t-foreach="mrp_production.root.records" t-as="record" t-key="record.id">
+                    <MrpDisplayRecord record="record" workorders="getWorkorders(record)" rawMoves="getRawMoves(record)"/>
+                </t>
+            </div>
         </Layout>
     </t>
 
