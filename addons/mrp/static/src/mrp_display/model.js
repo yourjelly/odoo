@@ -14,12 +14,21 @@ import { onWillStart, onWillUpdateProps, useComponent } from "@odoo/owl";
  * @param {Object} props
  * @returns {SearchParams}
  */
-function getSearchParams(model, props) {
+function getSearchParams(model, props, component) {
     const params = {};
     for (const key of SEARCH_KEYS) {
         if (model.rootParams.resModel == props.resModel) {
             params[key] = props[key];
         } else {
+            if (key == "domain") {
+                if (model.rootParams.resModel == "mrp.workorder") {
+                    const production_ids = component.mrp_production.root.records.map(
+                        (r) => r.resId
+                    );
+                    params[key] = [["production_id", "in", production_ids]];
+                    continue;
+                }
+            }
             // TODO handle domain of submodel here
             params[key] = [];
         }
@@ -33,10 +42,9 @@ function getSearchParams(model, props) {
  * @param {Object} params
  * @param {Object} [options]
  * @param {Function} [options.onUpdate]
- * @param {boolean} [options.ignoreUseSampleModel]
  * @returns {InstanceType<T>}
  */
-export function useModel(ModelClass, params, options = {}) {
+export function useModels(ModelClass, paramsList, options = {}) {
     const component = useComponent();
     if (!(ModelClass.prototype instanceof Model)) {
         throw new Error(`the model class should extend Model`);
@@ -47,9 +55,14 @@ export function useModel(ModelClass, params, options = {}) {
     }
     services.orm = services.orm || useService("orm");
 
-    const model = new ModelClass(component.env, params, services);
+    const models = [];
+    for (const params of paramsList) {
+        const model = new ModelClass(component.env, params, services);
+        models.push(model);
+    }
+
     useBus(
-        model.bus,
+        models[models.length - 1].bus,
         "update",
         options.onUpdate ||
             (() => {
@@ -57,22 +70,19 @@ export function useModel(ModelClass, params, options = {}) {
             })
     );
 
-    let started = false;
     async function load(props) {
-        const searchParams = getSearchParams(model, props);
-        await model.load(searchParams);
-
-        if (started) {
-            model.notify();
+        for (const model of models) {
+            const searchParams = getSearchParams(model, props, component);
+            await model.load(searchParams);
         }
     }
+
     onWillStart(async () => {
         await load(component.props);
-        started = true;
     });
     onWillUpdateProps((nextProps) => {
         load(nextProps);
     });
 
-    return model;
+    return models;
 }

@@ -3,13 +3,14 @@
 import { Layout } from "@web/search/layout";
 import { useService } from "@web/core/utils/hooks";
 import { RelationalModel } from "@web/views/relational_model";
-import { useModel } from "@mrp/mrp_display/model";
+import { useModels } from "@mrp/mrp_display/model";
+import { ControlPanelButtons } from "@mrp/mrp_display/control_panel";
 
-const { Component, useSubEnv } = owl;
+const { Component } = owl;
 
 export class MrpDisplay extends Component {
     static template = "mrp.MrpDisplay";
-    static components = { Layout };
+    static components = { Layout, ControlPanelButtons };
     static buttonTemplate = "mrp.MrpDisplayButtonTemplate";
     static props = {
         resModel: String,
@@ -25,37 +26,31 @@ export class MrpDisplay extends Component {
 
     setup() {
         this.viewService = useService("view");
+
+        this.workcenterButtons = [];
         this.display = {
             ...this.props.display,
             controlPanel: { "bottom-right": false, "bottom-left": false, "top-middle": true },
             searchPanel: true,
         };
+
+        const params = [];
         for (const [resModel, fields] of Object.entries(this.props.models)) {
-            const resModelName = resModel.replaceAll(".", "_");
-            const model = useModel(RelationalModel, {
+            params.push({
                 resModel: resModel,
                 fields: fields,
                 rootType: "list",
                 activeFields: fields,
             });
-            if (resModel == this.props.resModel) {
-                useSubEnv({ [resModelName]: model });
-            }
+        }
+        const models = useModels(RelationalModel, params);
+        for (const model of models) {
+            const resModelName = model.rootParams.resModel.replaceAll(".", "_");
             this[resModelName] = model;
         }
     }
 
     get workorders() {
         return this.mrp_workorder.root.records;
-    }
-
-    get workcenterButtons() {
-        // Problème du moment. Ca ne se refresh pas
-        const countByWorkcenter = this.workorders.reduce((workcenterButtons, workorder) => {
-            const name = workorder.data.workcenter_id[1];
-            workcenterButtons[name] = (workcenterButtons[name] || 0) + 1;
-            return workcenterButtons;
-        }, {});
-        return Object.entries(countByWorkcenter);
     }
 }

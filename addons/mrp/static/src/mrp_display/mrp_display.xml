@@ -13,13 +13,6 @@
     </t>
 
     <t t-name="mrp.MrpDisplayButtonTemplate" owl="1">
-        <button class="btn btn-secnodary">
-            ALL
-        </button>
-        <t t-foreach="workcenterButtons" t-as="workcenter" t-key="workcenter[0]">
-            <button class="btn btn-secnodary">
-                <t t-esc="workcenter[0]"/> <t t-esc="workcenter[1]"/>
-            </button>
-        </t>
+        <ControlPanelButtons workorders="workorders"/>
     </t>
 </templates>
