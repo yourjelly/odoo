@@ -100,16 +100,12 @@ QUnit.module("Web Components", (hooks) => {
             class Parent extends Component {
                 setup() {
                     this.state = useState({ value: "world" });
-                    this.choices = [
-                        { label: "Hello", value: "hello" },
-                    ];
+                    this.choices = [{ label: "Hello", value: "hello" }];
                     this.groups = [
                         {
                             label: "Group A",
-                            choices: [
-                                { label: "World", value: "world" },
-                            ]
-                        }
+                            choices: [{ label: "World", value: "world" }],
+                        },
                     ];
                 }
 
@@ -183,7 +179,7 @@ QUnit.module("Web Components", (hooks) => {
         async (assert) => {
             class Parent extends Component {
                 setup() {
-                    this.state = useState({ value: "Hello" });
+                    this.state = useState({ value: "hello" });
                     this.choices = [
                         { label: "Hello", value: "hello" },
                         { label: "World", value: "world" },
