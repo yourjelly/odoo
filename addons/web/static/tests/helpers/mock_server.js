@@ -22,7 +22,7 @@ const serviceRegistry = registry.category("services");
 const domParser = new DOMParser();
 const xmlSerializer = new XMLSerializer();
 
-const regex_field_agg = /(\w+)(?::(\w+)(?:\((\w+)\))?)?/;
+const regex_field_agg = /(\w+)(?::(\w+))?/;
 // valid SQL aggregation functions
 const VALID_AGGREGATE_FUNCTIONS = [
     "array_agg",
@@ -1022,16 +1022,11 @@ export class MockServer {
             }
         } else {
             kwargs.fields.forEach((fspec) => {
-                const [, name, func, fname] = fspec.match(regex_field_agg);
-                const fieldName = func ? fname || name : name;
+                const [, fieldName, func] = fspec.match(regex_field_agg);
                 if (func && !VALID_AGGREGATE_FUNCTIONS.includes(func)) {
                     throw new Error(`Invalid aggregation function ${func}.`);
                 }
                 if (!fields[fieldName]) {
-                    return;
-                }
-                if (groupByFieldNames.includes(fieldName)) {
-                    // grouped fields are not aggregated
                     return;
                 }
                 if (
@@ -1041,7 +1036,7 @@ export class MockServer {
                     return;
                 }
 
-                aggregatedFields.push({ fieldName, func, name });
+                aggregatedFields.push({ fieldName, func, name: fspec });
             });
         }
         function aggregateFields(group, records) {

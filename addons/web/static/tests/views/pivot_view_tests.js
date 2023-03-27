@@ -4480,13 +4480,13 @@ QUnit.module("Views", (hooks) => {
                         return Promise.resolve([
                             {
                                 customer: [2, "Second"],
-                                foo: 18,
+                                "foo:sum": 18,
                                 __count: 2,
                                 __domain: [["customer", "=", 2]],
                             },
                             {
                                 customer: [1, "First"],
-                                foo: 14,
+                                "foo:sum": 14,
                                 __count: 2,
                                 __domain: [["customer", "=", 1]],
                             },

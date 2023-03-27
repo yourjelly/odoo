@@ -479,7 +479,7 @@ export class GraphModel extends Model {
                                 labels.push(label);
                             }
 
-                            let value = group[measure];
+                            let value = group[measures.slice(-1)];
                             if (value instanceof Array) {
                                 // case where measure is a many2one and is used as groupBy
                                 value = 1;

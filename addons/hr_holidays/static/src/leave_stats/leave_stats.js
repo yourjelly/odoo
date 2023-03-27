@@ -95,7 +95,7 @@ export class LeaveStatsComponent extends Component {
                 ['date_from', '<=', dateTo],
                 ['date_to', '>=', dateFrom]
             ],
-            ['holiday_status_id', 'number_of_days:sum'],
+            ['number_of_days:sum'],
             ['holiday_status_id'],
         );
     }

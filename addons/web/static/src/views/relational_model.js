@@ -2493,14 +2493,19 @@ export class DynamicGroupList extends DynamicList {
 
     async _loadGroups() {
         const firstGroupByName = this.firstGroupBy.split(":")[0];
-        const _orderBy = this.orderBy.filter(
-            (o) => o.name === firstGroupByName || this.fields[o.name].group_operator !== undefined
-        );
+        const _orderBy = []
+        for (const orderTerm of this.orderBy) {
+            if (orderTerm.name === firstGroupByName) {
+                _orderBy.push({name: this.firstGroupBy, asc: orderTerm.asc})
+            } else if (this.fields[orderTerm.name].group_operator !== undefined) {
+                _orderBy.push(orderTerm)
+            }
+        }
         const orderby = orderByToString(_orderBy);
         const { groups, length } = await this.model.orm.webReadGroup(
             this.resModel,
             this.domain,
-            unique([...this.fieldNames, firstGroupByName]),
+            unique([...this.fieldNames]),
             [this.firstGroupBy],
             {
                 orderby,

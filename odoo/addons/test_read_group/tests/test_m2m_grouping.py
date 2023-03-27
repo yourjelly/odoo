@@ -45,19 +45,19 @@ class TestM2MGrouping(common.TransactionCase):
             {   # first task: both users
                 'task_ids': (self.tasks[0].id, "Super Mario Bros."),
                 'task_ids_count': 2,
-                'name': ['Mario', 'Luigi'],
+                'name:array_agg': ['Mario', 'Luigi'],
                 '__domain': [('task_ids', '=', self.tasks[0].id)],
             },
             {   # second task: Mario only
                 'task_ids': (self.tasks[1].id, "Paper Mario"),
                 'task_ids_count': 1,
-                'name': ['Mario'],
+                'name:array_agg': ['Mario'],
                 '__domain': [('task_ids', '=', self.tasks[1].id)],
             },
             {   # third task: Luigi only
                 'task_ids': (self.tasks[2].id, "Luigi's Mansion"),
                 'task_ids_count': 1,
-                'name': ['Luigi'],
+                'name:array_agg': ['Luigi'],
                 '__domain': [('task_ids', '=', self.tasks[2].id)],
             },
         ])
@@ -73,13 +73,13 @@ class TestM2MGrouping(common.TransactionCase):
             {   # task of Mario
                 'user_ids': (self.users[0].id, "Mario"),
                 'user_ids_count': 1,
-                'name': ["Super Mario Bros."],
+                'name:array_agg': ["Super Mario Bros."],
                 '__domain': ['&', ('id', '=', self.tasks[0].id), ('user_ids', '=', self.users[0].id)],
             },
             {   # task of Luigi
                 'user_ids': (self.users[1].id, "Luigi"),
                 'user_ids_count': 1,
-                'name': ["Super Mario Bros."],
+                'name:array_agg': ["Super Mario Bros."],
                 '__domain': ['&', ('id', '=', self.tasks[0].id), ('user_ids', '=', self.users[1].id)],
             },
         ])
@@ -94,19 +94,19 @@ class TestM2MGrouping(common.TransactionCase):
             {   # tasks of Mario
                 'user_ids': (self.users[0].id, "Mario"),
                 'user_ids_count': 2,
-                'name': unordered(["Super Mario Bros.", "Paper Mario"]),
+                'name:array_agg': ["Super Mario Bros.", "Paper Mario"],
                 '__domain': [('user_ids', '=', self.users[0].id)],
             },
             {   # tasks of Luigi
                 'user_ids': (self.users[1].id, "Luigi"),
                 'user_ids_count': 2,
-                'name': unordered(["Super Mario Bros.", "Luigi's Mansion"]),
+                'name:array_agg': ["Super Mario Bros.", "Luigi's Mansion"],
                 '__domain': [('user_ids', '=', self.users[1].id)],
             },
             {   # tasks of nobody
                 'user_ids': False,
                 'user_ids_count': 1,
-                'name': unordered(["Donkey Kong"]),
+                'name:array_agg': ["Donkey Kong"],
                 '__domain': [('user_ids', '=', False)],
             },
         ])
@@ -158,19 +158,19 @@ class TestM2MGrouping(common.TransactionCase):
             {   # tasks of Mario
                 'user_ids': (self.users[0].id, "Mario"),
                 'user_ids_count': 2,
-                'name': unordered(["Super Mario Bros.", "Paper Mario"]),
+                'name:array_agg': ["Super Mario Bros.", "Paper Mario"],
                 '__domain': [('user_ids', '=', self.users[0].id)],
             },
             {   # tasks of Luigi
                 'user_ids': (self.users[1].id, "Luigi"),
                 'user_ids_count': 2,
-                'name': unordered(["Super Mario Bros.", "Luigi's Mansion"]),
+                'name:array_agg': ["Super Mario Bros.", "Luigi's Mansion"],
                 '__domain': [('user_ids', '=', self.users[1].id)],
             },
             {   # tasks of nobody
                 'user_ids': False,
                 'user_ids_count': 1,
-                'name': unordered(["Donkey Kong"]),
+                'name:array_agg': ["Donkey Kong"],
                 '__domain': [('user_ids', '=', False)],
             },
         ])
@@ -209,24 +209,13 @@ class TestM2MGrouping(common.TransactionCase):
             {   # tasks of Mario
                 'user_ids': (self.users[0].id, "Mario"),
                 'user_ids_count': 2,
-                'name': unordered(['Super Mario Bros.', 'Paper Mario']),
+                'name:array_agg': ['Super Mario Bros.', 'Paper Mario'],
                 '__domain': [('user_ids', '=', self.users[0].id)],
             },
             {   # tasks of Luigi and no user
                 'user_ids': False,
                 'user_ids_count': 2,
-                'name': unordered(["Luigi's Mansion", 'Donkey Kong']),
+                'name:array_agg': ["Luigi's Mansion", 'Donkey Kong'],
                 '__domain': [('user_ids', '=', False)],
             },
         ])
-
-
-class unordered(list):
-    """ A list where equality is interpreted without ordering. """
-    __slots__ = ()
-
-    def __eq__(self, other):
-        return sorted(self) == sorted(other)
-
-    def __ne__(self, other):
-        return sorted(self) != sorted(other)

@@ -592,7 +592,6 @@ class TestPerformance(SavepointCaseWithUserDemo):
             result = model.read_group([], ['partner_id', 'value'], ['partner_id'])
             self.assertEqual(result, expected)
 
-
 @tagged('bacon_and_eggs')
 class TestIrPropertyOptimizations(TransactionCase):
 

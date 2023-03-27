@@ -11317,7 +11317,7 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["date:day"],
             async mockRPC(route, args) {
                 if (args.method === "web_read_group") {
-                    assert.deepEqual(args.kwargs.fields, ["foo", "date"]);
+                    assert.deepEqual(args.kwargs.fields, ["foo"]);
                     assert.deepEqual(args.kwargs.groupby, ["date:day"]);
                 }
                 assert.step(args.method);

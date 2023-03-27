@@ -1018,11 +1018,11 @@ export class PivotModel extends Model {
     _getMeasurements(group, config) {
         const { metaData } = config;
         return metaData.activeMeasures.reduce((measurements, measureName) => {
-            var measurement = group[measureName];
-            if (measurement instanceof Array) {
-                // case field is many2one and used as measure and groupBy simultaneously
-                measurement = 1;
+            let aggregate_spec = measureName;
+            if (aggregate_spec != '__count') {
+                aggregate_spec = aggregate_spec + ':' + metaData.measures[measureName].group_operator;
             }
+            var measurement = group[aggregate_spec];
             if (
                 metaData.measures[measureName].type === "boolean" &&
                 measurement instanceof Boolean

@@ -1096,7 +1096,7 @@ QUnit.module("MockServer", (hooks) => {
                 method: "read_group",
                 args: [[]],
                 kwargs: {
-                    fields: ["float:sum", "foo_sum:sum(foo)"],
+                    fields: ["float:sum", "foo:sum"],
                     domain: [],
                     groupby: ["bool"],
                     lazy: false,
@@ -1107,15 +1107,15 @@ QUnit.module("MockServer", (hooks) => {
                     __count: 2,
                     __domain: [["bool", "=", false]],
                     bool: false,
-                    float: 0,
-                    foo_sum: 17,
+                    "float:sum": 0,
+                    "foo:sum": 17,
                 },
                 {
                     __count: 4,
                     __domain: [["bool", "=", true]],
                     bool: true,
-                    float: 2,
-                    foo_sum: 57,
+                    "float:sum": 2,
+                    "foo:sum": 57,
                 },
             ]);
         }
@@ -1129,7 +1129,7 @@ QUnit.module("MockServer", (hooks) => {
             method: "read_group",
             args: [[]],
             kwargs: {
-                fields: ["aggregateLabel:array_agg(partner_id)"],
+                fields: ["partner_id:array_agg"],
                 domain: [],
                 groupby: [],
             },
@@ -1137,23 +1137,7 @@ QUnit.module("MockServer", (hooks) => {
         assert.deepEqual(result1, [
             {
                 __count: 6,
-                aggregateLabel: aggregateValue,
-            },
-        ]);
-        const result2 = await server.performRPC("", {
-            model: "bar",
-            method: "read_group",
-            args: [[]],
-            kwargs: {
-                fields: ["partner_id:array_agg"],
-                domain: [],
-                groupby: [],
-            },
-        });
-        assert.deepEqual(result2, [
-            {
-                __count: 6,
-                partner_id: aggregateValue,
+                "partner_id:array_agg": aggregateValue,
             },
         ]);
     });
@@ -1165,7 +1149,7 @@ QUnit.module("MockServer", (hooks) => {
             method: "read_group",
             args: [[]],
             kwargs: {
-                fields: ["aggregateLabel:array_agg(id)"],
+                fields: ["id:array_agg"],
                 domain: [],
                 groupby: [],
             },
@@ -1173,7 +1157,7 @@ QUnit.module("MockServer", (hooks) => {
         assert.deepEqual(result1, [
             {
                 __count: 6,
-                aggregateLabel: [1, 2, 3, 4, 5, 6],
+                "id:array_agg": [1, 2, 3, 4, 5, 6],
             },
         ]);
         const result2 = await server.performRPC("", {
@@ -1189,7 +1173,7 @@ QUnit.module("MockServer", (hooks) => {
         assert.deepEqual(result2, [
             {
                 __count: 3,
-                id: [2, 3, 5],
+                "id:array_agg": [2, 3, 5],
             },
         ]);
     });
@@ -1204,7 +1188,7 @@ QUnit.module("MockServer", (hooks) => {
                 method: "read_group",
                 args: [[]],
                 kwargs: {
-                    fields: ["aggregateLabel:array_agg(foo)"],
+                    fields: ["foo:array_agg"],
                     domain: [],
                     groupby: [],
                 },
@@ -1212,23 +1196,7 @@ QUnit.module("MockServer", (hooks) => {
             assert.deepEqual(result1, [
                 {
                     __count: 6,
-                    aggregateLabel: aggregateValue,
-                },
-            ]);
-            const result2 = await server.performRPC("", {
-                model: "bar",
-                method: "read_group",
-                args: [[]],
-                kwargs: {
-                    fields: ["foo:array_agg"],
-                    domain: [],
-                    groupby: [],
-                },
-            });
-            assert.deepEqual(result2, [
-                {
-                    __count: 6,
-                    foo: aggregateValue,
+                    "foo:array_agg": aggregateValue,
                 },
             ]);
         }
@@ -1241,7 +1209,7 @@ QUnit.module("MockServer", (hooks) => {
             method: "read_group",
             args: [[]],
             kwargs: {
-                fields: ["aggregateLabel:count_distinct(partner_id)"],
+                fields: ["partner_id:count_distinct"],
                 domain: [],
                 groupby: [],
             },
@@ -1249,23 +1217,7 @@ QUnit.module("MockServer", (hooks) => {
         assert.deepEqual(result1, [
             {
                 __count: 6,
-                aggregateLabel: 2,
-            },
-        ]);
-        const result2 = await server.performRPC("", {
-            model: "bar",
-            method: "read_group",
-            args: [[]],
-            kwargs: {
-                fields: ["partner_id:count_distinct"],
-                domain: [],
-                groupby: [],
-            },
-        });
-        assert.deepEqual(result2, [
-            {
-                __count: 6,
-                partner_id: 2,
+                "partner_id:count_distinct": 2,
             },
         ]);
 
@@ -1282,7 +1234,7 @@ QUnit.module("MockServer", (hooks) => {
         assert.deepEqual(result3, [
             {
                 __count: 0,
-                partner_id: 0,
+                "partner_id:count_distinct": 0,
             },
         ]);
     });
