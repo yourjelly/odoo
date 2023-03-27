@@ -20,6 +20,10 @@ import { onMounted, onWillUnmount, useState } from "@odoo/owl";
 patch(FormController.prototype, "mail", {
     setup() {
         this._super();
+        this.mailComponents = {
+            AttachmentView,
+            Chatter,
+        };
         this.messagingState = useState({
             /** @type {import("@mail/core/thread_model").Thread} */
             thread: undefined,
@@ -80,9 +84,4 @@ patch(FormController.prototype, "mail", {
     evalDomainFromRecord(record, expr) {
         return evalDomain(expr, record.evalContext);
     },
-});
-
-Object.assign(FormController.components, {
-    AttachmentView,
-    Chatter,
 });
