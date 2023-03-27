@@ -225,6 +225,7 @@
     const MENU_SEPARATOR_BORDER_WIDTH = 1;
     const MENU_SEPARATOR_PADDING = 5;
     const MENU_SEPARATOR_HEIGHT = MENU_SEPARATOR_BORDER_WIDTH + 2 * MENU_SEPARATOR_PADDING;
+    const FIGURE_BORDER_SIZE = 1;
     // Fonts
     const DEFAULT_FONT_WEIGHT = "400";
     const DEFAULT_FONT_SIZE = 10;
@@ -244,8 +245,6 @@
     // Figure
     const DEFAULT_FIGURE_HEIGHT = 335;
     const DEFAULT_FIGURE_WIDTH = 536;
-    const FIGURE_BORDER_WIDTH = 1;
-    const MIN_FIG_SIZE = 80;
     // Chart
     const MAX_CHAR_LABEL = 20;
     const FIGURE_ID_SPLITTER = "??";
@@ -256,6 +255,7 @@
     const DEFAULT_SCORECARD_BASELINE_COLOR_UP = "#00A04A";
     const DEFAULT_SCORECARD_BASELINE_COLOR_DOWN = "#DC6965";
     const LINE_FILL_TRANSPARENCY = 0.4;
+    const MIN_FIG_SIZE = 80;
     // session
     const DEBOUNCE_TIME = 200;
     const MESSAGE_VERSION = 1;
@@ -277,8 +277,7 @@
         ComponentsImportance[ComponentsImportance["TopBarComposer"] = 21] = "TopBarComposer";
         ComponentsImportance[ComponentsImportance["IconPicker"] = 25] = "IconPicker";
         ComponentsImportance[ComponentsImportance["Popover"] = 30] = "Popover";
-        ComponentsImportance[ComponentsImportance["FigureAnchor"] = 1000] = "FigureAnchor";
-        ComponentsImportance[ComponentsImportance["FigureSnapLine"] = 1001] = "FigureSnapLine";
+        ComponentsImportance[ComponentsImportance["ChartAnchor"] = 1000] = "ChartAnchor";
     })(ComponentsImportance || (ComponentsImportance = {}));
     const DEFAULT_SHEETVIEW_SIZE = 1000;
     const MAXIMAL_FREEZABLE_RATIO = 0.85;
@@ -3053,9 +3052,6 @@
         }
         return attributes;
     }
-    /**
-     * Transform CSS properties into a CSS string.
-     */
     function cssPropertiesToCss(attributes) {
         const str = Object.entries(attributes)
             .filter(([attName, attValue]) => attValue !== undefined)
@@ -5076,10 +5072,6 @@
     function rectIntersection(rect1, rect2) {
         return zoneToRect(intersection(rectToZone(rect1), rectToZone(rect2)));
     }
-    /** Compute the union of the rectangles, ie. the smallest rectangle that contain them all */
-    function rectUnion(...rects) {
-        return zoneToRect(union(...rects.map(rectToZone)));
-    }
     function rectToZone(rect) {
         return {
             left: rect.x,
@@ -6310,22 +6302,22 @@
     const CfTerms = {
         Errors: {
             [25 /* CommandResult.InvalidRange */]: _lt("The range is invalid"),
-            [51 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
-            [52 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
-            [53 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
-            [54 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
-            [55 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
-            [56 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
-            [57 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
-            [47 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
-            [50 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
-            [49 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
-            [48 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
-            [58 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
-            [60 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
-            [59 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
-            [61 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
-            [62 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
+            [50 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
+            [51 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
+            [52 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
+            [53 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
+            [54 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
+            [55 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
+            [56 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
+            [46 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
+            [49 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
+            [48 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
+            [47 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
+            [57 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
+            [59 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
+            [58 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
+            [60 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
+            [61 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
             [24 /* CommandResult.EmptyRange */]: _lt("A range needs to be defined"),
             Unexpected: _lt("The rule is invalid for an unknown reason"),
         },
@@ -6353,20 +6345,20 @@
         Errors: {
             Unexpected: _lt("The chart definition is invalid for an unknown reason"),
             // BASIC CHART ERRORS (LINE | BAR | PIE)
-            [32 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
-            [33 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
+            [31 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
+            [32 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
             // SCORECARD CHART ERRORS
-            [34 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
-            [35 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
+            [33 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
+            [34 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
             // GAUGE CHART ERRORS
-            [36 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
-            [37 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
-            [38 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
-            [39 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
-            [40 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
-            [41 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
-            [42 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
-            [43 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
+            [35 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
+            [36 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
+            [37 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
+            [38 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
+            [39 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
+            [40 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
+            [41 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
+            [42 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
         },
     };
     const NumberFormatTerms = {
@@ -7809,10 +7801,6 @@
   }
 `;
     class ChartFigure extends owl.Component {
-        onDoubleClick() {
-            this.env.model.dispatch("SELECT_FIGURE", { id: this.props.figure.id });
-            this.env.openSidePanel("ChartPanel");
-        }
         get chartType() {
             return this.env.model.getters.getChartType(this.props.figure.id);
         }
@@ -8336,13 +8324,13 @@
     };
     function interactiveAddFilter(env, sheetId, target) {
         const result = env.model.dispatch("CREATE_FILTER_TABLE", { target, sheetId });
-        if (result.isCancelledBecause(78 /* CommandResult.FilterOverlap */)) {
+        if (result.isCancelledBecause(77 /* CommandResult.FilterOverlap */)) {
             env.raiseError(AddFilterInteractiveContent.filterOverlap);
         }
-        else if (result.isCancelledBecause(80 /* CommandResult.MergeInFilter */)) {
+        else if (result.isCancelledBecause(79 /* CommandResult.MergeInFilter */)) {
             env.raiseError(AddFilterInteractiveContent.mergeInFilter);
         }
-        else if (result.isCancelledBecause(81 /* CommandResult.NonContinuousTargets */)) {
+        else if (result.isCancelledBecause(80 /* CommandResult.NonContinuousTargets */)) {
             env.raiseError(AddFilterInteractiveContent.nonContinuousTargets);
         }
     }
@@ -16107,7 +16095,7 @@
         const sheetId = env.model.getters.getActiveSheetId();
         const cmd = dimension === "COL" ? "FREEZE_COLUMNS" : "FREEZE_ROWS";
         const result = env.model.dispatch(cmd, { sheetId, quantity: base });
-        if (result.isCancelledBecause(65 /* CommandResult.MergeOverlap */)) {
+        if (result.isCancelledBecause(64 /* CommandResult.MergeOverlap */)) {
             env.raiseError(MergeErrorMessage);
         }
     }
@@ -18850,7 +18838,7 @@
     box-sizing: content-box;
 
     .o-fig-anchor {
-      z-index: ${ComponentsImportance.FigureAnchor};
+      z-index: ${ComponentsImportance.ChartAnchor};
       position: absolute;
       width: ${ANCHOR_SIZE}px;
       height: ${ANCHOR_SIZE}px;
@@ -19717,6 +19705,13 @@
       pointer-events: none;
     }
   }
+
+  .o-topbar-composer .o-composer:empty:not(:focus)::before {
+    /* svg free of use from https://uxwing.com/formula-fx-icon/ */
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 121.8 122.9' width='16' height='16' focusable='false'%3E%3Cpath d='m28 34-4 5v2h10l-6 40c-4 22-6 28-7 30-2 2-3 3-5 3-3 0-7-2-9-4H4c-2 2-4 4-4 7s4 6 8 6 9-2 15-8c8-7 13-17 18-39l7-35 13-1 3-6H49c4-23 7-27 11-27 2 0 5 2 8 6h4c1-1 4-4 4-7 0-2-3-6-9-6-5 0-13 4-20 10-6 7-9 14-11 24h-8zm41 16c4-5 7-7 8-7s2 1 5 9l3 12c-7 11-12 17-16 17l-3-1-2-1c-3 0-6 3-6 7s3 7 7 7c6 0 12-6 22-23l3 10c3 9 6 13 10 13 5 0 11-4 18-15l-3-4c-4 6-7 8-8 8-2 0-4-3-6-10l-5-15 8-10 6-4 3 1 3 2c2 0 6-3 6-7s-2-7-6-7c-6 0-11 5-21 20l-2-6c-3-9-5-14-9-14-5 0-12 6-18 15l3 3z' fill='%23BDBDBD' /%3E%3C/svg%3E");
+    position: relative;
+    top: 20%;
+  }
 `;
     class Composer extends owl.Component {
         constructor() {
@@ -20445,266 +20440,6 @@
     };
 
     /**
-     * Transform a figure with coordinates from the model, to coordinates as they are shown on the screen,
-     * taking into account the scroll position of the active sheet and the frozen panes.
-     */
-    function internalFigureToScreen(getters, fig) {
-        return { ...fig, ...internalToScreenCoordinates(getters, { x: fig.x, y: fig.y }) };
-    }
-    /**
-     * Transform a figure with coordinates as they are shown on the screen, to coordinates as they are in the model,
-     * taking into account the scroll position of the active sheet and the frozen panes.
-     *
-     * Note that this isn't  exactly the reverse operation as internalFigureToScreen, because the figure will always be on top
-     * of the frozen panes.
-     */
-    function screenFigureToInternal(getters, fig) {
-        return { ...fig, ...screenCoordinatesToInternal(getters, { x: fig.x, y: fig.y }) };
-    }
-    function internalToScreenCoordinates(getters, { x, y }) {
-        const { x: viewportX, y: viewportY } = getters.getMainViewportCoordinates();
-        const { scrollX, scrollY } = getters.getActiveSheetScrollInfo();
-        x = x < viewportX ? x : x - scrollX;
-        y = y < viewportY ? y : y - scrollY;
-        return { x, y };
-    }
-    function screenCoordinatesToInternal(getters, { x, y }) {
-        const { x: viewportX, y: viewportY } = getters.getMainViewportCoordinates();
-        const { scrollX, scrollY } = getters.getActiveSheetScrollInfo();
-        x = viewportX && x < viewportX ? x : x + scrollX;
-        y = viewportY && y < viewportY ? y : y + scrollY;
-        return { x, y };
-    }
-
-    function dragFigureForMove({ x: mouseX, y: mouseY }, { x: mouseInitialX, y: mouseInitialY }, initialFigure, { x: viewportX, y: viewportY }, { scrollX, scrollY }) {
-        const minX = viewportX ? 0 : -scrollX;
-        const minY = viewportY ? 0 : -scrollY;
-        let deltaX = mouseX - mouseInitialX;
-        const newX = Math.max(initialFigure.x + deltaX, minX);
-        let deltaY = mouseY - mouseInitialY;
-        const newY = Math.max(initialFigure.y + deltaY, minY);
-        return { ...initialFigure, x: newX, y: newY };
-    }
-    function dragFigureForResize(initialFigure, dirX, dirY, { x: mouseX, y: mouseY }, { x: mouseInitialX, y: mouseInitialY }, keepRatio, minFigSize) {
-        let { x, y, width, height } = initialFigure;
-        if (keepRatio && dirX != 0 && dirY != 0) {
-            const deltaX = Math.min(dirX * (mouseInitialX - mouseX), initialFigure.width - minFigSize);
-            const deltaY = Math.min(dirY * (mouseInitialY - mouseY), initialFigure.height - minFigSize);
-            const fraction = Math.min(deltaX / initialFigure.width, deltaY / initialFigure.height);
-            width = initialFigure.width * (1 - fraction);
-            height = initialFigure.height * (1 - fraction);
-            if (dirX < 0) {
-                x = initialFigure.x + initialFigure.width * fraction;
-            }
-            if (dirY < 0) {
-                y = initialFigure.y + initialFigure.height * fraction;
-            }
-        }
-        else {
-            const deltaX = Math.max(dirX * (mouseX - mouseInitialX), minFigSize - initialFigure.width);
-            const deltaY = Math.max(dirY * (mouseY - mouseInitialY), minFigSize - initialFigure.height);
-            width = initialFigure.width + deltaX;
-            height = initialFigure.height + deltaY;
-            if (dirX < 0) {
-                x = initialFigure.x - deltaX;
-            }
-            if (dirY < 0) {
-                y = initialFigure.y - deltaY;
-            }
-        }
-        return { ...initialFigure, x, y, width, height };
-    }
-
-    const SNAP_MARGIN = 5;
-    /**
-     * Try to snap the given figure to other figures when moving the figure, and return the snapped
-     * figure and the possible snap lines, if any were found
-     */
-    function snapForMove(getters, figureToSnap, otherFigures) {
-        const snappedFigure = { ...figureToSnap };
-        const verticalSnapLine = getSnapLine(getters, snappedFigure, ["hCenter", "right", "left"], otherFigures, ["hCenter", "right", "left"]);
-        const horizontalSnapLine = getSnapLine(getters, snappedFigure, ["vCenter", "bottom", "top"], otherFigures, ["vCenter", "bottom", "top"]);
-        const { y: viewportY, x: viewportX } = getters.getMainViewportCoordinates();
-        const { scrollY, scrollX } = getters.getActiveSheetScrollInfo();
-        // If the snap cause the figure to change pane, we need to also apply the scroll as an offset
-        if (horizontalSnapLine) {
-            snappedFigure.y -= horizontalSnapLine.snapOffset;
-            const isBaseFigFrozenY = figureToSnap.y < viewportY;
-            const isSnappedFrozenY = snappedFigure.y < viewportY;
-            if (isBaseFigFrozenY && !isSnappedFrozenY)
-                snappedFigure.y += scrollY;
-            else if (!isBaseFigFrozenY && isSnappedFrozenY)
-                snappedFigure.y -= scrollY;
-        }
-        if (verticalSnapLine) {
-            snappedFigure.x -= verticalSnapLine.snapOffset;
-            const isBaseFigFrozenX = figureToSnap.x < viewportX;
-            const isSnappedFrozenX = snappedFigure.x < viewportX;
-            if (isBaseFigFrozenX && !isSnappedFrozenX)
-                snappedFigure.x += scrollX;
-            else if (!isBaseFigFrozenX && isSnappedFrozenX)
-                snappedFigure.x -= scrollX;
-        }
-        return { snappedFigure, verticalSnapLine, horizontalSnapLine };
-    }
-    /**
-     * Try to snap the given figure to the other figures when resizing the figure, and return the snapped
-     * figure and the possible snap lines, if any were found
-     */
-    function snapForResize(getters, resizeDirX, resizeDirY, figureToSnap, otherFigures) {
-        const snappedFigure = { ...figureToSnap };
-        // Vertical snap line
-        const verticalSnapLine = getSnapLine(getters, snappedFigure, [resizeDirX === -1 ? "left" : "right"], otherFigures, ["right", "left"]);
-        if (verticalSnapLine) {
-            if (resizeDirX === 1) {
-                snappedFigure.width -= verticalSnapLine.snapOffset;
-            }
-            else if (resizeDirX === -1) {
-                snappedFigure.x -= verticalSnapLine.snapOffset;
-                snappedFigure.width += verticalSnapLine.snapOffset;
-            }
-        }
-        // Horizontal snap line
-        const horizontalSnapLine = getSnapLine(getters, snappedFigure, [resizeDirY === -1 ? "top" : "bottom"], otherFigures, ["bottom", "top"]);
-        if (horizontalSnapLine) {
-            if (resizeDirY === 1) {
-                snappedFigure.height -= horizontalSnapLine.snapOffset;
-            }
-            else if (resizeDirY === -1) {
-                snappedFigure.y -= horizontalSnapLine.snapOffset;
-                snappedFigure.height += horizontalSnapLine.snapOffset;
-            }
-        }
-        snappedFigure.x = Math.round(snappedFigure.x);
-        snappedFigure.y = Math.round(snappedFigure.y);
-        snappedFigure.height = Math.round(snappedFigure.height);
-        snappedFigure.width = Math.round(snappedFigure.width);
-        return { snappedFigure, verticalSnapLine, horizontalSnapLine };
-    }
-    /**
-     * Get the position of snap axes for the given figure
-     *
-     * @param figure the figure
-     * @param axesTypes the list of axis types to return the positions of
-     */
-    function getVisibleAxes(getters, figure, axesTypes) {
-        const axes = axesTypes.map((axisType) => getAxis(figure, axisType));
-        return axes
-            .filter((axis) => isAxisVisible(getters, figure, axis))
-            .map((axis) => getAxisScreenPosition(getters, figure, axis));
-    }
-    /**
-     * We need two positions for the figure axis :
-     *  - the position (core) of the axis in the figure. This is used to know whether or not the axis is
-     *      displayed, or is hidden by the scroll/the frozen panes
-     *  - the position in the screen, which is used to find snap matches. We cannot use the core position for this,
-     *      because figures partially in frozen panes aren't displayed at their actual coordinates
-     */
-    function getAxisScreenPosition(getters, figure, figureAxis) {
-        const screenFigure = internalFigureToScreen(getters, figure);
-        return getAxis(screenFigure, figureAxis.axisType);
-    }
-    function isAxisVisible(getters, figure, axis) {
-        const { x: mainViewportX, y: mainViewportY } = getters.getMainViewportCoordinates();
-        const axisStartEndPositions = [];
-        switch (axis.axisType) {
-            case "top":
-            case "bottom":
-            case "vCenter":
-                if (figure.y < mainViewportY)
-                    return true;
-                axisStartEndPositions.push({ x: figure.x, y: axis.position });
-                axisStartEndPositions.push({ x: figure.x + figure.width, y: axis.position });
-                break;
-            case "left":
-            case "right":
-            case "hCenter":
-                if (figure.x < mainViewportX)
-                    return true;
-                axisStartEndPositions.push({ x: axis.position, y: figure.y });
-                axisStartEndPositions.push({ x: axis.position, y: figure.y + figure.height });
-                break;
-        }
-        return axisStartEndPositions.some(getters.isPositionVisible);
-    }
-    /**
-     * Get a snap line for the given figure, if the figure can snap to any other figure
-     *
-     * @param figureToSnap figure to get the snap line for
-     * @param figAxesTypes figure axes of the given figure to be considered to find a snap line
-     * @param otherFigures figures to match against the snapped figure to find a snap line
-     * @param otherAxesTypes figure axes of the other figures to be considered to find a snap line
-     */
-    function getSnapLine(getters, figureToSnap, figAxesTypes, otherFigures, otherAxesTypes) {
-        const axesOfFigure = getVisibleAxes(getters, figureToSnap, figAxesTypes);
-        let closestMatch = undefined;
-        for (const otherFigure of otherFigures) {
-            const axesOfOtherFig = getVisibleAxes(getters, otherFigure, otherAxesTypes);
-            for (const axisOfFigure of axesOfFigure) {
-                for (const axisOfOtherFig of axesOfOtherFig) {
-                    if (!canSnap(axisOfFigure.position, axisOfOtherFig.position))
-                        continue;
-                    const snapOffset = axisOfFigure.position - axisOfOtherFig.position;
-                    if (closestMatch && snapOffset === closestMatch.snapOffset) {
-                        closestMatch.matchedFigIds.push(otherFigure.id);
-                    }
-                    else if (!closestMatch || Math.abs(snapOffset) <= Math.abs(closestMatch.snapOffset)) {
-                        closestMatch = {
-                            matchedFigIds: [otherFigure.id],
-                            snapOffset,
-                            snappedAxisType: axisOfFigure.axisType,
-                            position: axisOfOtherFig.position,
-                        };
-                    }
-                }
-            }
-        }
-        return closestMatch;
-    }
-    /** Check if two axes are close enough to snap */
-    function canSnap(axisPosition1, axisPosition2) {
-        return Math.abs(axisPosition1 - axisPosition2) <= SNAP_MARGIN;
-    }
-    function getAxis(fig, axisType) {
-        let position = 0;
-        switch (axisType) {
-            case "top":
-                position = fig.y;
-                break;
-            case "bottom":
-                position = fig.y + fig.height - FIGURE_BORDER_WIDTH;
-                break;
-            case "vCenter":
-                position = fig.y + Math.floor(fig.height / 2) - FIGURE_BORDER_WIDTH;
-                break;
-            case "left":
-                position = fig.x;
-                break;
-            case "right":
-                position = fig.x + fig.width - FIGURE_BORDER_WIDTH;
-                break;
-            case "hCenter":
-                position = fig.x + Math.floor(fig.width / 2) - FIGURE_BORDER_WIDTH;
-                break;
-        }
-        return { position, axisType: axisType };
-    }
-
-    css /*SCSS*/ `
-  .o-figure-snap-line {
-    position: relative;
-    z-index: ${ComponentsImportance.FigureSnapLine};
-    &.vertical {
-      width: 0px;
-      border-left: 1px dashed black;
-    }
-    &.horizontal {
-      border-top: 1px dashed black;
-      height: 0px;
-    }
-  }
-`;
-    /**
      * Each figure ⭐ is positioned inside a container `div` placed and sized
      * according to the split pane the figure is part of, or a separate container for the figure
      * currently drag & dropped. Any part of the figure outside of the container is hidden
@@ -20768,9 +20503,11 @@
         constructor() {
             super(...arguments);
             this.dnd = owl.useState({
-                draggedFigure: undefined,
-                horizontalSnap: undefined,
-                verticalSnap: undefined,
+                figId: undefined,
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
             });
         }
         setup() {
@@ -20786,11 +20523,9 @@
             });
         }
         getVisibleFigures() {
-            var _a;
             const visibleFigures = this.env.model.getters.getVisibleFigures();
-            if (this.dnd.draggedFigure &&
-                !visibleFigures.some((figure) => { var _a; return figure.id === ((_a = this.dnd.draggedFigure) === null || _a === void 0 ? void 0 : _a.id); })) {
-                visibleFigures.push(this.env.model.getters.getFigure(this.env.model.getters.getActiveSheetId(), (_a = this.dnd.draggedFigure) === null || _a === void 0 ? void 0 : _a.id));
+            if (this.dnd.figId && !visibleFigures.some((figure) => figure.id === this.dnd.figId)) {
+                visibleFigures.push(this.env.model.getters.getFigure(this.env.model.getters.getActiveSheetId(), this.dnd.figId));
             }
             return visibleFigures;
         }
@@ -20813,7 +20548,7 @@
                     });
                 }
             }
-            if (this.dnd.draggedFigure) {
+            if (this.dnd.figId) {
                 containers.push({
                     type: "dnd",
                     figures: [this.getDndFigure()],
@@ -20824,24 +20559,18 @@
             return containers;
         }
         getContainerStyle(container) {
-            return this.rectToCss(this.getContainerRect(container));
-        }
-        rectToCss(rect) {
-            return cssPropertiesToCss({
-                left: `${rect.x}px`,
-                top: `${rect.y}px`,
-                width: `${rect.width}px`,
-                height: `${rect.height}px`,
-            });
-        }
-        getContainerRect(container) {
             const { width: viewWidth, height: viewHeight } = this.env.model.getters.getMainViewportRect();
             const { x: viewportX, y: viewportY } = this.env.model.getters.getMainViewportCoordinates();
-            const x = ["bottomRight", "topRight"].includes(container) ? viewportX : 0;
-            const width = viewWidth - x;
-            const y = ["bottomRight", "bottomLeft"].includes(container) ? viewportY : 0;
-            const height = viewHeight - y;
-            return { x, y, width, height };
+            const left = ["bottomRight", "topRight"].includes(container) ? viewportX : 0;
+            const width = viewWidth - left;
+            const top = ["bottomRight", "bottomLeft"].includes(container) ? viewportY : 0;
+            const height = viewHeight - top;
+            return cssPropertiesToCss({
+                left: `${left}px`,
+                top: `${top}px`,
+                width: `${width}px`,
+                height: `${height}px`,
+            });
         }
         getInverseViewportPositionStyle(container) {
             const { scrollX, scrollY } = this.env.model.getters.getActiveSheetScrollInfo();
@@ -20854,9 +20583,8 @@
             });
         }
         getFigureContainer(figure) {
-            var _a;
             const { x: viewportX, y: viewportY } = this.env.model.getters.getMainViewportCoordinates();
-            if (figure.id === ((_a = this.dnd.draggedFigure) === null || _a === void 0 ? void 0 : _a.id)) {
+            if (figure.id === this.dnd.figId) {
                 return "dnd";
             }
             else if (figure.x < viewportX && figure.y < viewportY) {
@@ -20882,137 +20610,133 @@
                 return;
             }
             const sheetId = this.env.model.getters.getActiveSheetId();
-            const initialMousePosition = { x: ev.clientX, y: ev.clientY };
-            const { x, y } = internalFigureToScreen(this.env.model.getters, figure);
-            const initialFig = { ...figure, x, y };
+            const mouseInitialX = ev.clientX;
+            const mouseInitialY = ev.clientY;
+            const { x: dndInitialX, y: dndInitialY } = this.internalToScreenCoordinates(figure);
+            this.dnd.x = dndInitialX;
+            this.dnd.y = dndInitialY;
+            this.dnd.width = figure.width;
+            this.dnd.height = figure.height;
             const onMouseMove = (ev) => {
-                const getters = this.env.model.getters;
-                const currentMousePosition = { x: ev.clientX, y: ev.clientY };
-                const draggedFigure = dragFigureForMove(currentMousePosition, initialMousePosition, initialFig, this.env.model.getters.getMainViewportCoordinates(), getters.getActiveSheetScrollInfo());
-                const otherFigures = this.getOtherFigures(figure.id);
-                const internalDragged = screenFigureToInternal(getters, draggedFigure);
-                const snapResult = snapForMove(getters, internalDragged, otherFigures);
-                this.dnd.draggedFigure = internalFigureToScreen(getters, snapResult.snappedFigure);
-                this.dnd.horizontalSnap = this.getSnap(snapResult.horizontalSnapLine);
-                this.dnd.verticalSnap = this.getSnap(snapResult.verticalSnapLine);
+                const { x: viewportX, y: viewportY } = this.env.model.getters.getMainViewportCoordinates();
+                const { scrollX, scrollY } = this.env.model.getters.getActiveSheetScrollInfo();
+                const minX = viewportX ? 0 : -scrollX;
+                const minY = viewportY ? 0 : -scrollY;
+                this.dnd.figId = figure.id;
+                const newX = ev.clientX;
+                let deltaX = newX - mouseInitialX;
+                this.dnd.x = Math.max(dndInitialX + deltaX, minX);
+                const newY = ev.clientY;
+                let deltaY = newY - mouseInitialY;
+                this.dnd.y = Math.max(dndInitialY + deltaY, minY);
             };
             const onMouseUp = (ev) => {
-                if (!this.dnd.draggedFigure) {
+                if (!this.dnd.figId) {
                     return;
                 }
-                let { x, y } = screenFigureToInternal(this.env.model.getters, this.dnd.draggedFigure);
-                this.dnd.draggedFigure = undefined;
-                this.dnd.horizontalSnap = undefined;
-                this.dnd.verticalSnap = undefined;
+                let { x, y } = this.screenCoordinatesToInternal(this.dnd);
+                this.dnd.figId = undefined;
                 this.env.model.dispatch("UPDATE_FIGURE", { sheetId, id: figure.id, x, y });
             };
             startDnd(onMouseMove, onMouseUp);
         }
-        /**
-         * Initialize the resize of a figure with mouse movements
-         *
-         * @param dirX X direction of the resize. -1 : resize from the left border of the figure, 0 : no resize in X, 1 :
-         * resize from the right border of the figure
-         * @param dirY Y direction of the resize. -1 : resize from the top border of the figure, 0 : no resize in Y, 1 :
-         * resize from the bottom border of the figure
-         * @param ev Mouse Event
-         */
         startResize(figure, dirX, dirY, ev) {
             ev.stopPropagation();
-            const initialMousePosition = { x: ev.clientX, y: ev.clientY };
-            const { x, y } = internalFigureToScreen(this.env.model.getters, figure);
-            const initialFig = { ...figure, x, y };
+            const initialX = ev.clientX;
+            const initialY = ev.clientY;
+            const { x: dndInitialX, y: dndInitialY } = this.internalToScreenCoordinates(figure);
+            this.dnd.x = dndInitialX;
+            this.dnd.y = dndInitialY;
+            this.dnd.width = figure.width;
+            this.dnd.height = figure.height;
             const keepRatio = figureRegistry.get(figure.tag).keepRatio || false;
             const minFigSize = figureRegistry.get(figure.tag).minFigSize || MIN_FIG_SIZE;
-            const onMouseMove = (ev) => {
-                const currentMousePosition = { x: ev.clientX, y: ev.clientY };
-                const draggedFigure = dragFigureForResize(initialFig, dirX, dirY, currentMousePosition, initialMousePosition, keepRatio, minFigSize);
-                const otherFigures = this.getOtherFigures(figure.id);
-                const snapResult = snapForResize(this.env.model.getters, dirX, dirY, draggedFigure, otherFigures);
-                this.dnd.draggedFigure = snapResult.snappedFigure;
-                this.dnd.horizontalSnap = this.getSnap(snapResult.horizontalSnapLine);
-                this.dnd.verticalSnap = this.getSnap(snapResult.verticalSnapLine);
-            };
+            let onMouseMove;
+            if (keepRatio && dirX != 0 && dirY != 0) {
+                onMouseMove = (ev) => {
+                    this.dnd.figId = figure.id;
+                    const deltaX = Math.min(dirX * (initialX - ev.clientX), figure.width - minFigSize);
+                    const deltaY = Math.min(dirY * (initialY - ev.clientY), figure.height - minFigSize);
+                    const fraction = Math.min(deltaX / figure.width, deltaY / figure.height);
+                    this.dnd.width = figure.width * (1 - fraction);
+                    this.dnd.height = figure.height * (1 - fraction);
+                    if (dirX < 0) {
+                        this.dnd.x = dndInitialX + figure.width * fraction;
+                    }
+                    if (dirY < 0) {
+                        this.dnd.y = dndInitialY + figure.height * fraction;
+                    }
+                };
+            }
+            else {
+                onMouseMove = (ev) => {
+                    this.dnd.figId = figure.id;
+                    const deltaX = Math.max(dirX * (ev.clientX - initialX), minFigSize - figure.width);
+                    const deltaY = Math.max(dirY * (ev.clientY - initialY), minFigSize - figure.height);
+                    this.dnd.width = figure.width + deltaX;
+                    this.dnd.height = figure.height + deltaY;
+                    if (dirX < 0) {
+                        this.dnd.x = dndInitialX - deltaX;
+                    }
+                    if (dirY < 0) {
+                        this.dnd.y = dndInitialY - deltaY;
+                    }
+                };
+            }
             const onMouseUp = (ev) => {
-                if (!this.dnd.draggedFigure) {
+                if (!this.dnd.figId) {
                     return;
                 }
-                let { x, y } = screenFigureToInternal(this.env.model.getters, this.dnd.draggedFigure);
+                this.dnd.figId = undefined;
+                let { x, y } = this.screenCoordinatesToInternal(this.dnd);
                 const update = { x, y };
                 if (dirX) {
-                    update.width = this.dnd.draggedFigure.width;
+                    update.width = this.dnd.width;
                 }
                 if (dirY) {
-                    update.height = this.dnd.draggedFigure.height;
+                    update.height = this.dnd.height;
                 }
                 this.env.model.dispatch("UPDATE_FIGURE", {
                     sheetId: this.env.model.getters.getActiveSheetId(),
                     id: figure.id,
                     ...update,
                 });
-                this.dnd.draggedFigure = undefined;
-                this.dnd.horizontalSnap = undefined;
-                this.dnd.verticalSnap = undefined;
             };
             startDnd(onMouseMove, onMouseUp);
         }
-        getOtherFigures(figId) {
-            return this.getVisibleFigures().filter((f) => f.id !== figId);
-        }
         getDndFigure() {
-            const figure = this.getVisibleFigures().find((fig) => { var _a; return fig.id === ((_a = this.dnd.draggedFigure) === null || _a === void 0 ? void 0 : _a.id); });
+            const figure = this.getVisibleFigures().find((fig) => fig.id === this.dnd.figId);
             if (!figure)
                 throw new Error("Dnd figure not found");
             return {
                 ...figure,
-                ...this.dnd.draggedFigure,
+                x: this.dnd.x,
+                y: this.dnd.y,
+                width: this.dnd.width,
+                height: this.dnd.height,
             };
         }
         getFigureStyle(figure) {
-            var _a;
-            if (figure.id !== ((_a = this.dnd.draggedFigure) === null || _a === void 0 ? void 0 : _a.id))
+            if (figure.id !== this.dnd.figId)
                 return "";
             return cssPropertiesToCss({
                 opacity: "0.9",
                 cursor: "grabbing",
             });
         }
-        getSnap(snapLine) {
-            if (!snapLine || !this.dnd.draggedFigure)
-                return undefined;
-            const figureVisibleRects = snapLine.matchedFigIds
-                .map((id) => this.getVisibleFigures().find((fig) => fig.id === id))
-                .filter(isDefined$1)
-                .map((fig) => {
-                const figOnSCreen = internalFigureToScreen(this.env.model.getters, fig);
-                const container = this.getFigureContainer(fig);
-                return rectIntersection(figOnSCreen, this.getContainerRect(container));
-            })
-                .filter(isDefined$1);
-            const containerRect = rectUnion(this.dnd.draggedFigure, ...figureVisibleRects);
-            return {
-                line: snapLine,
-                containerStyle: this.rectToCss(containerRect),
-                lineStyle: this.getSnapLineStyle(snapLine, containerRect),
-            };
+        internalToScreenCoordinates({ x, y }) {
+            const { x: viewportX, y: viewportY } = this.env.model.getters.getMainViewportCoordinates();
+            const { scrollX, scrollY } = this.env.model.getters.getActiveSheetScrollInfo();
+            x = x < viewportX ? x : x - scrollX;
+            y = y < viewportY ? y : y - scrollY;
+            return { x, y };
         }
-        getSnapLineStyle(snapLine, containerRect) {
-            if (!snapLine)
-                return "";
-            if (["top", "vCenter", "bottom"].includes(snapLine.snappedAxisType)) {
-                return cssPropertiesToCss({
-                    top: `${snapLine.position - containerRect.y}px`,
-                    left: `0px`,
-                    width: `100%`,
-                });
-            }
-            else {
-                return cssPropertiesToCss({
-                    top: `0px`,
-                    left: `${snapLine.position - containerRect.x}px`,
-                    height: `100%`,
-                });
-            }
+        screenCoordinatesToInternal({ x, y }) {
+            const { x: viewportX, y: viewportY } = this.env.model.getters.getMainViewportCoordinates();
+            const { scrollX, scrollY } = this.env.model.getters.getActiveSheetScrollInfo();
+            x = viewportX && x < viewportX ? x : x + scrollX;
+            y = viewportY && y < viewportY ? y : y + scrollY;
+            return { x, y };
         }
     }
     FiguresContainer.template = "o-spreadsheet-FiguresContainer";
@@ -21158,9 +20882,6 @@
             });
             owl.onMounted(() => {
                 resizeObserver.observe(this.gridOverlayEl);
-            });
-            owl.onWillUnmount(() => {
-                resizeObserver.disconnect();
             });
             useTouchMove(this.gridOverlay, this.props.onGridMoved, () => {
                 const { scrollY } = this.env.model.getters.getActiveSheetDOMScrollInfo();
@@ -30518,7 +30239,6 @@
                             }
                             else if (range.zone[start] >= min && range.zone[end] <= max) {
                                 changeType = "REMOVE";
-                                newRange = range.clone({ ...this.getInvalidRange() });
                             }
                             else if (range.zone[start] <= max && range.zone[end] >= max) {
                                 const toRemove = max - range.zone[start] + 1;
@@ -30584,10 +30304,8 @@
                             return { changeType: "NONE" };
                         }
                         const invalidSheetName = this.getters.getSheetName(cmd.sheetId);
-                        range = range.clone({
-                            ...this.getInvalidRange(),
-                            invalidSheetName,
-                        });
+                        const sheetId = "";
+                        range = range.clone({ sheetId, invalidSheetName });
                         return { changeType: "REMOVE", range };
                     }, cmd.sheetId);
                     break;
@@ -30846,15 +30564,6 @@
                 str = colFixed + col + rowFixed + row;
             }
             return str;
-        }
-        getInvalidRange() {
-            return {
-                parts: [],
-                prefixSheet: false,
-                zone: { left: -1, top: -1, right: -1, bottom: -1 },
-                sheetId: "",
-                invalidXc: INCORRECT_RANGE_STRING,
-            };
         }
     }
     RangeAdapter.getters = [
@@ -33752,20 +33461,6 @@
             }
             return result;
         }
-        isPositionVisible(position) {
-            const { scrollX, scrollY } = this.getters.getActiveSheetScrollInfo();
-            const { x: mainViewportX, y: mainViewportY } = this.getters.getMainViewportCoordinates();
-            const { width, height } = this.getters.getSheetViewDimension();
-            if (position.x >= mainViewportX &&
-                (position.x < mainViewportX + scrollX || position.x > width + scrollX + mainViewportX)) {
-                return false;
-            }
-            if (position.y >= mainViewportY &&
-                (position.y < mainViewportY + scrollY || position.y > height + scrollY + mainViewportY)) {
-                return false;
-            }
-            return true;
-        }
         getFrozenSheetViewRatio(sheetId) {
             const { xSplit, ySplit } = this.getters.getPaneDivisions(sheetId);
             const offsetCorrectionX = this.getters.getColDimensions(sheetId, xSplit).start;
@@ -33794,7 +33489,6 @@
         "getSheetViewVisibleCols",
         "getSheetViewVisibleRows",
         "getFrozenSheetViewRatio",
-        "isPositionVisible",
     ];
 
     /**
@@ -40877,7 +40571,7 @@
     };
     function interactiveAddMerge(env, sheetId, target) {
         const result = env.model.dispatch("ADD_MERGE", { sheetId, target });
-        if (result.isCancelledBecause(80 /* CommandResult.MergeInFilter */)) {
+        if (result.isCancelledBecause(79 /* CommandResult.MergeInFilter */)) {
             env.raiseError(AddMergeInteractiveContent.MergeInFilter);
         }
         else if (result.isCancelledBecause(3 /* CommandResult.MergeIsDestructive */)) {
@@ -40894,11 +40588,6 @@
     margin-top: -1px;
     border: 1px solid;
     z-index: ${ComponentsImportance.TopBarComposer};
-
-    .o-composer:empty:not(:focus)::before {
-      /* svg free of use from https://uxwing.com/formula-fx-icon/ */
-      content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 121.8 142.9' width='24' height='24' focusable='false'%3E%3Cpath d='m28 34-4 5v2h10l-6 40c-4 22-6 28-7 30-2 2-3 3-5 3-3 0-7-2-9-4H4c-2 2-4 4-4 7s4 6 8 6 9-2 15-8c8-7 13-17 18-39l7-35 13-1 3-6H49c4-23 7-27 11-27 2 0 5 2 8 6h4c1-1 4-4 4-7 0-2-3-6-9-6-5 0-13 4-20 10-6 7-9 14-11 24h-8zm41 16c4-5 7-7 8-7s2 1 5 9l3 12c-7 11-12 17-16 17l-3-1-2-1c-3 0-6 3-6 7s3 7 7 7c6 0 12-6 22-23l3 10c3 9 6 13 10 13 5 0 11-4 18-15l-3-4c-4 6-7 8-8 8-2 0-4-3-6-10l-5-15 8-10 6-4 3 1 3 2c2 0 6-3 6-7s-2-7-6-7c-6 0-11 5-21 20l-2-6c-3-9-5-14-9-14-5 0-12 6-18 15l3 3z' fill='%23BDBDBD' /%3E%3C/svg%3E");
-    }
   }
 `;
     class TopBarComposer extends owl.Component {
@@ -41305,7 +40994,6 @@
             this.state.menuState.parentMenu = menu;
             this.isSelectingMenu = true;
             this.openedEl = ev.target;
-            this.env.model.dispatch("STOP_EDITION");
         }
         closeMenus() {
             this.state.activeTool = "";
@@ -41679,10 +41367,8 @@
             this.sidePanel.isOpen = true;
         }
         closeSidePanel() {
-            var _a, _b;
             this.sidePanel.isOpen = false;
             this.focusGrid();
-            (_b = (_a = this.sidePanel.panelProps) === null || _a === void 0 ? void 0 : _a.onCloseSidePanel) === null || _b === void 0 ? void 0 : _b.call(_a);
         }
         toggleSidePanel(panel, panelProps) {
             if (this.sidePanel.isOpen && panel === this.sidePanel.component) {
@@ -44121,7 +43807,7 @@
             if (currentPosition <= position && position < currentPosition + header.size) {
                 return {
                     index: parseInt(headerIndex),
-                    offset: convertDotValueToEMU(position - currentPosition + FIGURE_BORDER_WIDTH),
+                    offset: convertDotValueToEMU(position - currentPosition + FIGURE_BORDER_SIZE),
                 };
             }
             else {
@@ -44130,7 +43816,7 @@
         }
         return {
             index: headers.length - 1,
-            offset: convertDotValueToEMU(position - currentPosition + FIGURE_BORDER_WIDTH),
+            offset: convertDotValueToEMU(position - currentPosition + FIGURE_BORDER_SIZE),
         };
     }
     function createChartDrawing(figure, sheet, chartRelId) {
@@ -45391,9 +45077,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.3.0-alpha.2';
-    __info__.date = '2023-03-23T11:47:46.254Z';
-    __info__.hash = '59f25bb';
+    __info__.version = '16.3.0-alpha.1';
+    __info__.date = '2023-03-27T10:13:47.674Z';
+    __info__.hash = 'f41d64a';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
