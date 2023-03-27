@@ -17,9 +17,11 @@ class ProjectMilestone(models.Model):
     name = fields.Char(required=True)
     project_id = fields.Many2one('project.project', required=True, default=_get_default_project_id, ondelete='cascade')
     deadline = fields.Date(tracking=True, copy=False)
-    is_reached = fields.Boolean(string="Reached", default=False, copy=False)
+    is_reached = fields.Boolean(string="Reached", default=False, copy=False, store=True)
     reached_date = fields.Date(compute='_compute_reached_date', store=True)
     task_ids = fields.One2many('project.task', 'milestone_id', 'Tasks')
+    is_folded_task = fields.Boolean(compute="_compute_is_folded_task", store=True)
+    next_milestone_id = fields.Many2one('project.milestone', compute="_compute_next_milestone_id", store=True)
 
     # computed non-stored fields
     is_deadline_exceeded = fields.Boolean(compute="_compute_is_deadline_exceeded")
@@ -27,6 +29,18 @@ class ProjectMilestone(models.Model):
     task_count = fields.Integer('# of Tasks', compute='_compute_task_count', groups='project.group_project_milestone')
     done_task_count = fields.Integer('# of Done Tasks', compute='_compute_task_count', groups='project.group_project_milestone')
     can_be_marked_as_done = fields.Boolean(compute='_compute_can_be_marked_as_done', groups='project.group_project_milestone')
+
+    @api.depends('is_reached')
+    def _compute_next_milestone_id(self):
+        for milestone in self:
+            next_milestone = milestone.project_id.milestone_ids.filtered(lambda m: m.id != milestone.id and not m.is_reached)
+            milestone.next_milestone_id = next_milestone[0] if next_milestone and milestone.id != next_milestone[0].id else False
+
+    @api.depends('is_reached')
+    def _compute_is_folded_task(self):
+        not_folded = self.task_ids.filtered(lambda task: not task.stage_id.fold)
+        for milestone in self:
+            milestone.is_folded_task = True if not_folded else False
 
     @api.depends('is_reached')
     def _compute_reached_date(self):
@@ -116,3 +130,12 @@ class ProjectMilestone(models.Model):
             milestone_mapping = self.env.context.get('milestone_mapping', {})
             milestone_mapping[self.id] = milestone_copy.id
         return milestone_copy
+
+    def write(self, vals):
+        self.action_transfer_task()
+        res = super().write(vals)
+        return res
+
+    def action_transfer_task(self):
+        # if not self.is_folded_task and self.is_reached:
+            print("\n\n >>>>>>>>>><<<<<<<<<<<")

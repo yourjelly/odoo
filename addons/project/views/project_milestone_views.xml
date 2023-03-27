@@ -6,6 +6,9 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
+                    <field name="is_folded_task" invisible="1"/>
+                    <field name="task_ids" invisible="1"/>
+                    <field name="next_milestone_id" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="%(project.action_view_task_from_milestone)d"
                                 type="action"

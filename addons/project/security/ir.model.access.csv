@@ -43,3 +43,4 @@ access_project_collaborator_user,project.collaborator.user,model_project_collabo
 access_project_collaborator_portal,project.collaborator.portal,model_project_collaborator,base.group_portal,1,0,0,0
 access_project_share_manager,project.share.wizard.manager,model_project_share_wizard,project.group_project_manager,1,1,1,0
 access_project_personal_stage,project.personal.stage.user,model_project_task_stage_personal,base.group_user,1,1,1,1
+project.access_milestone_transfer_task_wizard,access_milestone_transfer_task_wizard,project.model_milestone_transfer_task_wizard,base.group_user,1,1,1,1

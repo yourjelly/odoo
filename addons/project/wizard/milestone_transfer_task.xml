@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_project_milestone_trsnsfer_task_wizard" model="ir.ui.view">
+        <field name="name">project.milestone.transfer.task.wizard.form</field>
+        <field name="model">milestone.transfer.task.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <div role="alert" class="alert alert-warning text-center">
+                    Some of the tasks linked to this milestone are still open. Would you like to transfer them to the next milestone:
+                    <!-- <field name="next_milestone"/> -->
+                </div>
+                <footer>
+                    <button string="Transfer Tasks" class="btn btn-primary" type="object" name="action_transfer_Task" data-hotkey="q" close="1"/>
+                    <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="z" close="1"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_milestone_trsnsfer_task_wizard" model="ir.actions.act_window">
+        <field name="name">Transfer Milestone</field>
+        <field name="res_model">milestone.transfer.task.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="context">{}</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

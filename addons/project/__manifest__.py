@@ -33,6 +33,7 @@
         'views/project_update_templates.xml',
         'views/project_project_stage_views.xml',
         'wizard/project_share_wizard_views.xml',
+        'wizard/milestone_transfer_task.xml',
         'views/project_collaborator_views.xml',
         'views/project_task_type_views.xml',
         'views/project_project_views.xml',
