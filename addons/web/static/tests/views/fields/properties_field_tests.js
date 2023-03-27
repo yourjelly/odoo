@@ -804,10 +804,10 @@ QUnit.module("Fields", (hooks) => {
 
         // Change the tag color
         await click(popover, ".o_tag:nth-child(2)");
-        await click(target, ".o_tag_popover .text-bg-11");
+        await click(target, ".o_tag_popover .o_colorlist_item_color_11");
         let secondTag = popover.querySelector(".o_tag:nth-child(2)");
         assert.ok(
-            secondTag.classList.contains("text-bg-11"),
+            secondTag.classList.contains("o_tag_color_11"),
             "Should have changed the tag color"
         );
 
@@ -815,7 +815,7 @@ QUnit.module("Fields", (hooks) => {
         await closePopover(target);
         secondTag = target.querySelector(".o_property_field_value .o_tag:first-child");
         assert.ok(
-            secondTag.classList.contains("text-bg-11"),
+            secondTag.classList.contains("o_tag_color_11"),
             "Should have changed the tag color"
         );
 

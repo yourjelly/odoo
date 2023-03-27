@@ -4401,7 +4401,7 @@ QUnit.module("Views", (hooks) => {
             2,
             "first record should contain 2 tags"
         );
-        assert.containsOnce(getCard(0), ".o_tag.text-bg-2", "first tag should have color 2");
+        assert.containsOnce(getCard(0), ".o_tag.o_tag_color_2", "first tag should have color 2");
         assert.verifySteps(
             [
                 "/web/dataset/call_kw/partner/get_views",

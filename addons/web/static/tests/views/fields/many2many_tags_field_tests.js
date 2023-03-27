@@ -228,7 +228,7 @@ QUnit.module("Fields", (hooks) => {
         );
         assert.hasClass(
             target.querySelector(".badge"),
-            "text-bg-2",
+            "o_tag_color_2",
             "should have correctly set the color"
         );
         assert.containsN(
@@ -265,7 +265,7 @@ QUnit.module("Fields", (hooks) => {
         );
         assert.hasClass(
             target.querySelectorAll(".badge")[2],
-            "text-bg-8",
+            "o_tag_color_8",
             "should have fetched the color of added tag"
         );
 
