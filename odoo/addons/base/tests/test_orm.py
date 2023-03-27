@@ -203,15 +203,15 @@ class TestORM(TransactionCase):
 
         # order by date should reorder by date:month
         res = partners.read_group([('id', 'in', partner_ids)], ['date'],
-                                  groupby=['date:month'], orderby='date DESC')
-        self.assertEqual([item['date:month'] for item in res], months)
+                                  groupby=['date'], orderby='date DESC')
+        self.assertEqual([item['date'] for item in res], months)
 
         # order by date should reorder by date:day
         days = ['11 Feb 2013', '28 Jan 2013', '14 Jan 2013', '07 Jan 2013',
                 '31 Dec 2012', '17 Dec 2012', '19 Nov 2012']
         res = partners.read_group([('id', 'in', partner_ids)], ['date'],
                                   groupby=['date:month', 'date:day'],
-                                  orderby='date DESC', lazy=False)
+                                  orderby='date:day DESC', lazy=False)
         self.assertEqual([item['date:day'] for item in res], days)
 
     def test_write_duplicate(self):
