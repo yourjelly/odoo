@@ -38,6 +38,79 @@
     </div>
   </t>
 
+  <t t-name="o-spreadsheet-BorderEditor" owl="1">
+    <div
+      class="o-border-selector"
+      t-on-click.stop=""
+      t-att-class="props.mainClass ? props.mainClass : ''">
+      <div class="o-border-selector-section">
+        <div
+          t-foreach="BORDER_POSITIONS"
+          t-as="borderPositionsRow"
+          t-key="borderPositionsRow"
+          class="o-dropdown-button o-dropdown-line">
+          <span
+            t-foreach="borderPositionsRow"
+            t-as="borderPosition"
+            t-key="borderPosition"
+            class="o-line-item o-tool"
+            t-att-class="{active:currentBorderPosition == borderPosition[0], [props.hoverableClass] : true}"
+            t-att-name="borderPosition[0]"
+            t-on-click.stop="() => this.setBorderPosition(borderPosition[0])">
+            <t t-call="{{borderPosition[1]}}"/>
+          </span>
+        </div>
+      </div>
+      <div class="o-divider"/>
+      <div class="o-border-selector-section">
+        <div
+          class="o-tool m-0 p-0 o-dropdown o-with-color"
+          t-att-class="props.hoverableClass ? props.hoverableClass : ''"
+          title="Border color"
+          t-on-click.stop="(ev) => this.toggleDropdownTool('borderColorTool', ev)">
+          <ColorPickerWidget
+            currentColor="currentBorderColor"
+            toggleColorPicker="(ev) => this.toggleDropdownTool('borderColorTool', ev)"
+            showColorPicker="state.activeTool === 'borderColorTool'"
+            onColorPicked="(color) => this.setBorderColor(color)"
+            title="env._t('Border Color')"
+            icon="'o-spreadsheet-Icon.BORDER_COLOR'"
+            dropdownMaxHeight="this.props.dropdownMaxHeight"
+            class="'o-tool o-dropdown-button o-border-color-picker-button'"
+          />
+          <t t-call="o-spreadsheet-Icon.TRIANGLE_DOWN"/>
+        </div>
+        <div
+          class="o-tool o-border-style-tool o-dropdown"
+          t-att-class="props.hoverableClass ? props.hoverableClass : ''"
+          title="Line style"
+          t-ref="lineStyleButton"
+          t-on-click.stop="(ev) => this.toggleDropdownTool('borderTypeTool', ev)">
+          <t t-call="o-spreadsheet-Icon.BORDER_TYPE"/>
+          <t t-call="o-spreadsheet-Icon.TRIANGLE_DOWN"/>
+          <Popover t-props="popoverProps" t-if="state.activeTool === 'borderTypeTool'">
+            <div class="o-border-style-dropdown">
+              <t t-foreach="borderStyles" t-as="borderStyle" t-key="borderStyle">
+                <div
+                  t-if="borderStyle !== 'double'"
+                  class="o-dropdown-item"
+                  t-att-title="borderStyle"
+                  t-on-click.stop="() => this.setBorderStyle(borderStyle)">
+                  <div class="o-dropdown-border-type">
+                    <div class="o-dropdown-border-check">
+                      <t t-if="currentBorderStyle == borderStyle">&#10004;</t>
+                    </div>
+                    <div t-attf-class="o-style-preview o-style-{{borderStyle}}"/>
+                  </div>
+                </div>
+              </t>
+            </div>
+          </Popover>
+        </div>
+      </div>
+    </div>
+  </t>
+
   <t t-name="o-spreadsheet-BottomBar" owl="1">
     <div
       class="o-spreadsheet-bottom-bar o-two-columns d-flex align-items-center overflow-hidden"
@@ -1394,6 +1467,27 @@
         transform="translate(2 2)"
         opacity=".54"
       />
+    </svg>
+  </t>
+  <t t-name="o-spreadsheet-Icon.BORDER_TYPE" owl="1">
+    <svg class="o-icon">
+      <g fill="#000000" transform="translate(2 2)">
+        <polygon points="0 0 0 2 14 2 14 0"/>
+        <polygon points="0 6 0 8 5 8 5 6"/>
+        <polygon points="9 6 9 8 14 8 14 6"/>
+        <polygon points="0 12 0 14 2 14 2 12"/>
+        <polygon points="4 12 4 14 6 14 6 12"/>
+        <polygon points="8 12 8 14 10 14 10 12"/>
+        <polygon points="12 12 12 14 14 14 14 12"/>
+      </g>
+    </svg>
+  </t>
+  <t t-name="o-spreadsheet-Icon.BORDER_COLOR" owl="1">
+    <svg class="o-icon">
+      <g fill="#000000" transform="translate(4 2)">
+        <polygon points="0 12 0 9 7 2 10 5 3 12"/>
+        <polygon points="8 1 9 0 12 3 11 4"/>
+      </g>
     </svg>
   </t>
 
@@ -3317,76 +3411,20 @@
                 class="'o-tool o-dropdown-button o-topbar-hoverable'"
               />
             </div>
-            <div class="o-dropdown">
-              <div
-                class="o-tool o-topbar-hoverable o-dropdown-button"
-                title="Borders"
-                t-on-click="(ev) => this.toggleDropdownTool('borderTool', ev)">
-                <span>
-                  <t t-call="o-spreadsheet-Icon.BORDERS"/>
-                </span>
-              </div>
-              <div
-                class="o-dropdown-content o-border-dropdown"
+            <div
+              class="o-dropdown"
+              title="Borders"
+              t-on-click="(ev) => this.toggleDropdownTool('borderTool', ev)">
+              <span class="o-tool o-topbar-hoverable o-dropdown-button">
+                <t t-call="o-spreadsheet-Icon.BORDERS"/>
+              </span>
+              <BorderEditor
                 t-if="state.activeTool === 'borderTool'"
-                t-att-style="dropdownStyle"
-                t-on-click.stop="">
-                <div class="o-dropdown-line">
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('all')">
-                    <t t-call="o-spreadsheet-Icon.BORDERS"/>
-                  </span>
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('hv')">
-                    <t t-call="o-spreadsheet-Icon.BORDER_HV"/>
-                  </span>
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('h')">
-                    <t t-call="o-spreadsheet-Icon.BORDER_H"/>
-                  </span>
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('v')">
-                    <t t-call="o-spreadsheet-Icon.BORDER_V"/>
-                  </span>
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('external')">
-                    <t t-call="o-spreadsheet-Icon.BORDER_EXTERNAL"/>
-                  </span>
-                </div>
-                <div class="o-dropdown-line">
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('left')">
-                    <t t-call="o-spreadsheet-Icon.BORDER_LEFT"/>
-                  </span>
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('top')">
-                    <t t-call="o-spreadsheet-Icon.BORDER_TOP"/>
-                  </span>
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('right')">
-                    <t t-call="o-spreadsheet-Icon.BORDER_RIGHT"/>
-                  </span>
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('bottom')">
-                    <t t-call="o-spreadsheet-Icon.BORDER_BOTTOM"/>
-                  </span>
-                  <span
-                    class="o-line-item o-topbar-hoverable"
-                    t-on-click="(ev) => this.setBorder('clear')">
-                    <t t-call="o-spreadsheet-Icon.BORDER_CLEAR"/>
-                  </span>
-                </div>
-              </div>
+                mainClass="'o-dropdown-content'"
+                hoverableClass="'o-topbar-hoverable'"
+              />
             </div>
+            <div class="o-divider"/>
             <div
               class="o-tool o-topbar-hoverable o-merge-tool"
               title="Merge Cells"
@@ -3551,6 +3589,6 @@
 </odoo>
 <!--
   __info__.version = '16.3.0-alpha.2';
-  __info__.date = '2023-03-23T11:47:49.776Z';
-  __info__.hash = '59f25bb';
+  __info__.date = '2023-03-27T08:18:12.662Z';
+  __info__.hash = 'b707da7';
 -->

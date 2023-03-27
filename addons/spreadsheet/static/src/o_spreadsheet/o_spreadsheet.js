@@ -231,8 +231,8 @@
     const HEADER_FONT_SIZE = 11;
     const DEFAULT_FONT = "'Roboto', arial";
     // Borders
-    const DEFAULT_BORDER_DESC = ["thin", "#000"];
-    const DEFAULT_FILTER_BORDER_DESC = ["thin", FILTERS_COLOR];
+    const DEFAULT_BORDER_DESC = { style: "thin", color: "#000000" };
+    const DEFAULT_FILTER_BORDER_DESC = { style: "thin", color: FILTERS_COLOR };
     // DateTimeRegex
     const DATETIME_FORMAT = /[ymd:]/;
     // Ranges
@@ -3089,6 +3089,7 @@
     const LINE_HEIGHT = 1.2;
     css /* scss */ `
   div.o-scorecard {
+    font-family: ${DEFAULT_FONT};
     user-select: none;
     background-color: white;
     display: flex;
@@ -4087,6 +4088,7 @@
         "SET_FORMATTING",
         "CLEAR_FORMATTING",
         "SET_BORDER",
+        "SET_ZONE_BORDERS",
         /** CHART */
         "CREATE_CHART",
         "UPDATE_CHART",
@@ -4222,6 +4224,7 @@
         CommandResult[CommandResult["ChartDoesNotExist"] = 85] = "ChartDoesNotExist";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
+    const borderStyles = ["thin", "medium", "thick", "dashed", "dotted", "double"];
     var DIRECTION;
     (function (DIRECTION) {
         DIRECTION["UP"] = "up";
@@ -19688,6 +19691,7 @@
       padding-right: 2px;
 
       box-sizing: border-box;
+      font-family: ${DEFAULT_FONT};
 
       caret-color: black;
       padding-left: 3px;
@@ -20130,7 +20134,7 @@
             const highlights = this.env.model.getters.getHighlights();
             const refSheet = sheetName
                 ? this.env.model.getters.getSheetIdByName(sheetName)
-                : this.env.model.getters.getEditionSheet();
+                : this.env.model.getters.getCurrentEditedCell().sheetId;
             const highlight = highlights.find((highlight) => {
                 if (highlight.sheetId !== refSheet)
                     return false;
@@ -23017,17 +23021,17 @@
     const BORDER_STYLE_CONVERSION_MAP = {
         dashDot: "thin",
         dashDotDot: "thin",
-        dashed: "thin",
-        dotted: "thin",
+        dashed: "dashed",
+        dotted: "dotted",
         double: "thin",
         hair: "thin",
-        medium: "thin",
+        medium: "medium",
         mediumDashDot: "thin",
         mediumDashDotDot: "thin",
         mediumDashed: "thin",
         none: undefined,
         slantDashDot: "thin",
-        thick: "thin",
+        thick: "thick",
         thin: "thin",
     };
     /** Conversion map Horizontal Alignment in XLSX <=> Horizontal Alignment in o_spreadsheet*/
@@ -23449,7 +23453,7 @@
             return undefined;
         addBorderDescrWarnings(borderDescr, warningManager);
         const style = BORDER_STYLE_CONVERSION_MAP[borderDescr.style];
-        return style ? [style, convertColor(borderDescr.color)] : undefined;
+        return style ? { style, color: convertColor(borderDescr.color) } : undefined;
     }
     function convertStyles(data, warningManager) {
         const stylesArray = data.styles.map((style) => {
@@ -23834,8 +23838,8 @@
             return undefined;
         }
         return {
-            style: descr[0],
-            color: { rgb: descr[1] },
+            style: descr.style,
+            color: { rgb: descr.color },
         };
     }
     function extractStyle(cell, data) {
@@ -24374,7 +24378,7 @@
     const TABLE_HIGHLIGHTED_CELL_STYLE = {
         bold: true,
     };
-    const TABLE_BORDER_STYLE = ["thin", "#000000FF"];
+    const TABLE_BORDER_STYLE = { style: "thin", color: "#000000FF" };
     /**
      * Convert the imported XLSX tables.
      *
@@ -26275,7 +26279,7 @@
      * a breaking change is made in the way the state is handled, and an upgrade
      * function should be defined
      */
-    const CURRENT_VERSION = 12;
+    const CURRENT_VERSION = 13;
     const INITIAL_SHEET_ID = "Sheet1";
     /**
      * This function tries to load anything that could look like a valid
@@ -26537,6 +26541,25 @@
             applyMigration(data) {
                 for (let sheet of data.sheets || []) {
                     sheet.isVisible = true;
+                }
+                return data;
+            },
+        },
+        {
+            description: "Change Border description structure",
+            from: 12,
+            to: 13,
+            applyMigration(data) {
+                for (const borderId in data.borders) {
+                    const border = data.borders[borderId];
+                    for (const position in border) {
+                        if (Array.isArray(border[position])) {
+                            border[position] = {
+                                style: border[position][0],
+                                color: border[position][1],
+                            };
+                        }
+                    }
                 }
                 return data;
             },
@@ -26905,10 +26928,13 @@
                 case "SET_BORDER":
                     this.setBorder(cmd.sheetId, cmd.col, cmd.row, cmd.border);
                     break;
-                case "SET_FORMATTING":
+                case "SET_ZONE_BORDERS":
                     if (cmd.border) {
                         const target = cmd.target.map((zone) => this.getters.expandZone(cmd.sheetId, zone));
-                        this.setBorders(cmd.sheetId, target, cmd.border);
+                        this.setBorders(cmd.sheetId, target, cmd.border.position, {
+                            style: cmd.border.style || DEFAULT_BORDER_DESC.style,
+                            color: cmd.border.color || DEFAULT_BORDER_DESC.color,
+                        });
                     }
                     break;
                 case "CLEAR_FORMATTING":
@@ -26997,6 +27023,28 @@
                 return null;
             }
             return border;
+        }
+        /**
+         * Return the colors of all borders of a sheet
+         * @param sheetId Id of the sheet that we want to get the borders
+         * @returns All the colors used in the borders of the sheets
+         */
+        getBordersColors(sheetId) {
+            const colors = [];
+            const sheetBorders = this.borders[sheetId];
+            if (sheetBorders) {
+                for (const borders of sheetBorders.filter(isDefined$1)) {
+                    for (const cellBorder of borders) {
+                        if (cellBorder === null || cellBorder === void 0 ? void 0 : cellBorder.horizontal) {
+                            colors.push(cellBorder.horizontal.color);
+                        }
+                        if (cellBorder === null || cellBorder === void 0 ? void 0 : cellBorder.vertical) {
+                            colors.push(cellBorder.vertical.color);
+                        }
+                    }
+                }
+            }
+            return colors;
         }
         // ---------------------------------------------------------------------------
         // Private
@@ -27212,43 +27260,44 @@
          * Set the borders of a zone by computing the borders to add from the given
          * command
          */
-        setBorders(sheetId, zones, command) {
-            if (command === "clear") {
+        setBorders(sheetId, zones, position, { style, color } = DEFAULT_BORDER_DESC) {
+            if (position === "clear") {
                 return this.clearBorders(sheetId, zones);
             }
+            const border = { style, color };
             for (let zone of zones) {
-                if (command === "h" || command === "hv" || command === "all") {
+                if (position === "h" || position === "hv" || position === "all") {
                     for (let row = zone.top + 1; row <= zone.bottom; row++) {
                         for (let col = zone.left; col <= zone.right; col++) {
-                            this.addBorder(sheetId, col, row, { top: DEFAULT_BORDER_DESC });
+                            this.addBorder(sheetId, col, row, { top: border });
                         }
                     }
                 }
-                if (command === "v" || command === "hv" || command === "all") {
+                if (position === "v" || position === "hv" || position === "all") {
                     for (let row = zone.top; row <= zone.bottom; row++) {
                         for (let col = zone.left + 1; col <= zone.right; col++) {
-                            this.addBorder(sheetId, col, row, { left: DEFAULT_BORDER_DESC });
+                            this.addBorder(sheetId, col, row, { left: border });
                         }
                     }
                 }
-                if (command === "left" || command === "all" || command === "external") {
+                if (position === "left" || position === "all" || position === "external") {
                     for (let row = zone.top; row <= zone.bottom; row++) {
-                        this.addBorder(sheetId, zone.left, row, { left: DEFAULT_BORDER_DESC });
+                        this.addBorder(sheetId, zone.left, row, { left: border });
                     }
                 }
-                if (command === "right" || command === "all" || command === "external") {
+                if (position === "right" || position === "all" || position === "external") {
                     for (let row = zone.top; row <= zone.bottom; row++) {
-                        this.addBorder(sheetId, zone.right + 1, row, { left: DEFAULT_BORDER_DESC });
+                        this.addBorder(sheetId, zone.right + 1, row, { left: border });
                     }
                 }
-                if (command === "top" || command === "all" || command === "external") {
+                if (position === "top" || position === "all" || position === "external") {
                     for (let col = zone.left; col <= zone.right; col++) {
-                        this.addBorder(sheetId, col, zone.top, { top: DEFAULT_BORDER_DESC });
+                        this.addBorder(sheetId, col, zone.top, { top: border });
                     }
                 }
-                if (command === "bottom" || command === "all" || command === "external") {
+                if (position === "bottom" || position === "all" || position === "external") {
                     for (let col = zone.left; col <= zone.right; col++) {
-                        this.addBorder(sheetId, col, zone.bottom + 1, { top: DEFAULT_BORDER_DESC });
+                        this.addBorder(sheetId, col, zone.bottom + 1, { top: border });
                     }
                 }
             }
@@ -27262,16 +27311,22 @@
             const bordersBottomRight = this.getCellBorder({ sheetId, col: right, row: bottom });
             this.clearBorders(sheetId, [zone]);
             if (bordersTopLeft === null || bordersTopLeft === void 0 ? void 0 : bordersTopLeft.top) {
-                this.setBorders(sheetId, [{ ...zone, bottom: top }], "top");
+                this.setBorders(sheetId, [{ ...zone, bottom: top }], "top", bordersTopLeft.top);
             }
             if (bordersTopLeft === null || bordersTopLeft === void 0 ? void 0 : bordersTopLeft.left) {
-                this.setBorders(sheetId, [{ ...zone, right: left }], "left");
+                this.setBorders(sheetId, [{ ...zone, right: left }], "left", bordersTopLeft.left);
             }
-            if ((bordersBottomRight === null || bordersBottomRight === void 0 ? void 0 : bordersBottomRight.bottom) || (bordersTopLeft === null || bordersTopLeft === void 0 ? void 0 : bordersTopLeft.bottom)) {
-                this.setBorders(sheetId, [{ ...zone, top: bottom }], "bottom");
+            if (bordersBottomRight === null || bordersBottomRight === void 0 ? void 0 : bordersBottomRight.bottom) {
+                this.setBorders(sheetId, [{ ...zone, top: bottom }], "bottom", bordersBottomRight.bottom);
             }
-            if ((bordersBottomRight === null || bordersBottomRight === void 0 ? void 0 : bordersBottomRight.right) || (bordersTopLeft === null || bordersTopLeft === void 0 ? void 0 : bordersTopLeft.right)) {
-                this.setBorders(sheetId, [{ ...zone, left: right }], "right");
+            else if (bordersTopLeft === null || bordersTopLeft === void 0 ? void 0 : bordersTopLeft.bottom) {
+                this.setBorders(sheetId, [{ ...zone, top: bottom }], "bottom", bordersTopLeft.bottom);
+            }
+            if (bordersBottomRight === null || bordersBottomRight === void 0 ? void 0 : bordersBottomRight.right) {
+                this.setBorders(sheetId, [{ ...zone, left: right }], "right", bordersBottomRight.right);
+            }
+            else if (bordersTopLeft === null || bordersTopLeft === void 0 ? void 0 : bordersTopLeft.right) {
+                this.setBorders(sheetId, [{ ...zone, left: right }], "right", bordersTopLeft.right);
             }
         }
         // ---------------------------------------------------------------------------
@@ -27340,7 +27395,7 @@
             this.export(data);
         }
     }
-    BordersPlugin.getters = ["getCellBorder"];
+    BordersPlugin.getters = ["getCellBorder", "getBordersColors"];
 
     class FunctionCodeBuilder {
         constructor(scope = new Scope()) {
@@ -31803,6 +31858,9 @@
                 case "UPDATE_CHART":
                 case "CREATE_CHART":
                 case "ADD_CONDITIONAL_FORMAT":
+                case "SET_BORDER":
+                case "SET_ZONE_BORDERS":
+                case "SET_FORMATTING":
                     this.shouldUpdateColors = true;
             }
         }
@@ -31817,8 +31875,7 @@
         getCustomColors() {
             let usedColors = [];
             for (const sheetId of this.getters.getSheetIds()) {
-                const cells = Object.values(this.getters.getCells(sheetId));
-                usedColors = usedColors.concat(this.getColorsFromCells(cells), this.getFormattingColors(sheetId), this.getChartColors(sheetId));
+                usedColors = usedColors.concat(this.getColorsFromCells(sheetId), this.getFormattingColors(sheetId), this.getChartColors(sheetId));
             }
             return sortWithClusters([
                 ...new Set(
@@ -31830,8 +31887,9 @@
                     .map((c) => toHex(c).toLowerCase())),
             ]).filter((color) => !COLOR_PICKER_DEFAULTS.includes(color));
         }
-        getColorsFromCells(cells) {
+        getColorsFromCells(sheetId) {
             var _a, _b;
+            const cells = Object.values(this.getters.getCells(sheetId));
             const colors = new Set();
             for (const cell of cells) {
                 if ((_a = cell.style) === null || _a === void 0 ? void 0 : _a.textColor) {
@@ -31840,6 +31898,9 @@
                 if ((_b = cell.style) === null || _b === void 0 ? void 0 : _b.fillColor) {
                     colors.add(cell.style.fillColor);
                 }
+            }
+            for (const color of this.getters.getBordersColors(sheetId)) {
+                colors.add(color);
             }
             return [...colors];
         }
@@ -33798,6 +33859,36 @@
     ];
 
     /**
+     * Border plugin
+     * This plugins aims to keep the properties of the last set Border in the
+     * current spreadsheet
+     */
+    class BorderPlugin extends UIPlugin {
+        constructor() {
+            super(...arguments);
+            this.borderColor = DEFAULT_BORDER_DESC.color;
+            this.borderStyle = DEFAULT_BORDER_DESC.style;
+        }
+        handle(cmd) {
+            switch (cmd.type) {
+                case "SET_ZONE_BORDERS":
+                    if (cmd.border.color)
+                        this.borderColor = cmd.border.color;
+                    if (cmd.border.style)
+                        this.borderStyle = cmd.border.style;
+                    break;
+            }
+        }
+        getLastBorder() {
+            return {
+                color: this.borderColor,
+                style: this.borderStyle,
+            };
+        }
+    }
+    BorderPlugin.getters = ["getLastBorder"];
+
+    /**
      * This plugin manage the autofill.
      *
      * The way it works is the next one:
@@ -35129,7 +35220,7 @@
             }
         }
         drawBorders(renderingContext) {
-            const { ctx, thinLineWidth } = renderingContext;
+            const { ctx } = renderingContext;
             for (let box of this.boxes) {
                 const border = box.border;
                 if (border) {
@@ -35148,13 +35239,54 @@
                     }
                 }
             }
-            function drawBorder([style, color], x1, y1, x2, y2) {
+            function drawBorder({ style, color }, x1, y1, x2, y2) {
                 ctx.strokeStyle = color;
-                ctx.lineWidth = (style === "thin" ? 2 : 3) * thinLineWidth;
+                switch (style) {
+                    case "medium":
+                        ctx.lineWidth = 2;
+                        x1 += y1 === y2 ? -0.5 : 0.5;
+                        x2 += y1 === y2 ? 1.5 : 0.5;
+                        y1 += x1 === x2 ? -0.5 : 0.5;
+                        y2 += x1 === x2 ? 1.5 : 0.5;
+                        break;
+                    case "thick":
+                        ctx.lineWidth = 3;
+                        if (y1 === y2) {
+                            x1--;
+                            x2++;
+                        }
+                        if (x1 === x2) {
+                            y1--;
+                            y2++;
+                        }
+                        break;
+                    case "dashed":
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([1, 3]);
+                        break;
+                    case "dotted":
+                        ctx.lineWidth = 1;
+                        if (y1 === y2) {
+                            x1 += 0.5;
+                            x2 += 0.5;
+                        }
+                        if (x1 === x2) {
+                            y1 += 0.5;
+                            y2 += 0.5;
+                        }
+                        ctx.setLineDash([1, 1]);
+                        break;
+                    case "thin":
+                    default:
+                        ctx.lineWidth = 1;
+                        break;
+                }
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
                 ctx.stroke();
+                ctx.lineWidth = 1;
+                ctx.setLineDash([]);
             }
         }
         drawTexts(renderingContext) {
@@ -38535,9 +38667,6 @@
             }
             return this.currentContent;
         }
-        getEditionSheet() {
-            return this.sheetId;
-        }
         getComposerSelection() {
             return {
                 start: this.selectionStart,
@@ -38821,7 +38950,7 @@
         getZoneReference(zone, fixedParts = [{ colFixed: false, rowFixed: false }]) {
             const sheetId = this.getters.getActiveSheetId();
             let selectedXc = this.getters.zoneToXC(sheetId, zone, fixedParts);
-            if (this.getters.getEditionSheet() !== this.getters.getActiveSheetId()) {
+            if (this.getters.getCurrentEditedCell().sheetId !== this.getters.getActiveSheetId()) {
                 const sheetName = getComposerSheetName(this.getters.getSheetName(this.getters.getActiveSheetId()));
                 selectedXc = `${sheetName}!${selectedXc}`;
             }
@@ -38836,7 +38965,7 @@
                 _fixedParts.pop();
             }
             const newRange = range.clone({ parts: _fixedParts });
-            return this.getters.getSelectionRangeString(newRange, this.getters.getEditionSheet());
+            return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell().sheetId);
         }
         /**
          * Replace the current selection by a new text.
@@ -38869,7 +38998,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return;
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const XCs = this.getReferencedRanges().map((range) => this.getters.getRangeString(range, editionSheetId));
             const colorsToKeep = {};
             for (const xc of XCs) {
@@ -38898,7 +39027,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return [];
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const rangeColor = (rangeString) => {
                 const colorIndex = this.colorIndexByRange[rangeString];
                 return colors$1[colorIndex % colors$1.length];
@@ -38916,7 +39045,7 @@
          * Return ranges currently referenced in the composer
          */
         getReferencedRanges() {
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             return this.currentTokens
                 .filter((token) => token.type === "REFERENCE")
                 .map((token) => this.getters.getRangeFromSheetXC(editionSheetId, token.value));
@@ -38975,7 +39104,6 @@
         "isSelectingForComposer",
         "showSelectionIndicator",
         "getCurrentContent",
-        "getEditionSheet",
         "getComposerSelection",
         "getCurrentTokens",
         "getTokenAtCursor",
@@ -39643,7 +39771,8 @@
         .add("evaluation_chart", EvaluationChartPlugin)
         .add("evaluation_cf", EvaluationConditionalFormatPlugin)
         .add("viewport", SheetViewPlugin)
-        .add("custom_colors", CustomColorsPlugin);
+        .add("custom_colors", CustomColorsPlugin)
+        .add("border", BorderPlugin);
 
     const clickableCellRegistry = new Registry();
     clickableCellRegistry.add("link", {
@@ -40887,6 +41016,161 @@
         }
     }
 
+    /**
+     * List the available borders positions and the corresponding icons.
+     * The structure of this array is defined to match the order/lines we want
+     * to display in the topbar's border tool.
+     */
+    const BORDER_POSITIONS = [
+        [
+            ["all", "o-spreadsheet-Icon.BORDERS"],
+            ["hv", "o-spreadsheet-Icon.BORDER_HV"],
+            ["h", "o-spreadsheet-Icon.BORDER_H"],
+            ["v", "o-spreadsheet-Icon.BORDER_V"],
+            ["external", "o-spreadsheet-Icon.BORDER_EXTERNAL"],
+        ],
+        [
+            ["left", "o-spreadsheet-Icon.BORDER_LEFT"],
+            ["top", "o-spreadsheet-Icon.BORDER_TOP"],
+            ["right", "o-spreadsheet-Icon.BORDER_RIGHT"],
+            ["bottom", "o-spreadsheet-Icon.BORDER_BOTTOM"],
+            ["clear", "o-spreadsheet-Icon.BORDER_CLEAR"],
+        ],
+    ];
+    // -----------------------------------------------------------------------------
+    // Border Editor
+    // -----------------------------------------------------------------------------
+    css /* scss */ `
+  .o-border-selector {
+    padding: 4px;
+    display: flex;
+  }
+  .o-border-selector-section {
+    .o-border-style-tool {
+      padding: 4px 3px;
+      column-gap: 2px;
+    }
+  }
+  .o-style-preview {
+    margin-top: 5px;
+    margin-bottom: 8px;
+    width: 60px;
+    height: 5px;
+  }
+  .o-style-thin {
+    border-bottom: 1px solid #000000;
+  }
+  .o-style-medium {
+    border-bottom: 2px solid #000000;
+  }
+  .o-style-thick {
+    border-bottom: 3px solid #000000;
+  }
+  .o-style-dashed {
+    border-bottom: 1px dashed #000000;
+  }
+  .o-style-dotted {
+    border-bottom: 1px dotted #000000;
+  }
+  .o-dropdown-border-type {
+    display: flex;
+  }
+  .o-dropdown-border-check {
+    width: 20px;
+    font-size: 16px;
+  }
+  .o-border-style-dropdown {
+    background: #ffffff;
+    padding: 4px;
+    .o-dropdown-line {
+      .o-line-item.active {
+        background-color: rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+  .o-border-color-picker-button {
+    padding: 0px !important;
+    margin: 3px 0px !important;
+  }
+`;
+    class BorderEditor extends owl.Component {
+        constructor() {
+            super(...arguments);
+            this.BORDER_POSITIONS = BORDER_POSITIONS;
+            this.lineStyleButtonRef = owl.useRef("lineStyleButton");
+            this.currentBorderPosition = "";
+            this.currentBorderStyle = this.env.model.getters.getLastBorder().style;
+            this.currentBorderColor = this.env.model.getters.getLastBorder().color;
+            this.borderStyles = borderStyles;
+            this.state = owl.useState({
+                menuState: { isOpen: false, position: null, menuItems: [] },
+                activeTool: undefined,
+            });
+        }
+        toggleDropdownTool(tool, ev) {
+            const isOpen = this.state.activeTool === tool;
+            this.closeMenus();
+            this.state.activeTool = isOpen ? undefined : tool;
+        }
+        closeMenus() {
+            this.state.activeTool = undefined;
+            this.state.menuState.isOpen = false;
+            this.state.menuState.parentMenu = undefined;
+        }
+        setBorderPosition(position) {
+            this.currentBorderPosition = position;
+            this.updateBorder();
+            this.closeMenus();
+        }
+        setBorderColor(color) {
+            this.currentBorderColor = color;
+            this.updateBorder();
+            this.closeMenus();
+        }
+        setBorderStyle(style) {
+            this.currentBorderStyle = style;
+            this.updateBorder();
+            this.closeMenus();
+        }
+        updateBorder() {
+            if (this.currentBorderPosition === "") {
+                return;
+            }
+            this.env.model.dispatch("SET_ZONE_BORDERS", {
+                sheetId: this.env.model.getters.getActiveSheetId(),
+                target: this.env.model.getters.getSelectedZones(),
+                border: {
+                    position: this.currentBorderPosition,
+                    color: this.currentBorderColor,
+                    style: this.currentBorderStyle,
+                },
+            });
+        }
+        get popoverProps() {
+            return {
+                anchorRect: this.colorPickerAnchorRect,
+                positioning: "BottomLeft",
+                verticalOffset: 0,
+            };
+        }
+        get colorPickerAnchorRect() {
+            const button = this.lineStyleButtonRef.el;
+            const buttonRect = button.getBoundingClientRect();
+            return {
+                x: buttonRect.x,
+                y: buttonRect.y,
+                width: buttonRect.width,
+                height: buttonRect.height,
+            };
+        }
+    }
+    BorderEditor.template = "o-spreadsheet-BorderEditor";
+    BorderEditor.components = { ColorPickerWidget, Popover };
+    BorderEditor.props = {
+        mainClass: { type: String, optional: true },
+        hoverableClass: { type: String, optional: true },
+    };
+
     const COMPOSER_MAX_HEIGHT = 100;
     css /* scss */ `
   .o-topbar-composer {
@@ -41128,10 +41412,6 @@
           margin-right: 8px;
         }
 
-        .o-border-dropdown {
-          padding: 4px;
-        }
-
         .o-divider {
           display: inline-block;
           border-right: 1px solid ${SEPARATOR_COLOR};
@@ -41367,14 +41647,6 @@
             setStyle(this.env, { [target]: color });
             this.onClick();
         }
-        setBorder(command) {
-            this.env.model.dispatch("SET_FORMATTING", {
-                sheetId: this.env.model.getters.getActiveSheetId(),
-                target: this.env.model.getters.getSelectedZones(),
-                border: command,
-            });
-            this.onClick();
-        }
         setFormat(format, custom) {
             if (!custom) {
                 this.toggleFormat(format);
@@ -41442,7 +41714,7 @@
         }
     }
     TopBar.template = "o-spreadsheet-TopBar";
-    TopBar.components = { ColorPickerWidget, Menu, TopBarComposer, FontSizeEditor };
+    TopBar.components = { ColorPickerWidget, Menu, TopBarComposer, FontSizeEditor, BorderEditor };
     TopBar.props = {
         onClick: Function,
         focusComposer: String,
@@ -41519,9 +41791,6 @@
       color: #333;
     }
 
-    * {
-      font-family: "Roboto", "RobotoDraft", Helvetica, Arial, sans-serif;
-    }
     &,
     *,
     *:before,
@@ -44295,11 +44564,21 @@
         for (let border of Object.values(borders)) {
             borderNodes.push(escapeXml /*xml*/ `
       <border>
-        <left ${formatBorderAttribute(border["left"])} />
-        <right ${formatBorderAttribute(border["right"])} />
-        <top ${formatBorderAttribute(border["top"])} />
-        <bottom ${formatBorderAttribute(border["bottom"])} />
-        <diagonal ${formatBorderAttribute(border["diagonal"])} />
+        <left ${formatBorderAttribute(border["left"])}>
+          ${addBorderColor(border["left"])}
+        </left>
+        <right ${formatBorderAttribute(border["right"])}>
+          ${addBorderColor(border["right"])}
+        </right>
+        <top ${formatBorderAttribute(border["top"])}>
+          ${addBorderColor(border["top"])}
+        </top>
+        <bottom ${formatBorderAttribute(border["bottom"])}>
+          ${addBorderColor(border["bottom"])}
+        </bottom>
+        <diagonal ${formatBorderAttribute(border["diagonal"])}>
+          ${addBorderColor(border["diagonal"])}
+        </diagonal>
       </border>
     `);
         }
@@ -44313,10 +44592,15 @@
         if (!description) {
             return escapeXml ``;
         }
-        return formatAttributes([
-            ["style", description.style],
-            ["color", toXlsxHexColor(description.color.rgb)],
-        ]);
+        return formatAttributes([["style", description.style]]);
+    }
+    function addBorderColor(description) {
+        if (!description) {
+            return escapeXml ``;
+        }
+        return escapeXml /*xml*/ `
+    <color ${formatAttributes([["rgb", toXlsxHexColor(description.color.rgb)]])}/>
+  `;
     }
     function addStyles(styles) {
         const styleNodes = [];
@@ -45392,8 +45676,8 @@
 
 
     __info__.version = '16.3.0-alpha.2';
-    __info__.date = '2023-03-23T11:47:46.254Z';
-    __info__.hash = '59f25bb';
+    __info__.date = '2023-03-27T08:18:09.373Z';
+    __info__.hash = 'b707da7';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
