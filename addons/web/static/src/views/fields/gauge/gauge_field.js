@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
+import { _lt, _t } from "@web/core/l10n/translation";
 import { loadJS } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { formatFloat } from "@web/views/fields/formatters";
@@ -97,6 +97,25 @@ GaugeField.props = {
 
 export const gaugeField = {
     component: GaugeField,
+    supportedOptions: [
+        {
+            label: _lt("Title"),
+            name: "title",
+            type: "string",
+        },
+        {
+            label: _lt("Max value field"),
+            name: "max_value",
+            type: "selection",
+            choices({ fields }) {
+                return fields
+                    .filter((f) => ["integer", "float"].includes(f.type))
+                    .map((f) => {
+                        return { label: `${f.string} (${f.name})`, value: f.name };
+                    });
+            },
+        },
+    ],
     extractProps: ({ options }) => ({
         maxValueField: options.max_field,
         title: options.title,

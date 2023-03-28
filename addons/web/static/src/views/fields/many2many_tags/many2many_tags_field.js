@@ -255,6 +255,13 @@ export class Many2ManyTagsField extends Component {
 export const many2ManyTagsField = {
     component: Many2ManyTagsField,
     displayName: _lt("Tags"),
+    supportedOptions: [
+        {
+            label: _lt("Use colors"),
+            name: "color_field",
+            type: "boolean",
+        },
+    ],
     supportedTypes: ["many2many"],
     isSet: (value) => value.count > 0,
     relatedFields: ({ options }) => {
@@ -373,6 +380,14 @@ export class Many2ManyTagsFieldColorEditable extends Many2ManyTagsField {
 export const many2ManyTagsFieldColorEditable = {
     ...many2ManyTagsField,
     component: Many2ManyTagsFieldColorEditable,
+    supportedOptions: [
+        ...many2ManyTagsField.supportedOptions,
+        {
+            label: _lt("Prevent color edition"),
+            name: "no_edit_color",
+            type: "boolean",
+        },
+    ],
     extractProps({ options }) {
         const props = many2ManyTagsField.extractProps(...arguments);
         props.canEditColor = !options.no_edit_color && !!options.color_field;

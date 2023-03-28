@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { loadJS } from "@web/core/assets";
 import { luxonToMoment, momentToLuxon } from "@web/core/l10n/dates";
@@ -157,6 +158,18 @@ export class DateRangeField extends Component {
 
 export const dateRangeField = {
     component: DateRangeField,
+    supportedOptions: [
+        {
+            label: _lt("Related Start Date"),
+            name: "related_start_date",
+            type: "selection",
+        },
+        {
+            label: _lt("Related End Date"),
+            name: "related_end_date",
+            type: "selection",
+        },
+    ],
     supportedTypes: ["date", "datetime"],
     extractProps: ({ attrs, options }) => ({
         relatedEndDateField: options.related_end_date,
