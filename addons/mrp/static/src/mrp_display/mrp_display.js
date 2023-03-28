@@ -7,7 +7,7 @@ import { useModels } from "@mrp/mrp_display/model";
 import { ControlPanelButtons } from "@mrp/mrp_display/control_panel";
 import { MrpDisplayRecord } from "./mrp_display_record";
 
-const { Component } = owl;
+const { Component, useState } = owl;
 
 export class MrpDisplay extends Component {
     static template = "mrp.MrpDisplay";
@@ -34,6 +34,10 @@ export class MrpDisplay extends Component {
             controlPanel: { "bottom-right": false, "bottom-left": false, "top-middle": true },
             searchPanel: true,
         };
+        this.state = useState({
+            activeResModel: this.props.resModel,
+            activeWorkcenter: false,
+        });
 
         const params = [];
         for (const [resModel, fields] of Object.entries(this.props.models)) {
@@ -56,10 +60,23 @@ export class MrpDisplay extends Component {
     }
 
     getRawMoves(record) {
-        return this.stock_move.root.records.filter(move => move.data.raw_material_production_id?.[0] === record.resId);
+        return this.stock_move.root.records.filter(
+            (move) => move.data.raw_material_production_id?.[0] === record.resId
+        );
     }
 
     getWorkorders(record) {
-        return this.workorders.filter(wo => record.data.workorder_ids.currentIds.includes(wo.resId));
+        return this.workorders.filter((wo) =>
+            record.data.workorder_ids.currentIds.includes(wo.resId)
+        );
+    }
+
+    selectWorkcenter(workcenterId) {
+        this.state.activeWorkcenter = workcenterId;
+        if (workcenterId) {
+            this.state.activeResModel = "mrp.workorder";
+        } else {
+            this.state.activeResModel = "mrp.production";
+        }
     }
 }

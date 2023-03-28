@@ -8,4 +8,8 @@
     .o_cp_top_middle {
         text-align: center;
     }
+
+    .o_selected {
+        background-color: $list-group-active-bg;
+    }
 }

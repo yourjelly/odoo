@@ -19,12 +19,17 @@
         </xpath>
     </t>
     <t t-name="mrp.ControlPanelButtons" owl="1">
-        <button class="btn btn-secnodary">
+        <button t-att-class="!this.props.activeWorkcenter ? 'o_selected' : ''" class="btn"
+        t-on-click="() => this.props.selectWorkcenter(false)">
             ALL
         </button>
         <t t-foreach="workcenterButtons" t-as="workcenter" t-key="workcenter[0]">
-            <button class="btn btn-secnodary">
-                <t t-esc="workcenter[0]"/> <t t-esc="workcenter[1]"/>
+            <t t-set="id" t-value="workcenter[0]"/>
+            <t t-set="name" t-value="workcenter[1].name"/>
+            <t t-set="count" t-value="workcenter[1].count"/>
+            <button class="btn" t-att-class="this.props.activeWorkcenter == id ? 'o_selected' : ''"
+            t-on-click="() => this.props.selectWorkcenter(id)">
+                <t t-esc="name"/> <t t-esc="count"/>
             </button>
         </t>
     </t>

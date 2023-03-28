@@ -14,6 +14,6 @@
     </t>
 
     <t t-name="mrp.MrpDisplayButtonTemplate" owl="1">
-        <ControlPanelButtons workorders="workorders"/>
+        <ControlPanelButtons workorders="workorders" selectWorkcenter="selectWorkcenter.bind(this)" activeWorkcenter="state.activeWorkcenter"/>
     </t>
 </templates>

@@ -16,9 +16,9 @@ export class MrpDisplayRecord extends Component {
     static template = "mrp.MrpDisplayRecord";
 
     setup() {
-        this.dialogService = useService('dialog');
+        this.dialogService = useService("dialog");
 
-        this.rawMoves = this.props.rawMoves.map(move => move.data);
+        this.rawMoves = this.props.rawMoves.map((move) => move.data);
         this.record = this.props.record.data;
         this.workorders = this.props.workorders;
     }
