@@ -93,6 +93,12 @@ function colorElement(element, color, mode) {
     if (color.startsWith('text') || color.startsWith('bg-')) {
         element.style[mode] = '';
         element.classList.add(color);
+
+        if (color === 'bg-black'){
+            element.classList.add('text-light')
+        } else if( color === 'bg-white'){
+            element.classList.add('text-dark')
+        }
     } else if (isColorGradient(color)) {
         element.style[mode] = '';
         if (mode === 'color') {
