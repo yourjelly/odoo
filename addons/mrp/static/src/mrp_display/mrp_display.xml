@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="mrp.MrpDisplay" owl="1">
-        <Layout display="display">
-            <t t-set-slot="control-panel-top-middle">
-                <t t-call="{{ constructor.buttonTemplate }}"/>
-            </t>
-            <div class="d-flex flex-row flex-wrap align-items-baseline">
-                <t t-if="state.activeResModel === 'mrp.production'">
-                    <t t-foreach="relevantRecords" t-as="record" t-key="record.id">
-                        <MrpDisplayRecord record="record" workorders="getProductionWorkorders(record)" rawMoves="getRawMoves(record)"/>
-                    </t>
+        <div class="o_action">
+            <Layout display="display">
+                <t t-set-slot="control-panel-top-middle">
+                    <t t-call="{{ constructor.buttonTemplate }}"/>
                 </t>
-                <t t-elif="state.activeResModel === 'mrp.workorder'">
-                    <t t-foreach="relevantRecords" t-as="record" t-key="record.id">
-                        <MrpDisplayRecord record="record" rawMoves="getRawMoves(record)"/>
+                <div class="d-flex flex-row flex-wrap align-items-baseline">
+                    <t t-if="state.activeResModel === 'mrp.production'">
+                        <t t-foreach="relevantRecords" t-as="record" t-key="record.id">
+                            <MrpDisplayRecord record="record" workorders="getProductionWorkorders(record)" rawMoves="getRawMoves(record)"/>
+                        </t>
                     </t>
-                </t>
-            </div>
-        </Layout>
+                    <t t-elif="state.activeResModel === 'mrp.workorder'">
+                        <t t-foreach="relevantRecords" t-as="record" t-key="record.id">
+                            <MrpDisplayRecord record="record" rawMoves="getRawMoves(record)"/>
+                        </t>
+                    </t>
+                </div>
+            </Layout>
+        </div>
     </t>
 
     <t t-name="mrp.MrpDisplayButtonTemplate" owl="1">

@@ -21,11 +21,16 @@ function getSearchParams(model, props, component) {
             params[key] = props[key];
         } else {
             if (key == "domain") {
+                const production_ids = component.mrp_production.root.records.map((r) => r.resId);
                 if (model.rootParams.resModel == "mrp.workorder") {
-                    const production_ids = component.mrp_production.root.records.map(
-                        (r) => r.resId
-                    );
                     params[key] = [["production_id", "in", production_ids]];
+                    continue;
+                } else if (model.rootParams.resModel == "stock.move") {
+                    params[key] = [
+                        "|",
+                        ["production_id", "in", production_ids],
+                        ["raw_material_production_id", "in", production_ids],
+                    ];
                     continue;
                 }
             }
