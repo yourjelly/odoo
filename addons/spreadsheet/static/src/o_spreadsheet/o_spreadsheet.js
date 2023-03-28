@@ -3052,6 +3052,7 @@
     const LINE_HEIGHT = 1.2;
     css /* scss */ `
   div.o-scorecard {
+    font-family: ${DEFAULT_FONT};
     user-select: none;
     background-color: white;
     display: flex;
@@ -19252,6 +19253,8 @@
                         start = 0;
                     if (end > textLength)
                         end = textLength;
+                    if (start > textLength)
+                        start = textLength;
                 }
                 let startNode = this.findChildAtCharacterIndex(start);
                 let endNode = this.findChildAtCharacterIndex(end);
@@ -19521,6 +19524,7 @@
       padding-right: 2px;
 
       box-sizing: border-box;
+      font-family: ${DEFAULT_FONT};
 
       caret-color: black;
       padding-left: 3px;
@@ -20238,14 +20242,23 @@
             return headerPositions.filter((position) => this.isPositionVisible(position.col, position.row));
         }
         getFilterHeaderPosition(position) {
+            var _a, _b;
             const sheetId = this.env.model.getters.getActiveSheetId();
             const rowDims = this.env.model.getters.getRowDimensionsInViewport(sheetId, position.row);
             const colDims = this.env.model.getters.getColDimensionsInViewport(sheetId, position.col);
-            // TODO : change this offset when we support vertical cell align
             const centeringOffset = Math.floor((rowDims.size - FILTER_ICON_EDGE_LENGTH) / 2);
+            const cell = this.env.model.getters.getCell({ sheetId, col: position.col, row: position.row });
+            let verticalFilterIconPosition = rowDims.end - FILTER_ICON_EDGE_LENGTH + this.props.gridPosition.y - centeringOffset;
+            if (((_a = cell === null || cell === void 0 ? void 0 : cell.style) === null || _a === void 0 ? void 0 : _a.verticalAlign) === "bottom") {
+                verticalFilterIconPosition =
+                    rowDims.end - FILTER_ICON_EDGE_LENGTH + this.props.gridPosition.y - FILTER_ICON_MARGIN;
+            }
+            else if (((_b = cell === null || cell === void 0 ? void 0 : cell.style) === null || _b === void 0 ? void 0 : _b.verticalAlign) === "top") {
+                verticalFilterIconPosition = rowDims.start + this.props.gridPosition.y + FILTER_ICON_MARGIN;
+            }
             return {
                 x: colDims.end - FILTER_ICON_EDGE_LENGTH + this.props.gridPosition.x - FILTER_ICON_MARGIN - 1,
-                y: rowDims.end - FILTER_ICON_EDGE_LENGTH + this.props.gridPosition.y - centeringOffset,
+                y: verticalFilterIconPosition,
             };
         }
         isFilterActive(position) {
@@ -22154,6 +22167,10 @@
             }
         }
         onInput(ev) {
+            // the user meant to paste in the sheet, not open the composer with the pasted content
+            if (!ev.isComposing && ev.inputType === "insertFromPaste") {
+                return;
+            }
             if (ev.data) {
                 // if the user types a character on the grid, it means he wants to start composing the selected cell with that
                 // character
@@ -41122,9 +41139,6 @@
       color: #333;
     }
 
-    * {
-      font-family: "Roboto", "RobotoDraft", Helvetica, Arial, sans-serif;
-    }
     &,
     *,
     *:before,
@@ -44993,8 +45007,8 @@
 
 
     __info__.version = '16.2.1';
-    __info__.date = '2023-03-23T11:46:56.858Z';
-    __info__.hash = 'd1e5470';
+    __info__.date = '2023-03-28T10:08:09.099Z';
+    __info__.hash = '3c5b2bc';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
