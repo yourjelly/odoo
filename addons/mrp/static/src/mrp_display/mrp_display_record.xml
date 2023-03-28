@@ -17,14 +17,15 @@
                 </div>
             </div>
             <ul class="list-group list-group-flush">
-                <t t-foreach="rawMoves" t-as="move" t-key="move.id">
-                    <t t-set="moveComplete" t-value="move.product_uom_qty &amp;&amp;move.quantity_done &gt;= move.product_uom_qty"/>
-                    <li class="list-group-item py-3" t-att-class="moveComplete ? 'text-muted text-decoration-line-through' : ''">
+                <t t-foreach="props.rawMoves" t-as="move" t-key="move.resId">
+                    <t t-set="moveComplete" t-value="move.data.product_uom_qty &amp;&amp;move.data.quantity_done &gt;= move.data.product_uom_qty"/>
+                    <li class="list-group-item py-3" t-att-class="moveComplete ? 'text-muted text-decoration-line-through' : ''"
+                        t-on-click="() => this.completeMove(move)">
                         <span class="me-2">
-                            <t t-esc="move.quantity_done"/>
-                            <t t-if="move.product_uom_qty"> / <t t-esc="move.product_uom_qty"/></t>
+                            <t t-esc="move.data.quantity_done"/>
+                            <t t-if="move.data.product_uom_qty"> / <t t-esc="move.data.product_uom_qty"/></t>
                         </span>
-                        <span t-esc="move.product_id[1]"/>
+                        <span t-esc="move.data.product_id[1]"/>
                     </li>
                 </t>
                 <t t-foreach="workorders" t-as="workorder" t-key="workorder.resId">
@@ -42,6 +43,13 @@
                     </li>
                 </t>
             </ul>
+            <div class="card-footer d-flex p-0">
+                <button t-if="displayDoneButton" class="btn btn-primary p-3 flex-grow-1"
+                        t-on-click="onClickManufacturingDone">
+                    Manufacturing Done
+                </button>
+                <button class="btn btn-secondary p-3 flex-grow-1" t-on-click="onClickOpenMenu">...</button>
+            </div>
         </div>
     </t>
 </templates>
