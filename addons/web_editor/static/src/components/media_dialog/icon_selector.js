@@ -40,6 +40,7 @@ export class IconSelector extends Component {
             // icons can have multiple classes e.g. "fa-gears" ~ "fa-cogs")
             initialIconChanged: this.props.media
                 && !icon.names.some(name => this.props.media.classList.contains(name)),
+            noInitialIcon: !this.props.media,
         });
         await this.props.save();
     }
