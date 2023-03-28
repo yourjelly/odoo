@@ -60,23 +60,36 @@ export class MrpDisplay extends Component {
     }
 
     getRawMoves(record) {
+        if (this.state.activeResModel === "mrp.workorder") {
+            return this.stock_move.root.records.filter((move) =>
+                record.data.move_raw_ids.currentIds.includes(move.resId)
+            );
+        }
         return this.stock_move.root.records.filter(
             (move) => move.data.raw_material_production_id?.[0] === record.resId
         );
     }
 
-    getWorkorders(record) {
+    getProductionWorkorders(production) {
         return this.workorders.filter((wo) =>
-            record.data.workorder_ids.currentIds.includes(wo.resId)
+            production.data.workorder_ids.currentIds.includes(wo.resId)
         );
     }
 
-    selectWorkcenter(workcenterId) {
-        this.state.activeWorkcenter = workcenterId;
-        if (workcenterId) {
-            this.state.activeResModel = "mrp.workorder";
-        } else {
-            this.state.activeResModel = "mrp.production";
+    get relevantRecords() {
+        if (this.state.activeResModel === "mrp.workorder") {
+            return this.mrp_workorder.root.records.filter(
+                (wo) => wo.data.workcenter_id[0] === this.state.activeWorkcenter
+                // Should return only ready workorders but it's weird while workcenters counts not ready ones.
+                //     wo.data.workcenter_id[0] === this.state.activeWorkcenter &&
+                //     ["ready", "progress"].includes(wo.data.state)
+            );
         }
+        return this.mrp_production.root.records;
+    }
+
+    selectWorkcenter(workcenterId) {
+        this.state.activeWorkcenter = Number(workcenterId);
+        this.state.activeResModel = workcenterId ? "mrp.workorder" : "mrp.production";
     }
 }

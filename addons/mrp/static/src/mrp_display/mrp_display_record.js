@@ -10,15 +10,17 @@ export class MrpDisplayRecord extends Component {
     static components = { CharField, Field };
     static props = {
         record: Object,
-        workorders: Array,
-        rawMoves: Array,
+        workorders: { type: Array, optional: true },
+        rawMoves: { type: Array, optional: true },
+    };
+    static defaultProps = {
+        rawMoves: [],
+        workorders: [],
     };
     static template = "mrp.MrpDisplayRecord";
 
     setup() {
         this.dialogService = useService("dialog");
-
-        this.rawMoves = this.props.rawMoves.map((move) => move.data);
         this.record = this.props.record.data;
         this.workorders = this.props.workorders;
     }

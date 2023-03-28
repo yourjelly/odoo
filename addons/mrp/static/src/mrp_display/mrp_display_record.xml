@@ -9,10 +9,11 @@
                         <t t-if="record.state === 'confirmed'">Not started</t>
                         <t t-elif="record.state === 'progress'">In progress</t>
                         <t t-elif="record.state === 'to_close'">To close</t>
+                        <t t-else="" t-esc="record.state"/>
                     </span>
                 </div>
                 <div class="o_finished_product">
-                    <span class="fw-bold me-2"><t t-esc="record.product_qty"/>x</span>
+                    <span class="fw-bold me-2"><t t-esc="record.product_qty || record.qty_production"/>x</span>
                     <span t-esc="record.product_id[1]"/>
                 </div>
             </div>
