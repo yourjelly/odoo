@@ -147,6 +147,42 @@ export class ProgressBarField extends Component {
 export const progressBarField = {
     component: ProgressBarField,
     displayName: _lt("Progress Bar"),
+    supportedOptions: [
+        {
+            name: "editable",
+            string: _lt("Editable"),
+            type: "boolean",
+        },
+        {
+            name: "edit_max_value",
+            string: _lt("Edit max value"),
+            type: "boolean",
+        },
+        {
+            name: "current_value",
+            string: _lt("Current value"),
+            type: "selection",
+            getChoices({ fields }) {
+                return fields
+                    .filter((f) => ["integer", "float"].includes(f.type))
+                    .map((f) => {
+                        return { label: `${f.string} (${f.name})`, value: f.name };
+                    });
+            },
+        },
+        {
+            name: "max_value",
+            string: _lt("Max value"),
+            type: "selection",
+            getChoices({ fields }) {
+                return fields
+                    .filter((f) => ["integer", "float"].includes(f.type))
+                    .map((f) => {
+                        return { label: `${f.string} (${f.name})`, value: f.name };
+                    });
+            },
+        },
+    ],
     supportedTypes: ["integer", "float"],
     extractProps: ({ attrs, options }) => ({
         maxValueField: options.max_value,

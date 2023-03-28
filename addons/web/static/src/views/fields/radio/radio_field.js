@@ -70,6 +70,13 @@ export class RadioField extends Component {
 export const radioField = {
     component: RadioField,
     displayName: _lt("Radio"),
+    supportedOptions: [
+        {
+            name: "horizontal",
+            string: _lt("Display horizontally"),
+            type: "boolean",
+        },
+    ],
     supportedTypes: ["many2one", "selection"],
     isEmpty: (record, fieldName) => record.data[fieldName] === false,
     extractProps: ({ options, string }) => ({

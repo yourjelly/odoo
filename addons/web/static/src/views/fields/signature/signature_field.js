@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { SignatureDialog } from "@web/core/signature/signature_dialog";
 import { useService } from "@web/core/utils/hooks";
@@ -137,6 +138,20 @@ export class SignatureField extends Component {
 
 export const signatureField = {
     component: SignatureField,
+    supportedOptions: [
+        {
+            name: "full_name",
+            string: _lt("Auto-complete with"),
+            type: "selection",
+            getChoices({ fields }) {
+                return fields
+                    .filter((f) => ["char", "many2one"].includes(f.type))
+                    .map((f) => {
+                        return { label: `${f.string} (${f.name})`, value: f.name };
+                    });
+            },
+        },
+    ],
     extractProps: ({ attrs, options }) => ({
         defaultFont: options.default_font || "",
         fullName: options.full_name,

@@ -255,6 +255,13 @@ export class Many2ManyTagsField extends Component {
 export const many2ManyTagsField = {
     component: Many2ManyTagsField,
     displayName: _lt("Tags"),
+    supportedOptions: [
+        {
+            name: "color_field",
+            string: _lt("Use colors"),
+            type: "boolean",
+        },
+    ],
     supportedTypes: ["many2many"],
     isSet: (value) => value.count > 0,
     relatedFields: ({ options }) => {

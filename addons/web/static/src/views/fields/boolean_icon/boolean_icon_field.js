@@ -24,6 +24,13 @@ export class BooleanIconField extends Component {
 export const booleanIconField = {
     component: BooleanIconField,
     displayName: _lt("Boolean Icon"),
+    supportedOptions: [
+        {
+            name: "icon",
+            string: _lt("Icon"),
+            type: "string",
+        },
+    ],
     supportedTypes: ["boolean"],
     extractProps: ({ options, string }) => ({
         icon: options.icon,
