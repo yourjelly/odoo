@@ -7,7 +7,6 @@ import { localization } from "@web/core/l10n/localization";
 import { session } from "@web/session";
 import { renderToString } from "./core/utils/render";
 import { setLoadXmlDefaultApp, templates } from "@web/core/assets";
-import { hasTouch } from "@web/core/browser/feature_detection";
 
 import { App, whenReady } from "@odoo/owl";
 
@@ -57,9 +56,6 @@ export async function startWebClient(Webclient) {
     }
     if (env.debug) {
         classList.add("o_debug");
-    }
-    if (hasTouch()) {
-        classList.add("o_touch_device");
     }
     // delete odoo.debug; // FIXME: some legacy code rely on this
     odoo.__WOWL_DEBUG__ = { root };

@@ -71,7 +71,7 @@
                     isLast="threads.length === 0 and failure_last"
                     hasMarkAsReadButton="true"
                     onClick="(isMarkAsRead) => isMarkAsRead ? this.cancelNotifications(failure) : this.onClickFailure(failure)"
-                    onSwipeRight="hasTouch() ? { action: () => this.cancelNotifications(failure), icon: 'fa-times-circle', bgColor: 'bg-warning' } : undefined"
+                    onSwipeRight="env.isTouch ? { action: () => this.cancelNotifications(failure), icon: 'fa-times-circle', bgColor: 'bg-warning' } : undefined"
                 />
             </t>
             <t t-foreach="threads" t-as="thread" t-key="thread.localId">
@@ -85,8 +85,8 @@
                     hasMarkAsReadButton="thread.isUnread"
                     isLast="thread_last"
                     onClick="(isMarkAsRead) => this.onClickThread(isMarkAsRead, thread)"
-                    onSwipeRight="hasTouch() and thread.isUnread ? { action: () => this.markAsRead(thread), icon: 'fa-check-circle', bgColor: 'bg-success' } : undefined"
-                    onSwipeLeft="hasTouch() and threadService.canUnpin(thread) ? { action: () => this.threadService.unpin(thread), icon: 'fa-times-circle', bgColor: 'bg-danger' } : undefined"
+                    onSwipeRight="env.isTouch and thread.isUnread ? { action: () => this.markAsRead(thread), icon: 'fa-check-circle', bgColor: 'bg-success' } : undefined"
+                    onSwipeLeft="env.isTouch and threadService.canUnpin(thread) ? { action: () => this.threadService.unpin(thread), icon: 'fa-times-circle', bgColor: 'bg-danger' } : undefined"
                 >
                     <t t-set-slot="icon">
                         <ImStatus t-if="thread.type === 'chat'" persona="thread.correspondent"/>

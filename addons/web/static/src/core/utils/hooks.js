@@ -41,7 +41,7 @@ export function useAutofocus({ refName, selectAll, mobile } = {}) {
     const comp = useComponent();
     const ref = useRef(refName || "autofocus");
     // Prevent autofocus in mobile
-    if (!mobile && comp.env.isSmall) {
+    if (!mobile && comp.env.isTouch) {
         return ref;
     }
     // LEGACY

@@ -10,6 +10,7 @@ import { getActiveHotkey } from "../hotkeys/hotkey_service";
 
 import { EventBus, reactive, useEffect, useRef } from "@odoo/owl";
 
+const INPUTMODES = { touchstart: "touch", keydown: "keyboard" };
 export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
 
 /**
@@ -120,11 +121,17 @@ export function getMediaQueryLists() {
 const MEDIAS = getMediaQueryLists();
 
 export const utils = {
+    getInputMode(ui = {}) {
+        return ui.inputMode;
+    },
     getSize() {
         return MEDIAS.findIndex((media) => media.matches);
     },
     isSmall(ui = {}) {
         return (ui.size || utils.getSize()) <= SIZES.SM;
+    },
+    isTouch(ui = {}) {
+        return ui.inputMode === "touch";
     },
 };
 
@@ -175,6 +182,7 @@ export const uiService = {
 
         const ui = reactive({
             bus,
+            inputMode: window.matchMedia("(pointer:fine)").matches ? "keyboard" : "touch",
             size: utils.getSize(),
             get activeElement() {
                 return activeElems[activeElems.length - 1];
@@ -183,6 +191,7 @@ export const uiService = {
                 return blockCount > 0;
             },
             isSmall: utils.isSmall(),
+            isTouch: utils.isTouch(),
             block,
             unblock,
             activateElement,
@@ -200,10 +209,37 @@ export const uiService = {
             }
         };
         browser.addEventListener("resize", throttleForAnimation(updateSize));
+        const updateInputMode = (ev) => {
+            if (INPUTMODES[ev.type] !== ui.inputMode) {
+                if (INPUTMODES[ev.type] === "touch") {
+                    document.body.classList.add("o_touch_device");
+                    browser.removeEventListener("touchstart", updateInputMode);
+                    browser.addEventListener("keydown", updateInputMode);
+                    ui.inputMode = "touch";
+                    bus.trigger("inputMode");
+                } else if (window.matchMedia("(pointer:fine)").matches) {
+                    document.body.classList.remove("o_touch_device");
+                    browser.removeEventListener("keydown", updateInputMode);
+                    browser.addEventListener("touchstart", updateInputMode);
+                    ui.inputMode = "keyboard";
+                    bus.trigger("inputMode");
+                }
+            }
+        };
+        browser.addEventListener(
+            ui.inputMode === "touch" ? "keydown" : "touchstart",
+            updateInputMode
+        );
 
         Object.defineProperty(env, "isSmall", {
             get() {
                 return ui.isSmall;
+            },
+        });
+
+        Object.defineProperty(env, "isTouch", {
+            get() {
+                return ui.inputMode === "touch";
             },
         });
 

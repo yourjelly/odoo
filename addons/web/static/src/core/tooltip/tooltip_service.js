@@ -3,7 +3,6 @@
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { Tooltip } from "./tooltip";
-import { hasTouch } from "@web/core/browser/feature_detection";
 
 import { whenReady } from "@odoo/owl";
 
@@ -74,7 +73,7 @@ export const tooltipService = {
             if (!document.body.contains(target)) {
                 return true; // target is no longer in the DOM
             }
-            if (hasTouch()) {
+            if (env.isTouch) {
                 return !touchPressed;
             }
             return false;
@@ -181,7 +180,7 @@ export const tooltipService = {
                 }
             }, CLOSE_DELAY);
 
-            if (hasTouch()) {
+            if (env.isTouch) {
                 document.body.addEventListener("touchstart", onTouchStart);
 
                 document.body.addEventListener("touchend", (ev) => {

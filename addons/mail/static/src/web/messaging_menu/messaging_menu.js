@@ -14,7 +14,6 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
-import { hasTouch } from "@web/core/browser/feature_detection";
 
 export class MessagingMenu extends Component {
     static components = { Dropdown, NotificationItem, ImStatus, ChannelSelector };
@@ -24,7 +23,6 @@ export class MessagingMenu extends Component {
     setup() {
         this.messaging = useMessaging();
         this.store = useStore();
-        this.hasTouch = hasTouch;
         this.notification = useState(useService("mail.notification.permission"));
         /** @type {import("@mail/web/chat_window/chat_window_service").ChatWindowService} */
         this.chatWindowService = useState(useService("mail.chat_window"));

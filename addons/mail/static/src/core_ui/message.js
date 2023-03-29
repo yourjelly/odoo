@@ -31,7 +31,6 @@ import { _t } from "@web/core/l10n/translation";
 import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { hasTouch } from "@web/core/browser/feature_detection";
 import { url } from "@web/core/utils/urls";
 
 /**
@@ -88,7 +87,6 @@ export class Message extends Component {
             isReadMoreByIndex: new Map(),
         });
         this.root = useRef("root");
-        this.hasTouch = hasTouch;
         this.messageBody = useRef("body");
         this.messaging = useMessaging();
         this.store = useStore();
