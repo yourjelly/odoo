@@ -110,7 +110,6 @@ export class TimeOffCalendarController extends CalendarController {
         });
     }
 }
-TimeOffCalendarController.template = "hr_holidays.CalendarController";
 TimeOffCalendarController.components = {
     ...TimeOffCalendarController.components,
     FilterPanel: TimeOffCalendarFilterPanel,
