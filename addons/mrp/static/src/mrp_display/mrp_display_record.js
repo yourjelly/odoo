@@ -2,14 +2,14 @@
 
 import { CharField } from "@web/views/fields/char/char_field";
 import { Component } from "@odoo/owl";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Field } from "@web/views/fields/field";
-import { useService } from "@web/core/utils/hooks";
-import { StockMove } from "@mrp/mrp_display/stock_move";
+import { StockMove } from "./mrp_record_line/stock_move";
+import { MrpWorkorder } from "./mrp_record_line/mrp_workorder";
 
 export class MrpDisplayRecord extends Component {
-    static components = { CharField, Field, StockMove };
+    static components = { CharField, Field, StockMove, MrpWorkorder };
     static props = {
+        openMenuPop: Function,
         record: Object,
         workorders: { type: Array, optional: true },
         rawMoves: { type: Array, optional: true },
@@ -21,17 +21,8 @@ export class MrpDisplayRecord extends Component {
     static template = "mrp.MrpDisplayRecord";
 
     setup() {
-        this.dialogService = useService("dialog");
         this.record = this.props.record.data;
         this.workorders = this.props.workorders;
-    }
-
-    displayInstruction(workorder) {
-        const params = {
-            title: workorder.data.display_name,
-            body: workorder.data.operation_note,
-        };
-        this.dialogService.add(ConfirmationDialog, params);
     }
 
     get displayDoneButton() {
@@ -40,11 +31,20 @@ export class MrpDisplayRecord extends Component {
         );
     }
 
+    async onClickHeader(ev) {
+        const { resModel, resId } = this.props.record;
+        if (resModel === "mrp.workorder") {
+            await this.props.record.model.orm.call(resModel, "button_pending", [resId]);
+            this.props.record.update();
+            this.render();
+        }
+    }
+
     onClickManufacturingDone(ev) {
         console.log("TODO");
     }
 
     onClickOpenMenu(ev) {
-        console.log("TODO");
+        this.props.openMenuPop(this.props.record);
     }
 }

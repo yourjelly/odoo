@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="mrp.MrpDisplayRecord" owl="1">
-        <div class="o_mrp_display_record border card rounded m-4">
-            <div class="card-header">
-                <div class="card-title d-flex justify-content-between">
-                    <span class="h5" t-esc="record.display_name"/>
-                    <span class="text-capitalize ms-5">
+        <div class="o_mrp_display_record border card rounded m-4"
+             t-att-class="record.state === 'progress' ? 'o_active' : ''">
+            <div class="card-header" t-on-click="onClickHeader">
+                <div class="card-title row">
+                    <span class="col-8 h5" t-esc="record.display_name"/>
+                    <span class="col-4 text-capitalize text-end">
                         <t t-if="record.state === 'confirmed'">Not started</t>
                         <t t-elif="record.state === 'progress'">In progress</t>
                         <t t-elif="record.state === 'to_close'">To close</t>
                         <t t-else="" t-esc="record.state"/>
                     </span>
                 </div>
-                <div class="o_finished_product">
-                    <span class="fw-bold me-2"><t t-esc="record.product_qty || record.qty_production"/>x</span>
-                    <span t-esc="record.product_id[1]"/>
+                <div class="d-flex justify-content-between">
+                    <div class="o_finished_product">
+                        <span class="fw-bold me-2"><t t-esc="record.product_qty || record.qty_production"/>x</span>
+                        <span t-esc="record.product_id[1]"/>
+                    </div>
+                    <span t-if="record.duration" t-esc="record.duration"/>
                 </div>
             </div>
             <ul class="list-group list-group-flush">
@@ -22,18 +26,7 @@
                     <StockMove record="move"/>
                 </t>
                 <t t-foreach="workorders" t-as="workorder" t-key="workorder.resId">
-                    <li class="list-group-item py-3 d-flex justify-content-between align-items-center"
-                        t-att-class="workorder.data.state === 'done' ? 'text-muted text-decoration-line-through' : ''">
-                        <span>
-                            <input type="checkbox" class="me-2" disabled=""
-                                   t-att-checked="workorder.data.state === 'done'"/>
-                            <t t-esc="workorder.data.name"/>
-                        </span>
-                        <button t-if="workorder.data.operation_note.length" class="btn"
-                                t-on-click="() => this.displayInstruction(workorder)">
-                           <i class="fa fa-lightbulb-o fa-lg text-info"/>
-                        </button>
-                    </li>
+                    <MrpWorkorder record="workorder"/>
                 </t>
             </ul>
             <div class="card-footer d-flex p-0">
@@ -41,7 +34,7 @@
                         t-on-click="onClickManufacturingDone">
                     Manufacturing Done
                 </button>
-                <button class="btn btn-secondary p-3 flex-grow-1" t-on-click="onClickOpenMenu">...</button>
+                <button class="btn btn-secondary p-3 flex-grow-1 fa fa-bars" t-on-click="onClickOpenMenu"/>
             </div>
         </div>
     </t>

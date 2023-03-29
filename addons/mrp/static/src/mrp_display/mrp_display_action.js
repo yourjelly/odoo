@@ -23,20 +23,19 @@ export class MrpDisplayAction extends Component {
         this.viewService = useService("view");
         this.orm = useService("orm");
         this.resModel = "mrp.production";
-        this.models = {};
+        this.models = [];
 
         // TODO Maybe it should be in MrpDisplay directly
         this.env.config.ControlPanel = MrpDisplayControlPanel;
 
         onWillStart(async () => {
-            for (const [model, fieldsName] of Object.entries(fieldsStructure)) {
-                const fields = await this.viewService.loadFields(model, {
-                    fieldNames: fieldsName,
-                });
+            for (const modelStructure of fieldsStructure) {
+                const { fieldNames, relationalModel, resModel } = modelStructure;
+                const fields = await this.viewService.loadFields(resModel, { fieldNames });
                 for (const [fName, fInfo] of Object.entries(fields)) {
                     fields[fName] = { ...defaultActiveField, ...fInfo };
                 }
-                this.models[model] = fields;
+                this.models.push({ fields, relationalModel, resModel });
             }
 
             const viewId = await this.orm.search("ir.ui.view", [

@@ -2,16 +2,16 @@
 
 import { Layout } from "@web/search/layout";
 import { useService } from "@web/core/utils/hooks";
-import { RelationalModel } from "@web/views/relational_model";
 import { useModels } from "@mrp/mrp_display/model";
 import { ControlPanelButtons } from "@mrp/mrp_display/control_panel";
 import { MrpDisplayRecord } from "./mrp_display_record";
+import { MrpDisplayMenuPopup } from "./mrp_display_menu_popup";
 
 const { Component, onWillStart, useState } = owl;
 
 export class MrpDisplay extends Component {
     static template = "mrp.MrpDisplay";
-    static components = { Layout, ControlPanelButtons, MrpDisplayRecord };
+    static components = { Layout, ControlPanelButtons, MrpDisplayRecord, MrpDisplayMenuPopup };
     static buttonTemplate = "mrp.MrpDisplayButtonTemplate";
     static props = {
         resModel: String,
@@ -39,18 +39,15 @@ export class MrpDisplay extends Component {
         this.state = useState({
             activeResModel: this.props.resModel,
             activeWorkcenter: false,
+            displayMenuPopup: false,
         });
 
-        const params = [];
-        for (const [resModel, fields] of Object.entries(this.props.models)) {
-            params.push({
-                resModel: resModel,
-                fields: fields,
-                rootType: "list",
-                activeFields: fields,
-            });
+        const paramsList = [];
+        for (const { relationalModel, resModel, fields } of this.props.models) {
+            const params = { resModel, fields, rootType: "list", activeFields: fields };
+            paramsList.push([relationalModel, params]);
         }
-        const models = useModels(RelationalModel, params);
+        const models = useModels(paramsList);
         for (const model of models) {
             const resModelName = model.rootParams.resModel.replaceAll(".", "_");
             this[resModelName] = model;
@@ -76,19 +73,19 @@ export class MrpDisplay extends Component {
         );
     }
 
-    getProductionWorkorders(production) {
-        return this.workorders.filter((wo) =>
-            production.data.workorder_ids.currentIds.includes(wo.resId)
-        );
+    getWorkorders(record) {
+        if (this.state.activeResModel === "mrp.production") {
+            return this.mrp_workorder.root.records.filter(
+                (wo) => wo.data.production_id?.[0] === record.resId
+            );
+        }
+        return [];
     }
 
     get relevantRecords() {
         if (this.state.activeResModel === "mrp.workorder") {
             return this.mrp_workorder.root.records.filter(
                 (wo) => wo.data.workcenter_id[0] === this.state.activeWorkcenter
-                // Should return only ready workorders but it's weird while workcenters counts not ready ones.
-                //     wo.data.workcenter_id[0] === this.state.activeWorkcenter &&
-                //     ["ready", "progress"].includes(wo.data.state)
             );
         }
         return this.mrp_production.root.records;
@@ -97,6 +94,14 @@ export class MrpDisplay extends Component {
     selectWorkcenter(workcenterId) {
         this.state.activeWorkcenter = Number(workcenterId);
         this.state.activeResModel = workcenterId ? "mrp.workorder" : "mrp.production";
+    }
+
+    displayMenuPopup(record) {
+        this.state.displayMenuPopup = true;
+    }
+
+    closeMenuPopup() {
+        this.state.displayMenuPopup = false;
     }
 
     toggleSearchPanel() {

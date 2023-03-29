@@ -22,17 +22,19 @@ function getSearchParams(model, props, component) {
         } else {
             if (key == "domain") {
                 const production_ids = component.mrp_production.root.records.map((r) => r.resId);
-                if (model.rootParams.resModel == "mrp.workorder") {
-                    params[key] = [["production_id", "in", production_ids]];
-                    continue;
-                } else if (model.rootParams.resModel == "stock.move") {
+                if (model.rootParams.resModel === "mrp.workorder") {
+                    params[key] = [
+                        ["production_id", "in", production_ids],
+                        ["state", "in", ["ready", "progress"]],
+                    ];
+                } else if (model.rootParams.resModel === "stock.move") {
                     params[key] = [
                         "|",
                         ["production_id", "in", production_ids],
                         ["raw_material_production_id", "in", production_ids],
                     ];
-                    continue;
                 }
+                continue;
             }
             // TODO handle domain of submodel here
             params[key] = [];
@@ -49,19 +51,18 @@ function getSearchParams(model, props, component) {
  * @param {Function} [options.onUpdate]
  * @returns {InstanceType<T>}
  */
-export function useModels(ModelClass, paramsList, options = {}) {
-    const component = useComponent();
-    if (!(ModelClass.prototype instanceof Model)) {
-        throw new Error(`the model class should extend Model`);
-    }
-    const services = {};
-    for (const key of ModelClass.services) {
-        services[key] = useService(key);
-    }
-    services.orm = services.orm || useService("orm");
-
+export function useModels(paramsList, options = {}) {
     const models = [];
-    for (const params of paramsList) {
+    const component = useComponent();
+    for (const [ModelClass, params] of paramsList) {
+        if (!(ModelClass.prototype instanceof Model)) {
+            throw new Error(`the model class should extend Model`);
+        }
+        const services = {};
+        for (const key of ModelClass.services) {
+            services[key] = useService(key);
+        }
+        services.orm = services.orm || useService("orm");
         const model = new ModelClass(component.env, params, services);
         models.push(model);
     }
