@@ -1,0 +1,1246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tax_report_pakistan" model="account.report">
+        <field name="name">Tax Report Pakistan</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.pk" />
+        <field name="column_ids">
+            <record id="tax_report_balance" model="account.report.column">
+                <field name="name">Balance</field>
+                <field name="expression_label">balance</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="tax_report_line_base_sales_tax" model="account.report.line">
+                <field name="name">Sales Tax (Base)</field>
+                <field name="sequence" eval="1" />
+                <field name="children_ids">
+
+                    <record id="tax_report_line_standard_rated_supplies_base" model="account.report.line">
+                        <field name="name">Standard Sales Tax (Base)</field>
+                        <field name="sequence" eval="1" />
+                        <field name="children_ids">
+                            <record id="tax_report_line_standard_sales_tax_17" model="account.report.line">
+                                <field name="name">Standard Sales Tax 17% (Base)</field>
+                                <field name="code">STD_SALE_B</field>
+                                <field name="sequence" eval="1" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_17_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 17% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_standard_tax_services_base" model="account.report.line">
+                        <field name="name">Sales Tax Services (Base)</field>
+                        <field name="sequence" eval="2" />
+                        <field name="children_ids">
+
+                            <record id="tax_report_line_standard_sales_tax_telecom_services_19" model="account.report.line">
+                                <field name="name">Sales Tax Telecommunication Services 19.5% (Base)</field>
+                                <field name="code">SALE_TELE</field>
+                                <field name="sequence" eval="1" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_telecom_services_19_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Sales Tax Telecommunication Services 19.5% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_17_2" model="account.report.line">
+                                <field name="name">Standard Sales Tax 17% (Base)</field>
+                                <field name="code">SALE_SRV_17_B</field>
+                                <field name="sequence" eval="2" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_17_2_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 17% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_16_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 16% (Base)</field>
+                                <field name="code">SALE_SRV_16_B</field>
+                                <field name="sequence" eval="3" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_16_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 16% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_15_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 15% (Base)</field>
+                                <field name="code">SALE_SRV_15_B</field>
+                                <field name="sequence" eval="4" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_15_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 15% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_13_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 13% (Base)</field>
+                                <field name="code">SALE_SRV_13_B</field>
+                                <field name="sequence" eval="5" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_13_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 13% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_10_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 10% (Base)</field>
+                                <field name="code">SALE_SRV_10_B</field>
+                                <field name="sequence" eval="6" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_10_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 10% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_8_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 8% (Base)</field>
+                                <field name="code">SALE_SRV_8_B</field>
+                                <field name="sequence" eval="7" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_8_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 8% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_5_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 5% (Base)</field>
+                                <field name="code">SALE_SRV_5_B</field>
+                                <field name="sequence" eval="8" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_5_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 5% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_3_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 3% (Base)</field>
+                                <field name="code">SALE_SRV_3_B</field>
+                                <field name="sequence" eval="9" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_3_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 3% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_2_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 2% (Base)</field>
+                                <field name="code">SALE_SRV_2_B</field>
+                                <field name="sequence" eval="10" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_2_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 2% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_1_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 1% (Base)</field>
+                                <field name="code">SALE_SRV_1_B</field>
+                                <field name="sequence" eval="11" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_1_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 1% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_0_1" model="account.report.line">
+                                <field name="name">Standard Sales Tax 0% (Base)</field>
+                                <field name="code">SALE_SRV_0_B</field>
+                                <field name="sequence" eval="12" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_0_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 0% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_rated_supplies_base_subtotal" model="account.report.line">
+                                <field name="name">Net Sales Services Tax (Base)</field>
+                                <field name="sequence" eval="13" />
+                                <field name="aggregation_formula">SALE_SRV_17_B.balance+SALE_SRV_16_B.balance+SALE_SRV_15_B.balance+SALE_SRV_13_B.balance+SALE_SRV_10_B.balance+SALE_SRV_8_B.balance+SALE_SRV_5_B.balance+SALE_SRV_3_B.balance+SALE_SRV_2_B.balance+SALE_SRV_1_B.balance+SALE_SRV_0_B.balance</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_standard_sales_tax_province" model="account.report.line">
+                        <field name="name">Standard Sales Service Tax Based On Province (Base)</field>
+                        <field name="sequence" eval="3" />
+                        <field name="children_ids">
+
+                            <record id="tax_report_line_standard_sales_tax_punjab_16" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax Punjab 16% (Base)</field>
+                                <field name="code">STD_SALE_SRV_PUN_B</field>
+                                <field name="sequence" eval="1" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_punjab_16_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax Punjab 16% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_ict_16" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax ICT 16% (Base)</field>
+                                <field name="code">STD_SALE_SRV_ICT_B</field>
+                                <field name="sequence" eval="2" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_ict_16_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax ICT 16% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_akj_16" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax AJK 16% (Base)</field>
+                                <field name="code">STD_SALE_SRV_AJK_B</field>
+                                <field name="sequence" eval="3" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_akj_16_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax AJK 16% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_kp_15" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax KP 15% (Base)</field>
+                                <field name="code">STD_SALE_SRV_KP_B</field>
+                                <field name="sequence" eval="4" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_kp_15_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax KP 15% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_balochistan_15" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax Balochistan 15% (Base)</field>
+                                <field name="code">STD_SALE_SRV_BLC_B</field>
+                                <field name="sequence" eval="5" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_balochistan_15_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax Balochistan 15% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_sindh_13" model="account.report.line">
+                                <field name="name">Standard Sales Tax Services 13% Sindh (Base)</field>
+                                <field name="code">STD_SALE_SRV_SIN_B</field>
+                                <field name="sequence" eval="6" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_sindh_13_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax Services 13% Sindh (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_rated_supplies_base_subtotal" model="account.report.line">
+                                <field name="name">Net Sales Services Tax (Base)</field>
+                                <field name="sequence" eval="7" />
+                                <field name="aggregation_formula">STD_SALE_SRV_PUN_B.balance+STD_SALE_SRV_ICT_B.balance+STD_SALE_SRV_AJK_B.balance+STD_SALE_SRV_KP_B.balance+STD_SALE_SRV_BLC_B.balance+STD_SALE_SRV_SIN_B.balance</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+
+            <record id="tax_report_line_tax_sales_tax" model="account.report.line">
+                <field name="name">Sales Tax (tax)</field>
+                <field name="sequence" eval="2" />
+                <field name="children_ids">
+
+                    <record id="tax_report_line_standard_rated_supplies_tax" model="account.report.line">
+                        <field name="name">Standard Sales Tax (Tax)</field>
+                        <field name="sequence" eval="1" />
+                        <field name="children_ids">
+                            <record id="tax_report_line_standard_sales_tax_17_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 17% (tax)</field>
+                                <field name="code">STD_SALE_T</field>
+                                <field name="sequence" eval="1" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_17_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 17% (tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_standard_tax_services_tax" model="account.report.line">
+                        <field name="name">Sales Tax Services (Tax)</field>
+                        <field name="sequence" eval="2" />
+                        <field name="children_ids">
+
+                            <record id="tax_report_line_standard_sales_tax_telecom_services_19_tax" model="account.report.line">
+                                <field name="name">Sales Tax Telecommunication Services 19.5% (Tax)</field>
+                                <field name="code">SALE_TELE_T</field>
+                                <field name="sequence" eval="1" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_telecom_services_19_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Sales Tax Telecommunication Services 19.5% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_17_2_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 17% (Tax)</field>
+                                <field name="code">SALE_SRV_17_T</field>
+                                <field name="sequence" eval="2" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_17_2_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 17% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_16_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 16% (Tax)</field>
+                                <field name="code">SALE_SRV_16_T</field>
+                                <field name="sequence" eval="3" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_16_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 16% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_15_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 15% (Tax)</field>
+                                <field name="code">SALE_SRV_15_T</field>
+                                <field name="sequence" eval="4" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_15_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 15% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_13_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 13% (Tax)</field>
+                                <field name="code">SALE_SRV_13_T</field>
+                                <field name="sequence" eval="5" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_13_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 13% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_10_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 10% (Tax)</field>
+                                <field name="code">SALE_SRV_10_T</field>
+                                <field name="sequence" eval="6" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_10_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 10% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_8_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 8% (Tax)</field>
+                                <field name="code">SALE_SRV_8_T</field>
+                                <field name="sequence" eval="7" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_8_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 8% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_5_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 5% (Tax)</field>
+                                <field name="code">SALE_SRV_5_T</field>
+                                <field name="sequence" eval="8" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_5_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 5% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_3_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 3% (Tax)</field>
+                                <field name="code">SALE_SRV_3_T</field>
+                                <field name="sequence" eval="9" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_3_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 3% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_2_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 2% (Tax)</field>
+                                <field name="code">SALE_SRV_2_T</field>
+                                <field name="sequence" eval="10" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_2_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 2% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_1_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 1% (Tax)</field>
+                                <field name="code">SALE_SRV_1_T</field>
+                                <field name="sequence" eval="11" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_1_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 1% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_0_1_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax 0% (Tax)</field>
+                                <field name="code">SALE_SRV_0_T</field>
+                                <field name="sequence" eval="12" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_0_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax 0% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_rated_supplies_tax_subtotal_tax" model="account.report.line">
+                                <field name="name">Net Sales Services Tax (Tax)</field>
+                                <field name="sequence" eval="13" />
+                                <field name="aggregation_formula">SALE_TELE_T.balance+SALE_SRV_17_T.balance+SALE_SRV_16_T.balance+SALE_SRV_15_T.balance+SALE_SRV_13_T.balance+SALE_SRV_10_T.balance+SALE_SRV_8_T.balance+SALE_SRV_5_T.balance+SALE_SRV_3_T.balance+SALE_SRV_2_T.balance+SALE_SRV_1_T.balance+SALE_SRV_0_T.balance</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_standard_sales_tax_province_tax" model="account.report.line">
+                        <field name="name">Standard Sales Service Tax Taxd On Province (Tax)</field>
+                        <field name="sequence" eval="3" />
+                        <field name="children_ids">
+                            <record id="tax_report_line_standard_sales_tax_punjab_16_tax" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax Punjab 16% (Tax)</field>
+                                <field name="code">STD_SALE_SRV_PUN_T</field>
+                                <field name="sequence" eval="1" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_punjab_16_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax Punjab 16% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_ict_16_tax" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax ICT 16% (Tax)</field>
+                                <field name="code">STD_SALE_SRV_ICT_T</field>
+                                <field name="sequence" eval="2" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_ict_16_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax ICT 16% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_akj_16_tax" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax AJK 16% (Tax)</field>
+                                <field name="code">STD_SALE_SRV_AJK_T</field>
+                                <field name="sequence" eval="3" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_akj_16_tax_tah" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax AJK 16% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_kp_15_tax" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax KP 15% (Tax)</field>
+                                <field name="code">STD_SALE_SRV_KP_T</field>
+                                <field name="sequence" eval="4" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_kp_15_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax KP 15% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_balochistan_15_tax" model="account.report.line">
+                                <field name="name">Standard Sales Service Tax Balochistan 15% (Tax)</field>
+                                <field name="code">STD_SALE_SRV_BAL_T</field>
+                                <field name="sequence" eval="5" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_balochistan_15_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Service Tax Balochistan 15% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_sales_tax_sindh_13_tax" model="account.report.line">
+                                <field name="name">Standard Sales Tax Services 13% Sindh (Tax)</field>
+                                <field name="code">STD_SALE_SRV_SIN_T</field>
+                                <field name="sequence" eval="6" />
+                                <field name="expression_ids">
+                                    <record id="standard_sales_tax_sindh_13_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Sales Tax Services 13% Sindh (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_rated_supplies_tax_subtotal_tax" model="account.report.line">
+                                <field name="name">Net Standard Sales Service Tax (Tax)</field>
+                                <field name="sequence" eval="7" />
+                                <field name="aggregation_formula">STD_SALE_SRV_PUN_T.balance+STD_SALE_SRV_AJK_T.balance+STD_SALE_SRV_ICT_T.balance+STD_SALE_SRV_KP_T.balance+STD_SALE_SRV_BAL_T.balance+STD_SALE_SRV_SIN_T.balance</field>
+                            </record>
+                        </field>
+                    </record>
+
+
+                    <record id="tax_report_line_net_sale_tax_tax" model="account.report.line">
+                        <field name="name">Net Sales Tax (Tax)</field>
+                        <field name="sequence" eval="4" />
+                        <field name="aggregation_formula">SALE_TELE_T.balance+STD_SALE_T.balance+SALE_SRV_17_T.balance+SALE_SRV_16_T.balance+SALE_SRV_15_T.balance+SALE_SRV_13_T.balance+SALE_SRV_10_T.balance+SALE_SRV_8_T.balance+SALE_SRV_5_T.balance+SALE_SRV_3_T.balance+SALE_SRV_2_T.balance+SALE_SRV_1_T.balance+SALE_SRV_0_T.balance+STD_SALE_SRV_PUN_T.balance+STD_SALE_SRV_AJK_T.balance+STD_SALE_SRV_ICT_T.balance+STD_SALE_SRV_KP_T.balance+STD_SALE_SRV_BAL_T.balance+STD_SALE_SRV_SIN_T.balance</field>
+                    </record>
+                </field>
+            </record>
+
+            <record id="tax_report_line_base_purchase_tax" model="account.report.line">
+                <field name="name">Purchase Taxes (Base)</field>
+                <field name="sequence" eval="3" />
+                <field name="aggregation_formula">STD_PUR_17_B.balance+PUR_SRV_TAX_19.balance+PUR_SRV_TAX_17.balance+PUR_SRV_TAX_16.balance+PUR_SRV_TAX_15.balance+PUR_SRV_TAX_13.balance+PUR_SRV_TAX_10.balance+PUR_SRV_TAX_8.balance+PUR_SRV_TAX_5.balance+PUR_SRV_TAX_3.balance+PUR_SRV_TAX_2.balance+PUR_SRV_TAX_1.balance+PUR_SRV_TAX_0.balance+STD_PUR_PUN.balance+STD_PUR_ICT.balance+STD_PUR_AJK.balance+STD_PUR_KP.balance+STD_PUR_BAL.balance+STD_PUR_SIN.balance</field>
+                <field name="children_ids">
+
+                    <record id="tax_report_line_standard_rated_supplies_purchase_base" model="account.report.line">
+                        <field name="name">Standard Purchases Tax (Base)</field>
+                        <field name="sequence" eval="1" />
+                        <field name="children_ids">
+                            <record id="tax_report_line_standard_purchase_tax_17" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 17% (Base)</field>
+                                <field name="sequence" eval="1" />
+                                <field name="code">STD_PUR_17_B</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchase_tax_17_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 17% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_standard_tax_services_base_purchases" model="account.report.line">
+                        <field name="name">Purchases Tax Services (Base)</field>
+                        <field name="sequence" eval="2" />
+                        <field name="children_ids">
+                            <record id="tax_report_line_standard_purchases_tax_telecom_services_19" model="account.report.line">
+                                <field name="name">Purchases Tax Telecommunication Services 19.5% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_19</field>
+                                <field name="sequence" eval="1" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_telecom_services_19_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Purchases Tax Telecommunication Services 19.5% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_17_2" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 17% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_17</field>
+                                <field name="sequence" eval="2" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_17_2_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 17% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_16_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 16% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_16</field>
+                                <field name="sequence" eval="3" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_16_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 16% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_15_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 15% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_15</field>
+                                <field name="sequence" eval="4" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_15_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 15% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_13_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 13% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_13</field>
+                                <field name="sequence" eval="5" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_13_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 13% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_10_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 10% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_10</field>
+                                <field name="sequence" eval="6" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_10_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 10% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_8_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 8% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_8</field>
+                                <field name="sequence" eval="7" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_8_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 8% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_5_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 5% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_5</field>
+                                <field name="sequence" eval="8" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_5_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 5% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_3_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 3% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_3</field>
+                                <field name="sequence" eval="9" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_3_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 3% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_2_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 2% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_2</field>
+                                <field name="sequence" eval="10" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_2_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 2% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_1_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 1% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_1</field>
+                                <field name="sequence" eval="11" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_1_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 1% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_0_1" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 0% (Base)</field>
+                                <field name="code">PUR_SRV_TAX_0</field>
+                                <field name="sequence" eval="12" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_0_1_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 0% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_rated_supplies_base_subtotal" model="account.report.line">
+                                <field name="name">Net Purchases Services Tax (Base)</field>
+                                <field name="sequence" eval="13" />
+                                <field name="aggregation_formula">PUR_SRV_TAX_19.balance+PUR_SRV_TAX_17.balance+PUR_SRV_TAX_16.balance+PUR_SRV_TAX_15.balance+PUR_SRV_TAX_13.balance+PUR_SRV_TAX_10.balance+PUR_SRV_TAX_8.balance+PUR_SRV_TAX_5.balance+PUR_SRV_TAX_3.balance+PUR_SRV_TAX_2.balance+PUR_SRV_TAX_1.balance+PUR_SRV_TAX_0.balance</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_standard_purchases_tax" model="account.report.line">
+                        <field name="name">Standard Purchases Services Tax (Base)</field>
+                        <field name="sequence" eval="3" />
+                        <field name="children_ids">
+                            <record id="tax_report_line_standard_purchases_tax_punjab_16" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax Punjab 16% (Base)</field>
+                                <field name="code">STD_PUR_PUN</field>
+                                <field name="sequence" eval="1" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_punjab_16_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax Punjab 16% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_ict_16" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax ICT 16% (Base)</field>
+                                <field name="code">STD_PUR_ICT</field>
+                                <field name="sequence" eval="2" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_ict_16_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax ICT 16% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_akj_16" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax AJK 16% (Base)</field>
+                                <field name="code">STD_PUR_AJK</field>
+                                <field name="sequence" eval="3" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_akj_16_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax AJK 16% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+
+                            <record id="tax_report_line_standard_purchases_tax_kp_15" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax KP 15% (Base)</field>
+                                <field name="code">STD_PUR_KP</field>
+                                <field name="sequence" eval="4" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_kp_15_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax KP 15% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_balochistan_15" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax Balochistan 15% (Base)</field>
+                                <field name="code">STD_PUR_BAL</field>
+                                <field name="sequence" eval="5" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_balochistan_15_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax Balochistan 15% (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_sindh_13" model="account.report.line">
+                                <field name="name">Standard Purchases Tax Services 13% Sindh (Base)</field>
+                                <field name="code">STD_PUR_SIN</field>
+                                <field name="sequence" eval="6" />
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_sindh_13_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax Services 13% Sindh (Base)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_rated_supplies_base_subtotal" model="account.report.line">
+                                <field name="name">Net Standard Purchases Service Tax (Base)</field>
+                                <field name="sequence" eval="7" />
+                                <field name="aggregation_formula">STD_PUR_PUN.balance+STD_PUR_ICT.balance+STD_PUR_AJK.balance+STD_PUR_KP.balance+STD_PUR_BAL.balance+STD_PUR_SIN.balance</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_net_purchase_tax_base" model="account.report.line">
+                        <field name="name">Net Purchases Tax (Base)</field>
+                        <field name="sequence" eval="4" />
+                        <field name="aggregation_formula">STD_PUR_17_B.balance+PUR_SRV_TAX_19.balance+PUR_SRV_TAX_17.balance+PUR_SRV_TAX_16.balance+PUR_SRV_TAX_15.balance+PUR_SRV_TAX_13.balance+PUR_SRV_TAX_10.balance+PUR_SRV_TAX_8.balance+PUR_SRV_TAX_5.balance+PUR_SRV_TAX_3.balance+PUR_SRV_TAX_2.balance+PUR_SRV_TAX_1.balance+PUR_SRV_TAX_0.balance+STD_PUR_PUN.balance+STD_PUR_ICT.balance+STD_PUR_AJK.balance+STD_PUR_KP.balance+STD_PUR_BAL.balance+STD_PUR_SIN.balance</field>
+                    </record>
+                </field>
+            </record>
+
+            <record id="tax_report_line_tax_purchase_tax" model="account.report.line">
+                <field name="name">Purchase Taxes (Tax)</field>
+                <field name="sequence" eval="4" />
+                <field name="aggregation_formula">STD_PUR_T.balance+PUR_TELE.balance+PUR_SRV_17.balance+PUR_SRV_16.balance+PUR_SRV_15.balance+PUR_SRV_13.balance+PUR_SRV_10.balance+PUR_SRV_8.balance+PUR_SRV_5.balance+PUR_SRV_3.balance+PUR_SRV_2.balance+PUR_SRV_1.balance+PUR_SRV_0.balance+STD_PUR_AJK_T.balance+STD_PUR_BAL_T.balance+STD_PUR_ICT_T.balance+STD_PUR_PUN.balance+STD_PUR_SIN_T.balance+STD_PUR_KP_T.balance</field>
+                <field name="children_ids">
+                    <record id="tax_report_line_standard_rated_supplies_purchase_tax" model="account.report.line">
+                        <field name="name">Standard Purchases Tax (Tax)</field>
+                        <field name="children_ids">
+                            <record id="tax_report_line_standard_purchase_tax_17_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 17% (Tax)</field>
+                                <field name="code">STD_PUR_T</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchase_tax_17_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 17% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_standard_tax_services_tax_purchases_tax" model="account.report.line">
+                        <field name="name">Purchases Tax Services (Tax)</field>
+                        <field name="sequence" eval="2" />
+                        <field name="children_ids">
+
+                            <record id="tax_report_line_standard_purchases_tax_telecom_services_19_tax" model="account.report.line">
+                                <field name="name">Purchases Tax Telecommunication Services 19.5% (Tax)</field>
+                                <field name="code">PUR_TELE</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_telecom_services_19_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Purchases Tax Telecommunication Services 19.5% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_17_2_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 17% (Tax)</field>
+                                <field name="code">PUR_SRV_17</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_17_2_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 17% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_16_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 16% (Tax)</field>
+                                <field name="code">PUR_SRV_16</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_16_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 16% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_15_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 15% (Tax)</field>
+                                <field name="code">PUR_SRV_15</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_15_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 15% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_13_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 13% (Tax)</field>
+                                <field name="code">PUR_SRV_13</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_13_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 13% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_10_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 10% (Tax)</field>
+                                <field name="code">PUR_SRV_10</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_10_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 10% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+
+                            <record id="tax_report_line_standard_purchases_tax_8_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 8% (Tax)</field>
+                                <field name="code">PUR_SRV_8</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_8_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 8% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_5_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 5% (Tax)</field>
+                                <field name="code">PUR_SRV_5</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_5_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 5% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_3_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 3% (Tax)</field>
+                                <field name="code">PUR_SRV_3</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_3_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 3% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+
+                            <record id="tax_report_line_standard_purchases_tax_2_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 2% (Tax)</field>
+                                <field name="code">PUR_SRV_2</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_2_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 2% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+
+                            <record id="tax_report_line_standard_purchases_tax_1_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 1% (Tax)</field>
+                                <field name="code">PUR_SRV_1</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_1_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 1% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+
+                            <record id="tax_report_line_standard_purchases_tax_0_1_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax 0% (Tax)</field>
+                                <field name="code">PUR_SRV_0</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_0_1_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax 0% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_rated_supplies_base_subtotal_tax" model="account.report.line">
+                                <field name="name">Net Purchases Services Tax (Tax)</field>
+                                <field name="aggregation_formula">PUR_TELE.balance+PUR_SRV_17.balance+PUR_SRV_16.balance+PUR_SRV_15.balance+PUR_SRV_13.balance+PUR_SRV_10.balance+PUR_SRV_8.balance+PUR_SRV_5.balance+PUR_SRV_3.balance+PUR_SRV_2.balance+PUR_SRV_1.balance+PUR_SRV_0.balance</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_standard_purchases_tax_tax" model="account.report.line">
+                        <field name="name">Standard Purchases Services Tax (Tax)</field>
+                        <field name="children_ids">
+                            <record id="tax_report_line_standard_purchases_tax_punjab_16_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax Punjab 16% (Tax)</field>
+                                <field name="code">STD_PUR_PUN_T</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_punjab_16_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax Punjab 16% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_ict_16_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax ICT 16% (Tax)</field>
+                                <field name="code">STD_PUR_ICT_T</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_ict_16_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax ICT 16% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_akj_16_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax AJK 16% (Tax)</field>
+                                <field name="code">STD_PUR_AJK_T</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_akj_16_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax AJK 16% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_kp_15_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax KP 15% (Tax)</field>
+                                <field name="code">STD_PUR_KP_T</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_kp_15_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax KP 15% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_balochistan_15_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Service Tax Balochistan 15% (Tax)</field>
+                                <field name="code">STD_PUR_BAL_T</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_balochistan_15_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Service Tax Balochistan 15% (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_purchases_tax_sindh_13_tax" model="account.report.line">
+                                <field name="name">Standard Purchases Tax Services 13% Sindh (Tax)</field>
+                                <field name="code">STD_PUR_SIN_T</field>
+                                <field name="expression_ids">
+                                    <record id="standard_purchases_tax_sindh_13_tax_tag" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">Standard Purchases Tax Services 13% Sindh (Tax)</field>
+                                    </record>
+                                </field>
+                            </record>
+
+                            <record id="tax_report_line_standard_rated_supplies_base_subtotal_tax" model="account.report.line">
+                                <field name="name">Net Purchases Service Tax (Tax)</field>
+                                <field name="aggregation_formula">STD_PUR_AJK_T.balance+STD_PUR_BAL_T.balance+STD_PUR_ICT_T.balance+STD_PUR_PUN_T.balance+STD_PUR_SIN_T.balance+STD_PUR_KP_T.balance</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_report_line_net_purchase_tax_tax" model="account.report.line">
+                        <field name="name">Net Purchases Tax (Tax)</field>
+                        <field name="aggregation_formula">STD_PUR_T.balance+PUR_TELE.balance+PUR_SRV_17.balance+PUR_SRV_16.balance+PUR_SRV_15.balance+PUR_SRV_13.balance+PUR_SRV_10.balance+PUR_SRV_8.balance+PUR_SRV_5.balance+PUR_SRV_3.balance+PUR_SRV_2.balance+PUR_SRV_1.balance+PUR_SRV_0.balance+STD_PUR_AJK_T.balance+STD_PUR_BAL_T.balance+STD_PUR_ICT_T.balance+STD_PUR_PUN_T.balance+STD_PUR_SIN_T.balance+STD_PUR_KP_T.balance</field>
+                    </record>
+                </field>
+            </record>
+
+            <record id="tax_report_line_net_standard_sales" model="account.report.line">
+                <field name="name">Net Standard Sales Tax</field>
+                <field name="sequence" eval="5" />
+                <field name="aggregation_formula">STD_SALE_T.balance-STD_PUR_T.balance</field>
+                <field name="children_ids">
+                    <record id="tax_report_line_net_std_tax_payable" model="account.report.line">
+                        <field name="name">Net Standard Tax Payable (Sales)</field>
+                        <field name="aggregation_formula">STD_SALE_T.balance</field>
+                    </record>
+                    <record id="tax_report_line_net_std_tax_payable_pur" model="account.report.line">
+                        <field name="name">Net Standard Tax Recoverable (Purchases)</field>
+                        <field name="aggregation_formula">STD_PUR_T.balance</field>
+                    </record>
+                    <record id="tax_report_line_net_std_tax" model="account.report.line">
+                        <field name="name">Net Standard Tax</field>
+                        <field name="aggregation_formula">STD_SALE_T.balance-STD_PUR_T.balance</field>
+                    </record>
+                </field>
+            </record>
+
+            <record id="tax_report_line_net_standard_services" model="account.report.line">
+                <field name="name">Net Standard Sales Tax</field>
+                <field name="sequence" eval="6" />
+                <field name="aggregation_formula">SALE_TELE_T.balance+SALE_SRV_17_T.balance+SALE_SRV_16_T.balance+SALE_SRV_15_T.balance+SALE_SRV_13_T.balance+SALE_SRV_10_T.balance+SALE_SRV_8_T.balance+SALE_SRV_5_T.balance+SALE_SRV_3_T.balance+SALE_SRV_2_T.balance+SALE_SRV_1_T.balance+SALE_SRV_0_T.balance-(PUR_TELE.balance+PUR_SRV_17.balance+PUR_SRV_16.balance+PUR_SRV_15.balance+PUR_SRV_13.balance+PUR_SRV_10.balance+PUR_SRV_8.balance+PUR_SRV_5.balance+PUR_SRV_3.balance+PUR_SRV_2.balance+PUR_SRV_1.balance+PUR_SRV_0.balance)</field>
+                <field name="children_ids">
+                    <record id="tax_report_line_net_std_tax_payable_tax" model="account.report.line">
+                        <field name="name">Net Services Tax Payable (Sales)</field>
+                        <field name="code">Total_Payable</field>
+                        <field name="aggregation_formula">SALE_TELE_T.balance+SALE_SRV_17_T.balance+SALE_SRV_16_T.balance+SALE_SRV_15_T.balance+SALE_SRV_13_T.balance+SALE_SRV_10_T.balance+SALE_SRV_8_T.balance+SALE_SRV_5_T.balance+SALE_SRV_3_T.balance+SALE_SRV_2_T.balance+SALE_SRV_1_T.balance+SALE_SRV_0_T.balance</field>
+                    </record>
+                    <record id="tax_report_line_net_std_tax_recoverable_tax" model="account.report.line">
+                        <field name="name">Net Services Tax Recoverable (Purchases)</field>
+                        <field name="aggregation_formula">PUR_TELE.balance+PUR_SRV_17.balance+PUR_SRV_16.balance+PUR_SRV_15.balance+PUR_SRV_13.balance+PUR_SRV_10.balance+PUR_SRV_8.balance+PUR_SRV_5.balance+PUR_SRV_3.balance+PUR_SRV_2.balance+PUR_SRV_1.balance+PUR_SRV_0.balance</field>
+                    </record>
+                    <record id="tax_report_line_net_service_tax_total" model="account.report.line">
+                        <field name="name">Net Services Tax Total</field>
+                        <field name="aggregation_formula">SALE_TELE_T.balance+SALE_SRV_17_T.balance+SALE_SRV_16_T.balance+SALE_SRV_15_T.balance+SALE_SRV_13_T.balance+SALE_SRV_10_T.balance+SALE_SRV_8_T.balance+SALE_SRV_5_T.balance+SALE_SRV_3_T.balance+SALE_SRV_2_T.balance+SALE_SRV_1_T.balance+SALE_SRV_0_T.balance-(PUR_TELE.balance+PUR_SRV_17.balance+PUR_SRV_16.balance+PUR_SRV_15.balance+PUR_SRV_13.balance+PUR_SRV_10.balance+PUR_SRV_8.balance+PUR_SRV_5.balance+PUR_SRV_3.balance+PUR_SRV_2.balance+PUR_SRV_1.balance+PUR_SRV_0.balance)</field>
+                    </record>
+                </field>
+            </record>
+
+            <record id="tax_report_line_net_services_tax" model="account.report.line">
+                <field name="name">Net Services Tax</field>
+                <field name="sequence" eval="7" />
+                <field name="aggregation_formula">SALE_TELE_T.balance+SALE_SRV_17_T.balance+SALE_SRV_16_T.balance+SALE_SRV_15_T.balance+SALE_SRV_13_T.balance+SALE_SRV_10_T.balance+SALE_SRV_8_T.balance+SALE_SRV_5_T.balance+SALE_SRV_3_T.balance+SALE_SRV_2_T.balance+SALE_SRV_1_T.balance+SALE_SRV_0_T.balance-(PUR_TELE.balance+PUR_SRV_17.balance+PUR_SRV_16.balance+PUR_SRV_15.balance+PUR_SRV_13.balance+PUR_SRV_10.balance+PUR_SRV_8.balance+PUR_SRV_5.balance+PUR_SRV_3.balance+PUR_SRV_2.balance+PUR_SRV_1.balance+PUR_SRV_0.balance)</field>
+                <field name="children_ids">
+                    <record id="tax_report_line_net_std_tax_payable_tax_sales" model="account.report.line">
+                        <field name="name">Net Services Tax Payable (Sales)</field>
+                        <field name="sequence" eval="1" />
+                        <field name="code">Total_Payable Tax</field>
+                        <field name="aggregation_formula">SALE_TELE_T.balance+SALE_SRV_17_T.balance+SALE_SRV_16_T.balance+SALE_SRV_15_T.balance+SALE_SRV_13_T.balance+SALE_SRV_10_T.balance+SALE_SRV_8_T.balance+SALE_SRV_5_T.balance+SALE_SRV_3_T.balance+SALE_SRV_2_T.balance+SALE_SRV_1_T.balance+SALE_SRV_0_T</field>
+                    </record>
+                    <record id="tax_report_line_net_std_tax_recoverable_tax_pur" model="account.report.line">
+                        <field name="name">Net Services Tax Recoverable (Purchases)</field>
+                        <field name="sequence" eval="2" />
+                        <field name="aggregation_formula">PUR_TELE.balance+PUR_SRV_17.balance+PUR_SRV_16.balance+PUR_SRV_15.balance+PUR_SRV_13.balance+PUR_SRV_10.balance+PUR_SRV_8.balance+PUR_SRV_5.balance+PUR_SRV_3.balance+PUR_SRV_2.balance+PUR_SRV_1.balance+PUR_SRV_0.balance</field>
+                    </record>
+                    <record id="tax_report_line_net_service_tax_total_total" model="account.report.line">
+                        <field name="name">Net Services Tax Total</field>
+                        <field name="sequence" eval="3" />
+                        <field name="aggregation_formula">SALE_TELE_T.balance+SALE_SRV_17_T.balance+SALE_SRV_16_T.balance+SALE_SRV_15_T.balance+SALE_SRV_13_T.balance+SALE_SRV_10_T.balance+SALE_SRV_8_T.balance+SALE_SRV_5_T.balance+SALE_SRV_3_T.balance+SALE_SRV_2_T.balance+SALE_SRV_1_T.balance+SALE_SRV_0_T.balance-(PUR_TELE.balance+PUR_SRV_17.balance+PUR_SRV_16.balance+PUR_SRV_15.balance+PUR_SRV_13.balance+PUR_SRV_10.balance+PUR_SRV_8.balance+PUR_SRV_5.balance+PUR_SRV_3.balance+PUR_SRV_2.balance+PUR_SRV_1.balance+PUR_SRV_0.balance)</field>
+                    </record>
+                </field>
+            </record>
+
+            <record id="tax_report_line_net_services_tax_provinces" model="account.report.line">
+                <field name="name">Net Standard Services Tax (Provinces)</field>
+                <field name="sequence" eval="8" />
+                <field name="aggregation_formula">STD_SALE_SRV_PUN_T.balance-STD_PUR_PUN_T.balance</field>
+                <field name="children_ids">
+                    <record id="tax_report_line_net_due_punjab_tax" model="account.report.line">
+                        <field name="name">Net Due Punjab Tax</field>
+                        <field name="sequence" eval="1" />
+                        <field name="children_ids">
+                            <record id="tax_report_line_punjab_tax_payable_sales" model="account.report.line">
+                                <field name="name">Punjab Tax Payable (Sales)</field>
+                                <field name="sequence" eval="1" />
+                                <field name="aggregation_formula">STD_SALE_SRV_PUN_T.balance</field>
+                            </record>
+                            <record id="tax_report_line_net_std_tax_payable_tax_sales" model="account.report.line">
+                                <field name="name">Punjab Tax Recoverable (Purchase)</field>
+                                <field name="sequence" eval="2" />
+                                <field name="aggregation_formula">STD_PUR_PUN_T.balance</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+
+</odoo>
