@@ -1480,7 +1480,7 @@
      *   formula, commas are used to separate arguments
      * - it does not support % symbol, in formulas % is an operator
      */
-    const formulaNumberRegexp = /^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+/;
+    const formulaNumberRegexp = /(^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+)(?!\w|!)/;
     const pIntegerAndDecimals = "(\\d+(,\\d{3,})*(\\.\\d*)?)"; // pattern that match integer number with or without decimal digits
     const pOnlyDecimals = "(\\.\\d+)"; // pattern that match only expression with decimal digits
     const pScientificFormat = "(e(\\+|-)?\\d+)?"; // pattern that match scientific format between zero and one time (should be placed before pPercentFormat)
@@ -3089,6 +3089,7 @@
     const LINE_HEIGHT = 1.2;
     css /* scss */ `
   div.o-scorecard {
+    font-family: ${DEFAULT_FONT};
     user-select: none;
     background-color: white;
     display: flex;
@@ -19419,6 +19420,8 @@
                         start = 0;
                     if (end > textLength)
                         end = textLength;
+                    if (start > textLength)
+                        start = textLength;
                 }
                 let startNode = this.findChildAtCharacterIndex(start);
                 let endNode = this.findChildAtCharacterIndex(end);
@@ -19688,6 +19691,7 @@
       padding-right: 2px;
 
       box-sizing: border-box;
+      font-family: ${DEFAULT_FONT};
 
       caret-color: black;
       padding-left: 3px;
@@ -20130,7 +20134,7 @@
             const highlights = this.env.model.getters.getHighlights();
             const refSheet = sheetName
                 ? this.env.model.getters.getSheetIdByName(sheetName)
-                : this.env.model.getters.getEditionSheet();
+                : this.env.model.getters.getCurrentEditedCell().sheetId;
             const highlight = highlights.find((highlight) => {
                 if (highlight.sheetId !== refSheet)
                     return false;
@@ -22582,6 +22586,10 @@
             }
         }
         onInput(ev) {
+            // the user meant to paste in the sheet, not open the composer with the pasted content
+            if (!ev.isComposing && ev.inputType === "insertFromPaste") {
+                return;
+            }
             if (ev.data) {
                 // if the user types a character on the grid, it means he wants to start composing the selected cell with that
                 // character
@@ -22989,6 +22997,7 @@
 
     const SUPPORTED_BORDER_STYLES = ["thin"];
     const SUPPORTED_HORIZONTAL_ALIGNMENTS = ["general", "left", "center", "right"];
+    const SUPPORTED_VERTICAL_ALIGNMENTS = ["top", "center", "bottom"];
     const SUPPORTED_FONTS = ["Arial"];
     const SUPPORTED_FILL_PATTERNS = ["solid"];
     const SUPPORTED_CF_TYPES = [
@@ -23040,6 +23049,14 @@
         justify: "left",
         centerContinuous: "center",
         distributed: "center",
+    };
+    /** Conversion map Horizontal Alignment in XLSX <=> Horizontal Alignment in o_spreadsheet*/
+    const V_ALIGNMENT_CONVERSION_MAP = {
+        top: "top",
+        center: "middle",
+        bottom: "bottom",
+        justify: "middle",
+        distributed: "middle",
     };
     /** Convert the "CellIs" cf operator.
      * We have all the operators that the xlsx have, but ours begin with a uppercase character */
@@ -23462,7 +23479,7 @@
         return arrayToObject(stylesArray, 1);
     }
     function convertStyle(styleStruct, warningManager) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         addStyleWarnings(styleStruct === null || styleStruct === void 0 ? void 0 : styleStruct.fontStyle, styleStruct === null || styleStruct === void 0 ? void 0 : styleStruct.fillStyle, warningManager);
         addHorizontalAlignmentWarnings((_a = styleStruct === null || styleStruct === void 0 ? void 0 : styleStruct.alignment) === null || _a === void 0 ? void 0 : _a.horizontal, warningManager);
         addVerticalAlignmentWarnings((_b = styleStruct === null || styleStruct === void 0 ? void 0 : styleStruct.alignment) === null || _b === void 0 ? void 0 : _b.vertical, warningManager);
@@ -23471,15 +23488,18 @@
             italic: (_d = styleStruct.fontStyle) === null || _d === void 0 ? void 0 : _d.italic,
             strikethrough: (_e = styleStruct.fontStyle) === null || _e === void 0 ? void 0 : _e.strike,
             underline: (_f = styleStruct.fontStyle) === null || _f === void 0 ? void 0 : _f.underline,
-            align: ((_g = styleStruct.alignment) === null || _g === void 0 ? void 0 : _g.horizontal)
+            verticalAlign: ((_g = styleStruct.alignment) === null || _g === void 0 ? void 0 : _g.vertical)
+                ? V_ALIGNMENT_CONVERSION_MAP[styleStruct.alignment.vertical]
+                : undefined,
+            align: ((_h = styleStruct.alignment) === null || _h === void 0 ? void 0 : _h.horizontal)
                 ? H_ALIGNMENT_CONVERSION_MAP[styleStruct.alignment.horizontal]
                 : undefined,
             // In xlsx fills, bgColor is the color of the fill, and fgColor is the color of the pattern above the background, except in solid fills
-            fillColor: ((_h = styleStruct.fillStyle) === null || _h === void 0 ? void 0 : _h.patternType) === "solid"
-                ? convertColor((_j = styleStruct.fillStyle) === null || _j === void 0 ? void 0 : _j.fgColor)
-                : convertColor((_k = styleStruct.fillStyle) === null || _k === void 0 ? void 0 : _k.bgColor),
-            textColor: convertColor((_l = styleStruct.fontStyle) === null || _l === void 0 ? void 0 : _l.color),
-            fontSize: (_m = styleStruct.fontStyle) === null || _m === void 0 ? void 0 : _m.size,
+            fillColor: ((_j = styleStruct.fillStyle) === null || _j === void 0 ? void 0 : _j.patternType) === "solid"
+                ? convertColor((_k = styleStruct.fillStyle) === null || _k === void 0 ? void 0 : _k.fgColor)
+                : convertColor((_l = styleStruct.fillStyle) === null || _l === void 0 ? void 0 : _l.bgColor),
+            textColor: convertColor((_m = styleStruct.fontStyle) === null || _m === void 0 ? void 0 : _m.color),
+            fontSize: (_o = styleStruct.fontStyle) === null || _o === void 0 ? void 0 : _o.size,
         };
     }
     function convertFormats(data, warningManager) {
@@ -23554,8 +23574,8 @@
         }
     }
     function addVerticalAlignmentWarnings(alignment, warningManager) {
-        if (alignment) {
-            warningManager.generateNotSupportedWarning(WarningTypes.VerticalAlignmentNotSupported);
+        if (alignment && !SUPPORTED_VERTICAL_ALIGNMENTS.includes(alignment)) {
+            warningManager.generateNotSupportedWarning(WarningTypes.VerticalAlignmentNotSupported, alignment, SUPPORTED_VERTICAL_ALIGNMENTS);
         }
     }
 
@@ -25688,7 +25708,7 @@
                     default: "general",
                 }).asString(),
                 vertical: this.extractAttr(alignmentElement, "vertical", {
-                    default: "center",
+                    default: "bottom",
                 }).asString(),
                 textRotation: (_a = this.extractAttr(alignmentElement, "textRotation")) === null || _a === void 0 ? void 0 : _a.asNum(),
                 wrapText: (_b = this.extractAttr(alignmentElement, "wrapText")) === null || _b === void 0 ? void 0 : _b.asBool(),
@@ -35258,7 +35278,7 @@
             const y = box.y + 1;
             const textHeight = computeTextLinesHeight(textLineHeight, numberOfLines);
             const hasEnoughSpaces = box.height > textHeight + MIN_CELL_TEXT_MARGIN * 2;
-            const verticalAlign = box.verticalAlign || "middle";
+            const verticalAlign = box.verticalAlign || "bottom";
             if (hasEnoughSpaces) {
                 if (verticalAlign === "middle") {
                     return y + (box.height - textHeight) / 2;
@@ -38535,9 +38555,6 @@
             }
             return this.currentContent;
         }
-        getEditionSheet() {
-            return this.sheetId;
-        }
         getComposerSelection() {
             return {
                 start: this.selectionStart,
@@ -38821,7 +38838,7 @@
         getZoneReference(zone, fixedParts = [{ colFixed: false, rowFixed: false }]) {
             const sheetId = this.getters.getActiveSheetId();
             let selectedXc = this.getters.zoneToXC(sheetId, zone, fixedParts);
-            if (this.getters.getEditionSheet() !== this.getters.getActiveSheetId()) {
+            if (this.getters.getCurrentEditedCell().sheetId !== this.getters.getActiveSheetId()) {
                 const sheetName = getComposerSheetName(this.getters.getSheetName(this.getters.getActiveSheetId()));
                 selectedXc = `${sheetName}!${selectedXc}`;
             }
@@ -38836,7 +38853,7 @@
                 _fixedParts.pop();
             }
             const newRange = range.clone({ parts: _fixedParts });
-            return this.getters.getSelectionRangeString(newRange, this.getters.getEditionSheet());
+            return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell().sheetId);
         }
         /**
          * Replace the current selection by a new text.
@@ -38869,7 +38886,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return;
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const XCs = this.getReferencedRanges().map((range) => this.getters.getRangeString(range, editionSheetId));
             const colorsToKeep = {};
             for (const xc of XCs) {
@@ -38898,7 +38915,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return [];
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const rangeColor = (rangeString) => {
                 const colorIndex = this.colorIndexByRange[rangeString];
                 return colors$1[colorIndex % colors$1.length];
@@ -38916,7 +38933,7 @@
          * Return ranges currently referenced in the composer
          */
         getReferencedRanges() {
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             return this.currentTokens
                 .filter((token) => token.type === "REFERENCE")
                 .map((token) => this.getters.getRangeFromSheetXC(editionSheetId, token.value));
@@ -38975,7 +38992,6 @@
         "isSelectingForComposer",
         "showSelectionIndicator",
         "getCurrentContent",
-        "getEditionSheet",
         "getComposerSelection",
         "getCurrentTokens",
         "getTokenAtCursor",
@@ -41519,9 +41535,6 @@
       color: #333;
     }
 
-    * {
-      font-family: "Roboto", "RobotoDraft", Helvetica, Arial, sans-serif;
-    }
     &,
     *,
     *:before,
@@ -45392,8 +45405,8 @@
 
 
     __info__.version = '16.3.0-alpha.2';
-    __info__.date = '2023-03-23T11:47:46.254Z';
-    __info__.hash = '59f25bb';
+    __info__.date = '2023-03-29T10:42:21.025Z';
+    __info__.hash = '1d05eea';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
