@@ -92,4 +92,9 @@ export class MrpDisplay extends Component {
         this.state.activeWorkcenter = Number(workcenterId);
         this.state.activeResModel = workcenterId ? "mrp.workorder" : "mrp.production";
     }
+
+    toggleSearchPanel() {
+        this.display.searchPanel = !this.display.searchPanel;
+        this.render(true);
+    }
 }

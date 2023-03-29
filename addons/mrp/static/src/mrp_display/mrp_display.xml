@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="mrp.MrpDisplay" owl="1">
-        <div class="o_action">
+        <div class="o_action o_mrp_display">
             <Layout display="display">
                 <t t-set-slot="control-panel-top-middle">
                     <t t-call="{{ constructor.buttonTemplate }}"/>
+                </t>
+                <t t-set-slot="control-panel-top-left">
+                    <button class="btn fa fa-bars" t-on-click="toggleSearchPanel"/>
+                    <img class="o_logo_img" src="/web/static/img/logo.png"/>
                 </t>
                 <div class="d-flex flex-row flex-wrap align-items-baseline">
                     <t t-if="state.activeResModel === 'mrp.production'">
