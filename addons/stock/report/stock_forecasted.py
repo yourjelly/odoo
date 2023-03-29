@@ -292,7 +292,7 @@ class StockForecasted(models.AbstractModel):
             # any sublocation qties will be added to the main stock location qty
             if location_id in wh_stock_sub_location_ids:
                 location_id = wh_stock_location.id
-            currents[(qty['product_id'][0], location_id)] += qty['quantity'] - qty['reserved_quantity']
+            currents[(qty['product_id'][0], location_id)] += qty['quantity']
         moves_data = {}
         for _, out_moves in outs_per_product.items():
             # to handle multiple out wtih same in (ex: same pick/pack for 2 outs)
