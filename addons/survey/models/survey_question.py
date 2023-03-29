@@ -173,6 +173,14 @@ class SurveyQuestion(models.Model):
         if invalid_pages:
             raise ValidationError(_("Question type should be empty for these pages: %s", ', '.join(invalid_pages.mapped('title'))))
 
+    @api.constrains("random_questions_count")
+    def _check_random_questions_count(self):
+        for record in self:
+            if record.random_questions_count < 0:
+                raise ValidationError(
+                    _("'Questions Randomly Picked' must not be negative.")
+                )
+
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
