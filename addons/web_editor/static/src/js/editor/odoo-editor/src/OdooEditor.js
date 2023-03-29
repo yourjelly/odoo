@@ -436,7 +436,7 @@ export class OdooEditor extends EventTarget {
                     this.historyStep(true);
                     this._historyStepsStates.set(peek(this._historySteps).id, 'consumed');
                     setTimeout(() => {
-                        ensureFocus(this.editable);
+                        ensureFocus(this.document.activeElement);
                         getDeepRange(this.editable, { select: true });
                     });
                 }
