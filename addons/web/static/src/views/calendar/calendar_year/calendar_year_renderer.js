@@ -7,7 +7,8 @@ import { getColor } from "../colors";
 import { useCalendarPopover, useFullCalendar } from "../hooks";
 import { CalendarYearPopover } from "./calendar_year_popover";
 
-import { Component, useEffect, useRef, onRendered } from "@odoo/owl";
+import { Component, useEffect, useRef } from "@odoo/owl";
+import { CalendarHeader } from "@web/views/calendar/calendar_header/calendar_header";
 
 export class CalendarYearRenderer extends Component {
     setup() {
@@ -22,14 +23,10 @@ export class CalendarYearRenderer extends Component {
         this.popover = useCalendarPopover(this.constructor.components.Popover);
         this.rootRef = useRef("root");
         this.onWindowResizeDebounced = useDebounced(this.onWindowResize, 200);
+        this.formatDate = formatDate;
 
         useEffect(() => {
             this.updateSize();
-        });
-
-        onRendered(() => {
-            const year = formatDate(this.props.model.date, { format: "yyyy" });
-            this.env.config.setDisplayName(`${this.props.displayName} (${year})`);
         });
     }
 
@@ -187,5 +184,6 @@ export class CalendarYearRenderer extends Component {
 }
 CalendarYearRenderer.components = {
     Popover: CalendarYearPopover,
+    CalendarHeader,
 };
 CalendarYearRenderer.template = "web.CalendarYearRenderer";

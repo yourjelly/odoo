@@ -2,6 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.CalendarCommonRenderer" owl="1">
+        <CalendarHeader title="state.viewTitle" model="props.model"/>
         <div class="o_calendar_widget" t-ref="fullCalendar" />
     </t>
 

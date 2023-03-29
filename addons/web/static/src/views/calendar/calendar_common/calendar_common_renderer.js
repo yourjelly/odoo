@@ -7,8 +7,9 @@ import { useDebounced } from "@web/core/utils/timing";
 import { getColor } from "../colors";
 import { useCalendarPopover, useClickHandler, useFullCalendar } from "../hooks";
 import { CalendarCommonPopover } from "./calendar_common_popover";
+import { CalendarHeader } from "@web/views/calendar/calendar_header/calendar_header";
 
-import { Component, useEffect } from "@odoo/owl";
+import { Component, useEffect, useState } from "@odoo/owl";
 
 const SCALE_TO_FC_VIEW = {
     day: "timeGridDay",
@@ -45,6 +46,9 @@ export class CalendarCommonRenderer extends Component {
         this.click = useClickHandler(this.onClick, this.onDblClick);
         this.popover = useCalendarPopover(this.constructor.components.Popover);
         this.onWindowResizeDebounced = useDebounced(this.onWindowResize, 200);
+        this.state = useState({
+            viewTitle: "",
+        });
 
         useEffect(() => {
             this.updateSize();
@@ -52,7 +56,7 @@ export class CalendarCommonRenderer extends Component {
 
         useEffect(
             (view) => {
-                this.env.config.setDisplayName(`${this.props.displayName} (${view.title})`);
+                this.state.viewTitle = view.title;
             },
             () => [this.fc.api.view]
         );
@@ -143,11 +147,12 @@ export class CalendarCommonRenderer extends Component {
             title: record.title,
             start: record.start.toISO(),
             end:
-                ["week", "month"].includes(this.props.model.scale) && (record.isAllDay || allDay &&
-                record.end.toMillis() !== record.end.startOf('day').toMillis())
+                ["week", "month"].includes(this.props.model.scale) &&
+                (record.isAllDay ||
+                    (allDay && record.end.toMillis() !== record.end.startOf("day").toMillis()))
                     ? record.end.plus({ days: 1 }).toISO()
                     : record.end.toISO(),
-            allDay: allDay ,
+            allDay: allDay,
         };
     }
     getPopoverProps(record) {
@@ -230,7 +235,7 @@ export class CalendarCommonRenderer extends Component {
             if (record.isStriked) {
                 el.classList.add("o_event_striked");
             }
-            if (record.duration <= 0.25 ) {
+            if (record.duration <= 0.25) {
                 el.classList.add("o_event_oneliner");
             }
         }
@@ -302,6 +307,7 @@ export class CalendarCommonRenderer extends Component {
 }
 CalendarCommonRenderer.components = {
     Popover: CalendarCommonPopover,
+    CalendarHeader,
 };
 CalendarCommonRenderer.template = "web.CalendarCommonRenderer";
 CalendarCommonRenderer.eventTemplate = "web.CalendarCommonRenderer.event";

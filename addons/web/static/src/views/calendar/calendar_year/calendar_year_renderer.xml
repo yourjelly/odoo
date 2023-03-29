@@ -2,6 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.CalendarYearRenderer" owl="1">
+        <CalendarHeader title="formatDate(this.props.model.date, { format: 'yyyy' })" model="props.model"/>
         <div class="o_calendar_widget" t-ref="root">
             <div class="fc-view-container">
                 <div class="fc fc-dayGridYear-view">
