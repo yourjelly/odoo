@@ -232,9 +232,27 @@ export class Many2XAutocomplete extends Component {
             label: result[1].split("\n")[0],
         };
     }
-    async loadOptionsSource(request) {
+    async loadRecordsFromServer(request) {
         if (this.lastProm) {
             this.lastProm.abort(false);
+        }
+        /**
+         * If the request is empty, we want to fetch all the records
+         * with searchRead in order to avoid fetching the records
+         * with a domain (name ilike "") which is not efficient.
+         */
+        if (request === "") {
+            this.lastProm = this.orm.searchRead(
+                this.props.resModel,
+                this.props.getDomain(),
+                ["id", "display_name"],
+                {
+                    limit: this.props.searchLimit + 1,
+                    context: this.props.context,
+                }
+            );
+            const records = await this.lastProm;
+            return records.map((record) => [record.id, record.display_name]);
         }
         this.lastProm = this.orm.call(this.props.resModel, "name_search", [], {
             name: request,
@@ -244,7 +262,11 @@ export class Many2XAutocomplete extends Component {
             context: this.props.context,
         });
         const records = await this.lastProm;
-
+        return records;
+    }
+    async loadOptionsSource(request) {
+        const records = await this.loadRecordsFromServer(request);
+        console.log(records);
         const options = records.map((result) => this.mapRecordToOption(result));
 
         if (this.props.quickCreate && request.length) {

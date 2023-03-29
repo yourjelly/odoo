@@ -1355,6 +1355,9 @@ QUnit.module("Fields", (hooks) => {
                 if (method === "name_search") {
                     assert.step(`search: ${kwargs.name}`);
                 }
+                if (method === "search_read") {
+                    assert.step(`search_read`);
+                }
             },
         });
 
@@ -1378,7 +1381,7 @@ QUnit.module("Fields", (hooks) => {
         await click(input);
         await click(input);
 
-        assert.verifySteps(["search: ", "search: ", "search: p", "search: p"]);
+        assert.verifySteps(["search_read", "search_read", "search: p", "search: p"]);
     });
 
     QUnit.test("many2one search with server returning multiple lines", async function (assert) {
@@ -1456,6 +1459,9 @@ QUnit.module("Fields", (hooks) => {
                 if (method === "name_search") {
                     assert.step("search: " + kwargs.name);
                 }
+                if (method === "search_read") {
+                    assert.step("search_read");
+                }
             },
         });
 
@@ -1499,7 +1505,7 @@ QUnit.module("Fields", (hooks) => {
             "autocomplete should contains 1 suggestion"
         );
 
-        assert.verifySteps(["search: ", "search: first", "search: first", "search: first"]);
+        assert.verifySteps(["search_read", "search: first", "search: first", "search: first"]);
     });
 
     QUnit.test("many2one field with option always_reload (readonly)", async function (assert) {
@@ -3859,7 +3865,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps([
             "get_views", // main form view
             "onchange",
-            "name_search", // to display results in the dropdown
+            "search_read", // to display results in the dropdown (with empty input)
             "get_views", // list view in dialog
             "web_search_read", // to display results in the dialog
         ]);
@@ -3917,7 +3923,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps([
             "get_views", // main form view
             "onchange",
-            "name_search", // empty search, triggered when the user clicks in the input
+            "search_read", // empty search, triggered when the user clicks in the input
             "name_search", // to display results in the dropdown
             "name_search", // to get preselected ids matching the search
             "get_views", // list view in dialog
@@ -4085,7 +4091,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps([
             "get_views",
             "onchange",
-            "name_search", // to display results in the dropdown
+            "search_read", // to display results in the dropdown (with empty input)
             "get_views", // list view in dialog
             "web_search_read", // to display results in the dialog
             "/web/dataset/resequence", // resequencing lines
