@@ -3,12 +3,13 @@
     <t t-name="mrp.MrpDisplay" owl="1">
         <div class="o_action o_mrp_display">
             <Layout display="display">
-                <t t-set-slot="control-panel-top-middle">
+                <t t-if="group_mrp_routings" t-set-slot="control-panel-top-middle">
                     <t t-call="{{ constructor.buttonTemplate }}"/>
                 </t>
                 <t t-set-slot="control-panel-top-left">
                     <button class="btn fa fa-bars" t-on-click="toggleSearchPanel"/>
                     <img class="o_logo_img" src="/web/static/img/logo.png"/>
+                    <button class="btn oi oi-view-kanban" t-if="group_mrp_routings" t-on-click="() => actionService.doAction('mrp.mrp_workcenter_kanban_action')"/>
                 </t>
                 <div class="d-flex flex-row flex-wrap align-items-baseline">
                     <t t-if="state.activeResModel === 'mrp.production'">

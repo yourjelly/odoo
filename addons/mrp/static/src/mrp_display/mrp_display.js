@@ -7,7 +7,7 @@ import { useModels } from "@mrp/mrp_display/model";
 import { ControlPanelButtons } from "@mrp/mrp_display/control_panel";
 import { MrpDisplayRecord } from "./mrp_display_record";
 
-const { Component, useState } = owl;
+const { Component, onWillStart, useState } = owl;
 
 export class MrpDisplay extends Component {
     static template = "mrp.MrpDisplay";
@@ -27,6 +27,8 @@ export class MrpDisplay extends Component {
 
     setup() {
         this.viewService = useService("view");
+        this.userService = useService("user");
+        this.actionService = useService("action");
 
         this.workcenterButtons = [];
         this.display = {
@@ -53,6 +55,10 @@ export class MrpDisplay extends Component {
             const resModelName = model.rootParams.resModel.replaceAll(".", "_");
             this[resModelName] = model;
         }
+
+        onWillStart(async () => {
+            this.group_mrp_routings = await this.userService.hasGroup("mrp.group_mrp_routings");
+        });
     }
 
     get workorders() {
