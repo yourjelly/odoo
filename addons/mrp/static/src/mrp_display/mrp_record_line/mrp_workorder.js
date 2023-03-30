@@ -32,6 +32,10 @@ export class MrpWorkorder extends StockMove {
         this.dialogService.add(ConfirmationDialog, params);
     }
 
+    get isComplete() {
+        return this.props.record.data.state === "done";
+    }
+
     toggle() {
         // TODO: pause & play.
     }

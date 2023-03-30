@@ -9,6 +9,11 @@ export class MrpDisplayControlPanel extends ControlPanel {
 
 export class ControlPanelButtons extends Component {
     static template = "mrp.ControlPanelButtons";
+    static props = {
+        activeWorkcenter: [Boolean, Number],
+        selectWorkcenter: Function,
+        workorders: Array,
+    };
 
     get workcenterButtons() {
         const countByWorkcenter = this.props.workorders.reduce((workcenterButtons, workorder) => {

@@ -51,18 +51,19 @@ function getSearchParams(model, props, component) {
  * @param {Function} [options.onUpdate]
  * @returns {InstanceType<T>}
  */
-export function useModels(paramsList, options = {}) {
-    const models = [];
+export function useModels(ModelClass, paramsList, options = {}) {
     const component = useComponent();
-    for (const [ModelClass, params] of paramsList) {
-        if (!(ModelClass.prototype instanceof Model)) {
-            throw new Error(`the model class should extend Model`);
-        }
-        const services = {};
-        for (const key of ModelClass.services) {
-            services[key] = useService(key);
-        }
-        services.orm = services.orm || useService("orm");
+    if (!(ModelClass.prototype instanceof Model)) {
+        throw new Error(`the model class should extend Model`);
+    }
+    const services = {};
+    for (const key of ModelClass.services) {
+        services[key] = useService(key);
+    }
+    services.orm = services.orm || useService("orm");
+
+    const models = [];
+    for (const params of paramsList) {
         const model = new ModelClass(component.env, params, services);
         models.push(model);
     }

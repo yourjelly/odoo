@@ -29,13 +29,12 @@ export class MrpDisplayAction extends Component {
         this.env.config.ControlPanel = MrpDisplayControlPanel;
 
         onWillStart(async () => {
-            for (const modelStructure of fieldsStructure) {
-                const { fieldNames, relationalModel, resModel } = modelStructure;
+            for (const [resModel, fieldNames] of Object.entries(fieldsStructure)) {
                 const fields = await this.viewService.loadFields(resModel, { fieldNames });
                 for (const [fName, fInfo] of Object.entries(fields)) {
                     fields[fName] = { ...defaultActiveField, ...fInfo };
                 }
-                this.models.push({ fields, relationalModel, resModel });
+                this.models.push({ fields, resModel });
             }
 
             const viewId = await this.orm.search("ir.ui.view", [

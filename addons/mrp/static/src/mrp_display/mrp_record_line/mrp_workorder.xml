@@ -3,7 +3,7 @@
     <t t-name="mrp.WorkOrder" owl="1">
         <li class="list-group-item py-3 d-flex justify-content-between align-items-center"
             t-att-class="cssClass"
-            t-on-animationend="animationEnded">
+            t-on-animationend="onAnimationEnd">
             <span>
                 <input type="checkbox" class="me-2" disabled=""
                         t-att-checked="props.record.data.state === 'done'"/>

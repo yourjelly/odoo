@@ -6,6 +6,7 @@ import { useModels } from "@mrp/mrp_display/model";
 import { ControlPanelButtons } from "@mrp/mrp_display/control_panel";
 import { MrpDisplayRecord } from "./mrp_display_record";
 import { MrpDisplayMenuPopup } from "./mrp_display_menu_popup";
+import { RelationalModel } from "@web/views/relational_model";
 
 const { Component, onWillStart, useState } = owl;
 
@@ -43,11 +44,11 @@ export class MrpDisplay extends Component {
         });
 
         const paramsList = [];
-        for (const { relationalModel, resModel, fields } of this.props.models) {
+        for (const { resModel, fields } of this.props.models) {
             const params = { resModel, fields, rootType: "list", activeFields: fields };
-            paramsList.push([relationalModel, params]);
+            paramsList.push(params);
         }
-        const models = useModels(paramsList);
+        const models = useModels(RelationalModel, paramsList);
         for (const model of models) {
             const resModelName = model.rootParams.resModel.replaceAll(".", "_");
             this[resModelName] = model;
