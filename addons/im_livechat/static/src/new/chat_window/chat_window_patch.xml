@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="mail.ChatWindow" t-inherit-mode="extension">
+        <xpath expr="//*[@t-name='chatWindowContent']" position="replace">
+           <FeedbackPanel
+                t-if="state.activeMode === 'feedback'"
+                onClickClose="() => this.close()"
+                sendFeedback="(rating, feedback) => this.sendFeedback(rating, feedback)"
+                thread="thread"
+            />
+           <t t-else="">$0</t>
+        </xpath>
+        <xpath expr="//*[@t-name='unreadCounter']" position="replace">
+            <t t-if="!chatbotService.active">$0</t>
+        </xpath>
+        <xpath expr="//*[@t-name='commandClose']" position="before">
+            <div t-if="chatbotService.completed and !chatbotService.currentStep?.operatorFound" class="o-mail-ChatWindow-command d-flex align-items-center h-100 px-3 opacity-50 opacity-100-hover" title="Restart Conversation" t-on-click.stop="() => chatbotService.restart()">
+                <i class="fa fa-refresh"/>
+            </div>
+        </xpath>
+        <xpath expr="//*[hasclass('o-mail-ChatWindow-name')]" position="attributes">
+            <attribute name="t-attf-style" add="color: {{ livechatService.options.title_color }};" separator=" "/>
+        </xpath>
+        <xpath expr="//Composer" position="replace">
+            <t t-if="chatbotService.inputEnabled">$0</t>
+            <t t-else="">
+                <span class="bg-200 py-1 text-center fst-italic" t-esc="chatbotService.inputDisabledText"/>
+            </t>
+        </xpath>
+    </t>
+</templates>
