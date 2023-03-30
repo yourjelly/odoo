@@ -2,23 +2,18 @@
 <templates xml:space="preserve">
     <t t-name="mrp.MrpDisplayRecord" owl="1">
         <div class="o_mrp_display_record border card rounded m-4"
-             t-att-class="record.state === 'progress' ? 'o_active' : ''">
+             t-att-class="active ? 'o_active' : ''">
             <div class="card-header" t-on-click="onClickHeader">
                 <div class="card-title row">
-                    <span class="col-8 h5" t-esc="record.display_name"/>
-                    <span class="col-4 text-capitalize text-end">
-                        <t t-if="record.state === 'confirmed'">Not started</t>
-                        <t t-elif="record.state === 'progress'">In progress</t>
-                        <t t-elif="record.state === 'to_close'">To close</t>
-                        <t t-else="" t-esc="record.state"/>
-                    </span>
+                    <t t-if="props.record.resModel=='mrp.production'" t-call="mrp.MrpDisplayProductionHeader"/>
+                    <t t-if="props.record.resModel=='mrp.workorder'" t-call="mrp.MrpDisplayWorkorderHeader"/>
                 </div>
                 <div class="d-flex justify-content-between">
                     <div class="o_finished_product">
                         <span class="fw-bold me-2"><t t-esc="record.product_qty || record.qty_production"/>x</span>
                         <span t-esc="record.product_id[1]"/>
                     </div>
-                    <span t-if="record.duration" t-esc="record.duration"/>
+                    <MrpTimer t-if="record.duration" value="record.duration" ongoing="active"/>
                 </div>
             </div>
             <ul class="list-group list-group-flush">
@@ -30,12 +25,35 @@
                 </t>
             </ul>
             <div class="card-footer d-flex p-0">
-                <button t-if="displayDoneButton" class="btn btn-primary p-3 flex-grow-1"
-                        t-on-click="onClickManufacturingDone">
-                    Manufacturing Done
-                </button>
+                <t t-if="props.record.resModel=='mrp.production'" t-call="mrp.MrpDisplayProductionFooter"/>
+                <t t-if="props.record.resModel=='mrp.workorder'" t-call="mrp.MrpDisplayWorkorderFooter"/>
                 <button class="btn btn-secondary p-3 flex-grow-1 fa fa-bars" t-on-click="onClickOpenMenu"/>
             </div>
         </div>
+    </t>
+
+    <t t-name="mrp.MrpDisplayProductionHeader" owl="1">
+        <span class="col-12 h5" t-esc="record.display_name"/>
+    </t>
+    <t t-name="mrp.MrpDisplayWorkorderHeader" owl="1">
+        <span class="col-8 h5" t-esc="record.display_name"/>
+            <span class="col-4 text-capitalize text-end">
+            <t t-if="record.state === 'confirmed'">Not started</t>
+            <t t-elif="record.state === 'progress'">In progress</t>
+            <t t-elif="record.state === 'to_close'">To close</t>
+            <t t-else="" t-esc="record.state"/>
+        </span>
+    </t>
+    <t t-name="mrp.MrpDisplayProductionFooter" owl="1">
+        <button t-if="displayDoneButton" class="btn btn-primary p-3 flex-grow-1"
+                t-on-click="validate">
+            Manufacturing Done
+        </button>
+    </t>
+    <t t-name="mrp.MrpDisplayWorkorderFooter" owl="1">
+        <button t-if="displayDoneButton" class="btn btn-primary p-3 flex-grow-1"
+                t-on-click="validate">
+            Done
+        </button>
     </t>
 </templates>

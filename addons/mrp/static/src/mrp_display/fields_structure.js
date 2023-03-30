@@ -21,6 +21,7 @@ export const fieldsStructure = [
             "state",
             "workcenter_id",
             "worksheet_type",
+            "is_user_working",
         ],
         relationalModel: MrpWorkorderModel,
     },

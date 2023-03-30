@@ -86,6 +86,7 @@ export function useModels(paramsList, options = {}) {
     onWillStart(async () => {
         await load(component.props);
     });
+
     onWillUpdateProps((nextProps) => {
         load(nextProps);
     });
