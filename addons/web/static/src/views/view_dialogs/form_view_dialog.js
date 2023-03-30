@@ -51,6 +51,8 @@ export class FormViewDialog extends Component {
                     }
                 }
             },
+            afterExecuteActionButton: this.afterExecuteActionButton.bind(this),
+            beforeExecuteActionButton: this.beforeExecuteActionButton.bind(this),
         };
         if (this.props.removeRecord) {
             this.viewProps.removeRecord = async () => {
@@ -70,6 +72,17 @@ export class FormViewDialog extends Component {
             }
         });
     }
+
+    async afterExecuteActionButton(clickParams) {
+        if (clickParams.special) {
+            if (clickParams.special === "save") {
+                this.viewProps.saveRecord();
+            }
+            this.props.close();
+        }
+    }
+
+    beforeExecuteActionButton(clickParams) {}
 }
 
 FormViewDialog.components = { Dialog, View };

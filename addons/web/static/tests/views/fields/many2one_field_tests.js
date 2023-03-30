@@ -216,34 +216,14 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("Many2oneField");
 
-    QUnit.test("many2ones in form views", async function (assert) {
-        assert.expect(2);
-
-        function createMockActionService(assert) {
-            return {
-                dependencies: [],
-                start() {
-                    return {
-                        doAction(params) {
-                            assert.strictEqual(
-                                params.res_id,
-                                17,
-                                "should do a do_action with correct parameters"
-                            );
-                        },
-                        loadState() {},
-                    };
-                },
-            };
-        }
-        registry
-            .category("services")
-            .add("action", createMockActionService(assert), { force: true });
-
+    QUnit.debug("many2ones in form views", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                 <form>
                     <field name="display_name" />
+                    <footer>
+                        <button class="btn btn-primary" special="save" data-hotkey="s">Save</button>
+                    </footer>
                 </form>`,
         };
 
@@ -255,41 +235,34 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <sheet>
-                        <group>
-                            <field name="trululu" string="custom label" open_target="new" />
-                        </group>
+                        <field name="trululu" open_target="new" />
                     </sheet>
                 </form>`,
-            mockRPC(route, { args, method }) {
-                if (method === "get_formview_action") {
-                    assert.deepEqual(
-                        args[0],
-                        [4],
-                        "should call get_formview_action with correct id"
-                    );
-                    return Promise.resolve({
-                        res_id: 17,
-                        type: "ir.actions.act_window",
-                        target: "current",
-                        res_model: "res.partner",
-                    });
-                }
-                if (method === "get_formview_id") {
-                    assert.deepEqual(args[0], [4], "should call get_formview_id with correct id");
-                    return Promise.resolve(false);
+            mockRPC(route, args) {
+                assert.step(args.method);
+                if (args.method === "create") {
+                    assert.deepEqual(args.args[0], { display_name: "new partner" });
                 }
             },
         });
 
-        await click(target, ".o_external_button");
-        assert.strictEqual(
-            target.querySelector(".modal .modal-title").textContent.trim(),
-            "Open: custom label",
-            "dialog title should display the custom string label"
-        );
+        await editInput(target, "[name='trululu'] input", "new value");
+        await click(target, "[name='trululu'] input");
+        await selectDropdownItem(target, "trululu", "Create and edit...");
+        assert.containsOnce(target, ".modal");
+        assert.verifySteps([
+            "get_views",
+            "read",
+            "name_search",
+            "name_search",
+            "get_views",
+            "onchange",
+        ]);
 
-        // TODO: test that we can edit the record in the dialog, and that
-        // the value is correctly updated on close
+        await editInput(target, ".modal [name='display_name'] input", "new partner");
+        await click(target, ".modal footer .btn-primary[special='save']");
+        assert.containsNone(target, ".modal");
+        assert.verifySteps(["create", "read", "read"]);
     });
 
     QUnit.test("editing a many2one, but not changing anything", async function (assert) {

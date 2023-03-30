@@ -373,6 +373,7 @@ export class FormController extends Component {
     }
 
     async beforeExecuteActionButton(clickParams) {
+        this.props.beforeExecuteActionButton(...arguments);
         if (clickParams.special !== "cancel") {
             return this.model.root
                 .save({ stayInEdition: true, useSaveErrorDialog: !this.env.inDialog })
@@ -387,7 +388,9 @@ export class FormController extends Component {
         }
     }
 
-    async afterExecuteActionButton(clickParams) {}
+    async afterExecuteActionButton(clickParams) {
+        return this.props.afterExecuteActionButton(...arguments);
+    }
 
     async edit() {
         await this.model.root.switchMode("edit");
@@ -507,8 +510,12 @@ FormController.props = {
     preventEdit: { type: Boolean, optional: true },
     onDiscard: { type: Function, optional: true },
     onSave: { type: Function, optional: true },
+    afterExecuteActionButton: { type: Function, optional: true },
+    beforeExecuteActionButton: { type: Function, optional: true },
 };
 FormController.defaultProps = {
     preventCreate: false,
     preventEdit: false,
+    afterExecuteActionButton: () => {},
+    beforeExecuteActionButton: () => {},
 };
