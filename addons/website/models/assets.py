@@ -44,6 +44,7 @@ class Assets(models.AbstractModel):
             # Also reset gradients which are in the "website" values palette
             self.make_scss_customization('/website/static/src/scss/options/user_values.scss', {
                 'menu-gradient': 'null',
+                'header-sales_one-gradient': 'null',
                 'footer-gradient': 'null',
                 'copyright-gradient': 'null',
             })

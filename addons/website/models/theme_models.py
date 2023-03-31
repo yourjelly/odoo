@@ -225,6 +225,7 @@ class Theme(models.AbstractModel):
         'website.template_header_rounded_box',
         'website.template_header_stretch',
         'website.template_header_search',
+        'website.template_header_sales_one',
         # Default one, keep it last
         'website.template_header_default',
     ]
