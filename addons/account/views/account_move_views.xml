@@ -341,6 +341,7 @@
                     <filter string="P&amp;L Accounts" domain="[('account_id.internal_group', 'in', ('income', 'expense'))]" help="From P&amp;L accounts" name="pl_accounts"/>
                     <separator/>
                     <filter string="Date" name="date" date="date"/>
+                    <filter string="Past" name="past" domain="[('date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
                     <separator/>
                     <filter string="Report Dates" name="date_between" domain="[('date', '&gt;=', context.get('date_from')), ('date', '&lt;=', context.get('date_to'))]" invisible="1"/>
                     <filter string="Report Dates" name="date_before" domain="[('date', '&lt;=', context.get('date_to'))]" invisible="1"/>
@@ -1426,7 +1427,7 @@
         </record>
 
         <record id="action_account_moves_all" model="ir.actions.act_window">
-            <field name="context">{'journal_type':'general', 'search_default_posted':1}</field>
+            <field name="context">{'journal_type':'general', 'search_default_posted':1, 'search_default_past': 1}</field>
             <field name="name">Journal Items</field>
             <field name="res_model">account.move.line</field>
             <field name="domain">[('display_type', 'not in', ('line_section', 'line_note')), ('parent_state', '!=', 'cancel')]</field>
