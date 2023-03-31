@@ -56,11 +56,17 @@ export class MrpDisplayRecord extends Component {
         }
     }
 
-    onClickManufacturingDone(ev) {
-        console.log("TODO");
-    }
-
     onClickOpenMenu(ev) {
         this.props.openMenuPop(this.props.record);
+    }
+
+    async validate() {
+        const { resModel, resId } = this.props.record;
+        if (resModel === "mrp.workorder") {
+            await this.props.record.model.orm.call(resModel, "button_done", [resId]);
+        } else {
+            await this.props.record.model.orm.call(resModel, "button_mark_done", [resId]);
+        }
+        this.props.record.model.load();
     }
 }

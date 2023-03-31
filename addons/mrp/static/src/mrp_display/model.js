@@ -65,17 +65,16 @@ export function useModels(ModelClass, paramsList, options = {}) {
     const models = [];
     for (const params of paramsList) {
         const model = new ModelClass(component.env, params, services);
+        useBus(
+            model.bus,
+            "update",
+            options.onUpdate ||
+                (() => {
+                    component.render(true); // FIXME WOWL reactivity
+                })
+        );
         models.push(model);
     }
-
-    useBus(
-        models[models.length - 1].bus,
-        "update",
-        options.onUpdate ||
-            (() => {
-                component.render(true); // FIXME WOWL reactivity
-            })
-    );
 
     async function load(props) {
         for (const model of models) {
