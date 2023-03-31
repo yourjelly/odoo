@@ -752,6 +752,11 @@
                        data-customize-website-views="website.template_header_sales_four"
                        data-customize-website-variable="'sales_four'"
                        data-img="/website/static/src/img/snippets_options/header_template_sales_four.svg"/>
+            <we-button title="Sidebar"
+                       data-name="header_sidebar_opt"
+                       data-customize-website-views="website.template_header_sidebar, website.no_autohide_menu"
+                       data-customize-website-variable="'sidebar'"
+                       data-img="/website/static/src/img/snippets_options/header_template_sidebar.svg"/>
         </we-select>
 
         <!-- Header Sidebar Template - Options -->

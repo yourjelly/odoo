@@ -1144,6 +1144,92 @@
     </xpath>
 </template>
 
+<!-- "sidebar" template -->
+<template id="template_header_sidebar" inherit_id="website.layout" name="Template Header Sidebar" active="False">
+    <xpath expr="//header" position="attributes">
+        <attribute name="t-attf-class" add="o_header_sidebar" separator=" "/>
+    </xpath>
+    <xpath expr="//header//nav" position="replace">
+        <t t-call="website.navbar">
+            <t t-set="_navbar_classes" t-valuef="d-none d-lg-block shadow"/>
+
+            <div id="top_menu_container" class="navbar-nav d-flex flex-column justify-content-between h-100 w-100">
+               <div class="d-flex flex-column w-100 h-100">
+                    <div class="d-flex pb-3">
+                        <!-- Brand -->
+                        <t t-call="website.placeholder_header_brand"/>
+                    </div>
+                    <div class="d-flex flex-column justify-content-between h-100 w-100">
+                        <ul class="navbar-nav p-0">
+                            <!-- Search bar -->
+                            <t t-call="website.placeholder_header_search_box">
+                                <t t-set="_classes" t-valuef="mb-3"/>
+                                <t t-set="_input_classes" t-valuef="ps-3 border border-end-0 rounded-start-pill bg-o-color-4"/>
+                                <t t-set="_submit_classes" t-valuef="pe-3 border border-start-0 rounded-end-pill bg-o-color-4"/>
+                                <t t-set="limit" t-valuef="0"/>
+                            </t>
+                            <!-- Navbar -->
+                            <li>
+                                <t t-call="website.navbar_nav">
+                                    <t t-set="_no_autohide_menu_mobile" t-valuef="True"/>
+
+                                    <!-- Menu -->
+                                    <t t-foreach="website.menu_id.child_id" t-as="submenu">
+                                        <t t-call="website.submenu">
+                                            <t t-set="item_class" t-valuef="nav-item"/>
+                                            <t t-set="link_class" t-valuef="nav-link"/>
+                                        </t>
+                                    </t>
+                                </t>
+                            </li>
+                            <!-- Text element -->
+                            <t t-call="website.placeholder_header_text_element">
+                                <t t-set="_div_class" t-valuef="mt-2 pt-2 border-top o_border_contrast"/>
+                                <t t-set="_link_class" t-valuef="nav-link d-block p-1"/>
+                                <t t-set="_txt_elt_content" t-valuef="phone_mail"/>
+                            </t>
+                            <!-- Social -->
+                            <t t-call="website.header_social_links_no_color">
+                                <t t-set="_div_class" t-valuef="mt-2 pt-2 border-top o_border_contrast"/>
+                            </t>
+                        </ul>
+                        <ul class="navbar-nav flex-column gap-2 w-100 mt-3">
+                            <!-- Sign In -->
+                            <t t-call="portal.placeholder_user_sign_in">
+                                <t t-set="_link_class" t-valuef="btn btn-outline-secondary w-100"/>
+                            </t>
+                            <!-- User Dropdown -->
+                            <t t-call="portal.user_dropdown">
+                                <t t-set="_icon" t-value="true"/>
+                                <t t-set="_user_name" t-value="true"/>
+                                <t t-set="_user_name_class" t-valuef="me-auto small"/>
+                                <t t-set="_link_class" t-valuef="btn-outline-secondary d-flex align-items-center px-2 border-0"/>
+                                <t t-set="_icon_class" t-valuef="me-2"/>
+                                <t t-set="_item_class" t-valuef="dropdown dropup"/>
+                                <t t-set="_dropdown_menu_class" t-valuef="w-100"/>
+                            </t>
+                            <!-- Language Selector -->
+                            <t t-call="website.placeholder_header_language_selector">
+                                <t t-set="_btn_class" t-valuef="btn-outline-secondary d-flex align-items-center w-100 px-2"/>
+                                <t t-set="_txt_class" t-valuef="me-auto small"/>
+                                <t t-set="_flag_class" t-valuef="me-2"/>
+                                <t t-set="_div_classes" t-valuef="dropup"/>
+                                <t t-set="_dropdown_menu_class" t-valuef="w-100"/>
+                            </t>
+                            <!-- Call To Action -->
+                            <t t-call="website.header_call_to_action_sidebar"/>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </t>
+        <t t-call="website.template_header_mobile">
+            <t t-set="_txt_elt_content" t-valuef="phone_mail"/>
+            <t t-set="_side" t-valuef="offcanvas-start"/>
+        </t>
+    </xpath>
+</template>
+
 <!-- Header options -->
 <template id="option_layout_hide_header" inherit_id="website.layout" active="False">
     <xpath expr="//header" position="before">
