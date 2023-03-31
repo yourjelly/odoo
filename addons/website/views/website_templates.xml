@@ -663,6 +663,77 @@
     </xpath>
 </template>
 
+<!-- "vertical" template -->
+<template id="template_header_vertical" inherit_id="website.layout" name="Template Header Vertical" active="False">
+    <xpath expr="//header//nav" position="replace">
+        <t t-call="website.navbar">
+            <t t-set="_navbar_classes" t-valuef="d-none d-lg-block pt-3 shadow-sm"/>
+
+            <div id="top_menu_container" class="container flex-wrap gap-3">
+                <div class="d-grid align-items-center w-100 o_grid_header_3_cols">
+                    <ul class="navbar-nav align-items-center gap-1">
+                        <!-- Search bar -->
+                        <t t-call="website.placeholder_header_search_box">
+                            <t t-set="_layout" t-valuef="modal"/>
+                            <t t-set="_input_classes" t-valuef="p-3 border border-end-0"/>
+                            <t t-set="_submit_classes" t-valuef="px-4 border border-start-0 bg-o-color-4"/>
+                            <t t-set="_button_classes" t-valuef="o_navlink_background text-reset"/>
+                        </t>
+                        <!-- Social Links -->
+                        <t t-call="website.placeholder_header_social_links"/>
+                        <!-- Text element -->
+                        <t t-call="website.placeholder_header_text_element">
+                            <t t-set="_link_class" t-valuef="nav-link"/>
+                        </t>
+                    </ul>
+                    <!-- Brand -->
+                    <t t-call="website.placeholder_header_brand">
+                        <t t-set="_link_class" t-valuef="mw-100 mx-auto"/>
+                    </t>
+                    <ul class="navbar-nav align-items-center gap-1 flex-wrap justify-content-end ms-auto">
+                        <!-- Sign In -->
+                        <t t-call="portal.placeholder_user_sign_in">
+                            <t t-set="_link_class" t-valuef="o_navlink_background btn rounded-circle text-reset"/>
+                        </t>
+                        <!-- User Dropdown -->
+                        <t t-call="portal.user_dropdown">
+                            <t t-set="_icon" t-value="true"/>
+                            <t t-set="_item_class" t-valuef="dropdown"/>
+                            <t t-set="_icon_class" t-valuef="fa-stack"/>
+                            <t t-set="_link_class" t-valuef="o_navlink_background btn d-flex align-items-center py-1 rounded-pill text-reset"/>
+                            <t t-set="_dropdown_menu_class" t-valuef="dropdown-menu-end"/>
+                        </t>
+                        <!-- Language Selector -->
+                        <t t-call="website.placeholder_header_language_selector">
+                            <t t-set="_txt_class" t-valuef="small"/>
+                            <t t-set="_btn_class" t-valuef="o_navlink_background rounded-pill py-1 text-reset"/>
+                            <t t-set="_flag_class" t-valuef="m-2"/>
+                            <t t-set="_dropdown_menu_class" t-valuef="dropdown-menu-end"/>
+                        </t>
+                        <!-- Call To Action -->
+                        <t t-call="website.header_call_to_action_pill"/>
+                    </ul>
+                </div>
+                <div class="d-flex justify-content-center w-100">
+                    <!-- Navbar -->
+                    <t t-call="website.navbar_nav">
+                        <t t-set="_nav_class" t-valuef="pb-0"/>
+
+                        <!-- Menu -->
+                        <t t-foreach="website.menu_id.child_id" t-as="submenu">
+                            <t t-call="website.submenu">
+                                <t t-set="item_class" t-valuef="nav-item"/>
+                                <t t-set="link_class" t-valuef="nav-link"/>
+                            </t>
+                        </t>
+                    </t>
+                </div>
+            </div>
+        </t>
+        <t t-call="website.template_header_mobile"/>
+    </xpath>
+</template>
+
 <!-- Header options -->
 <template id="option_layout_hide_header" inherit_id="website.layout" active="False">
     <xpath expr="//header" position="before">
