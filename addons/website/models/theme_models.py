@@ -223,6 +223,7 @@ class Theme(models.AbstractModel):
         'website.template_header_vertical',
         'website.template_header_sidebar',
         'website.template_header_rounded_box',
+        'website.template_header_stretch',
         # Default one, keep it last
         'website.template_header_default',
     ]

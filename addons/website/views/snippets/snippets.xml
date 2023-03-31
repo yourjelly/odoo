@@ -717,6 +717,11 @@
                        data-customize-website-views="website.template_header_rounded_box"
                        data-customize-website-variable="'rounded_box'"
                        data-img="/website/static/src/img/snippets_options/header_template_rounded_box.svg"/>
+            <we-button title="Stretch menu"
+                       data-name="header_stretch_opt"
+                       data-customize-website-views="website.template_header_stretch"
+                       data-customize-website-variable="'stretch'"
+                       data-img="/website/static/src/img/snippets_options/header_template_stretch.svg"/>
         </we-select>
 
         <!-- Header Sidebar Template - Options -->
@@ -867,7 +872,7 @@
             <we-input data-customize-website-variable="null" data-variable="header-font-size" data-unit="px" data-save-unit="rem"/>
         </we-row>
 
-        <we-select string="Links Style" data-variable="header-links-style" data-reload="/">
+        <we-select string="Links Style" data-variable="header-links-style" data-reload="/" data-dependencies="!header_stretch_opt">
             <we-button data-name="option_header_navbar_links_default"
                        data-customize-website-views=""
                        data-customize-website-variable="'default'">Default</we-button>
