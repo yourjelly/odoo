@@ -304,7 +304,16 @@ $-seen-urls: ();
     @include o-apply-colors('menu-custom');
     $-menu-color: o-color('menu-custom') or o-color('menu');
     @if ($-menu-color and color-contrast($-menu-color) != $color-contrast-dark) {
+        --NavLinkWithBackground-bg-color: #{rgba($navbar-dark-active-color, .1)};
+        --NavLinkWithBackground-bg-color--hover: #{rgba($navbar-dark-active-color, .2)};
+        --NavStretch-placeholder-color: #{rgba($navbar-dark-active-color, .3)};
+        --HeaderSeparator-bg-color: #{rgba($navbar-dark-active-color, .15)};
+
         @extend .navbar-dark;
+
+        .btn-close {
+            filter: $btn-close-white-filter;
+        }
     }
     @include o-add-gradient('menu-gradient');
 }
@@ -317,6 +326,25 @@ $-seen-urls: ();
     .nav-item > .nav-link > *, .nav-item > .nav-link::after, .js_language_selector span, .badge {
         color: o-website-value('header-text-color') !important;
     }
+}
+
+.o_navlink_background {
+    background: var(--NavLinkWithBackground-bg-color, rgba($navbar-light-active-color, .05));
+
+    &:hover {
+        background: var(--NavLinkWithBackground-bg-color--hover, rgba($navbar-light-active-color, .1));
+    }
+}
+
+.o_navlink_background_hover:hover {
+    background: var(--NavLinkWithBackground-bg-color, rgba($navbar-light-active-color, .05));
+}
+
+// Apply background color to the offcanvas menu
+.o_navbar_mobile {
+    $-menu-color: o-color('menu-custom') or o-color('menu');
+
+    @include o-bg-color($-menu-color);
 }
 
 $-header-nav-link-height: $nav-link-height;
@@ -447,8 +475,9 @@ font[class*='bg-'] {
 
 // Icons
 .fa {
+    $-size: map-get($spacers, 5);
+
     font-family: "FontAwesome" !important;
-    $size: 3rem;
 
     &.rounded-circle,
     &.rounded,
@@ -460,14 +489,14 @@ font[class*='bg-'] {
         vertical-align: middle;
         text-align: center;
         // fa-1x is not ouput
-        width: $size;
-        height: $size;
-        line-height: $size;
+        width: $-size;
+        height: $-size;
+        line-height: $-size;
         @for $i from 2 through 5 {
             &.fa-#{$i}x {
-                width: $size + $i;
-                height: $size + $i;
-                line-height: $size + $i;
+                width: $-size + $i;
+                height: $-size + $i;
+                line-height: $-size + $i;
             }
         }
         // Default, if no background-color already selected
@@ -477,8 +506,8 @@ font[class*='bg-'] {
         padding: 0;
     }
     &.rounded-leaf {
-        border-top-left-radius: $size;
-        border-bottom-right-radius: $size;
+        border-top-left-radius: $-size;
+        border-bottom-right-radius: $-size;
     }
     &.rounded-empty-circle {
         @extend .rounded-circle;
@@ -1152,6 +1181,31 @@ header {
     }
 }
 
+.o_grid_header_3_cols {
+    grid-template-columns: 1fr auto 1fr;
+}
+
+.o_grid_header_3_cols_fixed {
+    grid-template-columns: 1fr 33% 1fr;
+}
+
+.o_header_separator > *:not(:last-child):before {
+    position: absolute;
+    width: $border-width * 2;
+    height: 50%;
+    margin: auto map-get($spacers, 2) * -1 auto auto;
+    background: var(--HeaderSeparator-bg-color, rgba($navbar-light-active-color, .1));
+    inset: 0 0 0 100%;
+    content: '';
+}
+
+// Default border color didn't match with background custom colors.
+// This allow to use the same contrast system than the text
+// but for borders.
+.o_border_contrast {
+    border-color: var(--NavLinkWithBackground-bg-color--hover, rgba($navbar-light-active-color, .1)) !important;
+}
+
 // Mega menu
 .o_mega_menu {
     width: 100%;
@@ -1249,7 +1303,7 @@ header {
     }
 }
 .navbar-nav {
-    .nav-link {
+    .nav-link:not(.o_nav-link_secondary) {
         @if o-website-value('header-links-style') == 'outline' {
             // Need to force the padding in this case so that it stays in mobile
             padding-right: $navbar-nav-link-padding-x;
@@ -1355,10 +1409,6 @@ header {
     }
     a.list-inline-item {
         padding: 3px 0;
-
-        > * {
-            vertical-align: middle;
-        }
     }
 }
 .o_lang_flag {
@@ -1367,13 +1417,6 @@ header {
     margin-right: 0.2em;
     border-radius: $border-radius-pill;
     object-fit: cover;
-}
-a.js_change_lang:hover, a.o_add_language:hover {
-    text-decoration: none;
-
-    span {
-        text-decoration: $link-hover-decoration;
-    }
 }
 span.list-inline-item.o_add_language:last-child {
     display: none !important; // Hide the separator if it is the last list item
