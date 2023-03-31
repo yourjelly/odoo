@@ -48,7 +48,7 @@ $-seen-urls: ();
     // 3) The values in the $colors map are also printed by Bootstrap. However,
     // we have color variables which can contain a reference to a color
     // combination and that is the info we want in that case.
-    @each $key in ('menu', 'header-boxed', 'footer', 'copyright') {
+    @each $key in ('menu', 'footer', 'copyright') {
         $-value: map-get($o-color-palette, $key);
         @if type-of($-value) == 'number' {
             @include print-variable($key, $-value);
@@ -903,21 +903,6 @@ $-transition-duration: 200ms;
                 height: $o-theme-navbar-fixed-logo-height;
             }
         }
-        @if o-website-value('header-template') == 'vertical' {
-            .o_header_centered_logo {
-                display: none;
-            }
-            @include media-breakpoint-up(lg) {
-                .navbar-brand {
-                    font-size: 0;
-                    opacity: 0;
-
-                    img {
-                        height: 0;
-                    }
-                }
-            }
-        }
     }
     &.o_header_standard.o_header_is_scrolled {
         @if index(('menu_logo_below', 'logo_menu_below'), o-website-value('header-template')) != null {
@@ -1215,24 +1200,7 @@ header {
         }
     }
 }
-
-@if o-website-value('header-template') == 'vertical' {
-    header .o_header_centered_logo {
-        order: -1;
-        width: 50%;
-        margin-top: $spacer;
-
-        @include media-breakpoint-up(lg) {
-            order: inherit;
-            width: 40%;
-            margin-bottom: $spacer;
-        }
-    }
-    .navbar-nav {
-        padding-top: $navbar-padding-y;
-        padding-bottom: $navbar-padding-y;
-    }
-} @else if o-website-value('header-template') == 'sidebar' {
+@if o-website-value('header-template') == 'sidebar' {
     @include media-breakpoint-up(lg) {
         #wrapwrap {
             // Two different website options might add padding:
@@ -1287,48 +1255,6 @@ header {
                         position: static;
                     }
                 }
-            }
-        }
-    }
-} @else if o-website-value('header-template') == 'boxed' {
-    #wrapwrap:not(.o_header_overlay) .o_header_boxed_background {
-        @include o-apply-colors('header-boxed');
-        @include o-apply-colors('header-boxed-custom');
-        @include o-add-gradient('header-boxed-gradient');
-    }
-} @else if o-website-value('header-template') == 'centered_logo' {
-    header .o_header_centered_logo {
-        @include media-breakpoint-up(lg) {
-            width: 50%;
-        }
-    }
-} @else if o-website-value('header-template') == 'hamburger-full' {
-    @if not $-off-canvas-hamburger {
-        @include media-breakpoint-up(md) {
-            #wrapwrap {
-                $o-hamburger-full-navbar-height: $o-theme-navbar-logo-height + ($navbar-padding-y * 2);
-                > header {
-                    .navbar-collapse {
-                        max-height: unset;
-
-                        > .container {
-                            height: calc(100vh - #{$o-hamburger-full-navbar-height});
-                            transition: height .3s ease;
-                        }
-                        .nav-link {
-                            padding-right: $nav-link-padding-x;
-                            padding-left: $nav-link-padding-x;
-                        }
-                        .dropdown-menu {
-                            position: absolute;
-                        }
-                    }
-                }
-            }
-        }
-        @include media-breakpoint-up(lg) {
-            #wrapwrap > header #top_menu {
-                align-items: center !important;
             }
         }
     }
