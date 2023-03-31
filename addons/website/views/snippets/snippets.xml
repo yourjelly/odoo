@@ -727,6 +727,11 @@
                        data-customize-website-views="website.template_header_vertical"
                        data-customize-website-variable="'vertical'"
                        data-img="/website/static/src/img/snippets_options/header_template_vertical.svg"/>
+            <we-button title="Menu with Search bar"
+                       data-name="header_search_opt"
+                       data-customize-website-views="website.template_header_search"
+                       data-customize-website-variable="'search'"
+                       data-img="/website/static/src/img/snippets_options/header_template_search.svg"/>
         </we-select>
 
         <!-- Header Sidebar Template - Options -->
