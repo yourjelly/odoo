@@ -655,3 +655,15 @@ publicWidget.registry.HeaderMainCollapse = publicWidget.Widget.extend({
 export default {
     extraMenuUpdateCallbacks: extraMenuUpdateCallbacks,
 };
+
+// Autofocus the modal search bar in header (eg. default template)
+// TO DO : This code comes from Bootstrap, could you adapt it
+// to match with the correct internal structure ?
+var myModal = document.getElementById('o_search_modal')
+var myInput = document.querySelector('.search-query ')
+
+if(myModal) {
+    myModal.addEventListener('shown.bs.modal', function () {
+    myInput.focus()
+    })
+}
