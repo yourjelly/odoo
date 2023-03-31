@@ -1831,10 +1831,10 @@ export function setTagName(el, newTagName) {
     while (el.firstChild) {
         n.append(el.firstChild);
     }
-    const closestLi = el.closest('li');
+    const closestLi = closestElement(el, 'div, li');
     if (el.tagName === 'LI' && newTagName !== 'p') {
         el.append(n);
-    } else if (closestLi && newTagName === 'p') {
+    } else if (closestLi && closestLi.tagName === 'LI' && newTagName === 'p') {
         closestLi.replaceChildren(...n.childNodes);
     } else {
         el.parentNode.replaceChild(n, el);
