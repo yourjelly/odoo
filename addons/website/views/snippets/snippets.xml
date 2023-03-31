@@ -737,6 +737,11 @@
                        data-customize-website-views="website.template_header_sales_one"
                        data-customize-website-variable="'sales_one'"
                        data-img="/website/static/src/img/snippets_options/header_template_sales_one.svg"/>
+            <we-button title="Menu - Sales 2"
+                       data-name="header_sales_two_opt"
+                       data-customize-website-views="website.template_header_sales_two"
+                       data-customize-website-variable="'sales_two'"
+                       data-img="/website/static/src/img/snippets_options/header_template_sales_two.svg"/>
         </we-select>
 
         <!-- Header Sidebar Template - Options -->
@@ -758,6 +763,13 @@
             <we-colorpicker data-dependencies="header_sales_one_opt"
                             data-customize-website-color="" data-color="header-sales_one"
                             data-customize-website-layer2-color="" data-layer-color="header-sales_one-custom" data-layer-gradient="header-sales_one-gradient"
+                            data-no-bundle-reload="true"
+                            data-null-value="'NULL'"
+                            data-with-combinations="customizeWebsiteColor"
+                            data-with-gradients="true"/>
+            <we-colorpicker data-dependencies="header_sales_two_opt"
+                            data-customize-website-color="" data-color="header-sales_two"
+                            data-customize-website-layer2-color="" data-layer-color="header-sales_two-custom" data-layer-gradient="header-sales_two-gradient"
                             data-no-bundle-reload="true"
                             data-null-value="'NULL'"
                             data-with-combinations="customizeWebsiteColor"

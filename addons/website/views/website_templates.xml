@@ -885,6 +885,95 @@
     </xpath>
 </template>
 
+<!-- "sales_two" template -->
+<template id="template_header_sales_two" inherit_id="website.layout" name="Template Header Sale 2" active="False">
+    <xpath expr="//header//nav" position="replace">
+        <t t-call="website.navbar">
+            <t t-set="_navbar_classes" t-valuef="d-none d-lg-block p-0 shadow-sm"/>
+
+            <div id="top_menu_container">
+                <nav aria-label="Top" t-if="is_view_active('website.header_text_element') or is_view_active('website.header_social_links') or is_view_active('website.header_language_selector')" class="o_header_sales_two_top py-1">
+                    <ul class="navbar-nav container d-grid h-100 px-3 o_grid_header_3_cols">
+                        <!-- Return empty placeholder if the element is not active to keep the right layout -->
+                        <li class="o_header_sales_two_lang_selector_placeholder" t-if="is_view_active('website.header_language_selector') == False"/>
+                        <!-- Language Selector -->
+                        <t t-call="website.placeholder_header_language_selector">
+                            <t t-set="_div_classes" t-valuef="d-flex align-items-center h-100"/>
+                            <t t-set="_btn_class" t-valuef="btn-sm btn-outline-secondary border-0"/>
+                        </t>
+                        <!-- Text element -->
+                        <!-- Return empty placeholder if the element is not active to keep the right layout -->
+                        <li class="o_header_sales_two_txt_elts_placeholder" t-if="is_view_active('website.header_text_element') == False"/>
+                        <t t-call="website.placeholder_header_text_element">
+                            <t t-set="_txt_elt_content" t-valuef="sentence"/>
+                            <t t-set="_div_class" t-valuef="d-flex align-items-center mx-auto"/>
+                            <t t-set="_item_class" t-valuef="d-flex align-items-center"/>
+                        </t>
+                        <!-- Social -->
+                        <!-- Return empty placeholder if the element is not active to keep the right layout -->
+                        <li class="o_header_sales_two_social_links_placeholder" t-if="is_view_active('website.header_social_links') == False"/>
+                        <t t-call="website.header_social_links_no_color">
+                            <t t-set="_div_class" t-valuef="d-flex align-items-center justify-content-end h-100"/>
+                        </t>
+                    </ul>
+                </nav>
+                <nav aria-label="Middle" class="container d-flex justify-content-between align-items-center py-1">
+                    <!-- Brand -->
+                    <t t-call="website.placeholder_header_brand">
+                        <t t-set="_link_class" t-valuef="me-4"/>
+                    </t>
+                    <ul class="navbar-nav align-items-center gap-1">
+                        <!-- Search bar -->
+                        <t t-call="website.placeholder_header_search_box">
+                            <t t-set="_input_classes" t-valuef="ps-3 border border-end-0 rounded-start-pill bg-o-color-3"/>
+                            <t t-set="_submit_classes" t-valuef="p-3 border border-start-0 rounded-end-pill lh-1 bg-o-color-3"/>
+                        </t>
+                        <!-- Sign In -->
+                        <t t-call="portal.placeholder_user_sign_in">
+                            <t t-set="_link_class" t-valuef="btn btn-outline-secondary"/>
+                        </t>
+                        <!-- User Dropdown -->
+                        <t t-call="portal.user_dropdown">
+                            <t t-set="_user_name" t-value="true"/>
+                            <t t-set="_icon" t-value="true"/>
+                            <t t-set="_icon_class" t-valuef="fa-stack"/>
+                            <t t-set="_item_class" t-valuef="dropdown"/>
+                            <t t-set="_link_class" t-valuef="d-flex align-items-center border-0 fw-bold text-reset o_navlink_background_hover"/>
+                            <t t-set="_icon_wrap_class" t-value="'position-relative me-2 p-2 rounded-circle border bg-o-color-3'"/>
+                            <t t-set="_dropdown_menu_class" t-valuef="dropdown-menu-end"/>
+                        </t>
+                    </ul>
+                </nav>
+                <nav aria-label="Bottom" class="border-top o_border_contrast">
+                    <div class="container d-flex justify-content-between">
+                        <!-- Navbar -->
+                        <t t-call="website.navbar_nav">
+                            <t t-set="_nav_class" t-valuef="me-4 py-1"/>
+
+                            <!-- Menu -->
+                            <t t-foreach="website.menu_id.child_id" t-as="submenu">
+                                <t t-call="website.submenu">
+                                    <t t-set="item_class" t-valuef="nav-item"/>
+                                    <t t-set="link_class" t-valuef="nav-link"/>
+                                </t>
+                            </t>
+                        </t>
+                        <!-- Call To Action -->
+                        <ul class="navbar-nav">
+                            <t t-call="website.header_call_to_action_stretched">
+                                <t t-set="_div_class" t-valuef="d-flex h-100"/>
+                            </t>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </t>
+        <t t-call="website.template_header_mobile">
+            <t t-set="_txt_elt_content" t-valuef="sentence"/>
+        </t>
+    </xpath>
+</template>
+
 <!-- Header options -->
 <template id="option_layout_hide_header" inherit_id="website.layout" active="False">
     <xpath expr="//header" position="before">
