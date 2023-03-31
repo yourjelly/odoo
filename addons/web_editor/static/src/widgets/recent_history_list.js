@@ -35,6 +35,18 @@ export class One2ManyHistoryList extends Component {
         );
         browser.location.reload();
     }
+
+    async getComparisonAtDiffId(historyDiffId) {
+        const text = await this.orm.call(
+            'field.html.history.diff',
+            "get_comparison",
+            [historyDiffId],
+            {}
+        );
+        console.log("get_comparison", text);
+        document.querySelector(".note-editable.odoo-editor-editable").innerHTML = text;
+        return text;
+    }
 }
 
 One2ManyHistoryList.template = "web_editor.One2ManyHistoryList";

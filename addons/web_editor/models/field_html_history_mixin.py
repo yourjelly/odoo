@@ -49,13 +49,14 @@ class HtmlHistory(models.AbstractModel):
             'res_model': "field.html.history.diff",
             'domain': [('id', 'in', self.history_diff_ids.ids)]
         }
+
     # ------------------------------------------------------------
     # HISTORY Restoring
     # ------------------------------------------------------------
 
-    def restore_history_to(self, diff_id):
+    def get_version_at(self, diff_id):
         """
-        Restore the current article to a previous version.
+        Get the current article version at a given time.
         :param int diff_id: id of the version diff to restore to
         """
         self.ensure_one()
@@ -68,7 +69,18 @@ class HtmlHistory(models.AbstractModel):
         if len(diff_to_restore) > 0 and history_field_name:
             restored_content = self.env['field.html.history.diff'].get_restored_version(
                 getattr(self, history_field_name), diff_to_restore)
-            self.write({history_field_name: restored_content})
+            return restored_content
+        return False
+
+    def restore_history_to(self, diff_id):
+        """
+        Restore the current article to a previous version.
+        :param int diff_id: id of the version diff to restore to
+        """
+        self.ensure_one()
+        restored_content = self.get_version_at(diff_id)
+        if restored_content:
+             self.write({self._get_html_history_field_name(): restored_content})
 
         return {
             'name': _("Restored content"),
@@ -77,3 +89,26 @@ class HtmlHistory(models.AbstractModel):
             'res_model': self._name,
             'res_id': self.id
         }
+
+    # ------------------------------------------------------------
+    # HISTORY comparison
+    # ------------------------------------------------------------
+
+    def get_version_comparison_at(self, diff_id):
+        """
+        Get a comparison between the current version and the version at diff_id
+        :param int diff_id: id of the version diff to restore to
+        """
+        self.ensure_one()
+        history_field_name = self._get_html_history_field_name()
+
+        diff_to_restore = self.env['field.html.history.diff'].search(
+            [('related_id', '=', self.id),
+             ('related_model', '=', self._name),
+             ('id', '>=', diff_id)], order='id desc')
+        if len(diff_to_restore) > 0 and history_field_name:
+            comparison = self.env['field.html.history.diff'].\
+                get_comparison_version(getattr(self, history_field_name),
+                                       diff_to_restore)
+            return comparison
+        return False
