@@ -755,9 +755,9 @@ export class MockServer {
             const key = "default_" + fieldName;
             if (kwargs.context && key in kwargs.context) {
                 let value = kwargs.context[key];
-                if (typeof value === "string" && field.type === "many2one") {
-                    value = false; // todo: create record?
-                }
+                // if (typeof value === "string" && field.type === "many2one") {
+                //     value = false; // todo: create record?
+                // }
                 result[fieldName] = value;
                 continue;
             }
