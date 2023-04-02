@@ -956,6 +956,14 @@ export class MockServer {
             modelName,
             Object.assign(nullValues, defaultVals, onchangeVals)
         );
+        // to remove
+        if (firstOnChange) {
+            for (const field of fields) {
+                if (!(field in value) && field !== "id") {
+                    throw new Error("wrong onchange implem");
+                }
+            }
+        }
         return { value };
     }
 
