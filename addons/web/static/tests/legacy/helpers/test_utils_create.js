@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_utils_create **/
+/** @odoo-module **/
     
     /**
      * Create Test Utils
@@ -14,10 +14,10 @@
     import ControlPanel from "web.ControlPanel";
     import { useListener } from "@web/core/utils/hooks";
     import dom from "web.dom";
-    import makeTestEnvironment from "web.test_env";
+    import makeTestEnvironment from "./test_env";
     import ActionModel from "web.ActionModel";
     import Registry from "web.Registry";
-    import testUtilsMock from "web.test_utils_mock";
+    import testUtilsMock from "./test_utils_mock";
     import Widget from "web.Widget";
     import { destroy, getFixture, mount, useChild } from "@web/../tests/helpers/utils";
     import { registerCleanup } from "@web/../tests/helpers/cleanup";

@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_env **/
+/** @odoo-module **/
     
     import Bus from "web.Bus";
     import session from "web.session";

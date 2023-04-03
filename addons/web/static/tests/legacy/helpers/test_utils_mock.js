@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_utils_mock **/
+/** @odoo-module **/
 
 /**
  * Mock Test Utils
@@ -16,8 +16,8 @@ import Bus from "web.Bus";
 import config from "web.config";
 import core from "web.core";
 import dom from "web.dom";
-import makeTestEnvironment from "web.test_env";
-import MockServer from "web.MockServer";
+import makeTestEnvironment from "./test_env";
+import MockServer from "./mock_server";
 import RamStorage from "web.RamStorage";
 import session from "web.session";
 import { patchWithCleanup, patchDate } from "@web/../tests/helpers/utils";

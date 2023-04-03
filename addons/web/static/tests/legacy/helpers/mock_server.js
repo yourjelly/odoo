@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.MockServer **/
+/** @odoo-module **/
 
 import Class from "web.Class";
 import Domain from "web.Domain";

@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_utils_fields **/
+/** @odoo-module **/
     
     /**
      * Field Test Utils
@@ -9,7 +9,7 @@
      * testUtils file.
      */
 
-    import testUtilsDom from "web.test_utils_dom";
+    import testUtilsDom from "./test_utils_dom";
 
     const ARROW_KEYS_MAPPING = {
         down: 'ArrowDown',

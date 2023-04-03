@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_utils_file **/
+/** @odoo-module **/
 
 /**
  * FILE Test Utils
