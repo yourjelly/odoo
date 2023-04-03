@@ -21,6 +21,7 @@ class ProductTag(models.Model):
         'product.product', string='All Product Variants using this Tag',
         compute='_compute_product_ids', search='_search_product_ids'
     )
+    voucher_type = fields.Many2one('pos_payment_method.PoSPaymentMethod.product_voucher_tag')
 
     _sql_constraints = [
         ('name_uniq', 'unique (name)', "Tag name already exists!"),

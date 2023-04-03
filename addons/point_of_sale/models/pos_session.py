@@ -1900,7 +1900,7 @@ class PosSession(models.Model):
 
     def _loader_params_product_product(self):
         domain = [
-            '&', '&', ('sale_ok', '=', True), ('available_in_pos', '=', True), '|',
+            '&', '&', ('sale_ok', '=', True), ('voucher_type', '=', True), ('available_in_pos', '=', True), '|',
             ('company_id', '=', self.config_id.company_id.id), ('company_id', '=', False)
         ]
         if self.config_id.limit_categories and self.config_id.iface_available_categ_ids:
