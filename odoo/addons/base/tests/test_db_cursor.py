@@ -214,3 +214,17 @@ class TestCursorHooks(common.TransactionCase):
         self.prepare_hooks(cr)
         cr.close()
         self.assertEqual(self.log, ['preR', 'postR'])
+
+class TestCursorHooksTransactionCaseCleanup(common.TransactionCase):
+    """Check savepoint cases handle commit hooks properly."""
+    def test_isolation_first(self):
+        def mutate_second_test_ref():
+            del self.env.cr.precommit.data.get('test_cursor_hooks_savepoint_case_cleanup_test_second', [''])[0]
+        self.env.cr.precommit.add(mutate_second_test_ref)
+
+    def test_isolation_second(self):
+        some_reference = ['not_empty']
+        self.env.cr.precommit.data.setdefault("test_cursor_hooks_savepoint_case_cleanup_test_second", some_reference)
+        self.env.cr.precommit.run()
+        self.assertTrue(bool(some_reference))
+        self.assertEqual(some_reference[0], 'not_empty')

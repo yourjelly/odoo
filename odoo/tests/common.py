@@ -833,8 +833,16 @@ class TransactionCase(BaseCase):
 
         self.addCleanup(self.registry.clear_caches)
 
-        # flush everything in setUpClass before introducing a savepoint
-        self.env['base'].flush()
+        # This prevents precommit functions and data from piling up
+        # until cr.flush is called in 'assertRaises' clauses
+        # (these are not cleared in self.env.clear or envs.clear)
+        precommit_funcs = collections.deque(list(self.env.cr.precommit._funcs))
+        precommit_data = dict(self.env.cr.precommit.data.items())
+
+        def setPrecommit(funcs, data):
+            self.env.cr.precommit._funcs = funcs
+            self.env.cr.precommit.data = data
+        self.addCleanup(setPrecommit, precommit_funcs, precommit_data)
 
         self._savepoint_id = next(savepoint_seq)
         self.cr.execute('SAVEPOINT test_%d' % self._savepoint_id)
