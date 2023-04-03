@@ -57,15 +57,19 @@ class AccountMove(models.Model):
         for move in self:
             if move.expense_sheet_id:
                 balance = -sum(move.line_ids.filtered(lambda l: l.display_type != 'payment_term').mapped("amount_currency"))
-                move.needed_terms[frozendict({
-                    "move_id": move.id,
-                    "date_maturity": move.expense_sheet_id.accounting_date
-                    or fields.Date.context_today(move.expense_sheet_id),
-                })] = {
-                    "balance": balance,
-                    "name": "",
-                    "account_id": move.expense_sheet_id.expense_line_ids[0]._get_expense_account_destination(),
-                    "amount_currency": 0.0,
+                move.needed_terms = {
+                    frozendict(
+                        {
+                            "move_id": move.id,
+                            "date_maturity": move.expense_sheet_id.accounting_date
+                            or fields.Date.context_today(move.expense_sheet_id),
+                        }
+                    ): {
+                        "balance": balance,
+                        "name": "",
+                        "account_id": move.expense_sheet_id.expense_line_ids[0]._get_expense_account_destination(),
+                        "amount_currency": move.amount_total_in_currency_signed,
+                    }
                 }
 
     def _reverse_moves(self, default_values_list=None, cancel=False):
