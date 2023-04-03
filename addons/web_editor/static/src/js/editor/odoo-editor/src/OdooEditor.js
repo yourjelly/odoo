@@ -791,20 +791,9 @@ export class OdooEditor extends EventTarget {
     }
 
     automaticStepActive(label) {
-        if (!label) {
-            console.warn("some modofoca is REactivating the autoStep without a Label!!");
-        } else if (label !== 'skipStack') {
-            console.log("activate autoStep:", label);
-        }
         this._observerTimeoutUnactive.delete(label);
     }
     automaticStepUnactive(label) {
-        // temporarily disabling this if no label is provided.
-        if (!label) {
-            console.warn("some modofoca is UNactivating the autoStep without a Label!!");
-        } else if (label !== 'skipStack') {
-            console.log("UNactivating autoStep:", label);
-        }
         this._observerTimeoutUnactive.add(label);
     }
     automaticStepSkipStack() {
@@ -834,7 +823,6 @@ export class OdooEditor extends EventTarget {
                 this.dispatchEvent(new Event('contentChanged'));
                 clearTimeout(this.observerTimeout);
                 if (this._observerTimeoutUnactive.size === 0) {
-                    console.warn('auto step is set!');
                     this.observerTimeout = setTimeout(() => {
                         this.historyStep();
                     }, 100);
