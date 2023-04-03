@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError, RedirectWarning
+from odoo.exceptions import ValidationError, RedirectWarning, UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountMove(models.Model):
@@ -135,3 +139,13 @@ class AccountMove(models.Model):
         # TO OVERRIDE
         self.ensure_one()
         return False
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_l10n_in_except_once_post(self):
+        # Prevent deleting entries once it's posted for Indian Company only
+        if any(m.country_code == 'IN' and m.posted_before for m in self):
+            if self._context.get('force_delete'):
+                moves_name = ", ".join("%s (%s)" % (m.name, m.id) for m in self)
+                _logger.info(_('Force Delete Journal Entrys %s by %s (%s)', moves_name, self.env.user.name, self.env.user.id))
+            else:
+                raise UserError(_("To keep the audit trail rules you can not delete journal entrys once they hase been posted."))
