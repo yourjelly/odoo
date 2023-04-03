@@ -65,7 +65,7 @@ class AccountMove(models.Model):
                     "balance": balance,
                     "name": "",
                     "account_id": move.expense_sheet_id.expense_line_ids[0]._get_expense_account_destination(),
-                    "amount_currency": move.amount_total_in_currency_signed,
+                    "amount_currency": 0.0,
                 }
 
     def _reverse_moves(self, default_values_list=None, cancel=False):
