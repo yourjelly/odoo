@@ -1771,7 +1771,7 @@
             'o-invalid': isInvalid || !range.isValidRange,
             'text-decoration-underline': range.isFocused and state.mode === 'select-range'
           }"
-          t-ref="{{range.isFocused ? 'focused' : 'unfocused'}}Input"
+          t-ref="{{range.isFocused ? 'focusedInput' : 'unfocusedInput' + range_index}}"
         />
         <button
           class="o-btn o-remove-selection"
@@ -3500,7 +3500,7 @@
   </t>
 </odoo>
 <!--
-  __info__.version = '16.2.0';
-  __info__.date = '2023-03-24T12:51:44.002Z';
-  __info__.hash = 'a6bb7fc';
+  __info__.version = '16.2.1';
+  __info__.date = '2023-04-03T07:20:48.687Z';
+  __info__.hash = '42bcc8e';
 -->

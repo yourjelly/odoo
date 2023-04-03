@@ -698,7 +698,7 @@
      * Get the default height of the cell given its style.
      */
     function getDefaultCellHeight(cell) {
-        if (!cell || !cell.content) {
+        if (!cell || !cell.content || cell.isFormula) {
             return DEFAULT_CELL_HEIGHT;
         }
         const fontSize = computeTextFontSizeInPixels(cell.style);
@@ -1446,7 +1446,7 @@
      *   formula, commas are used to separate arguments
      * - it does not support % symbol, in formulas % is an operator
      */
-    const formulaNumberRegexp = /^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+/;
+    const formulaNumberRegexp = /(^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+)(?!\w|!)/;
     const pIntegerAndDecimals = "(\\d+(,\\d{3,})*(\\.\\d*)?)"; // pattern that match integer number with or without decimal digits
     const pOnlyDecimals = "(\\.\\d+)"; // pattern that match only expression with decimal digits
     const pScientificFormat = "(e(\\+|-)?\\d+)?"; // pattern that match scientific format between zero and one time (should be placed before pPercentFormat)
@@ -3052,6 +3052,7 @@
     const LINE_HEIGHT = 1.2;
     css /* scss */ `
   div.o-scorecard {
+    font-family: ${DEFAULT_FONT};
     user-select: none;
     background-color: white;
     display: flex;
@@ -19252,6 +19253,8 @@
                         start = 0;
                     if (end > textLength)
                         end = textLength;
+                    if (start > textLength)
+                        start = textLength;
                 }
                 let startNode = this.findChildAtCharacterIndex(start);
                 let endNode = this.findChildAtCharacterIndex(end);
@@ -19521,6 +19524,7 @@
       padding-right: 2px;
 
       box-sizing: border-box;
+      font-family: ${DEFAULT_FONT};
 
       caret-color: black;
       padding-left: 3px;
@@ -20730,6 +20734,9 @@
             });
             owl.onMounted(() => {
                 resizeObserver.observe(this.gridOverlayEl);
+            });
+            owl.onWillUnmount(() => {
+                resizeObserver.disconnect();
             });
             useTouchMove(this.gridOverlay, this.props.onGridMoved, () => {
                 const { scrollY } = this.env.model.getters.getActiveSheetDOMScrollInfo();
@@ -22151,6 +22158,10 @@
             }
         }
         onInput(ev) {
+            // the user meant to paste in the sheet, not open the composer with the pasted content
+            if (!ev.isComposing && ev.inputType === "insertFromPaste") {
+                return;
+            }
             if (ev.data) {
                 // if the user types a character on the grid, it means he wants to start composing the selected cell with that
                 // character
@@ -27975,7 +27986,6 @@
             if (!content.startsWith("=")) {
                 return this.createLiteralCell(id, content, format, style);
             }
-            content = content.replace(/\n/g, ""); //to evaluate formula in a single line
             try {
                 return this.createFormulaCell(id, content, format, style, sheetId);
             }
@@ -30088,6 +30098,7 @@
                             }
                             else if (range.zone[start] >= min && range.zone[end] <= max) {
                                 changeType = "REMOVE";
+                                newRange = range.clone({ ...this.getInvalidRange() });
                             }
                             else if (range.zone[start] <= max && range.zone[end] >= max) {
                                 const toRemove = max - range.zone[start] + 1;
@@ -30153,8 +30164,10 @@
                             return { changeType: "NONE" };
                         }
                         const invalidSheetName = this.getters.getSheetName(cmd.sheetId);
-                        const sheetId = "";
-                        range = range.clone({ sheetId, invalidSheetName });
+                        range = range.clone({
+                            ...this.getInvalidRange(),
+                            invalidSheetName,
+                        });
                         return { changeType: "REMOVE", range };
                     }, cmd.sheetId);
                     break;
@@ -30413,6 +30426,15 @@
                 str = colFixed + col + rowFixed + row;
             }
             return str;
+        }
+        getInvalidRange() {
+            return {
+                parts: [],
+                prefixSheet: false,
+                zone: { left: -1, top: -1, right: -1, bottom: -1 },
+                sheetId: "",
+                invalidXc: INCORRECT_RANGE_STRING,
+            };
         }
     }
     RangeAdapter.getters = [
@@ -40894,6 +40916,7 @@
             this.state.menuState.parentMenu = menu;
             this.isSelectingMenu = true;
             this.openedEl = ev.target;
+            this.env.model.dispatch("STOP_EDITION");
         }
         closeMenus() {
             this.state.activeTool = "";
@@ -41107,9 +41130,6 @@
       color: #333;
     }
 
-    * {
-      font-family: "Roboto", "RobotoDraft", Helvetica, Arial, sans-serif;
-    }
     &,
     *,
     *:before,
@@ -44977,9 +44997,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.2.0';
-    __info__.date = '2023-03-24T12:51:45.958Z';
-    __info__.hash = 'a6bb7fc';
+    __info__.version = '16.2.1';
+    __info__.date = '2023-04-03T07:20:50.884Z';
+    __info__.hash = '42bcc8e';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
