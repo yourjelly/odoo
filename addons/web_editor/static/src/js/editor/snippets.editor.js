@@ -975,7 +975,7 @@ var SnippetEditor = Widget.extend({
     _onDragAndDropStart: function () {
         this.options.wysiwyg.odooEditor.observerUnactive('dragAndDropMoveSnippet');
         this.trigger_up('drag_and_drop_start');
-        this.options.wysiwyg.odooEditor.automaticStepUnactive();
+        this.options.wysiwyg.odooEditor.automaticStepUnactive('dragAndDropMoveSnippet');
         var self = this;
         this.dragState = {};
         const rowEl = this.$target[0].parentNode;
@@ -1319,7 +1319,7 @@ var SnippetEditor = Widget.extend({
      * @param {Object} ui
      */
     _onDragAndDropStop: function (ev, ui) {
-        this.options.wysiwyg.odooEditor.automaticStepActive();
+        this.options.wysiwyg.odooEditor.automaticStepActive('dragAndDropMoveSnippet');
         this.options.wysiwyg.odooEditor.automaticStepSkipStack();
         this.options.wysiwyg.odooEditor.unbreakableStepUnactive();
 
@@ -3167,7 +3167,7 @@ var SnippetsMenu = Widget.extend({
                     const doc = self.options.wysiwyg.odooEditor.document;
                     $(doc.body).addClass('oe_dropzone_active');
 
-                    self.options.wysiwyg.odooEditor.automaticStepUnactive();
+                    self.options.wysiwyg.odooEditor.automaticStepUnactive('dragAndDropCreateSnippet');
 
                     self.$el.find('.oe_snippet_thumbnail').addClass('o_we_already_dragging');
                     self.options.wysiwyg.odooEditor.observerUnactive('dragAndDropCreateSnippet');
@@ -3265,7 +3265,7 @@ var SnippetsMenu = Widget.extend({
                 stop: async function (ev, ui) {
                     const doc = self.options.wysiwyg.odooEditor.document;
                     $(doc.body).removeClass('oe_dropzone_active');
-                    self.options.wysiwyg.odooEditor.automaticStepUnactive();
+                    self.options.wysiwyg.odooEditor.automaticStepActive('dragAndDropCreateSnippet');
                     self.options.wysiwyg.odooEditor.automaticStepSkipStack();
                     $toInsert.removeClass('oe_snippet_body');
                     self.draggableComponent.$scrollTarget.off('scroll.scrolling_element');
