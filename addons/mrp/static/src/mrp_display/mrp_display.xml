@@ -19,8 +19,7 @@
             </Layout>
         </div>
         <div t-if="state.displayMenuPopup" class="o_tablet_popups" >
-            <!-- <MrpDisplayMenuPopup popupData="popup['menu'].data" onClosePopup.bind="closePopup" onClose.bind="onCloseRerender"/> -->
-            <MrpDisplayMenuPopup closeMenuPopup.bind="closeMenuPopup"/>
+            <MrpDisplayMenuPopup closeMenuPopup.bind="closeMenuPopup" record="menuPopupRecord"/>
         </div>
     </t>
 

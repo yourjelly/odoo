@@ -99,10 +99,13 @@ export class MrpDisplay extends Component {
 
     displayMenuPopup(record) {
         this.state.displayMenuPopup = true;
+        this.menuPopupRecord = record;
     }
 
-    closeMenuPopup() {
+    async closeMenuPopup(record) {
+        await record.load();
         this.state.displayMenuPopup = false;
+        this.menuPopupRecord = false;
     }
 
     toggleSearchPanel() {
