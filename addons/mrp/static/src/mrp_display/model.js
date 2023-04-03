@@ -25,7 +25,7 @@ function getSearchParams(model, props, component) {
                 if (model.rootParams.resModel === "mrp.workorder") {
                     params[key] = [
                         ["production_id", "in", production_ids],
-                        ["state", "in", ["ready", "progress"]],
+                        ["state", "in", ["pending", "ready", "progress"]],
                     ];
                 } else if (model.rootParams.resModel === "stock.move") {
                     params[key] = [

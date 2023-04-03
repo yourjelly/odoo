@@ -3,14 +3,19 @@
     <t t-name="mrp.WorkOrder" owl="1">
         <li class="list-group-item py-3 d-flex justify-content-between align-items-center"
             t-att-class="cssClass"
+            t-on-click="onClick"
             t-on-animationend="onAnimationEnd">
-            <span>
-                <input type="checkbox" class="me-2" disabled=""
-                        t-att-checked="props.record.data.state === 'done'"/>
-                <t t-esc="props.record.data.name"/>
+            <span t-att-class="isComplete ? 'text-decoration-line-through' : ''">
+                <input type="checkbox" class="me-2" t-att-disabled="isComplete"
+                       t-on-click.stop="longPress"
+                       t-att-checked="isComplete"/>
+                <t t-esc="props.record.data.name"/> (<t t-esc="props.record.data.state"/>)
+            </span>
+            <span t-if="props.record.data.duration" t-att-class="active ? '' : 'text-muted'">
+                <MrpTimer value="props.record.data.duration" ongoing="active"/>
             </span>
             <button t-if="props.record.data.operation_note.length" class="btn"
-                    t-on-click="displayInstruction">
+                    t-on-click.stop="displayInstruction">
                 <i class="fa fa-lightbulb-o fa-lg text-info"/>
             </button>
         </li>

@@ -4,7 +4,9 @@ import { Component } from "@odoo/owl";
 
 export class StockMove extends Component {
     static template = "mrp.StockMove";
-    static props = { record: Object };
+    static props = {
+        record: Object,
+    };
 
     setup() {
         this.isLongPressable = false;
@@ -15,7 +17,7 @@ export class StockMove extends Component {
     get cssClass() {
         let cssClass = this.isLongPressable ? "o_longpressable" : "";
         if (this.isComplete) {
-            cssClass += "text-muted text-decoration-line-through";
+            cssClass += " text-muted";
         }
         return cssClass;
     }
@@ -27,9 +29,12 @@ export class StockMove extends Component {
         );
     }
 
+    longPress() {}
+
     onAnimationEnd(ev) {
         if (ev.animationName === "longpress") {
-            this._longPress();
+            this.longPressed = true;
+            this.longPress();
         }
     }
 
@@ -39,11 +44,6 @@ export class StockMove extends Component {
             return; // Do nothing since the longpress event was already called.
         }
         this.toggle();
-    }
-
-    _longPress() {
-        this.longPressed = true;
-        console.log("-- long press");
     }
 
     toggle() {

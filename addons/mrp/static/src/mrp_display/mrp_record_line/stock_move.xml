@@ -9,7 +9,8 @@
                 <t t-esc="props.record.data.quantity_done"/>
                 <t t-if="props.record.data.product_uom_qty"> / <t t-esc="props.record.data.product_uom_qty"/></t>
             </span>
-            <span t-esc="props.record.data.product_id[1]"/>
+            <span t-att-class="isComplete ? 'text-decoration-line-through' : ''"
+                  t-esc="props.record.data.product_id[1]"/>
         </li>
     </t>
 </templates>
