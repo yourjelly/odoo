@@ -3,7 +3,7 @@
 import { ActivityMenu } from "@mail/web/activity/activity_menu";
 import { patch } from "@web/core/utils/patch";
 import fieldUtils from "web.field_utils";
-import { getLangTimeFormat } from "web.time";
+import { getLangTimeFormat } from "@web/legacy/js/core/time";
 
 patch(ActivityMenu.prototype, "calendar", {
     async fetchSystrayActivities() {

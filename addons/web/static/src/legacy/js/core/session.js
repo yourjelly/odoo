@@ -1,9 +1,9 @@
-/** @odoo-module alias=web.Session **/
+/** @odoo-module **/
 
-import ajax from "web.ajax";
+import ajax from "./ajax";
 import core from "web.core";
-import mixins from "web.mixins";
-import {setCookie} from "web.utils.cookies";
+import mixins from "./mixins";
+import {setCookie} from "./cookie_utils";
 import { session } from "@web/session";
 import { loadJS } from "@web/core/assets";
 

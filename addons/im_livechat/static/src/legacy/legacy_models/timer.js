@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import Class from "web.Class";
+import Class from "@web/legacy/js/core/class";
 
 /**
  * This class creates a timer which, when times out, calls a function.

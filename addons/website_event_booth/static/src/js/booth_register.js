@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_event_booth.booth_registration **/
 
 import core from "web.core";
-import dom from "web.dom";
+import dom from "@web/legacy/js/core/dom";
 import publicWidget from "web.public.widget";
 var QWeb = core.qweb;
 var _t = core._t;

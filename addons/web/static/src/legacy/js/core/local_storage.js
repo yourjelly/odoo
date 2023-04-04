@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.local_storage **/
+/** @odoo-module **/
 
-import RamStorage from "web.RamStorage";
-import mixins from "web.mixins";
+import RamStorage from "./ram_storage";
+import mixins from "./mixins";
 
 // use a fake localStorage in RAM if the native localStorage is unavailable
 // (e.g. private browsing in Safari)

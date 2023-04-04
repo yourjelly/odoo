@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
     import publicWidget from 'web.public.widget';
-    import Dialog from 'web.Dialog';
+    import Dialog from '@web/legacy/js/core/dialog';
     import  { qweb as QWeb, _t } from 'web.core';
     import session from 'web.session';
-    import { Markup } from 'web.utils';
+    import { Markup } from '@web/legacy/js/core/utils';
     import CourseJoin from '@website_slides/js/slides_course_join';
     import QuestionFormWidget from '@website_slides/js/slides_course_quiz_question_form';
     import SlideQuizFinishModal from '@website_slides/js/slides_course_quiz_finish';

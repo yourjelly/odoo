@@ -3,7 +3,7 @@
 import core from "web.core";
 import config from "web.config";
 import publicWidget from "web.public.widget";
-import {Markup} from "web.utils";
+import {Markup} from "@web/legacy/js/core/utils";
 const DEFAULT_NUMBER_OF_ELEMENTS = 4;
 const DEFAULT_NUMBER_OF_ELEMENTS_SM = 1;
 

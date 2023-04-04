@@ -1,8 +1,8 @@
 /** @odoo-module alias=web.Colorpicker **/
 
 import core from "web.core";
-import utils from "web.utils";
-import Dialog from "web.Dialog";
+import utils from "@web/legacy/js/core/utils";
+import Dialog from "@web/legacy/js/core/dialog";
 import Widget from "web.Widget";
 
 var _t = core._t;

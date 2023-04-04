@@ -3,7 +3,7 @@
     import { registry } from "@web/core/registry";
     import { stepUtils } from "@web_tour/tour_service/tour_utils";
     import {_t} from "web.core";
-    import {Markup} from "web.utils";
+    import {Markup} from "@web/legacy/js/core/utils";
     var now = moment();
 
     registry.category("web_tour.tours").add('mass_mailing_tour', {

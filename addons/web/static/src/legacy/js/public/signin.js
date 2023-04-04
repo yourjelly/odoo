@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import dom from 'web.dom';
+import dom from '@web/legacy/js/core/dom';
 import publicWidget from 'web.public.widget';
 
 publicWidget.registry.login = publicWidget.Widget.extend({

@@ -2,8 +2,8 @@
 
 import core from "web.core";
 import portalChatter from "portal.chatter";
-import utils from "web.utils";
-import time from "web.time";
+import utils from "@web/legacy/js/core/utils";
+import time from "@web/legacy/js/core/time";
 
 var _t = core._t;
 var PortalChatter = portalChatter.PortalChatter;

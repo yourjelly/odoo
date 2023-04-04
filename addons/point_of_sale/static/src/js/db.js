@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import core from "web.core";
-import utils from "web.utils";
+import utils from "@web/legacy/js/core/utils";
 /* The PosDB holds reference to data that is either
  * - static: does not change between pos reloads
  * - persistent : must stay between reloads ( orders )

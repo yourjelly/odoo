@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.smooth_scroll_on_drag **/
+/** @odoo-module **/
 
-import Class from "web.Class";
-import mixins from "web.mixins";
+import Class from "./class";
+import mixins from "./mixins";
 
 /**
  * Provides a helper for SmoothScrollOnDrag options.offsetElements

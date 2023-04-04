@@ -15,10 +15,10 @@
  */
 
 import core from "web.core";
-import dom from "web.dom";
+import dom from "@web/legacy/js/core/dom";
 import session from "web.session";
-import time from "web.time";
-import utils from "web.utils";
+import time from "@web/legacy/js/core/time";
+import utils from "@web/legacy/js/core/utils";
 
 var _t = core._t;
 

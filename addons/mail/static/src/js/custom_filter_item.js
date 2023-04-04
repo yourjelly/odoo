@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import CustomFilterItem from "@web/legacy/js/control_panel/custom_filter_item";
-import { patch } from "web.utils";
+import { patch } from "@web/legacy/js/core/utils";
 
 patch(CustomFilterItem.prototype, "mail.CustomFilterItem", {
     /**

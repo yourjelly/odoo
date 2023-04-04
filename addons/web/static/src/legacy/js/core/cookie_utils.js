@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.utils.cookies **/
+/** @odoo-module **/
 
 const utils = {
     /**

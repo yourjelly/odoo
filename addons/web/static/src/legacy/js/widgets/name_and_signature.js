@@ -2,7 +2,7 @@
 
 import core from "web.core";
 import config from "web.config";
-import utils from "web.utils";
+import utils from "@web/legacy/js/core/utils";
 import Widget from "web.Widget";
 
 

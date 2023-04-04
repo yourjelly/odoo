@@ -10,13 +10,13 @@
      */
 
     import ActionMenus from "@web/legacy/js/components/action_menus";
-    import concurrency from "web.concurrency";
+    import concurrency from "@web/legacy/js/core/concurrency";
     import ControlPanel from "@web/legacy/js/control_panel/control_panel";
     import { useListener } from "@web/core/utils/hooks";
-    import dom from "web.dom";
+    import dom from "@web/legacy/js/core/dom";
     import makeTestEnvironment from "./test_env";
     import ActionModel from "web.ActionModel";
-    import Registry from "web.Registry";
+    import Registry from "@web/legacy/js/core/registry";
     import testUtilsMock from "./test_utils_mock";
     import Widget from "web.Widget";
     import { destroy, getFixture, mount, useChild } from "@web/../tests/helpers/utils";

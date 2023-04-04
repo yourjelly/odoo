@@ -1,11 +1,11 @@
 /** @odoo-module alias=web.core **/
 
-import Bus from "web.Bus";
+import Bus from "@web/legacy/js/core/bus";
 import config from "web.config";
-import Class from "web.Class";
-import QWeb from "web.QWeb";
-import Registry from "web.Registry";
-import translation from "web.translation";
+import Class from "@web/legacy/js/core/class";
+import QWeb from "@web/legacy/js/core/qweb";
+import Registry from "@web/legacy/js/core/registry";
+import translation from "@web/legacy/js/core/translation";
 
 /**
  * Whether the client is currently in "debug" mode

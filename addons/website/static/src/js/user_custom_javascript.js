@@ -9,7 +9,7 @@
 odoo.define('website.user_custom_code', function (require) {
 'use strict';
 
-var Dialog = require('web.Dialog');
+var Dialog = require('@web/legacy/js/core/dialog');
 var publicWidget = require('web.public.widget');
 
 publicWidget.registry.HelloWorldPopup = publicWidget.Widget.extend({

@@ -15,7 +15,7 @@ import {
 import { Model } from "@web/views/model";
 import { evalDomain } from "@web/views/utils";
 import BasicModel from "web.BasicModel";
-import Context from "web.Context";
+import Context from "@web/legacy/js/core/context";
 
 import { markup, toRaw } from "@odoo/owl";
 

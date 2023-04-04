@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.sessionStorage **/
+/** @odoo-module **/
 
-import RamStorage from "web.RamStorage";
-import mixins from "web.mixins";
+import RamStorage from "./ram_storage";
+import mixins from "./mixins";
 
 // use a fake sessionStorage in RAM if the native sessionStorage is unavailable
 // (e.g. private browsing in Safari)

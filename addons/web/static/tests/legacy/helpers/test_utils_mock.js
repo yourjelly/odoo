@@ -9,16 +9,16 @@
  * testUtils file.
  */
 
-import AbstractStorageService from "web.AbstractStorageService";
+import AbstractStorageService from "@web/legacy/js/core/abstract_storage_service";
 import AjaxService from "web.AjaxService";
 import basic_fields from "web.basic_fields";
-import Bus from "web.Bus";
+import Bus from "@web/legacy/js/core/bus";
 import config from "web.config";
 import core from "web.core";
-import dom from "web.dom";
+import dom from "@web/legacy/js/core/dom";
 import makeTestEnvironment from "./test_env";
 import MockServer from "./mock_server";
-import RamStorage from "web.RamStorage";
+import RamStorage from "@web/legacy/js/core/ram_storage";
 import session from "web.session";
 import { patchWithCleanup, patchDate } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";

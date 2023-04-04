@@ -2,7 +2,7 @@
 
 import core from "web.core";
 import field_utils from "web.field_utils";
-import time from "web.time";
+import time from "@web/legacy/js/core/time";
 import Widget from "web.Widget";
 
 var _t = core._t;

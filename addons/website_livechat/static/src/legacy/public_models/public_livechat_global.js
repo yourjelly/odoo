@@ -2,7 +2,7 @@
 
 import { Patch } from '@im_livechat/legacy/model';
 
-import { deleteCookie, setCookie } from 'web.utils.cookies';
+import { deleteCookie, setCookie } from '@web/legacy/js/core/cookie_utils';
 
 Patch({
     name: 'PublicLivechatGlobal',

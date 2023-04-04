@@ -2,7 +2,7 @@
 
 import { registry } from '@web/core/registry';
 import { UploadProgressToast } from './upload_progress_toast';
-import { getDataURLFromFile } from 'web.utils';
+import { getDataURLFromFile } from '@web/legacy/js/core/utils';
 
 import { reactive } from "@odoo/owl";
 

@@ -2,7 +2,7 @@
     
     import { DatePicker, DateTimePicker } from "@web/legacy/js/components/datepicker";
     import testUtils from "web.test_utils";
-    import time from "web.time";
+    import time from "@web/legacy/js/core/time";
 
     const { createComponent } = testUtils;
 

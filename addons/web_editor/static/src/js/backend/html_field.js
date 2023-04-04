@@ -10,7 +10,7 @@ import { QWebPlugin } from '@web_editor/js/backend/QWebPlugin';
 import { TranslationButton } from "@web/views/fields/translation_button";
 import { useDynamicPlaceholder } from "@web/views/fields/dynamic_placeholder_hook";
 import { QWeb } from 'web.core';
-import ajax from 'web.ajax';
+import ajax from '@web/legacy/js/core/ajax';
 import {
     useBus,
     useService,

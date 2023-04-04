@@ -3,7 +3,7 @@
 import { decrement, increment } from "@im_livechat/legacy/model/model_field_command";
 import { Listener } from "@im_livechat/legacy/model/model_listener";
 import { followRelations } from "@im_livechat/legacy/model/model_utils";
-import { unaccent } from "web.utils";
+import { unaccent } from "@web/legacy/js/core/utils";
 
 /**
  * Returns the given string after cleaning it. The goal of the clean is to give

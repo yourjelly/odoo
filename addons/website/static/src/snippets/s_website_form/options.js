@@ -3,8 +3,8 @@
 import core from "web.core";
 import FormEditorRegistry from "website.form_editor_registry";
 import options from "web_editor.snippets.options";
-import Dialog from "web.Dialog";
-import dom from "web.dom";
+import Dialog from "@web/legacy/js/core/dialog";
+import dom from "@web/legacy/js/core/dom";
 import {generateHTMLId} from "web_editor.utils";
 import "website.editor.snippets.options";
 

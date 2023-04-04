@@ -8,7 +8,7 @@
  */
 
 import BasicModel from 'web.BasicModel';
-import concurrency from 'web.concurrency';
+import concurrency from '@web/legacy/js/core/concurrency';
 
 var FieldManagerMixin = {
     custom_events: {

@@ -2,7 +2,7 @@
 
 import config from "web.config";
 import core from "web.core";
-import rpc from "web.rpc";
+import rpc from "@web/legacy/js/core/rpc";
 import session from "web.session";
 import { generateLegacyLoadViewsResult } from "@web/legacy/legacy_load_views";
 

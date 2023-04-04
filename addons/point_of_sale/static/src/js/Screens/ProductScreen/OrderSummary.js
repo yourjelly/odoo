@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Component } from "@odoo/owl";
-import { float_is_zero } from "web.utils";
+import { float_is_zero } from "@web/legacy/js/core/utils";
 
 export class OrderSummary extends Component {
     static template = "OrderSummary";

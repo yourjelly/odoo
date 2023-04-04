@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { AlreadyDefinedPatchError, patch, unpatch, UnknownPatchError } from "web.utils";
+import { AlreadyDefinedPatchError, patch, unpatch, UnknownPatchError } from "@web/legacy/js/core/utils";
 
 function makeBaseClass(assert, assertInSetup) {
     class BaseClass {

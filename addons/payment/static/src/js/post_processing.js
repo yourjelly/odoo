@@ -2,7 +2,7 @@
     
     import publicWidget from "web.public.widget";
     import core from "web.core";
-    import {Markup} from "web.utils";
+    import {Markup} from "@web/legacy/js/core/utils";
 
     var _t = core._t;
 

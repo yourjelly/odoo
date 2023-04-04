@@ -1,10 +1,10 @@
 /** @odoo-module alias=board.AddToBoardMenu **/
 
-    import Context from "web.Context";
-    import Domain from "web.Domain";
+    import Context from "@web/legacy/js/core/context";
+    import Domain from "@web/legacy/js/core/domain";
     import { Dropdown } from "@web/core/dropdown/dropdown";
     import FavoriteMenu from "@web/legacy/js/control_panel/favorite_menu";
-    import { sprintf } from "web.utils";
+    import { sprintf } from "@web/legacy/js/core/utils";
     import { useAutofocus } from "@web/core/utils/hooks";
 
     const { Component, useState } = owl;

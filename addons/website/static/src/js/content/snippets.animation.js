@@ -5,13 +5,13 @@
  */
 
 import { loadJS } from "@web/core/assets";
-import Class from "web.Class";
+import Class from "@web/legacy/js/core/class";
 import config from "web.config";
 import core from "web.core";
-import dom from "web.dom";
-import mixins from "web.mixins";
+import dom from "@web/legacy/js/core/dom";
+import mixins from "@web/legacy/js/core/mixins";
 import publicWidget from "web.public.widget";
-import utils from "web.utils";
+import utils from "@web/legacy/js/core/utils";
 import wUtils from "website.utils";
 
 var qweb = core.qweb;

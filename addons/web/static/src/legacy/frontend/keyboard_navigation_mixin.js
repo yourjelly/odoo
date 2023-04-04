@@ -1,5 +1,5 @@
 /** @odoo-module **/
-        import BrowserDetection from "web.BrowserDetection";
+        import BrowserDetection from "@web/legacy/js/core/browser_detection";
     import core from "web.core";
 
     /**

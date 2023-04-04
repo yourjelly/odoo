@@ -2,7 +2,7 @@
 
 import publicWidget from "web.public.widget";
 import core from "web.core";
-import Dialog from "web.Dialog";
+import Dialog from "@web/legacy/js/core/dialog";
 const _t = core._t;
 
 publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({

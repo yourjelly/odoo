@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.AjaxService **/
 
-import AbstractService from "web.AbstractService";
+import AbstractService from "@web/legacy/js/core/abstract_service";
 import core from "web.core";
 import session from "web.session";
 

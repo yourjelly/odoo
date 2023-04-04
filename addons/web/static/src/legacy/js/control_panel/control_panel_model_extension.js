@@ -1,8 +1,8 @@
 /** @odoo-module alias=web/static/src/js/control_panel/control_panel_model_extension.js **/
     
     import ActionModel from "web.ActionModel";
-    import Domain from "web.Domain";
-    import pyUtils from "web.py_utils";
+    import Domain from "@web/legacy/js/core/domain";
+    import pyUtils from "@web/legacy/js/core/py_utils";
 
     import { DEFAULT_INTERVAL, DEFAULT_PERIOD,
         getComparisonOptions, getIntervalOptions, getPeriodOptions,

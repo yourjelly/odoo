@@ -4,7 +4,7 @@
  * Provides a way to start JS code for public contents.
  */
 
-import dom from 'web.dom';
+import dom from '@web/legacy/js/core/dom';
 import Widget from 'web.Widget';
 
 /**

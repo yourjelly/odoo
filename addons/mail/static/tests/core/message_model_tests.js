@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { start } from "@mail/../tests/helpers/test_utils";
-import { str_to_datetime } from "web.time";
+import { str_to_datetime } from "@web/legacy/js/core/time";
 
 QUnit.module("message model test", {});
 

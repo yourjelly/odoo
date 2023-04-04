@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import concurrency from 'web.concurrency';
+import concurrency from '@web/legacy/js/core/concurrency';
 import publicWidget from 'web.public.widget';
 
 import {qweb} from 'web.core';
-import {Markup} from 'web.utils';
+import {Markup} from '@web/legacy/js/core/utils';
 
 publicWidget.registry.searchBar = publicWidget.Widget.extend({
     selector: '.o_searchbar_form',

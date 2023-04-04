@@ -83,12 +83,12 @@
  */
 
 import AbstractModel from "web.AbstractModel";
-import concurrency from "web.concurrency";
-import Context from "web.Context";
+import concurrency from "@web/legacy/js/core/concurrency";
+import Context from "@web/legacy/js/core/context";
 import core from "web.core";
-import Domain from "web.Domain";
+import Domain from "@web/legacy/js/core/domain";
 import session from "web.session";
-import utils from "web.utils";
+import utils from "@web/legacy/js/core/utils";
 import viewUtils from "web.viewUtils";
 
 var _t = core._t;

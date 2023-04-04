@@ -1,8 +1,8 @@
 /** @odoo-module alias=web.DomainSelectorDialog **/
 
 import core from "web.core";
-import Dialog from "web.Dialog";
-import Domain from "web.Domain";
+import Dialog from "@web/legacy/js/core/dialog";
+import Domain from "@web/legacy/js/core/domain";
 import DomainSelector from "web.DomainSelector";
 
 var _t = core._t;

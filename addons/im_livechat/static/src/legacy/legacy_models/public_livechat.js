@@ -4,11 +4,11 @@ import CCThrottleFunction from "@im_livechat/legacy/legacy_models/cc_throttle_fu
 import Timer from "@im_livechat/legacy/legacy_models/timer";
 import Timers from "@im_livechat/legacy/legacy_models/timers";
 
-import Class from "web.Class";
+import Class from "@web/legacy/js/core/class";
 import { _t } from "web.core";
 import session from "web.session";
-import Mixins from "web.mixins";
-import { sprintf } from "web.utils";
+import Mixins from "@web/legacy/js/core/mixins";
+import { sprintf } from "@web/legacy/js/core/utils";
 
 /**
  * Thread model that represents a livechat on the website-side. This livechat

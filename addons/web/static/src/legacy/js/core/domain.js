@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.Domain **/
+/** @odoo-module **/
 
-import collections from "web.collections";
-import pyUtils from "web.py_utils";
+import collections from "./collections";
+import pyUtils from "./py_utils";
 var py = window.py; // look py.js
 
 const TRUE_LEAF = [1, '=', 1];

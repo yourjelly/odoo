@@ -1,7 +1,7 @@
 /** @odoo-module alias=website.snippet.editor **/
 
 import {qweb, _t, _lt} from "web.core";
-import Dialog from "web.Dialog";
+import Dialog from "@web/legacy/js/core/dialog";
 import weSnippetEditor from "web_editor.snippet.editor";
 import wSnippetOptions from "website.editor.snippets.options";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/utils/utils";

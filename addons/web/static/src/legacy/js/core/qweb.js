@@ -1,6 +1,6 @@
-/** @odoo-module alias=web.QWeb **/
+/** @odoo-module **/
 
-import translation from "web.translation";
+import translation from "./translation";
 
 var _t = translation._t;
 

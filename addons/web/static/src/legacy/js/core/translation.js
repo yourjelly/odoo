@@ -1,7 +1,7 @@
 
-/** @odoo-module alias=web.translation **/
+/** @odoo-module **/
 
-import Class from "web.Class";
+import Class from "./class";
 import { _lt } from "@web/core/l10n/translation";
 
 var TranslationDataBase = Class.extend(/** @lends instance.TranslationDataBase# */{

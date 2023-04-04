@@ -29,7 +29,7 @@
 
                 odoo.define('root.widget', function (require) {
                     'use strict';
-                    var Widget = require('web.Widget');
+                    var Widget = require('@web/legacy/js/core/widget');
                     var widget = new Widget();
                     widget.appendTo(document.body);
                     return widget;

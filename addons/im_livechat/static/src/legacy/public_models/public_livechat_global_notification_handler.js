@@ -3,8 +3,8 @@
 import { increment, one, Model } from "@im_livechat/legacy/model";
 
 import session from "web.session";
-import utils from "web.utils";
-import { getCookie } from "web.utils.cookies";
+import utils from "@web/legacy/js/core/utils";
+import { getCookie } from "@web/legacy/js/core/cookie_utils";
 
 Model({
     name: "PublicLivechatGlobalNotificationHandler",

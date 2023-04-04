@@ -2,7 +2,7 @@
 
 import { attr, clear, one, Model } from "@im_livechat/legacy/model";
 
-import { getCookie, deleteCookie } from "web.utils.cookies";
+import { getCookie, deleteCookie } from "@web/legacy/js/core/cookie_utils";
 
 Model({
     name: "LivechatButtonView",

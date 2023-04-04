@@ -23,10 +23,10 @@ import { WebClient } from "@web/webclient/webclient";
 // web.test_utils easyload xml templates at line : 124:130.
 // Also it set the autocomplete delay time for the field Many2One at 0 for the tests at line : 132:137
 import "web.test_legacy";
-import AbstractService from "web.AbstractService";
+import AbstractService from "@web/legacy/js/core/abstract_service";
 import ActionMenus from "@web/legacy/js/components/action_menus";
 import basicFields from "web.basic_fields";
-import Registry from "web.Registry";
+import Registry from "@web/legacy/js/core/registry";
 import core from "web.core";
 import makeTestEnvironment from "@web/../tests/legacy/helpers/test_env";
 import { registerCleanup } from "../helpers/cleanup";

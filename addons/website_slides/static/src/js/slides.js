@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import publicWidget from 'web.public.widget';
-import time from 'web.time';
+import time from '@web/legacy/js/core/time';
 
 publicWidget.registry.websiteSlides = publicWidget.Widget.extend({
     selector: '#wrapwrap',

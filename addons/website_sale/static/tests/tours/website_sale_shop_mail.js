@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import rpc from "web.rpc";
+import rpc from "@web/legacy/js/core/rpc";
 import { registry } from "@web/core/registry";
 import tourUtils from "website_sale.tour_utils";
 

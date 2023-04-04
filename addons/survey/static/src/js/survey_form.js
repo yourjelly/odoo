@@ -2,12 +2,12 @@
 
 import field_utils from "web.field_utils";
 import publicWidget from "web.public.widget";
-import time from "web.time";
+import time from "@web/legacy/js/core/time";
 import config from "web.config";
 import core from "web.core";
-import Dialog from "web.Dialog";
-import dom from "web.dom";
-import {getCookie, setCookie, deleteCookie} from "web.utils.cookies";
+import Dialog from "@web/legacy/js/core/dialog";
+import dom from "@web/legacy/js/core/dom";
+import {getCookie, setCookie, deleteCookie} from "@web/legacy/js/core/cookie_utils";
 
 import SurveyPreloadImageMixin from "survey.preload_image_mixin";
 import { SurveyImageZoomer } from "@survey/js/survey_image_zoomer";

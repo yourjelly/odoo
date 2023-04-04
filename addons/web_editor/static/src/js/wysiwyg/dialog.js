@@ -2,7 +2,7 @@
 
 import config from "web.config";
 import core from "web.core";
-import Dialog from "web.Dialog";
+import Dialog from "@web/legacy/js/core/dialog";
 
 var _t = core._t;
 

@@ -9,12 +9,12 @@
 import AbstractField from "web.AbstractField";
 import core from "web.core";
 import datepicker from "web.datepicker";
-import dom from "web.dom";
-import framework from "web.framework";
-import py_utils from "web.py_utils";
+import dom from "@web/legacy/js/core/dom";
+import framework from "@web/legacy/js/core/framework";
+import py_utils from "@web/legacy/js/core/py_utils";
 import session from "web.session";
 import field_utils from "web.field_utils";
-import utils from "web.utils";
+import utils from "@web/legacy/js/core/utils";
 
 var _t = core._t;
 var _lt = core._lt;

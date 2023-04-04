@@ -8,7 +8,7 @@ import { toInline, getCSSRules } from "web_editor.convertInline";
 import { loadBundle, loadJS } from "@web/core/assets";
 import { qweb } from 'web.core';
 import { useService } from "@web/core/utils/hooks";
-import { buildQuery } from "web.rpc";
+import { buildQuery } from "@web/legacy/js/core/rpc";
 import { HtmlField, htmlField } from "@web_editor/js/backend/html_field";
 import { getWysiwygClass } from 'web_editor.loader';
 import { device } from 'web.config';

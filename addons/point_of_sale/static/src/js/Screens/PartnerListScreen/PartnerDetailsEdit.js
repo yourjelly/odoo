@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { _t } from "web.core";
-import { getDataURLFromFile } from "web.utils";
+import { getDataURLFromFile } from "@web/legacy/js/core/utils";
 import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";
 import { useService } from "@web/core/utils/hooks";
 import { Component, onMounted, onWillUnmount  } from "@odoo/owl";

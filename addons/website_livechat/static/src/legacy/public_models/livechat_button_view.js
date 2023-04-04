@@ -2,8 +2,8 @@
 
 import { attr, clear, one, Patch } from '@im_livechat/legacy/model';
 
-import {unaccent} from 'web.utils';
-import {setCookie} from 'web.utils.cookies';
+import {unaccent} from '@web/legacy/js/core/utils';
+import {setCookie} from '@web/legacy/js/core/cookie_utils';
 
 Patch({
     name: 'LivechatButtonView',

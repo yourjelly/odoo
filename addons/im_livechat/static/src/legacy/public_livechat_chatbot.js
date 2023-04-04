@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 import session from "web.session";
-import time from "web.time";
-import utils from "web.utils";
+import time from "@web/legacy/js/core/time";
+import utils from "@web/legacy/js/core/utils";
 
 import LivechatButton from "@im_livechat/legacy/widgets/livechat_button";
 

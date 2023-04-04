@@ -29,7 +29,7 @@
  */
 
 import fieldUtils from 'web.field_utils';
-import mvc from 'web.mvc';
+import mvc from '@web/legacy/js/core/mvc';
 
 
 var AbstractModel = mvc.Model.extend({

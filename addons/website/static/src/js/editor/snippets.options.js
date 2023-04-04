@@ -3,8 +3,8 @@
 import {ColorpickerWidget} from "web.Colorpicker";
 import core from "web.core";
 import { loadBundle, loadCSS } from "@web/core/assets";
-import Dialog from "web.Dialog";
-import {Markup, sprintf} from "web.utils";
+import Dialog from "@web/legacy/js/core/dialog";
+import {Markup, sprintf} from "@web/legacy/js/core/utils";
 import weUtils from "web_editor.utils";
 import options from "web_editor.snippets.options";
 import wLinkPopoverWidget from "@website/js/widgets/link_popover_widget";

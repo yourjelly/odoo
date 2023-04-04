@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
     import session from "web.session";
-    import ajax from "web.ajax";
+    import ajax from "@web/legacy/js/core/ajax";
     import core from "web.core";
     import "web.dom_ready";
 

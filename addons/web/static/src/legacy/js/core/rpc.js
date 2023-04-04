@@ -1,6 +1,6 @@
-/** @odoo-module alias=web.rpc **/
+/** @odoo-module **/
 
-import ajax from "web.ajax";
+import ajax from "./ajax";
 
 const rpc = {
     /**

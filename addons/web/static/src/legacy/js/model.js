@@ -1,7 +1,7 @@
 /** @odoo-module **/
     
-    import { groupBy  } from "web.utils";
-    import Registry from "web.Registry";
+    import { groupBy  } from "@web/legacy/js/core/utils";
+    import Registry from "@web/legacy/js/core/registry";
     import { useBus } from "@web/core/utils/hooks";
 
     const { EventBus, onWillRender, useComponent } = owl;

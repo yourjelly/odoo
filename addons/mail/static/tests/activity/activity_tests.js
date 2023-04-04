@@ -15,7 +15,7 @@ import {
     triggerHotkey,
     mockTimeout,
 } from "@web/../tests/helpers/utils";
-import { date_to_str } from "web.time";
+import { date_to_str } from "@web/legacy/js/core/time";
 
 const { inputFiles } = file;
 

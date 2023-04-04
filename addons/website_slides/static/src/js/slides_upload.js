@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import {_t, qweb as QWeb} from 'web.core';
-import Dialog from 'web.Dialog';
+import Dialog from '@web/legacy/js/core/dialog';
 import publicWidget from 'web.public.widget';
-import utils from 'web.utils';
+import utils from '@web/legacy/js/core/utils';
 import wUtils from 'website.utils';
 
 var SlideUploadDialog = Dialog.extend({

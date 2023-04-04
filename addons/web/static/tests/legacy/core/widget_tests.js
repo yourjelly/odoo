@@ -2,8 +2,8 @@
 
 import AjaxService from "web.AjaxService";
 import core from "web.core";
-import Dialog from "web.Dialog";
-import QWeb from "web.QWeb";
+import Dialog from "@web/legacy/js/core/dialog";
+import QWeb from "@web/legacy/js/core/qweb";
 import Widget from "web.Widget";
 import testUtils from "web.test_utils";
 

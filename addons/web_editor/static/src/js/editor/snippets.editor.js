@@ -1,14 +1,14 @@
 /** @odoo-module alias=web_editor.snippet.editor **/
 
-import concurrency from "web.concurrency";
+import concurrency from "@web/legacy/js/core/concurrency";
 import core from "web.core";
-import Dialog from "web.Dialog";
-import dom from "web.dom";
-import {Markup, sprintf, confine} from "web.utils";
+import Dialog from "@web/legacy/js/core/dialog";
+import dom from "@web/legacy/js/core/dom";
+import {Markup, sprintf, confine} from "@web/legacy/js/core/utils";
 import Widget from "web.Widget";
 import options from "web_editor.snippets.options";
 import {ColorPaletteWidget} from "web_editor.ColorPalette";
-import SmoothScrollOnDrag from "web.smooth_scroll_on_drag";
+import SmoothScrollOnDrag from "@web/legacy/js/core/smooth_scroll_on_drag";
 import {getCSSVariableValue} from "web_editor.utils";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
 const QWeb = core.qweb;

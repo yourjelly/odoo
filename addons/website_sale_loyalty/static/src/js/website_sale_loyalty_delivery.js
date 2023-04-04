@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import PublicWidget from 'web.public.widget';
-import { patch } from 'web.utils';
+import { patch } from '@web/legacy/js/core/utils';
 import core from 'web.core';
 
 const _t = core._t;

@@ -2,7 +2,7 @@
 
 import Timer from "@im_livechat/legacy/legacy_models/timer";
 
-import Class from "web.Class";
+import Class from "@web/legacy/js/core/class";
 
 /**
  * This class lists several timers that use a same callback and duration.

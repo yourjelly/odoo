@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.Context **/
+/** @odoo-module **/
 
-import Class from "web.Class";
-import pyUtils from "web.py_utils";
+import Class from "./class";
+import pyUtils from "./py_utils";
 
 var Context = Class.extend({
     init: function () {

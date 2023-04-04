@@ -2,7 +2,7 @@
     
     import { Dropdown } from "@web/core/dropdown/dropdown";
     import { DatePicker, DateTimePicker } from "@web/legacy/js/components/datepicker";
-    import Domain from "web.Domain";
+    import Domain from "@web/legacy/js/core/domain";
     import { FIELD_OPERATORS, FIELD_TYPES } from "./search_utils";
     import field_utils from "web.field_utils";
     import { useModel } from "@web/legacy/js/model";

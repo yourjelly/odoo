@@ -3,7 +3,7 @@
 import { loadJS } from "@web/core/assets";
 import { _t } from 'web.core';
 import KeyboardNavigationMixin from '@web/legacy/frontend/keyboard_navigation_mixin';
-import {Markup} from 'web.utils';
+import {Markup} from '@web/legacy/js/core/utils';
 import session from 'web.session';
 import publicRootData from 'web.public.root';
 import "web.zoomodoo";

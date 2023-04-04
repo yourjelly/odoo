@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import Wysiwyg from "web_editor.wysiwyg";
-import ajax from "web.ajax";
+import ajax from "@web/legacy/js/core/ajax";
 import core from "web.core";
 import config from "web.config";
 

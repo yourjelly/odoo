@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from 'web.core';
-import Dialog from 'web.Dialog';
+import Dialog from '@web/legacy/js/core/dialog';
 import publicWidget from 'web.public.widget';
 
 var SlideEnrollDialog = Dialog.extend({

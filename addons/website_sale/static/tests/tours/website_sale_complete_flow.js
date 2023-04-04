@@ -1,7 +1,7 @@
 /** @odoo-module **/
     
     import { registry } from "@web/core/registry";
-    import rpc from "web.rpc";
+    import rpc from "@web/legacy/js/core/rpc";
     import tourUtils from "website_sale.tour_utils";
 
     registry.category("web_tour.tours").add('website_sale_tour_1', {

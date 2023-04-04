@@ -1,13 +1,13 @@
 /** @odoo-module **/
     
     import core from "web.core";
-    import time from "web.time";
+    import time from "@web/legacy/js/core/time";
     import {ReCaptcha} from "google_recaptcha.ReCaptchaV3";
     import session from "web.session";
-    import ajax from "web.ajax";
+    import ajax from "@web/legacy/js/core/ajax";
     import publicWidget from "web.public.widget";
-    import dom from "web.dom";
-    import concurrency from "web.concurrency";
+    import dom from "@web/legacy/js/core/dom";
+    import concurrency from "@web/legacy/js/core/concurrency";
 
     var _t = core._t;
     var qweb = core.qweb;

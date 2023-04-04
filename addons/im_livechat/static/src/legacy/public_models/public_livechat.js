@@ -4,8 +4,8 @@ import PublicLivechat from "@im_livechat/legacy/legacy_models/public_livechat";
 
 import { attr, clear, one, Model } from "@im_livechat/legacy/model";
 
-import { unaccent } from "web.utils";
-import { deleteCookie, setCookie } from "web.utils.cookies";
+import { unaccent } from "@web/legacy/js/core/utils";
+import { deleteCookie, setCookie } from "@web/legacy/js/core/cookie_utils";
 
 Model({
     name: "PublicLivechat",

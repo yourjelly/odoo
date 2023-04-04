@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import core from "web.core";
-import utils from "web.utils";
+import utils from "@web/legacy/js/core/utils";
 import options from "web_editor.snippets.options";
 
 const _t = core._t;

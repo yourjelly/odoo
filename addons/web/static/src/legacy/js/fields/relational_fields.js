@@ -13,14 +13,14 @@
  */
 
 import AbstractField from "web.AbstractField";
-import concurrency from "web.concurrency";
+import concurrency from "@web/legacy/js/core/concurrency";
 import core from "web.core";
-import Dialog from "web.Dialog";
-import dom from "web.dom";
+import Dialog from "@web/legacy/js/core/dialog";
+import dom from "@web/legacy/js/core/dom";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-import Domain from "web.Domain";
-import { sprintf } from "web.utils";
+import Domain from "@web/legacy/js/core/domain";
+import { sprintf } from "@web/legacy/js/core/utils";
 import { escape } from "@web/core/utils/strings";
 
 var _t = core._t;

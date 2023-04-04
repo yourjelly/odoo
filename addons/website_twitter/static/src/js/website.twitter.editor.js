@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import core from "web.core";
-import dom from "web.dom";
+import dom from "@web/legacy/js/core/dom";
 import sOptions from "web_editor.snippets.options";
 
 var _t = core._t;

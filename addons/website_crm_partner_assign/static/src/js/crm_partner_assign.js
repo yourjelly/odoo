@@ -2,7 +2,7 @@
 
 import {_t} from "web.core";
 import publicWidget from "web.public.widget";
-import time from "web.time";
+import time from "@web/legacy/js/core/time";
 
 publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
     selector: '#wrapwrap:has(.interested_partner_assign_form, .desinterested_partner_assign_form, .opp-stage-button, .new_opp_form)',

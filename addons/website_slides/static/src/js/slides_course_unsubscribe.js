@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import core from 'web.core';
-import Dialog from 'web.Dialog';
+import Dialog from '@web/legacy/js/core/dialog';
 import publicWidget from 'web.public.widget';
 
 var QWeb = core.qweb;

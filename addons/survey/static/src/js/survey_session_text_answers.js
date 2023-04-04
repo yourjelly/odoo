@@ -2,7 +2,7 @@
 
 import publicWidget from "web.public.widget";
 import core from "web.core";
-import time from "web.time";
+import time from "@web/legacy/js/core/time";
 import SESSION_CHART_COLORS from "survey.session_colors";
 
 var QWeb = core.qweb;

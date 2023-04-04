@@ -1,6 +1,6 @@
 /** @odoo-module alias=portal.composer **/
 
-import ajax from "web.ajax";
+import ajax from "@web/legacy/js/core/ajax";
 import core from "web.core";
 import publicWidget from "web.public.widget";
 

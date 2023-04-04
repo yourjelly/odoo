@@ -2,9 +2,9 @@
     
     import { Dropdown } from "@web/core/dropdown/dropdown";
     import { SearchDropdownItem } from "@web/search/search_dropdown_item/search_dropdown_item";
-    import Dialog from "web.OwlDialog";
+    import Dialog from "@web/legacy/js/core/owl_dialog";
     import { FACET_ICONS } from "./search_utils";
-    import Registry from "web.Registry";
+    import Registry from "@web/legacy/js/core/registry";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 

@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import publicWidget from 'web.public.widget';
-import { DropPrevious } from 'web.concurrency';
+import { DropPrevious } from '@web/legacy/js/core/concurrency';
 import { debounce } from "@web/core/utils/timing";
 import { qweb as QWeb } from 'web.core';
 

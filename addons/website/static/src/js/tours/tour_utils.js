@@ -1,7 +1,7 @@
 /** @odoo-module alias=website.tour_utils **/
 
 import {_t} from "web.core";
-import {Markup} from "web.utils";
+import {Markup} from "@web/legacy/js/core/utils";
 import { registry } from "@web/core/registry";
 
 function addMedia(position = "right") {

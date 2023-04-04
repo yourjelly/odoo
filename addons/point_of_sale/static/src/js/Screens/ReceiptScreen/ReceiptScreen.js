@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Printer } from "@point_of_sale/js/printers";
-import { is_email } from "web.utils";
+import { is_email } from "@web/legacy/js/core/utils";
 import { useErrorHandlers } from "@point_of_sale/js/custom_hooks";
 import { AbstractReceiptScreen } from "@point_of_sale/js/Misc/AbstractReceiptScreen";
 import { OfflineErrorPopup } from "@point_of_sale/js/Popups/OfflineErrorPopup";

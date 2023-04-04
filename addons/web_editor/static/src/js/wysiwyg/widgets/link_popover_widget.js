@@ -2,7 +2,7 @@
 
 import Widget from 'web.Widget';
 import {_t} from 'web.core';
-import {DropPrevious} from 'web.concurrency';
+import {DropPrevious} from '@web/legacy/js/core/concurrency';
 import { ancestors } from '@web_editor/js/common/wysiwyg_utils';
 
 const LinkPopoverWidget = Widget.extend({

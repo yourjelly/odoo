@@ -2,7 +2,7 @@
 
 import { Component } from "@odoo/owl";
 import { format } from "web.field_utils";
-import { round_precision as round_pr } from "web.utils";
+import { round_precision as round_pr } from "@web/legacy/js/core/utils";
 
 /**
  * @props {pos.order.line} line

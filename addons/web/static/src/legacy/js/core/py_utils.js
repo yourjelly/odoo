@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.py_utils **/
+/** @odoo-module **/
 
 import core from "web.core";
 

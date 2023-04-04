@@ -1,8 +1,8 @@
 /** @odoo-module **/
     
     import { _lt, _t } from "web.core";
-    import Domain from "web.Domain";
-    import pyUtils from "web.py_utils";
+    import Domain from "@web/legacy/js/core/domain";
+    import pyUtils from "@web/legacy/js/core/py_utils";
 
     //-------------------------------------------------------------------------
     // Constants

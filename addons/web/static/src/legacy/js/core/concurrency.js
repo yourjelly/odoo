@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.concurrency **/
+/** @odoo-module **/
 
 /**
  * Concurrency Utils
@@ -14,7 +14,7 @@
  * we solved some concurrency issues, when we noticed that a pattern emerged.
  */
 
-import Class from "web.Class";
+import Class from "./class";
 
 export default {
     /**

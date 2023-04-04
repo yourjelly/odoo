@@ -2,7 +2,7 @@
 
 import { WysiwygAdapterComponent } from "@website/components/wysiwyg_adapter/wysiwyg_adapter";
 import websiteTourUtils from "website.tour_utils";
-import { patch, unpatch } from "web.utils";
+import { patch, unpatch } from "@web/legacy/js/core/utils";
 
 const patchWysiwygAdapter = () => patch(WysiwygAdapterComponent.prototype, 'snippets_all_drag_and_drop.wysiwyg_adapter', {
     _trigger_up(ev) {

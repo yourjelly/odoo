@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.utils **/
+/** @odoo-module **/
 
 /**
  * Utils
@@ -6,7 +6,7 @@
  * Various generic utility functions
  */
 
-import translation from "web.translation";
+import translation from "./translation";
 
 import { Component } from "@odoo/owl";
 

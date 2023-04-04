@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { _t } from 'web.core';
-import { Markup } from 'web.utils';
+import { Markup } from '@web/legacy/js/core/utils';
 import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_service/tour_utils";
 

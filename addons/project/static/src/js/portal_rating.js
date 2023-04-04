@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import time from 'web.time';
+import time from '@web/legacy/js/core/time';
 import publicWidget from 'web.public.widget';
 
 publicWidget.registry.ProjectRatingImage = publicWidget.Widget.extend({

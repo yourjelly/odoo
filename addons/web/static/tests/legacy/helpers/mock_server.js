@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import Class from "web.Class";
-import Domain from "web.Domain";
-import pyUtils from "web.py_utils";
+import Class from "@web/legacy/js/core/class";
+import Domain from "@web/legacy/js/core/domain";
+import pyUtils from "@web/legacy/js/core/py_utils";
 
 var MockServer = Class.extend({
     /**

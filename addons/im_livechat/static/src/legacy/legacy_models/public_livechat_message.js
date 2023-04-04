@@ -2,10 +2,10 @@
 
 import * as mailUtils from "@mail/js/utils";
 
-import Class from "web.Class";
+import Class from "@web/legacy/js/core/class";
 import { _t } from "web.core";
 import session from "web.session";
-import time from "web.time";
+import time from "@web/legacy/js/core/time";
 
 /**
  * This is a message that is handled by im_livechat, without making use of the

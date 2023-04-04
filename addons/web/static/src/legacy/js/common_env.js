@@ -16,13 +16,13 @@
      * [1] https://github.com/odoo/owl/blob/master/doc/reference/environment.md#content-of-an-environment
      */
 
-    import { jsonRpc } from "web.ajax";
+    import { jsonRpc } from "@web/legacy/js/core/ajax";
     import { device, isDebug } from "web.config";
     import { bus } from "web.core";
-    import rpc from "web.rpc";
+    import rpc from "@web/legacy/js/core/rpc";
     import session from "web.session";
-    import { _t } from "web.translation";
-    import {getCookie, setCookie} from "web.utils.cookies";
+    import { _t } from "@web/legacy/js/core/translation";
+    import {getCookie, setCookie} from "@web/legacy/js/core/cookie_utils";
 
     const browser = {
         clearInterval: window.clearInterval.bind(window),

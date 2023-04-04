@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.time **/
+/** @odoo-module **/
 
-import translation from "web.translation";
-import utils from "web.utils";
+import translation from "./translation";
+import utils from "./utils";
 
 var lpad = utils.lpad;
 var rpad = utils.rpad;

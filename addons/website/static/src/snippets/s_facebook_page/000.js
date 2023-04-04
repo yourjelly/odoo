@@ -1,7 +1,7 @@
 /** @odoo-module alias=website.s_facebook_page **/
 
 import publicWidget from "web.public.widget";
-import utils from "web.utils";
+import utils from "@web/legacy/js/core/utils";
 
 const FacebookPageWidget = publicWidget.Widget.extend({
     selector: '.o_facebook_page',

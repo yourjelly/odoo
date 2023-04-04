@@ -2,7 +2,7 @@
     
     import config from "web.config";
     import field_utils from "web.field_utils";
-    import time from "web.time";
+    import time from "@web/legacy/js/core/time";
     import { useAutofocus } from "@web/core/utils/hooks";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 

@@ -10,7 +10,7 @@ import {
     makeLegacyDropdownService,
 } from "./utils";
 import { makeLegacyActionManagerService } from "./backend_utils";
-import * as AbstractService from "web.AbstractService";
+import * as AbstractService from "@web/legacy/js/core/abstract_service";
 import legacyEnv from "@web/legacy/js/env";
 import * as session from "web.session";
 import makeLegacyWebClientService from "./pseudo_web_client";

@@ -3,7 +3,7 @@
 import ControlPanel from "@web/legacy/js/control_panel/control_panel";
 import Dashboard from "website.backend.dashboard";
 import testUtils from "web.test_utils";
-import { patch, unpatch } from "web.utils";
+import { patch, unpatch } from "@web/legacy/js/core/utils";
 
 const { createParent, nextTick, prepareTarget } = testUtils;
 

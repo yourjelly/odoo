@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import time from "web.time";
-import { getCookie } from "web.utils.cookies";
+import time from "@web/legacy/js/core/time";
+import { getCookie } from "@web/legacy/js/core/cookie_utils";
 import Widget from "web.Widget";
 
 const LivechatButton = Widget.extend({

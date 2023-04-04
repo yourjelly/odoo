@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import Domain from "web.Domain";
+    import Domain from "@web/legacy/js/core/domain";
     import field_utils from "web.field_utils";
     import { useAutofocus } from "@web/core/utils/hooks";
     import { useModel } from "@web/legacy/js/model";

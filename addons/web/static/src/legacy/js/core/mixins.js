@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.mixins **/
+/** @odoo-module **/
 
-import Class from "web.Class";
-import utils from "web.utils";
+import Class from "./class";
+import utils from "./utils";
 
 /**
  * Mixin to structure objects' life-cycles folowing a parent-children

@@ -2,8 +2,8 @@
 
 import core from "web.core";
 import datepicker from "web.datepicker";
-import dom from "web.dom";
-import Domain from "web.Domain";
+import dom from "@web/legacy/js/core/dom";
+import Domain from "@web/legacy/js/core/domain";
 import field_utils from "web.field_utils";
 import ModelFieldSelector from "web.ModelFieldSelector";
 import Widget from "web.Widget";

@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_sale_stock.VariantMixin **/
 
-import {Markup} from "web.utils";
+import {Markup} from "@web/legacy/js/core/utils";
 import VariantMixin from "sale.VariantMixin";
 import publicWidget from "web.public.widget";
 import core from "web.core";

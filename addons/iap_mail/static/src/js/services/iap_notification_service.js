@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Markup } from 'web.utils';
+import { Markup } from '@web/legacy/js/core/utils';
 import { registry } from "@web/core/registry";
 
 export const iapNotificationService = {

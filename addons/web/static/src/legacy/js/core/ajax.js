@@ -1,9 +1,9 @@
-/** @odoo-module alias=web.ajax **/
+/** @odoo-module **/
 
 import config from "web.config";
 import core from "web.core";
-import {Markup} from "web.utils";
-import time from "web.time";
+import {Markup} from "./utils";
+import time from "./time";
 import download from "web.download";
 import contentdisposition from "web.contentdisposition";
 import { session } from "@web/session";

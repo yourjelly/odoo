@@ -8,7 +8,7 @@ import wSaleUtils from "website_sale.utils";
 const cartHandlerMixin = wSaleUtils.cartHandlerMixin;
 import "web.zoomodoo";
 import {extraMenuUpdateCallbacks} from "website.content.menu";
-import dom from "web.dom";
+import dom from "@web/legacy/js/core/dom";
 import { cartesian } from "@web/core/utils/arrays";
 import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { ProductImageViewerWrapper } from "@website_sale/js/components/website_sale_image_viewer";

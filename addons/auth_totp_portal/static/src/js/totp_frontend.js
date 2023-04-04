@@ -2,7 +2,7 @@
 
 import {_t} from "web.core";
 import publicWidget from "web.public.widget";
-import Dialog from "web.Dialog";
+import Dialog from "@web/legacy/js/core/dialog";
 import {handleCheckIdentity} from "portal.portal";
 
 /**

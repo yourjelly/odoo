@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.framework **/
+/** @odoo-module **/
 
 import core from "web.core";
-import ajax from "web.ajax";
+import ajax from "./ajax";
 import Widget from "web.Widget";
 
 var _t = core._t;

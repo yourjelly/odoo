@@ -2,7 +2,7 @@
 
 import core from "web.core";
 import publicWidget from "web.public.widget";
-import time from "web.time";
+import time from "@web/legacy/js/core/time";
 import session from "web.session";
 
 var _t = core._t;

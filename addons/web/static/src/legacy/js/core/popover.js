@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.Popover **/
+/** @odoo-module **/
     
     import { LegacyComponent } from "@web/legacy/legacy_component";
     const { status, onWillUnmount, useEffect, useRef, useState } = owl;

@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { sprintf } from "web.utils";
+import { sprintf } from "@web/legacy/js/core/utils";
 import { parse } from "web.field_utils";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";

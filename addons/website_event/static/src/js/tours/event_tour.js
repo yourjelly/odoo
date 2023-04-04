@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_event.event_steps **/
 
 import {_t} from "web.core";
-import {Markup} from "web.utils";
+import {Markup} from "@web/legacy/js/core/utils";
 
 import EventAdditionalTourSteps from "event.event_steps";
 

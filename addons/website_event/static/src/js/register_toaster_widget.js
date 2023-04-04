@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_event.register_toaster_widget **/
 
 import core from "web.core";
-import {Markup} from "web.utils";
+import {Markup} from "@web/legacy/js/core/utils";
 let _t = core._t;
 import publicWidget from "web.public.widget";
 

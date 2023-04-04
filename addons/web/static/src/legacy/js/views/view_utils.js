@@ -1,8 +1,8 @@
 /** @odoo-module alias=web.viewUtils **/
 
 
-import * as dom from 'web.dom';
-import * as utils from 'web.utils';
+import * as dom from '@web/legacy/js/core/dom';
+import * as utils from '@web/legacy/js/core/utils';
 
 var viewUtils = {
     /**

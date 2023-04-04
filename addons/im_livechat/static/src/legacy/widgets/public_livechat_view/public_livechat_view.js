@@ -3,7 +3,7 @@
 import * as mailUtils from "@mail/js/utils";
 
 import core from "web.core";
-import time from "web.time";
+import time from "@web/legacy/js/core/time";
 import Widget from "web.Widget";
 
 const QWeb = core.qweb;

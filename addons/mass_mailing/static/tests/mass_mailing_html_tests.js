@@ -1,6 +1,6 @@
 /** @odoo-module alias=mass_mailing.field_html_tests **/
 
-import * as ajax from "web.ajax";
+import * as ajax from "@web/legacy/js/core/ajax";
 import weTestUtils from "web_editor.test_utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import * as testUtils from "@web/../tests/helpers/utils";

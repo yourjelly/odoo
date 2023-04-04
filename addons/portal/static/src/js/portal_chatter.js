@@ -1,11 +1,11 @@
 /** @odoo-module alias=portal.chatter **/
 
 import core from "web.core";
-import dom from "web.dom";
+import dom from "@web/legacy/js/core/dom";
 import publicWidget from "web.public.widget";
-import time from "web.time";
+import time from "@web/legacy/js/core/time";
 import portalComposer from "portal.composer";
-import {Markup} from "web.utils";
+import {Markup} from "@web/legacy/js/core/utils";
 
 var qweb = core.qweb;
 var _t = core._t;

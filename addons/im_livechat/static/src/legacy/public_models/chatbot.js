@@ -3,7 +3,7 @@
 import { attr, one, clear, increment, Model } from "@im_livechat/legacy/model";
 
 import { qweb } from "web.core";
-import { Markup } from "web.utils";
+import { Markup } from "@web/legacy/js/core/utils";
 
 Model({
     name: "Chatbot",

@@ -4,13 +4,13 @@
 
     import publicWidget from 'web.public.widget';
     import  { qweb as QWeb, _t } from 'web.core';
-    import { Markup } from 'web.utils';
+    import { Markup } from '@web/legacy/js/core/utils';
     import config from 'web.config';
 
     import session from 'web.session';
     import { Quiz } from '@website_slides/js/slides_course_quiz';
     import { SlideCoursePage } from '@website_slides/js/slides_course_page';
-    import Dialog from 'web.Dialog';
+    import Dialog from '@web/legacy/js/core/dialog';
     import '@website_slides/js/slides_course_join';
 
     /**

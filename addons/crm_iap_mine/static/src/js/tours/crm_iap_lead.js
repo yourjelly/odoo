@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import {Markup} from "web.utils";
+import {Markup} from "@web/legacy/js/core/utils";
 import core from "web.core";
 
 import "@crm/js/tours/crm";

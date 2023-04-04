@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.dom **/
+/** @odoo-module **/
 
 /**
  * DOM Utility helpers
@@ -9,7 +9,7 @@
  * something happens in the DOM.
  */
 
-import concurrency from "web.concurrency";
+import concurrency from "./concurrency";
 import core from "web.core";
 var _t = core._t;
 

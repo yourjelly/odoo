@@ -2,7 +2,7 @@
 import fieldRegistry from "web.field_registry";
 import { parseArch } from "web.viewUtils";
 import { parse } from "web.field_utils";
-import { traverse } from "web.utils";
+import { traverse } from "@web/legacy/js/core/utils";
 
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 
