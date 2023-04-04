@@ -31,7 +31,7 @@
 import Class from "./class";
 import mixins from "./mixins";
 import ServicesMixin from "./service_mixins";
-import Widget from "web.Widget";
+import Widget from "./widget";
 import { loadBundle } from "@web/core/assets";
 
 

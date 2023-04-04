@@ -1,7 +1,7 @@
 /** @odoo-module alias=wysiwyg.widgets.ImageCropWidget **/
 
 import core from "@web/legacy/js/services/core";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import {applyModifications, cropperDataFields, activateCropper, loadImage, loadImageInfo} from "web_editor.image_processing";
 
 const _t = core._t;

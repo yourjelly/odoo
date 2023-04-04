@@ -2,7 +2,7 @@
 
 import core from "@web/legacy/js/services/core";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import {isColorGradient} from "web_editor.utils";
 
 const getDeepRange = OdooEditorLib.getDeepRange;

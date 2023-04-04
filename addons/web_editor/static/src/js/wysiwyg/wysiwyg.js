@@ -6,7 +6,7 @@ import { VideoSelector } from "@web_editor/components/media_dialog/video_selecto
 import dom from "@web/legacy/js/core/dom";
 import core from "@web/legacy/js/services/core";
 import { browser } from "@web/core/browser/browser";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import Dialog from "@web/legacy/js/core/dialog";
 import customColors from "web_editor.custom_colors";
 import {ColorPaletteWidget} from "web_editor.ColorPalette";

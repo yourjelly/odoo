@@ -18,7 +18,7 @@
     import ActionModel from "web.ActionModel";
     import Registry from "@web/legacy/js/core/registry";
     import testUtilsMock from "./test_utils_mock";
-    import Widget from "web.Widget";
+    import Widget from "@web/legacy/js/core/widget";
     import { destroy, getFixture, mount, useChild } from "@web/../tests/helpers/utils";
     import { registerCleanup } from "@web/../tests/helpers/cleanup";
     import { LegacyComponent } from "@web/legacy/legacy_component";

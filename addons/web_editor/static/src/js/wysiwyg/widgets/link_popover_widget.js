@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import Widget from 'web.Widget';
+import Widget from '@web/legacy/js/core/widget';
 import {_t} from '@web/legacy/js/services/core';
 import {DropPrevious} from '@web/legacy/js/core/concurrency';
 import { ancestors } from '@web_editor/js/common/wysiwyg_utils';

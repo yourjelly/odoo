@@ -1,7 +1,7 @@
 /** @odoo-module **/
     
     import concurrency from "@web/legacy/js/core/concurrency";
-    import Widget from "web.Widget";
+    import Widget from "@web/legacy/js/core/widget";
 
     const { Component } = owl;
 

@@ -4,7 +4,7 @@ import AjaxService from "@web/legacy/js/services/ajax_service";
 import core from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import QWeb from "@web/legacy/js/core/qweb";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import testUtils from "web.test_utils";
 
 QUnit.module('core', {}, function () {

@@ -1,6 +1,6 @@
 /** @odoo-module alias=web_editor.toolbar **/
 
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import config from "@web/legacy/js/services/config";
 
 const Toolbar = Widget.extend({

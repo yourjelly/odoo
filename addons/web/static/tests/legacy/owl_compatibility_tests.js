@@ -6,7 +6,7 @@
         WidgetAdapterMixin,
     } from "@web/legacy/js/owl_compatibility";
     import testUtils from "web.test_utils";
-    import Widget from "web.Widget";
+    import Widget from "@web/legacy/js/core/widget";
     import { registry } from "@web/core/registry";
     import { LegacyComponent } from "@web/legacy/legacy_component";
     import { mapLegacyEnvToWowlEnv, useWowlService } from "@web/legacy/utils";

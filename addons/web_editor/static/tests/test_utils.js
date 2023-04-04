@@ -4,7 +4,7 @@ import ajax from "@web/legacy/js/core/ajax";
 import MockServer from "@web/../tests/legacy/helpers/mock_server";
 import testUtils from "web.test_utils";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import Wysiwyg from "web_editor.wysiwyg";
 import options from "web_editor.snippets.options";
 

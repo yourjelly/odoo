@@ -5,7 +5,7 @@ import core from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import dom from "@web/legacy/js/core/dom";
 import {Markup, sprintf, confine} from "@web/legacy/js/core/utils";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import options from "web_editor.snippets.options";
 import {ColorPaletteWidget} from "web_editor.ColorPalette";
 import SmoothScrollOnDrag from "@web/legacy/js/core/smooth_scroll_on_drag";

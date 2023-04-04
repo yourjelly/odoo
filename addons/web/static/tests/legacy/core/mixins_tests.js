@@ -3,7 +3,7 @@
 import AbstractAction from "@web/legacy/js/chrome/abstract_action";
 import core from "@web/legacy/js/services/core";
 import testUtils from "web.test_utils";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { errorService } from "@web/core/errors/error_service";

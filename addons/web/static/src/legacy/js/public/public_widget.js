@@ -5,7 +5,7 @@
  */
 
 import dom from '@web/legacy/js/core/dom';
-import Widget from 'web.Widget';
+import Widget from '@web/legacy/js/core/widget';
 
 /**
  * Specialized Widget which automatically instantiates child widgets to attach

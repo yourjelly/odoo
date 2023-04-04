@@ -9,7 +9,7 @@ import {scrollTo} from "@web/legacy/js/core/dom";
 import rpc from "@web/legacy/js/core/rpc";
 import time from "@web/legacy/js/core/time";
 import utils from "@web/legacy/js/core/utils";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import { ColorPaletteWidget } from "web_editor.ColorPalette";
 import weUtils from "web_editor.utils";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";

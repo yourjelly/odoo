@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import core from "@web/legacy/js/services/core";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import { fuzzyLookup } from "@web/core/utils/search";
 
 var _t = core._t;

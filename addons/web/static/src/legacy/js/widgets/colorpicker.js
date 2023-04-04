@@ -3,7 +3,7 @@
 import core from "@web/legacy/js/services/core";
 import utils from "@web/legacy/js/core/utils";
 import Dialog from "@web/legacy/js/core/dialog";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 
 var _t = core._t;
 

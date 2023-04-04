@@ -2,7 +2,7 @@
 
 import time from "@web/legacy/js/core/time";
 import { getCookie } from "@web/legacy/js/core/cookie_utils";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 
 const LivechatButton = Widget.extend({
     className: "openerp o_livechat_button d-print-none",

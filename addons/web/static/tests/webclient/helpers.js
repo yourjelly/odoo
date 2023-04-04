@@ -48,7 +48,7 @@ import {
 } from "../helpers/utils";
 import session from "web.session";
 import LegacyMockServer from "@web/../tests/legacy/helpers/mock_server";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import { uiService } from "@web/core/ui/ui_service";
 import { ClientActionAdapter } from "@web/legacy/action_adapters";
 import { commandService } from "@web/core/commands/command_service";

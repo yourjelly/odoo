@@ -4,7 +4,7 @@ import * as mailUtils from "@mail/js/utils";
 
 import core from "@web/legacy/js/services/core";
 import time from "@web/legacy/js/core/time";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 
 const QWeb = core.qweb;
 const _lt = core._lt;

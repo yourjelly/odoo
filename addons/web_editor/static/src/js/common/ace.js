@@ -5,7 +5,7 @@ import concurrency from "@web/legacy/js/core/concurrency";
 import core from "@web/legacy/js/services/core";
 import dom from "@web/legacy/js/core/dom";
 import Dialog from "@web/legacy/js/core/dialog";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 import localStorage from "@web/legacy/js/core/local_storage";
 
 var _t = core._t;

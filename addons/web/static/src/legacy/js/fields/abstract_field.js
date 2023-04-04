@@ -30,7 +30,7 @@
  */
 
 import field_utils from "./field_utils";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 
 var AbstractField = Widget.extend({
     events: {

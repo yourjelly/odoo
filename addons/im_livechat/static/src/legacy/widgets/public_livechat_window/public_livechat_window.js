@@ -2,7 +2,7 @@
 
 import config from "@web/legacy/js/services/config";
 import { _t, qweb } from "@web/legacy/js/services/core";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 
 import { unaccent } from "@web/legacy/js/core/utils";
 import { setCookie } from "@web/legacy/js/core/cookie_utils";

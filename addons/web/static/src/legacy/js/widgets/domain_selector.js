@@ -6,7 +6,7 @@ import dom from "@web/legacy/js/core/dom";
 import Domain from "@web/legacy/js/core/domain";
 import field_utils from "@web/legacy/js/fields/field_utils";
 import ModelFieldSelector from "./model_field_selector";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 
 var _t = core._t;
 var _lt = core._lt;

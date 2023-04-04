@@ -2,7 +2,7 @@
 
 import core from "@web/legacy/js/services/core";
 import ajax from "./ajax";
-import Widget from "web.Widget";
+import Widget from "./widget";
 
 var _t = core._t;
 
