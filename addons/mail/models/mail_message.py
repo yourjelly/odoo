@@ -6,10 +6,15 @@ import re
 import textwrap
 from binascii import Error as binascii_error
 from collections import defaultdict
+from datetime import datetime
+
+from dateutil.relativedelta import relativedelta
+from lxml import etree
 
 from odoo import _, api, Command, fields, models, modules, tools
 from odoo.exceptions import AccessError
 from odoo.osv import expression
+from odoo.tools import html2plaintext
 from odoo.tools.misc import clean_context
 
 _logger = logging.getLogger(__name__)
@@ -86,6 +91,7 @@ class Message(models.Model):
     subject = fields.Char('Subject')
     date = fields.Datetime('Date', default=fields.Datetime.now)
     body = fields.Html('Contents', default='', sanitize_style=True)
+    is_compressed = fields.Boolean('Is Body Compressed', default=False, index=False)
     description = fields.Char(
         'Short description', compute="_compute_description",
         help='Message description: either the subject, or the beginning of the body')
@@ -747,6 +753,60 @@ class Message(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
         }
+
+    # ------------------------------------------------------
+    # CRONS
+    # ------------------------------------------------------
+
+    def _cron_compress_messages(self, older_than_days=0, batch_size=None):
+        """
+        Compress messages:
+            - Remove quotes from the message's body (ex: email reply of reply of reply... )
+            - Convert message's html `body` to their plaintext variant.
+        This action is irreversible.
+        The primary use-case for this cron is saving space.
+        Removing quotes saves space by removing content that is already present in other messages in the thread.
+        Converting html to plaintext reduces consumned space by removing tags and styling.
+
+        :param int older_than_days: number of days the message needs to be older than to be converted
+        :param int batch_size: maximum number of message compression per cron dispatching
+        """
+        def remove_quotes(msg_body):
+            """
+            Remove quotes from the message's body
+            :param msg_body: mail.message body field
+            :return: new message's body, without quotes
+            """
+            quote_attr_types = ['data-o-mail-quote-container', 'data-o-mail-quote']
+            xpath_query = " | ".join(f'.//*[@{quote_type}="1"]' for quote_type in quote_attr_types)
+            html_body = etree.fromstring(msg_body, parser=etree.HTMLParser())
+            if html_body is not None:
+                for node in html_body.xpath(xpath_query):
+                    node.getparent().remove(node)
+                return etree.tostring(html_body)
+            return msg_body
+
+        domain = [
+            ('body', '!=', False),
+            ('body', '!=', ''),
+            ('is_compressed', '=', False),
+            ('date', '<=', datetime.now() - relativedelta(days=older_than_days))
+        ]
+        if len(self) > 0:
+            messages = self.filtered_domain(domain)
+        else:
+            messages = self.env['mail.message'].search(domain, limit=batch_size, order='id')
+        for msg in messages:
+            try:
+                new_body = html2plaintext(remove_quotes(msg.body))
+            except Exception:
+                _logger.exception("Error while compressing message %s", msg.id)
+            else:
+                msg.body = new_body
+            finally:
+                # even if an exception is raised, the message is still marked
+                # as compressed, to avoid reprocessing it
+                msg.is_compressed = True
 
     # ------------------------------------------------------
     # DISCUSS API
