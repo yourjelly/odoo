@@ -119,7 +119,7 @@ class configmanager(object):
         group.add_option("--pidfile", dest="pidfile", help="file where the server pid will be stored")
         group.add_option("--addons-path", dest="addons_path",
                          help="specify additional addons paths (separated by commas).",
-                         action="callback", callback=self._check_addons_path, nargs=1, type="string")
+                         action="store", nargs=1, type="string")
         group.add_option("--upgrade-path", dest="upgrade_path",
                          help="specify an additional upgrade path.",
                          action="callback", callback=self._check_upgrade_path, nargs=1, type="string")
@@ -500,19 +500,10 @@ class configmanager(object):
                 self.options[arg] = optparse.Option.TYPE_CHECKER[self.casts[arg].type](self.casts[arg], arg, self.options[arg])
 
         self.options['root_path'] = self._normalize(os.path.join(os.path.dirname(__file__), '..'))
-        if not self.options['addons_path'] or self.options['addons_path']=='None':
-            default_addons = []
-            base_addons = os.path.join(self.options['root_path'], 'addons')
-            if os.path.exists(base_addons):
-                default_addons.append(base_addons)
-            main_addons = os.path.abspath(os.path.join(self.options['root_path'], '../addons'))
-            if os.path.exists(main_addons):
-                default_addons.append(main_addons)
-            self.options['addons_path'] = ','.join(default_addons)
+        if not self.options['addons_path'] or self.options['addons_path'] == 'None':
+            self.options['addons_path'] = ''
         else:
-            self.options['addons_path'] = ",".join(
-                self._normalize(x)
-                for x in self.options['addons_path'].split(','))
+            self.options['addons_path'] = ",".join(map(self._normalize, self.options['addons_path'].split(',')))
 
         self.options["upgrade_path"] = (
             ",".join(self._normalize(x)
@@ -557,30 +548,6 @@ class configmanager(object):
                 "the gevent-port option, please use the latter.",
                 DeprecationWarning)
             self.options['gevent_port'] = self.options.pop('longpolling_port')
-
-    def _is_addons_path(self, path):
-        from odoo.modules.module import MANIFEST_NAMES
-        for f in os.listdir(path):
-            modpath = os.path.join(path, f)
-            if os.path.isdir(modpath):
-                def hasfile(filename):
-                    return os.path.isfile(os.path.join(modpath, filename))
-                if hasfile('__init__.py') and any(hasfile(mname) for mname in MANIFEST_NAMES):
-                    return True
-        return False
-
-    def _check_addons_path(self, option, opt, value, parser):
-        ad_paths = []
-        for path in value.split(','):
-            path = path.strip()
-            res = os.path.abspath(os.path.expanduser(path))
-            if not os.path.isdir(res):
-                raise optparse.OptionValueError("option %s: no such directory: %r" % (opt, res))
-            if not self._is_addons_path(res):
-                raise optparse.OptionValueError("option %s: the path %r is not a valid addons directory" % (opt, path))
-            ad_paths.append(res)
-
-        setattr(parser.values, option.dest, ",".join(ad_paths))
 
     def _check_upgrade_path(self, option, opt, value, parser):
         upgrade_path = []

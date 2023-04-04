@@ -8,7 +8,7 @@ import functools
 import importlib
 import logging
 import os
-import pkg_resources
+import pathlib
 import re
 import sys
 import warnings
@@ -17,7 +17,6 @@ from os.path import join as opj, normpath
 import odoo
 import odoo.tools as tools
 import odoo.release as release
-from odoo.tools import pycompat
 
 MANIFEST_NAMES = ('__manifest__.py', '__openerp__.py')
 README = ['README.rst', 'README.md', 'README.txt']
@@ -86,7 +85,17 @@ class UpgradeHook(object):
 
         return sys.modules[name]
 
+def is_addons_path(p):
+    p = pathlib.Path(p)
+    if not p.is_dir():
+        return False
 
+    return any(
+        (d / m).exists()
+        for d in p.iterdir()
+        if d.is_dir()
+        for m in MANIFEST_NAMES
+    )
 def initialize_sys_path():
     """
     Setup the addons path ``odoo.addons.__path__`` with various defaults
@@ -99,17 +108,16 @@ def initialize_sys_path():
 
     # hook odoo.addons on addons paths
     for ad in tools.config['addons_path'].split(','):
-        ad = os.path.normcase(os.path.abspath(tools.ustr(ad.strip())))
-        if not os.path.isdir(ad):
-            _logger.warning("addons path %r does not exist or is not a directory", ad)
+        if not is_addons_path(ad):
+            _logger.warning("path %r is not a valid addons path", ad)
             continue
 
         if ad not in odoo.addons.__path__:
             odoo.addons.__path__.append(ad)
 
     # hook odoo.addons on base module path
-    base_path = os.path.normcase(os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'addons')))
-    if base_path not in odoo.addons.__path__ and os.path.isdir(base_path):
+    base_path = os.path.join(tools.config['root_path'], 'addons')
+    if base_path not in odoo.addons.__path__ and is_addons_path(base_path):
         odoo.addons.__path__.append(base_path)
 
     # hook odoo.upgrade on upgrade-path
