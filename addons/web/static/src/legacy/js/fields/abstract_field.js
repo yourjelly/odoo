@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.AbstractField **/
+/** @odoo-module **/
 
 /**
  * This is the basic field widget used by all the views to render a field in a view.
@@ -29,7 +29,7 @@
  * @module web.AbstractField
  */
 
-import field_utils from "web.field_utils";
+import field_utils from "./field_utils";
 import Widget from "web.Widget";
 
 var AbstractField = Widget.extend({

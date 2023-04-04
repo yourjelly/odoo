@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.field_utils **/
+/** @odoo-module **/
 
 /**
  * Field Utils

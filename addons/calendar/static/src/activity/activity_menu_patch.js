@@ -2,7 +2,7 @@
 
 import { ActivityMenu } from "@mail/web/activity/activity_menu";
 import { patch } from "@web/core/utils/patch";
-import fieldUtils from "web.field_utils";
+import fieldUtils from "@web/legacy/js/fields/field_utils";
 import { getLangTimeFormat } from "@web/legacy/js/core/time";
 
 patch(ActivityMenu.prototype, "calendar", {

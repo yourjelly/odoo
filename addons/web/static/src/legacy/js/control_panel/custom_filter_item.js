@@ -4,7 +4,7 @@
     import { DatePicker, DateTimePicker } from "@web/legacy/js/components/datepicker";
     import Domain from "@web/legacy/js/core/domain";
     import { FIELD_OPERATORS, FIELD_TYPES } from "./search_utils";
-    import field_utils from "web.field_utils";
+    import field_utils from "@web/legacy/js/fields/field_utils";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 

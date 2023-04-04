@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.field_registry **/
+/** @odoo-module **/
     
     import Registry from "@web/legacy/js/core/registry";
 

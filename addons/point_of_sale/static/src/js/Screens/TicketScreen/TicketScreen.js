@@ -4,7 +4,7 @@ import { Order } from "@point_of_sale/js/models";
 import { IndependentToOrderScreen } from "@point_of_sale/js/Misc/IndependentToOrderScreen";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { parse, format } from "web.field_utils";
+import { parse, format } from "@web/legacy/js/fields/field_utils";
 
 import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";
 import { ConfirmPopup } from "@point_of_sale/js/Popups/ConfirmPopup";

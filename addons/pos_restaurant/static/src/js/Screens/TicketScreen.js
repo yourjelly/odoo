@@ -2,7 +2,7 @@
 import { TicketScreen } from "@point_of_sale/js/Screens/TicketScreen/TicketScreen";
 import { useAutofocus } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
-import { parse } from "web.field_utils";
+import { parse } from "@web/legacy/js/fields/field_utils";
 import { ConfirmPopup } from "@point_of_sale/js/Popups/ConfirmPopup";
 import { Component, useState } from "@odoo/owl";
 

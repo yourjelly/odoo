@@ -4,7 +4,7 @@
 import { PosDB } from "@point_of_sale/js/db";
 import config from "web.config";
 import core from "web.core";
-import field_utils from "web.field_utils";
+import field_utils from "@web/legacy/js/fields/field_utils";
 import time from "@web/legacy/js/core/time";
 import utils from "@web/legacy/js/core/utils";
 import { batched, uuidv4 } from "@point_of_sale/js/utils";

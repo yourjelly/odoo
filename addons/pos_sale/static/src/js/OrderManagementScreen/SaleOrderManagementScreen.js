@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { sprintf } from "@web/legacy/js/core/utils";
-import { parse } from "web.field_utils";
+import { parse } from "@web/legacy/js/fields/field_utils";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { ControlButtonsMixin } from "@point_of_sale/js/ControlButtonsMixin";

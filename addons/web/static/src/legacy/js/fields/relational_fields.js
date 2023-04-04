@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.relational_fields **/
+/** @odoo-module **/
 
 /**
  * Relational Fields
@@ -12,7 +12,7 @@
  * the corresponding record(s), or alter some of their fields.
  */
 
-import AbstractField from "web.AbstractField";
+import AbstractField from "./abstract_field";
 import concurrency from "@web/legacy/js/core/concurrency";
 import core from "web.core";
 import Dialog from "@web/legacy/js/core/dialog";

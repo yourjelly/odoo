@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { parse } from "web.field_utils";
+import { parse } from "@web/legacy/js/fields/field_utils";
 import { Transition } from "@web/core/transition";
 import { constrain, getLimits, useMovable } from "@point_of_sale/app/movable_hook";
 import { ConfirmPopup } from "@point_of_sale/js/Popups/ConfirmPopup";

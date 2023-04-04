@@ -11,7 +11,7 @@
 
 import AbstractStorageService from "@web/legacy/js/core/abstract_storage_service";
 import AjaxService from "web.AjaxService";
-import basic_fields from "web.basic_fields";
+import basic_fields from "@web/legacy/js/fields/basic_fields";
 import Bus from "@web/legacy/js/core/bus";
 import config from "web.config";
 import core from "web.core";

@@ -3,7 +3,7 @@
 import { patch } from "@web/core/utils/patch";
 import { Message } from "@mail/core_ui/message";
 import { useService } from "@web/core/utils/hooks";
-import { format } from "web.field_utils";
+import { format } from "@web/legacy/js/fields/field_utils";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";

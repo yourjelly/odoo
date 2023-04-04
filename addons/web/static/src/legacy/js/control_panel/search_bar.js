@@ -1,7 +1,7 @@
 /** @odoo-module **/
     
     import Domain from "@web/legacy/js/core/domain";
-    import field_utils from "web.field_utils";
+    import field_utils from "@web/legacy/js/fields/field_utils";
     import { useAutofocus } from "@web/core/utils/hooks";
     import { useModel } from "@web/legacy/js/model";
     import { fuzzyTest } from "@web/core/utils/search";

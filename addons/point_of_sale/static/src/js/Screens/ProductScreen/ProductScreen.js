@@ -4,7 +4,7 @@ import { ControlButtonsMixin } from "@point_of_sale/js/ControlButtonsMixin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { useBarcodeReader } from "@point_of_sale/app/barcode_reader_hook";
-import { parse } from "web.field_utils";
+import { parse } from "@web/legacy/js/fields/field_utils";
 
 import { NumberPopup } from "@point_of_sale/js/Popups/NumberPopup";
 import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";

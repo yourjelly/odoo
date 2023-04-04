@@ -25,7 +25,7 @@ import { WebClient } from "@web/webclient/webclient";
 import "web.test_legacy";
 import AbstractService from "@web/legacy/js/core/abstract_service";
 import ActionMenus from "@web/legacy/js/components/action_menus";
-import basicFields from "web.basic_fields";
+import basicFields from "@web/legacy/js/fields/basic_fields";
 import Registry from "@web/legacy/js/core/registry";
 import core from "web.core";
 import makeTestEnvironment from "@web/../tests/legacy/helpers/test_env";

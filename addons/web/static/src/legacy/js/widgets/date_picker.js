@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.datepicker **/
 
 import core from "web.core";
-import field_utils from "web.field_utils";
+import field_utils from "@web/legacy/js/fields/field_utils";
 import time from "@web/legacy/js/core/time";
 import Widget from "web.Widget";
 

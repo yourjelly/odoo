@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { parse } from "web.field_utils";
+import { parse } from "@web/legacy/js/fields/field_utils";
 import { useErrorHandlers } from "@point_of_sale/js/custom_hooks";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";

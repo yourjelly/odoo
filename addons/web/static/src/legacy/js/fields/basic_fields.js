@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.basic_fields **/
+/** @odoo-module **/
 
 /**
  * This module contains most of the basic (meaning: non relational) field
@@ -6,14 +6,14 @@
  * BasicView, so, they can work with the records obtained from a BasicModel.
  */
 
-import AbstractField from "web.AbstractField";
+import AbstractField from "./abstract_field";
 import core from "web.core";
 import datepicker from "web.datepicker";
 import dom from "@web/legacy/js/core/dom";
 import framework from "@web/legacy/js/core/framework";
 import py_utils from "@web/legacy/js/core/py_utils";
 import session from "web.session";
-import field_utils from "web.field_utils";
+import field_utils from "./field_utils";
 import utils from "@web/legacy/js/core/utils";
 
 var _t = core._t;
