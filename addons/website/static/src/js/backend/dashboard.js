@@ -7,7 +7,7 @@ import field_utils from "web.field_utils";
 import pyUtils from "web.py_utils";
 import session from "web.session";
 import time from "web.time";
-import web_client from "web.web_client";
+import web_client from "@web/legacy/web_client";
 
 var QWeb = core.qweb;
 

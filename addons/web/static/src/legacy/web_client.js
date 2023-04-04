@@ -1,2 +1,2 @@
-/** @odoo-module alias=web.web_client **/
+/** @odoo-module **/
 export default {};
