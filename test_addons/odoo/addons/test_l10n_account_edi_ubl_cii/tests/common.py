@@ -130,7 +130,7 @@ class TestUBLCommon(AccountTestInvoicingCommon):
         invoice_count = len(self.env['account.move'].search([]))
 
         self._update_invoice_from_file(
-            module_name='l10n_account_edi_ubl_cii_tests',
+            module_name='test_l10n_account_edi_ubl_cii',
             subfolder=subfolder,
             filename=filename,
             invoice=invoice,
@@ -216,7 +216,7 @@ class TestUBLCommon(AccountTestInvoicingCommon):
         xml_content = base64.b64decode(attachment.with_context(bin_size=False).datas)
         xml_etree = self.get_xml_tree_from_string(xml_content)
 
-        expected_file_path = get_resource_path('l10n_account_edi_ubl_cii_tests', 'tests/test_files', expected_file)
+        expected_file_path = get_resource_path('test_l10n_account_edi_ubl_cii', 'tests/test_files', expected_file)
         expected_etree = etree.parse(expected_file_path).getroot()
 
         modified_etree = self.with_applied_xpath(

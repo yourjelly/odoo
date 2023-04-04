@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo.addons.l10n_account_edi_ubl_cii_tests.tests.common import TestUBLCommon
+from odoo.addons.test_l10n_account_edi_ubl_cii.tests.common import TestUBLCommon
 from odoo.tests import tagged
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -323,7 +323,7 @@ class TestCIIFR(TestUBLCommon):
             'journal_id': self.company_data['default_journal_sale'].id,
         })
         self._update_invoice_from_file(
-            module_name='l10n_account_edi_ubl_cii_tests',
+            module_name='test_l10n_account_edi_ubl_cii',
             subfolder='tests/test_files/from_odoo',
             filename='facturx_test_import_partner.xml',
             invoice=invoice)

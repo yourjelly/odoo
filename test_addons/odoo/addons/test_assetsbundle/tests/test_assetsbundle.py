@@ -13,8 +13,7 @@ import lxml
 import base64
 
 import odoo
-from odoo import api, http
-from odoo.addons import __path__ as ADDONS_PATH
+from odoo import api
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 from odoo.addons.base.models.ir_asset import AssetPaths
 from odoo.addons.base.models.ir_attachment import IrAttachment
@@ -22,7 +21,7 @@ from odoo.modules.module import get_resource_path, get_manifest
 from odoo.tests import HttpCase, tagged
 from odoo.tests.common import TransactionCase
 from odoo.addons.base.models.ir_qweb import QWebException
-from odoo.tools import mute_logger, func
+from odoo.tools import mute_logger
 
 
 GETMTINE = os.path.getmtime
@@ -1745,7 +1744,7 @@ class TestAssetsManifest(AddonManifestPatched):
 
     @mute_logger('odoo.addons.base.models.ir_asset')
     def test_31(self):
-        path_to_dummy = '../../tests/dummy.js'
+        path_to_dummy = '../test_xassetsbundle_stuff/dummies/dummy.js'
         me = pathlib.Path(__file__).parent.absolute()
         file_path = me.joinpath("..", path_to_dummy)  # assuming me = test_assetsbundle/tests
         self.assertTrue(os.path.isfile(file_path))
@@ -1762,7 +1761,7 @@ class TestAssetsManifest(AddonManifestPatched):
 
     @mute_logger('odoo.addons.base.models.ir_asset')
     def test_32(self):
-        path_to_dummy = '../../tests/dummy.xml'
+        path_to_dummy = '../test_xassetsbundle_stuff/dummies/dummy.xml'
         me = pathlib.Path(__file__).parent.absolute()
         file_path = me.joinpath("..", path_to_dummy)  # assuming me = test_assetsbundle/tests
         self.assertTrue(os.path.isfile(file_path))
