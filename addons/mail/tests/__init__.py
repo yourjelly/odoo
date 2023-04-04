@@ -4,6 +4,7 @@ from . import test_get_model_definitions
 from . import test_link_preview
 from . import test_mail_composer
 from . import test_mail_full_composer
+from . import test_mail_message
 from . import test_mail_render
 from . import test_mail_template
 from . import test_mail_tools
