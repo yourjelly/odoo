@@ -3,7 +3,7 @@
     import { CheckBox } from "@web/core/checkbox/checkbox";
     import { Dropdown } from "@web/core/dropdown/dropdown";
     import FavoriteMenu from "web.FavoriteMenu";
-    import { useModel } from "web.Model";
+    import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
     const { useState, useRef } = owl;

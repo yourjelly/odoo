@@ -5,7 +5,7 @@
     import Domain from "web.Domain";
     import { FIELD_OPERATORS, FIELD_TYPES } from "web.searchUtils";
     import field_utils from "web.field_utils";
-    import { useModel } from "web.Model";
+    import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
     const { useState } = owl;

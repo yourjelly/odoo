@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import legacyEnv from 'web.commonEnv';
-import { ComponentAdapter } from 'web.OwlCompatibility';
+import legacyEnv from '@web/legacy/js/common_env';
+import { ComponentAdapter } from '@web/legacy/js/owl_compatibility';
 import { registry } from "@web/core/registry";
 import { _lt } from "@web/core/l10n/translation";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";

@@ -11,7 +11,7 @@ import {
 } from "./utils";
 import { makeLegacyActionManagerService } from "./backend_utils";
 import * as AbstractService from "web.AbstractService";
-import legacyEnv from "web.env";
+import legacyEnv from "@web/legacy/js/env";
 import * as session from "web.session";
 import makeLegacyWebClientService from "./pseudo_web_client";
 import { templates } from "@web/core/assets";

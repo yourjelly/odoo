@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.Model **/
+/** @odoo-module **/
     
     import { groupBy  } from "web.utils";
     import Registry from "web.Registry";

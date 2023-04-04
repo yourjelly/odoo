@@ -5,7 +5,7 @@
     import Dialog from "web.OwlDialog";
     import { FACET_ICONS } from "web.searchUtils";
     import Registry from "web.Registry";
-    import { useModel } from "web.Model";
+    import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
     const { useState } = owl;

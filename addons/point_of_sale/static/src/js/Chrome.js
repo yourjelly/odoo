@@ -12,7 +12,7 @@ import { Navbar } from "@point_of_sale/app/navbar/navbar";
 // ChromeAdapter imports
 import { ProductScreen } from "@point_of_sale/js/Screens/ProductScreen/ProductScreen";
 import { registry } from "@web/core/registry";
-import env from "web.env";
+import env from "@web/legacy/js/env";
 
 import { ErrorTracebackPopup } from "./Popups/ErrorTracebackPopup";
 

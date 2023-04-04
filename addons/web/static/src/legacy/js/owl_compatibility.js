@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.OwlCompatibility **/
+/** @odoo-module **/
     
     import { LegacyComponent } from "@web/legacy/legacy_component";
     import { templates } from "@web/core/assets";

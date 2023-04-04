@@ -11,7 +11,7 @@ import ActionMixin from "web.ActionMixin";
 import ActionModel from "web.ActionModel";
 import ControlPanel from "web.ControlPanel";
 import Widget from "web.Widget";
-import { ComponentWrapper } from "web.OwlCompatibility";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 
 import { Component } from "@odoo/owl";
 const AbstractAction = Widget.extend(ActionMixin, {

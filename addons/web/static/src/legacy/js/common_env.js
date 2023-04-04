@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.commonEnv **/
+/** @odoo-module **/
     
     /**
      * This file defines the common environment, which contains everything that

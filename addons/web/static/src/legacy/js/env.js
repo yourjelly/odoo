@@ -1,10 +1,10 @@
-/** @odoo-module alias=web.env **/
+/** @odoo-module **/
 
 /**
  * This file defines the env to use in the webclient.
  */
 
-import commonEnv from 'web.commonEnv';
+import commonEnv from './common_env';
 import dataManager from 'web.data_manager';
 import { blockUI, unblockUI } from "web.framework";
 

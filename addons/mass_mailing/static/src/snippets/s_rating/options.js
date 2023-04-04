@@ -1,7 +1,7 @@
 odoo.define('mass_mailing.s_rating_options', function (require) {
 'use strict';
 
-const { ComponentWrapper } = require('web.OwlCompatibility');
+const { ComponentWrapper } = require('@web/legacy/js/owl_compatibility');
 const { MediaDialogWrapper } = require('@web_editor/components/media_dialog/media_dialog');
 const options = require('web_editor.snippets.options');
 
