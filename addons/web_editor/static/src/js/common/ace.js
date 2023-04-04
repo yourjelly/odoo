@@ -518,9 +518,7 @@ var ViewEditor = Widget.extend({
 
         function _processViews(views) {
             // Only keep the active views and index them by ID.
-            Object.assign(this.views, _.indexBy(_.filter(views, function (view) {
-                return view.active;
-            }), 'id'));
+            Object.assign(this.views, _.indexBy(views.filter(view => view.active), 'id'));
 
             // Initialize a 0 level for each view and assign them an array containing their children.
             var self = this;

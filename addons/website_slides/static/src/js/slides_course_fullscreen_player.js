@@ -613,7 +613,7 @@
                 } else if (slideData.category === 'document') {
                     slideData.embedUrl = $(slideData.embedCode).attr('src');
                 }
-                // fill empty property to allow searching on it with _.filter(list, matcher)
+                // fill empty property to allow searching on it with list.filter(matcher)
                 slideData.isQuiz = !!slideData.isQuiz;
                 slideData.hasQuestion = !!slideData.hasQuestion;
                 // technical settings for the Fullscreen to work
@@ -755,8 +755,7 @@
         _toggleSlideCompleted: async function (slide, completed = true) {
             await this._super(...arguments);
 
-            const slideMatch = _.matcher({id: slide.id});
-            const fsSlides = _.filter(this.slides, slideMatch);
+            const fsSlides = this.slides.filter(_slide => _slide.id === slide.id);
 
             fsSlides.forEach(slide => slide.completed = completed);
 

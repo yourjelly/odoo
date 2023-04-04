@@ -1,5 +1,6 @@
 /** @odoo-module alias=web.ModelFieldSelectorPopover **/
 
+import {filter} from "@web/core/utils/objects";
 import core from "web.core";
 import Widget from "web.Widget";
 import { fuzzyLookup } from "@web/core/utils/search";
@@ -245,7 +246,7 @@ var ModelFieldSelectorPopover = Widget.extend({
                 }).bind(this));
         }
         return def.then((function () {
-            return _.filter(modelFieldsCache.cache[model], function (f) {
+            return modelFieldsCache.cache[model].filter(f => {
                 return (!filters.searchable || f.searchable) && self.options.filter(f);
             });
         }).bind(this));
@@ -429,7 +430,10 @@ var ModelFieldSelectorPopover = Widget.extend({
         var page = this.pages.at(-1);
         this.$(".o_field_selector_popover_header .o_field_selector_title").text(this._getTitle());
 
-        var lines = _.filter(page, this.options.filter);
+
+        //!TODO NEED HELP
+        // this.options.filter is an object like {[arg] : true} 
+        var lines = filter(page, this.options.filter);
         if (this.searchValue) {
             lines = fuzzyLookup(this.searchValue, lines, (l) => l.string);
         }

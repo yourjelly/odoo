@@ -61,3 +61,20 @@ export function pick(object, ...properties) {
         properties.filter((prop) => prop in object).map((prop) => [prop, object[prop]])
     );
 }
+
+/**
+ * Returns a filtered array of objects that have the same key/value as the properties
+ *
+ * @template T
+ * @template {keyof T} K
+ * @param {T[]} array
+ * @param {K[]} properties
+ * @returns {T[]} filtered array
+ */
+export function filter(array, properties) {
+    return array.filter((item) => {
+        return Object.keys(properties).every((key) => {
+            return item[key] === properties[key];
+        });
+    });
+}

@@ -415,9 +415,7 @@
                         // filter neither on required, nor on checkbox and
                         // checking the validity of the group of checkbox is
                         // currently done for each checkbox of that group...
-                        var checkboxes = _.filter(inputs, function (input) {
-                            return input.required && input.type === 'checkbox';
-                        });
+                        var checkboxes = inputs.filter(input => input.required && input.type === 'checkbox');
                         return !_.any(checkboxes, checkbox => checkbox.checkValidity());
 
                     // Special cases for dates and datetimes

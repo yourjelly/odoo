@@ -1813,11 +1813,8 @@ export class Product extends PosModel {
 
         var pricelist_items = [];
         if (pricelist) {
-            pricelist_items = _.filter(
-                self.applicablePricelistItems[pricelist.id],
-                function (item) {
-                    return self.isPricelistItemUsable(item, date);
-                }
+            pricelist_items = self.applicablePricelistItems[pricelist.id].filter((item) =>
+                self.isPricelistItemUsable(item, date)
             );
         }
 
@@ -2516,7 +2513,7 @@ export class Orderline extends PosModel {
 
         var product = this.get_product();
         var taxes_ids = this.tax_ids || product.taxes_id;
-        taxes_ids = _.filter(taxes_ids, (t) => t in this.pos.taxes_by_id);
+        taxes_ids = taxes_ids.filter((t) => t in this.pos.taxes_by_id);
         var taxdetail = {};
         var product_taxes = this.pos.get_taxes_after_fp(taxes_ids, this.order.fiscal_position);
 
@@ -3308,9 +3305,7 @@ export class Order extends PosModel {
         var self = this;
         this.pricelist = pricelist;
 
-        var lines_to_recompute = _.filter(this.get_orderlines(), function (line) {
-            return !line.price_manually_set;
-        });
+        var lines_to_recompute = this.get_orderlines().filter((line) => !line.price_manually_set);
         _.each(lines_to_recompute, function (line) {
             line.set_unit_price(
                 line.product.get_price(self.pricelist, line.get_quantity(), line.get_price_extra())

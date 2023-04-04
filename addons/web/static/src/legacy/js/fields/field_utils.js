@@ -271,7 +271,7 @@ function formatInteger(value, field, options) {
 function formatMany2one(value, field, options) {
     if (!value) {
         value = '';
-    } else if (_.isArray(value)) {
+    } else if (Array.isArray(value)) {
         // value is a pair [id, nameget]
         value = value[1];
     } else {
@@ -728,7 +728,7 @@ function parseInteger(value) {
  *                   number, the value is returned untouched.
  */
 function parseMany2one(value) {
-    if (_.isArray(value)) {
+    if (Array.isArray(value)) {
         return {
             id: value[0],
             display_name: value[1],

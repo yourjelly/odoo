@@ -860,8 +860,8 @@ var BasicModel = AbstractModel.extend({
             record.data[field.name] = null;
             if (field.type === 'many2one') {
                 if (field.value) {
-                    var id = _.isArray(field.value) ? field.value[0] : field.value;
-                    var display_name = _.isArray(field.value) ? field.value[1] : undefined;
+                    var id = Array.isArray(field.value) ? field.value[0] : field.value;
+                    var display_name = Array.isArray(field.value) ? field.value[1] : undefined;
                     dataPoint = self._makeDataPoint({
                         modelName: field.relation,
                         data: {
@@ -991,7 +991,7 @@ var BasicModel = AbstractModel.extend({
         if (parent.static) {
             // x2Many case: the new record has been stored in _changes, as a
             // command so we remove the command(s) related to that record
-            parent._changes = _.filter(parent._changes, function (change) {
+            parent._changes = parent._changes.filter( change => {
                 if (change.id === elementID &&
                     change.operation === 'ADD' && // For now, only an ADD command increases limits
                     parent.tempLimitIncrement) {
@@ -1572,7 +1572,7 @@ var BasicModel = AbstractModel.extend({
                 return self._fetchSpecialData(record).then(function (fieldNames2) {
                     // Return the names of the fields that changed (onchange or
                     // associated special data change)
-                    return _.union(fieldNames, fieldNames2);
+                    return fieldNames.contat(fieldNames2);
                 });
             });
         });
@@ -1729,7 +1729,7 @@ var BasicModel = AbstractModel.extend({
                 if (val) {
                     // when the value isn't false, it can be either
                     // an array [id, display_name] or just an id.
-                    var data = _.isArray(val) ?
+                    var data = Array.isArray(val) ?
                         {id: val[0], display_name: val[1]} :
                         {id: val};
                     if (!oldValue || (self.localData[oldValue].res_id !== data.id)) {
@@ -1961,7 +1961,7 @@ var BasicModel = AbstractModel.extend({
                 list._forceM2MLink = true;
                 // handle multiple add: command[2] may be a dict of values (1
                 // record added) or an array of dict of values
-                var data = _.isArray(command.ids) ? command.ids : [command.ids];
+                var data = Array.isArray(command.ids) ? command.ids : [command.ids];
 
                 // name_create records for which there is no id (typically, could
                 // be the case of a quick_create in a many2many_tags, so data.length
@@ -3316,9 +3316,7 @@ var BasicModel = AbstractModel.extend({
                 list = this._applyX2ManyOperations(list);
                 this._sortList(list);
                 if (type === 'many2many' || list._forceM2MLink) {
-                    var relRecordCreated = _.filter(relRecordAdded, function (rec) {
-                        return typeof rec.res_id === 'string';
-                    });
+                    var relRecordCreated = relRecordAdded.filter(rec => typeof rec.res_id === 'string');
                     var realIDs = _.difference(list.res_ids, _.pluck(relRecordCreated, 'res_id'));
                     // deliberately generate a single 'replace' command instead
                     // of a 'delete' and a 'link' commands with the exact diff
@@ -3878,7 +3876,7 @@ var BasicModel = AbstractModel.extend({
             }
             if (field.type === 'one2many' || field.type === 'many2many') {
                 var ids;
-                if (!context[fieldName] || _.isArray(context[fieldName])) { // no dataPoint created yet
+                if (!context[fieldName] || Array.isArray(context[fieldName])) { // no dataPoint created yet
                     ids = context[fieldName] ? context[fieldName].slice(0) : [];
                 } else {
                     relDataPoint = this._applyX2ManyOperations(this.localData[context[fieldName]]);
@@ -3894,9 +3892,7 @@ var BasicModel = AbstractModel.extend({
                      * The webClient doesn't do literal id list comparison like ids == list
                      * Only relevant in o2m: m2m does create actual records in db
                      */
-                    ids = _.filter(ids, function (id) {
-                        return typeof id !== 'string';
-                    });
+                    ids = ids.filter(id => typeof id !== 'string');
                 }
                 context[fieldName] = ids;
             }
@@ -3949,7 +3945,7 @@ var BasicModel = AbstractModel.extend({
                 }
                 if (field.type === 'one2many' || field.type === 'many2many') {
                     let ids;
-                    if (!fieldValue || _.isArray(fieldValue)) { // no dataPoint created yet
+                    if (!fieldValue || Array.isArray(fieldValue)) { // no dataPoint created yet
                         ids = fieldValue ? fieldValue.slice(0) : [];
                     } else {
                         relDataPoint = self._applyX2ManyOperations(self.localData[fieldValue]);
@@ -3965,13 +3961,11 @@ var BasicModel = AbstractModel.extend({
                         * The webClient doesn't do literal id list comparison like ids == list
                         * Only relevant in o2m: m2m does create actual records in db
                         */
-                        ids = _.filter(ids, function (id) {
-                            return typeof id !== 'string';
-                        });
+                        ids = ids.filter(id => typeof id !== 'string');
                     }
                     return ids;
                 }
-                if (field.type === "properties" && _.isArray(fieldValue)) {
+                if (field.type === "properties" && Array.isArray(fieldValue)) {
                     // remove deleted properties to be able
                     // to filter based on empty properties field
                     return fieldValue.filter(definition => !definition.definition_deleted);
@@ -4265,7 +4259,7 @@ var BasicModel = AbstractModel.extend({
 
         if (parentRecord && parentRecord.viewType in parentRecord.fieldsInfo) {
             var originView = parentRecord.viewType;
-            fieldNames = _.union(fieldNames, Object.keys(parentRecord.fieldsInfo[originView]));
+            fieldNames = fieldNames.concat(Object.keys(parentRecord.fieldsInfo[originView]));
             fieldsInfo[targetView] = _.defaults({}, fieldsInfo[targetView], parentRecord.fieldsInfo[originView]);
             fields = _.defaults({}, fields, parentRecord.fields);
         }
@@ -4594,7 +4588,7 @@ var BasicModel = AbstractModel.extend({
         var many2ones = {};
         var r;
         commands = commands || []; // handle false value
-        var isCommandList = commands.length && _.isArray(commands[0]);
+        var isCommandList = commands.length && Array.isArray(commands[0]);
         if (!isCommandList) {
             commands = [[6, false, commands]];
         }
@@ -4770,9 +4764,9 @@ var BasicModel = AbstractModel.extend({
         var groupByField = list.groupedBy[0];
         var rawGroupBy = groupByField.split(':')[0];
         var fields = _.uniq(list.getFieldNames().concat(rawGroupBy));
-        var orderedBy = _.filter(list.orderedBy, function (order) {
+        var orderedBy = list.orderedBy?.filter(order => {
             return order.name === rawGroupBy || list.fields[order.name].group_operator !== undefined;
-        });
+        }) || [];
         var openGroupsLimit = list.groupsLimit || self.OPEN_GROUP_LIMIT;
         var expand = list.openGroupByDefault && options.fetchRecordsWithGroups;
         return this._rpc({
@@ -4924,7 +4918,7 @@ var BasicModel = AbstractModel.extend({
         if (list.res_ids.length > list.limit && list.orderedBy.length) {
             if (!list.orderedResIDs) {
                 var fieldNames = _.pluck(list.orderedBy, 'name');
-                def = this._readMissingFields(list, _.filter(list.res_ids, _.isNumber), fieldNames, options.withoutRecordData);
+                def = this._readMissingFields(list, list.res_ids.filter(id => Number.isFinite(id)), fieldNames, options.withoutRecordData);
             }
             def.then(function () {
                 self._sortList(list);

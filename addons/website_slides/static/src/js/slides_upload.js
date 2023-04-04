@@ -293,7 +293,7 @@ var SlideUploadDialog = Dialog.extend({
             },
             createSearchChoice: function (term, data) {
                 var addedTags = $(this.opts.element).select2('data');
-                if (_.filter(_.union(addedTags, data), function (tag) {
+                if (addedTags.concat(data).filter(tag => {
                     return tag.text.toLowerCase().localeCompare(term.toLowerCase()) === 0;
                 }).length === 0) {
                     if (this.opts.can_create) {

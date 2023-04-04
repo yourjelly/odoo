@@ -708,7 +708,7 @@ var DomainLeaf = DomainNode.extend({
                 // Adapt display value and operator for rendering
                 this.displayValue = this.value;
                 try {
-                    if (selectedField && !selectedField.relation && !_.isArray(this.value)) {
+                    if (selectedField && !selectedField.relation && !Array.isArray(this.value)) {
                         this.displayValue = field_utils.format[selectedField.type](this.value, selectedField);
                     }
                 } catch {/**/}
@@ -819,9 +819,9 @@ var DomainLeaf = DomainNode.extend({
             this.operator = this.operator === "not set" ? "=" : "!=";
             this.value = false;
         } else if (_.contains(["in", "not in"], this.operator)) {
-            this.value = _.isArray(this.value) ? this.value : this.value ? ("" + this.value).split(",") : [];
+            this.value = Array.isArray(this.value) ? this.value : this.value ? ("" + this.value).split(",") : [];
         } else {
-            if (_.isArray(this.value)) {
+            if (Array.isArray(this.value)) {
                 this.value = this.value.join(",");
             }
             this._changeValue(this.value, true);
@@ -868,7 +868,7 @@ var DomainLeaf = DomainNode.extend({
             // Never display "true" or "false" strings from boolean value
             if (_.isBoolean(this.value)) {
                 this.value = "";
-            } else if (_.isObject(this.value) && !_.isArray(this.value)) { // Can be object if parsed to x2x representation
+            } else if (_.isObject(this.value) && !Array.isArray(this.value)) { // Can be object if parsed to x2x representation
                 this.value = this.value.id || value || "";
             }
         }
@@ -971,7 +971,7 @@ var DomainLeaf = DomainNode.extend({
         if (e.type === "keyup" && e.which !== $.ui.keyCode.ENTER) return;
         if (!_.contains(["not in", "in"], this.operator)) return;
 
-        var values = _.isArray(this.value) ? this.value.slice() : [];
+        var values = Array.isArray(this.value) ? this.value.slice() : [];
 
         var $input = this.$(".o_domain_leaf_value_tags input");
         var val = $input.val().trim();
@@ -982,7 +982,7 @@ var DomainLeaf = DomainNode.extend({
         }
     },
     on_remove_tag: function (e) {
-        var values = _.isArray(this.value) ? this.value.slice() : [];
+        var values = Array.isArray(this.value) ? this.value.slice() : [];
         var val = this.$(e.currentTarget).data("value");
 
         var index = values.indexOf(val);
