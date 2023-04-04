@@ -734,7 +734,7 @@ function parseMany2one(value) {
             display_name: value[1],
         };
     }
-    if (_.isNumber(value) || _.isString(value)) {
+    if (Number.isFinite(value) || _.isString(value)) {
         return {
             id: parseInt(value, 10),
         };

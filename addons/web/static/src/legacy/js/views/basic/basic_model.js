@@ -4953,7 +4953,7 @@ var BasicModel = AbstractModel.extend({
             var fieldNames = list.getFieldNames();
             for (var i = list.offset; i < upperBound; i++) {
                 var resId = currentResIDs[i];
-                if (_.isNumber(resId)) {
+                if (Number.isFinite(resId)) {
                     resIDs.push(resId);
                 }
             }
