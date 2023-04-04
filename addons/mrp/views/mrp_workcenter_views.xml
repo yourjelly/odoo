@@ -199,9 +199,9 @@
                             <div t-attf-class="#{!selection_mode ? kanban_color(record.color.raw_value) : ''}">
                                 <div t-attf-class="o_kanban_card_header o_kanban_record_top">
                                     <div class="o_kanban_record_headings o_kanban_card_header_title">
-                                        <span class="o_primary ml8" style="display: inline-block">
+                                        <a name="action_display_productions_and_workorders" type="object" class="o_primary ml8 d-inline-block">
                                             <field name="name"/>
-                                        </span>
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="container o_kanban_card_content">

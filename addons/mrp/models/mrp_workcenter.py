@@ -203,6 +203,12 @@ class MrpWorkcenter(models.Model):
             self.resource_id.company_id = vals['company_id']
         return super(MrpWorkcenter, self).write(vals)
 
+    def action_display_productions_and_workorders(self):
+        self.ensure_one()
+        action = self.env["ir.actions.client"]._for_xml_id("mrp.action_mrp_display")
+        action['context'] = {'search_default_workcenter_id': self.id}
+        return action
+
     def action_show_operations(self):
         self.ensure_one()
         action = self.env['ir.actions.actions']._for_xml_id('mrp.mrp_routing_action')
