@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.CustomFilterItem **/
     
     import { Dropdown } from "@web/core/dropdown/dropdown";
-    import { DatePicker, DateTimePicker } from "web.DatePickerOwl";
+    import { DatePicker, DateTimePicker } from "@web/legacy/js/components/datepicker";
     import Domain from "web.Domain";
     import { FIELD_OPERATORS, FIELD_TYPES } from "web.searchUtils";
     import field_utils from "web.field_utils";

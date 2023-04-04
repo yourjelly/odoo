@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.CustomFileInput **/
+/** @odoo-module **/
     
     import { LegacyComponent } from "@web/legacy/legacy_component";
     const { useRef } = owl;

@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.Pager **/
+/** @odoo-module **/
     
     import { useAutofocus } from "@web/core/utils/hooks";
     import { LegacyComponent } from "@web/legacy/legacy_component";

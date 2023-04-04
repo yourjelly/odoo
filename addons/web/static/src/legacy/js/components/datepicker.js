@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.DatePickerOwl **/
+/** @odoo-module **/
     
     import config from "web.config";
     import field_utils from "web.field_utils";

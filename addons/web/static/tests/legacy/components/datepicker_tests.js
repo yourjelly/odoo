@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import { DatePicker, DateTimePicker } from "web.DatePickerOwl";
+    import { DatePicker, DateTimePicker } from "@web/legacy/js/components/datepicker";
     import testUtils from "web.test_utils";
     import time from "web.time";
 

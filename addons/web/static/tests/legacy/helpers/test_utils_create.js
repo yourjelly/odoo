@@ -9,7 +9,7 @@
      * testUtils file.
      */
 
-    import ActionMenus from "web.ActionMenus";
+    import ActionMenus from "@web/legacy/js/components/action_menus";
     import concurrency from "web.concurrency";
     import ControlPanel from "web.ControlPanel";
     import { useListener } from "@web/core/utils/hooks";
