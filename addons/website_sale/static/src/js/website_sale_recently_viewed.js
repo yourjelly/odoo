@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import {getCookie, setCookie} from "@web/legacy/js/core/cookie_utils";
 
 publicWidget.registry.productsRecentlyViewedUpdate = publicWidget.Widget.extend({

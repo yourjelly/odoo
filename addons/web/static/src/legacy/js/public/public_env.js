@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.public_env **/
+/** @odoo-module **/
     
     /**
      * This file defines the env to use in the public side.

@@ -2,7 +2,7 @@
 
 import ajax from "@web/legacy/js/core/ajax";
 import core from "web.core";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import { OptionalProductsModal } from "@sale_product_configurator/js/product_configurator_modal";
 import "website_sale.website_sale";
 import wsUtils from "website_sale.utils";

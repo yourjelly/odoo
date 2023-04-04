@@ -3,7 +3,7 @@
 import core from "web.core";
 import {Markup} from "@web/legacy/js/core/utils";
 let _t = core._t;
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 
 publicWidget.registry.RegisterToasterWidget = publicWidget.Widget.extend({
     selector: '.o_wevent_register_toaster',

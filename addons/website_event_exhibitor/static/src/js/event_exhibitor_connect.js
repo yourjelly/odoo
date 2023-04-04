@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_event_exhibitor.event_exhibitor_connect **/
 
 import Dialog from "@web/legacy/js/core/dialog";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import {Markup} from "@web/legacy/js/core/utils";
 
 var ExhibitorConnectClosedDialog = Dialog.extend({

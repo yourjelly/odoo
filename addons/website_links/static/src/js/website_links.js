@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_links.website_links **/
 
 import core from "web.core";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 
 var _t = core._t;
 

@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.s_dynamic_snippet_carousel **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import DynamicSnippet from "website.s_dynamic_snippet";
 import config from "web.config";
 

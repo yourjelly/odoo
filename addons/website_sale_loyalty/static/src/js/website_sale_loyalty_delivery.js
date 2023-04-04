@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import PublicWidget from 'web.public.widget';
+import PublicWidget from '@web/legacy/js/public/public_widget';
 import { patch } from '@web/legacy/js/core/utils';
 import core from 'web.core';
 

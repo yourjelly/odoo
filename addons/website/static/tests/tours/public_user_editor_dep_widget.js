@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import wysiwygLoader from "web_editor.loader";
 
 publicWidget.registry['public_user_editor_test'] = publicWidget.Widget.extend({

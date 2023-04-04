@@ -2,7 +2,7 @@
 
 import core from "web.core";
 import config from "web.config";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import VariantMixin from "website_sale.VariantMixin";
 import wSaleUtils from "website_sale.utils";
 const cartHandlerMixin = wSaleUtils.cartHandlerMixin;

@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_profile.website_profile **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import wysiwygLoader from "web_editor.loader";
 
 publicWidget.registry.websiteProfile = publicWidget.Widget.extend({

@@ -1,7 +1,7 @@
 /** @odoo-module alias=website.s_popup **/
 
 import config from "web.config";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import {getCookie, setCookie} from "@web/legacy/js/core/cookie_utils";
 
 // TODO In master, export this class too or merge it with PopupWidget

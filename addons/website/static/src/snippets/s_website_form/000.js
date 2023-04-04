@@ -5,7 +5,7 @@
     import {ReCaptcha} from "google_recaptcha.ReCaptchaV3";
     import session from "web.session";
     import ajax from "@web/legacy/js/core/ajax";
-    import publicWidget from "web.public.widget";
+    import publicWidget from "@web/legacy/js/public/public_widget";
     import dom from "@web/legacy/js/core/dom";
     import concurrency from "@web/legacy/js/core/concurrency";
 

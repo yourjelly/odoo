@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import {_t} from "web.core";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import time from "@web/legacy/js/core/time";
 
 publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({

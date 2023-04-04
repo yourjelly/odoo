@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_sale_wishlist.wishlist **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import wSaleUtils from "website_sale.utils";
 import VariantMixin from "sale.VariantMixin";
 

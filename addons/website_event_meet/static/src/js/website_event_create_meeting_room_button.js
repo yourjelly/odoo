@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_event_meet.website_event_create_room_button **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import core from "web.core";
 const QWeb = core.qweb;
 

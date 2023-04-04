@@ -1,6 +1,6 @@
 /** @odoo-module alias=survey.session_leaderboard **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import SESSION_CHART_COLORS from "survey.session_colors";
 
 publicWidget.registry.SurveySessionLeaderboard = publicWidget.Widget.extend({

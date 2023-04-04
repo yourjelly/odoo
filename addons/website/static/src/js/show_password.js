@@ -7,7 +7,7 @@
 // On mouse up, we hide it again.
 //
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 
 publicWidget.registry.ShowPassword = publicWidget.Widget.extend({
     selector: '#showPass',

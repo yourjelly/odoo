@@ -1,6 +1,6 @@
 /** @odoo-module alias=payment.checkout_form **/
     
-    import publicWidget from "web.public.widget";
+    import publicWidget from "@web/legacy/js/public/public_widget";
 
     import paymentFormMixin from "payment.payment_form_mixin";
 

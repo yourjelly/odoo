@@ -2,7 +2,7 @@
 
 import { _t } from 'web.core';
 import Dialog from '@web/legacy/js/core/dialog';
-import publicWidget from 'web.public.widget';
+import publicWidget from '@web/legacy/js/public/public_widget';
 
 var TagCourseDialog = Dialog.extend({
     template: 'website.slides.tag.add',

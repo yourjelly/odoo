@@ -1,14 +1,14 @@
-/** @odoo-module alias=web.public.root */
+/** @odoo-module */
 
 import dom from '@web/legacy/js/core/dom';
-import legacyEnv from 'web.public_env';
+import legacyEnv from './public_env';
 import session from 'web.session';
 import {getCookie} from '@web/legacy/js/core/cookie_utils';
-import publicWidget from 'web.public.widget';
+import publicWidget from './public_widget';
 import { registry } from '@web/core/registry';
 
 import AbstractService from "@web/legacy/js/core/abstract_service";
-import lazyloader from "web.public.lazyloader";
+import lazyloader from "./lazyloader";
 
 import {
     makeLegacyNotificationService,

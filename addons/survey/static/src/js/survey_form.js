@@ -1,7 +1,7 @@
 /** @odoo-module alias=survey.form **/
 
 import field_utils from "@web/legacy/js/fields/field_utils";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import time from "@web/legacy/js/core/time";
 import config from "web.config";
 import core from "web.core";

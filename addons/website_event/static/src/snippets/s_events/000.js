@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import publicWidget from 'web.public.widget';
+import publicWidget from '@web/legacy/js/public/public_widget';
 import DynamicSnippet from 'website.s_dynamic_snippet';
 
 const DynamicSnippetEvents = DynamicSnippet.extend({

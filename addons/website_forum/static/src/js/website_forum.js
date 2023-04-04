@@ -5,7 +5,7 @@ import core from "web.core";
 import {setCookie} from "@web/legacy/js/core/cookie_utils";
 import Dialog from "@web/legacy/js/core/dialog";
 import wysiwygLoader from "web_editor.loader";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import { Markup } from "@web/legacy/js/core/utils";
 import session from "web.session";
 var qweb = core.qweb;

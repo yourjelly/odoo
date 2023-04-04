@@ -10,7 +10,7 @@ import config from "web.config";
 import core from "web.core";
 import dom from "@web/legacy/js/core/dom";
 import mixins from "@web/legacy/js/core/mixins";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import utils from "@web/legacy/js/core/utils";
 import wUtils from "website.utils";
 

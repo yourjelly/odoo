@@ -2,7 +2,7 @@
 
 import concurrency from "@web/legacy/js/core/concurrency";
 import core from "web.core";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import {getCookie, setCookie} from "@web/legacy/js/core/cookie_utils";
 import VariantMixin from "sale.VariantMixin";
 import website_sale_utils from "website_sale.utils";

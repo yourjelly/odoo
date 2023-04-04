@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import publicWidget from 'web.public.widget';
+import publicWidget from '@web/legacy/js/public/public_widget';
 import session from 'web.session';
 import { qweb as QWeb } from 'web.core';
 

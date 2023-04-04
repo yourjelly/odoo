@@ -3,7 +3,7 @@
 import { _t } from "web.core";
 import { loadJS } from "@web/core/assets";
 import { SurveyImageZoomer } from "@survey/js/survey_image_zoomer";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 
 // The given colors are the same as those used by D3
 var D3_COLORS = ["#1f77b4","#ff7f0e","#aec7e8","#ffbb78","#2ca02c","#98df8a","#d62728",

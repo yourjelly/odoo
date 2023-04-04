@@ -5,7 +5,7 @@ import { _t } from 'web.core';
 import KeyboardNavigationMixin from '@web/legacy/frontend/keyboard_navigation_mixin';
 import {Markup} from '@web/legacy/js/core/utils';
 import session from 'web.session';
-import publicRootData from 'web.public.root';
+import publicRootData from '@web/legacy/js/public/public_root';
 import "web.zoomodoo";
 
 export const WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMixin, {

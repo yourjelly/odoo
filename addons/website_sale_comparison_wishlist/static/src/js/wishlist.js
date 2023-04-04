@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import publicWidget from 'web.public.widget';
+import publicWidget from '@web/legacy/js/public/public_widget';
 import 'website_sale_comparison.comparison';
 
 publicWidget.registry.ProductComparison.include({

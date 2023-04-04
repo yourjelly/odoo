@@ -2,7 +2,7 @@
 
 import {_t, qweb as QWeb} from 'web.core';
 import Dialog from '@web/legacy/js/core/dialog';
-import publicWidget from 'web.public.widget';
+import publicWidget from '@web/legacy/js/public/public_widget';
 import utils from '@web/legacy/js/core/utils';
 import wUtils from 'website.utils';
 

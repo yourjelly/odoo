@@ -1,7 +1,7 @@
 /** @odoo-module alias=portal.signature_form **/
 
 import core from "web.core";
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import { NameAndSignature } from "web.name_and_signature";
 var qweb = core.qweb;
 

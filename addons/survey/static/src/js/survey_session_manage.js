@@ -1,6 +1,6 @@
 /** @odoo-module alias=survey.session_manage **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import SurveyPreloadImageMixin from "survey.preload_image_mixin";
 import SurveySessionChart from "survey.session_chart";
 import SurveySessionTextAnswers from "survey.session_text_answers";

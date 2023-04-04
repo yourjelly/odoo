@@ -1,6 +1,6 @@
 /** @odoo-module alias=portal.portal **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import Dialog from "@web/legacy/js/core/dialog";
 import {_t, qweb} from "web.core";
 import session from "web.session";

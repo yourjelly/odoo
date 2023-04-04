@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_sale.s_dynamic_snippet_products **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import DynamicSnippetCarousel from "website.s_dynamic_snippet_carousel";
 import wSaleUtils from "website_sale.utils";
 

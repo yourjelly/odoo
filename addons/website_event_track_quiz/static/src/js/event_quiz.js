@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_event_track_quiz.event.quiz **/
 
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import core from "web.core";
 import session from "web.session";
 

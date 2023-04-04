@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import publicWidget from 'web.public.widget';
+import publicWidget from '@web/legacy/js/public/public_widget';
 import time from '@web/legacy/js/core/time';
 
 publicWidget.registry.websiteSlides = publicWidget.Widget.extend({

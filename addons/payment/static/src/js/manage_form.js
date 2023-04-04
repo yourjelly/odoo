@@ -1,7 +1,7 @@
 /** @odoo-module alias=payment.manage_form **/
     
     import core from "web.core";
-    import publicWidget from "web.public.widget";
+    import publicWidget from "@web/legacy/js/public/public_widget";
     import Dialog from "@web/legacy/js/core/dialog";
 
     import paymentFormMixin from "payment.payment_form_mixin";

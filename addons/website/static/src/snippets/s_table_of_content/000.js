@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.s_table_of_content **/
 
-import publicWidget from "web.public.widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import {extraMenuUpdateCallbacks} from "website.content.menu";
 
 const TableOfContent = publicWidget.Widget.extend({

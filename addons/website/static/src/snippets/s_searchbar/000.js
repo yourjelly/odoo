@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import concurrency from '@web/legacy/js/core/concurrency';
-import publicWidget from 'web.public.widget';
+import publicWidget from '@web/legacy/js/public/public_widget';
 
 import {qweb} from 'web.core';
 import {Markup} from '@web/legacy/js/core/utils';

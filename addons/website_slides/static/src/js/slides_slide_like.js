@@ -2,7 +2,7 @@
 
 import { sprintf } from '@web/core/utils/strings';
 import { _t } from 'web.core';
-import publicWidget from 'web.public.widget';
+import publicWidget from '@web/legacy/js/public/public_widget';
 import '@website_slides/js/slides';
 
 var SlideLikeWidget = publicWidget.Widget.extend({
