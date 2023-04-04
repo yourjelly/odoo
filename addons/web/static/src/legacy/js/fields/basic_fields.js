@@ -8,7 +8,7 @@
 
 import AbstractField from "./abstract_field";
 import core from "@web/legacy/js/services/core";
-import datepicker from "web.datepicker";
+import datepicker from "@web/legacy/js/widgets/date_picker";
 import dom from "@web/legacy/js/core/dom";
 import framework from "@web/legacy/js/core/framework";
 import py_utils from "@web/legacy/js/core/py_utils";

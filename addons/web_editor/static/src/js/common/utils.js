@@ -1,6 +1,6 @@
 /** @odoo-module alias=web_editor.utils **/
 
-import {ColorpickerWidget} from "web.Colorpicker";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
 
 let editableWindow = window;
 const _setEditableWindow = (ew) => editableWindow = ew;

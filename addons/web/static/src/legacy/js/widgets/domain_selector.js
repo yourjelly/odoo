@@ -1,11 +1,11 @@
-/** @odoo-module alias=web.DomainSelector **/
+/** @odoo-module **/
 
 import core from "@web/legacy/js/services/core";
-import datepicker from "web.datepicker";
+import datepicker from "./date_picker";
 import dom from "@web/legacy/js/core/dom";
 import Domain from "@web/legacy/js/core/domain";
 import field_utils from "@web/legacy/js/fields/field_utils";
-import ModelFieldSelector from "web.ModelFieldSelector";
+import ModelFieldSelector from "./model_field_selector";
 import Widget from "web.Widget";
 
 var _t = core._t;

@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.ModelFieldSelectorPopover **/
+/** @odoo-module **/
 
 import core from "@web/legacy/js/services/core";
 import Widget from "web.Widget";

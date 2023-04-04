@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.Colorpicker **/
+/** @odoo-module **/
 
 import core from "@web/legacy/js/services/core";
 import utils from "@web/legacy/js/core/utils";

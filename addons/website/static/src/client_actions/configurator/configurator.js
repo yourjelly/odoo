@@ -3,7 +3,7 @@
 import concurrency from '@web/legacy/js/core/concurrency';
 import utils from '@web/legacy/js/core/utils';
 import weUtils from 'web_editor.utils';
-import {ColorpickerWidget} from 'web.Colorpicker';
+import {ColorpickerWidget} from '@web/legacy/js/widgets/colorpicker';
 import {_lt} from '@web/legacy/js/services/core';
 import {svgToPNG} from 'website.utils';
 import { useService } from "@web/core/utils/hooks";

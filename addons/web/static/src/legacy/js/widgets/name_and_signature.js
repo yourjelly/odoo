@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.name_and_signature **/
+/** @odoo-module **/
 
 import core from "@web/legacy/js/services/core";
 import config from "@web/legacy/js/services/config";

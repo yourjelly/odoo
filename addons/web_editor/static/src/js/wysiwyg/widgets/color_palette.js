@@ -1,7 +1,7 @@
 /** @odoo-module alias=web_editor.ColorPalette **/
 
 import session from "web.session";
-import {ColorpickerWidget} from "web.Colorpicker";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
 import Widget from "web.Widget";
 import customColors from "web_editor.custom_colors";
 import weUtils from "web_editor.utils";
