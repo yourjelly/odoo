@@ -60,7 +60,20 @@ export class MrpDisplay extends Component {
     }
 
     get workorders() {
-        return this.mrp_workorder.root.records;
+        const workorders = this.mrp_workorder.root.records;
+        const statesComparativeValues = {
+            // Smallest value = first. Biggest value = last.
+            progress: 0,
+            ready: 1,
+            pending: 2,
+            waiting: 3,
+        };
+        workorders.sort((wo1, wo2) => {
+            const v1 = statesComparativeValues[wo1.data.state];
+            const v2 = statesComparativeValues[wo2.data.state];
+            return v1 > v2 ? 1 : v1 < v2 ? -1 : 0;
+        });
+        return workorders;
     }
 
     getRawMoves(record) {
@@ -74,7 +87,7 @@ export class MrpDisplay extends Component {
         );
     }
 
-    getWorkorders(record) {
+    getProductionWorkorders(record) {
         if (this.state.activeResModel === "mrp.production") {
             return this.mrp_workorder.root.records.filter(
                 (wo) => wo.data.production_id?.[0] === record.resId
