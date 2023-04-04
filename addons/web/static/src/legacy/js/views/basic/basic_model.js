@@ -1572,7 +1572,7 @@ var BasicModel = AbstractModel.extend({
                 return self._fetchSpecialData(record).then(function (fieldNames2) {
                     // Return the names of the fields that changed (onchange or
                     // associated special data change)
-                    return fieldNames.contat(fieldNames2);
+                    return fieldNames.concat(fieldNames2);
                 });
             });
         });
