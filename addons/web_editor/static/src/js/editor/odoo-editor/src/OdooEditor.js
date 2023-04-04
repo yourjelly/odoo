@@ -2154,7 +2154,7 @@ export class OdooEditor extends EventTarget {
                 this._activateContenteditable();
             }
             const returnValue = editorCommands[method](this, ...args);
-            if (link) {
+            if (link && method !== 'unlink') {
                 this.setContenteditableLink(link);
             }
             return returnValue;

@@ -274,7 +274,12 @@ const LinkPopoverWidget = Widget.extend({
      */
     _onRemoveLinkClick(ev) {
         ev.preventDefault();
-        this.options.wysiwyg.removeLink();
+        // Wait for popover hide to be complete before removing link.
+        const removeLink = () => {
+            this.options.wysiwyg.removeLink();
+            this.$target.off('hidden.bs.popover.link_popover', removeLink)
+        }
+        this.$target.on('hidden.bs.popover.link_popover', removeLink);
         ev.stopImmediatePropagation();
     },
 });
