@@ -18,6 +18,14 @@ class MrpProduction(models.Model):
         place for financial management of the manufacturing order.",
         compute='_compute_analytic_account_id', store=True, readonly=False)
 
+    # accrued expense fields
+    order_line = fields.Many2many('stock.move', compute='_compute_order_line')
+
+    @api.depends('move_raw_ids')
+    def _compute_order_line(self):
+        for order in self:
+            order.order_line = order.move_raw_ids
+
     def _compute_show_valuation(self):
         for order in self:
             order.show_valuation = any(m.state == 'done' for m in order.move_finished_ids)

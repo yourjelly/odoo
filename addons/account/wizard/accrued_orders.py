@@ -114,7 +114,7 @@ class AccruedExpenseRevenue(models.TransientModel):
                 'credit': balance * -1 if balance < 0 else 0.0,
                 'account_id': account_id,
             }
-            if len(order) == 1 and self.company_id.currency_id != order.currency_id:
+            if len(order) == 1 and getattr(order, 'currency_id', False) and self.company_id.currency_id != order.currency_id:
                 values.update({
                     'amount_currency': amount_currency,
                     'currency_id': order.currency_id.id,
@@ -129,6 +129,8 @@ class AccruedExpenseRevenue(models.TransientModel):
         self.ensure_one()
         move_lines = []
         is_purchase = self.env.context.get('active_model') == 'purchase.order'
+        is_sale = self.env.context.get('active_model') == 'sale.order'
+        is_manufacturing = self.env.context.get('active_model') == 'mrp.production'
         orders = self.env[self._context['active_model']].with_company(self.company_id).browse(self._context['active_ids'])
 
         if orders.filtered(lambda o: o.company_id != self.company_id):
@@ -148,27 +150,31 @@ class AccruedExpenseRevenue(models.TransientModel):
                 values = _get_aml_vals(order, self.amount, 0, account.id, label=_('Manual entry'))
                 move_lines.append(Command.create(values))
             else:
-                other_currency = self.company_id.currency_id != order.currency_id
-                rate = order.currency_id._get_rates(self.company_id, self.date).get(order.currency_id.id) if other_currency else 1.0
+                order_currency = getattr(order, 'currency_id', self.company_id.currency_id)
+                other_currency = self.company_id.currency_id != order_currency
+                rate = order.currency_id._get_rates(self.company_id, self.date).get(order_currency.id) if other_currency else 1.0
                 # create a virtual order that will allow to recompute the qty delivered/received (and dependancies)
                 # without actually writing anything on the real record (field is computed and stored)
                 o = order.new(origin=order)
                 if is_purchase:
                     o.order_line.with_context(accrual_entry_date=self.date)._compute_qty_received()
                     o.order_line.with_context(accrual_entry_date=self.date)._compute_qty_invoiced()
-                else:
+                elif is_sale:
                     o.order_line.with_context(accrual_entry_date=self.date)._compute_qty_delivered()
                     o.order_line.with_context(accrual_entry_date=self.date)._compute_qty_invoiced()
                     o.order_line.with_context(accrual_entry_date=self.date)._compute_untaxed_amount_invoiced()
                     o.order_line.with_context(accrual_entry_date=self.date)._compute_qty_to_invoice()
-                lines = o.order_line.filtered(
-                    lambda l: l.display_type not in ['line_section', 'line_note'] and
-                    fields.Float.compare(
-                        l.qty_to_invoice,
-                        0,
-                        precision_rounding=l.product_uom.rounding,
-                    ) == 1
-                )
+                if is_manufacturing:
+                    lines = o.order_line
+                else:
+                    lines = o.order_line.filtered(
+                        lambda l: l.display_type not in ['line_section', 'line_note'] and
+                        fields.Float.compare(
+                            l.qty_to_invoice,
+                            0,
+                            precision_rounding=l.product_uom.rounding,
+                        ) == 1
+                    )
                 for order_line in lines:
                     if is_purchase:
                         account = order_line.product_id.property_account_expense_id or order_line.product_id.categ_id.property_account_expense_categ_id
@@ -176,12 +182,18 @@ class AccruedExpenseRevenue(models.TransientModel):
                         amount_currency = order_line.currency_id.round(order_line.qty_to_invoice * order_line.price_unit)
                         fnames = ['qty_to_invoice', 'qty_received', 'qty_invoiced', 'invoice_lines']
                         label = _('%s - %s; %s Billed, %s Received at %s each', order.name, _ellipsis(order_line.name, 20), order_line.qty_invoiced, order_line.qty_received, formatLang(self.env, order_line.price_unit, currency_obj=order.currency_id))
-                    else:
+                    elif is_sale:
                         account = order_line.product_id.property_account_income_id or order_line.product_id.categ_id.property_account_income_categ_id
                         amount = self.company_id.currency_id.round(order_line.untaxed_amount_to_invoice / rate)
                         amount_currency = order_line.untaxed_amount_to_invoice
                         fnames = ['qty_to_invoice', 'untaxed_amount_to_invoice', 'qty_invoiced', 'qty_delivered', 'invoice_lines']
                         label = _('%s - %s; %s Invoiced, %s Delivered at %s each', order.name, _ellipsis(order_line.name, 20), order_line.qty_invoiced, order_line.qty_delivered, formatLang(self.env, order_line.price_unit, currency_obj=order.currency_id))
+                    elif is_manufacturing:
+                        account = order_line.product_id.property_account_expense_id or order_line.product_id.categ_id.property_account_expense_categ_id
+                        amount = self.company_id.currency_id.round(order_line.quantity_done * order_line.price_unit / rate)
+                        amount_currency = amount
+                        fnames = ['quantity_done', 'product_qty']
+                        label = _('%s - %s; %s Produced, %s To Consume at %s each', order.name, _ellipsis(order_line.name, 20), order_line.quantity_done, order_line.quantity_done, formatLang(self.env, order_line.price_unit, currency_obj=order.company_id.currency_id))
                     values = _get_aml_vals(order, amount, amount_currency, account.id, label=label)
                     move_lines.append(Command.create(values))
                     total_balance += amount
