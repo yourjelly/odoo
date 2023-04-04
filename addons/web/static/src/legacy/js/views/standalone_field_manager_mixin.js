@@ -1,6 +1,6 @@
-/** @odoo-module alias=web.StandaloneFieldManagerMixin **/
+/** @odoo-module **/
 
-import FieldManagerMixin from 'web.FieldManagerMixin';
+import FieldManagerMixin from './field_manager_mixin';
 
 /**
  * The StandaloneFieldManagerMixin is a mixin, designed to be used by a widget

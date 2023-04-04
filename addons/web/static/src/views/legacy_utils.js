@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import fieldRegistry from "@web/legacy/js/fields/field_registry";
-import { parseArch } from "web.viewUtils";
+import { parseArch } from "@web/legacy/js/views/view_utils";
 import { parse } from "@web/legacy/js/fields/field_utils";
 import { traverse } from "@web/legacy/js/core/utils";
 

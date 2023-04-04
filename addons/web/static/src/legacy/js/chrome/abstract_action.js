@@ -8,7 +8,7 @@
  */
 
 import ActionMixin from "./action_mixin";
-import ActionModel from "web.ActionModel";
+import ActionModel from "@web/legacy/js/views/action_model";
 import ControlPanel from "@web/legacy/js/control_panel/control_panel";
 import Widget from "@web/legacy/js/core/widget";
 import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";

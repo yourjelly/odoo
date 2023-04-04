@@ -1,9 +1,9 @@
-/** @odoo-module alias=web.ActionModel **/
+/** @odoo-module **/
 
     import Domain from "@web/legacy/js/core/domain";
     import { FACET_ICONS } from "@web/legacy/js/control_panel/search_utils";
     import { Model } from "@web/legacy/js/model";
-    import { parseArch } from "web.viewUtils";
+    import { parseArch } from "./view_utils";
     import pyUtils from "@web/legacy/js/core/py_utils";
     import Registry from "@web/legacy/js/core/registry";
 

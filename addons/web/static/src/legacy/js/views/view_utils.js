@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.viewUtils **/
+/** @odoo-module **/
 
 
 import * as dom from '@web/legacy/js/core/dom';

@@ -22,7 +22,7 @@ import {
     triggerEvents,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
-import BasicModel from "web.BasicModel";
+import BasicModel from "@web/legacy/js/views/basic_model";
 import { browser } from "@web/core/browser/browser";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { getNextTabableElement } from "@web/core/utils/ui";

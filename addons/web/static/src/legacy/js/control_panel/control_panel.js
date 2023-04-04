@@ -2,7 +2,7 @@
     
     import ActionMenus from "@web/legacy/js/components/action_menus";
     import ComparisonMenu from "./comparison_menu";
-    import ActionModel from "web.ActionModel";
+    import ActionModel from "@web/legacy/js/views/action_model";
     import FavoriteMenu from "./favorite_menu";
     import FilterMenu from "./filter_menu";
     import GroupByMenu from "./groupby_menu";

@@ -1,6 +1,6 @@
 /** @odoo-module alias=web/static/src/js/control_panel/control_panel_model_extension.js **/
     
-    import ActionModel from "web.ActionModel";
+    import ActionModel from "@web/legacy/js/views/action_model";
     import Domain from "@web/legacy/js/core/domain";
     import pyUtils from "@web/legacy/js/core/py_utils";
 

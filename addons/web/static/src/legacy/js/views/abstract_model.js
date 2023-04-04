@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.AbstractModel **/
+/** @odoo-module **/
 
 /**
  * An AbstractModel is the M in MVC.  We tend to think of MVC more on the server

@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.BasicModel **/
+/** @odoo-module **/
 
 /**
  * Basic Model
@@ -82,14 +82,14 @@
  *   element, so it can be edited later.
  */
 
-import AbstractModel from "web.AbstractModel";
+import AbstractModel from "./abstract_model";
 import concurrency from "@web/legacy/js/core/concurrency";
 import Context from "@web/legacy/js/core/context";
 import core from "@web/legacy/js/services/core";
 import Domain from "@web/legacy/js/core/domain";
 import session from "web.session";
 import utils from "@web/legacy/js/core/utils";
-import viewUtils from "web.viewUtils";
+import viewUtils from "./view_utils";
 
 var _t = core._t;
 

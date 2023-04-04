@@ -15,7 +15,7 @@
     import { useListener } from "@web/core/utils/hooks";
     import dom from "@web/legacy/js/core/dom";
     import makeTestEnvironment from "./test_env";
-    import ActionModel from "web.ActionModel";
+    import ActionModel from "@web/legacy/js/views/action_model";
     import Registry from "@web/legacy/js/core/registry";
     import testUtilsMock from "./test_utils_mock";
     import Widget from "@web/legacy/js/core/widget";

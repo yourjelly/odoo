@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.FieldManagerMixin **/
+/** @odoo-module **/
 
 /**
  * The FieldManagerMixin is a mixin, designed to do the plumbing between field
@@ -7,7 +7,7 @@
  * calling the correct methods on the model.  This is the field_manager's job.
  */
 
-import BasicModel from 'web.BasicModel';
+import BasicModel from './basic_model';
 import concurrency from '@web/legacy/js/core/concurrency';
 
 var FieldManagerMixin = {
