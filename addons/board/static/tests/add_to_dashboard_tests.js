@@ -25,7 +25,7 @@ import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import LegacyAddToBoard from "board.AddToBoardMenu";
-import LegacyFavoriteMenu from "web.FavoriteMenu";
+import LegacyFavoriteMenu from "@web/legacy/js/control_panel/favorite_menu";
 import testUtils from "web.test_utils";
 import { makeFakeUserService } from "@web/../tests/helpers/mock_services";
 

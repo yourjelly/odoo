@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import ControlPanel from "web.ControlPanel";
+import ControlPanel from "@web/legacy/js/control_panel/control_panel";
 import Dashboard from "website.backend.dashboard";
 import testUtils from "web.test_utils";
 import { patch, unpatch } from "web.utils";

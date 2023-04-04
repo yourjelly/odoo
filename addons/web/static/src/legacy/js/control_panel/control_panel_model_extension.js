@@ -6,7 +6,7 @@
 
     import { DEFAULT_INTERVAL, DEFAULT_PERIOD,
         getComparisonOptions, getIntervalOptions, getPeriodOptions,
-        constructDateDomain, rankInterval, yearSelected } from "web.searchUtils";
+        constructDateDomain, rankInterval, yearSelected } from "@web/legacy/js/control_panel/search_utils";
 
     const FAVORITE_PRIVATE_GROUP = 1;
     const FAVORITE_SHARED_GROUP = 2;

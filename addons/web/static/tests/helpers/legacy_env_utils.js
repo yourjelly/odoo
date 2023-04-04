@@ -10,8 +10,8 @@ import makeTestEnvironment from "@web/../tests/legacy/helpers/test_env";
 import { registerCleanup } from "./cleanup";
 import { makeTestEnv } from "./mock_env";
 import { patchWithCleanup } from "./utils";
-import * as FavoriteMenu from "web.FavoriteMenu";
-import * as CustomFavoriteItem from "web.CustomFavoriteItem";
+import * as FavoriteMenu from "@web/legacy/js/control_panel/favorite_menu";
+import * as CustomFavoriteItem from "@web/legacy/js/control_panel/custom_favorite_item";
 
 const serviceRegistry = registry.category("services");
 

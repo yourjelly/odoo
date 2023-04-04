@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.ActionModel **/
 
     import Domain from "web.Domain";
-    import { FACET_ICONS } from "web.searchUtils";
+    import { FACET_ICONS } from "@web/legacy/js/control_panel/search_utils";
     import { Model } from "@web/legacy/js/model";
     import { parseArch } from "web.viewUtils";
     import pyUtils from "web.py_utils";

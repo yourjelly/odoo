@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.searchUtils **/
+/** @odoo-module **/
     
     import { _lt, _t } from "web.core";
     import Domain from "web.Domain";

@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.SearchBar **/
+/** @odoo-module **/
     
     import Domain from "web.Domain";
     import field_utils from "web.field_utils";

@@ -3,7 +3,7 @@
     import Context from "web.Context";
     import Domain from "web.Domain";
     import { Dropdown } from "@web/core/dropdown/dropdown";
-    import FavoriteMenu from "web.FavoriteMenu";
+    import FavoriteMenu from "@web/legacy/js/control_panel/favorite_menu";
     import { sprintf } from "web.utils";
     import { useAutofocus } from "@web/core/utils/hooks";
 
