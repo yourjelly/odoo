@@ -1813,9 +1813,10 @@ export class Product extends PosModel {
 
         var pricelist_items = [];
         if (pricelist) {
-            pricelist_items = self.applicablePricelistItems[pricelist.id].filter((item) =>
-                self.isPricelistItemUsable(item, date)
-            );
+            pricelist_items =
+                self.applicablePricelistItems[pricelist.id]?.filter((item) =>
+                    self.isPricelistItemUsable(item, date)
+                ) || [];
         }
 
         var price = self.lst_price;
