@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import FormEditorRegistry from "website.form_editor_registry";
 import options from "web_editor.snippets.options";
 import Dialog from "@web/legacy/js/core/dialog";

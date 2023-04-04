@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_event_track.website_event_track_proposal_form **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 
 var QWeb = core.qweb;

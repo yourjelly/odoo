@@ -9,7 +9,7 @@
      * testUtils file.
      */
 
-    import { _t } from "web.core";
+    import { _t } from "@web/legacy/js/services/core";
     import testUtilsDom from "./test_utils_dom";
 
     /**

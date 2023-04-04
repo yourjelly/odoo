@@ -1,7 +1,7 @@
 /** @odoo-module alias=google_recaptcha.ReCaptchaV3 **/
 
 import Class from "@web/legacy/js/core/class";
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import { session } from "@web/session";
 import { loadJS } from "@web/core/assets";
 

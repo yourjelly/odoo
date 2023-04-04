@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import publicWidget from '@web/legacy/js/public/public_widget';
-import { _t } from 'web.core';
+import { _t } from '@web/legacy/js/services/core';
 import 'website_sale_delivery.checkout';
 
 publicWidget.registry.websiteSaleDelivery.include({

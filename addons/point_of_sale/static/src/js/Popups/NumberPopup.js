@@ -1,5 +1,5 @@
 /** @odoo-module */
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 var _t = core._t;
 
 import { AbstractAwaitablePopup } from "@point_of_sale/js/Popups/AbstractAwaitablePopup";

@@ -2,7 +2,7 @@
 
 import BarcodeParser from "barcodes.BarcodeParser";
 const FNC1_CHAR = String.fromCharCode(29);
-import {_lt} from "web.core";
+import {_lt} from "@web/legacy/js/services/core";
 
 BarcodeParser.include({
     /**

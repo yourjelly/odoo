@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_links.charts **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 
 var _t = core._t;

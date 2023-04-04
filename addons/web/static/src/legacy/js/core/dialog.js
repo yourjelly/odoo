@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import dom from "./dom";
 import Widget from "web.Widget";
 import OwlDialog from "./owl_dialog";

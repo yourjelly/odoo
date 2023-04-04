@@ -2,7 +2,7 @@
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 import Dialog from "@web/legacy/js/core/dialog";
-import {_t, qweb} from "web.core";
+import {_t, qweb} from "@web/legacy/js/services/core";
 import session from "web.session";
 
 publicWidget.registry.portalDetails = publicWidget.Widget.extend({

@@ -3,7 +3,7 @@
 import {Markup} from "@web/legacy/js/core/utils";
 import VariantMixin from "sale.VariantMixin";
 import publicWidget from "@web/legacy/js/public/public_widget";
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 var QWeb = core.qweb;
 
 import "website_sale.website_sale";

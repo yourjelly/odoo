@@ -1,6 +1,6 @@
 /** @odoo-module alias=portal.PortalSidebar **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import time from "@web/legacy/js/core/time";
 import session from "web.session";

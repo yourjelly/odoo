@@ -2,7 +2,7 @@
 
 import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog";
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import {ColorpickerWidget} from "web.Colorpicker";
 import Dialog from "@web/legacy/js/core/dialog";
 import {scrollTo} from "@web/legacy/js/core/dom";

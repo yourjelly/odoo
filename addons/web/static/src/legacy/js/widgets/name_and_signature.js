@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.name_and_signature **/
 
-import core from "web.core";
-import config from "web.config";
+import core from "@web/legacy/js/services/core";
+import config from "@web/legacy/js/services/config";
 import utils from "@web/legacy/js/core/utils";
 import Widget from "web.Widget";
 

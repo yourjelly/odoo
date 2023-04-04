@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 
 var _t = core._t;
 var py = window.py; // to silence linters

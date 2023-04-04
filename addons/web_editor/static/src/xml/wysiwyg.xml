@@ -36,8 +36,8 @@
                 });
 
                 odoo.define('web.core.top', function (require) {
-                    var core = require('web.core');
-                    core.qweb.templates = window.top.odoo.__DEBUG__.services['web.core'].qweb.templates;
+                    var core = require('@web/legacy/js/services/core');
+                    core.qweb.templates = window.top.odoo.__DEBUG__.services['@web/legacy/js/services/core'].qweb.templates;
                 });
             </script>
         </head>

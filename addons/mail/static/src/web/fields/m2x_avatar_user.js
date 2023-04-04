@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import fieldRegistry from "@web/legacy/js/fields/field_registry";
 import {
     FieldMany2ManyTagsAvatar,

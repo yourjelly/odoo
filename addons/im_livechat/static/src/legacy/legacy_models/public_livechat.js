@@ -5,7 +5,7 @@ import Timer from "@im_livechat/legacy/legacy_models/timer";
 import Timers from "@im_livechat/legacy/legacy_models/timers";
 
 import Class from "@web/legacy/js/core/class";
-import { _t } from "web.core";
+import { _t } from "@web/legacy/js/services/core";
 import session from "web.session";
 import Mixins from "@web/legacy/js/core/mixins";
 import { sprintf } from "@web/legacy/js/core/utils";

@@ -4,7 +4,7 @@ import { useAutofocus, useService } from '@web/core/utils/hooks';
 import { Dialog } from '@web/core/dialog/dialog';
 import { Switch } from '@website/components/switch/switch';
 import {unslugHtmlDataObject} from '../../services/website_service';
-import {csrf_token, _t} from 'web.core';
+import {csrf_token, _t} from '@web/legacy/js/services/core';
 
 const { xml, useState, Component, onWillStart } = owl;
 

@@ -3,7 +3,7 @@
 import { browser } from '@web/core/browser/browser';
 import { registry } from '@web/core/registry';
 import { useService, useBus } from '@web/core/utils/hooks';
-import core from 'web.core';
+import core from '@web/legacy/js/services/core';
 import { AceEditorAdapterComponent } from '../../components/ace_editor/ace_editor';
 import { WebsiteEditorComponent } from '../../components/editor/editor';
 import { WebsiteTranslator } from '../../components/translator/translator';

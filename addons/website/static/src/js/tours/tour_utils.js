@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.tour_utils **/
 
-import {_t} from "web.core";
+import {_t} from "@web/legacy/js/services/core";
 import {Markup} from "@web/legacy/js/core/utils";
 import { registry } from "@web/core/registry";
 

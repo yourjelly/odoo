@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import config from "web.config";
-import { _t, qweb } from "web.core";
+import config from "@web/legacy/js/services/config";
+import { _t, qweb } from "@web/legacy/js/services/core";
 import Widget from "web.Widget";
 
 import { unaccent } from "@web/legacy/js/core/utils";

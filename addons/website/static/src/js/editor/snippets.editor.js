@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.snippet.editor **/
 
-import {qweb, _t, _lt} from "web.core";
+import {qweb, _t, _lt} from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import weSnippetEditor from "web_editor.snippet.editor";
 import wSnippetOptions from "website.editor.snippets.options";

@@ -1,7 +1,7 @@
 /** @odoo-module alias=website.editor.snippets.options **/
 
 import {ColorpickerWidget} from "web.Colorpicker";
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import { loadBundle, loadCSS } from "@web/core/assets";
 import Dialog from "@web/legacy/js/core/dialog";
 import {Markup, sprintf} from "@web/legacy/js/core/utils";

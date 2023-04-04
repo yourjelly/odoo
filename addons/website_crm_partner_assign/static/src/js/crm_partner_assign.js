@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import {_t} from "web.core";
+import {_t} from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import time from "@web/legacy/js/core/time";
 

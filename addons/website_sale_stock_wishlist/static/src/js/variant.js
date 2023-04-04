@@ -2,7 +2,7 @@
 
 import VariantMixin from "website_sale_stock.VariantMixin";
 import "website_sale.website_sale";
-import { qweb as QWeb } from "web.core";
+import { qweb as QWeb } from "@web/legacy/js/services/core";
 
 const oldChangeCombinationStock = VariantMixin._onChangeCombinationStock;
 /**

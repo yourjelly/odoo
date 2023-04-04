@@ -1,7 +1,7 @@
 /** @odoo-module alias=payment.post_processing **/
     
     import publicWidget from "@web/legacy/js/public/public_widget";
-    import core from "web.core";
+    import core from "@web/legacy/js/services/core";
     import {Markup} from "@web/legacy/js/core/utils";
 
     var _t = core._t;

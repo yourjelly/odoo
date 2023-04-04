@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import ajax from "./ajax";
 import Widget from "web.Widget";
 

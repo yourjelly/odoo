@@ -3,7 +3,7 @@
 import { Order, Orderline, PosGlobalState } from "@point_of_sale/js/models";
 import concurrency from "@web/legacy/js/core/concurrency";
 import { round_decimals, round_precision } from "@web/legacy/js/core/utils";
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import { patch } from "@web/core/utils/patch";
 import { ConfirmPopup } from "@point_of_sale/js/Popups/ConfirmPopup";
 

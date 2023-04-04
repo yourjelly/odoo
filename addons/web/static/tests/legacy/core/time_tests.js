@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import time from "@web/legacy/js/core/time";
 
 QUnit.module('core', {}, function () {

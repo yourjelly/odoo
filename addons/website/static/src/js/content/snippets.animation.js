@@ -6,8 +6,8 @@
 
 import { loadJS } from "@web/core/assets";
 import Class from "@web/legacy/js/core/class";
-import config from "web.config";
-import core from "web.core";
+import config from "@web/legacy/js/services/config";
+import core from "@web/legacy/js/services/core";
 import dom from "@web/legacy/js/core/dom";
 import mixins from "@web/legacy/js/core/mixins";
 import publicWidget from "@web/legacy/js/public/public_widget";

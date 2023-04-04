@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.AjaxService **/
+/** @odoo-module **/
 
 import AbstractService from "@web/legacy/js/core/abstract_service";
-import core from "web.core";
+import core from "./core";
 import session from "web.session";
 
 var AjaxService = AbstractService.extend({

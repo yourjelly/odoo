@@ -7,7 +7,7 @@
     import { patchWithCleanup } from "@web/../tests/helpers/utils";
     import { makeTestEnv } from "@web/../tests/helpers/mock_env";
     import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
-    import { _t } from "web.core";
+    import { _t } from "@web/legacy/js/services/core";
 
     const patchDate = testUtils.mock.patchDate;
 

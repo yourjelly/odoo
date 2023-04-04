@@ -10,11 +10,11 @@
  */
 
 import AbstractStorageService from "@web/legacy/js/core/abstract_storage_service";
-import AjaxService from "web.AjaxService";
+import AjaxService from "@web/legacy/js/services/ajax_service";
 import basic_fields from "@web/legacy/js/fields/basic_fields";
 import Bus from "@web/legacy/js/core/bus";
-import config from "web.config";
-import core from "web.core";
+import config from "@web/legacy/js/services/config";
+import core from "@web/legacy/js/services/core";
 import dom from "@web/legacy/js/core/dom";
 import makeTestEnvironment from "./test_env";
 import MockServer from "./mock_server";

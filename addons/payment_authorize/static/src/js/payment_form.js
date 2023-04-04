@@ -1,7 +1,7 @@
 /** @odoo-module **/
 /* global Accept */
     
-    import core from "web.core";
+    import core from "@web/legacy/js/services/core";
     import { loadJS } from "@web/core/assets";
 
     import checkoutForm from "payment.checkout_form";

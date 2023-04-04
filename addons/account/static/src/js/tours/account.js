@@ -1,6 +1,6 @@
 /** @odoo-module alias=account.tour **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import {Markup} from "@web/legacy/js/core/utils";
 import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_service/tour_utils";

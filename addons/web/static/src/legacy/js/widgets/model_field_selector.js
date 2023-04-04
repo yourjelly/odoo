@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.ModelFieldSelector **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import Widget from "web.Widget";
 import ModelFieldSelectorPopover from "web.ModelFieldSelectorPopover";
 

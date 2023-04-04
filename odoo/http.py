@@ -249,7 +249,7 @@ for more details.
       <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
 * if the form is generated or posted in javascript, the token value is
-  available as `csrf_token` on `web.core` and as the `csrf_token`
+  available as `csrf_token` on `@web/legacy/js/services/core` and as the `csrf_token`
   value in the default js-qweb execution context
 
 * if the form is accessed by an external third party (e.g. REST API

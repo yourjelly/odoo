@@ -1,7 +1,7 @@
 /** @odoo-module */
 /* global timapi */
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import { PaymentInterface } from "@point_of_sale/js/payment";
 import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";
 import { escape } from "@web/core/utils/strings";

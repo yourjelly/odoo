@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import concurrency from "@web/legacy/js/core/concurrency";
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import session from "web.session";
 import utils from "@web/legacy/js/core/utils";
 import Widget from "web.Widget";

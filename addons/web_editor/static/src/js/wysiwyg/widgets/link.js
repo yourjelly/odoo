@@ -1,6 +1,6 @@
 /** @odoo-module alias=wysiwyg.widgets.Link **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
 import Widget from "web.Widget";
 import {isColorGradient} from "web_editor.utils";

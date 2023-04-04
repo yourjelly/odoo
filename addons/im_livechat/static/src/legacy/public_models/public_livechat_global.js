@@ -2,7 +2,7 @@
 
 import { attr, clear, many, one, Model } from "@im_livechat/legacy/model";
 
-import { qweb } from "web.core";
+import { qweb } from "@web/legacy/js/services/core";
 import { Markup } from "@web/legacy/js/core/utils";
 import { getCookie, setCookie, deleteCookie } from "@web/legacy/js/core/cookie_utils";
 

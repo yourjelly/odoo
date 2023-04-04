@@ -2,7 +2,7 @@
 
 import * as mailUtils from "@mail/js/utils";
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import time from "@web/legacy/js/core/time";
 import Widget from "web.Widget";
 

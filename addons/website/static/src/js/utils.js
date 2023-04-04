@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.utils **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 
 const { qweb, _t } = core;
 

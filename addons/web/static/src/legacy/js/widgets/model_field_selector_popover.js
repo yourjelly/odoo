@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.ModelFieldSelectorPopover **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import Widget from "web.Widget";
 import { fuzzyLookup } from "@web/core/utils/search";
 

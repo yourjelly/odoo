@@ -2,7 +2,7 @@
 
 import { parse } from "@web/legacy/js/fields/field_utils";
 import { barcodeService } from "@barcodes/barcode_service";
-import { _t } from "web.core";
+import { _t } from "@web/legacy/js/services/core";
 import { registry } from "@web/core/registry";
 import { EventBus, onWillDestroy, useComponent, useExternalListener } from "@odoo/owl";
 

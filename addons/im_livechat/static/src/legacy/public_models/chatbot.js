@@ -2,7 +2,7 @@
 
 import { attr, one, clear, increment, Model } from "@im_livechat/legacy/model";
 
-import { qweb } from "web.core";
+import { qweb } from "@web/legacy/js/services/core";
 import { Markup } from "@web/legacy/js/core/utils";
 
 Model({

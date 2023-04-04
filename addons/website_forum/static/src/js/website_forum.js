@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import dom from "@web/legacy/js/core/dom";
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import {setCookie} from "@web/legacy/js/core/cookie_utils";
 import Dialog from "@web/legacy/js/core/dialog";
 import wysiwygLoader from "web_editor.loader";

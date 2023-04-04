@@ -2,7 +2,7 @@
 
 import publicWidget from '@web/legacy/js/public/public_widget';
 import '@website_slides/js/slides';
-import { _t } from 'web.core';
+import { _t } from '@web/legacy/js/services/core';
 
 var ShareMail = publicWidget.Widget.extend({
     events: {

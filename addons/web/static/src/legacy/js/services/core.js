@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.core **/
+/** @odoo-module **/
 
 import Bus from "@web/legacy/js/core/bus";
-import config from "web.config";
+import config from "./config";
 import Class from "@web/legacy/js/core/class";
 import QWeb from "@web/legacy/js/core/qweb";
 import Registry from "@web/legacy/js/core/registry";

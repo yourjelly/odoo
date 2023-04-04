@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.Colorpicker **/
 
-import core from "web.core";
+import core from "@web/legacy/js/services/core";
 import utils from "@web/legacy/js/core/utils";
 import Dialog from "@web/legacy/js/core/dialog";
 import Widget from "web.Widget";

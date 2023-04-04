@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import core from "web.core";
+    import core from "@web/legacy/js/services/core";
     import wTourUtils from "website.tour_utils";
 
     var _t = core._t;

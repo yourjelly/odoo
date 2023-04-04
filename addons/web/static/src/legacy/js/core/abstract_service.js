@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import Class from "./class";
-import { serviceRegistry } from "web.core";
+import { serviceRegistry } from "@web/legacy/js/services/core";
 import Mixins from "./mixins";
 import ServicesMixin from "./service_mixins";
 
