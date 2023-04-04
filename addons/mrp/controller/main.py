@@ -5,6 +5,8 @@ import base64
 import json
 import logging
 
+from werkzeug.urls import url_encode
+
 from odoo import http
 from odoo.http import request
 from odoo.tools.translate import _
@@ -13,6 +15,12 @@ logger = logging.getLogger(__name__)
 
 
 class MrpDocumentRoute(http.Controller):
+
+    @http.route('/mrp/manufacturing', type='http', auth="user")
+    def route_to_display_productions_and_workorders(self):
+        action = request.env.ref('mrp.action_mrp_display_fullscreen')
+        get_params_string = url_encode({'action': action.id})
+        return request.redirect(f'/web?#{get_params_string}')
 
     @http.route('/mrp/upload_attachment', type='http', methods=['POST'], auth="user")
     def upload_document(self, ufile, **kwargs):
