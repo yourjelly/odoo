@@ -1,16 +1,17 @@
-/** @odoo-module alias=web.DomainSelectorDialog **/
+odoo.define("web.DomainSelectorDialog", function (require) {
+"use strict";
 
-import core from "web.core";
-import Dialog from "web.Dialog";
-import Domain from "web.Domain";
-import DomainSelector from "web.DomainSelector";
+var core = require("web.core");
+var Dialog = require("web.Dialog");
+var Domain = require("web.Domain");
+var DomainSelector = require("web.DomainSelector");
 
 var _t = core._t;
 
 /**
  * @class DomainSelectorDialog
  */
-export default Dialog.extend({
+return Dialog.extend({
     custom_events: Object.assign({}, Dialog.prototype.custom_events, {
         domain_changed: "_onDomainChange",
     }),
@@ -64,4 +65,5 @@ export default Dialog.extend({
         ev.stopPropagation();
         this.newDomain = ev.data.domain;
     },
+});
 });
