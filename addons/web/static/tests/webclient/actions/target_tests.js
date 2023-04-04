@@ -2,7 +2,7 @@
 
 import testUtils from "web.test_utils";
 import core from "web.core";
-import AbstractAction from "web.AbstractAction";
+import AbstractAction from "@web/legacy/js/chrome/abstract_action";
 import { registry } from "@web/core/registry";
 import { click, getFixture, patchWithCleanup, makeDeferred, nextTick } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerServerData } from "./../helpers";

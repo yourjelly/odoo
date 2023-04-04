@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.ActionMixin **/
+/** @odoo-module **/
     
     /**
      * We define here the ActionMixin, the generic notion of action (from the point

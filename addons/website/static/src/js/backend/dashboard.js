@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.backend.dashboard **/
 
-import AbstractAction from "web.AbstractAction";
+import AbstractAction from "@web/legacy/js/chrome/abstract_action";
 import { loadBundle } from "@web/core/assets";
 import core from "web.core";
 import field_utils from "web.field_utils";

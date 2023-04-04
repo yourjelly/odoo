@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.AbstractAction **/
+/** @odoo-module **/
 
 /**
  * We define here the AbstractAction widget, which implements the ActionMixin.
@@ -7,7 +7,7 @@
  * @module @web/chrome/abstract_action
  */
 
-import ActionMixin from "web.ActionMixin";
+import ActionMixin from "./action_mixin";
 import ActionModel from "web.ActionModel";
 import ControlPanel from "web.ControlPanel";
 import Widget from "web.Widget";

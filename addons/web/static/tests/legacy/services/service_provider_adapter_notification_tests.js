@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
-import AbstractAction from "web.AbstractAction";
+import AbstractAction from "@web/legacy/js/chrome/abstract_action";
 import core from "web.core";
 import * as LegacyRegistry from "web.Registry";
 import { registerCleanup } from "../../helpers/cleanup";

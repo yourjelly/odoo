@@ -5,7 +5,7 @@ import { registry } from "@web/core/registry";
 import { WebClient } from "@web/webclient/webclient";
 import testUtils from "web.test_utils";
 import core from "web.core";
-import AbstractAction from "web.AbstractAction";
+import AbstractAction from "@web/legacy/js/chrome/abstract_action";
 import { registerCleanup } from "../../helpers/cleanup";
 import { makeTestEnv } from "../../helpers/mock_env";
 import {
