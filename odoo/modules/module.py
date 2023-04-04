@@ -100,6 +100,10 @@ def initialize_sys_path():
     # hook odoo.addons on addons paths
     for ad in tools.config['addons_path'].split(','):
         ad = os.path.normcase(os.path.abspath(tools.ustr(ad.strip())))
+        if not os.path.isdir(ad):
+            _logger.warning("addons path %r does not exist or is not a directory", ad)
+            continue
+
         if ad not in odoo.addons.__path__:
             odoo.addons.__path__.append(ad)
 

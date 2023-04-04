@@ -1969,6 +1969,8 @@ class Application:
         """
         mod2path = {}
         for addons_path in odoo.addons.__path__:
+            if not os.path.isdir(addons_path):
+                continue
             for module in os.listdir(addons_path):
                 manifest = get_manifest(module)
                 static_path = opj(addons_path, module, 'static')
