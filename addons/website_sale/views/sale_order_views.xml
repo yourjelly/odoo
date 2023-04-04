@@ -110,7 +110,7 @@
                 <filter string="Recovery Email to Send" name="recovery_email" domain="[('cart_recovery_email_sent', '=', False)]" />
                 <filter string="Recovery Email Sent" name="recovery_email_set" domain="[('cart_recovery_email_sent', '=', True)]" />
                 <group expand="0" string="Group By">
-                    <filter string="Order Date" name="order_date" domain="[]" context="{'group_by':'date_order'}"/>
+                    <filter string="Order Date" name="order_date" context="{'group_by': 'date_order'}"/>
                 </group>
                 <!-- Dashboard filter - used by context -->
                 <filter string="Last Week" invisible="1" name="week" domain="[('date_order','&gt;', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>

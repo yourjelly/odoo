@@ -11,7 +11,7 @@
                 <field name="user_id"/>
                 <field name="member_ids"/>
                 <group expand="0" string="Group By...">
-                    <filter string="Team Leader" name="team_leader" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Team Leader" name="team_leader" context="{'group_by': 'user_id'}"/>
                 </group>
             </search>
         </field>
