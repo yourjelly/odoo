@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.KeyboardNavigationMixin **/
+/** @odoo-module **/
         import BrowserDetection from "web.BrowserDetection";
     import core from "web.core";
 
