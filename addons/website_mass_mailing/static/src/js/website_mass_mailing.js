@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import {ReCaptcha} from "google_recaptcha.ReCaptchaV3";
 

@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import core from "@web/legacy/js/services/core";
+    import * as core from "@web/legacy/js/services/core";
     import time from "@web/legacy/js/core/time";
     import {ReCaptcha} from "google_recaptcha.ReCaptchaV3";
     import session from "web.session";

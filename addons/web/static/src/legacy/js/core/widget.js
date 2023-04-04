@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import mixins from "./mixins";
 import ServicesMixin from "./service_mixins";
 import { loadBundle } from "@web/core/assets";

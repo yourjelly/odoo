@@ -1,6 +1,6 @@
 /** @odoo-module */
 import Dialog from "@web/legacy/js/core/dialog";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 
 /**
  * An extension of Dialog Widget to render warnings.

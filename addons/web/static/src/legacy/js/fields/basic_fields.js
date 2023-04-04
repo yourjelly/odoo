@@ -7,7 +7,7 @@
  */
 
 import AbstractField from "./abstract_field";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import datepicker from "@web/legacy/js/widgets/date_picker";
 import dom from "@web/legacy/js/core/dom";
 import framework from "@web/legacy/js/core/framework";

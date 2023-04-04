@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import {Markup} from "@web/legacy/js/core/utils";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 
 import "@crm/js/tours/crm";
 var _t = core._t;

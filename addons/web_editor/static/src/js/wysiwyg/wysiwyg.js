@@ -4,7 +4,7 @@ import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog";
 import { VideoSelector } from "@web_editor/components/media_dialog/video_selector";
 import dom from "@web/legacy/js/core/dom";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import { browser } from "@web/core/browser/browser";
 import Widget from "@web/legacy/js/core/widget";
 import Dialog from "@web/legacy/js/core/dialog";

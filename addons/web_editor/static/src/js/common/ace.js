@@ -2,7 +2,7 @@
 
 import config from "@web/legacy/js/services/config";
 import concurrency from "@web/legacy/js/core/concurrency";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import dom from "@web/legacy/js/core/dom";
 import Dialog from "@web/legacy/js/core/dialog";
 import Widget from "@web/legacy/js/core/widget";

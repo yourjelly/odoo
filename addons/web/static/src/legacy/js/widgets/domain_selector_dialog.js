@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import Domain from "@web/legacy/js/core/domain";
 import DomainSelector from "./domain_selector";

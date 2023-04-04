@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 import AbstractAction from "@web/legacy/js/chrome/abstract_action";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import * as LegacyRegistry from "@web/legacy/js/core/registry";
 import { registerCleanup } from "../../helpers/cleanup";
 import { nextTick, patchWithCleanup } from "../../helpers/utils";

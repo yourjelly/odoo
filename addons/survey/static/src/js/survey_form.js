@@ -4,7 +4,7 @@ import field_utils from "@web/legacy/js/fields/field_utils";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import time from "@web/legacy/js/core/time";
 import config from "@web/legacy/js/services/config";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import dom from "@web/legacy/js/core/dom";
 import {getCookie, setCookie, deleteCookie} from "@web/legacy/js/core/cookie_utils";

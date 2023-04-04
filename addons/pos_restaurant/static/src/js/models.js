@@ -2,7 +2,7 @@
 
 import { PosGlobalState, Order, Orderline, Payment } from "@point_of_sale/js/models";
 import { uuidv4, batched } from "@point_of_sale/js/utils";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import { Printer } from "@point_of_sale/js/printers";
 import { patch } from "@web/core/utils/patch";
 import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";

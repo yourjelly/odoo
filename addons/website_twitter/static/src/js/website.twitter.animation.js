@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import {Markup} from "@web/legacy/js/core/utils";
 import publicWidget from "@web/legacy/js/public/public_widget";
 

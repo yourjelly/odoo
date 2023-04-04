@@ -1,7 +1,7 @@
 /** @odoo-module alias=sale.VariantMixin **/
 
 import concurrency from "@web/legacy/js/core/concurrency";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import utils from "@web/legacy/js/core/utils";
 import ajax from "@web/legacy/js/core/ajax";
 var _t = core._t;

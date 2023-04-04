@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 const _t = core._t;
 import MailGroup from "mail_group.mail_group";
 

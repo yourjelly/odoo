@@ -1,7 +1,7 @@
 /** @odoo-module **/
 /* global AdyenCheckout */
     
-    import core from "@web/legacy/js/services/core";
+    import * as core from "@web/legacy/js/services/core";
     import checkoutForm from "payment.checkout_form";
     import manageForm from "payment.manage_form";
 

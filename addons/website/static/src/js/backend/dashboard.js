@@ -2,7 +2,7 @@
 
 import AbstractAction from "@web/legacy/js/chrome/abstract_action";
 import { loadBundle } from "@web/core/assets";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import field_utils from "@web/legacy/js/fields/field_utils";
 import pyUtils from "@web/legacy/js/core/py_utils";
 import session from "web.session";

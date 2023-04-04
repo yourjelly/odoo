@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import config from "@web/legacy/js/services/config";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import {Markup} from "./utils";
 import time from "./time";
 import download from "web.download";

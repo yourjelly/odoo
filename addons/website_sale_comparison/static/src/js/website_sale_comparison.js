@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_sale_comparison.comparison **/
 
 import concurrency from "@web/legacy/js/core/concurrency";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import {getCookie, setCookie} from "@web/legacy/js/core/cookie_utils";
 import VariantMixin from "sale.VariantMixin";

@@ -20,7 +20,7 @@
      * @extends WidgetAdapterMixin
      */
 
-    import core from "@web/legacy/js/services/core";
+    import * as core from "@web/legacy/js/services/core";
     import { WidgetAdapterMixin } from "@web/legacy/js/owl_compatibility";
 
     const ActionMixin = Object.assign({}, WidgetAdapterMixin, {

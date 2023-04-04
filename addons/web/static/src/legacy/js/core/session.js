@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import ajax from "./ajax";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import mixins from "./mixins";
 import {setCookie} from "./cookie_utils";
 import { session } from "@web/session";

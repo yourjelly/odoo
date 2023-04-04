@@ -85,7 +85,7 @@
 import AbstractModel from "./abstract_model";
 import concurrency from "@web/legacy/js/core/concurrency";
 import Context from "@web/legacy/js/core/context";
-import core from "@web/legacy/js/services/core";
+import * as core from "@web/legacy/js/services/core";
 import Domain from "@web/legacy/js/core/domain";
 import session from "web.session";
 import utils from "@web/legacy/js/core/utils";

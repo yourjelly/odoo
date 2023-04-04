@@ -25,22 +25,20 @@ _.each('resize,scroll'.split(','), function (evtype) {
     });
 });
 
-export default {
-    qweb: new QWeb(config.isDebug()),
+export const qweb = new QWeb(config.isDebug());
 
-    // core classes and functions
-    Class: Class,
-    bus: bus,
-    main_bus: new Bus(),
-    _t: translation._t,
-    _lt: translation._lt,
+// core classes and functions
+export const Class = Class;
+export const bus = bus;
+export const main_bus = new Bus();
+export const _t = translation._t;
+export const _lt = translation._lt;
 
-    // registries
-    action_registry: new Registry(),
-    crash_registry: new Registry(),
-    serviceRegistry: new Registry(),
-    /**
-     * @type {String}
-     */
-    csrf_token: odoo.csrf_token,
-};
+// registries
+export const action_registry = new Registry();
+export const crash_registry = new Registry();
+export const serviceRegistry = new Registry();
+/**
+ * @type {String}
+ */
+export const csrf_token = odoo.csrf_token;
