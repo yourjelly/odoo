@@ -115,8 +115,7 @@ export class MrpDisplay extends Component {
         this.menuPopupRecord = record;
     }
 
-    async closeMenuPopup(record) {
-        await record.load();
+    async closeMenuPopup() {
         this.state.displayMenuPopup = false;
         this.menuPopupRecord = false;
     }

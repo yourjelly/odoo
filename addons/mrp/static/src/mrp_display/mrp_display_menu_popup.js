@@ -20,7 +20,12 @@ export class MrpDisplayMenuPopup extends Component {
         const action = await this.orm.call(this.props.record.resModel, method, [
             [this.props.record.resId],
         ]);
-        this.props.closeMenuPopup(this.props.record);
-        this.action.doAction(action, { onClose: this.props.onClose });
+        this.action.doAction(action, {
+            onClose: async () => {
+                // TODO: Need to update the record here. But how to know which move was updated
+                // or how to get the new move if one was created ?
+                this.props.closeMenuPopup();
+            },
+        });
     }
 }

@@ -29,6 +29,8 @@ function getSearchParams(model, props, component) {
                     ];
                 } else if (model.rootParams.resModel === "stock.move") {
                     params[key] = [
+                        "&",
+                        ["scrapped", "=", false],
                         "|",
                         ["production_id", "in", production_ids],
                         ["raw_material_production_id", "in", production_ids],
