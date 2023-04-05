@@ -309,7 +309,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
         });
         
         const targetModelName = this.$target[0].dataset.model_name || 'mail.mail';
-        this.activeForm = this.models.filter(m => m.model === targetModelName);
+        this.activeForm = this.models.find(m => m.model === targetModelName);
         // Create the Form Action select
         this.selectActionEl = document.createElement('we-select');
         this.selectActionEl.setAttribute('string', 'Action');
