@@ -2,7 +2,7 @@ odoo.define('mass_mailing.snippets.options', function (require) {
 "use strict";
 
 const options = require('web_editor.snippets.options');
-const {ColorpickerWidget} = require('web.Colorpicker');
+const {ColorpickerWidget} = require('@web/legacy/js/widgets/colorpicker');
 const SelectUserValueWidget = options.userValueWidgetsRegistry['we-select'];
 const weUtils = require('web_editor.utils');
 const {
