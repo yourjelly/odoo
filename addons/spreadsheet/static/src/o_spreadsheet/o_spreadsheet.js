@@ -114,88 +114,88 @@
     const BACKGROUND_HEADER_FILTER_COLOR = "#E6F4EA";
     const BACKGROUND_HEADER_SELECTED_FILTER_COLOR = "#CEEAD6";
     const SEPARATOR_COLOR = "#E0E2E4";
-    // Color picker
+    // Color picker defaults as upper case HEX to match `toHex`helper
     const COLOR_PICKER_DEFAULTS = [
         "#000000",
         "#434343",
         "#666666",
         "#999999",
-        "#b7b7b7",
-        "#cccccc",
-        "#d9d9d9",
-        "#efefef",
-        "#f3f3f3",
-        "#ffffff",
+        "#B7B7B7",
+        "#CCCCCC",
+        "#D9D9D9",
+        "#EFEFEF",
+        "#F3F3F3",
+        "#FFFFFF",
         "#980000",
-        "#ff0000",
-        "#ff9900",
-        "#ffff00",
-        "#00ff00",
-        "#00ffff",
-        "#4a86e8",
-        "#0000ff",
-        "#9900ff",
-        "#ff00ff",
-        "#e6b8af",
-        "#f4cccc",
-        "#fce5cd",
-        "#fff2cc",
-        "#d9ead3",
-        "#d0e0e3",
-        "#c9daf8",
-        "#cfe2f3",
-        "#d9d2e9",
-        "#ead1dc",
-        "#dd7e6b",
-        "#ea9999",
-        "#f9cb9c",
-        "#ffe599",
-        "#b6d7a8",
-        "#a2c4c9",
-        "#a4c2f4",
-        "#9fc5e8",
-        "#b4a7d6",
-        "#d5a6bd",
-        "#cc4125",
-        "#e06666",
-        "#f6b26b",
-        "#ffd966",
-        "#93c47d",
-        "#76a5af",
-        "#6d9eeb",
-        "#6fa8dc",
-        "#8e7cc3",
-        "#c27ba0",
-        "#a61c00",
-        "#cc0000",
-        "#e69138",
-        "#f1c232",
-        "#6aa84f",
-        "#45818e",
-        "#3c78d8",
-        "#3d85c6",
-        "#674ea7",
-        "#a64d79",
-        "#85200c",
+        "#FF0000",
+        "#FF9900",
+        "#FFFF00",
+        "#00FF00",
+        "#00FFFF",
+        "#4A86E8",
+        "#0000FF",
+        "#9900FF",
+        "#FF00FF",
+        "#E6B8AF",
+        "#F4CCCC",
+        "#FCE5CD",
+        "#FFF2CC",
+        "#D9EAD3",
+        "#D0E0E3",
+        "#C9DAF8",
+        "#CFE2F3",
+        "#D9D2E9",
+        "#EAD1DC",
+        "#DD7E6B",
+        "#EA9999",
+        "#F9CB9C",
+        "#FFE599",
+        "#B6D7A8",
+        "#A2C4C9",
+        "#A4C2F4",
+        "#9FC5E8",
+        "#B4A7D6",
+        "#D5A6BD",
+        "#CC4125",
+        "#E06666",
+        "#F6B26B",
+        "#FFD966",
+        "#93C47D",
+        "#76A5AF",
+        "#6D9EEB",
+        "#6FA8DC",
+        "#8E7CC3",
+        "#C27BA0",
+        "#A61C00",
+        "#CC0000",
+        "#E69138",
+        "#F1C232",
+        "#6AA84F",
+        "#45818E",
+        "#3C78D8",
+        "#3D85C6",
+        "#674EA7",
+        "#A64D79",
+        "#85200C",
         "#990000",
-        "#b45f06",
-        "#bf9000",
-        "#38761d",
-        "#134f5c",
-        "#1155cc",
-        "#0b5394",
-        "#351c75",
-        "#741b47",
-        "#5b0f00",
+        "#B45F06",
+        "#BF9000",
+        "#38761D",
+        "#134F5C",
+        "#1155CC",
+        "#0B5394",
+        "#351C75",
+        "#741B47",
+        "#5B0F00",
         "#660000",
-        "#783f04",
-        "#7f6000",
-        "#274e13",
-        "#0c343d",
-        "#1c4587",
+        "#783F04",
+        "#7F6000",
+        "#274E13",
+        "#0C343D",
+        "#1C4587",
         "#073763",
-        "#20124d",
-        "#4c1130",
+        "#20124D",
+        "#4C1130",
     ];
     // Dimensions
     const MIN_ROW_HEIGHT = 10;
@@ -234,7 +234,7 @@
     const DEFAULT_BORDER_DESC = ["thin", "#000"];
     const DEFAULT_FILTER_BORDER_DESC = ["thin", FILTERS_COLOR];
     // DateTimeRegex
-    const DATETIME_FORMAT = /[ymd:]/;
+    const DATETIME_FORMAT = /[ymdhs:]/;
     // Ranges
     const INCORRECT_RANGE_STRING = CellErrorType.InvalidReference;
     // Max Number of history steps kept in memory
@@ -715,7 +715,7 @@
      * '\w' captures [0-9][a-z][A-Z] and _.
      * @param sheetName Name of the sheet
      */
-    function getComposerSheetName(sheetName) {
+    function getCanonicalSheetName(sheetName) {
         var _a;
         if (((_a = sheetName.match(/\w/g)) === null || _a === void 0 ? void 0 : _a.length) !== sheetName.length) {
             sheetName = `'${sheetName}'`;
@@ -1089,6 +1089,8 @@
         return text;
     }
 
+    const RBA_REGEX = /rgba?\(|\s+|\)/gi;
+    const HEX_MATCH = /^#([A-F\d]{2}){3,4}$/g;
     const colors$1 = [
         "#eb6d00",
         "#0074d9",
@@ -1114,7 +1116,10 @@
     }
     /**
      * Converts any CSS color value to a standardized hex6 value.
-     * Accepts: hex3, hex6, hex8 and rgb (rgba is not supported)
+     * Accepts: hex3, hex6, hex8, rgb[1] and rgba[1].
+     *
+     * [1] under the form rgb(r, g, b, a?) or rgba(r, g, b, a?)
+     * with r,g,b ∈ [0, 255] and a ∈ [0, 1]
      *
      * toHex("#ABC")
      * >> "#AABBCC"
@@ -1125,27 +1130,31 @@
      * toHex("rgb(30, 80, 16)")
      * >> "#1E5010"
      *
+     *  * toHex("rgb(30, 80, 16, 0.5)")
+     * >> "#1E501080"
+     *
      */
     function toHex(color) {
-        if (color.includes("rgba")) {
-            throw new Error(`rgba() conversion currently not supported: ${color}`);
+        let hexColor = color;
+        if (color.startsWith("rgb")) {
+            hexColor = rgbaStringToHex(color);
         }
-        if (color.includes("rgb")) {
-            return rgbToHex6(color);
+        else {
+            hexColor = color.replace("#", "").toUpperCase();
+            if (hexColor.length === 3 || hexColor.length === 4) {
+                hexColor = hexColor.split("").reduce((acc, h) => acc + h + h, "");
+            }
+            hexColor = `#${hexColor}`;
         }
-        color = color.replace("#", "").toUpperCase();
-        if (color.length === 3 || color.length === 4) {
-            color = color.split("").reduce((acc, h) => acc + h + h, "");
+        if (!hexColor.match(HEX_MATCH)) {
+            throw new Error(`invalid color input: ${color}`);
         }
-        if (color.replace(/[a-f0-9]/gi, "") !== "") {
-            throw new Error("invalid color");
-        }
-        return "#" + color;
+        return hexColor;
     }
     function isColorValid(color) {
         try {
-            const { r, g, b, a } = colorToRGBA(color);
-            return (isColorValueValid(r) && isColorValueValid(g) && isColorValueValid(b) && isColorValueValid(a));
+            toHex(color);
+            return true;
         }
         catch (error) {
             return false;
@@ -1178,15 +1187,29 @@
     /**
      * Convert a CSS rgb color string to a standardized hex6 color value.
      *
-     * rgbToHex6("rgb(30, 80, 16)")
+     * rgbaStringToHex("rgb(30, 80, 16)")
      * >> "#1E5010"
+     *
+     * rgbaStringToHex("rgba(30, 80, 16, 0.5)")
+     * >> "#1E501080"
+     *
+     * DOES NOT SUPPORT NON INTEGER RGB VALUES
      */
-    function rgbToHex6(color) {
-        return ("#" +
-            concat(color
-                .slice(4, -1)
-                .split(",")
-                .map((valueString) => parseInt(valueString, 10).toString(16).padStart(2, "0"))).toUpperCase());
+    function rgbaStringToHex(color) {
+        const stringVals = color.replace(RBA_REGEX, "").split(",");
+        let alphaHex = 255;
+        if (stringVals.length !== 3 && stringVals.length !== 4) {
+            throw new Error("invalid color");
+        }
+        else if (stringVals.length === 4) {
+            const alpha = parseFloat(stringVals.pop() || "1");
+            alphaHex = Math.round((alpha || 1) * 255);
+        }
+        const vals = stringVals.map((val) => parseInt(val, 10));
+        if (alphaHex !== 255) {
+            vals.push(alphaHex);
+        }
+        return "#" + concat(vals.map((value) => value.toString(16).padStart(2, "0"))).toUpperCase();
     }
     /**
      * RGBA to HEX representation (#RRGGBBAA).
@@ -1208,7 +1231,7 @@
             a = "0" + a;
         if (a === "ff")
             a = "";
-        return "#" + r + g + b + a;
+        return ("#" + r + g + b + a).toUpperCase();
     }
     /**
      * Color string to RGBA representation
@@ -1329,6 +1352,9 @@
         s = +(s * 100).toFixed(1);
         l = +(l * 100).toFixed(1);
         return { a: rgba.a, h, s, l };
+    }
+    function isSameColor(color1, color2) {
+        return isColorValid(color1) && isColorValid(color2) && toHex(color1) === toHex(color2);
     }
 
     /** Reference of a cell (eg. A1, $B$5) */
@@ -1480,7 +1506,7 @@
      *   formula, commas are used to separate arguments
      * - it does not support % symbol, in formulas % is an operator
      */
-    const formulaNumberRegexp = /^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+/;
+    const formulaNumberRegexp = /(^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+)(?!\w|!)/;
     const pIntegerAndDecimals = "(\\d+(,\\d{3,})*(\\.\\d*)?)"; // pattern that match integer number with or without decimal digits
     const pOnlyDecimals = "(\\.\\d+)"; // pattern that match only expression with decimal digits
     const pScientificFormat = "(e(\\+|-)?\\d+)?"; // pattern that match scientific format between zero and one time (should be placed before pPercentFormat)
@@ -3089,6 +3115,7 @@
     const LINE_HEIGHT = 1.2;
     css /* scss */ `
   div.o-scorecard {
+    font-family: ${DEFAULT_FONT};
     user-select: none;
     background-color: white;
     display: flex;
@@ -6071,8 +6098,8 @@
         const dataSets = [];
         for (const sheetXC of dataSetsString) {
             const dataRange = getters.getRangeFromSheetXC(sheetId, sheetXC);
-            const { unboundedZone: zone, sheetId: dataSetSheetId, invalidSheetName } = dataRange;
-            if (invalidSheetName) {
+            const { unboundedZone: zone, sheetId: dataSetSheetId, invalidSheetName, invalidXc } = dataRange;
+            if (invalidSheetName || invalidXc) {
                 continue;
             }
             // It's a rectangle. We treat all columns (arbitrary) as different data series.
@@ -6097,14 +6124,8 @@
                         : undefined));
                 }
             }
-            else if (zone.left === zone.right && zone.top === zone.bottom) {
-                // A single cell. If it's only the title, the dataset is not added.
-                if (!dataSetsHaveTitle) {
-                    dataSets.push(createDataSet(getters, dataSetSheetId, zone, undefined));
-                }
-            }
             else {
-                /* 1 row or 1 column */
+                /* 1 cell, 1 row or 1 column */
                 dataSets.push(createDataSet(getters, dataSetSheetId, zone, dataSetsHaveTitle
                     ? {
                         top: zone.top,
@@ -6157,6 +6178,18 @@
             label: ds.labelCell ? getters.getRangeString(ds.labelCell, "forceSheetReference") : undefined,
             range: getters.getRangeString(dataRange, "forceSheetReference"),
         };
+    }
+    function toExcelLabelRange(getters, labelRange, shouldRemoveFirstLabel) {
+        if (!labelRange)
+            return undefined;
+        let zone = {
+            ...labelRange.zone,
+        };
+        if (shouldRemoveFirstLabel && labelRange.zone.bottom > labelRange.zone.top) {
+            zone.top = zone.top + 1;
+        }
+        const range = labelRange.clone({ zone });
+        return getters.getRangeString(range, "forceSheetReference");
     }
     /**
      * Transform a chart definition which supports dataSets (dataSets and LabelRange)
@@ -6241,6 +6274,20 @@
             }
         }
         return 0 /* CommandResult.Success */;
+    }
+    function shouldRemoveFirstLabel(labelRange, dataset, dataSetsHaveTitle) {
+        if (!dataSetsHaveTitle)
+            return false;
+        if (!labelRange)
+            return false;
+        if (!dataset)
+            return true;
+        const datasetLength = getZoneArea(dataset.dataRange.zone);
+        const labelLength = getZoneArea(labelRange.zone);
+        if (labelLength < datasetLength) {
+            return false;
+        }
+        return true;
     }
     // ---------------------------------------------------------------------------
     // Scorecard
@@ -6611,6 +6658,7 @@
             this.legendPosition = definition.legendPosition;
             this.stacked = definition.stacked;
             this.aggregated = definition.aggregated;
+            this.dataSetsHaveTitle = definition.dataSetsHaveTitle;
         }
         static transformDefinition(definition, executed) {
             return transformChartDefinitionWithDataSetsWithZone(definition, executed);
@@ -6678,11 +6726,13 @@
             const dataSets = this.dataSets
                 .map((ds) => toExcelDataset(this.getters, ds))
                 .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
+            const labelRange = toExcelLabelRange(this.getters, this.labelRange, shouldRemoveFirstLabel(this.labelRange, this.dataSets[0], this.dataSetsHaveTitle));
             return {
                 ...this.getDefinition(),
                 backgroundColor: toXlsxHexColor(this.background || BACKGROUND_CHART_COLOR),
                 fontColor: toXlsxHexColor(chartFontColor(this.background)),
                 dataSets,
+                labelRange,
             };
         }
         updateRanges(applyChange) {
@@ -6750,6 +6800,11 @@
         const labelValues = getChartLabelValues(getters, chart.dataSets, chart.labelRange);
         let labels = labelValues.formattedValues;
         let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
+        if (chart.dataSetsHaveTitle &&
+            dataSetsValues[0] &&
+            labels.length > dataSetsValues[0].data.length) {
+            labels.shift();
+        }
         ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
         if (chart.aggregated) {
             ({ labels, dataSetsValues } = aggregateDataForLabels(labels, dataSetsValues));
@@ -7172,6 +7227,7 @@
             this.labelsAsText = definition.labelsAsText;
             this.stacked = definition.stacked;
             this.aggregated = definition.aggregated;
+            this.dataSetsHaveTitle = definition.dataSetsHaveTitle;
         }
         static validateChartDefinition(validator, definition) {
             return validator.checkValidations(definition, checkDataset, checkLabelRange);
@@ -7239,11 +7295,13 @@
             const dataSets = this.dataSets
                 .map((ds) => toExcelDataset(this.getters, ds))
                 .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
+            const labelRange = toExcelLabelRange(this.getters, this.labelRange, shouldRemoveFirstLabel(this.labelRange, this.dataSets[0], this.dataSetsHaveTitle));
             return {
                 ...this.getDefinition(),
                 backgroundColor: toXlsxHexColor(this.background || BACKGROUND_CHART_COLOR),
                 fontColor: toXlsxHexColor(chartFontColor(this.background)),
                 dataSets,
+                labelRange,
             };
         }
         copyForSheetId(sheetId) {
@@ -7381,6 +7439,11 @@
         const labelValues = getChartLabelValues(getters, chart.dataSets, chart.labelRange);
         let labels = axisType === "linear" ? labelValues.values : labelValues.formattedValues;
         let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
+        if (chart.dataSetsHaveTitle &&
+            dataSetsValues[0] &&
+            labels.length > dataSetsValues[0].data.length) {
+            labels.shift();
+        }
         ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
         if (axisType === "time") {
             ({ labels, dataSetsValues } = fixEmptyLabelsForDateCharts(labels, dataSetsValues));
@@ -7439,6 +7502,7 @@
             this.background = definition.background;
             this.legendPosition = definition.legendPosition;
             this.aggregated = definition.aggregated;
+            this.dataSetsHaveTitle = definition.dataSetsHaveTitle;
         }
         static transformDefinition(definition, executed) {
             return transformChartDefinitionWithDataSetsWithZone(definition, executed);
@@ -7502,12 +7566,14 @@
             const dataSets = this.dataSets
                 .map((ds) => toExcelDataset(this.getters, ds))
                 .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
+            const labelRange = toExcelLabelRange(this.getters, this.labelRange, shouldRemoveFirstLabel(this.labelRange, this.dataSets[0], this.dataSetsHaveTitle));
             return {
                 ...this.getDefinition(),
                 backgroundColor: toXlsxHexColor(this.background || BACKGROUND_CHART_COLOR),
                 fontColor: toXlsxHexColor(chartFontColor(this.background)),
                 verticalAxisPosition: "left",
                 dataSets,
+                labelRange,
             };
         }
         updateRanges(applyChange) {
@@ -7553,6 +7619,11 @@
         const labelValues = getChartLabelValues(getters, chart.dataSets, chart.labelRange);
         let labels = labelValues.formattedValues;
         let dataSetsValues = getChartDatasetValues(getters, chart.dataSets);
+        if (chart.dataSetsHaveTitle &&
+            dataSetsValues[0] &&
+            labels.length > dataSetsValues[0].data.length) {
+            labels.shift();
+        }
         ({ labels, dataSetsValues } = filterEmptyDataPoints(labels, dataSetsValues));
         if (chart.aggregated) {
             ({ labels, dataSetsValues } = aggregateDataForLabels(labels, dataSetsValues));
@@ -8188,7 +8259,6 @@
             labelRangeXc = zoneToXc({
                 ...zone,
                 right: zone.left,
-                top: dataSetsHaveTitle ? zone.top + 1 : zone.top,
             });
         }
         // Only display legend for several datasets.
@@ -15106,7 +15176,7 @@
                 cellReference = rowPart + colPart;
             }
             if (sheet !== undefined) {
-                return `${getComposerSheetName(toString(sheet))}!${cellReference}`;
+                return `${getCanonicalSheetName(toString(sheet))}!${cellReference}`;
             }
             return cellReference;
         },
@@ -16931,6 +17001,22 @@
                 aggregated: ev.target.checked,
             });
         }
+        calculateHeaderPosition() {
+            if (this.isDatasetInvalid || this.isLabelInvalid) {
+                return undefined;
+            }
+            const getters = this.env.model.getters;
+            const sheetId = getters.getActiveSheetId();
+            const labelRange = createRange(getters, sheetId, this.labelRange);
+            const dataSets = createDataSets(getters, this.dataSeriesRanges, sheetId, this.props.definition.dataSetsHaveTitle);
+            if (dataSets.length) {
+                return dataSets[0].dataRange.zone.top + 1;
+            }
+            else if (labelRange) {
+                return labelRange.zone.top + 1;
+            }
+            return undefined;
+        }
     }
     LineBarPieConfigPanel.template = "o-spreadsheet-LineBarPieConfigPanel";
     LineBarPieConfigPanel.components = { SelectionInput };
@@ -17177,6 +17263,9 @@
                 left,
                 top,
             });
+        }
+        isSameColor(color1, color2) {
+            return isSameColor(color1, color2);
         }
     }
     ColorPicker.template = "o-spreadsheet-ColorPicker";
@@ -19419,6 +19508,8 @@
                         start = 0;
                     if (end > textLength)
                         end = textLength;
+                    if (start > textLength)
+                        start = textLength;
                 }
                 let startNode = this.findChildAtCharacterIndex(start);
                 let endNode = this.findChildAtCharacterIndex(end);
@@ -19688,6 +19779,7 @@
       padding-right: 2px;
 
       box-sizing: border-box;
+      font-family: ${DEFAULT_FONT};
 
       caret-color: black;
       padding-left: 3px;
@@ -20130,7 +20222,7 @@
             const highlights = this.env.model.getters.getHighlights();
             const refSheet = sheetName
                 ? this.env.model.getters.getSheetIdByName(sheetName)
-                : this.env.model.getters.getEditionSheet();
+                : this.env.model.getters.getCurrentEditedCell().sheetId;
             const highlight = highlights.find((highlight) => {
                 if (highlight.sheetId !== refSheet)
                     return false;
@@ -20291,7 +20383,7 @@
         get cellReference() {
             const { col, row, sheetId } = this.env.model.getters.getCurrentEditedCell();
             const prefixSheet = sheetId !== this.env.model.getters.getActiveSheetId();
-            return `${prefixSheet ? getComposerSheetName(this.env.model.getters.getSheetName(sheetId)) + "!" : ""}${toXC(col, row)}`;
+            return `${prefixSheet ? getCanonicalSheetName(this.env.model.getters.getSheetName(sheetId)) + "!" : ""}${toXC(col, row)}`;
         }
         get cellReferenceStyle() {
             const { x: left, y: top } = this.rect;
@@ -22582,6 +22674,10 @@
             }
         }
         onInput(ev) {
+            // the user meant to paste in the sheet, not open the composer with the pasted content
+            if (!ev.isComposing && ev.inputType === "insertFromPaste") {
+                return;
+            }
             if (ev.data) {
                 // if the user types a character on the grid, it means he wants to start composing the selected cell with that
                 // character
@@ -23430,6 +23526,70 @@
         });
     }
 
+    const XLSX_DATE_FORMAT_REGEX = /^(yy|yyyy|m{1,5}|d{1,4}|h{1,2}|s{1,2}|am\/pm|a\/m|\s|-|\/|\.|:)+$/i;
+    /**
+     * Convert excel format to o_spreadsheet format
+     *
+     * Excel format are defined in openXML §18.8.31
+     */
+    function convertXlsxFormat(numFmtId, formats, warningManager) {
+        var _a, _b, _c;
+        if (numFmtId === 0) {
+            return undefined;
+        }
+        // Format is either defined in the imported data, or the formatId is defined in openXML §18.8.30
+        let format = XLSX_FORMATS_CONVERSION_MAP[numFmtId] || ((_a = formats.find((f) => f.id === numFmtId)) === null || _a === void 0 ? void 0 : _a.format);
+        if (format) {
+            try {
+                let convertedFormat = format.replace(/(.*?);.*/, "$1"); // only take first part of multi-part format
+                convertedFormat = convertedFormat.replace(/\[(.*)-[A-Z0-9]{3}\]/g, "[$1]"); // remove currency and locale/date system/number system info (ECMA §18.8.31)
+                convertedFormat = convertedFormat.replace(/\[\$\]/g, ""); // remove empty bocks
+                // Quotes in format escape sequences of characters. ATM we only support [$...] blocks to escape characters, and only one of them per format
+                const numberOfQuotes = ((_b = convertedFormat.match(/"/g)) === null || _b === void 0 ? void 0 : _b.length) || 0;
+                const numberOfOpenBrackets = ((_c = convertedFormat.match(/\[/g)) === null || _c === void 0 ? void 0 : _c.length) || 0;
+                if (numberOfQuotes / 2 + numberOfOpenBrackets > 1) {
+                    throw new Error("Multiple escaped blocks in format");
+                }
+                convertedFormat = convertedFormat.replace(/"(.*)"/g, "[$$$1]"); // replace '"..."' by '[$...]'
+                convertedFormat = convertedFormat.replace(/_.{1}/g, ""); // _ == ignore width of next char for align purposes. Not supported ATM
+                convertedFormat = convertedFormat.replace(/\*.{1}/g, ""); // * == repeat next character enough to fill the line. Not supported ATM
+                convertedFormat = convertedFormat.replace(/\\ /g, " "); // unescape spaces
+                convertedFormat = convertedFormat.replace(/\\./g, (match) => match[1]); // unescape other characters
+                if (isXlsxDateFormat(convertedFormat)) {
+                    convertedFormat = convertDateFormat$1(convertedFormat);
+                }
+                if (isFormatSupported(convertedFormat)) {
+                    return convertedFormat;
+                }
+            }
+            catch (e) { }
+        }
+        warningManager.generateNotSupportedWarning(WarningTypes.NumFmtIdNotSupported, format || `nmFmtId ${numFmtId}`);
+        return undefined;
+    }
+    function isFormatSupported(format) {
+        try {
+            formatValue(0, format);
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+    function isXlsxDateFormat(format) {
+        return format.match(XLSX_DATE_FORMAT_REGEX) !== null;
+    }
+    function convertDateFormat$1(format) {
+        // Some of these aren't defined neither in the OpenXML spec not the Xlsx extension of OpenXML,
+        // but can still occur and are supported by Excel/Google sheets
+        format = format.toLowerCase();
+        format = format.replace(/mmmmm/g, "mmm");
+        format = format.replace(/am\/pm|a\/m/g, "a");
+        format = format.replace(/hhhh/g, "hh");
+        format = format.replace(/\bh\b/g, "hh");
+        return format;
+    }
+
     function convertBorders(data, warningManager) {
         const borderArray = data.borders.map((border) => {
             addBorderWarnings(border, warningManager);
@@ -23462,7 +23622,7 @@
         return arrayToObject(stylesArray, 1);
     }
     function convertStyle(styleStruct, warningManager) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         addStyleWarnings(styleStruct === null || styleStruct === void 0 ? void 0 : styleStruct.fontStyle, styleStruct === null || styleStruct === void 0 ? void 0 : styleStruct.fillStyle, warningManager);
         addHorizontalAlignmentWarnings((_a = styleStruct === null || styleStruct === void 0 ? void 0 : styleStruct.alignment) === null || _a === void 0 ? void 0 : _a.horizontal, warningManager);
         addVerticalAlignmentWarnings((_b = styleStruct === null || styleStruct === void 0 ? void 0 : styleStruct.alignment) === null || _b === void 0 ? void 0 : _b.vertical, warningManager);
@@ -23480,6 +23640,7 @@
                 : convertColor((_k = styleStruct.fillStyle) === null || _k === void 0 ? void 0 : _k.bgColor),
             textColor: convertColor((_l = styleStruct.fontStyle) === null || _l === void 0 ? void 0 : _l.color),
             fontSize: (_m = styleStruct.fontStyle) === null || _m === void 0 ? void 0 : _m.size,
+            wrapping: ((_o = styleStruct.alignment) === null || _o === void 0 ? void 0 : _o.wrapText) ? "wrap" : "overflow",
         };
     }
     function convertFormats(data, warningManager) {
@@ -23491,41 +23652,6 @@
             }
         }
         return arrayToObject(formats, 1);
-    }
-    /**
-     * Convert excel format to o_spreadsheet format
-     *
-     * Excel format are defined in openXML §18.8.31
-     */
-    function convertXlsxFormat(numFmtId, formats, warningManager) {
-        var _a, _b, _c;
-        if (numFmtId === 0) {
-            return undefined;
-        }
-        // Format is either defined in the imported data, or the formatId is defined in openXML §18.8.30
-        let format = XLSX_FORMATS_CONVERSION_MAP[numFmtId] || ((_a = formats.find((f) => f.id === numFmtId)) === null || _a === void 0 ? void 0 : _a.format);
-        if (format) {
-            try {
-                let convertedFormat = format.replace(/(.*?);.*/, "$1"); // only take first part of multi-part format
-                convertedFormat = convertedFormat.replace(/\[(.*)-[A-Z0-9]{3}\]/g, "[$1]"); // remove currency and locale/date system/number system info (ECMA §18.8.31)
-                convertedFormat = convertedFormat.replace(/\[\$\]/g, ""); // remove empty bocks
-                // Quotes in format escape sequences of characters. ATM we only support [$...] blocks to escape characters, and only one of them per format
-                const numberOfQuotes = ((_b = convertedFormat.match(/"/g)) === null || _b === void 0 ? void 0 : _b.length) || 0;
-                const numberOfOpenBrackets = ((_c = convertedFormat.match(/\[/g)) === null || _c === void 0 ? void 0 : _c.length) || 0;
-                if (numberOfQuotes / 2 + numberOfOpenBrackets > 1) {
-                    throw new Error("Multiple escaped blocks in format");
-                }
-                convertedFormat = convertedFormat.replace(/"(.*)"/g, "[$$$1]"); // replace '"..."' by '[$...]'
-                convertedFormat = convertedFormat.replace(/_.{1}/g, ""); // _ == ignore with of next char for align purposes. Not supported ATM
-                convertedFormat = convertedFormat.replace(/\*.{1}/g, ""); // * == repeat next character enough to fill the line. Not supported ATM
-                convertedFormat = convertedFormat.replace(/\\ /g, " "); // unescape spaces
-                formatValue(0, convertedFormat);
-                return convertedFormat;
-            }
-            catch (e) { }
-        }
-        warningManager.generateNotSupportedWarning(WarningTypes.NumFmtIdNotSupported, format || `nmFmtId ${numFmtId}`);
-        return undefined;
     }
     // ---------------------------------------------------------------------------
     // Warnings
@@ -24081,16 +24207,18 @@
         };
     }
     function convertChartData(chartData) {
-        var _a;
-        const labelRange = (_a = chartData.dataSets[0].label) === null || _a === void 0 ? void 0 : _a.replace(/\$/g, "");
-        let dataSets = chartData.dataSets.map((data) => data.range.replace(/\$/g, ""));
+        const dataSetsHaveTitle = chartData.dataSets[0].label !== undefined;
+        const labelRange = chartData.labelRange
+            ? convertExcelRangeToSheetXC(chartData.labelRange, dataSetsHaveTitle)
+            : undefined;
+        let dataSets = chartData.dataSets.map((data) => convertExcelRangeToSheetXC(data.range, dataSetsHaveTitle));
         // For doughnut charts, in chartJS first dataset = outer dataset, in excel first dataset = inner dataset
         if (chartData.type === "pie") {
             dataSets.reverse();
         }
         return {
             dataSets,
-            dataSetsHaveTitle: false,
+            dataSetsHaveTitle,
             labelRange,
             title: chartData.title || "",
             type: chartData.type,
@@ -24101,6 +24229,28 @@
             aggregated: false,
             labelsAsText: false,
         };
+    }
+    function convertExcelRangeToSheetXC(range, dataSetsHaveTitle) {
+        let { sheetName, xc } = splitReference(range);
+        if (sheetName) {
+            sheetName = getCanonicalSheetName(sheetName) + "!";
+        }
+        else {
+            sheetName = "";
+        }
+        let zone = toUnboundedZone(xc);
+        if (dataSetsHaveTitle && zone.bottom !== undefined && zone.right !== undefined) {
+            const height = zone.bottom - zone.top + 1;
+            const width = zone.right - zone.left + 1;
+            if (height === 1) {
+                zone = { ...zone, left: zone.left - 1 };
+            }
+            else if (width === 1) {
+                zone = { ...zone, top: zone.top - 1 };
+            }
+        }
+        const dataXC = zoneToXc(zone);
+        return sheetName + dataXC;
     }
 
     /**
@@ -24711,6 +24861,10 @@
             return fixXlsxUnicode(String(this.value));
         }
         asBool() {
+            if (this.value === "true")
+                return true; // for files exported from Libre Office
+            if (this.value === "false")
+                return false;
             return Boolean(Number(this.value));
         }
         asNum() {
@@ -25168,6 +25322,7 @@
                     title: chartTitle,
                     type: CHART_TYPE_CONVERSION_MAP[chartType],
                     dataSets: this.extractChartDatasets(this.querySelector(rootChartElement, `c:${chartType}`)),
+                    labelRange: this.extractChildTextContent(rootChartElement, "c:ser c:cat c:f"),
                     backgroundColor: this.extractChildAttr(rootChartElement, "c:chartSpace > c:spPr a:srgbClr", "val", {
                         default: "ffffff",
                     }).asString(),
@@ -25187,7 +25342,7 @@
         extractChartDatasets(chartElement) {
             return this.mapOnElements({ parent: chartElement, query: "c:ser" }, (chartDataElement) => {
                 return {
-                    label: this.extractChildTextContent(chartDataElement, "c:cat c:f"),
+                    label: this.extractChildTextContent(chartDataElement, "c:tx c:f"),
                     range: this.extractChildTextContent(chartDataElement, "c:val c:f", { required: true }),
                 };
             });
@@ -30774,7 +30929,7 @@
                     sheetName = rangeImpl.invalidSheetName;
                 }
                 else {
-                    sheetName = getComposerSheetName(this.getters.getSheetName(rangeImpl.sheetId));
+                    sheetName = getCanonicalSheetName(this.getters.getSheetName(rangeImpl.sheetId));
                 }
             }
             if (prefixSheet && !sheetName) {
@@ -31825,9 +31980,7 @@
                 // remove duplicates first to check validity on a reduced
                 // set of colors, then normalize to HEX and remove duplicates
                 // again
-                [...new Set([...usedColors, ...this.customColors])]
-                    .filter(isColorValid)
-                    .map((c) => toHex(c).toLowerCase())),
+                [...new Set([...usedColors, ...this.customColors])].filter(isColorValid).map(toHex)),
             ]).filter((color) => !COLOR_PICKER_DEFAULTS.includes(color));
         }
         getColorsFromCells(cells) {
@@ -31888,7 +32041,7 @@
             return [...chartsColors];
         }
         tryToAddColor(color) {
-            const formattedColor = toHex(color).toLowerCase();
+            const formattedColor = toHex(color);
             if (color && !COLOR_PICKER_DEFAULTS.includes(formattedColor)) {
                 this.customColors.add(formattedColor);
             }
@@ -35657,7 +35810,7 @@
             const inputSheetId = this.activeSheet;
             const sheetId = this.getters.getActiveSheetId();
             const sheetName = this.getters.getSheetName(sheetId);
-            this.add([sheetId === inputSheetId ? xc : `${getComposerSheetName(sheetName)}!${xc}`]);
+            this.add([sheetId === inputSheetId ? xc : `${getCanonicalSheetName(sheetName)}!${xc}`]);
         }
         handle(cmd) {
             switch (cmd.type) {
@@ -38276,7 +38429,7 @@
             return token;
         const { xc, sheetName } = splitReference(token.value);
         const [left, right] = xc.split(":");
-        const sheetRef = sheetName ? `${getComposerSheetName(sheetName)}!` : "";
+        const sheetRef = sheetName ? `${getCanonicalSheetName(sheetName)}!` : "";
         const updatedLeft = getTokenNextReferenceType(left);
         const updatedRight = right ? `:${getTokenNextReferenceType(right)}` : "";
         return { ...token, value: sheetRef + updatedLeft + updatedRight };
@@ -38534,9 +38687,6 @@
                 return this.getComposerContent(this.getters.getActivePosition());
             }
             return this.currentContent;
-        }
-        getEditionSheet() {
-            return this.sheetId;
         }
         getComposerSelection() {
             return {
@@ -38821,8 +38971,8 @@
         getZoneReference(zone, fixedParts = [{ colFixed: false, rowFixed: false }]) {
             const sheetId = this.getters.getActiveSheetId();
             let selectedXc = this.getters.zoneToXC(sheetId, zone, fixedParts);
-            if (this.getters.getEditionSheet() !== this.getters.getActiveSheetId()) {
-                const sheetName = getComposerSheetName(this.getters.getSheetName(this.getters.getActiveSheetId()));
+            if (this.getters.getCurrentEditedCell().sheetId !== this.getters.getActiveSheetId()) {
+                const sheetName = getCanonicalSheetName(this.getters.getSheetName(this.getters.getActiveSheetId()));
                 selectedXc = `${sheetName}!${selectedXc}`;
             }
             return selectedXc;
@@ -38836,7 +38986,7 @@
                 _fixedParts.pop();
             }
             const newRange = range.clone({ parts: _fixedParts });
-            return this.getters.getSelectionRangeString(newRange, this.getters.getEditionSheet());
+            return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell().sheetId);
         }
         /**
          * Replace the current selection by a new text.
@@ -38869,7 +39019,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return;
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const XCs = this.getReferencedRanges().map((range) => this.getters.getRangeString(range, editionSheetId));
             const colorsToKeep = {};
             for (const xc of XCs) {
@@ -38898,7 +39048,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return [];
             }
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             const rangeColor = (rangeString) => {
                 const colorIndex = this.colorIndexByRange[rangeString];
                 return colors$1[colorIndex % colors$1.length];
@@ -38916,7 +39066,7 @@
          * Return ranges currently referenced in the composer
          */
         getReferencedRanges() {
-            const editionSheetId = this.getters.getEditionSheet();
+            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
             return this.currentTokens
                 .filter((token) => token.type === "REFERENCE")
                 .map((token) => this.getters.getRangeFromSheetXC(editionSheetId, token.value));
@@ -38975,7 +39125,6 @@
         "isSelectingForComposer",
         "showSelectionIndicator",
         "getCurrentContent",
-        "getEditionSheet",
         "getComposerSelection",
         "getCurrentTokens",
         "getTokenAtCursor",
@@ -41519,9 +41668,6 @@
       color: #333;
     }
 
-    * {
-      font-family: "Roboto", "RobotoDraft", Helvetica, Arial, sans-serif;
-    }
     &,
     *,
     *:before,
@@ -45033,7 +45179,10 @@
             owl.markRaw(this);
         }
         get handlers() {
-            return [this.range, ...this.corePlugins, ...this.allUIPlugins, this.history];
+            return [...this.coreHandlers, ...this.allUIPlugins, this.history];
+        }
+        get coreHandlers() {
+            return [this.range, ...this.corePlugins];
         }
         get allUIPlugins() {
             return [...this.statefulUIPlugins, ...this.coreViewsPlugins, ...this.featurePlugins];
@@ -45161,6 +45310,16 @@
          * Check if the given command is allowed by all the plugins and the history.
          */
         checkDispatchAllowed(command) {
+            if (isCoreCommand(command)) {
+                return this.checkDispatchAllowedCoreCommand(command);
+            }
+            return this.checkDispatchAllowedLocalCommand(command);
+        }
+        checkDispatchAllowedCoreCommand(command) {
+            const results = this.coreHandlers.map((handler) => handler.allowDispatch(command));
+            return new DispatchResult(results.flat());
+        }
+        checkDispatchAllowedLocalCommand(command) {
             const results = this.handlers.map((handler) => handler.allowDispatch(command));
             return new DispatchResult(results.flat());
         }
@@ -45392,8 +45551,8 @@
 
 
     __info__.version = '16.3.0-alpha.2';
-    __info__.date = '2023-03-23T11:47:46.254Z';
-    __info__.hash = '59f25bb';
+    __info__.date = '2023-04-05T07:47:52.843Z';
+    __info__.hash = '0d309c2';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

@@ -193,7 +193,7 @@
             t-on-click="() => this.onColorClick(color)"
             t-attf-style="background-color:{{color}};">
             <div
-              t-if="props.currentColor === color"
+              t-if="isSameColor(props.currentColor, color)"
               align="center"
               t-attf-style="color:{{getCheckMarkColor()}}">
             &#10004;
@@ -201,13 +201,13 @@
           </div>
         </div>
         <div class="o-separator"/>
-        <div class="o-color-picker-section-name">
+        <div
+          class="o-color-picker-section-name o-color-picker-toggler"
+          t-on-click="toggleColorPicker">
           <span>Custom</span>
         </div>
-        <div class="colors-grid">
-          <div
-            class="o-color-picker-toggler o-color-picker-line-item"
-            t-on-click.stop="toggleColorPicker">
+        <div class="colors-grid o-color-picker-toggler" t-on-click.stop="toggleColorPicker">
+          <div class="o-color-picker-line-item o-color-picker-toggler">
             <div align="center">+</div>
           </div>
           <div
@@ -1841,15 +1841,6 @@
           onSelectionChanged="(ranges) => this.onDataSeriesRangesChanged(ranges)"
           onSelectionConfirmed="() => this.onDataSeriesConfirmed()"
         />
-        <label>
-          <input
-            type="checkbox"
-            t-att-checked="props.definition.dataSetsHaveTitle"
-            t-on-change="onUpdateDataSetsHaveTitle"
-            class="align-middle"
-          />
-          Data series include title
-        </label>
       </div>
       <div class="o-section o-data-labels">
         <div class="o-section-title">Categories / Labels</div>
@@ -1869,6 +1860,19 @@
             class="align-middle"
           />
           Aggregate
+        </label>
+      </div>
+      <div class="o-section o-use-row-as-headers" t-if="calculateHeaderPosition()">
+        <label>
+          <input
+            type="checkbox"
+            t-att-checked="props.definition.dataSetsHaveTitle"
+            t-on-change="onUpdateDataSetsHaveTitle"
+            class="align-middle"
+          />
+          Use row
+          <span t-esc="calculateHeaderPosition()"/>
+          as headers
         </label>
       </div>
       <div class="o-section o-sidepanel-error" t-if="errorMessages">
@@ -2104,15 +2108,6 @@
           onSelectionChanged="(ranges) => this.onDataSeriesRangesChanged(ranges)"
           onSelectionConfirmed="() => this.onDataSeriesConfirmed()"
         />
-        <label>
-          <input
-            type="checkbox"
-            t-att-checked="props.definition.dataSetsHaveTitle"
-            t-on-change="onUpdateDataSetsHaveTitle"
-            class="align-middle"
-          />
-          Data series include title
-        </label>
       </div>
       <div class="o-section o-data-labels">
         <div class="o-section-title">Categories / Labels</div>
@@ -2132,6 +2127,19 @@
             class="align-middle"
           />
           Aggregate
+        </label>
+      </div>
+      <div class="o-section o-use-row-as-headers" t-if="calculateHeaderPosition()">
+        <label>
+          <input
+            type="checkbox"
+            t-att-checked="props.definition.dataSetsHaveTitle"
+            t-on-change="onUpdateDataSetsHaveTitle"
+            class="align-middle"
+          />
+          Use row
+          <span t-esc="calculateHeaderPosition()"/>
+          as headers
         </label>
       </div>
       <div class="o-section o-sidepanel-error" t-if="errorMessages">
@@ -2207,15 +2215,6 @@
           onSelectionChanged="(ranges) => this.onDataSeriesRangesChanged(ranges)"
           onSelectionConfirmed="() => this.onDataSeriesConfirmed()"
         />
-        <label>
-          <input
-            type="checkbox"
-            t-att-checked="props.definition.dataSetsHaveTitle"
-            t-on-change="onUpdateDataSetsHaveTitle"
-            class="align-middle"
-          />
-          Data series include title
-        </label>
       </div>
       <div class="o-section o-data-labels">
         <div class="o-section-title">Categories / Labels</div>
@@ -2247,6 +2246,19 @@
             Treat labels as text
           </label>
         </div>
+      </div>
+      <div class="o-section o-use-row-as-headers" t-if="calculateHeaderPosition()">
+        <label>
+          <input
+            type="checkbox"
+            t-att-checked="props.definition.dataSetsHaveTitle"
+            t-on-change="onUpdateDataSetsHaveTitle"
+            class="align-middle"
+          />
+          Use row
+          <span t-esc="calculateHeaderPosition()"/>
+          as headers
+        </label>
       </div>
       <div class="o-section o-sidepanel-error" t-if="errorMessages">
         <div t-foreach="errorMessages" t-as="error" t-key="error">
@@ -3551,6 +3563,6 @@
 </odoo>
 <!--
   __info__.version = '16.3.0-alpha.2';
-  __info__.date = '2023-03-23T11:47:49.776Z';
-  __info__.hash = '59f25bb';
+  __info__.date = '2023-04-05T07:47:55.725Z';
+  __info__.hash = '0d309c2';
 -->
