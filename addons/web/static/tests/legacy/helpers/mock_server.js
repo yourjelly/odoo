@@ -1869,9 +1869,7 @@ var MockServer = Class.extend({
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
-        this.data[model].records = _.reject(this.data[model].records, function (record) {
-            return _.contains(ids, record.id);
-        });
+        this.data[model].records = this.data[model].records.filter(record => !_.contains(ids, record.id));
 
         // update value of relationnal fields pointing to the deleted records
         _.each(this.data, function (d) {

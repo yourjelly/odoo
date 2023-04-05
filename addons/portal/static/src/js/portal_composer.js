@@ -91,7 +91,7 @@ var PortalComposer = publicWidget.Widget.extend({
                 'access_token': accessToken,
             },
         }).then(function () {
-            self.attachments = _.reject(self.attachments, {'id': attachmentId});
+            self.attachments = self.attachments.filter(attachment => attachment.id !== attachmentId);
             self._updateAttachments();
             self.$sendButton.prop('disabled', false);
         });

@@ -1247,9 +1247,7 @@ var BasicModel = AbstractModel.extend({
                 list.orderedBy[0].asc = !list.orderedBy[0].asc;
             }
         } else {
-            var orderedBy = _.reject(list.orderedBy, function (o) {
-                return o.name === fieldName;
-            });
+            var orderedBy = list.orderedBy.filter(o => o.name !== fieldName);
             list.orderedBy = [{name: fieldName, asc: true}].concat(orderedBy);
         }
 
@@ -2066,23 +2064,22 @@ var BasicModel = AbstractModel.extend({
                 // no 'ADD' operation for that dataPoint, as it would mean
                 // that the record wasn't in the relation yet
                 var idsToRemove = command.ids;
-                list._changes = _.reject(list._changes, function (change, index) {
-                    var idInCommands = _.contains(command.ids, change.id);
+
+                list._changes = list._changes.filter(change => {
+                    var idInCommands = command.ids.includes(change.id);
                     if (idInCommands && change.operation === 'ADD') {
-                        idsToRemove = _.without(idsToRemove, change.id);
+                        idsToRemove = idsToRemove.filter(id => id !== change.id);
                     }
-                    return idInCommands;
+                    return !idInCommands;
                 });
-                _.each(idsToRemove, function (id) {
+                idsToRemove.forEach(id => {
                     var operation = list._forceM2MUnlink ? 'FORGET': 'DELETE';
                     list._changes.push({operation: operation, id: id});
                 });
                 break;
             case 'DELETE_ALL':
                 // first remove all pending 'ADD' operations
-                list._changes = _.reject(list._changes, function (change) {
-                    return change.operation === 'ADD';
-                });
+                list._changes = list._changes.filter(change => change.operation !== 'ADD');
 
                 // then apply 'DELETE' on existing records
                 return this._applyX2ManyChange(record, fieldName, {

@@ -1512,9 +1512,7 @@ var FieldSelection = AbstractField.extend({
             this.values = this.record.specialData[this.name];
             this.formatType = 'many2one';
         } else {
-            this.values = _.reject(this.field.selection, function (v) {
-                return v[0] === false && v[1] === '';
-            });
+            this.values = this.field.selection.filter(v => !(v[0] === false && v[1] === ''));
         }
         this.values = [[false, this.attrs.placeholder || '']].concat(this.values);
     },
