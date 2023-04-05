@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.DropdownMenu **/
+/** @odoo-module **/
     
     import { _t } from "web.core";
-    import DropdownMenuItem from "web.DropdownMenuItem";
+    import { DropdownMenuItem } from "./dropdown_menu_item";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
     const { useExternalListener, useRef, useState } = owl;

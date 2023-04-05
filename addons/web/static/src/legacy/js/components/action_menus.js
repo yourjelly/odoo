@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.ActionMenus **/
+/** @odoo-module **/
     
     import Context from "web.Context";
-    import DropdownMenu from "web.DropdownMenu";
+    import DropdownMenu from "./dropdown_menu";
     import Registry from "web.Registry";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
@@ -26,7 +26,7 @@
      * Action menu.
      * @extends Component
      */
-    class ActionMenus extends LegacyComponent {
+    export class ActionMenus extends LegacyComponent {
         setup() {
             this.actionButtonStrings = {
                 title: this.env._t("Action"),
@@ -202,5 +202,3 @@
         },
     };
     ActionMenus.template = 'web.Legacy.ActionMenus';
-
-    export default ActionMenus;

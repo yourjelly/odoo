@@ -24,7 +24,7 @@ import { WebClient } from "@web/webclient/webclient";
 // Also it set the autocomplete delay time for the field Many2One at 0 for the tests at line : 132:137
 import "web.test_legacy";
 import AbstractService from "web.AbstractService";
-import ActionMenus from "web.ActionMenus";
+import { ActionMenus } from "@web/legacy/js/components/action_menus";
 import * as basicFields from "@web/legacy/js/fields/basic_fields";
 import Registry from "web.Registry";
 import core from "web.core";

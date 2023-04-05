@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.ControlPanel **/
     
-    import ActionMenus from "web.ActionMenus";
+    import { ActionMenus } from "@web/legacy/js/components/action_menus";
     import ComparisonMenu from "web.ComparisonMenu";
     import ActionModel from "web.ActionModel";
     import FavoriteMenu from "web.FavoriteMenu";

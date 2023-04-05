@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.DropdownMenuItem **/
+/** @odoo-module **/
     
     import { useListener } from "@web/core/utils/hooks";
     import { LegacyComponent } from "@web/legacy/legacy_component";

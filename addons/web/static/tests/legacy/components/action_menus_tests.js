@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import ActionMenus from "web.ActionMenus";
+    import { ActionMenus } from "@web/legacy/js/components/action_menus";
     import Registry from "web.Registry";
     import testUtils from "web.test_utils";
 
