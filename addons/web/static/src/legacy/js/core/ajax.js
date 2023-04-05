@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.ajax **/
 
-import config from "web.config";
+import * as config from "web.config";
 import core from "web.core";
 import {Markup} from "web.utils";
 import time from "web.time";

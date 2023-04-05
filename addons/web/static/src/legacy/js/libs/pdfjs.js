@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import config from 'web.config';
+import * as config from 'web.config';
 
 /**
  * Until we have our own implementation of the /web/static/lib/pdfjs/web/viewer.{html,js,css}

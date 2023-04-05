@@ -1,5 +1,5 @@
 /** @odoo-module */
-import config from "web.config";
+import * as config from "web.config";
 
 /**
  * USAGE

@@ -1,6 +1,6 @@
 /** @odoo-module alias=wysiwyg.widgets.Dialog **/
 
-import config from "web.config";
+import * as config from "web.config";
 import core from "web.core";
 import Dialog from "web.Dialog";
 

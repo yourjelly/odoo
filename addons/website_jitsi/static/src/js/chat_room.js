@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_jitsi.chat_room **/
 
-import config from "web.config";
+import * as config from "web.config";
 import core from "web.core";
 import publicWidget from "web.public.widget";
 const QWeb = core.qweb;

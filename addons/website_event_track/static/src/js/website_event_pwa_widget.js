@@ -15,7 +15,7 @@
         });
     });
 
-    import config from "web.config";
+    import * as config from "web.config";
     import publicWidget from "web.public.widget";
 
     var PWAInstallBanner = publicWidget.Widget.extend({

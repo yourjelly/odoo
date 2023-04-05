@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_sale.website_sale **/
 
 import core from "web.core";
-import config from "web.config";
+import * as config from "web.config";
 import publicWidget from "web.public.widget";
 import VariantMixin from "website_sale.VariantMixin";
 import wSaleUtils from "website_sale.utils";

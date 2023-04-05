@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.core **/
 
 import Bus from "web.Bus";
-import config from "web.config";
+import * as config from "web.config";
 import Class from "web.Class";
 import QWeb from "web.QWeb";
 import Registry from "web.Registry";

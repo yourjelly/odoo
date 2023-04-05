@@ -6,7 +6,7 @@
 
 import { loadJS } from "@web/core/assets";
 import Class from "web.Class";
-import config from "web.config";
+import * as config from "web.config";
 import core from "web.core";
 import dom from "web.dom";
 import mixins from "web.mixins";

@@ -1,7 +1,7 @@
 /** @odoo-module alias=website.s_dynamic_snippet **/
 
 import core from "web.core";
-import config from "web.config";
+import * as config from "web.config";
 import publicWidget from "web.public.widget";
 import {Markup} from "web.utils";
 const DEFAULT_NUMBER_OF_ELEMENTS = 4;

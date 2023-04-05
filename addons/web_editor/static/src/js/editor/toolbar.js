@@ -1,7 +1,7 @@
 /** @odoo-module alias=web_editor.toolbar **/
 
 import Widget from "web.Widget";
-import config from "web.config";
+import * as config from "web.config";
 
 const Toolbar = Widget.extend({
     /**

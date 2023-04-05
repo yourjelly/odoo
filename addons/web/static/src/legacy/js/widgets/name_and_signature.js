@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import core from "web.core";
-import config from "web.config";
+import * as config from "web.config";
 import utils from "web.utils";
 import Widget from "web.Widget";
 

@@ -4,7 +4,7 @@ import { browser } from "@web/core/browser/browser";
 import { MEDIAS_BREAKPOINTS, SIZES, utils } from "@web/core/ui/ui_service";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 
-import config from "web.config";
+import * as config from "web.config";
 
 /**
  * Return the width corresponding to the given size. If an upper and lower bound

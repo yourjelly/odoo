@@ -1,10 +1,10 @@
-/** @odoo-module alias=web.AjaxService **/
+/** @odoo-module **/
 
 import AbstractService from "web.AbstractService";
 import core from "web.core";
 import session from "web.session";
 
-var AjaxService = AbstractService.extend({
+export var AjaxService = AbstractService.extend({
     rpc: function (route, args, options, target) {
         var rpcPromise;
         var promise = new Promise(function (resolve, reject) {
@@ -25,5 +25,3 @@ var AjaxService = AbstractService.extend({
 });
 
 core.serviceRegistry.add('ajax', AjaxService);
-
-export default AjaxService;

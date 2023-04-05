@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import config from "web.config";
+import * as config from "web.config";
 import { _t, qweb } from "web.core";
 import Widget from "web.Widget";
 
