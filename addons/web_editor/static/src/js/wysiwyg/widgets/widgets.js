@@ -6,7 +6,7 @@ import LinkDialog from "wysiwyg.widgets.LinkDialog";
 import LinkTools from "wysiwyg.widgets.LinkTools";
 import ImageCropWidget from "wysiwyg.widgets.ImageCropWidget";
 import LinkPopoverWidget from "@web_editor/js/wysiwyg/widgets/link_popover_widget";
-import {ColorpickerDialog} from "web.Colorpicker";
+import {ColorpickerDialog} from "@web/legacy/js/widgets/colorpicker";
 
 export default {
     Dialog: Dialog,

@@ -2,7 +2,7 @@
 
 import Link from "wysiwyg.widgets.Link";
 import {ColorPaletteWidget} from "web_editor.ColorPalette";
-import {ColorpickerWidget} from "web.Colorpicker";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
 import {
     computeColorClasses,
     getCSSVariableValue,

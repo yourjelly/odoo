@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.name_and_signature **/
+/** @odoo-module **/
 
 import core from "web.core";
 import config from "web.config";
@@ -11,7 +11,7 @@ import Widget from "web.Widget";
  * Alternatively the signature can also be generated automatically based on
  * the given name and a selected font, or loaded from an image file.
  */
-var NameAndSignature = Widget.extend({
+export var NameAndSignature = Widget.extend({
     template: 'web.sign_name_and_signature',
     events: {
         // name
@@ -679,7 +679,3 @@ var NameAndSignature = Widget.extend({
         this._setFont(parseInt($(ev.currentTarget).data('font-nb')));
     },
 });
-
-export default {
-    NameAndSignature: NameAndSignature,
-};

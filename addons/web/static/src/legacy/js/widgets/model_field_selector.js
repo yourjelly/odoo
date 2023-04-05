@@ -1,14 +1,14 @@
-/** @odoo-module alias=web.ModelFieldSelector **/
+/** @odoo-module **/
 
 import core from "web.core";
 import Widget from "web.Widget";
-import ModelFieldSelectorPopover from "web.ModelFieldSelectorPopover";
+import { ModelFieldSelectorPopover } from "./model_field_selector";
 
  /**
  * The ModelFieldSelector widget can be used to display/select a particular
  * field chain from a given model.
  */
-var ModelFieldSelector = Widget.extend({
+export var ModelFieldSelector = Widget.extend({
     template: "ModelFieldSelector",
     events: {},
     edition_events: {
@@ -173,5 +173,3 @@ var ModelFieldSelector = Widget.extend({
         this.popover._onFocusOut();
     },
 });
-
-export default ModelFieldSelector;

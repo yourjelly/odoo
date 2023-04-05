@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.datepicker **/
+/** @odoo-module **/
 
 import core from "web.core";
 import field_utils from "web.field_utils";

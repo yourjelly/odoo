@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.s_countdown **/
 
-import {ColorpickerWidget} from "web.Colorpicker";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
 import core from "web.core";
 import publicWidget from "web.public.widget";
 import weUtils from "web_editor.utils";

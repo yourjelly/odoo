@@ -2,7 +2,7 @@
 
 import core from "web.core";
 import publicWidget from "web.public.widget";
-import { NameAndSignature } from "web.name_and_signature";
+import { NameAndSignature } from "@web/legacy/js/widgets/name_and_signature";
 var qweb = core.qweb;
 
 var _t = core._t;

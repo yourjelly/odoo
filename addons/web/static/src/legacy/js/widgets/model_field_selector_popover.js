@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.ModelFieldSelectorPopover **/
+/** @odoo-module **/
 
 import core from "web.core";
 import Widget from "web.Widget";
@@ -24,7 +24,7 @@ core.bus.on('clear_cache', null, function () {
  * The ModelFieldSelector widget can be used to display/select a particular
  * field chain from a given model.
  */
-var ModelFieldSelectorPopover = Widget.extend({
+export var ModelFieldSelectorPopover = Widget.extend({
     baseTemplate: "ModelFieldSelector",
     template: "ModelFieldSelector.popover",
     events: {
@@ -700,8 +700,6 @@ var ModelFieldSelectorPopover = Widget.extend({
         }
     }
 });
-
-export default ModelFieldSelectorPopover;
 
 /**
  * Allows to transform a mapping field name -> field info in an array of the

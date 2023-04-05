@@ -10,7 +10,7 @@ import Widget from "web.Widget";
 import Dialog from "web.Dialog";
 import customColors from "web_editor.custom_colors";
 import {ColorPaletteWidget} from "web_editor.ColorPalette";
-import {ColorpickerWidget} from "web.Colorpicker";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
 import concurrency from "web.concurrency";
 import { device } from "web.config";
 import { localization } from "@web/core/l10n/localization";
