@@ -283,9 +283,9 @@ var ViewEditor = Widget.extend({
                 if (typeof this.viewKey === "number") {
                     initResID = this.viewKey;
                 } else {
-                    var view = Object.keys(this.views).find(view => view.xml_id === this.viewKey);
+                    var view = _.find(this.views, (view) => view.xml_id === this.viewKey);
                     if (!view) {
-                        view = Object.keys(this.views).find(view => view.key === this.viewKey);
+                        view = _.find(this.views, (view) => view.key === this.viewKey);
                     }
                     initResID = view.id;
                 }
