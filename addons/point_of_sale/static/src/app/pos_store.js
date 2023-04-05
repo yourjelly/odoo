@@ -10,6 +10,7 @@ import { Reactive } from "@point_of_sale/utils";
 import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";
 import { _t } from "@web/core/l10n/translation";
 import { CashOpeningPopup } from "@point_of_sale/js/Popups/CashOpeningPopup";
+import { sprintf } from "@web/core/utils/strings";
 
 export class PosStore extends Reactive {
     /** @type {'LOADING' | 'READY' | 'CLOSING'} */
@@ -77,7 +78,7 @@ export class PosStore extends Reactive {
                         // FIXME POSREF this looks like it's dead code.
                         reject({
                             title: _t("HTTPS connection to IoT Box failed"),
-                            body: _.str.sprintf(
+                            body: sprintf(
                                 _t(
                                     "Make sure you are using IoT Box v18.12 or higher. Navigate to %s to accept the certificate of your IoT Box."
                                 ),
@@ -147,7 +148,7 @@ export class PosStore extends Reactive {
         if (currentPartner && currentOrder.getHasRefundLines()) {
             this.popup.add(ErrorPopup, {
                 title: this.env._t("Can't change customer"),
-                body: _.str.sprintf(
+                body: sprintf(
                     this.env._t(
                         "This order already has refund lines for %s. We can't change the customer associated to it. Create a new order for the new customer."
                     ),

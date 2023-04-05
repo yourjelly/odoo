@@ -6,6 +6,7 @@ import SurveySessionChart from "survey.session_chart";
 import SurveySessionTextAnswers from "survey.session_text_answers";
 import SurveySessionLeaderBoard from "survey.session_leaderboard";
 import {_lt} from "web.core";
+import { sprintf } from "@web/core/utils/strings";
 
 const nextPageTooltips = {
     closingWords: _lt('End of Survey'),
@@ -250,7 +251,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
             args: [[this.surveyId]],
         }).then(function () {
             if ($(ev.currentTarget).data('showResults')) {
-                document.location = _.str.sprintf(
+                document.location = sprintf(
                     '/survey/results/%s',
                     self.surveyId
                 );

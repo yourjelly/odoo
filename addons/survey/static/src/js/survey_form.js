@@ -11,6 +11,7 @@ import {getCookie, setCookie, deleteCookie} from "web.utils.cookies";
 
 import SurveyPreloadImageMixin from "survey.preload_image_mixin";
 import { SurveyImageZoomer } from "@survey/js/survey_image_zoomer";
+import { sprintf } from "@web/core/utils/strings";
 
 var _t = core._t;
 var isMac = navigator.platform.toUpperCase().includes('MAC');
@@ -483,7 +484,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
         }
 
         var submitPromise = self._rpc({
-            route: _.str.sprintf('%s/%s/%s', route, self.options.surveyToken, self.options.answerToken),
+            route: sprintf('%s/%s/%s', route, self.options.surveyToken, self.options.answerToken),
             params: params,
         });
         this._nextScreen(submitPromise, options);

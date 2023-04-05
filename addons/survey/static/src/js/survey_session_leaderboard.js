@@ -2,6 +2,7 @@
 
 import publicWidget from "web.public.widget";
 import SESSION_CHART_COLORS from "survey.session_colors";
+import { sprintf } from "@web/core/utils/strings";
 
 publicWidget.registry.SurveySessionLeaderboard = publicWidget.Widget.extend({
     init: function (parent, options) {
@@ -44,7 +45,7 @@ publicWidget.registry.SurveySessionLeaderboard = publicWidget.Widget.extend({
         }
 
         var leaderboardPromise = this._rpc({
-            route: _.str.sprintf('/survey/session/leaderboard/%s', this.surveyAccessToken)
+            route: sprintf('/survey/session/leaderboard/%s', this.surveyAccessToken)
         });
 
         Promise.all([fadeOutPromise, leaderboardPromise]).then(function (results) {

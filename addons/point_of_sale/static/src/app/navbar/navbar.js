@@ -12,6 +12,7 @@ import { SyncNotification } from "@point_of_sale/js/ChromeWidgets/SyncNotificati
 import { CashMovePopup } from "./cash_move_popup/cash_move_popup";
 import { TicketScreen } from "@point_of_sale/js/Screens/TicketScreen/TicketScreen";
 import { Component } from "@odoo/owl";
+import { sprintf } from "@web/core/utils/strings";
 
 export class Navbar extends Component {
     static template = "point_of_sale.Navbar";
@@ -51,10 +52,7 @@ export class Navbar extends Component {
                     this.env.pos.setLoadingOrderState(true);
                     const message = await this.env.pos._syncAllOrdersFromServer();
                     if (message) {
-                        this.notification.add(
-                            _.str.sprintf(message),
-                            5000
-                        );
+                        this.notification.add(sprintf(message), 5000);
                     }
                 } finally {
                     this.env.pos.setLoadingOrderState(false);

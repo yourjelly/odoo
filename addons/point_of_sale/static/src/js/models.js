@@ -13,7 +13,7 @@ import { ProductConfiguratorPopup } from "@point_of_sale/js/Popups/ProductConfig
 import { EditListPopup } from "@point_of_sale/js/Popups/EditListPopup";
 import { markRaw, reactive } from "@odoo/owl";
 import { ConfirmPopup } from "@point_of_sale/js/Popups/ConfirmPopup";
-import { escape } from "@web/core/utils/strings";
+import { escape, sprintf } from "@web/core/utils/strings";
 import { Mutex } from "@web/core/utils/concurrency";
 import { unique } from "@web/core/utils/arrays";
 
@@ -754,7 +754,7 @@ export class PosGlobalState extends PosModel {
         const pricelistsNames = pricelistsJson.map((pricelist) => {
             return pricelist.display_name;
         });
-        message = _.str.sprintf(
+        message = sprintf(
             _t("%s fiscal position(s) added to the configuration."),
             pricelistsNames.join(", ")
         );
@@ -794,7 +794,7 @@ export class PosGlobalState extends PosModel {
         const fiscalPositionNames = fiscalPositionJson.map((fp) => {
             return fp.display_name;
         });
-        message = _.str.sprintf(
+        message = sprintf(
             _t("%s fiscal position(s) added to the configuration."),
             fiscalPositionNames.join(", ")
         );
@@ -2106,7 +2106,7 @@ export class Orderline extends PosModel {
                 } else {
                     this.pos.env.services.popup.add(ErrorPopup, {
                         title: _t("Greater than allowed"),
-                        body: _.str.sprintf(
+                        body: sprintf(
                             _t(
                                 "The requested quantity to be refunded is higher than the refundable quantity of %s."
                             ),
@@ -2838,7 +2838,7 @@ export class Order extends PosModel {
             this.access_token = uuidv4(); // unique uuid used to identify the authenticity of the request from the QR code.
             this.ticketCode = this._generateTicketCode(); // 5-digits alphanum code shown on the receipt
             this.uid = this.generate_unique_id();
-            this.name = _.str.sprintf(_t("Order %s"), this.uid);
+            this.name = sprintf(_t("Order %s"), this.uid);
             this.validation_date = undefined;
             this.fiscal_position = this.pos.fiscal_positions.find(function (fp) {
                 return fp.id === self.pos.config.default_fiscal_position_id[0];
@@ -2875,7 +2875,7 @@ export class Order extends PosModel {
         }
         this.session_id = this.pos.pos_session.id;
         this.uid = json.uid;
-        this.name = _.str.sprintf(_t("Order %s"), this.uid);
+        this.name = sprintf(_t("Order %s"), this.uid);
         this.validation_date = json.creation_date;
         this.server_id = json.server_id ? json.server_id : false;
         this.user_id = json.user_id;

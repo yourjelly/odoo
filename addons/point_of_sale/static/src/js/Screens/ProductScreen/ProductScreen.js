@@ -21,6 +21,7 @@ import { NumpadWidget } from "./NumpadWidget";
 import { OrderWidget } from "./OrderWidget";
 import { ProductsWidget } from "./ProductsWidget";
 import { ActionpadWidget } from "./ActionpadWidget";
+import { sprintf } from "@web/core/utils/strings";
 
 export class ProductScreen extends ControlButtonsMixin(Component) {
     static template = "ProductScreen";
@@ -214,9 +215,9 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
             }
             if (newQuantity >= selectedLine.saved_quantity) {
                 if (newQuantity == 0) {
-                    order.remove_orderline(selectedLine)
+                    order.remove_orderline(selectedLine);
                 }
-                selectedLine.set_quantity(newQuantity)
+                selectedLine.set_quantity(newQuantity);
                 return;
             }
             const newLine = selectedLine.clone();
@@ -242,7 +243,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
                         ui: { filter: "SYNCED", searchDetails },
                     });
                     this.notification.add(
-                        _.str.sprintf(this.env._t("The order has been already paid.")),
+                        sprintf(this.env._t("The order has been already paid.")),
                         3000
                     );
                     this.env.pos.removeOrder(this.env.pos.get_order(), false);

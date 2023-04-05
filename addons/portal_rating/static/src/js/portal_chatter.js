@@ -4,6 +4,7 @@ import core from "web.core";
 import portalChatter from "portal.chatter";
 import utils from "web.utils";
 import time from "web.time";
+import { sprintf } from "@web/core/utils/strings";
 
 var _t = core._t;
 var PortalChatter = portalChatter.PortalChatter;
@@ -172,7 +173,7 @@ PortalChatter.include({
         return {
             mes_index: messageIndex,
             publisher_id: this.options.partner_id,
-            publisher_avatar: _.str.sprintf('/web/image/res.partner/%s/avatar_128/50x50', this.options.partner_id),
+            publisher_avatar: sprintf('/web/image/res.partner/%s/avatar_128/50x50', this.options.partner_id),
             publisher_name: _t("Write your comment"),
             publisher_datetime: '',
             publisher_comment: '',
@@ -197,7 +198,7 @@ PortalChatter.include({
         if (rawRating.publisher_id && rawRating.publisher_id.length >= 2) {
             ratingData.publisher_id = rawRating.publisher_id[0];
             ratingData.publisher_name = rawRating.publisher_id[1];
-            ratingData.publisher_avatar = _.str.sprintf('/web/image/res.partner/%s/avatar_128/50x50', ratingData.publisher_id);
+            ratingData.publisher_avatar = sprintf('/web/image/res.partner/%s/avatar_128/50x50', ratingData.publisher_id);
         }
         var commentData = Object.assign(this._newPublisherCommentData(messageIndex), ratingData);
         return commentData;
