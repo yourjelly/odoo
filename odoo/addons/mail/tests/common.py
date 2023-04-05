@@ -1182,20 +1182,23 @@ class MailCommon(common.TransactionCase, MailCase):
         """
         # activate translations
         cls.env['res.lang']._activate_lang(lang_code)
+        test_mail = cls.env.ref('base.module_test_mail', False)
         with mute_logger("odoo.addons.base.models.ir_module", "odoo.tools.translate"):
             cls.env.ref('base.module_base')._update_translations([lang_code])
             cls.env.ref('base.module_mail')._update_translations([lang_code])
-            cls.env.ref('base.module_test_mail')._update_translations([lang_code])
             code_translations.get_python_translations('mail', lang_code)
-            code_translations.get_python_translations('test_mail', lang_code)
+            if test_mail:
+                test_mail._update_translations([lang_code])
+                code_translations.get_python_translations('test_mail', lang_code)
 
         # Make sure Spanish translations have not been altered
         if test_record:
             cls.env['ir.model']._get(test_record._name).with_context(lang=lang_code).name = 'Spanish Model Description'
 
         # Translate some code strings used in mailing
-        code_translations.python_translations[('test_mail', 'es_ES')]['NotificationButtonTitle'] = 'SpanishButtonTitle'
-        cls.addClassCleanup(code_translations.python_translations[('test_mail', 'es_ES')].pop, 'NotificationButtonTitle')
+        if test_mail:
+            code_translations.python_translations[('test_mail', 'es_ES')]['NotificationButtonTitle'] = 'SpanishButtonTitle'
+            cls.addClassCleanup(code_translations.python_translations[('test_mail', 'es_ES')].pop, 'NotificationButtonTitle')
         code_translations.python_translations[('mail', 'es_ES')]['View %s'] = 'SpanishView %s'
         cls.addClassCleanup(code_translations.python_translations[('mail', 'es_ES')].pop, 'View %s')
 
