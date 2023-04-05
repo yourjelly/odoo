@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.Pager **/
+/** @odoo-module **/
     
     import { useAutofocus } from "@web/core/utils/hooks";
     import { LegacyComponent } from "@web/legacy/legacy_component";
@@ -18,7 +18,7 @@
      * or previous).
      * @extends Component
      */
-    class Pager extends LegacyComponent {
+    export class Pager extends LegacyComponent {
         /**
          * @param {Object} [props]
          * @param {int} [props.size] the total number of elements
@@ -220,5 +220,3 @@
         onPagerChanged: Function,
     };
     Pager.template = 'web.legacy.Pager';
-
-    export default Pager;

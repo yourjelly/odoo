@@ -6,7 +6,7 @@
     import FavoriteMenu from "web.FavoriteMenu";
     import FilterMenu from "web.FilterMenu";
     import GroupByMenu from "web.GroupByMenu";
-    import Pager from "web.Pager";
+    import { Pager } from "@web/legacy/js/components/pager";
     import SearchBar from "web.SearchBar";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";

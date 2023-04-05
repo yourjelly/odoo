@@ -11,7 +11,7 @@
      * prompt.
      * @extends Component
      */
-    class CustomFileInput extends LegacyComponent {
+    export class CustomFileInput extends LegacyComponent {
         /**
          * @param {Object} [props]
          * @param {string} [props.accepted_file_extensions='*'] Comma-separated
@@ -83,5 +83,3 @@
         slots: { type: Object, optional: true },
     };
     CustomFileInput.template = 'web.CustomFileInput';
-
-    export default CustomFileInput;

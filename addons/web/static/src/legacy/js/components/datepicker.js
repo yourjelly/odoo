@@ -30,7 +30,7 @@
      * to this component will be passed as arguments to instantiate the picker widget).
      * @extends Component
      */
-    class DatePicker extends LegacyComponent {
+    export class DatePicker extends LegacyComponent {
         setup() {
             this.state = useState({ warning: false });
 
@@ -261,7 +261,7 @@
      * details.
      * @extends DatePicker
      */
-    class DateTimePicker extends DatePicker {
+    export class DateTimePicker extends DatePicker {
         setup() {
             super.setup();
             this.typeOfDate = 'datetime';
@@ -282,8 +282,3 @@
             showToday: false,
         },
     });
-
-    export default {
-        DatePicker,
-        DateTimePicker,
-    };

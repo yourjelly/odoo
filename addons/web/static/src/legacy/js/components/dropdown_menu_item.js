@@ -26,7 +26,7 @@
      * be put inside of a dropdown menu (@see CustomFilterItem as example).
      * @extends Component
      */
-    class DropdownMenuItem extends LegacyComponent {
+    export class DropdownMenuItem extends LegacyComponent {
         setup() {
             this.canBeOpened = Boolean(this.props.options && this.props.options.length);
 
@@ -123,5 +123,3 @@
     }
 
     DropdownMenuItem.template = 'web.DropdownMenuItem';
-
-    export default DropdownMenuItem;

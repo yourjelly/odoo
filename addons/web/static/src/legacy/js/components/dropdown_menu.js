@@ -27,7 +27,7 @@
      *      the behaviour of these items, @see DropdownMenuItem.
      * @extends Component
      */
-    class DropdownMenu extends LegacyComponent {
+    export class DropdownMenu extends LegacyComponent {
         setup() {
             this.dropdownMenu = useRef('dropdown');
             this.state = useState({ open: false });
@@ -185,5 +185,3 @@
         hotkeyTitle: { type: String, optional: 1 },
     };
     DropdownMenu.template = 'web.DropdownMenu';
-
-    export default DropdownMenu;
