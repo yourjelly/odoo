@@ -2,7 +2,7 @@
 
 import core from "web.core";
 import Widget from "web.Widget";
-import { ModelFieldSelectorPopover } from "./model_field_selector";
+import { ModelFieldSelectorPopover } from "./model_field_selector_popover";
 
  /**
  * The ModelFieldSelector widget can be used to display/select a particular
