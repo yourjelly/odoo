@@ -22,7 +22,7 @@ odoo.define('web.test_utils', async function (require) {
     const testUtilsMock = require('@web/../tests/legacy/helpers/test_utils_mock');
     const testUtilsModal = require('@web/../tests/legacy/helpers/test_utils_modal');
     const testUtilsPivot = require('@web/../tests/legacy/helpers/test_utils_pivot');
-    const tools = require('web.tools');
+    const tools = require('@web/legacy/js/tools/tools');
 
 
     function deprecated(fn, type) {

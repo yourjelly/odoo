@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.tools **/
+/** @odoo-module **/
 
 /**
  * Wrapper for deprecated functions that display a warning message.
@@ -7,13 +7,9 @@
  * @param {string} [message=''] optional message to display
  * @returns {Function}
  */
-function deprecated(fn, message) {
+export function deprecated(fn, message) {
     return function () {
         console.warn(message || (fn.name + ' is deprecated.'));
         return fn.apply(this, arguments);
     };
 }
-
-export default {
-    deprecated: deprecated,
-};
