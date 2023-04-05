@@ -1,11 +1,11 @@
-/** @odoo-module alias=web.commonEnv **/
+/** @odoo-module **/
     
     /**
      * This file defines the common environment, which contains everything that
      * is needed in the env for both the backend and the frontend (Odoo
      * terminology). This module shouldn't be used as is. It should only be
      * imported by the module defining the final env to use (in the frontend or
-     * in the backend). For instance, module 'web.env' imports it, adds stuff to
+     * in the backend). For instance, module '@web/legacy/js/env' imports it, adds stuff to
      * it, and exports the final env that is used by the whole webclient
      * application.
      *
@@ -42,7 +42,7 @@
     });
 
     // Build the basic env
-    const env = {
+    export const env = {
         _t,
         browser,
         bus,
@@ -94,5 +94,3 @@
         },
         session,
     };
-
-    export default env;

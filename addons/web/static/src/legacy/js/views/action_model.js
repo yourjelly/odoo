@@ -2,7 +2,7 @@
 
     import Domain from "web.Domain";
     import { FACET_ICONS } from "web.searchUtils";
-    import { Model } from "web.Model";
+    import { Model } from "@web/legacy/js/model";
     import { parseArch } from "web.viewUtils";
     import pyUtils from "web.py_utils";
     import Registry from "web.Registry";

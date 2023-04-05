@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { PosGlobalState } from "@point_of_sale/js/models";
-import legacyEnv from "web.env";
+import { env as legacyEnv } from "@web/legacy/js/env";
 
 import { registry } from "@web/core/registry";
 import { ConfirmPopup } from "@point_of_sale/js/Popups/ConfirmPopup";

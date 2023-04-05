@@ -3,7 +3,7 @@
     import Domain from "web.Domain";
     import field_utils from "web.field_utils";
     import { useAutofocus } from "@web/core/utils/hooks";
-    import { useModel } from "web.Model";
+    import { useModel } from "@web/legacy/js/model";
     import { fuzzyTest } from "@web/core/utils/search";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 

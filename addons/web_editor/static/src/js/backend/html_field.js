@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import legacyEnv from 'web.commonEnv';
+import { env as legacyEnv } from "@web/legacy/js/common_env";
 import { ComponentAdapter } from "@web/legacy/js/owl_compatibility";
 import { registry } from "@web/core/registry";
 import { _lt } from "@web/core/l10n/translation";

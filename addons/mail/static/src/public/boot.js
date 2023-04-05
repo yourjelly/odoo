@@ -8,7 +8,7 @@ import { templates } from "@web/core/assets";
 
 import { mapLegacyEnvToWowlEnv } from "@web/legacy/utils";
 
-import * as legacyEnv from "web.env";
+import { env as legacyEnv } from "@web/legacy/js/env";
 import { Component, mount, whenReady } from "@odoo/owl";
 import { DiscussPublic } from "@mail/public/discuss_public";
 

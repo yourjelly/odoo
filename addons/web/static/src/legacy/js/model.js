@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.Model **/
+/** @odoo-module **/
     
     import { groupBy  } from "web.utils";
     import Registry from "web.Registry";
@@ -208,7 +208,7 @@
      * @abstract
      * @extends EventBus
      */
-    class Model extends EventBus {
+    export class Model extends EventBus {
         /**
          * Instantiated extensions are determined by the `extensions` argument:
          * - keys are the extensions names as added in the registry
@@ -441,7 +441,7 @@
      * @param {string} modelName
      * @returns {model}
      */
-    function useModel(modelName) {
+    export function useModel(modelName) {
         const component = useComponent();
         const model = component.env[modelName];
         if (!(model instanceof Model)) {
@@ -471,8 +471,3 @@
 
         return model;
     }
-
-    export default {
-        Model,
-        useModel,
-    };
