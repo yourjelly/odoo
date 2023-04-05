@@ -9,7 +9,7 @@
 
 import { ActionMixin } from "@web/legacy/js/chrome/action_mixin";
 import ActionModel from "web.ActionModel";
-import ControlPanel from "web.ControlPanel";
+import { ControlPanel } from "@web/legacy/js/control_panel/control_panel";
 import Widget from "web.Widget";
 import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 

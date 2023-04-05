@@ -6,7 +6,7 @@ import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import ActionModel from "web.ActionModel";
-import CustomFilterItem from "web.CustomFilterItem";
+import { CustomFilterItem } from "@web/legacy/js/control_panel/custom_filter_item";
 import { createComponent } from "web.test_utils";
 import { editSelect } from "@web/../tests/legacy/helpers/test_utils_fields";
 import { registerCleanup } from "../helpers/cleanup";

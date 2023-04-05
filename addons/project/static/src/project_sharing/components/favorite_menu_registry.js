@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import FavoriteMenuLegacy from 'web.FavoriteMenu';
-import CustomFavoriteItemLegacy from 'web.CustomFavoriteItem';
+import { FavoriteMenu as FavoriteMenuLegacy } from "@web/legacy/js/control_panel/favorite_menu";
+import { CustomFavoriteItem as CustomFavoriteItemLegacy } from "@web/legacy/js/control_panel/custom_favorite_item";
 import { registry } from "@web/core/registry";
 
 

@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.SearchBar **/
+/** @odoo-module **/
     
     import Domain from "web.Domain";
     import * as field_utils from "@web/legacy/js/fields/field_utils";
@@ -36,7 +36,7 @@
      *    records having this exact value.
      * @extends Component
      */
-    class SearchBar extends LegacyComponent {
+    export class SearchBar extends LegacyComponent {
         setup() {
             this.inputRef = useAutofocus();
             this.model = useModel('searchModel');
@@ -487,5 +487,3 @@
         fields: { type: Object, optional: true },
     };
     SearchBar.template = 'web.Legacy.SearchBar';
-
-    export default SearchBar;

@@ -1,9 +1,9 @@
-/** @odoo-module alias=web.FavoriteMenu **/
+/** @odoo-module **/
     
     import { Dropdown } from "@web/core/dropdown/dropdown";
     import { SearchDropdownItem } from "@web/search/search_dropdown_item/search_dropdown_item";
     import Dialog from "web.OwlDialog";
-    import { FACET_ICONS } from "web.searchUtils";
+    import { FACET_ICONS } from "./search_utils";
     import Registry from "web.Registry";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
@@ -19,7 +19,7 @@
      * Only the favorite generator (@see CustomFavoriteItem) is registered in
      * the `web` module.
      */
-    class FavoriteMenu extends LegacyComponent {
+    export class FavoriteMenu extends LegacyComponent {
         setup() {
             this.icon = FACET_ICONS.favorite;
             this.model = useModel('searchModel');
@@ -84,5 +84,3 @@
     FavoriteMenu.registry = new Registry();
     FavoriteMenu.components = { Dialog, Dropdown, SearchDropdownItem };
     FavoriteMenu.template = 'web.Legacy.FavoriteMenu';
-
-    export default FavoriteMenu;

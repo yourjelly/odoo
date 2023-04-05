@@ -1,13 +1,13 @@
-/** @odoo-module alias=web.GroupByMenu **/
+/** @odoo-module **/
     
     import { Dropdown } from "@web/core/dropdown/dropdown";
     import { SearchDropdownItem } from "@web/search/search_dropdown_item/search_dropdown_item";
     import { CustomGroupByItem } from "@web/search/group_by_menu/custom_group_by_item";
-    import { FACET_ICONS, GROUPABLE_TYPES } from "web.searchUtils";
+    import { FACET_ICONS, GROUPABLE_TYPES } from "./search_utils";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
-    class GroupByMenu extends LegacyComponent {
+    export class GroupByMenu extends LegacyComponent {
 
         setup() {
             this.icon = FACET_ICONS.groupBy;
@@ -72,5 +72,3 @@
     GroupByMenu.components = { CustomGroupByItem, Dropdown, SearchDropdownItem };
     GroupByMenu.props = { fields: Object };
     GroupByMenu.template = "web.GroupByMenu";
-
-    export default GroupByMenu;

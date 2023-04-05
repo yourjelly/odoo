@@ -11,7 +11,7 @@
 
     import { ActionMenus } from "@web/legacy/js/components/action_menus";
     import concurrency from "web.concurrency";
-    import ControlPanel from "web.ControlPanel";
+    import { ControlPanel } from "@web/legacy/js/control_panel/control_panel";
     import { useListener } from "@web/core/utils/hooks";
     import dom from "web.dom";
     import { makeTestEnvironment } from "./test_env";

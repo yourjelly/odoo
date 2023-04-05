@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import ControlPanel from 'web.ControlPanel';
+import { ControlPanel } from "@web/legacy/js/control_panel/control_panel";
 import session from 'web.session';
 
 const { onWillStart, onWillUpdateProps } = owl;

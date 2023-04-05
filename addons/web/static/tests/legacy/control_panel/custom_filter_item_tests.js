@@ -1,7 +1,7 @@
 /** @odoo-module **/
     
     import Domain from "web.Domain";
-    import CustomFilterItem from "web.CustomFilterItem";
+    import { CustomFilterItem } from "@web/legacy/js/control_panel/custom_filter_item";
     import ActionModel from "web.ActionModel";
     import pyUtils from "web.py_utils";
     import testUtils from "web.test_utils";

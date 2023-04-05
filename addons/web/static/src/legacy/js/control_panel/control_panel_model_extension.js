@@ -1,4 +1,4 @@
-/** @odoo-module alias=web/static/src/js/control_panel/control_panel_model_extension.js **/
+/** @odoo-module **/
     
     import ActionModel from "web.ActionModel";
     import Domain from "web.Domain";
@@ -6,7 +6,7 @@
 
     import { DEFAULT_INTERVAL, DEFAULT_PERIOD,
         getComparisonOptions, getIntervalOptions, getPeriodOptions,
-        constructDateDomain, rankInterval, yearSelected } from "web.searchUtils";
+        constructDateDomain, rankInterval, yearSelected } from "./search_utils";
 
     const FAVORITE_PRIVATE_GROUP = 1;
     const FAVORITE_SHARED_GROUP = 2;
@@ -140,7 +140,7 @@
      * since the information is available on the corresponding filters.
      * @extends ActionModel.Extension
      */
-    class ControlPanelModelExtension extends ActionModel.Extension {
+    export class ControlPanelModelExtension extends ActionModel.Extension {
         /**
          * @param {Object} config
          * @param {(string|number)} config.actionId
@@ -1669,5 +1669,3 @@
     }
 
     ActionModel.registry.add("ControlPanel", ControlPanelModelExtension, 10);
-
-    export default ControlPanelModelExtension;

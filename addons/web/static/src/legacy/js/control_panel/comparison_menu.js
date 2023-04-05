@@ -1,12 +1,12 @@
-/** @odoo-module alias=web.ComparisonMenu **/
+/** @odoo-module **/
     
     import { Dropdown } from "@web/core/dropdown/dropdown";
     import { SearchDropdownItem } from "@web/search/search_dropdown_item/search_dropdown_item";
-    import { FACET_ICONS } from "web.searchUtils";
+    import { FACET_ICONS } from "./search_utils";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
-    class ComparisonMenu extends LegacyComponent {
+    export class ComparisonMenu extends LegacyComponent {
         setup() {
             this.icon = FACET_ICONS.comparison;
             this.model = useModel('searchModel');
@@ -29,5 +29,3 @@
     }
     ComparisonMenu.template = "web.ComparisonMenu";
     ComparisonMenu.components = { Dropdown, SearchDropdownItem };
-
-    export default ComparisonMenu;

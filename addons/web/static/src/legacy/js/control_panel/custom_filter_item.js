@@ -1,9 +1,9 @@
-/** @odoo-module alias=web.CustomFilterItem **/
+/** @odoo-module **/
     
     import { Dropdown } from "@web/core/dropdown/dropdown";
     import { DatePicker, DateTimePicker } from "@web/legacy/js/components/datepicker";
     import Domain from "web.Domain";
-    import { FIELD_OPERATORS, FIELD_TYPES } from "web.searchUtils";
+    import { FIELD_OPERATORS, FIELD_TYPES } from "./search_utils";
     import * as field_utils from "@web/legacy/js/fields/field_utils";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
@@ -42,7 +42,7 @@
      *                         [date_field, '<=', y],
      *                     ]
      */
-    class CustomFilterItem extends LegacyComponent {
+    export class CustomFilterItem extends LegacyComponent {
         setup() {
             this.model = useModel('searchModel');
 
@@ -277,5 +277,3 @@
     CustomFilterItem.components = { DatePicker, DateTimePicker, Dropdown };
     CustomFilterItem.props = { fields: Object };
     CustomFilterItem.template = "web.CustomFilterItem";
-
-    export default CustomFilterItem;

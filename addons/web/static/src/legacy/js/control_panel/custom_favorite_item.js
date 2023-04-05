@@ -1,8 +1,8 @@
-/** @odoo-module alias=web.CustomFavoriteItem **/
+/** @odoo-module **/
     
     import { CheckBox } from "@web/core/checkbox/checkbox";
     import { Dropdown } from "@web/core/dropdown/dropdown";
-    import FavoriteMenu from "web.FavoriteMenu";
+    import { FavoriteMenu } from "./favorite_menu";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
@@ -29,7 +29,7 @@
      * Finally, there is a 'Save' button used to apply the current configuration
      * and save the context to a new filter.
      */
-    class CustomFavoriteItem extends LegacyComponent {
+    export class CustomFavoriteItem extends LegacyComponent {
         setup() {
             const favId = favoriteId++;
             this.useByDefaultId = `o_favorite_use_by_default_${favId}`;
@@ -145,5 +145,3 @@
     CustomFavoriteItem.groupNumber = 3; // have 'Save Current Search' in its own group
 
     FavoriteMenu.registry.add('favorite-generator-menu', CustomFavoriteItem, 0);
-
-    export default CustomFavoriteItem;

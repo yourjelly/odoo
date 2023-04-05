@@ -1,9 +1,9 @@
-/** @odoo-module alias=web.FilterMenu **/
+/** @odoo-module **/
     
     import { Dropdown } from "@web/core/dropdown/dropdown";
     import { SearchDropdownItem } from "@web/search/search_dropdown_item/search_dropdown_item";
-    import CustomFilterItem from "web.CustomFilterItem";
-    import { FACET_ICONS } from "web.searchUtils";
+    import { CustomFilterItem } from "./custom_filter_item";
+    import { FACET_ICONS } from "./search_utils";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
@@ -14,7 +14,7 @@
      * model. It uses most of the behaviours implemented by the dropdown menu Component,
      * with the addition of a filter generator (@see CustomFilterItem).
      */
-    class FilterMenu extends LegacyComponent {
+    export class FilterMenu extends LegacyComponent {
 
         setup() {
             this.icon = FACET_ICONS.filter;
@@ -60,5 +60,3 @@
     };
     FilterMenu.template = "web.legacy.FilterMenu";
     FilterMenu.components = { CustomFilterItem, Dropdown, SearchDropdownItem };
-
-    export default FilterMenu;

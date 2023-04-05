@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import { constructDateDomain } from "web.searchUtils";
+    import { constructDateDomain } from "@web/legacy/js/control_panel/search_utils";
     import testUtils from "web.test_utils";
     import { registry } from "@web/core/registry";
     import { translatedTerms } from "@web/core/l10n/translation";

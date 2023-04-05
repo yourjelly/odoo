@@ -1,13 +1,13 @@
-/** @odoo-module alias=web.ControlPanel **/
+/** @odoo-module **/
     
     import { ActionMenus } from "@web/legacy/js/components/action_menus";
-    import ComparisonMenu from "web.ComparisonMenu";
+    import { ComparisonMenu } from "./comparison_menu";
     import ActionModel from "web.ActionModel";
-    import FavoriteMenu from "web.FavoriteMenu";
-    import FilterMenu from "web.FilterMenu";
-    import GroupByMenu from "web.GroupByMenu";
+    import { FavoriteMenu } from "./favorite_menu";
+    import { FilterMenu } from "./filter_menu";
+    import { GroupByMenu } from "./groupby_menu";
     import { Pager } from "@web/legacy/js/components/pager";
-    import SearchBar from "web.SearchBar";
+    import { SearchBar } from "./search_bar";
     import { useModel } from "@web/legacy/js/model";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
@@ -103,7 +103,7 @@
      * inheritance mechanism when converting the views/actions.
      * @extends Component
      */
-    class ControlPanel extends LegacyComponent {
+    export class ControlPanel extends LegacyComponent {
         setup() {
             this.additionalContent = getAdditionalContent(this.props);
 
@@ -238,5 +238,3 @@
         withSearchBar: { type: Boolean, optional: true },
     };
     ControlPanel.template = 'web.Legacy.ControlPanel';
-
-    export default ControlPanel;

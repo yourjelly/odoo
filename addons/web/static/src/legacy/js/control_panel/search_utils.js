@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.searchUtils **/
+/** @odoo-module **/
     
     import { _lt, _t } from "web.core";
     import Domain from "web.Domain";
@@ -9,7 +9,7 @@
     //-------------------------------------------------------------------------
 
     // Filter menu parameters
-    const FIELD_OPERATORS = {
+    export const FIELD_OPERATORS = {
         binary: [
             { symbol: "!=", description: _lt("is set"), value: false },
             { symbol: "=", description: _lt("is not set"), value: false },
@@ -70,7 +70,7 @@
             { symbol: "=", description: _lt("is not set"), value: false },
         ],
     };
-    const FIELD_TYPES = {
+    export const FIELD_TYPES = {
         binary: 'binary',
         boolean: 'boolean',
         char: 'char',
@@ -87,7 +87,7 @@
         text: 'char',
         selection: 'selection',
     };
-    const DEFAULT_PERIOD = 'this_month';
+    export const DEFAULT_PERIOD = 'this_month';
     const QUARTERS = {
         1: { description: _lt("Q1"), coveredMonths: [0, 1, 2] },
         2: { description: _lt("Q2"), coveredMonths: [3, 4, 5] },
@@ -140,10 +140,10 @@
             addParam: { years: -2 }, granularity: 'year',
         },
     };
-    const PERIOD_OPTIONS = Object.assign({}, MONTH_OPTIONS, QUARTER_OPTIONS, YEAR_OPTIONS);
+    export const PERIOD_OPTIONS = Object.assign({}, MONTH_OPTIONS, QUARTER_OPTIONS, YEAR_OPTIONS);
 
     // GroupBy menu parameters
-    const GROUPABLE_TYPES = [
+    export const GROUPABLE_TYPES = [
         'boolean',
         'char',
         'date',
@@ -153,8 +153,8 @@
         'many2many',
         'selection',
     ];
-    const DEFAULT_INTERVAL = 'month';
-    const INTERVAL_OPTIONS = {
+    export const DEFAULT_INTERVAL = 'month';
+    export const INTERVAL_OPTIONS = {
         year: { description: _lt("Year"), id: 'year', groupNumber: 1 },
         quarter: { description: _lt("Quarter"), id: 'quarter', groupNumber: 1 },
         month: { description: _lt("Month"), id: 'month', groupNumber: 1 },
@@ -163,7 +163,7 @@
     };
 
     // Comparison menu parameters
-    const COMPARISON_OPTIONS = {
+    export const COMPARISON_OPTIONS = {
         previous_period: {
             description: _lt("Previous Period"), id: 'previous_period',
         },
@@ -177,7 +177,7 @@
         month: 12,
     };
     // Search bar
-    const FACET_ICONS = {
+    export const FACET_ICONS = {
         filter: 'fa fa-filter',
         groupBy: 'oi oi-group',
         favorite: 'fa fa-star',
@@ -204,7 +204,7 @@
      * @param {string} [comparisonOptionId]
      * @returns {{ domain: string, description: string }}
      */
-    function constructDateDomain(
+    export function constructDateDomain(
         referenceMoment,
         fieldName,
         fieldType,
@@ -283,7 +283,7 @@
      * @param {Object} [params.addParam]
      * @returns {{ domain: string, description: string }}
      */
-    function constructDateRange({
+    export function constructDateRange({
         referenceMoment,
         fieldName,
         fieldType,
@@ -326,7 +326,7 @@
      * Returns a version of the options in COMPARISON_OPTIONS with translated descriptions.
      * @see getOptionsWithDescriptions
      */
-    function getComparisonOptions() {
+    export function getComparisonOptions() {
         return getOptionsWithDescriptions(COMPARISON_OPTIONS);
     }
 
@@ -398,7 +398,7 @@
      * Returns a version of the options in INTERVAL_OPTIONS with translated descriptions.
      * @see getOptionsWithDescriptions
      */
-    function getIntervalOptions() {
+    export function getIntervalOptions() {
         return getOptionsWithDescriptions(INTERVAL_OPTIONS);
     }
 
@@ -408,7 +408,7 @@
      * @param {moment} referenceMoment
      * @returns {Object[]}
      */
-    function getPeriodOptions(referenceMoment) {
+    export function getPeriodOptions(referenceMoment) {
         const options = [];
         for (const option of Object.values(PERIOD_OPTIONS)) {
             const { id, groupNumber, description, } = option;
@@ -497,7 +497,7 @@
      * @param {string} intervalOptionId
      * @returns {number} index
      */
-    function rankInterval(intervalOptionId) {
+    export function rankInterval(intervalOptionId) {
         return Object.keys(INTERVAL_OPTIONS).indexOf(intervalOptionId);
     }
 
@@ -522,26 +522,6 @@
      * @param {string[]} selectedOptionIds
      * @returns {boolean}
      */
-    function yearSelected(selectedOptionIds) {
+    export function yearSelected(selectedOptionIds) {
         return selectedOptionIds.some(optionId => !!YEAR_OPTIONS[optionId]);
     }
-
-    export default {
-        COMPARISON_OPTIONS,
-        DEFAULT_INTERVAL,
-        DEFAULT_PERIOD,
-        FACET_ICONS,
-        FIELD_OPERATORS,
-        FIELD_TYPES,
-        GROUPABLE_TYPES,
-        INTERVAL_OPTIONS,
-        PERIOD_OPTIONS,
-
-        constructDateRange,
-        constructDateDomain,
-        getComparisonOptions,
-        getIntervalOptions,
-        getPeriodOptions,
-        rankInterval,
-        yearSelected,
-    };
