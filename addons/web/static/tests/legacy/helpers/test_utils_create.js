@@ -14,10 +14,10 @@
     import ControlPanel from "web.ControlPanel";
     import { useListener } from "@web/core/utils/hooks";
     import dom from "web.dom";
-    import makeTestEnvironment from "web.test_env";
+    import { makeTestEnvironment } from "web.test_env";
     import ActionModel from "web.ActionModel";
     import Registry from "web.Registry";
-    import testUtilsMock from "web.test_utils_mock";
+    import * as testUtilsMock from "web.test_utils_mock";
     import Widget from "web.Widget";
     import { destroy, getFixture, mount, useChild } from "@web/../tests/helpers/utils";
     import { registerCleanup } from "@web/../tests/helpers/cleanup";
@@ -39,7 +39,7 @@
      * @param {boolean} [options.positionalClicks=false]
      * @returns {Promise<CalendarController>}
      */
-    async function createCalendarView(params, options) {
+    export async function createCalendarView(params, options) {
         const calendar = await createView(params);
         if (!options || !options.positionalClicks) {
             return calendar;
@@ -74,7 +74,7 @@
      * @param {Object} [params.props]
      * @returns {Promise<Component>} instance of `constructor`
      */
-    async function createComponent(constructor, params = {}) {
+    export async function createComponent(constructor, params = {}) {
         if (!constructor) {
             throw new Error(`Missing argument "constructor".`);
         }
@@ -120,7 +120,7 @@
      *  - helpers: a suite of bound helpers (see above functions for all
      *    available helpers)
      */
-    async function createControlPanel(params = {}) {
+    export async function createControlPanel(params = {}) {
         const env = makeTestEnvironment(params.env || {});
         const props = Object.assign({
             action: {},
@@ -201,7 +201,7 @@
      * @param {Class} params.Model the model class to use
      * @returns {Model}
      */
-    async function createModel(params) {
+    export async function createModel(params) {
         const widget = new Widget();
 
         const model = new params.Model(widget, params);
@@ -227,7 +227,7 @@
      *   any parameters from that method applies
      * @returns {Promise<Widget>}
      */
-    async function createParent(params) {
+    export async function createParent(params) {
         const widget = new Widget();
         await testUtilsMock.addMockEnvironment(widget, params);
         return widget;
@@ -263,7 +263,7 @@
      *   device with a touch screen. Default value is false
      * @returns {Promise<AbstractController>} the instance of the view
      */
-    async function createView(params) {
+    export async function createView(params) {
         const target = prepareTarget(params.debug);
         const widget = new Widget();
         // reproduce the DOM environment of views
@@ -385,17 +385,7 @@
      *      the DOM. Also, RPCs and uncaught OdooEvent will be logged
      * @returns {HTMLElement}
      */
-    function prepareTarget(debug = false) {
+    export function prepareTarget(debug = false) {
         document.body.classList.toggle('debug', debug);
         return debug ? document.body : document.getElementById('qunit-fixture');
     }
-
-    export default {
-        createCalendarView,
-        createComponent,
-        createControlPanel,
-        createModel,
-        createParent,
-        createView,
-        prepareTarget,
-    };

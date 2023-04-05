@@ -18,7 +18,7 @@
      * @param {Function} [providedRPC=null]
      * @returns {Proxy}
      */
-    function makeTestEnvironment(env = {}, providedRPC = null) {
+    export function makeTestEnvironment(env = {}, providedRPC = null) {
         if (!app) {
             app = new App(null, { templates, test: true });
             renderToString.app = app;
@@ -82,5 +82,3 @@
     QUnit.on('OdooBeforeTestHook', function () {
         Component.env = makeTestEnvironment();
     });
-
-    export default makeTestEnvironment;

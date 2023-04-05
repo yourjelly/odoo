@@ -10,15 +10,13 @@
      */
 
     import { _t } from "web.core";
-    import testUtilsDom from "web.test_utils_dom";
+    import * as testUtilsDom from "web.test_utils_dom";
 
     /**
      * Click on a button in the footer of a modal (which contains a given string).
      *
      * @param {string} text (in english: this method will perform the translation)
      */
-    function clickButton(text) {
+    export function clickButton(text) {
         return testUtilsDom.click($(`.modal-footer button:contains(${_t(text)})`));
     }
-
-    export default { clickButton };

@@ -9,8 +9,8 @@
  * testUtils file.
  */
 
-import testUtilsDom from "web.test_utils_dom";
-import testUtilsFields from "web.test_utils_fields";
+import * as testUtilsDom from "web.test_utils_dom";
+import * as testUtilsFields from "web.test_utils_fields";
 
 /**
  * Clicks on the Create button in a kanban view. Note that this method checks that
@@ -19,7 +19,7 @@ import testUtilsFields from "web.test_utils_fields";
  * @param {KanbanController} kanban
  * @returns {Promise}
  */
-function clickCreate(kanban) {
+export function clickCreate(kanban) {
     return testUtilsDom.click(kanban.$buttons.find('.o-kanban-button-new'));
 }
 
@@ -29,7 +29,7 @@ function clickCreate(kanban) {
  * @param {jQuery} $column
  * @returns {Promise}
  */
-function toggleGroupSettings($column) {
+export function toggleGroupSettings($column) {
     var $dropdownToggler = $column.find('.o_kanban_config > a.dropdown-toggle');
     if (!$dropdownToggler.is(':visible')) {
         $dropdownToggler.css('display', 'block');
@@ -46,7 +46,7 @@ function toggleGroupSettings($column) {
  * @param {[string]} fieldName
  * @returns {Promise}
  */
-function quickCreate(kanban, value, fieldName) {
+export function quickCreate(kanban, value, fieldName) {
     var additionalSelector = fieldName ? ('[name=' + fieldName + ']'): '';
     var enterEvent = $.Event(
         'keydown',
@@ -69,7 +69,7 @@ function quickCreate(kanban, value, fieldName) {
  * @param {[Object]} params given to the controller reload method
  * @returns {Promise}
  */
-function reload(kanban, params) {
+export function reload(kanban, params) {
     return kanban.reload(params);
 }
 
@@ -81,19 +81,10 @@ function reload(kanban, params) {
  * @param {jQuery} $record
  * @returns {Promise}
  */
-function toggleRecordDropdown($record) {
+export function toggleRecordDropdown($record) {
     var $dropdownToggler = $record.find('.o_dropdown_kanban > a.dropdown-toggle');
     if (!$dropdownToggler.is(':visible')) {
         $dropdownToggler.css('display', 'block');
     }
     return testUtilsDom.click($dropdownToggler);
 }
-
-
-export default {
-    clickCreate: clickCreate,
-    quickCreate: quickCreate,
-    reload: reload,
-    toggleGroupSettings: toggleGroupSettings,
-    toggleRecordDropdown: toggleRecordDropdown,
-};

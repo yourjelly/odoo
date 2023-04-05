@@ -4,7 +4,7 @@ import Class from "web.Class";
 import Domain from "web.Domain";
 import pyUtils from "web.py_utils";
 
-var MockServer = Class.extend({
+export var MockServer = Class.extend({
     /**
      * @constructor
      * @param {Object} data
@@ -2269,5 +2269,3 @@ var MockServer = Class.extend({
         }
     },
 });
-
-export default MockServer;

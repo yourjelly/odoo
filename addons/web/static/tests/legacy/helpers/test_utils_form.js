@@ -9,7 +9,7 @@
  * testUtils file.
  */
 
-import testUtilsDom from "web.test_utils_dom";
+import * as testUtilsDom from "web.test_utils_dom";
 
 /**
  * Clicks on the Edit button in a form view, to set it to edit mode. Note that
@@ -18,7 +18,7 @@ import testUtilsDom from "web.test_utils_dom";
  *
  * @param {FormController} form
  */
-function clickEdit(form) {
+export function clickEdit(form) {
     return testUtilsDom.click(form.$buttons.find('.o_form_button_edit'));
 }
 
@@ -28,7 +28,7 @@ function clickEdit(form) {
  *
  * @param {FormController} form
  */
-function clickSave(form) {
+export function clickSave(form) {
     return testUtilsDom.click(form.$buttons.find('.o_form_button_save'));
 }
 
@@ -38,7 +38,7 @@ function clickSave(form) {
  *
  * @param {FormController} form
  */
-function clickCreate(form) {
+export function clickCreate(form) {
     return testUtilsDom.click(form.$buttons.find('.o_form_button_create'));
 }
 
@@ -48,7 +48,7 @@ function clickCreate(form) {
  *
  * @param {FormController} form
  */
-function clickDiscard(form) {
+export function clickDiscard(form) {
     return testUtilsDom.click(form.$buttons.find('.o_form_button_cancel'));
 }
 
@@ -58,14 +58,6 @@ function clickDiscard(form) {
  * @param {FormController} form
  * @param {[Object]} params given to the controller reload method
  */
-function reload(form, params) {
+export function reload(form, params) {
     return form.reload(params);
 }
-
-export default {
-    clickEdit: clickEdit,
-    clickSave: clickSave,
-    clickCreate: clickCreate,
-    clickDiscard: clickDiscard,
-    reload: reload,
-};

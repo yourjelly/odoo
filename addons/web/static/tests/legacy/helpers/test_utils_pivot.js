@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.test_utils_pivot **/
 
-import testUtilsDom from "web.test_utils_dom";
+import * as testUtilsDom from "web.test_utils_dom";
 
 /**
  * Pivot Test Utils
@@ -22,7 +22,7 @@ import testUtilsDom from "web.test_utils_dom";
  * @param {PivotController} pivot
  * @param {string} measure
  */
-function clickMeasure(pivot, measure) {
+export function clickMeasure(pivot, measure) {
     return testUtilsDom.click(pivot.$buttons.find(`.dropdown-item[data-field=${measure}]`));
 }
 
@@ -33,7 +33,7 @@ function clickMeasure(pivot, measure) {
  *
  * @param {PivotController} pivot
  */
-function toggleMeasuresDropdown(pivot) {
+export function toggleMeasuresDropdown(pivot) {
     return testUtilsDom.click(pivot.$buttons.filter('.btn-group:first').find('> button'));
 }
 
@@ -43,12 +43,6 @@ function toggleMeasuresDropdown(pivot) {
  * @param {PivotController} pivot
  * @param {[Object]} params given to the controller reload method
  */
-function reload(pivot, params) {
+export function reload(pivot, params) {
     return pivot.reload(params);
 }
-
-export default {
-    clickMeasure: clickMeasure,
-    reload: reload,
-    toggleMeasuresDropdown: toggleMeasuresDropdown,
-};

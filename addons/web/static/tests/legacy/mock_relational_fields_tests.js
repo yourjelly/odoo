@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import MockServer from 'web.MockServer';
+import { MockServer } from 'web.MockServer';
 
 QUnit.module('web', {}, function () {
 QUnit.module('legacy', {}, function () {
