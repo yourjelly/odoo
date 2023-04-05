@@ -7,7 +7,7 @@ import Widget from "web.Widget";
 
 var _t = core._t;
 
-var DateWidget = Widget.extend({
+export var DateWidget = Widget.extend({
     template: "web.datepicker",
     type_of_date: "date",
     events: {
@@ -336,7 +336,7 @@ var DateWidget = Widget.extend({
     },
 });
 
-var DateTimeWidget = DateWidget.extend({
+export var DateTimeWidget = DateWidget.extend({
     type_of_date: "datetime",
     init: function (parent, options) {
         this._super(parent, _.extend({
@@ -348,8 +348,3 @@ var DateTimeWidget = DateWidget.extend({
         }, options || {}));
     },
 });
-
-export default {
-    DateWidget: DateWidget,
-    DateTimeWidget: DateTimeWidget,
-};

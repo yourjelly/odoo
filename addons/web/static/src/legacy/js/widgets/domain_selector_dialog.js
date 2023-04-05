@@ -10,7 +10,7 @@ var _t = core._t;
 /**
  * @class DomainSelectorDialog
  */
-export default Dialog.extend({
+export const DomainSelectorDialog = Dialog.extend({
     custom_events: _.extend({}, Dialog.prototype.custom_events, {
         domain_changed: "_onDomainChange",
     }),

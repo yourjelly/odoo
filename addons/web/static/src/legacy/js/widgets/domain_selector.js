@@ -459,7 +459,7 @@ var DomainTree = DomainNode.extend({
  * - Some kind of domain can not be build right now
  *   e.g ("country_id", "in", [1,2,3]) but you can insert from debug input.
  */
-var DomainSelector = DomainTree.extend({
+export var DomainSelector = DomainTree.extend({
     template: "DomainSelector",
     events: _.extend({}, DomainTree.prototype.events, {
         "click .o_domain_add_first_node_button": "_onAddFirstButtonClick",
@@ -1011,5 +1011,3 @@ function instantiateNode(parent, model, domain, options) {
     }
     return null;
 }
-
-export default DomainSelector;
