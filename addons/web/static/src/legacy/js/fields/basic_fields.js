@@ -1281,7 +1281,7 @@ var FieldFloatToggle = AbstractField.extend({
     _nextValue: function () {
         var range = this.nodeOptions.range;
         var val =  utils.closestNumber(this._getDisplayedValue(), range);
-        var index = _.indexOf(range, val);
+        var index = range.indexOf(val);
         if (index !== -1) {
             if (index + 1 < range.length) {
                 return range[index + 1];

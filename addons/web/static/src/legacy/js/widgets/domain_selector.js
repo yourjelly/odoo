@@ -251,7 +251,7 @@ var DomainTree = DomainNode.extend({
      *                   false otherwise (the afterNode was not found)
      */
     _addChild: function (domain, afterNode) {
-        var i = afterNode ? _.indexOf(this.children, afterNode) : this.children.length;
+        var i = afterNode ? this.children.indexOf(afterNode) : this.children.length;
         if (i < 0) return false;
 
         this.children.splice(i+1, 0, instantiateNode(this, this.model, domain, this.options));
@@ -355,7 +355,7 @@ var DomainTree = DomainNode.extend({
      *                   widget does not own the child)
      */
     _removeChild: function (oldChild) {
-        var i = _.indexOf(this.children, oldChild);
+        var i = this.children.indexOf(oldChild);
         if (i < 0) return false;
 
         this.children[i].destroy();

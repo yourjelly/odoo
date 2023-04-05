@@ -1073,7 +1073,7 @@ var BasicModel = AbstractModel.extend({
                         }
                         if (dataType === 'list') {
                             data.data = _.sortBy(data.data, function (d) {
-                                return _.indexOf(resIDs, self.localData[d].res_id)
+                                return resIDs.indexOf(self.localData[d].res_id);
                             });
                         }
                     }
@@ -4185,7 +4185,7 @@ var BasicModel = AbstractModel.extend({
             limit: type === 'record' ? 1 : (params.limit || Number.MAX_SAFE_INTEGER),
             loadMoreOffset: 0,
             model: params.modelName,
-            offset: params.offset || (type === 'record' ? _.indexOf(res_ids, res_id) : 0),
+            offset: params.offset || (type === 'record' ? res_ids.indexOf(res_id) : 0),
             openGroupByDefault: params.openGroupByDefault,
             orderedBy: params.orderedBy || [],
             orderedResIDs: params.orderedResIDs,
@@ -5037,7 +5037,7 @@ var BasicModel = AbstractModel.extend({
             element.count = element.res_ids.length;
         }
         if (element.type === 'record') {
-            element.offset = _.indexOf(element.res_ids, element.res_id);
+            element.offset = element.res_ids.indexOf(element.res_id);
         }
         var loadOptions = _.pick(options, 'fieldNames', 'viewType');
         return this._load(element, loadOptions).then(function (result) {

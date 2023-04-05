@@ -891,7 +891,7 @@ var ViewEditor = Widget.extend({
                     label: bundleInfos[0],
                 }).appendTo($list);
                 _.each(bundleInfos[1], function (dataInfo) {
-                    var name = dataInfo.url.substring(_.lastIndexOf(dataInfo.url, '/') + 1, dataInfo.url.length - lettersToRemove);
+                    var name = dataInfo.url.substring( dataInfo.url.lastIndexOf('/') + 1, dataInfo.url.length - lettersToRemove);
                     $optgroup.append($('<option/>', {
                         value: dataInfo.url,
                         text: name,
