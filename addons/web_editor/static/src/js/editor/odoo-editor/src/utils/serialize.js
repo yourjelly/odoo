@@ -38,7 +38,9 @@ export function unserializeNode(obj, idToNodeMap, store=false) {
     let result = idToNodeMap && idToNodeMap.get(obj.oid);
     if (obj.nodeType === Node.TEXT_NODE) {
         if (result) {
-            result.textContent = obj.textValue;
+            if (result.textContent !== obj.textValue) {
+                result.textContent = obj.textValue;
+            }
         } else {
             result = document.createTextNode(obj.textValue);
         }
@@ -50,7 +52,24 @@ export function unserializeNode(obj, idToNodeMap, store=false) {
             }
         }
         const children = obj.children.map(child => unserializeNode(child, idToNodeMap, store));
-        result.replaceChildren(...children);
+        const childrenSet = new Set(children);
+        for (const currentChild of Array.from(result.childNodes)) {
+            if (!childrenSet.has(currentChild)) {
+                currentChild.remove();
+            }
+        }
+        let index = 0;
+        for (const child of children) {
+            if (child !== result.childNodes.item(index)) {
+                const currentChild = result.childNodes.item(index);
+                if (!currentChild) {
+                    result.append(child);
+                } else {
+                    currentChild.before(child);
+                }
+            }
+            index++;
+        }
     } else {
         console.warn('unknown node type');
     }

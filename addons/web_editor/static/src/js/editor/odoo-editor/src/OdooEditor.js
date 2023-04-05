@@ -787,7 +787,10 @@ export class OdooEditor extends EventTarget {
      * @returns {Node}
      */
     unserializeNode(node, idToNodeMap, store) {
-        return unserializeNode(node, idToNodeMap, store);
+        this.observerUnactive('unserializing');
+        const unserializedNode = unserializeNode(node, idToNodeMap, store);
+        this.observerActive('unserializing');
+        return unserializedNode;
     }
 
     automaticStepActive(label) {
