@@ -15,6 +15,7 @@ import { markRaw, reactive } from "@odoo/owl";
 import { ConfirmPopup } from "@point_of_sale/js/Popups/ConfirmPopup";
 import { escape } from "@web/core/utils/strings";
 import { Mutex } from "@web/core/utils/concurrency";
+import { unique } from "@web/core/utils/arrays";
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -1503,7 +1504,7 @@ export class PosGlobalState extends PosModel {
                 }
             }
         }
-        return _.uniq(mappedTaxes, (tax) => tax.id);
+        return unique(mappedTaxes, (tax) => tax.id);
     }
 
     /**

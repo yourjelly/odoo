@@ -1,5 +1,6 @@
 /** @odoo-module alias=web.Domain **/
 
+import { intersection } from "@web/core/utils/arrays";
 import collections from "web.collections";
 import pyUtils from "web.py_utils";
 var py = window.py; // look py.js
@@ -102,12 +103,12 @@ var Domain = collections.Tree.extend({
                 case ">=":
                     return (fieldValue >= this._data[2]);
                 case "in":
-                    return _.intersection(
+                    return intersection(
                         Array.isArray(this._data[2]) ? this._data[2] : [this._data[2]],
                         Array.isArray(fieldValue) ? fieldValue : [fieldValue],
                     ).length !== 0;
                 case "not in":
-                    return _.intersection(
+                    return intersection(
                         Array.isArray(this._data[2]) ? this._data[2] : [this._data[2]],
                         Array.isArray(fieldValue) ? fieldValue : [fieldValue],
                     ).length === 0;

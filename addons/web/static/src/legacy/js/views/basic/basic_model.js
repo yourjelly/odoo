@@ -82,6 +82,7 @@
  *   element, so it can be edited later.
  */
 
+import { intersection, unique } from "@web/core/utils/arrays";
 import AbstractModel from "web.AbstractModel";
 import concurrency from "web.concurrency";
 import Context from "web.Context";
@@ -2509,7 +2510,7 @@ var BasicModel = AbstractModel.extend({
         return this._rpc({
                 model: model,
                 method: 'name_get',
-                args: [_.uniq(ids)],
+                args: [unique(ids)],
                 context: list.context,
             })
             .then(function (name_gets) {
@@ -2536,7 +2537,7 @@ var BasicModel = AbstractModel.extend({
         var self = this;
         options = options || {};
         var fieldNames = options.fieldNames || record.getFieldNames(options);
-        fieldNames = _.uniq(fieldNames.concat(['display_name']));
+        fieldNames = unique(fieldNames.concat(['display_name']));
         return this._rpc({
                 model: record.model,
                 method: 'read',
@@ -3337,7 +3338,7 @@ var BasicModel = AbstractModel.extend({
                 } else if (type === 'one2many') {
                     var removedIds = _.difference(oldResIDs, list.res_ids);
                     var addedIds = _.difference(list.res_ids, oldResIDs);
-                    var keptIds = _.intersection(oldResIDs, list.res_ids);
+                    var keptIds = intersection(oldResIDs, list.res_ids);
 
                     // the didChange variable keeps track of the fact that at
                     // least one id was updated
