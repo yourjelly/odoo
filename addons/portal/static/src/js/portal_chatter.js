@@ -6,6 +6,7 @@ import publicWidget from "web.public.widget";
 import time from "web.time";
 import portalComposer from "portal.composer";
 import {Markup} from "web.utils";
+import { range } from "@web/core/utils/numbers";
 
 var qweb = core.qweb;
 var _t = core._t;
@@ -245,7 +246,7 @@ var PortalChatter = publicWidget.Widget.extend({
         }
 
         var pages = [];
-        _.each(_.range(pmin, pmax + 1), function (index) {
+        _.each(range(pmin, pmax + 1), function (index) {
             pages.push(index);
         });
 

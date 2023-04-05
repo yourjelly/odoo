@@ -1215,7 +1215,7 @@ var MockServer = Class.extend({
                 }
             }
             var key = [model, viewID, viewType].join(',');
-            var arch = self.archs[key] || _.find(self.archs, function (_v, k) {
+            var arch = self.archs[key] || Object.keys(self.archs).find(k => {
                 var ka = k.split(',');
                 viewID = parseInt(ka[1], 10);
                 return ka[0] === model && ka[2] === viewType;
