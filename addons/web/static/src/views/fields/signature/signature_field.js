@@ -150,6 +150,7 @@ export const signatureField = {
                         return { label: `${f.string} (${f.name})`, value: f.name };
                     });
             },
+            extraInfo: _lt("The selected field will be used to pre-fill the signature"),
         },
     ],
     extractProps: ({ attrs, options }) => ({
