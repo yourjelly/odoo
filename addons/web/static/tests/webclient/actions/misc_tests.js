@@ -3,7 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
-import AbstractAction from "web.AbstractAction";
+import { AbstractAction } from "@web/legacy/js/chrome/abstract_action";
 import core from "web.core";
 import testUtils from "web.test_utils";
 import { makeTestEnv } from "../../helpers/mock_env";

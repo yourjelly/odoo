@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import AbstractAction from "web.AbstractAction";
+import { AbstractAction } from "@web/legacy/js/chrome/abstract_action";
 import core from "web.core";
 import testUtils from "web.test_utils";
 import Widget from "web.Widget";
