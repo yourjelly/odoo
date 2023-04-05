@@ -4,6 +4,7 @@ import { formatDateTime } from "@web/core/l10n/dates";
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { selectionField, SelectionField } from "../selection/selection_field";
+import { sprintf } from "@web/core/utils/strings";
 
 const { DateTime } = luxon;
 
@@ -27,8 +28,8 @@ export class TimezoneMismatchField extends SelectionField {
         if (userOffset && this.props.record.data[this.props.name]) {
             const offset = -new Date().getTimezoneOffset();
             let browserOffset = offset < 0 ? "-" : "+";
-            browserOffset += _.str.sprintf("%02d", Math.abs(offset / 60));
-            browserOffset += _.str.sprintf("%02d", Math.abs(offset % 60));
+            browserOffset += sprintf("%02d", Math.abs(offset / 60));
+            browserOffset += sprintf("%02d", Math.abs(offset % 60));
             return browserOffset !== userOffset;
         } else if (!this.props.record.data[this.props.name]) {
             return true;

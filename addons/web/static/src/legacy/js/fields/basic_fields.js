@@ -15,6 +15,7 @@ import py_utils from "web.py_utils";
 import session from "web.session";
 import field_utils from "web.field_utils";
 import utils from "web.utils";
+import { sprintf } from "@web/core/utils/strings";
 
 var _t = core._t;
 var _lt = core._lt;
@@ -1539,7 +1540,7 @@ var AbstractFieldBinary = AbstractField.extend({
                 var file = file_node.files[0];
                 if (file.size > this.max_upload_size) {
                     var msg = _t("The selected file exceed the maximum file size of %s.");
-                    this.displayNotification({ title: _t("File upload"), message: _.str.sprintf(msg, utils.human_size(this.max_upload_size)), type: 'danger' });
+                    this.displayNotification({ title: _t("File upload"), message: sprintf(msg, utils.human_size(this.max_upload_size)), type: 'danger' });
                     return false;
                 }
                 utils.getDataURLFromFile(file).then(function (data) {

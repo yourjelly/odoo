@@ -2882,7 +2882,7 @@ var SnippetsMenu = Widget.extend({
                     const btnRenameEl = document.createElement('we-button');
                     btnRenameEl.dataset.snippetId = $snippet.data('oeSnippetId');
                     btnRenameEl.classList.add('o_rename_btn', 'fa', 'fa-pencil', 'btn', 'o_we_hover_success');
-                    btnRenameEl.title = _.str.sprintf(_t("Rename %s"), name);
+                    btnRenameEl.title = sprintf(_t("Rename %s"), name);
                     $snippet.append(btnRenameEl);
                     const btnEl = document.createElement('we-button');
                     btnEl.dataset.snippetId = $snippet.data('oeSnippetId');

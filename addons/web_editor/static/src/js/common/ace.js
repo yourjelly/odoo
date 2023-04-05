@@ -7,6 +7,7 @@ import dom from "web.dom";
 import Dialog from "web.Dialog";
 import Widget from "web.Widget";
 import localStorage from "web.local_storage";
+import { sprintf } from "@web/core/utils/strings";
 
 var _t = core._t;
 
@@ -425,11 +426,11 @@ var ViewEditor = Widget.extend({
         this.aceEditor.setSession(editingSession);
 
         if (this.currentType === 'xml') {
-            this.$viewID.text(_.str.sprintf(_t("Template ID: %s"), this.views[resID].key));
+            this.$viewID.text(sprintf(_t("Template ID: %s"), this.views[resID].key));
         } else if (this.currentType === 'scss') {
-            this.$viewID.text(_.str.sprintf(_t("SCSS file: %s"), resID));
+            this.$viewID.text(sprintf(_t("SCSS file: %s"), resID));
         } else {
-            this.$viewID.text(_.str.sprintf(_t("JS file: %s"), resID));
+            this.$viewID.text(sprintf(_t("JS file: %s"), resID));
         }
         const isCustomized = this._isCustomResource(resID);
         this.$lists[this.currentType].select2('val', resID);

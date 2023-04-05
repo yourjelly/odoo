@@ -7,6 +7,7 @@ import { renderToString } from "@web/core/utils/render";
 import { useDebounced } from "@web/core/utils/timing";
 
 import { Component, useState, useRef, onWillStart, onMounted, onWillUnmount } from "@odoo/owl";
+import { sprintf } from "@web/core/utils/strings";
 
 class MenuItem extends Component {
     static template = "web.ProfilingQwebView.menuitem";
@@ -116,7 +117,7 @@ export class ProfilingQwebView extends Component {
      * @returns {string}
      */
     _formatDelay(delay) {
-        return delay ? _.str.sprintf("%.1f", Math.ceil(delay * 10) / 10) : ".";
+        return delay ? sprintf("%.1f", Math.ceil(delay * 10) / 10) : ".";
     }
 
     /**

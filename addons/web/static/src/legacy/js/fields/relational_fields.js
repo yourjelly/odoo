@@ -20,8 +20,7 @@ import dom from "web.dom";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import Domain from "web.Domain";
-import { sprintf } from "web.utils";
-import { escape } from "@web/core/utils/strings";
+import { escape, sprintf } from "@web/core/utils/strings";
 
 var _t = core._t;
 var _lt = core._lt;
@@ -37,7 +36,7 @@ var M2ODialog = Dialog.extend({
         this.name = name;
         this.value = value;
         this._super(parent, {
-            title: _.str.sprintf(_t("New %s"), this.name),
+            title: sprintf(_t("New %s"), this.name),
             size: 'medium',
             buttons: [{
                 text: _t('Create'),
@@ -423,7 +422,7 @@ var FieldMany2One = AbstractField.extend({
             domain: this.record.getDomain({fieldName: this.name}),
             context: Object.assign({}, this.record.getContext(this.recordParams), context || {}),
             dynamicFilters: dynamicFilters || [],
-            title: _.str.sprintf((view === 'search' ? _t("Search: %s") : _t("Create: %s")), this.string),
+            title: sprintf((view === 'search' ? _t("Search: %s") : _t("Create: %s")), this.string),
             multiSelect: false,
             noCreate: !self.can_create,
             onSelected: function (records) {
@@ -469,7 +468,7 @@ var FieldMany2One = AbstractField.extend({
                             return x[0];
                         });
                         dynamicFilters = [{
-                            description: _.str.sprintf(_t('Quick search: %s'), search_val),
+                            description: sprintf(_t('Quick search: %s'), search_val),
                             domain: [['id', 'in', ids]],
                         }];
                     }
@@ -596,7 +595,7 @@ var FieldMany2One = AbstractField.extend({
     _renderReadonly: function () {
         this.$el.html(this._renderValueLines(true));
         if (!this.noOpen && this.value) {
-            this.$el.attr('href', _.str.sprintf('#id=%s&model=%s', this.value.res_id, this.field.relation));
+            this.$el.attr('href', sprintf('#id=%s&model=%s', this.value.res_id, this.field.relation));
             this.$el.addClass('o_form_uri');
         }
     },

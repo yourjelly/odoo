@@ -14,6 +14,7 @@
  * conversions.
  */
 
+import { sprintf } from "@web/core/utils/strings";
 import core from "web.core";
 import dom from "web.dom";
 import session from "web.session";
@@ -175,7 +176,7 @@ function formatFloat(value, field, options) {
     } else {
         precision = 2;
     }
-    var formatted = _.str.sprintf('%.' + precision + 'f', value || 0).split('.');
+    var formatted = sprintf('%.' + precision + 'f', value || 0).split('.');
     formatted[0] = utils.insert_thousand_seps(formatted[0]);
     return formatted.join(l10n.decimal_point);
 }
@@ -221,7 +222,7 @@ function formatFloatTime(value, field, options) {
         min = 0;
         hour = hour + 1;
     }
-    return _.str.sprintf(pattern, hour, min);
+    return sprintf(pattern, hour, min);
 }
 
 /**
@@ -251,7 +252,7 @@ function formatInteger(value, field, options) {
     if (options.humanReadable && options.humanReadable(value)) {
         return utils.human_number(value, options.decimals, options.minDigits, options.formatterCallback);
     }
-    return utils.insert_thousand_seps(_.str.sprintf('%d', value));
+    return utils.insert_thousand_seps(sprintf('%d', value));
 }
 
 /**
@@ -509,7 +510,7 @@ function parseDate(value, field, options) {
             return date;
         }
     }
-    throw new Error(_.str.sprintf(core._t("'%s' is not a correct date"), value));
+    throw new Error(sprintf(core._t("'%s' is not a correct date"), value));
 }
 
 /**
@@ -562,7 +563,7 @@ function parseDateTime(value, field, options) {
             return datetime;
         }
     }
-    throw new Error(_.str.sprintf(core._t("'%s' is not a correct datetime"), value));
+    throw new Error(sprintf(core._t("'%s' is not a correct datetime"), value));
 }
 
 /**
@@ -596,7 +597,7 @@ function parseNumber(value) {
 function parseFloat(value) {
     var parsed = parseNumber(value);
     if (isNaN(parsed)) {
-        throw new Error(_.str.sprintf(core._t("'%s' is not a correct float"), value));
+        throw new Error(sprintf(core._t("'%s' is not a correct float"), value));
     }
     return parsed;
 }
@@ -644,7 +645,7 @@ function parseMonetary(value, field, options) {
         return parseFloat(value);
     }
     if (!value.includes(currency.symbol)) {
-        throw new Error(_.str.sprintf(core._t("'%s' is not a correct monetary field"), value));
+        throw new Error(sprintf(core._t("'%s' is not a correct monetary field"), value));
     }
     if (currency.position === 'before') {
         return parseFloat(value
@@ -709,7 +710,7 @@ function parseInteger(value) {
     var parsed = parseNumber(value);
     // do not accept not numbers or float values
     if (isNaN(parsed) || parsed % 1 || parsed < -2147483648 || parsed > 2147483647) {
-        throw new Error(_.str.sprintf(core._t("'%s' is not a correct integer"), value));
+        throw new Error(sprintf(core._t("'%s' is not a correct integer"), value));
     }
     return parsed;
 }

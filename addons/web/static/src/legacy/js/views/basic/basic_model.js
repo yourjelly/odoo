@@ -83,6 +83,7 @@
  */
 
 import { intersection, unique } from "@web/core/utils/arrays";
+import { sprintf } from "@web/core/utils/strings";
 import AbstractModel from "web.AbstractModel";
 import concurrency from "web.concurrency";
 import Context from "web.Context";
@@ -2391,7 +2392,7 @@ var BasicModel = AbstractModel.extend({
                 evalContext = evalContext || this._getEvalContext(element);
                 evaluated[k] = new Domain(mod, evalContext).compute(evalContext);
             } catch (e) {
-                throw new Error(_.str.sprintf('for modifier "%s": %s', k, e.message));
+                throw new Error(sprintf('for modifier "%s": %s', k, e.message));
             }
         }
         return evaluated;
@@ -2434,12 +2435,12 @@ var BasicModel = AbstractModel.extend({
                     const referenceFieldName = record.fields[fieldName].string;
 
                     this.displayNotification({
-                        title: _.str.sprintf(
+                        title: sprintf(
                             _t(`'%s' is unsynchronized with '%s'.`),
                             referenceFieldName,
                             modelFieldName,
                         ),
-                        message: _.str.sprintf(
+                        message: sprintf(
                             _t(`If you change %s or %s, the synchronization will be reapplied and the data will be modified.`),
                             modelFieldName,
                             referenceFieldName,

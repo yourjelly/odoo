@@ -1,5 +1,6 @@
 /** @odoo-module alias=web.KeyboardNavigationMixin **/
-    import BrowserDetection from "web.BrowserDetection";
+    import { sprintf } from "@web/core/utils/strings";
+import BrowserDetection from "web.BrowserDetection";
     import core from "web.core";
 
     /**
@@ -77,7 +78,7 @@
             }
             var accesskeyElements = $(document).find('[accesskey]').filter(':visible');
             _.each(accesskeyElements, function (elem) {
-                var overlay = $(_.str.sprintf("<div class='o_web_accesskey_overlay font-sans-serif'>%s</div>", $(elem).attr('accesskey').toUpperCase()));
+                var overlay = $(sprintf("<div class='o_web_accesskey_overlay font-sans-serif'>%s</div>", $(elem).attr('accesskey').toUpperCase()));
 
                 var $overlayParent;
                 if (elem.tagName.toUpperCase() === "INPUT") {

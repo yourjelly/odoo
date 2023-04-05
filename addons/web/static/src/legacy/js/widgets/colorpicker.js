@@ -4,6 +4,7 @@ import core from "web.core";
 import utils from "web.utils";
 import Dialog from "web.Dialog";
 import Widget from "web.Widget";
+import { sprintf } from "@web/core/utils/strings";
 
 var _t = core._t;
 
@@ -136,14 +137,14 @@ var ColorpickerWidget = Widget.extend({
 
         // Update inputs
         _.each(this.colorComponents, function (value, color) {
-            self.$(_.str.sprintf('.o_%s_input', color)).val(value);
+            self.$(sprintf('.o_%s_input', color)).val(value);
         });
 
         // Update preview
         this.$('.o_color_preview').css('background-color', this.colorComponents.cssColor);
 
         // Update picker area and picker pointer position
-        this.$colorpickerArea.css('background-color', _.str.sprintf('hsl(%s, 100%%, 50%%)', this.colorComponents.hue));
+        this.$colorpickerArea.css('background-color', sprintf('hsl(%s, 100%%, 50%%)', this.colorComponents.hue));
         var top = (100 - this.colorComponents.lightness) * this.$colorpickerArea.height() / 100;
         var left = this.colorComponents.saturation * this.$colorpickerArea.width() / 100;
         this.$colorpickerPointer.css({

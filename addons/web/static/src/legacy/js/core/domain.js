@@ -1,6 +1,7 @@
 /** @odoo-module alias=web.Domain **/
 
 import { intersection } from "@web/core/utils/arrays";
+import { sprintf } from "@web/core/utils/strings";
 import collections from "web.collections";
 import pyUtils from "web.py_utils";
 var py = window.py; // look py.js
@@ -79,7 +80,7 @@ var Domain = collections.Tree.extend({
                         fieldName in values.parent;
                 }
                 if (!(this._data[0] in values) && !(isParentField)) {
-                    throw new Error(_.str.sprintf(
+                    throw new Error(sprintf(
                         "Unknown field %s in domain",
                         this._data[0]
                     ));
@@ -133,7 +134,7 @@ var Domain = collections.Tree.extend({
                     }
                     return new RegExp(this._data[2].replace(/%/g, '.*'), 'i').test(fieldValue);
                 default:
-                    throw new Error(_.str.sprintf(
+                    throw new Error(sprintf(
                         "Domain %s uses an unsupported operator",
                         this._data
                     ));
@@ -300,7 +301,7 @@ var Domain = collections.Tree.extend({
         if (expected < 0) {
             domain.unshift.apply(domain, _.times(Math.abs(expected), _.constant("&")));
         } else if (expected > 0) {
-            throw new Error(_.str.sprintf(
+            throw new Error(sprintf(
                 "invalid domain %s (missing %d segment(s))",
                 JSON.stringify(domain), expected
             ));

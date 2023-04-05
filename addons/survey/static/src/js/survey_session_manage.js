@@ -360,7 +360,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
         }
 
         var nextQuestionPromise = this._rpc({
-            route: _.str.sprintf('/survey/session/next_question/%s', self.surveyAccessToken),
+            route: sprintf('/survey/session/next_question/%s', self.surveyAccessToken),
             params: {
                 'go_back': goBack,
             }
@@ -473,7 +473,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
         var self = this;
 
         return this._rpc({
-            route: _.str.sprintf('/survey/session/results/%s', self.surveyAccessToken)
+            route: sprintf('/survey/session/results/%s', self.surveyAccessToken)
         }).then(function (questionResults) {
             if (questionResults) {
                 self.attendeesCount = questionResults.attendees_count;
