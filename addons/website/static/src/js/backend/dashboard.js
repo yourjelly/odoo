@@ -7,7 +7,7 @@ import field_utils from "web.field_utils";
 import pyUtils from "web.py_utils";
 import session from "web.session";
 import time from "web.time";
-import web_client from "web.web_client";
+import webClient from "@web/legacy/web_client";
 
 var QWeb = core.qweb;
 
@@ -255,7 +255,7 @@ var Dashboard = AbstractAction.extend({
 
     on_reverse_breadcrumb: function() {
         var self = this;
-        web_client.do_push_state({});
+        webClient.do_push_state({});
         this.fetch_data().then(function() {
             self.$('.o_website_dashboard').empty();
             self.render_dashboards();

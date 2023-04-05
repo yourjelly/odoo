@@ -1,7 +1,8 @@
-/** @odoo-module alias=web.pseudo_web_client **/
-import FakeWebClient from "web.web_client";
+/** @odoo-module **/
 
-function makeLegacyWebClientService(legacyEnv) {
+import { webClient } from "./web_client";
+
+export function makeLegacyWebClientService(legacyEnv) {
     const legacyPseudoWebClient = {
         dependencies: ["title", "router"],
         start(env) {
@@ -12,7 +13,7 @@ function makeLegacyWebClientService(legacyEnv) {
                 const { part, title } = params;
                 setTitlePart(part, title || null);
             });
-            Object.assign(FakeWebClient, {
+            Object.assign(webClient, {
                 do_push_state(state) {
                     if ("title" in state) {
                         setTitlePart("action", state.title);
@@ -28,5 +29,3 @@ function makeLegacyWebClientService(legacyEnv) {
     };
     return legacyPseudoWebClient;
 }
-
-export default makeLegacyWebClientService;
