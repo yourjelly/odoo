@@ -1,6 +1,6 @@
 /** @odoo-module alias=web_editor.snippets.options **/
 
-import { ComponentWrapper } from "web.OwlCompatibility";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog";
 import core from "web.core";
 import {ColorpickerWidget} from "web.Colorpicker";

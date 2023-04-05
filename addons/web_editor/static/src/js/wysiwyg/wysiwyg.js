@@ -1,6 +1,6 @@
 /** @odoo-module alias=web_editor.wysiwyg **/
 
-import { ComponentWrapper } from "web.OwlCompatibility";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog";
 import { VideoSelector } from "@web_editor/components/media_dialog/video_selector";
 import dom from "web.dom";

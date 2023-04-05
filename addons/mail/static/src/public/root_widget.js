@@ -6,7 +6,7 @@
 // need to wait for owl.Component.env to be set by new/public/boot before
 // we spawn the component adapter
 import "@mail/public/boot";
-import { standaloneAdapter } from "web.OwlCompatibility";
+import { standaloneAdapter } from "@web/legacy/js/owl_compatibility";
 import { Component } from "@odoo/owl";
 
 export default standaloneAdapter({ Component });

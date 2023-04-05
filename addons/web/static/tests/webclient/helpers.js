@@ -54,7 +54,7 @@ import { ClientActionAdapter } from "@web/legacy/action_adapters";
 import { commandService } from "@web/core/commands/command_service";
 import { ConnectionAbortedError } from "@web/core/network/rpc_service";
 import { CustomFavoriteItem } from "@web/search/favorite_menu/custom_favorite_item";
-import { standaloneAdapter } from "web.OwlCompatibility";
+import { standaloneAdapter } from "@web/legacy/js/owl_compatibility";
 import { overlayService } from "@web/core/overlay/overlay_service";
 
 import { Component, onMounted, xml } from "@odoo/owl";

@@ -10,7 +10,7 @@ import "web.zoomodoo";
 import {extraMenuUpdateCallbacks} from "website.content.menu";
 import dom from "web.dom";
 import { cartesian } from "@web/core/utils/arrays";
-import { ComponentWrapper } from "web.OwlCompatibility";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { ProductImageViewerWrapper } from "@website_sale/js/components/website_sale_image_viewer";
 
 publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerMixin, {

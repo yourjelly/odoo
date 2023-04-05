@@ -4,7 +4,7 @@
         ComponentAdapter,
         ComponentWrapper,
         WidgetAdapterMixin,
-    } from "web.OwlCompatibility";
+    } from "@web/legacy/js/owl_compatibility";
     import testUtils from "web.test_utils";
     import Widget from "web.Widget";
     import { registry } from "@web/core/registry";

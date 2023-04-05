@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { ComponentAdapter } from 'web.OwlCompatibility';
+import { ComponentAdapter } from "@web/legacy/js/owl_compatibility";
 
 import { useWowlService } from '@web/legacy/utils';
 import { useHotkey } from '@web/core/hotkeys/hotkey_hook';

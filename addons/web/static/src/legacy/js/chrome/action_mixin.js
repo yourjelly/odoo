@@ -21,7 +21,7 @@
      */
 
     import core from "web.core";
-    import { WidgetAdapterMixin } from "web.OwlCompatibility";
+    import { WidgetAdapterMixin } from "@web/legacy/js/owl_compatibility";
 
     const ActionMixin = Object.assign({}, WidgetAdapterMixin, {
         template: 'Action',

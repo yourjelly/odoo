@@ -17,7 +17,7 @@ import {
     mapLegacyEnvToWowlEnv,
     makeLegacyRainbowManService,
 } from "../../utils";
-import { standaloneAdapter } from "web.OwlCompatibility";
+import { standaloneAdapter } from "@web/legacy/js/owl_compatibility";
 
 import { makeEnv, startServices } from "@web/env";
 import { setLoadXmlDefaultApp, loadJS, templates } from '@web/core/assets';
