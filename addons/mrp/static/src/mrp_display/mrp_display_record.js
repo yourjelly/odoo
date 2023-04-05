@@ -8,29 +8,18 @@ import { MrpWorkorder } from "./mrp_record_line/mrp_workorder";
 import { MrpTimer } from "@mrp/widgets/timer";
 
 export class MrpDisplayRecord extends Component {
-    static components = { CharField, Field, StockMove, MrpWorkorder, MrpTimer };
+    static components = { CharField, Field, MrpTimer };
     static props = {
         openMenuPop: Function,
         record: Object,
-        workorders: { type: Array, optional: true },
-        rawMoves: { type: Array, optional: true },
-    };
-    static defaultProps = {
-        rawMoves: [],
-        workorders: [],
+        subRecords: Array,
     };
     static template = "mrp.MrpDisplayRecord";
 
     setup() {
         this.record = this.props.record.data;
-        this.workorders = this.props.workorders;
-        this.rawMoves = this.props.rawMoves;
-    }
-
-    get displayDoneButton() {
-        return (
-            this.workorders.length === 0 || this.workorders.every((wo) => wo.data.state === "done")
-        );
+        this.rawMoves = this.props.subRecords.filter((rec) => rec.resModel === "stock.move");
+        this.workorders = this.props.subRecords.filter((rec) => rec.resModel === "mrp.workorder");
     }
 
     get active() {
@@ -41,6 +30,21 @@ export class MrpDisplayRecord extends Component {
                 : this.rawMoves.some((move) => move.data.quantity_done);
         }
         return this.record.is_user_working;
+    }
+
+    get displayDoneButton() {
+        return (
+            this.workorders.length === 0 || this.workorders.every((wo) => wo.data.state === "done")
+        );
+    }
+
+    getComponent(record) {
+        if (record.resModel === "stock.move") {
+            return StockMove;
+        } else if (record.resModel === "mrp.workorder") {
+            return MrpWorkorder;
+        }
+        throw Error(`No Component found for the model "${record.resModel}"`);
     }
 
     async onClickHeader() {

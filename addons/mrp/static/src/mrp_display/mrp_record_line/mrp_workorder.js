@@ -1,18 +1,22 @@
 /** @odoo-module */
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { Field } from "@web/views/fields/field";
 import { StockMove } from "./stock_move";
 import { useService } from "@web/core/utils/hooks";
 import { MrpTimer } from "@mrp/widgets/timer";
 
 export class MrpWorkorder extends StockMove {
     static template = "mrp.WorkOrder";
-    static components = { ...StockMove.components, MrpTimer };
+    static components = { ...StockMove.components, Field, MrpTimer };
 
     setup() {
         super.setup();
         this.isLongPressable = true;
         this.dialogService = useService("dialog");
+        this.name = this.props.record.data.name;
+        this.note = this.props.record.data.operation_note;
+        this.fieldState = "state";
     }
 
     get active() {
@@ -29,7 +33,7 @@ export class MrpWorkorder extends StockMove {
 
     displayInstruction() {
         const params = {
-            body: this.props.record.data.operation_note,
+            body: this.note,
             confirmLabel: this.env._t("Discard"),
             title: this.props.record.data.display_name,
         };

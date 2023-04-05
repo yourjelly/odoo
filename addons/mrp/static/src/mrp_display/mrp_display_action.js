@@ -5,7 +5,6 @@ import { useService } from "@web/core/utils/hooks";
 import { WithSearch } from "@web/search/with_search/with_search";
 import { MrpDisplay } from "@mrp/mrp_display/mrp_display";
 import { MrpDisplayControlPanel } from "@mrp/mrp_display/control_panel";
-import { fieldsStructure } from "@mrp/mrp_display/fields_structure";
 
 const { Component, onWillStart } = owl;
 
@@ -19,6 +18,38 @@ export class MrpDisplayAction extends Component {
         "*": true,
     };
 
+    get fieldsStructure() {
+        return {
+            "mrp.production": [
+                "move_raw_ids",
+                "name",
+                "product_id",
+                "product_qty",
+                "state",
+                "workorder_ids",
+            ],
+            "mrp.workorder": [
+                "duration",
+                "is_user_working",
+                "move_raw_ids",
+                "name",
+                "operation_note",
+                "product_id",
+                "production_id",
+                "qty_production",
+                "state",
+                "workcenter_id",
+                "worksheet_type",
+            ],
+            "stock.move": [
+                "product_id",
+                "product_uom_qty",
+                "quantity_done",
+                "raw_material_production_id",
+            ],
+        };
+    }
+
     setup() {
         this.viewService = useService("view");
         this.orm = useService("orm");
@@ -29,7 +60,7 @@ export class MrpDisplayAction extends Component {
         this.env.config.ControlPanel = MrpDisplayControlPanel;
 
         onWillStart(async () => {
-            for (const [resModel, fieldNames] of Object.entries(fieldsStructure)) {
+            for (const [resModel, fieldNames] of Object.entries(this.fieldsStructure)) {
                 const fields = await this.viewService.loadFields(resModel, { fieldNames });
                 for (const [fName, fInfo] of Object.entries(fields)) {
                     fields[fName] = { ...defaultActiveField, ...fInfo };

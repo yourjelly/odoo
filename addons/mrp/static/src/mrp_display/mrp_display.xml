@@ -13,7 +13,7 @@
                 </t>
                 <div class="d-flex flex-row flex-wrap align-items-baseline mb-5">
                     <t t-foreach="relevantRecords" t-as="record" t-key="record.id">
-                        <MrpDisplayRecord record="record" rawMoves="getRawMoves(record)" workorders="getProductionWorkorders(record)" openMenuPop.bind="displayMenuPopup"/>
+                        <MrpDisplayRecord record="record" subRecords="getSubRecords(record)" openMenuPop.bind="displayMenuPopup"/>
                     </t>
                 </div>
             </Layout>

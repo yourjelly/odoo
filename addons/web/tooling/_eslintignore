@@ -103,6 +103,8 @@ web_map/static/tests/legacy/**/*
 # whitelist mrp
 !addons/mrp
 !addons/mrp/**/*
+!addons/mrp_workorder
+!addons/mrp_workorder/**/*
 
 # whitelist purchase setup
 !addons/purchase

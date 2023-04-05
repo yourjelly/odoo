@@ -35,6 +35,12 @@ function getSearchParams(model, props, component) {
                         ["production_id", "in", production_ids],
                         ["raw_material_production_id", "in", production_ids],
                     ];
+                } else if (model.rootParams.resModel === "quality.check") {
+                    // TODO: should be moved in the right module.
+                    params[key] = [
+                        ["production_id", "in", production_ids],
+                        ["point_id", "!=", false],
+                    ];
                 }
                 continue;
             }

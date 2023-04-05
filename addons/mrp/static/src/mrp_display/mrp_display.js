@@ -76,6 +76,10 @@ export class MrpDisplay extends Component {
         return workorders;
     }
 
+    filterWorkorderByProduction(workorder, production) {
+        return workorder.data.production_id?.[0] === production.resId;
+    }
+
     getRawMoves(record) {
         if (this.state.activeResModel === "mrp.workorder") {
             return this.stock_move.root.records.filter((move) =>
@@ -89,11 +93,17 @@ export class MrpDisplay extends Component {
 
     getProductionWorkorders(record) {
         if (this.state.activeResModel === "mrp.production") {
-            return this.mrp_workorder.root.records.filter(
-                (wo) => wo.data.production_id?.[0] === record.resId
-            );
+            return this.mrp_workorder.root.records.filter((wo) => {
+                return this.filterWorkorderByProduction(wo, record);
+            });
         }
         return [];
+    }
+
+    getSubRecords(record) {
+        const records = this.getRawMoves(record);
+        records.push(...this.getProductionWorkorders(record));
+        return records;
     }
 
     get relevantRecords() {

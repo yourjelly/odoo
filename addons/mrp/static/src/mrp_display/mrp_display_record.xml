@@ -17,11 +17,8 @@
                 </div>
             </div>
             <ul class="list-group list-group-flush">
-                <t t-foreach="props.rawMoves" t-as="move" t-key="move.resId">
-                    <StockMove record="move"/>
-                </t>
-                <t t-foreach="workorders" t-as="workorder" t-key="workorder.resId">
-                    <MrpWorkorder record="workorder"/>
+                <t t-foreach="props.subRecords" t-as="record" t-key="record.resId">
+                    <t t-component="getComponent(record)" record="record"/>
                 </t>
             </ul>
             <div class="card-footer d-flex p-0">

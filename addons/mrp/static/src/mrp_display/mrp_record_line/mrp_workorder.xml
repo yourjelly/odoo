@@ -9,12 +9,13 @@
                 <input type="checkbox" class="me-2" t-att-disabled="isComplete"
                        t-on-click.stop="longPress"
                        t-att-checked="isComplete"/>
-                <t t-esc="props.record.data.name"/> (<t t-esc="props.record.data.state"/>)
+                <span class="me-2" t-esc="name"/>
+                <Field class="'text-muted'" name="fieldState" record="props.record"/>
             </span>
             <span t-if="props.record.data.duration" t-att-class="active ? '' : 'text-muted'">
                 <MrpTimer value="props.record.data.duration" ongoing="active"/>
             </span>
-            <button t-if="props.record.data.operation_note.length" class="btn"
+            <button t-if="note.length" class="btn"
                     t-on-click.stop="displayInstruction">
                 <i class="fa fa-lightbulb-o fa-lg text-info"/>
             </button>
