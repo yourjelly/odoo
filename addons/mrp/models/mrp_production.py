@@ -576,19 +576,22 @@ class MrpProduction(models.Model):
 
     @api.depends('state', 'move_raw_ids.state')
     def _compute_reservation_state(self):
-        self.reservation_state = False
+        processed_production = self.env['mrp.production']
         for production in self:
             if production.state in ('draft', 'done', 'cancel'):
                 continue
             relevant_move_state = production.move_raw_ids._get_relevant_state_among_moves()
             # Compute reservation state according to its component's moves.
             if relevant_move_state == 'partially_available':
+                processed_production += production
                 if production.workorder_ids.operation_id and production.bom_id.ready_to_produce == 'asap':
                     production.reservation_state = production._get_ready_to_produce_state()
                 else:
                     production.reservation_state = 'confirmed'
             elif relevant_move_state != 'draft':
+                processed_production += production
                 production.reservation_state = relevant_move_state
+        (self - processed_production).reservation_state = False
 
     @api.depends('move_raw_ids', 'state', 'move_raw_ids.product_uom_qty')
     def _compute_unreserve_visible(self):
@@ -1405,12 +1408,20 @@ class MrpProduction(models.Model):
     def _action_generate_backorder_wizard(self, quantity_issues):
         ctx = self.env.context.copy()
         lines = []
+        ask_create_backorder = always_create_backorder = self.env['mrp.production']
         for order in quantity_issues:
-            lines.append((0, 0, {
-                'mrp_production_id': order.id,
-                'to_backorder': True
-            }))
-        ctx.update({'default_mrp_production_ids': self.ids, 'default_mrp_production_backorder_line_ids': lines})
+            if order.picking_type_id.create_backorder == 'ask' or (order.picking_type_id.create_backorder == 'never' and order.product_id.tracking == 'serial'):
+                lines.append((0, 0, {
+                    'mrp_production_id': order.id,
+                    'to_backorder': True
+                }))
+                ask_create_backorder += order
+            if order.picking_type_id.create_backorder == 'always':
+                always_create_backorder += order
+        (self - ask_create_backorder).with_context(ctx, skip_backorder=True, mo_ids_to_backorder=always_create_backorder.ids).button_mark_done()
+        if not ask_create_backorder:
+            return True
+        ctx.update({'default_mrp_production_ids': ask_create_backorder.ids, 'default_mrp_production_backorder_line_ids': lines})
         action = self.env["ir.actions.actions"]._for_xml_id("mrp.action_mrp_production_backorder")
         action['context'] = ctx
         return action
@@ -1796,6 +1807,10 @@ class MrpProduction(models.Model):
                 'is_locked': True,
                 'state': 'done',
             })
+
+        for production in self:
+            if production.mrp_production_backorder_count > 1 and production.picking_type_id.create_backorder == "always":
+                backorders = self.procurement_group_id.mrp_production_ids.filtered(lambda p: p.state != "done" and p.id not in self.ids)
 
         if not backorders:
             if self.env.context.get('from_workorder'):
