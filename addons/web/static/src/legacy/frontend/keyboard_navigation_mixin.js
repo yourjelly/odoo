@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.KeyboardNavigationMixin **/
+/** @odoo-module **/
     import BrowserDetection from "web.BrowserDetection";
     import core from "web.core";
 
@@ -24,7 +24,7 @@
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' // reserved for Odoo menus
     ];
 
-    var KeyboardNavigationMixin = {
+    export var KeyboardNavigationMixin = {
         events: {
             'keydown': '_onKeyDown',
             'keyup': '_onKeyUp',
@@ -263,5 +263,3 @@
             }
         },
     };
-
-    export default KeyboardNavigationMixin;

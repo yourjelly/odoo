@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import KeyboardNavigationMixin from "web.KeyboardNavigationMixin";
+import { KeyboardNavigationMixin } from "@web/legacy/frontend/keyboard_navigation_mixin";
 import testUtils from "web.test_utils";
 import Widget from "web.Widget";
 
