@@ -5,7 +5,7 @@ import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
 import { formatPercentage } from "@web/views/fields/formatters";
 import { PivotGroupByMenu } from "@web/views/pivot/pivot_group_by_menu";
-import fieldUtils from "web.field_utils";
+import * as fieldUtils from "@web/legacy/js/fields/field_utils";
 
 import { Component, onWillUpdateProps, useRef } from "@odoo/owl";
 const formatters = registry.category("formatters");

@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import AbstractField from "web.AbstractField";
-import basic_fields from "web.basic_fields";
-import relational_fields from "web.relational_fields";
-import registry from "web.field_registry";
+import { AbstractField } from "./abstract_field";
+import * as basic_fields from "./basic_fields";
+import * as relational_fields from "./relational_fields";
+import { fieldRegistry } from "./field_registry";
 
 // Basic fields
-registry
+fieldRegistry
     .add('abstract', AbstractField)
     .add('input', basic_fields.InputField)
     .add('integer', basic_fields.FieldInteger)
@@ -26,7 +26,7 @@ registry
     .add('many2one_reference', basic_fields.FieldInteger)
 
 // Relational fields
-registry
+fieldRegistry
     .add('many2one', relational_fields.FieldMany2One)
     .add('many2one_avatar', relational_fields.Many2OneAvatar)
     .add('many2many_tags', relational_fields.FieldMany2ManyTags)

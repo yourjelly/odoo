@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.relational_fields **/
+/** @odoo-module **/
 
 /**
  * Relational Fields
@@ -12,7 +12,7 @@
  * the corresponding record(s), or alter some of their fields.
  */
 
-import AbstractField from "web.AbstractField";
+import { AbstractField } from "./abstract_field";
 import concurrency from "web.concurrency";
 import core from "web.core";
 import Dialog from "web.Dialog";
@@ -71,7 +71,7 @@ var M2ODialog = Dialog.extend({
     },
 });
 
-var FieldMany2One = AbstractField.extend({
+export var FieldMany2One = AbstractField.extend({
     description: _lt("Many2one"),
     supportedFieldTypes: ['many2one'],
     template: 'FieldMany2One',
@@ -918,7 +918,7 @@ var FieldMany2One = AbstractField.extend({
  * record's image next to the display_name. In edit, it behaves exactly like a
  * regular many2one widget.
  */
-const Many2OneAvatar = FieldMany2One.extend({
+export const Many2OneAvatar = FieldMany2One.extend({
     _template: 'web.Many2OneAvatar',
 
     init() {
@@ -968,7 +968,7 @@ const Many2OneAvatar = FieldMany2One.extend({
 // X2Many widgets
 //------------------------------------------------------------------------------
 
-var FieldMany2ManyTags = AbstractField.extend({
+export var FieldMany2ManyTags = AbstractField.extend({
     description: _lt("Tags"),
     tag_template: "FieldMany2ManyTag",
     className: "o_field_many2manytags",
@@ -1206,7 +1206,7 @@ var FieldMany2ManyTags = AbstractField.extend({
     },
 });
 
-var FieldMany2ManyTagsAvatar = FieldMany2ManyTags.extend({
+export var FieldMany2ManyTagsAvatar = FieldMany2ManyTags.extend({
     tag_template: 'FieldMany2ManyTagAvatar',
     className: 'o_field_many2manytags avatar',
 
@@ -1283,16 +1283,16 @@ const M2MAvatarMixin = {
     },
 }
 
-const KanbanMany2ManyTagsAvatar = FieldMany2ManyTagsAvatar.extend(M2MAvatarMixin, {
+export const KanbanMany2ManyTagsAvatar = FieldMany2ManyTagsAvatar.extend(M2MAvatarMixin, {
     tag_template: 'KanbanMany2ManyTagAvatar',
 });
 
-const ListMany2ManyTagsAvatar = FieldMany2ManyTagsAvatar.extend(M2MAvatarMixin, {
+export const ListMany2ManyTagsAvatar = FieldMany2ManyTagsAvatar.extend(M2MAvatarMixin, {
     tag_template: 'ListMany2ManyTagAvatar',
     visibleAvatarCount: 5,
 });
 
-var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
+export var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
     events: _.extend({}, FieldMany2ManyTags.prototype.events, {
         'click .dropdown-toggle': '_onOpenColorPicker',
         'mousedown .o_colorpicker a': '_onUpdateColor',
@@ -1408,7 +1408,7 @@ var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
  * allow the selection of a range of values.  It is designed to work with fields
  * of type 'selection' and 'many2one'.
  */
-var FieldSelection = AbstractField.extend({
+export var FieldSelection = AbstractField.extend({
     description: _lt("Selection"),
     template: 'web.Legacy.FieldSelection',
     specialData: "_fetchSpecialRelation",
@@ -1542,7 +1542,7 @@ var FieldSelection = AbstractField.extend({
     },
 });
 
-var FieldRadio = FieldSelection.extend({
+export var FieldRadio = FieldSelection.extend({
     description: _lt("Radio"),
     template: null,
     className: 'o_field_radio',
@@ -1701,15 +1701,3 @@ var FieldRadio = FieldSelection.extend({
         }
     },
 });
-
-export default {
-    FieldMany2One: FieldMany2One,
-    Many2OneAvatar: Many2OneAvatar,
-    FieldMany2ManyTags: FieldMany2ManyTags,
-    FieldMany2ManyTagsAvatar: FieldMany2ManyTagsAvatar,
-    KanbanMany2ManyTagsAvatar: KanbanMany2ManyTagsAvatar,
-    ListMany2ManyTagsAvatar: ListMany2ManyTagsAvatar,
-    FormFieldMany2ManyTags: FormFieldMany2ManyTags,
-    FieldRadio: FieldRadio,
-    FieldSelection: FieldSelection,
-};

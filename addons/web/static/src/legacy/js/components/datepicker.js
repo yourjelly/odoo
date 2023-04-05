@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.DatePickerOwl **/
     
     import config from "web.config";
-    import field_utils from "web.field_utils";
+    import * as field_utils from "@web/legacy/js/fields/field_utils";
     import time from "web.time";
     import { useAutofocus } from "@web/core/utils/hooks";
     import { LegacyComponent } from "@web/legacy/legacy_component";

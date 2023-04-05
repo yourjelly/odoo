@@ -1,7 +1,7 @@
 /** @odoo-module **/
-import fieldRegistry from "web.field_registry";
+import { fieldRegistry } from "@web/legacy/js/fields/field_registry";
 import { parseArch } from "web.viewUtils";
-import { parse } from "web.field_utils";
+import { parse } from "@web/legacy/js/fields/field_utils";
 import { traverse } from "web.utils";
 
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";

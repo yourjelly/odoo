@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.field_utils **/
+/** @odoo-module **/
 
 /**
  * Field Utils
@@ -744,49 +744,48 @@ function parseMany2one(value) {
     return value;
 }
 
-export default {
-    format: {
-        binary: formatBinary,
-        boolean: formatBoolean,
-        char: formatChar,
-        date: formatDate,
-        datetime: formatDateTime,
-        float: formatFloat,
-        float_factor: formatFloatFactor,
-        float_time: formatFloatTime,
-        html: _.identity, // todo
-        integer: formatInteger,
-        many2many: formatX2Many,
-        many2one: formatMany2one,
-        many2one_reference: formatInteger,
-        monetary: formatMonetary,
-        one2many: formatX2Many,
-        percentage: formatPercentage,
-        reference: formatMany2one,
-        selection: formatSelection,
-        text: formatChar,
-        json: formatJson,
-    },
-    parse: {
-        binary: _.identity,
-        boolean: _.identity, // todo
-        char: _.identity, // todo
-        date: parseDate, // todo
-        datetime: parseDateTime, // todo
-        float: parseFloat,
-        float_factor: parseFloatFactor,
-        float_time: parseFloatTime,
-        html: _.identity, // todo
-        integer: parseInteger,
-        many2many: _.identity, // todo
-        many2one: parseMany2one,
-        many2one_reference: parseInteger,
-        monetary: parseMonetary,
-        one2many: _.identity,
-        percentage: parsePercentage,
-        reference: parseMany2one,
-        selection: _.identity, // todo
-        text: _.identity, // todo
-        json: _.identity, // todo
-    },
+export const format = {
+    binary: formatBinary,
+    boolean: formatBoolean,
+    char: formatChar,
+    date: formatDate,
+    datetime: formatDateTime,
+    float: formatFloat,
+    float_factor: formatFloatFactor,
+    float_time: formatFloatTime,
+    html: _.identity, // todo
+    integer: formatInteger,
+    many2many: formatX2Many,
+    many2one: formatMany2one,
+    many2one_reference: formatInteger,
+    monetary: formatMonetary,
+    one2many: formatX2Many,
+    percentage: formatPercentage,
+    reference: formatMany2one,
+    selection: formatSelection,
+    text: formatChar,
+    json: formatJson,
+};
+
+export const parse = {
+    binary: _.identity,
+    boolean: _.identity, // todo
+    char: _.identity, // todo
+    date: parseDate, // todo
+    datetime: parseDateTime, // todo
+    float: parseFloat,
+    float_factor: parseFloatFactor,
+    float_time: parseFloatTime,
+    html: _.identity, // todo
+    integer: parseInteger,
+    many2many: _.identity, // todo
+    many2one: parseMany2one,
+    many2one_reference: parseInteger,
+    monetary: parseMonetary,
+    one2many: _.identity,
+    percentage: parsePercentage,
+    reference: parseMany2one,
+    selection: _.identity, // todo
+    text: _.identity, // todo
+    json: _.identity, // todo
 };

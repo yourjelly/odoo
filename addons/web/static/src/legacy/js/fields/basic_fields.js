@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.basic_fields **/
+/** @odoo-module **/
 
 /**
  * This module contains most of the basic (meaning: non relational) field
@@ -6,20 +6,20 @@
  * BasicView, so, they can work with the records obtained from a BasicModel.
  */
 
-import AbstractField from "web.AbstractField";
+import { AbstractField } from "./abstract_field";
 import core from "web.core";
 import { datepicker } from "@web/legacy/js/widgets/date_picker";
 import dom from "web.dom";
 import framework from "web.framework";
 import py_utils from "web.py_utils";
 import session from "web.session";
-import field_utils from "web.field_utils";
+import * as field_utils from "./field_utils";
 import utils from "web.utils";
 
 var _t = core._t;
 var _lt = core._lt;
 
-var TranslatableFieldMixin = {
+export var TranslatableFieldMixin = {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -57,7 +57,7 @@ var TranslatableFieldMixin = {
     },
 };
 
-var FieldBoolean = AbstractField.extend({
+export var FieldBoolean = AbstractField.extend({
     className: 'o_field_boolean',
     description: _lt("Checkbox"),
     events: _.extend({}, AbstractField.prototype.events, {
@@ -208,7 +208,7 @@ var FieldBoolean = AbstractField.extend({
     },
 });
 
-var DebouncedField = AbstractField.extend({
+export var DebouncedField = AbstractField.extend({
     /**
      * For field widgets that may have a large number of field changes quickly,
      * it could be a good idea to debounce the changes. In that case, this is
@@ -307,7 +307,7 @@ var DebouncedField = AbstractField.extend({
     _onBlur: function () {},
 });
 
-var InputField = DebouncedField.extend({
+export var InputField = DebouncedField.extend({
     custom_events: _.extend({}, DebouncedField.prototype.custom_events, {
         field_changed: '_onFieldChanged',
     }),
@@ -515,7 +515,7 @@ var InputField = DebouncedField.extend({
     },
 });
 
-var NumericField = InputField.extend({
+export var NumericField = InputField.extend({
     tagName: 'span',
 
     /**
@@ -703,7 +703,7 @@ var NumericField = InputField.extend({
     },
 });
 
-var FieldChar = InputField.extend(TranslatableFieldMixin, {
+export var FieldChar = InputField.extend(TranslatableFieldMixin, {
     description: _lt("Text"),
     className: 'o_field_char',
     tagName: 'span',
@@ -747,7 +747,7 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
     },
 });
 
-var FieldDate = InputField.extend({
+export var FieldDate = InputField.extend({
     description: _lt("Date"),
     className: "o_field_date",
     tagName: "span",
@@ -904,7 +904,7 @@ var FieldDate = InputField.extend({
     },
 });
 
-var FieldDateTime = FieldDate.extend({
+export var FieldDateTime = FieldDate.extend({
     description: _lt("Date & Time"),
     supportedFieldTypes: ['datetime'],
     isQuickEditable: true,
@@ -965,7 +965,7 @@ var FieldDateTime = FieldDate.extend({
     },
 });
 
-var FieldMonetary = NumericField.extend({
+export var FieldMonetary = NumericField.extend({
     description: _lt("Monetary"),
     className: 'o_field_monetary o_field_number',
     tagName: 'span',
@@ -1078,7 +1078,7 @@ var FieldMonetary = NumericField.extend({
     },
 });
 
-var FieldInteger = NumericField.extend({
+export var FieldInteger = NumericField.extend({
     description: _lt("Integer"),
     className: 'o_field_integer o_field_number',
     supportedFieldTypes: ['integer'],
@@ -1113,7 +1113,7 @@ var FieldInteger = NumericField.extend({
     },
 });
 
-var FieldFloat = NumericField.extend({
+export var FieldFloat = NumericField.extend({
     description: _lt("Decimal"),
     className: 'o_field_float o_field_number',
     supportedFieldTypes: ['float'],
@@ -1133,7 +1133,7 @@ var FieldFloat = NumericField.extend({
     },
 });
 
-var FieldFloatTime = FieldFloat.extend({
+export var FieldFloatTime = FieldFloat.extend({
     description: _lt("Time"),
     // this is not strictly necessary, as for this widget to be used, the 'widget'
     // attrs must be set to 'float_time', so the formatType is automatically
@@ -1167,7 +1167,7 @@ var FieldFloatTime = FieldFloat.extend({
     },
 });
 
-var FieldFloatFactor = FieldFloat.extend({
+export var FieldFloatFactor = FieldFloat.extend({
     supportedFieldTypes: ['float'],
     className: 'o_field_float_factor',
     formatType: 'float_factor',
@@ -1194,7 +1194,7 @@ var FieldFloatFactor = FieldFloat.extend({
  * Also, the widget support the factor conversion as the *float_factor* widget (Range values
  * should be the result of the conversion).
  **/
-var FieldFloatToggle = AbstractField.extend({
+export var FieldFloatToggle = AbstractField.extend({
     supportedFieldTypes: ['float'],
     formatType: 'float_factor',
     className: 'o_field_float_toggle',
@@ -1320,7 +1320,7 @@ var FieldFloatToggle = AbstractField.extend({
     },
 });
 
-var FieldPercentage = FieldFloat.extend({
+export var FieldPercentage = FieldFloat.extend({
     className: 'o_field_float_percentage o_field_number',
     description: _lt("Percentage"),
 
@@ -1358,7 +1358,7 @@ var FieldPercentage = FieldFloat.extend({
     },
 });
 
-var FieldText = InputField.extend(TranslatableFieldMixin, {
+export var FieldText = InputField.extend(TranslatableFieldMixin, {
     description: _lt("Multiline Text"),
     className: 'o_field_text',
     supportedFieldTypes: ['text', 'html'],
@@ -1424,7 +1424,7 @@ var FieldText = InputField.extend(TranslatableFieldMixin, {
     },
 });
 
-var UrlWidget = InputField.extend({
+export var UrlWidget = InputField.extend({
     description: _lt("URL"),
     className: 'o_field_url',
     events: _.extend({}, InputField.prototype.events, {
@@ -1502,7 +1502,7 @@ var UrlWidget = InputField.extend({
     },
 });
 
-var AbstractFieldBinary = AbstractField.extend({
+export var AbstractFieldBinary = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'change .o_input_file': 'on_file_change',
         'click .o_select_file_button': function () {
@@ -1624,7 +1624,7 @@ var AbstractFieldBinary = AbstractField.extend({
     },
 });
 
-var FieldBinaryFile = AbstractFieldBinary.extend({
+export var FieldBinaryFile = AbstractFieldBinary.extend({
     description: _lt("File"),
     template: 'FieldBinaryFile',
     events: _.extend({}, AbstractFieldBinary.prototype.events, {
@@ -1701,7 +1701,7 @@ var FieldBinaryFile = AbstractFieldBinary.extend({
  * This widget is intended to be used on boolean fields. It toggles a button
  * switching between a green bullet / gray bullet.
 */
-var FieldToggleBoolean = AbstractField.extend({
+export var FieldToggleBoolean = AbstractField.extend({
     description: _lt("Button"),
     template: "toggle_button",
     events: {
@@ -1758,26 +1758,3 @@ var FieldToggleBoolean = AbstractField.extend({
         this._setValue(!this.value);
     },
 });
-
-export default {
-    TranslatableFieldMixin: TranslatableFieldMixin,
-    DebouncedField: DebouncedField,
-    FieldBinaryFile: FieldBinaryFile,
-    AbstractFieldBinary: AbstractFieldBinary,
-    FieldBoolean: FieldBoolean,
-    FieldChar: FieldChar,
-    FieldDate: FieldDate,
-    FieldDateTime: FieldDateTime,
-    FieldFloat: FieldFloat,
-    FieldFloatTime: FieldFloatTime,
-    FieldFloatFactor: FieldFloatFactor,
-    FieldFloatToggle: FieldFloatToggle,
-    FieldPercentage: FieldPercentage,
-    FieldInteger: FieldInteger,
-    FieldMonetary: FieldMonetary,
-    FieldText: FieldText,
-    FieldToggleBoolean: FieldToggleBoolean,
-    InputField: InputField,
-    NumericField: NumericField,
-    UrlWidget: UrlWidget,
-};

@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { parse } from "web.field_utils";
+import { parse } from "@web/legacy/js/fields/field_utils";
 import { renderToString } from "@web/core/utils/render";
 import { registry } from "@web/core/registry";
 import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";

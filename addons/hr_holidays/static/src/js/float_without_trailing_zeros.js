@@ -1,6 +1,6 @@
 /** @odoo-module **/
-import FieldRegistry from 'web.field_registry';
-import basic_fields from 'web.basic_fields';
+import { fieldRegistry } from "@web/legacy/js/fields/field_registry";
+import * as basic_fields from "@web/legacy/js/fields/basic_fields";
 
 var FieldFloat = basic_fields.FieldFloat;
 
@@ -13,5 +13,5 @@ var FloatWithoutTrailingZeros = FieldFloat.extend({
     }
 });
 
-FieldRegistry.add('float_without_trailing_zeros', FloatWithoutTrailingZeros);
+fieldRegistry.add('float_without_trailing_zeros', FloatWithoutTrailingZeros);
 

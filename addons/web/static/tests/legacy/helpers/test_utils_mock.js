@@ -11,7 +11,7 @@
 
 import AbstractStorageService from "web.AbstractStorageService";
 import AjaxService from "web.AjaxService";
-import basic_fields from "web.basic_fields";
+import * as basic_fields from "@web/legacy/js/fields/basic_fields";
 import Bus from "web.Bus";
 import config from "web.config";
 import core from "web.core";

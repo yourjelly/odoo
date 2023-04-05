@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Component } from "@odoo/owl";
-import { format } from "web.field_utils";
+import { format } from "@web/legacy/js/fields/field_utils";
 import { round_precision as round_pr } from "web.utils";
 
 /**

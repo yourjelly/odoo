@@ -4,7 +4,7 @@ import core from "web.core";
 import { datepicker } from "./date_picker";
 import dom from "web.dom";
 import Domain from "web.Domain";
-import field_utils from "web.field_utils";
+import * as field_utils from "@web/legacy/js/fields/field_utils";
 import { ModelFieldSelector } from "./model_field_selector";
 import Widget from "web.Widget";
 

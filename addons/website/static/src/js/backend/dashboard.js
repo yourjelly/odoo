@@ -3,7 +3,7 @@
 import AbstractAction from "web.AbstractAction";
 import { loadBundle } from "@web/core/assets";
 import core from "web.core";
-import field_utils from "web.field_utils";
+import * as field_utils from "@web/legacy/js/fields/field_utils";
 import pyUtils from "web.py_utils";
 import session from "web.session";
 import time from "web.time";

@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { parse } from "web.field_utils";
+import { parse } from "@web/legacy/js/fields/field_utils";
 import { barcodeService } from "@barcodes/barcode_service";
 import { _t } from "web.core";
 import { registry } from "@web/core/registry";

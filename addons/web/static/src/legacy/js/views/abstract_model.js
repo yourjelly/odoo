@@ -28,7 +28,7 @@
  * sample model.
  */
 
-import fieldUtils from 'web.field_utils';
+import * as fieldUtils from "@web/legacy/js/fields/field_utils";
 import mvc from 'web.mvc';
 
 
