@@ -658,7 +658,7 @@ var SnippetEditor = Widget.extend({
      */
     toggleTargetVisibility: async function (show) {
         show = this._toggleVisibilityStatus(show);
-        var styles = _.values(this.styles);
+        var styles = Object.values(this.styles);
         const proms = _.sortBy(styles, '__order').map(style => {
             return show ? style.onTargetShow() : style.onTargetHide();
         });

@@ -1537,7 +1537,7 @@ var BasicModel = AbstractModel.extend({
 
         if (options.notifyChange === false) {
             return Promise.all(defs).then(function () {
-                return Promise.resolve(_.keys(changes));
+                return Promise.resolve(Object.keys(changes));
             });
         }
 
@@ -1557,7 +1557,7 @@ var BasicModel = AbstractModel.extend({
                     self._performOnChange(record, onChangeFields, { viewType: options.viewType })
                     .then(function (result) {
                         delete record._warning;
-                        resolve(_.keys(changes).concat(Object.keys(result && result.value || {})));
+                        resolve(Object.keys(changes).concat(Object.keys(result && result.value || {})));
                     }).guardedCatch(function () {
                         self._visitChildren(record, function (elem) {
                             Object.assign(elem, initialData[elem.id]);
@@ -1565,7 +1565,7 @@ var BasicModel = AbstractModel.extend({
                         reject();
                     });
                 } else {
-                    resolve(_.keys(changes));
+                    resolve(Object.keys(changes));
                 }
             }).then(function (fieldNames) {
                 return self._fetchSpecialData(record).then(function (fieldNames2) {
@@ -2759,7 +2759,7 @@ var BasicModel = AbstractModel.extend({
      */
     _fetchRelatedData: function (list, toFetch, fieldName) {
         var self = this;
-        var ids = _.keys(toFetch);
+        var ids = Object.keys(toFetch);
         for (var i = 0; i < ids.length; i++) {
             ids[i] = Number(ids[i]);
         }
@@ -2770,7 +2770,7 @@ var BasicModel = AbstractModel.extend({
         }
 
         var def;
-        var fieldNames = _.keys(fieldInfo.relatedFields);
+        var fieldNames = Object.keys(fieldInfo.relatedFields);
         if (fieldNames.length) {
             var field = list.fields[fieldName];
             def = this._rpc({
@@ -2785,7 +2785,7 @@ var BasicModel = AbstractModel.extend({
             }));
         }
         return def.then(function (result) {
-            var records = _.uniq(_.flatten(_.values(toFetch)));
+            var records = _.uniq(_.flatten(Object.values(toFetch)));
             self._updateRecordsData(records, fieldName, result);
         });
     },
@@ -3119,7 +3119,7 @@ var BasicModel = AbstractModel.extend({
         _.each(list.data, function (groupIndex) {
             var group = self.localData[groupIndex];
             var nextDataToFetch = self._getDataToFetch(group, fieldName);
-            _.each(_.keys(nextDataToFetch), function (id) {
+            _.each(Object.keys(nextDataToFetch), function (id) {
                 if (toFetch[id]) {
                     toFetch[id] = toFetch[id].concat(nextDataToFetch[id]);
                 } else {
@@ -4665,7 +4665,7 @@ var BasicModel = AbstractModel.extend({
         });
 
         // fetch many2ones display_name
-        _.each(_.keys(many2ones), function (name) {
+        _.each(Object.keys(many2ones), function (name) {
             defs.push(self._fetchNameGets(x2manyList, name));
         });
 
@@ -4693,7 +4693,7 @@ var BasicModel = AbstractModel.extend({
             }
             var record = self.localData[dataPointID];
             var data = Object.assign({}, record.data, record._changes);
-            if (_.difference(fieldNames, _.keys(data)).length) {
+            if (_.difference(fieldNames, Object.keys(data)).length) {
                 missingIDs.push(resId);
             }
         }

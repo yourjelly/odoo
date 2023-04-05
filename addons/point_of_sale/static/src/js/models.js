@@ -1225,7 +1225,7 @@ export class PosGlobalState extends PosModel {
                 this.orders.add(orders);
             }
 
-            report.unpaid_skipped_sessions = _.keys(skipped_sessions);
+            report.unpaid_skipped_sessions = Object.keys(skipped_sessions);
         }
 
         return report;
