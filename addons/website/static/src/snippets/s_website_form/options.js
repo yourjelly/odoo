@@ -307,7 +307,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             model: 'ir.model',
             method: 'get_compatible_form_models',
         });
-²²
+        
         const targetModelName = this.$target[0].dataset.model_name || 'mail.mail';
         this.activeForm = this.models.filter(m => m.model === targetModelName);
         // Create the Form Action select
