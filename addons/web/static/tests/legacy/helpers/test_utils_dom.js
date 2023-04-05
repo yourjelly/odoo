@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_utils_dom **/
+/** @odoo-module **/
     
     import concurrency from "web.concurrency";
     import Widget from "web.Widget";

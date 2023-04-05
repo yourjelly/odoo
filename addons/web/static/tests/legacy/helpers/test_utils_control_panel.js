@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.test_utils_control_panel **/
+/** @odoo-module **/
     
-    import { click, findItem, getNode, triggerEvent } from "web.test_utils_dom";
-    import { editInput, editSelect, editAndTrigger } from "web.test_utils_fields";
+    import { click, findItem, getNode, triggerEvent } from "./test_utils_dom";
+    import { editInput, editSelect, editAndTrigger } from "./test_utils_fields";
 
     //-------------------------------------------------------------------------
     // Exported functions

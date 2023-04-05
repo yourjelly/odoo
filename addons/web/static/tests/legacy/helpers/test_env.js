@@ -2,7 +2,7 @@
     
     import Bus from "web.Bus";
     import session from "web.session";
-    import { makeTestEnvServices } from "@web/../tests/legacy/helpers/test_services";
+    import { makeTestEnvServices } from "./test_services";
     import { templates, setLoadXmlDefaultApp } from "@web/core/assets";
     import { renderToString } from "@web/core/utils/render";
     const { App, Component } = owl;
