@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import Dialog from 'web.Dialog';
-import core from 'web.core';
+import * as core from "@web/legacy/js/services/core";
 import options from 'web_editor.snippets.options';
 import { loadBundle } from "@web/core/assets";
 

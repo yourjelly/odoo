@@ -2,7 +2,7 @@
 
 import publicWidget from 'web.public.widget';
 import Dialog from 'web.Dialog';
-import { _t } from 'web.core';
+import { _t } from "@web/legacy/js/services/core";
 
 const categoryDeleteDialog = Dialog.extend({
     template: 'slides.category.delete',

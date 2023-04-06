@@ -2,7 +2,7 @@
 /* global html2canvas */
 
 import Session from "web.Session";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import { ErrorPopup } from "./Popups/ErrorPopup";
 var _t = core._t;
 

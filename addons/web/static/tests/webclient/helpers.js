@@ -27,7 +27,7 @@ import AbstractService from "web.AbstractService";
 import { ActionMenus } from "@web/legacy/js/components/action_menus";
 import * as basicFields from "@web/legacy/js/fields/basic_fields";
 import Registry from "web.Registry";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import { makeTestEnvironment } from "@web/../tests/legacy/helpers/test_env";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";

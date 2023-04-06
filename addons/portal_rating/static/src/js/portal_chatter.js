@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import portalChatter from "portal.chatter";
 import utils from "web.utils";
 import time from "web.time";

@@ -2,7 +2,7 @@
 
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog";
 import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import options from "web_editor.snippets.options";
 
 var _t = core._t;

@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { _t } from "web.core";
+import { _t } from "@web/legacy/js/services/core";
 import Widget from "web.Widget";
 import { computeScore } from "@auth_password_policy/password_policy";
 

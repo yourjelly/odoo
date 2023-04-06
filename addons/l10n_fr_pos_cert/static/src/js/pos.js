@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { PosGlobalState, Order, Orderline } from "@point_of_sale/js/models";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import { patch } from "@web/core/utils/patch";
 import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";
 

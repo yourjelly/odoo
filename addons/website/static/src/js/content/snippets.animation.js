@@ -7,7 +7,7 @@
 import { loadJS } from "@web/core/assets";
 import Class from "web.Class";
 import * as config from "web.config";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import dom from "web.dom";
 import mixins from "web.mixins";
 import publicWidget from "web.public.widget";

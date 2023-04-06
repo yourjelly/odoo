@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.Widget **/
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import mixins from "web.mixins";
 import ServicesMixin from "web.ServicesMixin";
 import { loadBundle } from "@web/core/assets";

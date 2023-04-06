@@ -14,7 +14,7 @@
  * conversions.
  */
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import dom from "web.dom";
 import session from "web.session";
 import time from "web.time";

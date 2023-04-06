@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import Dialog from 'web.Dialog';
-import { _t } from 'web.core';
+import { _t } from "@web/legacy/js/services/core";
 
 /**
  * This modal is used when the user finishes the quiz.

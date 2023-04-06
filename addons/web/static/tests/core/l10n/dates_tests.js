@@ -15,7 +15,7 @@ import {
 } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { patch, unpatch } from "@web/core/utils/patch";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import * as field_utils from "@web/legacy/js/fields/field_utils";
 import session from "web.session";
 import test_utils from "web.test_utils";

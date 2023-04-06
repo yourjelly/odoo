@@ -2,7 +2,7 @@
 
     import session from "web.session";
     import ajax from "web.ajax";
-    import core from "web.core";
+    import * as core from "@web/legacy/js/services/core";
     import "web.dom_ready";
 
     var _t = core._t;

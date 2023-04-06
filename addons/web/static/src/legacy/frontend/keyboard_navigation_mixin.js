@@ -1,6 +1,6 @@
 /** @odoo-module **/
     import BrowserDetection from "web.BrowserDetection";
-    import core from "web.core";
+    import * as core from "@web/legacy/js/services/core";
 
     /**
      * list of the key that should not be used as accesskeys. Either because we want to reserve them for a specific behavior in Odoo or

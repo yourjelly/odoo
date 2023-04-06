@@ -5,7 +5,7 @@
  */
 
 import AbstractStorageService from "web.AbstractStorageService";
-import core from "web.core";
+import * as core from "./core";
 import sessionStorage from "web.sessionStorage";
 
 export var SessionStorageService = AbstractStorageService.extend({

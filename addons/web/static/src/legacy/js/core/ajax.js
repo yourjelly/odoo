@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.ajax **/
 
 import * as config from "web.config";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import {Markup} from "web.utils";
 import time from "web.time";
 import download from "web.download";

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import AbstractService from "web.AbstractService";
-import core from "web.core";
+import * as core from "./core";
 import session from "web.session";
 
 export var AjaxService = AbstractService.extend({

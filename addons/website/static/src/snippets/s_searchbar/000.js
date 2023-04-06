@@ -3,7 +3,7 @@
 import concurrency from 'web.concurrency';
 import publicWidget from 'web.public.widget';
 
-import {qweb} from 'web.core';
+import {qweb} from "@web/legacy/js/services/core";
 import {Markup} from 'web.utils';
 
 publicWidget.registry.searchBar = publicWidget.Widget.extend({

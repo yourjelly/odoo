@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_sale_options.website_sale **/
 
 import ajax from "web.ajax";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import publicWidget from "web.public.widget";
 import { OptionalProductsModal } from "@sale_product_configurator/js/product_configurator_modal";
 import "website_sale.website_sale";

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { bus } from "web.core";
+import { bus } from "@web/legacy/js/services/core";
 import Context from "web.Context";
 
 import { browser } from "../core/browser/browser";

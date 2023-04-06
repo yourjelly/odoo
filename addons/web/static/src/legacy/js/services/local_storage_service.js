@@ -5,7 +5,7 @@
  */
 
 import AbstractStorageService from "web.AbstractStorageService";
-import core from "web.core";
+import * as core from "./core";
 import localStorage from "web.local_storage";
 
 export var LocalStorageService = AbstractStorageService.extend({

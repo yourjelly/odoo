@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.s_dynamic_snippet **/
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import * as config from "web.config";
 import publicWidget from "web.public.widget";
 import {Markup} from "web.utils";

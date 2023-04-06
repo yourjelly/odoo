@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { AjaxService } from "@web/legacy/js/services/ajax_service";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import Dialog from "web.Dialog";
 import QWeb from "web.QWeb";
 import Widget from "web.Widget";

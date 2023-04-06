@@ -9,7 +9,7 @@ import { getWysiwygClass } from 'web_editor.loader';
 import { QWebPlugin } from '@web_editor/js/backend/QWebPlugin';
 import { TranslationButton } from "@web/views/fields/translation_button";
 import { useDynamicPlaceholder } from "@web/views/fields/dynamic_placeholder_hook";
-import { QWeb } from 'web.core';
+import { QWeb } from "@web/legacy/js/services/core";
 import ajax from 'web.ajax';
 import {
     useBus,

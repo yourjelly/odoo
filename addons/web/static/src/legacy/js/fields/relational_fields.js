@@ -14,7 +14,7 @@
 
 import { AbstractField } from "./abstract_field";
 import concurrency from "web.concurrency";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import Dialog from "web.Dialog";
 import dom from "web.dom";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";

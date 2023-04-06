@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.Session **/
 
 import ajax from "web.ajax";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import mixins from "web.mixins";
 import {setCookie} from "web.utils.cookies";
 import { session } from "@web/session";

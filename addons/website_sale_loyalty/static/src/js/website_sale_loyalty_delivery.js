@@ -2,7 +2,7 @@
 
 import PublicWidget from 'web.public.widget';
 import { patch } from 'web.utils';
-import core from 'web.core';
+import * as core from "@web/legacy/js/services/core";
 
 const _t = core._t;
 

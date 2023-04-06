@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import * as config from "web.config";
 import utils from "web.utils";
 import Widget from "web.Widget";

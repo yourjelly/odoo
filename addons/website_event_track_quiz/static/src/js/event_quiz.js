@@ -2,7 +2,7 @@
 
 
 import publicWidget from "web.public.widget";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import session from "web.session";
 
 var QWeb = core.qweb;

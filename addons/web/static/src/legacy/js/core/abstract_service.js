@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.AbstractService **/
 
 import Class from "web.Class";
-import { serviceRegistry } from "web.core";
+import { serviceRegistry } from "@web/legacy/js/services/core";
 import Mixins from "web.mixins";
 import ServicesMixin from "web.ServicesMixin";
 

@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_sale.website_sale **/
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import * as config from "web.config";
 import publicWidget from "web.public.widget";
 import VariantMixin from "website_sale.VariantMixin";

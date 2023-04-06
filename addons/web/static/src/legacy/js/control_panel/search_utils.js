@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import { _lt, _t } from "web.core";
+    import { _lt, _t } from "@web/legacy/js/services/core";
     import Domain from "web.Domain";
     import pyUtils from "web.py_utils";
 

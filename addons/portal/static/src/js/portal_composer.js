@@ -1,7 +1,7 @@
 /** @odoo-module alias=portal.composer **/
 
 import ajax from "web.ajax";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import publicWidget from "web.public.widget";
 
 var qweb = core.qweb;

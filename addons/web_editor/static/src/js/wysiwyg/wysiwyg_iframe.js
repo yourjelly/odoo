@@ -2,7 +2,7 @@
 
 import Wysiwyg from "web_editor.wysiwyg";
 import ajax from "web.ajax";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import * as config from "web.config";
 
 var qweb = core.qweb;

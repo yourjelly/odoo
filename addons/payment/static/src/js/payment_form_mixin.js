@@ -1,7 +1,7 @@
 odoo.define('payment.payment_form_mixin', require => {
     'use strict';
 
-    const core = require('web.core');
+    const core = require('@web/legacy/js/services/core');
     const Dialog = require('web.Dialog');
 
     const _t = core._t;

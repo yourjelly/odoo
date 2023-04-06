@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import {_t, qweb as QWeb} from 'web.core';
+import {_t, qweb as QWeb} from "@web/legacy/js/services/core";
 import Dialog from 'web.Dialog';
 import publicWidget from 'web.public.widget';
 import utils from 'web.utils';

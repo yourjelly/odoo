@@ -14,7 +14,7 @@ import { AjaxService } from "@web/legacy/js/services/ajax_service";
 import * as basic_fields from "@web/legacy/js/fields/basic_fields";
 import Bus from "web.Bus";
 import * as config from "web.config";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import dom from "web.dom";
 import { makeTestEnvironment } from "./test_env";
 import { MockServer } from "./mock_server";

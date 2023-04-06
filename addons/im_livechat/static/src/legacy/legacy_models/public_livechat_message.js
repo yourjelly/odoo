@@ -3,7 +3,7 @@
 import * as mailUtils from "@mail/js/utils";
 
 import Class from "web.Class";
-import { _t } from "web.core";
+import { _t } from "@web/legacy/js/services/core";
 import session from "web.session";
 import time from "web.time";
 

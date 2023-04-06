@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import * as field_utils from "@web/legacy/js/fields/field_utils";
 import time from "web.time";
 import Widget from "web.Widget";

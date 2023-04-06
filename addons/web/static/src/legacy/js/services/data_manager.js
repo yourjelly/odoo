@@ -1,7 +1,7 @@
 /** @odoo-module alias=web.data_manager **/
 
 import * as config from "web.config";
-import core from "web.core";
+import * as core from "./core";
 import rpc from "web.rpc";
 import session from "web.session";
 import { generateLegacyLoadViewsResult } from "@web/legacy/legacy_load_views";
@@ -221,6 +221,4 @@ const DataManager = core.Class.extend({
     },
 });
 
-var data_manager = new DataManager();
-
-export default data_manager;
+export var dataManager = new DataManager();

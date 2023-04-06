@@ -1,7 +1,7 @@
 /** @odoo-module alias=wysiwyg.widgets.Dialog **/
 
 import * as config from "web.config";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import Dialog from "web.Dialog";
 
 var _t = core._t;

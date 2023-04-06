@@ -3,7 +3,7 @@
 
 import { PosDB } from "@point_of_sale/js/db";
 import * as config from "web.config";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import * as field_utils from "@web/legacy/js/fields/field_utils";
 import time from "web.time";
 import utils from "web.utils";

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 var _t = core._t;
 import SlidesUpload from "@website_slides/js/slides_upload";
 

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import Widget from "web.Widget";
 import { ModelFieldSelectorPopover } from "./model_field_selector_popover";
 

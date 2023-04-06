@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_event_booth_exhibitor.tour_steps **/
     
-    import core from "web.core";
+    import * as core from "@web/legacy/js/services/core";
 
     var FinalSteps = core.Class.extend({
 

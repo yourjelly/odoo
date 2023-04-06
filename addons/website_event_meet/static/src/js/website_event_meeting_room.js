@@ -1,7 +1,7 @@
 /** @odoo-module alias=website_event_meet.website_event_meet_meeting_room **/
 
 import publicWidget from "web.public.widget";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import Dialog from "web.Dialog";
 const _t = core._t;
 

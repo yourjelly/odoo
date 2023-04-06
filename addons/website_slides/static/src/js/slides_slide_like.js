@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { sprintf } from '@web/core/utils/strings';
-import { _t } from 'web.core';
+import { _t } from "@web/legacy/js/services/core";
 import publicWidget from 'web.public.widget';
 import '@website_slides/js/slides';
 

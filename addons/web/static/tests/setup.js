@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { _t } from "web.core";
+import { _t } from "@web/legacy/js/services/core";
 import LegacyBus from "web.Bus";
 import session from "web.session";
 import { assets, templates } from "@web/core/assets";

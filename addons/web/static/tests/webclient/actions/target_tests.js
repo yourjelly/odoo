@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import testUtils from "web.test_utils";
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import { AbstractAction } from "@web/legacy/js/chrome/abstract_action";
 import { registry } from "@web/core/registry";
 import { click, getFixture, patchWithCleanup, makeDeferred, nextTick } from "../../helpers/utils";

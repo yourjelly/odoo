@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 
 /**
  * Implement this interface to support a new payment method in the POS:

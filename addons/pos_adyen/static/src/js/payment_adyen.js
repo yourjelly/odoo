@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import rpc from "web.rpc";
 import { PaymentInterface } from "@point_of_sale/js/payment";
 import { ErrorPopup } from "@point_of_sale/js/Popups/ErrorPopup";

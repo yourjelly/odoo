@@ -1,6 +1,6 @@
 /** @odoo-module alias=website_sale_delivery.checkout **/
 
-import core from "web.core";
+import * as core from "@web/legacy/js/services/core";
 import publicWidget from "web.public.widget";
 
 const _t = core._t;

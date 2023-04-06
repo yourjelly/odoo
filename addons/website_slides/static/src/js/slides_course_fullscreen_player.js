@@ -3,7 +3,7 @@
 /* global YT, Vimeo */
 
     import publicWidget from 'web.public.widget';
-    import  { qweb as QWeb, _t } from 'web.core';
+    import  { qweb as QWeb, _t } from "@web/legacy/js/services/core";
     import { Markup } from 'web.utils';
     import * as config from 'web.config';
 

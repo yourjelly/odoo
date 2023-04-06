@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import {_t} from 'web.core';
+import {_t} from "@web/legacy/js/services/core";
 import publicWidget from 'web.public.widget';
 
 publicWidget.registry.DonationSnippet = publicWidget.Widget.extend({

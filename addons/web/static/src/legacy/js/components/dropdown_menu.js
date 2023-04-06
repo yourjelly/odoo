@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import { _t } from "web.core";
+    import { _t } from "@web/legacy/js/services/core";
     import { DropdownMenuItem } from "./dropdown_menu_item";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
