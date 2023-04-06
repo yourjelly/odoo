@@ -13,7 +13,7 @@
                         <span class="fw-bold me-2"><t t-esc="record.product_qty || record.qty_production"/>x</span>
                         <span t-esc="record.product_id[1]"/>
                     </div>
-                    <MrpTimer t-if="record.duration" value="record.duration" ongoing="active"/>
+                    <MrpTimer t-if="record.duration || record.is_user_working" value="record.duration" ongoing="active"/>
                 </div>
             </div>
             <ul class="list-group list-group-flush">
@@ -30,7 +30,18 @@
     </t>
 
     <t t-name="mrp.MrpDisplayProductionHeader" owl="1">
-        <span class="col-12 h5" t-esc="record.display_name"/>
+        <t t-if="! tracking || tracking == 'multiple'">
+            <span class="col-12 h5" t-esc="record.display_name"/>
+        </t>
+        <t t-else="">
+            <span class="col-8 h5" t-esc="record.display_name"/>
+            <div class="col-4 text-end">
+                <span t-if="record.lot_producing_id.length" class=" h5" t-esc="record.lot_producing_id[1]"/>
+                <button t-if="! record.lot_producing_id.length" 
+                class="btn btn-primary fa fa-plus-square-o"
+                t-on-click="actionAssignSerial"/>
+            </div>
+        </t>
     </t>
     <t t-name="mrp.MrpDisplayWorkorderHeader" owl="1">
         <span class="col-8 h5" t-esc="record.display_name"/>

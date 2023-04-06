@@ -27,6 +27,8 @@ export class MrpDisplayAction extends Component {
                 "product_qty",
                 "state",
                 "workorder_ids",
+                "product_tracking",
+                "lot_producing_id",
             ],
             "mrp.workorder": [
                 "duration",
