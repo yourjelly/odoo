@@ -1215,6 +1215,7 @@ const Wysiwyg = Widget.extend({
                         wysiwyg: this,
                         noFocusUrl: options.noFocusUrl,
                         forceNewWindow: this.options.linkForceNewWindow,
+                        hideProtocols: this.options.hideProtocols,
                     }, this.odooEditor.editable, linkToolsData, $btn, link );
                 }
                 this.linkTools.noFocusUrl = options.noFocusUrl;
@@ -1253,6 +1254,7 @@ const Wysiwyg = Widget.extend({
             const linkDialog = new weWidgets.LinkDialog(this, {
                 forceNewWindow: this.options.linkForceNewWindow,
                 wysiwyg: this,
+                hideProtocols: this.options.hideProtocols,
             }, this.$editable[0], {
                 needLabel: true
             }, undefined, link);

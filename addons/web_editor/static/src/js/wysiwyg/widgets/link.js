@@ -5,9 +5,13 @@ import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor
 import Widget from "web.Widget";
 import {isColorGradient} from "web_editor.utils";
 
-const getDeepRange = OdooEditorLib.getDeepRange;
-const getInSelection = OdooEditorLib.getInSelection;
 const _t = core._t;
+const {
+    getDeepRange,
+    getInSelection,
+    splitURL,
+    urlRegexes,
+} = OdooEditorLib;
 
 /**
  * Allows to customize link content and style.
@@ -97,10 +101,7 @@ const Link = Widget.extend({
         }
 
         if (!this.data.url) {
-            const urls = this.data.content.match(OdooEditorLib.URL_REGEX_WITH_INFOS);
-            if (urls) {
-                this.data.url = urls[0];
-            }
+            this.data.url = this._deduceURL(this.data.content);
         }
 
         if (this.linkEl) {
@@ -156,8 +157,9 @@ const Link = Widget.extend({
         this._updateOptionsUI();
 
         if (this.data.url) {
-            var match = /mailto:(.+)/.exec(this.data.url);
-            this.$('input[name="url"]').val(match ? match[1] : this.data.url);
+            const [protocol, location] = splitURL(this.data.url);
+            const urlInputValue = this.options.hideProtocols?.includes(protocol) ? location : protocol + location;
+            this.el.querySelector("input[name='url']").value = urlInputValue;
             this._onURLInput();
             this._savedURLInputOnDestroy = false;
         }
@@ -282,18 +284,42 @@ const Link = Widget.extend({
      */
     _adaptPreview: function () {},
     /**
+     *
      * @private
+     * @param {string} text
      */
-    _correctLink: function (url) {
-        if (url.indexOf('mailto:') === 0 || url.indexOf('tel:') === 0) {
-            url = url.replace(/^tel:([0-9]+)$/, 'tel://$1');
-        } else if (url.indexOf('@') !== -1 && url.indexOf(':') === -1) {
-            url = 'mailto:' + url;
-        } else if (url && url.indexOf('://') === -1 && url[0] !== '/'
-                    && url[0] !== '#' && url.slice(0, 2) !== '${') {
-            url = 'http://' + url;
+    _deduceURL: function(text) {
+        text = text?.trim();
+        if (!text) {
+            return '';
         }
-        return url;
+        // Check if text already has a protocol.
+        let [protocol, location] = splitURL(text);
+        if (protocol) {
+            // Coerce 'tel:' to 'tel://'
+            // TODO: check if this is still necessary
+            if (protocol === 'tel:') {
+                protocol = 'tel://';
+            }
+            return protocol + location;
+        }
+        // Check for relative URLs
+        if (text.startsWith('/') || text.startsWith('#')) {
+            return text;
+        }
+        let protocols = ['http://', 'mailto:', 'tel://'];
+        const currentProtocol = splitURL(this.data.url)[0];
+        // Change search order to begin by currentProtocol
+        if (currentProtocol) {
+            protocols = [currentProtocol, ...protocols.filter(p => p !== currentProtocol)];
+        }
+        // Check if text matches a URL pattern for any of protocols
+        for (const protocol of protocols) {
+            if (urlRegexes[protocol]?.test(text)) {
+                return protocol + text;
+            }
+        }
+        return '';
     },
     /**
      * Abstract method: return true if the URL should be stripped of its domain.
@@ -335,21 +361,17 @@ const Link = Widget.extend({
             (type === 'custom' ? customClasses : '') +
             (type && shapeClasses ? (` ${shapeClasses}`) : '') +
             (type && size ? (' btn-' + size) : '');
-        var isNewWindow = this._isNewWindow(url);
+        const isNewWindow = this._isNewWindow(this.data.url);
         var doStripDomain = this._doStripDomain();
-        if (
-            url.indexOf('@') >= 0 && url.indexOf('mailto:') < 0 && !url.match(/^http[s]?/i) ||
-            this._link && this._link.href.includes('mailto:') && !url.includes('mailto:')
-        ) {
-            url = ('mailto:' + url);
-        } else if (url.indexOf(location.origin) === 0 && doStripDomain) {
-            url = url.slice(location.origin.length);
+        let href = this.data.url;
+        if (href.startsWith(window.location.origin) && doStripDomain) {
+            href = href.slice(window.location.origin.length);
         }
         var allWhitespace = /\s+/gi;
         var allStartAndEndSpace = /^\s+|\s+$/gi;
         return {
             content: content,
-            url: this._correctLink(url),
+            url: href,
             classes: classes.replace(allWhitespace, ' ').replace(allStartAndEndSpace, ''),
             customTextColor: customTextColor,
             customFill: customFill,
@@ -559,16 +581,19 @@ const Link = Widget.extend({
      * @private
      */
     __onURLInput: function () {
+        const urlInputValue = this.el.querySelector("input[name='url']").value;
+        this.data.url = this._deduceURL(urlInputValue) || urlInputValue;
         this._onURLInput(...arguments);
     },
     /**
      * @private
      */
+    // TODO: rename this updateUI or something? rewrite the jquery parts?
     _onURLInput: function () {
         this._savedURLInputOnDestroy = true;
-        var $linkUrlInput = this.$('#o_link_dialog_url_input');
-        let value = $linkUrlInput.val();
-        let isLink = value.indexOf('@') < 0;
+        // URL input field might not show the protocol 
+        const value = this.data.url;
+        let isLink = ["http", "/", "#"].some(item => value.startsWith(item));
         this._getIsNewWindowFormRow().toggleClass('d-none', !isLink);
         this.$('.o_strip_domain').toggleClass('d-none', value.indexOf(window.location.origin) !== 0);
     },

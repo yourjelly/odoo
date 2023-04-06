@@ -45,16 +45,15 @@ weWidgets.LinkTools.include({
      * @private
      */
     _adaptPageAnchor: function () {
-        const urlInputValue = this.$('input[name="url"]').val();
         const $pageAnchor = this.$('.o_link_dialog_page_anchor');
-        const isFromWebsite = urlInputValue[0] === '/';
+        const isFromWebsite = this.data.url[0] === '/';
         const $selectMenu = this.$('we-selection-items[name="link_anchor"]');
 
-        if ($selectMenu.data("anchor-for") !== urlInputValue) { // avoid useless query
+        if ($selectMenu.data("anchor-for") !== this.data.url) { // avoid useless query
             $pageAnchor.toggleClass('d-none', !isFromWebsite);
             $selectMenu.empty();
             const always = () => $pageAnchor.find('we-toggler').text('\u00A0');
-            wUtils.loadAnchors(urlInputValue, this.$editable[0].ownerDocument.body).then(anchors => {
+            wUtils.loadAnchors(this.data.url, this.$editable[0].ownerDocument.body).then(anchors => {
                 for (const anchor of anchors) {
                     const $option = $('<we-button class="dropdown-item">');
                     $option.text(anchor);
@@ -64,7 +63,7 @@ weWidgets.LinkTools.include({
                 always();
             }).guardedCatch(always);
         }
-        $selectMenu.data("anchor-for", urlInputValue);
+        $selectMenu.data("anchor-for", this.data.url);
     },
 
     //--------------------------------------------------------------------------
@@ -75,7 +74,7 @@ weWidgets.LinkTools.include({
      * @private
      */
     _onAutocompleteClose: function () {
-        this._onURLInput();
+        this.__onURLInput();
     },
     /**
      * @override
@@ -97,6 +96,7 @@ weWidgets.LinkTools.include({
                 urlInputValue = urlInputValue.substr(0, urlInputValue.indexOf('#'));
             }
             $urlInput.val(urlInputValue + anchorValue);
+            this.__onURLInput();
         }
         this._super(...arguments);
     },

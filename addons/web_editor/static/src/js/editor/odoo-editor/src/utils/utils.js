@@ -56,6 +56,17 @@ export const URL_REGEX_WITH_INFOS = new RegExp(`((?:(?:${httpCapturedRegex}${url
 export const YOUTUBE_URL_GET_VIDEO_ID =
     /^(?:(?:https?:)?\/\/)?(?:(?:www|m)\.)?(?:youtube\.com|youtu\.be)(?:\/(?:[\w-]+\?v=|embed\/|v\/)?)([^\s?&#]+)(?:\S+)?$/i;
 
+// TODO: review this regex
+const httpUrlRegex = new RegExp(`^(?:[-a-zA-Z0-9:%._\\+~#=]{1,64}\\.)[-a-zA-Z0-9:%._\\+~#=]{2,256}\\.[a-zA-Z][a-zA-Z0-9]{1,62}|^(?:[-a-zA-Z0-9:%._\\+~#=]{2,256}\\.(?:${tldWhitelist.join('|')}))\\b(?:(?!\\.)[^\\s]*)$`, 'i');
+//                                (                                 )                                                           (                                  (                     (   ) ))   (  (     )       )
+const emailRegex = /^[\w-\.]+@(?:[\w-]+\.)+[\w-]{2,4}$/i;
+const phoneRegex = /^\+?[\d\s.\-()\/]{3,25}$/;
+export const urlRegexes = {
+    'http://': httpUrlRegex,
+    'https://': httpUrlRegex,
+    'mailto:': emailRegex,
+    'tel://': phoneRegex,
+};
 //------------------------------------------------------------------------------
 // Position and sizes
 //------------------------------------------------------------------------------
@@ -2531,6 +2542,30 @@ export const rightLeafOnlyNotBlockNotEditablePath = createDOMPathGenerator(DIREC
     stopTraverseFunction: node => isNotEditableNode(node) || isBlock(node),
     stopFunction: node => isBlock(node) && !isNotEditableNode(node),
 });
+//------------------------------------------------------------------------------
+// URL
+//------------------------------------------------------------------------------
+/**
+ * Split URL into [protocol, resource_location].
+ *
+ * @param {string} url
+ * @returns {[string, string]}
+ */
+export function splitURL(url) {
+    url ||= '';
+    // Ignore trailing spaces and discard anything after a space
+    url = url.trimStart().split(/\s+/)[0];
+    let locationIndex = url.indexOf(':') + 1;
+    // Check if followed by '//'
+    if (url.slice(locationIndex, locationIndex + 2) === '//') {
+        locationIndex += 2;
+    }
+    const protocol = url.slice(0, locationIndex);
+    // protocols can be whitelisted here if needed
+    const location = url.slice(locationIndex);
+    return [protocol, location];
+}
+
 //------------------------------------------------------------------------------
 // Miscelaneous
 //------------------------------------------------------------------------------

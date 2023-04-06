@@ -53,6 +53,7 @@ const WebsiteWysiwyg = Wysiwyg.extend({
         // Do not insert a paragraph after each column added by the column commands:
         this.options.insertParagraphAfterColumns = false;
         this.options.dropImageAsAttachment = true;
+        this.options.hideProtocols = ["http://", "https://", "mailto:", "tel://"];
 
         const $editableWindow = this.$editable[0].ownerDocument.defaultView;
         // Dropdown menu initialization: handle dropdown openings by hand
