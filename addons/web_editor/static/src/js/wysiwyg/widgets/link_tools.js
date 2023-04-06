@@ -79,6 +79,11 @@ const LinkTools = Link.extend({
             this._setSelectOption($(customOption), true);
             this._updateOptionsUI();
         }
+        if (this.data.url && !link.href) {
+            // Link url was deduced from label. Apply changes to the DOM.
+            this.__onURLInput();
+            this._savedURLInputOnDestroy = true;
+        }
         return ret;
     },
     destroy: function () {
