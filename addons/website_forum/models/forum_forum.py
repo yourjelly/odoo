@@ -22,24 +22,17 @@ class Forum(models.Model):
 
     def _get_default_welcome_message(self):
         return """
-<section>
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="text-center">Welcome!</h1>
-                <p class="text-400 text-center">%(message_intro)s<br/>%(message_post)s</p>
-            </div>
-            <div class="col text-center mt-3">
+            <h1 style="text-align: center;"><font style="font-size: 62px; font-weight: bold;">Welllcome!</font></h1>
+            <p class="lead o_default_snippet_text" style="text-align: center;">%(message_intro)s<br/>%(message_post)s</p>
+            <p style="text-align: center;">
                 <a href="#" class="js_close_intro btn btn-outline-light mr-2">%(hide_text)s</a>
                 <a class="btn btn-light forum_register_url" href="/web/login">%(register_text)s</a>
-            </div>
-        </div>
-    </div>
-</section>""" % {
+            </p>
+            """ % {
     'message_intro': _("This community is for professionals and enthusiasts of our products and services."),
     'message_post': _("Share and discuss the best content and new marketing ideas, build your professional profile and become a better marketer together."),
     'hide_text': _('Hide Intro'),
-    'register_text': _('Register')}
+    'register_text': _('Sign in')}
 
     # description and use
     name = fields.Char('Forum Name', required=True, translate=True)

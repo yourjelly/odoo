@@ -3,7 +3,7 @@
         <div role="dialog" class="modal fade" id="oe_social_share_modal">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <header class="modal-header alert alert-info mb0" role="status">
+                    <header class="modal-header mb0" role="status">
                         <h4 class="modal-title">Thanks for posting!</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </header>
@@ -48,7 +48,7 @@
     <t t-name="website_forum.social_message_answer">
         <p>By sharing you answer, you will get additional <b>karma points</b> if your
         answer is selected as the right one. See what you can do with karma
-        <a href="/forum/help-1/faq" target="_blank">here</a>.</p>
+        <a href="/forum/help-1/faq/karma" target="_blank">here</a>.</p>
     </t>
     <t t-name="website_forum.social_message_default">
         <p>Share this content to increase your chances to be featured on the front page and attract more visitors.</p>

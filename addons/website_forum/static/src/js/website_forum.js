@@ -152,7 +152,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
             $(authorBox).popover({
                 trigger: 'hover',
                 offset: '10',
-                animation: false,
+                animation: true,
                 html: true,
                 customClass: 'o_wforum_bio_popover_container',
             });
@@ -327,8 +327,8 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                     elem.innerText = _t(' Flagged');
                     elem.prepend(child);
                     if (countFlaggedPosts) {
-                        countFlaggedPosts.classList.remove('bg-light');
-                        countFlaggedPosts.classList.add('bg-danger');
+                        countFlaggedPosts.classList.remove('text-bg-light');
+                        countFlaggedPosts.classList.add('text-bg-danger');
                         countFlaggedPosts.innerText = parseInt(countFlaggedPosts.innerText, 10) + 1;
                     }
                     $(elem).nextAll('.flag_validator').removeClass('d-none');
@@ -454,7 +454,8 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                     $answer.toggleClass('o_wforum_answer_correct', isCorrect);
                     $toggler.tooltip('dispose')
                             .attr('data-bs-original-title', newHelper)
-                            .tooltip({delay: 0});
+                            .tooltip({delay: 0})
+                            .toggleClass('text-success', isCorrect).toggleClass('text-muted', !isCorrect);
                 });
             }
         });
@@ -466,11 +467,12 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     _onFavoriteQuestionClick: function (ev) {
         ev.preventDefault();
         var $link = $(ev.currentTarget);
+        console.log($link);
         this._rpc({
             route: $link.data('href'),
         }).then(function (data) {
-            $link.toggleClass('o_wforum_gold fa-star', data)
-                 .toggleClass('fa-star-o text-muted', !data);
+            $link.toggleClass('text-warning fa-bookmark', data)
+                 .toggleClass('text-muted fa-bookmark-o', !data);
         });
     },
     /**

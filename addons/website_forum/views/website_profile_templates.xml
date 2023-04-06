@@ -54,15 +54,20 @@
         </xpath>
         <xpath expr="//div[@id='profile_extra_info_tabcontent']" position="inside">
             <t t-if="forum">
+                <t t-call="website_forum.forum_filter_tag"/>
                 <div role="tabpanel" class="o_wforum_profile_tab tab-pane" id="questions">
-                    <div class="mb-4">
+                    <div>
                         <h5 class="border-bottom pb-1">
+                            <i class="fa fa-pencil me-2"/>
                             Questions
-                            <t t-call="website_forum.forum_filter_tag"/>
                         </h5>
                         <t t-if="questions">
                             <div class="mb-1" t-foreach="questions" t-as="question">
-                                <t t-call="website_forum.display_post"/>
+                                <t t-call="website_forum.display_post_question_block">
+                                    <t t-set="hide_fav_icon" t-value="True"/>
+                                    <t t-set="is_website_profile" t-value="True"/>
+                                    <t t-set="_link_classes" t-value="'fs-6'"/>
+                                </t>
                             </div>
                         </t>
                         <t t-else="">
@@ -70,20 +75,26 @@
                         </t>
                     </div>
                     <t t-if="favourite">
-                        <div class="mb-4">
-                            <h5 class="border-bottom pb-1">Favourite Questions</h5>
+                        <div class="mt-5">
+                            <h5 class="border-bottom pb-1"> <i class="fa fa-bookmark me-2"/>Favourite Questions</h5>
                             <div class="mb-1" t-foreach="favourite" t-as="question">
-                                <t t-call="website_forum.display_post">
+                                <t t-call="website_forum.display_post_question_block">
                                     <t t-set="hide_fav_icon" t-value="True"/>
+                                    <t t-set="is_website_profile" t-value="True"/>
+                                    <t t-set="_link_classes" t-value="'fs-6'"/>
                                 </t>
                             </div>
                         </div>
                     </t>
                     <t t-if="followed">
-                        <div class="mb-4">
-                            <h5 class="border-bottom pb-1">Followed Questions</h5>
+                        <div class="mt-5">
+                            <h5 class="border-bottom pb-1"><i class="fa fa-bell me-2"/> Followed Questions</h5>
                             <div class="mb-1" t-foreach="followed" t-as="question">
-                                <t t-call="website_forum.display_post"/>
+                                <t t-call="website_forum.display_post_question_block">
+                                    <t t-set="hide_fav_icon" t-value="True"/>
+                                    <t t-set="is_website_profile" t-value="True"/>
+                                    <t t-set="_link_classes" t-value="'fs-6'"/>
+                                </t>
                             </div>
                         </div>
                     </t>
@@ -92,12 +103,12 @@
                     <div class="mb-4">
                         <h5 class="border-bottom pb-1">
                             Answers
-                            <t t-call="website_forum.forum_filter_tag"/>
                         </h5>
-
                         <t t-if="answers">
                             <div class="mb-1" t-foreach="answers" t-as="answer">
-                                <t t-call="website_forum.display_post_answer"/>
+                                <t t-call="website_forum.display_post_question_block">
+                                    <t t-set="question" t-value="answer"></t>
+                                </t>
                             </div>
                         </t>
                         <t t-else="">
@@ -115,7 +126,6 @@
                     <div class="mb-4">
                         <h5 class="border-bottom pb-1">
                             Activities
-                            <t t-call="website_forum.forum_filter_tag"/>
                         </h5>
                         <t t-call="website_forum.display_activities"/>
                     </div>
@@ -126,7 +136,7 @@
 
     <template id="forum_filter_tag" name="Filtering Forum Tag">
         <t t-if="forum_filtered">
-            <span class="align-items-baseline border d-inline-flex ps-2 rounded mb-1 ms-4">
+            <span class="align-items-baseline border d-inline-flex ps-2 rounded mb-2 me-1">
                 <i class="fa fa-filter me-2 text-muted"/>
                 <t t-esc="forum_filtered"/>
                 <a t-attf-href="/profile/user/#{uid}" class="btn border-0 py-1">&#215;</a>

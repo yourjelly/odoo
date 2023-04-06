@@ -13,86 +13,70 @@
     <xpath expr="//div[@id='wrapwrap']" position="attributes">
         <attribute name="t-att-data-forum_id">forum and forum.id</attribute>
     </xpath>
+    <xpath expr="//div[@id='wrapwrap']//main" position="attributes">
+        <attribute name="class">d-flex flex-column</attribute>
+    </xpath>
 </template>
 
 <!-- PAGE INDEX -->
 <!-- ============================================================ -->
 
+<!-- Page Index -->
 <template id="header" name="Forum Index">
     <t t-if="forum.active" t-call="website_forum.layout">
-        <section t-attf-class="s_cover parallax s_parallax_is_fixed py-3 #{forum.image_1920 and 'bg-black-50' or 'o_wforum_forum_card_bg text-white'}" data-scroll-background-ratio="1" data-snippet="s_cover">
-            <span t-if="forum.image_1920" class="s_parallax_bg oe_img_bg" t-attf-style="background-image: url('#{website.image_url(forum, 'image_1920')}'); background-position: center;"/>
-            <div t-if="forum.image_1920" class="o_we_bg_filter bg-black-50"/>
-            <div class="container">
-                <div class="row s_nb_column_fixed">
-                    <div class="col-lg-12">
-                        <h1 class="o_default_snippet_text text-center"><t t-esc="forum.name"></t></h1>
-                    </div>
-                </div>
-                <div t-if="editable or (is_public_user and not forum_welcome_message)" t-att-class="'css_non_editable_mode_hidden' if editable else 'forum_intro'">
-                    <div t-field="forum.welcome_message"/>
-                </div>
+        <div class="oe_structure" id="oe_structure_website_forum_header_1"/>
+        <div id="wrap" t-attf-class="o_wforum_main_wrapper d-grid h-100 #{website_forum_action}">
+
+            <div class="o_wforum_sidebar d-grid bg-100">
+                <t t-call="website_forum.user_sidebar"/>
             </div>
-        </section>
 
-        <div class="o_forum_nav_header_container mb-2 mb-md-4">
-            <t t-call="website_forum.forum_nav_header"></t>
-        </div>
-
-        <div id="wrap" t-attf-class="container #{website_forum_action}">
-            <div class="row">
-                <div class="col o_wprofile_email_validation_container mb16">
+            <div class="o_wforum_main_content">
+                <div class="o_wprofile_email_validation_container mb16">
                     <t t-call="website_profile.email_validation_banner">
                         <t t-set="redirect_url" t-value="'/forum/%s' % forum.id"/>
                         <t t-set="additional_validation_email_message"> and join this Forum</t>
                         <t t-set="additional_validated_email_message"> You may now participate in our forums.</t>
                     </t>
-                    <div class="row">
-                        <div class="col">
-                            <nav t-if="header.get('is_guidelines') or queue_type or new_question or is_edit or tags or reasons" aria-label="breadcrumb">
-                                <ol class="breadcrumb p-0 bg-white">
-                                    <li class="breadcrumb-item">
-                                        <a t-attf-href="/forum/#{ slug(forum) }" t-esc="forum.name"/>
-                                    </li>
-                                    <t t-if="header.get('is_guidelines')">
-                                        <li class="breadcrumb-item">
-                                            <a t-if="header.get('is_karma')" t-attf-href="/forum/#{ slug(forum) }/faq">Guidelines</a>
-                                            <t t-else="">
-                                                Guidelines
-                                            </t>
-                                        </li>
-                                        <li t-if="header.get('is_karma')" class="breadcrumb-item">Karma</li>
+                    <nav t-if="header.get('is_guidelines') or queue_type or new_question or is_edit or tags or reasons" class="o_wforum_nav d-flex align-items-baseline px-0 mt-3" aria-label="breadcrumb">
+                        <button class="navbar-toggler d-lg-none ps-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#user_sidebar"><i class="oi oi-panel-right"></i></button>
+                        <ol class="breadcrumb px-0 mb-0">
+                            <li class="o_wforum_forum_name_breadcrumb breadcrumb-item">
+                                <a class="fs-5" t-attf-href="/forum/#{ slug(forum) }" t-esc="forum.name"/>
+                            </li>
+                            <t t-if="header.get('is_guidelines')">
+                                <li class="breadcrumb-item">
+                                    <a t-if="header.get('is_karma')" t-attf-href="/forum/#{ slug(forum) }/faq" class="fs-5">Guidelines</a>
+                                    <t t-else="">
+                                        <span class="fs-5 fw-bold">Guidelines</span>
                                     </t>
-                                    <li t-if="queue_type" class="breadcrumb-item">Moderation</li>
-                                    <li t-if="queue_type == 'validation'" class="breadcrumb-item">To Validate</li>
-                                    <li t-if="queue_type == 'flagged'" class="breadcrumb-item">Flagged</li>
-                                    <li t-if="queue_type == 'offensive'" class="breadcrumb-item">Offensive</li>
-                                    <li t-if="reasons and offensive" class="breadcrumb-item">Offensive Post</li>
-                                    <li t-if="reasons and not offensive" class="breadcrumb-item">Close Post</li>
-                                    <li t-if="new_question" class="breadcrumb-item">New Post</li>
-                                    <t t-if="is_edit">
-                                        <t t-set="target" t-value="post.parent_id if is_answer else post"/>
-                                        <li class="breadcrumb-item text-truncate" style="max-width:150px">
-                                            <a t-attf-href="/forum/#{ slug(forum) }/#{ slug(target)}" title="Back to Question">
-                                                <t t-esc="target.name"/>
-                                            </a>
-                                        </li>
-                                        <li t-if="not is_answer" class="breadcrumb-item">Edit Question</li>
-                                        <li t-if="is_answer" class="breadcrumb-item">Edit Answer</li>
-                                    </t>
-                                    <li t-elif="tags" class="breadcrumb-item">All Tags</li>
-                                </ol>
-                            </nav>
-                            <t t-out="0"/>
-                        </div>
-                        <aside t-if="uid" class="d-none d-lg-flex justify-content-end col-auto">
-                            <t t-call="website_forum.user_sidebar"/>
-                        </aside>
-                    </div>
+                                </li>
+                                <li t-if="header.get('is_karma')" class="breadcrumb-item"><span class="fs-5 fw-bold">Karma</span></li>
+                            </t>
+                            <li t-if="queue_type" class="breadcrumb-item"><span class="fs-5">Moderation</span></li>
+                            <li t-if="queue_type == 'validation'" class="breadcrumb-item"><span class="fs-5 fw-bold">To Validate</span></li>
+                            <li t-if="queue_type == 'flagged'" class="breadcrumb-item"><span class="fs-5 fw-bold">Flagged</span></li>
+                            <li t-if="queue_type == 'offensive'" class="breadcrumb-item"><span class="fs-5 fw-bold">Offensive</span></li>
+                            <li t-if="reasons and offensive" class="breadcrumb-item"><span class="fs-5 fw-bold">Offensive Post</span></li>
+                            <li t-if="reasons and not offensive" class="breadcrumb-item"><span class="fs-5 fw-bold">Close Post</span></li>
+                            <li t-if="new_question" class="breadcrumb-item"><span class="fs-5 fw-bold">New Post</span></li>
+                            <t t-if="is_edit">
+                                <t t-set="target" t-value="post.parent_id if is_answer else post"/>
+                                <li class="breadcrumb-item text-truncate" style="max-width:150px">
+                                    <a t-attf-href="/forum/#{ slug(forum) }/#{ slug(target)}" title="Back to Question" class="fs-5">
+                                        <t t-esc="target.name"/>
+                                    </a>
+                                </li>
+                                <li t-if="not is_answer" class="breadcrumb-item"><span class="fs-5 fw-bold">Edit Question</span></li>
+                                <li t-if="is_answer" class="breadcrumb-item"><span class="fs-5 fw-bold">Edit Answer</span></li>
+                            </t>
+                            <li t-elif="tags" class="breadcrumb-item"><span class="fs-5 fw-bold">Tags</span></li>
+                        </ol>
+                    </nav>
+                    <t t-out="0"/>
                 </div>
             </div>
         </div>
-        <div class="oe_structure" id="oe_structure_website_forum_header_1"/>
     </t>
     <t t-else="" t-call="website_forum.layout">
         <t t-set="head">
@@ -206,81 +190,94 @@
 </template>
 
 <template id="website_forum.user_sidebar">
-    <nav t-if="uid" class="o_wforum_nav nav nav-pills flex-column ms-4">
-        <a t-attf-href="/forum/#{slug(forum)}/user/#{uid}?forum_origin=#{request.httprequest.path}"
-            class="nav-link d-flex align-items-center rounded-pill text-reset mb-2"
-            data-bs-toggle="tooltip"
-            data-trigger="hover"
-            title="My profile">
-            <img class="o_forum_avatar rounded-circle me-1" t-att-src="website.image_url(user, 'avatar_128', '30x30')" alt="Avatar"/>
-            <div>
-                <h6 class="my-0" t-esc="user_id.name"/>
-                <small class="text-muted fw-bold"><t t-esc="user_id.karma"/>xp</small>
+    <div>
+        <div t-if="not uid" class="o_wforum_sidebar_section text-center px-3 pt-3">
+            <div class="alert alert-info mb-0"><p>You need to sign in to interact with the community.</p>
+                <a t-if="is_public_user and forum_welcome_message" href="/web/login" class="btn btn-primary btn-block">Sign in</a>
             </div>
-        </a>
 
-        <t t-set="location" t-value="url_for('/forum/') + slug(forum) + ( ('/tag/' + slug(tag) + '/questions?') if tag else '?' )"/>
-
-        <!-- My Posts -->
-        <span t-if="my == 'mine'" class="nav-link rounded-pill mb-2 active fw-bold">
-            <i class="fa fa-question-circle-o fa-fw"/> My Posts
-            <a class="text-reset pull-right no-decoration" t-att-href="location + keep_query('search', 'filters', 'sorting')">&#215;</a>
-        </span>
-        <a t-else="" class="nav-link rounded-pill mb-2 text-reset" t-att-href="location + keep_query('search', 'filters', 'sorting', my='mine')">
-            <i class="fa fa-question-circle-o fa-fw"/> My Posts
-        </a>
-
-        <!-- My Favourites -->
-        <span t-if="my == 'favourites'" class="nav-link rounded-pill mb-2 active fw-bold">
-            <i class="fa fa-star fa-fw"/> Favourites
-            <a class="text-reset pull-right no-decoration" t-att-href="location + keep_query( 'search', 'filters', 'sorting')">&#215;</a>
-        </span>
-        <a t-else="" t-attf-class="nav-link rounded-pill mb-2 text-reset" t-att-href="location + keep_query( 'search', 'filters', 'sorting', my='favourites')">
-            <i class="fa fa-star fa-fw"/> Favourites
-        </a>
-
-        <!-- My Followed posts -->
-        <span t-if="my == 'followed'" class="nav-link rounded-pill mb-2 active fw-bold">
-            <i class="fa fa-bell fa-fw"/> Followed Posts
-            <a class="text-reset pull-right no-decoration" t-att-href="location + keep_query( 'search', 'filters', 'sorting')">&#215;</a>
-        </span>
-        <a t-else="" class="nav-link rounded-pill mb-2 text-reset" t-att-href="location + keep_query( 'search', 'filters', 'sorting', my='followed')">
-            <i class="fa fa-bell fa-fw"/> Followed Posts
-        </a>
-
-        <!-- My Followed tags -->
-        <span t-if="my == 'tagged'" class="nav-link rounded-pill mb-2 active fw-bold">
-            <i class="fa fa-tags fa-fw"/> Followed Tags
-            <a class="text-reset pull-right no-decoration" t-att-href="location + keep_query( 'search', 'filters', 'sorting')">&#215;</a>
-        </span>
-        <a t-else="" class="nav-link rounded-pill mb-2 text-reset" t-att-href="location + keep_query( 'search', 'filters', 'sorting', my='tagged')">
-            <i class="fa fa-tags fa-fw"/> Followed Tags
-        </a>
-
-        <!-- Moderation Tools -->
-        <t t-if="user.karma>=forum.karma_moderate or queue_type">
-            <span class="nav-link disabled mt-3">
-                <div class="pb-1 border-bottom text-muted">Moderation tools</div>
-            </span>
-
-            <span t-if="queue_type == 'validation'" class="nav-link rounded-pill mb-2 active fw-bold">
-                <i class="fa fa-check-square-o fa-fw"/> To Validate
-                <a class="text-reset pull-right no-decoration" t-attf-href="/forum/#{ slug(forum) }">&#215;</a>
-            </span>
-            <a t-else="" class="nav-link rounded-pill text-reset" t-attf-href="/forum/#{slug(forum)}/validation_queue">
-                <i class="fa fa-check-square-o fa-fw"/> To Validate
-                <span t-attf-class="badge pull-right #{forum.count_posts_waiting_validation > 0 and 'text-bg-warning' or 'text-bg-light'}" t-esc="forum.count_posts_waiting_validation"/>
+        </div>
+        <div t-if="uid" class="o_wforum_sidebar_section pt-3">
+            <a t-attf-href="/forum/#{slug(forum)}/user/#{uid}?forum_origin=#{request.httprequest.path}"
+                class="nav-link d-flex align-items-center text-reset mb-2"
+                data-bs-toggle="tooltip"
+                data-trigger="hover"
+                title="My profile">
+                <img class="o_forum_avatar rounded-3 me-2" t-att-src="website.image_url(user, 'avatar_128', '60x60')" alt="Avatar"/>
+                <div>
+                    <h6 class="mb-1" t-esc="user_id.name"/>
+                    <small class="text-muted"><t t-esc="user_id.karma"/> XP</small>
+                </div>
             </a>
-            <span t-if="queue_type == 'offensive' or queue_type == 'flagged'" class="nav-link rounded-pill mb-2 active fw-bold">
-                <i class="fa fa-flag fa-fw"/> Flagged
-                <a class="text-reset pull-right no-decoration" t-attf-href="/forum/#{ slug(forum) }">&#215;</a>
-            </span>
-            <a t-else="" class="nav-link rounded-pill text-reset" t-attf-href="/forum/#{slug(forum)}/flagged_queue">
-                <i class="fa fa-flag fa-fw"/> Flagged
-                <span id="count_flagged_posts" t-attf-class="badge pull-right #{forum.count_flagged_posts > 0 and 'text-bg-danger' or 'text-bg-light'}" t-esc="forum.count_flagged_posts"/>
+        </div>
+        <div t-if="uid" class="o_wforum_sidebar_section pt-3">
+            <t t-set="location" t-value="url_for('/forum/') + slug(forum) + ( ('/tag/' + slug(tag) + '/questions?') if tag else '?' )"/>
+
+            <!-- My Posts -->
+            <a t-attf-class="nav-link #{my == 'mine' and 'text-primary fw-bold disabled' or 'text-reset'}" t-att-href="location + keep_query('search', 'filters', 'sorting', my='mine')">
+                <i class="fa fa-user-circle fa-fw opacity-50"/> My Posts
             </a>
-        </t>
-    </nav>
+
+            <!-- My Favourites -->
+            <a t-attf-class="nav-link #{my == 'favourites' and 'text-primary fw-bold disabled' or 'text-reset'}" t-att-href="location + keep_query( 'search', 'filters', 'sorting', my='favourites')">
+                <i class="fa fa-bookmark fa-fw opacity-50"/> Favourites
+            </a>
+
+            <!-- My Followed posts -->
+            <a t-attf-class="nav-link #{my == 'followed' and 'text-primary fw-bold disabled' or 'text-reset'}" t-att-href="location + keep_query( 'search', 'filters', 'sorting', my='followed')">
+                <i class="fa fa-bell fa-fw opacity-50"/> Followed Posts
+            </a>
+
+            <!-- My Followed tags -->
+            <a t-attf-class="nav-link #{my == 'tagged' and 'text-primary fw-bold disabled' or 'text-reset'}" t-att-href="location + keep_query( 'search', 'filters', 'sorting', my='tagged')">
+                <i class="fa fa-tags fa-fw opacity-50"/> Followed Tags
+            </a>
+        </div>
+        <div t-if="user.karma>=forum.karma_moderate or queue_type" class="o_wforum_sidebar_section pt-3">
+            <!-- Moderation Tools -->
+            <div class="pb-1 fw-bold px-3">Moderation tools</div>
+            <a t-attf-class="nav-link #{queue_type == 'validation' and 'text-primary fw-bold disabled' or 'text-reset'}" t-attf-href="/forum/#{slug(forum)}/validation_queue">
+                <i class="fa fa-check-square-o fa-fw opacity-50"/> To Validate
+                <span t-if="forum.count_posts_waiting_validation > 0" t-attf-class="badge #{forum.count_posts_waiting_validation > 0 and 'text-bg-warning' or 'text-reset'}" t-esc="forum.count_posts_waiting_validation"/>
+            </a>
+            <a t-attf-class="nav-link #{queue_type == 'offensive' or queue_type == 'flagged' and 'text-primary fw-bold disabled' or 'text-reset'}" t-attf-href="/forum/#{slug(forum)}/flagged_queue">
+                <i class="fa fa-flag fa-fw opacity-50"/> Flagged
+                <span t-if="forum.count_flagged_posts > 0" id="count_flagged_posts" t-attf-class="badge #{forum.count_flagged_posts > 0 and 'text-bg-danger' or 'text-reset'}" t-esc="forum.count_flagged_posts"/>
+            </a>
+        </div>
+        <div t-if="forum.post_ids.tag_ids" class="o_wforum_sidebar_section pt-3">
+            <!-- [TODO] Limit to 5 most used tags -->
+            <div class="d-flex pb-1 fw-bold px-3">Tags
+                <a class="btn btn-link btn-sm ms-auto" t-attf-href="/forum/#{slug(forum)}/tag">
+                    View all
+                </a>
+            </div>
+            <t t-foreach="forum.post_ids.tag_ids" t-as="tag">
+                <a t-att-href="'/forum/' + slug(tag.forum_id) + '/tag/' + slug(tag) + '/questions?' + keep_query( 'search', 'sorting', 'my', filters='tag')"
+                    t-attf-class="nav-link text-reset">
+                    <i class="fa fa-tag fa-fw small opacity-50"/>
+                    <t t-esc="tag.name"/>
+                </a>
+            </t>
+        </div>
+    </div>
+    <div class="o_wforum_sidebar_footer mt-5 p-3 text-center">
+        <a class="nav-link small" t-attf-href="/forum/#{slug(forum)}/faq">
+            <i class="fa fa-info-circle fa-fw"/> About this forum
+        </a>
+    </div>
+</template>
+
+<template id="forum_oe_structure_top" inherit_id="website_forum.header" name="Forum Welcome Message (oe_structure_forum_top)">
+    <xpath expr="//*[hasclass('oe_structure')][@id='oe_structure_website_forum_header_1']" position="replace">
+        <div class="oe_structure oe_empty" id="oe_structure_website_forum_header_1">
+            <section t-if="editable or (is_public_user and not forum_welcome_message)" t-attf-class="s_cover parallax s_parallax_is_fixed py-3 pt96 pb96 bg-black-50 #{'css_non_editable_mode_hidden' if editable else 'forum_intro'}" data-scroll-background-ratio="1" data-snippet="s_cover">
+                <span t-if="forum.image_1920" class="s_parallax_bg oe_img_bg" t-attf-style="background-image: url('#{website.image_url(forum, 'image_1920')}'); background-position: center;"/>
+                <div t-if="forum.image_1920" class="o_we_bg_filter bg-black-50"/>
+                <div t-field="forum.welcome_message" class="container s_allow_columns"/>
+            </section>
+        </div>
+    </xpath>
 </template>
 
 <!-- ERROR MANAGEMENT -->
