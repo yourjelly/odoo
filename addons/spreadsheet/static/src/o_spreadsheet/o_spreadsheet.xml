@@ -91,7 +91,7 @@
           t-on-click="() => this.onColorClick(color)"
           t-attf-style="background-color:{{color}};">
           <div
-            t-if="props.currentColor === color"
+            t-if="isSameColor(props.currentColor, color)"
             align="center"
             t-attf-style="color:{{getCheckMarkColor()}}">
             &#10004;
@@ -106,7 +106,7 @@
         <div
           class="o-color-picker-toggler o-color-picker-line-item"
           t-on-click.stop="toggleColorPicker">
-          <div align="center">+</div>
+          <div class="add-color-icon"/>
         </div>
         <div
           t-foreach="env.model.getters.getCustomColors()"
@@ -117,7 +117,7 @@
           t-attf-style="background-color:{{color}};"
           t-on-click="() => this.onColorClick(color)">
           <div
-            t-if="props.currentColor === color"
+            t-if="isSameColor(props.currentColor, color)"
             align="center"
             t-attf-style="color:{{getCheckMarkColor()}}">
             &#10004;
@@ -692,7 +692,8 @@
       childHeight="cellPopover.Component.size.height"
       flipHorizontalOffset="cellPopover.cellWidth"
       flipVerticalOffset="cellPopover.cellHeight"
-      onMouseWheel="props.onMouseWheel">
+      onMouseWheel="props.onMouseWheel"
+      zIndex="zIndex">
       <t
         t-component="cellPopover.Component"
         t-props="{...cellPopover.props, onClosed : () => props.onClosePopover()}"
@@ -2189,7 +2190,7 @@
           <ColorPicker
             t-if="state.openedColorPicker === 'backgroundColor'"
             onColorPicked="(color) => this.setColor(color, 'backgroundColor')"
-            currentColor="props.definition.brackground"
+            currentColor="props.definition.background"
             t-key="backgroundColor"
           />
         </div>
@@ -3248,6 +3249,6 @@
 </odoo>
 <!--
   __info__.version = '16.0.5';
-  __info__.date = '2023-03-23T11:44:46.218Z';
-  __info__.hash = '53150ef';
+  __info__.date = '2023-04-06T12:59:13.380Z';
+  __info__.hash = 'a4a8230';
 -->
