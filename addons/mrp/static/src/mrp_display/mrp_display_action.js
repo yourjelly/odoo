@@ -68,9 +68,10 @@ export class MrpDisplayAction extends Component {
                 this.models.push({ fields, resModel });
             }
 
-            const viewId = await this.orm.search("ir.ui.view", [
-                ["model_data_id", "=", "mrp_production_view_mrp_display"],
-            ]);
+            // const viewId = await this.orm.search("ir.ui.view", [
+            //     ["model_data_id", "=", "mrp_production_view_mrp_display"],
+            // ]);
+            const viewId = false;
             const searchViews = await this.viewService.loadViews({
                 resModel: this.resModel,
                 views: [[viewId ? viewId[0] : false, "search"]],

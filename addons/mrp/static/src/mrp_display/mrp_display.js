@@ -35,7 +35,6 @@ export class MrpDisplay extends Component {
         this.display = {
             ...this.props.display,
             controlPanel: { "bottom-right": false, "bottom-left": false, "top-middle": true },
-            searchPanel: true,
         };
         this.state = useState({
             activeResModel: this.props.resModel,
