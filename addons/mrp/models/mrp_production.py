@@ -646,7 +646,7 @@ class MrpProduction(models.Model):
     def _compute_show_serial_mass_produce(self):
         self.show_serial_mass_produce = False
         for order in self:
-            if order.state == 'confirmed' and order.product_id.tracking == 'serial' and \
+            if order.state in ['confirmed', 'progress'] and order.product_id.tracking == 'serial' and \
                     float_compare(order.product_qty, 1, precision_rounding=order.product_uom_id.rounding) > 0 and \
                     float_compare(order.qty_producing, order.product_qty, precision_rounding=order.product_uom_id.rounding) < 0:
                 order.show_serial_mass_produce = True
@@ -1779,7 +1779,6 @@ class MrpProduction(models.Model):
         res = self._pre_button_mark_done()
         if res is not True:
             return res
-
         if self.env.context.get('mo_ids_to_backorder'):
             productions_to_backorder = self.browse(self.env.context['mo_ids_to_backorder'])
             productions_not_to_backorder = self - productions_to_backorder
@@ -1986,14 +1985,14 @@ class MrpProduction(models.Model):
             'target': 'new',
         }
 
-    def action_serial_mass_produce_wizard(self):
+    def action_serial_mass_produce_wizard(self, mark_as_done=False):
         self.ensure_one()
         self._check_company()
-        if self.state != 'confirmed':
+        if self.state not in ['confirmed', 'progress', 'to_close']:
             return
         if self.product_id.tracking != 'serial':
             return
-        if self.reservation_state != 'assigned':
+        if self.state == 'confirmed' and self.reservation_state != 'assigned':
             missing_components = {move.product_id for move in self.move_raw_ids if float_compare(move.reserved_availability, move.product_uom_qty, precision_rounding=move.product_uom.rounding) < 0}
             message = _("Make sure enough quantities of these components are reserved to do the production:\n")
             message += "\n".join(component.name for component in missing_components)
@@ -2015,6 +2014,7 @@ class MrpProduction(models.Model):
             'default_next_serial_number': next_serial,
             'default_next_serial_count': self.product_qty - self.qty_produced,
             'default_multiple_lot_components_names': ",".join(c.display_name for c in multiple_lot_components) if multiple_lot_components else None,
+            'default_mark_as_done': mark_as_done,
         }
         return action
 
