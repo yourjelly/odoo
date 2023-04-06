@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.config **/
+/** @odoo-module **/
 
 import Bus from "web.Bus";
 import { hasTouch, isAndroid, isIOS, isMobileOS } from "@web/core/browser/feature_detection";

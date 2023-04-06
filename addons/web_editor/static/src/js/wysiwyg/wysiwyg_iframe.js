@@ -3,7 +3,7 @@
 import Wysiwyg from "web_editor.wysiwyg";
 import ajax from "web.ajax";
 import * as core from "@web/legacy/js/services/core";
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 
 var qweb = core.qweb;
 var promiseJsAssets;

@@ -2,7 +2,7 @@
 
 import publicWidget from "web.public.widget";
 import DynamicSnippet from "website.s_dynamic_snippet";
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 
 const DynamicSnippetCarousel = DynamicSnippet.extend({
     selector: '.s_dynamic_snippet_carousel',

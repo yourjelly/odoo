@@ -1,5 +1,5 @@
 /** @odoo-module */
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 
 /**
  * USAGE

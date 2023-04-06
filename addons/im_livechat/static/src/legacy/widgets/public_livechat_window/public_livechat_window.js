@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 import { _t, qweb } from "@web/legacy/js/services/core";
 import Widget from "web.Widget";
 

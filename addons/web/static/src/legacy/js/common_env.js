@@ -17,7 +17,7 @@
      */
 
     import { jsonRpc } from "web.ajax";
-    import { device, isDebug } from "web.config";
+    import { device, isDebug } from "@web/legacy/js/services/config";
     import { bus } from "@web/legacy/js/services/core";
     import rpc from "web.rpc";
     import session from "web.session";

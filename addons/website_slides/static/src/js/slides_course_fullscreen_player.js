@@ -5,7 +5,7 @@
     import publicWidget from 'web.public.widget';
     import  { qweb as QWeb, _t } from "@web/legacy/js/services/core";
     import { Markup } from 'web.utils';
-    import * as config from 'web.config';
+    import * as config from "@web/legacy/js/services/config";
 
     import session from 'web.session';
     import { Quiz } from '@website_slides/js/slides_course_quiz';

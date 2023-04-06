@@ -3,7 +3,7 @@
 import * as field_utils from "@web/legacy/js/fields/field_utils";
 import publicWidget from "web.public.widget";
 import time from "web.time";
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 import * as core from "@web/legacy/js/services/core";
 import Dialog from "web.Dialog";
 import dom from "web.dom";

@@ -13,7 +13,7 @@ import AbstractStorageService from "web.AbstractStorageService";
 import { AjaxService } from "@web/legacy/js/services/ajax_service";
 import * as basic_fields from "@web/legacy/js/fields/basic_fields";
 import Bus from "web.Bus";
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 import * as core from "@web/legacy/js/services/core";
 import dom from "web.dom";
 import { makeTestEnvironment } from "./test_env";

@@ -6,7 +6,7 @@
 
 import { loadJS } from "@web/core/assets";
 import Class from "web.Class";
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 import * as core from "@web/legacy/js/services/core";
 import dom from "web.dom";
 import mixins from "web.mixins";

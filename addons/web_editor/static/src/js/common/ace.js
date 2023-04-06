@@ -1,6 +1,6 @@
 /** @odoo-module alias=web_editor.ace **/
 
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 import concurrency from "web.concurrency";
 import * as core from "@web/legacy/js/services/core";
 import dom from "web.dom";

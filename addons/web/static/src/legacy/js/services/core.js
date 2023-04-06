@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import Bus from "web.Bus";
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 import Class from "web.Class";
 import QWeb from "web.QWeb";
 import Registry from "web.Registry";

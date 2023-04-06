@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.s_popup **/
 
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 import publicWidget from "web.public.widget";
 import {getCookie, setCookie} from "web.utils.cookies";
 

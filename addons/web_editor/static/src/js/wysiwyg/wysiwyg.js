@@ -12,7 +12,7 @@ import customColors from "web_editor.custom_colors";
 import {ColorPaletteWidget} from "web_editor.ColorPalette";
 import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
 import concurrency from "web.concurrency";
-import { device } from "web.config";
+import { device } from "@web/legacy/js/services/config";
 import { localization } from "@web/core/l10n/localization";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
 import snippetsEditor from "web_editor.snippet.editor";

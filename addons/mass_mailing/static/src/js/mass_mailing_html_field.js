@@ -11,7 +11,7 @@ import { useService } from "@web/core/utils/hooks";
 import { buildQuery } from "web.rpc";
 import { HtmlField, htmlField } from "@web_editor/js/backend/html_field";
 import { getWysiwygClass } from 'web_editor.loader';
-import { device } from 'web.config';
+import { device } from "@web/legacy/js/services/config";
 import { MassMailingMobilePreviewDialog } from "./mass_mailing_mobile_preview";
 import { getRangePosition } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
 

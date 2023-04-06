@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import * as config from "web.config";
+    import * as config from "@web/legacy/js/services/config";
     import * as field_utils from "@web/legacy/js/fields/field_utils";
     import time from "web.time";
     import { useAutofocus } from "@web/core/utils/hooks";

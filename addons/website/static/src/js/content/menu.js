@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.content.menu **/
 
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 import publicWidget from "web.public.widget";
 import animations from "website.content.snippets.animation";
 const extraMenuUpdateCallbacks = [];

@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.data_manager **/
 
-import * as config from "web.config";
+import * as config from "@web/legacy/js/services/config";
 import * as core from "./core";
 import rpc from "web.rpc";
 import session from "web.session";
