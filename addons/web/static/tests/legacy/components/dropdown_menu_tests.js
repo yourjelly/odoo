@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import DropdownMenu from "@web/legacy/js/components/dropdown_menu";
+    import { DropdownMenu } from "@web/legacy/js/components/dropdown_menu";
     import testUtils from "web.test_utils";
     import { makeTestEnvironment }  from "@web/../tests/legacy/helpers/test_env";
     import { mount } from "@web/../tests/helpers/utils";

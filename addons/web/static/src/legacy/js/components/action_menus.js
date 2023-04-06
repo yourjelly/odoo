@@ -1,7 +1,7 @@
 /** @odoo-module **/
     
     import Context from "web.Context";
-    import DropdownMenu from "./dropdown_menu";
+    import { DropdownMenu } from "./dropdown_menu";
     import Registry from "web.Registry";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
