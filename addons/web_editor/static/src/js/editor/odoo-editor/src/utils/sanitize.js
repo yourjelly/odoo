@@ -244,14 +244,6 @@ class Sanitize {
                 this._parse(node.firstChild);
             }
 
-            // Update link URL if label is a new valid link.
-            if (node.nodeName === 'A' && anchorEl === node) {
-                const linkLabel = node.innerText;
-                const urlInfo = getUrlsInfosInString(linkLabel);
-                if (urlInfo.length && urlInfo[0].label === linkLabel && !node.href.startsWith('mailto:')) {
-                    node.setAttribute('href', urlInfo[0].url);
-                }
-            }
             node = node.nextSibling;
         }
 

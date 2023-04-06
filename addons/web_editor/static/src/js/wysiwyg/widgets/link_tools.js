@@ -10,6 +10,7 @@ import {
     getNumericAndUnit,
     isColorGradient,
 } from "web_editor.utils";
+import { preserveCursor } from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
 
 /**
  * Allows to customize link content and style.
@@ -30,11 +31,48 @@ const LinkTools = Link.extend({
      */
     init: function (parent, options, editable, data, $button, link) {
         this._link = link;
-        this._observer = new MutationObserver(async () => {
+        const observerOptions = {
+            subtree: true,
+            childList: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ['href'],
+        }
+        this._observer = new MutationObserver(async records => {
             await this.renderingPromise;
-            this._updateLabelInput();
+            let labelChanged, urlChanged;
+            for (const record of records) {
+                if (record.type === 'attributes') {
+                    urlChanged = true;
+                } else if (record.type === 'characterData') {
+                    labelChanged = true;
+                }
+            }
+            if (urlChanged) {
+                this.data.url = this._link.href;
+                this._updateURLInput();
+                this._savedURLInputOnDestroy = false;
+            }
+            if (labelChanged) {
+                this._updateLabelInput();
+                if (!this.data.url) {
+                    this.data.url = this._deduceURL(this._link.innerText);
+                    if (this.data.url) {
+                        // refactor this into a method? (updateDOMElement ?)
+                        this._observer.disconnect();
+                        const odooEditor = this.options.wysiwyg.odooEditor;
+                        odooEditor.historyPauseSteps('linkToolsObserver');
+                        // should I call adaptPreview instead?
+                        // Might have to rewrite the jquery parts 'cause it makes loose selection
+                        this._link.href = this.data.url;
+                        odooEditor.historyUnpauseSteps('linkToolsObserver');
+                        this._observer.observe(this._link, observerOptions);
+                        this._updateURLInput();
+                    }
+                }
+            }
         });
-        this._observer.observe(this._link, {subtree: true, childList: true, characterData: true});
+        this._observer.observe(this._link, observerOptions);
         this._super(parent, options, editable, data, $button, this._link);
         // Keep track of each selected custom color and colorpicker.
         this.customColors = {};

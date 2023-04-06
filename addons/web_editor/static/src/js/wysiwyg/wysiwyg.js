@@ -223,6 +223,7 @@ const Wysiwyg = Widget.extend({
             renderingClasses: ['o_dirty', 'o_transform_removal', 'oe_edited_link', 'o_menu_loading'],
             dropImageAsAttachment: options.dropImageAsAttachment,
             foldSnippets: !!options.foldSnippets,
+            onUnlink: () => this.linkPopover?.hide(),
         }, editorCollaborationOptions));
 
         this.odooEditor.addEventListener('contentChanged', function () {

@@ -157,10 +157,8 @@ const Link = Widget.extend({
         this._updateOptionsUI();
 
         if (this.data.url) {
-            const [protocol, location] = splitURL(this.data.url);
-            const urlInputValue = this.options.hideProtocols?.includes(protocol) ? location : protocol + location;
-            this.el.querySelector("input[name='url']").value = urlInputValue;
-            this._onURLInput();
+            this._updateURLInput();
+            // TODO: consider including the  line below in updateURLInput
             this._savedURLInputOnDestroy = false;
         }
 
@@ -250,6 +248,7 @@ const Link = Widget.extend({
             this.$link[0].removeAttribute('target');
         }
         this._updateLinkContent(this.$link, data);
+        this.linkEl.dataset.label = this.linkEl.innerText;
     },
     /**
      * Focuses the url input.
@@ -553,6 +552,15 @@ const Link = Widget.extend({
      * @private
      */
     _updateOptionsUI: function () {},
+    /**
+     * @private
+     */
+    _updateURLInput: function () {
+        const [protocol, location] = splitURL(this.data.url);
+        const urlInputValue = this.options.hideProtocols?.includes(protocol) ? location : protocol + location;
+        this.el.querySelector("input[name='url']").value = urlInputValue;
+        this._onURLInput();
+    },
 
     //--------------------------------------------------------------------------
     // Handlers
