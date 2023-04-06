@@ -3,13 +3,14 @@
 import { Component } from "@odoo/owl";
 
 export class StockMove extends Component {
-    static template = "mrp.StockMove";
     static props = {
         record: Object,
         parent: Object,
     };
+    static template = "mrp.StockMove";
 
     setup() {
+        this.fieldState = "state";
         this.isLongPressable = false;
         this.longPressed = false;
         this.resModel = this.props.record.resModel;
@@ -44,10 +45,10 @@ export class StockMove extends Component {
             this.longPressed = false;
             return; // Do nothing since the longpress event was already called.
         }
-        this.toggle();
+        this.clicked();
     }
 
-    toggle() {
+    clicked() {
         const quantity = this.isComplete ? 0 : this.props.record.data.product_uom_qty;
         this.props.record.update({ quantity_done: quantity });
         this.props.record.save(); // TODO: instead of saving after each individual change, it should be better to save at some point all the changes.

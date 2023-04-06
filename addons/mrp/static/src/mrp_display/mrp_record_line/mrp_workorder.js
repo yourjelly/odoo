@@ -7,8 +7,8 @@ import { useService } from "@web/core/utils/hooks";
 import { MrpTimer } from "@mrp/widgets/timer";
 
 export class MrpWorkorder extends StockMove {
-    static template = "mrp.WorkOrder";
     static components = { ...StockMove.components, Field, MrpTimer };
+    static template = "mrp.WorkOrder";
 
     setup() {
         super.setup();
@@ -16,7 +16,6 @@ export class MrpWorkorder extends StockMove {
         this.dialogService = useService("dialog");
         this.name = this.props.record.data.name;
         this.note = this.props.record.data.operation_note;
-        this.fieldState = "state";
     }
 
     get active() {
@@ -37,7 +36,7 @@ export class MrpWorkorder extends StockMove {
             confirmLabel: this.env._t("Discard"),
             title: this.props.record.data.display_name,
         };
-        if (this.props.record.data.state != "done") {
+        if (!this.isComplete) {
             params.confirm = async () => {
                 await this.props.record.model.orm.call(
                     this.props.record.resModel,
@@ -55,7 +54,7 @@ export class MrpWorkorder extends StockMove {
     }
 
     get isComplete() {
-        return this.props.record.data.state === "done";
+        return this.state === "done";
     }
 
     async longPress() {
@@ -64,10 +63,14 @@ export class MrpWorkorder extends StockMove {
         this.props.parent.load();
     }
 
-    async toggle() {
+    async clicked() {
         const { record } = this.props;
         const method = record.data.is_user_working ? "button_pending" : "button_start";
         await this.props.record.model.orm.call(record.resModel, method, [record.resId]);
         this.props.parent.load();
+    }
+
+    get state() {
+        return this.props.record.data[this.fieldState];
     }
 }

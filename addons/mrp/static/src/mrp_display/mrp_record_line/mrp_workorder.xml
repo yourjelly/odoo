@@ -6,9 +6,12 @@
             t-on-click="onClick"
             t-on-animationend="onAnimationEnd">
             <span t-att-class="isComplete ? 'text-decoration-line-through' : ''">
-                <input type="checkbox" class="me-2" t-att-disabled="isComplete"
-                       t-on-click.stop="longPress"
-                       t-att-checked="isComplete"/>
+                <span class="fa-stack me-2" t-on-click.stop="longPress"
+                      t-att-class="isComplete ? 'text-success' : failed ? 'text-danger' : 'text-muted'">
+                    <span class="fa fa-square-o fa-stack-1x fa-lg"/>
+                    <span t-if="isComplete" class="fa fa-check fa-stack-1x"/>
+                    <span t-elif="failed" class="fa fa-times fa-stack-1x"/>
+                </span>
                 <span class="me-2" t-esc="name"/>
                 <Field class="'text-muted'" name="fieldState" record="props.record"/>
             </span>
