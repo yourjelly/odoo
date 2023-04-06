@@ -27,25 +27,31 @@ export class One2ManyHistoryList extends Component {
     }
 
     async restoreVersion(historyDiffId) {
-        await this.orm.call(
-            'field.html.history.diff',
-            "action_restore_version",
+        const restoredVersion = await this.orm.call(
+            "field.html.history.diff",
+            "get_version",
             [historyDiffId],
             {}
         );
-        browser.location.reload();
+        // todo: find a better way to reference the editor
+        const editable = document.querySelector(".note-editable.odoo-editor-editable");
+        editable.innerHTML = restoredVersion;
+        editable.dispatchEvent(new Event('input', { bubbles: true }));
+        editable.focus();
+
+        return restoredVersion;
     }
 
     async getComparisonAtDiffId(historyDiffId) {
-        const text = await this.orm.call(
-            'field.html.history.diff',
+        const comparison = await this.orm.call(
+            "field.html.history.diff",
             "get_comparison",
             [historyDiffId],
             {}
         );
-        console.log("get_comparison", text);
-        document.querySelector(".note-editable.odoo-editor-editable").innerHTML = text;
-        return text;
+        console.log("get_comparison", comparison);
+        document.querySelector(".note-editable.odoo-editor-editable").innerHTML = comparison;
+        return comparison;
     }
 }
 

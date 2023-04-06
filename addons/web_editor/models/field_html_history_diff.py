@@ -177,7 +177,7 @@ class HtmlHistoryDiff(models.Model):
         return self.env[self.related_model].browse(
             [self.related_id]).restore_history_to(self.id)
 
-    def get_version_text(self):
+    def get_version(self):
         return self.env[self.related_model].browse(
             [self.related_id]).get_version_at(self.id)
 
