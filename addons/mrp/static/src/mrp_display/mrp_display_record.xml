@@ -17,8 +17,8 @@
                 </div>
             </div>
             <ul class="list-group list-group-flush">
-                <t t-foreach="props.subRecords" t-as="record" t-key="record.resId">
-                    <t t-component="getComponent(record)" record="record"/>
+                <t t-foreach="props.subRecords" t-as="subRecord" t-key="subRecord.resId">
+                    <t t-component="getComponent(subRecord)" record="subRecord" parent="props.record"/>
                 </t>
             </ul>
             <div class="card-footer d-flex p-0">

@@ -6,6 +6,7 @@ export class StockMove extends Component {
     static template = "mrp.StockMove";
     static props = {
         record: Object,
+        parent: Object,
     };
 
     setup() {

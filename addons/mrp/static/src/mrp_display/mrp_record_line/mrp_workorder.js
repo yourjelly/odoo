@@ -61,15 +61,13 @@ export class MrpWorkorder extends StockMove {
     async longPress() {
         const { record } = this.props;
         await record.model.orm.call(record.resModel, "button_finish", [record.resId]);
-        await this.props.record.load();
-        this.render();
+        this.props.parent.load();
     }
 
     async toggle() {
         const { record } = this.props;
         const method = record.data.is_user_working ? "button_pending" : "button_start";
         await this.props.record.model.orm.call(record.resModel, method, [record.resId]);
-        await this.props.record.load();
-        this.render();
+        this.props.parent.load();
     }
 }
