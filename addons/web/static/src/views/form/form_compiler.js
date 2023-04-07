@@ -134,7 +134,7 @@ export class FormCompiler extends ViewCompiler {
         let hasContent = false;
         for (const child of el.children) {
             const invisible = getModifier(child, "invisible");
-            if (this.isAlwaysInvisible(invisible, params)) {
+            if (invisible === "True") {
                 continue;
             }
             hasContent = true;
@@ -277,7 +277,7 @@ export class FormCompiler extends ViewCompiler {
             }
 
             const invisible = getModifier(child, "invisible");
-            if (this.isAlwaysInvisible(invisible, params)) {
+            if (invisible === "True") {
                 continue;
             }
 
@@ -499,7 +499,7 @@ export class FormCompiler extends ViewCompiler {
                 continue;
             }
             const invisible = getModifier(child, "invisible");
-            if (this.isAlwaysInvisible(invisible, params)) {
+            if (invisible === "True") {
                 continue;
             }
 
