@@ -6,6 +6,14 @@
             <field name="model">res.company</field>
             <field name="inherit_id" ref="base.view_company_form"/>
             <field name="arch" type="xml">
+                <xpath expr="//sheet" position="before">
+                    <header>
+                        <button name="action_regen_private_key" string="Generate Private Key"
+                            type="object" class="oe_highlight" data-hotkey="p" title="Generate Private Key"
+                                confirm="Are you sure you want to pursue? Regenerating the private key would mean regenerating the CSR and onboarding your journals over again."
+                            attrs="{'invisible': [('country_code', '!=', 'SA')]}" groups="base.group_erp_manager"/>
+                    </header>
+                </xpath>
                 <xpath expr="//field[@name='country_id']" position="after">
                     <field name="l10n_sa_edi_building_number" placeholder="Building Number"
                            attrs="{'invisible': [('country_code', '!=', 'SA')]}"
@@ -17,7 +25,6 @@
                 <xpath expr="//field[@name='vat']" position="before">
                     <field name="l10n_sa_additional_identification_scheme" attrs="{'invisible': [('country_code', '!=', 'SA')]}"/>
                     <field name="l10n_sa_additional_identification_number" attrs="{'invisible': [('country_code', '!=', 'SA')]}"/>
-                    <field name="l10n_sa_organization_unit" invisible="1"/>
                 </xpath>
             </field>
         </record>

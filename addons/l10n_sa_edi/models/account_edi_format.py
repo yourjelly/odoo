@@ -239,7 +239,7 @@ class AccountEdiFormat(models.Model):
         :return: XML content with QR code applied
         """
         root = etree.fromstring(xml_content)
-        qr_code = invoice.with_context(from_pos=True).l10n_sa_qr_code_str
+        qr_code = invoice.l10n_sa_qr_code_str
         qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
         qr_node.text = qr_code
         return etree.tostring(root, with_tail=False)
@@ -268,7 +268,7 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
 
         # Prepare UBL invoice values and render XML file
-        unsigned_xml = invoice.l10n_sa_unsigned_xml
+        unsigned_xml = self._l10n_sa_generate_zatca_template(invoice)
 
         # Load PCISD data and X509 certificate
         PCSID_data = invoice.journal_id._l10n_sa_api_get_pcsid()
@@ -366,8 +366,6 @@ class AccountEdiFormat(models.Model):
                 'blocking_level': 'error'
             }
 
-        if not invoice.l10n_sa_confirmation_datetime:
-            invoice.l10n_sa_confirmation_datetime = fields.Datetime.now()
         if not invoice.l10n_sa_chain_index:
             # If the Invoice doesn't have a chain index, it means it either has not been submitted before,
             # or it was submitted and rejected. Either way, we need to assign it a new Chain Index and regenerate
@@ -515,10 +513,3 @@ class AccountEdiFormat(models.Model):
                                          "before invoices can be submitted to the Authority")}}
         return {invoice: self._l10n_sa_post_zatca_edi(invoice)}
 
-    def _cancel_invoice_edi(self, invoices):
-        """
-            Override to cancel sa_zatca invoice EDIs
-        """
-        if self.code != "sa_zatca" or invoices.edi_state != 'sent':
-            return super()._cancel_invoice_edi(invoices)
-        raise UserError(_("Cannot cancel an invoice that has been reported/cleared by ZATCA"))

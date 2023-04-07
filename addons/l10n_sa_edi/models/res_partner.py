@@ -1,4 +1,14 @@
 from odoo import fields, models, api
+from odoo.http import Controller, route, request
+
+
+
+class Dummy(Controller):
+
+    @route('/dummy', type="json", auth="none", methods=['PUT', 'PATCH'])
+    def dummy(self, **kw):
+        return {}
+
 
 
 class ResPartner(models.Model):

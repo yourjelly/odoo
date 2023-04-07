@@ -18,4 +18,10 @@
     """,
     'category': 'Accounting/Localizations/EDI',
     'license': 'LGPL-3',
+    'assets': {
+        'point_of_sale.assets': [
+            'l10n_sa_edi_pos/static/src/js/pos_models.js',
+            'l10n_sa_edi_pos/static/src/js/PaymentScreen.js',
+        ],
+    }
 }

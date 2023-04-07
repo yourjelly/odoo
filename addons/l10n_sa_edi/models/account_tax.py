@@ -22,7 +22,7 @@ class AccountTax(models.Model):
                                                          ('VATEX-SA-34-2',
                                                           'VATEX-SA-34-1 The international transport of Passengers.'),
                                                          ('VATEX-SA-34-3',
-                                                          'VATEX-SA-34-3 services directly connected and incidental to a Supply of international passenger transport.'),
+                                                          'VATEX-SA-34-3 Services directly connected and incidental to a Supply of international passenger transport.'),
                                                          ('VATEX-SA-34-4',
                                                           'VATEX-SA-34-4 Supply of a qualifying means of transport.'),
                                                          ('VATEX-SA-34-5',

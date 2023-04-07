@@ -2,6 +2,17 @@
 <odoo>
     <data>
 
+        <record id="action_download_xml" model="ir.actions.server">
+            <field name="name">Download XML</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="binding_model_id" ref="account.model_account_move"/>
+            <field name="binding_view_types">form</field>
+            <field name="state">code</field>
+            <field name="code">
+                action = record._l10n_sa_download_xml_content()
+            </field>
+        </record>
+
         <template id="ubl_21_PaymentMeansType_zatca" inherit_id="account_edi_ubl_cii.ubl_20_PaymentMeansType">
             <xpath expr="//*[local-name()='InstructionID']" position="after">
                 <cbc:InstructionNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
@@ -138,6 +149,18 @@
                         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
                         t-att="vals.get('invoiced_quantity_attrs', {})"
                         t-out="vals.get('invoiced_quantity')"/>
+            </xpath>
+            <xpath expr="//*[local-name()='LineExtensionAmount']" position="after">
+                <cac:DocumentReference
+                        t-if="vals.get('prepayment_vals', {})"
+                        xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+                        xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                        xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                    <cbc:ID t-out="vals['prepayment_vals']['prepayment_id']" />
+                    <cbc:IssueDate t-esc="vals['prepayment_vals']['issue_date'].strftime('%Y-%m-%d')"/>
+                    <cbc:IssueTime t-esc="vals['prepayment_vals']['issue_date'].strftime('%H:%M:%S')"/>
+                    <cbc:DocumentTypeCode t-out="vals['prepayment_vals']['document_type_code']"/>
+                </cac:DocumentReference>
             </xpath>
         </template>
 

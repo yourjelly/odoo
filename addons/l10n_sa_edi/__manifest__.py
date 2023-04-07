@@ -9,6 +9,7 @@
         'account_edi_ubl_cii',
         'account_debit_note',
         'l10n_sa_invoice',
+        'sale'
     ],
     'author': 'Odoo',
     'summary': """

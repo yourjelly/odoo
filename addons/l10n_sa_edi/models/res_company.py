@@ -9,17 +9,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 class ResCompany(models.Model):
     _inherit = "res.company"
 
-    l10n_sa_organization_unit = fields.Char("Organization Unit", compute="_l10n_sa_compute_organization_unit",
-                                            help="The branch name for taxpayers. In case of VAT Groups, this field "
-                                                 "should contain the 10-digit TIN number of the individual group "
-                                                 "member whose device is being onboarded (First 10 digits of the "
-                                                 "VAT Number)")
-
-    def _l10n_sa_compute_organization_unit(self):
-        for company in self:
-            company.l10n_sa_organization_unit = (company.vat or '')[:10]
-
-    def _l10n_sa_compute_private_key(self):
+    def _l10n_sa_generate_private_key(self):
         """
             Compute a private key for each company that will be used to generate certificate signing requests (CSR)
             in order to receive X509 certificates from the ZATCA APIs and sign EDI documents
@@ -28,19 +18,25 @@ class ResCompany(models.Model):
                 of cryptography.
             -   key_size=2048 is considered a reasonable default key size, as per the documentation of cryptography.
 
-            See https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/
+            See https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
         """
         private_key = ec.generate_private_key(ec.SECP256K1, default_backend())
         return private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()
-        )
+            encryption_algorithm=serialization.NoEncryption())
+
+    # todo: remove after tisting
+    def action_regen_private_key(self):
+        """
+            (Re)generate Private Key for the company
+        """
+        self.ensure_one()
+        self.l10n_sa_private_key = self._l10n_sa_generate_private_key()
 
     l10n_sa_private_key = fields.Binary("ZATCA Private key", attachment=False, groups="base.group_erp_manager",
                                         copy=False,
-                                        help="The private key used to generate the CSR and obtain certificates",
-                                        default=_l10n_sa_compute_private_key)
+                                        help="The private key used to generate the CSR and obtain certificates",)
 
     l10n_sa_api_mode = fields.Selection(
         [('sandbox', 'Sandbox'), ('preprod', 'Simulation (Pre-Production)'), ('prod', 'Production')],
@@ -62,6 +58,14 @@ class ResCompany(models.Model):
             if company.l10n_sa_api_mode == 'prod' and 'l10n_sa_api_mode' in vals and vals['l10n_sa_api_mode'] != 'prod':
                 raise UserError("You cannot change the ZATCA Submission Mode once it has been set to Production")
         return super().write(vals)
+
+    def _l10n_sa_check_company_data(self):
+        self.ensure_one()
+        errors = []
+        if not self._l10n_sa_check_vat_tin():
+            errors.append((" - Please set a valid VAT number on the Company"))
+        # if errors:
+        #     return _("Please make sure to correct the following errors before requesting ")
 
     def _get_company_address_field_names(self):
         """ Override to add ZATCA specific address fields """
@@ -102,5 +106,5 @@ class ResCompany(models.Model):
         """
         self.ensure_one()
         if self.env['account.edi.format']._l10n_sa_check_vat_tin(self.vat) and self.vat[10] == '1':
-            return bool(self.l10n_sa_organization_unit and re.match(r'^[0-9]{10}$', self.l10n_sa_organization_unit))
-        return bool(self.l10n_sa_organization_unit)
+            return bool(re.match(r'^[0-9]{10}$', (self.vat or '')[:10]))
+        return bool((self.vat or '')[:10])
