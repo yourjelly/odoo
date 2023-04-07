@@ -7,9 +7,8 @@ import { useDebounced } from "@web/core/utils/timing";
 import { getColor } from "../colors";
 import { useCalendarPopover, useClickHandler, useFullCalendar } from "../hooks";
 import { CalendarCommonPopover } from "./calendar_common_popover";
-import { CalendarHeader } from "@web/views/calendar/calendar_header/calendar_header";
 
-import { Component, useEffect, useState } from "@odoo/owl";
+import { Component, useEffect } from "@odoo/owl";
 
 const SCALE_TO_FC_VIEW = {
     day: "timeGridDay",
@@ -46,20 +45,10 @@ export class CalendarCommonRenderer extends Component {
         this.click = useClickHandler(this.onClick, this.onDblClick);
         this.popover = useCalendarPopover(this.constructor.components.Popover);
         this.onWindowResizeDebounced = useDebounced(this.onWindowResize, 200);
-        this.state = useState({
-            viewTitle: "",
-        });
 
         useEffect(() => {
             this.updateSize();
         });
-
-        useEffect(
-            (view) => {
-                this.state.viewTitle = view.title;
-            },
-            () => [this.fc.api.view]
-        );
     }
 
     get options() {
@@ -307,7 +296,6 @@ export class CalendarCommonRenderer extends Component {
 }
 CalendarCommonRenderer.components = {
     Popover: CalendarCommonPopover,
-    CalendarHeader,
 };
 CalendarCommonRenderer.template = "web.CalendarCommonRenderer";
 CalendarCommonRenderer.eventTemplate = "web.CalendarCommonRenderer.event";
