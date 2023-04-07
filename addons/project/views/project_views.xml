@@ -1562,7 +1562,7 @@
                     <field name="is_private" />
                     <templates>
                         <div class="justify-content-between" t-name="activity-box">
-                            <div class="text-end col-6">
+                            <div class="text-end col-6 p-2">
                                 <span t-att-title="record.name.value">
                                     <field name="name" display="full" class="text-truncate"/>
                                 </span>
