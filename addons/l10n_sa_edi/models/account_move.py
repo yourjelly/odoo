@@ -1,5 +1,6 @@
 import uuid
 import json
+from markupsafe import Markup
 from odoo import fields, models, api
 from odoo.tools import float_repr
 from datetime import datetime
@@ -13,24 +14,14 @@ from cryptography.x509 import load_der_x509_certificate
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    l10n_sa_adjustment_reason = fields.Char("Adjustment Reason",
-                                            help="Reason for which the original invoice was adjusted")
-
     l10n_sa_uuid = fields.Char(string='Document UUID', copy=False, help="Universally unique identifier of the Invoice")
 
-    l10n_sa_submission_state = fields.Selection([('to_send', 'To Send'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'),
-                                                 ('cancelled', 'Cancelled')], string="Submission State",
-                                                compute="_l10n_sa_compute_submission_state", store=True)
-
-    l10n_sa_unsigned_xml = fields.Text("Unsigned XML", copy=False)
     l10n_sa_invoice_signature = fields.Char("Unsigned XML Signature", copy=False)
 
     l10n_sa_chain_index = fields.Integer(
         string="ZATCA chain index", copy=False, readonly=True,
         help="Invoice index in chain, set if and only if an in-chain XML was submitted and did not error",
     )
-
-    l10n_sa_submission_ids = fields.One2many("l10n_sa_edi.submission", "l10n_sa_move_id", string="Submitted Documents")
 
     def _l10n_sa_is_simplified(self):
         """
@@ -40,26 +31,27 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self.partner_id.company_type == 'person'
 
-    @api.depends('edi_document_ids', 'edi_document_ids.state')
-    def _l10n_sa_compute_submission_state(self):
-        for move in self:
-            sa_document = next((d for d in move.edi_document_ids if d.edi_format_id.code == 'sa_zatca'), None)
-            move.l10n_sa_submission_state = sa_document.state if sa_document else 'to_send'
-
     @api.depends('amount_total_signed', 'amount_tax_signed', 'l10n_sa_confirmation_datetime', 'company_id',
-                 'company_id.vat', 'journal_id', 'journal_id.l10n_sa_production_csid_json', 'l10n_sa_unsigned_xml',
+                 'company_id.vat', 'journal_id', 'journal_id.l10n_sa_production_csid_json',
                  'l10n_sa_invoice_signature', 'l10n_sa_chain_index')
     def _compute_qr_code_str(self):
         """ Override to update QR code generation in accordance with ZATCA Phase 2"""
         for move in self:
             move.l10n_sa_qr_code_str = ''
-            if move.country_code == 'SA' and move.move_type in (
-                    'out_invoice', 'out_refund') and move.l10n_sa_unsigned_xml and move.l10n_sa_chain_index:
-                x509_cert = json.loads(move.journal_id.l10n_sa_production_csid_json)['binarySecurityToken']
-                qr_code_str = move._l10n_sa_get_qr_code(move.journal_id, move.l10n_sa_unsigned_xml,
-                                                        b64decode(x509_cert), move.l10n_sa_invoice_signature,
-                                                        move._l10n_sa_is_simplified())
-                move.l10n_sa_qr_code_str = b64encode(qr_code_str).decode()
+            if move.country_code == 'SA' and move.move_type in ('out_invoice', 'out_refund') and move.l10n_sa_chain_index:
+                edi_format = self.env.ref('l10n_sa_edi.edi_sa_zatca')
+                zatca_document = move.edi_document_ids.filtered(lambda d: d.edi_format_id == edi_format)
+                if move._l10n_sa_is_simplified():
+                    x509_cert = json.loads(move.journal_id.l10n_sa_production_csid_json)['binarySecurityToken']
+                    xml_content = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_generate_zatca_template(move)
+                    qr_code_str = move._l10n_sa_get_qr_code(move.journal_id, xml_content, b64decode(x509_cert), move.l10n_sa_invoice_signature, move._l10n_sa_is_simplified())
+                    move.l10n_sa_qr_code_str = b64encode(qr_code_str).decode()
+                elif zatca_document.state == 'sent' and zatca_document.attachment_id.datas:
+                    document_xml = zatca_document.attachment_id.datas.decode()
+                    root = etree.fromstring(b64decode(document_xml))
+                    qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
+                    move.l10n_sa_qr_code_str = qr_node.text
+
 
     def _l10n_sa_get_qr_code_encoding(self, tag, field, int_length=1):
         """
@@ -68,6 +60,13 @@ class AccountMove(models.Model):
         company_name_tag_encoding = tag.to_bytes(length=1, byteorder='big')
         company_name_length_encoding = len(field).to_bytes(length=int_length, byteorder='big')
         return company_name_tag_encoding + company_name_length_encoding + field
+
+    def _l10n_sa_check_refund_reason(self):
+        """
+            Make sure credit/debit notes have a valid reason and reversal reference
+        """
+        self.ensure_one()
+        return self.reversed_entry_id and self.ref
 
     @api.model
     def _l10n_sa_get_qr_code(self, journal_id, unsigned_xml, x509_cert, signature, is_b2c=False):
@@ -119,13 +118,6 @@ class AccountMove(models.Model):
 
         return qr_code_str
 
-    def _l10n_sa_get_previous_invoice(self):
-        """
-            Get the previously submitted EDI document, whether it was accepted or rejected.
-        """
-        return self.env['l10n_sa_edi.submission'].search(
-            [('l10n_sa_move_id.journal_id', '=', self.journal_id.id), ('l10n_sa_xml_content', '!=', False)], limit=1)
-
     @api.depends('state', 'edi_document_ids.state')
     def _compute_edi_show_cancel_button(self):
         """
@@ -135,15 +127,9 @@ class AccountMove(models.Model):
         for move in self.filtered(lambda m: m.is_invoice() and m.country_code == 'SA'):
             move.edi_show_cancel_button = False
 
-    def button_recalculate_edi_values(self):
-        """
-            Force recalculate unsigned data (UUID, XML content, signature) for the invoice in case it is needed.
-        """
-        return self._l10n_sa_generate_unsigned_data()
-
     def _l10n_sa_generate_unsigned_data(self):
         """
-            Generate Unsigned XML content & digital signature to be used during both Signing and QR code generation.
+            Generate UUID and digital signature to be used during both Signing and QR code generation.
             It is necessary to save the signature as it changes everytime it is generated and both the signing and the
             QR code expect to have the same, identical signature.
         """
@@ -152,30 +138,51 @@ class AccountMove(models.Model):
         # Build the dict of values to be used for generating the Invoice XML content
         # Set Invoice field values required for generating the XML content, hash and signature
         self.l10n_sa_uuid = uuid.uuid4()
-        self.l10n_sa_unsigned_xml = edi_format._l10n_sa_generate_zatca_template(self)
         # Once the required values are generated, we hash the invoice, then use it to generate a Signature
         invoice_hash_hex = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(
-            self.l10n_sa_unsigned_xml).decode()
+            edi_format._l10n_sa_generate_zatca_template(self)).decode()
         self.l10n_sa_invoice_signature = edi_format._l10n_sa_get_digital_signature(self.journal_id.company_id,
                                                                                    invoice_hash_hex).decode()
 
-    def _l10n_sa_save_submission(self, xml_content, response_data=None, error=False):
+    def _l10n_sa_log_results(self, xml_content, response_data=None, error=False):
         """
-            Save submitted invoice XML content in case of either Rejection or Acceptance.
-            This is useful to figure out why an invoice was rejected since we also save the errors along with the state.
+            Save submitted invoice XML hash in case of either Rejection or Acceptance.
         """
         self.ensure_one()
-        self.l10n_sa_submission_ids = [(0, 0, {
-            "l10n_sa_move_id": self.id,
-            "l10n_sa_chain_index": self.l10n_sa_chain_index,
-            "l10n_sa_xml_content": xml_content,
-            "l10n_sa_status": "rejected" if (error or (response_data and response_data.get('error'))) else "accepted",
-            "l10n_sa_errors": json.dumps(response_data),
-        })]
+        self.journal_id.l10n_sa_latest_submission_hash = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(xml_content)
+        cls, title, content = ("success", "Invoice Successfully Submitted to ZATCA", response_data or "")
+        if error:
+            cls, title = ("danger", "Invoice was rejected by ZATCA")
+            content = Markup("""
+                <p class='mb-0'>
+                    The invoice was rejected by ZATCA. Please, check the response below:
+                </p>
+                <hr>
+                <p class='mb-0'>
+                    %s
+                </p>
+            """) % response_data
+        if response_data and response_data.get('validationResults', {}).get('warningMessages'):
+            cls, title = ("warning", "Invoice was Accepted by ZATCA (with Warnings)")
+            content = Markup("""
+                <p class='mb-0'>
+                    The invoice was accepted by ZATCA, but returned warnings. Please, check the response below:
+                </p>
+                <hr>
+                <p class='mb-0'>
+                    %s
+                </p>
+            """) % "<br/>".join([Markup("<b>%s</b> : %s") % (m['code'], m['message']) for m in response_data['validationResults']['warningMessages']])
+        self.message_post(body=Markup("""
+            <div role='alert' class='alert alert-%s'>
+                <h4 class='alert-heading'>%s</h4>%s
+            </div>
+        """) % (cls, title, content))
 
-    def _l10n_sa_ensure_line_taxes(self):
+    def _l10n_sa_is_in_chain(self):
         """
-            All invoice lines submitted to ZATCA need to have at least one Tax applied
+        If the invoice was successfully posted and confirmed by the government, then this would return True.
+        If the invoice timed out, then its edi_document should still be in the 'to_send' state.
         """
-        self.ensure_one()
-        return all(line.tax_ids for line in self.invoice_line_ids.filtered(lambda line: not line.display_type))
+        zatca_doc_ids = self.edi_document_ids.filtered(lambda d: d.edi_format_id.code == 'sa_zatca')
+        return len(zatca_doc_ids) > 0 and not any(zatca_doc_ids.filtered(lambda d: d.state == 'to_send'))

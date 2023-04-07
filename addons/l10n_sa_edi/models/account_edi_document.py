@@ -19,7 +19,7 @@ class AccountEdiDocument(models.Model):
         if len(jobs) > 1:
             move_first_index = 0
             for index, job in enumerate(jobs):
-                documents, doc_type = job
+                documents = job['documents']
                 if any(d.edi_format_id.code == 'sa_zatca' and d.state == 'to_send' and d.move_id.l10n_sa_chain_index for d in documents):
                     move_first_index = index
                     break

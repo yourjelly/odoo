@@ -9,6 +9,7 @@
         'account_edi_ubl_cii',
         'account_debit_note',
         'l10n_sa_invoice',
+        'base_vat'
     ],
     'author': 'Odoo',
     'summary': """
@@ -21,12 +22,11 @@
     'license': 'LGPL-3',
     'data': [
         'security/ir.model.access.csv',
+        'data/account_tax_template.xml',
         'data/account_edi_format.xml',
         'data/ubl_21_zatca.xml',
         'data/res_country_data.xml',
         'wizard/l10n_sa_edi_otp_wizard.xml',
-        'views/account_tax_group_views.xml',
-        'views/account_move_views.xml',
         'views/account_tax_views.xml',
         'views/account_journal_views.xml',
         'views/res_partner_views.xml',
@@ -35,9 +35,13 @@
         'views/report_invoice.xml',
         'views/l10n_sa_edi_submission_views.xml',
     ],
+    'demo': [
+        'demo/demo_company.xml',
+    ],
     'assets': {
         'web.assets_backend': [
             'l10n_sa_edi/static/src/scss/form_view.scss',
         ]
-    }
+    },
+    'post_init_hook': '_l10n_sa_edi_post_init',
 }
