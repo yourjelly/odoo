@@ -6,6 +6,7 @@ from odoo import Command
 from odoo.tests import Form
 
 from datetime import timedelta
+from lxml import etree
 
 
 class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
@@ -147,6 +148,15 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         orig_po = self.env['purchase.order'].create({
             'partner_id': self.res_partner_1.id,
         })
+
+        self.env.user.groups_id += self.env.ref('uom.group_uom')
+
+        view = self.env.ref('purchase.purchase_order_form').sudo()
+        tree = etree.fromstring(view.arch)
+        for node in tree.xpath('//field[@name="order_line"]//field[@name="display_type"][@column_invisible="True"]'):
+            node.attrib.pop('column_invisible')
+        view.arch = etree.tostring(tree)
+
         unit_price = 50
         po_form = Form(orig_po)
         with po_form.order_line.new() as line:
@@ -288,6 +298,8 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
     def test_10_alternative_po_line_price_unit_different_uom(self):
         """ Check that the uom is copied in the alternative PO, and the "unit_price"
         is calculated according to this uom and not that of the product """
+        self.env.user.groups_id += self.env.ref('uom.group_uom')
+
         # Creates a first Purchase Order.
         po_form = Form(self.env['purchase.order'])
         self.product_09.standard_price = 10

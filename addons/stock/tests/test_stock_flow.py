@@ -2071,7 +2071,7 @@ class TestStockFlow(TestStockCommon):
         })
         # Creates two receipts using some lot names in common.
         picking_type = self.env['stock.picking.type'].browse(self.picking_type_in)
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(show_lots_text=True))
         picking_form.picking_type_id = picking_type
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product_lot
@@ -2092,7 +2092,7 @@ class TestStockFlow(TestStockCommon):
             line.qty_done = 2
         move = move_form.save()
 
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(show_lots_text=True))
         picking_form.picking_type_id = picking_type
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product_lot
@@ -2149,7 +2149,7 @@ class TestStockFlow(TestStockCommon):
         receipt_1 = picking_form.save()
         receipt_1.action_confirm()
 
-        move_form = Form(receipt_1.move_ids, view="stock.view_stock_move_operations")
+        move_form = Form(receipt_1.move_ids.with_context(show_lots_text=True), view="stock.view_stock_move_operations")
         with move_form.move_line_ids.edit(0) as line:
             line.lot_name = 'sn-001'
         with move_form.move_line_ids.new() as line:
@@ -2168,7 +2168,7 @@ class TestStockFlow(TestStockCommon):
         receipt_2 = picking_form.save()
         receipt_2.action_confirm()
 
-        move_form = Form(receipt_2.move_ids, view="stock.view_stock_move_operations")
+        move_form = Form(receipt_2.move_ids.with_context(show_lots_text=True), view="stock.view_stock_move_operations")
         with move_form.move_line_ids.edit(0) as line:
             line.lot_name = 'sn-002'
         with move_form.move_line_ids.new() as line:
@@ -2330,7 +2330,7 @@ class TestStockFlow(TestStockCommon):
         product = self.env['product.product'].create({'name': 'Un petit coup de polish', 'type': 'product'})
         wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
 
-        f = Form(self.env['stock.picking'])
+        f = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         f.partner_id = partner_1
         f.picking_type_id = wh.out_type_id
         with f.move_ids_without_package.new() as move:
@@ -2393,7 +2393,7 @@ class TestStockFlow(TestStockCommon):
             move_line.product_id = self.productA
         receipt = receipt_form.save()
 
-        move_form = Form(receipt.move_ids, view='stock.view_stock_move_nosuggest_operations')
+        move_form = Form(receipt.move_ids.with_context(show_lots_text=True), view='stock.view_stock_move_nosuggest_operations')
         with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_name = "USN01"
         move_form.save()
@@ -2527,7 +2527,7 @@ class TestStockFlow(TestStockCommon):
         receipt = receipt_form.save()
         receipt.action_confirm()
 
-        with Form(receipt.move_ids, view='stock.view_stock_move_nosuggest_operations') as move_form:
+        with Form(receipt.move_ids.with_context(show_lots_text=True), view='stock.view_stock_move_nosuggest_operations') as move_form:
             with move_form.move_line_nosuggest_ids.new() as sml:
                 sml.location_dest_id = sub_loc
                 sml.lot_name = '123'

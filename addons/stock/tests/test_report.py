@@ -23,6 +23,11 @@ class TestReportsCommon(TransactionCase):
         cls.product = product_form.save()
         cls.product_template = cls.product.product_tmpl_id
 
+        # remove column_invisible from matrix addon
+        view = cls.env.ref('purchase_product_matrix.purchase_order_form_matrix', raise_if_not_found=False)
+        if view:
+            view.active = False
+
     def get_report_forecast(self, product_template_ids=False, product_variant_ids=False, context=False):
         if product_template_ids:
             report = self.env['stock.forecasted_product_template']
@@ -381,7 +386,8 @@ class TestReports(TestReportsCommon):
 
         # Creates a new receipt for the remaining quantity, confirm it...
         receipt_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
@@ -422,7 +428,8 @@ class TestReports(TestReportsCommon):
         """
         # Creates a receipt then checks draft picking quantities.
         receipt_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
@@ -434,7 +441,8 @@ class TestReports(TestReportsCommon):
 
         # Creates a delivery then checks draft picking quantities.
         delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
@@ -464,7 +472,8 @@ class TestReports(TestReportsCommon):
         one_month = timedelta(days=30)
         # Creates a bunch of deliveries with different date.
         delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
@@ -476,7 +485,8 @@ class TestReports(TestReportsCommon):
         delivery_1.action_confirm()
 
         delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
@@ -488,7 +498,8 @@ class TestReports(TestReportsCommon):
         delivery_2.action_confirm()
 
         delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
@@ -500,7 +511,8 @@ class TestReports(TestReportsCommon):
         delivery_3.action_confirm()
 
         delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
@@ -512,7 +524,8 @@ class TestReports(TestReportsCommon):
         delivery_4.action_confirm()
 
         delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
@@ -524,7 +537,8 @@ class TestReports(TestReportsCommon):
         delivery_5.action_confirm()
 
         delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
@@ -536,7 +550,8 @@ class TestReports(TestReportsCommon):
         delivery_6.action_confirm()
 
         delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
@@ -563,7 +578,8 @@ class TestReports(TestReportsCommon):
 
         # Creates 3 receipts for 20 units.
         receipt_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
@@ -575,7 +591,8 @@ class TestReports(TestReportsCommon):
         receipt_1.action_confirm()
 
         receipt_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
@@ -587,7 +604,8 @@ class TestReports(TestReportsCommon):
         receipt_2.action_confirm()
 
         receipt_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
@@ -873,7 +891,8 @@ class TestReports(TestReportsCommon):
 
         # Create two receipts.
         receipt_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
@@ -887,7 +906,8 @@ class TestReports(TestReportsCommon):
         receipt_1.action_confirm()
 
         receipt_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
@@ -910,7 +930,8 @@ class TestReports(TestReportsCommon):
         # Create a delivery for one of these products and check the report lines
         # are correctly linked to the good receipts.
         delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
+            force_detailed_view=True,
+            default_immediate_transfer=False,
         ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out

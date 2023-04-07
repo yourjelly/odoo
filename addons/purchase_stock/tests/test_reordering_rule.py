@@ -288,7 +288,7 @@ class TestReorderingRule(TransactionCase):
         product_buy_mto = product_form.save()
 
         # Create Delivery Order of 20 product and 10 buy + MTO
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.partner_id = partner
         picking_form.picking_type_id = self.env.ref('stock.picking_type_out')
         with picking_form.move_ids_without_package.new() as move:
@@ -335,7 +335,7 @@ class TestReorderingRule(TransactionCase):
         self.assertFalse(orderpoint_product_mto_buy)
 
         # Create Delivery Order of 10 product and 10 buy + MTO
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.partner_id = partner
         picking_form.picking_type_id = self.env.ref('stock.picking_type_out')
         with picking_form.move_ids_without_package.new() as move:
@@ -388,7 +388,7 @@ class TestReorderingRule(TransactionCase):
         product_buy_mto = product_form.save()
 
         # Create Delivery Order of 20 product and 10 buy + MTO
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.partner_id = partner
         picking_form.picking_type_id = self.env.ref('stock.picking_type_out')
         with picking_form.move_ids_without_package.new() as move:
@@ -434,7 +434,7 @@ class TestReorderingRule(TransactionCase):
         self.assertFalse(orderpoint_product_mto_buy)
 
         # Create Delivery Order of 10 product and 10 buy + MTO
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.partner_id = partner
         picking_form.picking_type_id = self.env.ref('stock.picking_type_out')
         with picking_form.move_ids_without_package.new() as move:
@@ -706,7 +706,7 @@ class TestReorderingRule(TransactionCase):
         postpones the scheduled date of the delivery. The quantities of the
         orderpoint should be reset to zero.
         """
-        delivery_form = Form(self.env['stock.picking'])
+        delivery_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.env.ref('stock.picking_type_out')
         with delivery_form.move_ids_without_package.new() as move:

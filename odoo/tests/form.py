@@ -208,6 +208,18 @@ class Form:
                         domain,
                         field_modifiers.get('invisible', [FALSE_LEAF]),
                     ])
+                if 'column_invisible' in ancestor_modifiers:
+                    # if inside column invisible the field/view is invisible
+                    domain = ancestor_modifiers['column_invisible']
+                    if isinstance(domain, int):
+                        domain = [TRUE_LEAF] if domain else [FALSE_LEAF]
+                    elif isinstance(domain, str):
+                        domain = safe_eval(domain, eval_context)
+                    domain = normalize_domain(domain)
+                    field_modifiers['invisible'] = expression.OR([
+                        domain,
+                        field_modifiers.get('invisible', [FALSE_LEAF]),
+                    ])
 
             # merge field_modifiers into modifiers[field_name]
             if field_name in modifiers:
@@ -324,6 +336,7 @@ class Form:
         assert field_info['type'] not in ('one2many', 'many2many'), "Can't set an x2many field directly, use its proxy instead"
         assert not self._get_modifier(field_name, 'readonly'), f"can't write on readonly field {field_name!r}"
         assert not self._get_modifier(field_name, 'invisible'), f"can't write on invisible field {field_name!r}"
+        assert not self._get_modifier(field_name, 'column_invisible'), f"can't write on invisible (column) field {field_name!r}"
 
         if field_info['type'] == 'many2one':
             assert isinstance(value, BaseModel) and value._name == field_info['relation']
@@ -842,6 +855,7 @@ class X2MProxy:
     def _assert_editable(self):
         assert not self._form._get_modifier(self._field, 'readonly'), f'field {self._field!r} is not editable'
         assert not self._form._get_modifier(self._field, 'invisible'), f'field {self._field!r} is not visible'
+        assert not self._form._get_modifier(self._field, 'column_invisible'), f'field {self._field!r} is not visible'
 
 
 class O2MProxy(X2MProxy):

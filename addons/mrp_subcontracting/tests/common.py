@@ -59,3 +59,8 @@ class TestMrpSubcontractingCommon(TransactionCase):
         cls.comp2_bom = bom_form.save()
 
         cls.warehouse = cls.env['stock.warehouse'].search([], limit=1)
+
+        # remove column_invisible from matrix addon
+        view = cls.env.ref('purchase_product_matrix.purchase_order_form_matrix', raise_if_not_found=False)
+        if view:
+            view.active = False

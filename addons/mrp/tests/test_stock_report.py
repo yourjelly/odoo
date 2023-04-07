@@ -218,7 +218,7 @@ class TestMrpStockReports(TestReportsCommon):
             ],
         }])
 
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.picking_type_id = self.picking_type_out
         picking_form.partner_id = self.partner
         with picking_form.move_ids_without_package.new() as move:

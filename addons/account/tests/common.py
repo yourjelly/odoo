@@ -95,6 +95,11 @@ class AccountTestInvoicingCommon(TransactionCase):
             'supplier_taxes_id': [Command.set((cls.tax_purchase_a + cls.tax_purchase_b).ids)],
         })
 
+        # remove column_invisible from matrix addon
+        view = cls.env.ref('purchase_product_matrix.purchase_order_form_matrix', raise_if_not_found=False)
+        if view:
+            view.active = False
+
         # ==== Fiscal positions ====
         cls.fiscal_pos_a = cls.env['account.fiscal.position'].create({
             'name': 'fiscal_pos_a',

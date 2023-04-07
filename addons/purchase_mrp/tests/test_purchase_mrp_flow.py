@@ -150,6 +150,11 @@ class TestPurchaseMrpFlow(TransactionCase):
             'product_qty': 2.0,
             'bom_id': bom_kit_parent.id})
 
+        # remove column_invisible from matrix addon
+        view = cls.env.ref('purchase_product_matrix.purchase_order_form_matrix', raise_if_not_found=False)
+        if view:
+            view.active = False
+
     @classmethod
     def _create_product(cls, name, uom_id, routes=()):
         p = Form(cls.env['product.product'])
@@ -476,7 +481,7 @@ class TestPurchaseMrpFlow(TransactionCase):
             ]})
 
         # Delivery to trigger replenishment
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.picking_type_id = warehouse.out_type_id
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = finished

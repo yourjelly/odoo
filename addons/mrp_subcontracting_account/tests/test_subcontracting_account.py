@@ -54,7 +54,7 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
 
         all_amls_ids = self.env['account.move.line'].search([]).ids
 
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
         picking_form.partner_id = self.subcontractor_partner1
         with picking_form.move_ids_without_package.new() as move:
@@ -96,7 +96,7 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         ])
 
         # Do the same without any additionnal cost
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
         picking_form.partner_id = self.subcontractor_partner1
         with picking_form.move_ids_without_package.new() as move:

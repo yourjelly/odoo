@@ -28,6 +28,11 @@ class TestAngloSaxonValuationPurchaseMRP(TransactionCase):
 
         cls.env.company.anglo_saxon_accounting = True
 
+        # remove column_invisible from matrix addon
+        view = cls.env.ref('purchase_product_matrix.purchase_order_form_matrix', raise_if_not_found=False)
+        if view:
+            view.active = False
+
     def test_kit_anglo_saxo_price_diff(self):
         """
         Suppose an automated-AVCO configuration and a Price Difference Account defined on

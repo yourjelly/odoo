@@ -196,7 +196,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
         self.env['stock.quant']._update_available_quantity(p2, self.stock_location, nb_product_todo, lot_id=lot_2)
 
         production.action_assign()
-        active_production = production
+        active_production = production.with_context(show_lots_m2o=True)
         for i in range(nb_product_todo):
 
             details_operation_form = Form(active_production.move_raw_ids.filtered(lambda m: m.product_id == p1), view=self.env.ref('stock.view_stock_move_operations'))
@@ -253,7 +253,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
             self.env['stock.quant']._update_available_quantity(p2, self.stock_location, 1, lot_id=serials_p2[-1])
 
         production.action_assign()
-        active_production = production
+        active_production = production.with_context(show_lots_m2o=True)
         for i in range(nb_product_todo):
 
             details_operation_form = Form(active_production.move_raw_ids.filtered(lambda m: m.product_id == p1), view=self.env.ref('stock.view_stock_move_operations'))

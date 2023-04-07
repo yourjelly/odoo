@@ -826,7 +826,7 @@ class TestSubcontractingTracking(TransactionCase):
         wh = picking_receipt.picking_type_id.warehouse_id
         lot_names_finished = [f"subtracked_{i}" for i in range(nb_finished_product)]
 
-        move_details = Form(picking_receipt.move_ids, view='stock.view_stock_move_nosuggest_operations')
+        move_details = Form(picking_receipt.move_ids.with_context(show_lots_text=True), view='stock.view_stock_move_nosuggest_operations')
         for lot_name in lot_names_finished:
             with move_details.move_line_nosuggest_ids.new() as ml:
                 ml.qty_done = 1

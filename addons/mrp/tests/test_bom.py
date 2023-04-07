@@ -1126,7 +1126,7 @@ class TestBoM(TestMrpCommon):
             'type': 'normal',
         })
         # We create a delivery order of 2300 grams
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.picking_type_id = self.env.ref('stock.picking_type_out')
         with picking_form.move_ids_without_package.new() as move:
             move.product_id = product_gram

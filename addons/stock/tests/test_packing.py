@@ -906,7 +906,7 @@ class TestPacking(TestPackingCommon):
         self.assertEqual(len(picking.move_ids), 1, 'Should have only 1 stock move')
 
     def test_picking_state_with_null_qty(self):
-        delivery_form = Form(self.env['stock.picking'])
+        delivery_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_type_id = self.warehouse.out_type_id
         delivery_form.picking_type_id = picking_type_id
         with delivery_form.move_ids_without_package.new() as move_line:

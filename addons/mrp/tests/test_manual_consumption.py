@@ -107,6 +107,7 @@ class TestManualConsumption(TestMrpCommon):
         self.env['stock.quant']._update_available_quantity(c1, self.stock_location, 8, lot_id=lot)
         self.env['stock.quant']._update_available_quantity(c2, self.stock_location, 2)
 
+        mo = mo.with_context(show_lots_m2o=True)
         mo.action_assign()
         mo_form = Form(mo)
         mo_form.qty_producing = 1

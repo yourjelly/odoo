@@ -77,6 +77,7 @@ class TestStockLot(TestStockCommon):
         mo = mo_form.save()
         mo.action_confirm()
         # ... and tries to product with a non-expired lot as component.
+        mo = mo.with_context(show_lots_m2o=True)
         mo_form = Form(mo)
         mo_form.qty_producing = 1
         mo = mo_form.save()
@@ -100,6 +101,7 @@ class TestStockLot(TestStockCommon):
         mo = mo_form.save()
         mo.action_confirm()
         # ... and tries to product with an expired lot as component.
+        mo = mo.with_context(show_lots_m2o=True)
         mo_form = Form(mo)
         mo_form.qty_producing = 1
         mo = mo_form.save()

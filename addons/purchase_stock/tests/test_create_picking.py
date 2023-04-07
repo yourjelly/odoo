@@ -38,6 +38,11 @@ class TestCreatePicking(common.TestProductCommon):
                 })],
         }
 
+        # remove column_invisible from matrix addon
+        view = cls.env.ref('purchase_product_matrix.purchase_order_form_matrix', raise_if_not_found=False)
+        if view:
+            view.active = False
+
     def test_00_create_picking(self):
 
         # Draft purchase order created

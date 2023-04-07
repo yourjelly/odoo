@@ -289,7 +289,7 @@ class TestStockLot(TestStockCommon):
         time_gap = timedelta(seconds=10)
 
         # Receives a tracked production using expiration date.
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.partner_id = partner
         picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
         with picking_form.move_ids_without_package.new() as move:
@@ -299,7 +299,7 @@ class TestStockLot(TestStockCommon):
         receipt.action_confirm()
 
         # Defines a date during the receipt.
-        move_form = Form(receipt.move_ids_without_package, view="stock.view_stock_move_operations")
+        move_form = Form(receipt.move_ids_without_package.with_context(show_lots_text=True), view="stock.view_stock_move_operations")
         with move_form.move_line_ids.new() as line:
             line.lot_name = 'Apple Box #2'
             line.expiration_date = expiration_date
@@ -394,7 +394,7 @@ class TestStockLot(TestStockCommon):
         expired_lot_1 = lot_form.save()
 
         # Case #1: make a delivery with no expired lot.
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.partner_id = partner
         picking_form.picking_type_id = self.env.ref('stock.picking_type_out')
         with picking_form.move_ids_without_package.new() as move:
@@ -418,7 +418,7 @@ class TestStockLot(TestStockCommon):
         self.assertEqual(res, True)
 
         # Case #2: make a delivery with one non-expired lot and one expired lot.
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.partner_id = partner
         picking_form.picking_type_id = self.env.ref('stock.picking_type_out')
         with picking_form.move_ids_without_package.new() as move:
@@ -452,7 +452,7 @@ class TestStockLot(TestStockCommon):
         self.assertEqual(res['res_model'], 'expiry.picking.confirmation')
 
         # Case #3: make a delivery with only on expired lot.
-        picking_form = Form(self.env['stock.picking'])
+        picking_form = Form(self.env['stock.picking'].with_context(default_immediate_transfer=False))
         picking_form.partner_id = partner
         picking_form.picking_type_id = self.env.ref('stock.picking_type_out')
         with picking_form.move_ids_without_package.new() as move:

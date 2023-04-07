@@ -66,3 +66,8 @@ class TestPurchaseRequisitionCommon(common.TransactionCase):
         cls.res_partner_1 = cls.env['res.partner'].create({
             'name': 'Wood Corner',
         })
+
+        # remove column_invisible from matrix addon
+        view = cls.env.ref('purchase_product_matrix.purchase_order_form_matrix', raise_if_not_found=False)
+        if view:
+            view.active = False

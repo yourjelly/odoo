@@ -175,6 +175,7 @@ class TestUnbuild(TestMrpCommon):
                 self.assertEqual(ml.lot_id, lot, 'Wrong reserved lot.')
 
         # FIXME sle: behavior change
+        mo = mo.with_context(show_lots_m2o=True)
         mo_form = Form(mo)
         mo_form.qty_producing = 5.0
         mo = mo_form.save()
@@ -423,6 +424,7 @@ class TestUnbuild(TestMrpCommon):
         })
 
         self.assertEqual(mo.product_qty, 5)
+        mo = mo.with_context(show_lots_m2o=True)
         mo_form = Form(mo)
         mo_form.qty_producing = 3.0
         mo_form.lot_producing_id = lot_finished_1
@@ -804,7 +806,7 @@ class TestUnbuild(TestMrpCommon):
         unbuild_form.save().action_unbuild()
 
         #mo2
-        mo_form = Form(self.env['mrp.production'])
+        mo_form = Form(self.env['mrp.production'].with_context(show_lots_m2o=True))
         mo_form.product_id = product_2
         mo2 = mo_form.save()
         mo2.action_confirm()

@@ -263,7 +263,7 @@ class TestMrpOrder(TestMrpCommon):
         mo_form.qty_producing = 1
         mo = mo_form.save()
 
-        details_operation_form = Form(mo.move_raw_ids[1], view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(mo.move_raw_ids[1].with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = lot_1
             ml.qty_done = 20
@@ -668,7 +668,7 @@ class TestMrpOrder(TestMrpCommon):
         details_operation_form.save()
 
         # p1
-        details_operation_form = Form(mo.move_raw_ids[1], view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(mo.move_raw_ids[1].with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         for i in range(len(details_operation_form.move_line_ids)):
             # reservation in shelf1: 3 lot1, shelf2: 3 lot1, stock: 4 lot2
             with details_operation_form.move_line_ids.edit(i) as line:
@@ -1037,12 +1037,12 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(move_byproduct_3.quantity_done, 2.0)
         self.assertEqual(move_byproduct_3.product_uom, dozen)
 
-        details_operation_form = Form(move_byproduct_1, view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(move_byproduct_1.with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = self.serial_1
             ml.qty_done = 1
         details_operation_form.save()
-        details_operation_form = Form(move_byproduct_2, view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(move_byproduct_2.with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.edit(0) as ml:
             ml.lot_id = self.lot_1
             ml.qty_done = 2
@@ -1071,12 +1071,12 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(move_byproduct_3.quantity_done, 2.0)
         self.assertEqual(move_byproduct_3.product_uom, dozen)
 
-        details_operation_form = Form(move_byproduct_1, view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(move_byproduct_1.with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = self.serial_2
             ml.qty_done = 1
         details_operation_form.save()
-        details_operation_form = Form(move_byproduct_2, view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(move_byproduct_2.with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = self.lot_2
             ml.qty_done = 2
@@ -1184,7 +1184,7 @@ class TestMrpOrder(TestMrpCommon):
         mo_form = Form(mo1)
         mo_form.qty_producing = 1
         mo1 = mo_form.save()
-        details_operation_form = Form(mo1.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(mo1.move_raw_ids[0].with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
@@ -1200,7 +1200,7 @@ class TestMrpOrder(TestMrpCommon):
         mo_form = Form(mo2)
         mo_form.qty_producing = 1
         mo2 = mo_form.save()
-        details_operation_form = Form(mo2.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(mo2.move_raw_ids[0].with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
@@ -1242,7 +1242,7 @@ class TestMrpOrder(TestMrpCommon):
         mo_form.qty_producing = 1
         mo = mo_form.save()
         move_byproduct = mo.move_finished_ids.filtered(lambda m: m.product_id != mo.product_id)
-        details_operation_form = Form(move_byproduct, view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(move_byproduct.with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
@@ -1259,7 +1259,7 @@ class TestMrpOrder(TestMrpCommon):
         mo_form.qty_producing = 1
         mo2 = mo_form.save()
         move_byproduct = mo2.move_finished_ids.filtered(lambda m: m.product_id != mo.product_id)
-        details_operation_form = Form(move_byproduct, view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(move_byproduct.with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
@@ -1278,7 +1278,7 @@ class TestMrpOrder(TestMrpCommon):
         mo_form = Form(mo1)
         mo_form.qty_producing = 1
         mo1 = mo_form.save()
-        details_operation_form = Form(mo1.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(mo1.move_raw_ids[0].with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
@@ -1302,7 +1302,7 @@ class TestMrpOrder(TestMrpCommon):
         mo_form = Form(mo2)
         mo_form.qty_producing = 1
         mo2 = mo_form.save()
-        details_operation_form = Form(mo2.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        details_operation_form = Form(mo2.move_raw_ids[0].with_context(show_lots_m2o=True), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()

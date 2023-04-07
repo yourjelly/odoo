@@ -180,7 +180,7 @@ class TestTraceability(TestMrpCommon):
         mo = mo_form.save()
         mo.action_confirm()
 
-        mo_form = Form(mo)
+        mo_form = Form(mo.with_context(show_lots_m2o=True))
         mo_form.lot_producing_id = self.env['stock.lot'].create({
             'product_id': product_final.id,
             'name': 'Final_lot_1',
