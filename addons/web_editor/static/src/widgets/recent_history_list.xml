@@ -2,12 +2,9 @@
 <templates xml:space="preserve">
     <t t-name="web_editor.One2ManyHistoryList" owl="1"  limit="2">
         <div class="widget-one2manyhistorylist">
-            <div class="d-flex flex-shrink-0 align-items-center w-100 pb-0 px-0 fw-bolder">
-                <hr class="flex-grow-1 w-auto border-top" />
-                <span class="px-3">Recent history</span>
-                <hr class="flex-grow-1 w-auto border-top" />
+            <div class="d-flex flex-shrink-0 align-items-center w-100 pb-10 px-0 fw-bolder">
+                <span class="title">Recent history</span>
             </div>
-            <br/>
             <div>
                 <t t-if="!latestHistoryDiffs.length">
                     <div class="text-center w-100 pb-2 pt-0 px-0 fw-bolder">
@@ -15,12 +12,22 @@
                     </div>
                 </t>
                 <t t-foreach="latestHistoryDiffs" t-as="rec" t-key="rec.id">
+                    <t t-if="this.getDateDay(rec.data.create_date) !== currentDay">
+                        <t t-set="currentDay" t-value="this.getDateDay(rec.data.create_date)"/>
+                        <div class="d-flex flex-shrink-0 align-items-center w-100 pb-0 px-0 fw-bolder">
+                            <hr class="flex-grow-1 w-auto border-top" />
+                            <span class="px-3"><t t-esc="currentDay"/></span>
+                            <hr class="flex-grow-1 w-auto border-top" />
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="d-flex flex-shrink-0 align-items-center w-100 pb-2 pt-2 px-0 fw-bolder">
+                            <hr class="flex-grow-1 mt-0 mb-1 w-auto border-top" />
+                        </div>
+                    </t>
                     <div class="d-flex widget-one2manyhistorylist-entry">
                         <div class="d-flex flex-shrink-0 avatar">
                             <img class="w-100 h-100 rounded-circle o_object_fit_cover" t-att-src="avatarUrl" t-att-title="userName" t-att-alt="userName"/>
-                            <a type="object" href="#" class="btn btn-light"  role="button" t-on-click="() => this.restoreVersion(rec.data.id)" title="Restore this version">
-                                <i class="fa fa-2x fa-undo me-1"></i>
-                            </a>
                         </div>
                         <div class="flex-grow-1">
                             <div class="d-flex flex-wrap align-items-baseline">
@@ -37,13 +44,25 @@
                                     </p>
                                 </div>
                             </div>
-                            <a type="object" href="#" class="btn btn-light"  role="button" t-on-click="() => this.getComparisonAtDiffId(rec.data.id)" title="get text version">
-                                <i class="fa fa-star me-1"></i>
-                            </a>
                         </div>
-                    </div>
-                    <div class="d-flex flex-shrink-0 align-items-center w-100 pb-2 pt-0 px-0 fw-bolder">
-                        <hr class="flex-grow-1  mt-0 mb-1 w-auto border-top" />
+                        <div class="d-flex flex-shrink-0 flex-column align-items-end action-buttons">
+                            <div>
+                                <a type="object" href="#"
+                                   class="btn btn-outline-primary"  role="button"
+                                   t-on-click="() => this.restoreVersion(rec.data.id)"
+                                   title="Restore this version">
+                                <i class="fa fa-fw fa-lg fa-undo"></i> Restore
+                            </a>
+                            </div>
+                            <div>
+                                <a type="object" href="#"
+                                   class="btn btn-outline-secondary"  role="button"
+                                   t-on-click="() => this.getComparisonAtDiffId(rec.data.id, rec.data.create_date)"
+                                   title="Compare with current version">
+                                <i class="fa fa-fw fa-lg fa-retweet"></i> Compare
+                            </a>
+                            </div>
+                        </div>
                     </div>
                 </t>
             </div>

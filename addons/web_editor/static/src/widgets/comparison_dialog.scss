@@ -1,0 +1,16 @@
+div.comparison-container {
+    padding: 8px;
+    border: 1px solid #ddd;
+
+    diffdel {
+        background-color: #f1afaf;
+        text-decoration: line-through;
+        opacity: 0.5;
+    }
+    diffadd {
+        background-color: #c8f1af;
+    }
+    p {
+        margin-bottom: 0.7rem;
+    }
+}

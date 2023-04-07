@@ -1,22 +1,31 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
+import { _lt, _t } from '@web/core/l10n/translation';
 import { registry } from "@web/core/registry";
-import { Component, onWillUpdateProps } from "@odoo/owl";
+import { Component, onWillUpdateProps, markup} from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from '@web/core/browser/browser';
+import { deserializeDateTime } from "@web/core/l10n/dates";
+import { dialogService } from '@web/core/dialog/dialog_service';
+import {
+    ConfirmationDialog
+} from '@web/core/confirmation_dialog/confirmation_dialog';
+import { ComparisonDialog } from '@web_editor/widgets/comparison_dialog';
+
+const { DateTime } = luxon;
 
 export class One2ManyHistoryList extends Component {
     setup() {
         this.orm = useService("orm");
+        this.dialog = useService("dialog");
 
         this.updateLatestHistoryDiffs(this.props);
         onWillUpdateProps(this.updateLatestHistoryDiffs.bind(this));
     }
 
-    updateLatestHistoryDiffs(props) {
+    updateLatestHistoryDiffs(props, limit = 1000) {
         this.historyDiffs = props.record.data["history_diff_ids"];
-        this.latestHistoryDiffs = [...this.historyDiffs.records].reverse().slice(0, 8);
+        this.latestHistoryDiffs = [...this.historyDiffs.records].reverse().slice(0, limit);
     }
 
     get avatarUrl() {
@@ -24,6 +33,16 @@ export class One2ManyHistoryList extends Component {
     }
     get userName() {
         return this.props.record.data.create_uid[1];
+    }
+    /**
+        return a formated version of the day of the provided date
+     */
+    getDateDay(date) {
+        let dateDay = DateTime.fromSQL(date).toLocaleString(DateTime.DATE_FULL);
+        if (dateDay === DateTime.now().toLocaleString(DateTime.DATE_FULL)) {
+            dateDay = _t("Today");
+        }
+        return dateDay;
     }
 
     async restoreVersion(historyDiffId) {
@@ -42,15 +61,21 @@ export class One2ManyHistoryList extends Component {
         return restoredVersion;
     }
 
-    async getComparisonAtDiffId(historyDiffId) {
+    async getComparisonAtDiffId(historyDiffId, date) {
         const comparison = await this.orm.call(
             "field.html.history.diff",
             "get_comparison",
             [historyDiffId],
             {}
         );
-        console.log("get_comparison", comparison);
-        document.querySelector(".note-editable.odoo-editor-editable").innerHTML = comparison;
+
+        let FormatedDate = DateTime.fromSQL(date).toLocaleString(DateTime.DATETIME_MED);
+        // open the comparison in a confimation dialog
+        this.dialog.add(ComparisonDialog, {
+            body: _t("Version from ") + FormatedDate,
+            comparisonHtml: markup(comparison),
+            confirm: () => this.restoreVersion(historyDiffId)
+        });
         return comparison;
     }
 }
