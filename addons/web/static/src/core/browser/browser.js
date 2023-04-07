@@ -13,6 +13,7 @@ let sessionStorage = window.sessionStorage;
 let localStorage = owl.browser.localStorage;
 try {
     // Safari crashes in Private Browsing
+
     localStorage.setItem("__localStorage__", "true");
     localStorage.removeItem("__localStorage__");
 } catch (e) {

@@ -46,65 +46,45 @@
                             </ol>
                         </p>
                         <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert"
-                             attrs="{'invisible':['|', ('l10n_sa_csr', '!=', False), ('l10n_sa_serial_number', '=', False)]}">
+                             attrs="{'invisible':['|', ('l10n_sa_csr_errors', '!=', False), ('l10n_sa_compliance_csid_json', '!=', False)]}">
                             <p class="mb-0">
-                                Generate a CSR before starting the onboarding process.
-                            </p>
-                            <button name="l10n_sa_regen_csr" type="object" icon="fa-key"
-                                    class="btn-info ">
-                                Generate a CSR
-                            </button>
-                        </div>
-                        <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert"
-                             attrs="{'invisible':['|', ('l10n_sa_compliance_csid_json', '!=', False), ('l10n_sa_csr', '=', False)]}">
-                            <p class="mb-0">
-                                Step 1: The Compliance CSID needs to be obtained before running the Compliance Checks.
+                                Onboard the Journal by completing each step
                             </p>
                             <button name="%(l10n_sa_edi_otp_wizard_act_window)d" type="action" icon="fa-key"
                                     class="btn-info ">
-                                Request Compliance CSID
+                                Onboard Journal
                             </button>
                         </div>
-                        <div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert"
-                             attrs="{'invisible':['|', ('l10n_sa_compliance_csid_json', '=', False), ('l10n_sa_compliance_checks_passed', '=', True)]}">
-                            <p class="mb-0">
-                                Step 2: The compliance checks need to be completed before requesting a Production CSID
-                            </p>
-                            <button name="l10n_sa_run_compliance_checks" type="object" icon="fa-refresh"
-                                    class="btn-warning ">
-                                Run Compliance Checks
+                        <div class="alert alert-danger d-flex flex-column align-items-end" role="alert"
+                             attrs="{'invisible':['|', '|', ('l10n_sa_csr_errors', '=', False), ('l10n_sa_compliance_csid_json', '!=', False), ('l10n_sa_production_csid_json', '!=', False)]}">
+                            <div class="w-100">
+                                <h4 role="alert" class="alert-heading">Journal could not be onboarded</h4>
+                                <field name="l10n_sa_csr_errors" nolabel="1" readonly="1"/>
+                                <hr/>
+                            </div>
+                            <button name="%(l10n_sa_edi_otp_wizard_act_window)d" type="action" icon="fa-key"
+                                    class="btn-danger">
+                                Onboard Journal
                             </button>
                         </div>
                         <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert"
-                             attrs="{'invisible':[('l10n_sa_compliance_checks_passed', '=', False)]}">
-                            <p class="mb-0" attrs="{'invisible': [('l10n_sa_production_csid_json', '!=', False)]}">
-                                Step 3: The Production CSID needs to be obtained before any invoice can be
-                                submitted to ZATCA. If it is expired, it needs to be renewed.
-                            </p>
-                            <p class="mb-0" attrs="{'invisible': [('l10n_sa_production_csid_json', '=', False)]}">
+                             attrs="{'invisible':['|', ('l10n_sa_compliance_checks_passed', '=', False), ('l10n_sa_production_csid_json', '=', False)]}">
+                            <p class="mb-0">
                                 The Production certificate is valid until
                                 <field name="l10n_sa_production_csid_validity" readonly="1" nolabel="1"
                                        class="font-weight-bold"/>
                             </p>
-                            <button name="l10n_sa_api_get_production_CSID" type="object" icon="fa-key"
-                                    class="btn-info "
-                                    attrs="{'invisible': [('l10n_sa_production_csid_json', '!=', False)]}">
-                                Request Production CSID
-                            </button>
-                            <button name="%(l10n_sa_edi_otp_wizard_act_window)d" type="action" icon="fa-refresh"
-                                    class="btn-info" context="{'default_l10n_sa_renewal': True}"
-                                    attrs="{'invisible': [('l10n_sa_production_csid_json', '=', False)]}">
-                                Renew Production CSID
-                            </button>
-                        </div>
-                        <div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert"
-                             attrs="{'invisible':[('l10n_sa_csr', '=', False)]}" groups="base.group_no_one">
-                            <p class="mb-0">
-                                If you wish to regenerate the CSR, please click on the following button:
-                            </p>
-                            <button name="l10n_sa_regen_csr" type="object" icon="fa-key" class="btn-danger mt8">
-                                Regenerate the CSR
-                            </button>
+                            <div>
+                                <button name="%(l10n_sa_edi_otp_wizard_act_window)d" type="action" icon="fa-refresh"
+                                        class="btn-info" context="{'default_l10n_sa_renewal': True}">
+                                    Renew Production CSID
+                                </button>
+                                <button name="%(l10n_sa_edi_otp_wizard_act_window)d" type="action" icon="fa-refresh"
+                                    groups="base.group_no_one" class="btn-warning ml-2"
+                                    confirm="Are you sure you wish to re-onboard the Journal?">
+                                    Re-Onboard
+                                </button>
+                            </div>
                         </div>
                     </page>
                 </xpath>

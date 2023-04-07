@@ -5,6 +5,7 @@ from datetime import datetime
 from base64 import b64encode, b64decode
 from odoo import models, fields, service, _, api
 from odoo.exceptions import UserError
+from requests.exceptions import HTTPError, RequestException
 from cryptography import x509
 from cryptography.x509 import ObjectIdentifier, load_der_x509_certificate
 from cryptography.x509.oid import NameOID
@@ -32,12 +33,42 @@ CERT_TEMPLATE_NAME = {
     'preprod': b'\x13\x15PREZATCA-Code-Signing',
 }
 
+SANDBOX_AUTH = {
+    'binarySecurityToken': "TUlJRDFEQ0NBM21nQXdJQkFnSVRid0FBZTNVQVlWVTM0SS8rNVFBQkFBQjdkVEFLQmdncWhrak9QUVFEQWpCak1SVXdFd1lLQ1pJbWlaUHlMR1FCR1JZRmJHOWpZV3d4RXpBUkJnb0praWFKay9Jc1pBRVpGZ05uYjNZeEZ6QVZCZ29Ka2lhSmsvSXNaQUVaRmdkbGVIUm5ZWHAwTVJ3d0dnWURWUVFERXhOVVUxcEZTVTVXVDBsRFJTMVRkV0pEUVMweE1CNFhEVEl5TURZeE1qRTNOREExTWxvWERUSTBNRFl4TVRFM05EQTFNbG93U1RFTE1Ba0dBMVVFQmhNQ1UwRXhEakFNQmdOVkJBb1RCV0ZuYVd4bE1SWXdGQVlEVlFRTEV3MW9ZWGxoSUhsaFoyaHRiM1Z5TVJJd0VBWURWUVFERXdreE1qY3VNQzR3TGpFd1ZqQVFCZ2NxaGtqT1BRSUJCZ1VyZ1FRQUNnTkNBQVRUQUs5bHJUVmtvOXJrcTZaWWNjOUhEUlpQNGI5UzR6QTRLbTdZWEorc25UVmhMa3pVMEhzbVNYOVVuOGpEaFJUT0hES2FmdDhDL3V1VVk5MzR2dU1ObzRJQ0p6Q0NBaU13Z1lnR0ExVWRFUVNCZ0RCK3BId3dlakViTUJrR0ExVUVCQXdTTVMxb1lYbGhmREl0TWpNMGZETXRNVEV5TVI4d0hRWUtDWkltaVpQeUxHUUJBUXdQTXpBd01EYzFOVGc0TnpBd01EQXpNUTB3Q3dZRFZRUU1EQVF4TVRBd01SRXdEd1lEVlFRYURBaGFZWFJqWVNBeE1qRVlNQllHQTFVRUR3d1BSbTl2WkNCQ2RYTnphVzVsYzNNek1CMEdBMVVkRGdRV0JCU2dtSVdENmJQZmJiS2ttVHdPSlJYdkliSDlIakFmQmdOVkhTTUVHREFXZ0JSMllJejdCcUNzWjFjMW5jK2FyS2NybVRXMUx6Qk9CZ05WSFI4RVJ6QkZNRU9nUWFBL2hqMW9kSFJ3T2k4dmRITjBZM0pzTG5waGRHTmhMbWR2ZGk1ellTOURaWEowUlc1eWIyeHNMMVJUV2tWSlRsWlBTVU5GTFZOMVlrTkJMVEV1WTNKc01JR3RCZ2dyQmdFRkJRY0JBUVNCb0RDQm5UQnVCZ2dyQmdFRkJRY3dBWVppYUhSMGNEb3ZMM1J6ZEdOeWJDNTZZWFJqWVM1bmIzWXVjMkV2UTJWeWRFVnVjbTlzYkM5VVUxcEZhVzUyYjJsalpWTkRRVEV1WlhoMFoyRjZkQzVuYjNZdWJHOWpZV3hmVkZOYVJVbE9WazlKUTBVdFUzVmlRMEV0TVNneEtTNWpjblF3S3dZSUt3WUJCUVVITUFHR0gyaDBkSEE2THk5MGMzUmpjbXd1ZW1GMFkyRXVaMjkyTG5OaEwyOWpjM0F3RGdZRFZSMFBBUUgvQkFRREFnZUFNQjBHQTFVZEpRUVdNQlFHQ0NzR0FRVUZCd01DQmdnckJnRUZCUWNEQXpBbkJna3JCZ0VFQVlJM0ZRb0VHakFZTUFvR0NDc0dBUVVGQndNQ01Bb0dDQ3NHQVFVRkJ3TURNQW9HQ0NxR1NNNDlCQU1DQTBrQU1FWUNJUUNWd0RNY3E2UE8rTWNtc0JYVXovdjFHZGhHcDdycVNhMkF4VEtTdjgzOElBSWhBT0JOREJ0OSszRFNsaWpvVmZ4enJkRGg1MjhXQzM3c21FZG9HV1ZyU3BHMQ==",
+    'secret': "Xlj15LyMCgSC66ObnEO/qVPfhSbs3kDTjWnGheYhfSs="
+}
+
 
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
-    l10n_sa_csr = fields.Binary(attachment=False, copy=False, compute="_l10n_sa_compute_csr", store=True,
+    """
+            In order to clear/report an invoice through the ZATCA API, we need to onboard each journal by following 
+            three steps:
+
+                STEP 1: 
+                    Make a call to the Compliance CSID API '/compliance'.
+                    This will return three things: 
+                        -   X509 Compliance Cryptographic Stamp Identifier (CCSID/Certificate) 
+                        -   Password (Secret)
+                        -   Compliance Request ID
+                STEP 2:
+                    Make a call to the Compliance Checks API '/compliance/invoices', by passing the hashed xml content
+                    of the files available in the tests/compliance folder. This will check if the provided 
+                    Standard/Simplified Invoices comply with UBL 2.1 standards in line with ZATCA specifications
+                STEP 3:
+                    Make a call to the Production CSID API '/production/csids' including the Compliance Certificate, 
+                    Password and Request ID from STEP 1.
+                    This will return three things:
+                        -   X509 Production Certificate 
+                        -   Password (Secret)
+                        -   Production Request ID
+        """
+
+    l10n_sa_csr = fields.Binary(attachment=True, copy=False, compute="_l10n_sa_compute_csr", store=True,
+                                groups="base.group_system",
                                 help="The Certificate Signing Request that is submitted to the Compliance API")
+    l10n_sa_csr_errors = fields.Html("Onboarding Errors")
 
     l10n_sa_compliance_csid_json = fields.Char("CCSID JSON", copy=False,
                                                help="Compliance CSID data received from the Compliance CSID API "
@@ -58,13 +89,6 @@ class AccountJournal(models.Model):
 
     # ====== Utility Functions =======
 
-    def _l10n_sa_get_zatca_datetime(self, timestamp):
-        """
-            Helper function that calls the _l10n_sa_get_zatca_datetime method available on the EDI Format model to
-            format date times
-        """
-        return self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_get_zatca_datetime(timestamp)
-
     def _l10n_sa_ready_to_submit_einvoices(self):
         """
             Helper function to know if the required CSIDs have been obtained, and the compliance checks have been
@@ -74,21 +98,13 @@ class AccountJournal(models.Model):
         # TODO Undo
         return True or self.l10n_sa_production_csid_json
 
-    @api.model
-    def _l10n_sa_sign_xml(self, xml_content, certificate_str, signature):
-        """
-            Helper function that calls the _l10n_sa_sign_xml method available on the EDI Format model to sign
-            the UBL document of an invoice
-        """
-        return self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_sign_xml(xml_content, certificate_str, signature)
-
     # ====== CSR Generation =======
 
     def _l10n_sa_csr_required_fields(self):
-        return ['l10n_sa_private_key', 'l10n_sa_organization_unit', 'vat', 'name', 'city', 'country_id', 'state_id']
+        return ['l10n_sa_private_key', 'vat', 'name', 'city', 'country_id', 'state_id']
 
     @api.depends('company_id.l10n_sa_private_key', 'l10n_sa_serial_number',
-                 'company_id.l10n_sa_organization_unit', 'company_id.vat', 'company_id.name', 'company_id.city',
+                 'company_id.vat', 'company_id.name', 'company_id.city',
                  'company_id.country_id', 'company_id.state_id')
     def _l10n_sa_compute_csr(self):
         """
@@ -97,7 +113,8 @@ class AccountJournal(models.Model):
         """
         for journal in self:
             journal._l10n_sa_reset_certificates()
-            if all(journal.company_id[f] for f in self._l10n_sa_csr_required_fields()) and journal.l10n_sa_serial_number:
+            if all(journal.company_id[f] for f in
+                   self._l10n_sa_csr_required_fields()) and journal.l10n_sa_serial_number:
                 journal.l10n_sa_csr = journal._l10n_sa_generate_company_csr()
 
     def _l10n_sa_generate_company_csr(self):
@@ -121,16 +138,16 @@ class AccountJournal(models.Model):
             # Country Name
             (NameOID.COUNTRY_NAME, company_id.country_id.code),
             # Organization Unit Name
-            (NameOID.ORGANIZATIONAL_UNIT_NAME, company_id.l10n_sa_organization_unit),
+            (NameOID.ORGANIZATIONAL_UNIT_NAME, (company_id.vat or '')[:10]),
             # Organization Name
             (NameOID.ORGANIZATION_NAME, _encode(company_id.name)),
-            # # Subject Common Name
+            # Subject Common Name
             (NameOID.COMMON_NAME, _encode(company_id.name)),
-            # # Organization Identifier
+            # Organization Identifier
             (ObjectIdentifier('2.5.4.97'), company_id.vat),
-            # # State/Province Name
+            # State/Province Name
             (NameOID.STATE_OR_PROVINCE_NAME, _encode(company_id.state_id.name)),
-            # # Locality Name
+            # Locality Name
             (NameOID.LOCALITY_NAME, _encode(company_id.city)),
         )
         # The CertificateSigningRequestBuilder instances are immutable, which is why everytime we modify one,
@@ -152,7 +169,8 @@ class AccountJournal(models.Model):
                 # Location
                 x509.NameAttribute(ObjectIdentifier('2.5.4.26'), _encode(company_id.street)),
                 # Industry
-                x509.NameAttribute(ObjectIdentifier('2.5.4.15'), _encode(company_id.partner_id.industry_id.name or 'Other')),
+                x509.NameAttribute(ObjectIdentifier('2.5.4.15'),
+                                   _encode(company_id.partner_id.industry_id.name or 'Other')),
             ]))
         ])
 
@@ -204,6 +222,35 @@ class AccountJournal(models.Model):
             journal.l10n_sa_compliance_csid_json = False
             journal.l10n_sa_compliance_checks_passed = False
 
+    def l10n_sa_api_onboard_journal(self, otp):
+        """
+            Perform the onboarding for the journal. The onboarding consists of three steps:
+                1.  Get the Compliance CSID
+                2.  Perform the Compliance Checks
+                3.  Get the Production CSID
+
+        :param otp: The OTO obtained from the FATOORA portal
+        """
+        self.ensure_one()
+        try:
+            # If the company does not have a private key, we generate it.
+            # The private key is used to generate the CSR but also to sign the invoices
+            if not self.company_id.l10n_sa_private_key:
+                self.company_id.l10n_sa_private_key = self.company_id._l10n_sa_generate_private_key()
+            self.l10n_sa_regen_csr()
+            # STEP 1: The first step of the process is to get the CCSID
+            self.l10n_sa_api_get_compliance_CSID(otp)
+            # STEP 2: Once we have the CCSID, we preform the compliance checks
+            self.l10n_sa_run_compliance_checks()
+            # STEP 3: Once the compliance checks are completed, we request the PCSID
+            self.l10n_sa_api_get_production_CSID()
+            # Once all three steps are completed, we set the errors field to False
+            self.l10n_sa_csr_errors = False
+        except (RequestException, HTTPError, UserError) as e:
+            # In case of an exception returned from ZATCA (not timeout), we will need to regenerate the CSR
+            # As the same CSR cannot be used twice for the same CCSID request
+            self.l10n_sa_csr_errors = e.args[0] or _("Journal could not be onboarded")
+
     def l10n_sa_api_get_compliance_CSID(self, otp):
         """
             Request a Compliance Cryptographic Stamp Identifier (CCSID) from ZATCA
@@ -232,8 +279,8 @@ class AccountJournal(models.Model):
         renew = False
 
         if self.l10n_sa_production_csid_json:
-            time_now = self._l10n_sa_get_zatca_datetime(datetime.now())
-            if self._l10n_sa_get_zatca_datetime(self.l10n_sa_production_csid_validity) < time_now:
+            time_now = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_get_zatca_datetime(datetime.now())
+            if self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_get_zatca_datetime(self.l10n_sa_production_csid_validity) < time_now:
                 renew = True
             else:
                 raise UserError(_("The Production CSID is still valid. You can only renew it once it has expired."))
@@ -272,25 +319,30 @@ class AccountJournal(models.Model):
 
             We read each one of these files separately, sign them, then process them through the Compliance Checks API.
         """
+
         self.ensure_one()
         if self.country_code != 'SA':
             raise UserError(_("Compliance checks can only be run for companies operating from KSA"))
         if not self.l10n_sa_compliance_csid_json:
             raise UserError(_("You need to request the CCSID first before you can proceed"))
-        edi_format = self.env.ref('l10n_sa_edi.edi_sa_zatca')
         CCSID_data = json.loads(self.l10n_sa_compliance_csid_json)
         compliance_files = self._l10n_sa_get_compliance_files()
         for fname, fval in compliance_files.items():
             invoice_hash_hex = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(
                 fval).decode()
-            digital_signature = edi_format._l10n_sa_get_digital_signature(self.company_id, invoice_hash_hex).decode()
+            digital_signature = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_get_digital_signature(self.company_id, invoice_hash_hex).decode()
             prepared_xml = self._l10n_sa_prepare_compliance_xml(fname, fval, CCSID_data['binarySecurityToken'],
                                                                 digital_signature)
             result = self._l10n_sa_api_compliance_checks(prepared_xml.decode(), CCSID_data)
             if result.get('error'):
-                raise UserError(_("Could not complete Compliance Checks for the following file: %s") % fname)
-            if result['validationResults']['status'] != 'PASS':
-                raise UserError(_("Could not complete Compliance Checks for the following file: %s") % fname)
+                raise UserError(_("<p class='mb-0'>Could not complete Compliance Checks for the following file: <b>%s</b></p>") % fname)
+            if result['validationResults']['status'] == 'WARNING':
+                warnings = "".join("<li><b>%s</b>: %s </li>" % (e['code'], e['message']) for e in result['validationResults']['warningMessages'])
+                self.l10n_sa_csr_errors = _("<br/><br/><ul class='pl-3'><b>Warnings:</b>%s</ul>") % warnings
+            elif result['validationResults']['status'] != 'PASS':
+                errors = "".join("<li><b>%s</b>: %s </li>" % (e['code'], e['message']) for e in result['validationResults']['errorMessages'])
+                raise UserError(_("<p class='mb-0'>Could not complete Compliance Checks for the following file: <b>%s</b> %s</p>")
+                                % (fname, _("<br/><br/><ul class='pl-3'><b>Errors:</b>%s</ul>") % errors))
         self.l10n_sa_compliance_checks_passed = True
 
     def _l10n_sa_prepare_compliance_xml(self, xml_name, xml_raw, PCSID, signature):
@@ -298,7 +350,7 @@ class AccountJournal(models.Model):
             Prepare XML content to be used for Compliance checks
         """
         xml_content = self._l10n_sa_prepare_invoice_xml(xml_raw)
-        signed_xml = self._l10n_sa_sign_xml(xml_content, PCSID, signature)
+        signed_xml = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_sign_xml(xml_content, PCSID, signature)
         if xml_name.startswith('simplified'):
             qr_code_str = self.env['account.move']._l10n_sa_get_qr_code(self, signed_xml, b64decode(PCSID).decode(),
                                                                         signature, True)
@@ -372,6 +424,7 @@ class AccountJournal(models.Model):
             raise UserError(_("Please, set a valid OTP to be used for Onboarding"))
         if not self.l10n_sa_csr:
             raise UserError(_("Please, generate a CSR before requesting a CCSID"))
+
         request_data = {
             'body': json.dumps({'csr': self.l10n_sa_csr.decode()}),
             'header': {'OTP': otp}
@@ -392,14 +445,18 @@ class AccountJournal(models.Model):
     def _l10n_sa_api_renew_production_CSID(self, PCSID_data, OTP):
         """
             API call to the Production CSID API to renew a PCSID certificate, password and production request_id
-            Requires an expired Production CSID
+            Requires an expired Production CSIDPCSID_data
         """
         self.ensure_one()
+        # For renewal, the sandbox API expects a specific Username/Password, which are set in the SANDBOX_AUTH dict
+        auth_data = PCSID_data
+        if self.company_id.l10n_sa_api_mode == 'sandbox':
+            auth_data = SANDBOX_AUTH
         request_data = {
             'body': json.dumps({'csr': self.l10n_sa_csr.decode()}),
             'header': {
                 'OTP': OTP,
-                'Authorization': self._l10n_sa_authorization_header(PCSID_data)
+                'Authorization': self._l10n_sa_authorization_header(auth_data)
             }
         }
         return self._l10n_sa_call_api(request_data, ZATCA_API_URLS['apis']['pcsid'], 'PATCH')
@@ -500,9 +557,9 @@ class AccountJournal(models.Model):
         if not self.l10n_sa_production_csid_json:
             raise UserError("Please, make a request to obtain the Compliance CSID and Production CSID before sending "
                             "documents to ZATCA")
-        pcsid_validity = self._l10n_sa_get_zatca_datetime(self.l10n_sa_production_csid_validity)
-        time_now = self._l10n_sa_get_zatca_datetime(datetime.now())
-        if pcsid_validity < time_now:
+        pcsid_validity = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_get_zatca_datetime(self.l10n_sa_production_csid_validity)
+        time_now = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_get_zatca_datetime(datetime.now())
+        if pcsid_validity < time_now and self.company_id.l10n_sa_api_mode != 'sandbox':
             raise UserError(_("Production certificate has expired, please renew the PCSID before proceeding"))
         return json.loads(self.l10n_sa_production_csid_json)
 
@@ -525,22 +582,17 @@ class AccountJournal(models.Model):
                                                     **self._l10n_sa_api_headers(),
                                                     **request_data.get('header')
                                                 }, timeout=(30, 30))
-        except (ValueError, requests.exceptions.RequestException) as ex:
+            request_response.raise_for_status()
+        except (ValueError, HTTPError) as ex:
+            # In the case of an explicit error from ZATCA, i.e we got a response but the code of the response is not 2xx
             return {
-                'error': str(ex),
-                'blocking_level': 'warning',
-                'excepted': True
-            }
-
-        # Authentication errors do not return json
-        if request_response.status_code == 401:
-            return {
-                'error': _("API %s could not be authenticated") % request_url,
+                'error': request_response.text or str(ex),
                 'blocking_level': 'error'
             }
-
-        if request_response.status_code in (303, 400, 404, 500, 409, 502, 503):
-            return {'error': request_response.text, 'blocking_level': 'error'}
+        except RequestException as ex:
+            # Usually only happens if a Timeout occurs. In this case we're not sure if the invoice was accepted or
+            # rejected, or if it even made it to ZATCA
+            return {'error': str(ex), 'blocking_level': 'warning', 'excepted': True}
 
         try:
             response_data = request_response.json()
@@ -580,5 +632,8 @@ class AccountJournal(models.Model):
         :param CSID_data: Either CCSID or PCSID data
         :return: Authorization Header
         """
-        auth_str = "%s:%s" % (CSID_data['binarySecurityToken'], CSID_data['secret'])
+        auth_data = CSID_data
+        # if self.company_id.l10n_sa_api_mode == 'sandbox':
+        #     auth_data = SANDBOX_AUTH
+        auth_str = "%s:%s" % (auth_data['binarySecurityToken'], auth_data['secret'])
         return 'Basic ' + b64encode(auth_str.encode()).decode()

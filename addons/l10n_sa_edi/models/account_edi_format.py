@@ -17,33 +17,17 @@ class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
 
     """
-        In order to clear/report an eInvoice through the ZATCA API, the following logic needs to be applied:
+        Once the journal has been successfully onboarded, we can clear/report invoices through the ZATCA API:
         
-            STEP 1: 
-                Make a call to the Compliance CSID API '/compliance'.
-                This will return three things: 
-                    -   X509 Compliance Cryptographic Stamp Identifier (CCSID/Certificate) 
-                    -   Password (Secret)
-                    -   Compliance Request ID
-            STEP 2:
-                Make a call to the Compliance Checks API '/compliance/invoices'.
-                This will check if the provided Standard/Simplified Invoices complies with UBL 2.1 standards in line 
-                with ZATCA specifications
-            STEP 3:
-                Make a call to the Production CSID API '/production/csids' including the Compliance Certificate, 
-                Password and Request ID from STEP 1.
-                This will return three things:
-                    -   X509 Production Certificate 
-                    -   Password (Secret)
-                    -   Production Request ID
-            STEP 4:
-                A) STANDARD Invoice:
-                    Make a call to the Clearance API '/invoices/clearance/single'.
-                    This will validate the invoice, sign it and apply a QR code then return the result.
-                B) SIMPLIFIED Invoice:
-                    Make a call to the Reporting API '/invoices/reporting/single'.
-                    This will validate the invoice then return the result.
-                The X509 Certificate and password from STEP 3 need to be provided in the request headers.
+            A) STANDARD Invoice:
+                Make a call to the Clearance API '/invoices/clearance/single'.
+                This will validate the invoice, sign it and apply a QR code then return the result.
+                
+            B) SIMPLIFIED Invoice:
+                Make a call to the Reporting API '/invoices/reporting/single'.
+                This will validate the invoice then return the result.
+                
+        The X509 Certificate and password from the PCSID API need to be provided in the request headers.
     """
 
     # ====== Helper Functions =======
@@ -55,13 +39,6 @@ class AccountEdiFormat(models.Model):
         namespaces = namespaces or self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_get_namespaces()
         return etree.tostring(root.xpath(xpath, namespaces=namespaces)[0], with_tail=False,
                               encoding='utf-8', method='xml')
-
-    def _l10n_sa_check_vat_tin(self, vat):
-        """
-            Check company VAT TIN according to ZATCA specifications: The VAT number should start and begin with a '3'
-            and be 15 digits long
-        """
-        return bool(vat and re.match(r'^3[0-9]{13}3$', vat))
 
     # ====== Xades Signing =======
 
@@ -239,7 +216,7 @@ class AccountEdiFormat(models.Model):
         :return: XML content with QR code applied
         """
         root = etree.fromstring(xml_content)
-        qr_code = invoice.with_context(from_pos=True).l10n_sa_qr_code_str
+        qr_code = invoice.l10n_sa_qr_code_str
         qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
         qr_node.text = qr_code
         return etree.tostring(root, with_tail=False)
@@ -268,7 +245,7 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
 
         # Prepare UBL invoice values and render XML file
-        unsigned_xml = invoice.l10n_sa_unsigned_xml
+        unsigned_xml = self._l10n_sa_generate_zatca_template(invoice)
 
         # Load PCISD data and X509 certificate
         PCSID_data = invoice.journal_id._l10n_sa_api_get_pcsid()
@@ -293,7 +270,7 @@ class AccountEdiFormat(models.Model):
         missing = []
         for field in fields_to_check:
             field_value = partner_id[field[0]]
-            if not field_value or (len(field) == 3 and not field[2](field_value)):
+            if not field_value or (len(field) == 3 and not field[2](partner_id, field_value)):
                 missing.append(field[1])
         return missing
 
@@ -304,13 +281,15 @@ class AccountEdiFormat(models.Model):
         partner_id = invoice.company_id.partner_id.commercial_partner_id
         fields_to_check = [
             ('l10n_sa_edi_building_number', _('Building Number for the Buyer is required on Standard Invoices')),
-            ('street2', _('Neighborhood for the Buyer is required on Standard Invoices')),
+            ('street2', _('Neighborhood for the Seller is required on Standard Invoices')),
             ('l10n_sa_additional_identification_scheme',
              _('Additional Identification Scheme is required for the Seller, and must be one of CRN, MOM, MLS, SAG or OTH'),
-             lambda v: v in ('CRN', 'MOM', 'MLS', 'SAG', 'OTH')
+             lambda p, v: v in ('CRN', 'MOM', 'MLS', 'SAG', 'OTH')
              ),
-            ('l10n_sa_additional_identification_number',
-             _('Additional Identification Number is required for commercial partners')),
+            ('vat',
+             _('VAT is required when Identification Scheme is set to Tax Identification Number'),
+             lambda p, v: p.l10n_sa_additional_identification_scheme != 'TIN'
+             ),
             ('state_id', _('State / Country subdivision'))
         ]
         return self._l10n_sa_check_partner_missing_info(partner_id, fields_to_check)
@@ -321,13 +300,20 @@ class AccountEdiFormat(models.Model):
         """
         fields_to_check = []
         if any(tax.l10n_sa_exemption_reason_code in ('VATEX-SA-HEA', 'VATEX-SA-EDU') for tax in
-               invoice.invoice_line_ids.filtered(lambda line: not line.display_type).tax_ids):
+               invoice.invoice_line_ids.filtered(
+                   lambda line: not line.display_type).tax_ids):
             fields_to_check += [
                 ('l10n_sa_additional_identification_scheme',
                  _('Additional Identification Scheme is required for the Buyer if tax exemption reason is either '
-                   'VATEX-SA-HEA or VATEX-SA-EDU, and its values must be NAT'), lambda v: v == 'NAT'),
+                   'VATEX-SA-HEA or VATEX-SA-EDU, and its value must be NAT'), lambda p, v: v == 'NAT'),
                 ('l10n_sa_additional_identification_number',
-                 _('Additional Identification Number is required for commercial partners')),
+                 _('Additional Identification Number is required for commercial partners'),
+                 lambda p, v: p.l10n_sa_additional_identification_scheme != 'TIN'
+                 ),
+            ]
+        elif invoice.commercial_partner_id.l10n_sa_additional_identification_scheme == 'TIN':
+            fields_to_check += [
+                ('vat', _('VAT is required when Identification Scheme is set to Tax Identification Number'))
             ]
         if not invoice._l10n_sa_is_simplified() and invoice.partner_id.country_id.code == 'SA':
             # If the invoice is a non-foreign, Standard (B2B), the Building Number and Neighborhood are required
@@ -359,6 +345,9 @@ class AccountEdiFormat(models.Model):
         """
 
         # Chain integrity check: chain head must have been REALLY posted, and did not time out
+        # When a submission times out, we reset the chain index of the invoice to False so it has to be submitted again
+        # According to ZATCA, if we end up submitting the same invoice more than once, they will directly reach out
+        # to the taxpayer for clarifications
         chain_head = invoice.journal_id._l10n_sa_get_last_posted_invoice()
         if chain_head and chain_head != invoice and not chain_head.l10n_sa_chain_index:
             return {
@@ -366,8 +355,6 @@ class AccountEdiFormat(models.Model):
                 'blocking_level': 'error'
             }
 
-        if not invoice.l10n_sa_confirmation_datetime:
-            invoice.l10n_sa_confirmation_datetime = fields.Datetime.now()
         if not invoice.l10n_sa_chain_index:
             # If the Invoice doesn't have a chain index, it means it either has not been submitted before,
             # or it was submitted and rejected. Either way, we need to assign it a new Chain Index and regenerate
@@ -449,7 +436,7 @@ class AccountEdiFormat(models.Model):
             errors.append(
                 _("- Finish the Onboarding procees for journal %s by requesting the CSIDs and completing the checks.") % journal.name)
 
-        if not self._l10n_sa_check_vat_tin(company.vat):
+        if not company.vat:
             errors.append(
                 _("- The company VAT identification must contain 15 digits, with the first and last digits being '3' as per the BR-KSA-39 ZATCA KSA business rule."))
         if not company._l10n_sa_check_organization_unit():
@@ -460,7 +447,7 @@ class AccountEdiFormat(models.Model):
                 _("- No Private Key was generated for company %s. A Private Key is mandatory in order to generate Certificate Signing Requests (CSR).") % company.name)
         if not journal.l10n_sa_serial_number:
             errors.append(
-                _("- No Serial Number was assigned for journal %s. A Serial Number (provided by ZATCA) is mandatory in order to generate Certificate Signing Requests (CSR).") % journal.name)
+                _("- No Serial Number was assigned for journal %s. A Serial Number is mandatory in order to generate Certificate Signing Requests (CSR).") % journal.name)
 
         supplier_missing_info = self._l10n_sa_check_seller_missing_info(invoice)
         customer_missing_info = self._l10n_sa_check_buyer_missing_info(invoice)
@@ -468,8 +455,7 @@ class AccountEdiFormat(models.Model):
         supplier = invoice.company_id.partner_id.commercial_partner_id
         customer = invoice.commercial_partner_id
 
-        if supplier.country_id == customer.country_id and customer.vat and not self._l10n_sa_check_vat_tin(
-                customer.vat):
+        if supplier.country_id == customer.country_id and not customer.vat:
             errors.append(
                 _('- If it is set, and the invoice is not an Export Invoice, the buyer\'s VAT number must contain 15 digits, with the first and last digits being "3"'))
 
@@ -479,9 +465,7 @@ class AccountEdiFormat(models.Model):
             errors.append(_set_missing_partner_fields(customer_missing_info, _("Customer")))
         if invoice.invoice_date > date.today():
             errors.append(_("- Please, make sure the invoice date is set to either the same as or before Today."))
-        if invoice.move_type in ('in_refund', 'out_refund') and not (
-                (invoice.reversed_entry_id or invoice.ref) and invoice.l10n_sa_adjustment_reason
-        ):
+        if invoice.move_type in ('in_refund', 'out_refund') and not (invoice.reversed_entry_id and invoice.ref):
             errors.append(
                 _("- Please, make sure both the Reversed Entry and the Reversal Reason are specified when confirming a Credit/Debit note"))
         return errors
@@ -511,14 +495,6 @@ class AccountEdiFormat(models.Model):
         if self.code != 'sa_zatca' or invoice.company_id.country_code != 'SA':
             return super()._post_invoice_edi(invoices)
         if not invoice.journal_id.l10n_sa_compliance_checks_passed:
-            return {invoice: {'error': _("ZATCA Compliance Checks need to be completed for the current company "
+            return {invoice: {'error': _("ZATCA Compliance Checks need to be completed for the current journal "
                                          "before invoices can be submitted to the Authority")}}
         return {invoice: self._l10n_sa_post_zatca_edi(invoice)}
-
-    def _cancel_invoice_edi(self, invoices):
-        """
-            Override to cancel sa_zatca invoice EDIs
-        """
-        if self.code != "sa_zatca" or invoices.edi_state != 'sent':
-            return super()._cancel_invoice_edi(invoices)
-        raise UserError(_("Cannot cancel an invoice that has been reported/cleared by ZATCA"))

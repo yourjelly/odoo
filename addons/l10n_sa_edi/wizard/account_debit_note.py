@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models
 from odoo.tools.translate import _
 from odoo.exceptions import UserError
 
 
 class AccountDebitNote(models.TransientModel):
     _inherit = 'account.debit.note'
-
-    def _prepare_default_values(self, move):
-        return {
-            **super(AccountDebitNote, self)._prepare_default_values(move),
-            'l10n_sa_adjustment_reason': self.reason
-        }
 
     def create_debit(self):
         self.ensure_one()

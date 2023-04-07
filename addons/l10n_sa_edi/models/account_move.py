@@ -13,16 +13,8 @@ from cryptography.x509 import load_der_x509_certificate
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    l10n_sa_adjustment_reason = fields.Char("Adjustment Reason",
-                                            help="Reason for which the original invoice was adjusted")
-
     l10n_sa_uuid = fields.Char(string='Document UUID', copy=False, help="Universally unique identifier of the Invoice")
 
-    l10n_sa_submission_state = fields.Selection([('to_send', 'To Send'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'),
-                                                 ('cancelled', 'Cancelled')], string="Submission State",
-                                                compute="_l10n_sa_compute_submission_state", store=True)
-
-    l10n_sa_unsigned_xml = fields.Text("Unsigned XML", copy=False)
     l10n_sa_invoice_signature = fields.Char("Unsigned XML Signature", copy=False)
 
     l10n_sa_chain_index = fields.Integer(
@@ -40,26 +32,27 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self.partner_id.company_type == 'person'
 
-    @api.depends('edi_document_ids', 'edi_document_ids.state')
-    def _l10n_sa_compute_submission_state(self):
-        for move in self:
-            sa_document = next((d for d in move.edi_document_ids if d.edi_format_id.code == 'sa_zatca'), None)
-            move.l10n_sa_submission_state = sa_document.state if sa_document else 'to_send'
-
     @api.depends('amount_total_signed', 'amount_tax_signed', 'l10n_sa_confirmation_datetime', 'company_id',
-                 'company_id.vat', 'journal_id', 'journal_id.l10n_sa_production_csid_json', 'l10n_sa_unsigned_xml',
+                 'company_id.vat', 'journal_id', 'journal_id.l10n_sa_production_csid_json',
                  'l10n_sa_invoice_signature', 'l10n_sa_chain_index')
     def _compute_qr_code_str(self):
         """ Override to update QR code generation in accordance with ZATCA Phase 2"""
         for move in self:
             move.l10n_sa_qr_code_str = ''
-            if move.country_code == 'SA' and move.move_type in (
-                    'out_invoice', 'out_refund') and move.l10n_sa_unsigned_xml and move.l10n_sa_chain_index:
-                x509_cert = json.loads(move.journal_id.l10n_sa_production_csid_json)['binarySecurityToken']
-                qr_code_str = move._l10n_sa_get_qr_code(move.journal_id, move.l10n_sa_unsigned_xml,
-                                                        b64decode(x509_cert), move.l10n_sa_invoice_signature,
-                                                        move._l10n_sa_is_simplified())
-                move.l10n_sa_qr_code_str = b64encode(qr_code_str).decode()
+            if move.country_code == 'SA' and move.move_type in ('out_invoice', 'out_refund') and move.l10n_sa_chain_index:
+                edi_format = self.env.ref('l10n_sa_edi.edi_sa_zatca')
+                zatca_document = move.edi_document_ids.filtered(lambda d: d.edi_format_id == edi_format)
+                if move._l10n_sa_is_simplified():
+                    x509_cert = json.loads(move.journal_id.l10n_sa_production_csid_json)['binarySecurityToken']
+                    xml_content = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_generate_zatca_template(move)
+                    qr_code_str = move._l10n_sa_get_qr_code(move.journal_id, xml_content, b64decode(x509_cert), move.l10n_sa_invoice_signature, move._l10n_sa_is_simplified())
+                    move.l10n_sa_qr_code_str = b64encode(qr_code_str).decode()
+                elif zatca_document.state == 'sent' and zatca_document.attachment_id.datas:
+                    document_xml = zatca_document.attachment_id.datas.decode()
+                    root = etree.fromstring(b64decode(document_xml))
+                    qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
+                    move.l10n_sa_qr_code_str = qr_node.text
+
 
     def _l10n_sa_get_qr_code_encoding(self, tag, field, int_length=1):
         """
@@ -119,7 +112,7 @@ class AccountMove(models.Model):
 
         return qr_code_str
 
-    def _l10n_sa_get_previous_invoice(self):
+    def _l10n_sa_get_previous_submission(self):
         """
             Get the previously submitted EDI document, whether it was accepted or rejected.
         """
@@ -135,11 +128,13 @@ class AccountMove(models.Model):
         for move in self.filtered(lambda m: m.is_invoice() and m.country_code == 'SA'):
             move.edi_show_cancel_button = False
 
-    def button_recalculate_edi_values(self):
-        """
-            Force recalculate unsigned data (UUID, XML content, signature) for the invoice in case it is needed.
-        """
-        return self._l10n_sa_generate_unsigned_data()
+    # todo: remove after testing
+    def regen_xml(self):
+        edi_format = self.env.ref('l10n_sa_edi.edi_sa_zatca')
+        # Build the dict of values to be used for generating the Invoice XML content
+        # Set Invoice field values required for generating the XML content, hash and signature
+        self.l10n_sa_uuid = uuid.uuid4()
+        return edi_format._l10n_sa_generate_zatca_template(self)
 
     def _l10n_sa_generate_unsigned_data(self):
         """
@@ -152,10 +147,9 @@ class AccountMove(models.Model):
         # Build the dict of values to be used for generating the Invoice XML content
         # Set Invoice field values required for generating the XML content, hash and signature
         self.l10n_sa_uuid = uuid.uuid4()
-        self.l10n_sa_unsigned_xml = edi_format._l10n_sa_generate_zatca_template(self)
         # Once the required values are generated, we hash the invoice, then use it to generate a Signature
         invoice_hash_hex = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(
-            self.l10n_sa_unsigned_xml).decode()
+            edi_format._l10n_sa_generate_zatca_template(self)).decode()
         self.l10n_sa_invoice_signature = edi_format._l10n_sa_get_digital_signature(self.journal_id.company_id,
                                                                                    invoice_hash_hex).decode()
 
@@ -165,10 +159,10 @@ class AccountMove(models.Model):
             This is useful to figure out why an invoice was rejected since we also save the errors along with the state.
         """
         self.ensure_one()
-        self.l10n_sa_submission_ids = [(0, 0, {
+        self.sudo().l10n_sa_submission_ids = [(0, 0, {
             "l10n_sa_move_id": self.id,
             "l10n_sa_chain_index": self.l10n_sa_chain_index,
-            "l10n_sa_xml_content": xml_content,
+            "l10n_sa_xml_content": b64encode(xml_content),
             "l10n_sa_status": "rejected" if (error or (response_data and response_data.get('error'))) else "accepted",
             "l10n_sa_errors": json.dumps(response_data),
         })]
@@ -179,3 +173,25 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         return all(line.tax_ids for line in self.invoice_line_ids.filtered(lambda line: not line.display_type))
+
+    def _l10n_sa_download_xml_content(self):
+        self.ensure_one()
+        att_id = self.env['ir.attachment'].search([('res_model', '=', 'account.move'), ('res_id', '=', self.id), ('name', '=', 'zatca_xml.xml')])
+        if att_id:
+            att_id.unlink()
+        xml_content = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_generate_zatca_template(self)
+        root = etree.fromstring(xml_content)
+        root.remove(root.xpath('//ext:UBLExtensions', namespaces=self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_get_namespaces())[0])
+        att_id = self.env['ir.attachment'].create({
+            'res_model': 'account.move',
+            'res_id': self.id,
+            'name': 'zatca_xml.xml',
+            'type': 'binary',
+            'raw': etree.tostring(root)
+        })
+        return {
+            'type': 'ir.actions.act_url',
+            'name': 'Download XML',
+            'target': '_blank',
+            'url': '/web/content/%s/zatca_xml.xml' % (att_id.id)
+        }

@@ -2,11 +2,22 @@
 <odoo>
     <data>
 
+        <record id="action_download_xml" model="ir.actions.server">
+            <field name="name">Download XML</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="binding_model_id" ref="account.model_account_move"/>
+            <field name="binding_view_types">form</field>
+            <field name="state">code</field>
+            <field name="code">
+                action = record._l10n_sa_download_xml_content()
+            </field>
+        </record>
+
         <template id="ubl_21_PaymentMeansType_zatca" inherit_id="account_edi_ubl_cii.ubl_20_PaymentMeansType">
             <xpath expr="//*[local-name()='InstructionID']" position="after">
                 <cbc:InstructionNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                                      xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-                                     t-out="vals.get('adjustment_reason')"/>
+                                     t-out="vals['adjustment_reason']"/>
             </xpath>
         </template>
 
@@ -124,11 +135,10 @@
         <template id="ubl_21_InvoiceLineType_zatca" inherit_id="account_edi_ubl_cii.ubl_20_InvoiceLineType">
             <!-- Remove SellersItemIdentification if None -->
             <xpath expr="//*[local-name()='SellersItemIdentification']" position="replace">
-                <cac:SellersItemIdentification t-if="vals.get('sellers_item_identification_vals')"
-                                               xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+                <cac:SellersItemIdentification xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                                                xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                                                xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-                    <cbc:ID t-out="item_vals.get('sellers_item_identification_vals', {}).get('id')"/>
+                    <cbc:ID t-out="item_vals['sellers_item_identification_vals']['id']"/>
                 </cac:SellersItemIdentification>
             </xpath>
             <xpath expr="//*[local-name()='CreditedQuantity']" position="replace"/>
@@ -137,7 +147,19 @@
                         xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
                         t-att="vals.get('invoiced_quantity_attrs', {})"
-                        t-out="vals.get('invoiced_quantity')"/>
+                        t-out="vals['invoiced_quantity']"/>
+            </xpath>
+            <xpath expr="//*[local-name()='LineExtensionAmount']" position="after">
+                <cac:DocumentReference
+                        t-if="vals.get('prepayment_vals', {})"
+                        xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+                        xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                        xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                    <cbc:ID t-out="vals['prepayment_vals']['prepayment_id']"/>
+                    <cbc:IssueDate t-esc="vals['prepayment_vals']['issue_date'].strftime('%Y-%m-%d')"/>
+                    <cbc:IssueTime t-esc="vals['prepayment_vals']['issue_date'].strftime('%H:%M:%S')"/>
+                    <cbc:DocumentTypeCode t-out="vals['prepayment_vals']['document_type_code']"/>
+                </cac:DocumentReference>
             </xpath>
         </template>
 
@@ -146,17 +168,17 @@
                 <cbc:RoundingAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                                     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
                                     t-att-currencyID="vals['currency'].name"
-                                    t-esc="format_float(vals.get('rounding_amount'), vals.get('currency_dp'))"/>
+                                    t-esc="format_float(vals.get('line_amount_total'), vals['currency_dp'])"/>
             </xpath>
         </template>
 
         <template id="ubl_21_PartyType_zatca" inherit_id="account_edi_ubl_cii.ubl_20_PartyType" primary="True">
             <xpath expr="//*[local-name()='PartyIdentification']" position="replace">
                 <cac:PartyIdentification t-if="party_vals.get('id')"
-                                                xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-                                               xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-                                               xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-                    <cbc:ID t-att="party_vals.get('id_attrs', {})" t-out="party_vals.get('id')"/>
+                                         xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+                                         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                                         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                    <cbc:ID t-att="party_vals.get('id_attrs', {})" t-out="party_vals['id']"/>
                 </cac:PartyIdentification>
             </xpath>
         </template>
@@ -186,8 +208,8 @@
                 <cbc:InvoiceTypeCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                                      xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                                      xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-                                     t-att="vals.get('invoice_type_code_attrs', {})"
-                                     t-out="vals.get('invoice_type_code')"/>
+                                     t-att="vals['invoice_type_code_attrs']"
+                                     t-out="vals['invoice_type_code']"/>
             </xpath>
 
             <!--    For ZATCA, we do not use CreditNoteLine or DebitNoteLine tags. We always use InvoiceLine. -->
@@ -213,7 +235,7 @@
                                     xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                                     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                                     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-                    <cbc:ID t-out="vals.get('order_reference')"/>
+                    <cbc:ID t-out="vals['order_reference']"/>
                 </cac:OrderReference>
             </xpath>
 
@@ -233,9 +255,7 @@
                 </t>
             </xpath>
 
-            <!-- Add Tax Currency Code in compliance with rules BR-KSA-EN16931-02 and BR-KSA-68
-                     The tax currency should be the same as the amount currency, since Odoo does not support
-                     different currencies for tax amounts -->
+            <!-- Add Tax Currency Code in compliance with rules BR-KSA-EN16931-02 and BR-KSA-68 -->
             <xpath expr="//*[local-name()='DocumentCurrencyCode']" position="after">
                 <cbc:TaxCurrencyCode xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
                                      xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
@@ -270,7 +290,8 @@
                     <!-- Add Signature references in compliance with rules BR-KSA-29 and BR-KSA-30 -->
                     <cac:Signature t-if="invoice._l10n_sa_is_simplified()">
                         <cbc:ID>urn:oasis:names:specification:ubl:signature:Invoice</cbc:ID>
-                        <cbc:SignatureMethod>urn:oasis:names:specification:ubl:dsig:enveloped:xades</cbc:SignatureMethod>
+                        <cbc:SignatureMethod>urn:oasis:names:specification:ubl:dsig:enveloped:xades
+                        </cbc:SignatureMethod>
                     </cac:Signature>
                 </t>
             </xpath>

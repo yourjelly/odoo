@@ -37,17 +37,6 @@
                 </tree>
             </field>
         </record>
-        
-        <record id="l10n_sa_edi_submission_action" model="ir.actions.act_window">
-            <field name="name">ZATCA Submissions</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">l10n_sa_edi.submission</field>
-            <field name="view_mode">tree,form</field>
-        </record>
-
-        <!-- This Menu Item must have a parent and an action -->
-        <menuitem id="l10n_sa_edi_submission_menu" name="ZATCA Submissions" groups="base.group_no_one"
-                  parent="account.menu_finance_receivables" action="l10n_sa_edi_submission_action" sequence="999"/>
     
     </data>
 </odoo>
