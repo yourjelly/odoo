@@ -77,4 +77,10 @@ export class StockMove extends Component {
         };
         this.props.record.model.action.doAction(action, options);
     }
+
+    async reload() {
+        await this.props.parent.load();
+        await this.props.record.load();
+        this.props.record.model.notify();
+    }
 }

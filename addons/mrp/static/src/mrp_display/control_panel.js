@@ -17,15 +17,11 @@ export class ControlPanelButtons extends Component {
 
     get workcenterButtons() {
         const countByWorkcenter = this.props.workorders.reduce((workcenterButtons, workorder) => {
-            const id = workorder.data.workcenter_id[0];
+            const [id, name] = workorder.data.workcenter_id;
             if (workcenterButtons[id]) {
                 workcenterButtons[id].count++;
             } else {
-                const name = workorder.data.workcenter_id[1];
-                workcenterButtons[id] = {
-                    count: 1,
-                    name: name,
-                };
+                workcenterButtons[id] = { count: 1, name };
             }
             return workcenterButtons;
         }, {});

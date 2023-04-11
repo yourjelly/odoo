@@ -99,7 +99,7 @@ export class MrpDisplayRecord extends Component {
         const { resModel, resId } = this.props.record;
         if (resModel === "mrp.workorder") {
             await this.model.orm.call(resModel, "button_done", [resId]);
-        } else if (this.trackingMode == "mass_produce") {
+        } else if (this.trackingMode === "mass_produce") {
             const params = { mark_as_done: true };
             const action = await this.model.orm.call(
                 resModel,
@@ -107,23 +107,24 @@ export class MrpDisplayRecord extends Component {
                 [resId],
                 params
             );
-            return this._doAction(action);
+            if (action && typeof action === "object") {
+                return this._doAction(action);
+            }
         } else {
             const kwargs = {};
             if (this.trackingMode == "serial") {
-                kwargs["context"] = {
+                kwargs.context = {
                     skip_redirection: true,
                 };
                 if (this.record.product_qty > 1) {
-                    kwargs.context["skip_backorder"] = true;
-                    kwargs.context["mo_ids_to_backorder"] = [resId];
+                    kwargs.context.skip_backorder = true;
+                    kwargs.context.mo_ids_to_backorder = [resId];
                 }
             }
             const action = await this.model.orm.call(resModel, "button_mark_done", [resId], kwargs);
             if (action && typeof action === "object") {
                 return this._doAction(action);
             }
-            this.model.load();
         }
     }
 
