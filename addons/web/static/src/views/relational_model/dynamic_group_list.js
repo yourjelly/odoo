@@ -119,7 +119,12 @@ export class DynamicGroupList extends DynamicList {
             const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
             sourceGroup._removeRecords([record]);
             targetGroup.addRecord(record, refIndex + 1);
+            // step 2: update record value
+            const value = targetGroup.value;
+            await record.update({ [this.groupByField.name]: value });
+            await record.save({ noReload: true });
         }
+
         return targetGroup.list._resequence();
     }
 }
