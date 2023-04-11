@@ -845,6 +845,7 @@ class expression(object):
                         # rewrite condition in terms of ids1
                         op1 = 'not in' if operator in NEGATIVE_TERM_OPERATORS else 'in'
                         push(('id', op1, ids1), model, alias)
+                        print("Inverse field no-store which doesn't use the _search ?", inverse_field, right, (('id', op1, ids1), model, alias))
 
                 else:
                     if inverse_field.store and not (inverse_is_int and domain):
@@ -862,6 +863,7 @@ class expression(object):
                         # rewrite condition to match records with/without lines
                         op1 = 'in' if operator in NEGATIVE_TERM_OPERATORS else 'not in'
                         push(('id', op1, ids1), model, alias)
+                        print("Inverse field no-store which doesn't use the _search ?", inverse_field, right, (('id', op1, ids1), model, alias))
 
             elif field.type == 'many2many':
                 rel_table, rel_id1, rel_id2 = field.relation, field.column1, field.column2
@@ -987,7 +989,7 @@ class expression(object):
             # -------------------------------------------------
 
             else:
-                if field.type == 'datetime' and right:
+                if field.type == 'datetime' and right:  # noqa: PLR5501
                     if isinstance(right, str) and len(right) == 10:
                         if operator in ('>', '<='):
                             right += ' 23:59:59'
