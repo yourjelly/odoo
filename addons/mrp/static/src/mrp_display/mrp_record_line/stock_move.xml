@@ -7,7 +7,7 @@
             t-on-animationend="onAnimationEnd">
             <span class="me-2">
                 <t t-esc="props.record.data.quantity_done"/>
-                <t t-if="props.record.data.product_uom_qty"> / <t t-esc="props.record.data.product_uom_qty"/></t>
+                <t t-if="toConsumeQuantity"> / <t t-esc="toConsumeQuantity"/></t>
             </span>
             <span t-att-class="isComplete ? 'text-decoration-line-through' : ''"
                   t-esc="props.record.data.product_id[1]"/>

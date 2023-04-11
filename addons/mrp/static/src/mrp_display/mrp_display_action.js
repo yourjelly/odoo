@@ -21,6 +21,7 @@ export class MrpDisplayAction extends Component {
     get fieldsStructure() {
         return {
             "mrp.production": [
+                "show_serial_mass_produce",
                 "move_raw_ids",
                 "name",
                 "product_id",

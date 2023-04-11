@@ -41,6 +41,25 @@ export class MrpDisplayRecord extends Component {
         return this.record.is_user_working;
     }
 
+    get trackingMode() {
+        const { resModel } = this.props.record;
+        if (resModel === "mrp.workorder") {
+            return true;
+        }
+        if (this.record.product_tracking == "none") {
+            return "none";
+        } else if (this.record.product_tracking == "lot") {
+            return "lot";
+        } else if (
+            this.record.product_tracking == "serial" &&
+            !this.record.show_serial_mass_produce
+        ) {
+            return "serial";
+        } else {
+            return "mass_produce";
+        }
+    }
+
     getComponent(record) {
         if (record.resModel === "stock.move") {
             return StockMove;
@@ -48,17 +67,6 @@ export class MrpDisplayRecord extends Component {
             return MrpWorkorder;
         }
         throw Error(`No Component found for the model "${record.resModel}"`);
-    }
-
-    get tracking() {
-        const { resModel } = this.props.record;
-        if (resModel === "mrp.workorder" || this.record.has_tracking == "none") {
-            return false;
-        }
-        if (this.record.has_tracking == "lot" || this.record.product_qty == 1) {
-            return "single";
-        }
-        return "multiple";
     }
 
     async onClickHeader() {
@@ -91,7 +99,7 @@ export class MrpDisplayRecord extends Component {
         const { resModel, resId } = this.props.record;
         if (resModel === "mrp.workorder") {
             await this.model.orm.call(resModel, "button_done", [resId]);
-        } else if (this.tracking == "multiple") {
+        } else if (this.trackingMode == "mass_produce") {
             const params = { mark_as_done: true };
             const action = await this.model.orm.call(
                 resModel,
@@ -99,16 +107,33 @@ export class MrpDisplayRecord extends Component {
                 [resId],
                 params
             );
-            const options = {
-                onClose: () => {
-                    this.model.load();
-                },
-            };
-            return this.model.action.doAction(action, options);
+            return this._doAction(action);
         } else {
-            await this.model.orm.call(resModel, "button_mark_done", [resId]);
+            const kwargs = {};
+            if (this.trackingMode == "serial") {
+                kwargs["context"] = {
+                    skip_redirection: true,
+                };
+                if (this.record.product_qty > 1) {
+                    kwargs.context["skip_backorder"] = true;
+                    kwargs.context["mo_ids_to_backorder"] = [resId];
+                }
+            }
+            const action = await this.model.orm.call(resModel, "button_mark_done", [resId], kwargs);
+            if (action && typeof action === "object") {
+                return this._doAction(action);
+            }
+            this.model.load();
         }
-        this.model.load();
+    }
+
+    _doAction(action) {
+        const options = {
+            onClose: () => {
+                this.model.load();
+            },
+        };
+        return this.model.action.doAction(action, options);
     }
 
     _productionDisplayDoneButton() {

@@ -646,9 +646,12 @@ class MrpProduction(models.Model):
     def _compute_show_serial_mass_produce(self):
         self.show_serial_mass_produce = False
         for order in self:
-            if order.state in ['confirmed', 'progress'] and order.product_id.tracking == 'serial' and \
+            if order.state in ['confirmed', 'progress', 'to_close'] and order.product_id.tracking == 'serial' and \
                     float_compare(order.product_qty, 1, precision_rounding=order.product_uom_id.rounding) > 0 and \
                     float_compare(order.qty_producing, order.product_qty, precision_rounding=order.product_uom_id.rounding) < 0:
+                moves_with_tracking = order.move_raw_ids.filtered(lambda m: m.has_tracking)
+                if any(len(m.move_line_ids.lot_id) > 1 for m in moves_with_tracking):
+                    continue
                 order.show_serial_mass_produce = True
 
     @api.depends('state', 'move_finished_ids')
@@ -1813,6 +1816,9 @@ class MrpProduction(models.Model):
                 'is_locked': True,
                 'state': 'done',
             })
+
+        if self.env.context.get('skip_redirection'):
+            return True
 
         if not backorders:
             if self.env.context.get('from_workorder'):

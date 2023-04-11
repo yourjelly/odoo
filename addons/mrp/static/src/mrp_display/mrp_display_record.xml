@@ -10,7 +10,11 @@
                 </div>
                 <div class="d-flex justify-content-between">
                     <div class="o_finished_product">
-                        <span class="fw-bold me-2"><t t-esc="record.product_qty || record.qty_production"/>x</span>
+                        <span class="fw-bold me-2">
+                            <t t-if="this.trackingMode != 'serial'" t-esc="record.product_qty || record.qty_production"/>
+                            <t t-else="">1</t>
+                            x
+                        </span>
                         <span t-esc="record.product_id[1]"/>
                     </div>
                     <MrpTimer t-if="record.duration || record.is_user_working" value="record.duration" ongoing="active"/>
@@ -30,14 +34,14 @@
     </t>
 
     <t t-name="mrp.MrpDisplayProductionHeader" owl="1">
-        <t t-if="! tracking || tracking == 'multiple'">
+        <t t-if="this.trackingMode == 'none' || this.trackingMode == 'mass_produce'">
             <span class="col-12 h5" t-esc="record.display_name"/>
         </t>
         <t t-else="">
             <span class="col-8 h5" t-esc="record.display_name"/>
             <div class="col-4 text-end">
                 <span t-if="record.lot_producing_id.length" class=" h5" t-esc="record.lot_producing_id[1]"/>
-                <button t-if="! record.lot_producing_id.length" 
+                <button t-if="!record.lot_producing_id.length"
                 class="btn btn-primary fa fa-plus-square-o"
                 t-on-click="actionAssignSerial"/>
             </div>
