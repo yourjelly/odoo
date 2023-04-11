@@ -156,9 +156,19 @@ class TestImage(TransactionCase):
         """Test the verify_resolution parameter of image_process."""
         res = tools.image_process(self.img_1920x1080_jpeg, verify_resolution=True)
         self.assertNotEqual(res, False, "size ok")
+<<<<<<< HEAD
         image_excessive = tools.image_apply_opt(Image.new('RGB', (50001, 1000)), 'PNG')
         with self.assertRaises(ValueError, msg="size excessive"):
             tools.image_process(image_excessive, verify_resolution=True)
+||||||| parent of 663970e9d21 (temp)
+        base64_image_excessive = tools.image_to_base64(Image.new('RGB', (50001, 1000)), 'PNG')
+        with self.assertRaises(ValueError, msg="size excessive"):
+            tools.image_process(base64_image_excessive, verify_resolution=True)
+=======
+        base64_image_excessive = tools.image_to_base64(Image.new('RGB', (50001, 1000)), 'PNG')
+        with self.assertRaises(UserError, msg="size excessive"):
+            tools.image_process(base64_image_excessive, verify_resolution=True)
+>>>>>>> 663970e9d21 (temp)
 
     def test_13_image_process_quality(self):
         """Test the quality parameter of image_process."""
