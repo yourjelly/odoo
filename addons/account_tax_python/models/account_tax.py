@@ -28,6 +28,14 @@ class AccountTaxPython(models.Model):
             ":param product: product.product recordset singleton or None\n"
             ":param partner: res.partner recordset singleton or None")
 
+    @api.onchange('amount_type')
+    def _onchange_amount_type(self):
+        self.amount_string = ''
+        if self.amount_type in ('percentage', 'percentage_st_line'):
+            self.amount_string = '100'
+        elif self.amount_type == 'regex':
+            self.amount_string = '([\d,]+)'
+
     def _compute_amount(self, base_amount, price_unit, quantity=1.0, product=None, partner=None, fixed_multiplicator=1):
         self.ensure_one()
         if product and product._name == 'product.template':

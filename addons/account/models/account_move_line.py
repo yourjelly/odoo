@@ -890,7 +890,7 @@ class AccountMoveLine(models.Model):
             tax_ids = self.account_id.tax_ids
 
         if self.company_id and tax_ids:
-            tax_ids = tax_ids.filtered(lambda tax: tax.company_id == self.company_id)
+            tax_ids = tax_ids.filtered(lambda tax: tax.company_id == self.company_id) #multi company tax_ids' case
 
         if tax_ids and self.move_id.fiscal_position_id:
             tax_ids = self.move_id.fiscal_position_id.map_tax(tax_ids)
