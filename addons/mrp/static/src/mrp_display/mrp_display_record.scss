@@ -54,6 +54,7 @@
     .o_longpressable {
         &:active {
             animation: longpress 1.3s forwards;
+            animation-delay: 0.05s;
         }
     }
 }
