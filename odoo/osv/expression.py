@@ -756,9 +756,6 @@ class expression(object):
                 subquery, subparams = query.select('"%s"."%s"' % (comodel._table, field.inverse_name))
                 push(('id', 'inselect', (subquery, subparams)), model, alias, internal=True)
 
-            elif len(path) > 1 and field.store and field.auto_join:
-                raise NotImplementedError('auto_join attribute not supported on field %s' % field)
-
             elif len(path) > 1 and field.store and field.type == 'many2one':
                 right_ids = comodel.with_context(active_test=False)._search([(path[1], operator, right)])
                 push((path[0], 'in', right_ids), model, alias)
@@ -818,6 +815,7 @@ class expression(object):
                         ids2 = right
                     else:
                         ids2 = [right]
+
                     if inverse_is_int and domain:
                         ids2 = comodel._search([('id', 'in', ids2)] + domain)
 
@@ -845,7 +843,7 @@ class expression(object):
                         # rewrite condition in terms of ids1
                         op1 = 'not in' if operator in NEGATIVE_TERM_OPERATORS else 'in'
                         push(('id', op1, ids1), model, alias)
-                        print("Inverse field no-store which doesn't use the _search ?", inverse_field, right, (('id', op1, ids1), model, alias))
+                        print("1. Inverse field no-store which doesn't use the _search ?", leaf, (('id', op1, ids1), model, alias))
 
                 else:
                     if inverse_field.store and not (inverse_is_int and domain):
@@ -863,7 +861,7 @@ class expression(object):
                         # rewrite condition to match records with/without lines
                         op1 = 'in' if operator in NEGATIVE_TERM_OPERATORS else 'not in'
                         push(('id', op1, ids1), model, alias)
-                        print("Inverse field no-store which doesn't use the _search ?", inverse_field, right, (('id', op1, ids1), model, alias))
+                        print("2. Inverse field no-store which doesn't use the _search ?", leaf, (('id', op1, ids1), model, alias))
 
             elif field.type == 'many2many':
                 rel_table, rel_id1, rel_id2 = field.relation, field.column1, field.column2
