@@ -264,9 +264,6 @@
 
     // Statusbar
     .o_form_statusbar {
-        @include media-breakpoint-up(md) {
-            padding-left: $o-horizontal-padding;
-        }
         background-color: $o-view-background-color;
 
         > .o_statusbar_status {
