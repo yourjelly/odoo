@@ -43,8 +43,7 @@ export class MrpWorkorder extends StockMove {
                     "button_finish",
                     this.props.record.resIds
                 );
-                await this.props.record.load();
-                this.render();
+                await this.reload();
             };
             params.confirmLabel = this.env._t("Validate");
             params.cancel = () => {};

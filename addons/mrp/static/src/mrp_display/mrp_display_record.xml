@@ -21,7 +21,7 @@
                 </div>
             </div>
             <ul class="list-group list-group-flush">
-                <t t-foreach="props.subRecords" t-as="subRecord" t-key="subRecord.resId">
+                <t t-foreach="props.subRecords" t-as="subRecord" t-key="subRecord.id">
                     <t t-component="getComponent(subRecord)" record="subRecord" parent="props.record"/>
                 </t>
             </ul>

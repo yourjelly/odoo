@@ -99,6 +99,7 @@ export class MrpDisplayRecord extends Component {
         const { resModel, resId } = this.props.record;
         if (resModel === "mrp.workorder") {
             await this.model.orm.call(resModel, "button_done", [resId]);
+            await this.reload();
         } else if (this.trackingMode === "mass_produce") {
             const params = { mark_as_done: true };
             const action = await this.model.orm.call(
@@ -137,6 +138,11 @@ export class MrpDisplayRecord extends Component {
         return this.model.action.doAction(action, options);
     }
 
+    async reload() {
+        await this.props.record.load();
+        this.props.record.model.notify();
+    }
+
     _productionDisplayDoneButton() {
         return (
             this.workorders.every((wo) => wo.data.state === "done") &&
@@ -145,6 +151,9 @@ export class MrpDisplayRecord extends Component {
     }
 
     _workorderDisplayDoneButton() {
-        return this.rawMoves.every((m) => m.data.quantity_done);
+        return (
+            ["pending", "waiting", "ready", "progress"].includes(this.record.state) &&
+            this.rawMoves.every((m) => m.data.quantity_done)
+        );
     }
 }
