@@ -34002,36 +34002,6 @@
     ];
 
     /**
-     * Border plugin
-     * This plugins aims to keep the properties of the last set Border in the
-     * current spreadsheet
-     */
-    class BorderPlugin extends UIPlugin {
-        constructor() {
-            super(...arguments);
-            this.borderColor = DEFAULT_BORDER_DESC.color;
-            this.borderStyle = DEFAULT_BORDER_DESC.style;
-        }
-        handle(cmd) {
-            switch (cmd.type) {
-                case "SET_ZONE_BORDERS":
-                    if (cmd.border.color)
-                        this.borderColor = cmd.border.color;
-                    if (cmd.border.style)
-                        this.borderStyle = cmd.border.style;
-                    break;
-            }
-        }
-        getLastBorder() {
-            return {
-                color: this.borderColor,
-                style: this.borderStyle,
-            };
-        }
-    }
-    BorderPlugin.getters = ["getLastBorder"];
-
-    /**
      * This plugin manage the autofill.
      *
      * The way it works is the next one:
@@ -39914,8 +39884,7 @@
         .add("evaluation_chart", EvaluationChartPlugin)
         .add("evaluation_cf", EvaluationConditionalFormatPlugin)
         .add("viewport", SheetViewPlugin)
-        .add("custom_colors", CustomColorsPlugin)
-        .add("border", BorderPlugin);
+        .add("custom_colors", CustomColorsPlugin);
 
     const clickableCellRegistry = new Registry();
     clickableCellRegistry.add("link", {
@@ -41242,8 +41211,6 @@
             this.BORDER_POSITIONS = BORDER_POSITIONS;
             this.lineStyleButtonRef = owl.useRef("lineStyleButton");
             this.currentBorderPosition = "";
-            this.currentBorderStyle = this.env.model.getters.getLastBorder().style;
-            this.currentBorderColor = this.env.model.getters.getLastBorder().color;
             this.borderStyles = borderStyles;
             this.state = owl.useState({
                 menuState: { isOpen: false, position: null, menuItems: [] },
@@ -41266,12 +41233,12 @@
             this.closeMenus();
         }
         setBorderColor(color) {
-            this.currentBorderColor = color;
+            BorderEditor._currentBorderColor = color;
             this.updateBorder();
             this.closeMenus();
         }
         setBorderStyle(style) {
-            this.currentBorderStyle = style;
+            BorderEditor._currentBorderStyle = style;
             this.updateBorder();
             this.closeMenus();
         }
@@ -41284,8 +41251,8 @@
                 target: this.env.model.getters.getSelectedZones(),
                 border: {
                     position: this.currentBorderPosition,
-                    color: this.currentBorderColor,
-                    style: this.currentBorderStyle,
+                    color: BorderEditor._currentBorderColor,
+                    style: BorderEditor._currentBorderStyle,
                 },
             });
         }
@@ -41306,8 +41273,16 @@
                 height: buttonRect.height,
             };
         }
+        get currentBorderColor() {
+            return BorderEditor._currentBorderColor;
+        }
+        get currentBorderStyle() {
+            return BorderEditor._currentBorderStyle;
+        }
     }
     BorderEditor.template = "o-spreadsheet-BorderEditor";
+    BorderEditor._currentBorderStyle = DEFAULT_BORDER_DESC.style;
+    BorderEditor._currentBorderColor = DEFAULT_BORDER_DESC.color;
     BorderEditor.components = { ColorPickerWidget, Popover };
     BorderEditor.props = {
         mainClass: { type: String, optional: true },
@@ -45832,8 +45807,8 @@
 
 
     __info__.version = '16.3.0-alpha.2';
-    __info__.date = '2023-04-11T14:34:50.133Z';
-    __info__.hash = 'e8d67ed';
+    __info__.date = '2023-04-12T07:11:14.318Z';
+    __info__.hash = 'cd8ff30';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
