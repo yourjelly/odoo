@@ -45,6 +45,7 @@ export class MrpDisplayAction extends Component {
                 "worksheet_type",
             ],
             "stock.move": [
+                "manual_consumption",
                 "product_id",
                 "product_uom_qty",
                 "quantity_done",

@@ -25,9 +25,7 @@ export class StockMove extends Component {
     }
 
     get isComplete() {
-        return (
-            this.toConsumeQuantity && this.props.record.data.quantity_done >= this.toConsumeQuantity
-        );
+        return this.toConsumeQuantity && this.props.record.data.quantity_done;
     }
 
     get toConsumeQuantity() {
@@ -62,5 +60,21 @@ export class StockMove extends Component {
         const quantity = this.isComplete ? 0 : this.toConsumeQuantity;
         this.props.record.update({ quantity_done: quantity });
         this.props.record.save(); // TODO: instead of saving after each individual change, it should be better to save at some point all the changes.
+    }
+
+    async openMoveDetails() {
+        const resId = [this.props.record.data.id];
+        const action = await this.props.record.model.orm.call(
+            this.resModel,
+            "action_show_details",
+            resId
+        );
+        const options = {
+            onClose: async () => {
+                await this.props.record.load();
+                this.render();
+            },
+        };
+        this.props.record.model.action.doAction(action, options);
     }
 }
