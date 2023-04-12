@@ -30,6 +30,6 @@ class PosConfig(models.Model):
         self.ensure_one()
         return {
             "type": "ir.actions.act_url",
-            "url": f"/menu/{slug(self)}",
+            "url": f"/menu/{self.id}",
             "target": "new",
         }

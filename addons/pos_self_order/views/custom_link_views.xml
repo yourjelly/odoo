@@ -17,8 +17,8 @@
             <field name="pos_config_ids" widget="many2many_tags" placeholder="empty = all points of sale" options="{'no_create': True}"/>
             <field name="style"/>
             <field name="link_html"/>
-            <button name="unlink" type="object" icon="fa-trash" title="Delete" class="btn-secondary float-end" />
         </tree>
+ 
     </field> 
 </record> 
 </odoo>
