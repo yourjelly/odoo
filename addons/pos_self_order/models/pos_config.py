@@ -12,9 +12,10 @@ class PosConfig(models.Model):
         string="QR Code Menu",
         help="Allow customers to view the menu on their phones by scanning the QR code on the table",
     )
-    self_order_image = fields.Binary(
+    self_order_image = fields.Image(
         string="Self Order Image",
         help="Image to display on the self order screen",
+        max_width=1920, max_height=1080,
     )
     self_order_image_name = fields.Char(
         string="Self Order Image Name",
