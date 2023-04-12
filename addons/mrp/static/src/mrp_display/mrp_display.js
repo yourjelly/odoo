@@ -133,4 +133,10 @@ export class MrpDisplay extends Component {
         this.display.searchPanel = !this.display.searchPanel;
         this.render(true);
     }
+
+    toggleFullScreen() {
+        this.props.action.target =
+            this.props.action.target === "fullscreen" ? "current" : "fullscreen";
+        this.env.bus.trigger("ACTION_MANAGER:UI-UPDATED", this.props.action.target);
+    }
 }
