@@ -45,25 +45,8 @@ export class Router extends Component {
                 `^${route
                     .split(/\{\w+:\w+\}/)
                     .map((part) => escapeRegExp(part))
-                    .join("(.*)?")}$`
+                    .join("([^/]+)")}$`
             );
-            // console.log(" route ", route);
-            // console.log(" escape rout ", escapeRegExp(route));
-            // const regex2 = new RegExp(
-            //     `^${escapeRegExp(route)
-            //         .split(/\{\w+:\w+\}/)
-            //         .map((part) => escapeRegExp(part))
-            //         .join("(.*)?")}$`
-            // );
-            // const regex3 = new RegExp(
-            //     `^${escapeRegExp(route)
-            //         .split(/\{\w+:\w+\}/)
-            //         .map((part) => escapeRegExp(part))
-            //         .join("([^/]+)")}$`
-            // );
-            // console.log("1st regex", regex);
-            // console.log("2nd regex", regex2);
-            // console.log("3nd regex", regex3);
             return { route, paramSpecs, regex };
         });
         this.matchURL();
