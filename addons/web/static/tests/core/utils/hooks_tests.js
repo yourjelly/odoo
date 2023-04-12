@@ -193,7 +193,7 @@ QUnit.module("utils", () => {
             async function (assert) {
                 class MyComponent extends Component {
                     setup() {
-                        this.inputRef = useAutofocus({ mobile: false });
+                        this.inputRef = useAutofocus();
                     }
                 }
                 MyComponent.template = xml`
