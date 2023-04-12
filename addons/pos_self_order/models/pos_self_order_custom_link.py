@@ -39,3 +39,4 @@ class PosSelfOrderCustomLink(models.Model):
             if link.name:
                 link.link_html = f"<a class=\"btn btn-{link.style} w-100\">{link.name}</a>"
                 
+

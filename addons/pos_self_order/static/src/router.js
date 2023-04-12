@@ -41,7 +41,10 @@ export class Router extends Component {
                 const [, type, name] = paramString.match(/(\w+):(\w+)/);
                 return { type, name };
             });
+            console.log(" route ", route);
+            console.log(" escape rout ", escapeRegExp(route));
             const regex = new RegExp(
+                // `^${escapeRegExp(route)
                 `^${route
                     .split(/\{\w+:\w+\}/)
                     .map((part) => escapeRegExp(part))
@@ -76,10 +79,12 @@ export class Router extends Component {
      * (this means that we don't make aditional requests to the server)
      * @param {string} route
      */
-    navigate(route) {
+    navigate(route, event = null) {
         if (!route.startsWith("/")) {
-            browser.location.href = route;
             return;
+        }
+        if (event) {
+            event.preventDefault();
         }
         const url = new URL(browser.location.href);
         url.pathname = `menu/${this.props.pos_config_id}` + route;
