@@ -136,7 +136,10 @@ const ODOO_FIN_ARGS = () => [
     ),
     arg("offset (number, default=0)", _t("Year offset applied to date_range.")),
     arg("company_id (number, optional)", _t("The company to target (Advanced).")),
-    arg("include_unposted (boolean, default=TRUE)", _t("Set to TRUE to include unposted entries.")),
+    arg(
+        "include_unposted (boolean, default=FALSE)",
+        _t("Set to TRUE to include unposted entries.")
+    ),
 ];
 
 functionRegistry.add("ODOO.CREDIT", {
@@ -148,7 +151,7 @@ functionRegistry.add("ODOO.CREDIT", {
         dateRange,
         offset = 0,
         companyId = null,
-        includeUnposted = true
+        includeUnposted = false
     ) {
         accountCodes = toString(accountCodes).split(",").sort();
         offset = toNumber(offset);
@@ -167,7 +170,7 @@ functionRegistry.add("ODOO.CREDIT", {
         dateRange,
         offset = 0,
         companyId = null,
-        includeUnposted = true
+        includeUnposted = false
     ) {
         return this.getters.getCompanyCurrencyFormat(companyId && companyId.value) || "#,##0.00";
     },
@@ -182,7 +185,7 @@ functionRegistry.add("ODOO.DEBIT", {
         dateRange,
         offset = 0,
         companyId = null,
-        includeUnposted = true
+        includeUnposted = false
     ) {
         accountCodes = toString(accountCodes).split(",").sort();
         offset = toNumber(offset);
@@ -201,7 +204,7 @@ functionRegistry.add("ODOO.DEBIT", {
         dateRange,
         offset = 0,
         companyId = null,
-        includeUnposted = true
+        includeUnposted = false
     ) {
         return this.getters.getCompanyCurrencyFormat(companyId && companyId.value) || "#,##0.00";
     },
@@ -216,7 +219,7 @@ functionRegistry.add("ODOO.BALANCE", {
         dateRange,
         offset = 0,
         companyId = null,
-        includeUnposted = true
+        includeUnposted = false
     ) {
         accountCodes = toString(accountCodes).split(",").sort();
         offset = toNumber(offset);
@@ -244,7 +247,7 @@ functionRegistry.add("ODOO.BALANCE", {
         dateRange,
         offset = 0,
         companyId = null,
-        includeUnposted = true
+        includeUnposted = false
     ) {
         return this.getters.getCompanyCurrencyFormat(companyId && companyId.value) || "#,##0.00";
     },
