@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.ProductMainView" owl="1">
-        <div class="d-flex flex-column h-100">
+        <div class="bg-white d-flex flex-column h-100">
             <NavBar previousPage="'/products'"/>
             <div class="py-3 overflow-auto">
                 <div class="px-3 border-bottom">

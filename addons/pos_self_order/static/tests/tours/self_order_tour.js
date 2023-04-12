@@ -22,12 +22,12 @@ registry.category("web_tour.tours").add("pos_self_order_tour", {
         // We should be on the products screen now
         {
             content: "Test that the tag list is present",
-            trigger: ".o_so_searchbar_filter li",
+            trigger: ".o_self_order_searchbar_filter li",
             isCheck: true,
         },
         {
             content: "Test that the first tag is active",
-            trigger: ".o_so_searchbar_filter li:nth-child(1) span.active",
+            trigger: ".o_self_order_searchbar_filter li:nth-child(1) span.active",
             isCheck: true,
         },
         {
@@ -84,15 +84,15 @@ registry.category("web_tour.tours").add("pos_self_order_tour", {
         },
         {
             content: "Test that the tag list is present and click on the 2nd tag",
-            trigger: ".o_so_searchbar_filter li:nth-child(2)",
+            trigger: ".o_self_order_searchbar_filter li:nth-child(2)",
         },
         {
             content: "Test that the tag is highlighted and click on it to deactivate it",
-            trigger: ".o_so_searchbar_filter li:nth-child(2) span.active",
+            trigger: ".o_self_order_searchbar_filter li:nth-child(2) span.active",
         },
         {
             content: "Test that the tag is not highlighted anymore",
-            trigger: ".o_so_searchbar_filter li:nth-child(2)",
+            trigger: ".o_self_order_searchbar_filter li:nth-child(2)",
             isCheck: true,
         },
         // After clicking on the 2nd tag, it will be deactivated and the screen should scroll up to the top
@@ -100,7 +100,7 @@ registry.category("web_tour.tours").add("pos_self_order_tour", {
         // we check that the 1st tag is now active <-- this would mean that the intersection observer is working properly
         {
             content: "Test that the first tag is active",
-            trigger: ".o_so_searchbar_filter li:nth-child(1) span.active",
+            trigger: ".o_self_order_searchbar_filter li:nth-child(1) span.active",
             isCheck: true,
         },
         {
@@ -115,13 +115,13 @@ registry.category("web_tour.tours").add("pos_self_order_tour", {
         },
         {
             content: "Test that the back button is present on the product screen and click on it",
-            trigger: "nav.o_so_navbar > button",
+            trigger: "nav.o_self_order_navbar > button",
         },
         // now that we are back on the product list screen, we click the back button again to go to the landing page
         {
             content:
                 "Test that the back button is present on the product list screen and click on it",
-            trigger: "nav.o_so_navbar > button",
+            trigger: "nav.o_self_order_navbar > button",
         },
         // on the landing page, we look for the View Menu button
         // finding it also means that the back button works properly
@@ -132,7 +132,7 @@ registry.category("web_tour.tours").add("pos_self_order_tour", {
         },
         {
             content: "Test that the back button is not present on the landing page",
-            trigger: "body:not(:has(nav.o_so_navbar > button))",
+            trigger: "body:not(:has(nav.o_self_order_navbar > button))",
             isCheck: true,
         },
     ],
