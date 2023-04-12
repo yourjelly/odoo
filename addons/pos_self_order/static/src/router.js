@@ -41,15 +41,29 @@ export class Router extends Component {
                 const [, type, name] = paramString.match(/(\w+):(\w+)/);
                 return { type, name };
             });
-            console.log(" route ", route);
-            console.log(" escape rout ", escapeRegExp(route));
             const regex = new RegExp(
-                // `^${escapeRegExp(route)
                 `^${route
                     .split(/\{\w+:\w+\}/)
                     .map((part) => escapeRegExp(part))
                     .join("(.*)?")}$`
             );
+            // console.log(" route ", route);
+            // console.log(" escape rout ", escapeRegExp(route));
+            // const regex2 = new RegExp(
+            //     `^${escapeRegExp(route)
+            //         .split(/\{\w+:\w+\}/)
+            //         .map((part) => escapeRegExp(part))
+            //         .join("(.*)?")}$`
+            // );
+            // const regex3 = new RegExp(
+            //     `^${escapeRegExp(route)
+            //         .split(/\{\w+:\w+\}/)
+            //         .map((part) => escapeRegExp(part))
+            //         .join("([^/]+)")}$`
+            // );
+            // console.log("1st regex", regex);
+            // console.log("2nd regex", regex2);
+            // console.log("3nd regex", regex3);
             return { route, paramSpecs, regex };
         });
         this.matchURL();
@@ -70,24 +84,19 @@ export class Router extends Component {
         this.state.slotProps = {};
     }
     /**
-     * Navigate to the given route.
-     * We can have 2 types of routes:
-     * - absolute: https://www.odoo.com
-     * - relative: /menu/products;
-     * If the route is absolute, we redirect to it.
-     * If the route is on the same origin, we use the history API to navigate to it.
+     * Navigate to the given relative route.
+     * We use the history API to navigate to it.
      * (this means that we don't make aditional requests to the server)
      * @param {string} route
+     * @param {Event} event
      */
     navigate(route, event = null) {
         if (!route.startsWith("/")) {
             return;
         }
-        if (event) {
-            event.preventDefault();
-        }
+        event?.preventDefault();
         const url = new URL(browser.location.href);
-        url.pathname = `menu/${this.props.pos_config_id}` + route;
+        url.pathname = `menu/${this.props.pos_config_id}${route}`;
         history.pushState({}, "", url);
         this.matchURL();
     }
