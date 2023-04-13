@@ -5739,7 +5739,7 @@ class BaseModel(metaclass=MetaModel):
         if origin is not None:
             origin = origin.id
         record = self.browse((NewId(origin, ref),))
-        record._update_cache(values, validate=False)
+        record._update_cache(values)
 
         return record
 
@@ -6476,7 +6476,8 @@ class BaseModel(metaclass=MetaModel):
                 initial_values.pop(parent_name)
 
         # create a new record with values
-        record = self.new(initial_values, origin=self)
+        record = self.new(origin=self)
+        record._update_cache(initial_values, validate=False)
 
         # make parent records match with the form values; this ensures that
         # computed fields on parent records have all their dependencies at

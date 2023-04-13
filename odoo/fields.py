@@ -1225,11 +1225,12 @@ class Field(MetaField('DummyField', (object,), {})):
                     field = record._fields[name]
                     return field.inherited and field.related.split('.')[0] == self.name
 
-                parent = record.env[self.comodel_name].new({
+                parent = record.env[self.comodel_name].new()
+                parent._update_cache({
                     name: value
                     for name, value in record._cache.items()
                     if is_inherited_field(name)
-                })
+                }, validate=False)
                 # in case the delegate field has inverse one2many fields, this
                 # updates the inverse fields as well
                 record._update_cache({self.name: parent}, validate=False)
@@ -2942,7 +2943,9 @@ class Many2one(_Relational):
             # return a new record (with the given field 'id' as origin)
             comodel = record.env[self.comodel_name]
             origin = comodel.browse(value.get('id'))
-            id_ = comodel.new(value, origin=origin).id
+            corecord = comodel.new(value, origin=origin)
+            corecord._update_cache(value, validate=False)
+            id_ = corecord.id
         else:
             id_ = None
 
@@ -2989,7 +2992,9 @@ class Many2one(_Relational):
             # value is either a pair (id, name), or a tuple of ids
             return value[0] if value else False
         if isinstance(value, dict):
-            return record.env[self.comodel_name].new(value).id
+            corecord = record.env[self.comodel_name].new()
+            corecord._update_cache(value, validate=False)
+            return corecord.id
         raise ValueError("Wrong value for %s: %r" % (self, value))
 
     def convert_to_export(self, value, record):
