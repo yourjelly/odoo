@@ -153,18 +153,10 @@ export class FormCompiler extends ViewCompiler {
             if (child.tagName === "button" || child.children.tagName === "button") {
                 child.classList.add(
                     "oe_stat_button",
-                    "btn-light",
-                    "flex-shrink-0",
-                    // "mb-0",
-                    // "py-0",
-                    // "border-0",
-                    // "border-start",
-                    // "border-bottom",
-                    "border",
-                    "rounded-0",
-                    "text-start",
-                    "text-nowrap",
-                    "text-capitalize"
+                    "btn",
+                    "btn-outline-secondary",
+                    "flex-grow-1",
+                    "flex-lg-grow-0",
                 );
             }
             if (child.tagName === "field") {
