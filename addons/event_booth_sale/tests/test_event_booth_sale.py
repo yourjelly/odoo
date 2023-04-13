@@ -116,6 +116,29 @@ class TestEventBoothSale(TestEventBoothSaleWData):
                 booth.state, 'unavailable',
                 "Booth should not be available anymore.")
 
+    @users('user_sales_salesman')
+    def test_event_booth_on_duplication(self):
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.event_customer.id,
+            'pricelist_id': self.test_pricelist.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.event_booth_product.id,
+                    'event_id': self.event_0.id,
+                    'event_booth_category_id': self.event_booth_category_1.id,
+                    'event_booth_pending_ids': (self.booth_1 + self.booth_2).ids
+                })
+            ]
+        })
+
+        # Duplicate the SO.
+        duplicated_sale_order = sale_order.copy()
+
+        # Check that the name of the order lines with the product "event_booth" has been changed
+        for line in duplicated_sale_order.order_line:
+            if line.product_template_id.detailed_type == 'event_booth':
+                self.assertEqual(line.name, 'Event Booth',
+                    "name field should be equal to Event Booth")
 
 @tagged('post_install', '-at_install')
 class TestEventBoothSaleInvoice(TestEventBoothSaleWData):
