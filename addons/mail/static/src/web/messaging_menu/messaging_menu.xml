@@ -57,7 +57,7 @@
                 onClick="() => notification.requestPermission()"
             >
                 <t t-set-slot="icon">
-                    <ImStatus className="'position-absolute bottom-0 end-0'" persona="notificationRequest.partner"/>
+                    <ImStatus persona="notificationRequest.partner"/>
                 </t>
             </NotificationItem>
             <t t-if="store.discuss.activeTab === 'all'">
@@ -88,7 +88,7 @@
                     onSwipeLeft="hasTouch() and threadService.canUnpin(preview.thread) ? { action: () => this.threadService.unpin(preview), icon: 'fa-times-circle', bgColor: 'bg-danger' } : undefined"
                 >
                     <t t-set-slot="icon">
-                        <ImStatus t-if="preview.thread.type === 'chat'" className="'position-absolute bottom-0 end-0'" persona="preview.thread.correspondent"/>
+                        <ImStatus t-if="preview.thread.type === 'chat'" persona="preview.thread.correspondent"/>
                     </t>
                     <t t-if="preview.message" t-set-slot="body-icon">
                         <t t-if="preview.message.isSelfAuthored">
