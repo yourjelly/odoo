@@ -268,63 +268,6 @@ QUnit.test("Message following a notification should not be squashed", async (ass
     assert.containsOnce($, ".o-mail-Message-sidebar .o-mail-Message-avatarContainer");
 });
 
-QUnit.test("Posting message should transform links.", async (assert) => {
-    const pyEnv = await startServer();
-    const channelId = pyEnv["mail.channel"].create({
-        name: "general",
-        channel_type: "channel",
-    });
-    const { openDiscuss } = await start();
-    await openDiscuss(channelId);
-    await insertText(".o-mail-Composer-input", "test https://www.odoo.com/");
-    await click(".o-mail-Composer-send");
-    assert.containsOnce($, "a[href='https://www.odoo.com/']");
-});
-
-QUnit.test("Posting message should transform relevant data to emoji.", async (assert) => {
-    const pyEnv = await startServer();
-    const channelId = pyEnv["mail.channel"].create({
-        name: "general",
-        channel_type: "channel",
-    });
-    const { openDiscuss } = await start();
-    await openDiscuss(channelId);
-    await insertText(".o-mail-Composer-input", "test :P :laughing:");
-    await click(".o-mail-Composer-send");
-    assert.equal($(".o-mail-Message-body").text(), "test 😛 😆");
-});
-
-QUnit.test(
-    "posting a message immediately after another one is displayed in 'simple' mode (squashed)",
-    async (assert) => {
-        const pyEnv = await startServer();
-        const channelId = pyEnv["mail.channel"].create({
-            name: "general",
-            channel_type: "channel",
-        });
-        let flag = false;
-        const { openDiscuss } = await start({
-            async mockRPC(route, params) {
-                if (flag && route === "/mail/message/post") {
-                    await new Promise(() => {});
-                }
-            },
-        });
-
-        await openDiscuss(channelId);
-        // write 1 message
-        await editInput(document.body, ".o-mail-Composer-input", "abc");
-        await click(".o-mail-Composer button:contains(Send)");
-
-        // write another message, but /mail/message/post is delayed by promise
-        flag = true;
-        await editInput(document.body, ".o-mail-Composer-input", "def");
-        await click(".o-mail-Composer button:contains(Send)");
-        assert.containsN($, ".o-mail-Message", 2);
-        assert.containsN($, ".o-mail-Message-header", 1); // just 1, because 2nd message is squashed
-    }
-);
-
 QUnit.test("Click on avatar opens its partner chat window", async (assert) => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "testPartner" });
@@ -608,109 +551,11 @@ QUnit.test("receive new needaction messages", async (assert) => {
     assert.containsOnce($, ".o-mail-Message:contains(not empty 2)");
 });
 
-QUnit.test("basic rendering", async (assert) => {
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.containsOnce($, ".o-mail-DiscussSidebar");
-    assert.containsOnce($, ".o-mail-Discuss-content");
-    assert.containsOnce($, ".o-mail-Discuss-content .o-mail-Thread");
-});
-
-QUnit.test("basic rendering: sidebar", async (assert) => {
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.containsOnce($, ".o-mail-DiscussSidebar button:contains(Inbox)");
-    assert.containsOnce($, ".o-mail-DiscussSidebar button:contains(Starred)");
-    assert.containsOnce($, ".o-mail-DiscussSidebar button:contains(History)");
-    assert.containsN($, ".o-mail-DiscussCategory", 2);
-    assert.containsOnce($, ".o-mail-DiscussCategory-channel");
-    assert.containsOnce($, ".o-mail-DiscussCategory-chat");
-    assert.strictEqual($(".o-mail-DiscussCategory-channel").text(), "Channels");
-    assert.strictEqual($(".o-mail-DiscussCategory-chat").text(), "Direct messages");
-});
-
-QUnit.test("sidebar: Inbox should have icon", async (assert) => {
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.containsOnce($, "button:contains(Inbox)");
-    assert.containsOnce($("button:contains(Inbox)"), ".fa-inbox");
-});
-
 QUnit.test("sidebar: default active inbox", async (assert) => {
     const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce($, "button:contains(Inbox)");
     assert.hasClass($("button:contains(Inbox)"), "o-active");
-});
-
-QUnit.test("sidebar: change active", async (assert) => {
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.containsOnce($, "button:contains(Inbox)");
-    assert.containsOnce($, "button:contains(Starred)");
-    assert.hasClass($("button:contains(Inbox)"), "o-active");
-    assert.doesNotHaveClass($("button:contains(Starred)"), "o-active");
-    await click("button:contains(Starred)");
-    assert.doesNotHaveClass($("button:contains(Inbox)"), "o-active");
-    assert.hasClass($("button:contains(Starred)"), "o-active");
-});
-
-QUnit.test("sidebar: add channel", async (assert) => {
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.containsOnce($, ".o-mail-DiscussCategory-channel .o-mail-DiscussCategory-add");
-    assert.hasAttrValue(
-        $(".o-mail-DiscussCategory-channel .o-mail-DiscussCategory-add")[0],
-        "title",
-        "Add or join a channel"
-    );
-    await click(".o-mail-DiscussCategory-channel .o-mail-DiscussCategory-add");
-    assert.containsOnce($, ".o-mail-ChannelSelector");
-    assert.containsOnce($, ".o-mail-ChannelSelector input[placeholder='Add or join a channel']");
-});
-
-QUnit.test("sidebar: basic channel rendering", async (assert) => {
-    const pyEnv = await startServer();
-    pyEnv["mail.channel"].create({ name: "General" });
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.containsOnce($, ".o-mail-DiscussCategoryItem");
-    assert.strictEqual($(".o-mail-DiscussCategoryItem").text(), "General");
-    assert.containsOnce($(".o-mail-DiscussCategoryItem"), "img[data-alt='Thread Image']");
-    assert.containsOnce($(".o-mail-DiscussCategoryItem"), ".o-mail-DiscussCategoryItem-commands");
-    assert.hasClass(
-        $(".o-mail-DiscussCategoryItem .o-mail-DiscussCategoryItem-commands"),
-        "d-none"
-    );
-    assert.containsOnce(
-        $(".o-mail-DiscussCategoryItem .o-mail-DiscussCategoryItem-commands"),
-        "i[title='Channel settings']"
-    );
-    assert.containsOnce(
-        $(".o-mail-DiscussCategoryItem .o-mail-DiscussCategoryItem-commands"),
-        "div[title='Leave this channel']"
-    );
-});
-
-QUnit.test("channel become active", async (assert) => {
-    const pyEnv = await startServer();
-    pyEnv["mail.channel"].create({ name: "General" });
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.containsOnce($, ".o-mail-DiscussCategoryItem");
-    assert.containsNone($, ".o-mail-DiscussCategoryItem.o-active");
-    await click(".o-mail-DiscussCategoryItem");
-    assert.containsOnce($, ".o-mail-DiscussCategoryItem.o-active");
-});
-
-QUnit.test("channel become active - show composer in discuss content", async (assert) => {
-    const pyEnv = await startServer();
-    pyEnv["mail.channel"].create({ name: "General" });
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    await click(".o-mail-DiscussCategoryItem");
-    assert.containsOnce($, ".o-mail-Thread");
-    assert.containsOnce($, ".o-mail-Composer");
 });
 
 QUnit.test("sidebar: channel rendering with needaction counter", async (assert) => {
@@ -766,27 +611,6 @@ QUnit.test("default active id on mailbox", async (assert) => {
     const { openDiscuss } = await start();
     await openDiscuss("mail.box_starred");
     assert.hasClass($("button:contains(Starred)"), "o-active");
-});
-
-QUnit.test("basic top bar rendering", async (assert) => {
-    const pyEnv = await startServer();
-    pyEnv["mail.channel"].create({ name: "General" });
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.strictEqual($(".o-mail-Discuss-threadName").val(), "Inbox");
-    const $markAllRead = $("button:contains(Mark all read)");
-    assert.isVisible($markAllRead);
-    assert.ok($markAllRead[0].disabled);
-
-    await click("button:contains(Starred)");
-    assert.strictEqual($(".o-mail-Discuss-threadName").val(), "Starred");
-    const $unstarAll = $("button:contains(Unstar all)");
-    assert.isVisible($unstarAll);
-    assert.ok($unstarAll[0].disabled);
-
-    await click(".o-mail-DiscussCategoryItem:contains(General)");
-    assert.strictEqual($(".o-mail-Discuss-threadName").val(), "General");
-    assert.isVisible($(".o-mail-Discuss-header button[title='Add Users']"));
 });
 
 QUnit.test("rendering of inbox message", async (assert) => {
@@ -963,21 +787,14 @@ QUnit.test("post a simple message", async (assert) => {
     await openDiscuss(channelId);
     assert.containsOnce($, ".o-mail-Thread:contains(There are no messages in this conversation.)");
     assert.containsNone($, ".o-mail-Message");
-    assert.strictEqual($(".o-mail-Composer-input").val(), "");
 
     // insert some HTML in editable
     await insertText(".o-mail-Composer-input", "Test");
-    assert.strictEqual($(".o-mail-Composer-input").val(), "Test");
 
     await click(".o-mail-Composer-send");
     assert.verifySteps(["message_post"]);
-    assert.strictEqual($(".o-mail-Composer-input").val(), "");
     assert.containsOnce($, ".o-mail-Message");
-    pyEnv["mail.message"].search([], { order: "id DESC" });
-    const $message = $(".o-mail-Message");
     assert.containsOnce($, ".o-mail-Message:contains(Test)");
-    assert.strictEqual($message.find(".o-mail-Message-author").text(), "Mitchell Admin");
-    assert.strictEqual($message.find(".o-mail-Message-body").text(), "Test");
 });
 
 QUnit.test("starred: unstar all", async (assert) => {
@@ -998,40 +815,6 @@ QUnit.test("starred: unstar all", async (assert) => {
     assert.containsNone($, ".o-mail-Message");
     $unstarAll = $("button:contains(Unstar all)");
     assert.ok($unstarAll[0].disabled);
-});
-
-QUnit.test("auto-focus composer on opening thread", async (assert) => {
-    const pyEnv = await startServer();
-    const partnerId = pyEnv["res.partner"].create({ name: "Demo User" });
-    pyEnv["mail.channel"].create([
-        { name: "General" },
-        {
-            channel_member_ids: [
-                [0, 0, { partner_id: pyEnv.currentPartnerId }],
-                [0, 0, { partner_id: partnerId }],
-            ],
-            channel_type: "chat",
-        },
-    ]);
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.containsOnce($, "button:contains(Inbox)");
-    assert.hasClass($("button:contains(Inbox)"), "o-active");
-    assert.containsOnce($, ".o-mail-DiscussCategoryItem:contains(General)");
-    assert.doesNotHaveClass($(".o-mail-DiscussCategoryItem:contains(General)"), "o-active");
-    assert.containsOnce($, ".o-mail-DiscussCategoryItem:contains(Demo User)");
-    assert.doesNotHaveClass($(".o-mail-DiscussCategoryItem:contains(Demo User)"), "o-active");
-    assert.containsNone($, ".o-mail-Composer");
-
-    await click(".o-mail-DiscussCategoryItem:contains(General)");
-    assert.hasClass($(".o-mail-DiscussCategoryItem:contains(General)"), "o-active");
-    assert.containsOnce($, ".o-mail-Composer");
-    assert.strictEqual(document.activeElement, $(".o-mail-Composer-input")[0]);
-
-    await click(".o-mail-DiscussCategoryItem:contains(Demo User)");
-    assert.hasClass($(".o-mail-DiscussCategoryItem:contains(Demo User)"), "o-active");
-    assert.containsOnce($, ".o-mail-Composer");
-    assert.strictEqual(document.activeElement, $(".o-mail-Composer-input")[0]);
 });
 
 QUnit.test(
@@ -1187,17 +970,6 @@ QUnit.test("should auto-pin chat when receiving a new DM", async (assert) => {
     assert.containsOnce($, ".o-mail-DiscussCategoryItem:contains(Demo)");
 });
 
-QUnit.test("'Add Users' button should be displayed in the topbar of channels", async (assert) => {
-    const pyEnv = await startServer();
-    const channelId = pyEnv["mail.channel"].create({
-        name: "general",
-        channel_type: "channel",
-    });
-    const { openDiscuss } = await start();
-    await openDiscuss(channelId);
-    assert.containsOnce($, "button[title='Add Users']");
-});
-
 QUnit.test("'Add Users' button should be displayed in the topbar of chats", async (assert) => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Marc Demo" });
@@ -1227,15 +999,6 @@ QUnit.test("'Add Users' button should be displayed in the topbar of groups", asy
     await openDiscuss(channelId);
     assert.containsOnce($, "button[title='Add Users']");
 });
-
-QUnit.test(
-    "'Add Users' button should not be displayed in the topbar of mailboxes",
-    async (assert) => {
-        const { openDiscuss } = await start();
-        await openDiscuss("mail.box_starred");
-        assert.containsNone($, "button[title='Add Users']");
-    }
-);
 
 QUnit.test(
     "'Hashtag' thread icon is displayed in top bar of channels of type 'channel' limited to a group",
@@ -1425,18 +1188,6 @@ QUnit.test("Chat is added to discuss on other tab that the one that joined", asy
     assert.containsOnce(tab2.target, ".o-mail-DiscussCategoryItem:contains(Jerry Golay)");
 });
 
-QUnit.test("select another mailbox", async (assert) => {
-    patchUiSize({ height: 360, width: 640 });
-    const { openDiscuss } = await start();
-    await openDiscuss();
-    assert.containsOnce($, ".o-mail-Discuss");
-    assert.strictEqual($(".o-mail-Discuss-threadName").val(), "Inbox");
-    assert.containsOnce($, "button:contains(Starred)");
-
-    await click("button:contains(Starred)");
-    assert.strictEqual($(".o-mail-Discuss-threadName").val(), "Starred");
-});
-
 QUnit.test(
     'auto-select "Inbox nav bar" when discuss had inbox as active thread',
     async (assert) => {
@@ -1447,19 +1198,6 @@ QUnit.test(
         assert.containsOnce($, ".o-mail-MessagingMenu-navbar:contains(Mailboxes) .fw-bolder");
         assert.containsOnce($, "button:contains(Inbox).o-active");
         assert.containsOnce($, "h4:contains(Congratulations, your inbox is empty)");
-    }
-);
-
-QUnit.test(
-    "composer should be focused automatically after clicking on the send button [REQUIRE FOCUS]",
-    async (assert) => {
-        const pyEnv = await startServer();
-        const channelId = pyEnv["mail.channel"].create({ name: "test" });
-        const { openDiscuss } = await start();
-        await openDiscuss(channelId);
-        await insertText(".o-mail-Composer-input", "Dummy Message");
-        await click(".o-mail-Composer-send");
-        assert.strictEqual(document.activeElement, $(".o-mail-Composer-input")[0]);
     }
 );
 

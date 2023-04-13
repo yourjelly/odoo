@@ -19,3 +19,6 @@ class TestUi(odoo.tests.HttpCase):
             'password': 'testuser',
         })
         self.start_tour("/web", 'mail_tour', login='testuser')
+
+    def test_03_discuss_tour(self):
+        self.start_tour("/web", 'discuss_tour', login="admin")
