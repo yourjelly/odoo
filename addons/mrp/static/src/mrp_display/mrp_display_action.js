@@ -80,13 +80,20 @@ export class MrpDisplayAction extends Component {
                 resModel: this.resModel,
                 views: [[viewId ? viewId[0] : false, "search"]],
             });
+            const domain = [["state", "in", ["confirmed", "progress", "to_close"]]];
+            if (
+                this.props.action.context.active_model === "stock.picking.type" &&
+                this.props.action.context.active_id
+            ) {
+                domain.push(["picking_type_id", "=", this.props.action.context.active_id]);
+            }
             this.withSearchProps = {
                 resModel: this.resModel,
                 searchViewArch: searchViews.views.search.arch,
                 searchViewId: searchViews.views.search.id,
                 searchViewFields: searchViews.fields,
                 context: this.props.action.context,
-                domain: [["state", "in", ["confirmed", "progress", "to_close"]]],
+                domain: domain,
             };
         });
     }
