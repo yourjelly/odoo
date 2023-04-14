@@ -152,6 +152,9 @@
                 <field name="color"/>
                 <field name="code" readonly="1"/>
                 <field name="count_mo_todo"/>
+                <header>
+                    <button name="%(mrp_workcenter_kanban_action)d" type="action" string="Workcenter Control Panel" groups="mrp.group_mrp_routings"/>
+                </header>
                 <templates>
                     <t t-name="kanban-menu" t-if="!selection_mode">
                         <div class="container">

@@ -18,7 +18,7 @@ class MrpDocumentRoute(http.Controller):
 
     @http.route('/mrp/manufacturing', type='http', auth="user")
     def route_to_display_productions_and_workorders(self):
-        action = request.env.ref('mrp.action_mrp_display_fullscreen')
+        action = request.env.ref('mrp.action_mrp_display')
         get_params_string = url_encode({'action': action.id})
         return request.redirect(f'/web?#{get_params_string}')
 

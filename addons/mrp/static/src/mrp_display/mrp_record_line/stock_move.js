@@ -25,7 +25,10 @@ export class StockMove extends Component {
     }
 
     get isComplete() {
-        return this.toConsumeQuantity && this.props.record.data.quantity_done;
+        return (
+            this.toConsumeQuantity &&
+            this.toConsumeQuantity === this.props.record.data.quantity_done
+        );
     }
 
     get toConsumeQuantity() {
