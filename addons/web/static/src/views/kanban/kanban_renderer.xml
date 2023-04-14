@@ -83,7 +83,7 @@
                     <KanbanColumnQuickCreate
                         folded="state.columnQuickCreateIsFolded"
                         onFoldChange="folded => state.columnQuickCreateIsFolded = props.list.groups.length > 0 and folded"
-                        onValidate="props.list.createGroup.bind(props.list)"
+                        onValidate.bind="onValidate"
                         exampleData="exampleData"
                         groupByField="props.list.groupByField"
                     />

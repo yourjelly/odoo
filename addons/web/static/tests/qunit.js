@@ -31,7 +31,7 @@ QUnit.debug = (name, cb) => {
 };
 
 QUnit.tttt = (name, cb) => {
-    QUnit.skip(name, cb);
+    QUnit.todo(name, cb);
 };
 
 // need to do this outside of the setup function so it is executed quickly

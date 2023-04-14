@@ -282,6 +282,11 @@ export class KanbanRenderer extends Component {
         }
     }
 
+    onValidate(name) {
+        // debugger;
+        this.props.list.createGroup(name);
+    }
+
     /**
      * @param {RelationalGroup} group
      * @param {boolean} isGroupProcessing
