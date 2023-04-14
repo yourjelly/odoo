@@ -42576,8 +42576,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.6';
-    __info__.date = '2023-04-13T09:04:00.410Z';
-    __info__.hash = '8d60b5c';
+    __info__.date = '2023-04-14T05:38:00.200Z';
+    __info__.hash = '1b1556e';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
