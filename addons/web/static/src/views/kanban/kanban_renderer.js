@@ -82,7 +82,7 @@ export class KanbanRenderer extends Component {
             validateColumnQuickCreateExamples(this.exampleData);
         }
         this.ghostColumns = this.generateGhostColumns();
-
+        owl.onWillRender(() => { debugger; console.log("WILL RENDER RENDERER")});
         // Sortable
         let dataRecordId;
         let dataGroupId;

@@ -67,7 +67,7 @@ export class KanbanColumnQuickCreate extends Component {
         if (this.state.columnTitle.length) {
             this.props.onValidate(this.state.columnTitle);
             // await new Promise((r) => setTimeout(r, 100));
-            // this.props.onValidate(this.state.columnTitle + "_1");
+            this.props.onValidate(this.state.columnTitle + "_1");
             // this.props.onValidate(this.state.columnTitle + "_2");
             // this.props.onValidate(this.state.columnTitle + "_3");
             this.state.columnTitle = "";

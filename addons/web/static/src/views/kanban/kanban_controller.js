@@ -40,7 +40,7 @@ export class KanbanController extends Component {
         });
         this.model = useState(model);
         this.headerButtons = archInfo.headerButtons;
-
+        owl.onWillRender(() => {debugger});
         const self = this;
         this.quickCreateState = reactive({
             get groupId() {

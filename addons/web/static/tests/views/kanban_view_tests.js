@@ -6327,6 +6327,52 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.debug("quick create column and examples: with folded columns", async (assert) => {
+
+
+        // // In this example, we show how components can be defined and created.
+        // const { Component, useState, mount, xml } = owl;
+
+        // class QuickCreateColumn extends Component {
+        //     static props = ["onClick"];
+        //     static template = xml`
+        //       <div>
+        //         <button t-on-click="props.onClick">Increment</button>
+        //       </div>
+        //     `;
+        // }
+
+        // class Renderer extends Component {
+        //     static components = { QuickCreateColumn };
+        //     static props = ["state", "isEmpty"];
+        //     static template = xml`
+        //       <div>
+        //         <t t-esc="props.state.groups.length"/>
+        //         <QuickCreateColumn onClick.bind="onClick"/>
+        //       </div>
+        //     `;
+        //     async onClick() {
+        //         this.props.state.groups.push(1);
+        //         await new Promise((r) => setTimeout(r));
+        //         this.props.state.groups.push(1);
+        //     }
+        // }
+
+        // // Main root component
+        // class Controller extends Component {
+        //     static components = { Renderer };
+        //     static template = xml`<Renderer state="state" isEmpty="state.groups.length === 0"/>`;
+
+        //     setup() {
+        //         this.state = useState({ groups: []});
+        //     }
+        // }
+
+        // // Application setup
+        // mount(Controller, target, { dev: true });
+
+
+
+
         serverData.models.partner.records = [];
         serverData.models.product.fields.folded = { string: "Folded", type: "boolean" };
         serviceRegistry.add("dialog", dialogService, { force: true });
