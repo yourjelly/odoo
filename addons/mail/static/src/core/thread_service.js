@@ -850,7 +850,8 @@ export class ThreadService {
         });
         this.update(thread, data);
         this.insertComposer({ thread });
-        return thread;
+        // return reactive version.
+        return this.store.threads[thread.localId];
     }
 
     /**

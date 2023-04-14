@@ -142,6 +142,7 @@ Help your customers with this chat, and analyse their feedback.
             'web/static/src/legacy/js/public/public_widget.js',
 
             'bus/static/src/bus_parameters_service.js',
+            ('remove', 'bus/static/src/services/assets_watchdog_service.js'),
 
             ('include', 'im_livechat.shared_frontend_public_assets'),
             'im_livechat/static/src/new/public/**/*',
