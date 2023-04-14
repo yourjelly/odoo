@@ -3,6 +3,56 @@
 
     <t t-name="web.ControlPanel" owl="1">
         <div class="o_control_panel" t-ref="root">
+
+        <div class="container">
+            <div class="row w-100">
+                <div class="col">
+                    <ul class="list-group text-end" style="--oi-font-size: 13px">
+                        <li class="list-group-item">Original size: <b>14px</b> - Rendered size: <b>13px</b></li>
+                        <li class="list-group-item"><i class="oi oi-view-pivot"/></li>
+                        <li class="list-group-item"><i class="oi oi-text-break"/></li>
+                        <li class="list-group-item"><i class="oi oi-text-inline"/></li>
+                        <li class="list-group-item"><i class="oi oi-voip"/></li>
+                        <li class="list-group-item"><i class="oi oi-odoo"/></li>
+                        <li class="list-group-item"><i class="oi oi-search"/></li>
+                        <li class="list-group-item"><i class="oi oi-group"/></li>
+                        <li class="list-group-item"><i class="oi oi-settings-adjust"/></li>
+                        <li class="list-group-item"><i class="oi oi-apps"/></li>
+                        <li class="list-group-item"><i class="oi oi-panel-right"/></li>
+                        <li class="list-group-item"><i class="oi oi-launch"/></li>
+                        <li class="list-group-item"><i class="oi oi-studio"/></li>
+                        <li class="list-group-item"><i class="oi oi-view-kanban"/></li>
+                        <li class="list-group-item"><i class="oi oi-text-wrap"/></li>
+                        <li class="list-group-item"><i class="oi oi-view-cohort"/></li>
+                        <li class="list-group-item"><i class="oi oi-view-list"/></li>
+                        <li class="list-group-item"><i class="oi oi-gif-picker"/></li>
+                </ul>
+                </div>
+                <div class="col">
+                    <ul class="list-group">
+                        <li class="list-group-item">Original size: <b>14px</b> - Rendered size: <b>14px</b></li>
+                        <li class="list-group-item"><i class="oi oi-view-pivot"/></li>
+                        <li class="list-group-item"><i class="oi oi-text-break"/></li>
+                        <li class="list-group-item"><i class="oi oi-text-inline"/></li>
+                        <li class="list-group-item"><i class="oi oi-voip"/></li>
+                        <li class="list-group-item"><i class="oi oi-odoo"/></li>
+                        <li class="list-group-item"><i class="oi oi-search"/></li>
+                        <li class="list-group-item"><i class="oi oi-group"/></li>
+                        <li class="list-group-item"><i class="oi oi-settings-adjust"/></li>
+                        <li class="list-group-item"><i class="oi oi-apps"/></li>
+                        <li class="list-group-item"><i class="oi oi-panel-right"/></li>
+                        <li class="list-group-item"><i class="oi oi-launch"/></li>
+                        <li class="list-group-item"><i class="oi oi-studio"/></li>
+                        <li class="list-group-item"><i class="oi oi-view-kanban"/></li>
+                        <li class="list-group-item"><i class="oi oi-text-wrap"/></li>
+                        <li class="list-group-item"><i class="oi oi-view-cohort"/></li>
+                        <li class="list-group-item"><i class="oi oi-view-list"/></li>
+                        <li class="list-group-item"><i class="oi oi-gif-picker"/></li>
+                </ul>
+                </div>
+            
+            </div>
+        </div>
             <t t-if="env.isSmall">
                 <t t-call="web.ControlPanel.Small" />
             </t>
