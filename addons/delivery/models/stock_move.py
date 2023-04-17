@@ -5,6 +5,10 @@ from odoo import api, fields, models
 from odoo.tools.sql import column_exists, create_column
 
 
+class StockRoute(models.Model):
+    _inherit = "stock.route"
+    shipping_selectable = fields.Boolean("Applicable on Shipping Methods")
+
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
@@ -41,6 +45,11 @@ class StockMove(models.Model):
     def _key_assign_picking(self):
         keys = super(StockMove, self)._key_assign_picking()
         return keys + (self.sale_line_id.order_id.carrier_id,)
+
+    def _prepare_procurement_values(self):
+        values = super(StockMove, self)._prepare_procurement_values()
+        values['carrier_id'] = self.group_id.sale_id.carrier_id
+        return values
 
 class StockMoveLine(models.Model):
     _inherit = 'stock.move.line'

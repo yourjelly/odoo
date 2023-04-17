@@ -472,7 +472,7 @@ class ProcurementGroup(models.Model):
         return True
 
     @api.model
-    def _search_rule(self, route_ids, packaging_id, product_id, warehouse_id, domain):
+    def _search_rule(self, route_ids, packaging_id, product_id, carrier_id, warehouse_id, domain):
         """ First find a rule among the ones defined on the procurement
         group, then try on the routes defined for the product, finally fallback
         on the default behavior
@@ -491,6 +491,10 @@ class ProcurementGroup(models.Model):
             product_routes = product_id.route_ids | product_id.categ_id.total_route_ids
             if product_routes:
                 res = Rule.search(expression.AND([[('route_id', 'in', product_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
+        if not res and carrier_id:
+            carrier_routes = carrier_id.route_ids
+            if carrier_routes:
+                res = Rule.search(expression.AND([[('route_id', 'in', carrier_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
         if not res and warehouse_id:
             warehouse_routes = warehouse_id.route_ids
             if warehouse_routes:
@@ -506,7 +510,7 @@ class ProcurementGroup(models.Model):
         location = location_id
         while (not result) and location:
             domain = self._get_rule_domain(location, values)
-            result = self._search_rule(values.get('route_ids', False), values.get('product_packaging_id', False), product_id, values.get('warehouse_id', False), domain)
+            result = self._search_rule(values.get('route_ids', False), values.get('product_packaging_id', False), product_id, values.get('carrier_id', False), values.get('warehouse_id', False), domain)
             location = location.location_id
         return result
 

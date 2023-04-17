@@ -197,3 +197,9 @@ class SaleOrderLine(models.Model):
 
         undeletable_lines = super()._check_line_unlink()
         return undeletable_lines.filtered(lambda line: not line.is_delivery)
+
+    def _prepare_procurement_values(self,group_id):
+        values = super(SaleOrderLine, self)._prepare_procurement_values(group_id)
+        values['carrier_id'] = self.order_id.carrier_id
+        return values
+

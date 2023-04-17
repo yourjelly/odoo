@@ -890,9 +890,9 @@ Please change the quantity done or the rounding precision of your unit of measur
             # first priority goes to the preferred routes defined on the move itself (e.g. coming from a SO line)
             warehouse_id = move.warehouse_id or move.picking_id.picking_type_id.warehouse_id
             if move.location_dest_id.company_id == self.env.company:
-                rule = self.env['procurement.group']._search_rule(move.route_ids, move.product_packaging_id, move.product_id, warehouse_id, domain)
+                rule = self.env['procurement.group']._search_rule(move.route_ids, move.product_packaging_id, move.product_id, False, warehouse_id, domain)
             else:
-                rule = self.sudo().env['procurement.group']._search_rule(move.route_ids, move.product_packaging_id, move.product_id, warehouse_id, domain)
+                rule = self.sudo().env['procurement.group']._search_rule(move.route_ids, move.product_packaging_id, move.product_id, False, warehouse_id, domain)
             # Make sure it is not returning the return
             if rule and (not move.origin_returned_move_id or move.origin_returned_move_id.location_dest_id.id != rule.location_dest_id.id):
                 new_move = rule._run_push(move)
@@ -2054,7 +2054,7 @@ Please change the quantity done or the rounding precision of your unit of measur
                 ('location_dest_id', '=', move.location_dest_id.id),
                 ('action', '!=', 'push')
             ]
-            rules = self.env['procurement.group']._search_rule(False, move.product_packaging_id, product_id, move.warehouse_id, domain)
+            rules = self.env['procurement.group']._search_rule(False, move.product_packaging_id, product_id, False, move.warehouse_id, domain)
             if rules:
                 if rules.procure_method in ['make_to_order', 'make_to_stock']:
                     move.procure_method = rules.procure_method

@@ -93,6 +93,7 @@
                                 </div>
                                 <field name="integration_level" widget="radio" attrs="{'invisible': ['|', ('delivery_type', '=', 'fixed'), ('delivery_type', '=', 'base_on_rule')]}"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="route_ids" widget="many2many_tags"/>
                             </group>
                             <group name="delivery_details">
                                 <field name="product_id" context="{'default_detailed_type': 'service', 'default_sale_ok': False, 'default_purchase_ok': False, 'default_invoice_policy': 'order'}" />
