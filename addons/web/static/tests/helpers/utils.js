@@ -995,7 +995,7 @@ export function getDropdownMenu(target, togglerSelector) {
         togglerSelector instanceof HTMLElement
             ? togglerSelector
             : target.querySelector(togglerSelector);
-    console.log(el);
+
     if (el && !el.classList.contains("o-dropdown")) {
         el = el.querySelector(".o-dropdown");
     }

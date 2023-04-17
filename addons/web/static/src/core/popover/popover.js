@@ -52,10 +52,6 @@ export class Popover extends Component {
             return;
         }
 
-        if (!this.arrow.el) {
-            return;
-        }
-
         // reset all arrow classes
         this.arrow.el.className = "popover-arrow";
         switch (position) {
