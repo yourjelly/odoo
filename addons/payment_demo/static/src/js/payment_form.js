@@ -1,6 +1,6 @@
 /** @odoo-module **/
     
-    import { _processDemoPayment } from '@payment_demo/js/payment_demo_mixin';
+    import { paymentDemo } from '@payment_demo/js/payment_demo_mixin';
 
     import checkoutForm from "payment.checkout_form";
     import manageForm from "payment.manage_form";
@@ -25,7 +25,7 @@
             if (code !== 'demo') {
                 return this._super(...arguments);
             }
-            new _processDemoPayment(processingValues);
+            paymentDemo.processDemoPayment(processingValues);
         },
 
         /**

@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { paymentExpressCheckoutForm } from '@payment/js/express_checkout_form';
-import { _processDemoPayment } from '@payment_demo/js/payment_demo_mixin';
+import { paymentDemo } from '@payment_demo/js/payment_demo_mixin';
 
 paymentExpressCheckoutForm.include({
 
@@ -66,7 +66,7 @@ paymentExpressCheckoutForm.include({
                 route: this.txContext.transactionRoute,
                 params: this._prepareTransactionRouteParams(providerId),
             }).then((processingValues) => {
-                _processDemoPayment(processingValues); //it should be called in different way now I think look in Stripe for suggestion
+                paymentDemo.processDemoPayment(processingValues); //it should be called in different way now I think look in Stripe for suggestion
             });
         });
     },
