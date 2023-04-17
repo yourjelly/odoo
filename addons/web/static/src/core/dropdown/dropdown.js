@@ -1,430 +1,359 @@
 /** @odoo-module **/
 
-import { useBus, useService } from "@web/core/utils/hooks";
-import { usePosition } from "../position/position_hook";
-import { useDropdownNavigation } from "./dropdown_navigation_hook";
-import { localization } from "../l10n/localization";
-
-import {
-    Component,
-    EventBus,
-    onWillStart,
-    status,
-    useEffect,
-    useExternalListener,
-    useRef,
-    useState,
-    useChildSubEnv,
-} from "@odoo/owl";
-
-const DIRECTION_CARET_CLASS = {
-    bottom: "dropdown",
-    top: "dropup",
-    left: "dropstart",
-    right: "dropend",
-};
-
-export const DROPDOWN = Symbol("Dropdown");
+import { Component, onMounted, onRendered, status, useEffect, useState, xml } from "@odoo/owl";
+import { useNavigation } from "@web/core/navigation/navigation";
+import { useChildRef, useService } from "@web/core/utils/hooks";
+import { useDropdownGroup } from "./dropdown_behaviours/dropdown_group_hook";
+import { useDropdownNesting } from "./dropdown_behaviours/dropdown_nesting";
+import { DropdownPopover } from "./dropdown_behaviours/dropdown_popover";
+import { effect } from "@web/core/utils/reactive";
+import { mergeClasses } from "../utils/className";
 
 /**
- * @typedef DropdownState
- * @property {boolean} open
- * @property {boolean} groupIsOpen
+ * @typedef {Object} DropdownState
+ * @property {() => void} open
+ * @property {() => void} close
+ * @property {() => void} toggle
+ * @property {boolean} isOpen
+ * @property {'auto'|'controlled'} mode
  */
 
 /**
- * @typedef DropdownStateChangedPayload
- * @property {Dropdown} emitter
- * @property {DropdownState} newState
+ * Hook used to interact with the Dropdown state.
+ *
+ * @param {'auto'|'controlled'} [mode='auto'] - By default the state
+ * is managed by the dropdown, meaning click events on the toggler will open
+ * the dropdown. Default is 'auto' but when set to 'controlled' no listener
+ * is added and it's the parent's responsability to open the dropdown.
+ *
+ * @param {Function} [onChange=undefined] - Callback invoked when the state
+ * changes, takes (isOpen) as its parameter.
+ *
+ * @returns {DropdownState}
  */
+export function useDropdown({ mode = "auto", onChange } = {}) {
+    const state = useState({
+        mode: mode,
+        isOpen: false,
+        open: async () => {
+            state.isOpen = true;
+            onChange?.(true);
+        },
+        close: () => {
+            state.isOpen = false;
+            onChange?.(false);
+        },
+        toggle: async () => {
+            if (state.isOpen) {
+                state.close();
+            } else {
+                await state.open();
+            }
+        },
+    });
+    return state;
+}
+
+function getFirstElementOfNode(node) {
+    if (!node) {
+        return null;
+    }
+    if (node.el) {
+        return node.el.nodeType === Node.ELEMENT_NODE ? node.el : null;
+    }
+    if (node.bdom || node.child) {
+        return getFirstElementOfNode(node.bdom || node.child);
+    }
+    if (node.children) {
+        for (const child of node.children) {
+            const el = getFirstElementOfNode(child);
+            if (el) {
+                return el;
+            }
+        }
+    }
+    return null;
+}
 
 /**
- * @extends Component
+ * The Dropdown component allows to define a menu that will
+ * show itself when a target is toggled.
+ *
+ * Items are defined using DropdownItems. Dropdowns are
+ * also allowed as items to be able to create nested
+ * dropdown menus.
  */
 export class Dropdown extends Component {
-    static template = "web.Dropdown";
-    static bus = new EventBus();
-    static defaultProps = {
-        menuDisplay: "d-block",
-        autoOpen: true,
-        holdOnHover: false,
-        onOpened: () => {},
-        onStateChanged: () => {},
-        onScroll: () => {},
-    };
+    static template = xml`<t t-slot="default"/>`;
+    static components = {};
     static props = {
-        class: {
-            type: String,
-            optional: true,
-        },
-        disabled: {
-            type: Boolean,
-            optional: true,
-        },
-        toggler: {
-            type: String,
-            optional: true,
-            validate: (prop) => ["parent"].includes(prop),
-        },
-        skipTogglerTabbing: {
-            type: Boolean,
-            optional: true,
-        },
-        startOpen: {
-            type: Boolean,
-            optional: true,
-        },
-        autoOpen: {
-            type: Boolean,
-            optional: true,
-        },
-        menuClass: {
-            type: String,
-            optional: true,
-        },
-        menuDisplay: {
-            type: String,
-            optional: true,
-        },
-        beforeOpen: {
-            type: Function,
-            optional: true,
-        },
-        onOpened: {
-            type: Function,
-            optional: true,
-        },
-        onScroll: {
-            type: Function,
-            optional: true,
-        },
-        onStateChanged: {
-            type: Function,
-            optional: true,
-        },
-        togglerClass: {
-            type: String,
-            optional: true,
-        },
-        hotkey: {
-            type: String,
-            optional: true,
-        },
-        tooltip: {
-            type: String,
-            optional: true,
-        },
-        title: {
-            type: String,
-            optional: true,
-        },
-        position: {
-            type: String,
-            optional: true,
-        },
+        menuClass: { optional: true },
+        position: { type: String, optional: true },
         slots: {
             type: Object,
+            shape: {
+                default: { optional: true },
+                content: { optional: true },
+            },
+        },
+
+        items: {
+            optional: true,
+            type: Array,
+            elements: {
+                type: Object,
+                shape: {
+                    label: String,
+                    onSelected: Function,
+                    class: { optional: true },
+                    "*": true,
+                },
+            },
+        },
+
+        /* To be used with useChildRef */
+        menuRef: { type: Function, optional: true },
+        enabled: { type: Boolean, optional: true },
+        holdOnHover: { type: Boolean, optional: true },
+        options: { type: Object, optional: true },
+
+        beforeOpen: { type: Function, optional: true },
+        onOpened: { type: Function, optional: true },
+        onStateChanged: { type: Function, optional: true },
+
+        /** Manual state handling, @see useDropdown */
+        state: {
+            type: Object,
+            shape: {
+                isOpen: Boolean,
+                close: Function,
+                open: Function,
+                "*": true,
+            },
             optional: true,
         },
-        showCaret: {
-            type: Boolean,
-            optional: true,
+    };
+    static defaultProps = {
+        menuClass: "",
+        holdOnHover: false,
+        options: {
+            navigation: {},
+            popover: {},
         },
-        holdOnHover: {
-            type: Boolean,
-            optional: true,
-        },
-        container: {
-            type: [Element, Function],
-            optional: true,
-        },
+        state: undefined,
     };
 
     setup() {
-        this.state = useState({
-            open: this.props.startOpen,
-            groupIsOpen: this.props.startOpen,
-            directionCaretClass: null,
+        this.popover = useService("popover");
+        this.menuRef = this.props.menuRef || useChildRef();
+
+        this.state = this.props.state || useDropdown();
+        this.nesting = useDropdownNesting(this.state);
+        this.group = useDropdownGroup();
+        this.navigation = useNavigation(this.menuRef, {
+            itemsSelector: ":scope .o-navigable, :scope .o-dropdown",
+            focusInitialElementOnDisabled: () => !this.group.isInGroup,
+            ...this.nesting.navigationOptions,
+            ...this.props.options.navigation,
         });
-        this.rootRef = useRef("root");
 
-        // Set up beforeOpen ---------------------------------------------------
-        onWillStart(() => {
-            if (this.state.open && this.props.beforeOpen) {
-                return this.props.beforeOpen();
-            }
-        });
+        this.DIRECTION_CLASS = {
+            bottom: "dropdown",
+            top: "dropup",
+            left: "dropstart",
+            right: "dropend",
+        };
 
-        // Set up dynamic open/close behaviours --------------------------------
+        // As the popover is in another context we need to force
+        // its re-rendering when the dropdown re-renders
+        this.renderRef = {};
+        onRendered(() => this.renderRef.render?.());
 
-        // Close on outside click listener
-        useExternalListener(window, "click", this.onWindowClicked, { capture: true });
-        // Listen to all dropdowns state changes
-        useBus(Dropdown.bus, "state-changed", ({ detail }) => this.onDropdownStateChanged(detail));
+        onMounted(() => this.onStateChanged(this.state));
+        effect((state) => this.onStateChanged(state), [this.state]);
 
-        // Set up UI active element related behavior ---------------------------
-        this.ui = useService("ui");
         useEffect(
-            () => {
-                Promise.resolve().then(() => {
-                    this.myActiveEl = this.ui.activeElement;
-                });
-            },
-            () => []
+            (target) => this.setTargetElement(target),
+            () => [this.target]
         );
 
-        // Set up nested dropdowns ---------------------------------------------
-        this.parentDropdown = this.env[DROPDOWN];
-        useChildSubEnv({
-            [DROPDOWN]: {
-                close: this.close.bind(this),
-                closeAllParents: () => {
-                    this.close();
-                    if (this.parentDropdown) {
-                        this.parentDropdown.closeAllParents();
-                    }
-                },
-            },
-        });
-
-        // Set up key navigation -----------------------------------------------
-        useDropdownNavigation();
-
-        // Set up toggler and positioning --------------------------------------
-        /** @type {string} **/
-        const position =
-            this.props.position || (this.parentDropdown ? "right-start" : "bottom-start");
-        let [direction] = position.split("-");
-        if (["left", "right"].includes(direction) && localization.direction === "rtl") {
-            direction = direction === "left" ? "right" : "left";
-        }
-        this.defaultDirection = direction;
-        const positioningOptions = {
-            position,
-            onPositioned: (el, { direction }) => {
-                this.state.directionCaretClass = DIRECTION_CARET_CLASS[direction];
-            },
-        };
-        if (this.props.container) {
-            positioningOptions.container = () =>
-                typeof this.props.container === "function"
-                    ? this.props.container()
-                    : this.props.container;
-        }
-        this.state.directionCaretClass = DIRECTION_CARET_CLASS[direction];
-        this.togglerRef = useRef("togglerRef");
-        if (this.props.toggler === "parent") {
-            // Add parent click listener to handle toggling
-            useEffect(
-                () => {
-                    const onClick = (ev) => {
-                        if (this.rootRef.el.contains(ev.target)) {
-                            // ignore clicks inside the dropdown
-                            return;
-                        }
-                        this.toggle();
-                    };
-                    if (this.rootRef.el.parentElement.tabIndex === -1) {
-                        // If the parent is not focusable, make it focusable programmatically.
-                        // This code may look weird, but an element with a negative tabIndex is
-                        // focusable programmatically ONLY if its tabIndex is explicitly set.
-                        this.rootRef.el.parentElement.tabIndex = -1;
-                    }
-                    this.rootRef.el.parentElement.addEventListener("click", onClick);
-                    return () => {
-                        this.rootRef.el.parentElement.removeEventListener("click", onClick);
-                    };
-                },
-                () => []
-            );
-
-            useEffect(
-                (open) => {
-                    this.rootRef.el.parentElement.ariaExpanded = open ? "true" : "false";
-                },
-                () => [this.state.open]
-            );
-
-            // Position menu relatively to parent element
-            this.position = usePosition(
-                "menuRef",
-                () => this.rootRef.el.parentElement,
-                positioningOptions
-            );
-        } else {
-            // Position menu relatively to inner toggler
-            const togglerRef = useRef("togglerRef");
-            this.position = usePosition("menuRef", () => togglerRef.el, positioningOptions);
-        }
-
         useEffect(
-            (isOpen) => {
-                if (isOpen) {
-                    this.props.onOpened();
+            (enabled) => {
+                if (!enabled) {
+                    this.closePopover();
                 }
             },
-            () => [this.state.open]
+            () => [this.props.enabled]
         );
     }
 
-    // -------------------------------------------------------------------------
-    // Private
-    // -------------------------------------------------------------------------
-
-    /**
-     * Changes the dropdown state and notifies over the Dropdown bus.
-     *
-     * All state changes must trigger on the bus, except when reacting to
-     * another dropdown state change.
-     *
-     * @see onDropdownStateChanged()
-     *
-     * @param {Partial<DropdownState>} stateSlice
-     */
-    async changeStateAndNotify(stateSlice) {
-        if (stateSlice.open && this.props.beforeOpen) {
-            await this.props.beforeOpen();
-            if (status(this) === "destroyed") {
-                return;
-            }
-        }
-
-        if (!stateSlice.open) {
-            this.state.directionCaretClass = DIRECTION_CARET_CLASS[this.defaultDirection];
-        }
-
-        // Update the state
-        Object.assign(this.state, stateSlice);
-        // Notify over the bus
-        /** @type DropdownStateChangedPayload */
-        const stateChangedPayload = {
-            emitter: this,
-            newState: { ...this.state },
-        };
-        Dropdown.bus.trigger("state-changed", stateChangedPayload);
-        this.props.onStateChanged({ ...this.state });
+    /** @type {string} */
+    get position() {
+        return this.props.position || (this.hasParent ? "right-start" : "bottom-start");
     }
 
-    /**
-     * Closes the dropdown.
-     *
-     * @returns {Promise<void>}
-     */
-    close() {
-        return this.changeStateAndNotify({ open: false, groupIsOpen: false });
+    /** @type {boolean} */
+    get hasParent() {
+        return this.nesting.hasParent;
     }
 
-    /**
-     * Opens the dropdown.
-     *
-     * @returns {Promise<void>}
-     */
-    open() {
-        return this.changeStateAndNotify({ open: true, groupIsOpen: this.props.autoOpen });
-    }
-
-    /**
-     * Toggles the dropdown open state.
-     *
-     * @returns {Promise<void>}
-     */
-    toggle() {
-        const toggled = !this.state.open;
-        return this.changeStateAndNotify({
-            open: toggled,
-            groupIsOpen: toggled && this.props.autoOpen,
-        });
-    }
-
-    get showCaret() {
-        return this.props.showCaret === undefined ? this.parentDropdown : this.props.showCaret;
-    }
-
-    // -------------------------------------------------------------------------
-    // Handlers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Dropdowns react to each other state changes through this method.
-     *
-     * All state changes must trigger on the bus, except when reacting to
-     * another dropdown state change.
-     *
-     * @see changeStateAndNotify()
-     *
-     * @param {DropdownStateChangedPayload} args
-     */
-    onDropdownStateChanged(args) {
-        if (
-            !this.rootRef.el ||
-            this.rootRef.el.contains(args.emitter.rootRef.el) ||
-            args.emitter.myActiveEl !== this.myActiveEl
-        ) {
-            // Do not listen to events emitted by self or children
-            return;
-        }
-
-        // Emitted by direct siblings ?
-        if (args.emitter.rootRef.el.parentElement === this.rootRef.el.parentElement) {
-            // Sync the group status (will not apply if autoOpen is set to false)
-            this.state.groupIsOpen = args.newState.groupIsOpen && this.props.autoOpen;
-
-            // Another dropdown is now open ? Close myself without notifying siblings.
-            if (this.state.open && args.newState.open) {
-                this.state.open = false;
-            }
+    /** @type {HTMLElement|null} */
+    get target() {
+        const target = getFirstElementOfNode(this.__owl__.bdom);
+        if (target) {
+            return target;
         } else {
-            // Another dropdown is now open ? Close myself and notify the world (i.e. siblings).
-            if (this.state.open && args.newState.open) {
-                this.close();
+            throw new Error(
+                "Could not find a valid dropdown toggler, prefer a single html element and put any dynamic content inside of it."
+            );
+        }
+    }
+
+    /** @type {boolean} */
+    get isControlled() {
+        return this.props.state && this.props.state.mode == "controlled";
+    }
+
+    handleClick(event) {
+        if (!this.props.enabled) {
+            return;
+        }
+
+        event.stopPropagation();
+        if (this.state.isOpen && !this.hasParent) {
+            this.state.close();
+        } else {
+            this.state.open();
+        }
+    }
+
+    handleMouseEnter() {
+        if (!this.props.enabled) {
+            return;
+        }
+
+        if (this.hasParent || this.group.isOpen) {
+            this.target.focus();
+            this.state.open();
+        }
+    }
+
+    onStateChanged(state) {
+        if (state.isOpen) {
+            this.openPopover();
+        } else if (!state.isOpen) {
+            this.closePopover();
+        }
+        this.props.onStateChanged?.(state.isOpen);
+    }
+
+    setTargetElement(target) {
+        if (!target) {
+            return;
+        }
+
+        target.ariaExpanded = false;
+        target.classList.add("o-dropdown");
+
+        if (this.hasParent) {
+            target.classList.add("o-dropdown--has-parent");
+        }
+
+        const tagName = target.tagName.toLowerCase();
+        if (!["input", "textarea", "table", "thead", "tbody", "tr", "th", "td"].includes(tagName)) {
+            target.classList.add("dropdown-toggle");
+            if (this.hasParent) {
+                target.classList.add("o-dropdown-item", "o-navigable", "dropdown-item");
+
+                if (!target.classList.contains("o-dropdown--no-caret")) {
+                    target.classList.add("o-dropdown-caret");
+                }
             }
         }
-    }
 
-    /**
-     * Toggles the dropdown on its toggler click.
-     */
-    onTogglerClick() {
-        this.toggle();
-    }
+        this.defaultDirection = this.position.split("-")[0];
+        this.setTargetDirectionClass(this.defaultDirection);
 
-    /**
-     * Opens the dropdown when the mouse enters its toggler if its group is open. (see autoOpen prop)
-     * NB: only if its siblings dropdown group is opened and if not a sub dropdown.
-     */
-    onTogglerMouseEnter() {
-        if (this.state.groupIsOpen && !this.state.open) {
-            this.togglerRef.el.focus();
-            this.open();
+        if (!this.isControlled) {
+            target.addEventListener("click", this.handleClick.bind(this));
+            target.addEventListener("mouseenter", this.handleMouseEnter.bind(this));
+
+            return () => {
+                target.removeEventListener("click", this.handleClick.bind(this));
+                target.removeEventListener("mouseenter", this.handleMouseEnter.bind(this));
+            };
         }
     }
 
-    /**
-     * Used to close ourself on outside click.
-     *
-     * @param {MouseEvent} ev
-     */
-    onWindowClicked(ev) {
-        // Return if already closed
-        if (!this.state.open) {
+    setTargetDirectionClass(direction) {
+        if (!this.target) {
             return;
         }
-        // Return if it's a different ui active element
-        if (this.ui.activeElement !== this.myActiveEl) {
+        for (const _direction in this.DIRECTION_CLASS) {
+            this.target.classList[_direction === direction ? "add" : "remove"](
+                this.DIRECTION_CLASS[_direction]
+            );
+        }
+    }
+
+    async openPopover() {
+        if (this._closePopover !== undefined || status(this) !== "mounted") {
+            return;
+        }
+        if (!this.target || !this.target.isConnected) {
+            this.state.close();
             return;
         }
 
-        if (ev.target.closest(".o_datetime_picker")) {
-            return;
-        }
+        const props = {
+            beforeOpen: () => this.props.beforeOpen?.(),
+            onOpened: () => this.onOpened(),
+            onClosed: () => this.onClosed(),
+            env: this.__owl__.childEnv,
+            renderRef: this.renderRef,
+            items: this.props.items,
+            slots: this.props.slots,
+        };
 
-        // Close if we clicked outside the dropdown, or outside the parent
-        // element if it is the toggler
-        const rootEl =
-            this.props.toggler === "parent" ? this.rootRef.el.parentElement : this.rootRef.el;
-        const gotClickedInside = rootEl.contains(ev.target);
-        if (!gotClickedInside) {
-            this.close();
+        const options = {
+            popoverClass: mergeClasses("o-dropdown--menu dropdown-menu", this.props.menuClass),
+            popoverRole: "menu",
+            arrow: false,
+            animation: true,
+            position: this.position,
+            ref: this.menuRef,
+            closeOnEscape: false, // Handled via navigation and prevents closing root of nested dropdown
+            onClose: () => this.state.close(),
+            onPositioned: (el, { direction }) => {
+                this.setTargetDirectionClass(direction);
+            },
+            holdOnHover: this.props.holdOnHover,
+        };
+
+        this._closePopover = this.popover.add(this.target, DropdownPopover, props, options);
+        this.renderRef.render?.();
+    }
+
+    closePopover() {
+        this._closePopover?.();
+        this._closePopover = undefined;
+        this.navigation.disable();
+    }
+
+    onOpened() {
+        this.props.onOpened?.();
+        this.navigation.enable();
+        if (this.target) {
+            this.target.ariaExpanded = true;
+            this.target.classList.add("show");
+        }
+    }
+
+    onClosed() {
+        if (this.target) {
+            this.target.ariaExpanded = false;
+            this.target.classList.remove("show");
+            this.setTargetDirectionClass(this.defaultDirection);
         }
     }
 }

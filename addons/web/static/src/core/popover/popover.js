@@ -1,8 +1,10 @@
 /** @odoo-module **/
 
-import { Component } from "@odoo/owl";
-import { useForwardRefToParent } from "@web/core/utils/hooks";
+import { Component, useEffect, onWillDestroy, useRef, onMounted } from "@odoo/owl";
+import { useForwardRefToParent } from "../utils/hooks";
 import { usePosition } from "@web/core/position/position_hook";
+import { addClassesToElement, mergeClasses } from "../utils/className";
+import { uniqueId } from "@web/core/utils/functions";
 import { useActiveElement } from "@web/core/ui/ui_service";
 
 export class Popover extends Component {
@@ -23,6 +25,10 @@ export class Popover extends Component {
             optional: true,
             type: String,
         },
+        role: {
+            optional: true,
+            type: String,
+        },
         position: {
             type: String,
             validate: (p) => {
@@ -39,6 +45,10 @@ export class Popover extends Component {
             optional: true,
         },
         fixedPosition: {
+            type: Boolean,
+            optional: true,
+        },
+        holdOnHover: {
             type: Boolean,
             optional: true,
         },
@@ -72,43 +82,73 @@ export class Popover extends Component {
 
     static animationTime = 200;
     setup() {
+        this.menuRef = useRef("ref");
+        this.arrow = useRef("popoverArrow");
+
         useActiveElement("ref");
         useForwardRefToParent("ref");
         this.shouldAnimate = this.props.animation;
         this.position = usePosition("ref", () => this.props.target, {
-            onPositioned: (el, solution) => {
-                (this.props.onPositioned || this.onPositioned.bind(this))(el, solution);
-                if (this.props.fixedPosition) {
-                    // Prevent further positioning updates if fixed position is wanted
-                    this.position.lock();
-                }
-            },
+            onPositioned: this.onPositioned.bind(this),
             position: this.props.position,
         });
+
+        if (this.props.holdOnHover) {
+            const lock = () => this.position.lock();
+            const unlock = () => this.position.unlock();
+
+            useEffect(
+                () => {
+                    this.menuRef.el.addEventListener("pointerenter", lock);
+                    this.menuRef.el.addEventListener("pointerleave", unlock);
+
+                    return () => {
+                        this.menuRef.el.removeEventListener("pointerenter", lock);
+                        this.menuRef.el.removeEventListener("pointerleave", unlock);
+                    };
+                },
+                () => [this.menuRef.el]
+            );
+        }
+
+        onMounted(() => {
+            const id = uniqueId("popover-");
+            this.menuRef.el.setAttribute("data-popover-id", id);
+            this.props.target.setAttribute("data-popover-for", id);
+        });
+
+        onWillDestroy(() => {
+            this.props.target?.removeAttribute("data-popover-for");
+        });
     }
-    onPositioned(el, { direction, variant }) {
+
+    get defaultClassObj() {
+        return mergeClasses("o_popover popover mw-100 shadow", this.props.class);
+    }
+
+    onPositioned(el, solution) {
+        const { direction, variant } = solution;
         const position = `${direction[0]}${variant[0]}`;
 
         // reset all popover classes
+        el.classList = [];
         const directionMap = {
             top: "top",
             bottom: "bottom",
             left: "start",
             right: "end",
         };
-        el.classList = [
-            "o_popover popover mw-100",
+        addClassesToElement(
+            el,
+            this.defaultClassObj,
             `bs-popover-${directionMap[direction]}`,
             `o-popover-${direction}`,
-            `o-popover--${position}`,
-        ].join(" ");
-        if (this.props.class) {
-            el.classList.add(...this.props.class.split(" "));
-        }
+            `o-popover--${position}`
+        );
 
-        // reset all arrow classes
         if (this.props.arrow) {
-            const arrowEl = el.querySelector(":scope > .popover-arrow");
+            const arrowEl = this.arrow.el;
+            // reset all arrow classes
             arrowEl.className = "popover-arrow";
             switch (position) {
                 case "tm": // top-middle
@@ -154,9 +194,19 @@ export class Popover extends Component {
             this.position.lock();
             const animation = el.animate(
                 { opacity: [0, 1], transform },
-                this.constructor.animationTime
+                {
+                    duration: this.constructor.animationTime,
+                    easing: "cubic-bezier(0.215, 0.610, 0.355, 1.000)",
+                }
             );
             animation.finished.then(this.position.unlock);
         }
+
+        if (this.props.fixedPosition) {
+            // Prevent further positioning updates if fixed position is wanted
+            this.position.lock();
+        }
+
+        this.props.onPositioned?.(el, solution);
     }
 }

@@ -7,6 +7,7 @@ import { getFixture, makeDeferred, mount, nextTick, triggerEvent } from "../../h
 import { makeTestEnv } from "../../helpers/mock_env";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
+import { useRef } from "@odoo/owl";
 
 let env;
 let fixture;
@@ -196,11 +197,16 @@ QUnit.test("reposition popover should properly change classNames", async (assert
     const TestPopover = class extends Popover {
         setup() {
             // Don't call super.setup() in order to replace the use of usePosition hook...
-            usePosition("ref", () => this.props.target, {
-                container,
-                onPositioned: this.onPositioned.bind(this),
-                position: this.props.position,
-            });
+            this.arrow = useRef("popoverArrow");
+            usePosition(
+                "ref",
+                () => this.props.target,
+                {
+                    container,
+                    onPositioned: this.onPositioned.bind(this),
+                    position: this.props.position,
+                }
+            );
         }
     };
 
@@ -209,10 +215,9 @@ QUnit.test("reposition popover should properly change classNames", async (assert
     const arrow = popover.firstElementChild;
 
     // Should have classes for a "bottom-middle" placement
-    assert.strictEqual(
-        popover.className,
-        "o_popover popover mw-100 bs-popover-bottom o-popover-bottom o-popover--bm"
-    );
+    assert.hasClass(popover, "bs-popover-bottom");
+    assert.hasClass(popover, "o-popover-bottom");
+    assert.hasClass(popover, "o-popover--bm");
     assert.strictEqual(arrow.className, "popover-arrow start-0 end-0 mx-auto");
 
     // Change container style and force update
@@ -222,10 +227,9 @@ QUnit.test("reposition popover should properly change classNames", async (assert
     await nextTick();
 
     // Should have classes for a "right-end" placement
-    assert.strictEqual(
-        popover.className,
-        "o_popover popover mw-100 bs-popover-end o-popover-right o-popover--re"
-    );
+    assert.hasClass(popover, "bs-popover-end");
+    assert.hasClass(popover, "o-popover-right");
+    assert.hasClass(popover, "o-popover--re");
     assert.strictEqual(arrow.className, "popover-arrow top-auto");
 });
 

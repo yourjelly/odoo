@@ -2,9 +2,9 @@
 <templates xml:space="preserve">
 
     <t t-name="web.PopoverWowl">
-        <div role="tooltip" class="o_popover popover mw-100" t-att-class="props.class" t-ref="ref">
+        <div t-att-role="props.role" t-ref="ref" t-att-class="defaultClassObj">
             <t t-slot="default" />
-            <div t-if="props.arrow" class="popover-arrow"/>
+            <div t-if="props.arrow" t-ref="popoverArrow" class="popover-arrow"/>
         </div>
     </t>
 
