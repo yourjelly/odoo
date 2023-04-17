@@ -4,4 +4,8 @@
     .o_dropdown_container {
         border-color: $dropdown-divider-bg !important;
     }
+    .collapse, .collapsing {
+        border-left: 1px solid lightgray;
+        margin-left: 1.5rem;
+    }
 }

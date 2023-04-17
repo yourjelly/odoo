@@ -113,7 +113,7 @@ export function useSetupAction(params = {}) {
                 Object.assign(state, getLocalState());
             }
             if (rootRef) {
-                if (component.env.isSmall) {
+                if (component.env.isSmall && false) {
                     state[scrollSymbol] = {
                         root: { left: rootRef.el.scrollLeft, top: rootRef.el.scrollTop },
                     };

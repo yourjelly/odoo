@@ -2,22 +2,19 @@
 <templates xml:space="preserve">
 
     <t t-name="web.ControlPanel" owl="1">
-        <t t-if="env.isSmall">
-            <t t-call="web.ControlPanel.Small" />
-        </t>
-        <t t-else="">
-            <t t-call="web.ControlPanel.Regular" />
-        </t>
+        <t t-call="web.ControlPanel.Regular" />
     </t>
 
     <t t-name="web.ControlPanel.Regular" owl="1">
         <div class="o_control_panel d-flex flex-column gap-3 gap-lg-1 px-3 pt-2 pb-3" t-ref="root">
             <div class="o_control_panel_main d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-start gap-3">
-                <div class="o_control_panel_breadcrumbs d-flex align-items-center w-100 w-md-50 w-lg-auto">
+                <div class="o_control_panel_breadcrumbs d-flex align-items-center w-md-50 w-lg-auto">
                     <div class="o_control_panel_main_buttons d-empty-none d-print-none me-2">
-                        <t t-slot="control-panel-create-button"/>
-                        <t t-slot="layout-buttons"/>
-                        <t t-slot="control-panel-always-buttons"/>
+                        <div class="btn-group">
+                            <t t-slot="control-panel-create-button"/>
+                            <t t-slot="layout-buttons"/>
+                            <t t-slot="control-panel-always-buttons"/>
+                        </div>
                     </div>
                     <t t-if="!env.config.noBreadcrumbs" t-call="web.Breadcrumbs"/>
                     <span class="d-none d-xl-block me-auto"/> <!-- Spacer -->
@@ -27,7 +24,7 @@
                     <t t-slot="layout-actions"/>
                 </div>
 
-                <div class="o_control_panel_navigation d-flex flex-wrap flex-md-nowrap align-items-center justify-content-between justify-content-md-end w-100 w-md-auto gap-3 gap-lg-1 gap-xl-3 order-2 order-lg-3">
+                <div class="o_control_panel_navigation d-flex flex-wrap flex-md-nowrap align-items-center justify-content-between justify-content-md-end w-md-auto gap-3 gap-lg-1 gap-xl-3 order-2 order-lg-3">
                     <span class="d-none d-xl-block ms-auto"/> <!-- Spacer -->
                     <div t-if="pagerProps and pagerProps.total > 0" class="o_cp_pager text-nowrap order-2 order-md-1" role="search">
                         <Pager t-props="pagerProps"/>
@@ -35,13 +32,40 @@
                     <nav t-if="env.config.viewSwitcherEntries?.length > 1"
                          class="o_cp_switch_buttons d-print-none btn-group order-1"
                          t-att-class="{'w-100 w-sm-auto': env.config.viewSwitcherEntries?.length > 5}">
-                        <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
-                            <button class="btn btn-secondary o_switch_view "
-                                t-attf-class="o_{{view.type}} {{view.icon}} {{view.active ? 'active' : ''}}"
-                                t-att-data-tooltip="view.name"
-                                t-on-click="() => this.onViewClicked(view.type)"
-                                />
-                        </t>
+                         <t t-if="env.isSmall">
+                                <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
+                                    <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                        t-attf-class="o_{{view.type}} {{view.icon}}"
+                                        t-att-data-tooltip="view.name"
+                                        t-if="view.active"
+                                    >
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                </t>
+                                <ul  class="dropdown-menu">
+                                    <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
+                                        <li t-attf-class="{{view.active ? 'active' : ''}}">
+                                            <button class="btn o_switch_view "
+                                                t-attf-class="o_{{view.type}} {{view.active ? 'active btn-primary' : ''}} dropdown-item dropdown-item_active_noarrow d-flex align-items-center"
+                                                t-att-data-tooltip="view.name"
+                                                t-on-click="() => this.onViewClicked(view.type)"
+                                                >
+                                                <i t-attf-class="{{view.icon}} pe-2"/>
+                                                <span t-out="view.name"/>
+                                            </button>
+                                        </li>
+                                    </t>
+                                </ul>
+                         </t>
+                         <t t-else="">
+                             <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
+                                 <button class="btn btn-secondary o_switch_view "
+                                     t-attf-class="o_{{view.type}} {{view.icon}} {{view.active ? 'active' : ''}}"
+                                     t-att-data-tooltip="view.name"
+                                     t-on-click="() => this.onViewClicked(view.type)"
+                                     />
+                             </t>
+                         </t>
                     </nav>
                 </div>
             </div>

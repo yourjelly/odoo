@@ -20,24 +20,21 @@
                         <div class="dropdown-divider" role="separator"/>
                     </t>
                     <t t-if="item.options">
-                        <Dropdown togglerClass="'o_menu_item' + (item.isActive ? ' selected' : '')">
-                            <t t-set-slot="toggler">
-                                <t t-esc="item.description"/>
-                            </t>
-                            <t t-set="subGroup" t-value="null"/>
-                            <t t-foreach="item.options" t-as="option" t-key="option.id">
-                                <t t-if="subGroup !== null and subGroup !== option.groupNumber">
-                                    <div class="dropdown-divider" role="separator"/>
+                        <button type="button" t-attf-class="{{'dropdown-item o_menu_item' + (item.isActive ? ' selected' : '')}}" data-bs-toggle="collapse" t-attf-data-bs-target="#collapse_{{item.name}}" aria-expanded="false" t-attf-aria-controls="#collapse_{{item.name}}"><t t-esc="item.description"/></button>
+                            <div class="collapse" t-attf-id="collapse_{{item.name}}" data-bs-parent=".o_filter_menu">
+                                <t t-foreach="item.options" t-as="option" t-key="option.id">
+                                    <t t-if="subGroup !== null and subGroup !== option.groupNumber">
+                                        <div class="dropdown-divider" role="separator"/>
+                                    </t>
+                                    <SearchDropdownItem class="{ o_item_option: true, selected: option.isActive }"
+                                                        t-esc="option.description"
+                                                        checked="option.isActive"
+                                                        parentClosingMode="'none'"
+                                                        onSelected="() => this.onFilterSelected({ itemId: item.id, optionId: option.id })"
+                                    />
+                                    <t t-set="subGroup" t-value="option.groupNumber"/>
                                 </t>
-                                <SearchDropdownItem class="{ o_item_option: true, selected: option.isActive }"
-                                                    t-esc="option.description"
-                                                    checked="option.isActive"
-                                                    parentClosingMode="'none'"
-                                                    onSelected="() => this.onFilterSelected({ itemId: item.id, optionId: option.id })"
-                                />
-                                <t t-set="subGroup" t-value="option.groupNumber"/>
-                            </t>
-                        </Dropdown>
+                            </div>
                     </t>
                     <t t-else="">
                         <SearchDropdownItem class="{ o_menu_item: true, selected: item.isActive }"
@@ -66,24 +63,21 @@
                         <div class="dropdown-divider" role="separator"/>
                     </t>
                     <t t-if="item.options">
-                        <Dropdown togglerClass="'o_menu_item' + (item.isActive ? ' selected' : '')">
-                            <t t-set-slot="toggler">
-                                <t t-esc="item.description"/>
-                            </t>
-                            <t t-set="subGroup" t-value="null"/>
-                            <t t-foreach="item.options" t-as="option" t-key="option.id">
-                                <t t-if="subGroup !== null and subGroup !== option.groupNumber">
-                                    <div class="dropdown-divider" role="separator"/>
+                        <button type="button" t-attf-class="{{'dropdown-item o_menu_item' + (item.isActive ? ' selected' : '')}}" data-bs-toggle="collapse" t-attf-data-bs-target="#collapse_{{item.name}}" aria-expanded="false" t-attf-aria-controls="#collapse_{{item.name}}"><t t-esc="item.description"/></button>
+                            <div class="collapse" t-attf-id="collapse_{{item.name}}" data-bs-parent=".o_filter_menu">
+                                <t t-foreach="item.options" t-as="option" t-key="option.id">
+                                    <t t-if="subGroup !== null and subGroup !== option.groupNumber">
+                                        <div class="dropdown-divider" role="separator"/>
+                                    </t>
+                                    <SearchDropdownItem class="{ o_item_option: true, selected: option.isActive }"
+                                                        t-esc="option.description"
+                                                        checked="option.isActive"
+                                                        parentClosingMode="'none'"
+                                                        onSelected="() => this.onGroupBySelected({ itemId: item.id, optionId: option.id})"
+                                    />
+                                    <t t-set="subGroup" t-value="option.groupNumber"/>
                                 </t>
-                                <SearchDropdownItem class="{ o_item_option: true, selected: option.isActive }"
-                                                    checked="option.isActive ? true : false"
-                                                    parentClosingMode="'none'"
-                                                    t-esc="option.description"
-                                                    onSelected="() => this.onGroupBySelected({ itemId: item.id, optionId: option.id})"
-                                />
-                                <t t-set="subGroup" t-value="option.groupNumber"/>
-                            </t>
-                        </Dropdown>
+                            </div>
                     </t>
                     <t t-else="">
                         <SearchDropdownItem class="{ o_menu_item: true, selected: item.isActive }"
