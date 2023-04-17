@@ -25,6 +25,10 @@ class ResCompany(models.Model):
     ], string='Barcode Source', default='front')
     attendance_kiosk_delay = fields.Integer(default=10)
 
+    mandatory_break_management = fields.Boolean(default=False)
+    attendance_minimal_pause_time = fields.Integer(string="Minimal Pause Time", default=0)
+    attendance_mandatory_break_ids = fields.One2many('hr.attendance.break', 'company_id', string="Pause Time Rules")
+
     def write(self, vals):
         search_domain = False  # Overtime to generate
         delete_domain = False  # Overtime to delete

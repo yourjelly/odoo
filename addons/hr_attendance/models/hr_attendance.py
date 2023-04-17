@@ -4,7 +4,7 @@
 import pytz
 
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from operator import itemgetter
 from pytz import timezone
 
@@ -13,6 +13,7 @@ from odoo.addons.resource.models.utils import Intervals
 from odoo.tools import format_datetime
 from odoo.osv.expression import AND, OR
 from odoo.tools.float_utils import float_is_zero
+from math import ceil
 
 
 class HrAttendance(models.Model):
@@ -29,6 +30,7 @@ class HrAttendance(models.Model):
     check_in = fields.Datetime(string="Check In", default=fields.Datetime.now, required=True)
     check_out = fields.Datetime(string="Check Out")
     worked_hours = fields.Float(string='Worked Hours', compute='_compute_worked_hours', store=True, readonly=True)
+    break_time_adjusted = fields.Boolean()
 
     def name_get(self):
         result = []
@@ -287,6 +289,61 @@ class HrAttendance(models.Model):
         self.env['hr.attendance.overtime'].sudo().create(overtime_vals_list)
         overtime_to_unlink.sudo().unlink()
 
+    def _update_mandatory_breaks(self, vals):
+        day = vals.get('check_out')
+        if isinstance(day, str):
+            day = datetime.strptime(day, '%Y-%m-%d %H:%M:%S').date()
+
+        attendance_day = date(day.year, day.month, day.day)
+        same_day_attendances = self.env['hr.attendance'].search([
+            ('employee_id', '=', self.employee_id.id),
+            ('check_in', '>=', attendance_day),
+            ('check_out', '<=', attendance_day)
+        ], order="check_in asc")
+        pause_time = 0
+        if len(same_day_attendances) > 1:
+            worked_time = (same_day_attendances[-1].check_out - same_day_attendances[0].check_in).seconds
+            for i in range(len(same_day_attendances)-1):
+                pause_duration = (same_day_attendances[i+1].check_in - same_day_attendances[i].check_out).seconds
+                if pause_duration > self.env.company.attendance_minimal_pause_time*60:
+                    pause_time += pause_duration
+        else:
+            worked_time = (same_day_attendances[0].check_out - same_day_attendances[0].check_in).seconds
+            pause_time = 0
+
+        company_break_times = self.env['hr.attendance.break'].search([('company_id', '=', self.env.company.id),
+                                                                      ('working_time', '<=', worked_time/3600)]).mapped('corresponding_mandatory_pause_time')
+        remaining_break_time = 0
+        if company_break_times:
+            remaining_break_time = company_break_times[-1]*60 - pause_time
+
+        if remaining_break_time > 0:
+            if len(same_day_attendances) == 1:
+                attendance = same_day_attendances[0]
+                original_check_out = attendance.check_out
+                first_half_check_out = attendance.check_in + timedelta(seconds=worked_time//2) - timedelta(seconds=remaining_break_time//2)
+                second_half_check_in = first_half_check_out + timedelta(seconds=remaining_break_time)
+
+                attendance.write({'check_out': first_half_check_out,
+                                  'break_time_adjusted': True})
+
+                self.env['hr.attendance'].create({
+                    'employee_id': attendance.employee_id.id,
+                    'check_in': second_half_check_in,
+                    'check_out': original_check_out
+                })
+
+            else:
+                break_per_attendance = ceil(remaining_break_time / len(same_day_attendances))
+                for i in range(len(same_day_attendances)-1):
+                    adjusted_check_out = same_day_attendances[i].check_out - timedelta(seconds=break_per_attendance//2)
+                    same_day_attendances[i].write({'check_out': adjusted_check_out,
+                                                   'break_time_adjusted': True})
+
+                    adjusted_check_in = same_day_attendances[i+1].check_in + timedelta(seconds=break_per_attendance//2)
+                    same_day_attendances[i+1].write({'check_in': adjusted_check_in,
+                                                     'break_time_adjusted': True})
+
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
@@ -296,6 +353,8 @@ class HrAttendance(models.Model):
     def write(self, vals):
         attendances_dates = self._get_attendances_dates()
         result = super(HrAttendance, self).write(vals)
+        if 'check_out' in vals and self.env.company.mandatory_break_management:
+            self._update_mandatory_breaks(vals)
         if any(field in vals for field in ['employee_id', 'check_in', 'check_out']):
             # Merge attendance dates before and after write to recompute the
             # overtime if the attendances have been moved to another day

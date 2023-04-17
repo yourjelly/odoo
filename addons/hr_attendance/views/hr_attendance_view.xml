@@ -16,6 +16,18 @@
         </field>
     </record>
 
+    <record id="view_attendance_break_tree" model="ir.ui.view">
+        <field name="name">hr.attendance.break.tree</field>
+        <field name="model">hr.attendance.break</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="working_time"/>
+                <field name="corresponding_mandatory_pause_time"/>
+            </tree>
+        </field>
+    </record>
+
+
     <record id="view_hr_attendance_kanban" model="ir.ui.view">
         <field name="name">hr.attendance.kanban</field>
         <field name="model">hr.attendance</field>

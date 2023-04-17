@@ -8,3 +8,4 @@ from . import hr_employee_public
 from . import ir_ui_menu
 from . import res_company
 from . import res_users
+from . import hr_attendance_break
