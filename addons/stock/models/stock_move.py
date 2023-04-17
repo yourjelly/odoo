@@ -1411,7 +1411,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         date = self._get_mto_procurement_date()
         if self.location_id.warehouse_id and self.location_id.warehouse_id.lot_stock_id.parent_path in self.location_id.parent_path:
             date = self.product_id._get_date_with_security_lead_days(self.date, self.location_id)
-        vals = {
+        return {
             'product_description_variants': self.description_picking and self.description_picking.replace(product_id._get_description(self.picking_type_id), ''),
             'date_planned': date,
             'date_deadline': self.date_deadline,
@@ -1423,15 +1423,6 @@ Please change the quantity done or the rounding precision of your unit of measur
             'orderpoint_id': self.orderpoint_id,
             'product_packaging_id': self.product_packaging_id,
         }
-        if 'carrier_id' in self.env['sale.order']._fields:
-            vals.update({
-                'carrier_id':self.group_id.sale_id.carrier_id
-            })
-        else:
-            vals.update({
-                'carrier_id':False
-            })        
-        return vals
 
     def _get_mto_procurement_date(self):
         return self.date
