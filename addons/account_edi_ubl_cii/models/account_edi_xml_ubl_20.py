@@ -215,24 +215,8 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     def _get_document_allowance_charge_vals_list(self, invoice):
         """
         https://docs.peppol.eu/poacc/billing/3.0/bis/#_document_level_allowance_or_charge
-        The aim is to transform the ecotax/récupel into a charge at the document level.
-        Warning, as the charge is transformed into an allowance, we have to make sure no tax is created on the line
-        level, otherwise, the TaxInclusiveAmount, will be wrong.
         """
-        vals_list = []
-        #for line in invoice.line_ids:
-        #    for tax in line.tax_ids:
-        #        if tax.amount_type == 'fixed':
-        #            total_amount += tax.amount
-        #            vals_list.append({
-        #                'charge_indicator': 'true',
-        #                'allowance_charge_reason_code': 'AEO',  # "Collection and recycling"
-        #                'allowance_charge_reason': 'Collection and recycling',
-        #                'amount': float(tax.amount),
-        #                'currency_name': line.currency_id.name,
-        #                'currency_dp': line.currency_id.decimal_places,
-        #            })
-        return vals_list
+        return []
 
     def _get_invoice_line_allowance_vals_list(self, line):
         """ Method used to fill the cac:InvoiceLine>cac:AllowanceCharge node.
@@ -348,8 +332,11 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         # Validate the structure of the taxes
         self._validate_taxes(invoice)
 
-        # Compute the tax details for the whole invoice and each invoice line separately.
-        taxes_vals = invoice._prepare_edi_tax_details(grouping_key_generator=grouping_key_generator)
+        # Tax details (and handle special case: Ecotax)
+        if 'fixed' in invoice.line_ids.tax_ids.mapped('amount_type'):
+            taxes_vals = invoice._prepare_edi_tax_details_fixed_tax(grouping_key_generator=grouping_key_generator)
+        else:
+            taxes_vals = invoice._prepare_edi_tax_details(grouping_key_generator=grouping_key_generator)
 
         # Compute values for invoice lines.
         line_extension_amount = 0.0
@@ -360,6 +347,14 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         for line in invoice_lines:
             line_taxes_vals = taxes_vals['tax_details_per_record'][line]
             line_vals = self._get_invoice_line_vals(line, line_taxes_vals)
+            invoice_line_vals_list.append(line_vals)
+
+            line_extension_amount += line_vals['line_extension_amount']
+
+        # Special case: Ecotax
+        if 'fixed' in invoice.line_ids.tax_ids.mapped('amount_type'):
+            line_taxes_vals = taxes_vals['tax_details_per_record']['FIXED_TAX_SIMULATED_AML']
+            line_vals = self._get_fake_invoice_line_vals_fixed_taxes(invoice_line_vals_list, line_taxes_vals)
             invoice_line_vals_list.append(line_vals)
 
             line_extension_amount += line_vals['line_extension_amount']

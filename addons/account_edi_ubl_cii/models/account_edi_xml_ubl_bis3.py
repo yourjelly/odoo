@@ -302,8 +302,10 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         }
 
         for line in invoice.line_ids:
-            if len(line.tax_ids) > 1:
+            if len(line.tax_ids) > 1 and not (len(line.tax_ids) == 2 and 'fixed' in line.tax_ids.mapped('amount_type')):
                 # [UBL-SR-48]-Invoice lines shall have one and only one classified tax category.
+                # /!\ exception: possible to have 1 recupel tax (fixed tax) and another one
+                # An additional invoice line is created in the xml document
                 constraints.update({'cen_en16931_tax_line': _("Each invoice line shall have one and only one tax.")})
 
         return constraints
