@@ -5,6 +5,10 @@ from odoo import api, fields, models
 from odoo.tools.sql import column_exists, create_column
 
 
+class StockRoute(models.Model):
+    _inherit = "stock.route"
+    shipping_selectable = fields.Boolean("Applicable on Shipping Methods")
+
 class StockMove(models.Model):
     _inherit = 'stock.move'
 

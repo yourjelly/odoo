@@ -253,6 +253,14 @@ class SaleOrderLine(models.Model):
             'product_packaging_id': self.product_packaging_id,
             'sequence': self.sequence,
         })
+        if 'carrier_id' in self.env['sale.order']._fields:
+            values.update({
+                'carrier_id':self.order_id.carrier_id
+            })
+        else:
+            values.update({
+               'carrier_id':False
+            })        
         return values
 
     def _get_qty_procurement(self, previous_product_uom_qty=False):

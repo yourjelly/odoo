@@ -78,6 +78,9 @@ class DeliveryCarrier(models.Model):
         help="Shipping insurance is a service which may reimburse senders whose parcels are lost, stolen, and/or damaged in transit.",
         default=0
     )
+    route_ids = fields.Many2many(
+        'stock.route', 'stock_route_shipping', 'shipping_id', 'route_id', 'Routes',
+        domain=[('shipping_selectable', '=', True)])
 
     _sql_constraints = [
         ('margin_not_under_100_percent', 'CHECK (margin >= -100)', 'Margin cannot be lower than -100%'),
