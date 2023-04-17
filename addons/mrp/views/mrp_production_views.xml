@@ -1,23 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Manufacturing Order -->
-        <record model="ir.actions.server" id="action_view_mrp_overview"> <!-- Menu + python -->
-            <field name="name">Overview</field>
-            <field name="model_id" ref="model_stock_picking_type"/>
-            <field name="state">code</field>
-            <field name="groups_id" eval="[(4, ref('mrp.group_mrp_user'))]"/>
-            <field name="code">
-                action = model.action_mrp_overview()
-            </field>
-        </record>
-
-        <record id="action_mrp_display" model="ir.actions.client">
-            <field name="name">Mrp Display</field>
-            <field name="tag">mrp_display</field>
-            <field name="res_model">mrp.production</field>
-        </record>
-
         <record id="action_report_mo_overview" model="ir.actions.client">
             <field name="name">MO Overview</field>
             <field name="tag">mrp_mo_overview</field>
@@ -692,12 +675,6 @@
                 </p>
             </field>
         </record>
-
-        <menuitem id="menu_mrp_dashboard"
-            name="Overview"
-            action="mrp.action_view_mrp_overview"
-            parent="mrp.menu_mrp_root"
-            sequence="5"/>
 
         <menuitem id="menu_mrp_workorder_todo"
                 name="Work Orders"

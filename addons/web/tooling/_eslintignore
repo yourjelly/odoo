@@ -100,9 +100,7 @@ web_map/static/tests/legacy/**/*
 !addons/base_setup
 !addons/base_setup/**/*
 
-# whitelist mrp
-!addons/mrp
-!addons/mrp/**/*
+# whitelist mrp_workorder
 !addons/mrp_workorder
 !addons/mrp_workorder/**/*
 
