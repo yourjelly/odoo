@@ -165,8 +165,9 @@
         <t t-set="visiblePathBreadcrumbs" t-value="breadcrumbs.slice(-3, -1)"/>
         <t t-set="collapsedBreadcrumbs" t-value="breadcrumbs.slice(0, -3)"/>
         <t t-set="breadcrumb" t-value="currentBreadcrumbs[0] || {}"/>
+        <t t-set="hasVisiblePath" t-value="collapsedBreadcrumbs.length || visiblePathBreadcrumbs.length"/>
 
-        <div t-if="collapsedBreadcrumbs.length || visiblePathBreadcrumbs.length" class="d-flex flex-column align-self-stretch justify-content-between min-w-0">
+        <div t-if="hasVisiblePath" class="d-flex flex-column align-self-stretch justify-content-between min-w-0">
             <ol class="breadcrumb flex-nowrap text-nowrap small lh-1">
                 <li t-if="collapsedBreadcrumbs.length" class="breadcrumb-item d-inline-flex min-w-0">
                     <Dropdown togglerClass="'btn btn-light btn-sm p-0'">
@@ -195,8 +196,10 @@
             <span class="min-w-0 text-truncate" t-call="web.Breadcrumb.Name"/>
         </div>
 
-        <t t-slot="control-panel-additional-actions"/>
-        <t t-slot="control-panel-status-indicator" />
+        <section class="o_control_panel_breadcrumbs_actions d-contents" t-att-class="{'o_has_visible_path': hasVisiblePath}">
+            <t t-slot="control-panel-additional-actions"/>
+            <t t-slot="control-panel-status-indicator" />
+        </section>
     </t>
 
     <t t-name="web.Breadcrumb.Name" owl="1">
