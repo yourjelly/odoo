@@ -22,6 +22,8 @@
             o-safe-get($-value, active-background),
             o-safe-get($-value, active-border),
             o-safe-get($-value, active-color),
+            // Handle btn-text exception specifically
+            $disabled-color: if(alpha(o-safe-get($-value, background)) == 0, $o-main-color-muted, color-contrast(o-safe-get($-value, background))),
         );
     }
 }

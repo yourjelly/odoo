@@ -261,9 +261,9 @@ $o-btns-custom: map-merge((
         hover-border: $o-gray-100,
         hover-color: $o-gray-900,
 
-        active-background: mix($o-action, $o-gray-100, 20%),
-        active-border:  $o-action,
-        active-color: $o-gray-900,
+        active-background: $o-component-active-bg,
+        active-border:  $o-component-active-border,
+        active-color: $o-component-active-color,
     ),
     "text": (
         background: transparent,
