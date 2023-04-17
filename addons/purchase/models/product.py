@@ -69,7 +69,14 @@ class ProductProduct(models.Model):
         action['display_name'] = _("Purchase History for %s", self.display_name)
         return action
 
+class ProductAttributeCustomValue(models.Model):
+    _inherit = "product.attribute.custom.value"
 
+    purchase_order_line_id = fields.Many2one('purchase.order.line', string="Purchase Order Line", required=True, ondelete='cascade')
+
+    _sql_constraints = [
+        ('sol_custom_value_unique', 'unique(custom_product_template_attribute_value_id, sale_order_line_id)', "Only one Custom Value is allowed per Attribute Value per Sales Order Line.")
+    ]
 class ProductSupplierinfo(models.Model):
     _inherit = "product.supplierinfo"
 

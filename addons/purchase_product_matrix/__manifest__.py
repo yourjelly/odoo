@@ -11,9 +11,11 @@
     """,
     'category': 'Inventory/Purchase',
     'version': '1.0',
-    'depends': ['purchase', 'product_matrix'],
+    'depends': ['purchase', 'product_matrix','purchase_product_configurator'],
     'data': [
         'views/purchase_views.xml',
+        'views/product_template_views.xml',
+
         'report/purchase_quotation_templates.xml',
         'report/purchase_order_templates.xml',
     ],
