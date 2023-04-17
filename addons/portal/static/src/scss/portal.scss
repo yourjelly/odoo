@@ -31,6 +31,10 @@ body {
     direction: ltr;
 }
 
+th{
+    font-weight: 500;
+}
+
 header {
     .navbar-brand {
         flex: 0 0 auto;
@@ -242,13 +246,6 @@ img, .media_iframe_video, .o_image {
 }
 
 // Portal specific
-// ===  Page custom bg ===
-// To be applied to all portal pages if bg-color is white (default).
-@if ($o-portal-use-default-colors) {
-    #wrapwrap.o_portal {
-        @include o-bg-color($o-portal-bg-color, $with-extras: false);
-    }
-}
 
 .o_portal {
     .breadcrumb {
@@ -323,7 +320,7 @@ img, .media_iframe_video, .o_image {
     }
 }
 
-.o_portal_address {
+address {
     span[itemprop="name"] {
         margin-bottom: 0.3em;
     }
@@ -337,19 +334,12 @@ img, .media_iframe_video, .o_image {
         }
 
         .fa {
-            @include o-position-absolute(0, $left: 0);
             line-height: $line-height-base;
+            color: $o-gray-500;
 
-            + span, + div, + a {
+            + span, + div {
                 display: block;
-                // FontAwesome '.fa-fw' fixed-with + margin
-                padding-left: 1.28571429em + 0.5em;
             }
-        }
-
-        span[itemprop="email"] {
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
     }
 }
@@ -368,9 +358,12 @@ form label {
 }
 
 .o_portal_contact_img {
-    width: 2.3em;
-    height: 2.3em;
     object-fit: cover;
+}
+.o_portal_icon {
+    img{
+        width: 50px;
+    }
 }
 
 .o_portal_sidebar {
@@ -525,3 +518,26 @@ form label {
         }
     }
 }
+
+div.sticky-top{
+    @include media-breakpoint-down(lg) {
+        background: $o-gray-100;
+    }
+}
+
+div.col-12.col-lg-9{
+    @include media-breakpoint-up(lg) {
+        border-left: 1px solid $gray-300;
+    }
+}
+
+
+.o_portal_contact_details .o_portal_contact_img{
+    min-height: 1px;
+    height: 2.2em;
+    aspect-ratio: 1;
+}
+
+// .o_portal_sidebar{
+//     background-color: red !important;
+// }
