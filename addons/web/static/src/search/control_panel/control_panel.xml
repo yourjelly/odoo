@@ -23,37 +23,42 @@
                 <t t-set="activeView" t-value="env.config.viewSwitcherEntries.find((view) => view.active)"/>
                 <div class="o_control_panel_navigation d-flex flex-wrap flex-md-nowrap align-items-center justify-content-between justify-content-md-end w-md-auto gap-3 gap-lg-1 gap-xl-3 order-2 order-lg-3">
                     <span class="d-none d-xl-block ms-auto"/> <!-- Spacer -->
-                    <div t-if="pagerProps and pagerProps.total > 0" class="o_cp_pager text-nowrap order-2 order-md-1" role="search">
+                    <!-- pager -->
+                    <div t-if="pagerProps and pagerProps.total > 0" class="o_cp_pager text-nowrap order-1" role="search">
                         <Pager t-props="pagerProps"/>
                     </div>
-                    <button t-if="activeView.multiRecord" class="btn btn-secondary d-lg-none" data-bs-toggle="collapse" data-bs-target=".o_collapsible_search" aria-expanded="false" aria-controls=".o_collapsible_search">
-                        <i class="fa fa-search"/>
-                    </button>
+                    <!-- view switcher -->
                     <nav t-if="env.config.viewSwitcherEntries?.length > 1"
-                         class="o_cp_switch_buttons d-print-none btn-group order-1">
+                        class="o_cp_switch_buttons d-print-none btn-group order-2">
                         <t t-log="env.config.viewSwitcherEntries"/>
-                        <button class="btn btn-secondary dropdown-toggle d-md-none" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                        <div class="btn-group">
+                            <!-- search button -->
+                            <button t-if="activeView.multiRecord" class="btn btn-secondary d-lg-none" data-bs-toggle="collapse" data-bs-target=".o_collapsible_search" aria-expanded="false" aria-controls=".o_collapsible_search">
+                                <i class="fa fa-search"/>
+                            </button>
+                            <button class="btn btn-secondary dropdown-toggle d-lg-none" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                             t-attf-class="o_{{activeView.type}} {{activeView.icon}}"
-                            t-att-data-tooltip="activeView.name"
-                        >
-                            <span class="sr-only">Toggle Dropdown</span>
-                        </button>
-                        <ul  class="dropdown-menu d-md-none">
-                            <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
-                                <li t-attf-class="{{view.active ? 'active' : ''}}">
-                                    <button class="btn o_switch_view "
-                                        t-attf-class="o_{{view.type}} {{view.active ? 'active btn-primary' : ''}} dropdown-item dropdown-item_active_noarrow d-flex align-items-center"
-                                        t-att-data-tooltip="view.name"
-                                        t-on-click="() => this.onViewClicked(view.type)"
-                                        >
-                                        <i t-attf-class="{{view.icon}} pe-2"/>
-                                        <span t-out="view.name"/>
-                                    </button>
-                                </li>
-                            </t>
-                        </ul>
+                                t-att-data-tooltip="activeView.name"
+                            >
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul  class="dropdown-menu d-lg-none">
+                                <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
+                                    <li t-attf-class="{{view.active ? 'active' : ''}}">
+                                        <button class="btn o_switch_view "
+                                            t-attf-class="o_{{view.type}} {{view.active ? 'active btn-primary' : ''}} dropdown-item dropdown-item_active_noarrow d-flex align-items-center"
+                                            t-att-data-tooltip="view.name"
+                                            t-on-click="() => this.onViewClicked(view.type)"
+                                            >
+                                            <i t-attf-class="{{view.icon}} pe-2"/>
+                                            <span t-out="view.name"/>
+                                        </button>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
                         <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
-                            <button class="btn btn-secondary o_switch_view d-none d-md-inline-block"
+                            <button class="btn btn-secondary o_switch_view d-none d-lg-inline-block"
                                 t-attf-class="o_{{view.type}} {{view.icon}} {{view.active ? 'active' : ''}}"
                                 t-att-data-tooltip="view.name"
                                 t-on-click="() => this.onViewClicked(view.type)"
