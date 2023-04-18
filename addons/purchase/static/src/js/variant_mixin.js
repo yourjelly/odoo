@@ -1,4 +1,4 @@
-odoo.define('sale.VariantMixin', function (require) {
+odoo.define('purchase.VariantMixin', function (require) {
 'use strict';
 
 var concurrency = require('web.concurrency');
@@ -49,7 +49,7 @@ var VariantMixin = {
      * @returns {Deferred}
      */
     _getCombinationInfo: function (ev) {
-        console.log("111111111111111111")
+        console.log("2222222222222")
         if ($(ev.target).hasClass('variant_custom_value')) {
             return Promise.resolve();
         }
@@ -66,7 +66,7 @@ var VariantMixin = {
                 const $currentOptionalProduct = $(optionalProduct);
                 const childCombination = this.getSelectedVariantValues($currentOptionalProduct);
                 const productTemplateId = parseInt($currentOptionalProduct.find('.product_template_id').val());
-                ajax.jsonRpc(this._getUri('/sale/get_combination_info'), 'call', {
+                ajax.jsonRpc(this._getUri('/purchase/get_combination_info'), 'call', {
                     'product_template_id': productTemplateId,
                     'product_id': this._getProductId($currentOptionalProduct),
                     'combination': childCombination,
@@ -85,7 +85,7 @@ var VariantMixin = {
             );
         }
 
-        return ajax.jsonRpc(this._getUri('/sale/get_combination_info'), 'call', {
+        return ajax.jsonRpc(this._getUri('/purchase/get_combination_info'), 'call', {
             'product_template_id': parseInt($parent.find('.product_template_id').val()),
             'product_id': this._getProductId($parent),
             'combination': combination,
@@ -329,7 +329,7 @@ var VariantMixin = {
                     JSON.stringify(VariantMixin.getSelectedVariantValues($container)),
             };
 
-            var route = '/sale/create_product_variant';
+            var route = '/purchase/create_product_variant';
             if (useAjax) {
                 productReady = ajax.jsonRpc(route, 'call', params);
             } else if (Boolean(this._rpc)) {

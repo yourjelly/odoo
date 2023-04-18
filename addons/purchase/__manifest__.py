@@ -30,7 +30,7 @@
         'report/purchase_quotation_templates.xml',
         'views/product_packaging_views.xml',
         'views/analytic_account_views.xml',
-        'views/variant_templates.xml'
+        # 'views/variant_templates.xml'
 
     ],
     'demo': [
@@ -45,6 +45,7 @@
             'purchase/static/src/js/tours/purchase.js',
             'purchase/static/src/**/*.xml',
             'purchase/static/src/js/purchase_product_field.js',
+            'purchase/static/src/js/variant_mixin.js',
         ],
         'web.assets_frontend': [
             'purchase/static/src/js/purchase_datetimepicker.js',

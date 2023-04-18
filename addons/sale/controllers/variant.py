@@ -10,6 +10,7 @@ from odoo.http import request
 class VariantController(http.Controller):
     @http.route(['/sale/get_combination_info'], type='json', auth="user", methods=['POST'])
     def get_combination_info(self, product_template_id, product_id, combination, add_qty, pricelist_id, **kw):
+        print("------------------sale-variant--------------------------")
         combination = request.env['product.template.attribute.value'].browse(combination)
         pricelist = self._get_pricelist(pricelist_id)
         cids = request.httprequest.cookies.get('cids', str(request.env.user.company_id.id))

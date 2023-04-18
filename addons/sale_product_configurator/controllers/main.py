@@ -8,6 +8,7 @@ from odoo.http import request
 class ProductConfiguratorController(http.Controller):
     @http.route(['/sale_product_configurator/configure'], type='json', auth="user", methods=['POST'])
     def configure(self, product_template_id, pricelist_id, **kw):
+        print("-----------sale----main-------------------")
         add_qty = float(kw.get('add_qty', 1))
         product_template = request.env['product.template'].browse(int(product_template_id))
         pricelist = self._get_pricelist(pricelist_id)
@@ -28,7 +29,7 @@ class ProductConfiguratorController(http.Controller):
             product_template = product_template.with_context(pricelist=pricelist.id, partner=request.env.user.partner_id)
 
         return request.env['ir.ui.view']._render_template(
-            "sale_product_configurator.configure",
+            "product_configurator.configure",
             {
                 'product': product_template,
                 'pricelist': pricelist,
@@ -57,7 +58,7 @@ class ProductConfiguratorController(http.Controller):
             # They are kept in the context since they are not linked to this product variant
             parent_combination |= product.env.context.get('no_variant_attribute_values')
 
-        return request.env['ir.ui.view']._render_template("sale_product_configurator.optional_product_items", {
+        return request.env['ir.ui.view']._render_template("product_configurator.optional_product_items", {
             'product': product,
             'parent_name': product.name,
             'parent_combination': parent_combination,
@@ -76,7 +77,7 @@ class ProductConfiguratorController(http.Controller):
         if no_variant_attribute_values:
             product = product.with_context(no_variant_attribute_values=no_variant_attribute_values)
 
-        return request.env['ir.ui.view']._render_template("sale_product_configurator.optional_products_modal", {
+        return request.env['ir.ui.view']._render_template("product_configurator.optional_products_modal", {
             'product': product,
             'combination': combination,
             'add_qty': add_qty,

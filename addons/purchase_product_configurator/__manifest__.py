@@ -5,7 +5,7 @@
     'auto_install': True,
     'data': [
                 'views/purchase_views.xml',
-                'views/templates.xml',
+                # 'views/templates.xml',
              ],
     'assets': {
         'web.assets_backend': [
