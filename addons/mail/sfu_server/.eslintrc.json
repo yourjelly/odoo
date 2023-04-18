@@ -1,0 +1,39 @@
+// Based on Odoo's .eslintrc.js
+{
+  "extends": ["plugin:node/recommended", "../../../.eslintrc.json"],
+  "env": {
+    "node": true,
+    "browser": false
+  },
+  "overrides": [
+    {
+      "files": ["tests/utils/*.js", "tests/*.js"],
+      "plugins": ["jest", "import"],
+      "env": {
+        "jest": true,
+        "jest/globals": true
+      },
+      "extends": ["plugin:jest/recommended"]
+    },
+    {
+      "files": ["src/client.js"],
+      "env": {
+        "browser": true,
+        "node": false
+      }
+    },
+    {
+      "files": ["src/shared/*.js"],
+      "env": {
+        "browser": true,
+        "node": true
+      }
+    }
+  ],
+  "ignorePatterns": "dist/*",
+  "rules": {
+    "node/no-unsupported-features/es-syntax": "off",
+    "node/no-missing-import": "off",
+    "no-console": "error"
+  }
+}
