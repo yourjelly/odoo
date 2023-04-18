@@ -11,11 +11,9 @@
                         </button>
                     </t>
                 </t>
-                <t t-set-slot="layout-buttons">
-                    <t t-call="{{ props.buttonTemplate }}"/>
-                </t>
                 <t t-set-slot="control-panel-always-buttons">
-                    <button t-if="headerButtons.length" type="button" class="btn btn-secondary d-lg-none dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <t t-set="needDropdown" t-value="headerButtons.length || true"/>
+                    <button t-if="needDropdown" type="button" class="btn btn-secondary d-lg-none dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="sr-only">Toggle Dropdown</span>
                         </button>
                         <ul class="dropdown-menu">
@@ -32,6 +30,7 @@
                                 title="button.title"
                             /></li>
                         </t>
+                        <t t-call="{{ props.buttonTemplate }}"/>
                     </ul>
                     <t t-foreach="headerButtons" t-as="button" t-key="button.id">
                         <MultiRecordViewButton
