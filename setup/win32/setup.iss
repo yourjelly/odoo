@@ -8,7 +8,19 @@
 #define OdooExeName "python.exe"
 #define ToolsDir "c:\odoobuild"
 #define ServiceName "odoo-server-" + OdooVersion
-#define PythonVersion "3.7.7"
+#define PythonVersion "3.8.10"
+#define OdooLicense ToolsDir + "\server\license.txt"
+#define OdooIcon ToolsDir + "\server\setup\win32\static\pixmaps\odoo-icon.ico"
+#define OdooLeftImage ToolsDir + "\server\setup\win32\static\pixmaps\odoo-intro.bmp"
+#define OdooHeaderImage ToolsDir + "\server\setup\win32\static\pixmaps\odoo-slogan.bmp"
+#define PostgreSqlUrl "https://get.enterprisedb.com/postgresql/postgresql-15.2-2-windows-x64.exe"
+#define GhostScriptUrl "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10011/gs10011w64.exe"
+#define NginxUrl "https://nginx.org/download/nginx-1.24.0.zip"
+#define DefaultPostgresqlHostname "localhost"
+#define DefaultPostgresqlPort "5432"
+#define DefaultPostgresqlUser "openpg"
+#define DefaultPostgresqlPassword "openpgpwd"
+
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -24,41 +36,150 @@ DefaultDirName={autopf}\{#OdooAppName}
 DisableProgramGroupPage=yes
 OutputDir="{#ToolsDir}\output"
 OutputBaseFilename=odoosetup
-Compression=lzma
+Compression=none
 SolidCompression=yes
 WizardStyle=modern
+LicenseFile="{#OdooLicense}"
+ArchitecturesInstallIn64BitMode=x64
+SetupIconFile={#OdooIcon}
+WizardImageStretch=no
+WizardImageFile={#OdooLeftImage}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 
 [Types]
-Name: "normal"; Description: "Odoo Installation"
-Name: "iot"; Description: "Iot Box Installation"
+Name: "server"; Description: "Install the Odoo server"
+Name: "iot"; Description: "Odoo Iot"
 
 [Components]
-Name: "normal"; Description: "Normal Odoo Installation"; Types: normal;
+Name: "postgres"; Description: "Postgresql database server"; Types: server;
+Name: "nginx"; Description: "Nginx Web Server"; Types: iot;
+Name: "ghostscript"; Description: "Ghostscript Interpreter"; Types: iot;
 
 [Tasks]
-Name: "install_postgresql"; Description: "Download and Install Postgresql Server"; GroupDescription: "Postgresql Server" ; Components: normal
+Name: "install_postgresql"; Description: "Download and Install Postgresql server"; Components: postgres
+Name: "install_nginx"; Description: "Download and Install Nginx web server"; GroupDescription: "Iot" ; Components: nginx
+Name: "install_ghostscript"; Description: "Download and Install Ghostscript interpreter"; GroupDescription: "Iot" ; Components: ghostscript
 
 [Dirs]
+Name: "{app}"; Permissions: service-full
 Name: "{app}\python"
 Name: "{app}\nssm"
 Name: "{app}\server"
 Name: "{app}\vcredist"
 Name: "{app}\thirdparty"
-
+Name: "{app}\sessions"
 
 [Files]
-Source: "{#ToolsDir}\WinPy64\python-{#PythonVersion}.amd64\*"; Excludes: "__pycache__" ; DestDir: "{app}\python"; Flags: recursesubdirs
-Source: "{#ToolsDir}\nssm-2.24\*"; DestDir: "{app}\nssm"; Flags: recursesubdirs
-Source: "{#ToolsDir}\server\*"; DestDir: "{app}\server"; Excludes: "wkhtmltopdf\*,enterprise\*"; Flags: recursesubdirs
+Source: "{#ToolsDir}\WinPy64\python-{#PythonVersion}.amd64\*"; Excludes: "__pycache__" ; DestDir: "{app}\python"; Flags: recursesubdirs;
+Source: "{#ToolsDir}\nssm-2.24\*"; DestDir: "{app}\nssm"; Flags: recursesubdirs;
+Source: "{#ToolsDir}\server\*"; DestDir: "{app}\server"; Excludes: "wkhtmltopdf\*,enterprise\*"; Flags: recursesubdirs;
 Source: "{#ToolsDir}\vcredist\*.exe"; DestDir: "{app}\vcredist"
+Source: "{#OdooHeaderImage}"; Flags: dontcopy;
+
+[INI]
+Filename: "{app}\odoo.conf"; Section: "options"; Key: "datadir"; String: "{app}\sessions"; Flags: createkeyifdoesntexist
+Filename: "{app}\odoo.conf"; Section: "options"; Key: "default_productivity_apps"; String: "True"; Flags: createkeyifdoesntexist
 
 [Run]
-Filename: "{app}\vcredist\vc_redist.x64.exe"; Parameters: "/q"; StatusMsg: "Installing Visual C++ redistribuable files"
-Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "install {#ServiceName} {app}\python\python.exe"; StatusMsg: "Installing Windows service"
-Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} AppDirectory {app}\python\"; StatusMsg: "Setting up Windows service"
-Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} AppParameters {app}\server\odoo-bin -c {app}\server\odoo.conf"; StatusMsg: "Setting up Windows service"
-Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} ObjectName LOCALSEERVICE"
+Filename: "{app}\vcredist\vc_redist.x64.exe"; Parameters: "/q"; StatusMsg: "Installing Visual C++ redistributable files"
+Filename: "{tmp}\postgresql.exe"; Parameters: "--mode unattended --prefix ""{app}\PostgreSQL"" --datadir ""{app}\PostgreSQL\data"" --servicename ""PostgreSQL_FOR_Odoo"" --serviceaccount ""openpgsvc"" --servicepassword ""0p3npgsvcPWD"""; StatusMsg: "Installing PostgreSQL"
+Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "install {#ServiceName} ""{app}\python\python.exe"""; StatusMsg: "Installing Odoo Windows service"; Flags: runhidden
+Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} AppDirectory """"{app}\python"""""; StatusMsg: "Setting up Odoo Windows service"; Flags: runhidden
+Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} AppParameters """"""{app}\server\odoo-bin"""""" -c """"""{app}\server\odoo.conf"""""""; StatusMsg: "Setting up Odoo Windows service"; Flags: runhidden
+Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} ObjectName ""localservice"""; Flags: runhidden
+Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "start {#ServiceName}"; StatusMsg: "Starting Odoo Windows Service"; Flags: runhidden
+
+[UninstallRun]
+Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "stop {#ServiceName}"; StatusMsg: "Stopping Odoo Windows service"
+Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "remove {#ServiceName} confirm"; StatusMsg: "Removing Odoo Windows service"
+
+[Uninstalldelete]
+Type: files; Name: "{app}\*.pyc"
+
+[Code]
+var
+  DownloadPage: TDownloadWizardPage;
+  PostgresInfosPage: TInputQueryWizardPage;
+  PgHost, PgPort, PgUser, PgPass: String;
+
+function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
+begin
+  if Progress = ProgressMax then
+    Log(Format('Successfully downloaded file to {tmp}: %s', [FileName]));
+  Result := True;
+end;
+
+procedure InitializeHeaderImage();
+var
+  HeaderImage: TBitmapImage;
+begin
+  ExtractTemporaryFile('odoo-slogan.bmp');
+  HeaderImage := TBitmapImage.Create(WizardForm);
+  HeaderImage.Parent := WizardForm.MainPanel;
+  HeaderImage.Width := WizardForm.MainPanel.Width;
+  HeaderImage.Height := WizardForm.MainPanel.Height;
+  HeaderImage.Anchors := [akLeft, akTop, akRight, akBottom];
+  HeaderImage.Stretch := True;
+  HeaderImage.AutoSize := False;
+  HeaderImage.Bitmap.LoadFromFile(ExpandConstant('{tmp}\odoo-slogan.bmp'));
+  WizardForm.WizardSmallBitmapImage.Visible := False;
+  WizardForm.PageDescriptionLabel.Visible := False;
+  WizardForm.PageNameLabel.Visible := False;
+end;
+
+function InitializeSetup(): Boolean;
+begin
+  PgHost := '{#DefaultPostgresqlHostname}';
+  PgPort := '{#DefaultPostgresqlPort}';
+  PgUser := '{#DefaultPostgresqlUser}';
+  PgPass := '{#DefaultPostgresqlPassword}';
+  if FileExists('{app}/odoo.conf') then begin
+    log('Le fichier existse');    
+  end else log('Le fichier existe pas');
+  Result := True;
+end;
+
+procedure InitializeWizard(); 
+begin
+  InitializeHeaderImage();
+  DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
+  PostgresInfosPage := CreateInputQueryPage(wpReady, 'PostgreSQL Setup', 'PostgreSQL Setup', 'Postgresql Connection Setup.');
+  PostgresInfosPage.Add('&Hostname', False);
+  PostgresInfosPage.Add('&Port', False);
+  PostgresInfosPage.Add('&Username', False);
+  PostgresInfosPage.Add('&Password', False);
+  PostgresInfosPage.Values[0] := PgHost;
+  PostgresInfosPage.Values[1] := PgPort;
+  PostgresInfosPage.Values[2] := PgUser;
+  PostgresInfosPage.Values[3] := PgPass;
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  if CurPageID = wpReady then begin
+
+    DownloadPage.Clear;
+    if WizardIsTaskSelected('install_postgresql') then
+      DownloadPage.Add('{#PostgreSqlUrl}', 'postgresql.exe', '');
+    if WizardIsTaskSelected('install_nginx') then
+      DownloadPage.Add('{#NginxUrl}', 'nginx.zip', '');
+    if WizardIsTaskSelected('install_ghostscript') then
+      DownloadPage.Add('{#GhostScriptUrl}', 'ghostscript.exe', ''); 
+    DownloadPage.Show;
+    try
+      try
+        DownloadPage.Download;
+        Result := True;
+      except
+        SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
+        Result := False;
+      end;
+    finally
+      DownloadPage.Hide;
+    end;
+  end else
+    Result := True;
+end;
