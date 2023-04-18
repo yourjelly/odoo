@@ -6332,6 +6332,12 @@
         height: 25px;
       }
     }
+    .o-remove-selection {
+      font-weight: bold;
+      // Make the character a bit bigger
+      // compared to its INPUT box neighbor
+      font-size: calc(100% + 2px);
+    }
   }
 `;
     /**
@@ -34708,6 +34714,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
      */
     class SelectionInputPlugin extends UIPlugin {
         constructor(getters, state, dispatch, config, selection, initialRanges, inputHasSingleRange) {
+            if (inputHasSingleRange && initialRanges.length > 1) {
+                throw new Error("Input with a single range cannot be instantiated with several range references.");
+            }
             super(getters, state, dispatch, config, selection);
             this.inputHasSingleRange = inputHasSingleRange;
             this.ranges = [];
@@ -34727,6 +34736,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             switch (cmd.type) {
                 case "ADD_EMPTY_RANGE":
                     if (this.inputHasSingleRange && this.ranges.length === 1) {
+                        return 29 /* CommandResult.MaximumRangesReached */;
+                    }
+                    break;
+                case "CHANGE_RANGE":
+                    if (this.inputHasSingleRange && cmd.value.split(",").length > 1) {
                         return 29 /* CommandResult.MaximumRangesReached */;
                     }
                     break;
@@ -42594,8 +42608,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.7';
-    __info__.date = '2023-04-14T13:14:04.892Z';
-    __info__.hash = '2b4831d';
+    __info__.date = '2023-04-18T16:24:04.463Z';
+    __info__.hash = '3279a0a';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

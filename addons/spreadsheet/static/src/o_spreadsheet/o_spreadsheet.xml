@@ -1563,7 +1563,7 @@
           class="o-btn o-remove-selection"
           t-if="ranges.length > 1"
           t-on-click="() => this.removeInput(range.id)">
-          ✖
+          ✕
         </button>
       </div>
 
@@ -3249,6 +3249,6 @@
 </odoo>
 <!--
   __info__.version = '16.0.7';
-  __info__.date = '2023-04-14T13:14:07.850Z';
-  __info__.hash = '2b4831d';
+  __info__.date = '2023-04-18T16:24:08.625Z';
+  __info__.hash = '3279a0a';
 -->
