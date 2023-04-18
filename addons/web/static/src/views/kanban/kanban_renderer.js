@@ -301,13 +301,13 @@ export class KanbanRenderer extends Component {
         if (!group.isFolded) {
             classes.push("bg-100");
         }
-        if (group.progressBars.length) {
-            classes.push("o_kanban_has_progressbar");
-            if (!group.isFolded && group.hasActiveProgressValue) {
-                const progressBar = group.activeProgressBar;
-                classes.push("o_kanban_group_show", `o_kanban_group_show_${progressBar.color}`);
-            }
-        }
+        // if (group.progressBars.length) {
+        //     classes.push("o_kanban_has_progressbar"); //Needed ??
+        //     if (!group.isFolded && group.hasActiveProgressValue) {
+        //         const progressBar = group.activeProgressBar;
+        //         classes.push("o_kanban_group_show", `o_kanban_group_show_${progressBar.color}`);
+        //     }
+        // }
         return classes.join(" ");
     }
 

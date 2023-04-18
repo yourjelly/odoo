@@ -23,7 +23,6 @@ export class KanbanController extends Component {
         const { rootState } = state || {};
         this.model = useModel(Model, {
             activeFields: archInfo.activeFields,
-            progressAttributes: archInfo.progressAttributes,
             fields,
             resModel,
             handleField: archInfo.handleField,

@@ -10,7 +10,10 @@ export class ColumnProgress extends Component {
     static template = "web.ColumnProgress";
     static props = {
         aggregate: { type: Object },
-        group: { type: Object },
+        progressBars: { type: Array },
+        progressValue: { type: Object },
+        count: { type: Number },
+        filterProgressValue: { type: Function },
         onBarClicked: { type: Function, optional: true },
     };
     static defaultProps = {
@@ -18,7 +21,7 @@ export class ColumnProgress extends Component {
     };
 
     async onBarClick(progressBar) {
-        await this.props.group.filterProgressValue(progressBar.value);
+        await this.props.filterProgressValue(progressBar.value);
         this.props.onBarClicked();
     }
 }

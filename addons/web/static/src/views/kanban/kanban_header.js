@@ -13,6 +13,8 @@ import { isNull, isRelational } from "@web/views/utils";
 import { ColumnProgress } from "@web/views/view_components/column_progress";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 
+const FALSE = Symbol("false");
+
 class KanbanHeaderTooltip extends Component {
     static template = "web.KanbanGroupTooltip";
 }
@@ -30,6 +32,7 @@ export class KanbanHeader extends Component {
         quickCreateState: { type: Object },
         scrollTop: { type: Function },
         tooltipInfo: { type: Object },
+        progressAttributes: { type: [Object, { value: false }] },
     };
 
     setup() {
@@ -38,6 +41,10 @@ export class KanbanHeader extends Component {
         this.rootRef = useRef("root");
         this.popover = usePopover(KanbanHeaderTooltip);
         this.onTitleMouseEnter = useDebounced(this.onTitleMouseEnter, 400);
+        this.progressBars = this._generateProgressBars();
+        this.progressValue = {
+            active: null,
+        };
     }
 
     async onTitleMouseEnter(ev) {
@@ -82,10 +89,25 @@ export class KanbanHeader extends Component {
     }
 
     get groupAggregate() {
-        const { sumField } = this.group.model.progressAttributes;
-        const value = this.group.getAggregates(sumField && sumField.name);
+        const { sumField } = this.props.progressAttributes;
+        const value = this._getAggregates(sumField && sumField.name);
         const title = sumField ? sumField.string : this.env._t("Count");
         return { value, title };
+    }
+
+    get hasProgressBars() {
+        return Boolean(this.props.progressAttributes);
+    }
+
+    get hasActiveProgressValue() {
+        return this.hasProgressBars && this.progressValue.active !== null;
+    }
+
+    get activeProgressBar() {
+        return (
+            this.hasActiveProgressValue &&
+            this.progressBars.find((pv) => pv.value === this.progressValue.active)
+        );
     }
 
     // ------------------------------------------------------------------------
@@ -189,4 +211,40 @@ export class KanbanHeader extends Component {
     canQuickCreate() {
         return this.props.canQuickCreate;
     }
+
+    // ------------------------------------------------------------------------
+    // Protected
+    // ------------------------------------------------------------------------
+
+    _generateProgressBars() {
+        if (!this.hasProgressBars) {
+            return [];
+        }
+        const { colors, fieldName } = this.props.progressAttributes;
+        const { selection: fieldSelection } = this.props.group.fields[fieldName];
+        /** @type {[string | typeof FALSE, string][]} */
+        const colorEntries = Object.entries(colors);
+        const selection = fieldSelection && Object.fromEntries(fieldSelection);
+        colorEntries.push([FALSE, "200"]);
+        return colorEntries.map(([value, color]) => {
+            let string;
+            if (value === FALSE) {
+                string = this.env._t("Other");
+            } else if (selection) {
+                string = selection[value];
+            } else {
+                string = String(value);
+            }
+            return { count: 0, value, string, color };
+        });
+    }
+
+    _getAggregates(fieldName) {
+        if (!this.hasActiveProgressValue) {
+            return this.group.getAggregates(...arguments);
+        }
+        return fieldName ? this.group.aggregates[fieldName] : this.activeProgressBar.count;
+    }
+
+    filterProgressValue() {}
 }

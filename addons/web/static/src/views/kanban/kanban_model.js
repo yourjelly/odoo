@@ -66,20 +66,20 @@ class KanbanGroup extends Group {
         super.setup(...arguments);
 
         /** @type {ProgressBar[]} */
-        this.progressBars = this._generateProgressBars();
+        // this.progressBars = this._generateProgressBars();
         this.progressValue = markRaw(state.progressValue || { active: null });
-        this.list.domain = this.getProgressBarDomain();
+        // this.list.domain = this.getProgressBarDomain();
         this.tooltip = [];
 
         this.model.transaction.register({
             onStart: () => ({
                 count: this.count,
-                progressBars: [...this.progressBars],
+                // progressBars: [...this.progressBars],
                 records: [...this.list.records],
             }),
             onAbort: ({ count, progressBars, records }) => {
                 this.count = count;
-                this.progressBars = progressBars;
+                // this.progressBars = progressBars;
                 this.list.records = records;
             },
         });
@@ -127,9 +127,9 @@ class KanbanGroup extends Group {
         super.empty();
 
         this.progressValue.active = null;
-        for (const progressBar of this.progressBars) {
-            progressBar.count = 0;
-        }
+        // for (const progressBar of this.progressBars) {
+        //     progressBar.count = 0;
+        // }
     }
 
     /**
@@ -158,7 +158,7 @@ class KanbanGroup extends Group {
 
     async filterProgressValue(value) {
         this.progressValue.active = this.progressValue.active === value ? null : value;
-        this.list.domain = this.getProgressBarDomain();
+        // this.list.domain = this.getProgressBarDomain();
 
         // Do not update progress bars data when filtering on them.
         await Promise.all([this.list.load()]);
@@ -245,28 +245,28 @@ class KanbanGroup extends Group {
     /**
      * @returns {ProgressBar[]}
      */
-    _generateProgressBars() {
-        if (!this.model.hasProgressBars) {
-            return [];
-        }
-        const { colors, fieldName } = this.model.progressAttributes;
-        const { selection: fieldSelection } = this.fields[fieldName];
-        /** @type {[string | typeof FALSE, string][]} */
-        const colorEntries = Object.entries(colors);
-        const selection = fieldSelection && Object.fromEntries(fieldSelection);
-        colorEntries.push([FALSE, "200"]);
-        return colorEntries.map(([value, color]) => {
-            let string;
-            if (value === FALSE) {
-                string = this.model.env._t("Other");
-            } else if (selection) {
-                string = selection[value];
-            } else {
-                string = String(value);
-            }
-            return { count: 0, value, string, color };
-        });
-    }
+    // _generateProgressBars() {
+    //     if (!this.model.hasProgressBars) {
+    //         return [];
+    //     }
+    //     const { colors, fieldName } = this.model.progressAttributes;
+    //     const { selection: fieldSelection } = this.fields[fieldName];
+    //     /** @type {[string | typeof FALSE, string][]} */
+    //     const colorEntries = Object.entries(colors);
+    //     const selection = fieldSelection && Object.fromEntries(fieldSelection);
+    //     colorEntries.push([FALSE, "200"]);
+    //     return colorEntries.map(([value, color]) => {
+    //         let string;
+    //         if (value === FALSE) {
+    //             string = this.model.env._t("Other");
+    //         } else if (selection) {
+    //             string = selection[value];
+    //         } else {
+    //             string = String(value);
+    //         }
+    //         return { count: 0, value, string, color };
+    //     });
+    // }
 }
 
 export class KanbanDynamicGroupList extends DynamicGroupList {
@@ -285,8 +285,9 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
     }
 
     get sumFields() {
-        const { sumField } = this.model.progressAttributes;
-        return sumField ? [sumField.name] : [];
+        // const { sumField } = this.model.progressAttributes;
+        // return sumField ? [sumField.name] : [];
+        return [];
     }
 
     /**
@@ -510,13 +511,13 @@ export class KanbanModel extends RelationalModel {
     setup(params) {
         super.setup(...arguments);
 
-        this.progressAttributes = params.progressAttributes;
+        // this.progressAttributes = params.progressAttributes;
         this.transaction = makeTransactionManager();
     }
 
-    get hasProgressBars() {
-        return Boolean(this.progressAttributes);
-    }
+    // get hasProgressBars() {
+    //     return Boolean(this.progressAttributes);
+    // }
 
     /**
      * @override
