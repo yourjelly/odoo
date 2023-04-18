@@ -7,6 +7,7 @@ import inspect
 import re
 import time
 import traceback
+import os
 
 from typing import NamedTuple
 
@@ -68,7 +69,8 @@ class OdooTestResult(object):
     _previousTestClass = None
     _moduleSetUpFailed = False
 
-    def __init__(self, stream=None, descriptions=None, verbosity=None):
+    def __init__(self, stream=None, descriptions=None, verbosity=None, failfast=0):
+        self.failfast = int(failfast or os.environ.get('ODOO_TEST_FAILFAST', 0))
         self.failures_count = 0
         self.errors_count = 0
         self.testsRun = 0

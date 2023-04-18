@@ -22,6 +22,7 @@ from .result import stats_logger
 from unittest import util, BaseTestSuite, TestCase
 
 __unittest = True
+_logger = logging.getLogger(__name__)
 
 
 class TestSuite(BaseTestSuite):
@@ -35,8 +36,13 @@ class TestSuite(BaseTestSuite):
 
     def run(self, result, debug=False):
         for test in self:
+            if result.failfast and result.failures_count + result.errors_count >= result.failfast:
+                _logger.runbot('At least %s test failed, stopping tests' % result.failfast)
+                break
+
             assert isinstance(test, (TestCase))
             self._tearDownPreviousClass(test, result)
+
             self._handleClassSetUp(test, result)
             result._previousTestClass = test.__class__
 

@@ -708,6 +708,7 @@ class TransactionCase(BaseCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.maxDiff = 8192
         super().setUpClass()
 
         cls.addClassCleanup(cls._gc_filestore)
