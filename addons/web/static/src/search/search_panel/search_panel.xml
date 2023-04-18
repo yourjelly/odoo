@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
 <t t-name="web.SearchPanel" owl="1">
-    <t t-if="env.isSmall">
+    <t t-if="env.isSmall === 12">
         <t t-call="web.SearchPanel.Small" />
     </t>
     <t t-else="">

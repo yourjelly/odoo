@@ -15,29 +15,12 @@
                     <t t-call="{{ props.buttonTemplate }}"/>
                 </t>
                 <t t-set-slot="control-panel-always-buttons">
-                    <t t-if="env.isSmall &amp;&amp; headerButtons.length">
-                        <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="sr-only">Toggle Dropdown</span>
-                          </button>
-                          <ul class="dropdown-menu">
-                            <t t-foreach="headerButtons" t-as="button" t-key="button.id">
-                                <li><MultiRecordViewButton
-                                    t-if="button.display === 'always'"
-                                    list="model.root"
-                                    className="button.className + ' dropdown-item'"
-                                    clickParams="button.clickParams"
-                                    defaultRank="'btn-secondary'"
-                                    domain="props.domain"
-                                    icon="button.icon"
-                                    string="button.string"
-                                    title="button.title"
-                                /></li>
-                            </t>
-                        </ul>
-                    </t>
-                    <t t-else="">
+                    <button t-if="headerButtons.length" type="button" class="btn btn-secondary d-md-none dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu">
                         <t t-foreach="headerButtons" t-as="button" t-key="button.id">
-                            <MultiRecordViewButton
+                            <li><MultiRecordViewButton
                                 t-if="button.display === 'always'"
                                 list="model.root"
                                 className="button.className + ' dropdown-item'"
@@ -47,8 +30,21 @@
                                 icon="button.icon"
                                 string="button.string"
                                 title="button.title"
-                            />
+                            /></li>
                         </t>
+                    </ul>
+                    <t t-foreach="headerButtons" t-as="button" t-key="button.id">
+                        <MultiRecordViewButton
+                            t-if="button.display === 'always'"
+                            list="model.root"
+                            className="button.className + ' dropdown-item d-none d-md-inline-block'"
+                            clickParams="button.clickParams"
+                            defaultRank="'btn-secondary'"
+                            domain="props.domain"
+                            icon="button.icon"
+                            string="button.string"
+                            title="button.title"
+                        />
                     </t>
                 </t>
                 <t t-set-slot="control-panel-additional-actions">

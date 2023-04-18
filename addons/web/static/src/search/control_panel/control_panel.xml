@@ -2,10 +2,6 @@
 <templates xml:space="preserve">
 
     <t t-name="web.ControlPanel" owl="1">
-        <t t-call="web.ControlPanel.Regular" />
-    </t>
-
-    <t t-name="web.ControlPanel.Regular" owl="1">
         <div class="o_control_panel d-flex flex-column gap-3 gap-lg-1 px-3 pt-2 pb-3" t-ref="root">
             <div class="o_control_panel_main d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-start gap-3">
                 <div class="o_control_panel_breadcrumbs d-flex align-items-center w-md-50 w-lg-auto">
@@ -24,164 +20,49 @@
                     <t t-slot="layout-actions"/>
                 </div>
 
+                <t t-set="activeView" t-value="env.config.viewSwitcherEntries.find((view) => view.active)"/>
                 <div class="o_control_panel_navigation d-flex flex-wrap flex-md-nowrap align-items-center justify-content-between justify-content-md-end w-md-auto gap-3 gap-lg-1 gap-xl-3 order-2 order-lg-3">
                     <span class="d-none d-xl-block ms-auto"/> <!-- Spacer -->
                     <div t-if="pagerProps and pagerProps.total > 0" class="o_cp_pager text-nowrap order-2 order-md-1" role="search">
                         <Pager t-props="pagerProps"/>
                     </div>
+                    <button t-if="activeView.multiRecord" class="btn btn-secondary d-lg-none" data-bs-toggle="collapse" data-bs-target=".o_collapsible_search" aria-expanded="false" aria-controls=".o_collapsible_search">
+                        <i class="fa fa-search"/>
+                    </button>
                     <nav t-if="env.config.viewSwitcherEntries?.length > 1"
-                         class="o_cp_switch_buttons d-print-none btn-group order-1"
-                         t-att-class="{'w-100 w-sm-auto': env.config.viewSwitcherEntries?.length > 5}">
-                         <t t-if="env.isSmall">
-                                <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
-                                    <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                        t-attf-class="o_{{view.type}} {{view.icon}}"
+                         class="o_cp_switch_buttons d-print-none btn-group order-1">
+                        <t t-log="env.config.viewSwitcherEntries"/>
+                        <button class="btn btn-secondary dropdown-toggle d-md-none" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            t-attf-class="o_{{activeView.type}} {{activeView.icon}}"
+                            t-att-data-tooltip="activeView.name"
+                        >
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul  class="dropdown-menu d-md-none">
+                            <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
+                                <li t-attf-class="{{view.active ? 'active' : ''}}">
+                                    <button class="btn o_switch_view "
+                                        t-attf-class="o_{{view.type}} {{view.active ? 'active btn-primary' : ''}} dropdown-item dropdown-item_active_noarrow d-flex align-items-center"
                                         t-att-data-tooltip="view.name"
-                                        t-if="view.active"
-                                    >
-                                        <span class="sr-only">Toggle Dropdown</span>
+                                        t-on-click="() => this.onViewClicked(view.type)"
+                                        >
+                                        <i t-attf-class="{{view.icon}} pe-2"/>
+                                        <span t-out="view.name"/>
                                     </button>
-                                </t>
-                                <ul  class="dropdown-menu">
-                                    <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
-                                        <li t-attf-class="{{view.active ? 'active' : ''}}">
-                                            <button class="btn o_switch_view "
-                                                t-attf-class="o_{{view.type}} {{view.active ? 'active btn-primary' : ''}} dropdown-item dropdown-item_active_noarrow d-flex align-items-center"
-                                                t-att-data-tooltip="view.name"
-                                                t-on-click="() => this.onViewClicked(view.type)"
-                                                >
-                                                <i t-attf-class="{{view.icon}} pe-2"/>
-                                                <span t-out="view.name"/>
-                                            </button>
-                                        </li>
-                                    </t>
-                                </ul>
-                         </t>
-                         <t t-else="">
-                             <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
-                                 <button class="btn btn-secondary o_switch_view "
-                                     t-attf-class="o_{{view.type}} {{view.icon}} {{view.active ? 'active' : ''}}"
-                                     t-att-data-tooltip="view.name"
-                                     t-on-click="() => this.onViewClicked(view.type)"
-                                     />
-                             </t>
-                         </t>
+                                </li>
+                            </t>
+                        </ul>
+                        <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
+                            <button class="btn btn-secondary o_switch_view d-none d-md-inline-block"
+                                t-attf-class="o_{{view.type}} {{view.icon}} {{view.active ? 'active' : ''}}"
+                                t-att-data-tooltip="view.name"
+                                t-on-click="() => this.onViewClicked(view.type)"
+                                />
+                        </t>
                     </nav>
                 </div>
             </div>
         </div>
-    </t>
-
-    <t t-name="web.ControlPanel.Small" owl="1">
-        <t t-if="state.showMobileSearch">
-            <t t-portal="'body'">
-                <div class="o_searchview o_mobile_search">
-                    <div class="o_mobile_search_header">
-                        <button
-                            type="button"
-                            class="o_mobile_search_button btn"
-                            t-on-click="() => state.showMobileSearch = false"
-                        >
-                            <i class="fa fa-arrow-left"/>
-                            <strong class="ms-2">FILTER</strong>
-                        </button>
-                        <button
-                            type="button"
-                            class="o_mobile_search_button btn"
-                            t-on-click="() => env.searchModel.clearQuery()"
-                        >
-                            CLEAR
-                        </button>
-                    </div>
-                    <div class="o_mobile_search_content">
-                        <t t-if="display['top-right']">
-                            <t t-slot="control-panel-top-right">
-                                <SearchBar/>
-                            </t>
-                        </t>
-                        <t t-if="display['bottom-right']">
-                            <t t-slot="control-panel-bottom-right">
-                                <div class="o_mobile_search_filter o_search_options">
-                                    <t t-foreach="searchMenus" t-as="menu" t-key="menu.key">
-                                        <t t-component="menu.Component"/>
-                                    </t>
-                                </div>
-                            </t>
-                        </t>
-                    </div>
-                    <button
-                        type="button"
-                        class="btn btn-primary o_mobile_search_footer"
-                        t-on-click="() => state.showMobileSearch = false"
-                    >
-                        SEE RESULT
-                    </button>
-                </div>
-            </t>
-        </t>
-        <t t-else="">
-            <div t-if="display['top']" class="o_cp_top">
-                <t t-if="display['top-left'] and !state.showSearchBar">
-                    <t t-slot="control-panel-top-left">
-                        <t t-call="web.Breadcrumbs.Small" />
-                    </t>
-                </t>
-                <t t-if="display['top-right']">
-                    <button type="button" class="o_enable_searchview btn btn-link"
-                        t-att-class="state.showSearchBar ? 'fa fa-arrow-left' : 'oi oi-search'"
-                        t-on-click="() => state.showSearchBar = !state.showSearchBar"
-                    />
-                    <t t-if="state.showSearchBar or !display['top-left']">
-                        <t t-slot="control-panel-top-right">
-                            <SearchBar/>
-                            <button
-                                type="button"
-                                class="o_toggle_searchview_full btn fa fa-filter"
-                                t-on-click="() => state.showMobileSearch = !state.showMobileSearch"
-                            />
-                        </t>
-                    </t>
-                </t>
-            </div>
-            <div t-if="display['bottom']" class="o_cp_bottom">
-                <div t-if="display['bottom-left']" class="o_cp_bottom_left">
-                    <t t-slot="control-panel-bottom-left-buttons" t-if="display['bottom-left-buttons']"/>
-                    <t t-slot="control-panel-bottom-left"/>
-                </div>
-                <div t-if="display['bottom-right']" class="o_cp_bottom_right">
-                    <div t-if="pagerProps and pagerProps.total > 0" class="o_cp_pager" role="search">
-                        <Pager t-props="pagerProps"/>
-                    </div>
-
-                    <t t-if="env.config.viewSwitcherEntries and env.config.viewSwitcherEntries.length > 1">
-                        <nav class="btn-group o_cp_switch_buttons">
-                            <t t-set="view" t-value="env.config.viewSwitcherEntries.find((v) => v.active)" />
-
-                            <Dropdown
-                                position="'bottom-end'"
-                                menuClass="'d-inline-flex'"
-                                togglerClass="'btn btn-link'"
-                            >
-                                <t t-set-slot="toggler">
-                                    <i
-                                        class="fa-lg o_switch_view"
-                                        t-attf-class="o_{{view.type}} {{view.icon}} {{view.active ? 'active' : ''}}"
-                                    />
-                                </t>
-                                <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
-                                    <button class="btn btn-light fa-lg o_switch_view"
-                                        t-attf-class="o_{{view.type}} {{view.icon}} {{view.active ? 'active' : ''}}"
-                                        t-att-data-tooltip="view.name"
-                                        t-on-click="() => this.onViewClicked(view.type)"
-                                    />
-                                </t>
-                            </Dropdown>
-                        </nav>
-                    </t>
-                    <t t-slot="control-panel-bottom-right"/>
-                </div>
-            </div>
-        </t>
     </t>
 
     <t t-name="web.Breadcrumbs" owl="1">
