@@ -50,7 +50,6 @@ This module contains all the common features of Sales Management and eCommerce.
         'views/product_packaging_views.xml',
         'views/product_views.xml',
         'views/res_partner_views.xml',
-        'views/variant_templates.xml',
         'views/sale_onboarding_views.xml',
         'views/sale_order_line_views.xml',
         'views/sale_portal_templates.xml',

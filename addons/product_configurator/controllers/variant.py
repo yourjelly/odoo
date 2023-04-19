@@ -8,9 +8,9 @@ from odoo.http import request
 
 
 class VariantController(http.Controller):
-    @http.route(['/purchase/get_combination_info'], type='json', auth="user", methods=['POST'])
+
+    @http.route(['/product_configurator/get_combination_info'], type='json', auth="user", methods=['POST'])
     def get_combination_info(self, product_template_id, product_id, combination, add_qty, pricelist_id, **kw):
-        print("-----------------purchase--variant-----------")
         combination = request.env['product.template.attribute.value'].browse(combination)
         pricelist = self._get_pricelist(pricelist_id)
         cids = request.httprequest.cookies.get('cids', str(request.env.user.company_id.id))
@@ -32,7 +32,7 @@ class VariantController(http.Controller):
             })
         return res
 
-    @http.route(['/purchase/create_product_variant'], type='json', auth="user", methods=['POST'])
+    @http.route(['/product_configurator/create_product_variant'], type='json', auth="user", methods=['POST'])
     def create_product_variant(self, product_template_id, product_template_attribute_value_ids, **kwargs):
         return request.env['product.template'].browse(int(product_template_id)).create_product_variant(json.loads(product_template_attribute_value_ids))
 

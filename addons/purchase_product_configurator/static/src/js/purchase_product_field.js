@@ -8,7 +8,7 @@ import {
     selectOrCreateProduct,
     getSelectedVariantValues,
     getNoVariantAttributeValues,
-} from "purchase.VariantMixin";
+} from "product_configurator.VariantMixin";
 
 
 patch(PurchaseOrderLineProductField.prototype, 'purchase_product_configurator', {
@@ -63,7 +63,6 @@ patch(PurchaseOrderLineProductField.prototype, 'purchase_product_configurator', 
     },
 
     async _openProductConfigurator(mode) {
-        console.log("Hello this is purchase_product_field")
         const purchaseOrderRecord = this.props.record.model.root;
         const pricelistId = purchaseOrderRecord.data.pricelist_id ? purchaseOrderRecord.data.pricelist_id[0] : false;
         const productTemplateId = this.props.record.data.product_template_id[0];

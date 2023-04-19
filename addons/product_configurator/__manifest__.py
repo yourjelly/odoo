@@ -33,5 +33,10 @@
     'demo': [
         'demo/demo.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'product_configurator/static/src/js/variant_mixin.js',
+        ],
+    },
     'auto_install': True,
 }

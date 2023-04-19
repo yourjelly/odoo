@@ -8,7 +8,7 @@ import {
     selectOrCreateProduct,
     getSelectedVariantValues,
     getNoVariantAttributeValues,
-} from "sale.VariantMixin";
+} from "product_configurator.VariantMixin";
 
 
 patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
