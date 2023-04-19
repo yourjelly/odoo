@@ -41,6 +41,7 @@ SolidCompression=yes
 WizardStyle=modern
 LicenseFile="{#OdooLicense}"
 ArchitecturesInstallIn64BitMode=x64
+WizardSizePercent=100
 SetupIconFile={#OdooIcon}
 WizardImageStretch=no
 WizardImageFile={#OdooLeftImage}
@@ -80,12 +81,25 @@ Source: "{#ToolsDir}\vcredist\*.exe"; DestDir: "{app}\vcredist"
 Source: "{#OdooHeaderImage}"; Flags: dontcopy;
 
 [INI]
-Filename: "{app}\odoo.conf"; Section: "options"; Key: "datadir"; String: "{app}\sessions"; Flags: createkeyifdoesntexist
-Filename: "{app}\odoo.conf"; Section: "options"; Key: "default_productivity_apps"; String: "True"; Flags: createkeyifdoesntexist
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "addons_path"; String: "{app}\server\odoo\addons"; Flags: createkeyifdoesntexist
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "bin_path"; String: "{app}\thirdparty"; Flags: createkeyifdoesntexist
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "datadir"; String: "{app}\sessions"; Flags: createkeyifdoesntexist
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "default_productivity_apps"; String: "True"; Flags: createkeyifdoesntexist
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "db_host"; String: "{code:GetPgParam|host}"; Flags: createkeyifdoesntexist
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "db_user"; String: "{code:GetPgParam|user}"; Flags: createkeyifdoesntexist
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "db_password"; String: "{code:GetPgParam|pass}"; Flags: createkeyifdoesntexist
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "db_port"; String: "{code:GetPgParam|port}"; Flags: createkeyifdoesntexist
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "pg_path"; String: "{app}\PostgreSQL\bin"; Flags: createkeyifdoesntexist; Tasks: install_postgresql;
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "server_wide_modules"; String: "web,hw_posbox_homepage,hw_drivers"; Flags: createkeyifdoesntexist; Check: CheckInstallType('iot');
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "list_db"; String: "False"; Flags: createkeyifdoesntexist; Check: CheckInstallType('iot');
+Filename: "{app}\server\odoo.conf"; Section: "options"; Key: "max_cron_threads"; String: "0"; Flags: createkeyifdoesntexist; Check: CheckInstallType('iot');
 
 [Run]
 Filename: "{app}\vcredist\vc_redist.x64.exe"; Parameters: "/q"; StatusMsg: "Installing Visual C++ redistributable files"
-Filename: "{tmp}\postgresql.exe"; Parameters: "--mode unattended --prefix ""{app}\PostgreSQL"" --datadir ""{app}\PostgreSQL\data"" --servicename ""PostgreSQL_FOR_Odoo"" --serviceaccount ""openpgsvc"" --servicepassword ""0p3npgsvcPWD"""; StatusMsg: "Installing PostgreSQL"
+Filename: "{tmp}\postgresql.exe"; \
+  Parameters: "--mode unattended --prefix ""{app}\PostgreSQL"" --datadir ""{app}\PostgreSQL\data"" --servicename ""PostgreSQL_FOR_Odoo"" --serviceaccount ""openpgsvc"" --servicepassword ""0p3npgsvcPWD"""; \
+  StatusMsg: "Installing PostgreSQL"; \
+  Tasks: "install_postgresql";
 Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "install {#ServiceName} ""{app}\python\python.exe"""; StatusMsg: "Installing Odoo Windows service"; Flags: runhidden
 Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} AppDirectory """"{app}\python"""""; StatusMsg: "Setting up Odoo Windows service"; Flags: runhidden
 Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} AppParameters """"""{app}\server\odoo-bin"""""" -c """"""{app}\server\odoo.conf"""""""; StatusMsg: "Setting up Odoo Windows service"; Flags: runhidden
@@ -104,6 +118,22 @@ var
   DownloadPage: TDownloadWizardPage;
   PostgresInfosPage: TInputQueryWizardPage;
   PgHost, PgPort, PgUser, PgPass: String;
+
+function CheckInstallType(InstallType: String): Boolean;
+begin
+  Result := False;
+  if WizardSetupType(False) = InstallType then Result := True;
+end;
+
+function GetPgParam(Param: String): String;
+begin
+  Case Param of
+    'host': Result:= PgHost;
+    'user': Result:= PgUser;
+    'port': Result:= PgPort;
+    'pass': Result:= PgPass;
+  end;
+end;
 
 function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
 begin
@@ -136,9 +166,6 @@ begin
   PgPort := '{#DefaultPostgresqlPort}';
   PgUser := '{#DefaultPostgresqlUser}';
   PgPass := '{#DefaultPostgresqlPassword}';
-  if FileExists('{app}/odoo.conf') then begin
-    log('Le fichier existse');    
-  end else log('Le fichier existe pas');
   Result := True;
 end;
 
@@ -151,16 +178,36 @@ begin
   PostgresInfosPage.Add('&Port', False);
   PostgresInfosPage.Add('&Username', False);
   PostgresInfosPage.Add('&Password', False);
-  PostgresInfosPage.Values[0] := PgHost;
-  PostgresInfosPage.Values[1] := PgPort;
-  PostgresInfosPage.Values[2] := PgUser;
-  PostgresInfosPage.Values[3] := PgPass;
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
+var
+  ConfigPath: String;
 begin
+  Result := True;
+  if CurPageID = wpSelectDir then begin
+      ConfigPath := ExpandConstant('{app}\server\odoo.conf');
+      if FileExists(configPath) then begin
+        log('Reading previous Odoo Config file');
+        PgHost := GetIniString('options', 'db_host', '{#DefaultPostgresqlHostname}', ConfigPath);
+        PgPort := GetIniString('options', 'db_port', '{#DefaultPostgresqlPort}', ConfigPath);
+        PgUser := GetIniString('options', 'db_user', '{#DefaultPostgresqlUser}', ConfigPath);
+        PgPass := GetIniString('options', 'db_password', '{#DefaultPostgresqlPassword}', ConfigPath);
+      end;
+  end;
+  if CurPageID = wpSelectComponents then begin
+    PostgresInfosPage.Values[0] := PgHost;
+    PostgresInfosPage.Values[1] := PgPort;
+    PostgresInfosPage.Values[2] := PgUser;
+    PostgresInfosPage.Values[3] := PgPass;
+  end;
+  if CurPageID = PostgresInfosPage.ID then begin
+    PgHost := PostgresInfosPage.Values[0];
+    PgPort := PostgresInfosPage.Values[1];
+    PgUser := PostgresInfosPage.Values[2];
+    PgPass := PostgresInfosPage.Values[3];
+  end;
   if CurPageID = wpReady then begin
-
     DownloadPage.Clear;
     if WizardIsTaskSelected('install_postgresql') then
       DownloadPage.Add('{#PostgreSqlUrl}', 'postgresql.exe', '');
@@ -180,6 +227,8 @@ begin
     finally
       DownloadPage.Hide;
     end;
-  end else
-    Result := True;
+    if CheckInstallType('iot') then begin
+      MsgBox('Here is your code: prout ça marche po', mbInformation, MB_OK);
+    end;
+  end;
 end;
