@@ -312,7 +312,8 @@ class ProductProduct(models.Model):
             self.product_tmpl_id._sanitize_vals(vals)
         products = super(ProductProduct, self.with_context(create_product_product=True)).create(vals_list)
         # `_get_variant_id_for_combination` depends on existing variants
-        self.clear_caches()
+        # would be great to make a more precise choice here.
+        self.pool._clear_cache()
         return products
 
     def write(self, values):
@@ -320,10 +321,10 @@ class ProductProduct(models.Model):
         res = super(ProductProduct, self).write(values)
         if 'product_template_attribute_value_ids' in values:
             # `_get_variant_id_for_combination` depends on `product_template_attribute_value_ids`
-            self.clear_caches()
+            self.pool._clear_cache()
         elif 'active' in values:
             # `_get_first_possible_variant_id` depends on variants active state
-            self.clear_caches()
+            self.pool._clear_cache()
         return res
 
     def unlink(self):
@@ -348,7 +349,7 @@ class ProductProduct(models.Model):
         # products due to ondelete='cascade'
         unlink_templates.unlink()
         # `_get_variant_id_for_combination` depends on existing variants
-        self.clear_caches()
+        self.pool._clear_cache()
         return res
 
     def _filter_to_unlink(self, check_access=True):
