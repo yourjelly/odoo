@@ -6,6 +6,7 @@ import session from 'web.session';
 import {getCookie} from 'web.utils.cookies';
 import publicWidget from 'web.public.widget';
 import { registry } from '@web/core/registry';
+import { omit } from '@web/core/utils/objects';
 
 import AbstractService from "web.AbstractService";
 import lazyloader from "web.public.lazyloader";
@@ -239,7 +240,7 @@ export const PublicRoot = publicWidget.RootWidget.extend({
         function _computeContext(context, noContextKeys) {
             context = Object.assign({}, this._getContext(), context);
             if (noContextKeys) {
-                context = _.omit(context, noContextKeys);
+                context = omit(context, noContextKeys);
             }
             return JSON.parse(JSON.stringify(context));
         }
@@ -257,7 +258,7 @@ export const PublicRoot = publicWidget.RootWidget.extend({
                 var noContextKeys;
                 if (options) {
                     noContextKeys = options.noContextKeys;
-                    args[2] = _.omit(options, 'noContextKeys');
+                    args[2] = omit(options, 'noContextKeys');
                 }
                 params.kwargs.context = _computeContext.call(this, params.kwargs.context, noContextKeys);
             }

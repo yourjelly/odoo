@@ -83,6 +83,7 @@
  */
 
 import { intersection, sortBy, unique } from "@web/core/utils/arrays";
+import { omit, pick } from "@web/core/utils/objects";
 import { sprintf } from "@web/core/utils/strings";
 import AbstractModel from "web.AbstractModel";
 import concurrency from "web.concurrency";
@@ -843,7 +844,7 @@ var BasicModel = AbstractModel.extend({
         var defs = [];
         var record_fields = {};
         fields.forEach((field) => {
-            record_fields[field.name] = _.pick(field, 'type', 'relation', 'domain', 'selection');
+            record_fields[field.name] = pick(field, 'type', 'relation', 'domain', 'selection');
         });
         fieldInfo = fieldInfo || {};
         var fieldsInfo = {};
@@ -1521,7 +1522,7 @@ var BasicModel = AbstractModel.extend({
         }
         var initialData = {};
         this._visitChildren(record, function (elem) {
-            initialData[elem.id] = $.extend(true, {}, _.pick(elem, 'data', '_changes'));
+            initialData[elem.id] = $.extend(true, {}, pick(elem, 'data', '_changes'));
         });
 
         // apply changes to local data
@@ -1638,7 +1639,7 @@ var BasicModel = AbstractModel.extend({
         if (relatedRecord && (data.id === this.localData[relatedID].res_id)) {
             return Promise.resolve();
         }
-        var rel_data = _.pick(data, 'id', 'display_name');
+        var rel_data = pick(data, 'id', 'display_name');
 
         const viewType = options.viewType || record.viewType;
         const fieldInfo = record.fieldsInfo[viewType][fieldName] || {};
@@ -3282,7 +3283,7 @@ var BasicModel = AbstractModel.extend({
         const changesOnly = options.changesOnly;
         var fields = record.fields;
         if (options.fieldNames) {
-            fields = _.pick(fields, options.fieldNames);
+            fields = pick(fields, options.fieldNames);
         }
         var commands = {};
         var data = Object.assign({}, record.data, record._changes);
@@ -3442,7 +3443,7 @@ var BasicModel = AbstractModel.extend({
 
         if (options.full || !(options.fieldName || options.additionalContext)) {
             var context_to_add = options.sanitize_default_values ?
-                _.omit(element.context, function (val, key) {
+                omit(element.context, function (val, key) {
                     return String(key).startsWith('default_');
                 })
                 : element.context;
@@ -4003,7 +4004,7 @@ var BasicModel = AbstractModel.extend({
         var fieldInfo = viewType && record.fieldsInfo && record.fieldsInfo[viewType][fieldName];
         if (fieldInfo) {
             var rawModifiers = fieldInfo.modifiers || {};
-            var modifiers = this._evalModifiers(record, _.pick(rawModifiers, 'readonly'));
+            var modifiers = this._evalModifiers(record, pick(rawModifiers, 'readonly'));
             return modifiers.readonly && !fieldInfo.force_save;
         } else {
             return false;
@@ -4056,7 +4057,7 @@ var BasicModel = AbstractModel.extend({
                 var field = element.fields[fieldName];
                 var fieldInfo = element.fieldsInfo[element.viewType][fieldName];
                 var rawModifiers = fieldInfo.modifiers || {};
-                var modifiers = self._evalModifiers(record, _.pick(rawModifiers, 'required'));
+                var modifiers = self._evalModifiers(record, pick(rawModifiers, 'required'));
                 if (modifiers.required && !self._isFieldSet(recordData[fieldName], field.type)) {
                     isValid = false;
                 }
@@ -4155,7 +4156,7 @@ var BasicModel = AbstractModel.extend({
             }
             // it doesn't make sense for a record datapoint to have those keys
             // besides, it will mess up x2m and actions down the line
-            context = _.omit(context, ['orderedBy', 'group_by']);
+            context = omit(context, 'orderedBy', 'group_by');
         } else {
             var isValueArray = params.value instanceof Array;
             res_id = isValueArray ? params.value[0] : undefined;
@@ -4458,7 +4459,7 @@ var BasicModel = AbstractModel.extend({
                     var filteredResults = results.filter(function (record) {
                         return request.ids.indexOf(record.id) >= 0;
                     }).map(function (record) {
-                        return _.pick(record, fieldNames);
+                        return pick(record, fieldNames);
                     });
                     request.resolve(filteredResults);
                 }
@@ -5042,7 +5043,7 @@ var BasicModel = AbstractModel.extend({
         if (element.type === 'record') {
             element.offset = element.res_ids.indexOf(element.res_id);
         }
-        var loadOptions = _.pick(options, 'fieldNames', 'viewType');
+        var loadOptions = pick(options, 'fieldNames', 'viewType');
         return this._load(element, loadOptions).then(function (result) {
             return result.id;
         });

@@ -10,6 +10,7 @@ import localStorage from "web.local_storage";
 import { sprintf } from "@web/core/utils/strings";
 import { debounce } from "@web/core/utils/timing";
 import { sortBy } from "@web/core/utils/arrays";
+import { pick } from "@web/core/utils/objects";
 
 var _t = core._t;
 
@@ -637,7 +638,7 @@ var ViewEditor = Widget.extend({
             (([type, editingSessions]) => {
                 if (errorFound) return;
 
-                var dirtySessions = _.pick(editingSessions, function (session) {
+                var dirtySessions = pick(editingSessions, function (session) {
                     return session.getUndoManager().hasUndo();
                 });
                 toSave[type] = _.map(dirtySessions, function (session, resID) {

@@ -35,6 +35,7 @@ import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor
 import {SIZES, MEDIAS_BREAKPOINTS} from "@web/core/ui/ui_service";
 import { sprintf } from "@web/core/utils/strings";
 import { debounce } from "@web/core/utils/timing";
+import { pick } from "@web/core/utils/objects";
 
 var qweb = core.qweb;
 var _t = core._t;
@@ -7243,7 +7244,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         }
         const defaultKeys = Object.keys(defaultColors);
         colors = Object.assign(defaultColors, colors);
-        return _.pick(colors, defaultKeys);
+        return pick(colors, defaultKeys);
     },
     /**
      * Toggles whether there is a shape or not, to be called from bg toggler.

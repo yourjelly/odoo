@@ -1,5 +1,6 @@
 /** @odoo-module alias=web.MockServer **/
 
+import { pick } from "@web/core/utils/objects";
 import Class from "web.Class";
 import Domain from "web.Domain";
 import pyUtils from "web.py_utils";
@@ -1875,7 +1876,7 @@ var MockServer = Class.extend({
 
         // update value of relationnal fields pointing to the deleted records
         Object.values(this.data).forEach((d) => {
-            var relatedFields = _.pick(d.fields, function (field) {
+            var relatedFields = pick(d.fields, function (field) {
                 return field.relation === model;
             });
             Object.keys(relatedFields).forEach((relatedField) => {
