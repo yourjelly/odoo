@@ -9187,6 +9187,7 @@
     };
     const pasteSpecialValue = {
         name: _lt("Paste value only"),
+        description: "Ctrl+Shift+V",
         execute: PASTE_VALUE_ACTION,
     };
     const pasteSpecialFormat = {
@@ -16129,6 +16130,7 @@
     };
     const insertImage = {
         name: _lt("Image"),
+        description: "Ctrl+O",
         execute: CREATE_IMAGE,
         isVisible: (env) => env.imageProvider !== undefined,
     };
@@ -16422,18 +16424,21 @@
     };
     const formatAlignmentLeft = {
         name: _lt("Left"),
+        description: "Ctrl+Shift+L",
         execute: (env) => setStyle(env, { align: "left" }),
         isActive: (env) => getHorizontalAlign(env) === "left",
         icon: "o-spreadsheet-Icon.ALIGN_LEFT",
     };
     const formatAlignmentCenter = {
         name: _lt("Center"),
+        description: "Ctrl+Shift+E",
         execute: (env) => setStyle(env, { align: "center" }),
         isActive: (env) => getHorizontalAlign(env) === "center",
         icon: "o-spreadsheet-Icon.ALIGN_CENTER",
     };
     const formatAlignmentRight = {
         name: _lt("Right"),
+        description: "Ctrl+Shift+R",
         execute: (env) => setStyle(env, { align: "right" }),
         isActive: (env) => getHorizontalAlign(env) === "right",
         icon: "o-spreadsheet-Icon.ALIGN_RIGHT",
@@ -16504,6 +16509,7 @@
     };
     const clearFormat = {
         name: _lt("Clear formatting"),
+        description: "Ctrl+<",
         execute: FORMAT_CLEARFORMAT_ACTION,
         icon: "o-spreadsheet-Icon.CLEAR_FORMAT",
     };
@@ -21186,12 +21192,25 @@
             const sheetId = this.env.model.getters.getActiveSheetId();
             const rowDims = this.env.model.getters.getRowDimensionsInViewport(sheetId, position.row);
             const colDims = this.env.model.getters.getColDimensionsInViewport(sheetId, position.col);
-            // TODO : change this offset when we support vertical cell align
-            const centeringOffset = Math.floor((rowDims.size - FILTER_ICON_EDGE_LENGTH) / 2);
+            const cell = this.env.model.getters.getCell({ sheetId, ...position });
+            const verticalFilterIconPosition = this.getIconVerticalPosition(rowDims, cell);
             return {
                 x: colDims.end - FILTER_ICON_EDGE_LENGTH + this.props.gridPosition.x - FILTER_ICON_MARGIN - 1,
-                y: rowDims.end - FILTER_ICON_EDGE_LENGTH + this.props.gridPosition.y - centeringOffset,
+                y: verticalFilterIconPosition + this.props.gridPosition.y,
             };
+        }
+        // Calculates the vertical position of the filter icon based on the row dimensions and cell styles.
+        getIconVerticalPosition(rowDims, cell) {
+            var _a;
+            const centeringOffset = Math.floor((rowDims.size - FILTER_ICON_EDGE_LENGTH) / 2);
+            switch ((_a = cell === null || cell === void 0 ? void 0 : cell.style) === null || _a === void 0 ? void 0 : _a.verticalAlign) {
+                case "bottom":
+                    return rowDims.end - FILTER_ICON_MARGIN - FILTER_ICON_EDGE_LENGTH;
+                case "top":
+                    return rowDims.start + FILTER_ICON_MARGIN;
+                default:
+                    return rowDims.end - FILTER_ICON_EDGE_LENGTH - centeringOffset;
+            }
         }
         isFilterActive(position) {
             const sheetId = this.env.model.getters.getActiveSheetId();
@@ -23123,6 +23142,7 @@
                     target: this.env.model.getters.getSelectedZones(),
                     style: { underline: !this.env.model.getters.getCurrentStyle().underline },
                 }),
+                "CTRL+O": () => CREATE_IMAGE(this.env),
                 "ALT+=": () => {
                     var _a;
                     const sheetId = this.env.model.getters.getActiveSheetId();
@@ -23138,6 +23158,12 @@
                     }
                     else {
                         this.env.model.dispatch("SUM_SELECTION");
+                    }
+                },
+                "ALT+ENTER": () => {
+                    const cell = this.env.model.getters.getActiveCell();
+                    if (cell.link) {
+                        openLink(cell.link, this.env);
                     }
                 },
                 "CTRL+HOME": () => {
@@ -23175,8 +23201,45 @@
                     const position = this.env.model.getters.getActivePosition();
                     this.env.model.selection.selectZone({ cell: position, zone: newZone });
                 },
+                "CTRL+SHIFT+E": () => this.setHorizontalAlign("center"),
+                "CTRL+SHIFT+L": () => this.setHorizontalAlign("left"),
+                "CTRL+SHIFT+R": () => this.setHorizontalAlign("right"),
+                "CTRL+SHIFT+V": () => PASTE_VALUE_ACTION(this.env),
+                "CTRL+SHIFT+<": () => this.clearFormatting(),
+                "CTRL+<": () => this.clearFormatting(),
                 "CTRL+SHIFT+ ": () => {
                     this.env.model.selection.selectAll();
+                },
+                "CTRL+ALT+=": () => {
+                    const activeCols = this.env.model.getters.getActiveCols();
+                    const activeRows = this.env.model.getters.getActiveRows();
+                    const isSingleSelection = this.env.model.getters.getSelectedZones().length === 1;
+                    const areFullCols = activeCols.size > 0 && isSingleSelection;
+                    const areFullRows = activeRows.size > 0 && isSingleSelection;
+                    if (areFullCols && !areFullRows) {
+                        INSERT_COLUMNS_BEFORE_ACTION(this.env);
+                    }
+                    else if (areFullRows && !areFullCols) {
+                        INSERT_ROWS_BEFORE_ACTION(this.env);
+                    }
+                },
+                "CTRL+ALT+-": () => {
+                    const columns = [...this.env.model.getters.getActiveCols()];
+                    const rows = [...this.env.model.getters.getActiveRows()];
+                    if (columns.length > 0 && rows.length === 0) {
+                        this.env.model.dispatch("REMOVE_COLUMNS_ROWS", {
+                            sheetId: this.env.model.getters.getActiveSheetId(),
+                            dimension: "COL",
+                            elements: columns,
+                        });
+                    }
+                    else if (rows.length > 0 && columns.length === 0) {
+                        this.env.model.dispatch("REMOVE_COLUMNS_ROWS", {
+                            sheetId: this.env.model.getters.getActiveSheetId(),
+                            dimension: "ROW",
+                            elements: rows,
+                        });
+                    }
                 },
                 "SHIFT+PAGEDOWN": () => {
                     this.env.model.dispatch("ACTIVATE_NEXT_SHEET");
@@ -23486,6 +23549,19 @@
         }
         displayWarningCopyPasteNotSupported() {
             this.env.raiseError(_lt("Copy/Paste is not supported in this browser."));
+        }
+        clearFormatting() {
+            this.env.model.dispatch("CLEAR_FORMATTING", {
+                sheetId: this.env.model.getters.getActiveSheetId(),
+                target: this.env.model.getters.getSelectedZones(),
+            });
+        }
+        setHorizontalAlign(align) {
+            this.env.model.dispatch("SET_FORMATTING", {
+                sheetId: this.env.model.getters.getActiveSheetId(),
+                target: this.env.model.getters.getSelectedZones(),
+                style: { align },
+            });
         }
         closeMenu() {
             this.menuState.isOpen = false;
@@ -46178,8 +46254,8 @@
 
 
     __info__.version = '16.3.0-alpha.4';
-    __info__.date = '2023-04-14T13:55:06.449Z';
-    __info__.hash = '6824b8a';
+    __info__.date = '2023-04-20T07:55:23.138Z';
+    __info__.hash = '97aa084';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
