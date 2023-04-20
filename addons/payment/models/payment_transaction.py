@@ -950,8 +950,6 @@ class PaymentTransaction(models.Model):
         """
         txs_to_post_process = self
         if not txs_to_post_process:
-            # Let the client post-process transactions so that they remain available in the portal
-            client_handling_limit_date = datetime.now() - relativedelta.relativedelta(minutes=10)
             # Don't try forever to post-process a transaction that doesn't go through. Set the limit
             # to 4 days because some providers (PayPal) need that much for the payment verification.
             retry_limit_date = datetime.now() - relativedelta.relativedelta(days=4)
@@ -959,8 +957,6 @@ class PaymentTransaction(models.Model):
             txs_to_post_process = self.search([
                 ('state', '=', 'done'),
                 ('is_post_processed', '=', False),
-                '|', ('last_state_change', '<=', client_handling_limit_date),
-                     ('source_transaction_id', '!=', False),
                 ('last_state_change', '>=', retry_limit_date),
             ])
         for tx in txs_to_post_process:

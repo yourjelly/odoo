@@ -4,38 +4,20 @@
             a look at payment_portal_templates.xml (xmlid: payment_status) for more infos-->
     <t t-name="payment.display_tx_list">
         <div>
-            <!-- Error transactions -->
-            <div t-if="tx_error.length > 0">
-                <h1>Failed operations</h1>
-                <ul class="list-group">
-                    <t t-foreach="tx_error" t-as="tx">
-                        <a t-att-href="tx['landing_route']" class="list-group-item">
-                            <h4 class="list-group-item-heading mb5">
-                                <t t-esc="tx['reference']"/>
-                                <span class="badge float-end"><t t-esc="tx['amount']"/> <t t-esc="tx['currency_code']"/></span>
-                            </h4>
-                            <small class="list-group-item-text">
-                                An error occurred during the processing of this payment.<br/>
-                                <strong>Reason:</strong> <t t-esc="tx['state_message']"/>
-                            </small>
-                        </a>
-                    </t>
-                </ul>
-            </div>
-            <!-- Pending/Authorized/Confirmed transactions -->
-            <div t-if="tx_done.length > 0 || tx_authorized.length > 0 || tx_pending.length > 0">
+            <!-- Pending/Confirmed transactions -->
+            <div t-if="tx_done || tx_pending">
                 <h1>Operations in progress</h1>
                 <div class="list-group">
                     <!-- Done transactions -->
-                    <t t-foreach="tx_done" t-as="tx">
-                        <a t-att-href="tx['landing_route']" class="list-group-item">
+                    <t t-if="tx_done"> <!-- I will not need foreach-->
+                        <a t-att-href="tx_done['landing_route']" class="list-group-item">
                             <h4 class="list-group-item-heading mb5">
-                                <t t-esc="tx['reference']"/>
-                                <span class="badge float-end"><t t-esc="tx['amount']"/> <t t-esc="tx['currency_code']"/></span>
+                                <t t-esc="tx_done['reference']"/>
+                                <span class="badge float-end"><t t-esc="tx_done['amount']"/> <t t-esc="tx_done['currency_code']"/></span>
                             </h4>
                             <small class="list-group-item-text">
-                                <t t-if="!tx['is_post_processed']">
-                                    <t t-if="tx['operation'] != 'validation'">
+                                <t t-if="!tx_done['is_post_processed']">
+                                    <t t-if="tx_done['operation'] != 'validation'">
                                         Your payment is being processed, please wait... <i class="fa fa-cog fa-spin"/>
                                     </t>
                                     <t t-else="">
@@ -43,7 +25,7 @@
                                     </t>
                                 </t>
                                 <t t-else="">
-                                    <t t-if="tx['operation'] != 'validation'">
+                                    <t t-if="tx_done['operation'] != 'validation'">
                                         Your payment has been processed.<br/>
                                         Click here to be redirected to the confirmation page.
                                     </t>
@@ -56,17 +38,17 @@
                         </a>
                     </t>
                     <!-- Pending transactions -->
-                    <t t-foreach="tx_pending" t-as="tx">
-                        <a t-att-href="tx['landing_route']" class="list-group-item">
+                    <t t-if="tx_pending">
+                        <a t-att-href="tx_pending['landing_route']" class="list-group-item">
                             <h4 class="list-group-item-heading mb5">
-                                <t t-esc="tx['reference']"/>
-                                <span class="badge float-end"><t t-esc="tx['amount']"/> <t t-esc="tx['currency_code']"/></span>
+                                <t t-esc="tx_pending['reference']"/>
+                                <span class="badge float-end"><t t-esc="tx_pending['amount']"/> <t t-esc="tx_pending['currency_code']"/></span>
                             </h4>
                             <small class="list-group-item-text">
-                                <t t-if="tx['display_message']">
+                                <t t-if="tx_pending['display_message']">
                                     <!-- display_message is the content of the HTML field associated
                                     with the current transaction state, set on the provider. -->
-                                    <t t-out="tx['display_message']"/>
+                                    <t t-out="tx_pending['display_message']"/>
                                 </t>
                                 <t t-else="">
                                     Your payment is in pending state.<br/>
@@ -76,68 +58,44 @@
                             </small>
                         </a>
                     </t>
-                    <!-- Authorized transactions -->
-                    <t t-foreach="tx_authorized" t-as="tx">
-                        <a t-att-href="tx['landing_route']" class="list-group-item">
-                            <h4 class="list-group-item-heading mb5">
-                                <t t-esc="tx['reference']"/>
-                                <span class="badge float-end"><t t-esc="tx['amount']"/> <t t-esc="tx['currency_code']"/></span>
-                            </h4>
-                            <small class="list-group-item-text">
-                                <t t-if="tx['display_message']">
-                                    <!-- display_message is the content of the HTML field associated
-                                    with the current transaction state, set on the provider. -->
-                                    <t t-out="tx['display_message']"/>
-                                </t>
-                                <t t-else="">
-                                    Your payment has been received but need to be confirmed manually.<br/>
-                                    You will be notified when the payment is confirmed.
-                                </t>
-                            </small>
-                        </a>
-                    </t>
                 </div>
             </div>
             <!-- Draft transactions -->
-            <div t-if="tx_draft.length > 0">
+            <div t-if="tx_draft">
                 <h1>Waiting for operations to process</h1>
                 <ul class="list-group">
-                    <t t-foreach="tx_draft" t-as="tx">
-                        <a t-att-href="tx['landing_route']" class="list-group-item">
-                            <h4 class="list-group-item-heading mb5">
-                                <t t-esc="tx['reference']"/>
-                                <span class="badge float-end"><t t-esc="tx['amount']"/> <t t-esc="tx['currency_code']"/></span>
-                            </h4>
-                            <small class="list-group-item-text">
-                                <t t-if="tx['display_message']">
-                                    <!-- display_message is the content of the HTML field associated
-                                    with the current transaction state, set on the provider. -->
-                                    <t t-out="tx['display_message']"/>
-                                </t>
-                                <t t-else="">
-                                    We are waiting for the payment provider to confirm the payment.
-                                </t>
-                            </small>
-                        </a>
-                    </t>
+                    <a t-att-href="tx_draft['landing_route']" class="list-group-item">
+                        <h4 class="list-group-item-heading mb5">
+                            <t t-esc="tx_draft['reference']"/>
+                            <span class="badge float-end"><t t-esc="tx_draft['amount']"/> <t t-esc="tx_draft['currency_code']"/></span>
+                        </h4>
+                        <small class="list-group-item-text">
+                            <t t-if="tx_draft['display_message']">
+                                <!-- display_message is the content of the HTML field associated
+                                with the current transaction state, set on the provider. -->
+                                <t t-out="tx_draft['display_message']"/>
+                            </t>
+                            <t t-else="">
+                                We are waiting for the payment provider to confirm the payment.
+                            </t>
+                        </small>
+                    </a>
                 </ul>
             </div>
             <!-- Cancel transactions -->
-            <div t-if="tx_cancel.length > 0">
+            <div t-if="tx_cancel">
                 <h1>Canceled operations</h1>
                 <ul class="list-group">
-                    <t t-foreach="tx_cancel" t-as="tx">
-                        <a t-att-href="tx['landing_route']" class="list-group-item">
+                        <a t-att-href="tx_cancel['landing_route']" class="list-group-item">
                             <h4 class="list-group-item-heading mb5">
-                                <t t-esc="tx['reference']"/>
-                                <span class="badge float-end"><t t-esc="tx['amount']"/> <t t-esc="tx['currency_code']"/></span>
+                                <t t-esc="tx_cancel['reference']"/>
+                                <span class="badge float-end"><t t-esc="tx_cancel['amount']"/> <t t-esc="tx_cancel['currency_code']"/></span>
                             </h4>
                             <small class="list-group-item-text">
                                 This payment has been canceled.<br/>
                                 No payment has been processed.
                             </small>
                         </a>
-                    </t>
                 </ul>
             </div>
         </div>

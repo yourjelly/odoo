@@ -43,7 +43,7 @@
                 }
             }).then(function(data) {
                 if(data.success === true) {
-                    self.processPolledData(data.display_values_list);
+                    self.processPolledData(data.display_values);
                 }
                 else {
                     switch(data.error) {
@@ -64,60 +64,33 @@
                 self.startPolling();
             });
         },
-        processPolledData: function (display_values_list) {
-            var render_values = {
-                'tx_draft': [],
-                'tx_pending': [],
-                'tx_authorized': [],
-                'tx_done': [],
-                'tx_cancel': [],
-                'tx_error': [],
-            };
+        processPolledData: function (display_values) {
+            var render_values = {};
 
             // group the transaction according to their state
-            display_values_list.forEach(function (display_values) {
-                var key = 'tx_' + display_values.state;
-                if(key in render_values) {
-                    if (display_values["display_message"]) {
-                        display_values.display_message = Markup(display_values.display_message)
-                    }
-                    render_values[key].push(display_values);
-                }
-            });
+            var key = 'tx_' + display_values.state;
 
-            function countTxInState(states) {
-                var nbTx = 0;
-                for (var prop in render_values) {
-                    if (states.indexOf(prop) > -1 && render_values.hasOwnProperty(prop)) {
-                        nbTx += render_values[prop].length;
-                    }
-                }
-                return nbTx;
+            if (display_values["display_message"]) {
+                display_values.display_message = Markup(display_values.display_message)
             }
-                       
+            render_values[key] = display_values;
+
             /*
-            * When the server sends the list of monitored transactions, it tries to post-process 
-            * all the successful ones. If it succeeds or if the post-process has already been made, 
-            * the transaction is removed from the list of monitored transactions and won't be 
-            * included in the next response. We assume that successful and post-process 
-            * transactions should always prevail on others, regardless of their number or state.
+            * When the server sends the monitored transaction, it tries to post-process it if
+            * it was successful one. If it succeeds or if the post-process has already been made, 
+            * polling stops.
             */
-            if (render_values['tx_done'].length === 1 &&
-                render_values['tx_done'][0].is_post_processed) {
-                    window.location = render_values['tx_done'][0].landing_route;
+            if (display_values.state === "done" &&
+                display_values.is_post_processed) {
+                    window.location = display_values.landing_route;
                     return;
             }
-            // If there are multiple transactions monitored, display them all to the customer. If
-            // there is only one transaction monitored, redirect directly the customer to the
-            // landing route.
-            if(countTxInState(['tx_done', 'tx_error', 'tx_pending', 'tx_authorized']) === 1) {
-                // We don't want to redirect customers to the landing page when they have a pending
-                // transaction. The successful transactions are dealt with before.
-                var tx = render_values['tx_authorized'][0] || render_values['tx_error'][0];
-                if (tx) {
-                    window.location = tx.landing_route;
-                    return;
-                }
+            
+            // We don't want to redirect customers to the landing page when they have a pending
+            // transaction. The successful transactions are dealt with before.
+            if (display_values.state === "authorized" || display_values.state === "error") {
+                window.location = display_values.landing_route;
+                return;
             }
 
             this.displayContent("payment.display_tx_list", render_values);

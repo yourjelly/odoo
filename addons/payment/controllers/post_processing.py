@@ -36,84 +36,72 @@ class PaymentPostProcessing(http.Controller):
 
     @http.route('/payment/status/poll', type='json', auth='public')
     def poll_status(self, **_kwargs):
-        """ Fetch the transactions to display on the status page and finalize their post-processing.
+        """ Fetch the transaction to display on the status page and finalize its post-processing.
 
-        :return: The post-processing values of the transactions
+        :return: The post-processing values of the transaction
         :rtype: dict
         """
-        # Retrieve recent user's transactions from the session
+        # Retrieve last user's transaction from the session
         limit_date = fields.Datetime.now() - timedelta(days=1)
-        monitored_txs = request.env['payment.transaction'].sudo().search([
-            ('id', 'in', self.get_monitored_transaction_ids()),
+        monitored_tx = request.env['payment.transaction'].sudo().search([
+            ('id', '=', self.get_monitored_transaction_id()),
             ('last_state_change', '>=', limit_date)
         ])
-        if not monitored_txs:  # The transaction was not correctly created
+        if not monitored_tx:  # The transaction was not correctly created
             return {
                 'success': False,
                 'error': 'no_tx_found',
             }
 
-        # Build the list of display values with the display message and post-processing values
-        display_values_list = []
-        for tx in monitored_txs:
-            display_message = None
-            if tx.state == 'pending':
-                display_message = tx.provider_id.pending_msg
-            elif tx.state == 'done':
-                display_message = tx.provider_id.done_msg
-            elif tx.state == 'cancel':
-                display_message = tx.provider_id.cancel_msg
-            display_values_list.append({
-                'display_message': display_message,
-                **tx._get_post_processing_values(),
-            })
+        # Build display values dictionary with the display message and post-processing values
+        display_message = None
+        if monitored_tx.state == 'pending':
+            display_message = monitored_tx.provider_id.pending_msg
+        elif monitored_tx.state == 'done':
+            display_message = monitored_tx.provider_id.done_msg
+        elif monitored_tx.state == 'cancel':
+            display_message = monitored_tx.provider_id.cancel_msg
+        display_values = {
+            'display_message': display_message,
+            **monitored_tx._get_post_processing_values(),
+        }
 
-        # Stop monitoring already post-processed transactions
-        post_processed_txs = monitored_txs.filtered('is_post_processed')
-        self.remove_transactions(post_processed_txs)
-
-        # Finalize post-processing of transactions before displaying them to the user
-        txs_to_post_process = (monitored_txs - post_processed_txs).filtered(
-            lambda t: t.state == 'done'
-        )
+        # Finalize post-processing transaction before displaying it to the user
         success, error = True, None
-        try:
-            txs_to_post_process._finalize_post_processing()
-        except psycopg2.OperationalError:  # A collision of accounting sequences occurred
-            request.env.cr.rollback()  # Rollback and try later
-            success = False
-            error = 'tx_process_retry'
-        except Exception as e:
-            request.env.cr.rollback()
-            success = False
-            error = str(e)
-            _logger.exception(
-                "encountered an error while post-processing transactions with ids %s:\n%s",
-                ', '.join([str(tx_id) for tx_id in txs_to_post_process.ids]), e
-            )
+        if monitored_tx.state == 'done':
+            try:
+                monitored_tx._finalize_post_processing()
+            except psycopg2.OperationalError:  # A collision of accounting sequences occurred
+                request.env.cr.rollback()  # Rollback and try later
+                success = False
+                error = 'tx_process_retry'
+            except Exception as e:
+                request.env.cr.rollback()
+                success = False
+                error = str(e)
+                _logger.exception(
+                    "encountered an error while post-processing transaction with id %s:\n%s",
+                    str(monitored_tx.id), e
+                )
 
         return {
             'success': success,
             'error': error,
-            'display_values_list': display_values_list,
+            'display_values': display_values,
         }
 
     @classmethod
-    def monitor_transactions(cls, transactions):
-        """ Add the ids of the provided transactions to the list of monitored transaction ids.
+    def monitor_transaction(cls, transaction):
+        """ Make the provided transaction id monitored.
 
-        :param recordset transactions: The transactions to monitor, as a `payment.transaction`
+        :param recordset transaction: The transaction to monitor, as a `payment.transaction`
                                        recordset
         :return: None
         """
-        if transactions:
-            monitored_tx_ids = request.session.get(cls.MONITORED_TX_IDS_KEY, [])
-            request.session[cls.MONITORED_TX_IDS_KEY] = list(
-                set(monitored_tx_ids).union(transactions.ids)
-            )
+        request.session[cls.MONITORED_TX_IDS_KEY] = transaction.id
 
     @classmethod
-    def get_monitored_transaction_ids(cls):
+    def get_monitored_transaction_id(cls):
         """ Return the ids of transactions being monitored.
 
         Only the ids and not the recordset itself is returned to allow the caller browsing the
@@ -122,18 +110,4 @@ class PaymentPostProcessing(http.Controller):
         :return: The ids of transactions being monitored
         :rtype: list
         """
-        return request.session.get(cls.MONITORED_TX_IDS_KEY, [])
-
-    @classmethod
-    def remove_transactions(cls, transactions):
-        """ Remove the ids of the provided transactions from the list of monitored transaction ids.
-
-        :param recordset transactions: The transactions to remove, as a `payment.transaction`
-                                       recordset
-        :return: None
-        """
-        if transactions:
-            monitored_tx_ids = request.session.get(cls.MONITORED_TX_IDS_KEY, [])
-            request.session[cls.MONITORED_TX_IDS_KEY] = [
-                tx_id for tx_id in monitored_tx_ids if tx_id not in transactions.ids
-            ]
+        return request.session.get(cls.MONITORED_TX_IDS_KEY)
