@@ -285,7 +285,7 @@ var Domain = collections.Tree.extend({
     normalizeArray: function (domain) {
         if (domain.length === 0) { return domain; }
         var expected = 1;
-        domain.forEach(item => {
+        domain.forEach((item) => {
             if (item === "&" || item === "|") {
                 expected++;
             } else if (item !== "!") {

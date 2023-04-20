@@ -480,7 +480,7 @@ var MockServer = Class.extend({
         if (active_test && 'active' in this.data[model].fields) {
             // add ['active', '=', true] to the domain if 'active' is not yet present in domain
             var activeInDomain = false;
-            domain.forEach((subdomain) => {
+            Object.values(domain).forEach((subdomain) => {
                 activeInDomain = activeInDomain || subdomain[0] === 'active';
             });
             if (!activeInDomain) {
