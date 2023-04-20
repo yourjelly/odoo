@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+    <!-- Image Zoom In -->
+    <g id="image_zoom_in">
+        <g id="hoverEffects">
+            <animateTransform
+                xlink:href="#shapeImage"
+                attributeName="transform"
+                attributeType="XML"
+                type="scale"
+                from="1"
+                to="1.1"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+            <animateTransform
+                xlink:href="#clip-path"
+                attributeName="transform"
+                attributeType="XML"
+                type="scale"
+                from="1"
+                to="0.91"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+            <animateTransform
+                xlink:href="#useClipPath"
+                attributeName="transform"
+                attributeType="XML"
+                type="translate"
+                from="0,0"
+                to="0.05,0.05"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+        </g>
+    </g>
+
+    <!-- Image Zoom Out -->
+    <g id="image_zoom_out">
+        <g id="hoverEffects">
+            <animateTransform
+                xlink:href="#shapeImage"
+                attributeName="transform"
+                attributeType="XML"
+                type="scale"
+                from="1.1"
+                to="1"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+            <animateTransform
+                xlink:href="#clip-path"
+                attributeName="transform"
+                attributeType="XML"
+                type="scale"
+                from="0.91"
+                to="1"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+            <animateTransform
+                xlink:href="#useClipPath"
+                attributeName="transform"
+                attributeType="XML"
+                type="translate"
+                from="0.05,0.05"
+                to="0,0"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+        </g>
+        <style>
+            <!-- only if not animated -->
+            svg:not([class^="o_shape_anim_"]) #shapeImage {
+                scale: 1.1;
+            }
+            svg:not([class^="o_shape_anim_"]) #clip-path {
+                scale: 0.91;
+            }
+            svg:not([class^="o_shape_anim_"]) #useClipPath {
+                transform: translate(0.05px, 0.05px);
+            }
+        </style>
+    </g>
+
+    <!-- Outline -->
+    <g id="outline">
+        <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+            <defs>
+                <clipPath id="shapeBorderClipPath">
+                    <!-- Needed because the border is "centered" on the path -->
+                    <use xlink:href="#filterPath"/>
+                </clipPath>
+            </defs>
+            <use id="shapeBorder" xlink:href="#filterPath" fill="none" stroke="hover_effect_color"
+                stroke-width="0" stroke-opacity="hover_effect_opacity" clip-path="url(#shapeBorderClipPath)"/>
+        </svg>
+        <g id="hoverEffects">
+            <animate
+                xlink:href="#shapeBorder"
+                attributeName="stroke-width"
+                from="0"
+                to="hover_effect_stroke_width"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+        </g>
+        <style>
+            #filterPath {
+                vector-effect: non-scaling-stroke;
+            }
+        </style>
+    </g>
+
+    <!-- Overlay -->
+    <g id="overlay">
+        <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+            <use id="shapeOverlay" xlink:href="#filterPath" fill="hover_effect_color" fill-opacity="0"/>
+        </svg>
+        <g id="hoverEffects">
+            <animate
+                xlink:href="#shapeOverlay"
+                attributeName="fill-opacity"
+                from="0"
+                to="hover_effect_opacity"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+        </g>
+    </g>
+
+</svg>

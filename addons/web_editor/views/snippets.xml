@@ -722,6 +722,18 @@
                 <we-button class="fa fa-fw fa-rotate-left" data-set-img-shape-rotate-left="true" data-no-preview="true" data-dependencies="shape_img_opt" title="Rotate left"/>
                 <we-button class="fa fa-fw fa-rotate-right" data-set-img-shape-rotate-right="true" data-no-preview="true" data-dependencies="shape_img_opt" title="Rotate right"/>
             </we-row>
+            <we-select string="Hover Effect" class="o_we_sublevel_1" data-attribute-name="hoverEffect"
+                data-dependencies="shape_img_opt" data-set-img-shape-hover-effect="true" data-no-preview="true">
+                <we-button data-select-data-attribute="">None</we-button>
+                <we-button data-select-data-attribute="image_zoom_in">Zoom In</we-button>
+                <we-button data-select-data-attribute="image_zoom_out">Zoom Out</we-button>
+                <we-button data-select-data-attribute="outline" data-name="hover_effect_outline_opt">Outline</we-button>
+                <we-button data-select-data-attribute="overlay" data-name="hover_effect_opacity_opt">Overlay</we-button>
+            </we-select>
+            <we-colorpicker string="Color" class="o_we_sublevel_2" data-set-hover-effect-color="true" data-excluded="theme, common"
+                data-dependencies="hover_effect_opacity_opt, hover_effect_outline_opt" data-no-preview="true"/>
+            <we-input string="Stroke Width" class="o_we_sublevel_2" data-set-hover-effect-stroke-width="true"
+                data-step="1" data-min="1" data-unit="px" data-dependencies="hover_effect_outline_opt" data-no-preview="true"/>
         </div>
 
         <we-row string="Transform">

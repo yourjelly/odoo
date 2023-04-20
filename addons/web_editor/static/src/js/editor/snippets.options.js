@@ -6089,6 +6089,9 @@ registry.ImageTools = ImageHandlerOption.extend({
             delete img.dataset.fileName;
             delete img.dataset.shapeFlip;
             delete img.dataset.shapeRotate;
+            delete img.dataset.hoverEffect;
+            delete img.dataset.hoverEffectColor;
+            delete img.dataset.hoverEffectStrokeWidth;
             if (saveData) {
                 img.dataset.mimetype = img.dataset.originalMimetype;
                 delete img.dataset.originalMimetype;
@@ -6142,6 +6145,51 @@ registry.ImageTools = ImageHandlerOption.extend({
      */
     async setImgShapeRotateRight(previewMode, widgetValue, params) {
         await this._setImgShapeRotate(90);
+    },
+    /**
+     * bla bla bla.
+     *
+     * @see this.selectClass for parameters
+     */
+    async setImgShapeHoverEffect(previewMode, widgetValue, params) {
+        const img = this._getImg();
+        if (["hover_effect_outline_opt", "hover_effect_opacity_opt"].includes(params.name)
+            && !img.dataset.hoverEffectColor) {
+            img.dataset.hoverEffectColor = this._getCSSColorValue("black-25");
+        }
+        if (params.name === "hover_effect_outline_opt" && !img.dataset.hoverEffectStrokeWidth) {
+            img.dataset.hoverEffectStrokeWidth = "4px";
+        }
+        await this._applyOptions();
+    },
+    /**
+     * bla bla bla.
+     *
+     * @see this.selectClass for parameters
+     */
+    async setHoverEffectColor(previewMode, widgetValue, params) {
+        const img = this._getImg();
+        const hoverEffectColor = this._getCSSColorValue(widgetValue);
+        if (hoverEffectColor) {
+            img.dataset.hoverEffectColor = hoverEffectColor;
+        } else {
+            delete img.dataset.hoverEffectColor;
+        }
+        await this._applyOptions();
+    },
+    /**
+     * bla bla bla.
+     *
+     * @see this.selectClass for parameters
+     */
+    async setHoverEffectStrokeWidth(previewMode, widgetValue, params) {
+        const img = this._getImg();
+        if (widgetValue) {
+            img.dataset.hoverEffectStrokeWidth = widgetValue;
+        } else {
+            delete img.dataset.hoverEffectStrokeWidth;
+        }
+        await this._applyOptions();
     },
 
     //--------------------------------------------------------------------------
@@ -6250,6 +6298,14 @@ registry.ImageTools = ImageHandlerOption.extend({
             // Applies the transformation values to the path used to create a
             // mask over the SVG image.
             svg.querySelector('#filterPath').setAttribute('style', `transform: ${shapeTransformValues.join(' ')}; ${transformOrigin}`);
+        }
+
+        // Add shape animations on hover.
+        if (img.dataset.hoverEffect) {
+            this._addImageShapeHoverEffect(svg, img);
+            // The "ImageShapeHoverEffet" public widget needs to restart
+            // (e.g. image replacement).
+            await this._refreshPublicWidgets();
         }
 
         const svgAspectRatio = parseInt(svg.getAttribute('width')) / parseInt(svg.getAttribute('height'));
@@ -6402,6 +6458,14 @@ registry.ImageTools = ImageHandlerOption.extend({
                 const img = this._getImg();
                 return (img.dataset.shapeFlip && img.dataset.shapeFlip.includes('y')) || '';
             }
+            case 'setHoverEffectColor': {
+                const img = this._getImg();
+                return img.dataset.hoverEffectColor || '';
+            }
+            case 'setHoverEffectStrokeWidth': {
+                const img = this._getImg();
+                return img.dataset.hoverEffectStrokeWidth || '';
+            }
         }
         return this._super(...arguments);
     },
@@ -6517,6 +6581,9 @@ registry.ImageTools = ImageHandlerOption.extend({
                 delete img.dataset.originalMimetype;
                 delete img.dataset.shapeFlip;
                 delete img.dataset.shapeRotate;
+                delete img.dataset.hoverEffect;
+                delete img.dataset.hoverEffectColor;
+                delete img.dataset.hoverEffectStrokeWidth;
                 return;
             }
             // Image data-mimetype should be changed to SVG since loadImageInfo()
@@ -6580,6 +6647,67 @@ registry.ImageTools = ImageHandlerOption.extend({
         }
         await this._applyShapeAndColors(true, (img.dataset.shapeColors && img.dataset.shapeColors.split(';')));
         img.classList.add('o_modified_image_to_save');
+    },
+    /**
+     * Add hover effect to the SVG.
+     *
+     * @private
+     * @param {HTMLElement} svgEl
+     * @param {HTMLImageElement} [img] img element
+     */
+    async _addImageShapeHoverEffect(svgEl, img) {
+        const hoverEffectName = img.dataset.hoverEffect;
+        if (!this.hoverEffectsSvg) {
+            this.hoverEffectsSvg = await this._gethoverEffects();
+        }
+        const hoverEffectEls = this.hoverEffectsSvg.querySelectorAll(`#${hoverEffectName} > *`);
+        hoverEffectEls.forEach(hoverEffectEl => {
+            svgEl.appendChild(hoverEffectEl.cloneNode(true));
+        });
+
+        switch (hoverEffectName) {
+            case 'overlay':
+            case 'outline': {
+                const rgba = ColorpickerWidget.convertCSSColorToRgba(img.dataset.hoverEffectColor);
+                const rbg = `rgb(${rgba.red},${rgba.green},${rgba.blue})`;
+                const opacity = rgba.opacity / 100;
+                if (hoverEffectName === "overlay") {
+                    svgEl.querySelector('[fill="hover_effect_color"]').setAttribute('fill', rbg);
+                    svgEl.querySelector('[to="hover_effect_opacity"]').setAttribute('to', opacity);
+                } else { // hoverEffectName === "outline"
+                    svgEl.querySelector('[stroke="hover_effect_color"]').setAttribute('stroke', rbg);
+                    svgEl.querySelector('[stroke-opacity="hover_effect_opacity"]').setAttribute('stroke-opacity', opacity);
+                    // The stroke width needs to be multiplied by two because half
+                    // of the stroke is invisible since it is centered on the path.
+                    svgEl.querySelector('[to="hover_effect_stroke_width"]').setAttribute('to', parseInt(img.dataset.hoverEffectStrokeWidth) * 2);
+                }
+                break;
+            }
+            case 'image_zoom_in':
+            case 'image_zoom_out': {
+                svgEl.querySelector('#clip-path > use').setAttribute('id', 'useClipPath');
+                const image = svgEl.querySelector('image');
+                image.setAttribute('id', 'shapeImage');
+                image.setAttribute('style', 'transform-origin: center;');
+                break;
+            }
+        }
+    },
+    /**
+     * Get the hover effects list.
+     *
+     * @private
+     * @returns {HTMLElement}
+     */
+    _gethoverEffects() {
+        const hoverEffectsURL = '/web_editor/static/image_shapes/hover_effects.svg';
+        return fetch(hoverEffectsURL)
+            .then(response => response.text())
+            .then(text => {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, "text/xml");
+                return xmlDoc.getElementsByTagName("svg")[0];
+        });
     },
 
     //--------------------------------------------------------------------------
