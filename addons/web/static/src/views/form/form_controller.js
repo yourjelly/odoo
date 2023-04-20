@@ -269,7 +269,7 @@ export class FormController extends Component {
     async beforeLeave() {
         if (this.model.root.isDirty) {
             return this.model.root.save({
-                noReload: true,
+                noReload: false,
                 stayInEdition: true,
                 useSaveErrorDialog: true,
             });
