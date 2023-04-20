@@ -386,10 +386,11 @@ range(40, 127).forEach((keyCode) => {
  * @param {Number} addTests
  */
 var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
-    var tests = _.compact(keyboardTests.map((k) => k.test));
-    var testNumber = _.compact(tests.map((test) => test.start)).length +
-        _.compact(tests.map((test) => test.content)).length +
-        _.compact(tests.map((test) => test.check)).length +
+    var tests = keyboardTests.map((k) => k.test).filter((x) => !!x);
+    var testNumber =
+        tests.map((test) => test.start).filter((x) => !!x).length +
+        tests.map((test) => test.content).filter((x) => !!x).length +
+        tests.map((test) => test.check).filter((x) => !!x).length +
         (addTests | 0);
     assert.expect(testNumber);
 

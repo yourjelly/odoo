@@ -2392,7 +2392,7 @@ var BasicModel = AbstractModel.extend({
                 evalContext = evalContext || this._getEvalContext(element);
                 evaluated[k] = new Domain(mod, evalContext).compute(evalContext);
             } catch (e) {
-                throw new Error(sprintf('for modifier "%s": %s', k, e.message));
+                throw new Error(`for modifier "${k}": ${e.message}`);
             }
         }
         return evaluated;
