@@ -859,7 +859,7 @@ var SnippetEditor = Widget.extend({
         this.$el.find('[data-bs-toggle="dropdown"]').dropdown();
 
         return Promise.all(defs).then(async () => {
-            const options = sortBy(this.styles, "__order");
+            const options = sortBy(Object.values(this.styles), "__order");
             const firstOptions = [];
             options.forEach(option => {
                 if (option.isTopOption) {
