@@ -279,10 +279,11 @@ export class PropertiesField extends Component {
     async onPropertyEdit(event, propertyName) {
         event.stopPropagation();
         event.preventDefault();
-        if (!await this.checkDefinitionWriteAccess()) {
-            this.notification.add(_lt("You need to be able to edit parent first to configure property fields"), {
-                type: "warning",
-            });
+        if (!(await this.checkDefinitionWriteAccess())) {
+            this.notification.add(
+                _lt("You need to be able to edit parent first to configure property fields"),
+                { type: "warning" }
+            );
             return;
         }
         if (event.target.classList.contains("disabled")) {
@@ -364,10 +365,11 @@ export class PropertiesField extends Component {
     }
 
     async onPropertyCreate() {
-        if (!await this.checkDefinitionWriteAccess()) {
-            this.notification.add(_lt("You need to be able to edit parent first to configure property fields"), {
-                type: "warning",
-            });
+        if (!(await this.checkDefinitionWriteAccess())) {
+            this.notification.add(
+                _lt("You need to be able to edit parent first to configure property fields"),
+                { type: "warning" }
+            );
             return;
         }
 
@@ -434,15 +436,10 @@ export class PropertiesField extends Component {
         const definitionRecordId = this.props.record.data[this.definitionRecordField][0];
         const definitionRecordModel = this.props.record.fields[this.definitionRecordField].relation;
         try {
-            await this.orm.call(
-                definitionRecordModel,
-                "check_access_rule",
-                [definitionRecordId],
-                {
-                    operation: "write",
-                }
-            );
-        } catch (_e) { // eslint-disable-line no-unused-vars
+            await this.orm.call(definitionRecordModel, "check_access_rule", [definitionRecordId], {
+                operation: "write",
+            });
+        } catch {
             return false;
         }
         return true;
