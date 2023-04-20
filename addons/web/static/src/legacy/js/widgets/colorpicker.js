@@ -57,7 +57,7 @@ var ColorpickerWidget = Widget.extend({
             this.opacitySliderFlag = false;
         }, 10));
 
-        this.options = _.clone(options);
+        this.options = Object.assign({},options);
     },
     /**
      * @override

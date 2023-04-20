@@ -49,7 +49,7 @@ var ParentedMixin = {
      * Return a list of the children of the current object.
      */
     getChildren : function () {
-        return _.clone(this.__parentedChildren);
+        return Object.assign({},this.__parentedChildren);
     },
     /**
      * Returns true if destroy() was called on the current object.

@@ -64,7 +64,7 @@ export const PaymentSix = PaymentInterface.extend({
             timapi.constants.Recipient.cardholder,
         ];
         var options = [];
-        _.forEach(recipients, (recipient) => {
+        recipients.forEach((recipient) => {
             var option = new timapi.PrintOption(
                 recipient,
                 timapi.constants.PrintFormat.normal,
@@ -152,7 +152,7 @@ export const PaymentSix = PaymentInterface.extend({
     },
 
     _printReceipts: function (receipts) {
-        _.forEach(receipts, (receipt) => {
+        receipts.forEach((receipt) => {
             if (
                 receipt.recipient === timapi.constants.Recipient.merchant &&
                 this.pos.hardwareProxy.printer

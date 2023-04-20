@@ -4,6 +4,7 @@ import core from "web.core";
 import portalChatter from "portal.chatter";
 import utils from "web.utils";
 import time from "web.time";
+import { sortBy } from "@web/core/utils/arrays";
 
 var _t = core._t;
 var PortalChatter = portalChatter.PortalChatter;
@@ -136,7 +137,7 @@ PortalChatter.include({
             'avg': Math.round(result['rating_stats']['avg'] * 100) / 100,
             'percent': [],
         };
-        _.sortBy(Object.keys(result["rating_stats"]["percent"]))
+        sortBy(Object.keys(result["rating_stats"]["percent"]))
             .reverse()
             .forEach((rating) => {
                 ratingData["percent"].push({

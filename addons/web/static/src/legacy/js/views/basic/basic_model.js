@@ -82,7 +82,7 @@
  *   element, so it can be edited later.
  */
 
-import { intersection, unique } from "@web/core/utils/arrays";
+import { intersection, sortBy, unique } from "@web/core/utils/arrays";
 import { sprintf } from "@web/core/utils/strings";
 import AbstractModel from "web.AbstractModel";
 import concurrency from "web.concurrency";
@@ -1063,17 +1063,17 @@ var BasicModel = AbstractModel.extend({
                         if (dataType === 'record') {
                             data.data.forEach((dataPoint) => {
                                 var recordData = self.localData[dataPoint].data;
-                                var inRecords = _.findWhere(records, {id: recordData.id});
+                                var inRecords = records.find(({ id }) => id === recordData.id);
                                 if (inRecords) {
                                     recordData[field] = inRecords[field];
                                 }
                             });
-                            data.data = _.sortBy(data.data, function (d) {
+                            data.data = sortBy(data.data, function (d) {
                                 return self.localData[d].data[field];
                             });
                         }
                         if (dataType === 'list') {
-                            data.data = _.sortBy(data.data, function (d) {
+                            data.data = sortBy(data.data, function (d) {
                                 return resIDs.indexOf(self.localData[d].res_id);
                             });
                         }

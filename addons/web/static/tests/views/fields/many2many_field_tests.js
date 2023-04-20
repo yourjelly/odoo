@@ -16,6 +16,7 @@ import { editSearch, validateSearch } from "@web/../tests/search/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
+import { sortBy } from "@web/core/utils/arrays";
 import { session } from "@web/session";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { companyService } from "@web/webclient/company_service";
@@ -284,9 +285,9 @@ QUnit.module("Fields", (hooks) => {
                     var createdType = _.findWhere(serverData.models.partner_type.records, {
                         display_name: "A new type",
                     });
-                    var ids = _.sortBy([12, 15, 18].concat(createdType.id), _.identity.bind(_));
+                    var ids = sortBy([12, 15, 18].concat(createdType.id), _.identity.bind(_));
                     assert.ok(
-                        JSON.stringify(_.sortBy(commands[0][2], _.identity.bind(_))) ===
+                        JSON.stringify(sortBy(commands[0][2], _.identity.bind(_))) ===
                             JSON.stringify(ids),
                         "new value should be " + ids
                     );

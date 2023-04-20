@@ -1714,7 +1714,7 @@ export class Product extends PosModel {
 
         const rules = !pricelist
             ? []
-            : _.filter(this.applicablePricelistItems[pricelist.id], (item) =>
+            : this.applicablePricelistItems[pricelist.id].filter((item) =>
                   this.isPricelistItemUsable(item, date)
               );
 

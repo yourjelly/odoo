@@ -2210,7 +2210,7 @@ var MockServer = Class.extend({
                 throw Error(`Mock: Can't write value "${JSON.stringify(value)}" on field "${field_changed}" on record "${model},${id}" (field is undefined)`);
             }
             if (["one2many", "many2many"].includes(field.type)) {
-                var ids = _.clone(record[field_changed]) || [];
+                var ids = Object.assign({},record[field_changed]) || [];
 
                 if (
                     Array.isArray(value) &&

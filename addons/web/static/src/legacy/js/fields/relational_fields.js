@@ -21,6 +21,7 @@ import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import Domain from "web.Domain";
 import { escape, sprintf } from "@web/core/utils/strings";
+import { sortBy } from "@web/core/utils/arrays";
 
 var _t = core._t;
 var _lt = core._lt;
@@ -238,7 +239,7 @@ var FieldMany2One = AbstractField.extend({
             order: params.order || 999
         });
 
-        this._autocompleteSources = _.sortBy(this._autocompleteSources, 'order');
+        this._autocompleteSources = sortBy(this._autocompleteSources, 'order');
     },
     /**
      * @private

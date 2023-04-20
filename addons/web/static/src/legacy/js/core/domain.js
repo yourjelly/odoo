@@ -36,7 +36,7 @@ var Domain = collections.Tree.extend({
     init: function (domain, evalContext) {
         this._super.apply(this, arguments);
         if (Array.isArray(domain) || typeof domain === "string") {
-            this._parse(this.normalizeArray(_.clone(this.stringToArray(domain, evalContext))));
+            this._parse(this.normalizeArray(Object.assign({},this.stringToArray(domain, evalContext))));
         } else {
             this._data = !!domain;
         }
@@ -268,7 +268,7 @@ var Domain = collections.Tree.extend({
      * @returns {Array}
      */
     stringToArray: function (domain, evalContext) {
-        if (typeof domain !== "string") return _.clone(domain);
+        if (typeof domain !== "string") return Object.assign({},domain);
         return pyUtils.eval("domain", domain ? domain.replace(/%%/g, '%') : "[]", evalContext);
     },
     /**
@@ -379,7 +379,7 @@ var Domain = collections.Tree.extend({
                 case '(number)': return node.value;
                 case '(constant)': return node.value === 'None' ? null : node.value === 'True' ? true : false;
                 case '(':
-                case '[': return _.map(node.first, function (node) {return astToStackValue(node);});
+                case '[': return node.first.map((node) => astToStackValue(node));
             }
         }
         function astToStack (node) {

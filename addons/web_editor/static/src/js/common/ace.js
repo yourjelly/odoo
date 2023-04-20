@@ -9,6 +9,7 @@ import Widget from "web.Widget";
 import localStorage from "web.local_storage";
 import { sprintf } from "@web/core/utils/strings";
 import { debounce } from "@web/core/utils/timing";
+import { sortBy } from "@web/core/utils/arrays";
 
 var _t = core._t;
 
@@ -663,7 +664,7 @@ var ViewEditor = Widget.extend({
         Object.entries(toSave || {}).forEach(
             (([type, _toSave]) => {
                 // Child views first as COW on a parent would delete them
-                _toSave = _.sortBy(_toSave, 'id').reverse();
+                _toSave = sortBy(_toSave, 'id').reverse();
                 _toSave.forEach((session) => {
                     defs.push(mutex.exec(function () {
                         return (type === 'xml' ? self._saveView(session) : self._saveSCSSorJS(session));

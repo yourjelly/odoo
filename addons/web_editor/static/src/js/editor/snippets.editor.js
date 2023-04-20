@@ -15,6 +15,7 @@ import { sprintf, escape } from "@web/core/utils/strings";
 const QWeb = core.qweb;
 import {closestElement} from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 import { debounce } from "@web/core/utils/timing";
+import { sortBy } from "@web/core/utils/arrays";
 
 var _t = core._t;
 
@@ -678,7 +679,7 @@ var SnippetEditor = Widget.extend({
     toggleTargetVisibility: async function (show) {
         show = this._toggleVisibilityStatus(show);
         var styles = Object.values(this.styles);
-        const proms = _.sortBy(styles, '__order').map(style => {
+        const proms = sortBy(styles, '__order').map(style => {
             return show ? style.onTargetShow() : style.onTargetHide();
         });
         await Promise.all(proms);
@@ -858,7 +859,7 @@ var SnippetEditor = Widget.extend({
         this.$el.find('[data-bs-toggle="dropdown"]').dropdown();
 
         return Promise.all(defs).then(async () => {
-            const options = _.sortBy(this.styles, '__order');
+            const options = sortBy(this.styles, "__order");
             const firstOptions = [];
             options.forEach(option => {
                 if (option.isTopOption) {

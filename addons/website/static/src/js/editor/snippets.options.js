@@ -862,7 +862,7 @@ options.Class.include({
      * @param {OdooEvent} ev
      */
     _onGoogleFontsCustoRequest: function (ev) {
-        const values = ev.data.values ? _.clone(ev.data.values) : {};
+        const values = ev.data.values ? Object.assign({},ev.data.values) : {};
         const googleFonts = ev.data.googleFonts;
         const googleLocalFonts = ev.data.googleLocalFonts;
         if (googleFonts.length) {

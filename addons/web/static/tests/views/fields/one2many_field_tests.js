@@ -11390,7 +11390,7 @@ QUnit.module("Fields", (hooks) => {
             partner_ids: function (obj) {
                 // simulate actual server onchange after save of modal with new record
                 if (numUserOnchange === 0) {
-                    obj.partner_ids = _.clone(obj.partner_ids);
+                    obj.partner_ids = Object.assign({}, obj.partner_ids);
                     obj.partner_ids.unshift([5]);
                     obj.partner_ids[1][2].turtles.unshift([5]);
                     obj.partner_ids[2] = [
@@ -11403,7 +11403,7 @@ QUnit.module("Fields", (hooks) => {
                         },
                     ];
                 } else if (numUserOnchange === 1) {
-                    obj.partner_ids = _.clone(obj.partner_ids);
+                    obj.partner_ids = Object.assign({}, obj.partner_ids);
                     obj.partner_ids.unshift([5]);
                     obj.partner_ids[1][2].turtles.unshift([5]);
                     obj.partner_ids[2][2].turtles.unshift([5]);
