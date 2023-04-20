@@ -53,11 +53,12 @@ const MassMailingWysiwyg = Wysiwyg.extend({
                 this._updateEditorUI();
                 this.setCSSVariables(this.toolbar.el);
                 this.odooEditor.setupToolbar(this.toolbar.el);
-                if (this.odooEditor.isMobile) {
+                // if (this.odooEditor.isMobile) {
                     document.body.querySelector('.o_mail_body').prepend(this.toolbar.el);
-                } else {
-                    document.body.append(this.toolbar.el);
-                }
+                // } else {
+                    // document.querySelector('iframe').before(this.toolbar.el);
+                    // document.body.append(this.toolbar.el);
+                // }
             } else {
                 this.toolbar = this.floatingToolbar;
             }

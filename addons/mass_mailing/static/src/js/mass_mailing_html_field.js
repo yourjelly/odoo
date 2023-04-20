@@ -40,6 +40,9 @@ export class MassMailingHtmlField extends HtmlField {
                 this._hideIrrelevantTemplates();
             }
         });
+
+        console.log('record fields:', this.props.record.fields);
+
     }
 
     get wysiwygOptions() {

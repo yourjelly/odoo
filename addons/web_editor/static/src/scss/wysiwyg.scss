@@ -400,7 +400,7 @@ body:not(.editor_has_snippets) {
     .oe-toolbar {
         // Bootstrap sets .modal z-index at 1055. Ensure toolbar is visible in
         // modals. Only apply this to the toolbar if it's not in a snippets menu.
-        z-index: 1056;
+        // z-index: 1056;
     }
 }
 @media only screen and (max-width: 767px) {

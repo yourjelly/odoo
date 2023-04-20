@@ -2922,7 +2922,9 @@ export class OdooEditor extends EventTarget {
         const OFFSET = 10;
         let isBottom = false;
         this.toolbar.classList.toggle('toolbar-bottom', false);
-        this.toolbar.style.maxWidth = window.innerWidth - OFFSET * 2 + 'px';
+        const editorRect = this.editable.getBoundingClientRect();
+        // this.toolbar.style.maxWidth = window.innerWidth - OFFSET * 2 + 'px';
+        this.toolbar.style.maxWidth = editorRect.width - OFFSET * 2 + 'px';
         const sel = this.document.getSelection();
         const range = sel.getRangeAt(0);
         const isSelForward =
@@ -2944,38 +2946,47 @@ export class OdooEditor extends EventTarget {
         }
         const toolbarWidth = this.toolbar.offsetWidth;
         const toolbarHeight = this.toolbar.offsetHeight;
-        const editorRect = this.editable.getBoundingClientRect();
         const parentContextRect = this.options.getContextFromParentRect();
-        const editorTopPos = Math.max(0, editorRect.top);
-        const scrollX = this.document.defaultView.scrollX;
-        const scrollY = this.document.defaultView.scrollY;
+        // TODO: Correct selection position if in an iframe
+        // const editorTopPos = Math.max(0, editorRect.top);
+
+        // TODO: check if position toolbar on scroll is really needed
+        // const scrollX = this.document.defaultView.scrollX;
+        // const scrollY = this.document.defaultView.scrollY;
+        const scrollX = 0;
+        const scrollY = 0;
+
+        const toolbarParentRect = this.toolbar.parentNode.getBoundingClientRect();
 
         // Get left position.
-        let left = correctedSelectionRect.left + OFFSET;
+        let left = correctedSelectionRect.left - toolbarParentRect.left + OFFSET;
         // Ensure the toolbar doesn't overflow the editor on the left.
         left = Math.max(OFFSET, left);
         // Ensure the toolbar doesn't overflow the editor on the right.
-        left = Math.min(window.innerWidth - OFFSET - toolbarWidth, left);
+        left = Math.min(toolbarParentRect.width - OFFSET - toolbarWidth, left);
         // Offset left to compensate for parent context position (eg. Iframe).
-        left += parentContextRect.left;
+        // left += parentContextRect.left;
         this.toolbar.style.left = scrollX + left + 'px';
 
         // Get top position.
-        let top = correctedSelectionRect.top - toolbarHeight - OFFSET;
+        let top = correctedSelectionRect.top - toolbarParentRect.top - toolbarHeight - OFFSET;
+        // Offset top to compensate for parent context position (eg. Iframe).
+        // top += parentContextRect.top;
         // Ensure the toolbar doesn't overflow the editor on the top.
-        if (top < editorTopPos) {
+        // if (top < editorTopPos) {
+        if (top < 0) {
             // Position the toolbar below the selection.
-            top = correctedSelectionRect.bottom + OFFSET;
+            top = correctedSelectionRect.bottom - toolbarParentRect.top + OFFSET;
+            // top += parentContextRect.top;
             isBottom = true;
         }
-        // Ensure the toolbar doesn't overflow the editor on the bottom.
-        top = Math.min(window.innerHeight - OFFSET - toolbarHeight, top);
-        // Offset top to compensate for parent context position (eg. Iframe).
-        top += parentContextRect.top;
         this.toolbar.style.top = scrollY + top + 'px';
+        // Ensure the toolbar doesn't overflow the editor on the bottom.
+        // top = Math.min(window.innerHeight - OFFSET - toolbarHeight, top);
+
 
         // Position the arrow.
-        let arrowLeftPos = (isSelForward && !isSelectionPotentiallyBugged ? correctedSelectionRect.right : correctedSelectionRect.left) - left - OFFSET;
+        let arrowLeftPos = (isSelForward && !isSelectionPotentiallyBugged ? correctedSelectionRect.right : correctedSelectionRect.left) - left - toolbarParentRect.left - 10;
         // Ensure the arrow doesn't overflow the toolbar on the left.
         arrowLeftPos = Math.max(OFFSET, arrowLeftPos);
         // Ensure the arrow doesn't overflow the toolbar on the right.
