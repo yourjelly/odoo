@@ -240,7 +240,7 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
      * @private
      */
     _lastWeekClicksByCountry: function () {
-        var interval = moment().subtract(7, 'days').format('YYYY-MM-DD');
+        var interval = moment().subtract(7, 'days').locale('en').format('YYYY-MM-DD');
         return this._rpc({
             model: 'link.tracker.click',
             method: 'read_group',
