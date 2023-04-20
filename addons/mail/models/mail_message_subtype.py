@@ -45,15 +45,15 @@ class MailMessageSubtype(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        self.clear_caches()
+        self.pool._clear_caches()
         return super(MailMessageSubtype, self).create(vals_list)
 
     def write(self, vals):
-        self.clear_caches()
+        self.pool._clear_caches()
         return super(MailMessageSubtype, self).write(vals)
 
     def unlink(self):
-        self.clear_caches()
+        self.pool._clear_caches()
         return super(MailMessageSubtype, self).unlink()
 
     @tools.ormcache('model_name')
