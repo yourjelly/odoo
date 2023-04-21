@@ -327,7 +327,7 @@ var RecentLinks = publicWidget.Widget.extend({
      * @private
      */
     removeLinks: function () {
-        this.getChildren().forEach((child) => {
+        Object.values(this.getChildren()).forEach((child) => {
             child.destroy();
         });
     },
