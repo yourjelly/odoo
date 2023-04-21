@@ -105,6 +105,7 @@ Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} AppDirect
 Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} AppParameters """"""{app}\server\odoo-bin"""""" -c """"""{app}\server\odoo.conf"""""""; StatusMsg: "Setting up Odoo Windows service"; Flags: runhidden
 Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "set {#ServiceName} ObjectName ""localservice"""; Flags: runhidden
 Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "start {#ServiceName}"; StatusMsg: "Starting Odoo Windows Service"; Flags: runhidden
+Filename: "{app}\python\python.exe"; Parameters: "{app}\server\odoo-bin genproxytoken"; Check: CheckInstallType('iot');
 
 [UninstallRun]
 Filename: "{app}\nssm\win64\nssm.exe"; Parameters: "stop {#ServiceName}"; StatusMsg: "Stopping Odoo Windows service"
@@ -117,7 +118,9 @@ Type: files; Name: "{app}\*.pyc"
 var
   DownloadPage: TDownloadWizardPage;
   PostgresInfosPage: TInputQueryWizardPage;
+  ProxyAccessTokenPage: TOutputMsgWizardPage;
   PgHost, PgPort, PgUser, PgPass: String;
+  ProxyAccessToken: String;
 
 function CheckInstallType(InstallType: String): Boolean;
 begin
@@ -178,6 +181,18 @@ begin
   PostgresInfosPage.Add('&Port', False);
   PostgresInfosPage.Add('&Username', False);
   PostgresInfosPage.Add('&Password', False);
+  ProxyAccessTokenPage := CreateOutputMsgPage(PostgresInfosPage.ID,
+    'Information',
+    'Here is your access token for the Odoo IOT, please write it down in a safe place, you will need it to configure the IOT',
+    '...');
+end;
+
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  Result := False;
+  log('Checking to skip page: ' + IntToStr(PageID));
+  log('proxy page ID: ' + IntToStr(ProxyAccessTokenPage.ID));
+  if PageID = ProxyAccessTokenPage.ID then Result := not (WizardSetupType(False) = 'iot');
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
@@ -193,6 +208,8 @@ begin
         PgPort := GetIniString('options', 'db_port', '{#DefaultPostgresqlPort}', ConfigPath);
         PgUser := GetIniString('options', 'db_user', '{#DefaultPostgresqlUser}', ConfigPath);
         PgPass := GetIniString('options', 'db_password', '{#DefaultPostgresqlPassword}', ConfigPath);
+        ProxyAccessToken := GetIniString('options', 'proxy_access_token', 'shit', ConfigPath);
+        ProxyAccessTokenPage.MsgLabel.Caption := ProxyAccessToken;
       end;
   end;
   if CurPageID = wpSelectComponents then begin
@@ -206,6 +223,7 @@ begin
     PgPort := PostgresInfosPage.Values[1];
     PgUser := PostgresInfosPage.Values[2];
     PgPass := PostgresInfosPage.Values[3];
+    log(WizardSetupType(False));
   end;
   if CurPageID = wpReady then begin
     DownloadPage.Clear;
@@ -226,9 +244,6 @@ begin
       end;
     finally
       DownloadPage.Hide;
-    end;
-    if CheckInstallType('iot') then begin
-      MsgBox('Here is your code: prout ça marche po', mbInformation, MB_OK);
     end;
   end;
 end;
