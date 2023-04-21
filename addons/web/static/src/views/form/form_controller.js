@@ -268,8 +268,9 @@ export class FormController extends Component {
 
     async beforeLeave() {
         if (this.model.root.isDirty) {
+            // debugger
             return this.model.root.save({
-                noReload: false,
+                noReload: true,
                 stayInEdition: true,
                 useSaveErrorDialog: true,
             });
@@ -297,9 +298,7 @@ export class FormController extends Component {
                     description: this.env._t("Archive"),
                     callback: () => {
                         const dialogProps = {
-                            body: this.env._t(
-                                "Are you sure that you want to archive this record?"
-                            ),
+                            body: this.env._t("Are you sure that you want to archive this record?"),
                             confirmLabel: this.env._t("Archive"),
                             confirm: () => this.model.root.archive(),
                             cancel: () => {},

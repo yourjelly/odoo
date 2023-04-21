@@ -31,6 +31,7 @@ const errorNotificationRegistry = registry.category("error_notifications");
  * @returns {boolean}
  */
 export function rpcErrorHandler(env, error, originalError) {
+    // debugger
     if (!(error instanceof UncaughtPromiseError)) {
         return false;
     }

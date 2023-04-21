@@ -24,25 +24,26 @@ import { toggleActionMenu, toggleGroupByMenu, toggleMenuItem } from "@web/../tes
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
+import { WarningDialog } from "@web/core/errors/error_dialogs";
+import { errorService } from "@web/core/errors/error_service";
+import { localization } from "@web/core/l10n/localization";
+import { RPCError } from "@web/core/network/rpc_service";
 import { registry } from "@web/core/registry";
+import { scrollerService } from "@web/core/scroller_service";
 import { tooltipService } from "@web/core/tooltip/tooltip_service";
+import { SIZES } from "@web/core/ui/ui_service";
+import { session } from "@web/session";
 import { CharField } from "@web/views/fields/char/char_field";
 import { FormController } from "@web/views/form/form_controller";
-import { session } from "@web/session";
-import legacySession from "web.session";
-import { scrollerService } from "@web/core/scroller_service";
 import BasicModel from "web.BasicModel";
-import { localization } from "@web/core/l10n/localization";
-import { SIZES } from "@web/core/ui/ui_service";
-import { errorService } from "@web/core/errors/error_service";
-import { RPCError } from "@web/core/network/rpc_service";
-import { WarningDialog } from "@web/core/errors/error_dialogs";
+import legacySession from "web.session";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
 const widgetRegistry = registry.category("view_widgets");
 
-import { Component, xml, EventBus } from "@odoo/owl";
+import { Component, EventBus, xml } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 
 let target;
 let serverData;
@@ -10234,6 +10235,93 @@ QUnit.module("Views", (hooks) => {
             "partner:read",
             "partner_type:read",
         ]);
+    });
+
+    QUnit.debug("coming to a form view from a grouped and sorted list", async function (assert) {
+        assert.expect(22);
+        registry.category("services").add("error", errorService);
+
+        class TestClientAction extends Component {
+            setup() {
+                // debugger
+                throw new RPCError("Something went wrong");
+            }
+        }
+        TestClientAction.template = xml`
+          <div class="test_client_action">
+            Hello World
+          </div>`;
+        registry.category("actions").add("__test__client__action__", TestClientAction);
+
+        class MyComponent extends owl.Component {
+            setup() {
+                this.actionService = useService("action");
+            }
+            onClick() {
+                this.actionService.doAction({
+                    id: 2,
+                    tag: "__test__client__action__",
+                    target: "main",
+                    type: "ir.actions.client",
+                });
+            }
+        }
+        MyComponent.template = owl.xml`
+            <div class="test_widget">
+                <button t-on-click="onClick">MyButton</button>
+            </div>`;
+        widgetRegistry.add("test_widget", MyComponent);
+
+        serverData.actions = {
+            1: {
+                id: 1,
+                name: "test",
+                res_model: "partner",
+                res_id: 1,
+                type: "ir.actions.act_window",
+                views: [[false, "form"]],
+            },
+        };
+        serverData.views = {
+            "partner,false,list": `<tree editable="bottom"><field name="foo"/></tree>`,
+            "partner,false,search": `
+                <search>
+                    <filter string="bar" name="Bar" context="{'group_by': 'bar'}"/>
+                </search>`,
+            "partner,false,form": `
+                <form>
+                    <field name="foo"/>
+                    <field name="p"/>
+                    <widget name="test_widget"/>
+                </form>`,
+            "partner_type,false,list": `<tree editable="bottom"><field name="display_name"/></tree>`,
+        };
+        serverData.models.partner.fields.foo.sortable = true;
+        serverData.models.partner.records[0].timmy = [12, 14];
+
+        const mockRPC = async (route, args) => {
+            assert.step(args.method || route);
+
+            if (args.method === "read") {
+                // debugger
+            }
+        };
+        const webClient = await createWebClient({ serverData, mockRPC });
+        await doAction(webClient, 1);
+        await addRow(target, "[name='p']");
+        await addRow(target, "[name='p']");
+        assert.verifySteps([
+            "/web/webclient/load_menus",
+            "/web/action/load",
+            "get_views",
+            "read",
+            "onchange",
+            "onchange",
+        ]);
+
+        await click(target, ".test_widget button");
+
+        assert.verifySteps([]);
     });
 
     QUnit.test('edition in form view on a "noCache" model', async function (assert) {

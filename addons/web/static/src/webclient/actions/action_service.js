@@ -650,7 +650,7 @@ function makeActionManager(env) {
             }
             onError(error) {
                 reject(error);
-
+                // debugger
                 cleanDomFromBootstrap();
                 if (action.target === "new") {
                     // get the dialog service to close the dialog.
@@ -662,6 +662,7 @@ function makeActionManager(env) {
                         if (lastCt.jsId === controller.jsId) {
                             // the error occurred on the controller which is
                             // already in the DOM, so simply show the error
+
                             Promise.resolve().then(() => {
                                 throw error;
                             });

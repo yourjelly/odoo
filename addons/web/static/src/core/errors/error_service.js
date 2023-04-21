@@ -43,6 +43,7 @@ export class UncaughtCorsError extends UncaughtError {
 export const errorService = {
     start(env) {
         function handleError(uncaughtError, retry = true) {
+            // debugger
             let originalError = uncaughtError;
             while (originalError instanceof Error && "cause" in originalError) {
                 originalError = originalError.cause;
