@@ -5,6 +5,7 @@
  */
 
 import { loadJS } from "@web/core/assets";
+import { uniqueId } from "@web/core/utils/functions";
 import { escape } from "@web/core/utils/strings";
 import { debounce } from "@web/core/utils/timing";
 import Class from "web.Class";
@@ -160,7 +161,7 @@ var AnimationEffect = Class.extend(mixins.ParentedMixin, {
         this._getStateCallback = this._getStateCallback.bind(parent);
 
         // Add a namespace to events using the generated uid
-        this._uid = '_animationEffect' + _.uniqueId();
+        this._uid = '_animationEffect' + uniqueId();
         this.startEvents = _processEvents(this.startEvents, this._uid);
         if (this.endEvents) {
             this.endEvents = _processEvents(this.endEvents, this._uid);
@@ -760,7 +761,7 @@ registry.backgroundVideo = publicWidget.Widget.extend(MobileYoutubeAutoplayMixin
         var proms = [this._super(...arguments)];
 
         this.videoSrc = this.el.dataset.bgVideoSrc;
-        this.iframeID = _.uniqueId('o_bg_video_iframe_');
+        this.iframeID = uniqueId('o_bg_video_iframe_');
         proms.push(this._setupAutoplay(this.videoSrc));
         if (this.isYoutubeVideo && this.isMobileEnv && !this.videoSrc.includes('enablejsapi=1')) {
             // Compatibility: when choosing an autoplay youtube video via the

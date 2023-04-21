@@ -22,6 +22,7 @@ import Link from "wysiwyg.widgets.Link";
 import * as wysiwygUtils from "@web_editor/js/common/wysiwyg_utils";
 import weUtils from "web_editor.utils";
 import { PeerToPeer } from "@web_editor/js/wysiwyg/PeerToPeer";
+import { uniqueId } from "@web/core/utils/functions";
 
 var _t = core._t;
 const QWeb = core.qweb;
@@ -2328,14 +2329,14 @@ const Wysiwyg = Widget.extend({
             // `_saveElement` which is expected to be called for each unique
             // dirty element). In that case, do not group those elements.
             if (!model) {
-                return _.uniqueId('special-element-to-save-');
+                return uniqueId('special-element-to-save-');
             }
 
             // Do not group elements which are parts of views, unless we are
             // in translate mode.
             if (!this.options.enableTranslation
                     && (model === 'ir.ui.view' && field === 'arch')) {
-                return _.uniqueId('view-part-to-save-');
+                return uniqueId('view-part-to-save-');
             }
 
             // Otherwise, group elements which are from the same field of the
@@ -2362,7 +2363,7 @@ const Wysiwyg = Widget.extend({
                     // setup the popover here as everything will be destroyed by
                     // the DOM regeneration. Add markings instead, and returns a
                     // new rejection with all relevant info
-                    var id = _.uniqueId('carlos_danger_');
+                    var id = uniqueId('carlos_danger_');
                     $els.addClass('o_dirty o_editable oe_carlos_danger ' + id);
                     $('.o_editable.' + id)
                         .removeClass(id)

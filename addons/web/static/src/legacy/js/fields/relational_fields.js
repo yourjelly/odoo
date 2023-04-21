@@ -22,6 +22,7 @@ import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog
 import Domain from "web.Domain";
 import { escape, sprintf } from "@web/core/utils/strings";
 import { sortBy } from "@web/core/utils/arrays";
+import { uniqueId } from "@web/core/utils/functions";
 
 var _t = core._t;
 var _lt = core._lt;
@@ -1555,7 +1556,7 @@ var FieldRadio = FieldSelection.extend({
     init: function () {
         this._super.apply(this, arguments);
         this.className += this.nodeOptions.horizontal ? ' o_horizontal' : ' o_vertical';
-        this.unique_id = _.uniqueId("radio");
+        this.unique_id = uniqueId("radio");
         this._setValues();
     },
 

@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { uniqueId } from '@web/core/utils/functions';
 import { sprintf } from '@web/core/utils/strings';
 import {_t, qweb as QWeb} from 'web.core';
 import Dialog from 'web.Dialog';
@@ -299,7 +300,7 @@ var SlideUploadDialog = Dialog.extend({
                 }).length === 0) {
                     if (this.opts.can_create) {
                         return {
-                            id: _.uniqueId('tag_'),
+                            id: uniqueId("tag_"),
                             create: true,
                             tag: term,
                             text: sprintf(_t("Create new %s '%s'"), tag, term),

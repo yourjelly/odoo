@@ -4,6 +4,7 @@ import core from "web.core";
 import utils from "web.utils";
 import Dialog from "web.Dialog";
 import Widget from "web.Widget";
+import { uniqueId } from "@web/core/utils/functions";
 
 var _t = core._t;
 
@@ -34,7 +35,7 @@ var ColorpickerWidget = Widget.extend({
         this.sliderFlag = false;
         this.opacitySliderFlag = false;
         this.colorComponents = {};
-        this.uniqueId = _.uniqueId('colorpicker');
+        this.uniqueId = uniqueId('colorpicker');
         this.selectedHexValue = '';
 
         // Needs to be bound on document to work in all possible cases.

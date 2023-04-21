@@ -6,6 +6,7 @@ import utils from "web.utils";
 import Widget from "web.Widget";
 import { debounce } from "@web/core/utils/timing";
 import { pick } from "@web/core/utils/objects";
+import { uniqueId } from "@web/core/utils/functions";
 
 
 /**
@@ -65,7 +66,7 @@ var NameAndSignature = Widget.extend({
     init: function (parent, options) {
         this._super.apply(this, arguments);
         options = options || {};
-        this.htmlId = _.uniqueId();
+        this.htmlId = uniqueId();
         this.defaultName = options.defaultName || '';
         this.defaultFont = options.defaultFont || '';
         this.fontColor = options.fontColor || 'DarkBlue';

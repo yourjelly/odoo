@@ -26,6 +26,7 @@ import { assets } from "@web/core/assets";
 import { processArch } from "@web/legacy/legacy_load_views";
 
 import { Component } from "@odoo/owl";
+import { uniqueId } from "@web/core/utils/functions";
 const DebouncedField = basic_fields.DebouncedField;
 
 
@@ -624,7 +625,7 @@ var patches = {};
  * @param {Object} props
  */
 function patch(target, props) {
-    var patchID = _.uniqueId('patch_');
+    var patchID = uniqueId('patch_');
     target.__patchID = patchID;
     patches[patchID] = {
         target: target,

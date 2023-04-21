@@ -16,6 +16,7 @@ const QWeb = core.qweb;
 import {closestElement} from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 import { debounce } from "@web/core/utils/timing";
 import { sortBy } from "@web/core/utils/arrays";
+import { uniqueId } from "@web/core/utils/functions";
 
 var _t = core._t;
 
@@ -833,12 +834,12 @@ var SnippetEditor = Widget.extend({
                 }, val.data),
                 this.options
             );
-            var key = optionName || _.uniqueId('option');
+            var key = optionName || uniqueId('option');
             if (this.styles[key]) {
                 // If two snippet options use the same option name (and so use
                 // the same JS option), store the subsequent ones with a unique
                 // ID (TODO improve)
-                key = _.uniqueId(key);
+                key = uniqueId(key);
             }
             this.styles[key] = option;
             option.__order = i++;

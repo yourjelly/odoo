@@ -83,6 +83,7 @@
  */
 
 import { intersection, sortBy, unique } from "@web/core/utils/arrays";
+import { uniqueId } from "@web/core/utils/functions";
 import { omit, pick } from "@web/core/utils/objects";
 import { sprintf } from "@web/core/utils/strings";
 import AbstractModel from "web.AbstractModel";
@@ -4152,7 +4153,7 @@ var BasicModel = AbstractModel.extend({
             if (res_id) {
                 data.id = res_id;
             } else {
-                res_id = _.uniqueId('virtual_');
+                res_id = uniqueId('virtual_');
             }
             // it doesn't make sense for a record datapoint to have those keys
             // besides, it will mess up x2m and actions down the line

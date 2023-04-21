@@ -34,6 +34,7 @@ import {
     useEffect,
     onWillUnmount,
 } from "@odoo/owl";
+import { uniqueId } from '@web/core/utils/functions';
 
 export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
     setup() {
@@ -108,7 +109,7 @@ export class HtmlField extends Component {
 
         useSpellCheck();
 
-        this._onUpdateIframeId = 'onLoad_' + _.uniqueId('FieldHtml');
+        this._onUpdateIframeId = 'onLoad_' + uniqueId('FieldHtml');
 
         onWillStart(async () => {
             this.Wysiwyg = await this._getWysiwygClass();

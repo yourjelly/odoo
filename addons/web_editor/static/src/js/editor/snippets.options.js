@@ -36,6 +36,7 @@ import {SIZES, MEDIAS_BREAKPOINTS} from "@web/core/ui/ui_service";
 import { sprintf } from "@web/core/utils/strings";
 import { debounce } from "@web/core/utils/timing";
 import { pick } from "@web/core/utils/objects";
+import { uniqueId } from "@web/core/utils/functions";
 
 var qweb = core.qweb;
 var _t = core._t;
@@ -1831,7 +1832,7 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
     start: async function () {
         await this._super(...arguments);
 
-        const datetimePickerId = _.uniqueId('datetimepicker');
+        const datetimePickerId = uniqueId('datetimepicker');
         this.el.classList.add('o_we_large');
         this.inputEl.classList.add('datetimepicker-input', 'mx-0', 'text-start');
         this.inputEl.setAttribute('id', datetimePickerId);
