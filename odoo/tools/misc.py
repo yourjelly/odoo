@@ -160,6 +160,13 @@ def file_path(file_path, filter_ext=('',)):
     :raise FileNotFoundError: if the file is not found under the known `addons_path` directories
     :raise ValueError: if the file doesn't have one of the supported extensions (`filter_ext`)
     """
+    for path in _file_path(file_path, filter_ext):
+        if os.path.exists(path):
+            return path
+
+    raise FileNotFoundError("File not found: " + file_path)
+
+def _file_path(file_path, filter_ext=('',)):
     root_path = os.path.abspath(config['root_path'])
     addons_paths = odoo.addons.__path__ + [root_path]
     is_abs = os.path.isabs(file_path)
@@ -173,15 +180,16 @@ def file_path(file_path, filter_ext=('',)):
     if normalized_path.startswith('addons' + os.sep):
         normalized_path = normalized_path[7:]
 
+    fpaths = []
     for addons_dir in addons_paths:
         # final path sep required to avoid partial match
         parent_path = os.path.normpath(os.path.normcase(addons_dir)) + os.sep
         fpath = (normalized_path if is_abs else
                  os.path.normpath(os.path.normcase(os.path.join(parent_path, normalized_path))))
-        if fpath.startswith(parent_path) and os.path.exists(fpath):
-            return fpath
+        if fpath.startswith(parent_path):
+            fpaths.append(fpath)
 
-    raise FileNotFoundError("File not found: " + file_path)
+    return fpaths
 
 def file_open(name, mode="r", filter_ext=None):
     """Open a file from within the addons_path directories, as an absolute or relative path.
@@ -200,18 +208,20 @@ def file_open(name, mode="r", filter_ext=None):
     :raise FileNotFoundError: if the file is not found under the known `addons_path` directories
     :raise ValueError: if the file doesn't have one of the supported extensions (`filter_ext`)
     """
-    path = file_path(name, filter_ext=filter_ext)
-    if os.path.isfile(path):
-        if 'b' not in mode:
-            # Force encoding for text mode, as system locale could affect default encoding,
-            # even with the latest Python 3 versions.
-            # Note: This is not covered by a unit test, due to the platform dependency.
-            #       For testing purposes you should be able to force a non-UTF8 encoding with:
-            #         `sudo locale-gen fr_FR; LC_ALL=fr_FR.iso8859-1 python3 ...'
-            # See also PEP-540, although we can't rely on that at the moment.
-            return open(path, mode, encoding="utf-8")
-        return open(path, mode)
-    raise FileNotFoundError("Not a file: " + name)
+    for path in _file_path(name, filter_ext=filter_ext):
+        try:
+            if 'b' not in mode:
+                # Force encoding for text mode, as system locale could affect default encoding,
+                # even with the latest Python 3 versions.
+                # Note: This is not covered by a unit test, due to the platform dependency.
+                #       For testing purposes you should be able to force a non-UTF8 encoding with:
+                #         `sudo locale-gen fr_FR; LC_ALL=fr_FR.iso8859-1 python3 ...'
+                # See also PEP-540, although we can't rely on that at the moment.
+                return open(path, mode, encoding="utf-8")
+            return open(path, mode)
+        except (IsADirectoryError, FileNotFoundError):
+            continue
+    raise FileNotFoundError("Path doesn't exist or it's not a file: " + name)
 
 #----------------------------------------------------------
 # iterables
