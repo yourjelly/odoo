@@ -650,6 +650,7 @@ function makeActionManager(env) {
             }
             onError(error) {
                 reject(error);
+
                 cleanDomFromBootstrap();
                 if (action.target === "new") {
                     // get the dialog service to close the dialog.
@@ -824,8 +825,9 @@ function makeActionManager(env) {
      */
     function _executeActURLAction(action, options) {
         let url = action.url;
-        if (url && !(url.startsWith('http') || url.startsWith('/')))
-            url = '/' + url;
+        if (url && !(url.startsWith("http") || url.startsWith("/"))) {
+            url = "/" + url;
+        }
         if (action.target === "self") {
             env.services.router.redirect(url);
         } else {
@@ -1419,6 +1421,7 @@ function makeActionManager(env) {
             const msg = jsId ? "Invalid controller to restore" : "No controller to restore";
             throw new ControllerNotFoundError(msg);
         }
+
         const canProceed = await clearUncommittedChanges(env);
         if (!canProceed) {
             return;
