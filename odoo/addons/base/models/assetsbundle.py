@@ -436,7 +436,7 @@ class AssetsBundle(object):
                         or self.save_attachment('js.map', '')
         generator = SourceMapGenerator(
             source_root="/".join(
-                [".." for i in range(0, len(self.get_debug_asset_url(name=self.name).split("/")) - 2)]
+                [".." for i in range(0, self.get_debug_asset_url(name=self.name).count("/") - 1)]
                 ) + "/",
         )
         content_bundle_list = []
@@ -452,7 +452,7 @@ class AssetsBundle(object):
                     asset.url, asset.content, content_line_count, start_offset=line_header)
 
             content_bundle_list.append(asset.with_header(asset.content, minimal=False))
-            content_line_count += len(asset.content.split("\n")) + line_header
+            content_line_count += asset.content.count("\n") + line_header + 1
 
         content_bundle = ';\n'.join(content_bundle_list)
         if template_bundle:
@@ -636,13 +636,13 @@ class AssetsBundle(object):
                                                    extra='rtl/' if self.user_direction == 'rtl' else '')
         generator = SourceMapGenerator(
             source_root="/".join(
-                [".." for i in range(0, len(debug_asset_url.split("/")) - 2)]
+                [".." for i in range(0, debug_asset_url.count("/") - 1)]
                 ) + "/",
         )
 
         # adds the @import rules at the beginning of the bundle
         content_bundle_list = [content_import_rules]
-        content_line_count = len(content_import_rules.split("\n"))
+        content_line_count = content_import_rules.count("\n") + 1
         for asset in self.stylesheets:
             if asset.content:
                 content = asset.with_header(asset.content)
@@ -651,7 +651,7 @@ class AssetsBundle(object):
                 # comments all @import rules that have been added at the beginning of the bundle
                 content = re.sub(self.rx_css_import, lambda matchobj: f"/* {matchobj.group(0)} */", content)
                 content_bundle_list.append(content)
-                content_line_count += len(content.split("\n"))
+                content_line_count += content.count("\n") + 1
 
         content_bundle = '\n'.join(content_bundle_list) + f"\n//*# sourceMappingURL={sourcemap_attachment.url} */"
         css_attachment = self.save_attachment('css', content_bundle)
