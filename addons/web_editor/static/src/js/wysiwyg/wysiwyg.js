@@ -2328,15 +2328,16 @@ const Wysiwyg = Widget.extend({
     _saveViewBlocks: function (context) {
         // TODO should be review to probably not search in the whole body,
         // iframe or not.
-        const $ = (this.$editable[0].ownerDocument.defaultView.$ || window.$);
-        const $allBlocks = $((this.options || {}).savableSelector).filter('.o_dirty');
+        const doc = this.$editable[0].ownerDocument || document;
+        const $ = (doc.defaultView?.$ || window.$);
+        const $allBlocks = $(doc).find((this.options || {}).savableSelector).filter('.o_dirty');
 
-        const $dirty = $('.o_dirty');
+        const $dirty = $(doc.querySelectorAll(".o_dirty"));
         $dirty
             .removeAttr('contentEditable')
             .removeClass('o_dirty oe_carlos_danger o_is_inline_editable');
 
-        $('.o_editable')
+        $(doc.querySelectorAll('.o_editable'))
             .removeClass('o_editable o_is_inline_editable o_editable_date_field_linked o_editable_date_field_format_changed');
 
         const saveElementFuncName = this.options.enableTranslation
