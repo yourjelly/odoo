@@ -99,7 +99,7 @@ export const WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMi
     _getPublicWidgetsRegistry: function (options) {
         var registry = this._super.apply(this, arguments);
         if (options.editableMode) {
-            return pick(registry, function (PublicWidget) {
+            return _.pick(registry, function (PublicWidget) {
                 return !PublicWidget.prototype.disabledInEditableMode;
             });
         }
