@@ -30,6 +30,7 @@ import { makeView, makeViewInDialog, setupViewRegistries } from "@web/../tests/v
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
+import { pick } from "@web/core/utils/objects";
 
 let serverData;
 let target;
@@ -8867,7 +8868,7 @@ QUnit.module("Fields", (hooks) => {
                     // convert LINK_TO commands to UPDATE commands
                     var id = command[1];
                     var record = _.findWhere(serverData.models.turtle.records, { id: id });
-                    return [1, id, _.pick(record, ["turtle_int", "turtle_foo", "partner_ids"])];
+                    return [1, id, pick(record, "turtle_int", "turtle_foo", "partner_ids")];
                 });
                 obj.turtles = [[5]].concat(res);
             },

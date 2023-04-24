@@ -1,5 +1,6 @@
 /** @odoo-module alias=web.DomainSelector **/
 
+import { pick } from "@web/core/utils/objects";
 import core from "web.core";
 import datepicker from "web.datepicker";
 import dom from "web.dom";
@@ -903,28 +904,28 @@ var DomainLeaf = DomainNode.extend({
             case "char":
             case "text":
             case "html":
-                operators = _.pick(operator_mapping, "=", "!=", "ilike", "not ilike", "set", "not set", "in", "not in");
+                operators = pick(operator_mapping, "=", "!=", "ilike", "not ilike", "set", "not set", "in", "not in");
                 break;
 
             case "many2many":
             case "one2many":
             case "many2one":
-                operators = _.pick(operator_mapping, "=", "!=", "ilike", "not ilike", "set", "not set");
+                operators = pick(operator_mapping, "=", "!=", "ilike", "not ilike", "set", "not set");
                 break;
 
             case "integer":
             case "float":
             case "monetary":
-                operators = _.pick(operator_mapping, "=", "!=", ">", "<", ">=", "<=", "ilike", "not ilike", "set", "not set");
+                operators = pick(operator_mapping, "=", "!=", ">", "<", ">=", "<=", "ilike", "not ilike", "set", "not set");
                 break;
 
             case "selection":
-                operators = _.pick(operator_mapping, "=", "!=", "set", "not set");
+                operators = pick(operator_mapping, "=", "!=", "set", "not set");
                 break;
 
             case "date":
             case "datetime":
-                operators = _.pick(operator_mapping, "=", "!=", ">", "<", ">=", "<=", "set", "not set");
+                operators = pick(operator_mapping, "=", "!=", ">", "<", ">=", "<=", "set", "not set");
                 break;
 
             default:
