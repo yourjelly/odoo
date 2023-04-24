@@ -7,7 +7,6 @@ import {Markup} from 'web.utils';
 import session from 'web.session';
 import publicRootData from 'web.public.root';
 import "web.zoomodoo";
-import { pick } from "@web/core/utils/objects";
 
 export const WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMixin, {
     // TODO remove KeyboardNavigationMixin in master
