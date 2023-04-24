@@ -438,6 +438,18 @@
     </xpath>
 </template>
 
+<template id="template_header_default_align_center" inherit_id="website.template_header_default" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="mx-auto"/>
+    </xpath>
+</template>
+
+<template id="template_header_default_align_right" inherit_id="website.template_header_default" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="ms-auto"/>
+    </xpath>
+</template>
+
 <!-- "hamburger" template -->
 <template id="template_header_hamburger" inherit_id="website.layout" name="Template Header Hamburger" active="False">
     <xpath expr="//header//nav" position="replace">
@@ -524,6 +536,22 @@
     </xpath>
 </template>
 
+<template id="template_header_hamburger_align_right" inherit_id="website.template_header_hamburger" active="False">
+    <xpath expr="//t[@t-set='_toggler_class']" position="replace">
+        <t t-set="_toggler_class" t-valuef="btn order-2 p-2 ms-auto"/>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_hamburger_right_col')]" position="attributes">
+        <attribute name="class" add="order-0 me-auto" remove="ms-auto" separator=" "/>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_brand']" position="inside" >
+        <t t-set="_link_class" t-valuef="order-1 mw-100 mx-auto"/>
+    </xpath>
+    <xpath expr="//div[@id='top_menu_collapse']" position="attributes" >
+        <attribute name="class" add="offcanvas-end" remove="offcanvas-start" separator=" "/>
+    </xpath>
+    <xpath expr="//t[@t-call='portal.user_dropdown']//t[@t-set='_dropdown_menu_class']" position="replace"/>
+</template>
+
 <!-- "rounded_box" template -->
 <template id="template_header_rounded_box" inherit_id="website.layout" name="Template Header Rounded Box" active="False">
     <xpath expr="//header//nav" position="replace">
@@ -589,6 +617,18 @@
                 <t t-set="_extra_navbar_classes" t-valuef="rounded-pill mx-1"/>
             </t>
         </div>
+    </xpath>
+</template>
+
+<template id="template_header_rounded_box_align_center" inherit_id="website.template_header_rounded_box" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="mx-auto"/>
+    </xpath>
+</template>
+
+<template id="template_header_rounded_box_align_right" inherit_id="website.template_header_rounded_box" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="ms-auto"/>
     </xpath>
 </template>
 
@@ -660,6 +700,21 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"/>
+    </xpath>
+</template>
+
+<template id="template_header_stretch_align_center" inherit_id="website.template_header_stretch" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="d-flex align-items-center mx-auto px-2 border-end o_border_contrast"/>
+    </xpath>
+</template>
+
+<template id="template_header_stretch_align_right" inherit_id="website.template_header_stretch" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="d-flex align-items-center ms-auto o_border_contrast"/>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_stretch_elts')]" position="attributes">
+        <attribute name="class" remove="ps-2" separator=" "/>
     </xpath>
 </template>
 
@@ -809,6 +864,51 @@
     </xpath>
 </template>
 
+<template id="template_header_search_align_center" inherit_id="website.template_header_search" active="False">
+    <xpath expr="//nav[hasclass('o_grid_header_3_cols')]" position="attributes">
+        <attribute name="class" add="o_grid_header_3_cols_fixed" remove="o_grid_header_3_cols_fixed" separator=" "/>
+    </xpath>
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="order-1 justify-content-center w-100 mx-auto px-4"/>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_brand']" position="inside" >
+        <t t-set="_link_class" t-valuef="order-0 mw-100 me-auto"/>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_search_right_col')]" position="attributes">
+        <attribute name="class" add="order-2" remove="" separator=" "/>
+    </xpath>
+</template>
+
+<template id="template_header_search_align_middle" inherit_id="website.template_header_search" active="False">
+    <xpath expr="//nav[hasclass('o_grid_header_3_cols')]" position="attributes">
+        <attribute name="class" add="d-flex" remove="d-grid o_grid_header_3_cols" separator=" "/>
+    </xpath>
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="order-1 w-100 me-auto pe-4"/>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_brand']" position="inside" >
+        <t t-set="_link_class" t-valuef="order-0 mw-100 me-3"/>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_search_right_col')]" position="attributes">
+        <attribute name="class" add="order-2 flex-shrink-0" remove="" separator=" "/>
+    </xpath>
+</template>
+
+<template id="template_header_search_align_right" inherit_id="website.template_header_search" active="False">
+    <xpath expr="//nav[hasclass('o_grid_header_3_cols')]" position="attributes">
+        <attribute name="class" add="o_grid_header_3_cols_fixed" remove="o_grid_header_3_cols_fixed" separator=" "/>
+    </xpath>
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="order-2 justify-content-end w-100 ps-4 ms-auto"/>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_brand']" position="inside" >
+        <t t-set="_link_class" t-valuef="order-1 mw-100 mx-auto"/>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_search_right_col')]" position="attributes">
+        <attribute name="class" add="order-0 me-4" remove="ms-auto ps-3" separator=" "/>
+    </xpath>
+</template>
+
 <!-- "sales_one" template -->
 <template id="template_header_sales_one" inherit_id="website.layout" name="Template Header Sale 1" active="False">
     <xpath expr="//header//nav" position="replace">
@@ -882,6 +982,21 @@
         <t t-call="website.template_header_mobile">
             <t t-set="_txt_elt_content" t-valuef="list"/>
         </t>
+    </xpath>
+</template>
+
+<template id="template_header_sales_one_align_center" inherit_id="website.template_header_sales_one" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="flex-grow-1 justify-content-end pe-2"/>
+    </xpath>
+</template>
+
+<template id="template_header_sales_one_align_right" inherit_id="website.template_header_sales_one" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="flex-grow-1 justify-content-end pe-2"/>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_sales_one_right_col')]" position="attributes">
+        <attribute name="class" remove="flex-grow-1" separator=" "/>
     </xpath>
 </template>
 
@@ -971,6 +1086,18 @@
         <t t-call="website.template_header_mobile">
             <t t-set="_txt_elt_content" t-valuef="sentence"/>
         </t>
+    </xpath>
+</template>
+
+<template id="template_header_sales_two_align_center" inherit_id="website.template_header_sales_two" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="mx-auto p-2"/>
+    </xpath>
+</template>
+
+<template id="template_header_sales_two_align_right" inherit_id="website.template_header_sales_two" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="ms-auto py-2 pe-2"/>
     </xpath>
 </template>
 
@@ -1144,6 +1271,18 @@
     </xpath>
 </template>
 
+<template id="template_header_sales_four_align_center" inherit_id="website.template_header_sales_four" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="align-items-center mx-auto px-3"/>
+    </xpath>
+</template>
+
+<template id="template_header_sales_four_align_right" inherit_id="website.template_header_sales_four" active="False">
+    <xpath expr="//t[@t-set='_nav_class']" position="replace">
+        <t t-set="_nav_class" t-valuef="align-items-center ms-auto pe-3"/>
+    </xpath>
+</template>
+
 <!-- "sidebar" template -->
 <template id="template_header_sidebar" inherit_id="website.layout" name="Template Header Sidebar" active="False">
     <xpath expr="//header" position="attributes">
@@ -1227,6 +1366,30 @@
             <t t-set="_txt_elt_content" t-valuef="phone_mail"/>
             <t t-set="_side" t-valuef="offcanvas-start"/>
         </t>
+    </xpath>
+</template>
+
+<template id="template_header_sidebar_align_center" inherit_id="website.template_header_sidebar" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="inside">
+        <t t-set="_nav_class" t-valuef="text-center"/>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_text_element']" position="inside">
+        <t t-set="_div_class" t-valuef="mt-2 pt-2 border-top o_border_contrast text-center"/>
+    </xpath>
+    <xpath expr="//t[@t-call='website.header_social_links_no_color']" position="inside">
+        <t t-set="_div_class" t-valuef="mt-2 pt-2 border-top o_border_contrast text-center"/>
+    </xpath>
+</template>
+
+<template id="template_header_sidebar_align_right" inherit_id="website.template_header_sidebar" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="inside">
+        <t t-set="_nav_class" t-valuef="text-end"/>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_text_element']" position="inside">
+        <t t-set="_div_class" t-valuef="mt-2 pt-2 border-top o_border_contrast text-end"/>
+    </xpath>
+    <xpath expr="//t[@t-call='website.header_social_links_no_color']" position="inside">
+        <t t-set="_div_class" t-valuef="mt-2 pt-2 border-top o_border_contrast text-end"/>
     </xpath>
 </template>
 

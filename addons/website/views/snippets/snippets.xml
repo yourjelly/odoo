@@ -969,10 +969,35 @@
         <we-select string="Alignment"
                    data-name="header_alignment_opt"
                    data-variable="hamburger-position"
+                   data-dependencies="header_default_opt, header_hamburger_opt, header_rounded_box_opt, header_stretch_opt, header_search_opt, header_sales_one_opt, header_sales_two_opt, header_sales_four_opt, header_sidebar_opt"
                    data-reload="/">
             <we-button data-customize-website-views="" data-customize-website-variable="'left'">Left</we-button>
-            <we-button data-customize-website-views="website.template_header_default_align_center" data-customize-website-variable="'center'">Center</we-button>
-            <we-button data-customize-website-views="website.template_header_default_align_right" data-customize-website-variable="'right'">Right</we-button>
+            <we-button data-dependencies="!header_hamburger_opt"
+                       data-customize-website-views="
+                            website.template_header_default_align_center,
+                            website.template_header_stretch_align_center,
+                            website.template_header_rounded_box_align_center,
+                            website.template_header_search_align_center,
+                            website.template_header_sales_one_align_center,
+                            website.template_header_sales_two_align_center,
+                            website.template_header_sales_four_align_center,
+                            website.template_header_sidebar_align_center"
+                       data-customize-website-variable="'center'">Center</we-button>
+            <we-button data-dependencies="header_search_opt"
+                       data-customize-website-views="
+                            website.template_header_search_align_middle"
+                       data-customize-website-variable="'middle'">Middle</we-button>
+            <we-button data-customize-website-views="
+                            website.template_header_default_align_right,
+                            website.template_header_hamburger_align_right,
+                            website.template_header_rounded_box_align_right,
+                            website.template_header_stretch_align_right,
+                            website.template_header_search_align_right,
+                            website.template_header_sales_one_align_right,
+                            website.template_header_sales_two_align_right,
+                            website.template_header_sales_four_align_right,
+                            website.template_header_sidebar_align_right"
+                       data-customize-website-variable="'right'">Right</we-button>
         </we-select>
 
         <we-row string="Font">

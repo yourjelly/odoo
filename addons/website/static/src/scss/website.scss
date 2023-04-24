@@ -1041,16 +1041,6 @@ header {
         flex-direction: inherit;
     }
 
-    .collapsing, .show {
-        #top_menu {
-            @if $-hamburger-center {
-                text-align: center !important;
-            } @else if $-hamburger-right {
-                text-align: right;
-            }
-        }
-    }
-
     @include media-breakpoint-up(md) {
         // Allow to center the logo, ignoring the toggler space
         .o_navbar_toggler_container {
