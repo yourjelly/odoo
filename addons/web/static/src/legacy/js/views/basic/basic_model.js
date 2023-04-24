@@ -2650,10 +2650,10 @@ var BasicModel = AbstractModel.extend({
     _fetchReferences: function (record, options) {
         var self = this;
         var defs = [];
-        var fieldNames = options && options.fieldNames || record.getFieldNames();
+        var fieldNames = options?.fieldNames || record.getFieldNames();
         fieldNames.forEach((fieldName) => {
             var field = record.fields[fieldName];
-            if (field.type === 'reference') {
+            if (field.type === "reference") {
                 var def = self._fetchReference(record, fieldName).then(function (dataPoint) {
                     if (dataPoint) {
                         record.data[fieldName] = dataPoint.id;
@@ -3284,7 +3284,8 @@ var BasicModel = AbstractModel.extend({
         const changesOnly = options.changesOnly;
         var fields = record.fields;
         if (options.fieldNames) {
-            fields = pick(fields, options.fieldNames);
+            console.log(options.fieldNames)
+            fields = pick(fields, ...options.fieldNames);
         }
         var commands = {};
         var data = Object.assign({}, record.data, record._changes);
@@ -4460,7 +4461,7 @@ var BasicModel = AbstractModel.extend({
                     var filteredResults = results.filter(function (record) {
                         return request.ids.indexOf(record.id) >= 0;
                     }).map(function (record) {
-                        return pick(record, fieldNames);
+                        return pick(record, ...fieldNames);
                     });
                     request.resolve(filteredResults);
                 }
