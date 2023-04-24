@@ -1246,6 +1246,9 @@ class Import(models.TransientModel):
                     field=field
                 )
 
+            SUPPORTED_IMAGE_MIMETYPES = ['image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png', 'image/svg+xml']
+            if response.headers.get('Content-Type', '') not in SUPPORTED_IMAGE_MIMETYPES:
+                return False
             content = bytearray()
             for chunk in response.iter_content(DEFAULT_IMAGE_CHUNK_SIZE):
                 content += chunk
