@@ -302,8 +302,8 @@ class AccountEdiFormat(models.Model):
         to_process = []
 
         # XML attachments received by mail have a 'text/plain' mimetype.
-        # Therefore, if content start with '<?xml', it is considered as XML.
-        is_text_plain_xml = 'text/plain' in attachment.mimetype and content.startswith(b'<?xml')
+        # Therefore, if content start with '<?xml', or if the filename ends with '.xml', it is considered as XML.
+        is_text_plain_xml = 'text/plain' in attachment.mimetype and (content.startswith(b'<?xml') or attachment.name.endswith('.xml'))
         if 'pdf' in attachment.mimetype:
             to_process.extend(self._decode_pdf(attachment.name, content))
         elif attachment.mimetype.endswith('/xml') or is_text_plain_xml:

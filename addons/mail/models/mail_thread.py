@@ -1861,7 +1861,11 @@ class MailThread(models.AbstractModel):
                     continue
                 if isinstance(content, str):
                     encoding = info and info.get('encoding')
-                    content = content.encode(encoding or 'utf-8')
+                    try:
+                        content = content.encode(encoding or 'utf-8')
+                    except Exception as e:
+                        _logger.warning("Failed to encode the content of the attachment with error: %s", str(e))
+                        content = content.encode(encoding or 'utf-8', 'ignore')  # UnicodeEncodeError
                 elif isinstance(content, EmailMessage):
                     content = content.as_bytes()
                 elif content is None:
