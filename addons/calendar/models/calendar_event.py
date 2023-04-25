@@ -504,14 +504,17 @@ class Meeting(models.Model):
                 detached_events = event._apply_recurrence_values(recurrence_values)
                 detached_events.active = False
 
-        events.filtered(lambda event: event.start > fields.Datetime.now()).attendee_ids._send_mail_to_attendees(
-            self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False)
-        )
+        for event in events.filtered(lambda event: event.start > fields.Datetime.now()):
+            mail_template, force_send = event._get_default_attendee_mail_template_params()
+            event.attendee_ids._send_mail_to_attendees(mail_template, force_send=force_send)
         events._sync_activities(fields={f for vals in vals_list for f in vals.keys()})
         if not self.env.context.get('dont_notify'):
             events._setup_alarms()
 
         return events.with_context(is_calendar_event_new=False)
+
+    def _get_default_attendee_mail_template_params(self):
+        return self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False), False
 
     def _compute_field_value(self, field):
         if field.compute_sudo:
@@ -790,9 +793,8 @@ class Meeting(models.Model):
         email = self.env.user.email
         if email:
             for meeting in self:
-                meeting.attendee_ids._send_mail_to_attendees(
-                    self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False)
-                )
+                mail_template, force_send = meeting._get_default_attendee_mail_template_params()
+                meeting.attendee_ids._send_mail_to_attendees(mail_template, force_send=force_send)
         return True
 
     def action_open_composer(self):
