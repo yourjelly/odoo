@@ -81,6 +81,9 @@ class PosPaymentMethod(models.Model):
         return latest_response
 
     def proxy_adyen_request(self, data, operation=False):
+
+        _logger.error('test')
+        self.adyen_latest_response = 'hello'
         ''' Necessary because Adyen's endpoints don't have CORS enabled '''
         if data['SaleToPOIRequest']['MessageHeader']['MessageCategory'] == 'Payment': # Clear only if it is a payment request
             self.sudo().adyen_latest_response = ''  # avoid handling old responses multiple times

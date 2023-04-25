@@ -1961,7 +1961,7 @@ class PosSession(models.Model):
         return {
             'search_params': {
                 'domain': [('id', '=', self.config_id.currency_id.id)],
-                'fields': ['name', 'symbol', 'position', 'rounding', 'rate', 'decimal_places'],
+                'fields': ['name', 'numeric_code', 'symbol', 'position', 'rounding', 'rate', 'decimal_places'],
             },
         }
 

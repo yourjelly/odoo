@@ -81,6 +81,7 @@ PKGS_TO_INSTALL="
     python3-urllib3 \
     python3-werkzeug \
     python3-venv \
+    python3-websocket-client \
     rsync \
     screen \
     swig \
