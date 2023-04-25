@@ -19,9 +19,12 @@
     }
 }
 
-.o_avatar_many2x_autocomplete > img{
-    width: 19px;
-    height: 19px;
-    object-fit: cover;
-    margin-right: 4px;
+// Avatar
+.o_avatar img, .o_avatar .o_avatar_empty, img.o_avatar {
+    height: var(--Avatar-size, #{$o-avatar-size});
+    aspect-ratio: 1;
+}
+
+.o_avatar_empty {
+    background-color: $gray-300;
 }
