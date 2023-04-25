@@ -459,6 +459,8 @@ class AccountMoveLine(models.Model):
     @api.depends('product_id', 'journal_id')
     def _compute_name(self):
         for line in self:
+            if line.name:
+                continue
             if line.display_type == 'payment_term':
                 if line.move_id.payment_reference:
                     line.name = line.move_id.payment_reference
