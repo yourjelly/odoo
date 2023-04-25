@@ -1000,6 +1000,17 @@
                        data-customize-website-variable="'right'">Right</we-button>
         </we-select>
 
+        <we-select string="Mobile Alignment"
+                   data-name="header_mobile_alignment_opt"
+                   data-variable="hamburger-position-mobile"
+                   data-reload="/">
+            <we-button data-customize-website-views="" data-customize-website-variable="'left'">Left</we-button>
+            <we-button data-customize-website-views="website.template_header_mobile_align_center, website.template_header_hamburger_mobile_align_center"
+                       data-customize-website-variable="'center'">Center</we-button>
+            <we-button data-customize-website-views="website.template_header_mobile_align_right, website.template_header_hamburger_mobile_align_right"
+                       data-customize-website-variable="'right'">Right</we-button>
+        </we-select>
+
         <we-row string="Font">
             <we-fontfamilypicker data-variable="navbar-font"/>
             <we-input data-customize-website-variable="null" data-variable="header-font-size" data-unit="px" data-save-unit="rem"/>
