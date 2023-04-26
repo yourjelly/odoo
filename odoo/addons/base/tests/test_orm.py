@@ -103,6 +103,12 @@ class TestORM(TransactionCase):
         result = partner.read()
         self.assertIsInstance(result, list)
 
+        partner = partner.browse([-1])
+        self.assertEqual(partner.read(['name']), [])
+
+        partner = partner.browse([0])
+        self.assertEqual(partner.read(['name']), [])
+
     @mute_logger('odoo.models')
     def test_search_read(self):
         partner = self.env['res.partner']

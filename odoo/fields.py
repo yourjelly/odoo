@@ -1177,7 +1177,7 @@ class Field(MetaField('DummyField', (object,), {})):
             #       not stored and computed -> compute
             #       not stored and not computed -> default
             #
-            if self.store and record.id:
+            if self.store and isinstance(record.id, int):
                 # real record: fetch from database
                 recs = record._in_cache_without(self)
                 try:
