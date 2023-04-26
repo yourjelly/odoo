@@ -3,7 +3,7 @@
 
     <t t-name="web.CogMenu" owl="1">
         <div t-if="hasItems" class="o_cp_action_menus d-flex pe-2 gap-1">
-            <Dropdown togglerClass="'o_cp_action_menus_toggler d-print-none btn btn-light ms-2 px-2 lh-sm'">
+            <Dropdown togglerClass="'d-print-none btn btn-text ms-1 lh-sm'">
                 <t t-set-slot="toggler">
                     <i class="fa fa-cog"/>
                 </t>

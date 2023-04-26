@@ -6,11 +6,6 @@
         min-width: 200px;
     }
 
-    .o_control_panel_breadcrumbs_actions.o_has_visible_path {
-        --cp-breadcrumb-action-alignment: end;
-        --cp-breadcrumb-action-translate-y: #{$btn-padding-y};
-    }
-
     @include media-breakpoint-down(md) {
         &.o_mobile_sticky {
             @include o-position-sticky();
