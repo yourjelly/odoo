@@ -9,6 +9,10 @@
         <field name="arch" type="xml">
             <xpath expr="//group[@name='right_event_details']/field[@name='company_id']" position="after">
                 <field name="website_id" options="{'no_create': True}" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]" groups="website.group_multi_website"/>
+                <field name="website_id" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="attributes">
+                <attribute name="context">{'propagate_website_id': website_id}</attribute>
             </xpath>
             <div name="button_box" position="inside">
                 <field name="website_url" invisible="1"/>
