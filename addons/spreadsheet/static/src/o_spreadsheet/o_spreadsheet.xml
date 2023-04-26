@@ -1470,7 +1470,7 @@
 
   <t t-name="o-spreadsheet-Menu" owl="1">
     <Popover
-      t-if="props.menuItems.length"
+      t-if="visibleMenuItems.length"
       position="props.position"
       childWidth="MENU_WIDTH"
       childHeight="menuHeight"
@@ -1484,7 +1484,7 @@
         t-on-wheel.stop=""
         t-on-click.stop=""
         t-on-contextmenu.prevent="">
-        <t t-foreach="props.menuItems" t-as="menuItem" t-key="menuItem.id">
+        <t t-foreach="visibleMenuItems" t-as="menuItem" t-key="menuItem.id">
           <t t-set="isMenuRoot" t-value="isRoot(menuItem)"/>
           <t t-set="isMenuEnabled" t-value="isEnabled(menuItem)"/>
           <div
@@ -1571,7 +1571,7 @@
         <button class="o-btn-action o-add-selection" t-if="canAddRange" t-on-click="addEmptyInput">
           Add range
         </button>
-        <button class="o-btn-action o-selection-ok" t-if="hasFocus" t-on-click="disable">
+        <button class="o-btn-action o-selection-ok" t-if="hasFocus" t-on-click="confirm">
           Confirm
         </button>
       </div>
@@ -2899,7 +2899,7 @@
     <div class="o-sidePanel">
       <div class="o-sidePanelHeader">
         <div class="o-sidePanelTitle" t-esc="getTitle()"/>
-        <div class="o-sidePanelClose" t-on-click="() => this.props.onCloseSidePanel()">×</div>
+        <div class="o-sidePanelClose" t-on-click="() => this.props.onCloseSidePanel()">✕</div>
       </div>
       <div class="o-sidePanelBody">
         <t
@@ -3248,7 +3248,7 @@
   </t>
 </odoo>
 <!--
-  __info__.version = '16.0.7';
-  __info__.date = '2023-04-18T16:24:08.625Z';
-  __info__.hash = '3279a0a';
+  __info__.version = '16.0.8';
+  __info__.date = '2023-04-26T06:38:14.235Z';
+  __info__.hash = '08c1734';
 -->
