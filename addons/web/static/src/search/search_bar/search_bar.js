@@ -27,6 +27,7 @@ export class SearchBar extends Component {
             expanded: [],
             focusedIndex: 0,
             query: "",
+            showSearchBar: !this.env.isSmall,
         });
 
         // derived state
@@ -522,6 +523,10 @@ export class SearchBar extends Component {
         } else if (this.items.length) {
             this.resetState();
         }
+    }
+
+    onToggleSearchBar() {
+        this.state.showSearchBar = !this.state.showSearchBar;
     }
 
     /**
