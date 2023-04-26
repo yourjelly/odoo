@@ -17,7 +17,7 @@ class TestOrmcache(TransactionCase):
         miss = counter.miss
 
         # clear the caches of ir.model.data, retrieve its key and
-        IMD.clear_caches()
+        self.env.registry.clear_cache()
         self.assertNotIn(key, cache)
 
         # lookup some reference

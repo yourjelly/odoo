@@ -724,7 +724,7 @@ class TransactionCase(BaseCase):
                     cls.registry.registry_invalidated = False
 
         cls.addClassCleanup(reset_changes)
-        cls.addClassCleanup(cls.registry.clear_caches)
+        cls.addClassCleanup(cls.registry.clear_all_caches)
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(cls.cr.close)
@@ -743,7 +743,7 @@ class TransactionCase(BaseCase):
         self.addCleanup(envs.update, list(envs))
         self.addCleanup(envs.clear)
 
-        self.addCleanup(self.registry.clear_caches)
+        self.addCleanup(self.registry.clear_all_caches)
 
         # This prevents precommit functions and data from piling up
         # until cr.flush is called in 'assertRaises' clauses
@@ -782,7 +782,7 @@ class SingleTransactionCase(BaseCase):
         super().setUpClass()
         cls.registry = odoo.registry(get_db_name())
         cls.addClassCleanup(cls.registry.reset_changes)
-        cls.addClassCleanup(cls.registry.clear_caches)
+        cls.addClassCleanup(cls.registry.clear_all_caches)
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(cls.cr.close)

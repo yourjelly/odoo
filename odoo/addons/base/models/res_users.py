@@ -653,10 +653,10 @@ class Users(models.Model):
 
         # per-method / per-model caches have been removed so the various
         # clear_cache/clear_caches methods pretty much just end up calling
-        # Registry._clear_cache
+        # Registry.clear_cache
         invalidation_fields = self._get_invalidation_fields()
         if (invalidation_fields & values.keys()) or any(key.startswith('context_') for key in values):
-            self.clear_caches()
+            self.env.registry.clear_cache()
 
         return res
 
@@ -664,7 +664,7 @@ class Users(models.Model):
     def _unlink_except_superuser(self):
         if SUPERUSER_ID in self.ids:
             raise UserError(_('You can not remove the admin user as it is used internally for resources created by Odoo (updates, module installation, ...)'))
-        self.clear_caches()
+        self.env.registry.clear_cache()
 
     @api.model
     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
@@ -844,7 +844,7 @@ class Users(models.Model):
                                 FROM res_users
                                 WHERE id=%%s""" % (session_fields), (self.id,))
         if self.env.cr.rowcount != 1:
-            self.clear_caches()
+            self.env.registry.clear_cache()
             return False
         data_fields = self.env.cr.fetchone()
         # generate hmac key
@@ -1353,7 +1353,7 @@ class GroupsView(models.Model):
         groups = super().create(vals_list)
         self._update_user_groups_view()
         # actions.get_bindings() depends on action records
-        self.env['ir.actions.actions'].clear_caches()
+        self.env.registry.clear_cache()
         return groups
 
     def write(self, values):
@@ -1366,14 +1366,14 @@ class GroupsView(models.Model):
         if view_values0 != view_values1:
             self._update_user_groups_view()
         # actions.get_bindings() depends on action records
-        self.env['ir.actions.actions'].clear_caches()
+        self.env.registry.clear_cache()
         return res
 
     def unlink(self):
         res = super(GroupsView, self).unlink()
         self._update_user_groups_view()
         # actions.get_bindings() depends on action records
-        self.env['ir.actions.actions'].clear_caches()
+        self.env.registry.clear_cache()
         return res
 
     def _get_hidden_extra_categories(self):

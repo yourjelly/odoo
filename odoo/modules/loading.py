@@ -279,7 +279,7 @@ def load_module_graph(env, graph, status=None, perform_checks=True,
                 if not needs_update:
                     registry.setup_models(env.cr)
                 # Python tests
-                env['ir.http']._clear_routing_map()     # force routing map to be rebuilt
+                env.registry.clear_cache('routing')     # force routing map to be rebuilt
 
                 tests_t0, tests_q0 = time.time(), odoo.sql_db.sql_counter
                 test_results = loader.run_suite(suite, module_name)
