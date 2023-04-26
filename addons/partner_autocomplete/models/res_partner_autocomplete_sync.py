@@ -18,14 +18,12 @@ class ResPartnerAutocompleteSync(models.Model):
         to_sync_items = self.search([('synched', '=', False)])
         for to_sync_item in to_sync_items:
             partner = to_sync_item.partner_id
-
             params = {
                 'partner_gid': partner.partner_gid,
             }
-
             if partner.vat and partner._is_vat_syncable(partner.vat):
                 params['vat'] = partner.vat
-                _, error = self.env['iap.autocomplete.api']._request_partner_autocomplete('update', params)
+                _, error = self.env['iap.autocomplete.api']._request_partner_autocomplete('1/complete/update', params)
                 if error:
                     _logger.error('Send Partner to sync failed: %s' % str(error))
 

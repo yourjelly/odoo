@@ -65,6 +65,9 @@ odoo.define('partner_autocomplete.tests', function (require) {
                         });
                         return def;
                     },
+                    _getActiveVAT: function(partner_gid) {
+                        return this._getOdooSuggestions(partner_gid);
+                    },
                     _enrichCompany: function (company) {
                         return Promise.resolve(enrichData);
                     },

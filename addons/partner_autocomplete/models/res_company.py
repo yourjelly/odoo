@@ -75,7 +75,6 @@ class ResCompany(models.Model):
 
         # handle o2m values, e.g. {'bank_ids': ['acc_number': 'BE012012012', 'acc_holder_name': 'MyWebsite']}
         self._enrich_replace_o2m_creation(company_data)
-
         self.partner_id.write(company_data)
 
         if additional_data:

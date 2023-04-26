@@ -2,10 +2,17 @@
     > .o_partner_autocomplete_dropdown .dropdown-item {
         min-width: 300px;
         padding: 4px 8px;
-        > img {
+        > img.company_logo {
             float: left;
             width: 36px;
             height: 36px;
+            object-fit: contain;
+        }
+        > img.vat {
+            float: left;
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
         }
         > .o_partner_autocomplete_info {
             margin-left: 50px;
@@ -35,6 +42,7 @@
                 height: 20px;
                 right: 20px;
                 top: 3px;
+                object-fit: contain;
             }
         }
     }

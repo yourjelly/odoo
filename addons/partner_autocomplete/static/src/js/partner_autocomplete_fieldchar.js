@@ -51,6 +51,7 @@ var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
 
         if (this.debounceSuggestions > 0) {
             this._suggestCompanies = _.debounce(this._suggestCompanies.bind(this), this.debounceSuggestions);
+            this._suggestVAT = _.debounce(this._suggestVAT.bind(this), this.debounceSuggestions);
         }
     },
 
@@ -62,6 +63,7 @@ var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
      * Check if the autocomplete should be active
      * Active :
      *  - only when creating new record
+     *      (or on edit mode of existing record that have been enriched, so we can have a suggestion of the vat numbers)
      *  - on model res.partner and is_company=true
      *  - on model res.company
      *
@@ -70,11 +72,7 @@ var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
      */
     _isActive: function () {
         return this.model === 'res.company' ||
-            (
-                this.model === 'res.partner'
-                && this.record.data.is_company
-                && !(this.record.data && this.record.data.id)
-            );
+            (this.model === 'res.partner' && this.record.data.is_company);
     },
 
     /**
@@ -112,35 +110,45 @@ var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
      */
     _selectCompany: function (company) {
         var self = this;
-        this._getCreateData(company).then(function (data) {
-            if (data.logo) {
-                var logoField = self.model === 'res.partner' ? 'image_1920' : 'logo';
-                data.company[logoField] = data.logo;
-            }
+        if (company.name) {
+            this._getCreateData(company).then(function (data) {
+                if (data.logo) {
+                    var logoField = self.model === 'res.partner' ? 'image_1920' : 'logo';
+                    data.company[logoField] = data.logo;
+                }
 
-            // Some fields are unnecessary in res.company
-            if (self.model === 'res.company') {
-                var fields = 'comment,child_ids,bank_ids,additional_info'.split(',');
-                fields.forEach(function (field) {
-                    delete data.company[field];
+                if (self.model === 'res.company') {
+                    var fields = 'comment,child_ids,bank_ids,additional_info'.split(',');
+                    fields.forEach(function (field) {
+                        delete data.company[field];
+                    });
+                }
+
+                self._setOne2ManyField('bank_ids', data.company.bank_ids);
+                delete data.company.bank_ids;
+
+                self.trigger_up('field_changed', {
+                    dataPointID: self.dataPointID,
+                    changes: data.company,
+                    onSuccess: function () {
+                        if (self.onlyVAT)
+                            self.$input.val(self._formatValue(company.vat));
+                        else
+                            self.$input.val(self._formatValue(company.name));
+                    },
                 });
-            }
-
-            self._setOne2ManyField('bank_ids', data.company.bank_ids);
-            delete data.company.bank_ids;
-
-            self.trigger_up('field_changed', {
+            });
+        } else {
+            this.trigger_up('field_changed', {
                 dataPointID: self.dataPointID,
-                changes: data.company,
+                changes: {
+                    vat: company.vat,
+                },
                 onSuccess: function () {
-                    // update the input's value directly
-                    if (self.onlyVAT)
-                        self.$input.val(self._formatValue(company.vat));
-                    else
-                        self.$input.val(self._formatValue(company.name));
+                    self.$input.val(self._formatValue(company.vat));
                 },
             });
-        });
+        }
         this._removeDropdown();
     },
 
@@ -172,7 +180,8 @@ var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
     _showDropdown: function () {
         this._removeDropdown();
         if (this.suggestions.length > 0) {
-            this.$dropdown = $(QWeb.render('partner_autocomplete.dropdown', {
+            var templateDropdown = this.onlyVAT ? 'partner_autocomplete.vat_dropdown' : 'partner_autocomplete.dropdown';
+            this.$dropdown = $(QWeb.render(templateDropdown, {
                 suggestions: this.suggestions,
             }));
             this.$dropdown.appendTo(this.$el);
@@ -205,6 +214,33 @@ var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
             this._removeDropdown();
         }
     },
+
+    /**
+     * Show all active VAT numbers for a partner when it has been enriched and I select the vat number field
+     *
+     * @private
+     */
+    _suggestVAT: function (partner_gid) {
+        var self = this;
+        if (this._isOnline()) {
+            return this._getActiveVAT(partner_gid).then(function (suggestions) {
+                if (suggestions && suggestions.length) {
+                    self.suggestions = suggestions;
+                    self.suggestions.forEach(function (suggestion) {
+                        if (typeof suggestion.country_code === 'string'){
+                            suggestion.country_code = suggestion.country_code.toLowerCase();
+                        }
+                    });
+                    self._showDropdown();
+                } else {
+                    self._removeDropdown();
+                }
+            });
+        } else {
+            this._removeDropdown();
+        }
+    },
+
 
 
     //--------------------------------------------------------------------------
@@ -241,7 +277,12 @@ var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
     _onInput: function () {
         this._super.apply(this, arguments);
         if (this._isActive()) {
-            this._suggestCompanies(this.$input.val());
+            if (this.onlyVAT && this.record.data.partner_gid){
+                this._suggestVAT(this.record.data.partner_gid);
+            // With this condition we only show suggestions for the companies on creation
+            } else if (!this.record.data.id) {
+                this._suggestCompanies(this.$input.val());
+            }
         }
     },
 

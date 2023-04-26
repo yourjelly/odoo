@@ -5,10 +5,25 @@
             <a role="menuitem" href="#"
                 t-attf-class="dropdown-item o_partner_autocomplete_suggestion clearfix#{info_index == 0 and ' active' or ''}"
                 t-att-data-index="info_index">
-                <img t-att-src="info['logo']" onerror="this.src='/base/static/img/company_image.png'" alt="Placeholder"/>
+                <img t-att-src="info['logo']" onerror="this.src='/base/static/img/company_image.png'" alt="Placeholder" class="company_logo"/>
                 <div class="o_partner_autocomplete_info">
+                    <!-- label, description, type -->
                     <strong><t t-esc="info['label'] or '&#160;'"/></strong>
-                    <div><t t-esc="info['description']"/></div>
+                    <div><t t-esc="info['website']"/></div>
+                    <div><t t-esc="info['vat']"/></div>
+                </div>
+            </a>
+        </t>
+    </div>
+    
+    <div t-name="partner_autocomplete.vat_dropdown" class="o_partner_autocomplete_dropdown dropdown-menu show" role="menu">
+        <t t-foreach="suggestions" t-as="info">
+            <a role="menuitem" href="#"
+                t-attf-class="dropdown-item o_partner_autocomplete_suggestion clearfix#{info_index == 0 and ' active' or ''}"
+                t-att-data-index="info_index">
+                <img t-att-src="'/base/static/img/country_flags/' + info['country_code'] + '.png'" t-att-alt="info['country_code']" class="country-flag vat"/>
+                <div class="o_partner_autocomplete_info">
+                    <strong><t t-esc="info['vat'] or '&#160;'"/></strong>
                 </div>
             </a>
         </t>

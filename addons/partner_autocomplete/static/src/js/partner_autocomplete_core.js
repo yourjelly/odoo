@@ -31,7 +31,7 @@ var PartnerAutocompleteMixin = {
     _autocomplete: function (value) {
         var self = this;
         value = value.trim();
-        var isVAT = this._isVAT(value);
+        var isVAT = this._isPossibleVAT(value);
         var odooSuggestions = [];
         var clearbitSuggestions = [];
         return new Promise(function (resolve, reject) {
@@ -53,7 +53,9 @@ var PartnerAutocompleteMixin = {
                     clearbitSuggestions.forEach(function (suggestion) {
                         if (websites.indexOf(suggestion.domain) < 0) {
                             websites.push(suggestion.domain);
-                            odooSuggestions.push(suggestion);
+                            if (odooSuggestions.length < 10){
+                                odooSuggestions.push(suggestion);
+                            }
                         }
                     });
                 }
@@ -66,11 +68,31 @@ var PartnerAutocompleteMixin = {
                 });
                 return resolve(odooSuggestions);
             };
-
             self._whenAll([odooPromise, clearbitPromise]).then(concatResults, concatResults);
         });
 
     },
+
+    /**
+     * Get all the active VAT for the current company based on the partner_gid
+     *
+     * @param {Object} company
+     * @param {string} company.partner_gid
+     * @returns {Promise}
+     */
+    _getActiveVAT: function (partner_gid) {
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            self._rpc({
+                model: 'res.partner',
+                method: 'get_active_vat',
+                args: [partner_gid],
+            }).then(function (result) {
+                resolve(result);
+            });
+        });
+    },
+
 
     /**
      * Get enrichment data
@@ -139,7 +161,7 @@ var PartnerAutocompleteMixin = {
 
                 // The vat should be returned for free. This is the reason why
                 // we add it into the data of 'company' even if an error such as
-                // an insufficient credit error is raised. 
+                // an insufficient credit error is raised.
                 if (company_data.error && company_data.vat) {
                     company.vat = company_data.vat;
                 }
@@ -192,7 +214,7 @@ var PartnerAutocompleteMixin = {
      * @private
      */
     _validateSearchTerm: function (search_val, onlyVAT) {
-        if (onlyVAT) return this._isVAT(search_val);
+        if (onlyVAT) return this._isPossibleVAT(search_val);
         else return search_val && search_val.length > 2;
     },
 
@@ -258,7 +280,6 @@ var PartnerAutocompleteMixin = {
      */
     _getOdooSuggestions: function (value, isVAT) {
         var method = isVAT ? 'read_by_vat' : 'autocomplete';
-
         var def = this._rpc({
             model: 'res.partner',
             method: method,
@@ -285,15 +306,27 @@ var PartnerAutocompleteMixin = {
         return this._dropPreviousOdoo.add(def);
     },
     /**
-     * Check if searched value is possibly a VAT : 2 first chars = alpha + min 5 numbers
+     * Check if searched value is possibly a VAT
      *
      * @param {string} search_val
      * @returns {boolean}
      * @private
      */
-    _isVAT: function (search_val) {
+    _isPossibleVAT: function (search_val) {
         var str = this._sanitizeVAT(search_val);
-        return checkVATNumber(str);
+        if (str.length >= 7) {
+            var firstTwoChars = str.substring(0, 2).toUpperCase();
+            var lastChars = str.substring(2);
+            var regexVAT = /^(AT|BE|BG|CY|CZ|DE|DK|EE|EL|ES|FI|FR|HR|HU|IE|IT|LT|LU|LV|MT|NL|PL|PT|RO|SE|SI|SK|XI|EU)/;
+            if (regexVAT.test(firstTwoChars)) {
+                var countNumericChars = (lastChars.match(/\d/g) || []).length;
+                if (countNumericChars / lastChars.length >= 0.5) {
+                    return true;
+                }
+            }
+        } else {
+            return checkVATNumber(str);
+        }
     },
 
     /**

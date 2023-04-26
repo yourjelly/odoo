@@ -11,6 +11,14 @@ from odoo import api, fields, models, tools, _
 _logger = logging.getLogger(__name__)
 
 PARTNER_AC_TIMEOUT = 5
+# This list is the counterpart to what is used in the Odoo module `directory_service` in the
+# file `autocomplete_company_sync.py`. They don't need to be a perfect match. The client can
+# already anticipatorily sync VAT numbers that aren't supported upstream, but will be. In
+# this case, the upstream `directory_service` will process them, mark them as unsupported,
+# and keep their records in a dormant state until support is added for those VAT formats.
+SUPPORTED_VAT_PREFIXES = {'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', \
+                          'FR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', \
+                          'PT', 'RO', 'SE', 'SI', 'SK', 'XI', 'EU'}
 
 
 class ResPartner(models.Model):
@@ -72,7 +80,6 @@ class ResPartner(models.Model):
     @api.model
     def _format_data_company(self, iap_data):
         self._iap_replace_location_codes(iap_data)
-
         if iap_data.get('child_ids'):
             child_ids = []
             for child in iap_data.get('child_ids'):
@@ -86,8 +93,13 @@ class ResPartner(models.Model):
 
     @api.model
     def autocomplete(self, query, timeout=15):
-        suggestions, _ = self.env['iap.autocomplete.api']._request_partner_autocomplete('search', {
+        # The search returns results based on the where the request is from. For this we preferentially
+        # use the fiscal country id, and fall back to the active company's country id. If both are empty,
+        # the request is processed with no country preference.
+        country = getattr(self.env.company, 'account_fiscal_country_id', self.env.company.country_id).code
+        suggestions, _ = self.env['iap.autocomplete.api']._request_partner_autocomplete('1/complete/search', {
             'query': query,
+            'country_code': country,
         }, timeout=timeout)
         if suggestions:
             results = []
@@ -98,8 +110,25 @@ class ResPartner(models.Model):
             return []
 
     @api.model
+    def get_active_vat(self, partner_gid, timeout=15):
+        # Multiples vat possible on the response
+        response, _ = self.env['iap.autocomplete.api']._request_partner_autocomplete('1/complete/search_active_vat', {
+            'partner_gid': partner_gid,
+        }, timeout=timeout)
+        if response:
+            results = []
+            for rep in response:
+                results.append(rep)
+            return results
+        else:
+            return []
+
+
+    @api.model
     def enrich_company(self, company_domain, partner_gid, vat, timeout=15):
-        response, error = self.env['iap.autocomplete.api']._request_partner_autocomplete('enrich', {
+        country = getattr(self.env.company, 'account_fiscal_country_id', self.env.company.country_id).code
+        response, error = self.env['iap.autocomplete.api']._request_partner_autocomplete('1/complete/enrich', {
+            'country_code' : country,
             'domain': company_domain,
             'partner_gid': partner_gid,
             'vat': vat,
@@ -124,30 +153,25 @@ class ResPartner(models.Model):
 
     @api.model
     def read_by_vat(self, vat, timeout=15):
-        vies_vat_data, _ = self.env['iap.autocomplete.api']._request_partner_autocomplete('search_vat', {
+        #user_country = self.env.user.country_id.code
+        country = getattr(self.env.company, 'account_fiscal_country_id', self.env.company.country_id).code
+        suggestions, _ = self.env['iap.autocomplete.api']._request_partner_autocomplete('2/complete/search_vat', {
             'vat': vat,
+            'country_code': country,
         }, timeout=timeout)
-        if vies_vat_data:
-            return [self._format_data_company(vies_vat_data)]
+        if suggestions:
+            results = []
+            for suggestion in suggestions:
+                results.append(self._format_data_company(suggestion))
+            return results
         else:
             return []
 
-    @api.model
-    def _is_company_in_europe(self, country_code):
-        country = self.env['res.country'].search([('code', '=ilike', country_code)])
-        if country:
-            country_id = country.id
-            europe = self.env.ref('base.europe')
-            if not europe:
-                europe = self.env["res.country.group"].search([('name', '=', 'Europe')], limit=1)
-            if not europe or country_id not in europe.country_ids.ids:
-                return False
-        return True
-
     def _is_vat_syncable(self, vat):
-        vat_country_code = vat[:2]
-        partner_country_code = self.country_id.code if self.country_id else ''
-        return self._is_company_in_europe(vat_country_code) and (partner_country_code == vat_country_code or not partner_country_code)
+        if not vat:
+            return False
+        vat_country_prefix = vat[:2]
+        return vat_country_prefix in SUPPORTED_VAT_PREFIXES
 
     def _is_synchable(self):
         already_synched = self.env['res.partner.autocomplete.sync'].search([('partner_id', '=', self.id), ('synched', '=', True)])
@@ -177,7 +201,9 @@ class ResPartner(models.Model):
 
     def write(self, values):
         res = super(ResPartner, self).write(values)
-        if len(self) == 1:
+        if len(self) == 1 and values.get('vat', False) is not False:
+            # Synched is set to False to force the sync if the vat is changed
+            self.env['res.partner.autocomplete.sync'].search([('partner_id', '=', self.id)]).write({'synched': False})
             self._update_autocomplete_data(values.get('vat', False))
-
         return res
+
