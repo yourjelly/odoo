@@ -4270,6 +4270,8 @@
         CommandResult[CommandResult["InvalidSelectionStep"] = 83] = "InvalidSelectionStep";
         CommandResult[CommandResult["DuplicatedChartId"] = 84] = "DuplicatedChartId";
         CommandResult[CommandResult["ChartDoesNotExist"] = 85] = "ChartDoesNotExist";
+        CommandResult[CommandResult["InvalidHeaderIndex"] = 86] = "InvalidHeaderIndex";
+        CommandResult[CommandResult["InvalidQuantity"] = 87] = "InvalidQuantity";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
     var DIRECTION;
@@ -22992,6 +22994,16 @@
         64: "000000",
         65: "FFFFFF", // system background
     };
+    const IMAGE_MIMETYPE_EXTENSION_MAPPING = {
+        "image/avif": "avif",
+        "image/bmp": "bmp",
+        "image/gif": "gif",
+        "image/vnd.microsoft.icon": "ico",
+        "image/jpeg": "jpeg",
+        "image/png": "png",
+        "image/tiff": "tiff",
+        "image/webp": "webp",
+    };
 
     /**
      * Most of the functions could stay private, but are exported for testing purposes
@@ -24385,6 +24397,11 @@
     function createOverride(partName, contentType) {
         return escapeXml /*xml*/ `
     <Override ContentType="${contentType}" PartName="${partName}" />
+  `;
+    }
+    function createDefaultXMLElement(extension, contentType) {
+        return escapeXml /*xml*/ `
+    <Default Extension="${extension}" ContentType="${contentType}" />
   `;
     }
     function joinXmlNodes(xmlNodes) {
@@ -29478,9 +29495,16 @@
                     const elements = cmd.dimension === "COL"
                         ? this.getters.getNumberCols(cmd.sheetId)
                         : this.getters.getNumberRows(cmd.sheetId);
-                    return (hiddenGroup || []).flat().concat(cmd.elements).length < elements
-                        ? 0 /* CommandResult.Success */
-                        : 66 /* CommandResult.TooManyHiddenElements */;
+                    const hiddenElements = new Set((hiddenGroup || []).flat().concat(cmd.elements));
+                    if (hiddenElements.size >= elements) {
+                        return 66 /* CommandResult.TooManyHiddenElements */;
+                    }
+                    else if (Math.min(...cmd.elements) < 0 || Math.max(...cmd.elements) > elements) {
+                        return 86 /* CommandResult.InvalidHeaderIndex */;
+                    }
+                    else {
+                        return 0 /* CommandResult.Success */;
+                    }
                 }
                 case "REMOVE_COLUMNS_ROWS":
                     if (!this.getters.tryGetSheet(cmd.sheetId)) {
@@ -30653,6 +30677,28 @@
                     return this.orderedSheetIds.length > 1
                         ? 0 /* CommandResult.Success */
                         : 9 /* CommandResult.NotEnoughSheets */;
+                case "ADD_COLUMNS_ROWS":
+                    const elements = cmd.dimension === "COL"
+                        ? this.getNumberCols(cmd.sheetId)
+                        : this.getNumberRows(cmd.sheetId);
+                    if (cmd.base < 0 || cmd.base > elements) {
+                        return 86 /* CommandResult.InvalidHeaderIndex */;
+                    }
+                    else if (cmd.quantity <= 0) {
+                        return 87 /* CommandResult.InvalidQuantity */;
+                    }
+                    return 0 /* CommandResult.Success */;
+                case "REMOVE_COLUMNS_ROWS": {
+                    const elements = cmd.dimension === "COL"
+                        ? this.getNumberCols(cmd.sheetId)
+                        : this.getNumberRows(cmd.sheetId);
+                    if (Math.min(...cmd.elements) < 0 || Math.max(...cmd.elements) > elements) {
+                        return 86 /* CommandResult.InvalidHeaderIndex */;
+                    }
+                    else {
+                        return 0 /* CommandResult.Success */;
+                    }
+                }
                 case "FREEZE_ROWS": {
                     return this.checkValidations(cmd, this.checkRowFreezeQuantity, this.checkRowFreezeOverlapMerge);
                 }
@@ -39423,7 +39469,7 @@
             const file = await this.getImageFromUser();
             const path = await this.fileStore.upload(file);
             const size = await this.getImageSize(path);
-            return { path, size };
+            return { path, size, mimetype: file.type };
         }
         getImageFromUser() {
             return new Promise((resolve, reject) => {
@@ -44477,6 +44523,7 @@
         return createXMLFile(parseXML(xml), "xl/workbook.xml", "workbook");
     }
     function createWorksheets(data, construct) {
+        var _a;
         const files = [];
         let currentTableIndex = 1;
         for (const [sheetIndex, sheet] of Object.entries(data.sheets)) {
@@ -44493,8 +44540,7 @@
             // Figures and Charts
             let drawingNode = escapeXml ``;
             const drawingRelIds = [];
-            const charts = sheet.charts;
-            for (const chart of charts) {
+            for (const chart of sheet.charts) {
                 const xlsxChartId = convertChartId(chart.id);
                 const chartRelId = addRelsToFile(construct.relsFiles, `xl/drawings/_rels/drawing${sheetIndex}.xml.rels`, {
                     target: `../charts/chart${xlsxChartId}.xml`,
@@ -44503,20 +44549,26 @@
                 drawingRelIds.push(chartRelId);
                 files.push(createXMLFile(createChart(chart, sheetIndex, data), `xl/charts/chart${xlsxChartId}.xml`, "chart"));
             }
-            const images = sheet.images;
-            for (const image of images) {
+            for (const image of sheet.images) {
+                const mimeType = (_a = image.data.mimetype) !== null && _a !== void 0 ? _a : "image/jpeg";
+                const extension = IMAGE_MIMETYPE_EXTENSION_MAPPING[mimeType];
+                // only support exporting images with mimetypes specified in the mapping
+                if (extension === undefined)
+                    continue;
                 const xlsxImageId = convertImageId(image.id);
+                let imageFileName = `image${xlsxImageId}.${extension}`;
                 const imageRelId = addRelsToFile(construct.relsFiles, `xl/drawings/_rels/drawing${sheetIndex}.xml.rels`, {
-                    target: `../media/image${xlsxImageId}`,
+                    target: `../media/${imageFileName}`,
                     type: XLSX_RELATION_TYPE.image,
                 });
                 drawingRelIds.push(imageRelId);
                 files.push({
-                    path: `xl/media/image${xlsxImageId}`,
-                    imagePath: image.data.path,
+                    path: `xl/media/${imageFileName}`,
+                    imageSrc: image.data.path,
+                    mimetype: mimeType,
                 });
             }
-            const drawings = [...charts, ...images];
+            const drawings = [...sheet.charts, ...sheet.images];
             if (drawings.length) {
                 const drawingRelId = addRelsToFile(construct.relsFiles, `xl/worksheets/_rels/sheet${sheetIndex}.xml.rels`, {
                     target: `../drawings/drawing${sheetIndex}.xml`,
@@ -44635,6 +44687,8 @@
     }
     function createContentTypes(files) {
         const overrideNodes = [];
+        // hard-code supported image mimetypes
+        const imageDefaultNodes = Object.entries(IMAGE_MIMETYPE_EXTENSION_MAPPING).map(([mimetype, extension]) => createDefaultXMLElement(extension, mimetype));
         for (const file of files) {
             if ("contentType" in file && file.contentType) {
                 overrideNodes.push(createOverride("/" + file.path, CONTENT_TYPES[file.contentType]));
@@ -44642,6 +44696,7 @@
         }
         const xml = escapeXml /*xml*/ `
     <Types xmlns="${NAMESPACE["Types"]}">
+      ${joinXmlNodes(Object.values(imageDefaultNodes))}
       <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />
       <Default Extension="xml" ContentType="application/xml" />
       ${joinXmlNodes(overrideNodes)}
@@ -45204,8 +45259,8 @@
 
 
     __info__.version = '16.2.4';
-    __info__.date = '2023-04-21T08:02:02.039Z';
-    __info__.hash = '7169d69';
+    __info__.date = '2023-04-26T11:42:43.301Z';
+    __info__.hash = '9e806f8';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
