@@ -23,6 +23,7 @@ export class SearchBarMenu extends Component {
         SearchDropdownItem,
         CustomGroupByItem,
     };
+    static props = {};
 
     setup() {
         this.facet_icons = FACET_ICONS;
