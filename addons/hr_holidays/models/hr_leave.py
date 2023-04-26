@@ -361,7 +361,7 @@ class HolidaysRequest(models.Model):
     @api.depends('holiday_status_id')
     def _compute_state(self):
         for leave in self:
-            leave.state = 'confirm' if leave.validation_type != 'no_validation' else 'draft'
+            leave.state = 'confirm' if leave.validation_type == 'no_validation' else 'draft'
 
     @api.depends('holiday_status_id.requires_allocation', 'validation_type', 'employee_id', 'date_from', 'date_to')
     def _compute_from_holiday_status_id(self):
@@ -950,7 +950,7 @@ class HolidaysRequest(models.Model):
 
                 if 'state' not in values:
                     # To mimic the behavior of compute_state that was always triggered, as the field was readonly
-                    values['state'] = 'confirm' if mapped_validation_type[leave_type_id] != 'no_validation' else 'draft'
+                    values['state'] = 'draft'
 
                 # Handle double validation
                 if mapped_validation_type[leave_type_id] == 'both':
