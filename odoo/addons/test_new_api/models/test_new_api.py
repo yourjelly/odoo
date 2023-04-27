@@ -1766,3 +1766,28 @@ class EmptyChar(models.Model):
     _description = 'A model to test emtpy char'
 
     name = fields.Char('Name')
+
+class TestRelatedNotTriggered(models.Model):
+    _name = 'test_new_api.related_not_triggered'
+    _description = "test_one2many_related_not_triggered"
+
+    child_ids = fields.One2many(comodel_name='test_new_api.related_not_triggered_line', inverse_name='parent_id')
+    trigger = fields.Char()
+    name = fields.Char(compute='_compute_name', store=True)
+
+    def do_something(self):
+        self.trigger = "just to trigger a compute"
+        self.flush_recordset()
+
+    @api.depends('trigger')
+    def _compute_name(self):
+        for record in self:
+            self.env['test_new_api.related_not_triggered_line'].flush_model()
+            record.name = "turlututu"
+
+class TestRelatedNotTriggeredLine(models.Model):
+    _name = 'test_new_api.related_not_triggered_line'
+    _description = "test_one2many_related_not_triggered"
+
+    parent_id = fields.Many2one(comodel_name='test_new_api.related_not_triggered')
+    name = fields.Char(related='parent_id.name', store=True)

@@ -409,3 +409,11 @@ class One2manyCase(TransactionCase):
         self.assertEqual(len(parent.child_ids), 3)
         self.assertEqual(parent, parent.child_ids.parent_id)
         self.assertEqual(parent.child_ids.mapped('name'), ['C3', 'PO', 'R2D2'])
+
+    def test_one2many_related_not_triggered(self):
+        record = self.env['test_new_api.related_not_triggered'].create({
+            'child_ids': [Command.create({})],
+        })
+        record.do_something()
+
+        self.assertRecordValues(record.child_ids, [{'name': record.name}])
