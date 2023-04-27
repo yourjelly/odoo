@@ -2182,7 +2182,7 @@ msgstr "Derechos por pagar"
 #: code:addons/l10n_mx/models/chart_template.py:0
 #, python-format
 msgid "Effectively Paid"
-msgstr "Pago efectivo"
+msgstr "Efectivamente pagado"
 
 #. module: l10n_mx
 #: model:account.group,name:l10n_mx.1_account_subgroup_energía_eléctrica
