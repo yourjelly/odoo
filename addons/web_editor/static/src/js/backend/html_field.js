@@ -379,16 +379,17 @@ export class HtmlField extends Component {
     }
     async commitChanges({ urgent } = {}) {
         if (this._isDirty() || urgent) {
+            let toInlinePromise;
+            if (this.props.isInlineStyle && this.wysiwyg) {
+                // Avoid listening to changes made during the _toInline process.
+                this.wysiwyg.odooEditor.observerUnactive('commitChanges');
+                toInlinePromise = this._toInline();
+            }
             if (urgent) {
                 await this.updateValue();
             }
-            if (this.wysiwyg) {
-                // Avoid listening to changes made during the _toInline process.
-                this.wysiwyg.odooEditor.observerUnactive('commitChanges');
-                await this.wysiwyg.saveModifiedImages();
-                if (this.props.isInlineStyle) {
-                    await this._toInline();
-                }
+            if (this.props.isInlineStyle && this.wysiwyg) {
+                await toInlinePromise;
                 this.wysiwyg.odooEditor.observerActive('commitChanges');
             }
             if (owl.status(this) !== 'destroyed') {
