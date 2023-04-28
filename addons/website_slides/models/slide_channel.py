@@ -333,8 +333,11 @@ class Channel(models.Model):
     ], default='public', string='Show Course To', required=True,
         help='Defines who can access your courses and their content.')
     partner_ids = fields.Many2many(
-        'res.partner', 'slide_channel_partner', 'channel_id', 'partner_id',
-        string='Members', help="All members of the channel.", context={'active_test': False}, copy=False, depends=['channel_partner_ids'])
+        # implemented as a compute/search instead of specifying the relation table directly
+        # this is done because we want to exclude active=False records on the joining table
+        'res.partner',
+        compute="_compute_partner_ids", search="_search_partner_ids",
+        string='Members', help="All members of the channel.")
     members_count = fields.Integer('Attendees count', compute='_compute_members_count')
     members_done_count = fields.Integer('Attendees Done Count', compute='_compute_members_done_count')
     has_requested_access = fields.Boolean(string='Access Requested', compute='_compute_has_requested_access', compute_sudo=False)
@@ -422,6 +425,25 @@ class Channel(models.Model):
         for channel in self:
             channel.slide_category_ids = channel.slide_ids.filtered(lambda slide: slide.is_category)
             channel.slide_content_ids = channel.slide_ids - channel.slide_category_ids
+
+    @api.depends('channel_partner_ids.active')
+    def _compute_partner_ids(self):
+        memberships_by_channel = self.env['slide.channel.partner'].sudo()._read_group(
+            [('channel_id', 'in', self.ids)],
+            ['channel_id'],
+            aggregates=['partner_id:array_agg']
+        )
+
+        for slide_channel, partner_ids in memberships_by_channel:
+            slide_channel.partner_ids = partner_ids
+
+    def _search_partner_ids(self, operator, value):
+        return [(
+            'channel_partner_ids', '=', self.env['slide.channel.partner']._search(
+                [('partner_id', operator, value),
+                 ('active', '=', True)],
+            )
+        )]
 
     @api.depends('slide_ids.slide_category', 'slide_ids.is_published', 'slide_ids.completion_time',
                  'slide_ids.likes', 'slide_ids.dislikes', 'slide_ids.total_views', 'slide_ids.is_category', 'slide_ids.active')

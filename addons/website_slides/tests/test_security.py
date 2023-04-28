@@ -42,6 +42,17 @@ class TestAccess(common.SlidesCase):
         self.slide.with_user(self.user_emp).read(['name'])
 
         # not member anymore -> cannot read
+        membership.action_archive()
+        self.channel.with_user(self.user_emp).read(['name'])
+        with self.assertRaises(AccessError):
+            self.slide.with_user(self.user_emp).read(['name'])
+
+        # re-activate member -> can read again
+        membership.action_unarchive()
+        self.channel.with_user(self.user_emp).read(['name'])
+        self.slide.with_user(self.user_emp).read(['name'])
+
+        # unlink membership -> cannot read
         membership.unlink()
         self.channel.with_user(self.user_emp).read(['name'])
         with self.assertRaises(AccessError):
