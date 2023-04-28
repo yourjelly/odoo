@@ -6,7 +6,7 @@
                   menuClass="'o_search_bar_menu d-flex flex-wrap flex-lg-nowrap mt-2 py-3'"
                   position="'bottom-end'">
             <t t-set-slot="toggler" t-slot-scope="scope">
-                <i class="fa fa-caret-down" aria-hidden="true"/>
+                <i class="fa fa-caret-down" aria-hidden="true" data-hotkey="shift+q"/>
             </t>
             <!-- Filter -->
             <div class="o_dropdown_container o_filter_menu w-100 w-lg-auto px-3 mb-4 mb-lg-0">
