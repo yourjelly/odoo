@@ -30,8 +30,10 @@ var ParentedMixin = {
     setParent : function (parent) {
         if (this.getParent()) {
             if (this.getParent().__parentedMixin) {
-                this.getParent().__parentedChildren = _.without(this
-                    .getParent().getChildren(), this);
+                const children = this.getParent().getChildren();
+                this.getParent().__parentedChildren = children.filter(
+                    (child) => child.$el !== this.$el
+                );
             }
         }
         this.__parentedParent = parent;

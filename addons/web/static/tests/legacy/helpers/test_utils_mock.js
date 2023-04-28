@@ -27,6 +27,7 @@ import { processArch } from "@web/legacy/legacy_load_views";
 
 import { Component } from "@odoo/owl";
 import { uniqueId } from "@web/core/utils/functions";
+import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 const DebouncedField = basic_fields.DebouncedField;
 
 
@@ -388,16 +389,18 @@ async function addMockEnvironmentOwl(Component, params, mockServer) {
     dom.DEBOUNCE = 0;
 
     // patch underscore debounce/throttle functions
-    const initialDebounce = _.debounce;
+    let debounceCopy = debounce;
+    const initialDebounce = debounceCopy;
     if (params.debounce === false) {
-        _.debounce = function (func) {
+        debounceCopy = function (func) {
             return func;
         };
     }
     // fixme: throttle is inactive by default, should we make it explicit ?
-    const initialThrottle = _.throttle;
-    if (!('throttle' in params) || !params.throttle) {
-        _.throttle = function (func) {
+    let throttleCopy = throttleForAnimation;
+    const initialThrottle = throttleCopy;
+    if (!("throttle" in params) || !params.throttle) {
+        throttleCopy = function (func) {
             return func;
         };
     }
@@ -434,8 +437,8 @@ async function addMockEnvironmentOwl(Component, params, mockServer) {
 
         DebouncedField.prototype.DEBOUNCE = initialDebounceValue;
         dom.DEBOUNCE = initialDOMDebounceValue;
-        _.debounce = initialDebounce;
-        _.throttle = initialThrottle;
+        debounceCopy = initialDebounce;
+        throttleCopy = initialThrottle;
 
         // clear the caches (e.g. data_manager, ModelFieldSelector) at the end
         // of each test to avoid collisions

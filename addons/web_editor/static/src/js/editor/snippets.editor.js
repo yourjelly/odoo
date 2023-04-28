@@ -14,7 +14,7 @@ import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
 import { sprintf, escape } from "@web/core/utils/strings";
 const QWeb = core.qweb;
 import {closestElement} from "@web_editor/js/editor/odoo-editor/src/utils/utils";
-import { debounce } from "@web/core/utils/timing";
+import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { uniqueId } from "@web/core/utils/functions";
 import { sortBy, unique } from "@web/core/utils/arrays";
 
@@ -247,7 +247,7 @@ var SnippetEditor = Widget.extend({
         }
 
         var _animationsCount = 0;
-        var postAnimationCover = _.throttle(() => {
+        var postAnimationCover = debounce(() => {
             this.trigger_up('cover_update', {
                 overlayVisible: true,
             });
@@ -1941,7 +1941,7 @@ var SnippetsMenu = Widget.extend({
         core.bus.on('deactivate_snippet', this, this._onDeactivateSnippet);
 
         // Adapt overlay covering when the window is resized / content changes
-        var debouncedCoverUpdate = _.throttle(() => {
+        var debouncedCoverUpdate = debounce(() => {
             this.updateCurrentSnippetEditorOverlay();
         }, 50);
         this.$window.on('resize.snippets_menu', debouncedCoverUpdate);
@@ -1956,7 +1956,7 @@ var SnippetsMenu = Widget.extend({
                 editor.toggleOverlayVisibility(false);
             });
         });
-        this.$body.on('mousemove.snippets_menu, mousedown.snippets_menu', _.throttle(() => {
+        this.$body.on('mousemove.snippets_menu, mousedown.snippets_menu', throttleForAnimation(() => {
             if (!this.__overlayKeyWasDown) {
                 return;
             }
@@ -1965,7 +1965,7 @@ var SnippetsMenu = Widget.extend({
                 editor.toggleOverlayVisibility(true);
                 editor.cover();
             });
-        }, 250));
+        }));
 
         // Hide the active overlay when scrolling.
         // Show it again and recompute all the overlays after the scroll.
@@ -1976,7 +1976,7 @@ var SnippetsMenu = Widget.extend({
         this.$scrollingTarget = this.$scrollingElement.is(this.$body[0].ownerDocument.scrollingElement)
             ? $(this.$body[0].ownerDocument.defaultView)
             : this.$scrollingElement;
-        this._onScrollingElementScroll = _.throttle(() => {
+        this._onScrollingElementScroll = throttleForAnimation(() => {
             for (const editor of this.snippetEditors) {
                 editor.toggleOverlayVisibility(false);
             }
@@ -1988,7 +1988,7 @@ var SnippetsMenu = Widget.extend({
                     editor.cover();
                 }
             }, 250);
-        }, 50);
+        });
         // We use addEventListener instead of jQuery because we need 'capture'.
         // Setting capture to true allows to take advantage of event bubbling
         // for events that otherwise don’t support it. (e.g. useful when

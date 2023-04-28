@@ -1,6 +1,7 @@
 /** @odoo-module alias=web.MockServer **/
 
 import { unique } from "@web/core/utils/arrays";
+import { pick } from "@web/core/utils/objects";
 import Class from "web.Class";
 import Domain from "web.Domain";
 import pyUtils from "web.py_utils";
@@ -650,13 +651,11 @@ var MockServer = Class.extend({
         var modelFields = this.data[modelName].fields;
         // Get only the asked fields (args[0] could be the field names)
         if (args[0] && args[0].length) {
-            modelFields = _.pick.apply(_, [modelFields].concat(args[0]));
+            modelFields = pick(modelFields, ...Object.keys(modelFields).concat(args[0]));
         }
         // Get only the asked attributes (args[1] could be the attribute names)
         if (args[1] && args[1].length) {
-            modelFields = _.mapObject(modelFields, function (field) {
-                return _.pick.apply(_, [field].concat(args[1]));
-            });
+            modelFields = pick(modelFields, ...Object.keys(modelFields).concat(args[1]));
         }
         return modelFields;
     },
@@ -1876,9 +1875,11 @@ var MockServer = Class.extend({
 
         // update value of relationnal fields pointing to the deleted records
         Object.values(this.data).forEach((d) => {
-            var relatedFields = _.pick(d.fields, function (field) {
+            const fields_to_pick = Object.keys(d.fields || {}).filter((key) => {
+                const field = d.fields[key];
                 return field.relation === model;
             });
+            var relatedFields = pick(d.fields, ...fields_to_pick);
             Object.keys(relatedFields).forEach((relatedField) => {
                 d.records.forEach((record) => {
                     if (Array.isArray(record[relatedField])) {

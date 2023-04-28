@@ -18,11 +18,12 @@
      *
      * @private
      * @param {Array<Object>} slideList List of dict reprensenting a slide
-     * @param {Object} matcher (see https://underscorejs.org/#matcher)
+     * @param {[string] : any} matcher
      */
     var findSlide = function (slideList, matcher) {
-        var slideMatch = _.matcher(matcher);
-        return slideList.find(slide => slideMatch(slide));
+        return slideList.find((slide) => {
+            return Object.keys(matcher).every((key) => matcher[key] === slide[key]);
+        });
     };
 
     /**

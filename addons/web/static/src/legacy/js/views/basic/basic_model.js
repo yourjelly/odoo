@@ -3444,10 +3444,9 @@ var BasicModel = AbstractModel.extend({
         var context = new Context(session.user_context);
 
         if (options.full || !(options.fieldName || options.additionalContext)) {
+            const keys_to_omit = Object.keys(element.context || {}).filter((key) => String(key).startsWith('default_'));
             var context_to_add = options.sanitize_default_values ?
-                _.omit(element.context, function (val, key) {
-                    return String(key).startsWith('default_');
-                })
+                omit(element.context, ...keys_to_omit)
                 : element.context;
             context.add(context_to_add);
         }
