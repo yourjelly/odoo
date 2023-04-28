@@ -2,11 +2,11 @@
 
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
-import { SaleOrderLineProductField } from '@sale/js/sale_product_field';
+import { PurchaseOrderLineProductField } from '@purchase/js/purchase_product_field';
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { ProductConfiguratorDialog } from "./product_configurator_dialog/product_configurator_dialog";
 
-patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
+patch(PurchaseOrderLineProductField.prototype, 'purchase_product_configurator', {
 
     setup() {
         this._super(...arguments);
@@ -17,14 +17,17 @@ patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
 
     async _onProductTemplateUpdate() {
         this._super(...arguments);
+        let ctx = this.context;
+        ctx["from_purchase"] = true;
         const result = await this.orm.call(
             'product.template',
-            'get_single_product_variant',
+            'get_single_purchase_product_variant',
             [this.props.record.data.product_template_id[0]],
             {
                 context: this.context,
             }
         );
+        debugger;
         if(result && result.product_id) {
             if (this.props.record.data.product_id != result.product_id.id) {
                 await this.props.record.update({
@@ -37,19 +40,26 @@ patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
                 }
             }
         } else {
+            // debugger;
             if (!result.mode || result.mode === 'configurator') {
-                this._openProductConfigurator();
+                this._openProductConfigurator(false);
             } else {
-                // only triggered when sale_product_matrix is installed.
-                this._openGridConfigurator();
+                // only triggered when purchase_product_matrix is installed.
+                this._openGridConfigurator(false);
             }
         }
     },
 
     _editProductConfiguration() {
         this._super(...arguments);
+        debugger;
         if (this.props.record.data.is_configurable_product) {
-            this._openProductConfigurator(true);
+            if (!result.mode || result.mode === 'configurator') {
+                this._openProductConfigurator(true);
+            } else {
+                // only triggered when purchase_product_matrix is installed.
+                this._openGridConfigurator(true);
+            }
         }
     },
 
@@ -58,7 +68,7 @@ patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
     },
 
     async _openProductConfigurator(edit=false) {
-        const saleOrderRecord = this.props.record.model.root;
+        const purchaseOrderRecord = this.props.record.model.root;
 
         /**
          *  `product_custom_attribute_value_ids` records are not loaded in the view bc sub templates
@@ -75,6 +85,7 @@ patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
                 this.props.record.data.product_custom_attribute_value_ids.currentIds,
                 ["custom_product_template_attribute_value_id", "custom_value"]
             );
+        // debugger;
         this.dialog.add(ProductConfiguratorDialog, {
             productTemplateId: this.props.record.data.product_template_id[0],
             ptavIds: this.props.record.data.product_template_attribute_value_ids.records.map(
@@ -90,27 +101,29 @@ patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
                     }
                 }
             ),
-            quantity: this.props.record.data.product_uom_qty,
+            quantity: this.props.record.data.product_qty,
             productUOMId: this.props.record.data.product_uom[0],
-            companyId: saleOrderRecord.data.company_id[0],
-            pricelistId: saleOrderRecord.data.pricelist_id[0],
+            companyId: purchaseOrderRecord.data.company_id[0],
+            // pricelistId: purchaseOrderRecord.data.pricelist_id[0],
             currencyId: this.props.record.data.currency_id[0],
-            soDate: serializeDateTime(saleOrderRecord.data.date_order),
+            soDate: serializeDateTime(purchaseOrderRecord.data.date_order),
             edit: edit,
             save: async (mainProduct, optionalProducts) => {
                 debugger;
                 await this.props.record.update(mainProduct);
+                
+                await this.props.record.update({product_qty: mainProduct.product_qty});
                 this._onProductUpdate();
                 for (const optionalProduct of optionalProducts) {
-                    const line = await saleOrderRecord.data.order_line.addNew({
+                    const line = await purchaseOrderRecord.data.order_line.addNew({
                         position: 'bottom',
                     });
                     line.update(optionalProduct);
                 }
-                saleOrderRecord.data.order_line.unselectRecord();
+                purchaseOrderRecord.data.order_line.unselectRecord();
             },
             discard: () => {
-                saleOrderRecord.data.order_line.removeRecord(this.props.record);
+                purchaseOrderRecord.data.order_line.removeRecord(this.props.record);
             },
         });
     },

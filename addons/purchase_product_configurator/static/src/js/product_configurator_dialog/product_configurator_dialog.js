@@ -7,7 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 
 export class ProductConfiguratorDialog extends Component {
     static components = { Dialog, ProductList};
-    static template = 'sale_product_configurator.dialog';
+    static template = 'purchase_product_configurator.dialog';
     static props = {
         productTemplateId: Number,
         ptavIds: { type: Array, element: Number },
@@ -54,6 +54,7 @@ export class ProductConfiguratorDialog extends Component {
         });
 
         onWillStart(async () => {
+            debugger;
             const { products, optional_products } = await this._loadData(this.props.edit);
             this.state.products = products;
             this.state.optionalProducts = optional_products;
@@ -73,9 +74,9 @@ export class ProductConfiguratorDialog extends Component {
     //--------------------------------------------------------------------------
 
     async _loadData(onlyMainProduct) {
-        return this.rpc('/sale_product_configurator/get_values', {
+        return this.rpc('/purchase_product_configurator/get_values', {
             product_template_id: this.props.productTemplateId,
-            quantity: this.props.quantity,
+            quantity: this.props.product_qty,
             currency_id: this.props.currencyId,
             so_date: this.props.soDate,
             product_uom_id: this.props.productUOMId,
@@ -87,14 +88,14 @@ export class ProductConfiguratorDialog extends Component {
     }
 
     async _createProduct(product) {
-        return this.rpc('/sale_product_configurator/create_product', {
+        return this.rpc('/purchase_product_configurator/create_product', {
             product_template_id: product.product_tmpl_id,
             combination: this._getCombination(product),
         });
     }
 
     async _updateCombination(product, quantity) {
-        return this.rpc('/sale_product_configurator/update_combination', {
+        return this.rpc('/purchase_product_configurator/update_combination', {
             product_template_id: product.product_tmpl_id,
             combination: this._getCombination(product),
             currency_id: this.props.currencyId,
@@ -102,19 +103,19 @@ export class ProductConfiguratorDialog extends Component {
             quantity: quantity,
             product_uom_id: this.props.productUOMId,
             company_id: this.props.companyId,
-            pricelist_id: this.props.pricelistId,
+            // pricelist_id: this.props.pricelistId,
         });
     }
 
     async _getOptionalProducts(product) {
-        return this.rpc('/sale_product_configurator/get_optional_products', {
+        return this.rpc('/purchase_product_configurator/get_optional_products', {
             product_template_id: product.product_tmpl_id,
             combination: this._getCombination(product),
             parent_combination: this._getParentsCombination(product),
             currency_id: this.props.currencyId,
             so_date: this.props.soDate,
             company_id: this.props.companyId,
-            pricelist_id: this.props.pricelistId,
+            // pricelist_id: this.props.pricelistId,
         });
     }
 
@@ -132,6 +133,7 @@ export class ProductConfiguratorDialog extends Component {
             p => p.product_tmpl_id === productTmplId
         );
         if (index >= 0) {
+            debugger;
             this.state.products.push(...this.state.optionalProducts.splice(index, 1));
             // Fetch optional product from the server with the parent combination.
             const product = this._findProduct(productTmplId);
@@ -198,6 +200,7 @@ export class ProductConfiguratorDialog extends Component {
             };
             this._removeProduct(productTmplId);
         } else {
+            debugger;
             const product = this._findProduct(productTmplId);
             const { price } = await this._updateCombination(product, quantity);
             product.quantity = quantity;
@@ -312,6 +315,7 @@ export class ProductConfiguratorDialog extends Component {
      * @return {Array} - The list of dependents products.
      */
     _getChildProducts(productTmplId) {
+        debugger;
         return [
             ...this.state.products.filter(p => p.parent_product_tmpl_ids?.includes(productTmplId)),
             ...this.state.optionalProducts.filter(p => p.parent_product_tmpl_ids?.includes(productTmplId))
@@ -367,7 +371,7 @@ export class ProductConfiguratorDialog extends Component {
     }
 
     /**
-     * Serialize the product into a format understandable by `sale.order.line`.
+     * Serialize the product into a format understandable by `purchase.order.line`.
      *
      * @param {Object} product - The product to serialize.
      * @return {Object} - The serialized product.
@@ -375,7 +379,7 @@ export class ProductConfiguratorDialog extends Component {
     _serializeProduct(product) {
         let serializedProduct = {
             product_id: [product.id, product.display_name],
-            product_uom_qty: product.quantity,
+            product_qty: product.quantity,
         }
 
         // handle custom values & no variants
@@ -421,6 +425,7 @@ export class ProductConfiguratorDialog extends Component {
      * @return {undefined}
      */
     async onConfirm() {
+        debugger;
         if (!this.isPossibleConfiguration()) return;
         // Create the products with dynamic attributes
         for (const product of this.state.products) {

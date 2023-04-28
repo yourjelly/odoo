@@ -161,6 +161,7 @@ class PurchaseOrderLine(models.Model):
     is_configurable_product = fields.Boolean('Is the product configurable?', related="product_template_id.has_configurable_attributes")
     product_template_attribute_value_ids = fields.Many2many(related='product_id.product_template_attribute_value_ids', readonly=True)
     product_no_variant_attribute_value_ids = fields.Many2many('product.template.attribute.value', string='Product attribute values that do not create variants', ondelete='restrict')
+    purchase_add_mode = fields.Selection(related='product_template_id.purchase_add_mode', depends=['product_template_id'])
 
     def _get_product_purchase_description(self, product):
         name = super(PurchaseOrderLine, self)._get_product_purchase_description(product)
