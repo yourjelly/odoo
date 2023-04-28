@@ -1877,9 +1877,10 @@ var MockServer = Class.extend({
 
         // update value of relationnal fields pointing to the deleted records
         Object.values(this.data).forEach((d) => {
-            const fields_to_pick = Object.keys(d.fields).filter(
-                (field) => field.relation === model
-            );
+            const fields_to_pick = Object.keys(d.fields || {}).filter((key) => {
+                const field = d.fields[key];
+                return field.relation === model;
+            });
             var relatedFields = pick(d.fields, ...fields_to_pick);
             Object.keys(relatedFields).forEach((relatedField) => {
                 d.records.forEach((record) => {
