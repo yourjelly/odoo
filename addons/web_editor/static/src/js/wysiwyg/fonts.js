@@ -1,5 +1,7 @@
 /** @odoo-module alias=wysiwyg.fonts **/
 
+import { memoize } from "@web/core/utils/functions";
+
 export default {
     /**
      * Retrieves all the CSS rules which match the given parser (Regex).
@@ -86,7 +88,7 @@ export default {
     /**
      * Searches the fonts described by the @see fontIcons variable.
      */
-    computeFonts: _.once(function () {
+    computeFonts: memoize(function () {
         var self = this;
         this.fontIcons.forEach((data) => {
             data.cssData = self.getCssSelectors(data.parser);

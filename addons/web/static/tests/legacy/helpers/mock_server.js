@@ -655,7 +655,7 @@ var MockServer = Class.extend({
         }
         // Get only the asked attributes (args[1] could be the attribute names)
         if (args[1] && args[1].length) {
-            modelFields = _.mapObject(modelFields, function (field) {
+            modelFields = Object.values(modelFields || {}).map((field) => {
                 return _.pick.apply(_, [field].concat(args[1]));
             });
         }
