@@ -237,7 +237,7 @@ registry.category("web_tour.tours").add('shop_wishlist', {
         // Test one impossible combination while other combinations are possible
         {
             content: "Archive the first variant",
-            trigger: '#top_menu:contains("Mitchell Admin")',
+            trigger: 'header#top:contains("Mitchell Admin")',
             run: function () {
                 rpc.query({
                     model: 'product.product',
@@ -303,7 +303,7 @@ registry.category("web_tour.tours").add('shop_wishlist', {
         // test when all combinations are impossible
         {
             content: "Archive all variants",
-            trigger: '#top_menu:contains("Mitchell Admin")',
+            trigger: 'header#top:contains("Mitchell Admin")',
             run: function () {
                 rpc.query({
                     model: 'product.product',
@@ -360,7 +360,7 @@ registry.category("web_tour.tours").add('shop_wishlist', {
         },
         {
             content: "Go to '/shop",
-            trigger: '#top_menu_collapse a[href="/shop"]',
+            trigger: 'header#top a[href="/shop"]',
         },
         {
             content: "Search the product Customizable Desk'",
@@ -385,7 +385,7 @@ registry.category("web_tour.tours").add('shop_wishlist', {
         },
         {
             content: "Go to '/shop",
-            trigger: '#top_menu_collapse a[href="/shop"]',
+            trigger: 'header#top a[href="/shop"]',
         },
         {
             content: "Search the product Customizable Desk'",
