@@ -127,7 +127,7 @@
                                     <Composer autofocus="true" composer="message.composer" messageComponent="constructor" onDiscardCallback.bind="exitEditMode" onPostCallback.bind="exitEditMode" mode="'compact'"/>
                                 </div>
                             </div>
-                            <div t-if="props.hasActions and !message.isTransient" class="o-mail-Message-actions bg-view"
+                            <div t-if="props.hasActions and !message.isTransient" class="o-mail-Message-actions"
                                 t-att-class="{
                                     'position-absolute top-0': !env.inDiscussApp,
                                     'start-0 ms-3': isAlignedRight,
@@ -141,7 +141,7 @@
                                     'o-expanded': state.expandOptions
                                 }"
                             >
-                                <div class="d-flex rounded-1 shadow-sm overflow-hidden alignedRight" t-att-class="{
+                                <div class="d-flex rounded-1 bg-view shadow-sm overflow-hidden alignedRight" t-att-class="{
                                         'mt-3': env.inChatter and !(message.isDiscussion or message.isNotification),
                                         'flex-row-reverse': env.inChatWindow and isAlignedRight,
                                     }"
