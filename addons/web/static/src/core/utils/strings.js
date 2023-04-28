@@ -316,3 +316,37 @@ export function unaccent(str, caseSensitive) {
     });
     return caseSensitive ? str : str.toLowerCase();
 }
+
+const htmlCaracters = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+}
+
+/**
+ * Replace HTML character with ASCII character
+ *
+ * @param {string} str string
+ * @returns {string} ASCII string
+ */
+export function escapeHTML(str) {
+    for( const [key, value] of Object.entries(htmlCaracters) ) {
+        str = String(str).replace( new RegExp(key, "g"), value)
+    }
+    return str 
+}
+
+/**
+ * Replace ASCII character with HTML character
+ *
+ * @param {string} str string
+ * @returns {string} HTML string
+ */
+export function unescapeHTML(str) {
+    for( const [key, value] of Object.entries(htmlCaracters) ) {
+        str = String(str).replace( new RegExp(value, "g"), key)
+    }
+    return str 
+}

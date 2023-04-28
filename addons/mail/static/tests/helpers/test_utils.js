@@ -370,7 +370,7 @@ async function addSwitchTabDropdownItem(rootTarget, tabTarget) {
  * @returns {Object}
  */
 async function start(param0 = {}) {
-    // patch _.debounce and _.throttle to be fast and synchronous.
+    // patch debounce and throttle to be fast and synchronous.
     patchWithCleanup(_, {
         debounce: (func) => func,
         throttle: (func) => func,

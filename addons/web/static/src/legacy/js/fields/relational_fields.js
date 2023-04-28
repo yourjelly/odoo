@@ -21,6 +21,8 @@ import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import Domain from "web.Domain";
 import { escape, sprintf } from "@web/core/utils/strings";
+import { uniqueId } from "@web/core/utils/functions";
+import { sortBy } from "@web/core/utils/arrays";
 
 var _t = core._t;
 var _lt = core._lt;
@@ -111,9 +113,12 @@ var FieldMany2One = AbstractField.extend({
         this.can_create = canCreate && !this.nodeOptions.no_create && !options.noCreate;
         this.can_write = 'can_write' in this.attrs ? JSON.parse(this.attrs.can_write) : true;
 
-        this.nodeOptions = _.defaults(this.nodeOptions, {
-            quick_create: true,
-        });
+        this.nodeOptions = Object.assign(
+            {
+                quick_create: true,
+            },
+            this.nodeOptions
+        );
         this.noOpen = 'noOpen' in options ? options.noOpen : this.nodeOptions.no_open;
         this.m2o_value = this._formatValue(this.value);
         // 'recordParams' is a dict of params used when calling functions
@@ -238,7 +243,7 @@ var FieldMany2One = AbstractField.extend({
             order: params.order || 999
         });
 
-        this._autocompleteSources = _.sortBy(this._autocompleteSources, 'order');
+        this._autocompleteSources = sortBy(this._autocompleteSources, 'order');
     },
     /**
      * @private
@@ -464,9 +469,7 @@ var FieldMany2One = AbstractField.extend({
                 Promise.resolve(prom).then(function (results) {
                     var dynamicFilters;
                     if (results) {
-                        var ids = _.map(results, function (x) {
-                            return x[0];
-                        });
+                        var ids = results.map((x) => x[0]);
                         dynamicFilters = [{
                             description: sprintf(_t('Quick search: %s'), search_val),
                             domain: [['id', 'in', ids]],
@@ -1089,7 +1092,7 @@ var FieldMany2ManyTags = AbstractField.extend({
      * @param {any} id
      */
     _removeTag: function (id) {
-        var record = _.findWhere(this.value.data, {res_id: id});
+        var record = this.value.data.find((val) => val.res_id === id);
         this._setValue({
             operation: 'FORGET',
             ids: [record.id],
@@ -1338,7 +1341,7 @@ var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
         }
         var tagID = $(ev.currentTarget).parent().data('id');
         var tagColor = $(ev.currentTarget).parent().data('color');
-        var tag = _.findWhere(this.value.data, { res_id: tagID });
+        var tag = this.value.data.find((val) => val.res_id === tagID);
         if (tag && this.colorField in tag.data) { // if there is a color field on the related model
             // Manual initialize dropdown and show (once)
             if (ev.currentTarget.dataset.bsToggle !== 'dropdown') {
@@ -1391,7 +1394,7 @@ var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
         changes[this.colorField] = color;
 
         this.trigger_up('field_changed', {
-            dataPointID: _.findWhere(this.value.data, {res_id: id}).id,
+            dataPointID: this.value.data.find((val) => val.res_id === id).id,
             changes: changes,
             force_save: true,
         });
@@ -1554,7 +1557,7 @@ var FieldRadio = FieldSelection.extend({
     init: function () {
         this._super.apply(this, arguments);
         this.className += this.nodeOptions.horizontal ? ' o_horizontal' : ' o_vertical';
-        this.unique_id = _.uniqueId("radio");
+        this.unique_id = uniqueId("radio");
         this._setValues();
     },
 
@@ -1659,7 +1662,7 @@ var FieldRadio = FieldSelection.extend({
         if (this.field.type === 'selection') {
             this.values = this.field.selection || [];
         } else if (this.field.type === 'many2one') {
-            this.values = _.map(this.record.specialData[this.name], function (val) {
+            this.values = this.record.specialData[this.name].map((val) => {
                 return [val.id, val.display_name];
             });
         }

@@ -15,6 +15,8 @@ import { sprintf, escape } from "@web/core/utils/strings";
 const QWeb = core.qweb;
 import {closestElement} from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 import { debounce } from "@web/core/utils/timing";
+import { uniqueId } from "@web/core/utils/functions";
+import { sortBy, unique } from "@web/core/utils/arrays";
 
 var _t = core._t;
 
@@ -326,7 +328,7 @@ var SnippetEditor = Widget.extend({
         await this.toggleTargetVisibility(!this.$target.hasClass('o_snippet_invisible')
             && !this.$target.hasClass('o_snippet_mobile_invisible')
             && !this.$target.hasClass('o_snippet_desktop_invisible'));
-        const proms = _.map(this.styles, option => {
+        const proms = Object.values(this.styles).map((option) => {
             return option.cleanForSave();
         });
         await Promise.all(proms);
@@ -650,11 +652,7 @@ var SnippetEditor = Widget.extend({
             };
         for (const $el of this._customize$Elements) {
             const editor = $el.data('editor');
-            const styles = _.chain(editor.styles)
-                .values()
-                .sortBy('__order')
-                .value();
-
+            const styles = sortBy(Object.values(editor.styles || {}), "__order");
             await focusOrBlur(editor, styles);
         }
         await Promise.all(editorUIsToUpdate.map(editor => editor.updateOptionsUI()));
@@ -678,7 +676,7 @@ var SnippetEditor = Widget.extend({
     toggleTargetVisibility: async function (show) {
         show = this._toggleVisibilityStatus(show);
         var styles = Object.values(this.styles);
-        const proms = _.sortBy(styles, '__order').map(style => {
+        const proms = sortBy(styles, "__order").map((style) => {
             return show ? style.onTargetShow() : style.onTargetHide();
         });
         await Promise.all(proms);
@@ -806,7 +804,7 @@ var SnippetEditor = Widget.extend({
         this.$el.data('$optionsSection', $optionsSection);
 
         var i = 0;
-        var defs = _.map(this.templateOptions, val => {
+        var defs = this.templateOptions.map((val) => {
             if (!val.selector.is(this.$target)) {
                 return;
             }
@@ -832,12 +830,12 @@ var SnippetEditor = Widget.extend({
                 }, val.data),
                 this.options
             );
-            var key = optionName || _.uniqueId('option');
+            var key = optionName || uniqueId("option");
             if (this.styles[key]) {
                 // If two snippet options use the same option name (and so use
                 // the same JS option), store the subsequent ones with a unique
                 // ID (TODO improve)
-                key = _.uniqueId(key);
+                key = uniqueId(key);
             }
             this.styles[key] = option;
             option.__order = i++;
@@ -858,7 +856,7 @@ var SnippetEditor = Widget.extend({
         this.$el.find('[data-bs-toggle="dropdown"]').dropdown();
 
         return Promise.all(defs).then(async () => {
-            const options = _.sortBy(this.styles, '__order');
+            const options = sortBy(Object.values(this.styles), "__order");
             const firstOptions = [];
             options.forEach(option => {
                 if (option.isTopOption) {
@@ -2367,7 +2365,7 @@ var SnippetsMenu = Widget.extend({
             });
 
             // add children near drop zone
-            $selectorSiblings = $(_.uniq(($selectorSiblings || $()).add($selectorChildren.children()).get()));
+            $selectorSiblings = $(unique(($selectorSiblings || $()).add($selectorChildren.children()).get()));
         }
 
         var noDropZonesSelector = '[data-invisible="1"], .o_we_no_overlay, :not(:visible), :not(:o_editable)';
@@ -2480,7 +2478,7 @@ var SnippetsMenu = Widget.extend({
 
             $invisibleDOMPanelEl.toggleClass('d-none', !$invisibleSnippets.length);
 
-            const proms = _.map($invisibleSnippets, async el => {
+            const proms = Array.from($invisibleSnippets).map(async (el) => {
                 const editor = await this._createSnippetEditor($(el));
                 const $invisEntry = $('<div/>', {
                     class: 'o_we_invisible_entry d-flex align-items-center justify-content-between',
@@ -2682,7 +2680,7 @@ var SnippetsMenu = Widget.extend({
      */
     _callForEachChildSnippet: function ($snippet, callback) {
         var self = this;
-        var defs = _.map($snippet.add(globalSelector.all($snippet)), function (el) {
+        var defs = Array.from($snippet.add(globalSelector.all($snippet))).map((el) => {
             var $snippet = $(el);
             return self._createSnippetEditor($snippet).then(function (editor) {
                 if (editor) {
@@ -3363,7 +3361,7 @@ var SnippetsMenu = Widget.extend({
                         self.options.wysiwyg.odooEditor.observerActive('dragAndDropCreateSnippet');
 
 
-                        _.defer(async function () {
+                        setTimeout(async () => {
                             // Free the mutex now to allow following operations
                             // (mutexed as well).
                             dragAndDropResolve();
@@ -3594,7 +3592,7 @@ var SnippetsMenu = Widget.extend({
             return;
         }
         this.lastElement = srcElement;
-        _.defer(() => {
+        setTimeout(() => {
             this.lastElement = false;
         });
 

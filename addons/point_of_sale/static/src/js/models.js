@@ -1716,7 +1716,7 @@ export class Product extends PosModel {
 
         const rules = !pricelist
             ? []
-            : _.filter(this.applicablePricelistItems[pricelist.id], (item) =>
+            : (this.applicablePricelistItems[pricelist.id] || []).filter((item) =>
                   this.isPricelistItemUsable(item, date)
               );
 
@@ -2311,8 +2311,8 @@ export class Orderline extends PosModel {
             return this.compute_all(product_taxes, lst_price, 1, this.pos.currency.rounding)
                 .total_included;
         }
-        var digits = this.pos.dp['Product Price'];
-        return lst_price.toFixed(digits)
+        var digits = this.pos.dp["Product Price"];
+        return lst_price.toFixed(digits);
     }
     get_price_without_tax() {
         return this.get_all_prices().priceWithoutTax;
@@ -3138,7 +3138,9 @@ export class Order extends PosModel {
         var self = this;
         this.pricelist = pricelist;
 
-        var lines_to_recompute = this.get_orderlines().filter((line) => !(line.price_manually_set || line.price_automatically_set));
+        var lines_to_recompute = this.get_orderlines().filter(
+            (line) => !(line.price_manually_set || line.price_automatically_set)
+        );
         lines_to_recompute.forEach((line) => {
             line.set_unit_price(
                 line.product.get_price(self.pricelist, line.get_quantity(), line.get_price_extra())
@@ -3389,9 +3391,14 @@ export class Order extends PosModel {
         return [];
     }
     _reduce_total_discount_callback(sum, orderLine) {
-        sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
-        if (orderLine.display_discount_policy() === 'without_discount'){
-            sum += ((orderLine.get_taxed_lst_unit_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
+        sum +=
+            orderLine.get_unit_price() *
+            (orderLine.get_discount() / 100) *
+            orderLine.get_quantity();
+        if (orderLine.display_discount_policy() === "without_discount") {
+            sum +=
+                (orderLine.get_taxed_lst_unit_price() - orderLine.get_unit_price()) *
+                orderLine.get_quantity();
         }
         return sum;
     }

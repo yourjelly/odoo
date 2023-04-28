@@ -26,6 +26,7 @@ import { assets } from "@web/core/assets";
 import { processArch } from "@web/legacy/legacy_load_views";
 
 import { Component } from "@odoo/owl";
+import { uniqueId } from "@web/core/utils/functions";
 const DebouncedField = basic_fields.DebouncedField;
 
 
@@ -84,7 +85,7 @@ async function _getMockedOwlEnv(params, mockServer) {
                     method: 'get_views',
                     model: params.model,
                 }).then(function (views) {
-                    views = _.mapObject(views, viewParams => {
+                    views = Object.values(views).map((viewParams) => {
                         return getView(mockServer, viewParams);
                     });
                     if (favoriteFilters && 'search' in views) {
@@ -317,9 +318,9 @@ function intercept(widget, eventName, fn, propagate) {
  * @param {function} [params.mockRPC]
  * @param {number} [params.fieldDebounce=0] the value of the DEBOUNCE attribute
  *   of fields
- * @param {boolean} [params.debounce=true] if false, patch _.debounce to remove
+ * @param {boolean} [params.debounce=true] if false, patch _debounce to remove
  *   its behavior
- * @param {boolean} [params.throttle=false] by default, _.throttle is patched to
+ * @param {boolean} [params.throttle=false] by default, _throttle is patched to
  *   remove its behavior, except if this params is set to true
  * @param {boolean} [params.mockSRC=false] if true, redirect src GET requests to
  *   the mockServer
@@ -624,7 +625,7 @@ var patches = {};
  * @param {Object} props
  */
 function patch(target, props) {
-    var patchID = _.uniqueId('patch_');
+    var patchID = uniqueId("patch_");
     target.__patchID = patchID;
     patches[patchID] = {
         target: target,

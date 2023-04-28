@@ -33,6 +33,7 @@ import { session } from "@web/session";
 import { RelationalModel } from "@web/views/relational_model";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { rpcService } from "@web/core/network/rpc_service";
+import { pick } from "@web/core/utils/objects";
 
 let serverData;
 let target;
@@ -8862,15 +8863,17 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.turtle.records[0].partner_ids = [1];
         serverData.models.partner.onchanges = {
             turtles: function (obj) {
-                var res = _.map(obj.turtles, function (command) {
+                var res = obj.turtles.map((command) => {
                     if (command[0] === 1) {
                         // already an UPDATE command: do nothing
                         return command;
                     }
                     // convert LINK_TO commands to UPDATE commands
                     var id = command[1];
-                    var record = _.findWhere(serverData.models.turtle.records, { id: id });
-                    return [1, id, _.pick(record, ["turtle_int", "turtle_foo", "partner_ids"])];
+                    var record = serverData.models.turtle.records.find(
+                        (record) => record.id === id
+                    );
+                    return [1, id, pick(record, "turtle_int", "turtle_foo", "partner_ids")];
                 });
                 obj.turtles = [[5]].concat(res);
             },
@@ -11393,7 +11396,7 @@ QUnit.module("Fields", (hooks) => {
             partner_ids: function (obj) {
                 // simulate actual server onchange after save of modal with new record
                 if (numUserOnchange === 0) {
-                    obj.partner_ids = _.clone(obj.partner_ids);
+                    obj.partner_ids = [...obj.partner_ids];
                     obj.partner_ids.unshift([5]);
                     obj.partner_ids[1][2].turtles.unshift([5]);
                     obj.partner_ids[2] = [
@@ -11406,7 +11409,7 @@ QUnit.module("Fields", (hooks) => {
                         },
                     ];
                 } else if (numUserOnchange === 1) {
-                    obj.partner_ids = _.clone(obj.partner_ids);
+                    obj.partner_ids = [...obj.partner_ids];
                     obj.partner_ids.unshift([5]);
                     obj.partner_ids[1][2].turtles.unshift([5]);
                     obj.partner_ids[2][2].turtles.unshift([5]);
@@ -13093,7 +13096,7 @@ QUnit.module("Fields", (hooks) => {
                 if (method === "onchange") {
                     return {
                         value: {
-                            line_ids: [[0, 0, {date: "2020-01-01"}]],
+                            line_ids: [[0, 0, { date: "2020-01-01" }]],
                         },
                     };
                 }
@@ -13109,7 +13112,7 @@ QUnit.module("Fields", (hooks) => {
                 rootType: "record",
                 activeFields: serverData.models.turlututu.fields,
             },
-            env.services,
+            env.services
         );
 
         await model.load({
@@ -13131,7 +13134,6 @@ QUnit.module("Fields", (hooks) => {
         // The one2many orm commands should be parsed correctly and then, the date value is now a Datetime
         // and not no longer a string.
         const record = model.root.data.line_ids.records[0];
-        assert.strictEqual(typeof(record.data.date), "object");
+        assert.strictEqual(typeof record.data.date, "object");
     });
-
 });

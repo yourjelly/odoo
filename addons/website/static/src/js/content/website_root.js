@@ -155,7 +155,7 @@ export const WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMi
      * @override
      */
     _onWidgetsStartRequest: function (ev) {
-        ev.data.options = _.clone(ev.data.options || {});
+        ev.data.options = Object.assign({}, ev.data.options || {});
         ev.data.options.editableMode = ev.data.editableMode;
         this._super.apply(this, arguments);
     },

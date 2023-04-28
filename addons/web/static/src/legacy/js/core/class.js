@@ -61,7 +61,7 @@ var fnTest = /xyz/.test(function(){xyz();}) ? /\b_super\b/ : /.*/;
 OdooClass.extend = function() {
     var _super = this.prototype;
     // Support mixins arguments
-    var args = _.toArray(arguments);
+    var args = [...arguments];
     args.unshift({});
     var prop = _.extend.apply(_,args);
 

@@ -20,3 +20,15 @@ export function memoize(func) {
         },
     }[funcName];
 }
+
+/**
+ * Generate a unique integer id (unique within the entire client session).
+ * Useful for temporary DOM ids.
+ *
+ * @param {string} prefix
+ * @returns {string}
+ */
+let idCounter = 0;
+export function uniqueId(prefix = "") {
+    return `${prefix}${++idCounter}`;
+}

@@ -31,7 +31,7 @@ var ParentedMixin = {
         if (this.getParent()) {
             if (this.getParent().__parentedMixin) {
                 this.getParent().__parentedChildren = _.without(this
-                        .getParent().getChildren(), this);
+                    .getParent().getChildren(), this);
             }
         }
         this.__parentedParent = parent;
@@ -49,7 +49,7 @@ var ParentedMixin = {
      * Return a list of the children of the current object.
      */
     getChildren : function () {
-        return _.clone(this.__parentedChildren);
+        return [...this.__parentedChildren];
     },
     /**
      * Returns true if destroy() was called on the current object.

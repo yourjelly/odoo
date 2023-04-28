@@ -1,5 +1,6 @@
 /** @odoo-module alias=web.MockServer **/
 
+import { unique } from "@web/core/utils/arrays";
 import Class from "web.Class";
 import Domain from "web.Domain";
 import pyUtils from "web.py_utils";
@@ -567,9 +568,9 @@ var MockServer = Class.extend({
     _mockCopy: function (modelName, id) {
         var model = this.data[modelName];
         var newID = this._getUnusedID(modelName);
-        var originalRecord = _.findWhere(model.records, {id: id});
-        var duplicateRecord = Object.assign({}, originalRecord, {id: newID});
-        duplicateRecord.display_name = originalRecord.display_name + ' (copy)';
+        var originalRecord = model.records.find((r) => r.id === id);
+        var duplicateRecord = Object.assign({}, originalRecord, { id: newID });
+        duplicateRecord.display_name = originalRecord.display_name + " (copy)";
         model.records.push(duplicateRecord);
         return newID;
     },
@@ -1183,7 +1184,7 @@ var MockServer = Class.extend({
      * @returns {Object}
      */
     _mockLoadAction: function (kwargs) {
-        var action = _.findWhere(this.actions, {id: parseInt(kwargs.action_id)});
+        var action = this.actions.find((action) => action.id === parseInt(kwargs.action_id));
         if (!action) {
             // when the action doesn't exist, the real server doesn't crash, it
             // simply returns false
@@ -1254,8 +1255,8 @@ var MockServer = Class.extend({
             ids = [ids];
         }
         var records = this.data[model].records;
-        var names = ids.map(id => {
-            return id ? [id, _.findWhere(records, {id: id}).display_name] : [null, ""];
+        var names = ids.map((id) => {
+            return id ? [id, records.find((r) => r.id === id).display_name] : [null, ""];
         });
         return names;
     },
@@ -1379,15 +1380,17 @@ var MockServer = Class.extend({
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
-        var fields = args[1] && args[1].length ? _.uniq(args[1].concat(['id'])) : Object.keys(this.data[model].fields);
-        var records = _.reduce(ids, function (records, id) {
+        var fields = args[1] && args[1].length ? unique(args[1].concat(['id'])) : Object.keys(this.data[model].fields);
+        var records = ids.reduce((records, id) => {
             if (!id) {
-                throw new Error("mock read: falsy value given as id, would result in an access error in actual server !");
+                throw new Error(
+                    "mock read: falsy value given as id, would result in an access error in actual server !"
+                );
             }
-            var record =  _.findWhere(self.data[model].records, {id: id});
+            var record = self.data[model].records.find((record) => record.id === id);
             return record ? records.concat(record) : records;
         }, []);
-        var results = _.map(records, function (record) {
+        var results = records.map((record) => {
             var result = {};
             for (var i = 0; i < fields.length; i++) {
                 var field = self.data[model].fields[fields[i]];
@@ -1401,9 +1404,9 @@ var MockServer = Class.extend({
                     // read should return 0 for unset numeric fields
                     result[fields[i]] = record[fields[i]] || 0;
                 } else if (field.type === 'many2one') {
-                    var relatedRecord = _.findWhere(self.data[field.relation].records, {
-                        id: record[fields[i]]
-                    });
+                    var relatedRecord = self.data[field.relation].records.find(
+                        (r) => r.id === record[fields[i]]
+                    );
                     if (relatedRecord) {
                         result[fields[i]] =
                             [record[fields[i]], relatedRecord.display_name];
@@ -1466,7 +1469,7 @@ var MockServer = Class.extend({
             aggregatedFields = Object.keys(this.data[model].fields);
         }
 
-        var groupByFieldNames = _.map(groupBy, function (groupByField) {
+        var groupByFieldNames = groupBy.map((groupByField) => {
             return groupByField.split(":")[0];
         });
 
@@ -1488,7 +1491,7 @@ var MockServer = Class.extend({
                 }
                 if (type === 'many2one') {
                     var ids = records.map((record) => aggregatedFields[i]);
-                    group[aggregatedFields[i]] = _.uniq(ids).length || null;
+                    group[aggregatedFields[i]] = unique(ids).length || null;
                 }
             }
         }
@@ -1589,9 +1592,7 @@ var MockServer = Class.extend({
                 const { relation, type } = fields[fieldName];
 
                 if (["many2one", "many2many"].includes(type) && !Array.isArray(value)) {
-                    const relatedRecord = _.findWhere(this.data[relation].records, {
-                        id: value
-                    });
+                    const relatedRecord = this.data[relation].records.find((r) => r.id === value);
                     if (relatedRecord) {
                         group[gbField] = [value, relatedRecord.display_name];
                     } else {
@@ -1743,7 +1744,7 @@ var MockServer = Class.extend({
             return false;
         }
         for (var i in args.ids) {
-            var record = _.findWhere(records, {id: args.ids[i]});
+            var record = records.find((record) => record.id === args.ids[i]);
             record[field] = Number(i) + offset;
         }
         return true;
@@ -1834,14 +1835,14 @@ var MockServer = Class.extend({
             records = this._sortByField(records, args.model, fieldName, order);
         }
         records = records.slice(offset, args.limit ? (offset + args.limit) : nbRecords);
-        var processedRecords = _.map(records, function (r) {
+        var processedRecords = records.map((r) => {
             var result = {};
-            _.uniq(fields.concat(['id'])).forEach((fieldName) => {
+            unique(fields.concat(['id'])).forEach((fieldName) => {
                 var field = self.data[args.model].fields[fieldName];
                 if (field.type === 'many2one') {
-                    var related_record = _.findWhere(self.data[field.relation].records, {
-                        id: r[fieldName]
-                    });
+                    var related_record = self.data[field.relation].records.find(
+                        (record) => record.id === r[fieldName]
+                    );
                     result[fieldName] =
                         related_record ? [r[fieldName], related_record.display_name] : false;
                 } else {
@@ -1881,7 +1882,9 @@ var MockServer = Class.extend({
             Object.keys(relatedFields).forEach((relatedField) => {
                 d.records.forEach((record) => {
                     if (Array.isArray(record[relatedField])) {
-                        record[relatedField] = _.difference(record[relatedField], ids);
+                        record[relatedField] = record[relatedField].filter(
+                            (x) => ids.indexOf(x) < 0
+                        );
                     } else if (ids.includes(record[relatedField])) {
                         record[relatedField] = false;
                     }
@@ -2202,7 +2205,7 @@ var MockServer = Class.extend({
      */
     _writeRecord: function (model, values, id, { ensureIntegrity = true } = {}) {
         var self = this;
-        var record = _.findWhere(this.data[model].records, {id: id});
+        var record = this.data[model].records.find((record) => record.id === id);
         for (var field_changed in values) {
             var field = this.data[model].fields[field_changed];
             var value = values[field_changed];
@@ -2210,7 +2213,7 @@ var MockServer = Class.extend({
                 throw Error(`Mock: Can't write value "${JSON.stringify(value)}" on field "${field_changed}" on record "${model},${id}" (field is undefined)`);
             }
             if (["one2many", "many2many"].includes(field.type)) {
-                var ids = _.clone(record[field_changed]) || [];
+                var ids = record[field_changed] ? [...record[field_changed]] : [];
 
                 if (
                     Array.isArray(value) &&
@@ -2235,9 +2238,9 @@ var MockServer = Class.extend({
                     } else if (command[0] === 1) { // UPDATE
                         self._mockWrite(field.relation, [[command[1]], command[2]]);
                     } else if (command[0] === 2) { // DELETE
-                        ids = _.without(ids, command[1]);
+                        ids = ids.filter((x) => x !== command[1]);
                     } else if (command[0] === 3) { // FORGET
-                        ids = _.without(ids, command[1]);
+                        ids = ids.filter((x) => x !== command[1]);
                     } else if (command[0] === 4) { // LINK_TO
                         if (!ids.includes(command[1])) {
                             ids.push(command[1]);
@@ -2254,9 +2257,9 @@ var MockServer = Class.extend({
                 record[field_changed] = ids;
             } else if (field.type === 'many2one') {
                 if (value) {
-                    var relatedRecord = _.findWhere(this.data[field.relation].records, {
-                        id: value
-                    });
+                    var relatedRecord = this.data[field.relation].records.find(
+                        (r) => r.id === value
+                    );
                     if (!relatedRecord && ensureIntegrity) {
                         throw Error(`Wrong id "${JSON.stringify(value)}" for a many2one on field "${field_changed}" on record "${model},${id}"`);
                     }

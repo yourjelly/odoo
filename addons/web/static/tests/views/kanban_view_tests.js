@@ -45,6 +45,7 @@ import { ViewButton } from "@web/views/view_button/view_button";
 
 import { Component, onWillRender, xml } from "@odoo/owl";
 import { SampleServer } from "@web/views/sample_server";
+import { pick } from "@web/core/utils/objects";
 
 const serviceRegistry = registry.category("services");
 const viewWidgetRegistry = registry.category("view_widgets");
@@ -3187,7 +3188,7 @@ QUnit.module("Views", (hooks) => {
                     }
                     if (args.method === "create") {
                         assert.step("create");
-                        assert.deepEqual(_.pick(args.args[0], "foo", "int_field"), {
+                        assert.deepEqual(pick(args.args[0], "foo", "int_field"), {
                             foo: "new partner",
                             int_field: 3,
                         });
@@ -10100,14 +10101,15 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("keyboard navigation on kanban when the kanban has a oe_kanban_global_click class", async (assert) => {
-        assert.expect(1);
-        await makeView({
-            type: "kanban",
-            resModel: "partner",
-            serverData,
-            arch:
-                `<kanban>
+    QUnit.test(
+        "keyboard navigation on kanban when the kanban has a oe_kanban_global_click class",
+        async (assert) => {
+            assert.expect(1);
+            await makeView({
+                type: "kanban",
+                resModel: "partner",
+                serverData,
+                arch: `<kanban>
                     <templates>
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click">
@@ -10117,18 +10119,19 @@ QUnit.module("Views", (hooks) => {
                         </t>
                     </templates>
                 </kanban>`,
-            selectRecord(recordId) {
-                assert.strictEqual(
-                    recordId,
-                    1,
-                    "should call its selectRecord prop with the selected record"
-                );
-            },
-        });
-        const firstCard = getCard(0);
-        firstCard.focus();
-        await triggerEvent(firstCard, null, "keydown", { key: "Enter" });
-    });
+                selectRecord(recordId) {
+                    assert.strictEqual(
+                        recordId,
+                        1,
+                        "should call its selectRecord prop with the selected record"
+                    );
+                },
+            });
+            const firstCard = getCard(0);
+            firstCard.focus();
+            await triggerEvent(firstCard, null, "keydown", { key: "Enter" });
+        }
+    );
 
     QUnit.test("set cover image", async (assert) => {
         assert.expect(10);
