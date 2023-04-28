@@ -80,7 +80,7 @@
         @extend %-main-navbar-entry-spacing;
         padding-left: 0;
         font-size: $o-navbar-brand-font-size;
-        color: $o-navbar-brand-color;
+        color: var(--NavBar-brand-color, #{$o-navbar-brand-color});
 
         &:hover {
             background: none;

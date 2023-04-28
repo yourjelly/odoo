@@ -46,7 +46,10 @@ $o-navbar-badge-text-shadow: 1px 1px 0 rgba($o-black, .3) !default;
     background: transparent;
     font-size: $o-navbar-entry-font-size;
 
-    @include o-hover-text-color($o-navbar-entry-color, $o-navbar-entry-color--hover);
+    @include o-hover-text-color(
+        var(--NavBar-entry-color, #{$o-navbar-entry-color}),
+        var(--NavBar-entry-color--hover, #{$o-navbar-entry-color--hover})
+    );
 }
 
 %-main-navbar-entry-spacing {
@@ -61,13 +64,13 @@ $o-navbar-badge-text-shadow: 1px 1px 0 rgba($o-black, .3) !default;
 
 %-main-navbar-entry-bg-hover {
     &:hover {
-        background-color: $o-navbar-entry-bg--hover;
+        background-color: var(--NavBar-entry-backgroundColor--hover, #{$o-navbar-entry-bg--hover});
     }
 }
 
 %-main-navbar-entry-active {
     &, &:hover, &:focus {
-        background: $o-navbar-entry-bg--active;
-        color: $o-navbar-entry-color--active;
+        background: var(--NavBar-entry-backgroundColor--active, #{$o-navbar-entry-bg--active});
+        color: var(--NavBar-entry-color--active, #{$o-navbar-entry-color--active});
     }
 }
