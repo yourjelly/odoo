@@ -5,6 +5,7 @@ import utils from "web.utils";
 import Dialog from "web.Dialog";
 import Widget from "web.Widget";
 import { uniqueId } from "@web/core/utils/functions";
+import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 
 var _t = core._t;
 
@@ -44,12 +45,14 @@ var ColorpickerWidget = Widget.extend({
             (parent.el && parent.el.parentElement && parent.el.ownerDocument)
             || (parent.options && parent.options.$editable && parent.options.$editable[0] && parent.options.$editable[0].ownerDocument)
             || document);
-        $document.on(`mousemove.${this.uniqueId}`, _.throttle((ev) => {
+
+        this.throttleOnMouseMove = throttleForAnimation((ev) => {
             this._onMouseMovePicker(ev);
             this._onMouseMoveSlider(ev);
             this._onMouseMoveOpacitySlider(ev);
-        }, 50));
-        $document.on(`mouseup.${this.uniqueId}`, _.throttle((ev) => {
+        });
+        $document.on(`mousemove.${this.uniqueId}`, this.throttleOnMouseMove);
+        $document.on(`mouseup.${this.uniqueId}`, debounce((ev) => {
             if (this.pickerFlag || this.sliderFlag || this.opacitySliderFlag) {
                 this._colorSelected();
             }
@@ -106,6 +109,7 @@ var ColorpickerWidget = Widget.extend({
     destroy: function () {
         this._super.apply(this, arguments);
         $(document).off(`.${this.uniqueId}`);
+        this.this.throttleOnMouseMove.cancel();
     },
     /**
      * Sets the currently selected color

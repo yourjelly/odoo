@@ -227,16 +227,21 @@ var AnimationEffect = Class.extend(mixins.ParentedMixin, {
              * must be playing *during* an event (scroll, mousemove, resize,
              * repeated clicks, ...).
              */
+            this.throttleOnStartEvents = throttleForAnimation(
+                ((e) => {
+                    this.play(e);
+                    clearTimeout(pauseTimer);
+                    pauseTimer = setTimeout(
+                        (() => {
+                            this.pause();
+                            pauseTimer = null;
+                        }).bind(this),
+                        2000
+                    );
+                }).bind(this)
+            );
             var pauseTimer = null;
-            this.$startTarget.on(this.startEvents, _.throttle((function (e) {
-                this.play(e);
-
-                clearTimeout(pauseTimer);
-                pauseTimer = setTimeout((() => {
-                    this.pause();
-                    pauseTimer = null;
-                }).bind(this), 2000);
-            }).bind(this), 250, {trailing: false}));
+            this.$startTarget.on(this.startEvents, this.throttleOnStartEvents);
         }
     },
     /**
@@ -1289,7 +1294,7 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
         // Setting capture to true allows to take advantage of event bubbling
         // for events that otherwise don’t support it. (e.g. useful when
         // scrolling a modal)
-        this.__onScrollWebsiteAnimate = _.throttle(this._onScrollWebsiteAnimate.bind(this), 10);
+        this.__onScrollWebsiteAnimate = throttleForAnimation(this._onScrollWebsiteAnimate.bind(this));
         this.$scrollingElement[0].addEventListener('scroll', this.__onScrollWebsiteAnimate, {capture: true});
 
         $(window).on('resize.o_animate, shown.bs.modal.o_animate, slid.bs.carousel.o_animate, shown.bs.tab.o_animate, shown.bs.collapse.o_animate', () => {
@@ -1312,6 +1317,7 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
                 'visibility': '',
             });
         $(window).off('.o_animate');
+        this.__onScrollWebsiteAnimate.cancel();
         this.$scrollingElement[0].removeEventListener('scroll', this.__onScrollWebsiteAnimate, {capture: true});
         this.$scrollingElement[0].classList.remove('o_wanim_overflow_xy_hidden');
     },
@@ -1568,7 +1574,7 @@ registry.ZoomedBackgroundShape = publicWidget.Widget.extend({
      */
     start() {
         this._onBackgroundShapeResize();
-        this.throttledShapeResize = _.throttle(() => this._onBackgroundShapeResize(), 25);
+        this.throttledShapeResize = throttleForAnimation(() => this._onBackgroundShapeResize());
         window.addEventListener('resize', this.throttledShapeResize);
         return this._super(...arguments);
     },
@@ -1577,6 +1583,7 @@ registry.ZoomedBackgroundShape = publicWidget.Widget.extend({
      */
     destroy() {
         this._updateShapePosition();
+        this.throttledShapeResize.cancel();
         window.removeEventListener('resize', this.throttledShapeResize);
         this._super(...arguments);
     },
