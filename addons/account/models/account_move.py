@@ -3713,11 +3713,17 @@ class AccountMove(models.Model):
     def action_post(self):
         moves_with_payments = self.filtered('payment_id')
         other_moves = self - moves_with_payments
+
         if moves_with_payments:
             moves_with_payments.payment_id.action_post()
+
         if other_moves:
             other_moves._post(soft=False)
+
         return False
+
+    def action_tax_closing(self):
+        return self.action_post()
 
     def js_assign_outstanding_line(self, line_id):
         ''' Called by the 'payment' widget to reconcile a suggested journal item to the present
