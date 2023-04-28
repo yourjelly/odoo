@@ -37,16 +37,13 @@ export class SearchBarMenu extends Component {
             }
         }
         this.fields = sortBy(fields, "string");
-
         // Favorite
         this.dialogService = useService("dialog");
 
         useBus(this.env.searchModel, "update", this.render);
     }
 
-    ////////////
-    // Filter //
-    ////////////
+    // Filter Panel
     get filterItems() {
         return this.env.searchModel.getSearchItems((searchItem) =>
             ["filter", "dateFilter"].includes(searchItem.type)
@@ -93,9 +90,7 @@ export class SearchBarMenu extends Component {
         }
     }
 
-    /////////////
-    // GroupBy //
-    /////////////
+    // GroupBy Panel
     /**
      * @returns {boolean}
      */
@@ -146,20 +141,12 @@ export class SearchBarMenu extends Component {
         this.env.searchModel.createNewGroupBy(fieldName);
     }
 
-    ////////////////
-    // Comparison //
-    ////////////////
-
+    // Comparison Panel
     get showComparisonMenu() {
-        for (const key of this.env.searchModel.searchMenuTypes) {
-            if (
-                key === "comparison" &&
-                this.env.searchModel.getSearchItems((i) => i.type === "comparison").length > 0
-            ) {
-                return true;
-            }
-        }
-        return false;
+        return (
+            this.env.searchModel.searchMenuTypes.has("comparison") &&
+            this.env.searchModel.getSearchItems((i) => i.type === "comparison").length > 0
+        );
     }
     get comparisonItems() {
         return this.env.searchModel.getSearchItems(
@@ -174,9 +161,7 @@ export class SearchBarMenu extends Component {
         this.env.searchModel.toggleSearchItem(itemId);
     }
 
-    //////////////
-    // Favorite //
-    //////////////
+    // Favorite Panel
     /**
      * @returns {Array}
      */
