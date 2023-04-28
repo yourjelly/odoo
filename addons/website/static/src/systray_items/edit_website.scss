@@ -1,5 +1,3 @@
 .o_edit_website_container {
-    &:not(.o_translatable) {
-        margin: -$o-navbar-padding-v 0;
-    }
+    margin: -$o-navbar-padding-v 0;
 }
