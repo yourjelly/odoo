@@ -66,6 +66,9 @@
                     </t>
                 </div>
             </div>
+                <div class="d-flex gap-1 mt-2 flex-wrap">
+                    <t t-slot="extra-row"/>
+                </div>
         </div>
     </t>
 
