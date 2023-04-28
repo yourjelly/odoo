@@ -109,7 +109,7 @@ var ColorpickerWidget = Widget.extend({
     destroy: function () {
         this._super.apply(this, arguments);
         $(document).off(`.${this.uniqueId}`);
-        this.this.throttleOnMouseMove.cancel();
+        this.throttleOnMouseMove.cancel();
     },
     /**
      * Sets the currently selected color
