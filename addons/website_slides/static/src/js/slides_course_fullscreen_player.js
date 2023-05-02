@@ -11,7 +11,7 @@
     import { Quiz } from '@website_slides/js/slides_course_quiz';
     import { SlideCoursePage } from '@website_slides/js/slides_course_page';
     import Dialog from 'web.Dialog';
-    import '@website_slides/js/slides_course:_join';
+    import '@website_slides/js/slides_course_join';
 
     /**
      * Helper: Get the slide dict matching the given criteria
