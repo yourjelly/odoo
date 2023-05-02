@@ -373,11 +373,11 @@
         },
 
         init: function (parent, options, slide) {
-            options = _.defaults(options || {}, {
+            options = Object.assign({
                 title: _t("Share This Content"),
                 buttons: [{text: "Close", close: true}],
                 size: 'medium',
-            });
+            }, options || {});
             this._super(parent, options);
             this.slide = slide;
             this.session = session;

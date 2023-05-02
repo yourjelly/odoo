@@ -7,6 +7,7 @@ import {Markup} from 'web.utils';
 import session from 'web.session';
 import publicRootData from 'web.public.root';
 import "web.zoomodoo";
+import { pick } from "@web/core/utils/objects";
 
 export const WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMixin, {
     // TODO remove KeyboardNavigationMixin in master
@@ -98,7 +99,7 @@ export const WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMi
     _getPublicWidgetsRegistry: function (options) {
         var registry = this._super.apply(this, arguments);
         if (options.editableMode) {
-            return _.pick(registry, function (PublicWidget) {
+            return pick(registry, function (PublicWidget) {
                 return !PublicWidget.prototype.disabledInEditableMode;
             });
         }

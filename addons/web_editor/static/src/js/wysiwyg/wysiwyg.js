@@ -24,6 +24,7 @@ import weUtils from "web_editor.utils";
 import { PeerToPeer } from "@web_editor/js/wysiwyg/PeerToPeer";
 import { uniqueId } from "@web/core/utils/functions";
 import { groupBy } from "@web/core/utils/arrays";
+import { debounce } from "@web/core/utils/timing";
 
 var _t = core._t;
 const QWeb = core.qweb;
@@ -672,10 +673,10 @@ const Wysiwyg = Widget.extend({
                 if (!this.ptp) return;
                 this.ptp.notifyAllClients('oe_history_step', historyStep, { transport: 'rtc' });
             },
-            onCollaborativeSelectionChange: _.throttle((collaborativeSelection) => {
+            onCollaborativeSelectionChange: debounce((collaborativeSelection) => {
                 if (!this.ptp) return;
                 this.ptp.notifyAllClients('oe_history_set_selection', collaborativeSelection, { transport: 'rtc' });
-            }, 50),
+            }),
             onHistoryMissingParentSteps: async ({ step, fromStepId }) => {
                 if (!this.ptp) return;
                 const missingSteps = await this.ptp.requestClient(
