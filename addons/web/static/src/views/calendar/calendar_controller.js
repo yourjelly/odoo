@@ -17,7 +17,7 @@ import { CogMenu } from "@web/search/cog_menu/cog_menu";
 
 import { Component, useState } from "@odoo/owl";
 
-const SCALE_LABELS = {
+export const SCALE_LABELS = {
     day: _lt("Day"),
     week: _lt("Week"),
     month: _lt("Month"),
