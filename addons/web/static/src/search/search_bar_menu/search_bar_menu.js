@@ -194,7 +194,7 @@ export class SearchBarMenu extends Component {
      * @param {number} itemId
      */
     openConfirmationDialog(itemId) {
-        const { userId } = this.items.find((item) => item.id === itemId);
+        const { userId } = this.favoriteItems.find((item) => item.id === itemId);
         const dialogProps = {
             title: this.env._t("Warning"),
             body: userId
