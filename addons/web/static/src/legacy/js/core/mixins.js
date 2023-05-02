@@ -32,7 +32,7 @@ var ParentedMixin = {
             if (this.getParent().__parentedMixin) {
                 const children = this.getParent().getChildren();
                 this.getParent().__parentedChildren = children.filter(
-                    (child) => JSON.stringify(child) !== JSON.stringify(this)
+                    (child) => child.$el !== this.$el
                 );
             }
         }
