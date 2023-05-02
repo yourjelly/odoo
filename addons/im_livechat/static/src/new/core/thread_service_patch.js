@@ -58,14 +58,14 @@ patch(ThreadService.prototype, "im_livechat", {
             this.notification.add(_t("No available collaborator, please try again later."));
             return;
         }
-        const livechatThread = this.insert({
+        const thread = this.insert({
             ...session,
             id: session.id ?? this.TEMPORARY_ID,
             model: "discuss.channel",
             type: "livechat",
         });
         if (session.messages) {
-            livechatThread.messages = session.messages.map((message) => {
+            thread.messages = session.messages.map((message) => {
                 if (message.parentMessage) {
                     message.parentMessage.body = markup(message.parentMessage.body);
                 }
@@ -73,7 +73,7 @@ patch(ThreadService.prototype, "im_livechat", {
                 return this.messageService.insert(message);
             });
         }
-        this.chatWindowService.insert({ thread: livechatThread });
+        this.chatWindowService.insert({ thread });
     },
 
     insert(data) {
@@ -98,12 +98,6 @@ patch(ThreadService.prototype, "im_livechat", {
                 id: data.operator_pid[0],
                 name: data.operator_pid[1],
             });
-        }
-    },
-
-    async fetchNewMessages(thread) {
-        if (thread.type !== "livechat") {
-            this._super(thread);
         }
     },
 
