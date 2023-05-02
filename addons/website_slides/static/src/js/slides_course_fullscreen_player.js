@@ -21,7 +21,7 @@
      * @param {Object} matcher (see https://underscorejs.org/#matcher)
      */
     var findSlide = function (slideList, matcher) {
-        var slideMatch = _.matcher(matcher);
+        const slideMatch = (x) => matcher(x);
         return slideList.find(slide => slideMatch(slide));
     };
 
@@ -372,11 +372,11 @@
         },
 
         init: function (parent, options, slide) {
-            options = Object.assign({
+            options = _.defaults(options || {}, {
                 title: _t("Share This Content"),
                 buttons: [{text: "Close", close: true}],
                 size: 'medium',
-            }, options || {});
+            });
             this._super(parent, options);
             this.slide = slide;
             this.session = session;
