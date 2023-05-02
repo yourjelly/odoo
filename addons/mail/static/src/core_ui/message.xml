@@ -116,7 +116,7 @@
                                     </t>
                                 </t>
                             </div>
-                            <div t-if="!props.disableActions and message.hasActions" class="o-mail-Message-actions"
+                            <div t-if="props.hasActions and message.hasActions" class="o-mail-Message-actions"
                                 t-att-class="{
                                     'position-absolute top-0': !env.inDiscussApp,
                                     'start-0 ms-3': isAlignedRight,
