@@ -31,7 +31,7 @@
                     <span class="d-none d-xl-block me-auto"/> <!-- Spacer -->
                 </div>
 
-                <div t-if="display.layoutActions" class="o_control_panel_actions d-flex align-items-center justify-content-around order-2 order-lg-1 w-100 w-lg-auto">
+                <div t-if="display.layoutActions" class="o_control_panel_actions d-empty-none d-flex align-items-center justify-content-around order-2 order-lg-1 w-100 w-lg-auto">
                     <t t-slot="layout-actions"/>
                 </div>
 
