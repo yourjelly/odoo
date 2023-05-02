@@ -7,8 +7,10 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
 import { fuzzyTest } from "@web/core/utils/search";
 import { SearchBarMenu } from "../search_bar_menu/search_bar_menu";
+import { useDebounced } from "@web/core/utils/timing";
+import { browser } from "@web/core/browser/browser";
 
-import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useExternalListener, useRef, useState } from "@odoo/owl";
 const parsers = registry.category("parsers");
 
 const CHAR_FIELDS = ["char", "html", "many2many", "many2one", "one2many", "text", "properties"];
@@ -50,6 +52,14 @@ export class SearchBar extends Component {
 
         useExternalListener(window, "click", this.onWindowClick);
         useExternalListener(window, "keydown", this.onWindowKeydown);
+
+        this.onResize = useDebounced(this.onResize, 200);
+        onMounted(() => browser.addEventListener("resize", this.onResize));
+        onWillUnmount(() => browser.removeEventListener("resize", this.onResize));
+    }
+
+    onResize() {
+        this.state.showSearchBar = !this.env.isSmall;
     }
 
     /**
