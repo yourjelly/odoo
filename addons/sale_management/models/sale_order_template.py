@@ -26,6 +26,11 @@ class SaleOrderTemplate(models.Model):
         string="Quotation Duration",
         help="Number of days for the validity date computation of the quotation")
 
+    quotation_description = fields.Html(
+        help="Description of the quotation displayed on the customer portal",
+        translate=True,
+    )
+
     require_signature = fields.Boolean(
         string="Online Signature",
         compute='_compute_require_signature',

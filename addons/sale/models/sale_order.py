@@ -107,6 +107,11 @@ class SaleOrder(models.Model):
         help="The payment communication of this sale order.",
         copy=False)
 
+    quotation_description = fields.Html(
+        compute="_compute_quotation_description", store=True, readonly=False,
+        help="Description of the quotation displayed on the customer portal",
+    )
+
     require_signature = fields.Boolean(
         string="Online Signature",
         compute='_compute_require_signature',
@@ -300,6 +305,9 @@ class SaleOrder(models.Model):
         create_index(self._cr, 'sale_order_date_order_id_idx', 'sale_order', ["date_order desc", "id desc"])
 
     #=== COMPUTE METHODS ===#
+
+    def _compute_quotation_description(self):
+        self.quotation_description = False
 
     @api.depends('company_id')
     def _compute_require_signature(self):

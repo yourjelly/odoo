@@ -103,6 +103,9 @@
                         <setting id="order_warnings" string="Sale Warnings" help="Get warnings in orders for products or customers">
                             <field name="group_warning_sale"/>
                         </setting>
+                        <setting id="quotation_description" string="Quotation Description" help="Provide to your customers a detailed description of each quotation">
+                            <field name="group_quotation_description"/>
+                        </setting>
                         <setting id="no_edit_order" help="No longer edit orders once confirmed">
                             <field name="group_auto_done_setting"/>
                         </setting>

@@ -458,6 +458,8 @@
                 </div>
             </div>
 
+            <div t-field="sale_order.quotation_description" class="oe_no_empty"/>
+
             <section id="details" style="page-break-inside: auto;" class="mt32">
                 <h3 id="details">Pricing</h3>
 

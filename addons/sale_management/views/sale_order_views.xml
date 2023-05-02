@@ -6,7 +6,7 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
-            <page name="order_lines" position="after">
+            <page name="quotation_description" position="after">
                 <page string="Optional Products"
                     name="optional_products"
                     attrs="{'invisible': [('state', 'not in', ['draft', 'sent'])]}">

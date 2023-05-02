@@ -47,6 +47,13 @@ class SaleOrder(models.Model):
             order.note = template.note if not is_html_empty(template.note) else order.note
 
     @api.depends('sale_order_template_id')
+    def _compute_quotation_description(self):
+        super()._compute_quotation_description
+        for order in self.filtered('sale_order_template_id'):
+            template = order.sale_order_template_id.with_context(lang=order.partner_id.lang)
+            order.quotation_description = template.quotation_description if not is_html_empty(template.quotation_description) else order.quotation_description
+
+    @api.depends('sale_order_template_id')
     def _compute_require_signature(self):
         super()._compute_require_signature()
         for order in self.filtered('sale_order_template_id'):

@@ -16,4 +16,9 @@
         <field name="category_id" ref="base.module_category_hidden"/>
     </record>
 
+    <record id="group_quotation_description" model="res.groups">
+        <field name="name">Quotation Descriptions</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
 </odoo>
