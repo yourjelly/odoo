@@ -117,8 +117,8 @@ QUnit.module('QWeb', {
         assert.expect(8);
         assert.equal(escapeHTML('a'), 'a');
         assert.equal(escapeHTML('<a>'), '&lt;a&gt;');
-        assert.equal(_.escape({[_.escapeMethod]() { return 'a'; }}), 'a');
-        assert.equal(_.escape({[_.escapeMethod]() { return '<a>'; }}), '<a>');
+        assert.equal(_.escape({[Symbol("html")]() { return 'a'; }}), 'a');
+        assert.equal(_.escape({[Symbol("html")]() { return '<a>'; }}), '<a>');
         assert.equal(escapeHTML(Markup('a')), 'a');
         assert.equal(_.escape(Markup('<a>')), '<a>');
         assert.equal(escapeHTML(Markup`a`), 'a');

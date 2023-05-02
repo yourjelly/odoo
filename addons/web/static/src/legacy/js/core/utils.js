@@ -277,9 +277,8 @@ class UnknownPatchError extends Error {
 }
 
 const __escape = _.escape;
-_.escapeMethod = Symbol('html')
 _.escape = function escape(s) {
-    return s[_.escapeMethod] ? s[_.escapeMethod]() : __escape(s);
+    return s[Symbol("html")] ? s[Symbol("html")]() : __escape(s);
 }
 
 // notable issues:
@@ -291,7 +290,7 @@ _.escape = function escape(s) {
 
 // get a reference to the internalMarkup class from owl
 const _Markup = owl.markup('').constructor; 
-_Markup.prototype[_.escapeMethod] = function () {
+_Markup.prototype[Symbol("html")] = function () {
     return this;
 }
 
