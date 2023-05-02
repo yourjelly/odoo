@@ -6,12 +6,15 @@
             <div class="o_control_panel_main d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-start gap-3 w-100 w-sm-auto">
                 <div class="o_control_panel_breadcrumbs d-flex align-items-center gap-1 order-0">
                     <div class="o_control_panel_main_buttons d-flex gap-1 d-empty-none d-print-none 2" t-ref="mainButtons">
-                        <div class="btn-group d-xl-none">
+                        <div class="btn-group d-xl-none o_control_panel_collapsed_create">
                             <t t-slot="control-panel-create-button"/>
-                            <Dropdown class="'btn-group'" togglerClass="'btn btn-primary'" showCaret="true">
+                            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="visually-hidden">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
                                 <t t-slot="layout-buttons"/>
                                 <t t-slot="control-panel-always-buttons"/>
-                            </Dropdown>
+                            </ul>
                         </div>
                         <div class="d-none d-xl-inline-flex gap-1">
                             <t t-slot="control-panel-create-button"/>
