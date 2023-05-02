@@ -29,7 +29,7 @@ export class CogMenu extends Component {
     };
 
     get hasItems() {
-        return this.cogItems.length || !!this.slots?.default;
+        return this.cogItems.length || !!this.props.slots?.default;
     }
 
     get cogItems() {
