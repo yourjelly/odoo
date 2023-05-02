@@ -3,7 +3,8 @@
 
 from collections import defaultdict
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import RedirectWarning
 
 class ProjectMilestone(models.Model):
     _name = 'project.milestone'
@@ -20,6 +21,8 @@ class ProjectMilestone(models.Model):
     is_reached = fields.Boolean(string="Reached", default=False, copy=False)
     reached_date = fields.Date(compute='_compute_reached_date', store=True)
     task_ids = fields.One2many('project.task', 'milestone_id', 'Tasks')
+    has_task_folded = fields.Boolean(compute="_compute_has_task_folded", store=True)
+    next_milestone_id = fields.Many2one('project.milestone', compute="_compute_next_milestone_id", store=True)
 
     # computed non-stored fields
     is_deadline_exceeded = fields.Boolean(compute="_compute_is_deadline_exceeded")
@@ -27,6 +30,28 @@ class ProjectMilestone(models.Model):
     task_count = fields.Integer('# of Tasks', compute='_compute_task_count', groups='project.group_project_milestone')
     done_task_count = fields.Integer('# of Done Tasks', compute='_compute_task_count', groups='project.group_project_milestone')
     can_be_marked_as_done = fields.Boolean(compute='_compute_can_be_marked_as_done', groups='project.group_project_milestone')
+
+    @api.depends('is_reached')
+    def _compute_next_milestone_id(self):
+        for milestone in self:
+            next_milestone = milestone.project_id.milestone_ids.filtered(lambda m: m.id != milestone.id and not m.is_reached)
+            milestone.next_milestone_id = next_milestone[0] if next_milestone and milestone.id != next_milestone[0].id else False
+
+    @api.depends('is_reached')
+    def _compute_has_task_folded(self):
+        not_folded = self.task_ids.filtered(lambda task: not task.stage_id.fold)
+        for milestone in self:
+            milestone.has_task_folded = True if not_folded else False
+
+    def write(self, vals):
+        print("\n\n self.has_task_folded, self.next_milestone_id",self.has_task_folded ,self.next_milestone_id)
+        if vals.get('is_reached') and not self.is_reached and self.has_task_folded and self.next_milestone_id:
+            msg = _('Some of the tasks linked to this milestone are still open. Would you like to transfer them to the next milestone:')
+            action = self.env.ref("project.project_update_all_action")
+            raise RedirectWarning(msg, action.id, _('Transfer Task'))
+        print("\n\n >>>>>>>>>>>>",self)
+        res = super().write(vals)
+        return res
 
     @api.depends('is_reached')
     def _compute_reached_date(self):
