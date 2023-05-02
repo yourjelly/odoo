@@ -54,7 +54,7 @@
                     <t t-if="filterItems.length">
                         <div role="separator" class="dropdown-divider"/>
                     </t>
-                    <DropdownItem onSelected.bind="onAdvancedSearchClick" parentClosingMode="'none'">Advanced Search</DropdownItem>
+                    <DropdownItem onSelected.bind="onAdvancedSearchClick">Advanced Search</DropdownItem>
                 </div>
             </t>
             <!-- GroupBy -->
