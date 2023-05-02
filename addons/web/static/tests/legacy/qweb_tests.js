@@ -5,6 +5,7 @@ import {Markup} from "web.utils";
 var qwebPath = '/web/static/lib/qweb/';
 import {hushConsole} from "@web/../tests/helpers/utils";
 import { escapeHTML } from "@web/core/utils/strings";
+import { escapeMethod } from "@web/legacy/js/core/utils";
 
 function trim(s) {
     return s.replace(/(^\s+|\s+$)/g, '');
@@ -117,8 +118,8 @@ QUnit.module('QWeb', {
         assert.expect(8);
         assert.equal(escapeHTML('a'), 'a');
         assert.equal(escapeHTML('<a>'), '&lt;a&gt;');
-        assert.equal(_.escape({[Symbol("html")]() { return 'a'; }}), 'a');
-        assert.equal(_.escape({[Symbol("html")]() { return '<a>'; }}), '<a>');
+        assert.equal(_.escape({[escapeMethod]() { return 'a'; }}), 'a');
+        assert.equal(_.escape({[escapeMethod]() { return '<a>'; }}), '<a>');
         assert.equal(escapeHTML(Markup('a')), 'a');
         assert.equal(_.escape(Markup('<a>')), '<a>');
         assert.equal(escapeHTML(Markup`a`), 'a');
