@@ -8,7 +8,7 @@ from odoo.tools.float_utils import float_compare, float_is_zero
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    def _stock_account_prepare_anglo_saxon_in_lines_vals(self):
+    def _stock_account_prepare_anglo_saxon_in_lines_vals(self, workaround=False):
         ''' Prepare values used to create the journal items (account.move.line) corresponding to the price difference
          lines for vendor bills.
 
@@ -36,6 +36,9 @@ class AccountMove(models.Model):
         '''
         lines_vals_list = []
         price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
+
+        assert len(self) == 1
+        affected = False
 
         for move in self:
             if move.move_type not in ('in_invoice', 'in_refund', 'in_receipt') or not move.company_id.anglo_saxon_accounting:
@@ -69,7 +72,9 @@ class AccountMove(models.Model):
                     po_company = line.purchase_line_id.company_id
 
                     if valuation_stock_moves:
-                        valuation_price_unit_total, valuation_total_qty = valuation_stock_moves._get_valuation_price_and_qty(line, move.currency_id)
+                        valuation_price_unit_total, valuation_total_qty, line_affected = valuation_stock_moves._get_valuation_price_and_qty(line, move.currency_id, workaround)
+                        if line_affected:
+                            affected = True
                         valuation_price_unit = valuation_price_unit_total / valuation_total_qty
                         valuation_price_unit = line.product_id.uom_id._compute_price(valuation_price_unit, line.product_uom_id)
                     else:
@@ -155,6 +160,9 @@ class AccountMove(models.Model):
                     }
                     vals.update(line._get_fields_onchange_subtotal(price_subtotal=vals['price_subtotal']))
                     lines_vals_list.append(vals)
+        if workaround and not affected:
+            raise Exception("Not affected")
+
         return lines_vals_list
 
     def _post(self, soft=True):

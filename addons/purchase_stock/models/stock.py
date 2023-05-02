@@ -127,9 +127,10 @@ class StockMove(models.Model):
         res = super()._get_source_document()
         return self.purchase_line_id.order_id or res
 
-    def _get_valuation_price_and_qty(self, related_aml, to_curr):
+    def _get_valuation_price_and_qty(self, related_aml, to_curr, workaround=False):
         valuation_price_unit_total = 0
         valuation_total_qty = 0
+        affected = False
         for val_stock_move in self:
             # In case val_stock_move is a return move, its valuation entries have been made with the
             # currency rate corresponding to the original stock move
@@ -138,6 +139,16 @@ class StockMove(models.Model):
                 lambda l: l.quantity)
             layers_qty = sum(svl.mapped('quantity'))
             layers_values = sum(svl.mapped('value'))
+            line = val_stock_move.account_move_ids.line_ids.filtered(lambda l: l.account_id == related_aml.account_id)
+            assert(len(line) in [0, 1])
+            if layers_values != 0 and len(line) == 1:
+                current_rate = self.env['res.currency']._get_conversion_rate(related_aml.company_currency_id, to_curr, related_aml.company_id, valuation_date)
+                used_rate = line.amount_currency / line.balance
+                from odoo.tools import float_compare
+                from datetime import timedelta
+                if workaround and float_compare(current_rate, used_rate, precision_digits=4) != 0:
+                    valuation_date -= timedelta(days=1)
+                    affected = True
             valuation_price_unit_total += related_aml.company_currency_id._convert(
                 layers_values, to_curr, related_aml.company_id, valuation_date, round=False,
             )
@@ -145,7 +156,7 @@ class StockMove(models.Model):
         if float_is_zero(valuation_total_qty, precision_rounding=related_aml.product_uom_id.rounding or related_aml.product_id.uom_id.rounding):
             raise UserError(
                 _('Odoo is not able to generate the anglo saxon entries. The total valuation of %s is zero.') % related_aml.product_id.display_name)
-        return valuation_price_unit_total, valuation_total_qty
+        return valuation_price_unit_total, valuation_total_qty, affected
 
     def _is_purchase_return(self):
         self.ensure_one()
