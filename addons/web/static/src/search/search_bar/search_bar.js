@@ -9,8 +9,11 @@ import { DomainSelectorDialog } from "@web/core/domain_selector_dialog/domain_se
 import { fuzzyTest } from "@web/core/utils/search";
 import { _t } from "@web/core/l10n/translation";
 import { SearchBarMenu } from "../search_bar_menu/search_bar_menu";
+import { useDebounced } from "@web/core/utils/timing";
+import { browser } from "@web/core/browser/browser";
+import { SIZES } from "@web/core/ui/ui_service";
 
-import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useExternalListener, useRef, useState } from "@odoo/owl";
 const parsers = registry.category("parsers");
 
 const CHAR_FIELDS = ["char", "html", "many2many", "many2one", "one2many", "text", "properties"];
@@ -24,13 +27,14 @@ export class SearchBar extends Component {
         this.fields = this.env.searchModel.searchViewFields;
         this.searchItemsFields = this.env.searchModel.getSearchItems((f) => f.type === "field");
         this.root = useRef("root");
+        this.ui = useService("ui");
 
         // core state
         this.state = useState({
             expanded: [],
             focusedIndex: 0,
             query: "",
-            showSearchBar: !this.env.isSmall,
+            showSearchBar: this.ui.size > SIZES.SM,
         });
 
         // derived state
@@ -53,6 +57,10 @@ export class SearchBar extends Component {
 
         useExternalListener(window, "click", this.onWindowClick);
         useExternalListener(window, "keydown", this.onWindowKeydown);
+
+        this.onResize = useDebounced(this.onResize, 200);
+        onMounted(() => browser.addEventListener("resize", this.onResize));
+        onWillUnmount(() => browser.removeEventListener("resize", this.onResize));
     }
 
     /**
@@ -426,6 +434,10 @@ export class SearchBar extends Component {
     onItemMousemove(focusedIndex) {
         this.state.focusedIndex = focusedIndex;
         this.inputRef.el.focus();
+    }
+
+    onResize() {
+        this.state.showSearchBar = this.ui.size > SIZES.SM;
     }
 
     /**
