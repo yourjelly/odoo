@@ -4168,6 +4168,7 @@ var SnippetsMenu = Widget.extend({
         this._filterSnippets('');
     },
     _addToolbar(toolbarMode = "text") {
+        debugger
         if (this.folded) {
             return;
         }

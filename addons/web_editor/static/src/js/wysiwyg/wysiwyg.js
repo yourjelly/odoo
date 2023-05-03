@@ -348,6 +348,7 @@ const Wysiwyg = Widget.extend({
         this._configureToolbar(options);
 
         $(this.odooEditor.editable).on('mouseup', this._updateEditorUI.bind(this));
+        $(this.odooEditor.editable).on('dblclick', this._updateEditorUI.bind(this));
         $(this.odooEditor.editable).on('keydown', this._updateEditorUI.bind(this));
         $(this.odooEditor.editable).on('keydown', this._handleShortcuts.bind(this));
         // Ensure the Toolbar always have the correct layout in note.
@@ -1835,6 +1836,15 @@ const Wysiwyg = Widget.extend({
      * Update any editor UI that is not handled by the editor itself.
      */
     _updateEditorUI: function (e) {
+        if (e && e.type==="dblclick") {
+            let selection = this.odooEditor.editable.ownerDocument.getSelection();
+            let range = new Range();
+            selection.removeAllRanges();
+            range.setStart(e.target,0);
+            range.setEnd(e.target,1);
+            selection.addRange(range);
+            
+        }
         let selection = this.odooEditor.document.getSelection();
         const anchorNode = selection.anchorNode;
         if (anchorNode && closestElement(anchorNode, '[data-oe-protected="true"]')) {

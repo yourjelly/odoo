@@ -344,7 +344,11 @@ export class HtmlField extends Component {
             dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''` : '';
             const t = document.createElement('T');
             t.setAttribute('t-out', dynamicPlaceholder);
-            this.wysiwyg.odooEditor.execCommand('insert', t);
+            const span = document.createElement('SPAN');
+            const text = document.createTextNode(dynamicPlaceholder);
+            span.appendChild(t);
+            // S.appendChild(span)
+            this.wysiwyg.odooEditor.execCommand('insert', span);
         }
     }
     onDynamicPlaceholderClose() {

@@ -4091,6 +4091,9 @@ export class OdooEditor extends EventTarget {
     }
 
     _onMouseup(ev) {
+        if (ev.type === "dblclick") {
+            debugger
+        }
         this._currentMouseState = ev.type;
 
         this._fixFontAwesomeSelection();

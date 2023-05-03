@@ -564,6 +564,7 @@ export function setSelection(
     focusOffset = anchorOffset,
     normalize = true,
 ) {
+    // debugger   
     if (
         !anchorNode ||
         !anchorNode.parentNode ||
