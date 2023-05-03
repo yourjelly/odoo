@@ -156,7 +156,7 @@ export class FormCompiler extends ViewCompiler {
                     "btn",
                     "btn-outline-secondary",
                     "flex-grow-1",
-                    "flex-lg-grow-0",
+                    "flex-lg-grow-0"
                 );
             }
             if (child.tagName === "field") {
@@ -225,7 +225,11 @@ export class FormCompiler extends ViewCompiler {
         });
         if (!sheetNode) {
             for (const child of el.childNodes) {
-                append(form, this.compileNode(child, params));
+                // ButtonBox are already compiled for the control panel and should not
+                // be recompiled for the renderer of the view
+                if (child.attributes?.name.value !== "button_box") {
+                    append(form, this.compileNode(child, params));
+                }
             }
             form.classList.add("o_form_nosheet");
         } else {
