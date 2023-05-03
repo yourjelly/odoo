@@ -323,7 +323,6 @@ If you have development competencies, we can propose you specific traineeships</
       <record id="work_contact_qdp" model="res.partner">
           <field name="name">Marc Demo</field>
           <field name="email">gilles@odoo.com</field>
-          <field name="image_1920" type="base64" file="hr/static/img/employee_qdp-image.png"/>
       </record>
 
       <record id="employee_qdp" model="hr.employee">

@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="hr.view_employee_tree"></field>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='work_email']" position="after">
-                <field name="first_contract_date" optional="hide"/>
+                <field name="first_contract_date" optional="show"/>
             </xpath>
         </field>
     </record>
