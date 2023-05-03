@@ -83,11 +83,26 @@
 //    '$o-theme-text-colors' ones.
 $-o-theme-text-colors: map-merge($theme-colors, $o-theme-text-colors);
 
-// 2. Use different colors for links end buttons when in conjunction with
+// 2. Use different colors for links and buttons when in conjunction with
 //    'text-x' classes to keep consistency with previous versions of Bootstrap.
 //    To do so we pass the values through the 'text-emphasis-variant' mixin.
 @each $-name, $-value in $-o-theme-text-colors {
     @include text-emphasis-variant(".text-#{$-name}", $-value);
+}
+
+// 3. Adapt the behaviour of .btn-link buttons when in conjuction with contextual
+//    classes (eg. text-warning). 'muted' is set as default text color, while
+//    the contextual-class color will be used on ':hover'.
+//    Note: For the custom classes, this is duplicated below where the classes are
+//    generated with the o-gray
+.btn-link {
+    font-weight: $btn-font-weight;
+
+    @each $-name, $-color in $-o-theme-text-colors{
+        &.btn-#{$-name}, &.text-#{$-name} {
+            @include o-btn-link-variant($o-main-color-muted!important, o-text-color($-name) or $-color!important);
+        }
+    }
 }
 
 // 3. Cleanup temporary map
@@ -203,9 +218,22 @@ $-o-bg-colors-custom: map-merge($o-bg-colors-custom, $o-grays);
     }
 }
 
-// 3. Cleanup temporary maps
+// 4. Cleanup temporary maps
 $-o-text-colors-custom: null;
 $-o-bg-colors-custom: null;
+
+// 5. Adapt the behaviour of .btn-link buttons when in conjuction with the custom
+//    contextual classes (eg. text-action). 'muted' is set as default text color,
+//    while the contextual-class color will be used on ':hover'.
+//    Note: the same is done above for the '$theme-colors'. Here on the
+//    '$o-text-colors-custom' because we don't want it to apply on the '$o-grays'.
+.btn-link {
+    @each $-name, $-color in $o-text-colors-custom{
+        &.btn-#{$-name}, &.text-#{$-name} {
+            @include o-btn-link-variant($o-main-color-muted!important, o-text-color($-name) or $-color!important);
+        }
+    }
+}
 
 // Cards
 // ============================================================================
