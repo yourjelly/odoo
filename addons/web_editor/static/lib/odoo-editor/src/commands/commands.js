@@ -189,7 +189,7 @@ function insert(editor, data, isText = true) {
         } else {
             currentNode.after(nodeToInsert);
         }
-        if (currentNode.tagName !== 'BR' && isShrunkBlock(currentNode)) {
+        if (currentNode.tagName !== 'BR' && isShrunkBlock(closestBlock(currentNode))) {
             currentNode.remove();
         }
         currentNode = nodeToInsert;

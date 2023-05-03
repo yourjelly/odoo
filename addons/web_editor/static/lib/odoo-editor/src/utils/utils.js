@@ -1745,8 +1745,26 @@ export function insertText(sel, content) {
  */
 export function unwrapContents(node) {
     const contents = [...node.childNodes];
-    for (const child of contents) {
-        node.parentNode.insertBefore(child, node);
+    const regex = new RegExp('\\b(' + paragraphRelatedElements.join('|') + ')\\b', 'gi');
+    const match = node.attributes['style'] && node.attributes['style'].value.match(regex);
+    if (match) {
+        const br = document.createElement(match[0])
+        if (node.attributes['style']) {
+            const style = node.attributes['style'];
+            node.parentNode.insertBefore(br, node);
+            br.setAttribute(style.name, style.value)
+            for (const child of contents) {
+                br.appendChild(child);
+            }
+        }
+    } else {
+        if (node.parentElement && node.parentElement.attributes['style'] && node.parentElement.attributes['style'].value.match(regex)) {
+            const br = document.createElement('br');
+            node.parentNode.insertBefore(br, node);
+        }
+        for (const child of contents) {
+            node.parentNode.insertBefore(child, node);
+        }
     }
     node.parentNode.removeChild(node);
     return contents;
