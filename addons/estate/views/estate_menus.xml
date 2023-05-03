@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="estate_menu_root" name="Real Estate App"
+        web_icon="estate,static/description/icon.png">
+        <menuitem id="estate_first_level_menu" name="Advertisements">
+            <menuitem id="estate_property_menu_action" action="estate_property_action" />
+        </menuitem>
+
+        <menuitem id="estate_property_type_level_menu" name="Settings">
+            <menuitem id="estate_property_menu_type_action" action="estate_property_type_action" />
+            <menuitem id="estate_property_tag_type_action" action="estate_property_tag_action" />
+        </menuitem>
+    </menuitem>
+
+    <record id="website_property_menu" model="website.menu">
+        <field name="name">Properties</field>
+        <field name="url">properties</field>
+        <field name="parent_id" ref="website.main_menu" />
+        <field name="sequence">50</field>
+    </record>
+</odoo>
