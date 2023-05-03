@@ -1165,10 +1165,9 @@ class SaleOrderLine(models.Model):
         return amount
 
     def action_add_from_catalog(self):
-        order_id = self.env.context.get('order_id')
+        order = self.env['sale.order'].browse(self.env.context.get('order_id'))
         kanban_view_id = self.env.ref('sale.sale_product_catalog_kanban_view').id
         search_view_id = self.env.ref('sale.sale_product_catalog_search_view').id
-        domain = self.order_id._get_product_catalog_domain()
 
         return {
             'type': 'ir.actions.act_window',
@@ -1176,10 +1175,11 @@ class SaleOrderLine(models.Model):
             'res_model': 'product.product',
             'views': [(kanban_view_id, 'kanban'), (False, 'form')],
             'search_view_id': [search_view_id, 'search'],
-            'domain': domain,
+            'domain': order._get_product_catalog_domain(),
             'context': {
                 **self.env.context,
-                'order_id': order_id,
+                'order_id': order.id,
+                'currency_id': order.currency_id.id,
             },
             'help': """<p class="o_view_nocontent_smiling_face">
                 Create a new product
