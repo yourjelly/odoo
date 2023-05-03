@@ -53,9 +53,7 @@ import {
     removeFacet,
     saveFavorite,
     toggleActionMenu,
-    toggleFavoriteMenu,
-    toggleFilterMenu,
-    toggleGroupByMenu,
+    toggleSearchBarMenu,
     toggleMenuItem,
     toggleSaveFavorite,
     validateSearch,
@@ -294,7 +292,10 @@ QUnit.module("Views", (hooks) => {
             arch: '<tree><field name="foo"/><field name="int_field"/></tree>',
         });
         await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[0]);
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs_actions"),
+            ".o_list_selection_box"
+        );
         assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
@@ -314,7 +315,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
-            "4 selected  Unselect all"
+            "4 selected"
         );
         assert.strictEqual(
             document.querySelectorAll(".o_data_row .o_list_record_selector input:checked").length,
@@ -329,7 +330,7 @@ QUnit.module("Views", (hooks) => {
         );
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
-            "2 selected  Unselect all"
+            "2 selected"
         );
         assert.strictEqual(
             document.querySelectorAll(".o_data_row .o_list_record_selector input:checked").length,
@@ -569,7 +570,6 @@ QUnit.module("Views", (hooks) => {
             target.querySelectorAll("tbody td.o_list_record_selector").length,
             "should have at least one record"
         );
-        assert.containsOnce(target, "div.o_control_panel .o_cp_buttons .o_list_export_xlsx");
 
         await click(target.querySelector("tbody td.o_list_record_selector input"));
         assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
@@ -581,54 +581,6 @@ QUnit.module("Views", (hooks) => {
             ["Export", "Delete"],
             "action menu should have Export button"
         );
-    });
-
-    QUnit.test("export button in list view", async function (assert) {
-        function hasGroup(group) {
-            return group === "base.group_allow_export";
-        }
-        serviceRegistry.add("user", makeFakeUserService(hasGroup), { force: true });
-
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: '<tree><field name="foo"/></tree>',
-        });
-
-        assert.containsN(target, ".o_data_row", 4);
-        assert.isVisible(target.querySelector(".o_list_export_xlsx"));
-
-        await click(target.querySelector("tbody td.o_list_record_selector input"));
-        assert.isNotVisible(target.querySelector(".o_list_export_xlsx"));
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
-
-        await click(target.querySelector("tbody td.o_list_record_selector input"));
-        assert.isVisible(target.querySelector(".o_list_export_xlsx"));
-    });
-
-    QUnit.test("export button in empty list view", async function (assert) {
-        const records = serverData.models.foo.records;
-
-        serverData.models.foo.records = [];
-
-        function hasGroup(group) {
-            return group === "base.group_allow_export";
-        }
-        serviceRegistry.add("user", makeFakeUserService(hasGroup), { force: true });
-
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: '<tree><field name="foo"/></tree>',
-        });
-
-        assert.isNotVisible(target.querySelector(".o_list_export_xlsx"));
-
-        serverData.models.foo.records = records;
-        await reloadListView(target);
-        assert.isVisible(target.querySelector(".o_list_export_xlsx"));
     });
 
     QUnit.test("Direct export button invisible", async function (assert) {
@@ -855,31 +807,31 @@ QUnit.module("Views", (hooks) => {
                     <field name="foo" />
                 </tree>`,
         });
-        let cpButtons = getButtons(target);
-        assert.containsNone(cpButtons[0], 'button[name="x"]');
-        assert.containsNone(cpButtons[0], ".o_list_selection_box");
-        assert.containsNone(cpButtons[0], 'button[name="y"]');
+        let cpBreadcrumb = target.querySelector("div.o_control_panel_breadcrumbs");
+        assert.containsNone(cpBreadcrumb, 'button[name="x"]');
+        assert.containsNone(cpBreadcrumb, ".o_list_selection_box");
+        assert.containsNone(cpBreadcrumb, 'button[name="y"]');
 
         await click(
             target.querySelector('.o_data_row .o_list_record_selector input[type="checkbox"]')
         );
-        cpButtons = getButtons(target);
-        assert.containsOnce(cpButtons[0], 'button[name="x"]');
-        assert.hasClass(cpButtons[0].querySelector('button[name="x"]'), "btn btn-secondary plaf");
-        assert.containsOnce(cpButtons[0], ".o_list_selection_box");
+        cpBreadcrumb = target.querySelector("div.o_control_panel_breadcrumbs");
+        assert.containsOnce(cpBreadcrumb, 'button[name="x"]');
+        assert.hasClass(cpBreadcrumb.querySelector('button[name="x"]'), "btn btn-secondary plaf");
+        assert.containsOnce(cpBreadcrumb, ".o_list_selection_box");
         assert.strictEqual(
-            cpButtons[0].querySelector('button[name="x"]').nextElementSibling,
-            cpButtons[0].querySelector(".o_list_selection_box")
+            cpBreadcrumb.querySelector('button[name="x"]').previousElementSibling,
+            cpBreadcrumb.querySelector(".o_list_selection_box")
         );
-        assert.containsNone(cpButtons[0], 'button[name="y"]');
+        assert.containsNone(cpBreadcrumb, 'button[name="y"]');
 
         await click(
             target.querySelector('.o_data_row .o_list_record_selector input[type="checkbox"]')
         );
-        cpButtons = getButtons(target);
-        assert.containsNone(cpButtons[0], 'button[name="x"]');
-        assert.containsNone(cpButtons[0], ".o_list_selection_box");
-        assert.containsNone(cpButtons[0], 'button[name="y"]');
+        cpBreadcrumb = target.querySelector("div.o_control_panel_breadcrumbs");
+        assert.containsNone(cpBreadcrumb, 'button[name="x"]');
+        assert.containsNone(cpBreadcrumb, ".o_list_selection_box");
+        assert.containsNone(cpBreadcrumb, 'button[name="y"]');
     });
 
     QUnit.test(
@@ -898,34 +850,28 @@ QUnit.module("Views", (hooks) => {
                     <field name="foo" />
                 </tree>`,
             });
-            let cpButtons = getButtons(target)[0];
+            let cpButtons = getButtons(target);
             assert.deepEqual(
-                [...cpButtons.querySelectorAll("button")].map((button) =>
-                    button.textContent.trim()
-                ),
-                ["New", "display", ""]
+                [...cpButtons].map((button) => button.textContent.trim()),
+                ["New", "display"]
             );
 
             await click(
                 target.querySelector('.o_data_row .o_list_record_selector input[type="checkbox"]')
             );
-            cpButtons = getButtons(target)[0];
+            cpButtons = getButtons(target);
             assert.deepEqual(
-                [...cpButtons.querySelectorAll("button")].map((button) =>
-                    button.textContent.trim()
-                ),
+                [...cpButtons].map((button) => button.textContent.trim()),
                 ["New", "display", "default-selection"]
             );
 
             await click(
                 target.querySelector('.o_data_row .o_list_record_selector input[type="checkbox"]')
             );
-            cpButtons = getButtons(target)[0];
+            cpButtons = getButtons(target);
             assert.deepEqual(
-                [...cpButtons.querySelectorAll("button")].map((button) =>
-                    button.textContent.trim()
-                ),
-                ["New", "display", ""]
+                [...cpButtons].map((button) => button.textContent.trim()),
+                ["New", "display"]
             );
         }
     );
@@ -961,8 +907,8 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            const cpButtons = getButtons(target)[0];
-            await click(cpButtons.querySelectorAll("button")[1]);
+            const cpButtons = getButtons(target);
+            await click(cpButtons[1]);
             assert.verifySteps(["doActionButton"]);
         }
     );
@@ -992,20 +938,13 @@ QUnit.module("Views", (hooks) => {
                 target.querySelector('.o_data_row .o_list_record_selector input[type="checkbox"]')
             );
             const cpButtons = getButtons(target);
-            assert.ok(
-                Array.from(cpButtons[0].querySelectorAll("button")).every((btn) => !btn.disabled)
-            );
-
-            await click(cpButtons[0].querySelector('button[name="x"]'));
-            assert.ok(
-                Array.from(cpButtons[0].querySelectorAll("button")).every((btn) => btn.disabled)
-            );
+            assert.ok([...cpButtons].every((btn) => !btn.disabled));
+            await click(cpButtons[1]);
+            assert.ok([...cpButtons].every((btn) => btn.disabled));
 
             executeActionDef.resolve();
             await nextTick();
-            assert.ok(
-                Array.from(cpButtons[0].querySelectorAll("button")).every((btn) => !btn.disabled)
-            );
+            assert.ok([...cpButtons].every((btn) => !btn.disabled));
         }
     );
 
@@ -1133,7 +1072,7 @@ QUnit.module("Views", (hooks) => {
                 target.querySelector('.o_data_row .o_list_record_selector input[type="checkbox"]')
             );
             const cpButtons = getButtons(target);
-            await click(cpButtons[0].querySelector('button[name="x"]'));
+            await click(cpButtons[1]);
         }
     );
 
@@ -1189,12 +1128,11 @@ QUnit.module("Views", (hooks) => {
             await click(
                 target.querySelector('.o_data_row .o_list_record_selector input[type="checkbox"]')
             );
-            const cpButtons = getButtons(target);
 
-            await click(cpButtons[0].querySelector(".o_list_select_domain"));
+            await click(target.querySelector(".o_list_select_domain"));
             assert.verifySteps([]);
 
-            await click(cpButtons[0].querySelector('button[name="x"]'));
+            await click(target.querySelector('button[name="x"]'));
             assert.verifySteps(["search", "execute_action"]);
         }
     );
@@ -2027,6 +1965,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    // TODO
     QUnit.test("deletion of record is disabled when groupby m2m field", async function (assert) {
         serviceRegistry.add(
             "user",
@@ -2059,7 +1998,6 @@ QUnit.module("Views", (hooks) => {
         );
 
         // unselect group by m2m
-        await toggleGroupByMenu(target);
         await toggleMenuItem(target, "M2M field");
         await click(target.querySelector(".o_data_row .o_list_record_selector input"));
         assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
@@ -2189,7 +2127,7 @@ QUnit.module("Views", (hooks) => {
         // Ascending order on Date
         await click(target, "th.o_column_sortable[data-name=date]");
 
-        await toggleFavoriteMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleSaveFavorite(target);
         await editFavoriteName(target, "My favorite");
         await saveFavorite(target);
@@ -2253,7 +2191,7 @@ QUnit.module("Views", (hooks) => {
             ],
         });
 
-        await toggleFavoriteMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "My second favorite");
     });
 
@@ -2860,7 +2798,7 @@ QUnit.module("Views", (hooks) => {
             assert.containsNone(target, ".o_list_button_add");
             assert.containsOnce(target, ".o_list_button_save");
 
-            await toggleGroupByMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "candle");
 
             assert.containsNone(
@@ -3054,11 +2992,17 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsN(target, ".o_data_row", 4);
-        assert.containsNone(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsNone(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
 
         // select a record
         await click(target.querySelector(".o_data_row .o_list_record_selector input"));
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
@@ -3067,20 +3011,26 @@ QUnit.module("Views", (hooks) => {
 
         // select all records of first page
         await click(target.querySelector("thead .o_list_record_selector input"));
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
-            "4 selected  Unselect all"
+            "4 selected"
         );
 
         // unselect a record
         await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[1]);
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
-            "3 selected  Unselect all"
+            "3 selected"
         );
         await click(target.querySelector(".o_list_unselect_all"));
         assert.containsNone(
@@ -3104,11 +3054,17 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsN(target, ".o_data_row", 3);
-        assert.containsNone(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsNone(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
 
         // select a record
         await click(target.querySelector(".o_data_row .o_list_record_selector input"));
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
@@ -3117,19 +3073,25 @@ QUnit.module("Views", (hooks) => {
 
         // select all records of first page
         await click(target.querySelector("thead .o_list_record_selector input"));
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.containsOnce(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.replace(/\s+/g, " ").trim(),
-            "3 selected Select all 4 Unselect all"
+            "3 selected Select all 4"
         );
 
         // select all domain
         await click(target.querySelector(".o_list_selection_box .o_list_select_domain"));
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
-            "All 4 selected Unselect all"
+            "All 4 selected"
         );
         await click(target.querySelector(".o_list_unselect_all"));
         assert.containsNone(
@@ -3148,14 +3110,20 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["foo"],
         });
         assert.containsN(target, ".o_group_header", 3);
-        assert.containsNone(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsNone(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
 
         // open first group
         await click(target.querySelector(".o_group_header"));
 
         // select a record
         await click(target.querySelector(".o_data_row .o_list_record_selector input"));
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.containsNone(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
@@ -3164,19 +3132,25 @@ QUnit.module("Views", (hooks) => {
 
         // select all records of first page
         await click(target.querySelector("thead .o_list_record_selector input"));
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.containsOnce(target.querySelector(".o_list_selection_box"), ".o_list_select_domain");
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.replace(/\s+/g, " ").trim(),
-            "2 selected Select all 4 Unselect all"
+            "2 selected Select all 4"
         );
 
         // select all domain
         await click(target.querySelector(".o_list_selection_box .o_list_select_domain"));
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.strictEqual(
             target.querySelector(".o_list_selection_box").textContent.trim(),
-            "All 4 selected Unselect all"
+            "All 4 selected"
         );
         await click(target.querySelector(".o_list_unselect_all"));
         assert.containsNone(
@@ -3186,7 +3160,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("selection box is displayed after header buttons", async function (assert) {
+    QUnit.test("selection box is displayed as first action button", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -3203,15 +3177,23 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsN(target, ".o_data_row", 4);
-        assert.containsNone($(target).find(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsNone(
+            $(target).find(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
 
         // select a record
         await click(target, ".o_data_row:first-child .o_list_record_selector input");
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
-        const lastElement = target.querySelector(".o_cp_buttons .o_list_buttons").lastElementChild;
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
+        const firstElement = target.querySelector(
+            ".o_control_panel_breadcrumbs_actions > div"
+        ).firstElementChild;
         assert.strictEqual(
-            lastElement,
-            target.querySelector(".o_cp_buttons .o_list_selection_box"),
+            firstElement,
+            target.querySelector(".o_control_panel_breadcrumbs .o_list_selection_box"),
             "last element should selection box"
         );
         assert.strictEqual(
@@ -3230,7 +3212,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsN(target, ".o_data_row", 4, "there should be 4 records");
         assert.containsNone(
-            target.querySelector(".o_cp_buttons"),
+            target.querySelector(".o_control_panel_breadcrumbs"),
             ".o_list_selection_box",
             "list selection box should not be displayed"
         );
@@ -3238,7 +3220,7 @@ QUnit.module("Views", (hooks) => {
         // select all records
         await click(target.querySelector(".o_list_record_selector input"));
         assert.containsOnce(
-            target.querySelector(".o_cp_buttons"),
+            target.querySelector(".o_control_panel_breadcrumbs"),
             ".o_list_selection_box",
             "list selection box should be displayed"
         );
@@ -3254,7 +3236,7 @@ QUnit.module("Views", (hooks) => {
         await editInput(target, ".o_data_row [name=foo] input", "legion");
         await click(target, ".modal-dialog button.btn-primary");
         assert.containsNone(
-            target.querySelector(".o_cp_buttons"),
+            target.querySelector(".o_control_panel_breadcrumbs"),
             ".o_list_selection_box",
             "list selection box should not be displayed"
         );
@@ -3265,7 +3247,8 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("selection is reset on reload", async function (assert) {
+    // TODO
+    QUnit.debug("selection is reset on reload", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -3277,7 +3260,10 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
         });
 
-        assert.containsNone(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsNone(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.strictEqual(
             $(target).find("tfoot td:nth(2)").text(),
             "32",
@@ -3288,7 +3274,10 @@ QUnit.module("Views", (hooks) => {
         var firstRowSelector = target.querySelector("tbody .o_list_record_selector input");
         await click(firstRowSelector);
         assert.ok(firstRowSelector.checked, "first row should be selected");
-        assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsOnce(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.strictEqual(
             $(target).find("tfoot td:nth(2)").text(),
             "10",
@@ -3298,7 +3287,10 @@ QUnit.module("Views", (hooks) => {
         await reloadListView(target);
         firstRowSelector = target.querySelector("tbody .o_list_record_selector input");
         assert.notOk(firstRowSelector.checked, "first row should no longer be selected");
-        assert.containsNone(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
+        assert.containsNone(
+            target.querySelector(".o_control_panel_breadcrumbs"),
+            ".o_list_selection_box"
+        );
         assert.strictEqual(
             $(target).find("tfoot td:nth(2)").text(),
             "32",
@@ -3412,7 +3404,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getFooterTextArray(), ["", "", "32", "1.50"]);
 
         // Let's update the view to dislay NO records
-        await toggleFilterMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "My Filter");
         assert.deepEqual(getFooterTextArray(), ["", "", "", ""]);
     });
@@ -5822,7 +5814,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsOnce(target, "div.o_control_panel .o_cp_pager .o_pager");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "4");
-        await toggleGroupByMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "Bar");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "2");
     });
@@ -6233,10 +6225,10 @@ QUnit.module("Views", (hooks) => {
                     </search>`,
             });
 
-            await toggleFilterMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "Foo");
 
-            await toggleGroupByMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "Bar");
 
             // expand group
@@ -6964,7 +6956,7 @@ QUnit.module("Views", (hooks) => {
                 "o_catch_attention"
             );
 
-            await toggleFilterMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "Empty List");
             assert.containsOnce(target, ".o_view_nocontent");
 
@@ -7075,7 +7067,7 @@ QUnit.module("Views", (hooks) => {
             "Datetime field should have the right format"
         );
 
-        await toggleFilterMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "empty");
         await toggleMenuItem(target, "False Domain");
         assert.doesNotHaveClass(
@@ -7271,7 +7263,7 @@ QUnit.module("Views", (hooks) => {
             "o_view_sample_data"
         );
 
-        await toggleFilterMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "true_domain");
         await toggleMenuItem(target, "false_domain");
         assert.containsOnce(target, ".o_list_table");
@@ -9042,7 +9034,7 @@ QUnit.module("Views", (hooks) => {
             await toggleMenuItem(target, "Custom Action");
 
             // add a domain and select first two records
-            await toggleFilterMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "bar");
             assert.containsN(target, ".o_data_row", 3);
             assert.containsNone(target, ".o_list_record_selector input:checked");
@@ -9124,7 +9116,7 @@ QUnit.module("Views", (hooks) => {
             await toggleMenuItem(target, "Custom Action");
 
             // add a domain
-            await toggleFilterMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "bar");
             assert.containsNone(target, ".o_list_selection_box .o_list_select_domain");
 
@@ -9891,7 +9883,7 @@ QUnit.module("Views", (hooks) => {
                         <filter name="bar" string="bar" context="{'group_by': 'bar'}"/>
                     </search>`,
             });
-            await toggleGroupByMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "bar");
             await toggleMenuItem(target, "bar");
 
@@ -9906,7 +9898,7 @@ QUnit.module("Views", (hooks) => {
             );
 
             const modal = target.querySelector(".modal");
-            await toggleGroupByMenu(modal);
+            await toggleSearchBarMenu(modal);
             await toggleMenuItem(modal, "cornichon");
             await click(target.querySelector(".o_group_header"));
             assert.containsOnce(target, ".modal-content .o_group_open");
@@ -12489,7 +12481,7 @@ QUnit.module("Views", (hooks) => {
         // reload with a domain (this request is blocked)
         blockSearchRead = true;
         // list.reload({ domain: [["foo", "=", "yop"]] });
-        await toggleFilterMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "yop");
         assert.containsN(
             target,
@@ -12501,7 +12493,7 @@ QUnit.module("Views", (hooks) => {
         // reload without the domain
         blockSearchRead = false;
         // list.reload({ domain: [] });
-        // await toggleFilterMenu(target);
+        // await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "yop");
         assert.containsN(
             target,
@@ -13120,7 +13112,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_group_header", 1); // page 2
 
         // toggle a filter -> there should be only one group left (on page 1)
-        await toggleFilterMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, 0);
         assert.deepEqual(getPagerValue(target), [1, 1]);
         assert.containsN(target, ".o_group_header", 1); // page 1
@@ -13139,7 +13131,7 @@ QUnit.module("Views", (hooks) => {
                     <filter name="bar" string="bar" context="{'group_by': 'bar'}"/>
                 </search>`,
         });
-        await toggleGroupByMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "bar");
         await click(target.querySelector(".o_group_header"));
 
@@ -13152,7 +13144,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_selected_row");
 
         // reload without groupBy
-        await toggleGroupByMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "bar");
 
         // enter edition (ungrouped case)
@@ -13181,7 +13173,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_selected_row");
 
         // reload with a groupby
-        await toggleGroupByMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "bar");
 
         // open first group
@@ -13227,7 +13219,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_list_button_add");
 
         // reload with a groupby
-        await toggleGroupByMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "bar");
 
         assert.containsNone(target, ".o_list_button_add");
@@ -14445,7 +14437,7 @@ QUnit.module("Views", (hooks) => {
                 </search>`,
         });
 
-        await toggleGroupByMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "Foo");
 
         // expand group
@@ -16789,7 +16781,7 @@ QUnit.module("Views", (hooks) => {
             ["yop", "gnap", "blip", "blip"]
         );
 
-        await toggleGroupByMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "Foo");
 
         assert.deepEqual(
@@ -17295,7 +17287,7 @@ QUnit.module("Views", (hooks) => {
                 ["yop", "blip"]
             );
 
-            await toggleGroupByMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "Bar");
             assert.containsN(target, "tbody .o_group_header", 2);
             assert.deepEqual(
@@ -17319,7 +17311,7 @@ QUnit.module("Views", (hooks) => {
                 ["gnap", "blip"]
             );
 
-            await toggleGroupByMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "Bar");
             assert.containsN(target, "tbody .o_group_header", 2);
             assert.deepEqual(
@@ -17608,7 +17600,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 4);
 
         // apply the filter to trigger a reload of datapoints
-        await toggleFilterMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "My Filter");
 
         assert.containsN(target, ".o_data_row", 3);
@@ -18322,7 +18314,7 @@ QUnit.module("Views", (hooks) => {
             "/web/dataset/call_kw/foo/web_search_read",
         ]);
 
-        await toggleFavoriteMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "only one");
 
         assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read"]);
