@@ -499,6 +499,51 @@ class PropertiesCase(TransactionCase):
             msg='Should not take the default value',
         )
 
+        # default value but no parent are set
+        record = self.env['test_new_api.message'].create({
+            'attributes': {'my_many2one': self.partner_2.id},
+        })
+        self.assertFalse(self._get_sql_properties(record))
+
+        # default value but the parent has no definition
+        self.discussion_1.attributes_definition = []
+        record = self.env['test_new_api.message'].create({
+            'discussion': self.discussion_1.id,
+            'attributes': {'my_many2one': self.partner_2.id},
+        })
+        self.assertFalse(self._get_sql_properties(record))
+
+        # default value but the parent has no definition and we create a new property
+        self.discussion_1.attributes_definition = []
+        record = self.env['test_new_api.message'].create({
+            'discussion': self.discussion_1.id,
+            'attributes': [{
+                'name': 'test',
+                'type': 'many2one',
+                'comodel': 'test_new_api.partner',
+                'default': self.partner_2.id,
+                'definition_changed': True,
+            }],
+        })
+        self.assertEqual(self._get_sql_properties(record), {'test': self.partner_2.id})
+
+        # default value, a parent is set and change the definition
+        record = self.env['test_new_api.message'].create({
+            'discussion': self.discussion_1.id,
+            'attributes': [{
+                'name': 'test',
+                'type': 'many2one',
+                'comodel': 'test_new_api.partner',
+                'default': self.partner_2.id,
+            }, {
+                'name': 'my_char',
+                'type': 'char',
+                'default': 'my char',
+                'definition_changed': True,
+            }],
+        })
+        self.assertEqual(self._get_sql_properties(record), {'my_char': 'my char', 'test': self.partner_2.id})
+
     def test_properties_field_read(self):
         """Test the behavior of the read method.
 
@@ -1430,7 +1475,7 @@ class PropertiesCase(TransactionCase):
             """, (message.id, ),
         )
         value = self.env.cr.fetchone()
-        self.assertTrue(value and value[0])
+        self.assertTrue(value)
         return value[0]
 
     def _get_sql_definition(self, discussion):
