@@ -227,7 +227,7 @@ export class FormCompiler extends ViewCompiler {
             for (const child of el.childNodes) {
                 // ButtonBox are already compiled for the control panel and should not
                 // be recompiled for the renderer of the view
-                if (child.attributes?.name.value !== "button_box") {
+                if (child.attributes?.name?.value !== "button_box") {
                     append(form, this.compileNode(child, params));
                 }
             }
