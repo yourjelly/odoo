@@ -52,7 +52,7 @@ function compileChatter(node, params) {
         saveRecord: "() => __comp__.saveButtonClicked and __comp__.saveButtonClicked()",
     });
     const chatterContainerHookXml = createElement("div");
-    chatterContainerHookXml.classList.add("o-mail-Form-chatter", "bg-100");
+    chatterContainerHookXml.classList.add("o-mail-Form-chatter");
     append(chatterContainerHookXml, chatterContainerXml);
     return chatterContainerHookXml;
 }
@@ -141,7 +141,7 @@ patch(FormCompiler.prototype, "mail", {
                 hasMessageListScrollAdjust: `__comp__.uiService.size >= ${SIZES.XXL}`,
             });
             setAttributes(chatterContainerHookXml, {
-                "t-attf-class": `{{ __comp__.uiService.size >= ${SIZES.XXL} ? "o-aside" : "pt-3" }}`,
+                "t-attf-class": `{{ __comp__.uiService.size >= ${SIZES.XXL} ? "o-aside" : "" }}`,
             });
         }
         append(parentXml, chatterContainerHookXml);

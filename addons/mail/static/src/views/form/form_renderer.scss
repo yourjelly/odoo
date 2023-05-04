@@ -10,7 +10,6 @@
     &.o-aside {
         flex-shrink: 0;
         width: $o-mail-Chatter-minWidth;
-        border-left: $border-width solid;
         padding: map-get($spacers, 0);
 
         .o-mail-Message.o-not-discussion {
@@ -36,11 +35,6 @@
 // ------------------------------------------------------------------
 // Style
 // ------------------------------------------------------------------
-
-.o-mail-Form-chatter.o-aside {
-    border-left-color: $border-color;
-}
-
 
 .o-mail-Form-chatter {
     display: flex;
