@@ -113,4 +113,19 @@ patch(ThreadService.prototype, "im_livechat", {
             return `${session.origin}/mail/static/src/img/smiley/avatar.jpg`;
         }
     },
+
+    /**
+     * Returns the current livechat thread if any.
+     *
+     * @returns {Promise<@import("@mail/core/thread_model").Thread?>}
+     */
+    async getLivechatThread() {
+        const session = await this.livechatService.getSession();
+        if (!session) {
+            return;
+        }
+        return this.storeService.threads[
+            createLocalId("discuss.channel", session.id ?? this.TEMPORARY_ID)
+        ];
+    },
 });
