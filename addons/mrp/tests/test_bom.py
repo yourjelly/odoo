@@ -1082,3 +1082,75 @@ class TestBoM(TestMrpCommon):
         self.assertEqual(orderpoint.route_id.id, manufacturing_route_id)
         self.assertEqual(orderpoint.qty_multiple, 2000.0)
         self.assertEqual(orderpoint.qty_to_order, 4000.0)
+
+    def test_bom_kit_multi_company(self):
+        uom_unit = self.env.ref("uom.product_uom_unit")
+        product_category_all = self.env.ref("product.product_category_all")
+        company1 = self.env["res.company"].create({"name": "Company1"})
+        company2 = self.env["res.company"].create({"name": "Company2"})
+        warehouse1 = self.env["stock.warehouse"].search([("company_id", "=", company1.id)], limit=1)
+        warehouse2 = self.env["stock.warehouse"].search([("company_id", "=", company2.id)])
+        product1 = self.env["product.product"].create(
+            {"name": "product1", "type": "product", "categ_id": product_category_all.id, "company_id": company1.id}
+        )
+        product2 = self.env["product.product"].create(
+            {"name": "product2", "type": "product", "categ_id": product_category_all.id}
+        )
+        self.env['stock.quant']._update_available_quantity(product2, warehouse1.lot_stock_id, 10.0)
+        product3 = self.env["product.product"].create(
+            {"name": "product3", "type": "product", "categ_id": product_category_all.id, "active": False}
+        )
+        kit_product_qty1, _, _ = (product1 + product2 + product3).mapped("qty_available")
+        self.assertEqual(kit_product_qty1, 0.0)
+        self.env["mrp.bom"].create(
+            {
+                "product_tmpl_id": product1.product_tmpl_id.id,
+                "product_qty": 1,
+                "type": "phantom",
+                "product_uom_id": uom_unit.id,
+                "company_id": company1.id,
+                "bom_line_ids": [
+                    (0, 0, {"product_id": product2.id, "product_qty": 1, "product_uom_id": uom_unit.id}),
+                    (0, 0, {"product_id": product3.id, "product_qty": 1, "product_uom_id": uom_unit.id}),
+                ],
+            }
+        )
+        product4 = self.env["product.product"].create(
+            {"name": "product4", "type": "product", "categ_id": product_category_all.id}
+        )
+        product5 = self.env["product.product"].create(
+            {"name": "product5", "type": "product", "categ_id": product_category_all.id}
+        )
+        self.env['stock.quant']._update_available_quantity(product5, warehouse1.lot_stock_id, 20.0)
+        self.env["mrp.bom"].create(
+            {
+                "product_tmpl_id": product4.product_tmpl_id.id,
+                "product_qty": 1,
+                "type": "phantom",
+                "product_uom_id": uom_unit.id,
+                "company_id": company1.id,
+                "bom_line_ids": [
+                    (0, 0, {"product_id": product5.id, "product_qty": 1, "product_uom_id": uom_unit.id}),
+                ],
+            }
+        )
+        kit_product_qty2, _ = (product4 + product5).mapped("qty_available")
+        self.assertEqual(kit_product_qty2, 20.0)
+        product6 = self.env["product.product"].create(
+            {"name": "product6", "type": "product", "categ_id": product_category_all.id}
+        )
+        self.env['stock.quant']._update_available_quantity(product4, warehouse2.lot_stock_id, 50.0)
+        self.env["mrp.bom"].create(
+            {
+                "product_tmpl_id": product6.product_tmpl_id.id,
+                "product_qty": 1,
+                "type": "phantom",
+                "product_uom_id": uom_unit.id,
+                "company_id": company2.id,
+                "bom_line_ids": [
+                    (0, 0, {"product_id": product4.id, "product_qty": 1, "product_uom_id": uom_unit.id}),
+                ],
+            }
+        )
+        kit_product_qty3, _ = (product6 + product4).mapped("qty_available")
+        self.assertEqual(kit_product_qty3, 20.0)
