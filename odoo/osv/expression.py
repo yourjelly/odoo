@@ -742,47 +742,6 @@ def get_unaccent_wrapper(cr):
     return lambda x: x
 
 
-class Domain:
-
-    def __init__(self, domain_list: list, model: BaseModel) -> None:
-        self._decompose_leaf()
-        self.root = _tree_from_domain(domain_list)
-
-        self._optimize()
-
-    def _decompose_leaf(self):
-        """
-        """
-        pass
-
-    def _optimize(self):
-        """ Simplify the condition, to simplify condition to generate simpler condition
-
-        When they are several condition on the same field:
-        - Any are combined if possible
-        - = -> in (it helps postgresql)
-        - not in -> in for selection fields (if selection is known)
-        - <bool> in [True, False] -> True
-        - = + = on other values -> False
-        - =like -> n-ary
-        """
-        pass
-
-    def __add__(self, other):
-        pass
-
-    def _to_where_clause(self, query: Query):
-        """ Translate the domain in the where clause
-
-        """
-
-    def __iter__(self):
-        # yield level_list_condition, operator
-        # yield None (level change)
-        # yield None (level change)
-        pass
-
-
 class expression(object):
     """ Parse a domain expression
         Use a real polish notation
