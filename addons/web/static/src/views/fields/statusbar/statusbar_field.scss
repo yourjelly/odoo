@@ -10,11 +10,9 @@
         align-items: stretch;
 
         > .o_arrow_button {
-            min-height: $o-statusbar-height;
             position: relative;
             padding-left: $o-statusbar-arrow-width*2;
             border-radius: 0;
-            font-size: $font-size-sm;
 
             &:first-child {
                 @include border-end-radius($border-radius);
