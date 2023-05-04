@@ -16,12 +16,15 @@
             }
 
             &:before {
-                @include o-position-absolute(0, $left: ($o-hrs-timeline-dot-size * .5 + $o-hrs-timeline-entry-padding));
-                width: 1px;
+                @include o-position-absolute(0, $left: calc(#{$o-hrs-timeline-dot-size} * .5 + #{$o-horizontal-padding} - #{$border-width} ));
+                width: $border-width;
                 height: 100%;
-                margin-left: 2.1rem;
                 background-color: $border-color;
                 content: "";
+
+                @include media-breakpoint-up(lg, $o-extra-grid-breakpoints) {
+                    @include o-position-absolute(0, $left: calc(#{$o-hrs-timeline-dot-size} * .5 + #{$o-horizontal-padding} * 2 - #{$border-width} ));
+                }
             }
         }
     }
