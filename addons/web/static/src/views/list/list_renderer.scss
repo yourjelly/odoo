@@ -2,10 +2,12 @@
 .o_list_renderer {
     --ListRenderer-table-padding-h: #{$table-cell-padding-x-sm};
 
-    --ListRenderer-thead-padding-v: #{$table-cell-padding-y * 1.25};
-    --ListRenderer-thead-bg-color: #{$gray-200};
+    --ListRenderer-thead-padding-v: #{map-get($spacers, 3)};
+    --ListRenderer-thead-bg-color: transparent;
     --ListRenderer-thead-border-end-color: #{$border-color};
     --ListRenderer-thead-shadow: linear-gradient(180deg, rgba(0, 0, 0, 0.08), transparent);
+
+    --ListRenderer-tfoot-bg-color: #{$o-list-footer-bg-color};
 
     // sticky header on desktop
     @include media-breakpoint-up(md) {
@@ -30,10 +32,11 @@
 
     .o_list_view &  {
         --ListRenderer-table-padding-h: #{$o-horizontal-padding};
+
+        padding-top: var(--ListRenderer-thead-padding-v);
     }
 
     .o_list_table {
-        background-color: $o-view-background-color;
         // We need this to be collapse because we want to add a border on the rows
         // for sale order/invoice lines of type section.
         border-collapse: collapse;
@@ -53,14 +56,7 @@
             }
         }
 
-        :not(.o_field_x2many_list) > & thead, tfoot {
-            tr > :not(:empty) {
-                padding-top: var(--ListRenderer-thead-padding-v);
-                padding-bottom: var(--ListRenderer-thead-padding-v);
-            }
-        }
-
-        thead {
+        thead th {
             background-color: var(--ListRenderer-thead-bg-color);
             color: $headings-color;
         }
@@ -120,15 +116,10 @@
         }
 
         tfoot {
-            // cursor: default;
-            color: $o-list-footer-color;
-            background-color: $o-list-footer-bg-color;
-            font-weight: $o-list-footer-font-weight;
-            border-top: 1px solid $table-border-color;
-            border-bottom: 1px solid $table-border-color;
-
-
             > tr > td {
+                color: $o-list-footer-color;
+                background-color: $o-list-footer-bg-color;
+                font-weight: $o-list-footer-font-weight;
                 @include o-text-overflow(table-cell);
             }
         }
