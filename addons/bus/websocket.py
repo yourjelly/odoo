@@ -14,6 +14,7 @@ from collections import defaultdict, deque
 from contextlib import closing, suppress
 from enum import IntEnum
 from psycopg2.pool import PoolError
+from urllib.parse import urlparse
 from weakref import WeakSet
 
 from werkzeug.local import LocalStack
@@ -22,7 +23,7 @@ from werkzeug.exceptions import BadRequest, HTTPException
 import odoo
 from odoo import api
 from .models.bus import dispatch
-from odoo.http import root, Request, Response, SessionExpiredException
+from odoo.http import root, Request, Response, SessionExpiredException, get_default_session
 from odoo.modules.registry import Registry
 from odoo.service import model as service_model
 from odoo.service.server import CommonServer
@@ -808,6 +809,13 @@ class WebsocketConnectionHandler:
         versions the client supports and those we support.
         :raise: BadRequest if the handshake data is incorrect.
         """
+        # Verify origin as we're not covered by CORS/SOP protection. Host and Origin include port.
+        headers = request.httprequest.headers
+        origin_url = urlparse(headers['origin'])
+        if origin_url.netloc != headers['host'] or origin_url.scheme != request.httprequest.scheme:
+            request.session = root.session_store.new()
+            request.session.update(get_default_session(), db=request.session.db)
+            _logger.debug('Invalid origin: %s. Downgrading to anonymous session.', headers['origin'])
         response = cls._get_handshake_response(request.httprequest.headers)
         response.call_on_close(functools.partial(
             cls._serve_forever,
