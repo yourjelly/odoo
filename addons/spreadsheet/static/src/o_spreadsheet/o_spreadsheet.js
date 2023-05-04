@@ -10323,6 +10323,9 @@
         constructor() {
             super(...arguments);
             this.menuState = owl.useState({ isOpen: false, position: null, menuItems: [] });
+            this.readonlyState = owl.useState({
+                isReadonly: this.env.model.getters.isReadonly(),
+            });
             this.chartContainerRef = owl.useRef("chartContainer");
             this.menuButtonRef = owl.useRef("menuButton");
             this.menuButtonPosition = useAbsolutePosition(this.menuButtonRef);
@@ -10371,6 +10374,12 @@
                 },
             });
             return registry;
+        }
+        setup() {
+            owl.onPatched(() => (this.readonlyState.isReadonly = this.env.model.getters.isReadonly()));
+        }
+        get figureReadonlyStyle() {
+            return cssPropertiesToCss({ display: this.readonlyState.isReadonly ? "none" : "block" });
         }
         get chartType() {
             return this.env.model.getters.getChartType(this.props.figure.id);
@@ -42779,8 +42788,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.9';
-    __info__.date = '2023-04-28T12:35:06.357Z';
-    __info__.hash = 'e06ca83';
+    __info__.date = '2023-05-04T05:17:34.389Z';
+    __info__.hash = '3bfeffc';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
