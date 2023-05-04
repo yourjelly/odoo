@@ -271,13 +271,3 @@ $o-btns-outline-custom: () !default;
 
 // Avatar
 $o-avatar-size: 1.7145em !default;
-
-
-// Generate Bootstrap, BS-legacy and custom text/bg classes in a consistent
-// way (see bootstrap_review_backend.scss). It applies the desired color to the
-// specified rule using CSS variables.
-// ----------------------------------------------------------------------------
-@mixin o-print-color($-color, $-rule, $-css-opacity-var) {
-    --#{$-rule}: RGBA(#{to-rgb($-color)}, var(--#{$-css-opacity-var}, 1));
-    #{$-rule}: var(--#{$-rule}) !important;
-}
