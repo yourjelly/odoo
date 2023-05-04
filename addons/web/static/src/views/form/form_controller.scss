@@ -250,8 +250,6 @@
 
     // Sheet
     .o_form_sheet_bg {
-        border-bottom: 1px solid $border-color;
-
         > .o_form_sheet {
             background-color: $o-view-background-color;
 
@@ -264,8 +262,6 @@
 
     // Statusbar
     .o_form_statusbar {
-        background-color: $o-view-background-color;
-
         > .o_statusbar_status {
             display: flex;
             align-items: center;

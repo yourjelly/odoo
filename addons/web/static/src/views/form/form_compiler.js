@@ -406,7 +406,7 @@ export class FormCompiler extends ViewCompiler {
     compileHeader(el, params) {
         const statusBar = createElement("div");
         statusBar.className =
-            "o_form_statusbar position-relative d-flex justify-content-between pb-3 px-3";
+            "o_form_statusbar position-relative d-flex justify-content-between mt-2 px-3";
         const buttons = [];
         const others = [];
         for (const child of el.childNodes) {
@@ -640,10 +640,10 @@ export class FormCompiler extends ViewCompiler {
      */
     compileSheet(el, params) {
         const sheetBG = createElement("div");
-        sheetBG.className = "o_form_sheet_bg pt-2";
+        sheetBG.className = "o_form_sheet_bg";
 
         const sheetFG = createElement("div");
-        sheetFG.className = "o_form_sheet position-relative clearfix px-3";
+        sheetFG.className = "o_form_sheet position-relative flex-basis-100 clearfix mt-2 mx-3 mb-3 mb-xxl-5 pt-3 px-3 border";
 
         append(sheetBG, sheetFG);
         for (const child of el.childNodes) {
