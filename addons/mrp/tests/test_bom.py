@@ -1084,44 +1084,12 @@ class TestBoM(TestMrpCommon):
         self.assertEqual(orderpoint.qty_to_order, 4000.0)
 
     def test_bom_kit_with_sub_kit(self):
+        p1, p2, p3 = self.make_prods(3)
+        self.make_bom(p1, p2, p3)
+        self.make_bom(p2, p3)
 
-        def make_prods(n):
-            return [
-                self.env["product.product"].create(
-                    {"name": f"p{k + 1}", "type": "product"}
-                )
-                for k in range(n)
-            ]
-
-        def make_bom(p, *cs):
-            self.env["mrp.bom"].create(
-                {
-                    "product_tmpl_id": p.product_tmpl_id.id,
-                    "product_id": p.id,
-                    "product_qty": 1,
-                    "type": "phantom",
-                    "product_uom_id": self.uom_unit.id,
-                    "bom_line_ids": [
-                        (0, 0, {
-                            "product_id": c.id,
-                            "product_qty": 1,
-                            "product_uom_id": self.uom_unit.id
-                        })
-                        for c in cs
-                    ],
-                }
-            )
-
-        def make_quant(p, q):
-            lid = self.env.ref("stock.stock_location_stock").id
-            self.env["stock.quant"].create(
-                {"product_id": p.id, "quantity": q, "location_id": lid}
-            )
-
-        p1,p2,p3 = make_prods(3)
-        make_bom(p1, p2, p3)
-        make_bom(p2, p3)
-        make_quant(p3, 10)
+        loc = self.env.ref("stock.stock_location_stock")
+        self.env["stock.quant"]._update_available_quantity(p3, loc, 10)
         self.assertEqual(p1.qty_available, 5.0)
         self.assertEqual(p2.qty_available, 10.0)
         self.assertEqual(p3.qty_available, 10.0)
