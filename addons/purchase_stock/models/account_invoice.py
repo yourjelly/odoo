@@ -142,8 +142,8 @@ class AccountMove(models.Model):
         return lines_vals_list
 
     def _post(self, soft=True):
-        if self._context.get('move_reverse_cancel'):
-            return super()._post(soft)
+        # if self._context.get('move_reverse_cancel'):
+        #     return super()._post(soft)
         self.env['account.move.line'].create(self._stock_account_prepare_anglo_saxon_in_lines_vals())
 
         # Create correction layer if invoice price is different

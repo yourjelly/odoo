@@ -9,14 +9,23 @@ class AccountMove(models.Model):
     stock_move_id = fields.Many2one('stock.move', string='Stock Move', index='btree_not_null')
     stock_valuation_layer_ids = fields.One2many('stock.valuation.layer', 'account_move_id', string='Stock Valuation Layer')
 
+    def _sort_by_posted_time(self):
+        posted_times = {}
+        state_field = self.env['ir.model.fields'].search([('model', '=', self._name), ('name', '=', 'state')])
+        posted_moves = self.env['account.move']
+        for move in self:
+            if move.state != 'posted':
+                continue
+            state_trackings = move.message_ids.tracking_value_ids.filtered(lambda t: t.field == state_field).sorted('id')
+            posted_times[move] = state_trackings[-1:].create_date or move.create_date   # in case it has been created in posted state
+            posted_moves |= move
+        return posted_moves.sorted(lambda am: (posted_times.get(am), am.id))
+
     def _compute_show_reset_to_draft_button(self):
         super()._compute_show_reset_to_draft_button()
         for move in self:
-            for line in move.line_ids:
-                # if a line has correction layers hide the 'Reset to Darft' button
-                if line.sudo()._get_stock_valuation_layers(move).stock_valuation_layer_ids.filtered('account_move_line_id'):
-                    move.show_reset_to_draft_button = False
-                    break
+            if move.sudo().line_ids.stock_valuation_layer_ids:
+                move.show_reset_to_draft_button = False
 
     # -------------------------------------------------------------------------
     # OVERRIDE METHODS
