@@ -8958,7 +8958,7 @@
         handlePasteResult(env, result);
     };
     const MENU_INSERT_ROWS_NAME = (env) => {
-        const number = getColumnsNumber(env);
+        const number = getRowsNumber(env);
         return number === 1 ? _lt("Insert row") : _lt("Insert %s rows", number.toString());
     };
     const MENU_INSERT_ROWS_BEFORE_NAME = (env) => {
@@ -16230,74 +16230,78 @@
 
     const insertRow = {
         name: MENU_INSERT_ROWS_NAME,
-        isVisible: IS_ONLY_ONE_RANGE,
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()) &&
+            IS_ONLY_ONE_RANGE(env) &&
+            env.model.getters.getActiveCols().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_ROW",
     };
     const rowInsertRowBefore = {
         name: ROW_INSERT_ROWS_BEFORE_NAME,
         execute: INSERT_ROWS_BEFORE_ACTION,
-        isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()),
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()) &&
+            IS_ONLY_ONE_RANGE(env) &&
+            env.model.getters.getActiveCols().size === 0,
     };
     const topBarInsertRowsBefore = {
         ...rowInsertRowBefore,
         name: MENU_INSERT_ROWS_BEFORE_NAME,
-        isVisible: (env) => env.model.getters.getActiveCols().size === 0 &&
-            isConsecutive(env.model.getters.getActiveRows()),
     };
     const cellInsertRowsBefore = {
         ...rowInsertRowBefore,
         name: CELL_INSERT_ROWS_BEFORE_NAME,
-        isVisible: IS_ONLY_ONE_RANGE,
         icon: "o-spreadsheet-Icon.INSERT_ROW",
     };
     const rowInsertRowsAfter = {
         execute: INSERT_ROWS_AFTER_ACTION,
         name: ROW_INSERT_ROWS_AFTER_NAME,
-        isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()),
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()) &&
+            IS_ONLY_ONE_RANGE(env) &&
+            env.model.getters.getActiveCols().size === 0,
     };
     const topBarInsertRowsAfter = {
         ...rowInsertRowsAfter,
         name: MENU_INSERT_ROWS_AFTER_NAME,
-        isVisible: (env) => env.model.getters.getActiveCols().size === 0 &&
-            isConsecutive(env.model.getters.getActiveRows()),
     };
     const insertCol = {
         name: MENU_INSERT_COLUMNS_NAME,
-        isVisible: IS_ONLY_ONE_RANGE,
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()) &&
+            IS_ONLY_ONE_RANGE(env) &&
+            env.model.getters.getActiveRows().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_COL",
     };
     const colInsertColsBefore = {
         name: COLUMN_INSERT_COLUMNS_BEFORE_NAME,
         execute: INSERT_COLUMNS_BEFORE_ACTION,
-        isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()),
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()) &&
+            IS_ONLY_ONE_RANGE(env) &&
+            env.model.getters.getActiveRows().size === 0,
     };
     const topBarInsertColsBefore = {
         ...colInsertColsBefore,
         name: MENU_INSERT_COLUMNS_BEFORE_NAME,
-        isVisible: (env) => env.model.getters.getActiveRows().size === 0 &&
-            isConsecutive(env.model.getters.getActiveCols()),
     };
     const cellInsertColsBefore = {
         ...colInsertColsBefore,
         name: CELL_INSERT_COLUMNS_BEFORE_NAME,
-        isVisible: IS_ONLY_ONE_RANGE,
         icon: "o-spreadsheet-Icon.INSERT_COL",
     };
     const colInsertColsAfter = {
         name: COLUMN_INSERT_COLUMNS_AFTER_NAME,
         execute: INSERT_COLUMNS_AFTER_ACTION,
-        isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()),
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()) &&
+            IS_ONLY_ONE_RANGE(env) &&
+            env.model.getters.getActiveRows().size === 0,
     };
     const topBarInsertColsAfter = {
         ...colInsertColsAfter,
         name: MENU_INSERT_COLUMNS_AFTER_NAME,
         execute: INSERT_COLUMNS_AFTER_ACTION,
-        isVisible: (env) => env.model.getters.getActiveRows().size === 0 &&
-            isConsecutive(env.model.getters.getActiveCols()),
     };
     const insertCell = {
         name: _lt("Insert cells"),
-        isVisible: IS_ONLY_ONE_RANGE,
+        isVisible: (env) => IS_ONLY_ONE_RANGE(env) &&
+            env.model.getters.getActiveCols().size === 0 &&
+            env.model.getters.getActiveRows().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_CELL",
     };
     const insertCellShiftDown = {
@@ -47151,8 +47155,8 @@
 
 
     __info__.version = '16.3.0-alpha.7';
-    __info__.date = '2023-05-05T05:39:01.383Z';
-    __info__.hash = 'fa1f051';
+    __info__.date = '2023-05-05T07:24:23.764Z';
+    __info__.hash = '961d7cb';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
