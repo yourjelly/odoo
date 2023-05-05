@@ -296,7 +296,7 @@
                                                      t-if="record.hr_icon_display.raw_value == 'presence_present'"
                                                      name="presence_present">
                                                     <!-- Employee is present/connected and it is normal according to his work schedule  -->
-                                                    <span class="fa fa-circle text-success"
+                                                    <span class="o_status d-inline-block bg-success"
                                                           role="img" aria-label="Present"
                                                           title="Present" name="presence_present">
                                                     </span>
@@ -324,7 +324,7 @@
                                                      t-if="record.hr_icon_display.raw_value == 'presence_to_define'"
                                                         name="presence_to_define">
                                                     <!-- Employee is not here but according to his work schedule, he should be connected -->
-                                                    <span class="fa fa-circle text-warning" role="img"
+                                                    <span class="o_status d-inline-block bg-warning" role="img"
                                                           aria-label="To define" title="To define"
                                                           name="presence_to_define">
                                                     </span>

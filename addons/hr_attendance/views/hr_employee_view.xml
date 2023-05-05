@@ -114,10 +114,10 @@
                         <div class="oe_kanban_details">
                             <div id="textbox">
                                 <div class="float-end" t-if="record.attendance_state.raw_value == 'checked_in'">
-                                    <span id="oe_hr_attendance_status" class="fa fa-circle text-success me-1" role="img" aria-label="Available" title="Available"></span>
+                                    <span id="oe_hr_attendance_status" class="o_status d-inline-block bg-success" role="img" aria-label="Available" title="Available"></span>
                                 </div>
                                 <div class="float-end" t-if="record.attendance_state.raw_value == 'checked_out'">
-                                    <span id="oe_hr_attendance_status" class="fa fa-circle text-warning me-1"
+                                    <span id="oe_hr_attendance_status" class="o_status d-inline-block bg-warning"
                                           role="img" aria-label="Not available" title="Not available">
                                     </span>
                                 </div>
