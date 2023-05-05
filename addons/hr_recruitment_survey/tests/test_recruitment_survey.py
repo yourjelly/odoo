@@ -49,7 +49,7 @@ class TestRecruitmentSurvey(common.SingleTransactionCase):
             **action['context'],
         }))
         invite = invite_form.save()
-        invite.action_invite()
+        invite.with_context(active_model="hr.applicant").action_invite()
 
         self.assertEqual(invite.applicant_id, self.job_sysadmin)
         self.assertNotEqual(self.job_sysadmin.response_ids.ids, False)

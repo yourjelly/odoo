@@ -123,7 +123,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCommon):
         invite_form.deadline = fields.Datetime.to_string(deadline)
 
         invite = invite_form.save()
-        invite.action_invite()
+        invite.with_context(active_model="survey.survey").action_invite()
 
         answers = Answer.search([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 1)
@@ -162,7 +162,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCommon):
         invite_form.emails = False
 
         invite = invite_form.save()
-        invite.action_invite()
+        invite.with_context(active_model="survey.survey").action_invite()
 
         answers = Answer.search([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 2)
@@ -189,7 +189,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCommon):
         # invite_form.emails = 'test1@example.com, Raoulette Vignolette <test2@example.com>'
 
         invite = invite_form.save()
-        invite.action_invite()
+        invite.with_context(active_model="survey.survey").action_invite()
 
         answers = Answer.search([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 3)
@@ -208,7 +208,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCommon):
         invite_form.template_id.write({'email_from':'{{ object.partner_id.email_formatted }}'})
         invite = invite_form.save()
         with self.mock_mail_gateway():
-            invite.action_invite()
+            invite.with_context(active_model="survey.survey").action_invite()
 
         self.assertEqual(len(self._new_mails), 1, "A new mail.mail should have been created")
         mail = self._new_mails[0]
@@ -227,7 +227,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCommon):
         invite_form.emails = 'test1@example.com, Raoulette Vignolette <test2@example.com>'
 
         invite = invite_form.save()
-        invite.action_invite()
+        invite.with_context(active_model="survey.survey").action_invite()
 
         answers = Answer.search([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 3)
@@ -248,7 +248,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCommon):
         invite_form.emails = 'test1@example.com, Raoulette Vignolette <test2@example.com>'
 
         invite = invite_form.save()
-        invite.action_invite()
+        invite.with_context(active_model="survey.survey").action_invite()
 
         answers = Answer.search([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 3)
@@ -276,7 +276,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCommon):
         invite_form.emails = False
 
         invite = invite_form.save()
-        invite.action_invite()
+        invite.with_context(active_model="survey.survey").action_invite()
 
         answers = Answer.search([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 1)
@@ -306,7 +306,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCommon):
         invite_form = Form(self.env[action['res_model']].with_context(action['context']))
         invite_form.emails = 'test@example.com'
         invite = invite_form.save()
-        invite.action_invite()
+        invite.with_context(active_model="survey.survey").action_invite()
 
         answers = self.env['survey.user_input'].search([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 1)
