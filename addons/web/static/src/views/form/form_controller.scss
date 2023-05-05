@@ -260,6 +260,10 @@
                 float: right;
             }
         }
+
+        .o_kanban_renderer{
+            --Kanban-background: transparent;
+        }
     }
 
     // Statusbar
