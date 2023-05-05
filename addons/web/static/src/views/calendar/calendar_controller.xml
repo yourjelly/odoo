@@ -14,11 +14,23 @@
                     <SearchBar/>
                 </t>
                 <div class="o_calendar_container">
-                    <MobileFilterPanel t-if="env.isSmall" t-props="mobileFilterPanelProps" />
+                    <MobileFilterPanel t-if="env.isSmall" t-props="mobileFilterPanelProps">
+                        <t t-set-slot="scaleControl">
+                            <div class="d-flex btn-group">
+                                <button
+                                    class="btn btn-secondary o_calendar_button_today"
+                                    t-on-click.stop="() => this.setDate('today')"
+                                >
+                                    <i class="fa fa-calendar"/>
+                                </button>
+                                <ViewScaleSelector scales="scales" currentScale="model.scale" setScale.bind="setScale" />
+                            </div>
+                        </t>
+                    </MobileFilterPanel>
                     <div t-if="showSideBar" class="o_calendar_sidebar_container d-md-block">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between" t-if="!env.isSmall">
                             <button
-                                class="btn btn-secondary mx-1 o_calendar_button_today"
+                                class="btn btn-secondary o_calendar_button_today"
                                 t-on-click.stop="() => this.setDate('today')"
                             >
                                 Today
