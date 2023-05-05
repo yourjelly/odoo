@@ -23,6 +23,7 @@ export class LivechatButton extends Component {
 
     get isShown() {
         return (
+            this.livechatService.initialized &&
             this.livechatService.available &&
             !this.livechatService.shouldRestoreSession &&
             this.livechatService.state !== SESSION_STATE.CLOSED &&
