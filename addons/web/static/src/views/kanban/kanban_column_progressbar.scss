@@ -42,5 +42,6 @@
         @include o-kanban-css-filter(danger, map-get($theme-colors, "danger"));
         @include o-kanban-css-filter(muted, map-get($theme-colors, "dark"));
         @include o-kanban-css-filter(info, map-get($theme-colors, "info"));
+        @include o-kanban-css-filter(purple, purple);
     }
 }
