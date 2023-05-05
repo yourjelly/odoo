@@ -247,3 +247,12 @@ $-o-bg-colors-custom: null;
     background-color: $input-focus-bg;
     border-color: $o-input-hover-border-color;
 }
+
+// Manage fa-circle and fa-circle-o in association with contextual classes text-*
+// 'o_status' should be used instead but this is a temporary solution for the cases that
+// couldn't be adapted yet.
+@each $-name, $-color in $theme-colors {
+    .fa-circle.text-#{$-name}, .fa-circle-o.text-#{$-name} {
+        --color: #{$-color};
+    }
+}
