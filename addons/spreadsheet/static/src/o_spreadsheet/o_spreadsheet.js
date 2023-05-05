@@ -1103,6 +1103,18 @@
         text = text.replace(newLineRegex, NEWLINE);
         return text;
     }
+    /**
+     * Determine if the numbers are consecutive.
+     */
+    function isConsecutive(iterable) {
+        const array = Array.from(iterable).sort((a, b) => a - b); // sort numerically rather than lexicographically
+        for (let i = 1; i < array.length; i++) {
+            if (array[i] - array[i - 1] !== 1) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     const RBA_REGEX = /rgba?\(|\s+|\)/gi;
     const HEX_MATCH = /^#([A-F\d]{2}){3,4}$/;
@@ -6328,8 +6340,14 @@
                         : undefined));
                 }
             }
+            else if (zone.left === zone.right && zone.top === zone.bottom) {
+                // A single cell. If it's only the title, the dataset is not added.
+                if (!dataSetsHaveTitle) {
+                    dataSets.push(createDataSet(getters, dataSetSheetId, zone, undefined));
+                }
+            }
             else {
-                /* 1 cell, 1 row or 1 column */
+                /* 1 row or 1 column */
                 dataSets.push(createDataSet(getters, dataSetSheetId, zone, dataSetsHaveTitle
                     ? {
                         top: zone.top,
@@ -16218,11 +16236,13 @@
     const rowInsertRowBefore = {
         name: ROW_INSERT_ROWS_BEFORE_NAME,
         execute: INSERT_ROWS_BEFORE_ACTION,
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()),
     };
     const topBarInsertRowsBefore = {
         ...rowInsertRowBefore,
         name: MENU_INSERT_ROWS_BEFORE_NAME,
-        isVisible: (env) => env.model.getters.getActiveCols().size === 0,
+        isVisible: (env) => env.model.getters.getActiveCols().size === 0 &&
+            isConsecutive(env.model.getters.getActiveRows()),
     };
     const cellInsertRowsBefore = {
         ...rowInsertRowBefore,
@@ -16233,11 +16253,13 @@
     const rowInsertRowsAfter = {
         execute: INSERT_ROWS_AFTER_ACTION,
         name: ROW_INSERT_ROWS_AFTER_NAME,
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()),
     };
     const topBarInsertRowsAfter = {
         ...rowInsertRowsAfter,
         name: MENU_INSERT_ROWS_AFTER_NAME,
-        isVisible: (env) => env.model.getters.getActiveCols().size === 0,
+        isVisible: (env) => env.model.getters.getActiveCols().size === 0 &&
+            isConsecutive(env.model.getters.getActiveRows()),
     };
     const insertCol = {
         name: MENU_INSERT_COLUMNS_NAME,
@@ -16247,11 +16269,13 @@
     const colInsertColsBefore = {
         name: COLUMN_INSERT_COLUMNS_BEFORE_NAME,
         execute: INSERT_COLUMNS_BEFORE_ACTION,
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()),
     };
     const topBarInsertColsBefore = {
         ...colInsertColsBefore,
         name: MENU_INSERT_COLUMNS_BEFORE_NAME,
-        isVisible: (env) => env.model.getters.getActiveRows().size === 0,
+        isVisible: (env) => env.model.getters.getActiveRows().size === 0 &&
+            isConsecutive(env.model.getters.getActiveCols()),
     };
     const cellInsertColsBefore = {
         ...colInsertColsBefore,
@@ -16262,12 +16286,14 @@
     const colInsertColsAfter = {
         name: COLUMN_INSERT_COLUMNS_AFTER_NAME,
         execute: INSERT_COLUMNS_AFTER_ACTION,
+        isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()),
     };
     const topBarInsertColsAfter = {
         ...colInsertColsAfter,
         name: MENU_INSERT_COLUMNS_AFTER_NAME,
         execute: INSERT_COLUMNS_AFTER_ACTION,
-        isVisible: (env) => env.model.getters.getActiveRows().size === 0,
+        isVisible: (env) => env.model.getters.getActiveRows().size === 0 &&
+            isConsecutive(env.model.getters.getActiveCols()),
     };
     const insertCell = {
         name: _lt("Insert cells"),
@@ -16277,10 +16303,12 @@
     const insertCellShiftDown = {
         name: _lt("Insert cells and shift down"),
         execute: INSERT_CELL_SHIFT_DOWN,
+        isVisible: (env) => env.model.getters.getActiveRows().size === 0 && env.model.getters.getActiveCols().size === 0,
     };
     const insertCellShiftRight = {
         name: _lt("Insert cells and shift right"),
         execute: INSERT_CELL_SHIFT_RIGHT,
+        isVisible: (env) => env.model.getters.getActiveRows().size === 0 && env.model.getters.getActiveCols().size === 0,
     };
     const insertChart = {
         name: _lt("Chart"),
@@ -36310,13 +36338,9 @@
         }
         loadInitialMessages(messages) {
             this.isReplayingInitialRevisions = true;
-            this.on("unexpected-revision-id", this, ({ revisionId }) => {
-                throw new Error(`The spreadsheet could not be loaded. Revision ${revisionId} is corrupted.`);
-            });
             for (const message of messages) {
                 this.onMessageReceived(message);
             }
-            this.off("unexpected-revision-id", this);
             this.isReplayingInitialRevisions = false;
         }
         /**
@@ -36402,6 +36426,10 @@
         onMessageReceived(message) {
             if (this.isAlreadyProcessed(message))
                 return;
+            if (this.isWrongServerRevisionId(message)) {
+                this.trigger("unexpected-revision-id");
+                return;
+            }
             switch (message.type) {
                 case "CLIENT_MOVED":
                     this.onClientMoved(message);
@@ -36428,10 +36456,6 @@
                     });
                     break;
                 case "REMOTE_REVISION":
-                    if (message.serverRevisionId !== this.serverRevisionId) {
-                        this.trigger("unexpected-revision-id", { revisionId: message.serverRevisionId });
-                        return;
-                    }
                     const { clientId, commands } = message;
                     const revision = new Revision(message.nextRevisionId, clientId, commands, "REMOTE");
                     if (revision.clientId !== this.clientId) {
@@ -36559,6 +36583,17 @@
                 case "REVISION_REDONE":
                 case "REVISION_UNDONE":
                     return this.processedRevisions.has(message.nextRevisionId);
+                default:
+                    return false;
+            }
+        }
+        isWrongServerRevisionId(message) {
+            switch (message.type) {
+                case "REMOTE_REVISION":
+                case "REVISION_REDONE":
+                case "REVISION_UNDONE":
+                case "SNAPSHOT_CREATED":
+                    return message.serverRevisionId !== this.serverRevisionId;
                 default:
                     return false;
             }
@@ -41286,7 +41321,8 @@
                 },
                 zone: selectedZone,
             };
-            this.setSelectionMixin(anchor, [selectedZone]);
+            const selections = this.gridSelection.zones.map((zone) => updateSelectionOnDeletion(zone, "left", [...cmd.elements]));
+            this.setSelectionMixin(anchor, selections);
         }
         onRowsRemoved(cmd) {
             const { cell, zone } = this.gridSelection.anchor;
@@ -41300,13 +41336,18 @@
                 },
                 zone: selectedZone,
             };
-            this.setSelectionMixin(anchor, [selectedZone]);
+            const selections = this.gridSelection.zones.map((zone) => updateSelectionOnDeletion(zone, "top", [...cmd.elements]));
+            this.setSelectionMixin(anchor, selections);
         }
         onAddElements(cmd) {
-            const selection = this.gridSelection.anchor.zone;
-            const zone = updateSelectionOnInsertion(selection, cmd.dimension === "COL" ? "left" : "top", cmd.base, cmd.position, cmd.quantity);
-            const anchor = { cell: { col: zone.left, row: zone.top }, zone };
-            this.setSelectionMixin(anchor, [zone]);
+            const start = cmd.dimension === "COL" ? "left" : "top";
+            const anchorZone = updateSelectionOnInsertion(this.gridSelection.anchor.zone, start, cmd.base, cmd.position, cmd.quantity);
+            const selection = this.gridSelection.zones.map((zone) => updateSelectionOnInsertion(zone, start, cmd.base, cmd.position, cmd.quantity));
+            const anchor = {
+                cell: { col: anchorZone.left, row: anchorZone.top },
+                zone: anchorZone,
+            };
+            this.setSelectionMixin(anchor, selection);
         }
         onMoveElements(cmd) {
             const thickness = cmd.elements.length;
@@ -44099,13 +44140,13 @@
     }
 
     class SelectiveHistory {
+        HEAD_BRANCH;
+        HEAD_OPERATION;
+        tree;
         applyOperation;
         revertOperation;
         buildEmpty;
         buildTransformation;
-        HEAD_BRANCH;
-        HEAD_OPERATION;
-        tree;
         /**
          * The selective history is a data structure used to register changes/updates of a state.
          * Each change/update is called an "operation".
@@ -44126,14 +44167,15 @@
          *                    (used for internal implementation)
          * @param buildTransformation Factory used to build transformations
          */
-        constructor(initialOperationId, applyOperation, revertOperation, buildEmpty, buildTransformation) {
-            this.applyOperation = applyOperation;
-            this.revertOperation = revertOperation;
-            this.buildEmpty = buildEmpty;
-            this.buildTransformation = buildTransformation;
+        constructor(args) {
+            this.applyOperation = args.applyOperation;
+            this.revertOperation = args.revertOperation;
+            this.buildEmpty = args.buildEmpty;
+            this.buildTransformation = args.buildTransformation;
             this.HEAD_BRANCH = new Branch(this.buildTransformation);
-            this.tree = new Tree(buildTransformation, this.HEAD_BRANCH);
-            const initial = new Operation(initialOperationId, buildEmpty(initialOperationId));
+            this.tree = new Tree(this.buildTransformation, this.HEAD_BRANCH);
+            const initialOperationId = args.initialOperationId;
+            const initial = new Operation(initialOperationId, this.buildEmpty(initialOperationId));
             this.tree.insertOperationLast(this.HEAD_BRANCH, initial);
             this.HEAD_OPERATION = initial;
         }
@@ -44247,21 +44289,27 @@
         }
     }
 
-    function buildRevisionLog(initialRevisionId, recordChanges, dispatch) {
-        return new SelectiveHistory(initialRevisionId, (revision) => {
-            const commands = revision.commands.slice();
-            const { changes } = recordChanges(() => {
-                for (const command of commands) {
-                    dispatch(command);
-                }
-            });
-            revision.setChanges(changes);
-        }, (revision) => revertChanges([revision]), (id) => new Revision(id, "empty", []), {
-            with: (revision) => (toTransform) => {
-                return new Revision(toTransform.id, toTransform.clientId, transformAll(toTransform.commands, revision.commands), toTransform.rootCommand);
+    function buildRevisionLog(args) {
+        return new SelectiveHistory({
+            initialOperationId: args.initialRevisionId,
+            applyOperation: (revision) => {
+                const commands = revision.commands.slice();
+                const { changes } = args.recordChanges(() => {
+                    for (const command of commands) {
+                        args.dispatch(command);
+                    }
+                });
+                revision.setChanges(changes);
             },
-            without: (revision) => (toTransform) => {
-                return new Revision(toTransform.id, toTransform.clientId, transformAll(toTransform.commands, revision.commands.map(inverseCommand).flat()), toTransform.rootCommand);
+            revertOperation: (revision) => revertChanges([revision]),
+            buildEmpty: (id) => new Revision(id, "empty", []),
+            buildTransformation: {
+                with: (revision) => (toTransform) => {
+                    return new Revision(toTransform.id, toTransform.clientId, transformAll(toTransform.commands, revision.commands), toTransform.rootCommand);
+                },
+                without: (revision) => (toTransform) => {
+                    return new Revision(toTransform.id, toTransform.clientId, transformAll(toTransform.commands, revision.commands.map(inverseCommand).flat()), toTransform.rootCommand);
+                },
             },
         });
     }
@@ -46599,6 +46647,7 @@
                 this.setupCorePlugin(Plugin, workbookData);
             }
             Object.assign(this.getters, this.coreGetters);
+            this.session.loadInitialMessages(stateUpdateMessages);
             for (let Plugin of statefulUIPluginRegistry.getAll()) {
                 const plugin = this.setupUiPlugin(Plugin);
                 this.statefulUIPlugins.push(plugin);
@@ -46626,8 +46675,6 @@
             // This should be done after construction of LocalHistory due to order of
             // events
             this.setupSessionEvents();
-            // Load the initial revisions
-            this.session.loadInitialMessages(stateUpdateMessages);
             this.joinSession();
             if (config.snapshotRequested) {
                 this.session.snapshot(this.exportData());
@@ -46691,14 +46738,18 @@
             this.finalize();
         }
         setupSession(revisionId) {
-            const session = new Session(buildRevisionLog(revisionId, this.state.recordChanges.bind(this.state), (command) => {
-                const result = this.checkDispatchAllowed(command);
-                if (!result.isSuccessful) {
-                    return;
-                }
-                this.isReplayingCommand = true;
-                this.dispatchToHandlers(this.coreHandlers, command);
-                this.isReplayingCommand = false;
+            const session = new Session(buildRevisionLog({
+                initialRevisionId: revisionId,
+                recordChanges: this.state.recordChanges.bind(this.state),
+                dispatch: (command) => {
+                    const result = this.checkDispatchAllowed(command);
+                    if (!result.isSuccessful) {
+                        return;
+                    }
+                    this.isReplayingCommand = true;
+                    this.dispatchToHandlers(this.coreHandlers, command);
+                    this.isReplayingCommand = false;
+                },
             }), this.config.transportService, revisionId);
             return session;
         }
@@ -47100,8 +47151,8 @@
 
 
     __info__.version = '16.3.0-alpha.7';
-    __info__.date = '2023-05-02T13:11:44.262Z';
-    __info__.hash = '77c8f5f';
+    __info__.date = '2023-05-05T05:39:01.383Z';
+    __info__.hash = 'fa1f051';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
