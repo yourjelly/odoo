@@ -23,6 +23,8 @@
     }
 
     %-stat-button-value {
+        display: flex;
+        gap: map-get($spacers, 1);
         order: 2;
         font-weight: $font-weight-bold;
         color: $o-brand-primary;
