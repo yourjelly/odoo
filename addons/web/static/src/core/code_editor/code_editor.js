@@ -40,6 +40,7 @@ export class CodeEditor extends Component {
             optional: true,
             validate: (theme) => CodeEditor.THEMES.includes(theme),
         },
+        sessionId: { type: Number, optional: true },
     };
     static defaultProps = {
         readonly: false,
@@ -47,6 +48,7 @@ export class CodeEditor extends Component {
         onChange: () => {},
         class: "",
         theme: "",
+        sessionId: 1,
     };
 
     static MODES = ["js", "xml", "qweb", "scss", "python"];
@@ -68,42 +70,15 @@ export class CodeEditor extends Component {
                 this.aceEditor = aceEditor;
 
                 this.aceEditor.setOptions({
-                    maxLines: Infinity,
                     showPrintMargin: false,
                 });
-                this.aceEditor.session.setOptions({
-                    useWorker: false,
-                    tabSize: 2,
-                    useSoftTabs: true,
-                });
                 this.aceEditor.$blockScrolling = true;
-
-                this.aceEditor.setValue(this.props.value);
-                this.aceEditor.session.on("change", () => {
-                    if (this.props.onChange) {
-                        this.props.onChange(this.aceEditor.getValue());
-                    }
-                });
 
                 return () => {
                     aceEditor.destroy();
                 };
             },
             () => [this.editorRef.el]
-        );
-
-        useEffect(
-            (value) => {
-                if (value !== this.aceEditor.getValue()) {
-                    this.aceEditor.setValue(value);
-                }
-            },
-            () => [this.props.value]
-        );
-
-        useEffect(
-            (mode) => this.aceEditor.session.setMode(mode ? `ace/mode/${mode}` : ""),
-            () => [this.props.mode]
         );
 
         useEffect(
@@ -129,6 +104,35 @@ export class CodeEditor extends Component {
                     : "block";
             },
             () => [this.props.readonly]
+        );
+
+        const sessions = {};
+        useEffect(
+            (sessionId, mode, value) => {
+                let session = sessions[sessionId];
+                if (session) {
+                    if (session.getValue() !== value) {
+                        session.setValue(value);
+                    }
+                } else {
+                    session = new window.ace.EditSession(value);
+                    session.setUndoManager(new window.ace.UndoManager());
+                    session.setOptions({
+                        useWorker: false,
+                        tabSize: 2,
+                        useSoftTabs: true,
+                    });
+                    session.on("change", () => {
+                        if (this.props.onChange) {
+                            this.props.onChange(this.aceEditor.getValue());
+                        }
+                    });
+                    sessions[sessionId] = session;
+                }
+                session.setMode(mode ? `ace/mode/${mode}` : "");
+                this.aceEditor.setSession(session);
+            },
+            () => [this.props.sessionId, this.props.mode, this.props.value]
         );
 
         const debouncedResize = useDebounced(() => {
