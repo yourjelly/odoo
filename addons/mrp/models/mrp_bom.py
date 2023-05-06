@@ -8,6 +8,32 @@ from odoo.tools import float_round
 
 from collections import defaultdict
 
+class DAG(dict):
+    """
+    Direct Acyclic Graph.
+    Adding an edge fails if it adds a cycle to the graph.
+    """
+
+    def add_edge(self, u, v):
+        if u == v or self.has_path(v, u):
+            raise ValueError("The new edge will create a cycle")
+        if v not in self.setdefault(u, []):
+            self[u].append(v)
+
+    def has_path(self, u, v):
+        """Checks if there is a path from u to v in DFS fashion"""
+        seen, togo = set(), [u]
+        while togo:
+            u = togo.pop()
+            if u in seen:
+                continue
+            seen.add(u)
+            ws = self.get(u, [])
+            if v in ws:
+                return True
+            togo.extend(w for w in ws if w not in seen)
+        return False
+
 
 class MrpBom(models.Model):
     """ Defines bills of material for a product or a product template """
@@ -268,22 +294,7 @@ class MrpBom(models.Model):
             Quantity describes the number of times you need the BoM: so the quantity divided by the number created by the BoM
             and converted into its UoM
         """
-        from collections import defaultdict
-
-        graph = defaultdict(list)
-        V = set()
-
-        def check_cycle(v, visited, recStack, graph):
-            visited[v] = True
-            recStack[v] = True
-            for neighbour in graph[v]:
-                if visited[neighbour] == False:
-                    if check_cycle(neighbour, visited, recStack, graph) == True:
-                        return True
-                elif recStack[neighbour] == True:
-                    return True
-            recStack[v] = False
-            return False
+        graph = DAG()
 
         product_ids = set()
         product_boms = {}
@@ -297,13 +308,14 @@ class MrpBom(models.Model):
 
         boms_done = [(self, {'qty': quantity, 'product': product, 'original_qty': quantity, 'parent_line': False})]
         lines_done = []
-        V |= set([product.product_tmpl_id.id])
 
         bom_lines = []
         for bom_line in self.bom_line_ids:
             product_id = bom_line.product_id
-            V |= set([product_id.product_tmpl_id.id])
-            graph[product.product_tmpl_id.id].append(product_id.product_tmpl_id.id)
+            try:
+                graph.add_edge(product.product_tmpl_id, product_id.product_tmpl_id)
+            except ValueError:
+                raise UserError(_('Recursion error!  A product with a Bill of Material should not have itself in its BoM or child BoMs!'))
             bom_lines.append((bom_line, product, quantity, False))
             product_ids.add(product_id.id)
         update_product_boms()
@@ -324,11 +336,11 @@ class MrpBom(models.Model):
                 converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity / bom.product_qty, bom.product_uom_id)
                 bom_lines += [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids]
                 for bom_line in bom.bom_line_ids:
-                    graph[current_line.product_id.product_tmpl_id.id].append(bom_line.product_id.product_tmpl_id.id)
-                    if bom_line.product_id.product_tmpl_id.id in V and check_cycle(bom_line.product_id.product_tmpl_id.id, {key: False for  key in V}, {key: False for  key in V}, graph):
+                    try:
+                        graph.add_edge(current_line.product_id.product_tmpl_id, bom_line.product_id.product_tmpl_id)
+                    except ValueError:
                         raise UserError(_('Recursion error!  A product with a Bill of Material should not have itself in its BoM or child BoMs!'))
-                    V |= set([bom_line.product_id.product_tmpl_id.id])
-                    if not bom_line.product_id in product_boms:
+                    if bom_line.product_id not in product_boms:
                         product_ids.add(bom_line.product_id.id)
                 boms_done.append((bom, {'qty': converted_line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': current_line}))
             else:
