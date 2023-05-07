@@ -61,11 +61,17 @@
 
 // Button group
 // ============================================================================
-.btn-group .btn {
-    // Ensure that active buttons will always be rendered on top, including
-    // hovered ones.
-    &:active, &.active, &:active:hover, &.active:hover {
-        z-index: 2;
+.btn-group {
+    > .btn, .btn-group {
+        // Ensure that active buttons will always be rendered on top, including
+        // hovered ones.
+        &:active, &.active, &:active:hover, &.active:hover {
+            z-index: 2;
+        }
+
+        &:not(:first-child) {
+            margin-left: $btn-border-width;
+        }
     }
 }
 
