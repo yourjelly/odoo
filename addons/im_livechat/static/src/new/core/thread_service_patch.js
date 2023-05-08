@@ -124,7 +124,7 @@ patch(ThreadService.prototype, "im_livechat", {
         if (!session) {
             return;
         }
-        return this.storeService.threads[
+        return this.store.threads[
             createLocalId("discuss.channel", session.id ?? this.TEMPORARY_ID)
         ];
     },
