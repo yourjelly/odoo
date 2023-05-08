@@ -39,7 +39,10 @@ patch(ThreadService.prototype, "im_livechat", {
 
     async openChat() {
         const thread = await this.getLivechatThread();
-        const chatWindow = this.chatWindowService.insert({ thread });
+        const chatWindow = this.chatWindowService.insert({
+            thread,
+            folded: thread.state === "folded",
+        });
         chatWindow.autofocus++;
     },
 
