@@ -73,7 +73,7 @@ patch(ThreadService.prototype, "im_livechat", {
                 return this.messageService.insert(message);
             });
         }
-        this.chatWindowService.insert({ thread });
+        this.chatWindowService.insert({ thread, folded: thread.state === "folded" });
     },
 
     insert(data) {
