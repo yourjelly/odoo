@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="init_session_token_request_template">
+            <ns3:InitSessionTokenRequest xmlns="http://ksef.mf.gov.pl/schema/gtw/svc/online/types/2021/10/01/0001" xmlns:ns2="http://ksef.mf.gov.pl/schema/gtw/svc/types/2021/10/01/0001" xmlns:ns3="http://ksef.mf.gov.pl/schema/gtw/svc/online/auth/request/2021/10/01/0001">
+                <ns3:Context>
+                    <Challenge t-out="challenge"/>
+                    <Identifier xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns2:SubjectIdentifierByCompanyType">
+                        <ns2:Identifier t-out="nip"/>
+                    </Identifier>
+                    <DocumentType>
+                        <ns2:Service>KSeF</ns2:Service>
+                        <ns2:FormCode>
+                            <ns2:SystemCode>FA (2)</ns2:SystemCode>
+                            <ns2:SchemaVersion>1-0E</ns2:SchemaVersion>
+                            <ns2:TargetNamespace>http://crd.gov.pl/wzor/2023/06/29/12648/</ns2:TargetNamespace>
+                            <ns2:Value>FA</ns2:Value>
+                        </ns2:FormCode>
+                    </DocumentType>
+                    <Token t-out="token"/>
+                </ns3:Context>
+            </ns3:InitSessionTokenRequest>
+        </template>
+
+
+        <template id="init_batch_request_template">
+            <ns3:InitRequest xmlns="http://ksef.mf.gov.pl/schema/gtw/svc/types/2021/10/01/0001" xmlns:ns2="http://ksef.mf.gov.pl/schema/gtw/svc/batch/types/2021/10/01/0001" xmlns:ns3="http://ksef.mf.gov.pl/schema/gtw/svc/batch/init/request/2021/10/01/0001">
+                <ns3:Identifier xsi:type="SubjectIdentifierByCompanyType" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <Identifier t-out="9999999999"/>
+                </ns3:Identifier>
+                <ns3:DocumentType>
+                    <Service>KSeF</Service>
+                    <FormCode>
+                        <SystemCode>FA (1)</SystemCode>
+                        <SchemaVersion>1-0E</SchemaVersion>
+                        <TargetNamespace>http://crd.gov.pl/wzor/2021/11/29/11089/</TargetNamespace>
+                        <Value>FA</Value>
+                    </FormCode>
+                </ns3:DocumentType>
+                <ns3:Encryption>
+                    <EncryptionKey>
+                        <Encoding>Base64</Encoding>
+                        <Algorithm>AES</Algorithm>
+                        <Size>256</Size>
+                        <Value t-out="encrypted_aes_key"/>
+                    </EncryptionKey>
+                    <EncryptionInitializationVector>
+                        <Encoding>Base64</Encoding>
+                        <Bytes>16</Bytes>
+                        <Value t-out="iv"/>
+                    </EncryptionInitializationVector>
+                    <EncryptionAlgorithmKey>
+                        <Algorithm>RSA</Algorithm>
+                        <Mode>ECB</Mode>
+                        <Padding>PKCS#1</Padding>
+                    </EncryptionAlgorithmKey>
+                    <EncryptionAlgorithmData>
+                        <Algorithm>AES</Algorithm>
+                        <Mode>CBC</Mode>
+                        <Padding>PKCS#7</Padding>
+                    </EncryptionAlgorithmData>
+                </ns3:Encryption>
+                <ns3:PackageSignature>
+                    <ns3:Package>
+                        <ns2:PackageType>split</ns2:PackageType>
+                        <ns2:CompressionType>zip</ns2:CompressionType>
+                        <ns2:Value>KSeF_F1CE.tmp</ns2:Value>
+                    </ns3:Package>
+                    <ns3:PackageFileHash>
+                        <HashSHA>
+                            <Algorithm>SHA-256</Algorithm>
+                            <Encoding>Base64</Encoding>
+                            <Value t-out="zip_hashed_256"/>
+                        </HashSHA>
+                        <FileSize t-out="total_zip_size"/>
+                    </ns3:PackageFileHash>
+                    <ns3:PackagePartsList>
+                        <ns3:PackagePartSignature>
+                            <ns2:OrdinalNumber>1</ns2:OrdinalNumber>
+                            <ns2:PartFileName>archive1</ns2:PartFileName>
+                            <ns2:PartFileHash>
+                                <HashSHA>
+                                    <Algorithm>SHA-256</Algorithm>
+                                    <Encoding>Base64</Encoding>
+                                    <Value t-out="part_hashed_encrypted_256"/>
+                                </HashSHA>
+                                <FileSize t-out="child_zip_size"/>
+                            </ns2:PartFileHash>
+                        </ns3:PackagePartSignature>
+                    </ns3:PackagePartsList>
+                </ns3:PackageSignature>
+            </ns3:InitRequest>
+        </template>
+    </data>
+</odoo>

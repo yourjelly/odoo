@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="account_invoice_pl_ksef_export">
+            <tns:Faktura xmlns:tns="http://crd.gov.pl/wzor/2023/06/29/12648/" xmlns:etd="http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2021/06/09/eD/DefinicjeTypy/">
+                <tns:Naglowek>
+                    <tns:KodFormularza kodSystemowy="FA (2)" wersjaSchemy="1-0E">FA</tns:KodFormularza>
+                    <tns:WariantFormularza>2</tns:WariantFormularza>
+                    <tns:DataWytworzeniaFa t-out="date_now"/>
+                    <tns:SystemInfo>Odoo</tns:SystemInfo>
+                </tns:Naglowek>
+                <tns:Podmiot1>
+                    <t t-if="any(tag_name in record.line_ids.tax_tag_ids.mapped('name') for tag_name in ('OSS', '+Triangular Sale', '-Triangular Sale'))">
+                        <tns:PrefiksPodatnika t-out="get_vat_country(company.vat) or company.country_code"/>
+                    </t>
+
+                    <!--<tns:NrEORI /> No info in Odoo-->
+                    <tns:DaneIdentyfikacyjne>
+                        <tns:NIP t-out="get_vat_number(company.vat)"/>
+                        <tns:Nazwa t-out="company.name"/>
+                    </tns:DaneIdentyfikacyjne>
+                    <tns:Adres>
+                        <tns:KodKraju t-out="company.country_code"/>
+                        <tns:AdresL1 t-out="company.street or '' + company.zip or '' + company.city or '' + company.country_id.name or ''"/>
+                        <tns:AdresL2 t-if="company.street2" t-out="company.street2"/>
+                    </tns:Adres>
+                    <!--<tns:DaneKontaktowe>
+                        <tns:Email t-if="company.email" t-out="company.email"/>
+                        <tns:Telefon t-if="company.phone or company.mobile" t-out="company.phone or company.mobile"/>
+                    </tns:DaneKontaktowe> Optional -->
+                </tns:Podmiot1>
+                <tns:Podmiot2>
+                    <!--<tns:NrEORI /> No info in Odoo-->
+                    <tns:DaneIdentyfikacyjne>
+                        <t t-if="buyer.vat">
+                            <t t-if="(get_vat_country(buyer.vat) or buyer.country_code) == 'PL'">
+                                <tns:NIP t-out="get_vat_number(buyer.vat)"/>
+                            </t>
+                            <t t-elif="any(tag_name in record.line_ids.tax_tag_ids.mapped('name') for tag_name in ('OSS', '+Triangular Sale', '-Triangular Sale'))">
+                                <tns:KodUE t-out="get_vat_country(buyer.vat) or buyer.country_code"/>
+                                <tns:NrVatUE t-out="get_vat_number(buyer.vat)"/>
+                            </t>
+                            <t t-else="">
+                                <tns:KodKraju t-out="get_vat_country(buyer.vat) or buyer.country_code"/>
+                                <tns:NrID t-out="get_vat_number(buyer.vat)"/>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <tns:BrakID>1</tns:BrakID>
+                        </t>
+                        <tns:Nazwa t-out="buyer.name"/>
+                    </tns:DaneIdentyfikacyjne>
+                    <t t-if="buyer.street or buyer.zip or buyer.city or buyer.country_id">
+                        <tns:Adres>
+                            <tns:KodKraju t-out="company.country_code"/>
+                            <tns:AdresL1 t-out="company.street or '' + company.zip or '' + company.city or '' + company.country_id.name or ''"/>
+                            <tns:AdresL2 t-if="company.street2" t-out="company.street2"/>
+                        </tns:Adres>
+                    </t>
+                    <!--<tns:DaneKontaktowe>
+                        <tns:Email t-if="company.email" t-out="company.email"/>
+                        <tns:Telefon t-if="company.phone or company.mobile" t-out="company.phone or company.mobile"/>
+                    </tns:DaneKontaktowe> Optional -->
+                </tns:Podmiot2>
+                <!--
+                <tns:Podmiot3>
+                    Any number of third party entities
+                </tns:Podmiot3>
+                <tns:PodmiottUpowazniony>
+                    Indentification of authorized entity
+                    Pretty much the same as other Podmiot, but we need to know the role of the entity (tax representative, ...)
+                </tns:PodmiottUpowazniony>
+                 -->
+                <tns:Fa>
+                    <tns:KodWaluty t-out="record.currency_id.name"/>
+                    <tns:P_1 t-out="record.date"/>
+                    <!-- <tns:P_1M/> Place of issue of invoice, don't know if we provide it, except place of company -->
+                    <tns:P_2 t-out="record.name"/>
+                    <!-- <tns:WZ/> Goods Issued Note (WZ), optional -->
+                    <tns:P_6 t-if="record.delivery_date and record.delivery_date != record.date" t-out="record.delivery_date"/>
+                    <!-- <tns:OkresFA /> if period of supplying/payments -->
+                    <t  t-if="not float_is_zero(get_amounts_from_tag('K_19'), 2)">
+                        <tns:P_13_1 t-out="float_repr(get_amounts_from_tag('K_19'), 2)"/>
+                        <tns:P_14_1 t-out="float_repr(get_amounts_from_tag('K_20'), 2)"/>
+                        <tns:P_14_1W t-if="record.currency_id.name != 'PLN'"  t-out="float_repr(get_amounts_from_tag_in_PLN_currency('K_20'), 2)"/>
+                    </t>
+                    <t  t-if="not float_is_zero(get_amounts_from_tag('K_17'), 2)">
+                        <tns:P_13_2 t-out="float_repr(get_amounts_from_tag('K_17'), 2)"/>
+                        <tns:P_14_2 t-out="float_repr(get_amounts_from_tag('K_18'), 2)"/>
+                        <tns:P_14_2W t-if="record.currency_id.name != 'PLN'"  t-out="float_repr(get_amounts_from_tag_in_PLN_currency('K_18'), 2)"/>
+                    </t>
+                    <t  t-if="not float_is_zero(get_amounts_from_tag('K_15'), 2)">
+                        <tns:P_13_3 t-out="float_repr(get_amounts_from_tag('K_15'), 2)"/>
+                        <tns:P_14_3 t-out="float_repr(get_amounts_from_tag('K_16'), 2)"/>
+                        <tns:P_14_3W t-if="record.currency_id.name != 'PLN'"  t-out="float_repr(get_amounts_from_tag_in_PLN_currency('K_16'), 2)"/>
+                    </t>
+                    <!-- taxis 4% tax not on report
+                         <tns:P_13_4/>
+                         <tns:P_14_4/>
+                         <tns:P_14_4W/>-->
+                    <t t-if="not float_is_zero(get_amounts_from_tag('OSS_Base'), 2)">
+                        <tns:P_13_5 t-out="float_repr(get_amounts_from_tag('OSS_Base'), 2)"/>
+                        <tns:P_14_5 t-if="not float_is_zero(get_amounts_from_tag('OSS_Tax'), 2)"  t-out="float_repr(get_amounts_from_tag('OSS_Tax'), 2)"/>
+                    </t>
+                    <tns:P_13_6_1 t-if="not float_is_zero(get_amounts_from_tag('K_13'), 2)"  t-out="float_repr(get_amounts_from_tag('K_13'), 2)"/>
+                    <tns:P_13_6_2 t-if="not float_is_zero(get_amounts_from_tag('K_21'), 2)"  t-out="float_repr(get_amounts_from_tag('K_21'), 2)"/>
+                    <tns:P_13_6_3 t-if="not float_is_zero(get_amounts_from_tag('K_22'), 2)"  t-out="float_repr(get_amounts_from_tag('K_22'), 2)"/>
+                    <tns:P_13_7 t-if="not float_is_zero(get_amounts_from_tag('K_10'), 2)"  t-out="float_repr(get_amounts_from_tag('K_10'), 2)"/>
+                    <tns:P_13_8 t-if="not float_is_zero(get_amounts_from_tag('K_11'), 2)"  t-out="float_repr(get_amounts_from_tag('K_11'), 2)"/>
+                    <tns:P_13_9 t-if="not float_is_zero(get_amounts_from_tag('K_12'), 2)"  t-out="float_repr(get_amounts_from_tag('K_12'), 2)"/>
+                    <!--<tns:P_13_10 /> reverse charge? -->
+                    <!--<tns:P_13_11 /> margin based -->
+                    <tns:P_15 t-out="float_repr(record.amount_total, 2)"/>
+                    <!-- <tns:KursWalutyZ  t-if="record.currency_id.name != 'PLN'"/> Currency rate -->
+                    <tns:Adnotacje>
+                        <t t-if="any(tax.tax_exigibility == 'on_payment' for tax in record.line_ids.tax_ids)">
+                            <tns:P_16 t-out="1"/>
+                        </t>
+                        <t t-else="">
+                            <tns:P_16 t-out="2"/>
+                        </t>
+                        <tns:P_17 t-out="2"/> <!-- self-billing, puchasing goods from taxpayer, may issue invoice on behalf of that taxpayer -->
+                        <tns:P_18 t-out="2"/> <!-- reverse charge -->
+                        <tns:P_18A t-out="2"/> <!-- split payment mechanism -->
+                        <tns:Zwolnienie>
+                            <!-- TODO how to have this info? reason for exemption -->
+<!--                            <t t-if="not float_is_zero(get_amounts_from_tag('K_10'), 2)">-->
+<!--                                <tns:P_19 t-out="1"/>-->
+<!--                                &lt;!&ndash; <tns:P_19A /> legal basis from exemption (name of law article written in letters) => type of product/didn't make enough money previous year/ flat rate farmer &ndash;&gt;-->
+<!--                                &lt;!&ndash; <tns:P_19B /> relevant provision of directive for exemption (code)&ndash;&gt;-->
+<!--                                &lt;!&ndash; <tns:P_19C /> other reason for exemption&ndash;&gt;-->
+<!--                            </t>-->
+<!--                            <t t-else="">-->
+                                <tns:P_19N t-out="1"/>
+<!--                            </t>-->
+                        </tns:Zwolnienie>
+
+                        <tns:NoweSrodkiTransportu><!-- Intra-Com supply of new means of transport TODO do we deal with it-->
+                            <tns:P_22N t-out="1"/>
+                        </tns:NoweSrodkiTransportu>
+                        <tns:P_23 t-out="1 if any(tag_name in record.line_ids.tax_tag_ids.mapped('name') for tag_name in ('+Triangular Sale', '-Triangular Sale')) else 2"/> <!-- Triangular -->
+                        <tns:PMarzy>
+                            <tns:P_PMarzyN t-out="1"/>
+                        </tns:PMarzy> <!-- Tourism or second-hand goods or works of art ... with children for each category. Not done because we don't deal with margin-based -->
+
+                    </tns:Adnotacje>
+                    <tns:RodzajFaktury t-out="'VAT'"/>
+                    <!--<tns:RodzajFaktury t-elif="" t-out="'ZAL'"/> invoice documenting the receipt of a payment prior to service/delivery -->
+                    <!--<tns:RodzajFaktury t-elif="" t-out="'ROZ'"/> Not sure, but the invoice after the service for the service where there was a payment before (see above)?-->
+                    <!--<tns:RodzajFaktury t-elif="" t-out="'UPR'"/> Total Amount below PLN 450 or EUR 100 -> Simlified invoice, not taken care of as of now -->
+                    <!--<tns:RodzajFaktury t-elif="" t-out="'KOR_ZAL'"/> Correction of a ZAL -->
+                    <!--<tns:RodzajFaktury t-elif="" t-out="'KOR_ROZ'"/> Correction of a ROZ -->
+                    <!-- todo check what a corrected invoice mean
+                    <t t-if="record.reversed_entry_id">
+
+                        <tns:RodzajFaktury t-out="'KOR'"/>
+                        <tns:PrzyczynaKorekty t-if="len(record.ref.split()) > 3" t-out="record.ref.split()[3:]"/>
+                        <tns:TypKorekty t-if="record.date == record.reversed_entry_id.date" t-out="1"/>
+                        <tns:TypKorekty t-elif="record.date == date_today" t-out="2"/>
+                        <tns:TypKorekty t-else="" t-out="3"/>
+                        <tns:DaneFaKorygowanej>
+                            <tns:DataWystFaKorygowanej t-out="record.reversed_entry_id.date"/>  Should be date on which it was sent to KSeF
+                            <tns:NrFaKorygowanej t-out="record.name"/>
+                            <tns:NrKSeFFaKorygowanej />  Number of corrected invoice in KSeF
+
+                        </tns:DaneFaKorygowanej>
+                        <tns:Podmiot1K>
+                            <t t-if="any(tag_name in record.line_ids.tax_tag_ids.mapped('name') for tag_name in ('OSS', '+Triangular Sale', '-Triangular Sale'))">
+                                <tns:PrefiksPodatnika t-out="get_vat_country(company.vat) or company.country_code"/>
+                            </t>
+                            <tns:DaneIdentyfikacyjne>
+                                <tns:NIP t-out="get_vat_number(company.vat)"/>
+                                <t t-if="company.partner_id.company_type=='company'">
+                                    <tns:PelnaNazwa t-out="company.name"/>
+                                </t>
+                                <t t-else="">
+                                    <tns:ImiePierwsze t-out="' '.join(company.name.split()[:1])"/>
+                                    <tns:Nazwisko t-out="' '.join(company.name.split()[1:])"/>
+                                </t>
+                            </tns:DaneIdentyfikacyjne>
+                            <tns:Adres>
+                            </tns:Adres>
+                        </tns:Podmiot1K>
+                        <tns:Podmiot2K>
+                            <t t-if="any(tag_name in record.line_ids.tax_tag_ids.mapped('name') for tag_name in ('OSS', '+Triangular Sale', '-Triangular Sale'))">
+                                <tns:PrefiksNabywcy t-out="get_vat_country(buyer.vat) or buyer.country_code"/>
+                            </t>
+                            <tns:DaneIdentyfikacyjne>
+                                <tns:NIP t-out="get_vat_number(buyer.vat)"/>
+                                <t t-if="buyer.company_type=='company'">
+                                    <tns:PelnaNazwa t-out="buyer.name"/>
+                                </t>
+                                <t t-else="">
+                                    <tns:ImiePierwsze t-out="' '.join(buyer.name.split()[:1])"/>
+                                    <tns:Nazwisko t-out="' '.join(buyer.name.split()[1:])"/>
+                                </t>
+                            </tns:DaneIdentyfikacyjne>
+                            <tns:Adres>
+                            </tns:Adres>
+                        </tns:Podmiot2K>
+                    </t>
+                    <t t-else="">
+                        <tns:RodzajFaktury t-out="'VAT'"/>
+                    </t> -->
+                    <!--<ZaliczkaCzesciowa>
+
+                    </ZaliczkaCzesciowa> Advance payment not available if we send when we post? Not Downpayment-->
+                    <tns:FP t-if="'pos_order_id' in record._fields and record.pos_order_id" t-out="1"/>
+                    <!--<tns:TP t-if="record.partner_id.l10n_pl_links_with_customer" t-out="1"/> TODO When JPK -->
+                    <!-- <tns:DodatkowyOpis Additional description
+                        <tns:NrWiersza /> Line number concerned (optional)
+                        <tns:Klucz/> key
+                        <tns:Wartosc/> value
+                    </tns:DodatkowyOpis> Other Mandatory information to be put on the invoice -->
+                    <t t-if="'sale_line_ids' in record.line_ids._fields">
+                    <tns:FakturaZaliczkowa t-foreach="record.line_ids.filtered(lambda l: l.is_downpayment)" t-as="line">
+                        <!-- TODO <NrKSEFFaZaliczkowej/> number given by KSEF instead of lines below-->
+                        <NrKSeFZN t-out="1"/>
+                        <NrFaZaliczkowa t-out="line.sale_line_ids[0].invoice_line_ids.filtered(lambda l: l.id != line.id)[0].move_id.name"/>
+                    </tns:FakturaZaliczkowa>
+                    </t>
+                    <!-- <tns:ZwrotAkcyzy/> Additional information for farmers, optional -->
+                    <tns:FaWiersz t-foreach="record.invoice_line_ids.filtered(lambda line: line.display_type == 'product')" t-as="line">
+                        <tns:NrWierszaFa t-out="line_index+1"/>
+                        <tns:UU_ID t-out="line.id"/>
+                        <!-- <tns:P_6a/> payment/supply done before if different for each line -->
+                        <tns:P_7 t-out="line.name"/>
+                        <!-- tns:Indeks /> Internal code of goods/service or additional description of product, optional -->
+                        <!-- tns:GTIN /> Global Trade Item Number, optional -->
+                        <!-- tns:PKWiU /> Polish Classification of Products adn Services, optional -->
+                        <!-- tns:CN /> Combined Nomenclature, optional -->
+                        <!-- tns:GDP /> Polish Classification of Buildings, optional -->
+                        <tns:P_8A t-if="line.product_id" t-out="line.product_id.uom_id.name"/>
+                        <tns:P_8B t-out="line.quantity"/>
+                        <tns:P_9A t-if="not any(tax.include_base_amount for tax in line.tax_ids)" t-out="float_repr(line.price_unit, 8)"/> <!-- TODO check that -->
+                        <tns:P_9B t-if="any(tax.include_base_amount for tax in line.tax_ids)" t-out="float_repr(line.price_unit, 8)"/>
+                        <!-- <P_10 /> TODO discount amount + epd? -->
+                        <tns:P_11 t-out="line.price_subtotal"/>
+                        <tns:P_11A t-if="any(tax.include_base_amount for tax in line.tax_ids)" t-out="line.price_total"/>
+                        <tns:P_12 t-if="any(tag in line.tax_tag_ids for tag in ('+K_10', '-K_10'))" t-out="'zw'"/>
+                        <tns:P_12 t-elif="any(tag in line.tax_tag_ids for tag in ('+K_11', '-K_11'))" t-out="'np'"/>
+                        <tns:P_12 t-elif="line.tax_ids" t-out="int(line.tax_ids[0].amount)"/>
+                        <tns:P_12 t-else="" t-out="'oo'"/>
+                        <tns:P_12_XII t-if="'OSS' in line.tax_tag_ids.name" t-out="line.tax_ids[0].amount"/>
+                        <!-- <P_12_Zal_15/> check annex 15, optional -->
+                        <!-- <tns:KwotaAkcyzy /> optional field, excise duty, at request of purchaser -->
+                        <!-- <GTU /> just waiting for the merge -->
+                        <!-- <tns:Procedura /> -> WSTO_EE to B_MPV_PROWIZJA, optional but TODO -->
+                        <tns:KursWaluty t-if="record.currency_id.name != 'PLN'" t-out="line.balance/line.amount_currency"/>
+                        <!-- <tns:StanPrzed /> line the same before correction (not this line that was corrected) -->
+                    </tns:FaWiersz>
+
+                    <!--<tns:Rozliczenie>
+
+                    </tns:Rozliczenie> optional, additional info (extra burdens or deductions, like stamp duty, 'reimbursement' of overpaid amounts, ...-->
+                    <tns:Platnosc>
+                        <!-- <tns:Zaplacono /> tag informing invoiced amount has been paid in full before issuing it -->
+                        <!-- <tns:DataZaplaty /> Payment Date -->
+                        <!-- <tns:ZaplataCzesciowa /> tag informing that it is partially paid -->
+                        <!-- <tns:PlatnosciCzesciowe> partial payments
+                                <tns:KwotaZaplatyCzesciowej/>  partial payments amounts
+                                <tns:DataZaplatyCzesciowej/>  partial payments date
+                                </tns:PlatnosciCzesciowe> -->
+                        <tns:TerminPlatnosci t-foreach="record.payment_term_details" t-as="term">
+                            <tns:Termin t-out="term.get('date')"/>
+                            <tns:TerminOpis t-out="term.get('amount')"/>
+                        </tns:TerminPlatnosci>
+                        <!-- <tns:FormaPlatnosci/> form of payment -->
+                        <!-- <tns:PlatnoscInna /> <tns:OpisPlatnosci/> if really another form of payment -->
+                        <tns:RachunekBankowy t-if="record.partner_bank_id and record.partner_bank_id.partner_id == company.partner_id">
+
+                            <tns:NrRB t-out="record.partner_bank_id.acc_number"/>
+                            <tns:SWIFT t-out="record.partner_bank_id.bank_bic"/>
+                            <!-- RachunekWlasnyBanku type of bank's own accounts -->
+                            <tns:NazwaBanku t-out="record.partner_bank_id.bank_name"/>
+                            <!-- OpisRachunku additional info on bank account if we want -->
+                        </tns:RachunekBankowy>
+                        <!-- don't know what RachunekBankowyFaktora is
+                        <tns:RachunekBankowyFaktora t-if="record.partner_bank_id and record.partner_bank_id.partner_id != company.partner_id">
+                            <t t-if="_get_account_number_NRB(record)">
+                                <tns:NrRBPL t-out="_get_account_number_NRB(record)"/>
+                            </t>
+                            <t t-else="">
+                                <tns:NrRBZagr t-out="record.partner_bank_id.acc_number"/>
+                            </t>
+                            <tns:SWIFT t-out="record.partner_bank_id.bank_bic"/>
+                             RachunekWlasnyBanku type of bank's own accounts
+                            <tns:NazwaBanku t-out="record.partner_bank_id.bank_name"/>
+                        </tns:RachunekBankowyFaktora> -->
+                        <tns:Skonto t-if="record.invoice_payment_term_id.early_discount">
+                            <tns:WarunkiSkonta t-out="f'Pay Before this number of days: {record.invoice_payment_term_id.discount_days}' "/>
+                            <tns:WysokoscSkonta t-out="f'{record.invoice_payment_term_id.discount_percentage}% Discounted' "/>
+                        </tns:Skonto>
+
+                    </tns:Platnosc>
+                    <!-- TODO remove sale dependency -->
+                    <t t-if="'sale_line_ids' in record.line_ids._fields">
+                    <tns:WarunkiTransakcji t-if="'sale_line_ids' in record.line_ids._fields">
+                        <!-- <tns:Umowy /> Element containing info on the contract that provoqued the invoice -->
+                        <tns:Zamowienia t-foreach="record.line_ids.sale_line_ids.order_id" t-as="order">
+                            <tns:DataZamowienia t-out="order.date_order"/>
+                            <tns:NrZamowienia t-out="order.name"/>
+                        </tns:Zamowienia>
+                        <!-- TODO remove stock dependency -->
+                        <t t-if="'stock_move_ids' in record.line_ids.product_id._fields">
+                        <tns:NrPartiiTowaru t-if="len(record.line_ids.product_id.stock_move_ids.lot_ids) == 1" t-out="record.line_ids.product_id.stock_move_ids.lot_ids.name"/>
+                        </t>
+                        <tns:WarunkiDostawy t-if="record.narration" t-out="record.narration"/> <!-- TODO check Markup -->
+                        <!-- <tns:Transport/> Information about transport. I guess we don't do it -->
+                        <tns:PodmiotPosredniczacy/>
+                    </tns:WarunkiTransakcji>
+                    <tns:Zamowienie t-if="record.line_ids.sale_line_ids.order_id">
+                        <tns:LiczbaWierszyZamowienia t-out="len(record.line_ids.sale_line_ids.order_id.order_line)"/>
+                        <tns:WartoscZamowienia t-out="record.line_ids.sale_line_ids.order_id.amount_total"/>
+                        <tns:ZamowienieWiersz t-foreach="record.line_ids.sale_line_ids.order_id.order_line" t-as="order_line">
+                            <tns:NrWierszaZam t-out="list(record.line_ids.sale_line_ids.order_id.order_line).index(order_line)+1"/>
+                            <tns:UU_IDZ t-out="order_line.order_id.name"/>
+                            <tns:P_7Z t-out="order_line.name"/>
+                            <!-- Codes for the product -->
+                            <tns:P_8AZ t-out="order_line.product_uom.name"/>
+                            <tns:P_8BZ t-out="order_line.qty_invoiced"/>
+                            <tns:P_9AZ t-out="order_line.price_unit"/>
+                            <tns:P_11NettoZ t-out="order_line.price_subtotal"/> <!-- TODO -->
+                            <tns:P_11VatZ t-out="order_line.price_tax"/>
+                            <tns:P_12Z t-if="any(tag in order_line.tax_id.repartition_line_ids.tag_ids for tag in ('+K_10', '-K_10'))" t-out="'zw'"/>
+                            <tns:P_12Z t-elif="any(tag in order_line.tax_id.repartition_line_ids.tag_ids for tag in ('+K_11', '-K_11'))" t-out="'np'"/>
+                            <tns:P_12Z t-elif="order_line.tax_id" t-out="order_line.tax_ids[0].amount"/>
+                            <tns:P_12Z t-else="" t-out="'oo'"/>
+                            <tns:P_12Z_XII t-if="'OSS' in order_line.tax_id.repartition_line_ids.tag_ids.name" t-out="order_line.tax_id.amount"/>
+                            <tns:GTUZ t-if="order_line.product_id.l10n_pl_vat_gtu" t-out="order_line.product_id.l10n_pl_vat_gtu"/>
+                            <!-- <tns:ProceduraZ /> -> WSTO_EE to B_MPV_PROWIZJA, optional but TODO -->
+                            <!-- <tns:KwotaAkcyzyZ /> -> amount of excise duty, optional -->
+                            <tns:KursWaluty t-if="order_line.currency_id.name != 'PLN'" t-out="order_line.order_id.currency_rate"/>
+                        </tns:ZamowienieWiersz>
+                    </tns:Zamowienie>
+                </t>
+
+                </tns:Fa>
+                <!--
+                <tns:Stopka>
+
+                </tns:Stopka>
+                -->
+            </tns:Faktura>
+        </template>
+    </data>
+</odoo>
