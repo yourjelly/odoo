@@ -2,6 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.PivotView.Buttons" owl="1">
+    <div class="d-flex gap-1">
         <div class="btn-group" role="toolbar" aria-label="Main actions">
             <t t-call="web.ReportViewMeasures">
                 <t t-set="measures" t-value="model.metaData.measures"/>
@@ -13,6 +14,7 @@
             <button class="btn btn-secondary fa fa-exchange o_pivot_flip_button" t-on-click="onFlipButtonClicked" data-tooltip="Flip axis" aria-label="Flip axis" t-attf-disabled="{{noDataDisplayed ? 'disabled' : false}}"/>
             <button class="btn btn-secondary fa fa-arrows o_pivot_expand_button" t-on-click="onExpandButtonClicked" data-tooltip="Expand all" aria-label="Expand all" t-attf-disabled="{{noDataDisplayed ? 'disabled' : false}}"/>
             <button class="btn btn-secondary fa fa-download o_pivot_download" t-on-click="onDownloadButtonClicked" data-tooltip="Download xlsx" aria-label="Download xlsx" t-attf-disabled="{{noDataDisplayed ? 'disabled' : false}}"/>
+        </div>
         </div>
     </t>
 
