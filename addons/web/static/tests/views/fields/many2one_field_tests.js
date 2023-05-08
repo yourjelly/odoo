@@ -4423,7 +4423,7 @@ QUnit.module("Fields", (hooks) => {
         await doAction(webClient, 1);
 
         await selectDropdownItem(target, "trululu", "first record");
-        assert.containsOnce(target, ".o_field_widget .o_external_button.fa-arrow-right");
+        assert.containsOnce(target, ".o_field_widget .o_external_button.oi-arrow-right");
         await click(target, ".o_field_widget .o_external_button");
 
         assert.verifySteps(["get_formview_action"]);
