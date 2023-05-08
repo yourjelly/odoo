@@ -2459,13 +2459,13 @@ const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
         this.numPages = this.pages.length;
 
         const prev = document.createElement('i');
-        prev.classList.add('o_we_pager_prev', 'fa', 'fa-chevron-left');
+        prev.classList.add('o_we_pager_prev', 'oi', 'oi-chevron-left');
 
         this.pageNum = document.createElement('span');
         this.currentPage = 0;
 
         const next = document.createElement('i');
-        next.classList.add('o_we_pager_next', 'fa', 'fa-chevron-right');
+        next.classList.add('o_we_pager_next', 'oi', 'oi-chevron-right');
 
         const pagerControls = document.createElement('div');
         pagerControls.classList.add('o_we_pager_controls');

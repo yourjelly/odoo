@@ -33,7 +33,7 @@ export const iapNotificationService = {
          * Displays the IAP failure notification on user's screen
          */
         function displayFailureIapNotification(notif) {
-            const message = Markup`<a class='btn btn-link' href='${notif.url}' target='_blank' ><i class='fa fa-arrow-right'></i> ${env._t("Buy more credits")}</a>`;
+            const message = Markup`<a class='btn btn-link' href='${notif.url}' target='_blank' ><i class='oi oi-arrow-right'></i> ${env._t("Buy more credits")}</a>`;
             notification.add(message, {
                 type: notif.error_type,
                 title: notif.title
