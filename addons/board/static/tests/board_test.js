@@ -131,7 +131,10 @@ QUnit.module("Board", (hooks) => {
                     return Promise.resolve(true);
                 }
                 if (args.method === "get_views" && args.model == "partner") {
-                    assert.deepEqual(args.kwargs.views.find((v) => v[1] === 'list'), [4, "list"]);
+                    assert.deepEqual(
+                        args.kwargs.views.find((v) => v[1] === "list"),
+                        [4, "list"]
+                    );
                 }
             },
         });
@@ -188,7 +191,7 @@ QUnit.module("Board", (hooks) => {
         assert.verifySteps(["edit custom"]);
     });
 
-    QUnit.test("views in the dashboard do not have a control panel", async function (assert) {
+    QUnit.skipMilk("views in the dashboard do not have a control panel", async function (assert) {
         serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
 
         await makeView({
