@@ -6,6 +6,8 @@ import { useAutofocus, useChildRef } from "@web/core/utils/hooks";
 import { NavBar } from "@pos_self_order/Components/NavBar/NavBar";
 import { ProductCard } from "@pos_self_order/Components/ProductCard/ProductCard";
 import { fuzzyLookup } from "@web/core/utils/search";
+import { useScrollDirection } from "@pos_self_order/Hooks/useScrollDirection";
+import { effect } from "@point_of_sale/utils";
 export class ProductList extends Component {
     static template = "pos_self_order.ProductList";
     static props = [];
@@ -47,6 +49,17 @@ export class ProductList extends Component {
         this.main = useRef("main");
         this.orderButton = useRef("orderButton");
 
+        // this is used to hide the navbar when the user is scrolling down
+        this.scroll = useScrollDirection(this.productsList);
+        effect(
+            (scroll) => {
+                console.log(scroll.down);
+                if (this.productPage.el) {
+                    this.toggleNavbar(scroll.down);
+                }
+            },
+            [this.scroll]
+        );
         onMounted(() => {
             // TODO: replace this logic with dvh once it is supported
             this.main.el.style.height = `${window.innerHeight}px`;
@@ -69,47 +82,6 @@ export class ProductList extends Component {
                 this.scrollTo(this.currentProductCard, { behavior: "instant" });
             }
         });
-        // this useEffect is used to hide the navbar when the user is scrolling down
-        // ( so the list looks like it's pushing the navbar up )
-        useEffect(
-            (scrollingDown, searchIsFocused) => {
-                if (searchIsFocused) {
-                    return;
-                }
-                const threshold = 60;
-                let lastScrollY = this.productsList.el?.scrollTop;
-                let ticking = false;
-
-                const updateScrollDir = () => {
-                    if (!this.productsList.el) {
-                        return;
-                    }
-                    const scrollY = this.productsList.el?.scrollTop;
-                    const amountScrolled = Math.abs(scrollY - lastScrollY);
-                    if (amountScrolled < threshold) {
-                        ticking = false;
-                        return;
-                    }
-                    scrollingDown = scrollY > lastScrollY;
-                    if (scrollingDown === this.privateState.navbarIsShown) {
-                        this.toggleNavbar(this.privateState.navbarIsShown);
-                    }
-                    lastScrollY = scrollY > 0 ? scrollY : 0;
-                    ticking = false;
-                };
-
-                const onScroll = () => {
-                    if (!ticking) {
-                        // this makes the scrolling smooth
-                        window.requestAnimationFrame(updateScrollDir);
-                        ticking = true;
-                    }
-                };
-                this.productsList.el.addEventListener("scroll", onScroll);
-                return () => this.productsList.el.removeEventListener("scroll", onScroll);
-            },
-            () => [this.privateState.scrollingDown, this.privateState.searchIsFocused]
-        );
         // this IntersectionObserver is used to highlight the tag (in the header)
         // of the category that is currently visible in the viewport
         useEffect(

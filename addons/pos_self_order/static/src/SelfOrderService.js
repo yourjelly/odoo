@@ -227,9 +227,6 @@ export class SelfOrder {
             return (({ state, ...rest }) => ({ state: "not found", ...rest }))(order);
         }
     }
-    showProductMainView(orderLine) {
-        this.orderLine = orderLine;
-    }
 }
 
 export const selfOrderService = {
