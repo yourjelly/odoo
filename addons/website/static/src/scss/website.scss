@@ -1516,6 +1516,64 @@ span.list-inline-item.o_add_language:last-child {
     }
 }
 
+// Website Calendar
+.o_website_calendar {
+    padding: 0;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-lg;
+
+    .o_website_calendar_days {
+        .o_weekend {
+            background-color: map-get($theme-colors, 'light');
+        }
+        
+        .o_day_wrapper{
+            margin: map-get($spacers, 1);
+            padding: map-get($spacers, 3) map-get($spacers, 2);
+            box-sizing: content-box;
+        }
+    
+        .o_slot_button {
+            border: 1px solid map-get($theme-colors, 'primary');
+            border-radius: $border-radius-lg;
+            cursor: pointer;
+        }
+    
+        .o_slot_button:hover, .o_slot_selected {
+            color: color-contrast(map-get($theme-colors, 'primary'));
+            background-color: map-get($theme-colors, 'primary');
+        }
+        .o_mute_day {
+            color: $text-muted;
+        }
+        .o_today {
+            position: relative;
+    
+            & .o_day_wrapper:after {
+                content: "";
+                display: block;
+                position: absolute;
+                width: 6px;
+                height: 6px;
+                left: calc(50% - 3px);
+                bottom: 14px;
+                background-color: map-get($theme-colors, 'light');
+                border-radius: $border-radius-pill;
+            }
+    
+            & .o_day_wrapper:not(.o_slot_selected):after {
+                background-color: map-get($theme-colors, 'primary');
+            }
+        }
+    }
+
+    .o_website_calendar_weekdays .o_weekday{
+        padding: map-get($spacers, 2) 0;
+        font-size: $small-font-size;
+        text-align: center;
+    }
+}
+
 // Ribbons
 $ribbon-padding: 100px;
 .o_ribbon {
