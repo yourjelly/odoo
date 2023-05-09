@@ -422,7 +422,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         }
     );
 
-    QUnit.skipMilk("resIds should contains only 1 id", async function (assert) {
+    QUnit.test("resIds should contains only 1 id", async function (assert) {
         assert.expect(1);
 
         serverData.models["res.config.settings"].fields.foo_text = {
@@ -497,11 +497,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         await click(target.querySelector(".o_field_char .btn.o_field_translate")); // Transalte
         await click(target.querySelector(".modal-footer .btn-primary")); // Warning dialog (OK)
         await click(target.querySelectorAll(".modal-footer .btn")[1]); // Discard
-        await click(
-            target.querySelector(
-                ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_form_button_save"
-            )
-        ); // Save Settings
+        await click(target.querySelector(".o_control_panel .o_form_button_save")); // Save Settings
     });
 
     QUnit.test("settings views does not read existing id when reload", async function (assert) {
@@ -690,7 +686,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         assert.hasClass(target.querySelectorAll(".o_form_label")[1], "c");
     });
 
-    QUnit.skipMilk("settings views does not write the id on the url", async function (assert) {
+    QUnit.test("settings views does not write the id on the url", async function (assert) {
         serverData.actions = {
             1: {
                 id: 1,
@@ -734,11 +730,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         assert.notOk(target.querySelector(".o_field_boolean input").disabled);
         await click(target.querySelector(".o_field_boolean input"));
         assert.containsOnce(target, ".o_field_boolean input:checked", "checkbox should be checked");
-        await click(
-            target.querySelector(
-                ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_form_button_save"
-            )
-        );
+        await click(target.querySelector(".o_control_panel .o_form_button_save"));
 
         await nextTick();
         assert.notOk(webClient.env.services.router.current.hash.id);
@@ -849,7 +841,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         assert.containsNone(target, ".app_settings_block:not(.d-none) .settingSearchHeader");
     });
 
-    QUnit.skipMilk(
+    QUnit.test(
         "clicking on any button in setting should show discard warning if setting form is dirty",
         async function (assert) {
             assert.expect(11);
@@ -933,20 +925,12 @@ QUnit.module("SettingsFormView", (hooks) => {
             await click(target.querySelectorAll(".modal-footer .btn")[1]); // Stay Here
             assert.containsOnce(target, ".o_form_view", "should be remain on form view");
 
-            await click(
-                target.querySelector(
-                    ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_form_button_save"
-                )
-            ); // Form Save button
+            await click(target.querySelector(".o_control_panel .o_form_button_save")); // Form Save button
             assert.containsNone(document.body, ".modal", "should not open a warning dialog");
             assert.notOk(target.querySelector(".o_field_boolean input").disabled); // Everything must stay in edit
 
             await click(target.querySelector(".o_field_boolean input"));
-            await click(
-                target.querySelector(
-                    ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_form_button_cancel"
-                )
-            ); // Form Discard button
+            await click(target.querySelector(".o_control_panel .o_form_button_cancel")); // Form Discard button
             assert.containsNone(document.body, ".modal", "should not open a warning dialog");
         }
     );
@@ -1131,7 +1115,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         );
     });
 
-    QUnit.skipMilk("settings view shows a message if there are changes", async function (assert) {
+    QUnit.test("settings view shows a message if there are changes", async function (assert) {
         await makeView({
             type: "form",
             resModel: "res.config.settings",
@@ -1151,17 +1135,21 @@ QUnit.module("SettingsFormView", (hooks) => {
             ".o_field_boolean input:checked",
             "checkbox should not be checked"
         );
-        assert.containsNone(target, ".o_dirty_warning", "warning message should not be shown");
+        assert.containsNone(
+            target,
+            ".o_control_panel .o_dirty_warning",
+            "warning message should not be shown"
+        );
         await click(target.querySelector(".o_field_boolean input[id=bar_0]"));
         assert.containsOnce(target, ".o_field_boolean input:checked", "checkbox should be checked");
         assert.containsOnce(
             target,
-            ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_dirty_warning",
+            ".o_control_panel .o_dirty_warning",
             "warning message should be shown"
         );
     });
 
-    QUnit.skipMilk(
+    QUnit.test(
         "settings view shows a message if there are changes even if the save failed",
         async function (assert) {
             const self = this;
@@ -1190,17 +1178,13 @@ QUnit.module("SettingsFormView", (hooks) => {
             await click(target.querySelector("input[id=bar_0]"));
             assert.containsOnce(
                 target,
-                ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_dirty_warning",
+                ".o_control_panel .o_dirty_warning",
                 "warning message should be shown"
             );
-            await click(
-                target.querySelector(
-                    ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_form_button_save"
-                )
-            );
+            await click(target.querySelector(".o_control_panel .o_form_button_save"));
             assert.containsOnce(
                 target,
-                ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_dirty_warning",
+                ".o_control_panel .o_dirty_warning",
                 "warning message should be shown"
             );
         }
@@ -1436,7 +1420,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         await click(target.querySelector(".o_field_boolean input"));
         assert.containsOnce(target, ".o_field_boolean input:checked", "checkbox should be checked");
 
-        await click(target.querySelector(".o_form_button_cancel"));
+        await click(target.querySelector(".o_control_panel .o_form_button_cancel"));
 
         assert.containsNone(
             target,
