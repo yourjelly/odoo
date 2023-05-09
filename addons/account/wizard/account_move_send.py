@@ -430,9 +430,14 @@ class AccountMoveSend(models.Model):
         self.ensure_one()
         return {}
 
+    def _call_web_service(self, prepared_data_list):
+        # TO OVERRIDE
+        return
+
     def _generate_documents(self, moves, from_cron):
         """ Main entry point to generate the invoice pdf and the related attachments.
         """
+        prepared_data_list = []
         success, errors = self.env['account.move'], []
         for move in moves:
             try:
@@ -441,12 +446,21 @@ class AccountMoveSend(models.Model):
                     if prepared_data.get('error'):
                         raise UserError(prepared_data['error'])
                     else:
-                        self._render_document(move, prepared_data)
-                        self._postprocess_document(move, prepared_data)
-                        self._link_document(move, prepared_data)
+                        prepared_data_list.append((move, prepared_data))
                 success |= move
             except UserError as e:
                 errors.append((move, str(e)))
+
+        if errors:
+            return success, errors
+
+        self._call_web_service(prepared_data_list)
+
+        for move, prepared_data in prepared_data_list:
+            self._render_document(move, prepared_data)
+            self._postprocess_document(move, prepared_data)
+            self._link_document(move, prepared_data)
+            success |= move
 
         return success, errors
 
