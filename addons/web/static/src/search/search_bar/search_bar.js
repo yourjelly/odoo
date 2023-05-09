@@ -13,7 +13,14 @@ import { useDebounced } from "@web/core/utils/timing";
 import { browser } from "@web/core/browser/browser";
 import { SIZES } from "@web/core/ui/ui_service";
 
-import { Component, onMounted, onWillUnmount, useExternalListener, useRef, useState } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillUnmount,
+    useExternalListener,
+    useRef,
+    useState,
+} from "@odoo/owl";
 const parsers = registry.category("parsers");
 
 const CHAR_FIELDS = ["char", "html", "many2many", "many2one", "one2many", "text", "properties"];
@@ -373,9 +380,9 @@ export class SearchBar extends Component {
     // Handlers
     //---------------------------------------------------------------------
 
-    onFacetClick(target, facet) {
+    onFacetLabelClick(target, facet) {
         const { domain, groupId } = facet;
-        if (!target.classList.contains("o_searchview_facet_label") || !domain) {
+        if (!domain) {
             return;
         }
         const { resModel } = this.env.searchModel;
