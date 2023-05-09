@@ -6,6 +6,8 @@
         <div t-ref="productPage" class="position-relative ">
             <header t-ref="header" class="bg-white shadow-sm">
                 <NavBar goBack="'/'"/>
+                <t t-esc="`${this.currentTag.name}sal`"/>
+                <t t-esc="`${this.scroll.down}sal`"/>
                 <div class="o_self_order_searchbar_filter d-flex justify-content-start align-items-center p-0 m-0 border-bottom">
                     <t t-if="privateState.searchIsFocused" t-call="pos_self_order.SearchBox"/>
                     <t t-if="!privateState.searchIsFocused" t-call="pos_self_order.TagPicker" />

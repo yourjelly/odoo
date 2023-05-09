@@ -7,7 +7,7 @@ import { NavBar } from "@pos_self_order/Components/NavBar/NavBar";
 import { ProductCard } from "@pos_self_order/Components/ProductCard/ProductCard";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { useScrollDirection } from "@pos_self_order/Hooks/useScrollDirection";
-import { effect } from "@point_of_sale/utils";
+import { useTagDetection } from "@pos_self_order/Hooks/useTagDetection";
 export class ProductList extends Component {
     static template = "pos_self_order.ProductList";
     static props = [];
@@ -49,22 +49,17 @@ export class ProductList extends Component {
         this.main = useRef("main");
         this.orderButton = useRef("orderButton");
 
+
         // this is used to hide the navbar when the user is scrolling down
         this.scroll = useScrollDirection(this.productsList);
-        effect(
-            (scroll, searchIsFocused) => {
-
-                if (searchIsFocused) {
-                    this.toggleNavbar(true);
-                    scroll.down = true;
-                    return;
-                }
-                if (this.productPage.el) {
-                    this.toggleNavbar(scroll.down);
-                }
-            },
-            [this.scroll, this.privateState.searchIsFocused]
-        );
+        // effect(
+        //     (scroll) => {
+        //         if (this.productPage.el) {
+        //             this.toggleNavbar(scroll.down);
+        //         }
+        //     },
+        //     [this.scroll]
+        // );
         onMounted(() => {
             // TODO: replace this logic with dvh once it is supported
             this.main.el.style.height = `${window.innerHeight}px`;
@@ -87,6 +82,7 @@ export class ProductList extends Component {
                 this.scrollTo(this.currentProductCard, { behavior: "instant" });
             }
         });
+        this.currentTag = useTagDetection(this.productsList, this.productGroup, this.privateState);
         // this IntersectionObserver is used to highlight the tag (in the header)
         // of the category that is currently visible in the viewport
         useEffect(
@@ -94,6 +90,10 @@ export class ProductList extends Component {
                 if (searchIsFocused) {
                     return;
                 }
+                console.log(
+                    this.productsList.el.offsetHeight -
+                        (parseInt(this.productsList.el?.style?.paddingBottom) || 0) -
+                );
                 const OBSERVING_WINDOW_HEIGHT = 5;
                 const observer = new IntersectionObserver(
                     (entries) => {
