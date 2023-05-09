@@ -1,6 +1,5 @@
 from lxml import etree
-from odoo.tests.common import tagged
-from odoo.addons.base.tests.common import HttpCaseWithUserDemo
+import odoo.tests
 from werkzeug import urls
 
 import logging
@@ -9,8 +8,8 @@ import re
 
 _logger = logging.getLogger(__name__)
 
-@tagged('black_magic')
-class BlackMagicCrawler(HttpCaseWithUserDemo):
+@odoo.tests.tagged('black_magic', '-at_install', 'post_install')
+class BlackMagicCrawler(odoo.tests.HttpCase):
     def crawl(self, url, seen = {}):
         url_slug = re.sub(r"[/](([^/=?&]+-)?[0-9]+)([/]|$)", '/<slug>/', url) # replaces /abc-123/ by /<slug>/
         url_slug = re.sub(r"([^/=?&]+)=[^/=?&]+", '\g<1>=param', url_slug) # replaces abcb=1234 by abcd=param
