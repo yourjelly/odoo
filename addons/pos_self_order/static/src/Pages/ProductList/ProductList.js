@@ -52,13 +52,18 @@ export class ProductList extends Component {
         // this is used to hide the navbar when the user is scrolling down
         this.scroll = useScrollDirection(this.productsList);
         effect(
-            (scroll) => {
-                console.log(scroll.down);
+            (scroll, searchIsFocused) => {
+
+                if (searchIsFocused) {
+                    this.toggleNavbar(true);
+                    scroll.down = true;
+                    return;
+                }
                 if (this.productPage.el) {
                     this.toggleNavbar(scroll.down);
                 }
             },
-            [this.scroll]
+            [this.scroll, this.privateState.searchIsFocused]
         );
         onMounted(() => {
             // TODO: replace this logic with dvh once it is supported
