@@ -19,7 +19,25 @@ patch(ThreadService.prototype, "im_livechat", {
         this.notification = services.notification;
     },
 
-    async post(thread, body) {
+    getMessagePostRoute(thread) {
+        if (thread.type === "livechat") {
+            return "/im_livechat/chat_post";
+        }
+        return this._super(thread);
+    },
+
+    getMessagePostParams({ thread, body }) {
+        if (thread.type !== "livechat") {
+            return this._super(thread, body);
+        }
+        return {
+            uuid: thread.uuid,
+            message_content: body,
+        };
+    },
+
+    async post(thread, body, params) {
+        const _super = this._super;
         const session = await this.livechatService.getSession({ persisted: true });
         const chatWindow = this.store.chatWindows.find(
             (chatWindow) =>
@@ -40,16 +58,7 @@ patch(ThreadService.prototype, "im_livechat", {
             });
             chatWindow.thread = thread;
         }
-        const data = await this.rpc("/im_livechat/chat_post", {
-            uuid: thread.uuid,
-            message_content: body,
-        });
-        const message = this.messageService.insert(
-            Object.assign(data, { body: markup(data.body) })
-        );
-        if (!thread.messages.some(({ id }) => id === message.id)) {
-            thread.messages.push(message);
-        }
+        return _super(thread, body, params);
     },
 
     async openChat() {
@@ -81,6 +90,7 @@ patch(ThreadService.prototype, "im_livechat", {
         const thread = this._super(data);
         if (thread.type === "livechat" && isUnknown) {
             thread.welcomeMessage = this.messageService.insert({
+                id: -1,
                 body: this.livechatService.options.default_message,
                 res_id: thread.id,
                 model: thread.model,

@@ -893,34 +893,13 @@ export class ThreadService {
      */
     async post(thread, body, { attachments = [], isNote = false, parentId, rawMentions }) {
         let tmpMsg;
-        const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
-        const validMentions = this.store.user
-            ? this.messageService.getMentionsFromText(rawMentions, body)
-            : undefined;
-        const partner_ids = validMentions?.partners.map((partner) => partner.id);
-        if (!isNote) {
-            const recipientIds = thread.suggestedRecipients
-                .filter((recipient) => recipient.persona && recipient.checked)
-                .map((recipient) => recipient.persona.id);
-            partner_ids?.push(...recipientIds);
-        }
-        const lastMessageId = this.messageService.getLastMessageId();
-        const tmpId = lastMessageId + 0.01;
-        const params = {
-            context: {
-                mail_post_autofollow: !isNote && thread.hasWriteAccess,
-                temporary_id: tmpId,
-            },
-            post_data: {
-                body: await prettifyMessageContent(body, validMentions),
-                attachment_ids: attachments.map(({ id }) => id),
-                message_type: "comment",
-                partner_ids,
-                subtype_xmlid: subtype,
-            },
-            thread_id: thread.id,
-            thread_model: thread.model,
-        };
+        const params = await this.getMessagePostParams({
+            attachments,
+            body,
+            isNote,
+            rawMentions,
+            thread,
+        });
         if (parentId) {
             params.post_data.parent_id = parentId;
         }
@@ -929,7 +908,7 @@ export class ThreadService {
             params.thread_model = thread.model;
         } else {
             const tmpData = {
-                id: tmpId,
+                id: params.context?.temporary_id,
                 attachments: attachments,
                 res_id: thread.id,
                 model: "discuss.channel",
@@ -943,7 +922,7 @@ export class ThreadService {
             if (parentId) {
                 tmpData.parentMessage = this.store.messages[parentId];
             }
-            const prettyContent = await prettifyMessageContent(body, validMentions);
+            const prettyContent = await prettifyMessageContent(body, params.validMentions);
             const { emojis } = await loadEmoji();
             const recentEmojis = JSON.parse(
                 browser.localStorage.getItem("mail.emoji.frequent") || "{}"
@@ -962,12 +941,12 @@ export class ThreadService {
                 body: markup(prettyContent),
                 res_id: thread.id,
                 model: thread.model,
-                temporary_id: tmpId,
+                temporary_id: params.context?.temporary_id,
             });
             thread.messages.push(tmpMsg);
             thread.seen_message_id = tmpMsg.id;
         }
-        const data = await this.rpc("/mail/message/post", params);
+        const data = await this.rpc(this.getMessagePostRoute(thread), params);
         if (data.parentMessage) {
             data.parentMessage.body = data.parentMessage.body
                 ? markup(data.parentMessage.body)
@@ -990,6 +969,47 @@ export class ThreadService {
             delete this.store.messages[tmpMsg.id];
         }
         return message;
+    }
+
+    /**
+     * Get the parameters to pass to the message post route.
+     */
+    async getMessagePostParams({ attachments, body, isNote, rawMentions, thread }) {
+        const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
+        const validMentions = this.store.user
+            ? this.messageService.getMentionsFromText(rawMentions, body)
+            : undefined;
+        const partner_ids = validMentions?.partners.map((partner) => partner.id);
+        if (!isNote) {
+            const recipientIds = thread.suggestedRecipients
+                .filter((recipient) => recipient.persona && recipient.checked)
+                .map((recipient) => recipient.persona.id);
+            partner_ids?.push(...recipientIds);
+        }
+        const lastMessageId = this.messageService.getLastMessageId();
+        const tmpId = lastMessageId + 0.01;
+        return {
+            context: {
+                mail_post_autofollow: !isNote && thread.hasWriteAccess,
+                temporary_id: tmpId,
+            },
+            post_data: {
+                body: await prettifyMessageContent(body, validMentions),
+                attachment_ids: attachments.map(({ id }) => id),
+                message_type: "comment",
+                partner_ids,
+                subtype_xmlid: subtype,
+            },
+            thread_id: thread.id,
+            thread_model: thread.model,
+        };
+    }
+
+    /**
+     * @param {Thread} thread
+     */
+    getMessagePostRoute(thread) {
+        return "/mail/message/post";
     }
 
     /**
