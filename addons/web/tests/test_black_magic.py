@@ -4,7 +4,6 @@ from werkzeug import urls
 
 import logging
 import time
-import re
 
 _logger = logging.getLogger(__name__)
 
@@ -12,26 +11,48 @@ _logger = logging.getLogger(__name__)
 class BlackMagicCrawler(odoo.tests.HttpCase):
     def get_urls(self):
         views = self.env['ir.actions.act_window'].search_read(
-            domain=[["res_model", "ilike", "estate"]],
-            fields=["id", "view_mode", "res_model"]
+            domain=[],
+            fields=["id", "view_mode", "res_model", "view_id"]
         )
+        seen = {}
         urls = []
+
         for view in views:
             modes = view["view_mode"].split(',')
 
-            for mode in modes:
-                url = f"/web#action_id={view['id']}&model={view['res_model']}&cids=1%2C2%2C3%2C4%2C5&view_type={mode}"
+            for mode in modes: 
                 if mode == 'search':
+                    continue
+
+                url = f"/web#action_id={view['id']}&model={view['res_model']}&cids=1%2C2%2C3%2C4%2C5&view_type={mode}"
+
+                if (view['res_model'], mode) not in seen:
+                    seen[(view['res_model'], mode)] = []
+                
+                if view['view_id'] not in seen[(view['res_model'], mode)]:
+                    seen[(view['res_model'], mode)].append(view['view_id'])
+                else:
                     continue
                 
                 if mode == 'form':
-                    url += "&id=1"
-                        # ids = self.env[view['model']].search_read(
-                        #     domain=[],fields=['id'],limit=1#,order="write_date DESC"
-                        # )
-                        # if ids:
-                        #     url += f"&id={ids[0]['id']}"
-                    
+                    if not self.env[view['res_model']]._auto:
+                        _logger.info(f'SKIP: {view["res_model"]}: Abstract Model.')
+                        continue
+
+                    try:
+                        ids = self.env[view['res_model']].search_read(
+                            domain=[],fields=['id'],limit=1,order="write_date DESC"
+                        )
+                    except Exception:
+                        ids = self.env[view['res_model']].search_read(
+                            domain=[],fields=['id'],limit=1
+                        )
+
+                    if ids:
+                        url += f"&id={ids[0]['id']}"
+                    else:
+                        _logger.info(f'SKIP: {url}: No record found for URL.')
+                        continue
                 
                 urls.append(url)
 
@@ -77,14 +98,14 @@ class BlackMagicCrawler(odoo.tests.HttpCase):
             test()
         """
         urls = self.get_urls()
-        #urls = ['/web#id=75&cids=1%2C2%2C3%2C4%2C5&menu_id=874&model=sale.order&view_type=form']
         ctr = 0
+        
+        start = time.now()
         for url in urls:
             with self.subTest(url):
                 print('Left', ctr/len(urls), ':', url)
                 ctr+=1
                 self.browser_js(url, code, "odoo.isReady === true", login="admin", watch=False)
                 self.terminate_browser()
-        
-        # TO_CHECK optimize by checking if the view _id are different for different action, 
-        # If not simply skip since we've already seen it.
+
+        _logger.info(f'Time for test : {time.now() - start}')
