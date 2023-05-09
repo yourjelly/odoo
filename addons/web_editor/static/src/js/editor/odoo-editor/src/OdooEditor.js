@@ -388,15 +388,15 @@ export class OdooEditor extends EventTarget {
             // Create the move buttons.
             if (direction === 'column') {
                 uiMenu.append(...parser.parseFromString(`
-                    <div class="o_move_left"><span class="oi oi-chevron-left"></span>` + this.options._t('Move left') + `</div>
-                    <div class="o_move_right"><span class="oi oi-chevron-right"></span>` + this.options._t('Move right') + `</div>
+                    <div class="o_move_left"><span class="fa fa-chevron-left"></span>` + this.options._t('Move left') + `</div>
+                    <div class="o_move_right"><span class="fa fa-chevron-right"></span>` + this.options._t('Move right') + `</div>
                 `, 'text/html').body.children);
                 this.addDomListener(uiMenu.querySelector('.o_move_left'), 'click', this._onTableMoveLeftClick);
                 this.addDomListener(uiMenu.querySelector('.o_move_right'), 'click', this._onTableMoveRightClick);
             } else {
                 uiMenu.append(...parser.parseFromString(`
-                    <div class="o_move_up"><span class="oi oi-chevron-left" style="transform: rotate(90deg);"></span>` + this.options._t('Move up') + `</div>
-                    <div class="o_move_down"><span class="oi oi-chevron-right" style="transform: rotate(90deg);"></span>` + this.options._t('Move down') + `</div>
+                    <div class="o_move_up"><span class="fa fa-chevron-left" style="transform: rotate(90deg);"></span>` + this.options._t('Move up') + `</div>
+                    <div class="o_move_down"><span class="fa fa-chevron-right" style="transform: rotate(90deg);"></span>` + this.options._t('Move down') + `</div>
                 `, 'text/html').body.children);
                 this.addDomListener(uiMenu.querySelector('.o_move_up'), 'click', this._onTableMoveUpClick);
                 this.addDomListener(uiMenu.querySelector('.o_move_down'), 'click', this._onTableMoveDownClick);
