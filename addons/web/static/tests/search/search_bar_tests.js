@@ -16,9 +16,8 @@ import {
     makeWithSearch,
     removeFacet,
     setupControlPanelServiceRegistry,
-    toggleComparisonMenu,
-    toggleGroupByMenu,
     toggleMenuItem,
+    toggleSearchBarMenu,
     validateSearch,
 } from "./helpers";
 
@@ -31,7 +30,6 @@ function getDomain(controlPanel) {
 }
 
 import { Component, onWillUpdateProps, xml } from "@odoo/owl";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 
 let target;
@@ -1429,7 +1427,7 @@ QUnit.module("Search", (hooks) => {
         await makeWithSearch({
             serverData,
             resModel: "partner",
-            Component: ControlPanel,
+            Component: SearchBar,
             searchMenuTypes: ["groupBy"], // we need it to have facet (see facets getter in search_model)
             searchViewId: false,
             searchViewArch: `
@@ -1492,7 +1490,7 @@ QUnit.module("Search", (hooks) => {
             const controlPanel = await makeWithSearch({
                 serverData,
                 resModel: "partner",
-                Component: ControlPanel,
+                Component: SearchBar,
                 searchViewId: false,
                 searchViewArch: `
                 <search>
@@ -1529,7 +1527,7 @@ QUnit.module("Search", (hooks) => {
         await makeWithSearch({
             serverData,
             resModel: "partner",
-            Component: ControlPanel,
+            Component: SearchBar,
             searchMenuTypes: ["groupBy"], // we need it to have facet (see facets getter in search_model)
             searchViewId: false,
             searchViewArch: `
@@ -1545,7 +1543,7 @@ QUnit.module("Search", (hooks) => {
             ".o_searchview_facet.o_facet_with_domain .o_searchview_facet_label"
         );
 
-        await toggleGroupByMenu(target);
+        await toggleSearchBarMenu(target);
         await toggleMenuItem(target, "Company");
 
         assert.deepEqual(getFacetTexts(target), ["My favorite", "Company"]);
@@ -1564,7 +1562,7 @@ QUnit.module("Search", (hooks) => {
 
         await click(target.querySelector(".modal footer button"));
         assert.containsNone(target, ".modal");
-        assert.deepEqual(getFacetTexts(target), ["Bool>Company", 'Foo contains "abc"']);
+        assert.deepEqual(getFacetTexts(target), ["Bool\n>\nCompany", 'Foo contains "abc"']);
     });
 
     QUnit.test("edit a date filter with comparison active", async function (assert) {
@@ -1572,7 +1570,7 @@ QUnit.module("Search", (hooks) => {
         await makeWithSearch({
             serverData,
             resModel: "partner",
-            Component: ControlPanel,
+            Component: SearchBar,
             searchMenuTypes: ["filter", "comparison"],
             searchViewId: false,
             searchViewArch: `
@@ -1590,8 +1588,8 @@ QUnit.module("Search", (hooks) => {
             ".o_searchview_facet.o_facet_with_domain .o_searchview_facet_label"
         );
 
-        await toggleComparisonMenu(target);
-        await toggleMenuItem(target);
+        await toggleSearchBarMenu(target);
+        await toggleMenuItem(target, "Birthday: Previous Period");
 
         assert.deepEqual(getFacetTexts(target), [
             "Birthday: April 2023",
@@ -1630,7 +1628,7 @@ QUnit.module("Search", (hooks) => {
         await makeWithSearch({
             serverData,
             resModel: "partner",
-            Component: ControlPanel,
+            Component: SearchBar,
             searchViewId: false,
             searchViewArch: `
                 <search>
@@ -1652,7 +1650,7 @@ QUnit.module("Search", (hooks) => {
         await triggerEvent(searchInput, null, "keydown", { key: "ArrowDown" });
         await triggerEvent(searchInput, null, "keydown", { key: "Enter" }); // select
 
-        assert.deepEqual(getFacetTexts(target), ["Foo\nabcordef"]);
+        assert.deepEqual(getFacetTexts(target), ["Foo\nabc\nor\ndef"]);
 
         await click(target, ".o_facet_with_domain .o_searchview_facet_label");
         assert.containsN(target, ".o_domain_leaf", 2);
