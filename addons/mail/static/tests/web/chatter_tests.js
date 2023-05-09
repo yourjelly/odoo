@@ -177,7 +177,7 @@ QUnit.test("Textarea content is kept when switching from aside to bottom", async
     assert.strictEqual($(".o-mail-Composer-input").val(), "Hello world !");
 });
 
-QUnit.skipMilk("Composer type is kept when switching from aside to bottom", async (assert) => {
+QUnit.test("Composer type is kept when switching from aside to bottom", async (assert) => {
     patchUiSize({ size: SIZES.XXL });
     const { openFormView, pyEnv } = await start();
     const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
@@ -190,10 +190,10 @@ QUnit.skipMilk("Composer type is kept when switching from aside to bottom", asyn
     });
     assert.hasClass(
         $("button:contains(Log note)"),
-        "btn-odoo",
+        "btn-primary",
         "Active button should be the log note button"
     );
-    assert.doesNotHaveClass($("button:contains(Send message)"), "btn-odoo");
+    assert.doesNotHaveClass($("button:contains(Send message)"), "btn-primary");
 });
 
 QUnit.test("chatter: drop attachments", async (assert) => {

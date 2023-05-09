@@ -311,7 +311,7 @@ QUnit.test(
     }
 );
 
-QUnit.skipMilk(
+QUnit.test(
     "avatar_user widget displays the appropriate user image in form view",
     async (assert) => {
         const pyEnv = await startServer();
@@ -330,9 +330,9 @@ QUnit.skipMilk(
             views: [[false, "form"]],
         });
         assert.strictEqual(
-            $(".o_field_many2many_avatar_user.o_field_widget .badge img")[0].getAttribute(
-                "data-src"
-            ),
+            document.body
+                .querySelector(".o_field_many2many_avatar_user.o_field_widget .o_avatar img")
+                .getAttribute("data-src"),
             `/web/image/res.users/${userId}/avatar_128`
         );
     }
@@ -357,7 +357,7 @@ QUnit.test("many2one_avatar_user widget in list view", async (assert) => {
     assert.strictEqual($(".o-mail-ChatWindow-name").text(), "Partner 1");
 });
 
-QUnit.skipMilk("many2many_avatar_user widget in form view", async (assert) => {
+QUnit.test("many2many_avatar_user widget in form view", async (assert) => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Partner 1" });
     const userId = pyEnv["res.users"].create({ name: "Mario", partner_id: partnerId });
@@ -374,7 +374,7 @@ QUnit.skipMilk("many2many_avatar_user widget in form view", async (assert) => {
         res_id: avatarUserId,
         views: [[false, "form"]],
     });
-    await click(document.body, ".o_field_many2many_avatar_user .badge .o_m2m_avatar");
+    await click(document.body, ".o_field_many2many_avatar_user .o_avatar img");
     assert.containsOnce($, ".o-mail-ChatWindow");
     assert.strictEqual($(".o-mail-ChatWindow-name").text(), "Partner 1");
 });

@@ -1984,7 +1984,7 @@ QUnit.test("Create a direct message channel when clicking on start a meeting", a
     assert.containsOnce($, ".o-mail-Call");
 });
 
-QUnit.skipMilk(
+QUnit.test(
     "Correct breadcrumb when open discuss from chat window then see settings",
     async (assert) => {
         const pyEnv = await startServer();
@@ -1994,6 +1994,6 @@ QUnit.skipMilk(
         await click(".o-mail-NotificationItem:contains(General)");
         await click(".o-mail-ChatWindow [title='Open in Discuss']");
         await click(".o-mail-DiscussCategoryItem:contains(General) [title='Channel settings']");
-        assert.strictEqual($(".breadcrumb").text(), "DiscussGeneral");
+        assert.strictEqual($(".o_breadcrumb").text(), "DiscussGeneral");
     }
 );

@@ -777,48 +777,6 @@ QUnit.module("Views", ({ beforeEach }) => {
         }
     );
 
-    QUnit.skipMilk(`breadcrumbs are updated with the displayed period`, async (assert) => {
-        await makeView({
-            type: "calendar",
-            resModel: "event",
-            serverData,
-            arch: `
-                <calendar date_start="start" date_stop="stop" all_day="allday" />
-            `,
-        });
-
-        // displays week mode by default
-        assert.strictEqual(
-            target.querySelector(".o_control_panel .breadcrumb-item.active").textContent,
-            "undefined (Dec 11 – 17, 2016)",
-            "should display the current week"
-        );
-
-        // switch to day mode
-        await changeScale(target, "day");
-        assert.strictEqual(
-            target.querySelector(".o_control_panel .breadcrumb-item.active").textContent,
-            "undefined (December 12, 2016)",
-            "should display the current day"
-        );
-
-        // switch to month mode
-        await changeScale(target, "month");
-        assert.strictEqual(
-            target.querySelector(".o_control_panel .breadcrumb-item.active").textContent,
-            "undefined (December 2016)",
-            "should display the current month"
-        );
-
-        // switch to year mode
-        await changeScale(target, "year");
-        assert.strictEqual(
-            target.querySelector(".o_control_panel .breadcrumb-item.active").textContent,
-            "undefined (2016)",
-            "should display the current year"
-        );
-    });
-
     QUnit.skipMilk(`create and change events`, async (assert) => {
         assert.expect(28);
 
