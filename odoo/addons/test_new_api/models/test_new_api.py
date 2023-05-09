@@ -115,8 +115,8 @@ class Discussion(models.Model):
             for message in self.important_messages:
                 message.body = 'not last dummy message'
             # add new dummy message
-            message_vals = self.messages._add_missing_default_values({'body': 'dummy message', 'important': True})
-            self.messages |= self.messages.new(message_vals)
+            message_vals = self.messages._prepare_create_values([{'body': 'dummy message', 'important': True}])
+            self.messages |= self.messages.new(message_vals[0])
             self.important_messages |= self.messages.new(message_vals)
 
     @api.onchange('moderator')

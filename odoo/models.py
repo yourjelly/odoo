@@ -1711,60 +1711,6 @@ class BaseModel(metaclass=MetaModel):
             domain += aggregator([[(field_name, operator, name)] for field_name in search_fnames])
         return self._search(domain, limit=limit, order=order)
 
-    @api.model
-    def _add_missing_default_values(self, values):
-        # avoid overriding inherited values when parent is set
-        avoid_models = set()
-
-        def collect_models_to_avoid(model):
-            for parent_mname, parent_fname in model._inherits.items():
-                if parent_fname in values:
-                    avoid_models.add(parent_mname)
-                else:
-                    # manage the case where an ancestor parent field is set
-                    collect_models_to_avoid(self.env[parent_mname])
-
-        collect_models_to_avoid(self)
-
-        def avoid(field):
-            # check whether the field is inherited from one of avoid_models
-            if avoid_models:
-                while field.inherited:
-                    field = field.related_field
-                    if field.model_name in avoid_models:
-                        return True
-            return False
-
-        # compute missing fields
-        missing_defaults = [
-            name
-            for name, field in self._fields.items()
-            if name not in values
-            if not avoid(field)
-        ]
-
-        if missing_defaults:
-            # override defaults with the provided values, never allow the other way around
-            defaults = self.default_get(missing_defaults)
-            for name, value in defaults.items():
-                if self._fields[name].type == 'many2many' and value and isinstance(value[0], int):
-                    # convert a list of ids into a list of commands
-                    defaults[name] = [Command.set(value)]
-                elif self._fields[name].type == 'one2many' and value and isinstance(value[0], dict):
-                    # convert a list of dicts into a list of commands
-                    defaults[name] = [Command.create(x) for x in value]
-            defaults.update(values)
-
-        else:
-            defaults = values
-
-        # delegate the default properties to the properties field
-        for field in self._fields.values():
-            if field.type == 'properties':
-                defaults[field.name] = field._add_default_values(self.env, defaults)
-
-        return defaults
-
     @classmethod
     def clear_caches(cls):
         """ Clear the caches
@@ -4269,14 +4215,13 @@ class BaseModel(metaclass=MetaModel):
         :returns: new list of completed create values
         :rtype: dict
         """
-        bad_names = ['id', 'parent_path']
-        if self._log_access:
-            # the superuser can set log_access fields while loading registry
-            if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
-                bad_names.extend(LOG_ACCESS_COLUMNS)
+        bad_names = {'id', 'parent_path'}
+        # the superuser can set log_access fields while loading registry
+        if self._log_access and not (self.env.uid == SUPERUSER_ID and not self.pool.ready):
+            bad_names.update(LOG_ACCESS_COLUMNS)
 
         # also discard precomputed readonly fields (to force their computation)
-        bad_names.extend(
+        bad_names.update(
             fname
             for fname, field in self._fields.items()
             if field.precompute and field.readonly
@@ -4297,19 +4242,63 @@ class BaseModel(metaclass=MetaModel):
 
         result_vals_list = []
         for vals in vals_list:
-            # add default values
-            vals = self._add_missing_default_values(vals)
+            # avoid overriding inherited values when parent is set
+            avoid_models = set()
 
-            # add magic fields
-            for fname in bad_names:
-                vals.pop(fname, None)
+            def collect_models_to_avoid(model):
+                for parent_mname, parent_fname in model._inherits.items():
+                    if parent_fname in vals:
+                        avoid_models.add(parent_mname)
+                    else:
+                        # manage the case where an ancestor parent field is set
+                        collect_models_to_avoid(self.env[parent_mname])
+
+            collect_models_to_avoid(self)
+
+            def avoid(field):
+                # check whether the field is inherited from one of avoid_models
+                if avoid_models:
+                    while field.inherited:
+                        field = field.related_field
+                        if field.model_name in avoid_models:
+                            return True
+                return False
+
+            # compute missing fields
+            missing_defaults = [
+                name
+                for name, field in self._fields.items()
+                if name not in vals
+                if name not in bad_names
+                if not avoid(field)
+            ]
+
+            if missing_defaults:
+                # override defaults with the provided values, never allow the other way around
+                defaults = self.default_get(missing_defaults)
+                for name, value in defaults.items():
+                    if self._fields[name].type == 'many2many' and value and isinstance(value[0], int):
+                        # convert a list of ids into a list of commands
+                        defaults[name] = [Command.set(value)]
+                    elif self._fields[name].type == 'one2many' and value and isinstance(value[0], dict):
+                        # convert a list of dicts into a list of commands
+                        defaults[name] = [Command.create(x) for x in value]
+                defaults.update(vals)
+            else:
+                defaults = vals
+
+            # delegate the default properties to the properties field
+            for field in self._fields.values():
+                if field.type == 'properties':
+                    defaults[field.name] = field._add_default_values(self.env, defaults)
+
             if self._log_access:
-                vals.setdefault('create_uid', self.env.uid)
-                vals.setdefault('create_date', self.env.cr.now())
-                vals.setdefault('write_uid', self.env.uid)
-                vals.setdefault('write_date', self.env.cr.now())
+                defaults.setdefault('create_uid', self.env.uid)
+                defaults.setdefault('create_date', self.env.cr.now())
+                defaults.setdefault('write_uid', self.env.uid)
+                defaults.setdefault('write_date', self.env.cr.now())
 
-            result_vals_list.append(vals)
+            result_vals_list.append(defaults)
 
         # add precomputed fields
         self._add_precomputed_values(result_vals_list)
