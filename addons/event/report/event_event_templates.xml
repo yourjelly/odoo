@@ -177,7 +177,7 @@
     </div>
 
     <div class="row footer o_event_full_page_ticket_footer d-block">
-        <div class="o_event_full_page_ticket_powered_by bg-odoo text-white text-center p-2 w-100">
+        <div class="o_event_full_page_ticket_powered_by bg-primary text-white text-center p-2 w-100">
             <t t-if="event.organizer_id">
                 <span class="fw-bold" t-field="event.organizer_id.name"></span>
                 <span t-if="event.organizer_id.phone" class="ps-3 fa fa-phone"/>

@@ -28,8 +28,8 @@
                             <button
                                 class="o_date_item_cell o_datetime_button o_center o_cell_md btn p-1 border-0 fw-normal"
                                 t-att-class="{
-                                    'o_active bg-odoo': !itemInfo.isOutOfRange and arInfo.isActive,
-                                    'o_preview_active bg-odoo': !itemInfo.isOutOfRange and arInfo.isPreviewActive,
+                                    'o_active bg-primary': !itemInfo.isOutOfRange and arInfo.isActive,
+                                    'o_preview_active bg-primary': !itemInfo.isOutOfRange and arInfo.isPreviewActive,
                                     o_active_start: arInfo.isStart or arInfo.isPreviewStart,
                                     o_active_end: arInfo.isEnd or arInfo.isPreviewEnd,
                                     o_today: itemInfo.includesToday,
@@ -84,7 +84,7 @@
                     class="o_date_item_cell o_datetime_button o_center o_cell_lg btn p-1"
                     t-att-class="{
                         o_today: itemInfo.includesToday,
-                        'o_active text-bg-odoo': arInfo.isActive,
+                        'o_active text-bg-primary': arInfo.isActive,
                         o_active_start: arInfo.isStart,
                         o_active_end: arInfo.isEnd,
                         o_out_of_range: itemInfo.isOutOfRange or itemInfo.isInvalid,
