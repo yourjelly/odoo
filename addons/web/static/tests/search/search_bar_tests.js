@@ -31,6 +31,7 @@ function getDomain(controlPanel) {
 }
 
 import { Component, onWillUpdateProps, xml } from "@odoo/owl";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 
 let target;
