@@ -1384,7 +1384,7 @@ QUnit.module("SettingsFormView", (hooks) => {
             ]);
         }
     );
-    QUnit.skipMilk("Discard button clean the settings view", async function (assert) {
+    QUnit.test("Discard button clean the settings view", async function (assert) {
         assert.expect(10);
 
         serverData.actions = {
@@ -1436,11 +1436,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         await click(target.querySelector(".o_field_boolean input"));
         assert.containsOnce(target, ".o_field_boolean input:checked", "checkbox should be checked");
 
-        await click(
-            target.querySelector(
-                ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_form_button_cancel"
-            )
-        );
+        await click(target.querySelector(".o_form_button_cancel"));
 
         assert.containsNone(
             target,
