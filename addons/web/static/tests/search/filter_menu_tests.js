@@ -9,7 +9,6 @@ import {
     patchWithCleanup,
 } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
 import {
     getFacetTexts,
     isItemSelected,
@@ -601,7 +600,7 @@ QUnit.module("Search", (hooks) => {
         await makeWithSearch({
             serverData,
             resModel: "foo",
-            Component: ControlPanel,
+            Component: DropDownMenusTestComponent,
             searchMenuTypes: ["filter"],
         });
 
@@ -629,7 +628,7 @@ QUnit.module("Search", (hooks) => {
             await makeWithSearch({
                 serverData,
                 resModel: "foo",
-                Component: ControlPanel,
+                Component: DropDownMenusTestComponent,
                 searchMenuTypes: ["filter"],
             });
             await toggleFilterMenu(target);
@@ -653,7 +652,7 @@ QUnit.module("Search", (hooks) => {
             await makeWithSearch({
                 serverData,
                 resModel: "foo",
-                Component: ControlPanel,
+                Component: DropDownMenusTestComponent,
                 searchMenuTypes: ["filter"],
             });
             await toggleFilterMenu(target);
@@ -697,7 +696,7 @@ QUnit.module("Search", (hooks) => {
         const controlPanel = await makeWithSearch({
             serverData,
             resModel: "foo",
-            Component: ControlPanel,
+            Component: DropDownMenusTestComponent,
             searchMenuTypes: ["filter"],
             searchViewId: false,
             searchViewArch: `
@@ -757,7 +756,7 @@ QUnit.module("Search", (hooks) => {
         const controlPanel = await makeWithSearch({
             serverData,
             resModel: "foo",
-            Component: ControlPanel,
+            Component: DropDownMenusTestComponent,
             searchMenuTypes: ["filter"],
             searchViewId: false,
             searchViewArch: `<search />`,
@@ -782,7 +781,7 @@ QUnit.module("Search", (hooks) => {
         const controlPanel = await makeWithSearch({
             serverData,
             resModel: "foo",
-            Component: ControlPanel,
+            Component: DropDownMenusTestComponent,
             searchMenuTypes: ["filter"],
             searchViewId: false,
             searchViewArch: `<search />`,
