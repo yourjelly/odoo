@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 import { click, getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
-import { setupControlPanelServiceRegistry, toggleGroupByMenu, toggleMenuItem, toggleMenuItemOption } from "@web/../tests/search/helpers";
+import { setupControlPanelServiceRegistry, toggleSearchBarMenu, toggleMenuItem, toggleMenuItemOption } from "@web/../tests/search/helpers";
 import { makeView } from "@web/../tests/views/helpers";
 import { registry } from "@web/core/registry";
 import { makeFakeNotificationService, fakeCookieService } from "@web/../tests/helpers/mock_services";
@@ -133,7 +133,7 @@ QUnit.module("Project", {}, () => {
         }
 
         async function openGroupByMainMenu(target) {
-            await toggleGroupByMenu(target);
+            await toggleSearchBarMenu(target);
         }
 
         async function openGroupByDateMenu(target) {
@@ -170,21 +170,21 @@ QUnit.module("Project", {}, () => {
             await testBurnDownChartWithSearchView(stepsTriggeringNotification, assert);
         });
 
-        QUnit.skipMilk("check that removing the group by 'Date' triggers a notification", async function (assert) {
+        QUnit.test("check that removing the group by 'Date' triggers a notification", async function (assert) {
             const stepsTriggeringNotification = async () => {
                 await toggleSelectedGroupByDateItem(target);
             };
             await testBurnDownChartWithSearchView(stepsTriggeringNotification, assert);
         });
 
-        QUnit.skipMilk("check that removing the group by 'Stage' triggers a notification", async function (assert) {
+        QUnit.test("check that removing the group by 'Stage' triggers a notification", async function (assert) {
             const stepsTriggeringNotification = async () => {
                 await toggleGroupByStageMenu(target);
             };
             await testBurnDownChartWithSearchView(stepsTriggeringNotification, assert);
         });
 
-        QUnit.skipMilk("check that adding a group by 'Date' actually toggle it", async function (assert) {
+        QUnit.test("check that adding a group by 'Date' actually toggle it", async function (assert) {
             await makeBurnDownChartWithSearchView();
             await openGroupByDateMenu(target);
             const firstNotSelectedGroupByDateItemXpath = `//div
@@ -212,7 +212,7 @@ QUnit.module("Project", {}, () => {
 
         function checkGroupByOrder(assert) {
             const dateSearchFacetXpath = `//div[contains(@class, 'o_searchview_facet')]
-                                            [.//span[@class='o_facet_value']
+                                            [.//small[@class='o_facet_value']
                                             [contains(., 'Date: Month')]]`;
             const dateSearchFacetElement = getFirstElementForXpath(target, dateSearchFacetXpath);
             const dateSearchFacetParts = dateSearchFacetElement.querySelectorAll('.o_facet_value');
@@ -221,12 +221,12 @@ QUnit.module("Project", {}, () => {
             assert.equal(dateSearchFacetParts[1].innerText, 'Stage');
         }
 
-        QUnit.skipMilk("check that the group by is always sorted 'Date' first, 'Stage' second", async function (assert) {
+        QUnit.test("check that the group by is always sorted 'Date' first, 'Stage' second", async function (assert) {
             await makeBurnDownChartWithSearchView({context: {...makeViewParams.context, 'search_default_date': 1, 'search_default_stage': 1}});
             checkGroupByOrder(assert);
         });
 
-        QUnit.skipMilk("check that the group by is always sorted 'Date' first, 'Stage' second", async function (assert) {
+        QUnit.test("check that the group by is always sorted 'Date' first, 'Stage' second", async function (assert) {
             await makeBurnDownChartWithSearchView({context: {...makeViewParams.context, 'search_default_stage': 1, 'search_default_date': 1}});
             checkGroupByOrder(assert);
         });
