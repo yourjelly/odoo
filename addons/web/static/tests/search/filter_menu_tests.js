@@ -9,6 +9,7 @@ import {
     patchWithCleanup,
 } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
 import {
     getFacetTexts,
     isItemSelected,
