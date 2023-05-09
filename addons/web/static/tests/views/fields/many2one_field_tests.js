@@ -4446,7 +4446,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal");
 
         await selectDropdownItem(target, "trululu", "first record");
-        assert.containsOnce(target, ".o_field_widget .o_external_button.fa-external-link");
+        assert.containsOnce(target, ".o_field_widget .o_external_button.oi-launch");
         await click(target, ".o_field_widget .o_external_button");
 
         assert.verifySteps(["get_formview_id"]);
@@ -4469,7 +4469,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal");
 
         await selectDropdownItem(target, "trululu", "first record");
-        assert.containsOnce(target, ".o_field_widget .o_external_button.fa-external-link");
+        assert.containsOnce(target, ".o_field_widget .o_external_button.oi-launch");
         await click(target, ".o_field_widget .o_external_button");
 
         assert.verifySteps(["get_formview_id"]);
@@ -4498,7 +4498,7 @@ QUnit.module("Fields", (hooks) => {
 
         await editInput(target, ".o_field_widget[name=foo] input", "some value");
         await selectDropdownItem(target, "trululu", "first record");
-        assert.containsOnce(target, ".o_field_widget .o_external_button.fa-external-link");
+        assert.containsOnce(target, ".o_field_widget .o_external_button.oi-launch");
         await click(target, ".o_field_widget .o_external_button");
         assert.containsN(target, ".modal", 2);
 
