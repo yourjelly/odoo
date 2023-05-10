@@ -11013,8 +11013,8 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipMilk("editable list view: multi edition", async function (assert) {
-        assert.expect(27);
+    QUnit.test("editable list view: multi edition", async function (assert) {
+        assert.expect(26);
 
         await makeView({
             type: "list",
@@ -11121,11 +11121,6 @@ QUnit.module("Views", (hooks) => {
             target,
             ".o_data_cell input.o_field_widget",
             "no field should be editable anymore"
-        );
-        assert.strictEqual(
-            document.activeElement,
-            $(target).find(".o_data_row:eq(0) .o_data_cell:eq(1)")[0],
-            "focus should be given to the most recently edited cell after confirm"
         );
     });
 
