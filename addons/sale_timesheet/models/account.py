@@ -107,10 +107,10 @@ class AccountAnalyticLine(models.Model):
                 if map_entry:
                     return map_entry.sale_line_id
             if self.project_id.sale_line_id:
-                return self.project_id.sale_line_id
-        if self.task_id.allow_billable and self.task_id.sale_line_id:
+                return
+        if self.task_id.allow_billable:
             if self.task_id.pricing_type in ('task_rate', 'fixed_rate'):
-                return self.task_id.sale_line_id
+                return
             else:  # then pricing_type = 'employee_rate'
                 map_entry = self.project_id.sale_line_employee_ids.filtered(
                     lambda map_entry:
