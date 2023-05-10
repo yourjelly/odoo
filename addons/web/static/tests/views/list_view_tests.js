@@ -14806,7 +14806,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, firstVisibleDataRow.querySelector("[name=foo]"));
     });
 
-    QUnit.skipMilk("execute group header button with keyboard navigation", async function (assert) {
+    QUnit.test("execute group header button with keyboard navigation", async function (assert) {
         const list = await makeView({
             type: "list",
             resModel: "foo",
@@ -18594,5 +18594,4 @@ QUnit.module("Views", (hooks) => {
             "order:amount ASC, foo ASC", // go back to the list view, it should still be ordered by amount
         ]);
     });
-
 });
