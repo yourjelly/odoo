@@ -1,5 +1,5 @@
 .o_field_statusbar {
-    $-btn-secondary-design: map-get($o-btns-custom, "secondary");
+    $-btn-secondary-design: map-get($o-btns-bs-override, "secondary");
 
     > .o_statusbar_status {
         display: flex;
