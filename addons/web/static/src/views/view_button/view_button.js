@@ -97,8 +97,6 @@ export class ViewButton extends Component {
                     this.env[DROPDOWN].close();
                 }
             },
-            disableAction: this.props.disable,
-            enableAction: this.props.enable,
         });
     }
 
@@ -140,9 +138,7 @@ ViewButton.props = [
     "clickParams?",
     "icon?",
     "defaultRank?",
-    "disable?",
     "disabled?",
-    "enable?",
     "size?",
     "tabindex?",
     "title?",
@@ -155,6 +151,4 @@ ViewButton.defaultProps = {
     tag: "button",
     className: "",
     clickParams: {},
-    disable: () => {},
-    enable: () => {},
 };
