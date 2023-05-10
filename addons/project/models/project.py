@@ -1668,7 +1668,7 @@ class Task(models.Model):
     @api.depends('child_ids.planned_hours')
     def _compute_subtask_planned_hours(self):
         for task in self:
-            task.subtask_planned_hours = sum(child_task.planned_hours + child_task.subtask_planned_hours for child_task in task.child_ids)
+            task.subtask_planned_hours = sum(child_task.planned_hours for child_task in task.child_ids)
 
     @api.depends('child_ids')
     def _compute_child_text(self):
