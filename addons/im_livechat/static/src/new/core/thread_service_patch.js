@@ -38,9 +38,6 @@ patch(ThreadService.prototype, "im_livechat", {
     },
 
     async post(thread, body, params) {
-        if (thread.type !== "livechat") {
-            return this._super(...arguments);
-        }
         const _super = this._super;
         if (this.livechatService.state !== SESSION_STATE.PERSISTED && thread.type === "livechat") {
             const chatWindow = this.store.chatWindows.find(
@@ -101,6 +98,11 @@ patch(ThreadService.prototype, "im_livechat", {
         }
     },
 
+    /**
+     * @param {import('@mail/core/persona_model').Persona} persona
+     * @param {import("@mail/core/thread_model").Thread} thread
+     * @return {string}
+     */
     avatarUrl(author, thread) {
         if (thread.type !== "livechat") {
             return this._super(...arguments);
