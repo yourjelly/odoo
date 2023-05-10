@@ -1992,54 +1992,52 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // TODO
-    QUnit.skipMilk(
-        "deletion of record is disabled when groupby m2m field",
-        async function (assert) {
-            serviceRegistry.add(
-                "user",
-                makeFakeUserService(() => false),
-                { force: true }
-            );
+    QUnit.test("deletion of record is disabled when groupby m2m field", async function (assert) {
+        serviceRegistry.add(
+            "user",
+            makeFakeUserService(() => false),
+            { force: true }
+        );
 
-            serverData.models.foo.fields.m2m.store = true;
+        serverData.models.foo.fields.m2m.store = true;
 
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: `
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
                 <tree>
                     <field name="foo"/>
                     <field name="m2m" widget="many2many_tags"/>
                 </tree>`,
-                actionMenus: {},
-            });
-            await groupByMenu(target, "m2m");
+            actionMenus: {},
+        });
+        await groupByMenu(target, "m2m");
 
-            await click(target.querySelector(".o_group_header:first-child")); // open first group
-            await click(target.querySelector(".o_data_row .o_list_record_selector input"));
-            assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
-            assert.containsNone(
-                target,
-                "div.o_control_panel .o_cp_action_menus .dropdown",
-                "should not have dropdown as delete item is not there"
-            );
+        await click(target.querySelector(".o_group_header:first-child")); // open first group
+        await click(target.querySelector(".o_data_row .o_list_record_selector input"));
+        assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
+        assert.containsNone(
+            target,
+            "div.o_control_panel .o_cp_action_menus .dropdown",
+            "should not have dropdown as delete item is not there"
+        );
 
-            // unselect group by m2m
-            await toggleMenuItem(target, "M2M field");
-            await click(target.querySelector(".o_data_row .o_list_record_selector input"));
-            assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
-            assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus .dropdown");
-            await click(target, "div.o_control_panel .o_cp_action_menus .dropdown button");
-            assert.deepEqual(
-                [...target.querySelectorAll(".o_cp_action_menus .o_menu_item")].map(
-                    (el) => el.innerText
-                ),
-                ["Delete"]
-            );
-        }
-    );
+        // unselect group by m2m (need to unselect record first)
+        await click(target.querySelector(".o_data_row .o_list_record_selector input"));
+        await click(target, ".o_searchview .o_facet_remove");
+
+        await click(target.querySelector(".o_data_row .o_list_record_selector input"));
+        assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
+        assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus .dropdown");
+        await click(target, "div.o_control_panel .o_cp_action_menus .dropdown button");
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_cp_action_menus .o_menu_item")].map(
+                (el) => el.innerText
+            ),
+            ["Delete"]
+        );
+    });
 
     QUnit.test(
         "editing a record should change same record in other groups when grouped by m2m field",
@@ -9039,8 +9037,8 @@ QUnit.module("Views", (hooks) => {
             "web_search_read",
         ]);
     });
-    // TODO check with dbo search not available with selection => unfixable ?
-    QUnit.skipMilk(
+
+    QUnit.test(
         "execute ActionMenus actions with correct params (single page)",
         async function (assert) {
             assert.expect(12);
@@ -9101,7 +9099,9 @@ QUnit.module("Views", (hooks) => {
             await toggleActionMenu(target);
             await toggleMenuItem(target, "Custom Action");
 
-            // add a domain and select first two records
+            // add a domain and select first two records (need to unselect records first)
+            await click(target.querySelector("thead .o_list_record_selector input")); // select all
+            await click(target.querySelector("thead .o_list_record_selector input")); // unselect all
             await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "bar");
             assert.containsN(target, ".o_data_row", 3);
@@ -9122,8 +9122,8 @@ QUnit.module("Views", (hooks) => {
             ]);
         }
     );
-    // TODO check with dbo search not available with selection => unfixable ?
-    QUnit.skipMilk(
+
+    QUnit.test(
         "execute ActionMenus actions with correct params (multi pages)",
         async function (assert) {
             patchWithCleanup(actionService, {
@@ -9183,7 +9183,8 @@ QUnit.module("Views", (hooks) => {
             await toggleActionMenu(target);
             await toggleMenuItem(target, "Custom Action");
 
-            // add a domain
+            // add a domain (need to unselect records first)
+            await click(target.querySelector("thead .o_list_record_selector input"));
             await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "bar");
             assert.containsNone(target, ".o_list_selection_box .o_list_select_domain");
