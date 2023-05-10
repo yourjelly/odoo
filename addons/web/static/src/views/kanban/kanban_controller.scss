@@ -32,7 +32,7 @@
 
     --KanbanRecord__dropdown-gap: #{$border-width};
 
-    --KanbanColumn__highlight-background: #{rgba($o-action, 0.05)};
+    --KanbanColumn__highlight-background: #{tint-color($o-action, 90%)};
     --KanbanColumn__highlight-border: #{$o-action};
 
     --o-view-nocontent-zindex: 1;
