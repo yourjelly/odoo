@@ -16,12 +16,12 @@
 }
 // Compensate margins
 @mixin o-form-sheet-negative-margin {
-    margin-left: -$o-horizontal-padding;
-    margin-right: -$o-horizontal-padding;
+    margin-left: calc(var(--formView-sheet-padding-x) * -1);
+    margin-right: calc(var(--formView-sheet-padding-x) * -1);
 }
 @mixin o-form-nosheet-negative-margin {
-    margin-left: -$o-horizontal-padding;
-    margin-right: -$o-horizontal-padding;
+    margin-left: calc(var(--formView-sheet-padding-x) * -1);
+    margin-right: calc(var(--formView-sheet-padding-x) * -1);
 }
 
 // XXS form view specific rules
@@ -1094,6 +1094,10 @@
 
 .o_form_view.o_xxl_form_view {
     flex-flow: row nowrap !important;
+
+    .o_form_view_container {
+        width: 1px; // List view needs a width value to recompute the size correctly
+    }
 
     .o_form_sheet_bg {
         overflow: auto;
