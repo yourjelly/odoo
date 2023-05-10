@@ -703,6 +703,11 @@ class Project(models.Model):
         return {}
 
     def _get_profitability_sequence_per_invoice_type(self):
+        # for i,j in self.read():
+        #     print("\n\n-->",i, j)
+        # else:
+        #     pass
+        print("\n\n",self.read())
         return {}
 
     def _get_already_included_profitability_invoice_line_ids(self):

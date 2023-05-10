@@ -110,6 +110,7 @@ class Project(models.Model):
     def _get_profitability_items(self, with_action=True):
         profitability_data = super()._get_profitability_items(with_action)
         expenses_data = self._get_expenses_profitability_items(with_action)
+        print("\n\n\n\n---------expenses_data-------------",expenses_data)
         if expenses_data:
             if 'revenues' in expenses_data:
                 revenues = profitability_data['revenues']
@@ -118,4 +119,5 @@ class Project(models.Model):
             costs = profitability_data['costs']
             costs['data'].append(expenses_data['costs'])
             costs['total'] = {k: costs['total'][k] + expenses_data['costs'][k] for k in ['billed', 'to_bill']}
+        print("\n\n\n\n---------profitability_data_expense-------------",profitability_data)
         return profitability_data

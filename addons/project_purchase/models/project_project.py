@@ -175,4 +175,5 @@ class Project(models.Model):
                 ('id', 'not in', purchase_order_line_invoice_line_ids),
             ]
             self._get_costs_items_from_purchase(domain, profitability_items, with_action=with_action)
+        print("\n\n\n\n-------------profitability_items_purchase--------------------",profitability_items)
         return profitability_items
