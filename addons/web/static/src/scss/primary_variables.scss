@@ -128,6 +128,10 @@ $o-bg-colors-custom: (
     "favourite": $o-main-favorite-color,
 ) !default;
 
+$o-btn-custom: (
+    "favourite": $o-main-favorite-color,
+) !default;
+
 // Components (BS)
 
 $o-border-color: $o-gray-300 !default;
@@ -222,8 +226,8 @@ $o-touch-btn-padding: 7px 14px !default;
 // here, the relative values will take priority over default BS ones.
 // Notice: each map's entry is passed directly to the Bootstrap mixin, meaning
 // that all states must be defined, there can't be omissions.
-$o-btns-custom: () !default;
-$o-btns-custom: map-merge((
+$o-btns-bs-override: () !default;
+$o-btns-bs-override: map-merge((
     "primary": (
         background: $o-brand-primary,
         border: $o-brand-primary,
@@ -263,6 +267,6 @@ $o-btns-custom: map-merge((
         active-border:  $o-component-active-border,
         active-color: $o-component-active-color,
     ),
-), $o-btns-custom);
+), $o-btns-bs-override);
 
-$o-btns-outline-custom: () !default;
+$o-btns-bs-outline-override: () !default;
