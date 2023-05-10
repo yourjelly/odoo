@@ -3196,16 +3196,10 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["read1", "willStart"]);
 
         await click(target.querySelector(".o_form_statusbar button.p"));
-        assert.verifySteps(["willUpdateProps", "read2", "willUpdateProps", "willUpdateProps"]);
+        assert.verifySteps(["willUpdateProps", "read2", "willUpdateProps"]);
 
         await click(target.querySelector(".o_form_statusbar button.p"));
-        assert.verifySteps([
-            "willUpdateProps",
-            "willUpdateProps",
-            "read3",
-            "willUpdateProps",
-            "willUpdateProps",
-        ]);
+        assert.verifySteps(["willUpdateProps", "read3", "willUpdateProps"]);
     });
 
     QUnit.test("buttons in form view, new record", async function (assert) {
@@ -9266,27 +9260,24 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // TODO: some weird rerender timings happening here
-    QUnit.skipMilk(
-        "buttons are disabled until button box action is resolved",
-        async function (assert) {
-            const def = makeDeferred();
-            const actionService = {
-                start() {
-                    return {
-                        async doActionButton(args) {
-                            await def;
-                        },
-                    };
-                },
-            };
-            registry.category("services").add("action", actionService, { force: true });
+    QUnit.test("buttons are disabled until button box action is resolved", async function (assert) {
+        const def = makeDeferred();
+        const actionService = {
+            start() {
+                return {
+                    async doActionButton(args) {
+                        await def;
+                    },
+                };
+            },
+        };
+        registry.category("services").add("action", actionService, { force: true });
 
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
                 <form>
                     <header>
                         <button name="post" class="p" string="Confirm" type="object"/>
@@ -9303,69 +9294,68 @@ QUnit.module("Views", (hooks) => {
                         </group>
                     </sheet>
                 </form>`,
-                resId: 1,
-            });
+            resId: 1,
+        });
 
-            assert.containsN(
-                target,
-                ".o_control_panel_breadcrumbs button:not(.fa):not(:disabled)",
-                5,
-                "control panel buttons should be enabled"
-            );
-            assert.containsN(
-                target,
-                ".o_form_statusbar button:not(:disabled)",
-                2,
-                "status bar buttons should be enabled"
-            );
-            assert.containsOnce(
-                target,
-                ".o-form-buttonbox button:not(:disabled)",
-                "stat buttons should be enabled"
-            );
+        assert.containsN(
+            target,
+            ".o_control_panel_breadcrumbs button:not(.fa):not(:disabled)",
+            5,
+            "control panel buttons should be enabled"
+        );
+        assert.containsN(
+            target,
+            ".o_form_statusbar button:not(:disabled)",
+            2,
+            "status bar buttons should be enabled"
+        );
+        assert.containsOnce(
+            target,
+            ".o-form-buttonbox button:not(:disabled)",
+            "stat buttons should be enabled"
+        );
 
-            await click(target.querySelector(".o-form-buttonbox button"));
+        await click(target.querySelector(".o-form-buttonbox button"));
 
-            // The unresolved promise lets us check the state of the buttons
-            assert.containsN(
-                target,
-                ".o_control_panel_breadcrumbs button:not(.fa):disabled",
-                4,
-                "control panel buttons should be disabled"
-            );
-            assert.containsN(
-                target,
-                ".o_form_statusbar button:disabled",
-                2,
-                "status bar buttons should be disabled"
-            );
-            assert.containsOnce(
-                target,
-                ".o-form-buttonbox button:disabled",
-                "stat buttons should be disabled"
-            );
+        // The unresolved promise lets us check the state of the buttons
+        assert.containsN(
+            target,
+            ".o_control_panel_breadcrumbs button:not(.fa):disabled",
+            5,
+            "control panel buttons should be disabled"
+        );
+        assert.containsN(
+            target,
+            ".o_form_statusbar button:disabled",
+            2,
+            "status bar buttons should be disabled"
+        );
+        assert.containsOnce(
+            target,
+            ".o-form-buttonbox button:disabled",
+            "stat buttons should be disabled"
+        );
+        def.resolve();
 
-            def.resolve();
-            await nextTick();
-            assert.containsN(
-                target,
-                ".o_control_panel_breadcrumbs button:not(.fa):not(:disabled)",
-                5,
-                "control panel buttons should be enabled"
-            );
-            assert.containsN(
-                target,
-                ".o_form_statusbar button:not(:disabled)",
-                2,
-                "status bar buttons should be enabled"
-            );
-            assert.containsOnce(
-                target,
-                ".o-form-buttonbox button:not(:disabled)",
-                "stat buttons should be enabled"
-            );
-        }
-    );
+        await nextTick();
+        assert.containsN(
+            target,
+            ".o_control_panel_breadcrumbs button:not(.fa):not(:disabled)",
+            5,
+            "control panel buttons should be enabled"
+        );
+        assert.containsN(
+            target,
+            ".o_form_statusbar button:not(:disabled)",
+            2,
+            "status bar buttons should be enabled"
+        );
+        assert.containsOnce(
+            target,
+            ".o-form-buttonbox button:not(:disabled)",
+            "stat buttons should be enabled"
+        );
+    });
 
     QUnit.test(
         'buttons with "confirm" attribute save before calling the method',
