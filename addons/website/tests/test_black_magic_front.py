@@ -18,8 +18,6 @@ class BlackMagicCrawler(odoo.tests.HttpCase):
         else:
             seen[url_slug] = True
 
-        print(url)
-
         r = self.url_open(url, allow_redirects=False)
         if r.status_code in (301, 302, 303):
             # check local redirect to avoid fetch externals pages

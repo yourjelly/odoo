@@ -97,15 +97,11 @@ class BlackMagicCrawler(odoo.tests.HttpCase):
 
             test()
         """
-        urls = self.get_urls()
-        ctr = 0
-        
-        start = time.now()
+        urls = self.get_urls()        
+        start = time.time()
         for url in urls:
             with self.subTest(url):
-                print('Left', ctr/len(urls), ':', url)
-                ctr+=1
                 self.browser_js(url, code, "odoo.isReady === true", login="admin", watch=False)
                 self.terminate_browser()
 
-        _logger.info(f'Time for test : {time.now() - start}')
+        _logger.info(f'Time for test : {time.time() - start}')
