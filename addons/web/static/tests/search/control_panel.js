@@ -26,7 +26,7 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.module("ControlPanel");
 
-    QUnit.skipMilk("simple rendering", async (assert) => {
+    QUnit.test("simple rendering", async (assert) => {
         await makeWithSearch({
             serverData,
             resModel: "foo",
@@ -39,16 +39,15 @@ QUnit.module("Search", (hooks) => {
             searchMenuTypes: [],
         });
 
-        assert.containsOnce(target, ".o_cp_top");
-        assert.containsOnce(target, ".o_cp_top_left");
-        assert.strictEqual(target.querySelector(".o_cp_top_right").innerHTML, "");
-        assert.containsOnce(target, ".o_cp_bottom");
-        assert.containsOnce(target, ".o_cp_bottom_left");
-        assert.containsOnce(target, ".o_cp_bottom_right");
+        assert.containsOnce(target, ".o_control_panel_breadcrumbs");
+        assert.containsOnce(target, ".o_control_panel_actions");
+        assert.strictEqual(target.querySelector(".o_control_panel_actions").innerHTML, "");
+        assert.containsOnce(target, ".o_control_panel_navigation");
+        assert.strictEqual(target.querySelector(".o_control_panel_navigation").innerHTML, "");
 
         assert.containsNone(target, ".o_cp_switch_buttons");
 
-        assert.containsOnce(target, ".breadcrumb");
+        assert.containsOnce(target, ".o_breadcrumb");
     });
 
     QUnit.test("breadcrumbs", async (assert) => {
@@ -80,7 +79,7 @@ QUnit.module("Search", (hooks) => {
         assert.verifySteps(["controller_7"]);
     });
 
-    QUnit.skipMilk("view switcher", async (assert) => {
+    QUnit.test("view switcher", async (assert) => {
         const controlPanel = await makeWithSearch({
             serverData,
             resModel: "foo",
@@ -94,7 +93,10 @@ QUnit.module("Search", (hooks) => {
             searchMenuTypes: [],
         });
 
-        assert.containsOnce(target, ".o_cp_switch_buttons");
+        assert.containsOnce(
+            target,
+            ".o_control_panel_navigation .d-xl-inline-flex.o_cp_switch_buttons"
+        );
         assert.containsN(target, ".o_switch_view", 2);
         const views = target.querySelectorAll(".o_switch_view");
 

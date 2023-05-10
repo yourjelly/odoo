@@ -5022,8 +5022,8 @@ QUnit.module("Views", (hooks) => {
         assert.ok(postResizeTextWidth < initialTextWidth);
         assert.strictEqual(selectorWidth, postResizeSelectorWidth);
     });
-    // TODO only work in debug ?
-    QUnit.skipMilk(
+
+    QUnit.test(
         "columns with an absolute width are never narrower than that width",
         async function (assert) {
             serverData.models.foo.records[0].text =
@@ -5044,8 +5044,11 @@ QUnit.module("Views", (hooks) => {
                         <field name="text"/>
                     </tree>`,
             });
-
-            assert.strictEqual($(target).find('th[data-name="int_field"]')[0].offsetWidth, 200);
+            const pixelsWidth = getComputedStyle(
+                target.querySelector('th[data-name="int_field"]')
+            ).width;
+            const width = Math.floor(parseFloat(pixelsWidth));
+            assert.strictEqual(width, 200);
         }
     );
 
@@ -17280,8 +17283,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    // TODO table-active is still existing ?
-    QUnit.skipMilk("sort on a non sortable field with allow_order option", async function (assert) {
+    QUnit.test("sort on a non sortable field with allow_order option", async function (assert) {
         serverData.models.foo.records = [{ bar: true }, { bar: false }, { bar: true }];
 
         await makeView({
@@ -17516,8 +17518,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    // TODO table-active is still existing ?
-    QUnit.skipMilk("no highlight of a (sortable) column without label", async function (assert) {
+    QUnit.test("no highlight of a (sortable) column without label", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -17533,8 +17534,7 @@ QUnit.module("Views", (hooks) => {
         assert.doesNotHaveClass(target.querySelector("thead th[data-name=foo]"), "table-active");
     });
 
-    // TODO table-active is still existing ?
-    QUnit.skipMilk("highlight of a (sortable) column with label", async function (assert) {
+    QUnit.test("highlight of a (sortable) column with label", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
