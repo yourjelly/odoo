@@ -3,7 +3,7 @@
 <templates xml:space="preserve">
 
     <t t-name="purchase.PurchaseProductField" t-inherit="web.Many2OneField" t-inherit-mode="primary" owl="1">
-        <xpath expr="//t[@t-if='hasExternalButton']" position="before">
+        <xpath expr="//div[hasclass('o_field_many2one_selection')]/t[@t-if='canOpen']" position="before">
             <t t-if="isConfigurableTemplate">
                 <button
                     type="button"

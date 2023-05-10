@@ -54,20 +54,19 @@ export class SaleOrderLineProductField extends Many2OneField {
         }
     }
 
-    get isProductClickable() {
-        // product form should be accessible if the widget field is readonly
-        // or if the line cannot be edited (e.g. locked SO)
-        return (
-            this.props.readonlyField ||
-            (this.props.record.model.root.activeFields.order_line &&
-                this.props.record.model.root._isReadonly("order_line"))
-        );
-    }
-    get hasExternalButton() {
-        // Keep external button, even if field is specified as 'no_open' so that the user is not
-        // redirected to the product when clicking on the field content
-        const res = super.hasExternalButton;
-        return res || (!!this.props.record.data[this.props.name] && !this.state.isFloating);
+    get canOpen() {
+        let canOpen = super.canOpen;
+        if (this.props.readonly) {
+            // product form should be accessible if the widget field is readonly
+            // or if the line cannot be edited (e.g. locked SO)
+            canOpen |= this.props.record.model.root.activeFields.order_line &&
+                this.props.record.model.root._isReadonly("order_line");
+        } else {
+            // Keep external button, even if field is specified as 'no_open' so that the user is not
+            // redirected to the product when clicking on the field content
+            canOpen |= (!!this.props.record.data[this.props.name] && !this.state.isFloating);
+        }
+        return canOpen;
     }
     get hasConfigurationButton() {
         return this.isConfigurableLine || this.isConfigurableTemplate;

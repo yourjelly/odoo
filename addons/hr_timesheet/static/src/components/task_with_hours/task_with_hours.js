@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Many2OneField, many2OneField } from "@web/views/fields/many2one/many2one_field";
+import { Many2OneField, ListMany2OneField, many2OneField, listMany2OneField } from "@web/views/fields/many2one/many2one_field";
 
-
-class TaskWithHours extends Many2OneField {
-
+const TaskWithHoursMixin = (component) => class extends component {
     get canCreate() {
         return Boolean(this.context.default_project_id);
     }
@@ -45,10 +43,20 @@ class TaskWithHours extends Many2OneField {
         activeActions.create = activeActions.create && this.canCreate;
         activeActions.createEdit = activeActions.create;
     }
-
 }
 
-registry.category("fields").add("task_with_hours", {
+export class TaskWithHours extends TaskWithHoursMixin(Many2OneField) {}
+export class ListTaskWithHours extends TaskWithHoursMixin(ListMany2OneField) {}
+
+export const taskWithHours = {
     ...many2OneField,
     component: TaskWithHours,
-});
+};
+
+export const listTaskWithHours = {
+    ...listMany2OneField,
+    component: ListTaskWithHours,
+}
+
+registry.category("fields").add("task_with_hours", taskWithHours);
+registry.category("fields").add("list.task_with_hours", listTaskWithHours);
