@@ -157,8 +157,12 @@ export class Many2OneField extends Component {
     get string() {
         return this.props.string || this.props.record.fields[this.props.name].string || "";
     }
-    get hasExternalButton() {
-        return this.props.canOpen && !!this.value && !this.state.isFloating;
+    get canOpen() {
+        let canOpen = this.props.canOpen;
+        if (!this.props.readonly) {
+            canOpen &= !!this.value && !this.state.isFloating;
+        }
+        return canOpen;
     }
     get context() {
         return this.props.context;
@@ -246,7 +250,7 @@ export class Many2OneField extends Component {
     }
 
     onClick(ev) {
-        if (this.props.canOpen && this.props.readonly) {
+        if (this.props.readonly && this.canOpen) {
             ev.stopPropagation();
             this.openAction();
         }
@@ -304,7 +308,16 @@ export class Many2OneField extends Component {
     get hasBarcodeButton() {
         const canScanBarcode = this.props.canScanBarcode;
         const supported = BarcodeScanner.isBarcodeScannerSupported();
-        return canScanBarcode && isMobileOS() && supported && !this.hasExternalButton;
+        return canScanBarcode && isMobileOS() && supported && !this.canOpen;
+    }
+}
+
+export class ListMany2OneField extends Many2OneField {
+    get canOpen() {
+        if (this.props.readonly && !this.props.record.isInEdition) {
+            return false;
+        }
+        return super.canOpen;
     }
 }
 
@@ -354,7 +367,12 @@ export const many2OneField = {
     },
 };
 
+export const listMany2OneField = {
+    ...many2OneField,
+    component: ListMany2OneField,
+};
+
 registry.category("fields").add("many2one", many2OneField);
-// the two following lines are there to prevent the fallback on legacy widgets
-registry.category("fields").add("list.many2one", many2OneField);
+registry.category("fields").add("list.many2one", listMany2OneField);
+// the following line is there to prevent the fallback on legacy widget
 registry.category("fields").add("kanban.many2one", many2OneField);
