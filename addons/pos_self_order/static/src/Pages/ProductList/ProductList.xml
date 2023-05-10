@@ -6,8 +6,6 @@
         <div t-ref="productPage" class="position-relative ">
             <header t-ref="header" class="bg-white shadow-sm">
                 <NavBar goBack="'/'"/>
-                <t t-esc="`${this.currentTag.name}sal`"/>
-                <t t-esc="`${this.scroll.down}sal`"/>
                 <div class="o_self_order_searchbar_filter d-flex justify-content-start align-items-center p-0 m-0 border-bottom">
                     <t t-if="privateState.searchIsFocused" t-call="pos_self_order.SearchBox"/>
                     <t t-if="!privateState.searchIsFocused" t-call="pos_self_order.TagPicker" />
@@ -84,7 +82,7 @@
                 <li class="nav-item mx-1 py-2" 
                     t-on-click="() => this.selectTag(tag)">
                     <span 
-                        t-attf-class="user-select-none nav-link py-2 rounded {{privateState.selectedTag === tag ? 'active' : 'text-dark'}}" 
+                        t-attf-class="user-select-none nav-link py-2 rounded {{privateState.selectedTag.name === tag ? 'active' : 'text-dark'}}" 
                         t-ref="tag_{{tag}}"
                         t-esc="tag"/>
                 </li>

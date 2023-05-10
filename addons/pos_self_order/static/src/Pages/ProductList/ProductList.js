@@ -49,19 +49,7 @@ export class ProductList extends Component {
         this.main = useRef("main");
         this.orderButton = useRef("orderButton");
 
-
-        // this is used to hide the navbar when the user is scrolling down
-        this.scroll = useScrollDirection(this.productsList);
-        // effect(
-        //     (scroll) => {
-        //         if (this.productPage.el) {
-        //             this.toggleNavbar(scroll.down);
-        //         }
-        //     },
-        //     [this.scroll]
-        // );
         onMounted(() => {
-            // TODO: replace this logic with dvh once it is supported
             this.main.el.style.height = `${window.innerHeight}px`;
 
             this.headerHeight = this.header.el.offsetHeight;
@@ -82,53 +70,15 @@ export class ProductList extends Component {
                 this.scrollTo(this.currentProductCard, { behavior: "instant" });
             }
         });
-        this.currentTag = useTagDetection(this.productsList, this.productGroup, this.privateState);
         // this IntersectionObserver is used to highlight the tag (in the header)
         // of the category that is currently visible in the viewport
-        useEffect(
-            (searchIsFocused) => {
-                if (searchIsFocused) {
-                    return;
-                }
-                console.log(
-                    this.productsList.el.offsetHeight -
-                        (parseInt(this.productsList.el?.style?.paddingBottom) || 0) -
-                );
-                const OBSERVING_WINDOW_HEIGHT = 5;
-                const observer = new IntersectionObserver(
-                    (entries) => {
-                        const entry = entries.filter((entry) => entry.isIntersecting)?.[0];
-                        if (entry) {
-                            this.privateState.selectedTag =
-                                entry.target.querySelector("h3").textContent;
-                            // we scroll the tag list horizontally so that the selected tag is in the middle of the screen
-                            this.tagList?.el?.scroll({
-                                top: 0,
-                                left:
-                                    this.tagButtons[this.privateState.selectedTag].el.offsetLeft -
-                                    window.innerWidth / 2,
-                                behavior: "smooth",
-                            });
-                        }
-                    },
-                    {
-                        root: this.productsList.el,
-                        rootMargin: `0px 0px -${
-                            this.productsList.el.offsetHeight -
-                            (parseInt(this.productsList.el?.style?.paddingBottom) || 0) -
-                            OBSERVING_WINDOW_HEIGHT
-                        }px 0px`,
-                    }
-                );
-                Object.keys(this.productGroup).forEach((tag) => {
-                    observer.observe(this.productGroup[tag]?.el);
-                });
-                return () => {
-                    observer.disconnect();
-                };
-            },
-            () => [this.privateState.searchIsFocused]
+        this.privateState.selectedTag = useTagDetection(
+            this.productsList,
+            this.productGroup,
+            this.privateState
         );
+        // this is used to hide the navbar when the user is scrolling down
+        this.scroll = useScrollDirection(this.productsList);
     }
     /**
      * This function hides or shows the navbar by sliding the whole productPage up or down
@@ -206,8 +156,8 @@ export class ProductList extends Component {
      * @param {string} tag_name
      */
     selectTag(tag_name) {
-        if (this.privateState.selectedTag === tag_name) {
-            this.privateState.selectedTag = "";
+        if (this.privateState.selectedTag.name === tag_name) {
+            this.privateState.selectedTag.name = "";
             this.scrollToTop();
             return;
         }
