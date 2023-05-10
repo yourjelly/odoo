@@ -246,10 +246,10 @@ class Location(models.Model):
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
-        default = dict(default or {})
-        if 'name' not in default:
-            default['name'] = _("%s (copy)") % self.name
-        return super().copy(default=default)
+        loc_copy = super().copy(default=default)
+        if 'name' not in (default or {}):
+            loc_copy.name = _("%s (copy)") % self.name
+        return loc_copy
 
     def _get_putaway_strategy(self, product, quantity=0, package=None, packaging=None, additional_qty=None):
         """Returns the location where the product has to be put, if any compliant

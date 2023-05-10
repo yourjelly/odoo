@@ -201,11 +201,10 @@ class Groups(models.Model):
         return super(Groups, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
 
     def copy(self, default=None):
-        self.ensure_one()
-        chosen_name = default.get('name') if default else ''
-        default_name = chosen_name or _('%s (copy)', self.name)
-        default = dict(default or {}, name=default_name)
-        return super(Groups, self).copy(default)
+        self_copy = super(Groups, self).copy(default)
+        if 'name' not in (default or {}):
+            self_copy.name = _('%s (copy)', self.name)
+        return self_copy
 
     def write(self, vals):
         if 'name' in vals:

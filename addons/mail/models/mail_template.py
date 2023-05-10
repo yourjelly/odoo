@@ -155,9 +155,10 @@ class MailTemplate(models.Model):
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
-        default = dict(default or {},
-                       name=_("%s (copy)", self.name))
-        return super(MailTemplate, self).copy(default=default)
+        template_copy = super(MailTemplate, self).copy(default=default)
+        if 'name' not in (default or {}):
+            template_copy.name = _("%s (copy)", self.name)
+        return template_copy
 
     def unlink_action(self):
         for template in self:

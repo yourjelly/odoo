@@ -62,9 +62,10 @@ class ChatbotScript(models.Model):
         the original and the clone, using 'zip()' to match the records between the two. """
 
         default = default or {}
-        default['title'] = self.title + _(' (copy)')
 
         clone_chatbot_script = super().copy(default=default)
+        if 'title' not in default:
+            clone_chatbot_script.title = self.title + _(' (copy)')
         if 'question_ids' in default:
             return clone_chatbot_script
 

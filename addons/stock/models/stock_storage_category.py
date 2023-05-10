@@ -40,9 +40,10 @@ class StorageCategory(models.Model):
             storage_category.capacity_ids = storage_category.product_capacity_ids | storage_category.package_capacity_ids
 
     def copy(self, default=None):
-        default = dict(default or {})
-        default.update(name=_("%s (copy)") % self.name)
-        return super().copy(default)
+        storage_category_copy = super().copy(default)
+        if 'name' not in (default or {}):
+            storage_category_copy.name = _("%s (copy)") % self.name
+        return storage_category_copy
 
 
 class StorageCategoryProductCapacity(models.Model):

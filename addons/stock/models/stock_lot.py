@@ -149,11 +149,10 @@ class StockLot(models.Model):
         return super().write(vals)
 
     def copy(self, default=None):
-        if default is None:
-            default = {}
-        if 'name' not in default:
-            default['name'] = _("(copy of) %s", self.name)
-        return super().copy(default)
+        lot_copy = super().copy(default)
+        if 'name' not in (default or {}):
+            lot_copy = _("(copy of) %s", self.name)
+        return lot_copy
 
     @api.depends('quant_ids', 'quant_ids.quantity')
     def _product_qty(self):

@@ -44,6 +44,7 @@ class PackageType(models.Model):
             package_type.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
 
     def copy(self, default=None):
-        default = dict(default or {})
-        default.update(name=_("%s (copy)") % self.name)
-        return super().copy(default)
+        package_type_copy = super().copy(default)
+        if 'name' not in (default or {}):
+            package_type_copy.name = _("%s (copy)") % self.name
+        return package_type_copy

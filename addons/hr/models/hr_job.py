@@ -50,11 +50,10 @@ class Job(models.Model):
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
-        self.ensure_one()
-        default = dict(default or {})
-        if 'name' not in default:
-            default['name'] = _("%s (copy)") % (self.name)
-        return super(Job, self).copy(default=default)
+        job_copy = super(Job, self).copy(default=default)
+        if 'name' not in (default or {}):
+            job_copy.name = _("%s (copy)") % (self.name)
+        return job_copy
 
     def write(self, vals):
         if len(self) == 1:

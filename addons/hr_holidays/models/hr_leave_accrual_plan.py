@@ -65,6 +65,7 @@ class AccrualPlan(models.Model):
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
-        default = dict(default or {},
-                       name=_("%s (copy)", self.name))
-        return super().copy(default=default)
+        plan_copy = super().copy(default=default)
+        if 'name' not in (default or {}):
+            plan_copy.name = _("%s (copy)", self.name)
+        return plan_copy

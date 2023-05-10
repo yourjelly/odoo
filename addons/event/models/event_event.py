@@ -613,9 +613,10 @@ class EventEvent(models.Model):
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
-        self.ensure_one()
-        default = dict(default or {}, name=_("%s (copy)") % (self.name))
-        return super(EventEvent, self).copy(default)
+        event_copy = super(EventEvent, self).copy(default)
+        if 'name' not in (default or {}):
+            event_copy.name = _("%s (copy)") % (self.name)
+        return event_copy
 
     @api.model
     def _get_mail_message_access(self, res_ids, operation, model_name=None):
