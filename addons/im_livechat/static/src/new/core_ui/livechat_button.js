@@ -30,4 +30,8 @@ export class LivechatButton extends Component {
             this.store.chatWindows.length === 0
         );
     }
+
+    get text() {
+        return this.livechatService.options.button_text;
+    }
 }
