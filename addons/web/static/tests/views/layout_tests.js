@@ -290,15 +290,15 @@ QUnit.module("Views", (hooks) => {
         assert.ok(target.querySelector(".o_toy_content").closest(".o_content"));
     });
 
-    QUnit.skipMilk("Simple rendering: with dynamically displayed search", async (assert) => {
-        let displayControlPanelTopRight = true;
+    QUnit.test("Simple rendering: with dynamically displayed search", async (assert) => {
+        let displayLayoutActions = true;
         class ToyComponent extends Component {
             get display() {
                 return {
                     ...this.props.display,
                     controlPanel: {
                         ...this.props.display.controlPanel,
-                        "top-right": displayControlPanelTopRight,
+                        layoutActions: displayLayoutActions,
                     },
                 };
             }
@@ -324,7 +324,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_cp_searchview");
         assert.containsOnce(target, ".o_content > .toy_content");
 
-        displayControlPanelTopRight = false;
+        displayLayoutActions = false;
         comp.render();
         await nextTick();
 
