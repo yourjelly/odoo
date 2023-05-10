@@ -367,7 +367,15 @@ export const editorCommands = {
                 }
                 editor.historyUnpauseSteps();
                 const inLI = block.closest('li');
-                if (inLI && tagName === "P") {
+                if (inLI) {
+                    if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName.toLowerCase())) {
+                        ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach((el) => {
+                            inLI.classList.contains(el) && inLI.classList.replace(el, tagName.toLowerCase());
+                        });
+                        inLI.classList.add(tagName.toLowerCase())
+                    }
+                }
+                else if (inLI && tagName === "P") {
                     inLI.oToggleList(0);
                 } else {
                     setTagName(block, tagName);
@@ -574,7 +582,14 @@ export const editorCommands = {
         const fonts = selectedNodes.flatMap(node => {
             let font = closestElement(node, 'font') || closestElement(node, 'span');
             const children = font && descendants(font);
-            if (font && (font.nodeName === 'FONT' || (font.nodeName === 'SPAN' && font.style[mode]))) {
+            const closestLi = closestElement(node, 'li');
+            const liDescendants = closestLi && descendants(closestLi).filter(n=>n.nodeType === Node.TEXT_NODE);
+            let isLiCompletelySelected = false;
+            if (liDescendants && selectedNodes.includes(liDescendants[0]) && selectedNodes.includes(liDescendants[liDescendants.length-1])) {
+                isLiCompletelySelected = true;
+            }
+            //this code split the partially selected font but i dont want it if li is completely selected
+            if (font && (font.nodeName === 'FONT' || (font.nodeName === 'SPAN' && font.style[mode])) && !isLiCompletelySelected) {
                 // Partially selected <font>: split it.
                 const selectedChildren = children.filter(child => selectedNodes.includes(child));
                 if (selectedChildren.length) {
@@ -605,11 +620,15 @@ export const editorCommands = {
                     // colored in the other mode: append to that.
                     font = previous;
                 } else {
-                    // No <font> found: insert a new one.
-                    font = document.createElement('font');
-                    node.after(font);
+                    if (isLiCompletelySelected) {
+                        font = closestLi;
+                    } else {
+                        // No <font> found or Li is not fully selected: insert a new <font>.
+                        font = document.createElement('font');
+                        node.after(font);
+                    }
                 }
-                if (node.textContent) {
+                if (node.textContent && font.nodeName !== 'LI') {
                     font.appendChild(node);
                 } else {
                     fillEmpty(font);
@@ -621,6 +640,16 @@ export const editorCommands = {
         });
         // Color the selected <font>s and remove uncolored fonts.
         const fontsSet = new Set(fonts);
+        fontsSet.forEach((node) => {
+            if (node.nodeName === 'LI') {
+                node.querySelectorAll('font').forEach((font) => {
+                    fontsSet.has(font) && fontsSet.delete(font);
+                    const fontsText = document.createTextNode(font.textContent);
+                    font.after(fontsText);
+                    font.remove();
+                });
+            }
+        });
         for (const font of fontsSet) {
             colorElement(font, color, mode);
             if (!hasColor(font, mode) && !font.hasAttribute('style')) {

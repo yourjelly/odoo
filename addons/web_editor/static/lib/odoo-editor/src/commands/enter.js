@@ -43,6 +43,9 @@ HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
 
     // First split the node in two and move half the children in the clone.
     const splitEl = this.cloneNode(false);
+    // if(splitEl.nodeName === 'LI'){
+        // splitEl.removeAttribute('class')
+    // }
     while (offset < this.childNodes.length) {
         splitEl.appendChild(this.childNodes[offset]);
     }

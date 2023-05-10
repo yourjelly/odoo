@@ -903,7 +903,6 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
 
     const direction = getCursorDirection(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset);
     getDeepRange(editor.editable, { splitText: true, select: true, correctTripleClick: true });
-
     if (typeof applyStyle === 'undefined') {
         applyStyle = !isSelectionFormat(editor.editable, formatName);
     }
@@ -950,22 +949,35 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
         }
 
         const firstBlockOrClassHasFormat = formatSpec.isFormatted(parentNode, formatProps);
-
+        const closestLi = closestElement(selectedTextNode, 'li');
+        const liDescendants = closestLi && descendants(closestLi).filter(n => n.nodeType === Node.TEXT_NODE);
+        const isLiCompletelySelected = liDescendants && selectedTextNodes.includes(liDescendants[0]) && selectedTextNodes.includes(liDescendants[liDescendants.length-1]);
         if (firstBlockOrClassHasFormat && !applyStyle) {
-            formatSpec.addNeutralStyle && formatSpec.addNeutralStyle(getOrCreateSpan(selectedTextNode, inlineAncestors));
+            if(isLiCompletelySelected){
+                formatSpec.addNeutralStyle && formatSpec.addNeutralStyle(closestLi)
+            }else{
+                formatSpec.addNeutralStyle && formatSpec.addNeutralStyle(getOrCreateSpan(selectedTextNode, inlineAncestors));
+            }
         } else if (!firstBlockOrClassHasFormat && applyStyle) {
             const tag = formatSpec.tagName && document.createElement(formatSpec.tagName);
             if (tag) {
-                selectedTextNode.after(tag);
-                tag.append(selectedTextNode);
-
-                if (!formatSpec.isFormatted(tag, formatProps)) {
-                    tag.after(selectedTextNode);
-                    tag.remove();
-                    formatSpec.addStyle(getOrCreateSpan(selectedTextNode, inlineAncestors), formatProps);
+                if (isLiCompletelySelected && ['STRONG', 'EM'].includes(tag.nodeName)) {
+                    formatSpec.addStyle(closestLi, formatProps);
+                }else{
+                    selectedTextNode.after(tag);
+                    tag.append(selectedTextNode);
+                    if (!formatSpec.isFormatted(tag, formatProps)) {
+                        tag.after(selectedTextNode);
+                        tag.remove();
+                        formatSpec.addStyle(getOrCreateSpan(selectedTextNode, inlineAncestors), formatProps);
+                    }
                 }
             } else if (formatName !== 'fontSize' || formatProps.size !== undefined) {
-                formatSpec.addStyle(getOrCreateSpan(selectedTextNode, inlineAncestors), formatProps);
+                if (isLiCompletelySelected) {
+                    formatSpec.addStyle(closestLi, formatProps);
+                } else {
+                    formatSpec.addStyle(getOrCreateSpan(selectedTextNode, inlineAncestors), formatProps);
+                }
             }
         }
     }
