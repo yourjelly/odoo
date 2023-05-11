@@ -220,6 +220,7 @@ class TestBoM(TestMrpCommon):
         self.assertEqual(set((test_bom_2_l1 | test_bom_2_l4 | self.bom_2.bom_line_ids).ids), set([l[0].id for l in lines]))
 
         #check recursion
+        print("======> Recursion")
         test_bom_3 = self.env['mrp.bom'].create({
             'product_id': self.product_9.id,
             'product_tmpl_id': self.product_9.product_tmpl_id.id,
@@ -1094,3 +1095,28 @@ class TestBoM(TestMrpCommon):
         self.assertEqual(p2.qty_available, 10.0)
         self.assertEqual(p3.qty_available, 10.0)
 
+    def test_bom_kit_cycle(self):
+        import time
+        tot = 0
+        p1, p2, p3 = self.make_prods(3)
+        b1 = self.make_bom(p1, p2)
+        b2 = self.make_bom(p2, p1)
+        for b in [b1, b2]:
+            with self.assertRaises(exceptions.UserError):
+                s = time.time_ns()
+                b.explode(b.product_id, 1)
+            tot += time.time_ns() - s
+
+
+        p1, p2, p3, p4, p5 = self.make_prods(5)
+        b1 = self.make_bom(p1, p2, p3)
+        b2 = self.make_bom(p2, p3)
+        b3 = self.make_bom(p3, p4, p5)
+        b4 = self.make_bom(p5, p2)
+        for b in [b1, b2, b3, b4]:
+            with self.assertRaises(exceptions.UserError):
+                s = time.time_ns()
+                b.explode(b.product_id, 1)
+            tot += time.time_ns() - s
+
+        print("    ===> Time", tot)
