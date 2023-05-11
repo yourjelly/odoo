@@ -17,8 +17,9 @@ export class BooleanFavoriteField extends Component {
         noLabel: false,
     };
 
-    update() {
-        this.props.record.update({ [this.props.name]: !this.props.record.data[this.props.name] });
+    async update() {
+        await this.props.record.update({ [this.props.name]: !this.props.record.data[this.props.name] });
+        return this.props.record.save()
     }
 }
 
