@@ -40,10 +40,7 @@ const ThemePreviewKanbanView = {
     Controller: ThemePreviewKanbanController,
     ControlPanel: ThemePreviewControlPanel,
     display: {
-        controlPanel: {
-            'bottom-left': false,
-            'bottom-right': false,
-        },
+        controlPanel: {},
     },
 };
 
