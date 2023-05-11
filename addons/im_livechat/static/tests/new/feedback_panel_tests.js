@@ -89,3 +89,20 @@ QUnit.test("Feedback with rating and comment", async (assert) => {
         "/im_livechat/chat_post",
     ]);
 });
+
+QUnit.test("Closing folded chat window should open it with feedback", async (assert) => {
+    await startServer();
+    await loadDefaultConfig();
+    const { root } = await start();
+    await click(".o-livechat-LivechatButton");
+    await insertText(".o-mail-Composer-input", "Hello World!");
+    await afterNextRender(() => triggerHotkey("Enter"));
+    await click(".o-mail-ChatWindow-header");
+    assert.containsOnce(root, ".o-mail-ChatWindow.o-folded");
+    await click(".o-mail-ChatWindow-command[title*='Close']");
+    assert.containsNone(root, ".o-mail-ChatWindow.o-folded");
+    assert.containsOnce(
+        root,
+        ".o-mail-ChatWindow:contains(Did we correctly answer your question?)"
+    );
+});

@@ -20,6 +20,7 @@ patch(ChatWindow.prototype, "im_livechat", {
         }
         if (this.livechatService.state === SESSION_STATE.PERSISTED) {
             this.state.activeMode = "feedback";
+            this.chatWindowService.show(this.props.chatWindow);
         } else {
             this._super();
         }
@@ -32,5 +33,9 @@ patch(ChatWindow.prototype, "im_livechat", {
      */
     sendFeedback(rating, feedback) {
         this.livechatService.sendFeedback(this.thread.uuid, rating, feedback);
+    },
+
+    get style() {
+        return `${this._super()} transition: height 0.3s linear 0s;`;
     },
 });
