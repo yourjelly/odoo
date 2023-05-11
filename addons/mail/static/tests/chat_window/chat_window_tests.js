@@ -138,7 +138,15 @@ QUnit.test(
 
 QUnit.test("chat window: fold", async (assert) => {
     const pyEnv = await startServer();
-    pyEnv["discuss.channel"].create({});
+    pyEnv["discuss.channel"].create({
+        channel_member_ids: [
+            Command.create({
+                fold_state: "folded",
+                is_minimized: true,
+                partner_id: pyEnv.currentPartnerId,
+            }),
+        ],
+    });
     await start({
         mockRPC(route, args) {
             if (args.method === "channel_fold") {
@@ -146,21 +154,16 @@ QUnit.test("chat window: fold", async (assert) => {
             }
         },
     });
-    // Open Thread
-    await click("button i[aria-label='Messages']");
-    await click(".o-mail-NotificationItem");
-    assert.containsOnce($, ".o-mail-ChatWindow .o-mail-Thread");
-    assert.verifySteps(["rpc:channel_fold/open"]);
-
-    // Fold chat window
-    await click(".o-mail-ChatWindow-header");
-    assert.verifySteps(["rpc:channel_fold/folded"]);
     assert.containsNone($, ".o-mail-ChatWindow .o-mail-Thread");
 
     // Unfold chat window
     await click(".o-mail-ChatWindow-header");
     assert.verifySteps(["rpc:channel_fold/open"]);
     assert.containsOnce($, ".o-mail-ChatWindow .o-mail-Thread");
+
+    // Fold chat window
+    await click(".o-mail-ChatWindow-header");
+    assert.verifySteps(["rpc:channel_fold/folded"]);
 });
 
 QUnit.test("chat window: open / close", async (assert) => {
@@ -916,7 +919,7 @@ QUnit.test(
 
         // fold chat window
         await click(".o-mail-ChatWindow-header");
-        assert.containsNone($, ".o-mail-Thread");
+        assert.containsOnce($, ".o-mail-ChatWindow.o-folded");
         // unfold chat window
         await click(".o-mail-ChatWindow-header");
         assert.strictEqual($(".o-mail-Thread")[0].scrollTop, 142);
