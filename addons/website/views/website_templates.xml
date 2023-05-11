@@ -2589,6 +2589,43 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
     </xpath>
 </template>
 
+<template id="website.step_wizard" name="Step Wizard">
+    <!-- REQUIRED WHEN CALLING -->
+    <!-- o_wizard_activestep = int active step (from 0) -->
+    <!-- o_wizard_steps_text = array of step text -->
+    <!-- o_wizard_steps_href = array of step href -->
+
+    <!-- <t t-set='o_wizard_steps_text' t-value=""/>
+    <t t-set='o_wizard_steps_href' t-value=""/> -->
+
+    <t t-set="o_wizard_steps_in_deg" t-value="(o_wizard_activestep + 1) / len(o_wizard_steps_text) * 360"/>
+
+    <div class="o_wizard d-flex flex-wrap justify-content-end justify-content-sm-start mb-4">
+        <a t-attf-href="{{ o_wizard_steps_href[o_wizard_activestep - 1] if o_wizard_activestep &gt; 0 else '#' }}" class="align-self-center me-auto"><i class="fa fa-long-arrow-left me-2"/>Back</a>
+        <div class="d-flex flex-column flex-md-row align-items-end align-items-md-start justify-content-center">
+            <t t-foreach="o_wizard_steps_text" t-as="step">
+                <a t-attf-class="d-flex no-decoration {{'o_disabled' if step_index &gt; o_wizard_activestep else '' }} {{ 'd-none d-md-flex' if step_index &gt; o_wizard_activestep + 1 or step_index &lt; o_wizard_activestep else ''}}" t-att-href="o_wizard_steps_href[step_index]">
+                    <div t-attf-class="d-flex align-items-center {{ 'o_wizard_step-active fw-bold' if o_wizard_activestep == step_index else 'o_wizard_step-done' if o_wizard_activestep &gt; step_index else 'o_wizard_step-inactive text-muted' }}">
+                        <p t-attf-class="o_wizard_steplabel text-center mb-0"><span t-if="step_index &gt; o_wizard_activestep" class="d-md-none" t-out="'Next: '"/><t t-out="step"/></p>
+                        <span t-if="not step_last" class="d-none d-md-inline-block align-middle mx-sm-3 fa fa-angle-right text-muted fs-5"/>
+                    </div>
+                </a>
+            </t>
+        </div>
+        <div class="o_wizard_circle_progress progress d-md-none position-relative rounded-circle ms-3 bg-transparent" t-attf-style="--rightProgress:{{ '180' if o_wizard_steps_in_deg >= 180 else o_wizard_steps_in_deg }}deg; --leftProgress:{{ o_wizard_steps_in_deg-180 if o_wizard_steps_in_deg >= 180 else 0}}deg;">
+            <span class="o_wizard_circle_progress-left position-absolute top-0 start-0 z-index-1 overflow-hidden w-50 h-100 ">
+               <span class="progress-bar position-absolute top-0 start-100 w-100 h-100 border border-start-0 border-primary border-5 bg-transparent"/>
+            </span>
+            <span class="o_wizard_circle_progress-right position-absolute top-0 end-0 z-index-1 overflow-hidden w-50 h-100">
+                <span class="progress-bar position-absolute top-0 end-100 w-100 h-100 border border-end-0 border-primary border-5 bg-transparent"/>
+            </span>
+            <p class="fs-small fw-bold mx-auto">
+                <t t-out="o_wizard_activestep+1"/> of <t t-out="len(o_wizard_steps_text)"/>
+            </p>
+        </div>
+    </div>
+</template>
+
 <template id="iframefallback" inherit_id="web.layout" primary="True">
     <xpath expr="//head/link[last()]" position="after">
         <t t-call-assets="web.assets_frontend" t-js="false"/>
