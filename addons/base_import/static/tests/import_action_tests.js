@@ -1436,7 +1436,11 @@ QUnit.module("Base Import Tests", (hooks) => {
         // Parse the file again with the updated date format to check that
         // the format is correctly formatted in the UI
         await click(target.querySelector(".o_import_formatting button"));
-        await click(target.querySelector(".o_control_panel button:nth-child(2)"));
+        await click(
+            $(target).find(
+                ".o_control_panel_main_buttons > div:visible > button:contains(Import)"
+            )[0]
+        );
         assert.verifySteps(["execute_import"]);
         assert.strictEqual(
             target.querySelector(".o_import_date_format").value,
@@ -1487,7 +1491,7 @@ QUnit.module("Base Import Tests", (hooks) => {
 
             // Set and trigger the change of a file for the input
             const file = new File(["fake_file"], "fake_file.csv", { type: "text/plain" });
-            await editInput(target, "input[type='file']", file);
+            await editInput(target, ".o_control_panel_collapsed_create input[type='file']", file);
             assert.strictEqual(
                 target.querySelector(".o_import_date_format").list.id,
                 "list-3",
