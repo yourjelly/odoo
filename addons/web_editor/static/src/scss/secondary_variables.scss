@@ -28,7 +28,6 @@ $o-theme-color-palette: map-get($o-theme-color-palettes, $o-theme-color-palette-
     $o-theme-color-palette: map-remove($o-theme-color-palette, 'alpha', 'beta', 'gamma', 'delta', 'epsilon');
 }
 $-main-color: map-get($o-color-palette, 'o-color-1');
-$-main-color-lightness: lightness($-main-color);
 $o-theme-color-palette: map-merge((
     // color 1 and 2 are used to override primary and secondary BS4
     // colors by default, so that theme colors affect the default Odoo layouts
