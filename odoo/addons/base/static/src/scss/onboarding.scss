@@ -26,32 +26,39 @@ $o-onboarding-step-width: map-get($container-max-widths, 'lg') / 4 !default;
             }
         }
 
-        &:last-child,
-        &:first-child {
-            .o_onboarding_progress_overlay {
-                background-color: $o-onboarding-main-bg;
+        &:first-child, &:last-child {
+            .o_onboarding_line {
+                width: $o-onboarding-line-width / 2 ;
             }
         }
 
-        &:last-child .o_onboarding_progress_overlay {
-            right: 0;
+        &:first-child {
+            .o_onboarding_line {
+                margin-left: $o-onboarding-line-width / 2;
+            }
         }
 
-        &:first-child .o_onboarding_progress_overlay {
-            left: 0;
+        &:last-child {
+            .o_onboarding_line {
+                margin-right: $o-onboarding-line-width / 2;
+            }
+        }
+
+        .o_onboarding_line {
+            background: linear-gradient(to right, $o-onboarding-color-orange 0%, $o-onboarding-color-blue 100%);
+            height: $o-onboarding-line-height;
+            width: $o-onboarding-line-width;
+            top: $o-onboarding-image-size / 2;
+            background-attachment: fixed;
         }
 
         .o_onboarding_step_content {
             width: $o-onboarding-step-width;
         }
 
-        .o_onboarding_step_side {
-            background-color: $o-onboarding-main-bg;
-            
-            img {
-                width: $o-onboarding-image-size;
-                height: $o-onboarding-image-size;
-            }
+        .o_onboarding_step_side img {            
+            width: $o-onboarding-image-size;
+            height: $o-onboarding-image-size;
         }
 
         .o_onboarding_step_action {
@@ -65,10 +72,6 @@ $o-onboarding-step-width: map-get($container-max-widths, 'lg') / 4 !default;
                 background-color: $o-onboarding-color-orange;
                 color: #FFF;
             }
-        }
-
-        &:first-of-type .o_onboarding_progress {
-            display: none;
         }
 
         // = "To do" Step Design
@@ -101,12 +104,6 @@ $o-onboarding-step-width: map-get($container-max-widths, 'lg') / 4 !default;
             }
         }
     }
-
-    .o_onboarding_progress {
-        height: $o-onboarding-progress-size;
-        background: linear-gradient(to right, #{$o-onboarding-color-orange} 0%,  #{$o-onboarding-color-blue} 100%);
-        transform: translateY($o-onboarding-image-size / 2);
-    } 
 
     // = Animations
     // ------------------------------------------------------------------------
