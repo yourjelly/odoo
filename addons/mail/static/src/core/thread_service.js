@@ -708,6 +708,7 @@ export class ThreadService {
                 "name",
                 "seen_message_id",
                 "state",
+                "status",
                 "group_based_subscription",
                 "last_interest_dt",
                 "defaultDisplayMode",
