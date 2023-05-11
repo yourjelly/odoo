@@ -35,6 +35,7 @@ _forged_values = {
 
 @odoo.tests.tagged('black_magic', '-at_install', 'post_install', '-standard')
 class BlackMagicCrawler(odoo.tests.HttpCase):
+
     def setUp(self):
         super(BlackMagicCrawler, self).setUp()
 
@@ -342,7 +343,7 @@ class BlackMagicCrawler(odoo.tests.HttpCase):
             _logger.info('INFO: No dark magic detected!')
         else:          
             for model in xss:
-                _logger.info(f'WARNING: {model} has unsanitized field(s) {xss[model]["fields"]} at id {xss[model]["id"]}')
+                _logger.warning(f'WARNING: {model} has unsanitized field(s) {xss[model]["fields"]} at id {xss[model]["id"]}')
             
     def test_10_front_crawl(self):
         def crawl(self, url, seen = {}):
@@ -409,48 +410,22 @@ class BlackMagicCrawler(odoo.tests.HttpCase):
 
     def test_10_back_crawl(self):
         def generate_backend_urls(self):
-            views = self.env['ir.actions.act_window'].search_read(
-                domain=[],
-                fields=["id", "view_mode", "res_model", "view_id"]
-            )
-            seen = {}
+            seen = []
             urls = []
 
-            for view in views:
-                modes = view["view_mode"].split(',')
+            menus = self.env['ir.ui.menu'].load_menus(False)
+            for id, menu_item in menus.items():
+                if not menu_item.get('action'):
+                    continue
 
-                for mode in modes: 
-                    if mode == 'search':
-                        continue
+                if menu_item['app_id'] in seen:
+                    continue
+                seen.append(menu_item['app_id'])
 
-                    url = f"/web#action_id={view['id']}&model={view['res_model']}&cids=1%2C2%2C3%2C4%2C5&view_type={mode}"
-
-                    if (view['res_model'], mode) not in seen:
-                        seen[(view['res_model'], mode)] = []
-                    
-                    if view['view_id'] not in seen[(view['res_model'], mode)]:
-                        seen[(view['res_model'], mode)].append(view['view_id'])
-                    else:
-                        continue
-                    
-                    if mode == 'form':
-                        if not self.env[view['res_model']]._auto:
-                            _logger.info(f'SKIP: {view["res_model"]}: Abstract Model.')
-                            continue
-
-                        try:
-                            ids = self.env[view['res_model']].search_read(
-                                domain=[],fields=['id'],limit=1,order="write_date DESC"
-                            )
-                        except Exception:
-                            ids = self.env[view['res_model']].search_read(
-                                domain=[],fields=['id'],limit=1
-                            )
-
-                        if ids:
-                            url += f"&id={ids[0]['id']}"
+                action_id = menu_item['action'].split(',')[1]
+                url = f"/web?debug=1#action_id={action_id}&menu_id={menu_item['app_id']}&cids=1%2C2%2C3%2C4%2C5"
                         
-                    urls.append(url)
+                urls.append((url, menu_item['name']))
 
             return urls
 
@@ -480,24 +455,89 @@ class BlackMagicCrawler(odoo.tests.HttpCase):
                 }
                 for (const page of pages) {
                     await triggerClick(page, page);
-                    await sleep(1000);
+                    await sleep(250);
                 }
             }
 
-            async function test() {
-                await sleep(3000)
+            async function click_form_view() {
+                const record = document.querySelector("div.o_content > div.o_list_renderer > table > tbody tr.o_data_row > td.o_data_cell");
+                if(!record) {
+                    return;
+                }
+                await triggerClick(record, record);
+                await sleep(1000);
                 await click_notebook();
+            }
+
+            async function remove_filters() {
+                const filters = document.querySelectorAll("div.o_searchview_input_container > div.o_searchview_facet > i.o_facet_remove");
+                if(!filters) {
+                    return;
+                }
+                for (const filter of filters) {
+                    await triggerClick(filter, filter);
+                }
+            }
+
+            async function click_views() {
+                const views = document.querySelectorAll("nav.o_cp_switch_buttons > button.o_switch_view:not(.active)");
+                if(!views) {
+                    return;
+                }
+                for (const view of views) {
+                    await triggerClick(view, view);
+                    await sleep(250);
+                }
+            }
+
+            async function click_list_view() {
+                const list_view = document.querySelector("nav.o_cp_switch_buttons > button.o_switch_view.o_list");
+                if (!list_view) {
+                    return;
+                }
+                await triggerClick(list_view, list_view);
+                await sleep(250);
+            }
+
+            async function test_menu() {
+                await click_views();
+                await click_list_view();
+                await remove_filters();
+                await click_form_view();
+            }
+
+            async function test_all_menus() {
+                
+                menuIndex = 0;
+                subMenuIndex = 0;
+                await sleep(3000);
+
+                const menus = document.querySelectorAll("div.o_menu_sections > div.dropdown > button.dropdown-toggle, div.o_menu_sections > a.dropdown-item");
+
+                for (const menu of menus) {
+                    await triggerClick(menu, menu);
+                    await sleep(250);
+
+                    const sub_menus = document.querySelectorAll("div.o_menu_sections > div.dropdown > div.dropdown-menu > a.dropdown-item");
+                    for (const sub_menu of sub_menus) {
+                        await triggerClick(sub_menu, sub_menu);
+                        await sleep(1000);
+
+                        await test_menu();
+                    }
+                }
                 console.log('test successful');
             }
 
-            test()
+            test_all_menus()
         """
-        urls = generate_backend_urls(self)        
+        urls = generate_backend_urls(self)
         t0 = time.time()
-        for url in urls:
-            with self.subTest(url):
-                self.browser_js(url, code, "odoo.isReady === true", login="admin", watch=False)
+        for url, app_name in urls:
+            with self.subTest(f'{app_name} @{url}'):
+                self.browser_js(url, code, "odoo.isReady === true", login="admin", watch=True)
                 self.terminate_browser()
         count = len(urls)
         duration = time.time() - t0
         _logger.runbot("admin crawled %s urls in %.2fs", count, duration)
+        
