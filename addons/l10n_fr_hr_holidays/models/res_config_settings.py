@@ -10,3 +10,6 @@ class ResConfigSettings(models.TransientModel):
         'hr.leave.type',
         related='company_id.l10n_fr_reference_leave_type',
         readonly=False)
+    l10n_fr_holiday_days_type = fields.Selection(
+        related='company_id.l10n_fr_holiday_days_type',
+        readonly=False)

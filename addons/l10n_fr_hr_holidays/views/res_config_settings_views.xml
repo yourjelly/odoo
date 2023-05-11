@@ -15,6 +15,10 @@
                             domain="[('company_id', 'in', [company_id, False])]"
                             context="{'default_company_id': company_id}"/>
                     </setting>
+                    <setting company_dependent="1" help="Set the week format used by the company Paid Time Off to know wether the five saturdays rule should be applied">
+                        <field name="l10n_fr_holiday_days_type"
+                            class="o_light_label"/>
+                    </setting>
                 </block>
             </block>
         </field>

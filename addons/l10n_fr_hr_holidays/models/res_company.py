@@ -11,6 +11,17 @@ class ResCompany(models.Model):
     l10n_fr_reference_leave_type = fields.Many2one(
         'hr.leave.type',
         string='Company Paid Time Off Type')
+    l10n_fr_holiday_days_type = fields.Selection(
+        [
+            ('ouvres', 'working days (Mon-Fri)'),
+            ('ouvrables', 'business days (Mon-Sat)'),
+        ],
+        default='ouvrables',
+        string='Time off reference days',
+        help="""
+            Determins wether or not the five saturdays rule should be used.
+            The rule is used when business days are selected.
+        """)
 
     def _get_fr_reference_leave_type(self):
         self.ensure_one()

@@ -10,7 +10,7 @@ from collections import defaultdict
 class ResourceCalendar(models.Model):
     _inherit = 'resource.calendar'
 
-    def _works_on_date(self, date):
+    def _works_on_date(self, date, count_saturdays=False):
         self.ensure_one()
 
         working_days = self._get_working_hours()
