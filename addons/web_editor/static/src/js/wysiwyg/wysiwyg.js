@@ -1988,7 +1988,7 @@ const Wysiwyg = Widget.extend({
         }
         if (isInMedia) {
             // Handle the media/link's tooltip.
-            this.showTooltip = true;
+            this.showTooltip = "tooltip" in $target;
             this.tooltipTimeouts.push(setTimeout(() => {
                 // Do not show tooltip on double-click and if there is already one
                 if (!this.showTooltip || $target.attr('title') !== undefined) {
