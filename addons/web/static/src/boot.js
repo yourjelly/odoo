@@ -45,6 +45,8 @@
         didLogInfoResolve = resolve;
     });
 
+    odoo.asyncModules = [];
+
     odoo.remainingJobs = jobs;
     odoo.__DEBUG__ = {
         didLogInfo: didLogInfoPromise,
@@ -110,6 +112,10 @@
                         onError(e);
                     }
                     if (!job.error) {
+                        if (jobExec instanceof Promise) {
+                            odoo.asyncModules.push(job.name);
+                            console.log("Async module:", job.name);
+                        }
                         Promise.resolve(jobExec)
                             .then(function (data) {
                                 services[job.name] = data;
