@@ -7,6 +7,13 @@
     height: $font-size-lg;
 }
 
+.o-mail-ChannelSelector-suggestion .o-mail-ImStatus {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    margin: 0 !important;
+}
+
 .o-bg-inherit {
     background-color: inherit;
 }
