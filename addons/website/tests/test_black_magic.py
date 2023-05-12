@@ -409,6 +409,8 @@ class BlackMagicCrawler(odoo.tests.HttpCase):
         _logger.runbot("admin crawled %s urls in %.2fs", count, duration)
 
     def test_10_back_crawl(self):
+        blacklist = ['barcode']
+
         def generate_backend_urls(self):
             seen = []
             urls = []
@@ -532,6 +534,7 @@ class BlackMagicCrawler(odoo.tests.HttpCase):
             test_all_menus()
         """
         urls = generate_backend_urls(self)
+        #urls = [('/web#menu_id=775&action_id=1130', 'barcode')]
         t0 = time.time()
         for url, app_name in urls:
             with self.subTest(f'{app_name} @{url}'):
