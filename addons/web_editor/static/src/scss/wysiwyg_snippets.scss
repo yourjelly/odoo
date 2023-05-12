@@ -1267,22 +1267,9 @@
         }
 
         // Color Pickers
-        .o_we_so_color_palette.o_we_user_value_widget {
-            &:first-of-type {
-                margin-right: $o-we-sidebar-content-field-multi-spacing * 4;
-            }
-
-            + .o_we_so_color_palette {
-                // Countering the margin of the first colorpicker and targeting
-                // the div to avoid misalignment of we-title (theme tab)
-                &:nth-of-type(2) {
-                    > div {
-                        margin-left: -$o-we-sidebar-content-field-multi-spacing * 4;
-                    }
-                    we-title + div {
-                        margin-left: 0;
-                    }
-                }
+        .o_we_so_color_palette.o_we_user_value_widget:not(.d-none) {
+            + .o_we_user_value_widget:not(.o_we_so_color_palette) {
+                margin-left: $o-we-sidebar-content-field-multi-spacing * 4 !important;
             }
 
             .o_we_color_preview {
