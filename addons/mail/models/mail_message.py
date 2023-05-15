@@ -1162,6 +1162,28 @@ class Message(models.Model):
     # TOOLS
     # ------------------------------------------------------
 
+    def _classify_by_model(self):
+        """ To ease batch computation of various messages related methods they
+        are classified by model. Messages not linked to a valid record through
+        res_model / res_id are ignored.
+
+        :return dict: for each model having at least one message in self, have
+          a sub-dict containing
+            * messages: messages related to that model;
+            * record IDs: records linked to the messages of that model, in same
+              order;
+        """
+        data_by_model = {}
+        for message in self.filtered(lambda act: act.model and act.res_id):
+            if message.res_model not in data_by_model:
+                data_by_model[message.model] = {
+                    'messages': self.env['mail.message'],
+                    'record_ids': [],
+                }
+            data_by_model[message.res_model]['messages'] += message
+            data_by_model[message.res_model]['record_ids'].append(message.res_id)
+        return data_by_model
+
     def _cleanup_side_records(self):
         """ Clean related data: notifications, stars, ... to avoid lingering
         notifications / unreachable counters with void messages notably. """

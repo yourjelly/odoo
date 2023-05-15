@@ -31,13 +31,14 @@ class MailMessage(models.Model):
         if not 'rating' in properties_names:
             return vals_list
 
-        related_rating = self.env['rating.rating'].sudo().search_read(
+        related_ratings = self.env['rating.rating'].sudo().search_fetch(
             [('message_id', 'in', self.ids)],
-            ["id", "publisher_comment", "publisher_id", "publisher_datetime", "message_id"]
+            ["id", "message_id", "model", "publisher_comment",
+             "publisher_datetime", "publisher_id", "res_id"]
         )
         message_to_rating = {
-            rating['message_id'][0]: self._portal_message_format_rating(rating)
-            for rating in related_rating
+            rating.message_id.id: self._portal_message_format_rating(rating.read()[0])
+            for rating in related_ratings
         }
 
         for message, values in zip(self, vals_list):
@@ -45,9 +46,12 @@ class MailMessage(models.Model):
             if rating_values:
                 values["rating"] = rating_values
 
-            record = self.env[message.model].browse(message.res_id)
-            if hasattr(record, 'rating_get_stats'):
-                values['rating_stats'] = record.sudo().rating_get_stats()
+        message_to_rating_stats = {}
+        for model, model_values in self._classify_by_model():
+            records = self.env[model].sudo().browse(model_values['record_ids'])
+            if hasattr(records, 'rating_get_stats'):
+                for message, record in zip(model_values['messages'], records):
+                    message_to_rating_stats[message.id] = record.rating_get_stats()
 
         return vals_list
 
