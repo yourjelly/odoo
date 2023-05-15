@@ -6,8 +6,10 @@
                 t-foreach="propertiesList"
                 t-as="propertyConfiguration"
                 t-key="propertyConfiguration.name"
-                t-if="(propertyConfiguration.value || ['integer', 'float'].includes(propertyConfiguration.type)) &amp;&amp; propertyConfiguration.view_in_kanban">
-                <div class="mw-100 text-truncate">
+                t-if="propertyConfiguration.view_in_kanban &amp;&amp; propertyConfiguration.value">
+                <div class="mw-100 text-truncate d-flex gap-2"
+                    t-att-class="(['boolean'].includes(propertyConfiguration.type)) ? 'border border-dark rounded-3 ps-2' : ''">
+                    <label t-if="['integer', 'float', 'date', 'datetime', 'boolean'].includes(propertyConfiguration.type)" class="fw-bolder"><t t-out="propertyConfiguration.string"/></label>
                     <PropertyValue
                         id="generateUniqueDomID()"
                         canChangeDefinition="state.canChangeDefinition"
