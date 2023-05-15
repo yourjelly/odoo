@@ -257,7 +257,8 @@ class PosSession(models.Model):
                 raise UserError(_("You cannot close the POS when orders are still in draft"))
             if session.state == 'closed':
                 raise UserError(_('This session is already closed.'))
-            session.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
+            stop_at = self.stop_at or fields.Datetime.now()
+            session.write({'state': 'closing_control', 'stop_at': stop_at})
             if not session.config_id.cash_control:
                 return session.action_pos_session_close(balancing_account, amount_to_balance, bank_payment_method_diffs)
             # If the session is in rescue, we only compute the payments in the cash register
@@ -1641,6 +1642,7 @@ class PosSession(models.Model):
         loaded_data['attributes_by_ptal_id'] = self._get_attributes_by_ptal_id()
         loaded_data['base_url'] = self.get_base_url()
         loaded_data['pos_has_valid_product'] = self._pos_has_valid_product()
+        loaded_data['open_orders'] = self._load_open_orders()
 
     @api.model
     def _pos_ui_models_to_load(self):
@@ -1790,6 +1792,9 @@ class PosSession(models.Model):
                                                        or config['iface_scan_via_proxy'] or config['iface_customer_facing_display_via_proxy'])
         return config
 
+    def _load_open_orders(self):
+        domain = [('session_id', '=', self.id), ('state', '=', 'draft')]
+        return self.env['pos.order'].get_orders(domain)
     def _loader_params_pos_bill(self):
         return {'search_params': {'domain': [('id', 'in', self.config_id.default_bill_ids.ids)], 'fields': ['name', 'value']}}
 

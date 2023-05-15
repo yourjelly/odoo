@@ -173,7 +173,7 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
         self.assertTrue(params)
         pos_config_products_domain = params['search_params']['domain']
         self.assertTrue(pos_config_products_domain)
-        tests_products_domain = AND([pos_config_products_domain, ['&', '&', ('name', '=', 'Letter Tray'), ('list_price', '=', 4.8), ('available_in_pos', '=', True)]])
+        tests_products_domain = AND([pos_config_products_domain, ['&', '&', ('name', '=', 'Apple Pie'), ('list_price', '=', 12.0), ('available_in_pos', '=', True)]])
         # active_test=False to follow pos.config:get_pos_ui_product_product_by_params
         self.assertEqual(self.env['product.product'].with_context(active_test=False).search_count(tests_products_domain, limit=1), 1)
 

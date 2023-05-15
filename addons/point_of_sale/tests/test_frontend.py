@@ -90,13 +90,19 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         (all_pos_product - discount - cls.tip)._write({'active': False})
 
         # In DESKS categ: Desk Pad
-        pos_categ_desks = env.ref('point_of_sale.pos_category_desks')
-
-        # In DESKS categ: Whiteboard Pen
-        pos_categ_misc = env.ref('point_of_sale.pos_category_miscellaneous')
+        pos_categ_desks = env['pos.category'].create({
+            'name': 'Desks',
+        })
 
         # In CHAIR categ: Letter Tray
-        pos_categ_chairs = env.ref('point_of_sale.pos_category_chairs')
+        pos_categ_misc = env['pos.category'].create({
+            'name': 'Miscellaneous',
+        })
+
+        # In CHAIR categ: Letter Tray
+        pos_categ_chairs = env['pos.category'].create({
+            'name': 'Chairs',
+        })
 
         # test an extra price on an attribute
         cls.whiteboard_pen = env['product.product'].create({

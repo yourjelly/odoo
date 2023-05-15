@@ -1,122 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <data noupdate="1">
         <!-- Partners with Barcodes -->
-        <record id='base.res_partner_1'  model='res.partner'> <field name='barcode'>0420100000005</field> </record>
-        <record id='base.res_partner_2'  model='res.partner'> <field name='barcode'>0420200000004</field> </record>
-        <record id='base.res_partner_3'  model='res.partner'> <field name='barcode'>0420300000003</field> </record>
-        <record id='base.res_partner_4'  model='res.partner'> <field name='barcode'>0420400000002</field> </record>
-        <record id='base.res_partner_4'  model='res.partner'> <field name='barcode'>0420700000009</field> </record>
-        <record id='base.res_partner_10' model='res.partner'> <field name='barcode'>0421000000003</field> </record>
-        <record id='base.res_partner_12'  model='res.partner'> <field name='barcode'>0420800000008</field> </record>
-        <record id='base.res_partner_18' model='res.partner'> <field name='barcode'>0421800000005</field> </record>
+        <record id='base.res_partner_1' model='res.partner'>
+            <field name='barcode'>0420100000005</field>
+        </record>
+        <record id='base.res_partner_2' model='res.partner'>
+            <field name='barcode'>0420200000004</field>
+        </record>
+        <record id='base.res_partner_3' model='res.partner'>
+            <field name='barcode'>0420300000003</field>
+        </record>
+        <record id='base.res_partner_4' model='res.partner'>
+            <field name='barcode'>0420400000002</field>
+        </record>
+        <record id='base.res_partner_4' model='res.partner'>
+            <field name='barcode'>0420700000009</field>
+        </record>
+        <record id='base.res_partner_10' model='res.partner'>
+            <field name='barcode'>0421000000003</field>
+        </record>
+        <record id='base.res_partner_12' model='res.partner'>
+            <field name='barcode'>0420800000008</field>
+        </record>
+        <record id='base.res_partner_18' model='res.partner'>
+            <field name='barcode'>0421800000005</field>
+        </record>
 
         <record id="base.user_root" model="res.users">
             <field name="barcode">0410100000006</field>
-            <field name="groups_id" eval="[(4,ref('group_pos_manager'))]"/>
+            <field name="groups_id" eval="[(4,ref('group_pos_manager'))]" />
         </record>
 
         <record id="base.user_demo" model="res.users">
-            <field name="groups_id" eval="[(4, ref('group_pos_user'))]"/>
+            <field name="groups_id" eval="[(4, ref('group_pos_user'))]" />
         </record>
 
 
         <!-- Resource: pos.category -->
-        <record id="pos_category_miscellaneous" model="pos.category">
-          <field name="name">Miscellaneous</field>
+        <record id="pos_category_furniture" model="pos.category">
+            <field name="name">Office furniture</field>
         </record>
-        <record id="pos_category_desks" model="pos.category">
-          <field name="name">Desks</field>
+
+        <record id="pos_category_clothes" model="pos.category">
+            <field name="name">Clothes</field>
         </record>
-        <record id="pos_category_chairs" model="pos.category">
-          <field name="name">Chairs</field>
+
+        <record id="pos_category_bakery" model="pos.category">
+            <field name="name">Bakery</field>
         </record>
 
         <record model="pos.config" id="pos_config_main">
-            <field name="iface_start_categ_id" ref="pos_category_chairs"/>
+            <field name="iface_start_categ_id" ref="pos_category_furniture" />
             <field name="start_category">True</field>
+            <field name="limit_categories">True</field>
+            <field name="iface_available_categ_ids"
+                eval="[(6, 0, [ref('pos_category_furniture'), ref('pos_category_clothes'), ref('pos_category_bakery')])]" />
         </record>
 
         <!-- Preparation Printer -->
         <record id="preparation_printer" model="pos.printer">
             <field name="name">Preparation Printer</field>
             <field name="proxy_ip">localhost</field>
-            <field name="product_categories_ids" eval="[(6, 0, [ref('point_of_sale.pos_category_miscellaneous')])]"/>
+            <field name="product_categories_ids" eval="[(6, 0, [ref('point_of_sale.pos_category_furniture')])]" />
         </record>
 
-        <!-- Resource: product.product -->
-        <record id="stock.product_cable_management_box" model="product.product">
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('point_of_sale.pos_category_miscellaneous')])]"/>
-        </record>
-         <record id="wall_shelf" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">1.98</field>
-          <field name="name">Wall Shelf Unit</field>
-          <field name="default_code">FURN_0009</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="to_weight">True</field>
-          <field name="barcode">2100002000003</field>
-          <field name="taxes_id" eval="[(5,)]"/>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/wall_shelf_unit.png"/>
-        </record>
-        <record id="small_shelf" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">2.83</field>
-          <field name="name">Small Shelf</field>
-          <field name="default_code">FURN_0008</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="taxes_id" eval="[(5,)]"/>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="to_weight">True</field>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/small_shelf.png"/>
+        <!-- Taxes -->
+
+        <record id="pos_taxes_0" model="account.tax">
+            <field name="name">Default Tax for PoS</field>
+            <field name="amount">0</field>
+            <field name="amount_type">percent</field>
         </record>
 
-        <record id="letter_tray" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">4.80</field>
-          <field name="name">Letter Tray</field>
-          <field name="default_code">FURN_0004</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="to_weight">True</field>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/letter_tray.png"/>
-        </record>
-        <record id="desk_organizer" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">5.10</field>
-          <field name="name">Desk Organizer</field>
-          <field name="default_code">FURN_0001</field>
-          <field name="to_weight">True</field>
-          <field name="barcode">2300001000008</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/desk_organizer.png"/>
-          <field name="taxes_id" eval="[(5,)]"/>  <!-- no taxes -->
-        </record>
+        <!-- Products -->
 
-        <function model="ir.model.data" name="_update_xmlids">
-            <value model="base" eval="[{
-                'xml_id': 'point_of_sale.desk_organizer_product_template',
-                'record': obj().env.ref('point_of_sale.desk_organizer').product_tmpl_id,
-                'noupdate': True,
-            }]"/>
-        </function>
+        <record id="casual_t_shirt" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">20.00</field>
+            <field name="name">Casual T-shirt</field>
+            <field name="default_code">FURN_0010</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_clothes')])]" />
+            <field name="to_weight">False</field>
+            <field name="barcode">2100002000004</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/casual_t_shirt.jpg" />
+            <field name="description">Casual t-shirt 100% cotton. Various colors and sizes available.</field>
+        </record>
 
         <record id="size_attribute" model="product.attribute">
             <field name="name">Size</field>
@@ -127,256 +102,506 @@
         <record id="size_attribute_s" model="product.attribute.value">
             <field name="name">S</field>
             <field name="sequence">1</field>
-            <field name="attribute_id" ref="size_attribute"/>
+            <field name="attribute_id" ref="size_attribute" />
         </record>
         <record id="size_attribute_m" model="product.attribute.value">
             <field name="name">M</field>
             <field name="sequence">2</field>
-            <field name="attribute_id" ref="size_attribute"/>
+            <field name="attribute_id" ref="size_attribute" />
         </record>
         <record id="size_attribute_l" model="product.attribute.value">
             <field name="name">L</field>
             <field name="sequence">3</field>
-            <field name="attribute_id" ref="size_attribute"/>
-        </record>
-        <record id="desk_organizer_size" model="product.template.attribute.line">
-            <field name="product_tmpl_id" ref="point_of_sale.desk_organizer_product_template"/>
-            <field name="attribute_id" ref="size_attribute"/>
-            <field name="value_ids" eval="[(6, 0, [ref('size_attribute_s'), ref('size_attribute_m'), ref('size_attribute_l')])]"/>
+            <field name="attribute_id" ref="size_attribute" />
         </record>
 
-        <record id="fabric_attribute" model="product.attribute">
-            <field name="name">Fabric</field>
+        <!-- 
+            Here we use casual_t_shirt_product_template as the product template record is automatically created after the product record is created
+            We do the same for every product configuration we have
+        -->
+        <record id="casual_t_shirt_size" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="point_of_sale.casual_t_shirt_product_template" />
+            <field name="attribute_id" ref="size_attribute" />
+            <field name="value_ids"
+                eval="[(6, 0, [ref('size_attribute_s'), ref('size_attribute_m'), ref('size_attribute_l')])]" />
+        </record>
+
+        <record id="color_attribute" model="product.attribute">
+            <field name="name">Color</field>
             <field name="sequence">40</field>
             <field name="display_type">select</field>
             <field name="create_variant">no_variant</field>
         </record>
-        <record id="fabric_attribute_plastic" model="product.attribute.value">
-            <field name="name">Plastic</field>
+        <record id="color_attribute_black" model="product.attribute.value">
+            <field name="name">Black</field>
             <field name="sequence">1</field>
-            <field name="attribute_id" ref="fabric_attribute"/>
+            <field name="attribute_id" ref="color_attribute" />
         </record>
-        <record id="fabric_attribute_leather" model="product.attribute.value">
-            <field name="name">Leather</field>
+        <record id="color_attribute_white" model="product.attribute.value">
+            <field name="name">White</field>
             <field name="sequence">2</field>
-            <field name="attribute_id" ref="fabric_attribute"/>
+            <field name="attribute_id" ref="color_attribute" />
         </record>
-        <record id="fabric_attribute_custom" model="product.attribute.value">
-            <field name="name">Custom</field>
+        <record id="color_attribute_purple" model="product.attribute.value">
+            <field name="name">Purple</field>
             <field name="sequence">3</field>
-            <field name="attribute_id" ref="fabric_attribute"/>
-            <field name="is_custom">True</field>
+            <field name="attribute_id" ref="color_attribute" />
         </record>
-        <record id="desk_organizer_fabric" model="product.template.attribute.line">
-            <field name="product_tmpl_id" ref="point_of_sale.desk_organizer_product_template"/>
-            <field name="attribute_id" ref="fabric_attribute"/>
-            <field name="value_ids" eval="[(6, 0, [ref('fabric_attribute_plastic'), ref('fabric_attribute_leather'), ref('fabric_attribute_custom')])]"/>
-        </record>
-
-        <record id="magnetic_board" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">1.98</field>
-          <field name="name">Magnetic Board</field>
-          <field name="default_code">FURN_0005</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="barcode">2301000000006</field>
-          <field name="to_weight">True</field>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/magnetic_board.png"/>
-        </record>
-        <record id="monitor_stand" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">3.19</field>
-          <field name="name">Monitor Stand</field>
-          <field name="default_code">FURN_0006</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="to_weight">True</field>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/monitor_stand.png"/>
-        </record>
-        <record id="desk_pad" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">1.98</field>
-          <field name="name">Desk Pad</field>
-          <field name="default_code">FURN_0002</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="to_weight">True</field>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/desk_pad.png"/>
+        <record id="casual_t_shirt_color" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="point_of_sale.casual_t_shirt_product_template" />
+            <field name="attribute_id" ref="color_attribute" />
+            <field name="value_ids"
+                eval="[(6, 0, [ref('color_attribute_black'), ref('color_attribute_white'), ref('color_attribute_purple')])]" />
         </record>
 
-        <record id="whiteboard" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">1.70</field>
-          <field name="name">Whiteboard</field>
-          <field name="to_weight">True</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/whiteboard.png"/>
+        <record id="blue_denim_jeans" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">80.00</field>
+            <field name="name">Blue Denim Jeans</field>
+            <field name="default_code">FURN_0011</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_clothes')])]" />
+            <field name="to_weight">False</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/blue_denim_jeans.jpg" />
+            <field name="description_sale">5-pocket jeans in cotton denim with a slight stretch for good comfort.
+            </field>
         </record>
 
-        <record id="led_lamp" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">0.90</field>
-          <field name="name">LED Lamp</field>
-          <field name="default_code">FURN_0003</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="to_weight">True</field>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/led_lamp.png"/>
+        <record id="blue_denim_jeans_size" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="point_of_sale.blue_denim_jeans_product_template" />
+            <field name="attribute_id" ref="size_attribute" />
+            <field name="value_ids"
+                eval="[(6, 0, [ref('size_attribute_s'), ref('size_attribute_m'), ref('size_attribute_l')])]" />
         </record>
 
-        <record id="newspaper_rack" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">1.28</field>
-          <field name="name">Newspaper Rack</field>
-          <field name="default_code">FURN_0007</field>
-          <field name="type">product</field>
-          <field name="weight">0.01</field>
-          <field name="to_weight">True</field>
-          <field name="barcode">2100001000004</field>
-          <field name="categ_id" ref="product.product_category_5"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/newspaper_stand.png"/>
+        <record id="classic_brown_jacket" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">50.00</field>
+            <field name="name">Classic Brown Jacket</field>
+            <field name="default_code">FURN_0012</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_clothes')])]" />
+            <field name="to_weight">False</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/classic_brown_jacket.jpg" />
+            <field name="description_sale">Lightweight bomber jacket in linen with a ribbed stand-up collar and zip down
+                the front.</field>
         </record>
 
-        <record id="whiteboard_pen" model="product.product">
-          <field name="available_in_pos">True</field>
-          <field name="list_price">1.20</field>
-          <field name="name">Whiteboard Pen</field>
-          <field name="weight">0.01</field>
-          <field name="default_code">CONS_0001</field>
-          <field name="to_weight">True</field>
-          <field name="categ_id" ref="product.product_category_consumable"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-          <field name="uom_id" ref="uom.product_uom_unit"/>
-          <field name="uom_po_id" ref="uom.product_uom_unit"/>
-          <field name="image_1920" type="base64" file="point_of_sale/static/img/whiteboard_pen.png"/>
+        <record id="classic_brown_jacket_size" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="point_of_sale.classic_brown_jacket_product_template" />
+            <field name="attribute_id" ref="size_attribute" />
+            <field name="value_ids"
+                eval="[(6, 0, [ref('size_attribute_s'), ref('size_attribute_m'), ref('size_attribute_l')])]" />
         </record>
 
-        <record id="product.product_product_1" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+        <record id="crocheted_poncho_unisize" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">25.00</field>
+            <field name="name">Crocheted Poncho Unisize</field>
+            <field name="default_code">FURN_0013</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_clothes')])]" />
+            <field name="to_weight">False</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/crocheted_poncho_unisize.jpg" />
+            <field name="description_sale">Poncho in a soft, crochet-look knit with a round, gently draped neckline.
+            </field>
         </record>
-        <record id="product.product_product_2" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+
+        <record id="odoo_sneakers" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">60.40</field>
+            <field name="name">Odoo Sneakers</field>
+            <field name="default_code">FURN_0014</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_clothes')])]" />
+            <field name="to_weight">False</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/odoo_sneakers.jpg" />
+            <field name="description_sale">Trainers in cotton canvas with a padded top edge, tongue and lacing at the
+                front.</field>
         </record>
-        <record id="product.product_delivery_01" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_chairs')])]"/>
+
+        <record id="size_attribute_39" model="product.attribute.value">
+            <field name="name">39</field>
+            <field name="sequence">1</field>
+            <field name="attribute_id" ref="size_attribute" />
         </record>
-        <record id="product.product_delivery_02" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+        <record id="size_attribute_40" model="product.attribute.value">
+            <field name="name">40</field>
+            <field name="sequence">2</field>
+            <field name="attribute_id" ref="size_attribute" />
         </record>
-        <record id="product.product_order_01" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+        <record id="size_attribute_41" model="product.attribute.value">
+            <field name="name">41</field>
+            <field name="sequence">3</field>
+            <field name="attribute_id" ref="size_attribute" />
         </record>
-        <record id="product.product_product_3" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_desks')])]"/>
+        <record id="size_attribute_42" model="product.attribute.value">
+            <field name="name">42</field>
+            <field name="sequence">4</field>
+            <field name="attribute_id" ref="size_attribute" />
         </record>
-        <record id="product.product_product_4_product_template" model="product.template">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_desks')])]"/>
+        <record id="size_attribute_43" model="product.attribute.value">
+            <field name="name">43</field>
+            <field name="sequence">5</field>
+            <field name="attribute_id" ref="size_attribute" />
         </record>
-        <record id="product.product_product_5" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_desks')])]"/>
+
+        <record id="odoo_sneakers_size" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="point_of_sale.odoo_sneakers_product_template" />
+            <field name="attribute_id" ref="size_attribute" />
+            <field name="value_ids"
+                eval="[(6, 0, [ref('size_attribute_39'), ref('size_attribute_40'), ref('size_attribute_41'), ref('size_attribute_42'), ref('size_attribute_43')])]" />
         </record>
-        <record id="product.product_product_6" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-        </record>
-        <record id="product.product_product_7" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-        </record>
-        <record id="product.product_product_8" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_desks')])]"/>
-        </record>
-        <record id="product.product_product_9" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-        </record>
-        <record id="product.product_product_10" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-        </record>
-        <record id="product.product_product_11" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_chairs')])]"/>
-        </record>
-        <record id="product.product_product_11b" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_chairs')])]"/>
-        </record>
+
         <record id="product.product_product_12" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_chairs')])]"/>
+            <field name="available_in_pos" eval="True" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_furniture')])]" />
         </record>
-        <record id="product.product_product_13" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_desks')])]"/>
-        </record>
-        <record id="product.product_product_16" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-        </record>
-        <record id="product.product_product_20" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
-        </record>
+
         <record id="product.product_product_22" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+            <field name="available_in_pos" eval="True" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_furniture')])]" />
         </record>
-        <record id="product.product_product_24" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+
+        <record id="product.product_product_3" model="product.product">
+            <field name="available_in_pos" eval="True" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_furniture')])]" />
         </record>
-        <record id="product.product_product_25" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+
+        <record id="stock.product_cable_management_box" model="product.product">
+            <field name="available_in_pos" eval="True" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_furniture')])]" />
         </record>
-        <record id="product.product_product_27" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+
+        <record id="product.product_product_13" model="product.product">
+            <field name="available_in_pos" eval="True" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_furniture')])]" />
         </record>
-        <record id="product.consu_delivery_03" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_desks')])]"/>
+
+        <record id="wholemeal_loaf" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">2.99</field>
+            <field name="name">Wholemeal loaf</field>
+            <field name="default_code">FURN_0015</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_bakery')])]" />
+            <field name="to_weight">False</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/wholemeal_loaf.png" />
+            <field name="description_sale">High fibre loaf. Baked with fine wholemeal flour to give a soft texture.
+            </field>
         </record>
-        <record id="product.consu_delivery_02" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+
+        <record id="tiger_white_loaf" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">2.75</field>
+            <field name="name">Tiger white loaf</field>
+            <field name="default_code">FURN_0016</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_bakery')])]" />
+            <field name="to_weight">False</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/tiger_white_loaf.png" />
+            <field name="description_sale">Tiger bloomer. Baked for a soft inside, with its distinctive savoury crackled
+                crust.</field>
         </record>
-        <record id="product.consu_delivery_01" model="product.product">
-          <field name="available_in_pos" eval="True"/>
-          <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_miscellaneous')])]"/>
+
+        <record id="butter_croissant" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">1.20</field>
+            <field name="name">Butter Croissant</field>
+            <field name="default_code">FURN_0017</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_bakery')])]" />
+            <field name="to_weight">False</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/butter_croissant.png" />
+            <field name="description_sale">Flaky all butter pastry, layered for a light and golden croissant.</field>
         </record>
+
+        <record id="apple_pie" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">12.0</field>
+            <field name="name">Apple Pie</field>
+            <field name="default_code">FURN_0018</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_bakery')])]" />
+            <field name="to_weight">False</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/apple_pie.png" />
+            <field name="description_sale">Shortcrust pastry with a Bramley apple filling.</field>
+        </record>
+
+        <record id="cherry_pie" model="product.product">
+            <field name="available_in_pos">True</field>
+            <field name="list_price">12.0</field>
+            <field name="name">Cherry Pie</field>
+            <field name="default_code">FURN_0019</field>
+            <field name="type">product</field>
+            <field name="weight">0.01</field>
+            <field name="categ_id" ref="product.product_category_1" />
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_category_bakery')])]" />
+            <field name="to_weight">False</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('pos_taxes_0')])]" />
+            <field name="uom_id" ref="uom.product_uom_unit" />
+            <field name="uom_po_id" ref="uom.product_uom_unit" />
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/cherry_pie.png" />
+            <field name="description_sale">Shortcrust pastry with a Morello cherry filling.</field>
+        </record>
+
+        <!-- Closed Sessions -->
+        <!-- forcecreate is set to false in order to not create record when updating the db -->
+
+        <function model="ir.model.data" name="_update_xmlids">
+            <value model="base" eval="[{
+                    'xml_id': 'point_of_sale.payment_method',
+                    'record': obj().env.ref('point_of_sale.pos_config_main').payment_method_ids[0],
+                    'noupdate': True,
+                    }]" />
+        </function>
+
+        <!-- Closed Session 1 -->
+
+        <record id="pos_closed_session_1" model="pos.session" forcecreate="False">
+            <field name="config_id" ref="pos_config_main" />
+            <field name="user_id" ref="base.user_admin" />
+            <field name="start_at" eval="(DateTime.today() + relativedelta(days=-1)).strftime('%Y-%m-%d %H:%M:%S')" />
+            <field name="stop_at"
+                eval="(DateTime.today() + relativedelta(days=-1, hours=1)).strftime('%Y-%m-%d %H:%M:%S')" />
+        </record>
+
+        <record id="pos_closed_order_1_1" model="pos.order" forcecreate="False">
+            <field name="session_id" ref="pos_closed_session_1" />
+            <field name="company_id" ref="base.main_company" />
+            <field name="name">ClosedDemo/0001</field>
+            <field name="state">paid</field>
+            <field name="amount_total">85.40</field>
+            <field name="amount_tax">0.0</field>
+            <field name="amount_paid">85.40</field>
+            <field name="amount_return">0.0</field>
+            <field name="pos_reference">Order 00000-001-1001</field>
+            <field name="partner_id" ref="base.res_partner_1" />
+        </record>
+
+        <record id="pos_closed_orderline_1_1_1" model="pos.order.line" forcecreate="False">
+            <field name="product_id" ref="odoo_sneakers" />
+            <field name="price_subtotal">60.40</field>
+            <field name="price_subtotal_incl">60.40</field>
+            <field name="price_unit">60.40</field>
+            <field name="order_id" ref="pos_closed_order_1_1" />
+            <field name="full_product_name">Odoo Sneakers</field>
+        </record>
+
+        <record id="pos_closed_orderline_1_1_2" model="pos.order.line" forcecreate="False">
+            <field name="product_id" ref="crocheted_poncho_unisize" />
+            <field name="price_subtotal">25.0</field>
+            <field name="price_subtotal_incl">25.0</field>
+            <field name="price_unit">25.0</field>
+            <field name="order_id" ref="pos_closed_order_1_1" />
+            <field name="full_product_name">Crocheted Poncho Unisize</field>
+        </record>
+
+        <record id="pos_payment_1" model="pos.payment" forcecreate="False">
+            <field name="payment_method_id" ref="point_of_sale.payment_method" />
+            <field name="pos_order_id" ref="pos_closed_order_1_1" />
+            <field name="amount">85.40</field>
+        </record>
+
+        <record id="pos_closed_order_1_2" model="pos.order" forcecreate="False">
+            <field name="session_id" ref="pos_closed_session_1" />
+            <field name="company_id" ref="base.main_company" />
+            <field name="name">ClosedDemo/0002</field>
+            <field name="state">paid</field>
+            <field name="amount_total">2220.50</field>
+            <field name="amount_tax">0.0</field>
+            <field name="amount_paid">2220.50</field>
+            <field name="amount_return">0.0</field>
+            <field name="pos_reference">Order 00000-001-1002</field>
+            <field name="partner_id" ref="base.res_partner_1" />
+        </record>
+
+        <record id="pos_closed_orderline_1_2_1" model="pos.order.line" forcecreate="False">
+            <field name="product_id" ref="product.product_product_12" />
+            <field name="price_subtotal">120.50</field>
+            <field name="price_subtotal_incl">120.5</field>
+            <field name="price_unit">120.50</field>
+            <field name="order_id" ref="pos_closed_order_1_2" />
+            <field name="full_product_name">Office Chair Black</field>
+        </record>
+
+        <record id="pos_closed_orderline_1_2_2" model="pos.order.line" forcecreate="False">
+            <field name="product_id" ref="product.product_product_22" />
+            <field name="price_subtotal">2100.0</field>
+            <field name="price_subtotal_incl">2100.0</field>
+            <field name="price_unit">2100.0</field>
+            <field name="order_id" ref="pos_closed_order_1_2" />
+            <field name="full_product_name">Desk Stand with Screen</field>
+        </record>
+
+        <record id="pos_payment_2" model="pos.payment" forcecreate="False">
+            <field name="payment_method_id" ref="point_of_sale.payment_method" />
+            <field name="pos_order_id" ref="pos_closed_order_1_2" />
+            <field name="amount">2220.50</field>
+        </record>
+
+        <function model="pos.session" name="action_pos_session_closing_control"
+            eval="[[ref('pos_closed_session_1')]]" />
+
+        <!-- Closed Session 2 -->
+
+        <record id="pos_closed_session_2" model="pos.session" forcecreate="False">
+            <field name="config_id" ref="pos_config_main" />
+            <field name="user_id" ref="base.user_admin" />
+            <field name="start_at" eval="(DateTime.today() + relativedelta(hours=-3)).strftime('%Y-%m-%d %H:%M:%S')" />
+            <field name="stop_at" eval="(DateTime.today() + relativedelta(hours=-2)).strftime('%Y-%m-%d %H:%M:%S')" />
+        </record>
+
+        <record id="pos_closed_order_2_1" model="pos.order" forcecreate="False">
+            <field name="session_id" ref="pos_closed_session_2" />
+            <field name="company_id" ref="base.main_company" />
+            <field name="name">ClosedDemo/0003</field>
+            <field name="state">paid</field>
+            <field name="amount_total">14.99</field>
+            <field name="amount_tax">0.0</field>
+            <field name="amount_paid">14.99</field>
+            <field name="amount_return">0.0</field>
+            <field name="pos_reference">Order 00000-002-1001</field>
+            <field name="partner_id" ref="base.res_partner_12" />
+        </record>
+
+        <record id="pos_closed_orderline_2_1_1" model="pos.order.line" forcecreate="False">
+            <field name="name">Closed Orderline 2.1.1</field>
+            <field name="product_id" ref="wholemeal_loaf" />
+            <field name="price_subtotal">2.99</field>
+            <field name="price_subtotal_incl">2.99</field>
+            <field name="price_unit">2.99</field>
+            <field name="order_id" ref="pos_closed_order_2_1" />
+            <field name="full_product_name">Wholemeal Loaf</field>
+        </record>
+
+        <record id="pos_closed_orderline_2_1_2" model="pos.order.line" forcecreate="False">
+            <field name="name">Closed Orderline 2.1.2</field>
+            <field name="product_id" ref="apple_pie" />
+            <field name="price_subtotal">12.0</field>
+            <field name="price_subtotal_incl">12.0</field>
+            <field name="price_unit">12.0</field>
+            <field name="order_id" ref="pos_closed_order_2_1" />
+            <field name="full_product_name">Apple Pie</field>
+        </record>
+
+        <record id="pos_payment_3" model="pos.payment" forcecreate="False">
+            <field name="payment_method_id" ref="point_of_sale.payment_method" />
+            <field name="pos_order_id" ref="pos_closed_order_2_1" />
+            <field name="amount">14.99</field>
+        </record>
+
+        <record id="pos_closed_order_2_2" model="pos.order" forcecreate="False">
+            <field name="session_id" ref="pos_closed_session_2" />
+            <field name="company_id" ref="base.main_company" />
+            <field name="name">ClosedDemo/0003</field>
+            <field name="state">paid</field>
+            <field name="amount_total">5.15</field>
+            <field name="amount_tax">0.0</field>
+            <field name="amount_paid">5.15</field>
+            <field name="amount_return">0.0</field>
+            <field name="pos_reference">Order 00000-002-1002</field>
+            <field name="partner_id" ref="base.res_partner_12" />
+        </record>
+
+        <record id="pos_closed_orderline_2_2_1" model="pos.order.line" forcecreate="False">
+            <field name="name">Closed Orderline 2.2.1</field>
+            <field name="product_id" ref="tiger_white_loaf" />
+            <field name="price_subtotal">2.75</field>
+            <field name="price_subtotal_incl">2.75</field>
+            <field name="price_unit">2.75</field>
+            <field name="order_id" ref="pos_closed_order_2_2" />
+            <field name="full_product_name">Tiger White Loaf</field>
+        </record>
+
+        <record id="pos_closed_orderline_2_2_2" model="pos.order.line" forcecreate="False">
+            <field name="name">Closed Orderline 2.1.2</field>
+            <field name="product_id" ref="butter_croissant" />
+            <field name="price_subtotal">2.40</field>
+            <field name="price_subtotal_incl">2.40</field>
+            <field name="qty">2</field>
+            <field name="price_unit">1.20</field>
+            <field name="order_id" ref="pos_closed_order_2_2" />
+            <field name="full_product_name">Butter Croissant</field>
+        </record>
+
+        <record id="pos_payment_4" model="pos.payment" forcecreate="False">
+            <field name="payment_method_id" ref="point_of_sale.payment_method" />
+            <field name="pos_order_id" ref="pos_closed_order_2_2" />
+            <field name="amount">5.15</field>
+        </record>
+
+        <function model="pos.session" name="action_pos_session_closing_control"
+            eval="[[ref('pos_closed_session_2')]]" />
+
+        <!-- Open Session -->
+
+        <record id="pos_open_session_1" model="pos.session" forcecreate="False">
+            <field name="config_id" ref="pos_config_main" />
+            <field name="user_id" ref="base.user_admin" />
+        </record>
+
+        <record id="pos_open_order_1" model="pos.order" forcecreate="False">
+            <field name="session_id" ref="pos_open_session_1" />
+            <field name="company_id" ref="base.main_company" />
+            <field name="name">Shop/00001</field>
+            <field name="state">draft</field>
+            <field name="amount_total">1.20</field>
+            <field name="amount_tax">0.0</field>
+            <field name="amount_paid">0.0</field>
+            <field name="amount_return">0.0</field>
+            <field name="pos_reference">Order 00001-001-0000</field>
+            <field name="partner_id" ref="base.res_partner_1" />
+        </record>
+
+        <record id="pos_orderline_1" model="pos.order.line" forcecreate="False">
+            <field name="name">Orderline 1</field>
+            <field name="product_id" ref="butter_croissant" />
+            <field name="price_subtotal">1.20</field>
+            <field name="price_subtotal_incl">1.20</field>
+            <field name="price_unit">1.20</field>
+            <field name="order_id" ref="pos_open_order_1" />
+            <field name="full_product_name">Butter Croissant</field>
+        </record>
+    </data>
 </odoo>

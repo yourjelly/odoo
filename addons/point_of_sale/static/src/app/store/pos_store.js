@@ -205,6 +205,7 @@ export class PosStore extends Reactive {
         const { start_category, iface_start_categ_id } = this.config;
         this.selectedCategoryId = (start_category && iface_start_categ_id?.[0]) || 0;
         this.hasBigScrollBars = this.config.iface_big_scrollbars;
+        this.load_server_orders();
         // Push orders in background, do not await
         this.push_orders();
         this.markReady();
@@ -252,6 +253,7 @@ export class PosStore extends Reactive {
         this.pos_has_valid_product = loadedData["pos_has_valid_product"];
         await this._loadPictures();
         await this._loadPosPrinters(loadedData["pos.printer"]);
+        this.open_orders_json = loadedData["open_orders"];
     }
     _loadPosSession() {
         // We need to do it here, since only then the local storage has the correct uuid
@@ -599,6 +601,17 @@ export class PosStore extends Reactive {
             }
         }
         this.loadingOrderState = false;
+    }
+    load_server_orders() {
+        if (!this.open_orders_json) {
+            return;
+        }
+        for (const json of this.open_orders_json) {
+            this._createOrder(json);
+        }
+        if (this.open_orders_json.length > 0) {
+            this.selectedOrder = this.orders[1];
+        }
     }
     async _loadMissingProducts(orders) {
         const missingProductIds = new Set([]);

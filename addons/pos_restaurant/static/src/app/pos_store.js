@@ -25,15 +25,15 @@ patch(PosStore.prototype, "pos_restaurant.PosStore", {
      * @override
      */
     async setup() {
+        this.orderToTransfer = null; // table transfer feature
+        this.transferredOrdersSet = new Set(); // used to know which orders has been transferred but not sent to the back end yet
+        this.floorPlanStyle = "default";
+        this.isEditMode = false;
         await this._super(...arguments);
         if (this.config.module_pos_restaurant) {
             this.setActivityListeners();
             this.showScreen("FloorScreen", { floor: this.table?.floor || null });
         }
-        this.orderToTransfer = null; // table transfer feature
-        this.transferredOrdersSet = new Set(); // used to know which orders has been transferred but not sent to the back end yet
-        this.floorPlanStyle = "default";
-        this.isEditMode = false;
     },
     setActivityListeners() {
         IDLE_TIMER_SETTER = this.setIdleTimer.bind(this);

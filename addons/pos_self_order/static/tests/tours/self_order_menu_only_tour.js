@@ -13,7 +13,7 @@ registry.category("web_tour.tours").add("self_order_menu_only_tour", {
         PosSelf.action.clickBack(),
         ...PosSelf.check.cannotAddProduct("Office Chair Black"),
         PosSelf.action.clickBack(),
-        ...PosSelf.check.cannotAddProduct("Conference Chair (Aluminium)"),
+        ...PosSelf.check.cannotAddProduct("Desk Combination"),
         PosSelf.action.clickBack(),
         PosSelf.check.isNotPrimaryBtn("Review"),
     ],

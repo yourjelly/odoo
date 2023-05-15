@@ -439,7 +439,7 @@ class PosOrder(models.Model):
 
     @api.model
     def _complete_values_from_session(self, session, values):
-        if values.get('state') and values['state'] == 'paid':
+        if values.get('state') and values['state'] == 'paid' and not values.get('name'):
             values['name'] = self._compute_order_name()
         values.setdefault('pricelist_id', session.config_id.pricelist_id.id)
         values.setdefault('fiscal_position_id', session.config_id.default_fiscal_position_id.id)
@@ -1162,15 +1162,20 @@ class PosOrder(models.Model):
         """Search for 'draft' orders that satisfy the given domain."""
         config = self.env['pos.config'].browse(config_id)
         default_domain = ['&', ('state', '=', 'draft'), '|', ('config_id', '=', config_id), ('config_id', 'in', config.trusted_config_ids.ids)]
+        orders = self.get_orders(default_domain)
+
+        return orders
+
+    @api.model
+    def get_orders(self, domain):
         orders = self.search_read(
-                domain=default_domain,
+                domain=domain,
                 fields=self._get_fields_for_draft_order())
 
         self._get_order_lines(orders)
         self._get_payment_lines(orders)
 
         self._prepare_order(orders)
-
         return orders
 
     def is_already_paid(self):

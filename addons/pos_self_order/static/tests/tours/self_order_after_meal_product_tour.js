@@ -12,19 +12,19 @@ registry.category("web_tour.tours").add("self_order_after_meal_product_tour", {
 
         // Add some products
         PosSelf.action.clickPrimaryBtn("View Menu"),
-        ...PosSelf.action.addProduct("Large Cabinet", 15),
+        ...PosSelf.action.addProduct("Desk Stand with Screen", 15),
         ...PosSelf.action.addProduct("Office Chair Black", 3),
-        ...PosSelf.action.addProduct("Conference Chair (Aluminium)", 7),
+        ...PosSelf.action.addProduct("Desk Combination", 7),
 
         // Check if products in the products list have their quantity
         // They should have because in "meal" mode we add products always to the same order
-        PosSelf.check.isProductQuantity("Large Cabinet", 15),
+        PosSelf.check.isProductQuantity("Desk Stand with Screen", 15),
         PosSelf.check.isProductQuantity("Office Chair Black", 3),
-        PosSelf.check.isProductQuantity("Conference Chair (Aluminium)", 7),
+        PosSelf.check.isProductQuantity("Desk Combination", 7),
 
         // Check if product price are shown.
-        PosSelf.check.isProductPrice("Cabinet with Doors", "161.00"),
-        PosSelf.check.isProductPrice("Desk Pad", "2.28"),
-        PosSelf.check.isProductPrice("Letter Tray", "5.52"),
+        PosSelf.check.isProductPrice("Cherry Pie", "13.80"),
+        PosSelf.check.isProductPrice("Butter Croissant", "1.38"),
+        PosSelf.check.isProductPrice("Tiger white loaf", "3.16"),
     ],
 });
