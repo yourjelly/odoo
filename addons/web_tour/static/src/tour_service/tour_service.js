@@ -73,7 +73,8 @@ function extractRegisteredTours() {
 }
 
 export const tourService = {
-    dependencies: ["orm", "effect", "ui"],
+    // depend on localization service to ensure translations are loaded
+    dependencies: ["orm", "effect", "ui", "localization"],
     start: async (_env, { orm, effect, ui }) => {
         await whenReady();
 
