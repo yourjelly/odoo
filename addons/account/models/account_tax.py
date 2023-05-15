@@ -145,6 +145,7 @@ class AccountTax(models.Model):
     invoice_repartition_line_ids = fields.One2many(
         string="Distribution for Invoices",
         comodel_name="account.tax.repartition.line",
+        compute='_compute_repartition_line_ids', store=True, readonly=False,
         inverse_name="tax_id",
         domain=[('document_type', '=', 'invoice')],
         help="Distribution when the tax is used on an invoice",
@@ -152,6 +153,7 @@ class AccountTax(models.Model):
     refund_repartition_line_ids = fields.One2many(
         string="Distribution for Refund Invoices",
         comodel_name="account.tax.repartition.line",
+        compute='_compute_repartition_line_ids', store=True, readonly=False,
         inverse_name="tax_id",
         domain=[('document_type', '=', 'refund')],
         help="Distribution when the tax is used on a refund",
@@ -159,6 +161,7 @@ class AccountTax(models.Model):
     repartition_line_ids = fields.One2many(
         string="Distribution",
         comodel_name="account.tax.repartition.line",
+        compute='_compute_repartition_line_ids', store=True, readonly=False,
         inverse_name="tax_id",
         copy=True,
         help="Distribution when the tax is used on a refund",
@@ -206,23 +209,18 @@ class AccountTax(models.Model):
                 ('country_id', '=', False),
             ], limit=1)
 
-    @api.model
-    def default_get(self, fields_list):
-        # company_id is added so that we are sure to fetch a default value from it to use in repartition lines, below
-        rslt = super(AccountTax, self).default_get(fields_list + ['company_id'])
-
-        company_id = rslt.get('company_id')
-
-        repartition = rslt.setdefault('repartition_line_ids', [])
-        if 'repartition_line_ids' in fields_list and not repartition:
-            repartition.extend([
-                Command.create({'document_type': 'invoice', 'repartition_type': 'base', 'tag_ids': [], 'company_id': company_id}),
-                Command.create({'document_type': 'invoice', 'repartition_type': 'tax', 'tag_ids': [], 'company_id': company_id}),
-                Command.create({'document_type': 'refund', 'repartition_type': 'base', 'tag_ids': [], 'company_id': company_id}),
-                Command.create({'document_type': 'refund', 'repartition_type': 'tax', 'tag_ids': [], 'company_id': company_id}),
-            ])
-
-        return rslt
+    @api.depends('company_id')
+    def _compute_repartition_line_ids(self):
+        for tax in self:
+            if not tax.repartition_line_ids:
+                tax.invoice_repartition_line_ids = [
+                    Command.create({'document_type': 'invoice', 'repartition_type': 'base', 'tag_ids': [], 'company_id': tax.company_id.id}),
+                    Command.create({'document_type': 'invoice', 'repartition_type': 'tax', 'tag_ids': [], 'company_id': tax.company_id.id}),
+                ]
+                tax.refund_repartition_line_ids = [
+                    Command.create({'document_type': 'refund', 'repartition_type': 'base', 'tag_ids': [], 'company_id': tax.company_id.id}),
+                    Command.create({'document_type': 'refund', 'repartition_type': 'tax', 'tag_ids': [], 'company_id': tax.company_id.id}),
+                ]
 
     @staticmethod
     def _parse_name_search(name):
@@ -254,7 +252,7 @@ class AccountTax(models.Model):
         if len(base_line) != 1:
             raise ValidationError(_("Invoice and credit note distribution should each contain exactly one line for the base."))
 
-    @api.constrains('invoice_repartition_line_ids', 'refund_repartition_line_ids')
+    @api.constrains('invoice_repartition_line_ids', 'refund_repartition_line_ids', 'repartition_line_ids')
     def _validate_repartition_lines(self):
         for record in self:
             invoice_repartition_line_ids = record.invoice_repartition_line_ids.sorted(lambda l: (l.sequence, l.id))
@@ -325,6 +323,7 @@ class AccountTax(models.Model):
                     else (command, id, v)
                     for command, id, v in sanitized.pop(fname)
                 ])
+                sanitized[fname] = []
         return sanitized
 
     @api.model_create_multi
