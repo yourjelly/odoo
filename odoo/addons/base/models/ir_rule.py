@@ -229,14 +229,6 @@ class IrRule(models.Model):
         operation_error = msg_heads[operation]
         resolution_info = _("Contact your administrator to request access if necessary.")
 
-        if not self.env.user.has_group('base.group_no_one') or not self.env.user.has_group('base.group_user'):
-            msg = """{operation_error}
-
-{resolution_info}""".format(
-                operation_error=operation_error,
-                resolution_info=resolution_info)
-            return AccessError(msg)
-
         # This extended AccessError is only displayed in debug mode.
         # Note that by default, public and portal users do not have
         # the group "base.group_no_one", even if debug mode is enabled,
