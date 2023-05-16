@@ -10,7 +10,7 @@
          * @override method from `payment.post_processing`
          * @param {Object} display_values - The post-processing values of the transaction
          */
-        processPolledData: function (display_values) {
+        processPolledData(display_values) {
             if (display_values.provider_code === 'custom') {
                 window.location = display_values.landing_route;
             } else {
