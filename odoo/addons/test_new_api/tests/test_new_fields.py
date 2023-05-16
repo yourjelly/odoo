@@ -497,11 +497,40 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual((a + b + c + d).exists(), a)
 
     def test_12_recursive_recompute_2(self):
-        root = self.env['test_new_api.recursive'].create({'name': str(0)})
+        RecursiveModel = self.env['test_new_api.recursive']
+        root = RecursiveModel.create({'name': str(0)})
+        all_records = root
         for i in range(100):
-            root = self.env['test_new_api.recursive'].create({'name': str(i + 1), 'parent': root.id})
+            root = RecursiveModel.create({'name': str(i + 1), 'parent': root.id})
+            all_records += root
 
-        self.env.flush_all()
+        self.env.invalidate_all()  # flush and clean all caches
+        all_records[0].name = 'ROOT'
+        self.env.invalidate_all()  # flush and clean all caches
+        all_records[0].display_name = '0'
+
+        self.assertEqual(self.env.records_to_compute(RecursiveModel._fields['display_name']), all_records[1:])
+
+        # # Create a ir.rule, which will force to flush `display_name` when `_read`
+        # self.env['ir.rule'].create({
+        #     'model_id': self.env['ir.model']._get_id('test_new_api.recursive'),
+        #     'groups': [self.env.ref('base.group_user').id],
+        #     'domain_force': str([('display_name', '!=', False)]),
+        # })
+        self.env.invalidate_all()  # flush and clean all caches
+        all_records = all_records.with_user(self.user_demo)  # Use the user_demo to have previous ir rule apply
+
+        all_records[0].display_name = 'Root'
+        self.assertEqual(self.env.records_to_compute(RecursiveModel._fields['display_name']), all_records[1:])
+
+        all_records[-1].display_name
+        self.env.invalidate_all()  # flush and clean all caches
+
+        all_records[0].display_name = 'Other'
+        self.assertEqual(self.env.records_to_compute(RecursiveModel._fields['display_name']), all_records[1:])
+
+        next(reversed(all_records)).display_name
+
 
     def test_12_recursive_tree(self):
         foo = self.env['test_new_api.recursive.tree'].create({'name': 'foo'})
