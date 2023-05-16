@@ -447,9 +447,10 @@ actual arch.
                 combined_arch = view._get_combined_arch()
                 if view.type == 'qweb':
                     continue
-            except ValueError as e:
-                err = ValidationError(_(
-                    "Error while validating view:\n\n%(error)s",
+
+            except (etree.ParseError, ValueError) as e:
+                err = UserError(_(
+                    "Error while parsing or validating view:\n\n%(error)s",
                     error=tools.ustr(e),
                 )).with_traceback(e.__traceback__)
                 err.context = getattr(e, 'context', None)
@@ -468,7 +469,7 @@ actual arch.
                     check = valid_view(view_arch, env=self.env, model=view.model)
                     if not check:
                         view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
-                        raise ValidationError(_(
+                        raise UserError(_(
                             'Invalid view %(name)s definition in %(file)s',
                             name=view_name, file=view.arch_fs
                         ))
@@ -478,7 +479,7 @@ actual arch.
             except ValueError as e:
                 lines = etree.tostring(combined_arch, encoding='unicode').splitlines(keepends=True)
                 fivelines = "".join(lines[max(0, e.context["line"]-3):e.context["line"]+2])
-                err = ValidationError(_(
+                err = UserError(_(
                     "Error while validating view near:\n\n%(fivelines)s\n%(error)s",
                     fivelines=fivelines, error=tools.ustr(e),
                 ))
