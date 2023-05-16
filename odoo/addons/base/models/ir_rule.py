@@ -250,7 +250,7 @@ class IrRule(models.Model):
 
 {failing_records}
 {failing_user}
-
+{company}
 {failing_rules}
 
 {resolution_info}""".format(
@@ -258,7 +258,8 @@ class IrRule(models.Model):
                 failing_records=failing_records,
                 failing_user=failing_user,
                 failing_rules=failing_rules,
-                resolution_info=resolution_info)
+                resolution_info=resolution_info,
+                company=f"Company: {self.env.company.id} - {self.env.company.name}")
 
         # clean up the cache of records prefetched with display_name above
         for record in records[:6]:
