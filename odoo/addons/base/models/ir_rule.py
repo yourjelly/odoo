@@ -264,6 +264,9 @@ class IrRule(models.Model):
         for record in records[:6]:
             record._cache.clear()
 
+        import traceback
+        traceback.print_stack()
+
         return AccessError(msg)
 
 
