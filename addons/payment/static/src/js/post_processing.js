@@ -15,14 +15,14 @@
 
         _pollCount: 0,
 
-        start: function() {
+        start() {
             this.displayLoading();
             this.poll();
             return this._super.apply(this, arguments);
         },
         /* Methods */
-        startPolling: function () {
-            var timeout = 3000;
+        startPolling() {
+            let timeout = 3000;
             //
             if(this._pollCount >= 10 && this._pollCount < 20) {
                 timeout = 10000;
@@ -34,14 +34,14 @@
             setTimeout(this.poll.bind(this), timeout);
             this._pollCount ++;
         },
-        poll: function () {
-            var self = this;
+        poll() {
+            const self = this;
             this._rpc({
                 route: '/payment/status/poll',
                 params: {
                     'csrf_token': core.csrf_token,
                 }
-            }).then(function(data) {
+            }).then(data => {
                 if(data.success === true) {
                     self.processPolledData(data.display_values);
                 }
@@ -59,16 +59,16 @@
                 }
                 self.startPolling();
 
-            }).guardedCatch(function() {
+            }).guardedCatch(() => {
                 self.displayContent("payment.rpc_error", {});
                 self.startPolling();
             });
         },
-        processPolledData: function (display_values) {
-            var render_values = {};
+        processPolledData(display_values) {
+            let render_values = {};
 
             // group the transaction according to their state
-            var key = 'tx_' + display_values.state;
+            const key = 'tx_' + display_values.state;
 
             if (display_values["display_message"]) {
                 display_values.display_message = Markup(display_values.display_message)
@@ -95,13 +95,13 @@
 
             this.displayContent("payment.display_tx_list", render_values);
         },
-        displayContent: function (xmlid, render_values) {
-            var html = core.qweb.render(xmlid, render_values);
+        displayContent(xmlid, render_values) {
+            const html = core.qweb.render(xmlid, render_values);
             $.unblockUI();
             this.$el.find('div[name="o_payment_status_content"]').html(html);
         },
-        displayLoading: function () {
-            var msg = _t("We are processing your payment, please wait ...");
+        displayLoading() {
+            const msg = _t("We are processing your payment, please wait ...");
             $.blockUI({
                 'message': '<h2 class="text-white"><img src="/web/static/img/spin.png" class="fa-pulse"/>' +
                     '    <br />' + msg +
