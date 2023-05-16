@@ -1331,10 +1331,22 @@ class Field(MetaField('DummyField', (object,), {})):
         if not to_compute_ids:
             return
 
+        def missing_guard(func, batch_records):
+            try:
+                func(batch_records)
+            except MissingError:
+                existing = batch_records.exists()
+                func(existing)
+                for f in batch_records.pool.field_computed[self]:
+                    batch_records.env.remove_to_compute(f, batch_records - existing)
+
         if self.recursive:
-            for record in records:
-                if record.id in to_compute_ids:
-                    self.compute_value(record)
+            def recursive_compute(batch_records):
+                for record in batch_records:
+                    if record.id in to_compute_ids:
+                        self.compute_value(record)
+
+            missing_guard(recursive_compute, records)
             return
 
         for record in records:
@@ -1342,8 +1354,8 @@ class Field(MetaField('DummyField', (object,), {})):
                 ids = expand_ids(record.id, to_compute_ids)
                 recs = record.browse(itertools.islice(ids, PREFETCH_MAX))
                 try:
-                    self.compute_value(recs)
-                except (AccessError, MissingError):
+                    missing_guard(self.compute_value, recs)
+                except AccessError:
                     self.compute_value(record)
 
     def compute_value(self, records):
