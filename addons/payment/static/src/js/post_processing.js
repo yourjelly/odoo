@@ -65,15 +65,10 @@
             });
         },
         processPolledData(display_values) {
-            let render_values = {};
-
-            // group the transaction according to their state
-            const key = 'tx_' + display_values.state;
 
             if (display_values["display_message"]) {
                 display_values.display_message = Markup(display_values.display_message)
             }
-            render_values[key] = display_values;
 
             /*
             * When the server sends the monitored transaction, it tries to post-process it if
@@ -93,10 +88,10 @@
                 return;
             }
 
-            this.displayContent("payment.display_tx_list", render_values);
+            this.displayContent("payment.display_tx_list", display_values);
         },
-        displayContent(xmlid, render_values) {
-            const html = core.qweb.render(xmlid, render_values);
+        displayContent(xmlid, display_values) {
+            const html = core.qweb.render(xmlid, display_values);
             $.unblockUI();
             this.$el.find('div[name="o_payment_status_content"]').html(html);
         },
