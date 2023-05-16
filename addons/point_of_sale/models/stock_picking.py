@@ -42,6 +42,7 @@ class StockPicking(models.Model):
                 self._prepare_picking_vals(partner, picking_type, location_id, location_dest_id)
             )
 
+            print(f"POSITIVE PICKING: Company: {positive_picking.company_id.id} - {positive_picking.company_id.name}")
             positive_picking._create_move_from_pos_order_lines(positive_lines)
             try:
                 with self.env.cr.savepoint():
