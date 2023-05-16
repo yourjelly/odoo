@@ -212,7 +212,7 @@ class TestPoSStock(TestPoSCommon):
             'owner_id': self.partner_a.id,
         }).action_apply_inventory()
 
-        print('READING STOCK MOVES AFTER INVENTORY ADJUSTMENT: ', self.env['stock.move'].search([]).mapped(lambda move: (move.id, move.display_name)))
+        print('READING STOCK MOVES AFTER INVENTORY ADJUSTMENT: ', self.env['stock.move'].search([]).mapped(lambda move: (move.id, move.display_name, f"Company: {move.company_id.id}, {move.company_id.name}")))
         print('USER:', self.env.user.id, self.env.user.name)
         print('COMPANY: ', self.env.company.id, self.env.company.name)
 
@@ -225,7 +225,7 @@ class TestPoSStock(TestPoSCommon):
         # sync orders
         order = self.env['pos.order'].create_from_ui(orders)
 
-        print('READING STOCK MOVES AFTER POS ORDER CREATION: ', self.env['stock.move'].search([]).mapped(lambda move: (move.id, move.display_name)))
+        print('READING STOCK MOVES AFTER POS ORDER CREATION: ', self.env['stock.move'].search([]).mapped(lambda move: (move.id, move.display_name, f"Company: {move.company_id.id}, {move.company_id.name}")))
         print('USER:', self.env.user.id, self.env.user.name)
         print('COMPANY: ', self.env.company.id, self.env.company.name)
 
