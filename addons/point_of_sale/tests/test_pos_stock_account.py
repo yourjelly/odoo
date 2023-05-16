@@ -215,8 +215,11 @@ class TestPoSStock(TestPoSCommon):
         print('READING STOCK MOVES AFTER INVENTORY ADJUSTMENT: ', self.env['stock.move'].search([]).mapped(lambda move: (move.id, move.display_name, f"Company: {move.company_id.id}, {move.company_id.name}")))
         print('USER:', self.env.user.id, self.env.user.name)
         print('COMPANY: ', self.env.company.id, self.env.company.name)
+        print('POS CONFIG BEFORE OPENING SESSION: ', self.config.id, self.config.name, f"Company: {self.config.company_id.id} - {self.config.company_id.name}")
 
         self.open_new_session()
+
+        print('POS CONFIG AFTER OPENING SESSION: ', self.config.id, self.config.name, f"Company: {self.config.company_id.id} - {self.config.company_id.name}")
 
         # create orders
         orders = []
@@ -224,6 +227,11 @@ class TestPoSStock(TestPoSCommon):
 
         # sync orders
         order = self.env['pos.order'].create_from_ui(orders)
+
+        orderobj = self.env['pos.order'].browse(order[0]['id'])
+
+        print('POS CONFIG AFTER CREATING ORDER: ', self.config.id, self.config.name, f"Company: {self.config.company_id.id} - {self.config.company_id.name}")
+        print('CREATED POS ORDER: ', orderobj.id, orderobj.pos_reference, f"Company: {orderobj.company_id.id} - {orderobj.company_id.name}")
 
         print('READING STOCK MOVES AFTER POS ORDER CREATION: ', self.env['stock.move'].search([]).mapped(lambda move: (move.id, move.display_name, f"Company: {move.company_id.id}, {move.company_id.name}")))
         print('USER:', self.env.user.id, self.env.user.name)
