@@ -496,6 +496,13 @@ class TestFields(TransactionCaseWithUserDemo):
         b.unlink()
         self.assertEqual((a + b + c + d).exists(), a)
 
+    def test_12_recursive_recompute_2(self):
+        root = self.env['test_new_api.recursive'].create({'name': str(0)})
+        for i in range(100):
+            root = self.env['test_new_api.recursive'].create({'name': str(i + 1), 'parent': root.id})
+
+        self.env.flush_all()
+
     def test_12_recursive_tree(self):
         foo = self.env['test_new_api.recursive.tree'].create({'name': 'foo'})
         self.assertEqual(foo.display_name, 'foo()')
@@ -515,6 +522,32 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual(record.baz, "<[Hi]>")
         record.foo = "Ho"
         self.assertEqual(record.baz, "<[Ho]>")
+
+    def test_12_unlink_cascade_active_store(self):
+        message = self.env['test_new_api.message'].create({
+            'active': False,
+        })
+        self.env['test_new_api.emailmessage'].create(
+            [{'message': message.id}] * 101,
+        )
+        message.unlink()
+
+    def test_12_unlink_cascade_ir_rule_using_related(self):
+        message = self.env['test_new_api.message'].create({
+            'active': False,
+        })
+        self.env['test_new_api.emailmessage'].create(
+            [{'message': message.id}] * 101,
+        )
+
+        # Create a ir.rule, which will force to flush active
+        self.env['ir.rule'].create({
+            'model_id': self.env['ir.model']._get_id('test_new_api.emailmessage'),
+            'groups': [self.env.ref('base.group_user').id],
+            'domain_force': str([('active', '=', False)]),
+        })
+
+        message.with_user(self.user_demo).unlink()
 
     def test_12_dynamic_depends(self):
         Model = self.registry['test_new_api.compute.dynamic.depends']
