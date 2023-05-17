@@ -150,7 +150,7 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         self.journal_id.l10n_sa_latest_submission_hash = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(xml_content)
-        cls, title, content = ("success", "Invoice Successfully Submitted to ZATCA", response_data or "")
+        cls, title, content = ("success", "Invoice Successfully Submitted to ZATCA", "" if (not error or not response_data) else response_data)
         if error:
             cls, title = ("danger", "Invoice was rejected by ZATCA")
             content = Markup("""

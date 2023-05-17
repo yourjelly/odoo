@@ -242,6 +242,7 @@ class AccountJournal(models.Model):
         except (RequestException, HTTPError, UserError) as e:
             # In case of an exception returned from ZATCA (not timeout), we will need to regenerate the CSR
             # As the same CSR cannot be used twice for the same CCSID request
+            self._l10n_sa_reset_certificates()
             self.l10n_sa_csr_errors = e.args[0] or _("Journal could not be onboarded")
 
     def l10n_sa_api_get_compliance_CSID(self, otp):

@@ -33,7 +33,6 @@
         'views/res_company_views.xml',
         'views/res_config_settings_view.xml',
         'views/report_invoice.xml',
-        'views/l10n_sa_edi_submission_views.xml',
     ],
     'demo': [
         'demo/demo_company.xml',

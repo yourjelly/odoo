@@ -181,7 +181,7 @@
                    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
                     <!--  Add Building number in compliance with rules KSA-17 (seller)/ KSA-18 (customer)  -->
-                    <cbc:BuildingNumber t-out="vals['building_number']"/>
+                    <cbc:BuildingNumber t-out="vals.get('building_number')"/>
                     <!--  Add Plot identification in compliance with rules KSA-23 (seller)/ KSA-19 (customer)  -->
                     <cbc:PlotIdentification t-out="vals.get('plot_identification')"/>
                     <!--  Add Neighborhood in compliance with rules KSA-3 (seller)/ KSA-4 (customer)  -->
