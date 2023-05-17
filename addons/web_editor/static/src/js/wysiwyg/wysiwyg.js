@@ -156,6 +156,7 @@ const Wysiwyg = Widget.extend({
             allowInlineAtRoot: this.options.allowInlineAtRoot,
             getYoutubeVideoElement: getYoutubeVideoElement,
             getContextFromParentRect: options.getContextFromParentRect,
+            getScrollContainer: () => this.scrollableContainer || document.body,
             getPowerboxElement: () => {
                 const selection = (this.options.document || document).getSelection();
                 if (selection.isCollapsed && selection.rangeCount) {
@@ -1477,10 +1478,10 @@ const Wysiwyg = Widget.extend({
         if ($colorpickerGroup.length) {
             this._createPalette();
         }
-        const scrollableContainer = document.querySelector('.o_action_manager .o_content');
-        if (!options.snippets && scrollableContainer) {
+        this.scrollableContainer = document.querySelector('.o_action_manager .o_content');
+        if (!options.snippets && this.scrollableContainer) {
             this.odooEditor.addDomListener(
-                scrollableContainer,
+                this.scrollableContainer,
                 'scroll',
                 throttleForAnimation(this.odooEditor.updateToolbarPosition.bind(this.odooEditor)),
             );
