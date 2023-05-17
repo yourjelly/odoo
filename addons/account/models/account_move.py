@@ -1495,6 +1495,8 @@ class AccountMove(models.Model):
     @api.onchange('company_id')
     def _inverse_company_id(self):
         for move in self:
+            if self.company_id:
+                raise UserError(_('You connot remove company change instead.'))
             if move.journal_id.company_id != move.company_id:
                 self.env.add_to_compute(self._fields['journal_id'], move)
 
