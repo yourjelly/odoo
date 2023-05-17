@@ -4,6 +4,7 @@
 from typing import Optional, List, Dict, Callable
 from werkzeug.urls import url_quote
 import base64
+import uuid
 
 
 from odoo import api, fields, models, modules
@@ -86,14 +87,16 @@ class PosConfig(models.Model):
         base_route = f"/menu/{self.id}"
         if not self.self_order_table_mode:
             return base_route
-        table_access_token = (
+        table = (
             self.env["restaurant.table"]
             .search(
                 [("active", "=", True), *(table_id and [("id", "=", table_id)] or [])], limit=1
             )
-            .access_token
         )
-        return f"{base_route}?at={table_access_token}"
+        if not table.access_token:
+            table.write({'access_token': uuid.uuid4().hex[:8]})
+
+        return f"{base_route}?at={table.access_token}"
 
     def _get_self_order_url(self, table_id: Optional[int] = None) -> str:
         self.ensure_one()
