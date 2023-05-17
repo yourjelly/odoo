@@ -414,11 +414,11 @@ const Wysiwyg = Widget.extend({
         });
 
         if (this.options.autohideToolbar) {
-            // if (this.odooEditor.isMobile) {
+            if (this.odooEditor.isMobile) {
                 $(this.odooEditor.editable).before(this.toolbar.$el);
-            // } else {
-                // $(document.body).append(this.toolbar.$el);
-            // }
+            } else {
+                $(document.body).append(this.toolbar.$el);
+            }
         }
     },
     setupCollaboration(collaborationChannel) {
