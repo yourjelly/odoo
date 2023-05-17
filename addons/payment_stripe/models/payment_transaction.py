@@ -282,8 +282,19 @@ class PaymentTransaction(models.Model):
                 customer=self.token_id.provider_ref,
                 off_session=True,
                 payment_method=self.token_id.stripe_payment_method,
+                **self._stripe_get_mandate_options(),
             )
         return payment_intent_payload
+
+    def _stripe_get_mandate_options(self):
+        return {
+            'payment_method_options[card][mandate_options][reference]': self.reference,
+            'payment_method_options[card][mandate_options][amount_type]': 'maximum',
+            'payment_method_options[card][mandate_options][amount]': payment_utils.to_minor_currency_units(self.amount, self.currency_id),
+            'payment_method_options[card][mandate_options][start_date]': int(round(fields.Datetime.now().timestamp())),
+            'payment_method_options[card][mandate_options][interval]': 'sporadic',
+            'payment_method_options[card][mandate_options][supported_types][]': 'india',
+        }
 
     def _send_refund_request(self, amount_to_refund=None):
         """ Override of payment to send a refund request to Stripe.
