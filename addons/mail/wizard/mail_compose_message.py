@@ -335,6 +335,7 @@ class MailComposer(models.TransientModel):
                     mail_values['reply_to'] = mail_values['email_from']
                 # mail_mail values: body -> body_html, partner_ids -> recipient_ids
                 mail_values['body_html'] = mail_values.get('body', '')
+                partner_ids = mail_values['partner_ids']
                 mail_values['recipient_ids'] = [(4, id) for id in mail_values.pop('partner_ids', [])]
 
                 # process attachments: should not be encoded before being processed by message_post / mail_mail create
@@ -354,6 +355,47 @@ class MailComposer(models.TransientModel):
                     mail_values['state'] = 'cancel'
                     # Do not post the mail into the recipient's chatter
                     mail_values['notification'] = False
+
+                # body: render layout in mass mail mode (comment mode is managed by the
+                # notification process, see @_notify_record_by_email)
+                email_layout_xmlid = self._context.get('custom_layout')
+                model_description = self._context.get('model_description')
+                if email_layout_xmlid and mail_values['recipient_ids']:
+                    msg_vals = {
+                        'email_layout_xmlid': email_layout_xmlid,
+                        'model': self.model,
+                        'partner_ids': partner_ids,
+                        'channel_ids': set(mail_values.get('channel_ids', [])),
+                        'subtype_id': self.subtype_id.id,
+                        'message_type': self.message_type,
+                    }
+                    message_inmem = self.env['mail.message'].new({
+                        'body': mail_values['body'],
+                    })
+
+                    recipients_data = record._notify_compute_recipients(message=message_inmem, msg_vals=msg_vals)
+                    partners_data = [r for r in recipients_data['partners'] if r['notif'] == 'email']
+                    recipients_groups_data = record._notify_classify_recipients(partners_data, model_description,
+                                                                                msg_vals=msg_vals)
+
+                    template_values = record._notify_prepare_template_context(message_inmem, mail_values,
+                                                                              model_description=model_description)
+                    try:
+                        base_template = self.env.ref(email_layout_xmlid, raise_if_not_found=True).with_context(
+                            lang=template_values['lang'])
+                    except ValueError:
+                        base_template = False
+
+                    for recipients_group_data in recipients_groups_data:
+                        render_values = {**template_values, **recipients_group_data}
+
+                        if base_template:
+                            mail_body = base_template._render(render_values, engine='ir.qweb', minimal_qcontext=True)
+                        else:
+                            mail_body = mail_values['body_html']
+                        mail_body = self.env['mail.render.mixin']._replace_local_links(mail_body)
+
+                        mail_values['body_html'] = mail_body
 
             results[res_id] = mail_values
         return results
