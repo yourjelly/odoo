@@ -2922,6 +2922,9 @@ export class OdooEditor extends EventTarget {
         const OFFSET = 10;
         let isBottom = false;
         this.toolbar.classList.toggle('toolbar-bottom', false);
+        // Toolbar must be visible in order to get its offsetWidth/Height.
+        this.toolbar.classList.toggle('d-none', false);
+        this.toolbar.style.removeProperty('z-index');
         this.toolbar.style.maxWidth = window.innerWidth - OFFSET * 2 + 'px';
         const sel = this.document.getSelection();
         const range = sel.getRangeAt(0);
@@ -2934,6 +2937,7 @@ export class OdooEditor extends EventTarget {
         // height to be 0. In that case, use the rect of the startContainer if
         // possible.
         const isSelectionPotentiallyBugged = [selRect.x, selRect.y, selRect.width, selRect.height].every( x => x === 0 );
+        if (isSelectionPotentiallyBugged) console.log('selection bugged');
         let correctedSelectionRect = isSelectionPotentiallyBugged && startRect ? startRect : selRect;
         const selAncestors = [sel.anchorNode, ...ancestors(sel.anchorNode, this.editable)];
         // If a table is selected, we want to position the toolbar in function
@@ -2946,9 +2950,9 @@ export class OdooEditor extends EventTarget {
         const toolbarHeight = this.toolbar.offsetHeight;
         const editorRect = this.editable.getBoundingClientRect();
         const parentContextRect = this.options.getContextFromParentRect();
+        const scrollContainer = this.options.getScrollContainer();
+        const scrollContainerRect = scrollContainer.getBoundingClientRect();
         const editorTopPos = Math.max(0, editorRect.top);
-        const scrollX = this.document.defaultView.scrollX;
-        const scrollY = this.document.defaultView.scrollY;
 
         // Get left position.
         let left = correctedSelectionRect.left + OFFSET;
@@ -2958,21 +2962,19 @@ export class OdooEditor extends EventTarget {
         left = Math.min(window.innerWidth - OFFSET - toolbarWidth, left);
         // Offset left to compensate for parent context position (eg. Iframe).
         left += parentContextRect.left;
-        this.toolbar.style.left = scrollX + left + 'px';
+        this.toolbar.style.left = left + 'px';
 
         // Get top position.
         let top = correctedSelectionRect.top - toolbarHeight - OFFSET;
-        // Ensure the toolbar doesn't overflow the editor on the top.
-        if (top < editorTopPos) {
+        // Ensure the toolbar doesn't overflow the editor or scroll container on the top.
+        if (top < editorTopPos || top + parentContextRect.top < scrollContainerRect.top) {
             // Position the toolbar below the selection.
             top = correctedSelectionRect.bottom + OFFSET;
             isBottom = true;
         }
-        // Ensure the toolbar doesn't overflow the editor on the bottom.
-        top = Math.min(window.innerHeight - OFFSET - toolbarHeight, top);
         // Offset top to compensate for parent context position (eg. Iframe).
         top += parentContextRect.top;
-        this.toolbar.style.top = scrollY + top + 'px';
+        this.toolbar.style.top = top + 'px';
 
         // Position the arrow.
         let arrowLeftPos = (isSelForward && !isSelectionPotentiallyBugged ? correctedSelectionRect.right : correctedSelectionRect.left) - left - OFFSET;
@@ -2987,6 +2989,14 @@ export class OdooEditor extends EventTarget {
         } else {
             this.toolbar.style.setProperty('--arrow-top-pos', toolbarHeight - 3 + 'px');
         }
+
+        // Calculate final position including the arrow.
+        const arrowHeight = 5;
+        const toolbarTop = top - (isBottom ? arrowHeight : 0);
+        const toolbarBottom = top + toolbarHeight + (isBottom ? 0 : arrowHeight);
+        // Hide toolbar if it would overflow the editor's container.
+        const shouldHide = toolbarTop < scrollContainerRect.top || toolbarBottom > scrollContainerRect.bottom;
+        this.toolbar.classList.toggle('d-none', shouldHide);
     }
 
     // PASTING / DROPPING
