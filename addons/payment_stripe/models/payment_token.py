@@ -13,6 +13,7 @@ class PaymentToken(models.Model):
     _inherit = 'payment.token'
 
     stripe_payment_method = fields.Char(string="Stripe Payment Method ID", readonly=True)
+    stripe_mandate_id = fields.Char(string="Stripe Mandate ID", readonly=True)
 
     def _stripe_sca_migrate_customer(self):
         """ Migrate a token from the old implementation of Stripe to the SCA-compliant one.

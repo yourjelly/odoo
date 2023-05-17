@@ -5,7 +5,7 @@ import pprint
 
 from werkzeug import urls
 
-from odoo import _, models
+from odoo import _, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons.payment import utils as payment_utils
@@ -179,6 +179,7 @@ class PaymentTransaction(models.Model):
             'customer': customer['id'],
             'description': self.reference,
             'payment_method_types[]': 'card',
+            **self._stripe_get_mandate_options(),
         }
 
     def _stripe_prepare_payment_intent_payload(self, payment_by_token=False):
@@ -195,23 +196,61 @@ class PaymentTransaction(models.Model):
             'amount': payment_utils.to_minor_currency_units(self.amount, self.currency_id),
             'currency': self.currency_id.name.lower(),
             'description': self.reference,
-            'automatic_payment_methods[enabled]': True,
             'capture_method': 'manual' if self.provider_id.capture_manually else 'automatic',
         }
-        if self.tokenize:
-            customer = self._stripe_create_customer()
-            payment_intent_payload.update(
-                customer=customer['id'],
-                setup_future_usage='off_session',
-            )
-        elif payment_by_token:
+        if payment_by_token:
             payment_intent_payload.update(
                 confirm=True,
                 customer=self.token_id.provider_ref,
                 off_session=True,
                 payment_method=self.token_id.stripe_payment_method,
+                mandate=self.token_id.stripe_mandate_id,
             )
+        else:
+            payment_intent_payload.update({
+                'automatic_payment_methods[enabled]': True,
+            })
+            if self.tokenize:
+                customer = self._stripe_create_customer()
+                payment_intent_payload.update(
+                    customer=customer['id'],
+                    setup_future_usage='off_session',
+                    **self._stripe_get_mandate_options(),
+                )
         return payment_intent_payload
+
+    def _stripe_get_mandate_options(self):
+        mandate_specific_values = self._get_mandate_specific_values()
+
+        mandate_options = {
+            'payment_method_options[card][mandate_options][reference]': self.reference,
+            'payment_method_options[card][mandate_options][amount_type]': 'maximum',
+            'payment_method_options[card][mandate_options][amount]': payment_utils.to_minor_currency_units(mandate_specific_values.get('amount', 1500000), self.currency_id),  # TODO VCR change that
+            'payment_method_options[card][mandate_options][start_date]': int(round((mandate_specific_values.get('start_date') or fields.Datetime.now()).timestamp())),
+            'payment_method_options[card][mandate_options][interval]': 'sporadic',
+            'payment_method_options[card][mandate_options][supported_types][]': 'india',
+        }
+
+        if mandate_specific_values.get('end_date'):
+            mandate_options.update({
+                'payment_method_options[card][mandate_options][end_date]': int(
+                    round(mandate_specific_values.end_date.timestamp())
+                ),
+            })
+
+        if mandate_specific_values.get('reccurence_unit') and mandate_specific_values.get('reccurence_duration'):
+            mandate_options.update({
+                'payment_method_options[card][mandate_options][interval]': mandate_specific_values['reccurence_unit'],
+                'payment_method_options[card][mandate_options][interval_count]': mandate_specific_values['reccurence_duration'],
+            })
+
+        if self.operation == 'validation':
+            mandate_options.update({
+                'payment_method_options[card][mandate_options][currency]': self.provider_id._get_validation_currency().name.lower(),
+            })
+
+
+        return mandate_options
 
     def _send_refund_request(self, amount_to_refund=None):
         """ Override of payment to send a refund request to Stripe.
@@ -409,11 +448,13 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         if self.operation == 'online_direct':
-            payment_method_id = notification_data.get('payment_intent', {}).get('payment_method', {}).get('id')
-            customer_id = notification_data.get('payment_intent', {}).get('customer')
+            payment_method_id = notification_data.get('payment_method').get('id')
+            customer_id = notification_data.get('payment_intent').get('customer')
+            mandate_id = notification_data['payment_intent']['charges']['data'][0]['payment_method_details']['card'].get('mandate')
         else:  # 'validation'
-            payment_method_id = notification_data.get('payment_method', {}).get('id')
-            customer_id = notification_data.get('setup_intent', {}).get('customer')
+            payment_method_id = notification_data.get('payment_method').get('id')
+            customer_id = notification_data.get('setup_intent').get('customer')
+            mandate_id = notification_data.get('setup_intent').get('mandate')
         payment_method = notification_data.get('payment_method')
         if not payment_method_id or not payment_method:
             _logger.warning(
@@ -435,6 +476,7 @@ class PaymentTransaction(models.Model):
             'provider_ref': customer_id,
             'verified': True,
             'stripe_payment_method': payment_method_id,
+            'stripe_mandate_id': mandate_id,
         })
         self.write({
             'token_id': token,

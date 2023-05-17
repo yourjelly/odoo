@@ -1123,6 +1123,20 @@ class PaymentTransaction(models.Model):
                 message += Markup("<br/>") + _("Reason: %s", self.state_message)
         return message
 
+    def _get_mandate_specific_values(self):
+        """ Return a dict of module-specific values used to create a mandate.
+
+        For a module to add its own mandate values, it must overwrite this method and return a
+        dict of module-specific values.
+
+        Note: `self.ensure_one()`
+
+        :return: The dict of module-specific mandate values.
+        :rtype: dict
+        """
+        self.ensure_one()
+        return dict()
+
     def _get_last(self):
         """ Return the last transaction of the recordset.
 
