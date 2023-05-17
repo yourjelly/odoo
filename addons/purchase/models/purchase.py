@@ -1220,6 +1220,8 @@ class PurchaseOrderLine(models.Model):
         for line in self:
             if not line.product_id or line.invoice_lines:
                 continue
+            if not line.order_id.date_order:
+                line.order_id.date_order = fields.Date.context_today(line)
             params = {'order_id': line.order_id}
             seller = line.product_id._select_seller(
                 partner_id=line.partner_id,
