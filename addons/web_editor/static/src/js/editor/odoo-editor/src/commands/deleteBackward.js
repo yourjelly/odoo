@@ -48,7 +48,7 @@ const isDeletable = (node) => {
 
 HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, offsetLimit) {
     console.log('HTMLElement.prototype.oDeleteBackward', this, offset);
-    console.log('===> ', this.closest('[contenteditable="true"]').innerHTML);
+    console.log('===> ', this.closest('[contenteditable="true"]')?.innerHTML);
     const contentIsZWS = this.textContent === '\u200B';
     let moveDest;
     if (offset) {
@@ -146,6 +146,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
             console.log(' ======== del back remove empty block');
             this.previousElementSibling.remove();
             setSelection(this, 0);
+            console.log('===> ', this.closest('[contenteditable="true"]')?.innerHTML);
             return;
 
             // take all the current node children and add them in the previous node.
