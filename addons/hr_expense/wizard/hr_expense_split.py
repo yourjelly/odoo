@@ -31,7 +31,7 @@ class HrExpenseSplit(models.TransientModel):
     product_id = fields.Many2one('product.product', string='Product', required=True)
     tax_ids = fields.Many2many('account.tax', domain="[('company_id', '=', company_id), ('type_tax_use', '=', 'purchase')]")
     total_amount = fields.Monetary("Total In Currency", required=True, compute='_compute_from_product_id', store=True, readonly=False)
-    amount_tax = fields.Monetary(string='Tax amount in Currency', compute='_compute_amount_tax')
+    amount_tax = fields.Monetary(string='Tax amount in Currency', compute='_compute_amount_tax', readonly=False, store=True)
     employee_id = fields.Many2one('hr.employee', string="Employee", required=True)
     company_id = fields.Many2one('res.company')
     currency_id = fields.Many2one('res.currency')
@@ -44,12 +44,22 @@ class HrExpenseSplit(models.TransientModel):
             taxes = split.tax_ids.with_context(force_price_include=True).compute_all(price_unit=split.total_amount, currency=split.currency_id, quantity=1, product=split.product_id)
             split.amount_tax = taxes['total_included'] - taxes['total_excluded']
 
-    @api.depends('product_id')
+    @api.depends('product_id', 'amount_tax')
     def _compute_from_product_id(self):
         for split in self:
             split.product_has_cost = split.product_id and (float_compare(split.product_id.standard_price, 0.0, precision_digits=2) != 0)
             if split.product_has_cost:
                 split.total_amount = split.product_id._price_compute('standard_price', currency=split.currency_id)[split.product_id.id]
+            if split.amount_tax:
+                taxes = split.tax_ids.with_context(force_price_include=True).compute_all(price_unit=split.total_amount,
+                                                                                         currency=split.currency_id,
+                                                                                         quantity=1,
+                                                                                         product=split.product_id)
+                amount_tax_old = taxes['total_included'] - taxes['total_excluded']
+                if split.amount_tax != round(amount_tax_old, 2):
+                    tax = split.tax_ids.amount/100
+                    split.total_amount = split.amount_tax * (1+tax)/tax
+
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
