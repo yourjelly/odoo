@@ -78,7 +78,7 @@
                             <field name="allocation_validation_type" string="Approval" widget="radio" attrs="{'invisible': ['|', ('requires_allocation', '=', 'no'), ('employee_requests', '=', 'no')]}"/>
                         </group>
                     </group>
-                    <group name="visual" id="visual" >
+                    <group name="visual" id="visual" class="flex-column">
                         <group colspan="2" string="Display Option">
                         </group>
                         <group colspan="2">
