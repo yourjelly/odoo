@@ -208,6 +208,9 @@ class Web_Editor(http.Controller):
     def add_url(self, url, res_id=False, res_model='ir.ui.view', **kwargs):
         self._clean_context()
         attachment = self._attachment_create(url=url, res_id=res_id, res_model=res_model)
+        response = requests.get(url)
+        attachment.datas = b64encode(response.content).decode('utf-8')
+        attachment.mimetype = response.headers.get('Content-Type')
         return attachment._get_media_info()
 
     @http.route('/web_editor/attachment/remove', type='json', auth='user', website=True)

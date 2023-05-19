@@ -163,6 +163,7 @@ var FileWidget = SearchableMediaWidget.extend({
 
         this.options = _.extend({
             mediaWidth: media && media.parentElement && $(media.parentElement).width(),
+            mimetypeDomain: [['mimetype', 'in', this.IMAGE_MIMETYPES]],
             useMediaLibrary: true,
         }, options || {});
 
@@ -446,7 +447,7 @@ var FileWidget = SearchableMediaWidget.extend({
         }
 
         if (!img.public && !img.access_token) {
-            await this._rpc({
+            this._rpc({
                 model: 'ir.attachment',
                 method: 'generate_access_token',
                 args: [[img.id]]
@@ -677,16 +678,31 @@ var FileWidget = SearchableMediaWidget.extend({
     /**
      * @private
      */
-    _onURLInputChange: function () {
+    _onURLInputChange: async function() {
         const inputValue = this.$urlInput.val().split('?')[0];
         var emptyValue = (inputValue === '');
 
         var isURL = /^.+\..+$/.test(inputValue); // TODO improve
-        var isImage = _.any(this.IMAGE_EXTENSIONS, function (format) {
-            return inputValue.endsWith(format);
-        });
-
-        this._updateAddUrlUi(emptyValue, isURL, isImage);
+        if_.any(this.IMAGE_EXTENSIONS, function (format) {
+            -           inputValue.endsWith(format);
+        })
+        var isImage = false;
+        if (isURL) {
+            await fetch(inputValue)
+            .then(response => {
+                const contentType = response.headers.get('Content-Type');
+                if (contentType) {
+                    isImage = this.IMAGE_MIMETYPES.includes(contentType);
+                }
+                this._updateAddUrlUi(emptyValue, isURL, isImage);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                this._updateAddUrlUi(emptyValue, isURL, isImage);
+            });
+        } else {
+          this._updateAddUrlUi(emptyValue, isURL, isImage);
+        }
     },
     /**
      * @private
