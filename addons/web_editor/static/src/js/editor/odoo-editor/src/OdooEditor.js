@@ -1892,15 +1892,20 @@ export class OdooEditor extends EventTarget {
             range.startContainer.before(zws);
             insertedZws = zws;
         }
+        console.log('step 0 \n==> ', this.editable.innerHTML);
         let start = range.startContainer;
         let end = range.endContainer;
+        console.log('range start ', range.startContainer, range.startContainer.textContent);
+        console.log('range end ', range.endContainer, range.endContainer.textContent);
         // Let the DOM split and delete the range.
         const doJoin =
             (closestBlock(start) !== closestBlock(range.commonAncestorContainer) ||
             closestBlock(end) !== closestBlock(range.commonAncestorContainer))
             && (closestBlock(start).tagName !== 'TD' && closestBlock(end).tagName !== 'TD');
         let next = nextLeaf(end, this.editable);
+        console.log('next ', next);
         const contents = range.extractContents();
+        console.log('contents', contents);
         setSelection(start, nodeSize(start));
         range = getDeepRange(this.editable, { sel });
         // Restore unremovables removed by extractContents.
@@ -1910,24 +1915,29 @@ export class OdooEditor extends EventTarget {
         });
         // If the end container was fully selected, extractContents may have
         // emptied it without removing it. Ensure it's gone.
-        const isRemovableInvisible = (node, noBlocks = true) =>
-            !isVisible(node, noBlocks) && !isUnremovable(node);
+        const isRemovableInvisible = (node, noBlocks = false) =>
+            (!isVisible(node, noBlocks) || node?.textContent === '\u200B')&& !isUnremovable(node);
         const endIsStart = end === start;
-        while (end && isRemovableInvisible(end, false) && !end.contains(range.endContainer)) {
+        while (end && isRemovableInvisible(end) && !end.contains(range.endContainer)) {
             const parent = end.parentNode;
             end.remove();
             end = parent;
         }
         // Same with the start container
         while (
-            start &&
-            isRemovableInvisible(start) &&
-            !(endIsStart && start.contains(range.startContainer))
+            start && isRemovableInvisible(start) && !(endIsStart && start.contains(range.startContainer))
         ) {
             const parent = start.parentNode;
             start.remove();
             start = parent;
         }
+        // If start element have been deleted until editable,
+        // set the start element to be the first child of the editable
+        // to avoid having the selection directly in the editable.
+        // if (start === this.editable && this.editable.childNodes.length) {
+        //     start = this.editable.firstChild;
+        //     setSelection(start, 0);
+        // }
         // Ensure empty blocks be given a <br> child.
         if (start) {
             fillEmpty(closestBlock(start));
@@ -1943,6 +1953,8 @@ export class OdooEditor extends EventTarget {
             joinWith.textContent = oldText.replace(/ $/, '\u00A0');
             setSelection(joinWith, nodeSize(joinWith));
         }
+
+        console.log('before delete range loop \n==> ', this.editable.innerHTML);
         // Rejoin blocks that extractContents may have split in two.
         while (
             doJoin &&
@@ -1950,6 +1962,9 @@ export class OdooEditor extends EventTarget {
             !(next.previousSibling && next.previousSibling === joinWith) &&
             this.editable.contains(next)
         ) {
+            console.log('\n\n======================= LOOP ==============================');
+            console.log('next', next);
+            console.log('joinWith', joinWith);
             const restore = preserveCursor(this.document);
             this.observerFlush();
             const res = this._protect(() => {

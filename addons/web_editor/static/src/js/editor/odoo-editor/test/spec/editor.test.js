@@ -1146,28 +1146,64 @@ X[]
                     contentAfter: '<h1>ab []gh</h1>',
                 });
             });
-            it('should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph', async () => {
-                // Forward selection
+            it('should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph + start of editable', async () => {
+                //Forward selection
                 await testEditor(BasicEditor, {
-                    contentBefore: '<h1><b>[abcd</b></h1><p>ef]gh</p>',
+                    contentBefore: '<h1><b>[abcd</b></h1><p>ef]gh1</p>',
                     stepFunction: deleteForward,
-                    contentAfter: '<p>[]gh</p>',
+                    contentAfter: '<p>[]gh1</p>',
                 });
                 await testEditor(BasicEditor, {
-                    contentBefore: '<h1>[<b>abcd</b></h1><p>ef]gh</p>',
+                    contentBefore: '<h1>[<b>abcd</b></h1><p>ef]gh2</p>',
                     stepFunction: deleteForward,
-                    contentAfter: '<p>[]gh</p>',
+                    contentAfter: '<p>[]gh2</p>',
                 });
                 // Backward selection
                 await testEditor(BasicEditor, {
-                    contentBefore: '<h1><b>]abcd</b></h1><p>ef[gh</p>',
+                    contentBefore: '<h1><b>]abcd</b></h1><p>ef[gh3</p>',
                     stepFunction: deleteForward,
-                    contentAfter: '<p>[]gh</p>',
+                    contentAfter: '<p>[]gh3</p>',
                 });
                 await testEditor(BasicEditor, {
-                    contentBefore: '<h1>]<b>abcd</b></h1><p>ef[gh</p>',
+                    contentBefore: '<h1>]<b>abcd</b></h1><p>ef[gh4</p>',
                     stepFunction: deleteForward,
-                    contentAfter: '<p>[]gh</p>',
+                    contentAfter: '<p>[]gh4</p>',
+                });
+            });
+            it('should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph + content', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>content</p><h1><b>[abcd</b></h1><p>ef]gh1</p>',
+                    stepFunction: deleteForward,
+                    contentAfter: '<p>content</p><p>[]gh1</p>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>content</p><h1>[<b>abcd</b></h1><p>ef]gh2</p>',
+                    stepFunction: deleteForward,
+                    contentAfter: '<p>content</p><p>[]gh2</p>',
+                });
+            });
+            it('should delete a selection from the beginning of a heading1 with a format to the end of a paragraph', async () => {
+                //Forward selection
+                await testEditor(BasicEditor, {
+                    contentBefore: '<h1><b>[abcd</b></h1><p>ef]</p><h2>1</h2>',
+                    stepFunction: deleteForward,
+                    contentAfter: '<h1>[]</h1><h2>1</h2>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<h1>[<b>abcd</b></h1><p>ef]</p><h2>2</h2>',
+                    stepFunction: deleteForward,
+                    contentAfter: '<h1>[]</h1><h2>2</h2>',
+                });
+                // Backward selection
+                await testEditor(BasicEditor, {
+                    contentBefore: '<h1><b>]abcd</b></h1><p>ef[</p><h2>3</h2>',
+                    stepFunction: deleteForward,
+                    contentAfter: '<h1>[]</h1><h2>3</h2>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<h1>]<b>abcd</b></h1><p>ef[</p><h2>4</h2>',
+                    stepFunction: deleteForward,
+                    contentAfter: '<h1>[]</h1><h2>4</h2>',
                 });
             });
             it('should not break unbreakables', async () => {
@@ -2648,25 +2684,25 @@ X[]
             it('should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph', async () => {
                 // Forward selection
                 await testEditor(BasicEditor, {
-                    contentBefore: '<h1><b>[abcd</b></h1><p>ef]gh</p>',
+                    contentBefore: '<h1><b>[abcd</b></h1><p>ef]gh1</p>',
                     stepFunction: deleteBackward,
-                    contentAfter: '<p>[]gh</p>',
+                    contentAfter: '<p>[]gh1</p>',
                 });
                 await testEditor(BasicEditor, {
-                    contentBefore: '<h1>[<b>abcd</b></h1><p>ef]gh</p>',
+                    contentBefore: '<h1>[<b>abcd</b></h1><p>ef]gh2</p>',
                     stepFunction: deleteBackward,
-                    contentAfter: '<p>[]gh</p>',
+                    contentAfter: '<p>[]gh2</p>',
                 });
                 // Backward selection
                 await testEditor(BasicEditor, {
-                    contentBefore: '<h1><b>]abcd</b></h1><p>ef[gh</p>',
+                    contentBefore: '<h1><b>]abcd</b></h1><p>ef[gh3</p>',
                     stepFunction: deleteBackward,
-                    contentAfter: '<p>[]gh</p>',
+                    contentAfter: '<p>[]gh3</p>',
                 });
                 await testEditor(BasicEditor, {
-                    contentBefore: '<h1>]<b>abcd</b></h1><p>ef[gh</p>',
+                    contentBefore: '<h1>]<b>abcd</b></h1><p>ef[gh4</p>',
                     stepFunction: deleteBackward,
-                    contentAfter: '<p>[]gh</p>',
+                    contentAfter: '<p>[]gh4</p>',
                 });
             });
             it('should delete a heading (triple click backspace)', async () => {
