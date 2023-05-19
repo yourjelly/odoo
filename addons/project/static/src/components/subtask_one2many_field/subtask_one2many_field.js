@@ -4,6 +4,10 @@ import { registry } from "@web/core/registry";
 import { X2ManyField, x2ManyField } from '@web/views/fields/x2many/x2many_field';
 
 import { SubtaskListRenderer } from './subtask_list_renderer';
+import { TaskViewButton } from './task_view_button';
+
+SubtaskListRenderer.components = { ...SubtaskListRenderer.components, ViewButton: TaskViewButton };
+
 
 export class SubtaskOne2ManyField extends X2ManyField {}
 
