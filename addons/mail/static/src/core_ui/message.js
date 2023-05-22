@@ -260,9 +260,7 @@ export class Message extends Component {
 
     get isAlignedRight() {
         return Boolean(
-            !this.env.pinnedPanel &&
-                this.env.inChatWindow &&
-                this.user.partnerId === this.props.message.author?.id
+            !this.env.pinnedPanel && this.env.inChatWindow && this.props.message.isSelfAuthored
         );
     }
 

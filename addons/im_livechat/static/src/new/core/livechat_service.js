@@ -1,16 +1,18 @@
 /* @odoo-module */
 
+import { reactive } from "@odoo/owl";
+
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { session } from "@web/session";
 import { sprintf } from "@web/core/utils/strings";
-import { reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
 
 /**
  * @typedef LivechatRule
  * @property {"auto_popup"|undefined} [action]
  * @property {number?} [auto_popup_timer]
+ * @property {import("@im_livechat/new/chatbot/chatbot_model").IChatbot} [chatbot]
  */
 
 export const RATING = Object.freeze({
@@ -45,10 +47,17 @@ export class LivechatService {
     /** @type {string} */
     userName;
 
+    /**
+     * @param {import("@web/env").OdooEnv} env
+     * @param {{
+     * cookie: typeof import("@web/core/browser/cookie_service").cookieService.start,
+     * bus_service: typeof import("@bus/services/bus_service").busService.start,
+     * rpc: typeof import("@web/core/network/rpc_service").rpcService.start,
+     * }} services
+     */
     constructor(env, services) {
         this.env = env;
         this.cookie = services.cookie;
-        this.notification = services.notification;
         this.busService = services.bus_service;
         this.rpc = services.rpc;
         this.available = session.livechatData?.isAvailable;
@@ -66,11 +75,15 @@ export class LivechatService {
     }
 
     async _createSession({ persisted = false } = {}) {
+        const chatbotScriptId = this.sessionCookie
+            ? this.sessionCookie.chatbot_script_id
+            : this.rule.chatbot?.chatbot_script_id;
         const session = await this.rpc(
             "/im_livechat/get_session",
             {
                 channel_id: this.options.channel_id,
                 anonymous_name: this.userName,
+                chatbot_script_id: chatbotScriptId,
                 previous_operator_id: this.cookie.current[this.OPERATOR_COOKIE],
                 persisted,
             },
@@ -81,6 +94,7 @@ export class LivechatService {
             this.state = SESSION_STATE.NONE;
             return;
         }
+        session.chatbot_script_id = chatbotScriptId;
         session.isLoaded = true;
         session.status = "ready";
         if (session.operator_pid) {
@@ -151,6 +165,10 @@ export class LivechatService {
 
     get options() {
         return session.livechatData?.options ?? {};
+    }
+
+    get sessionCookie() {
+        return JSON.parse(this.cookie.current[this.SESSION_COOKIE] ?? "false");
     }
 
     get shouldRestoreSession() {

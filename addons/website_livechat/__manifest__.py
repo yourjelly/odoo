@@ -25,13 +25,8 @@ Allow website visitors to chat with the collaborators. This module also brings a
         'data/website_livechat_chatbot_demo.xml',
     ],
     'assets': {
-        'im_livechat.assets_public_livechat': [
-            # 'website_livechat/static/src/legacy/public_models/**/*',
-            # 'website_livechat/static/src/legacy/widgets/**/*',
-        ],
         'web.assets_frontend': [
-            # 'website_livechat/static/src/legacy/public_livechat.js',
-            # 'website_livechat/static/src/legacy/public_livechat.scss',
+            'website_livechat/static/src/new/**/*',
         ],
         'website.assets_wysiwyg': [
             'website_livechat/static/src/scss/**/*',
@@ -44,6 +39,7 @@ Allow website visitors to chat with the collaborators. This module also brings a
             ('remove', 'website_livechat/static/src/external_lib/**/*'),
             ('remove', 'website_livechat/static/src/legacy/**/*'),
             ('remove', 'website_livechat/static/src/scss/**/*'),
+            ('remove', 'website_livechat/static/src/new/**/*'),
         ],
         'web.assets_tests': [
             'website_livechat/static/tests/tours/**/*',
@@ -61,7 +57,7 @@ Allow website visitors to chat with the collaborators. This module also brings a
             'website_livechat/static/src/legacy/public_livechat.scss',
         ],
         'im_livechat.assets_embed': [
-            'website_livechat/static/src/external_lib/new/**/*',
+            'website_livechat/static/src/new/**/*',
         ],
     },
     'license': 'LGPL-3',

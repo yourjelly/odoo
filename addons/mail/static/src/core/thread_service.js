@@ -904,8 +904,7 @@ export class ThreadService {
             rawMentions,
             thread,
         });
-        const lastMessageId = this.messageService.getLastMessageId();
-        const tmpId = lastMessageId + 0.01;
+        const tmpId = this.messageService.getNextTemporaryId();
         params.context = { ...params.context, temporary_id: tmpId };
         if (parentId) {
             params.post_data.parent_id = parentId;

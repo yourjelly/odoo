@@ -8,15 +8,30 @@ import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 import { session } from "@web/session";
 
-threadService.dependencies.push("im_livechat.livechat", "mail.chat_window", "notification");
+threadService.dependencies.push(
+    "im_livechat.livechat",
+    "im_livechat.chatbot",
+    "mail.chat_window",
+    "notification"
+);
 
 patch(ThreadService.prototype, "im_livechat", {
     TEMPORARY_ID: "livechat_temporary_thread",
 
+    /**
+     * @param {import("@web/env").OdooEnv} env
+     * @param {{
+     * "im_livechat.chatbot": import("@im_livechat/new/chatbot/chatbot_service").ChatBotService,
+     * "im_livechat.livechat": import("@im_livechat/new/core/livechat_service").LivechatService,
+     * "mail.chat_window": import("@mail/web/chat_window/chat_window_service").ChatWindowService,
+     * notification: typeof import("@web/core/notifications/notification_service").notificationService.start,
+     * }} services
+     */
     setup(env, services) {
         this._super(env, services);
         this.livechatService = services["im_livechat.livechat"];
         this.chatWindowService = services["mail.chat_window"];
+        this.chatbotService = services["im_livechat.chatbot"];
         this.notification = services.notification;
     },
 
@@ -37,6 +52,9 @@ patch(ThreadService.prototype, "im_livechat", {
         };
     },
 
+    /**
+     * @returns {Promise<import("@mail/core/message_model").Message}
+     */
     async post(thread, body, params) {
         const _super = this._super;
         const chatWindow = this.store.chatWindows.find((c) => c.threadLocalId === thread.localId);
@@ -48,6 +66,9 @@ patch(ThreadService.prototype, "im_livechat", {
             }
             // replace temporary thread by the persisted one.
             chatWindow.thread = thread;
+            if (this.chatbotService.active) {
+                await this.chatbotService.postWelcomeSteps();
+            }
         }
         const message = await _super(thread, body, params);
         if (!message) {
@@ -55,6 +76,8 @@ patch(ThreadService.prototype, "im_livechat", {
             this.chatWindowService.close(chatWindow);
             this.livechatService.leaveSession({ notifyServer: false });
         }
+        this.chatbotService.bus.trigger("MESSAGE_POST", message);
+        return message;
     },
 
     async openChat() {
@@ -67,6 +90,9 @@ patch(ThreadService.prototype, "im_livechat", {
             folded: thread.state === "folded",
         });
         chatWindow.autofocus++;
+        if (this.chatbotService.active) {
+            this.chatbotService.start();
+        }
     },
 
     insert(data) {
@@ -74,8 +100,14 @@ patch(ThreadService.prototype, "im_livechat", {
         const thread = this._super(...arguments);
         if (thread.type === "livechat" && isUnknown) {
             thread.welcomeMessage = this.messageService.insert({
-                id: -1,
+                id: this.messageService.getNextTemporaryId(),
                 body: this.livechatService.options.default_message,
+                res_id: thread.id,
+                model: thread.model,
+                author: thread.operator,
+            });
+            thread.chatbotTypingMessage = this.messageService.insert({
+                id: this.messageService.getNextTemporaryId(),
                 res_id: thread.id,
                 model: thread.model,
                 author: thread.operator,
@@ -89,6 +121,7 @@ patch(ThreadService.prototype, "im_livechat", {
             onChange(thread, "message_unread_counter", () => {
                 this.livechatService.updateSession({ channel: thread.channel });
             });
+            this.store.livechatThread = thread;
         }
         return thread;
     },
@@ -102,6 +135,7 @@ patch(ThreadService.prototype, "im_livechat", {
                 name: data.operator_pid[1],
             });
         }
+        thread.chatbotScriptId = data.chatbot_script_id ?? thread.chatbotScriptId;
     },
 
     avatarUrl(author, thread) {

@@ -7,6 +7,6 @@ patch(Message.prototype, "im_livechat", {
         if (this.originThread.type !== "livechat") {
             return this._super();
         }
-        return this.author?.id !== this.originThread.operator?.id;
+        return this.author?.id !== this.originThread.operator.id;
     },
 });
