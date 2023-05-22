@@ -176,10 +176,13 @@ class AccountMove(models.Model):
         """
         return self.env['stock.move']
 
-    def _stock_account_anglo_saxon_reconcile_valuation(self, product=False):
+    def _stock_account_anglo_saxon_reconcile_valuation(self, product=False, workaround=False):
         """ Reconciles the entries made in the interim accounts in anglosaxon accounting,
         reconciling stock valuation move lines with the invoice's.
         """
+        assert len(self) == 1
+        reconciliations = []
+
         for move in self:
             if not move.is_invoice():
                 continue
@@ -214,7 +217,14 @@ class AccountMove(models.Model):
                         .filtered(lambda line: line.account_id == product_interim_account and not line.reconciled)
 
                     # Reconcile.
-                    product_account_moves.reconcile()
+                    if not workaround:
+                        product_account_moves.reconcile()
+                    elif product_account_moves:
+                        reconciliations.append(product_account_moves)
+
+        if workaround:
+            return reconciliations
+
 
     def _get_invoiced_lot_values(self):
         return []
