@@ -22,7 +22,7 @@
                     'ms-3 me-1 my-0': !thread,
                 }"
             />
-            <div t-if="thread and thread.isChannel and thread.message_unread_counter > 0" class="mx-1 my-0">
+            <div t-if="thread and thread.isChannel and thread.message_unread_counter > 0" class="mx-1 my-0" t-name="unreadCounter">
                 (<t t-out="thread.message_unread_counter"/>)
             </div>
             <div class="flex-grow-1"/>
@@ -37,7 +37,7 @@
                     <i class="fa fa-expand"/>
                 </div>
             </t>
-            <div class="o-mail-ChatWindow-command d-flex align-items-center h-100 px-3 opacity-50 opacity-100-hover" title="Close chat window" t-on-click.stop="() => this.close()">
+            <div class="o-mail-ChatWindow-command d-flex align-items-center h-100 px-3 opacity-50 opacity-100-hover" title="Close chat window" t-on-click.stop="() => this.close()" t-name="commandClose">
                 <i class="fa fa-close"></i>
             </div>
         </div>

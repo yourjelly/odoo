@@ -321,6 +321,13 @@ export class Thread {
         );
     }
 
+    /**
+     * @param {import("@mail/core/message_model").Message} message
+     */
+    hasMessage(message) {
+        return this.messages.some(({ id }) => id === message.id);
+    }
+
     get invitationLink() {
         if (!this.uuid || this.type === "chat") {
             return undefined;

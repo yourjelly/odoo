@@ -181,7 +181,7 @@ class DiscussChannel(models.Model):
 
         return values
 
-    def _chatbot_post_message(self, chatbot_script, body):
+    def _chatbot_post_message(self, chatbot_script, body, message_type='comment'):
         """ Small helper to post a message as the chatbot operator
 
         :param record chatbot_script
@@ -190,7 +190,7 @@ class DiscussChannel(models.Model):
         return self.with_context(mail_create_nosubscribe=True).message_post(
             author_id=chatbot_script.operator_partner_id.id,
             body=body,
-            message_type='comment',
+            message_type=message_type,
             subtype_xmlid='mail.mt_comment',
         )
 
@@ -236,4 +236,6 @@ class DiscussChannel(models.Model):
 
         return self._chatbot_post_message(
             chatbot_script,
-            '<div class="o_mail_notification">%s</div>' % _('Restarting conversation...'))
+            Markup('<div class="o_mail_notification">%s</div>') % _('restarting conversation...'),
+            message_type='notification'
+        )

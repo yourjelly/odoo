@@ -5,6 +5,7 @@ import { FeedbackPanel } from "../feedback_panel/feedback_panel";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { SESSION_STATE } from "../core/livechat_service";
+import { useState } from "@odoo/owl";
 
 ChatWindow.components["FeedbackPanel"] = FeedbackPanel;
 
@@ -12,6 +13,7 @@ patch(ChatWindow.prototype, "im_livechat", {
     setup() {
         this._super(...arguments);
         this.livechatService = useService("im_livechat.livechat");
+        this.chatbotService = useState(useService("im_livechat.chatbot"));
     },
 
     close() {
@@ -24,6 +26,7 @@ patch(ChatWindow.prototype, "im_livechat", {
         } else {
             this._super();
         }
+        this.chatbotService.stop();
         this.livechatService.leaveSession();
     },
 
@@ -36,6 +39,8 @@ patch(ChatWindow.prototype, "im_livechat", {
     },
 
     get style() {
-        return `${this._super()} transition: height 0.3s linear 0s;`;
+        return `${this._super()} transition: height 0.3s linear 0s; background-color: ${
+            this.livechatService.options.header_background_color
+        };`;
     },
 });
