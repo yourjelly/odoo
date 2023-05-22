@@ -145,6 +145,12 @@
                                     <div class="text-warning mt16"><strong>Save</strong> this page and come back here to set up the feature.</div>
                                 </div>
                             </setting>
+                            <setting string="Whatsapp" documentation="/applications/productivity/calendar/google.html" help="Enable Whatsapp communications" id="module_mail_wa">
+                                <field name="module_mail_wa"/>
+                                <div class="content-group" attrs="{'invisible': [('module_mail_wa','=',False)]}" id="msg_module_mail_wa">
+                                    <div class="text-warning mt16"><strong>Save</strong> this page and come back here to set up the feature.</div>
+                                </div>
+                            </setting>
                             <div id="product_get_pic_setting"/>
                             <setting string="OAuth Authentication" help="Use external accounts to log in (Google, Facebook, etc.)" id="module_auth_oauth">
                                 <field name="module_auth_oauth" />

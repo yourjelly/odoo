@@ -20,6 +20,8 @@ class ResConfigSettings(models.TransientModel):
     module_base_import = fields.Boolean("Allow users to import data from CSV/XLS/XLSX/ODS files")
     module_google_calendar = fields.Boolean(
         string='Allow the users to synchronize their calendar  with Google Calendar')
+    module_mail_wa = fields.Boolean(
+        string='Enable Whatsapp communications')
     module_microsoft_calendar = fields.Boolean(
         string='Allow the users to synchronize their calendar with Outlook Calendar')
     module_mail_plugin = fields.Boolean(
