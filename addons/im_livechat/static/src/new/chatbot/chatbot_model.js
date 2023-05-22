@@ -27,20 +27,13 @@ export class Chatbot {
      * @param {IChatbot} data
      */
     constructor(data) {
-        const {
-            chatbot_name: name,
-            chatbot_operator_partner_id: operatorPartnerId,
-            chatbot_welcome_steps: welcomeSteps,
-            welcome_step_index: welcomeStepIndex,
-            chatbot_script_id: scriptId,
-        } = data;
-        assignDefined(this, {
-            name,
-            operatorPartnerId,
-            scriptId,
-            welcomeStepIndex,
-            welcomeSteps,
-        });
+        assignDefined(this, data, [
+            "name",
+            "operatorPartnerId",
+            "scriptId",
+            "welcomeSteps",
+            "welcomeStepIndex",
+        ]);
     }
 
     get welcomeCompleted() {
@@ -49,20 +42,5 @@ export class Chatbot {
 
     get nextWelcomeStep() {
         return this.welcomeSteps[this.welcomeStepIndex++];
-    }
-
-    /**
-     * Convert this record to its corresponding server representation.
-     *
-     * @returns {IChatbot}
-     */
-    toServerData() {
-        return {
-            chatbot_name: this.name,
-            chatbot_operator_partner_id: this.operatorPartnerId,
-            chatbot_welcome_steps: this.welcomeSteps,
-            chatbot_script_id: this.scriptId,
-            welcome_step_index: this.welcomeStepIndex,
-        };
     }
 }

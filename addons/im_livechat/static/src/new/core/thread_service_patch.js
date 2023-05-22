@@ -135,7 +135,7 @@ patch(ThreadService.prototype, "im_livechat", {
                 name: data.operator_pid[1],
             });
         }
-        thread.chatbotScriptId = data.chatbot_script_id ?? thread.chatbotScriptId;
+        thread.chatbotScriptId = data.chatbotScriptId ?? thread.chatbotScriptId;
     },
 
     avatarUrl(author, thread) {

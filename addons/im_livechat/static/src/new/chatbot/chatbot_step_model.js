@@ -6,7 +6,7 @@ import { assignDefined } from "@mail/utils/misc";
  * @typedef StepAnswer
  * @property {number} id
  * @property {string} label
- * @property {string} [redirect_link]
+ * @property {string} [redirectLink]
  */
 
 /**
@@ -15,15 +15,15 @@ import { assignDefined } from "@mail/utils/misc";
 
 /**
  * @typedef IChatbotStep
- * @property {number} chatbot_script_step_id
- * @property {boolean} chatbot_step_is_last
- * @property {string} chatbot_step_message
- * @property {StepType} chatbot_step_type
- * @property {StepAnswer[]} [chatbot_step_answers]
- * @property {boolean} [chatbot_operator_found]
- * @property {boolean} [is_email_valid]
- * @property {number} [chatbot_selected_answer_id]
- * @property {boolean} [has_answer]
+ * @property {number} id
+ * @property {boolean} isLast
+ * @property {string} message
+ * @property {StepType} type
+ * @property {StepAnswer[]} [answers]
+ * @property {boolean} [operatorFound]
+ * @property {boolean} [isEmailValid]
+ * @property {number} [selectedAnswerId]
+ * @property {boolean} [hasAnswer]
  */
 
 export class ChatbotStep {
@@ -36,7 +36,7 @@ export class ChatbotStep {
     /** @type {StepType} */
     type;
     hasAnswer = false;
-    validEmail = false;
+    isEmailValid = false;
     operatorFound = false;
     isLast = false;
 
@@ -44,32 +44,22 @@ export class ChatbotStep {
      * @param {IChatbotStep} data
      */
     constructor(data) {
-        const {
-            chatbot_script_step_id: id,
-            chatbot_step_answers: answers,
-            chatbot_step_is_last: isLast,
-            chatbot_step_message: message,
-            chatbot_step_type: type,
-            chatbot_operator_found: operatorFound,
-            is_email_valid: validEmail,
-            chatbot_selected_answer_id,
-            has_answer: hasAnswer,
-        } = data;
-        assignDefined(this, {
-            answers,
-            id,
-            isLast,
-            message,
-            operatorFound,
-            hasAnswer: hasAnswer || Boolean(chatbot_selected_answer_id),
-            type,
-            validEmail,
-        });
+        assignDefined(this, data, [
+            "answers",
+            "id",
+            "isLast",
+            "message",
+            "operatorFound",
+            "hasAnswer",
+            "type",
+            "isEmailValid",
+        ]);
+        this.hasAnswer = data.hasAnswer ?? Boolean(data.selectedAnswerId);
     }
 
     get expectAnswer() {
         if (
-            (this.type === "question_email" && !this.validEmail) ||
+            (this.type === "question_email" && !this.isEmailValid) ||
             (this.answers.length > 0 && !this.hasAnswer)
         ) {
             return true;
@@ -83,23 +73,5 @@ export class ChatbotStep {
                 "question_phone",
             ].includes(this.type) && !this.hasAnswer
         );
-    }
-
-    /**
-     * Convert this record to its corresponding server representation.
-     *
-     * @returns {IChatbotStep}
-     */
-    toServerData() {
-        return {
-            chatbot_script_step_id: this.id,
-            chatbot_step_answers: this.answers,
-            chatbot_step_is_last: this.isLast,
-            chatbot_step_message: this.message,
-            chatbot_step_type: this.type,
-            chatbot_operator_found: this.operatorFound,
-            is_email_valid: this.validEmail,
-            has_answer: this.hasAnswer,
-        };
     }
 }

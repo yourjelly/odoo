@@ -11,7 +11,7 @@ import { browser } from "@web/core/browser/browser";
 import { debounce } from "@web/core/utils/timing";
 import { registry } from "@web/core/registry";
 
-const MESSAGE_DELAY = 2000;
+const MESSAGE_DELAY = 500;
 // Time between two messages coming from the bot.
 const STEP_DELAY = 500;
 // Time to wait without user input before considering a multi line
@@ -147,7 +147,7 @@ export class ChatBotService {
                     const { success } = await this.rpc("/chatbot/step/validate_email", {
                         channel_uuid: this.thread.uuid,
                     });
-                    this.currentStep.validEmail = success;
+                    this.currentStep.isEmailValid = success;
                 }
                 this.save();
                 if (this.currentStep.expectAnswer) {
@@ -177,7 +177,7 @@ export class ChatBotService {
             return {
                 step: new ChatbotStep(welcomeStep),
                 stepMessage: {
-                    ...welcomeStep,
+                    chatbotStep: welcomeStep,
                     id: this.messageService.getNextTemporaryId(),
                     res_id: this.thread.id,
                     model: this.thread.model,
@@ -223,8 +223,8 @@ export class ChatBotService {
                 selected_answer_id: answer.id,
             });
         }
-        if (answer?.redirect_link) {
-            browser.location.assign(answer.redirect_link);
+        if (answer?.redirectLink) {
+            browser.location.assign(answer.redirectLink);
             return;
         }
         this._triggerNextStep();
@@ -263,8 +263,8 @@ export class ChatBotService {
         browser.localStorage.setItem(
             `im_livechat.chatbot.state.uuid_${this.thread.uuid}`,
             JSON.stringify({
-                _chatbot: this.chatbot?.toServerData(),
-                _chatbotCurrentStep: this.currentStep?.toServerData(),
+                _chatbot: this.chatbot,
+                _chatbotCurrentStep: this.currentStep,
             })
         );
     }
