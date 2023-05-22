@@ -264,7 +264,7 @@
                         fetch(`/web/webclient/translations/${cache_hashes.translations}?lang=${user_context.lang}`);
                     }
                 </script>
-                <t t-if="request.httprequest.cookies.get('color_scheme') == 'dark'">
+                <t t-if="color_scheme == 'dark'">
                     <t t-call-assets="web.dark_mode_assets_common" t-js="false"/>
                     <t t-call-assets="web.dark_mode_assets_backend" t-js="false"/>
                 </t>
