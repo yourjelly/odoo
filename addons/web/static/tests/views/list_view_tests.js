@@ -18607,7 +18607,6 @@ QUnit.module("Views", (hooks) => {
             async mockRPC(route, args) {
                 if (args.method === "onchange") {
                     assert.step("onchange");
-                    await nextTick();
                     return { value: { m2o: [3, "Value 3"] } };
                 }
             },
