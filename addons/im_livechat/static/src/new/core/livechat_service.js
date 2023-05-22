@@ -76,8 +76,8 @@ export class LivechatService {
 
     async _createSession({ persisted = false } = {}) {
         const chatbotScriptId = this.sessionCookie
-            ? this.sessionCookie.chatbot_script_id
-            : this.rule.chatbot?.chatbot_script_id;
+            ? this.sessionCookie.chatbotScriptId
+            : this.rule.chatbot?.scriptId;
         const session = await this.rpc(
             "/im_livechat/get_session",
             {
@@ -94,7 +94,7 @@ export class LivechatService {
             this.state = SESSION_STATE.NONE;
             return;
         }
-        session.chatbot_script_id = chatbotScriptId;
+        session.chatbotScriptId = chatbotScriptId;
         session.isLoaded = true;
         session.status = "ready";
         if (session.operator_pid) {
