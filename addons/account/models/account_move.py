@@ -2331,10 +2331,20 @@ class AccountMove(models.Model):
             # del values[to_del]
             # KeyError: 'line_ids'
             values.pop(to_del, None)
+        # elif values.get('invoice_line_ids') and not values.get('line_ids'):
+        #     values['line_ids'] = values['invoice_line_ids']
         if field_name and not isinstance(field_name, list):
             field_name = [field_name]
         with self.env.protecting([self._fields[fname] for fname in field_name or []], self):
             return super().onchange(values, field_name, field_onchange)
+            return_val = super().onchange(values, field_name, field_onchange)
+            if (
+                field_onchange.get('invoice_line_ids')
+                and 'line_ids' in return_val['value']
+                and 'invoice_line_ids' not in return_val['value']
+            ):
+                return_val['value']['invoice_line_ids'] = return_val['value']['line_ids']
+            return return_val
 
     # -------------------------------------------------------------------------
     # RECONCILIATION METHODS

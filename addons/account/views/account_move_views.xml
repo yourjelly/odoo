@@ -865,8 +865,6 @@
                                        context="{
                                            'default_move_type': context.get('default_move_type'),
                                            'journal_id': journal_id,
-                                           'default_partner_id': commercial_partner_id,
-                                           'default_currency_id': currency_id or company_currency_id,
                                            'default_display_type': 'product',
                                            'quick_encoding_vals': quick_encoding_vals,
                                        }">
@@ -1044,8 +1042,6 @@
                                            'default_move_type': context.get('default_move_type'),
                                            'line_ids': line_ids,
                                            'journal_id': journal_id,
-                                           'default_partner_id': commercial_partner_id,
-                                           'default_currency_id': currency_id or company_currency_id,
                                            'kanban_view_ref': 'account.account_move_line_view_kanban_mobile',
                                        }"
                                        attrs="{'invisible': [('payment_state', '=', 'invoicing_legacy'), ('move_type', '!=', 'entry')]}">

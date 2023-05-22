@@ -6066,7 +6066,7 @@ class BaseModel(metaclass=MetaModel):
             model = self.env[field.model_name]
             for invf in model.pool.field_inverses[field]:
                 # use an inverse of field without domain
-                if not (invf.type in ('one2many', 'many2many') and invf.domain):
+                if not (invf.type in ('one2many', 'many2many')):
                     if invf.type == 'many2one_reference':
                         rec_ids = OrderedSet()
                         for rec in self:

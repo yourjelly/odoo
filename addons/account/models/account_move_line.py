@@ -442,6 +442,7 @@ class AccountMoveLine(models.Model):
             ) if line.move_id.is_invoice() else 'product'
 
     # Do not depend on `move_id.partner_id`, the inverse is taking care of that
+    @api.depends('move_id')
     def _compute_partner_id(self):
         for line in self:
             line.partner_id = line.move_id.partner_id.commercial_partner_id
