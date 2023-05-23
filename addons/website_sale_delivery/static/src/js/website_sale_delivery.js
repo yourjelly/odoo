@@ -132,6 +132,7 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
      */
     _onCarrierClick: function (ev) {
         var $radio = $(ev.currentTarget).find('input[type="radio"]');
+        const badge_value = $radio.siblings('.o_wsale_delivery_badge_price').html();
         this._showLoading($radio);
         $radio.prop("checked", true);
         var $payButton = $('button[name="o_payment_submit_button"]');
@@ -144,7 +145,12 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
             params: {
                 carrier_id: $radio.val(),
             },
-        })).then(this._handleCarrierUpdateResult.bind(this));
+        })).then(
+            this._handleCarrierUpdateResult.bind(this)
+        ).catch(function () {
+            $radio.siblings('.o_wsale_delivery_badge_price').empty();
+            $radio.siblings('.o_wsale_delivery_badge_price').append(badge_value);
+        });
     },
     /**
      * @private
