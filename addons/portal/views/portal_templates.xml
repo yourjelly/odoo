@@ -37,6 +37,25 @@
         </xpath>
     </template>
 
+    <template id="service_link_preview_front_end" inherit_id="portal.frontend_layout" primary="True">
+        <xpath expr="//head/meta[last()]" position="after">
+            <t t-if="record">
+                <!-- Remove seo_object to not define og and twitter tags twice when wesbite is installed -->
+                <t t-set="seo_object" t-value="False"/>
+                <meta property="og:title" t-att-content="record.name"/>
+                <meta property="og:description" t-att-content="record.description.striptags() if record.description else ''"/>
+                <meta property="og:site_name" t-att-content="request.env.company.name"/>
+                <meta property="og:image"
+                    t-attf-content="/web/binary/company_logo?company={{ request.env.company.id }}"/>
+                <meta name="twitter:card" content="summary_large_image"/>
+                <meta property="twitter:title" t-att-content="record.name"/>
+                <meta property="twitter:description" t-att-content="record.description.striptags() if record.description else ''"/>
+                <meta property="twitter:image"
+                    t-attf-content="/web/binary/company_logo?company={{ request.env.company.id }}"/>
+            </t>
+        </xpath>
+    </template>
+
     <!-- Added by another template so that it can be disabled if needed -->
     <template id="footer_language_selector" inherit_id="portal.frontend_layout" name="Footer Language Selector">
         <xpath expr="//*[hasclass('o_footer_copyright_name')]" position="after">
@@ -166,6 +185,13 @@
                 </div>
             </div>
         </t>
+    </template>
+
+    <!-- Use this template to show name,description and company logo in link preview  -->
+    <template id="link_preview_portal_layout" inherit_id="portal.portal_layout" primary="True">
+        <xpath expr="//t[@t-call='portal.frontend_layout']" position="attributes">
+            <attribute name="t-call">portal.service_link_preview_front_end</attribute>
+        </xpath>
     </template>
 
     <template id="placeholder_user_sign_in" name="User Sign In Placeholder"/>

@@ -46,6 +46,7 @@ class ProjectCustomerPortal(CustomerPortal):
             pager=pager,
             project=project,
             task_url=f'projects/{project.id}/task',
+            record=project,
         )
         # default value is set to 'project' in _prepare_tasks_values, so we have to set it to 'none' here.
         if not groupby:
@@ -249,6 +250,7 @@ class ProjectCustomerPortal(CustomerPortal):
             'user': request.env.user,
             'project_accessible': project_accessible,
             'task_link_section': [],
+            'record': task,
         }
 
         values = self._get_page_view_values(task, access_token, values, history, False, **kwargs)

@@ -56,7 +56,7 @@
     </template>
 
     <template id="portal_my_projects" name="My Projects">
-        <t t-call="portal.portal_layout">
+        <t t-call="portal.link_preview_portal_layout">
             <t t-set="breadcrumbs_searchbar" t-value="True"/>
 
             <t t-call="portal.portal_searchbar">
@@ -84,7 +84,7 @@
     </template>
 
     <template id="portal_my_project" name="My Project">
-        <t t-call="portal.portal_layout">
+        <t t-call="portal.link_preview_portal_layout">
             <t t-set="o_portal_fullwidth_alert" groups="project.group_project_user">
                 <t t-call="portal.portal_back_in_edit_mode">
                     <t t-set="backend_url" t-value="'/web#model=project.project&amp;id=%s&amp;view_type=kanban' % (project.id)"/>
@@ -208,7 +208,31 @@
         </t>
     </template>
 
+    <template id="task_link_preview_front_end" inherit_id="portal.service_link_preview_front_end" primary="True">
+        <xpath expr="//meta[@property='og:image']" position="replace">
+            <t t-if="record.displayed_image_id">
+                <meta property="og:image" t-attf-content="/web/image/#{record.displayed_image_id.id}/300x200?access_token=#{record.displayed_image_id.access_token}"/>
+            </t>
+            <meta property="og:image" t-attf-content="/web/binary/company_logo?company={{ request.env.company.id }}"/>
+        </xpath>
+        <xpath expr="//meta[@property='twitter:image']" position="replace">
+            <t t-if="record.displayed_image_id">
+                <meta property="twitter:image" t-attf-content="/web/image/#{record.displayed_image_id.id}/300x200?access_token=#{record.displayed_image_id.access_token}"/>
+            </t>
+            <meta property="twitter:image" t-attf-content="/web/binary/company_logo?company={{ request.env.company.id }}"/>
+        </xpath>
+    </template>
+
+    <template id="task_link_preview_portal_layout" inherit_id="portal.portal_layout" primary="True">
+        <xpath expr="//t[@t-call='portal.frontend_layout']" position="attributes">
+            <attribute name="t-call">project.task_link_preview_front_end</attribute>
+        </xpath>
+    </template>
+
     <template id="portal_my_task" name="My Task" inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//t[@t-call='portal.portal_layout']" position="attributes">
+            <attribute name="t-call">project.task_link_preview_portal_layout</attribute>
+        </xpath>
         <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
             <t t-set="o_portal_fullwidth_alert" groups="project.group_project_user">
                 <t t-call="portal.portal_back_in_edit_mode">
