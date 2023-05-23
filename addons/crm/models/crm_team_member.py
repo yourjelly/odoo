@@ -209,4 +209,4 @@ class Team(models.Model):
         assign_ratio = work_days / 30.0
         to_assign = self.assignment_max * assign_ratio
         compensation = max(0, self.assignment_max - (self.lead_month_count + to_assign)) * 0.2
-        return round(to_assign + compensation)
+        return max(1, round(to_assign + compensation))

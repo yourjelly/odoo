@@ -492,6 +492,13 @@ class TestLeadAssign(TestLeadAssignCommon):
         self.assertEqual(leads[5].team_id, self.sales_team_convert, 'Assigned lead should not be reassigned')
         self.assertEqual(leads[5].user_id, self.user_sales_manager, 'Assigned lead should not be reassigned')
 
+    def test_assign_duplicates_with_assign_max(self):
+        """ Test assign process with assignment_max 1 and works_days 0.2.
+        Ensure the weights team member is more than zero. """
+
+        self.sales_team_1_m1.assignment_max = 1
+        self.sales_team_1._action_assign_leads(work_days=0.2)
+
     @mute_logger('odoo.models.unlink')
     def test_merge_assign_keep_master_team(self):
         """ Check existing opportunity keep its team and salesman when merged with a new lead """
