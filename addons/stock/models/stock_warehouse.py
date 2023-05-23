@@ -135,7 +135,6 @@ class Warehouse(models.Model):
         # create routes and push/stock rules
         route_vals = warehouse._create_or_update_route()
         warehouse.write(route_vals)
-
         # Update global route with specific warehouse rule.
         warehouse._create_or_update_global_routes_rules()
 
@@ -331,12 +330,38 @@ class Warehouse(models.Model):
         for picking_type, values in data.items():
             if self[picking_type]:
                 self[picking_type].update(values)
+            # elif picking_type == 'pbm_type_id' and PickingType.search([('active', '!=', None), ('company_id', '=', self.company_id.id), ('sequence_code', '=', 'PC')]):
+            #     data[picking_type].update(create_data[picking_type])
+            #     sequence = IrSequenceSudo.create(sequence_data[picking_type])
+            #     values.update(warehouse_id=self.id, color=color, sequence_id=sequence.id)
+            #     or_record = PickingType.search([('active', '!=', None), ('company_id', '=', self.company_id.id), ('sequence_code', '=', 'PC')])
+            #     or_record.update(values)
+            #     warehouse_data[picking_type] = or_record.id
+            # elif isinstance(create_data[picking_type], int):mrp_picking_type or
+            #     warehouse_data[picking_type] = create_data[picking_type]
+            # elif picking_type=='manu_type_id' and self.env['stock.picking.type'].search([('active', '!=', None), ('code', '=', 'mrp_operation'), ('company_id', '=', self.company_id.id)], limit=1).id:
+            #     self.env['stock.picking.type'].search([('active', '!=', None), ('code', '=', 'mrp_operation'), ('company_id', '=', self.company_id.id)], limit=1).update(values)
+            #     warehouse_data[picking_type] = self.env['stock.picking.type'].search([('active', '!=', None), ('code', '=', 'mrp_operation'), ('company_id', '=', self.company_id.id)], limit=1).id
             else:
                 data[picking_type].update(create_data[picking_type])
                 sequence = IrSequenceSudo.create(sequence_data[picking_type])
                 values.update(warehouse_id=self.id, color=color, sequence_id=sequence.id)
-                warehouse_data[picking_type] = PickingType.create(values).id
-
+                if picking_type == 'pbm_type_id' and PickingType.search([('active', '!=', None), ('company_id', '=', self.company_id.id), ('sequence_code', '=', 'PC')]):
+                    or_record = PickingType.search([('active', '!=', None), ('company_id', '=', self.company_id.id), ('sequence_code', '=', 'PC')])
+                    or_record.update(values)
+                    warehouse_data[picking_type] = or_record.id
+                else:
+                    warehouse_data[picking_type] = PickingType.create(values).id
+            # elif isinstance(create_data[picking_type], int):mrp_picking_type or
+            #     warehouse_data[picking_type] = create_data[picking_type]
+            # elif picking_type=='manu_type_id' and self.env['stock.picking.type'].search([('active', '!=', None), ('code', '=', 'mrp_operation'), ('company_id', '=', self.company_id.id)], limit=1).id:
+            #     self.env['stock.picking.type'].search([('active', '!=', None), ('code', '=', 'mrp_operation'), ('company_id', '=', self.company_id.id)], limit=1).update(values)
+            #     warehouse_data[picking_type] = self.env['stock.picking.type'].search([('active', '!=', None), ('code', '=', 'mrp_operation'), ('company_id', '=', self.company_id.id)], limit=1).id
+            # else:
+            #     data[picking_type].update(create_data[picking_type])
+            #     sequence = IrSequenceSudo.create(sequence_data[picking_type])
+            #     values.update(warehouse_id=self.id, color=color, sequence_id=sequence.id)
+            #     warehouse_data[picking_type] = PickingType.create(values).id
         if 'out_type_id' in warehouse_data:
             PickingType.browse(warehouse_data['out_type_id']).write({'return_picking_type_id': warehouse_data.get('in_type_id', False)})
         if 'in_type_id' in warehouse_data:
@@ -380,6 +405,7 @@ class Warehouse(models.Model):
             -update_values: values used to update the route when a field in
             depends is modify on the warehouse.
         """
+
         # We use 0 since routing are order from stock to cust. If the routing
         # order is modify, the mto rule will be wrong.
         rule = self.get_rules_dict()[self.id][self.delivery_steps]
@@ -428,6 +454,7 @@ class Warehouse(models.Model):
         """
         # Create routes and active/create their related rules.
         routes = []
+
         rules_dict = self.get_rules_dict()
         for route_field, route_data in self._get_routes_values().items():
             # If the route exists update it
@@ -584,7 +611,6 @@ class Warehouse(models.Model):
                 self.env['stock.rule'].create(rule_vals)
             else:
                 existing_rule.write({'active': True})
-
     def _get_locations_values(self, vals, code=False):
         """ Update the warehouse locations. """
         def_values = self.default_get(['reception_steps', 'delivery_steps'])

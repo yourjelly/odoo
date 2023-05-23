@@ -24,5 +24,6 @@ internal transfer document is needed.
     'data': ['data/stock_data.xml', 'views/sale_order_views.xml'],
     'installable': True,
     'auto_install': False,
+    'uninstall_hook': 'uninstall_hook',
     'license': 'LGPL-3',
 }

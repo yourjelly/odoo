@@ -220,6 +220,7 @@ class StockWarehouse(models.Model):
 
     def _get_picking_type_create_values(self, max_sequence):
         data, next_sequence = super(StockWarehouse, self)._get_picking_type_create_values(max_sequence)
+        # mrp_picking_type = self.env['stock.picking.type'].search([('active', '!=', None), ('code', '=', 'mrp_operation'), ('company_id', '=', self.company_id.id)], limit=1).id
         data.update({
             'pbm_type_id': {
                 'name': _('Pick Components'),
@@ -252,6 +253,15 @@ class StockWarehouse(models.Model):
                 'sequence_code': 'MO',
                 'company_id': self.company_id.id,
             },
+            # 'manu_type_id': mrp_picking_type or {
+            #     'name': _('Manufacturing'),
+            #     'code': 'mrp_operation',
+            #     'use_create_lots': True,
+            #     'use_existing_lots': True,
+            #     'sequence': next_sequence + 2,
+            #     'sequence_code': 'MO',
+            #     'company_id': self.company_id.id,
+            # },
         })
         return data, max_sequence + 4
 

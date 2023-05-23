@@ -44,3 +44,19 @@ def uninstall_hook(cr, registry):
     except:
         pass
 
+    # env["stock.picking.type"].search([('code', '=', 'mrp_operation')]).write({'active': False})
+
+    # env["stock.picking.type"].search([('sequence_code', 'in', ('MO','PC','SFP')),('active','!=',None)]).write({'active': False})
+
+    env["stock.rule"].search([('picking_type_id.sequence_code', 'in', ('MO', 'PC', 'SFP')), ('picking_type_id.active', '!=', None), ('active', '!=', None)]).unlink()
+    env["stock.picking.type"].search([('sequence_code', '=', 'SFP'), ('active', '!=', None)]).unlink()
+
+    # check = env["stock.picking.type"].search([('sequence_code', 'in', ('MO','PC','SFP')),('active','!=',None)])
+    # for r in check:
+    #     check_two = env["stock.rule"].search([('picking_type_id','=',r.id)])
+    #     for record in check_two:
+    #         env["stock.rule"].browse(record.id).unlink()
+        # check_three = env["mrp.production"].search([('picking_type_id','=',r.id),('state','!=','done')])
+        # for record in check_three:
+        #     env["mrp.production"].browse(record.id).unlink()
+        # env["stock.picking.type"].browse(r.id).write({'active': False})

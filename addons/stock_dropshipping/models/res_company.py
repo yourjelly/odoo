@@ -44,16 +44,21 @@ class ResCompany(models.Model):
                 ('code', '=', 'stock.dropshipping'),
                 ('company_id', '=', company.id),
             ])
-            dropship_vals.append({
-                'name': 'Dropship',
-                'company_id': company.id,
-                'warehouse_id': False,
-                'sequence_id': sequence.id,
-                'code': 'incoming',
-                'default_location_src_id': self.env.ref('stock.stock_location_suppliers').id,
-                'default_location_dest_id': self.env.ref('stock.stock_location_customers').id,
-                'sequence_code': 'DS',
-            })
+            dropship_type = self.env['stock.picking.type'].search([('active', '!=', None), ('company_id', '=', company.id), ('default_location_src_id.usage', '=', 'supplier'), ('default_location_dest_id.usage', '=', 'customer')])
+            if dropship_type:
+                dropship_type.active = True
+                dropship_type.sequence_id = sequence.id
+            else:
+                dropship_vals.append({
+                    'name': 'Dropship',
+                    'company_id': company.id,
+                    'warehouse_id': False,
+                    'sequence_id': sequence.id,
+                    'code': 'incoming',
+                    'default_location_src_id': self.env.ref('stock.stock_location_suppliers').id,
+                    'default_location_dest_id': self.env.ref('stock.stock_location_customers').id,
+                    'sequence_code': 'DS',
+                })
         if dropship_vals:
             self.env['stock.picking.type'].create(dropship_vals)
 

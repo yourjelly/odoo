@@ -35,6 +35,7 @@ class MrpProduction(models.Model):
         return self.env['stock.picking.type'].search([
             ('code', '=', 'mrp_operation'),
             ('warehouse_id.company_id', '=', company_id),
+            # ('active', '!=', None),
         ], limit=1).id
 
     @api.model
@@ -580,6 +581,7 @@ class MrpProduction(models.Model):
         elif not self.bom_id or self.bom_id.product_tmpl_id != self.product_tmpl_id or (self.bom_id.product_id and self.bom_id.product_id != self.product_id):
             picking_type_id = self._context.get('default_picking_type_id')
             picking_type = picking_type_id and self.env['stock.picking.type'].browse(picking_type_id)
+
             bom = self.env['mrp.bom']._bom_find(product=self.product_id, picking_type=picking_type, company_id=self.company_id.id, bom_type='normal')
             if bom:
                 self.bom_id = bom.id
