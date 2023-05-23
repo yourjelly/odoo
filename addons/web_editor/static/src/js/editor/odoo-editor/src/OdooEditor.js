@@ -2955,7 +2955,7 @@ export class OdooEditor extends EventTarget {
         const editorTopPos = Math.max(0, editorRect.top);
 
         // Get left position.
-        let left = correctedSelectionRect.left + OFFSET;
+        let left = isSelForward ? correctedSelectionRect.left + OFFSET : correctedSelectionRect.right - OFFSET - toolbarWidth;
         // Ensure the toolbar doesn't overflow the editor on the left.
         left = Math.max(OFFSET, left);
         // Ensure the toolbar doesn't overflow the editor on the right.
