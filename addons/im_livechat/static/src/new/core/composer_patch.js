@@ -10,6 +10,6 @@ patch(Composer.prototype, "im_livechat", {
         if (this.thread?.type !== "livechat") {
             return this._super();
         }
-        return options.input_placeholder || _t("Ask something...");
+        return options.input_placeholder || _t("Say something...");
     },
 });

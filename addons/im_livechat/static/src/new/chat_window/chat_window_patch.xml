@@ -18,8 +18,8 @@
                 <i class="fa fa-refresh"/>
             </div>
         </xpath>
-        <xpath expr="//*[hasclass('o-mail-ChatWindow-name')]" position="attributes">
-            <attribute name="t-attf-style" add="color: {{ livechatService.options.title_color }};" separator=" "/>
+        <xpath expr="//*[hasclass('o-mail-ChatWindow-header')]" position="attributes">
+            <attribute name="t-attf-style" add="color: {{ livechatService.options.title_color }}; background-color: {{ livechatService.options.header_background_color }} !important;" separator=" "/>
         </xpath>
         <xpath expr="//Composer" position="replace">
             <t t-if="chatbotService.inputEnabled">$0</t>

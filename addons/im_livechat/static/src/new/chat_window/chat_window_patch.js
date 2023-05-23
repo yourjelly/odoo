@@ -39,8 +39,6 @@ patch(ChatWindow.prototype, "im_livechat", {
     },
 
     get style() {
-        return `${this._super()} transition: height 0.3s linear 0s; background-color: ${
-            this.livechatService.options.header_background_color
-        };`;
+        return `${this._super()} transition: height 0.3s linear 0s;`;
     },
 });
