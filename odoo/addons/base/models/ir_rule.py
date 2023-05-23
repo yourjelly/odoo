@@ -32,6 +32,15 @@ class IrRule(models.Model):
          'Rule must have at least one checked access right !'),
     ]
 
+    @api.constrains('domain_force')
+    def _check_domain_force(self):
+        eval_context = self._eval_context()
+        for rule in self.filtered('domain_force'):
+            try:
+                safe_eval(rule.domain_force, eval_context)
+            except:
+                raise ValidationError(_("This domain is not valid"))
+
     def _eval_context_for_combinations(self):
         """Returns a dictionary to use as evaluation context for
            ir.rule domains, when the goal is to obtain python lists
