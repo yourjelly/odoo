@@ -26,6 +26,7 @@ from odoo.tools import (config, existing_tables, lazy_classproperty,
                         lazy_property, sql, Collector, OrderedSet)
 from odoo.tools.func import locked
 from odoo.tools.lru import LRU
+from odoo.tools.misc import dumpstacks
 
 _logger = logging.getLogger(__name__)
 _schema = logging.getLogger('odoo.schema')
@@ -755,6 +756,9 @@ class Registry(Mapping):
         """
         if self.in_test_mode():
             return self
+
+        _logger.warning("Entering check signaling in Test mode: %s", self.in_test_mode())
+        dumpstacks()
 
         with closing(self.cursor()) as cr:
             cr.execute(""" SELECT base_registry_signaling.last_value,
