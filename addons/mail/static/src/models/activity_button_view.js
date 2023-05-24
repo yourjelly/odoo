@@ -9,13 +9,17 @@ registerModel({
     identifyingMode: 'xor',
     recordMethods: {
         onClick(ev) {
+            this.webRecord.save();
             if (!this.exists()) {
                 return;
             }
             if (this.listFieldActivityViewOwner) {
                 ev.stopPropagation(); // prevents list view click that opens form view. TODO use special_click instead?
             }
-            this.update({ activityListPopoverView: this.activityListPopoverView ? clear() : {} });
+            if(this.webRecord.data.name)
+            {
+                this.update({ activityListPopoverView: this.activityListPopoverView ? clear() : {} });
+            }
         },
     },
     fields: {
