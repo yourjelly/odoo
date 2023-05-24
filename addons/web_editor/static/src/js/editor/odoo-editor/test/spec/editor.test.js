@@ -1697,14 +1697,16 @@ X[]
                             `<div class="oe_unbreakable">abc</div></div></div></div>`,
                     });
                     await testEditor(BasicEditor, {
-                        contentBefore: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">[ab</div>` +
+                        contentBefore: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">[ab</div>` +
                             `<div class="oe_unbreakable">cd</div>` +
-                            `<div class="oe_unbreakable">e]f</div></div></div></div>`,
+                            `<div class="oe_unbreakable">e]f</div>` +
+                            `</div>`,
                         stepFunction: deleteBackward,
-                        contentAfter: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">[]<br></div>` +
-                            `<div class="oe_unbreakable">f</div></div></div></div>`,
+                        contentAfter: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">[]<br></div>` +
+                            `<div class="oe_unbreakable">f</div>` +
+                            `</div>`,
                     });
                     await testEditor(BasicEditor, {
                         contentBefore: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +

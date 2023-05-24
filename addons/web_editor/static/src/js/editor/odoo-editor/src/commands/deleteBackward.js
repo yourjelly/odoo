@@ -25,7 +25,7 @@ import {
     isVisibleEmpty,
     isNotEditableNode,
     createDOMPathGenerator,
-    closestElement,
+    closestElement, closestBlock
 } from '../utils/utils.js';
 
 Text.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
@@ -139,12 +139,15 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
          *   <=>  <h3>abc[]def</h3>
         */
         console.log('previousElementSibling', this.previousElementSibling);
+        const previousElementSiblingClosestBlock = closestBlock(this.previousElementSibling);
+        console.log('previousElementSiblingClosestBlock', previousElementSiblingClosestBlock);
+        console.log('isEmptyBlock(previousElementSiblingClosestBlock)', isEmptyBlock(previousElementSiblingClosestBlock));
         if (
-            (isEmptyBlock(this.previousElementSibling) || this.previousElementSibling?.textContent === '\u200B') &&
+            (isEmptyBlock(previousElementSiblingClosestBlock) || previousElementSiblingClosestBlock?.textContent === '\u200B') &&
             !['TR','TD','TABLE','TBODY','UL','OL','LI'].includes(this.nodeName)
         ) {
             console.log(' ======== del back remove empty block');
-            this.previousElementSibling.remove();
+            previousElementSiblingClosestBlock.remove();
             setSelection(this, 0);
             console.log('===> ', this.closest('[contenteditable="true"]')?.innerHTML);
             return;
