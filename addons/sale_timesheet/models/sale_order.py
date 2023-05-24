@@ -182,6 +182,13 @@ class SaleOrderLine(models.Model):
             return result
         return res
 
+    @api.depends('state', 'product_uom_qty', 'qty_delivered', 'qty_to_invoice', 'qty_invoiced')
+    def _compute_invoice_status(self):
+        super()._compute_invoice_status()
+        for line in self:
+            if not line.has_displayed_warning_upsell and line.invoice_status == 'upselling':
+                line.invoice_status = 'invoiced'
+
     @api.depends('product_id.service_policy')
     def _compute_remaining_hours_available(self):
         uom_hour = self.env.ref('uom.product_uom_hour')
