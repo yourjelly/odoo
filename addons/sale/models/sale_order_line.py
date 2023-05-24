@@ -15,6 +15,9 @@ class SaleOrderLine(models.Model):
     _description = 'Sales Order Line'
     _order = 'order_id, sequence, id'
     _check_company_auto = True
+    
+    def get_threshold_value(self):
+        return 1.0
 
     @api.depends('state', 'product_uom_qty', 'qty_delivered', 'qty_to_invoice', 'qty_invoiced')
     def _compute_invoice_status(self):
@@ -41,7 +44,7 @@ class SaleOrderLine(models.Model):
                 line.invoice_status = 'to invoice'
             elif line.state == 'sale' and line.product_id.invoice_policy == 'order' and\
                     line.product_uom_qty >= 0.0 and\
-                    float_compare(line.qty_delivered, line.product_uom_qty, precision_digits=precision) == 1:
+                    float_compare(line.qty_delivered, line.product_uom_qty * self.get_threshold_value(), precision_digits=precision) == 1:
                 line.invoice_status = 'upselling'
             elif float_compare(line.qty_invoiced, line.product_uom_qty, precision_digits=precision) >= 0:
                 line.invoice_status = 'invoiced'
