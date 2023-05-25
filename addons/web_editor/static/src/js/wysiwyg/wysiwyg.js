@@ -1935,6 +1935,9 @@ const Wysiwyg = Widget.extend({
             selection.addRange(range);
             // Always hide the unlink button on media.
             this.toolbar.$el.find('#unlink').toggleClass('d-none', true);
+            // FIXME: this is dead code as it is.
+            // OdooEditor.onSelectionChange will be triggered (selection.addRange 2 lines above)
+            // and the toolbar will be repositioned.
             // Show the floatingtoolbar on the topleft of the media.
             if (this.odooEditor.autohideToolbar && !this.odooEditor.isMobile) {
                 const imagePosition = this.lastMediaClicked.getBoundingClientRect();
@@ -1976,6 +1979,8 @@ const Wysiwyg = Widget.extend({
             const hasVisibleButtons = !!buttonGroup.querySelector('.btn:not(.d-none)');
             buttonGroup.classList.toggle('d-none', !hasVisibleButtons);
         }
+        // Toolbar might have changed size, update its position.
+        this.odooEditor.updateToolbarPosition();
         // Update color of already opened colorpickers.
         setTimeout(() => {
             for (let eventName in this.colorpickers) {
