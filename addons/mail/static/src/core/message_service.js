@@ -76,6 +76,10 @@ export class MessageService {
         );
     }
 
+    getNextTemporaryId() {
+        return this.getLastMessageId() + 0.01;
+    }
+
     getMentionsFromText(rawMentions, body) {
         if (!this.store.user) {
             // mentions are not supported for guests
@@ -150,7 +154,9 @@ export class MessageService {
         const thread = message.originThread;
         await this.env.services["mail.thread"].removeFollower(thread.followerOfSelf);
         this.env.services.notification.add(
-            sprintf(_t('You are no longer following "%(thread_name)s".'), { thread_name: thread.name }),
+            sprintf(_t('You are no longer following "%(thread_name)s".'), {
+                thread_name: thread.name,
+            }),
             { type: "success" }
         );
     }
@@ -490,13 +496,13 @@ export class MessageService {
 
     scheduledDateSimple(message) {
         return message.scheduledDate.toLocaleString(DateTime.TIME_SIMPLE, {
-            locale: this.userService.lang.replace("_", "-"),
+            locale: this.userService.lang?.replace("_", "-"),
         });
     }
 
     dateSimple(message) {
         return message.datetime.toLocaleString(DateTime.TIME_SIMPLE, {
-            locale: this.userService.lang.replace("_", "-"),
+            locale: this.userService.lang?.replace("_", "-"),
         });
     }
 }

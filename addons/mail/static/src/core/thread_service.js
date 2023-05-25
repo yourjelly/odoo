@@ -101,7 +101,7 @@ export class ThreadService {
             await new Promise(setTimeout);
         }
         const newestPersistentMessage = thread.newestPersistentMessage;
-        thread.seen_message_id = thread.newestPersistentMessage?.id ?? false;
+        thread.seen_message_id = newestPersistentMessage?.id ?? false;
         if (
             thread.message_unread_counter > 0 &&
             thread.allowSetLastSeenMessage &&
@@ -113,6 +113,8 @@ export class ThreadService {
             }).then(() => {
                 this.updateSeen(thread, newestPersistentMessage.id);
             });
+        } else if (newestPersistentMessage) {
+            this.updateSeen(thread);
         }
         if (thread.hasNeedactionMessages) {
             this.markAllMessagesAsRead(thread);
@@ -698,6 +700,7 @@ export class ThreadService {
                 "seen_message_id",
                 "state",
                 "type",
+                "status",
                 "group_based_subscription",
                 "last_interest_dt",
                 "is_editable",
@@ -843,6 +846,11 @@ export class ThreadService {
             return thread;
         }
         const thread = new Thread(this.store, data);
+        onChange(thread, "message_unread_counter", () => {
+            if (thread.channel) {
+                thread.channel.message_unread_counter = thread.message_unread_counter;
+            }
+        });
         onChange(thread, "isLoaded", () => thread.isLoadedDeferred.resolve());
         onChange(thread, "channelMembers", () => this.store.updateBusSubscription());
         onChange(thread, "is_pinned", () => {
@@ -852,7 +860,8 @@ export class ThreadService {
         });
         this.update(thread, data);
         this.insertComposer({ thread });
-        return thread;
+        // return reactive version.
+        return this.store.threads[thread.localId];
     }
 
     /**
@@ -890,34 +899,15 @@ export class ThreadService {
      */
     async post(thread, body, { attachments = [], isNote = false, parentId, rawMentions }) {
         let tmpMsg;
-        const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
-        const validMentions = this.store.user
-            ? this.messageService.getMentionsFromText(rawMentions, body)
-            : undefined;
-        const partner_ids = validMentions?.partners.map((partner) => partner.id);
-        if (!isNote) {
-            const recipientIds = thread.suggestedRecipients
-                .filter((recipient) => recipient.persona && recipient.checked)
-                .map((recipient) => recipient.persona.id);
-            partner_ids?.push(...recipientIds);
-        }
-        const lastMessageId = this.messageService.getLastMessageId();
-        const tmpId = lastMessageId + 0.01;
-        const params = {
-            context: {
-                mail_post_autofollow: !isNote && thread.hasWriteAccess,
-                temporary_id: tmpId,
-            },
-            post_data: {
-                body: await prettifyMessageContent(body, validMentions),
-                attachment_ids: attachments.map(({ id }) => id),
-                message_type: "comment",
-                partner_ids,
-                subtype_xmlid: subtype,
-            },
-            thread_id: thread.id,
-            thread_model: thread.model,
-        };
+        const params = await this.getMessagePostParams({
+            attachments,
+            body,
+            isNote,
+            rawMentions,
+            thread,
+        });
+        const tmpId = this.messageService.getNextTemporaryId();
+        params.context = { ...params.context, temporary_id: tmpId };
         if (parentId) {
             params.post_data.parent_id = parentId;
         }
@@ -940,7 +930,7 @@ export class ThreadService {
             if (parentId) {
                 tmpData.parentMessage = this.store.messages[parentId];
             }
-            const prettyContent = await prettifyMessageContent(body, validMentions);
+            const prettyContent = await prettifyMessageContent(body, params.validMentions);
             const { emojis } = await loadEmoji();
             const recentEmojis = JSON.parse(
                 browser.localStorage.getItem("mail.emoji.frequent") || "{}"
@@ -964,7 +954,14 @@ export class ThreadService {
             thread.messages.push(tmpMsg);
             thread.seen_message_id = tmpMsg.id;
         }
-        const data = await this.rpc("/mail/message/post", params);
+        const data = await this.rpc(this.getMessagePostRoute(thread), params);
+        if (thread.type !== "chatter") {
+            removeFromArrayWithPredicate(thread.messages, ({ id }) => id === tmpMsg.id);
+            delete this.store.messages[tmpMsg.id];
+        }
+        if (!data) {
+            return;
+        }
         if (data.parentMessage) {
             data.parentMessage.body = data.parentMessage.body
                 ? markup(data.parentMessage.body)
@@ -982,11 +979,45 @@ export class ThreadService {
         if (!message.isEmpty && this.store.hasLinkPreviewFeature) {
             this.rpc("/mail/link_preview", { message_id: data.id }, { silent: true });
         }
-        if (thread.type !== "chatter") {
-            removeFromArrayWithPredicate(thread.messages, ({ id }) => id === tmpMsg.id);
-            delete this.store.messages[tmpMsg.id];
-        }
         return message;
+    }
+
+    /**
+     * Get the parameters to pass to the message post route.
+     */
+    async getMessagePostParams({ attachments, body, isNote, rawMentions, thread }) {
+        const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
+        const validMentions = this.store.user
+            ? this.messageService.getMentionsFromText(rawMentions, body)
+            : undefined;
+        const partner_ids = validMentions?.partners.map((partner) => partner.id);
+        if (!isNote) {
+            const recipientIds = thread.suggestedRecipients
+                .filter((recipient) => recipient.persona && recipient.checked)
+                .map((recipient) => recipient.persona.id);
+            partner_ids?.push(...recipientIds);
+        }
+        return {
+            context: {
+                mail_post_autofollow: !isNote && thread.hasWriteAccess,
+            },
+            post_data: {
+                body: await prettifyMessageContent(body, validMentions),
+                attachment_ids: attachments.map(({ id }) => id),
+                message_type: "comment",
+                partner_ids,
+                subtype_xmlid: subtype,
+            },
+            thread_id: thread.id,
+            thread_model: thread.model,
+        };
+    }
+
+    /**
+     * @param {Thread} thread
+     */
+    getMessagePostRoute(thread) {
+        return "/mail/message/post";
     }
 
     /**
@@ -1093,7 +1124,7 @@ export class ThreadService {
     /**
      * @param {number} threadId
      * @param {string} data base64 representation of the binary
-     * @returns 
+     * @returns
      */
     async notifyThreadAvatarToServer(threadId, data) {
         return this.rpc("/discuss/channel/update_avatar", {
