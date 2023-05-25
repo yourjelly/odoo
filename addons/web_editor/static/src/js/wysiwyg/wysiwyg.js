@@ -1862,6 +1862,11 @@ const Wysiwyg = Widget.extend({
         }
 
         this.odooEditor.automaticStepSkipStack();
+        // Clear "d-none"s
+        for (const buttonGroup of this.toolbar.el.querySelectorAll('.btn-group')) {
+            buttonGroup.classList.remove('d-none');
+        }
+
         // We need to use the editor's window so the tooltip displays in its
         // document even if it's in an iframe.
         const editorWindow = this.odooEditor.document.defaultView;
@@ -1965,6 +1970,11 @@ const Wysiwyg = Widget.extend({
                 });
                 this.odooEditor.observerActive();
             }, 400));
+        }
+        // Hide button groups if none of its buttons is visible.
+        for (const buttonGroup of this.toolbar.el.querySelectorAll('.btn-group:not(.d-none)')) {
+            const hasVisibleButtons = !!buttonGroup.querySelector('.btn:not(.d-none)');
+            buttonGroup.classList.toggle('d-none', !hasVisibleButtons);
         }
         // Update color of already opened colorpickers.
         setTimeout(() => {
