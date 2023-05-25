@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
-import { registry } from '@web/core/registry';
-import { getWysiwygClass } from 'web_editor.loader';
+import { registry } from "@web/core/registry";
+import { getWysiwygClass } from "web_editor.loader";
 
-import { FullscreenIndication } from '../components/fullscreen_indication/fullscreen_indication';
-import { WebsiteLoader } from '../components/website_loader/website_loader';
+import { FullscreenIndication } from "../components/fullscreen_indication/fullscreen_indication";
+import { WebsiteLoader } from "../components/website_loader/website_loader";
 
 const { reactive, EventBus } = owl;
 
-const websiteSystrayRegistry = registry.category('website_systray');
+const websiteSystrayRegistry = registry.category("website_systray");
 
 export const unslugHtmlDataObject = (repr) => {
     const match = repr && repr.match(/(.+)\((\d+),(.*)\)/);
@@ -21,12 +21,13 @@ export const unslugHtmlDataObject = (repr) => {
     };
 };
 
-const ANONYMOUS_PROCESS_ID = 'ANONYMOUS_PROCESS_ID';
+const ANONYMOUS_PROCESS_ID = "ANONYMOUS_PROCESS_ID";
 
 export const websiteService = {
-    dependencies: ['orm', 'action', 'user', 'dialog', 'hotkey'],
+    dependencies: ["orm", "action", "user", "dialog", "hotkey"],
     async start(env, { orm, action, user, dialog, hotkey }) {
         let websites = [];
+        let isPreviewOpen = false;
         let currentWebsiteId;
         let currentMetadata = {};
         let fullscreen;
@@ -55,23 +56,29 @@ export const websiteService = {
         });
         const bus = new EventBus();
 
-        hotkey.add("escape", () => {
-            // Toggle fullscreen mode when pressing escape.
-            if (!currentWebsiteId && !fullscreen) {
-                // Only allow to use this feature while on the website app, or
-                // while it is already fullscreen (in case you left the website
-                // app in fullscreen mode, thanks to CTRL-K).
-                return;
-            }
-            fullscreen = !fullscreen;
-            document.body.classList.toggle('o_website_fullscreen', fullscreen);
-            bus.trigger(fullscreen ? 'FULLSCREEN-INDICATION-SHOW' : 'FULLSCREEN-INDICATION-HIDE');
-        }, { global: true });
-        registry.category('main_components').add('FullscreenIndication', {
+        hotkey.add(
+            "escape",
+            () => {
+                // Toggle fullscreen mode when pressing escape.
+                if (!currentWebsiteId && !fullscreen) {
+                    // Only allow to use this feature while on the website app, or
+                    // while it is already fullscreen (in case you left the website
+                    // app in fullscreen mode, thanks to CTRL-K).
+                    return;
+                }
+                fullscreen = !fullscreen;
+                document.body.classList.toggle("o_website_fullscreen", fullscreen);
+                bus.trigger(
+                    fullscreen ? "FULLSCREEN-INDICATION-SHOW" : "FULLSCREEN-INDICATION-HIDE"
+                );
+            },
+            { global: true }
+        );
+        registry.category("main_components").add("FullscreenIndication", {
             Component: FullscreenIndication,
             props: { bus },
         });
-        registry.category('main_components').add('WebsiteLoader', {
+        registry.category("main_components").add("WebsiteLoader", {
             Component: WebsiteLoader,
             props: { bus },
         });
@@ -82,7 +89,7 @@ export const websiteService = {
                     lastWebsiteId = id;
                 }
                 currentWebsiteId = id;
-                websiteSystrayRegistry.trigger('EDIT-WEBSITE');
+                websiteSystrayRegistry.trigger("EDIT-WEBSITE");
             },
             /**
              * This represents the current website being edited in the
@@ -91,7 +98,7 @@ export const websiteService = {
              * not displayed.
              */
             get currentWebsite() {
-                const currentWebsite = websites.find(w => w.id === currentWebsiteId);
+                const currentWebsite = websites.find((w) => w.id === currentWebsiteId);
                 if (currentWebsite) {
                     currentWebsite.metadata = currentMetadata;
                 }
@@ -120,18 +127,25 @@ export const websiteService = {
                 if (!isWebsitePage) {
                     currentMetadata = {};
                 } else {
-                    const { mainObject, seoObject, isPublished, canPublish, editableInBackend, translatable, viewXmlid } = dataset;
-                    const contentMenus = [...document.querySelectorAll('[data-content_menu_id]')].map(menu => [
-                        menu.dataset.menu_name,
-                        menu.dataset.content_menu_id,
-                    ]);
+                    const {
+                        mainObject,
+                        seoObject,
+                        isPublished,
+                        canPublish,
+                        editableInBackend,
+                        translatable,
+                        viewXmlid,
+                    } = dataset;
+                    const contentMenus = [
+                        ...document.querySelectorAll("[data-content_menu_id]"),
+                    ].map((menu) => [menu.dataset.menu_name, menu.dataset.content_menu_id]);
                     currentMetadata = {
                         path: document.location.href,
                         mainObject: unslugHtmlDataObject(mainObject),
                         seoObject: unslugHtmlDataObject(seoObject),
-                        isPublished: isPublished === 'True',
-                        canPublish: canPublish === 'True',
-                        editableInBackend: editableInBackend === 'True',
+                        isPublished: isPublished === "True",
+                        canPublish: canPublish === "True",
+                        editableInBackend: editableInBackend === "True",
                         title: document.title,
                         translatable: !!translatable,
                         contentMenus,
@@ -139,14 +153,16 @@ export const websiteService = {
                         // a page is editable or not. For now, we use
                         // the editable selector because it's the common
                         // denominator of editable pages.
-                        editable: !!document.getElementById('wrapwrap'),
+                        editable: !!document.getElementById("wrapwrap"),
                         viewXmlid: viewXmlid,
-                        lang: document.documentElement.getAttribute('lang').replace('-', '_'),
-                        direction: document.documentElement.querySelector('#wrapwrap.o_rtl') ? 'rtl' : 'ltr',
+                        lang: document.documentElement.getAttribute("lang").replace("-", "_"),
+                        direction: document.documentElement.querySelector("#wrapwrap.o_rtl")
+                            ? "rtl"
+                            : "ltr",
                     };
                 }
                 contentWindow = document.defaultView;
-                websiteSystrayRegistry.trigger('CONTENT-UPDATED');
+                websiteSystrayRegistry.trigger("CONTENT-UPDATED");
             },
             get pageDocument() {
                 return pageDocument;
@@ -193,14 +209,16 @@ export const websiteService = {
                 this.websiteRootInstance = undefined;
                 if (lang) {
                     invalidateSnippetCache = true;
-                    path = `/website/lang/${encodeURIComponent(lang)}?r=${encodeURIComponent(path)}`;
+                    path = `/website/lang/${encodeURIComponent(lang)}?r=${encodeURIComponent(
+                        path
+                    )}`;
                 }
-                action.doAction('website.website_preview', {
+                action.doAction("website.website_preview", {
                     clearBreadcrumbs: true,
                     additionalContext: {
                         params: {
                             website_id: websiteId || currentWebsiteId,
-                            path: path || (contentWindow && contentWindow.location.href) || '/',
+                            path: path || (contentWindow && contentWindow.location.href) || "/",
                             enable_editor: edition,
                             edit_translations: translation,
                         },
@@ -210,26 +228,26 @@ export const websiteService = {
             async fetchUserGroups() {
                 // Fetch user groups, before fetching the websites.
                 [isRestrictedEditor, isDesigner, hasMultiWebsites] = await Promise.all([
-                    user.hasGroup('website.group_website_restricted_editor'),
-                    user.hasGroup('website.group_website_designer'),
-                    user.hasGroup('website.group_multi_website'),
+                    user.hasGroup("website.group_website_restricted_editor"),
+                    user.hasGroup("website.group_website_designer"),
+                    user.hasGroup("website.group_multi_website"),
                 ]);
             },
             async fetchWebsites() {
-                websites = [...(await orm.searchRead('website', [], ['domain', 'id', 'name']))];
+                websites = [...(await orm.searchRead("website", [], ["domain", "id", "name"]))];
             },
             async loadWysiwyg() {
                 if (!Wysiwyg) {
                     Wysiwyg = await getWysiwygClass({
-                        moduleName: 'website.wysiwyg',
-                        additionnalAssets: ['website.assets_wysiwyg']
+                        moduleName: "website.wysiwyg",
+                        additionnalAssets: ["website.assets_wysiwyg"],
                     });
                 }
                 return Wysiwyg;
             },
             blockPreview(showLoader, processId) {
                 if (!blockingProcesses.length) {
-                    bus.trigger('BLOCK', { showLoader });
+                    bus.trigger("BLOCK", { showLoader });
                 }
                 blockingProcesses.push(processId || ANONYMOUS_PROCESS_ID);
             },
@@ -238,15 +256,15 @@ export const websiteService = {
                 if (processIndex > -1) {
                     blockingProcesses.splice(processIndex, 1);
                     if (blockingProcesses.length === 0) {
-                        bus.trigger('UNBLOCK');
+                        bus.trigger("UNBLOCK");
                     }
                 }
             },
             showLoader(props) {
-                bus.trigger('SHOW-WEBSITE-LOADER', props);
+                bus.trigger("SHOW-WEBSITE-LOADER", props);
             },
             hideLoader() {
-                bus.trigger('HIDE-WEBSITE-LOADER');
+                bus.trigger("HIDE-WEBSITE-LOADER");
             },
             /**
              * Returns the (translated) "functional" name of a model
@@ -262,10 +280,11 @@ export const websiteService = {
                     // with another helper to map a model functional name from
                     // its technical map without the need of the right access
                     // rights (which is why I cannot use search_read here).
-                    modelNamesProm = orm.call("ir.model", "get_available_models")
-                        .then(modelsData => {
+                    modelNamesProm = orm
+                        .call("ir.model", "get_available_models")
+                        .then((modelsData) => {
                             for (const modelData of modelsData) {
-                                modelNames[modelData['model']] = modelData['display_name'];
+                                modelNames[modelData["model"]] = modelData["display_name"];
                             }
                         })
                         // Precaution in case the util is simply removed without
@@ -276,8 +295,14 @@ export const websiteService = {
                 await modelNamesProm;
                 return modelNames[model] || env._t("Data");
             },
+            get isPreviewOpen() {
+                return isPreviewOpen;
+            },
+            set isPreviewOpen(value) {
+                isPreviewOpen = value;
+            },
         };
     },
 };
 
-registry.category('services').add('website', websiteService);
+registry.category("services").add("website", websiteService);
