@@ -99,27 +99,37 @@ patch(ThreadService.prototype, "im_livechat", {
         const isUnknown = !(createLocalId(data.model, data.id) in this.store.threads);
         const thread = this._super(...arguments);
         if (thread.type === "livechat" && isUnknown) {
-            thread.welcomeMessage = this.messageService.insert({
-                id: this.messageService.getNextTemporaryId(),
-                body: this.livechatService.options.default_message,
-                res_id: thread.id,
-                model: thread.model,
-                author: thread.operator,
+            if (!thread.isChatRequest && !thread.isChatbotThread) {
+                thread.welcomeMessage = this.messageService.insert({
+                    id: this.messageService.getNextTemporaryId(),
+                    body: this.livechatService.options.default_message,
+                    res_id: thread.id,
+                    model: thread.model,
+                    author: thread.operator,
+                });
+            }
+            if (thread.isChatbotThread) {
+                thread.chatbotTypingMessage = this.messageService.insert({
+                    id: this.messageService.getNextTemporaryId(),
+                    res_id: thread.id,
+                    model: thread.model,
+                    author: thread.operator,
+                });
+            }
+            onChange(thread, "state", () => {
+                if (this.livechatService.state !== SESSION_STATE.CLOSED) {
+                    this.livechatService.updateSession({ state: thread.state });
+                }
             });
-            thread.chatbotTypingMessage = this.messageService.insert({
-                id: this.messageService.getNextTemporaryId(),
-                res_id: thread.id,
-                model: thread.model,
-                author: thread.operator,
+            onChange(thread, "seen_message_id", () => {
+                if (this.livechatService.state !== SESSION_STATE.CLOSED) {
+                    this.livechatService.updateSession({ seen_message_id: thread.seen_message_id });
+                }
             });
-            onChange(thread, "state", () =>
-                this.livechatService.updateSession({ state: thread.state })
-            );
-            onChange(thread, "seen_message_id", () =>
-                this.livechatService.updateSession({ seen_message_id: thread.seen_message_id })
-            );
             onChange(thread, "message_unread_counter", () => {
-                this.livechatService.updateSession({ channel: thread.channel });
+                if (this.livechatService.state !== SESSION_STATE.CLOSED) {
+                    this.livechatService.updateSession({ channel: thread.channel });
+                }
             });
             this.store.livechatThread = thread;
         }
@@ -135,6 +145,7 @@ patch(ThreadService.prototype, "im_livechat", {
                 name: data.operator_pid[1],
             });
         }
+        thread.isChatRequest = data.isChatRequest ?? thread.isChatRequest;
         thread.chatbotScriptId = data.chatbotScriptId ?? thread.chatbotScriptId;
     },
 
