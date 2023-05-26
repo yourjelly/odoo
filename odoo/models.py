@@ -5298,6 +5298,9 @@ class BaseModel(metaclass=MetaModel):
                         else:
                             invf._update(inv_rec, self)
 
+                        if invf.type == 'many2one':
+                            invf._update_inverses(inv_rec, invf.convert_to_cache(self, inv_rec, validate=False))
+
     def _convert_to_record(self, values):
         """ Convert the ``values`` dictionary from the cache format to the
         record format.
