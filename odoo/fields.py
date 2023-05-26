@@ -3083,6 +3083,7 @@ class Many2one(_Relational):
             if ids0 is not None or not corecord.id:
                 ids1 = tuple(unique((ids0 or ()) + valid_records._ids))
                 cache.set(corecord, invf, ids1)
+                print('Inverse', self, invf, corecord, ids0, ids1)
 
 
 class Many2oneReference(Integer):

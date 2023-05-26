@@ -387,7 +387,9 @@ class AccountTestInvoicingCommon(TransactionCase):
             move_form.date = move_form.invoice_date
         move_form.partner_id = partner or cls.partner_a
 
+        print(products, amounts)
         for product in (products or []):
+            print(" Add one line ")
             with move_form.invoice_line_ids.new() as line_form:
                 line_form.product_id = product
                 if taxes is not None:
@@ -407,7 +409,7 @@ class AccountTestInvoicingCommon(TransactionCase):
                         line_form.tax_ids.add(tax)
 
         rslt = move_form.save()
-
+        print(rslt.invoice_line_ids)
         if post:
             rslt.action_post()
 
@@ -416,6 +418,14 @@ class AccountTestInvoicingCommon(TransactionCase):
     def assertInvoiceValues(self, move, expected_lines_values, expected_move_values):
         def sort_lines(lines):
             return lines.sorted(lambda line: (line.sequence, not bool(line.tax_line_id), line.name or '', line.balance))
+        
+        print(len(move.line_ids.sorted()))
+        print(len(expected_lines_values))
+        assert len(move.line_ids.sorted()) == len(expected_lines_values)
+        # print(move)
+        # print(expected_lines_values)
+        # print(expected_move_values)
+        
         self.assertRecordValues(sort_lines(move.line_ids.sorted()), expected_lines_values)
         self.assertRecordValues(move, [expected_move_values])
 
