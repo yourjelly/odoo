@@ -28,7 +28,7 @@
                     'ms-3 me-1 my-0': !thread,
                 }"
             />
-            <div t-if="thread and thread.isChannel and thread.message_unread_counter > 0" class="mx-1 my-0">
+            <div t-if="thread and thread.isChannel and thread.message_unread_counter > 0" class="mx-1 my-0" t-name="unreadCounter">
                 (<t t-out="thread.message_unread_counter"/>)
             </div>
             <div class="flex-grow-1"/>
@@ -52,7 +52,7 @@
              </t>
              <t t-if="actions.length > 0">
                  <t t-set="lastAction" t-value="orderedActions.at(-1)"/>
-                 <button class="o-mail-ChatWindow-command btn d-flex p-2 me-1 opacity-75 opacity-100-hover" t-att-title="lastAction.name" t-on-click.stop="lastAction.onSelect"><i t-att-class="lastAction.icon"/></button>
+                 <button class="o-mail-ChatWindow-command btn d-flex p-2 me-1 opacity-75 opacity-100-hover" t-att-title="lastAction.name" t-on-click.stop="lastAction.onSelect" t-name="last action"><i t-att-class="lastAction.icon"/></button>
              </t>
         </div>
         <div t-if="!props.chatWindow.folded" class="o-mail-ChatWindow-content bg-view d-flex flex-column h-100 overflow-auto border-start border-end position-relative" t-ref="content">
@@ -63,11 +63,11 @@
                     <Thread isInChatWindow="true" thread="thread" t-key="thread.localId" messageEdition="messageEdition" messageToReplyTo="messageToReplyTo"/>
                     <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" messageEdition="messageEdition" messageToReplyTo="messageToReplyTo" dropzoneRef="contentRef"/>
                 </t>
+                <div t-else="" class="d-flex align-items-center m-3">
+                    <span class="flex-shrink-0 me-2">To :</span>
+                    <ChannelSelector category="store.discuss.chats" onValidate="() => chatWindowService.closeNewMessage()" multiple="false" autofocus="true"/>
+                </div>
             </t>
-            <div t-else="" class="d-flex align-items-center m-3">
-                <span class="flex-shrink-0 me-2">To :</span>
-                <ChannelSelector category="store.discuss.chats" onValidate="() => chatWindowService.closeNewMessage()" multiple="false" autofocus="true"/>
-            </div>
         </div>
     </div>
 </t>

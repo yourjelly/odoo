@@ -9,3 +9,4 @@ from . import test_get_discuss_channel
 from . import test_im_livechat_report
 from . import test_im_livechat_support_page
 from . import test_message
+from . import test_js

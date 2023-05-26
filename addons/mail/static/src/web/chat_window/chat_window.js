@@ -169,7 +169,7 @@ export class ChatWindow extends Component {
                 sequence: 10,
             });
         }
-        if (this.thread && this.props.chatWindow.isOpen) {
+        if (this.thread && this.props.chatWindow.isOpen && this.thread.allowOpenInDiscuss) {
             acts.push({
                 id: "expand",
                 name:

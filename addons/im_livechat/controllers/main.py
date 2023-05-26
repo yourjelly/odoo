@@ -5,6 +5,7 @@ from werkzeug.exceptions import NotFound
 from odoo import http, tools, _
 from odoo.http import request
 from odoo.addons.base.models.assetsbundle import AssetsBundle
+from odoo.modules.module import get_resource_path
 
 
 class LivechatController(http.Controller):
@@ -12,10 +13,10 @@ class LivechatController(http.Controller):
     # Note: the `cors` attribute on many routes is meant to allow the livechat
     # to be embedded in an external website.
 
-    @http.route('/im_livechat/external_lib.<any(css,js):ext>', type='http', auth='public')
-    def livechat_lib(self, ext, **kwargs):
+    @http.route('/im_livechat/assets_embed.<any(css,js):ext>', type='http', auth='public')
+    def embed_assets(self, ext, **kwargs):
         # _get_asset return the bundle html code (script and link list) but we want to use the attachment content
-        bundle = 'im_livechat.external_lib'
+        bundle = 'im_livechat.assets_embed'
         files, _ = request.env["ir.qweb"]._get_asset_content(bundle)
         asset = AssetsBundle(bundle, files)
 
@@ -25,6 +26,11 @@ class LivechatController(http.Controller):
 
         stream = request.env['ir.binary']._get_stream_from(mock_attachment)
         return stream.get_response()
+
+    @http.route('/im_livechat/font-awesome', type='http', auth='none', cors="*")
+    def fontawesome(self, **kwargs):
+        font_awesome_path = get_resource_path('web', 'static/src/libs/fontawesome/fonts/fontawesome-webfont.woff2')
+        return http.Stream.from_path(font_awesome_path).get_response()
 
     @http.route('/im_livechat/load_templates', type='json', auth='none', cors="*")
     def load_templates(self, **kwargs):
@@ -202,7 +208,7 @@ class LivechatController(http.Controller):
         if channel:
             channel._email_livechat_transcript(email)
 
-    @http.route('/im_livechat/visitor_leave_session', type='json', auth="public")
+    @http.route('/im_livechat/visitor_leave_session', type='json', auth="public", cors="*")
     def visitor_leave_session(self, uuid):
         """ Called when the livechat visitor leaves the conversation.
          This will clean the chat request and warn the operator that the conversation is over.
@@ -234,7 +240,10 @@ class LivechatController(http.Controller):
             message_type='comment',
             subtype_xmlid='mail.mt_comment'
         )
-        return message.id if message else False
+        message_format = message.message_format()[0]
+        if 'temporary_id' in request.env.context:
+            message_format['temporary_id'] = request.env.context['temporary_id']
+        return message.message_format()[0] if message else False
 
     @http.route(['/im_livechat/chat_history'], type="json", auth="public", cors="*")
     def im_livechat_chat_history(self, uuid, last_id=False, limit=20):
