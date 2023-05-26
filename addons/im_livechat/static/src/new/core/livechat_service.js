@@ -47,6 +47,10 @@ export class LivechatService {
     /** @type {string} */
     userName;
 
+    constructor(env, services) {
+        this.setup(env, services);
+    }
+
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {{
@@ -55,8 +59,7 @@ export class LivechatService {
      * rpc: typeof import("@web/core/network/rpc_service").rpcService.start,
      * }} services
      */
-    constructor(env, services) {
-        this.env = env;
+    setup(env, services) {
         this.cookie = services.cookie;
         this.busService = services.bus_service;
         this.rpc = services.rpc;
@@ -105,15 +108,11 @@ export class LivechatService {
     }
 
     /**
-     * Update the session with the given values and update the cookies.
-     * Ignore if the session is not active.
+     * Update the session with the given values.
      *
      * @param {Object} values
      */
     updateSession(values) {
-        if ([SESSION_STATE.NONE, SESSION_STATE.CLOSED].includes(this.state)) {
-            return;
-        }
         const session = JSON.parse(this.cookie.current[this.SESSION_COOKIE] ?? "{}");
         Object.assign(session, values);
         this.cookie.deleteCookie(this.SESSION_COOKIE);

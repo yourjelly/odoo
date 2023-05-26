@@ -59,6 +59,12 @@ Allow website visitors to chat with the collaborators. This module also brings a
         'im_livechat.assets_embed': [
             'website_livechat/static/src/new/**/*',
         ],
+        'im_livechat.embed_test_assets': [
+            'website_livechat/static/src/new/**/*',
+        ],
+        'im_livechat.qunit_embed_suite': [
+            'website_livechat/static/tests/new/**/*',
+        ],
     },
     'license': 'LGPL-3',
 }

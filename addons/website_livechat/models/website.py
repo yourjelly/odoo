@@ -54,7 +54,7 @@ class Website(models.Model):
                     ],
                     "name": chat_request_channel.name,
                     "uuid": chat_request_channel.uuid,
-                    "type": "chat_request"
+                    "isChatRequest": True,
                 }
         return {}
 

@@ -441,7 +441,7 @@ export class ThreadService {
     }
 
     pin(thread) {
-        if (thread.model !== "discuss.channel" || this.store.guest) {
+        if (thread.model !== "discuss.channel" || !this.store.user) {
             return;
         }
         thread.is_pinned = true;

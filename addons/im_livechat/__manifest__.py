@@ -155,7 +155,7 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/src/public/bus_parameters_service_patch.js',
             'im_livechat/static/src/public/session.js',
         ],
-        'im_livechat.external_tests_assets': [
+        'im_livechat.embed_test_assets': [
             ('include', 'web.assets_backend'),
             ('include', 'web.tests_assets'),
             ('remove', 'web/static/tests/mock_server_tests.js'),
@@ -165,7 +165,7 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/src/livechat_data.js',
             ('remove', 'im_livechat/static/src/new/public/**/*'),
         ],
-        'im_livechat.qunit_external_suite': [
+        'im_livechat.qunit_embed_suite': [
             'im_livechat/static/tests/new/**/*',
         ],
     },
