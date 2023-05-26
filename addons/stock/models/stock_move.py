@@ -1820,6 +1820,21 @@ Please change the quantity done or the rounding precision of your unit of measur
                 extra_move = extra_move._action_confirm()
         return extra_move | self
 
+    def _check_unlink_move_dest(self):
+        """ For each move in self, check if the location_dest_id of move is outside (!= and not a child of) the source location of move_dest_ids,
+            if so, break the link.
+        """
+        new_push_moves = self.env['stock.move']
+        for move in self:
+            for move_dest in move.move_dest_ids:
+                if move.location_dest_id != move_dest.location_id and str(move_dest.location_id.id) not in move.location_dest_id.parent_path.split('/'):
+                    # break link
+                    move.move_dest_ids = [Command.unlink(move_dest.id)]
+                    move_dest.procure_method = 'make_to_stock'
+                    new_push_moves |= move._push_apply()
+        if new_push_moves:
+            new_push_moves._action_confirm()
+
     def _action_done(self, cancel_backorder=False):
         moves = self.filtered(lambda move: move.state == 'draft')._action_confirm()  # MRP allows scrapping draft moves
         moves = (self | moves).exists().filtered(lambda x: x.state not in ('done', 'cancel'))
@@ -1873,6 +1888,11 @@ Please change the quantity done or the rounding precision of your unit of measur
         if new_push_moves:
             new_push_moves._action_confirm()
         move_dests_per_company = defaultdict(lambda: self.env['stock.move'])
+
+        # Break move dest link if move dest and move_dest source are not the same,
+        # so that when move_dests._action_assign is called, the move lines are not created with
+        # the new location, they should not be created at all.
+        moves_todo._check_unlink_move_dest()
         for move_dest in moves_todo.move_dest_ids:
             move_dests_per_company[move_dest.company_id.id] |= move_dest
         for company_id, move_dests in move_dests_per_company.items():
