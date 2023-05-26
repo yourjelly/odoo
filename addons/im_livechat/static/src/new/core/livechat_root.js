@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { ChatWindowContainer } from "@mail/web/chat_window/chat_window_container";
+import { ChatWindowContainer } from "@mail/chat_window/chat_window_container";
 import { Component, xml } from "@odoo/owl";
 import { LivechatButton } from "../core_ui/livechat_button";
 

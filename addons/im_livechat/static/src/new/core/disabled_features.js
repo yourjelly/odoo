@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { ChatWindowService } from "@mail/web/chat_window/chat_window_service";
+import { ChatWindowService } from "@mail/chat_window/chat_window_service";
 import { Composer } from "@mail/composer/composer";
 import { Message as MessageModel } from "@mail/core/message_model";
 import { Thread } from "@mail/core/thread_model";
@@ -39,10 +39,6 @@ patch(Message.prototype, "im_livechat/disabled", {
 
 patch(Thread.prototype, "im_livechat/disabled", {
     get hasMemberList() {
-        return false;
-    },
-
-    get allowOpenInDiscuss() {
         return false;
     },
 });

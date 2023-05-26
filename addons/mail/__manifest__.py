@@ -185,6 +185,7 @@ For more specific needs, you may also assign custom-defined actions
             ('remove', 'mail/static/src/worklets/**/*'),
             ('remove', 'mail/static/src/views/**/*'),
             ('remove', 'mail/static/src/**/web/**/*'),
+            ('remove', 'mail/static/src/chat_window/**/*'),
             ('remove', 'mail/static/src/emoji_picker/emoji_data.js'),
             ('remove', 'mail/static/src/**/*.dark.scss'),
             # discuss (loaded last to fix dependencies)

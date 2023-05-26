@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { ChatWindow } from "@mail/web/chat_window/chat_window";
+import { ChatWindow } from "@mail/chat_window/chat_window";
 import { FeedbackPanel } from "../feedback_panel/feedback_panel";
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";

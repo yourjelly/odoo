@@ -63,10 +63,6 @@
                     <Thread isInChatWindow="true" thread="thread" t-key="thread.localId" messageEdition="messageEdition" messageToReplyTo="messageToReplyTo"/>
                     <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" messageEdition="messageEdition" messageToReplyTo="messageToReplyTo" dropzoneRef="contentRef"/>
                 </t>
-                <div t-else="" class="d-flex align-items-center m-3">
-                    <span class="flex-shrink-0 me-2">To :</span>
-                    <ChannelSelector category="store.discuss.chats" onValidate="() => chatWindowService.closeNewMessage()" multiple="false" autofocus="true"/>
-                </div>
             </t>
         </div>
     </div>

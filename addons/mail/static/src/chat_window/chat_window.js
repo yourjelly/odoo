@@ -23,7 +23,7 @@ export const MODES = {
 
 /**
  * @typedef {Object} Props
- * @property {import("@mail/web/chat_window/chat_window_model").ChatWindow} chatWindow
+ * @property {import("@mail/chat_window/chat_window_model").ChatWindow} chatWindow
  * @property {boolean} [right]
  * @extends {Component<Props, Env>}
  */
@@ -44,7 +44,7 @@ export class ChatWindow extends Component {
     setup() {
         this.MODES = MODES;
         this.store = useStore();
-        /** @type {import("@mail/web/chat_window/chat_window_service").ChatWindowService} */
+        /** @type {import("@mail/chat_window/chat_window_service").ChatWindowService} */
         this.chatWindowService = useState(useService("mail.chat_window"));
         /** @type {import("@mail/core/thread_service").ThreadService} */
         this.threadService = useState(useService("mail.thread"));
@@ -63,7 +63,6 @@ export class ChatWindow extends Component {
              */
             activeMode: MODES.NONE,
         });
-        this.actionService = useService("action");
         this.ui = useState(useService("ui"));
         this.contentRef = useRef("content");
         useChildSubEnv({
@@ -123,28 +122,6 @@ export class ChatWindow extends Component {
         this.chatWindowService.notifyState(this.props.chatWindow);
     }
 
-    expand() {
-        if (this.thread.type === "chatter") {
-            this.actionService.doAction({
-                type: "ir.actions.act_window",
-                res_id: this.thread.id,
-                res_model: this.thread.model,
-                views: [[false, "form"]],
-            });
-            this.chatWindowService.close(this.props.chatWindow);
-            return;
-        }
-        this.threadService.setDiscussThread(this.thread);
-        this.actionService.doAction(
-            {
-                type: "ir.actions.client",
-                tag: "mail.action_discuss",
-                name: _t("Discuss"),
-            },
-            { clearBreadcrumbs: true }
-        );
-    }
-
     close(options) {
         this.chatWindowService.close(this.props.chatWindow, options);
         this.chatWindowService.notifyState(this.props.chatWindow);
@@ -167,18 +144,6 @@ export class ChatWindow extends Component {
                 icon: "fa fa-fw fa-phone",
                 onSelect: () => this.rtc.toggleCall(this.props.chatWindow.thread),
                 sequence: 10,
-            });
-        }
-        if (this.thread && this.props.chatWindow.isOpen && this.thread.allowOpenInDiscuss) {
-            acts.push({
-                id: "expand",
-                name:
-                    this.thread.model === "discuss.channel"
-                        ? _t("Open in Discuss")
-                        : _t("Open Form View"),
-                icon: "fa fa-fw fa-expand",
-                onSelect: () => this.expand(),
-                sequence: 50,
             });
         }
         acts.push({

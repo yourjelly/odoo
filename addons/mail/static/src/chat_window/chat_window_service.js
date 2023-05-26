@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { browser } from "@web/core/browser/browser";
-import { ChatWindow } from "@mail/web/chat_window/chat_window_model";
+import { ChatWindow } from "@mail/chat_window/chat_window_model";
 import { assignDefined } from "@mail/utils/misc";
 import { registry } from "@web/core/registry";
 

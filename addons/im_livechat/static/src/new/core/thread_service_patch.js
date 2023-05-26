@@ -23,7 +23,7 @@ patch(ThreadService.prototype, "im_livechat", {
      * @param {{
      * "im_livechat.chatbot": import("@im_livechat/new/chatbot/chatbot_service").ChatBotService,
      * "im_livechat.livechat": import("@im_livechat/new/core/livechat_service").LivechatService,
-     * "mail.chat_window": import("@mail/web/chat_window/chat_window_service").ChatWindowService,
+     * "mail.chat_window": import("@mail/chat_window/chat_window_service").ChatWindowService,
      * notification: typeof import("@web/core/notifications/notification_service").notificationService.start,
      * }} services
      */

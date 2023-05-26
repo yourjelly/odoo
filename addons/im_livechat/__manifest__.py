@@ -85,23 +85,6 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/tests/tours/**/*',
         ],
         'im_livechat.shared_frontend_public_assets': [
-            # Those imports are required by the action service which is
-            # required by the chat window expand feature which is not
-            # available in public livechat.
-            # TODO: split this feature to remove those deps
-            'web/static/src/search/**/*',
-            'web/static/src/views/view.js',
-            'web/static/src/views/view_hook.js',
-            'web/static/src/views/onboarding_banner.js',
-            'web/static/src/webclient/actions/action_service.js',
-            'web/static/src/webclient/actions/action_hook.js',
-            'web/static/src/webclient/actions/action_dialog.js',
-            'web/static/src/webclient/actions/reports/utils.js',
-            'web/static/src/webclient/actions/reports/report_action.js',
-            'web/static/src/webclient/actions/reports/report_hook.js',
-            'web/static/src/views/utils.js',
-            # ===== END OF ACTION SERVICE DEPS =====
-
             'mail/static/src/core/**/*',
             'mail/static/src/core_ui/**/*',
             'mail/static/src/utils/**/*',
@@ -110,7 +93,7 @@ Help your customers with this chat, and analyse their feedback.
             'mail/static/src/composer/**/*',
             'mail/static/src/dropzone/**/*',
             'mail/static/src/rtc**/*',
-            'mail/static/src/web/chat_window/**/*',
+            'mail/static/src/chat_window/**/*',
             'mail/static/src/web/discuss_app/context_service.js',
             'mail/static/src/discuss_app/**/*',
             ('remove', 'mail/static/src/**/*.dark.scss'),

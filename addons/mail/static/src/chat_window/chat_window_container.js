@@ -1,11 +1,11 @@
 /* @odoo-module */
 
-import { ChatWindow } from "@mail/web/chat_window/chat_window";
+import { ChatWindow } from "@mail/chat_window/chat_window";
 import {
     CHAT_WINDOW_END_GAP_WIDTH,
     CHAT_WINDOW_INBETWEEN_WIDTH,
     CHAT_WINDOW_WIDTH,
-} from "@mail/web/chat_window/chat_window_service";
+} from "@mail/chat_window/chat_window_service";
 import { useMessaging, useStore } from "@mail/core/messaging_hook";
 
 import {
