@@ -22,6 +22,7 @@ const wysiwygUtils = require('@web_editor/js/common/wysiwyg_utils');
 const weUtils = require('web_editor.utils');
 const { PeerToPeer } = require('@web_editor/js/wysiwyg/PeerToPeer');
 const { Mutex } = require('web.concurrency');
+const { throttleForAnimation } = require('@web/core/utils/timing');
 
 var _t = core._t;
 const QWeb = core.qweb;
@@ -1476,18 +1477,14 @@ const Wysiwyg = Widget.extend({
         if ($colorpickerGroup.length) {
             this._createPalette();
         }
-        // we need the Timeout to be sure the editable content is loaded
-        // before calculating the scrollParent() element.
-        setTimeout(() => {
-            const scrollableContainer = this.$el.scrollParent();
-            if (!options.snippets && scrollableContainer.length) {
-                this.odooEditor.addDomListener(
-                    scrollableContainer[0],
-                    'scroll',
-                    this.odooEditor.updateToolbarPosition.bind(this.odooEditor),
-                );
-            }
-        }, 0);
+        const scrollableContainer = document.querySelector('.o_action_manager .o_content');
+        if (!options.snippets && scrollableContainer) {
+            this.odooEditor.addDomListener(
+                scrollableContainer,
+                'scroll',
+                throttleForAnimation(this.odooEditor.updateToolbarPosition.bind(this.odooEditor)),
+            );
+        }
     },
     /**
      * @private
