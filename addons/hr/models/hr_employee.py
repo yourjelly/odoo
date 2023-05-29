@@ -165,7 +165,7 @@ class HrEmployeePrivate(models.Model):
                 if employee.user_id:
                     avatar = employee.user_id[avatar_field]
                 else:
-                    avatar = base64.b64encode(employee._avatar_get_placeholder())
+                    avatar = employee._avatar_generate_svg()
             employee[avatar_field] = avatar
 
     def action_create_user(self):
