@@ -2,11 +2,14 @@
 
 import { useService } from '@web/core/utils/hooks';
 import { FormRenderer } from '@web/views/form/form_renderer';
+import { qweb } from "web.core";
+import {Markup} from "web.utils";
 
-const { useRef, useEffect } = owl;
+const { useRef, useEffect, onMounted, } = owl;
 
 export class FormRendererWithHtmlExpander extends FormRenderer {
     setup() {
+        debugger
         super.setup();
         this.ui = useService('ui');
         const ref = useRef('compiled_view_root');
@@ -25,6 +28,17 @@ export class FormRendererWithHtmlExpander extends FormRenderer {
             },
             () => [ref.el, this.ui.size, this.props.record.mode],
         );
+
+        onMounted(()=>{
+            const content = document.querySelector('.o_project_update_description');
+            // const template = `<div>Project update description with JS</div>` + this.props.record.data.project_id + 'Discription values' + this.props.record.data.description
+            const template = "project.ProjectUpdateDescription"
+            $(content).html(qweb.render(template, {
+                description: Markup(this.props.record.data.description),
+            }));
+        }
+        );
+
     }
 
     get htmlFieldQuerySelector() {

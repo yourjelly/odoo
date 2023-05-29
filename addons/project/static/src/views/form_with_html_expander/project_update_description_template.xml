@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="project.ProjectUpdateDescription">
+            <p>Description Template values from qweb template</p>
+            <t t-out="description"/>
+        </xpath>
+    </t>
+
+</templates>
