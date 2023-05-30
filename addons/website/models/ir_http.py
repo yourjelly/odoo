@@ -333,7 +333,7 @@ class Http(models.AbstractModel):
             return website_page
 
         redirect = cls._serve_redirect()
-        if redirect:
+        if redirect and redirect.url_to:
             return request.redirect(_build_url_w_params(redirect.url_to, request.params), code=redirect.redirect_type)
 
         return False
