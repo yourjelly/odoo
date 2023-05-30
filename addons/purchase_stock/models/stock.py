@@ -146,7 +146,7 @@ class StockMove(models.Model):
                 used_rate = line.amount_currency / line.balance
                 from odoo.tools import float_compare
                 from datetime import timedelta
-                if workaround and float_compare(current_rate, used_rate, precision_digits=4) != 0:
+                if workaround and float_compare(current_rate, used_rate, precision_digits=2) != 0:
                     valuation_date -= timedelta(days=1)
                     affected = True
             valuation_price_unit_total += related_aml.company_currency_id._convert(
