@@ -44,4 +44,6 @@ class TestFrontendMobile(odoo.tests.HttpCase):
             self.pos_config._get_self_order_route(),
             "self_order_tour",
             login=None,
+            watch=True,
+            step_delay=1000
         )

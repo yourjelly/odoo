@@ -61,7 +61,7 @@
                 style="margin-top: 20px" 
                 t-if="table['id']"
                 >
-                Table: <t t-esc="table['name']"/>   
+                Table: <t t-esc="table['name']"/>
             </h4>
             <div class="p-3">
                 <div class="mt-1 mb-4 position-relative top-0 start-0">
@@ -70,6 +70,9 @@
                     />
                     <t t-call="pos_self_order.first_letter_of_odoo_logo_svg"/>
                 </div>
+            </div>
+            <div class="text-center">
+                 (<t t-esc="table['access_token']"/>)
             </div>
         </div>
     </template>

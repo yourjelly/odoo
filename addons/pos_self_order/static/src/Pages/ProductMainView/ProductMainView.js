@@ -1,55 +1,51 @@
 /** @odoo-module */
 
-import { Component, onWillUnmount, useState } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/SelfOrderService";
 import { NavBar } from "@pos_self_order/Components/NavBar/NavBar";
-import { IncrementCounter } from "@pos_self_order/Components/IncrementCounter/IncrementCounter";
-import { MainButton } from "@pos_self_order/Components/MainButton/MainButton";
+import { Line } from "../../models/line";
 export class ProductMainView extends Component {
     static template = "pos_self_order.ProductMainView";
     static props = { product: Object };
     static components = {
         NavBar,
-        IncrementCounter,
-        MainButton,
     };
+
     setup() {
         this.selfOrder = useSelfOrder();
-
-        onWillUnmount(() => {
-            this.selfOrder.currentlyEditedOrderLine = null;
+        this.editedLine = true;
+        this.selfOrder.lastEditedProductId = this.props.product.id;
+        this.state = useState({
+            line: null,
         });
 
-        // we want to keep track of the last product that was viewed
-        this.selfOrder.currentProduct = this.props.product.product_id;
-        this.orderLine = useState({
-            qty: this.selfOrder?.currentlyEditedOrderLine?.qty || 1,
-            customer_note: this.selfOrder?.currentlyEditedOrderLine?.customer_note || "",
-            selectedVariants: Object.fromEntries(
-                this.props.product.attributes.map((attribute, key) => [
-                    attribute.name,
-                    this.selfOrder?.currentlyEditedOrderLine?.description?.split(", ")?.[key] ||
-                        attribute.values[0].name,
-                ])
-            ),
-        });
+        this.initLine();
     }
 
-    incrementQty(up) {
-        this.orderLine.qty = this.computeNewQty(this.orderLine.qty, up);
+    initLine() {
+        // FIXME: we need to verify the product name for future attribute variants
+        let line = this.selfOrder.currentOrder.lines.find(
+            (o) => o.product_id === this.props.product.id
+        );
+
+        if (!line) {
+            this.editedLine = false;
+            line = new Line(
+                {
+                    qty: 1,
+                    product_id: this.props.product.id,
+                },
+                this
+            );
+        }
+
+        this.state.line = line;
     }
-    computeNewQty(qty, up) {
-        if (up) {
-            return qty + 1;
-        }
-        if (qty > 1) {
-            return qty - 1;
-        }
-        if (this.selfOrder.currentlyEditedOrderLine) {
-            return 0;
-        }
-        return 1;
+
+    changeQuantity(increase) {
+        return increase ? this.state.line.qty++ : this.state.line.qty--;
     }
+
     /**
      * @param {Object} selectedVariants
      * @param {import ("@pos_self_order/SelfOrderService").Attribute[]} attributes
@@ -74,24 +70,28 @@ export class ProductMainView extends Component {
         return Object.fromEntries(priceTypes.map((type) => [type, getPriceExtra(type)]));
     }
 
-    preFormOrderline() {
-        const orderLine = this.orderLine;
+    addToCart() {
+        const line = this.state.line;
         const product = this.props.product;
-        return {
-            product_id: product.product_id,
-            customer_note: orderLine.customer_note,
-            description: Object.values(orderLine.selectedVariants).join(", "),
-            nonFinalQty: orderLine.qty,
-            price_extra: this.getAllPricesExtra(orderLine.selectedVariants, product.attributes),
-        };
-    }
+        const lines = this.selfOrder.currentOrder.lines;
+        const lineIdx = lines.findIndex((o) => o.uuid === line.uuid);
 
-    addToCartButtonClicked() {
-        const preFormedOrderline = this.preFormOrderline();
-        this.selfOrder.updateCart(preFormedOrderline);
+        line.description = Object.values(line.selectedVariants).join(", ");
+        line.price_extra = this.getAllPricesExtra(line.selectedVariants, product.attributes);
+
+        if (lineIdx >= 0) {
+            lines[lineIdx] = this.state.line;
+        } else {
+            lines.push(this.state.line);
+        }
+
+        // If a command line does not have a quantity greater than 0, we consider it deleted
+        this.selfOrder.getOrderTaxesFromServer();
+        this.selfOrder.currentOrder.lines = lines.filter((o) => o.qty > 0);
         this.env.navigate(this.returnRoute());
     }
+
     returnRoute() {
-        return this.selfOrder.currentlyEditedOrderLine ? "/cart" : "/products";
+        return this.env.getPreviousRoute() === "cart" ? "/cart" : "/products";
     }
 }

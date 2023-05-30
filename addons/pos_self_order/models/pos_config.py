@@ -86,14 +86,14 @@ class PosConfig(models.Model):
         base_route = f"/menu/{self.id}"
         if not self.self_order_table_mode:
             return base_route
-        table_access_token = (
+        access_token = (
             self.env["restaurant.table"]
             .search(
                 [("active", "=", True), *(table_id and [("id", "=", table_id)] or [])], limit=1
             )
             .access_token
         )
-        return f"{base_route}?at={table_access_token}"
+        return f"{base_route}?at={access_token}"
 
     def _get_self_order_url(self, table_id: Optional[int] = None) -> str:
         self.ensure_one()
@@ -161,6 +161,7 @@ class PosConfig(models.Model):
             "pos_config_id": self.id,
             "company_name": self.company_id.name,
             "currency_id": self.currency_id.id,
+            "self_order_pay_after": self.self_order_pay_after,
             "show_prices_with_tax_included": self.iface_tax_included == "total",
             "custom_links": self._get_self_order_custom_links(),
             "products": self._get_available_products()._get_self_order_data(self),

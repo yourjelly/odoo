@@ -9,8 +9,6 @@ import { fuzzyLookup } from "@web/core/utils/search";
 import { useScrollDirection } from "@pos_self_order/Hooks/useScrollDirection";
 import { useDetection } from "@pos_self_order/Hooks/useDetection";
 import { Transition } from "@web/core/transition";
-import { TagSelector } from "@pos_self_order/Components/TagSelector/TagSelector";
-import { MainButton } from "@pos_self_order/Components/MainButton/MainButton";
 
 export class ProductList extends Component {
     static template = "pos_self_order.ProductList";
@@ -19,33 +17,26 @@ export class ProductList extends Component {
         NavBar,
         ProductCard,
         Transition,
-        TagSelector,
-        MainButton,
     };
     setup() {
+        // reference to the last visited product
+        // (used to scroll back to it when the user comes back from the product page)
+        this.currentProductCard = useChildRef();
+        this.selfOrder = useSelfOrder();
+        this.productsList = useRef("productsList");
         this.search = useState({
             isFocused: false,
             input: "",
         });
-        this.selfOrder = useSelfOrder();
+
         useAutofocus({ refName: "input", mobile: true });
-        this.productsList = useRef("productsList");
 
-        // reference to the last visited product
-        // (used to scroll back to it when the user comes back from the product page)
-        this.currentProductCard = useChildRef();
-
-        // object with references to each product group
-        this.productGroups = Object.fromEntries(
-            Array.from(this.selfOrder.tagList).map((tag) => {
-                return [tag, useRef(`productsWithTag_${tag}`)];
-            })
-        );
+        this.productGroups = Object.values(this.selfOrder.tagList).map((tag) => {
+            return [tag, useRef(`productsWithTag_${tag}`)];
+        });
 
         onMounted(() => {
-            // if the user is coming from the product page
-            // we scroll back to the product card that he was looking at before
-            if (this.selfOrder.currentProduct) {
+            if (this.env.getPreviousRoute() === "products") {
                 this.scrollTo(this.currentProductCard, { behavior: "instant" });
             }
         });
@@ -76,6 +67,7 @@ export class ProductList extends Component {
             behavior,
         });
     }
+
     /**
      * This function returns the list of products that should be displayed;
      *             it filters the products based on the search input
@@ -91,6 +83,7 @@ export class ProductList extends Component {
             (product) => product.name + product.description_sale
         );
     }
+
     /**
      * This function is called when a tag is clicked;
      * @param {string} tag_name
@@ -104,16 +97,12 @@ export class ProductList extends Component {
             this.currentProductGroup.name != tag_name ? this.productGroups[tag_name] : null
         );
     }
-    /**
-     * This function is called when the search button is clicked.
-     */
+
     focusSearch() {
         this.search.isFocused = true;
         this.scrollTo();
     }
-    /**
-     * This function is called when the 'Close Search'  button is clicked ( the 'x' button )
-     */
+
     closeSearch() {
         this.search.isFocused = false;
         this.search.input = "";

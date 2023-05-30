@@ -7,7 +7,7 @@
                 <i class="fa fa-fw fa-chevron-left"/>
             </button>
             <div class="mx-auto overflow-hidden">
-                <h3 class="my-3 text-primary text-truncate" 
+                <h3 class="my-3 text-primary text-truncate"
                     t-esc="props.customText or selfOrder.company_name"
                     t-on-click="() => env.navigate('/')"
                     />

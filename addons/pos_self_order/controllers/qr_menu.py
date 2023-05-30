@@ -48,7 +48,7 @@ class PosQRMenuController(http.Controller):
         The user gets this route from the QR code that they scan at the table
         :param pos_name: the name of the pos config: can be the id or the slugified name of the pos config. (e.g. "3" or "bar-3")
         :param at: the access token of the table; we call this argument "at" because
-            it will be displayed in the url ( as a query param ), and "at" is more user friendly than "table_access_token"
+            it will be displayed in the url ( as a query param ), and "at" is more user friendly than "access_token"
             the user is allowed to order only if this "at" matches the access token of a table
         :param product_id: the id of the product that the user wants to see the details of;
             we never actually use this argument in this function ( it will be read by the client side router ),
@@ -63,7 +63,7 @@ class PosQRMenuController(http.Controller):
                     "currencies": request.env["ir.http"].get_currencies(),
                     "pos_self_order_data": self._get_self_order_config(
                         get_pos_config_sudo(pos_name),
-                        get_table_sudo(table_access_token=at),
+                        get_table_sudo(access_token=at),
                     ),
                 }
             },

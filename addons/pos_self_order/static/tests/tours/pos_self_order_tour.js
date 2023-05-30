@@ -1,64 +1,63 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { clickOn, clickOnBackButton, clickOnProductCard, addProductsToCart } from "./tour_utils";
+import { PosSelf } from "./tour_utils";
 
 registry.category("web_tour.tours").add("self_order_tour", {
     test: true,
     steps: [
-        {
-            content: "Check that the `Pos is Closed` notification is not present",
-            trigger: "body:not(:has(.o_notification_content:contains(restaurant is closed)))",
-            isCheck: true,
-        },
-        ...clickOn("My Orders", { isCheck: true, isNot: true }),
-        ...clickOn("View Menu"),
-        // We should now be on the product list screen
-        ...addProductsToCart([1, 2]),
-        // this will allow us to test if the merging of orderlines works
-        ...addProductsToCart([1]),
-        ...clickOn("Review"),
+        // Verify if the self is open
+        PosSelf.check.isOpen(),
+        PosSelf.check.isNotPrimaryBtn("My Orders"),
 
-        // check that the products are in the card
-        ...[1, 2].map((id) => clickOnProductCard(id, { isCheck: true })).flat(),
+        // Add some products
+        PosSelf.action.clickPrimaryBtn("View Menu"),
+        ...PosSelf.action.addProduct("Office Chair", 15),
+        ...PosSelf.action.addProduct("Office Chair Black", 3),
+        ...PosSelf.action.addProduct("Conference Chair (Aluminium)", 7),
 
-        ...clickOnProductCard(1, { isCheck: true, qty: 2 }),
+        // Check if the products are in the cart
+        PosSelf.action.clickPrimaryBtn("Review"),
+        PosSelf.check.isOrderline("Office Chair", 15),
+        PosSelf.check.isOrderline("Office Chair Black", 3),
+        PosSelf.check.isOrderline("Conference Chair (Aluminium)", 7),
+        PosSelf.action.clickPrimaryBtn("Order"),
 
-        ...clickOn("Order"),
-        // We should now be on the landing page screen ( because ordering redirects to the landing page )
-        ...clickOn("My Orders"),
-        {
-            content: "Check if the status of the first order is `Draft`",
-            trigger: "span.badge:contains('draft')",
-            isCheck: true,
-        },
-        ...[1, 2].map((id) => clickOnProductCard(id, { isCheck: true })).flat(),
+        // Check if the orderlines was sent to the server
+        // We can check whether the order has been correctly sent to the server here,
+        // as this screen (My orders) only displays data from the server.
+        PosSelf.check.isPrimaryBtn("My Orders"),
+        PosSelf.action.clickPrimaryBtn("My Orders"),
+        PosSelf.check.isOrderline("Office Chair", 15),
+        PosSelf.check.isOrderline("Office Chair Black", 3),
+        PosSelf.check.isOrderline("Conference Chair (Aluminium)", 7),
+        PosSelf.action.clickBack(),
 
-        ...clickOnProductCard(1, { isCheck: true, qty: 2 }),
+        // Check if products in the products list have their quantity
+        // They should have because in "meal" mode we add products always to the same order
+        PosSelf.action.clickPrimaryBtn("View Menu"),
+        PosSelf.check.isProductQuantity("Office Chair", 15),
+        PosSelf.check.isProductQuantity("Office Chair Black", 3),
+        PosSelf.check.isProductQuantity("Conference Chair (Aluminium)", 7),
 
-        ...clickOnBackButton(),
-        // We should now be on the Landing Page
+        // In "meal" mode we add products always to the same order until we pay it
+        ...PosSelf.action.addProduct("Corner Desk Left Sit", 5),
+        ...PosSelf.action.addProduct("Large Desk", 23),
+        PosSelf.action.clickPrimaryBtn("Review"),
+        PosSelf.check.isOrderline("Office Chair", 15),
+        PosSelf.check.isOrderline("Office Chair Black", 3),
+        PosSelf.check.isOrderline("Conference Chair (Aluminium)", 7),
+        PosSelf.check.isOrderline("Corner Desk Left Sit", 5),
+        PosSelf.check.isOrderline("Large Desk", 23),
+        PosSelf.action.clickPrimaryBtn("Order"),
 
-        // We will now repeat the same steps as above, ordering again.
-        // The idea is to test that the previous order is not present in the cart
-        // and that the previous order is present in the `My Orders` screen
-        // along with the new order.
-
-        ...clickOn("View Menu"),
-        // We should now be on the product list screen
-        ...addProductsToCart([2, 3, 4]),
-        ...clickOn("Review"),
-        // We should now be on the cart screen
-        ...[1].map((id) => clickOnProductCard(id, { isCheck: true, isNot: true })).flat(),
-        ...[2, 3, 4].map((id) => clickOnProductCard(id, { isCheck: true })).flat(),
-
-        ...clickOn("Order"),
-        // We should now be on the landing page screen
-        ...clickOn("My Orders"),
-        // We should now be on the orders screen
-
-        // if the product 2 has qty 2, then the order was merged correctly
-        ...[1, 2].map((id) => clickOnProductCard(id, { isCheck: true, qty: 2 })).flat(),
-        ...[3, 4].map((id) => clickOnProductCard(id, { isCheck: true, qty: 1 })).flat(),
+        PosSelf.check.isPrimaryBtn("My Orders"),
+        PosSelf.action.clickPrimaryBtn("My Orders"),
+        PosSelf.check.isOrderline("Office Chair", 15),
+        PosSelf.check.isOrderline("Office Chair Black", 3),
+        PosSelf.check.isOrderline("Conference Chair (Aluminium)", 7),
+        PosSelf.check.isOrderline("Corner Desk Left Sit", 5),
+        PosSelf.check.isOrderline("Large Desk", 23),
+        PosSelf.action.clickBack(),
     ],
 });

@@ -29,6 +29,7 @@ export class Router extends Component {
         this.selfOrder.navigate = this.navigate.bind(this);
         useSubEnv({
             navigate: this.navigate.bind(this),
+            getPreviousRoute: this.getPreviousRoute.bind(this),
             getCurrentRoute: this.getCurrentRoute.bind(this),
         });
         this.state = useState({
@@ -81,6 +82,7 @@ export class Router extends Component {
      * @param {number} pos_config_id
      */
     navigate(route, pos_config_id = this.props.pos_config_id) {
+        this.previousRoute = this.getCurrentRoute()[0];
         const url = new URL(browser.location.href);
         url.pathname = `menu/${pos_config_id}${route}`;
         history.pushState({}, "", url);
@@ -94,5 +96,9 @@ export class Router extends Component {
         // The base part of the route is there on all routes, so it
         // makes no sense to have it in the return
         return this.state.activeSlot.split("/").splice(baseLength);
+    }
+
+    getPreviousRoute() {
+        return this.previousRoute;
     }
 }

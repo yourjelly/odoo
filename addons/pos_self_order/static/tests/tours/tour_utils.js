@@ -1,68 +1,103 @@
 /** @odoo-module */
 
-// HELPERS ////////////////////////////////
-// Each of the export functions below returns an array of steps
-// (even those that return a single step, for consistency)
-
-/**
- * START: product list screen
- * END: product list screen
- * @param {number[]} product_ids
- * @returns {Array}
- */
-export function addProductsToCart(product_ids) {
-    return product_ids
-        .map((id) => [
-            ...clickOnProductCard(id),
-            // We should now be on the product main view screen
-            ...clickOn("Add"),
-            // We should now be on the product list screen
-        ])
-        .flat();
-}
-/**
- * @param {string} selector
- * @returns {string}
- */
-export function doesNotExist(selector) {
-    return `body:not(:has(${selector}))`;
-}
-
-export function clickOnProductCard(
-    product_id,
-    { isCheck = false, isNot = false, qty = false } = {}
-) {
-    let productCard = `.o_self_order_item_card:contains(Product ${product_id} test)`;
-    if (qty) {
-        productCard = `${productCard}:has(span:contains(${qty} x ))`;
-    }
-    return [
-        {
-            content: `${isCheck ? "Test" : "Click"} the product card of Product ${product_id}${
-                qty ? ` with quantity ${qty}` : ""
-            }${isNot ? " (should not present)" : ""}`,
-            trigger: isNot ? doesNotExist(productCard) : productCard,
-            isCheck,
+export const PosSelf = {
+    check: {
+        isOpen: () => {
+            return {
+                content: "Check if the notification of closed PoS is not present",
+                trigger: "body:not(:has(.o_notification_content:contains(restaurant is closed)))",
+                run: () => {},
+            };
         },
-    ];
-}
-
-export function clickOnBackButton() {
-    return [
-        {
-            content: "Click the navbar back button",
-            trigger: "nav.o_self_order_navbar > button",
+        isClose: () => {
+            return {
+                content: "Check if the notification of closed PoS is present",
+                trigger: "body:has(.o_notification_content:contains(restaurant is closed))",
+                run: () => {},
+            };
         },
-    ];
-}
-
-export function clickOn(element, { isCheck = false, isNot = false } = {}) {
-    const selector = `.btn:contains('${element}')`;
-    return [
-        {
-            content: `Click on '${element}' button`,
-            trigger: isNot ? doesNotExist(selector) : selector,
-            isCheck,
+        isPrimaryBtn: (buttonName) => {
+            return {
+                content: `Click on primary button '${buttonName}'`,
+                trigger: `.btn:contains('${buttonName}')`,
+                run: () => {},
+            };
         },
-    ];
-}
+        isNotPrimaryBtn: (buttonName) => {
+            return {
+                content: `Click on primary button '${buttonName}'`,
+                trigger: `.btn:not(:contains('${buttonName}'))`,
+                run: () => {},
+            };
+        },
+        isOrderline: (name, quantity) => {
+            // Verify if the product has a quantity in the product list.
+            return {
+                content: `Verify is there an orderline with ${name} and ${quantity} quantity`,
+                trigger: `.o_self_order_item_card h3:contains('${name}') ~ span.text-muted:contains('${quantity} x')`,
+                run: () => {},
+            };
+        },
+        isProductQuantity: (name, quantity) => {
+            return {
+                content: `Verify is there a product with ${name} and ${quantity} selected quantity`,
+                trigger: `.o_self_order_item_card span.text-primary:contains('${quantity}x') ~ h3:contains('${name}')`,
+                run: () => {},
+            };
+        },
+        cannotAddProduct: (name) => {
+            return [
+                {
+                    content: `Click on product '${name}'`,
+                    trigger: `.o_self_order_item_card h3:contains('${name}')`,
+                },
+                {
+                    content: `Click on 'Add' button`,
+                    trigger: `.btn:not(:contains('Add'))`,
+                    run: () => {},
+                },
+            ];
+        },
+    },
+    action: {
+        clickBack: () => {
+            return {
+                content: "Click the navbar back button",
+                trigger: "nav.o_self_order_navbar > button",
+            };
+        },
+        clickPrimaryBtn: (buttonName) => {
+            return {
+                content: `Click on primary button '${buttonName}'`,
+                trigger: `.btn:contains('${buttonName}')`,
+            };
+        },
+        addProduct: (name, quantity) => {
+            const increaseQuantity = [];
+
+            for (let i = 1; i < quantity; i++) {
+                const newQuantity = i + 1;
+                increaseQuantity.push({
+                    content: `Increase quantity from ${i} to ${newQuantity} to get ${quantity}`,
+                    trigger: `.o_self_order_incr_button .btn:contains('+')`,
+                });
+                increaseQuantity.push({
+                    content: `Increase quantity from ${i} to ${newQuantity} to get ${quantity}`,
+                    trigger: `.o_self_order_incr_button div:contains('${newQuantity}')`,
+                });
+            }
+
+            return [
+                {
+                    content: `Click on product '${name}'`,
+                    trigger: `.o_self_order_item_card h3:contains('${name}')`,
+                },
+                ...increaseQuantity,
+                {
+                    content: `Click on 'Add' button`,
+                    trigger: `.o_self_order_main_button:contains('Add')`,
+                },
+            ];
+        },
+    },
+};

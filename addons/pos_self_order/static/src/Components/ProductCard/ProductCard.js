@@ -6,22 +6,28 @@ import { useForwardRefToParent } from "@web/core/utils/hooks";
 
 export class ProductCard extends Component {
     static template = "pos_self_order.ProductCard";
-    static props = ["product", "orderLine?", "currentProductCard?", "class?"];
+    static props = ["product", "line?", "currentProductCard?", "class?"];
     static defaultProps = { class: "" };
+
     setup() {
         this.selfOrder = useSelfOrder();
         useForwardRefToParent("currentProductCard");
-        this.qtyInCart = !this.props.orderLine && this.getQtyInCart();
     }
+
+    get quantityInCart() {
+        return this.selfOrder.currentOrder.lines.find((o) => o.product_id === this.props.product.id)
+            ?.qty;
+    }
+
+    // FIXME: we need to verify the product name for future attribute variants
+    // in case of variants, we need to show the main product screen with "add" btn
+    // if the user select the same variant as an existing orderline, we merge it.
     clickOnProduct() {
         const product = this.props.product;
         if (!this.canOpenProductMainView(product)) {
             return;
         }
-        if (this.env.getCurrentRoute()[0] === "cart") {
-            this.selfOrder.setCurrentlyEditedOrderLine(this.props?.orderLine);
-        }
-        this.env.navigate("/products/" + product.product_id);
+        this.env.navigate("/products/" + product.id);
     }
 
     canOpenProductMainView(product) {
@@ -32,24 +38,16 @@ export class ProductCard extends Component {
             product.attributes.length
         );
     }
-    getQtyInCart() {
-        const cart = this.selfOrder.cart;
-        const product = this.props.product;
-        return cart
-            .filter((x) => x.product_id === product.product_id)
-            .reduce((sum, x) => sum + x.qty, 0);
-    }
+
     getQtyInCartString() {
-        return `${this.props.orderLine.qty} x ${this.selfOrder.formatMonetary(
-            this.props.product.price_info.list_price +
-                (this.props.orderLine?.price_extra.list_price || 0)
-        )}`;
+        // FIXME need to implement price_extra
+        const productId = this.props.line.product_id;
+        return `${this.props.line.qty} x ${this.selfOrder.productByIds[productId].priceWithTax}`;
     }
+
     getTotalPriceString() {
-        return `${this.selfOrder.formatMonetary(
-            (this.props.orderLine?.qty || 1) *
-                (this.props.product.price_info.list_price +
-                    (this.props.orderLine?.price_extra.list_price || 0))
-        )}`;
+        const productPriceWithTax = this.props.product.priceWithTax;
+        const quantity = this.props.line?.qty ? this.props.line.qty : 1;
+        return this.selfOrder.formatMonetary(productPriceWithTax * quantity);
     }
 }
