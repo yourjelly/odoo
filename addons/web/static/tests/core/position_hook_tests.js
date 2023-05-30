@@ -81,18 +81,33 @@ QUnit.test("default position is bottom-middle", async (assert) => {
 });
 
 QUnit.test("can add margin", async (assert) => {
+    // Add a sheet to set a margin on the popper
+    const sheet = document.createElement("style");
+    sheet.textContent = `
+        #popper {
+            margin: 11px;
+        }
+    `;
+    document.head.appendChild(sheet);
+    registerCleanup(() => {
+        sheet.remove();
+    });
+
+    // Mount a first popper, without additional margin
     let TestComp = getTestComponent({ margin: 0 });
     let popper = await mount(TestComp, container);
-
     const popBox1 = document.getElementById("popper").getBoundingClientRect();
+    const targetBox1 = document.getElementById("target").getBoundingClientRect();
+    assert.strictEqual(popBox1.top, targetBox1.bottom + 11, "margin from the sheet is applied");
     destroy(popper);
 
+    // Mount a second popper, with additional margin
     TestComp = getTestComponent({ margin: 20 });
     popper = await mount(TestComp, container);
     const popBox2 = document.getElementById("popper").getBoundingClientRect();
+    const targetBox2 = document.getElementById("target").getBoundingClientRect();
+    assert.strictEqual(popBox2.top, targetBox2.bottom + 31, "both margins are applied");
     destroy(popper);
-
-    assert.strictEqual(popBox1.top + 20, popBox2.top);
 });
 
 QUnit.test("popper is an inner element", async (assert) => {

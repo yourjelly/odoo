@@ -116,6 +116,16 @@ function getBestPosition(target, popper, iframe, { container, margin, position }
         container = container();
     }
 
+    // Account for popper actual margins
+    const popperStyle = getComputedStyle(popper);
+    const { marginTop, marginLeft, marginRight, marginBottom } = popperStyle;
+    const popMargins = {
+        top: parseFloat(marginTop),
+        left: parseFloat(marginLeft),
+        right: parseFloat(marginRight),
+        bottom: parseFloat(marginBottom),
+    };
+
     // Boxes
     const popBox = popper.getBoundingClientRect();
     const targetBox = target.getBoundingClientRect();
@@ -127,10 +137,10 @@ function getBestPosition(target, popper, iframe, { container, margin, position }
     // Compute positioning data
     /** @type {DirectionsData} */
     const directionsData = {
-        t: iframeBox.top + targetBox.top - popBox.height - margin,
-        b: iframeBox.top + targetBox.bottom + margin,
-        r: iframeBox.left + targetBox.right + margin,
-        l: iframeBox.left + targetBox.left - popBox.width - margin,
+        t: iframeBox.top + targetBox.top + popMargins.top - popBox.height - margin,
+        b: iframeBox.top + targetBox.bottom + popMargins.bottom + margin,
+        r: iframeBox.left + targetBox.right + popMargins.right + margin,
+        l: iframeBox.left + targetBox.left + popMargins.left - popBox.width - margin,
     };
     /** @type {VariantsData} */
     const variantsData = {
