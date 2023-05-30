@@ -2978,6 +2978,8 @@ export class OdooEditor extends EventTarget {
 
         // Position the arrow.
         let arrowLeftPos = (isSelForward && !isSelectionPotentiallyBugged ? correctedSelectionRect.right : correctedSelectionRect.left) - left - OFFSET;
+        // Offset left to compensate for parent context position (eg. Iframe).
+        arrowLeftPos += parentContextRect.left;
         // Ensure the arrow doesn't overflow the toolbar on the left.
         arrowLeftPos = Math.max(OFFSET, arrowLeftPos);
         // Ensure the arrow doesn't overflow the toolbar on the right.
