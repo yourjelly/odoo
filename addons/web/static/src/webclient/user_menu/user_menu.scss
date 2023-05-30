@@ -7,3 +7,7 @@
         height: calc(var(--o-navbar-height) - 20px);
     }
 }
+
+.o_user_menu .dropdown-menu {
+    margin: 0 !important;
+}

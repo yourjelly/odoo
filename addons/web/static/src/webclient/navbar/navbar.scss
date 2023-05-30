@@ -83,6 +83,10 @@
         font-size: $o-navbar-brand-font-size;
     }
 
+    .o_navbar_apps_menu .dropdown-menu {
+        margin: 0 !important;
+    }
+
     .o_menu_brand {
         @extend %-main-navbar-entry-base;
         @extend %-main-navbar-entry-spacing;
