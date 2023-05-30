@@ -949,14 +949,14 @@ class Survey(models.Model):
         self.check_validity()
 
         template = self.env.ref('survey.mail_template_user_input_invite', raise_if_not_found=False)
-
-        local_context = dict(
-            self.env.context,
-            default_survey_id=self.id,
-            default_template_id=template and template.id or False,
-            default_email_layout_xmlid='mail.mail_notification_light',
-            default_send_email=(self.access_mode != 'public'),
-        )
+        if template:
+            local_context = dict(
+                self.env.context,
+                default_survey_id=self.id,
+                default_template_id=template and template.id or False,
+                default_email_layout_xmlid='mail.mail_notification_layout',
+                default_send_email=(self.access_mode != 'public'),
+            )
         return {
             'type': 'ir.actions.act_window',
             'name': _("Share a Survey"),
@@ -965,6 +965,17 @@ class Survey(models.Model):
             'target': 'new',
             'context': local_context,
         }
+
+    def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
+        groups = super()._notify_get_recipients_groups(message, model_description, msg_vals=msg_vals)
+        customer_group = next(group for group in groups if group[0] == 'customer')
+        customer_group[2]['active'] = True
+        customer_group[2]['has_button_access'] = True
+        title = 'Start Certification' if self.certification else 'Start Survey'
+        access_opt = customer_group[2].setdefault('button_access', {'title': _(title)})
+        access_opt['url'] = self.get_start_url()
+
+        return groups
 
     def action_start_survey(self, answer=None):
         """ Open the website page with the survey form """

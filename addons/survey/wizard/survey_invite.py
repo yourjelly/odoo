@@ -236,20 +236,17 @@ class SurveyInvite(models.TransientModel):
             mail_values['email_to'] = answer.email
 
         # optional support of default_email_layout_xmlid in context
-        email_layout_xmlid = self.env.context.get('default_email_layout_xmlid', self.env.context.get('notif_layout'))
+        email_layout_xmlid = self.env.context.get('default_email_layout_xmlid')
         if email_layout_xmlid:
-            template_ctx = {
-                'message': self.env['mail.message'].sudo().new(dict(body=mail_values['body_html'], record_name=self.survey_id.title)),
-                'model_description': self.env['ir.model']._get('survey.survey').display_name,
-                'company': self.env.company,
-            }
-            body = self.env['ir.qweb']._render(email_layout_xmlid, template_ctx, minimal_qcontext=True, raise_if_not_found=False)
+            body = self.env.context.get('default_template_id')
             if body:
                 mail_values['body_html'] = self.env['mail.render.mixin']._replace_local_links(body)
+                self.survey_id.message_notify(
+                    body=self.env.ref('survey.mail_template_user_input_invite').body_html,
+                    partner_ids=self.partner_ids.ids,
+                )
             else:
                 _logger.warning('QWeb template %s not found or is empty when sending survey mails. Sending without layout', email_layout_xmlid)
-
-        return self.env['mail.mail'].sudo().create(mail_values)
 
     def action_invite(self):
         """ Process the wizard content and proceed with sending the related
