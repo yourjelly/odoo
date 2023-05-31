@@ -352,7 +352,6 @@ QUnit.test('activity view: activity widget', async function (assert) {
     assert.verifySteps([
         "do_action_compose",
         "activity_send_mail",
-        "do_action_activity",
         "action_feedback_schedule_next",
         "serverGeneratedAction"
         ]);

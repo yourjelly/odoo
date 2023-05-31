@@ -504,8 +504,18 @@ var BasicActivity = AbstractField.extend({
      */
     _onScheduleActivity: function (ev) {
         ev.preventDefault();
-        return this._openActivityForm(false, this._reload.bind(this));
-    },
+        // return this._openActivityForm(false, this._reload.bind(this));
+        if (!this.recordData.id) {
+            this.displayNotification({
+                title: 'Alert',
+                message: 'Please save the record before scheduling an activity.',
+                type: 'danger',
+            });
+        }
+        else {
+            return this._openActivityForm(false, this._reload.bind(this));
+        }
+    },    
 
     /**
      * @private
