@@ -425,7 +425,8 @@ function formatProperties(value, field) {
  * @returns {string}
  */
 export function formatReference(value, options) {
-    return formatMany2one(value ? [value.resId, value.displayName] : false, options);
+    throw new Error("This test will fail");
+    // return formatMany2one(value ? [value.resId, value.displayName] : false, options);
 }
 
 /**
