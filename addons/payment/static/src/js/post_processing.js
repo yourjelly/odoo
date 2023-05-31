@@ -3,6 +3,7 @@
     import publicWidget from "web.public.widget";
     import core from "web.core";
     import {Markup} from "web.utils";
+    import field_utils from "web.field_utils";
 
     var _t = core._t;
 
@@ -88,6 +89,7 @@
                 return;
             }
 
+            display_values.amount = field_utils.format.monetary(display_values.amount, undefined, {currency: display_values.currency});
             this.displayContent("payment.display_tx_list", display_values);
         },
         displayContent(xmlid, display_values) {
