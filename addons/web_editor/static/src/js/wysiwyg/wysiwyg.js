@@ -2149,7 +2149,7 @@ const Wysiwyg = Widget.extend({
             this._getBannerCommand(_t('Banner Info'), 'info', 'fa-info-circle', _t('Insert an info banner section'), 24),
             this._getBannerCommand(_t('Banner Success'), 'success', 'fa-check-circle', _t('Insert a success banner section'), 23),
             this._getBannerCommand(_t('Banner Warning'), 'warning', 'fa-exclamation-triangle', _t('Insert a warning banner section'), 22),
-            this._getBannerCommand(_t('Banner Danger'), 'danger', 'fa-exclamation', _t('Insert a danger banner section'), 21),
+            this._getBannerCommand(_t('Banner Danger'), 'danger', 'fa-exclamation-circle', _t('Insert a danger banner section'), 21),
             {
                 category: _t('Structure'),
                 name: _t('Quote'),
