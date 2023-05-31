@@ -2090,6 +2090,7 @@ const Wysiwyg = Widget.extend({
                     iconClass: iconClass
                 }))[0]
                 this.odooEditor.execCommand('insert', bannerHTML);
+                setSelection(this.odooEditor._latestComputedSelectionInEditable.focusNode.previousSibling.querySelector('p'), 0);
             },
         }
     },
