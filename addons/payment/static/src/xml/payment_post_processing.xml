@@ -3,100 +3,64 @@
     <!-- The templates here as rendered by 'post_processing.js', you can also take
             a look at payment_portal_templates.xml (xmlid: payment_status) for more infos-->
     <t t-name="payment.display_tx_list">
-        <div>
-            <!-- Pending/Confirmed transactions -->
-            <div t-if="state == 'done' || 'pending'">
-                <h1>Operations in progress</h1>
-                <div class="list-group">
-                    <!-- Done transactions -->
-                    <t t-if="state == 'done'"> <!-- I will not need foreach-->
-                        <a t-att-href="landing_route" class="list-group-item">
-                            <h4 class="list-group-item-heading mb5">
-                                <t t-esc="reference"/>
-                                <span class="badge float-end"><t t-esc="amount"/> <t t-esc="currency_code"/></span>
-                            </h4>
-                            <small class="list-group-item-text">
-                                <t t-if="!is_post_processed">
-                                    <t t-if="operation != 'validation'">
-                                        Your payment is being processed, please wait... <i class="fa fa-cog fa-spin"/>
-                                    </t>
-                                    <t t-else="">
-                                        Saving your payment method, please wait... <i class="fa fa-cog fa-spin"/>
-                                    </t>
-                                </t>
-                                <t t-else="">
-                                    <t t-if="operation != 'validation'">
-                                        Your payment has been processed.<br/>
-                                        Click here to be redirected to the confirmation page.
-                                    </t>
-                                    <t t-else="">
-                                        Your payment method has been saved.<br/>
-                                        Click here to be redirected to the confirmation page.
-                                    </t>
-                                </t>
-                            </small>
-                        </a>
-                    </t>
-                    <!-- Pending transactions -->
-                    <t t-if="state == 'pending'">
-                        <a t-att-href="landing_route" class="list-group-item">
-                            <h4 class="list-group-item-heading mb5">
-                                <t t-esc="reference"/>
-                                <span class="badge float-end"><t t-esc="amount"/> <t t-esc="currency_code"/></span>
-                            </h4>
-                            <small class="list-group-item-text">
-                                <t t-if="display_message">
-                                    <!-- display_message is the content of the HTML field associated
-                                    with the current transaction state, set on the provider. -->
-                                    <t t-out="display_message"/>
-                                </t>
-                                <t t-else="">
-                                    Your payment is in pending state.<br/>
-                                    You will be notified when the payment is fully confirmed.<br/>
-                                    Click here to be redirected to the confirmation page.
-                                </t>
-                            </small>
-                        </a>
-                    </t>
-                </div>
+        <!-- Done transactions -->
+        <t t-if="state == 'done'">
+            <t t-if="!is_post_processed">
+                <t t-set="alert_message" t-value="operation != 'validation' ? 'Your payment is being processed' : 'Saving your payment method'"/>
+            </t>
+            <t t-else="">
+                <t t-set="alert_header" t-value="operation != 'validation' ? 'Your payment has been processed' : 'Your payment method has been saved'"/>
+            </t>
+        </t>
+
+        <!-- Pending transactions -->
+        <t t-if="state == 'pending'">
+            <t t-set="alert_message" t-value="display_message"/>
+        </t>
+
+        <!-- Draft transactions -->
+        <t t-if="state == 'draft'">
+            <t t-set="alert_message" t-value="display_message ? display_message : 'We are waiting for the payment provider to confirm the payment.'"/>
+        </t>
+
+        <!-- Cancel transactions -->
+        <t t-if="state == 'cancel'">
+            <t t-set="alert_style" t-value="'danger'"/>
+            <t t-set="alert_header" t-value="'This payment has been canceled'"/>
+            <t t-set="alert_message" t-value="'No payment has been processed.'"/>
+        </t>
+
+        <div id="o_payment_status_alert" t-attf-class="alert alert-{{alert_style ? alert_style : 'info'}} d-flex align-items-center gap-3">
+            <i t-attf-class="fa fa-{{alert_style and alert_style == 'danger' ? 'exclamation-triangle' : 'cog fa-spin'}}"/>
+            <div>
+                <h5 class="alert-heading mb-0" t-out="alert_header ? alert_header : 'Please wait...'"/>
+                <p t-if="alert_message" class="mb-0" t-out="alert_message"/>
             </div>
-            <!-- Draft transactions -->
-            <div t-if="state == 'draft'">
-                <h1>Waiting for operations to process</h1>
-                <ul class="list-group">
-                    <a t-att-href="landing_route" class="list-group-item">
-                        <h4 class="list-group-item-heading mb5">
-                            <t t-esc="reference"/>
-                            <span class="badge float-end"><t t-esc="amount"/> <t t-esc="currency_code"/></span>
-                        </h4>
-                        <small class="list-group-item-text">
-                            <t t-if="display_message">
-                                <!-- display_message is the content of the HTML field associated
-                                with the current transaction state, set on the provider. -->
-                                <t t-out="display_message"/>
-                            </t>
-                            <t t-else="">
-                                We are waiting for the payment provider to confirm the payment.
-                            </t>
-                        </small>
-                    </a>
-                </ul>
+            <a t-att-href="landing_route" class="alert-link ms-auto text-nowrap">Skip <i class="oi oi-arrow-right small"/></a>
+        </div>
+
+        <div class="o_payment_details o_cc2 row row-cols-1 row-cols-md-2 row-cols-lg-4 mx-0 mb-3 py-2 rounded">
+            <div class="col my-3">
+                <label for="form_amount" class="d-block small text-muted">
+                    Amount
+                </label>
+                <span name="form_amount"
+                      t-esc="amount + currency_code"/>
             </div>
-            <!-- Cancel transactions -->
-            <div t-if="state == 'cancel'">
-                <h1>Canceled operations</h1>
-                <ul class="list-group">
-                        <a t-att-href="landing_route" class="list-group-item">
-                            <h4 class="list-group-item-heading mb5">
-                                <t t-esc="reference"/>
-                                <span class="badge float-end"><t t-esc="amount"/> <t t-esc="currency_code"/></span>
-                            </h4>
-                            <small class="list-group-item-text">
-                                This payment has been canceled.<br/>
-                                No payment has been processed.
-                            </small>
-                        </a>
-                </ul>
+            <div class="col my-3">
+                <label for="form_reference" class="d-block small text-muted">
+                    Reference
+                </label>
+                <a t-att-href="landing_route"
+                   name="form_reference"
+                   t-esc="reference"/>
+            </div>
+            <div class="col my-3">
+                <label for="form_provider" class="d-block small text-muted">
+                    Powered by
+                </label>
+                <span name="form_provider"
+                      t-esc="'TODO ANKO'"/>
             </div>
         </div>
     </t>
