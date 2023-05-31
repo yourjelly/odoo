@@ -2,9 +2,9 @@
 <templates>
     <t t-name="web_editor.banner">
         <div t-attf-class="o_editor_banner o_not_editable lh-1 d-flex alert alert-#{alertClass}" role="status" data-oe-protected="true">
-            <i t-attf-class="oe_unremovable fa #{iconClass}" t-att-aria-label="label"/>
+            <i t-attf-class="oe_unremovable fs-4 fa #{iconClass}" t-att-aria-label="label"/>
             <div class="o_editable w-100 ms-3 oe_unremovable" data-oe-protected="false">
-                <p><br/></p>
+                <h4><br/></h4>
             </div>
         </div>
     </t>
