@@ -173,6 +173,7 @@ export class KanbanHeader extends Component {
     }
 
     quickCreate(group) {
+        this.onTitleMouseLeave();
         this.props.quickCreateState.groupId = this.group.id;
     }
 

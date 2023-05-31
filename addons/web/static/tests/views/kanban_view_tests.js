@@ -8802,6 +8802,42 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["read: product"]);
     });
 
+    QUnit.test("Hide tooltip when user click inside a kanban headers item", async (assert) => {
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban default_group_by="product_id">
+                    <field name="product_id" options='{"group_by_tooltip": {"name": "Name"}}'/>
+                    <templates>
+                        <t t-name="kanban-box"/>
+                    </templates>
+                </kanban>`,
+        });
+        assert.hasClass(target.querySelector(".o_kanban_renderer"), "o_kanban_grouped");
+        assert.containsN(target, ".o_column_title", 2);
+
+        await mouseEnter(target, ".o_kanban_group:first-child .o_kanban_header_title");
+        assert.containsOnce(target, ".o-tooltip");
+
+        await click(
+            target,
+            ".o_kanban_group:first-child .o_kanban_header_title .o_kanban_quick_add"
+        );
+        assert.containsNone(target, ".o-tooltip");
+
+        await mouseEnter(target, ".o_kanban_group:first-child .o_kanban_header_title");
+        assert.containsOnce(target, ".o-tooltip");
+
+        await click(target, ".o_kanban_group:first-child .o_kanban_header_title .fa-gear");
+        await nextTick();
+        assert.containsNone(target, ".o-tooltip");
+    });
+
     QUnit.test("loads data tooltips only when first opening", async (assert) => {
         patchWithCleanup(browser, {
             setTimeout: (fn) => fn(),
