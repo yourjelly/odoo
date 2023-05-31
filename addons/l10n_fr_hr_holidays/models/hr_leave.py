@@ -11,29 +11,55 @@ class HrLeave(models.Model):
 
     l10n_fr_date_to_changed = fields.Boolean()
 
+    def _get_fr_date_to_info(self, vals):
+        affecting_fields = ['holiday_type', 'employee_id', 'mode_company_id', 'department_id', 'category_id']
+        if set(vals) & set(affecting_fields):  # checks if any field affecting employee_ids is affected
+            domain = []
+            Employee = self.env['hr.employee']
+            holiday_type = 'holiday_type' in vals and vals['holiday_type'] or len(self.mapped('holiday_type')) == 1 and self[0].holiday_type
+            if holiday_type == 'employee':
+                domain = [('id', 'in', [vals['employee_id']] if 'employee_id' in vals else vals['employee_ids'])]
+            elif holiday_type == 'company':
+                domain = [('company_id', '=', vals['mode_company_id'])]
+            elif holiday_type == 'department':
+                domain = [('department_id', '=', vals['department_id'])]
+            elif holiday_type == 'category':
+                domain = [('category_ids', 'in', vals['department_id'])]
+            employees = Employee.search(domain) if domain else Employee
+        else:
+            employees = self.all_employee_ids
+        calendar = employees.resource_calendar_id if len(employees.resource_calendar_id) == 1 else False
+        company = len(employees.company_id) and employees.company_id
+        return (employees, calendar, company)
+
     def _get_fr_date_to(self, vals):
-        assert 'employee_id' in vals or len(self) == 1
-        employee = self.env['hr.employee'].browse(vals['employee_id']).sudo() if 'employee_id' in vals else self.employee_id
-        employee_calendar = employee.resource_calendar_id
-        company_calendar = employee.company_id.resource_calendar_id
-        leave_type_id = vals['holiday_status_id'] if 'holiday_status_id' in vals else self.holiday_status_id.id
-        if employee.company_id.country_id.code == 'FR' and employee_calendar != company_calendar and leave_type_id:
-            reference_leave_type = employee.company_id._get_fr_reference_leave_type()
+        # the french date_to is meant to be computed only in very specific cases:
+        # - if there is only one calendar for the concerned employees if there is multiple
+        # - if there is only one leave_type affected by the change
+        # - if there is only one company which is french
+        # - the leave_type is the reference leave_type of that company
+        # If any of those condition is not filled, the initial date_to is returned
+        (employees, calendar, company) = self._get_fr_date_to_info(vals)
+        if not calendar or not company:
+            return vals['date_to']
+        leave_type_id = vals['holiday_status_id'] if 'holiday_status_id' in vals else len(self.holiday_status_id) == 1 and self.holiday_status_id.id
+        if company.country_id.code == 'FR' and calendar != company.resource_calendar_id and leave_type_id:
+            reference_leave_type = company._get_fr_reference_leave_type()
             if reference_leave_type.id == leave_type_id:
-                return self._get_fr_new_date_to(vals['date_to'], employee_calendar, company_calendar)
+                return self._get_fr_new_date_to(vals['date_to'], calendar, company.resource_calendar_id)
         return vals['date_to']
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            vals['date_to'] = self._get_fr_date_to(vals)  # returns the initial date_to if no change needed
+            vals['date_to'] = self._get_fr_date_to(vals)
         return super().create(vals_list)
 
     def write(self, vals):
         if 'date_to' not in vals:
             return super().write(vals)
         if 'employee_id' in vals:
-            vals['date_to'] = self._get_fr_date_to(vals)  # returns the initial date_to if no change needed
+            vals['date_to'] = self._get_fr_date_to(vals)
             return super().write(vals)
         else:
             # Different employees could share different calendars
