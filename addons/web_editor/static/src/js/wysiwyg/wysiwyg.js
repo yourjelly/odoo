@@ -2082,7 +2082,7 @@ const Wysiwyg = Widget.extend({
             priority: priority,
             description: description,
             fontawesome: iconClass,
-            isDisabled: () => !this.odooEditor.isSelectionInBlockRoot(),
+            isDisabled: () => this._filterCommandInBanner() || !this.odooEditor.isSelectionInBlockRoot(),
             callback: () => {
                 const bannerHTML = $(QWeb.render('web_editor.banner', {
                     label: title,
@@ -2093,6 +2093,22 @@ const Wysiwyg = Widget.extend({
                 setSelection(this.odooEditor._latestComputedSelectionInEditable.focusNode.previousSibling.querySelector('p'), 0);
             },
         }
+    },
+    /**
+     * Check if the selection starts inside a banner. This function can be used
+     * as the `isDisabled` property of a command of the PowerBox to disable
+     * a command in banners.
+     * @returns {boolean} true if the command should be filtered
+     */
+    _filterCommandInBanner: function () {
+        let anchor = document.getSelection().anchorNode;
+        if (anchor.nodeType !== Node.ELEMENT_NODE) {
+            anchor = anchor.parentElement;
+        }
+        if (anchor && anchor.closest('.o_editor_banner')) {
+            return true;
+        }
+        return false;
     },
     _insertSnippetMenu: function () {
         return this.snippetsMenu.insertBefore(this.$el);
