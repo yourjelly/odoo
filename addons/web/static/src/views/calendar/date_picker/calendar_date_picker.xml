@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.CalendarDatePicker" owl="1">
+        <DateTimePicker
+            t-if="!env.isSmall"
+            class="'o_calendar_datetime_picker'"
+            type="'date'"
+            value="state.value"
+            ranges="ranges"
+            maxPrecision="'days'"
+            hideWeekNumbers="true"
+            labelsLength="'short'"
+            onSelect.bind="onDateSelected"
+        />
+    </t>
+
+</templates>

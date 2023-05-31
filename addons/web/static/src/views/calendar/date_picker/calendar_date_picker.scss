@@ -1,0 +1,16 @@
+@keyframes calendar-background-fate {
+    from {
+        background-color: rgba(var(--info-rgb), 0.5);
+    }
+    to {
+        background-color: rgba(var(--info-rgb), 0.1);
+    }
+}
+
+.o_calendar_datetime_picker {
+    --DateTimePicker__Today-color: var(--Calendar__Today-color);
+
+    .o_selected_range {
+        animation: calendar-background-fate 1s forwards;
+    }
+}

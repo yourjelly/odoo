@@ -6,13 +6,14 @@ import {
     MAX_VALID_DATE,
     MIN_VALID_DATE,
     clampDate,
+    getStartOfWeek,
     is24HourFormat,
     isInRange,
     isMeridiemFormat,
+    isValidDate,
     today,
 } from "../l10n/dates";
-import { localization } from "../l10n/localization";
-import { ensureArray } from "../utils/arrays";
+import { ensureArray, unique } from "../utils/arrays";
 
 /**
  * @typedef DateItem
@@ -30,12 +31,16 @@ import { ensureArray } from "../utils/arrays";
  * @typedef {luxon.DateTime} DateTime
  *
  * @typedef DateTimePickerProps
+ * @property {string} [class]
  * @property {number} [focusedDateIndex=0]
+ * @property {boolean} [hideWeekNumbers]
+ * @property {"short" | "long"} [labelsLength]
  * @property {DateLimit} [maxDate]
  * @property {PrecisionLevel} [maxPrecision="decades"]
  * @property {DateLimit} [minDate]
  * @property {PrecisionLevel} [minPrecision="days"]
  * @property {(value: DateTime) => any} [onSelect]
+ * @property {DateRange[]} [ranges]
  * @property {number} [rounding=5]
  * @property {{ buttons?: any }} [slots]
  * @property {"date" | "datetime"} [type]
@@ -56,6 +61,7 @@ import { ensureArray } from "../utils/arrays";
  * @typedef PrecisionInfo
  * @property {(date: DateTime, params: Partial<DateTimePickerProps>) => string} getTitle
  * @property {(date: DateTime, params: Partial<DateTimePickerProps>) => Item[]} getItems
+ * @property {(date: DateTime) => number} round
  * @property {string} mainTitle
  * @property {string} nextTitle
  * @property {string} prevTitle
@@ -71,10 +77,9 @@ import { ensureArray } from "../utils/arrays";
 const { DateTime } = luxon;
 
 /**
- * @param {NullableDateTime} date1
- * @param {NullableDateTime} date2
+ * @param {NullableDateRange} value
  */
-const earliest = (date1, date2) => (date1 < date2 ? date1 : date2);
+const ensureRange = ([start, end]) => (!start ? [end, end] : !end ? [start, start] : [start, end]);
 
 /**
  * @param {DateTime} date
@@ -85,20 +90,6 @@ const getStartOfDecade = (date) => Math.floor(date.year / 10) * 10;
  * @param {DateTime} date
  */
 const getStartOfCentury = (date) => Math.floor(date.year / 100) * 100;
-
-/**
- * @param {DateTime} date
- */
-const getStartOfWeek = (date) => {
-    const { weekStart } = localization;
-    return date.set({ weekday: date.weekday < weekStart ? weekStart - 7 : weekStart });
-};
-
-/**
- * @param {NullableDateTime} date1
- * @param {NullableDateTime} date2
- */
-const latest = (date1, date2) => (date1 > date2 ? date1 : date2);
 
 /**
  * @param {number} min
@@ -154,15 +145,15 @@ const PRECISION_LEVELS = new Map()
         nextTitle: _lt("Next month"),
         prevTitle: _lt("Previous month"),
         step: { month: 1 },
-        getTitle: (date, { additionalMonth }) => {
-            const titles = [`${date.monthLong} ${date.year}`];
+        getTitle: (date, { additionalMonth, shortLabels }) => {
+            const titles = [`${shortLabels ? date.monthShort : date.monthLong} ${date.year}`];
             if (additionalMonth) {
                 const next = date.plus({ month: 1 });
-                titles.push(`${next.monthLong} ${next.year}`);
+                titles.push(`${shortLabels ? next.monthShort : next.monthLong} ${next.year}`);
             }
             return titles;
         },
-        getItems: (date, { additionalMonth, maxDate, minDate, showWeekNumbers }) => {
+        getItems: (date, { additionalMonth, maxDate, minDate, shortLabels, showWeekNumbers }) => {
             const startDates = [date];
             if (additionalMonth) {
                 startDates.push(date.plus({ month: 1 }));
@@ -194,10 +185,10 @@ const PRECISION_LEVELS = new Map()
                 }
 
                 // Generate days of week labels
-                const daysOfWeek = weeks[0].days.map((d) => [
-                    d.range[0].weekdayShort,
-                    d.range[0].weekdayLong,
-                ]);
+                const daysOfWeek = weeks[0].days.map((d) => {
+                    const { weekdayLong, weekdayShort } = d.range[0];
+                    return [shortLabels ? weekdayShort[0] : weekdayShort, weekdayLong];
+                });
                 if (showWeekNumbers) {
                     daysOfWeek.unshift(["#", _lt("Week numbers")]);
                 }
@@ -210,6 +201,7 @@ const PRECISION_LEVELS = new Map()
                 };
             });
         },
+        round: (date) => date.startOf("day").toMillis(),
     })
     .set("months", {
         mainTitle: _lt("Select year"),
@@ -228,6 +220,7 @@ const PRECISION_LEVELS = new Map()
                 });
             });
         },
+        round: (date) => date.startOf("month").toMillis(),
     })
     .set("years", {
         mainTitle: _lt("Select decade"),
@@ -247,6 +240,7 @@ const PRECISION_LEVELS = new Map()
                 });
             });
         },
+        round: (date) => date.year,
     })
     .set("decades", {
         mainTitle: _lt("Select century"),
@@ -266,6 +260,7 @@ const PRECISION_LEVELS = new Map()
                 });
             });
         },
+        round: getStartOfDecade,
     });
 
 // Other constants
@@ -276,7 +271,10 @@ const NULLABLE_DATETIME_PROPERTY = [DateTime, { value: false }, { value: null }]
 /** @extends {Component<DateTimePickerProps>} */
 export class DateTimePicker extends Component {
     static props = {
+        class: { type: String, optional: true },
         focusedDateIndex: { type: Number, optional: true },
+        hideWeekNumbers: { type: Boolean, optional: true },
+        labelsLength: { type: [{ value: "short" }, { value: "long" }], optional: true },
         maxDate: { type: [NULLABLE_DATETIME_PROPERTY, { value: "today" }], optional: true },
         maxPrecision: {
             type: [...PRECISION_LEVELS.keys()].map((value) => ({ value })),
@@ -288,6 +286,14 @@ export class DateTimePicker extends Component {
             optional: true,
         },
         onSelect: { type: Function, optional: true },
+        ranges: {
+            type: Object,
+            validate: (value) =>
+                Object.values(value).every(
+                    (range) => range.length === 2 && range.every(isValidDate)
+                ),
+            optional: true,
+        },
         rounding: { type: Number, optional: true },
         slots: {
             type: Object,
@@ -310,9 +316,12 @@ export class DateTimePicker extends Component {
 
     static defaultProps = {
         focusedDateIndex: 0,
+        labelsLength: "long",
         maxPrecision: "decades",
         minPrecision: "days",
+        ranges: {},
         rounding: 5,
+        slots: {},
         type: "datetime",
     };
 
@@ -331,6 +340,10 @@ export class DateTimePicker extends Component {
             this.allowedPrecisionLevels.indexOf(this.state.precision) ===
             this.allowedPrecisionLevels.length - 1
         );
+    }
+
+    get showWeekNumbers() {
+        return !this.isRange && !this.props.hideWeekNumbers;
     }
 
     get titles() {
@@ -374,9 +387,7 @@ export class DateTimePicker extends Component {
      */
     onPropsUpdated(props) {
         /** @type {[NullableDateTime] | NullableDateRange} */
-        this.values = ensureArray(props.value).map((value) =>
-            value && !value.isValid ? null : value
-        );
+        this.values = ensureArray(props.value).map((value) => (isValidDate(value) ? value : null));
         this.isRange = Array.isArray(props.value);
         this.availableHours = HOURS;
         this.availableMinutes = MINUTES.filter((minute) => !(minute[0] % props.rounding));
@@ -410,26 +421,26 @@ export class DateTimePicker extends Component {
             additionalMonth: this.additionalMonth,
             maxDate: this.maxDate,
             minDate: this.minDate,
-            showWeekNumbers: !this.isRange,
+            shortLabels: this.props.labelsLength === "short",
+            showWeekNumbers: this.showWeekNumbers,
         };
         const referenceDate = this.state.focusDate;
+        const currentRange = ensureRange(this.values);
+
         this.title = precision.getTitle(referenceDate, getterParams);
         this.items = precision.getItems(referenceDate, getterParams);
+        this.ranges = Object.entries(this.props.ranges);
 
-        /** Selected Range: current values with hovered date applied */
-        this.selectedRange = [...this.values];
-        /** Highlighted Range: union of current values and selected range */
-        this.highlightedRange = [...this.values];
-
-        // Apply hovered date to selected range
         if (hoveredDate) {
-            [this.selectedRange] = this.applyValueAtIndex(hoveredDate, this.props.focusedDateIndex);
-            if (this.isRange && this.selectedRange.every(Boolean)) {
-                this.highlightedRange = [
-                    earliest(this.selectedRange[0], this.values[0]),
-                    latest(this.selectedRange[1], this.values[1]),
-                ];
-            }
+            const selectedRange = ensureRange(
+                this.applyValueAtIndex(hoveredDate, this.props.focusedDateIndex)[0]
+            );
+            this.ranges.push(
+                ["o_current", currentRange, this.additionalMonth],
+                ["o_selected", selectedRange, this.additionalMonth]
+            );
+        } else {
+            this.ranges.push(["o_selected", currentRange, this.additionalMonth]);
         }
     }
 
@@ -515,37 +526,35 @@ export class DateTimePicker extends Component {
      *      > range: current start date or current end date.
      * @param {DateItem} item
      */
-    getActiveRangeInfo({ isOutOfRange, range }) {
-        const result = {
-            isSelected: !isOutOfRange && isInRange(this.selectedRange, range),
-            isSelectStart: false,
-            isSelectEnd: false,
-            isHighlighted: !isOutOfRange && isInRange(this.highlightedRange, range),
-            isHighlightStart: false,
-            isHighlightEnd: false,
-            isCurrent: false,
-        };
+    getDateItemClass({ includesToday, isInvalid, isOutOfRange, range }) {
+        const outOfRange = isOutOfRange || isInvalid;
+        const classNames = [];
 
-        if (this.isRange) {
-            if (result.isSelected) {
-                const [selectStart, selectEnd] = this.selectedRange;
-                result.isSelectStart = !selectStart || isInRange(selectStart, range);
-                result.isSelectEnd = !selectEnd || isInRange(selectEnd, range);
-            }
-            if (result.isHighlighted) {
-                const [currentStart, currentEnd] = this.highlightedRange;
-                result.isHighlightStart = !currentStart || isInRange(currentStart, range);
-                result.isHighlightEnd = !currentEnd || isInRange(currentEnd, range);
-            }
-            result.isCurrent =
-                !isOutOfRange &&
-                (isInRange(this.values[0], range) || isInRange(this.values[1], range));
-        } else {
-            result.isSelectStart = result.isSelectEnd = result.isSelected;
-            result.isHighlightStart = result.isHighlightEnd = result.isHighlighted;
+        if (outOfRange) {
+            classNames.push("o_out_of_range");
         }
 
-        return result;
+        if (includesToday) {
+            classNames.push("o_today");
+        }
+
+        for (const [className, rangeValue, ignoreIfOutOfRange] of this.ranges) {
+            if (ignoreIfOutOfRange && outOfRange) {
+                continue;
+            }
+            if (isInRange(range, rangeValue, true)) {
+                classNames.push(className);
+                const { round } = this.activePrecisionLevel;
+                if (round(range[0]) === round(rangeValue[0])) {
+                    classNames.push(`${className}_start`);
+                }
+                if (round(range[1]) === round(rangeValue[1])) {
+                    classNames.push(`${className}_end`);
+                }
+            }
+        }
+
+        return unique(classNames).join(" ");
     }
 
     getTimeValues(valueIndex) {

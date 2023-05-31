@@ -1,0 +1,26 @@
+.o_datetime_picker_popover {
+    --DateTimePicker__Border-width: 1px;
+
+    .o_date_picker,
+    .o_date_item_picker {
+        width: calc(40px * var(--DateTimePicker__Day-template-columns));
+    }
+
+    .o_day_of_week_cell {
+        --DateTimePicker__Border-width: 2px;
+
+        background-color: var(--gray-100);
+    }
+
+    .o_week_number_cell {
+        background-color: var(--gray-100);
+    }
+
+    .o_day_of_week_cell,
+    .o_week_number_cell,
+    .o_date_picker .o_date_item_cell {
+        &:not(.o_last) {
+            border-bottom: var(--DateTimePicker__Border-width) solid var(--gray-300);
+        }
+    }
+}

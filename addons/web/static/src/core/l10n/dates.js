@@ -128,6 +128,15 @@ export function clampDate(desired, minDate, maxDate) {
     }
     return desired;
 }
+/**
+ * @param {DateTime} date
+ */
+export function getStartOfWeek(date) {
+    const { weekStart } = localization;
+    return date
+        .set({ weekday: date.weekday < weekStart ? weekStart - 7 : weekStart })
+        .startOf("day");
+}
 
 /**
  * Returns whether the given format is a 24-hour format.
@@ -142,9 +151,11 @@ export function is24HourFormat(format) {
 /**
  * @param {NullableDateTime | NullableDateRange} value
  * @param {NullableDateRange} range
+ * @param {Object} [options]
+ * @param {boolean} [options.strict]
  * @returns {boolean}
  */
-export function isInRange(value, range) {
+export function isInRange(value, range, { strict } = {}) {
     if (!value || !range) {
         return false;
     }
@@ -152,11 +163,11 @@ export function isInRange(value, range) {
         const actualValues = value.filter(Boolean);
         if (actualValues.length < 2) {
             return isInRange(actualValues[0], range);
+        } else if (strict) {
+            return range[0] <= value[0] && value[1] <= range[1];
+        } else {
+            return isInRange(range[0], value) || isInRange(value[0], range);
         }
-        return (
-            (value[0] <= range[0] && range[0] <= value[1]) ||
-            (range[0] <= value[0] && value[0] <= range[1])
-        );
     } else {
         return range[0] <= value && value <= range[1];
     }
@@ -183,7 +194,7 @@ export function isMeridiemFormat(format) {
  *
  * @param {NullableDateTime} date
  */
-function isValidDate(date) {
+export function isValidDate(date) {
     return date && date.isValid && isInRange(date, [MIN_VALID_DATE, MAX_VALID_DATE]);
 }
 
