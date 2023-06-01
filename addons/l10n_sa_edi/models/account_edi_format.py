@@ -17,15 +17,12 @@ class AccountEdiFormat(models.Model):
 
     """
         Once the journal has been successfully onboarded, we can clear/report invoices through the ZATCA API:
-        
             A) STANDARD Invoice:
                 Make a call to the Clearance API '/invoices/clearance/single'.
                 This will validate the invoice, sign it and apply a QR code then return the result.
-                
             B) SIMPLIFIED Invoice:
                 Make a call to the Reporting API '/invoices/reporting/single'.
                 This will validate the invoice then return the result.
-                
         The X509 Certificate and password from the PCSID API need to be provided in the request headers.
     """
 
