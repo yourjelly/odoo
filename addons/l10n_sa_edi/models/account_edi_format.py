@@ -165,10 +165,9 @@ class AccountEdiFormat(models.Model):
         """
         xml_content, errors = self.env['account.edi.xml.ubl_21.zatca']._export_invoice(invoice)
         if errors:
-            {
-                'error': errors,
-                'rejected': not is_warning,
-                'blocking_level': 'warning' if is_warning else 'error'
+            return {
+                'error': _("Could not generate Invoice UBL content: %s") % ", \n".join(errors),
+                'blocking_level': 'error'
             }
         return self._l10n_sa_postprocess_zatca_template(xml_content)
 

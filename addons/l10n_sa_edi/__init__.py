@@ -24,5 +24,5 @@ def _l10n_sa_edi_post_init(cr, registry):
                 tax = env.ref('%s.%s_%s' % (module, company.id, xml_id), raise_if_not_found=False)
                 if tax:
                     tax.write({
-                        'l10n_sa_is_retention': tax_template.l10n_sa_is_retention,
+                        'l10n_sa_is_retention': False if tax.amount >= 0 else tax_template.l10n_sa_is_retention,
                     })
