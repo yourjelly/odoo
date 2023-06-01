@@ -1358,7 +1358,8 @@ export class RelationalModel extends Model {
                 // ajax service uses an extra 'target' argument for rpc
                 args = args.concat(ev.target);
                 if (owl.status(this.__component) === "destroyed") {
-                    console.warn("Component is destroyed");
+                    console.trace();
+                    console.error("Component is destroyed");
                     return payload.callback(new Promise(() => {}));
                 }
                 const prom = new Promise((resolve, reject) => {
