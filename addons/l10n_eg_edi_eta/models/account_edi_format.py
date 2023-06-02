@@ -7,6 +7,7 @@ import logging
 import requests
 from werkzeug.urls import url_quote
 from base64 import b64encode
+from json.decoder import JSONDecodeError
 from urllib3.util.ssl_ import create_urllib3_context
 
 from odoo import api, models, _
@@ -68,8 +69,14 @@ class AccountEdiFormat(models.Model):
                 'error': str(ex),
                 'blocking_level': 'warning'
             }
-        if not request_response.ok:
+        try:
             response_data = request_response.json()
+        except JSONDecodeError as ex:
+            return {
+                'error': isinstance(request_response, str) and request_response or str(ex),
+                'blocking_level': 'warning'
+            }
+        if not request_response.ok:
             if isinstance(response_data, dict) and response_data.get('error'):
                 return {
                     'error': response_data.get('error', _('Unknown error')),
