@@ -138,11 +138,13 @@ class AccountMove(models.Model):
         # Build the dict of values to be used for generating the Invoice XML content
         # Set Invoice field values required for generating the XML content, hash and signature
         self.l10n_sa_uuid = uuid.uuid4()
+        # We generate the XML content
+        xml_content = edi_format._l10n_sa_generate_zatca_template(self)
         # Once the required values are generated, we hash the invoice, then use it to generate a Signature
-        invoice_hash_hex = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(
-            edi_format._l10n_sa_generate_zatca_template(self)).decode()
+        invoice_hash_hex = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(xml_content).decode()
         self.l10n_sa_invoice_signature = edi_format._l10n_sa_get_digital_signature(self.journal_id.company_id,
                                                                                    invoice_hash_hex).decode()
+        return xml_content
 
     def _l10n_sa_log_results(self, xml_content, response_data=None, error=False):
         """

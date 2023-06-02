@@ -215,7 +215,7 @@ class AccountJournal(models.Model):
             journal.l10n_sa_compliance_csid_json = False
             journal.l10n_sa_compliance_checks_passed = False
 
-    def l10n_sa_api_onboard_journal(self, otp):
+    def _l10n_sa_api_onboard_journal(self, otp):
         """
             Perform the onboarding for the journal. The onboarding consists of three steps:
                 1.  Get the Compliance CSID
