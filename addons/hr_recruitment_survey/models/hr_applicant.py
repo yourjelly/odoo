@@ -33,7 +33,6 @@ class Applicant(models.Model):
 
     def action_send_survey(self):
         self.ensure_one()
-
         # if an applicant does not already has associated partner_id create it
         if not self.partner_id:
             if not self.partner_name:
@@ -54,7 +53,7 @@ class Applicant(models.Model):
             default_survey_id=self.survey_id.id,
             default_use_template=bool(template),
             default_template_id=template and template.id or False,
-            default_email_layout_xmlid='mail.mail_notification_light',
+            default_email_layout_xmlid='mail.mail_notification_layout',
             default_deadline=fields.Datetime.now() + timedelta(days=15)
         )
 
