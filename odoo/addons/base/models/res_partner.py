@@ -229,7 +229,6 @@ class Partner(models.Model):
         [('contact', 'Contact'),
          ('invoice', 'Invoice Address'),
          ('delivery', 'Delivery Address'),
-         ('private', 'Private Address'),
          ('other', 'Other Address'),
         ], string='Address Type',
         default='contact',
