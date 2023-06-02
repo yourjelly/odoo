@@ -36,7 +36,7 @@
                 <h5 class="alert-heading mb-0" t-out="alert_header ? alert_header : 'Please wait...'"/>
                 <p t-if="alert_message" class="mb-0" t-out="alert_message"/>
             </div>
-            <a t-att-href="landing_route" class="alert-link ms-auto text-nowrap">Skip <i class="oi oi-arrow-right small"/></a>
+            <a t-att-href="landing_route" class="alert-link ms-auto text-nowrap">Skip<i class="oi oi-arrow-right small"/></a>
         </div>
 
         <div class="o_payment_details o_cc2 row row-cols-1 row-cols-md-2 row-cols-lg-4 mx-0 mb-3 py-2 rounded">
@@ -45,7 +45,7 @@
                     Amount
                 </label>
                 <span name="form_amount"
-                      t-esc="amount + currency_code"/>
+                      t-out="amount"/>
             </div>
             <div class="col my-3">
                 <label for="form_reference" class="d-block small text-muted">
@@ -60,7 +60,7 @@
                     Powered by
                 </label>
                 <span name="form_provider"
-                      t-esc="'TODO ANKO'"/>
+                      t-esc="provider_name"/>
             </div>
         </div>
     </t>
