@@ -928,9 +928,12 @@ class PaymentTransaction(models.Model):
 
         post_processing_values = {
             'provider_code': self.provider_code,
+            'provider_name': self.provider_id.name,
             'reference': self.reference,
             'amount': self.amount,
-            'currency_code': self.currency_id.name,
+            'currency': {'digits': [69, self.currency_id.decimal_places],
+                                'position': self.currency_id.position,
+                                'symbol': self.currency_id.symbol},
             'state': self.state,
             'state_message': self.state_message,
             'operation': self.operation,
