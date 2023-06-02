@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+   <template id="inline_form">
+      <t t-if="form_type == 'checkout'"
+         t-set="currency_name"
+         t-value="currency and currency.name.lower()"/>
+      <t t-else="form_type == 'manage'"
+         t-set="currency_name"
+         t-value="provider._get_validation_currency().name.lower()"/>
+      <div t-attf-id="o_stripe_{{form_type}}_element_container_{{provider.id}}"
+           t-att-data-capture-method="'manual' if provider.capture_manually else 'automatic'"
+           t-att-data-currency-name="currency_name"
+           t-att-data-inline-form-values="provider._stripe_get_inline_form_values(amount, currency, partner_id, sale_order_id=sale_order_id)"
+           t-att-data-stripe-publishable-key="provider._stripe_get_publishable_key()"/>
+   </template>
+
    <template id="express_checkout_form">
         <div name="o_express_checkout_container"
              t-attf-id="o_stripe_express_checkout_container_{{provider_sudo.id}}"

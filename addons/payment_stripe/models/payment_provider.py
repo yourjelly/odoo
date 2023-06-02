@@ -2,6 +2,7 @@
 
 import logging
 import uuid
+import json
 
 import requests
 from werkzeug.urls import url_encode, url_join, url_parse
@@ -9,6 +10,7 @@ from werkzeug.urls import url_encode, url_join, url_parse
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
+from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_stripe import utils as stripe_utils
 from odoo.addons.payment_stripe import const
 from odoo.addons.payment_stripe.controllers.onboarding import OnboardingController
@@ -450,3 +452,39 @@ class PaymentProvider(models.Model):
         self.ensure_one()
 
         return stripe_utils.get_publishable_key(self.sudo())
+
+    def _stripe_get_inline_form_values(self, amount, currency, partner_id, **kwargs):
+        """ Return values needed to render Stripe's inline form.
+
+        This getter allows fetching values from a QWeb template and through Payment's utils.
+
+        Note: `self.ensure_one()
+
+        :param float amount: The amount in major units, to convert in minor units.
+        :param recordset currency: The currency of the amount, as a `res.currency` record.
+        :param recordset partner_id: The partner of the transaction, as an id of `res.partner` record.
+        :return: The values needed to render Stripe's inline form.
+        :rtype: dict
+        """
+        self.ensure_one()
+        partner = self.env['res.partner'].with_context(show_address=1).browse(partner_id)
+        inline_form_values = dict(
+            minorAmount=amount and payment_utils.to_minor_currency_units(amount, currency),
+            billingDetails=dict(
+                name=partner.name or '',
+                email=partner.email or '',
+                phone=partner.phone or '',
+                address=dict(
+                    line1=partner.street or '',
+                    line2=partner.street2 or '',
+                    city=partner.city or '',
+                    state=partner.state_id.code or '',
+                    country=partner.country_id.code or '',
+                    postal_code=partner.zip or '',
+                ),
+            ),
+            paymentMethodsTokenizationSupport=const.PAYMENT_METHODS_TOKENIZATION_SUPPORT,
+            isTokenizationRequired=self._is_tokenization_required(**kwargs),
+        )
+
+        return json.dumps(inline_form_values)

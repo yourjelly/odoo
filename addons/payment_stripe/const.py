@@ -8,22 +8,47 @@ API_VERSION = '2019-05-16'  # The API version of Stripe implemented in this modu
 # Stripe proxy URL
 PROXY_URL = 'https://stripe.api.odoo.com/api/stripe/'
 
-# Support payment method types
-PMT = namedtuple('PaymentMethodType', ['name', 'countries', 'currencies', 'recurrence'])
-PAYMENT_METHOD_TYPES = [
-    PMT('card', [], [], 'recurring'),
-    PMT('ideal', ['nl'], ['eur'], 'punctual'),
-    PMT('bancontact', ['be'], ['eur'], 'punctual'),
-    PMT('eps', ['at'], ['eur'], 'punctual'),
-    PMT('giropay', ['de'], ['eur'], 'punctual'),
-    PMT('p24', ['pl'], ['eur', 'pln'], 'punctual'),
-]
+# Payment methods supporting tokenization. See https://stripe.com/docs/payments/payment-methods/integration-options page.
+PAYMENT_METHODS_TOKENIZATION_SUPPORT = {
+    "us_bank_account": True,
+    "bacs_debit": False,  # Stripe doesn't support saving BACS with setupIntent.
+    "au_becs_debit": True,
+    "acss_debit": True,
+    "sepa_debit": True,
+    "bancontact": True,
+    "customer_balance": False,
+    "blik": False,
+    "eps": False,
+    "fpx": False,
+    "giropay": False,
+    "ideal": True,
+    "p24": False,
+    "sofort": True,
+    "affirm": False,
+    "afterpay_clearpay": False,
+    "klarna": False,
+    "zip": False,
+    "card": True,
+    "link": True,
+    "paynow": False,
+    "promptpay": False,
+    "boleto": True,
+    "konbini": False,
+    "oxxo": False,
+    "alipay": False,
+    "apple_pay": True,
+    "cashapp": True,
+    "google_pay": True,
+    "grabpay": False,
+    "mobilepay": False,
+    "paypal": True,
+    "wechat_pay": False,
+}
 
-# Mapping of transaction states to Stripe objects ({Payment,Setup}Intent, Charge, Refund) statuses.
+# Mapping of transaction states to Stripe objects ({Payment,Setup}Intent, Refund) statuses.
 # For each object's exhaustive status list, see:
 # https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status
 # https://stripe.com/docs/api/setup_intents/object#setup_intent_object-status
-# https://stripe.com/docs/api/charges/object#charge_object-status
 # https://stripe.com/docs/api/refunds/object#refund_object-status
 STATUS_MAPPING = {
     'draft': ('requires_confirmation', 'requires_action'),
