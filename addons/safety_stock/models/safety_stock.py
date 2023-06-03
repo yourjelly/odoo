@@ -59,7 +59,6 @@ class SafetyStockModel(models.Model):
             if record.supplier_id:
                 basic_delay = record.supplier_id.delay
             elif record.product_id.product_tmpl_id.produce_delay:
-                # TODO calculate real lead time for manufacture
                 basic_delay = record.product_id.product_tmpl_id.produce_delay
             lead_time_list = []
             for move in record.product_id.stock_move_ids:
@@ -107,17 +106,6 @@ class SafetyStockModel(models.Model):
             origin_mean_date = date_last_move
         internal_lead_time = (date_last_move - origin_mean_date).days
         return internal_lead_time
-
-    def action_safety_stock_info(self):
-        self.ensure_one()
-        action = self.env['ir.actions.actions']._for_xml_id('safety_stock.action_safety_stock_info')
-        action['name'] = _('Safety stock Information for %s in %s', self.product_id.display_name,
-                           self.warehouse_id.display_name)
-        res = self.env['safety.stock.info'].create({
-            'orderpoint_id': self.id,
-        })
-        action['res_id'] = res.id
-        return action
 
     @api.model
     def get_safety_stock_stats(self, orderpoint_ids):

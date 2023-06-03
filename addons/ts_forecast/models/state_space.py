@@ -20,6 +20,7 @@ class StateSpace:
         self.m = 12  # number of seasonal components
         self.m_unit = 'month'  # duration of a seasonal components
         self.m_tot = 'year'  # duration of a season
+        self.mse = sys.maxsize  # current mean square error
         self.compute_state()
 
     def set_parameters(self, params, x):
@@ -27,19 +28,15 @@ class StateSpace:
         self.state['param'] = params
 
     """ try to optimize the parameters in the state for the current model """
-    def optimize_state_parameters(self):
+    def optimize_state_parameters(self, level, nb_steps_levels):
+        if nb_steps_levels[level] == 0:
+            return
         alpha = []
         beta = []
         sigma = []
-        current_sum = 0.0
-        for i in range(39):
-            current_sum += 0.025
-            alpha.append(current_sum)
-            if self.trend != 'N':
-                beta.append(current_sum)
-            if self.season != 'N':
-                sigma.append(current_sum)
+        self.fill_parameter_array(nb_steps_levels[level], alpha, beta, sigma)
 
+        # try to estimate x inital array
         x = []
 
         # decompose time series to obtain seasonal component
@@ -60,7 +57,7 @@ class StateSpace:
             a, b = self.get_linear_regression(y_sample)
             x.append(b)
             if self.trend != 'N':
-                if self.trend == 'M':
+                if self.trend == 'M' and b != 0:
                     x.append(1 + a / b)
                 else:
                     x.append(a)
@@ -93,8 +90,8 @@ class StateSpace:
                     continue
             model = ESModel(self.y, self)
             mse = model.compute_mse()
-            if min_mse > mse:
-                min_mse = mse
+            if self.mse > mse:
+                self.mse = mse
                 best_param = self.state['param']
         self.state['param'] = best_param
 
@@ -128,6 +125,7 @@ class StateSpace:
     def get_estimate_seasonal_components(self, y_sample):
         trend_part = []
         k = (self.m // 2) * self.get_modulo_period()
+        # moving average to obtain trend components
         for i in range(len(y_sample)):
             if i < k or i >= len(y_sample) - k:
                 trend_part.append(0)
@@ -146,7 +144,17 @@ class StateSpace:
         season_components = [season_components[i]/self.get_modulo_period() for i in range(self.m)]
         return season_components
 
-    """ tell if the parameters is admissible """
+    def fill_parameter_array(self, nb_param, alpha, beta, sigma):
+        current_sum = 0.0
+        for i in range(nb_param-1):
+            current_sum += 1.0/nb_param
+            alpha.append(current_sum)
+            if self.trend != 'N':
+                beta.append(current_sum)
+            if self.season != 'N':
+                sigma.append(current_sum)
+
+    """ return if the parameters combination is admissible """
     def break_constraints(self, param):
         if self.trend != 'N':
             if param[1] >= param[0]:
@@ -201,7 +209,7 @@ class StateSpace:
 
         elif self.trend == 'A' and self.season == 'A':
             self.state = {
-                'x': [0 for _ in range(1 + self.m)],
+                'x': [0 for _ in range(2 + self.m)],
                 'param': [0.1, 0.1, 0.1],
                 'w': lambda x: x[0] + x[1] + x[2],
                 'f': lambda x, t: [x[0] + x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] + x[1]] + [x[i] for i in range(1, len(x))],
@@ -229,7 +237,7 @@ class StateSpace:
 
         elif self.trend == 'A' and self.season == 'M':
             self.state = {
-                'x': [0 for _ in range(1 + self.m)],
+                'x': [0 for _ in range(2 + self.m)],
                 'param': [0.1, 0.1, 0.1],
                 'w': lambda x: (x[0] + x[1]) * x[2],
                 'f': lambda x, t: [x[0] + x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] + x[1]] + [x[i] for i in range(1, len(x))],
@@ -238,23 +246,31 @@ class StateSpace:
             }
         elif self.trend == 'M' and self.season == 'M':
             self.state = {
-                'x': [0 for _ in range(1 + self.m)],
+                'x': [0 for _ in range(2 + self.m)],
                 'param': [0.1, 0.1, 0.1],
                 'w': lambda x: x[0] * x[1] * x[2],
                 'f': lambda x, t: [x[0] * x[1], x[1]] + [x[2 + i] for i in range(1, self.m)] + [x[2]] if t % self.get_modulo_period() == self.get_modulo_period() - 1 else [x[0] * x[1]] + [x[i] for i in range(1, len(x))],
                 'g': lambda x, param: [param[0]/x[2], param[1]/(x[0]*x[2]), param[2]/(x[0]*x[1])] + [0 for _ in range(self.m - 1)],
                 'forecast': lambda x, h: x[0] * pow(x[1], h) * x[2 + ((h - 1) // self.get_modulo_period()) % self.m]
             }
+        self.state['r'] = lambda x: 1
+        self.state['g2'] = lambda x, param: self.state['g'](x, param)
 
+    """ switch between additive error and multiplicative error"""
+    def recompute_state_error(self, error):
+        self.error = error
         if self.error == 'A':
             self.state['r'] = lambda x: 1
+            self.state['g2'] = lambda x, param: self.state['g'](x, param)
         elif self.error == 'M':
             self.state['r'] = self.state['w']
+            self.state['g2'] = lambda x, param: list(
+                map(lambda y: y * self.state['w'](x), self.state['g'](x, param)))
 
-    """ return all possible model """
+    """ return all possible methods """
     @staticmethod
-    def get_all_states():
-        return [
+    def get_all_states(only_linear=False):
+        return list(filter(lambda x: True if not only_linear else 'M' not in x, [
             ('A', 'N', 'N'),
             ('A', 'A', 'N'),
             ('A', 'M', 'N'),
@@ -263,14 +279,5 @@ class StateSpace:
             ('A', 'M', 'A'),
             ('A', 'N', 'M'),
             ('A', 'A', 'M'),
-            ('A', 'M', 'M'),
-            ('M', 'N', 'N'),
-            ('M', 'A', 'N'),
-            ('M', 'M', 'N'),
-            ('M', 'N', 'A'),
-            ('M', 'A', 'A'),
-            ('M', 'M', 'A'),
-            ('M', 'N', 'M'),
-            ('M', 'A', 'M'),
-            ('M', 'M', 'M'),
-        ]
+            ('A', 'M', 'M')
+        ]))
