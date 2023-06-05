@@ -42,9 +42,6 @@ class AccountEdiFormat(models.Model):
     def _l10n_sa_get_digital_signature(self, company_id, invoice_hash):
         """
             Generate an ECDSA SHA256 digital signature for the XML eInvoice
-        :param invoice: Invoice record
-        :param invoice_hash: base64 sha256 hash of the invoice
-        :return: digital signature
         """
         decoded_hash = b64decode(invoice_hash).decode()
         private_key = load_pem_private_key(company_id.sudo().l10n_sa_private_key, password=None, backend=default_backend())
@@ -55,12 +52,6 @@ class AccountEdiFormat(models.Model):
         """
             Calculate the SHA256 value of the SignedProperties XML node. The algorithm used by ZATCA expects the indentation
             of the nodes to start with 40 spaces, except for the root SignedProperties node.
-
-        :param issuer_name: Name of the issuer extracted from the X509 Certificate
-        :param serial_number: Serial number of the issuer extracted from the X509 Certificate
-        :param signing_time: Time at which the signature is applied
-        :param public_key: Public key extracted from the X509 Certificate
-        :return: B64 encoded SHA256 hash of the signedProperties node
         """
         signed_properties = etree.fromstring(self.env.ref('l10n_sa_edi.export_sa_zatca_ubl_signed_properties')._render({
             'issuer_name': issuer_name,
@@ -84,10 +75,6 @@ class AccountEdiFormat(models.Model):
     def _l10n_sa_sign_xml(self, xml_content, certificate_str, signature):
         """
             Function that signs XML content of a UBL document with a provided B64 encoded X509 certificate
-        :param invoice: Invoice to be submitted
-        :param xml_content: XML content of the UBL document to be signed
-        :param certificate_str: Base64 encoded string of the X509 certificate
-        :return: signed xml content
         """
         root = etree.fromstring(xml_content)
         etree.indent(root, space='    ')
@@ -126,8 +113,6 @@ class AccountEdiFormat(models.Model):
     def _l10n_sa_assert_clearance_status(self, invoice, clearance_data):
         """
             Assert Clearance status. To be overridden in case there are any other cases to be accounted for
-        :param invoice: Cleared invoice
-        :param clearance_data: Results of the clearance process
         """
         mode = 'reporting' if invoice._l10n_sa_is_simplified() else 'clearance'
         if mode == 'clearance' and clearance_data.get('clearanceStatus', '') != 'CLEARED':
@@ -145,7 +130,11 @@ class AccountEdiFormat(models.Model):
                     the generated UBL file does not have any ext namespaced element, so the namespace is removed
                     since it is unused.
         """
+
+        # Append UBLExtensions to the XML content
+        ubl_extensions = etree.fromstring(self.env.ref('l10n_sa_edi.export_sa_zatca_ubl_extensions')._render())
         root = etree.fromstring(xml_content)
+        root.insert(0, ubl_extensions)
 
         # Force xmlns:ext namespace on UBl file
         ns_map = {'ext': 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2'}
@@ -156,8 +145,6 @@ class AccountEdiFormat(models.Model):
     def _l10n_sa_generate_zatca_template(self, invoice):
         """
             Render the ZATCA UBL file
-        :return: XML content of the rendered UBL file
-        :rtype: str
         """
         xml_content, errors = self.env['account.edi.xml.ubl_21.zatca']._export_invoice(invoice)
         if errors:
@@ -172,7 +159,6 @@ class AccountEdiFormat(models.Model):
             Submit a generated Invoice UBL file by making calls to the following APIs:
                 -   A. Clearance API: Submit a standard Invoice to ZATCA for validation, returns signed UBL
                 -   B. Reporting API: Submit a simplified Invoice to ZATCA for validation
-        :return: Signed Invoice's XML content string
         """
         clearance_data = invoice.journal_id._l10n_sa_api_clearance(invoice, signed_xml.decode(), PCSID_data)
         if clearance_data.get('json_errors'):
@@ -199,10 +185,6 @@ class AccountEdiFormat(models.Model):
         """
             Once an invoice has been successfully submitted, it is returned as a Cleared invoice, on which data
             from ZATCA was applied. To be overridden to account for other cases, such as Reporting.
-        :param invoice: Cleared Invoice
-        :param signed_xml: XML Data sent to ZATCA
-        :param clearance_data: Data received from ZATCA
-        :return: Cleared XML content
         """
         if invoice._l10n_sa_is_simplified():
             # if invoice is B2C, it is a SIMPLIFIED invoice, and thus it is only reported and returns
@@ -213,7 +195,6 @@ class AccountEdiFormat(models.Model):
     def _l10n_sa_apply_qr_code(self, invoice, xml_content):
         """
             Apply QR code on Invoice UBL content
-        :return: XML content with QR code applied
         """
         root = etree.fromstring(xml_content)
         qr_code = invoice.l10n_sa_qr_code_str
@@ -223,11 +204,8 @@ class AccountEdiFormat(models.Model):
 
     def _l10n_sa_get_signed_xml(self, invoice, unsigned_xml, x509_cert):
         """
-            Helper method
-        :param invoice: Invoice to be signed
-        :param unsigned_xml: Unsigned XML Content
-        :param x509_cert: PCSID to be used for signing
-        :return: Signed XML Content
+            Helper method to sign the provided XML, apply the QR code in the case if Simplified invoices (B2C), then
+            return the signed XML
         """
         signed_xml = self._l10n_sa_sign_xml(unsigned_xml, x509_cert, invoice.l10n_sa_invoice_signature)
         if invoice._l10n_sa_is_simplified():
@@ -238,9 +216,6 @@ class AccountEdiFormat(models.Model):
         """
             Generate a ZATCA compliant UBL file, make API calls to authenticate, sign and include QR Code and
             Cryptographic Stamp, then create an attachment with the final contents of the UBL file
-        :param recordset invoice: Invoice to be processed
-        :return: Attachment record with the content of the processed Invoice UBL file
-        :rtype: ir.attachment recordset
         """
         self.ensure_one()
 
@@ -263,9 +238,6 @@ class AccountEdiFormat(models.Model):
     def _l10n_sa_check_partner_missing_info(self, partner_id, fields_to_check):
         """
             Helper function to check if ZATCA mandated partner fields are missing for a specified partner record
-        :param recordset partner_id: Partner record to check
-        :return: Missing partner fields
-        :rtype: list
         """
         missing = []
         for field in fields_to_check:

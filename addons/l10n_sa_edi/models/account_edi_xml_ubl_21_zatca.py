@@ -368,17 +368,6 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
         }]
         return res
 
-    def _export_invoice(self, invoice):
-        """
-            Override to include/update values specific to ZATCA's UBL 2.1 specs.
-            In this case, we need to make sure blank nodes are not removed from the final xml by making
-            remove_blank_nodes = False
-        """
-        vals = self._export_invoice_vals(invoice)
-        errors = [constraint for constraint in self._export_invoice_constraints(invoice, vals).values() if constraint]
-        xml_content = self.env['ir.qweb']._render(vals['main_template'], vals)
-        return etree.tostring(cleanup_xml_node(xml_content, remove_blank_nodes=False)), set(errors)
-
     def _get_tax_unece_codes(self, invoice, tax):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
 

@@ -179,7 +179,7 @@ class AccountJournal(models.Model):
 
         return b64encode(request.public_bytes(Encoding.PEM)).decode()
 
-    def l10n_sa_generate_csr(self):
+    def _l10n_sa_generate_csr(self):
         """
             Generate a CSR for the Journal to be used for the Onboarding process and Invoice submissions
         """
@@ -221,8 +221,6 @@ class AccountJournal(models.Model):
                 1.  Get the Compliance CSID
                 2.  Perform the Compliance Checks
                 3.  Get the Production CSID
-
-        :param otp: The OTO obtained from the FATOORA portal
         """
         self.ensure_one()
         try:
@@ -230,13 +228,13 @@ class AccountJournal(models.Model):
             # The private key is used to generate the CSR but also to sign the invoices
             if not self.company_id.l10n_sa_private_key:
                 self.company_id.l10n_sa_private_key = self.company_id._l10n_sa_generate_private_key()
-            self.l10n_sa_generate_csr()
+            self._l10n_sa_generate_csr()
             # STEP 1: The first step of the process is to get the CCSID
-            self.l10n_sa_api_get_compliance_CSID(otp)
+            self._l10n_sa_get_compliance_CSID(otp)
             # STEP 2: Once we have the CCSID, we preform the compliance checks
-            self.l10n_sa_run_compliance_checks()
+            self._l10n_sa_run_compliance_checks()
             # STEP 3: Once the compliance checks are completed, we request the PCSID
-            self.l10n_sa_api_get_production_CSID()
+            self._l10n_sa_api_get_production_CSID()
             # Once all three steps are completed, we set the errors field to False
             self.l10n_sa_csr_errors = False
         except (RequestException, HTTPError, UserError) as e:
@@ -245,10 +243,9 @@ class AccountJournal(models.Model):
             self._l10n_sa_reset_certificates()
             self.l10n_sa_csr_errors = e.args[0] or _("Journal could not be onboarded")
 
-    def l10n_sa_api_get_compliance_CSID(self, otp):
+    def _l10n_sa_get_compliance_CSID(self, otp):
         """
             Request a Compliance Cryptographic Stamp Identifier (CCSID) from ZATCA
-        :return: Either raise an error in case the API returns one, or display a success notification
         """
         CCSID_data = self._l10n_sa_generate_compliance_csid(otp)
         if CCSID_data.get('error'):
@@ -259,10 +256,9 @@ class AccountJournal(models.Model):
             'l10n_sa_compliance_checks_passed': False,
         })
 
-    def l10n_sa_api_get_production_CSID(self, OTP=None):
+    def _l10n_sa_api_get_production_CSID(self, OTP=None):
         """
             Request a Production Cryptographic Stamp Identifier (PCSID) from ZATCA
-        :return: Either raise an error in case the API returns one, or display a success notification
         """
 
         self_sudo = self.sudo()
@@ -304,7 +300,7 @@ class AccountJournal(models.Model):
                 compliance_files[file] = ip.read().decode()
         return compliance_files
 
-    def l10n_sa_run_compliance_checks(self):
+    def _l10n_sa_run_compliance_checks(self):
         """
             Run Compliance Checks once the CCSID has been obtained.
 
@@ -487,7 +483,7 @@ class AccountJournal(models.Model):
         }
         return self._l10n_sa_call_api(request_data, ZATCA_API_URLS['apis']['compliance'], 'POST')
 
-    def _l10n_sa_get_api_clearance(self, invoice):
+    def _l10n_sa_get_api_clearance_url(self, invoice):
         """
             Return the API to be used for clearance. To be overridden to account for other cases, such as reporting.
         """
@@ -513,7 +509,7 @@ class AccountJournal(models.Model):
                 'Clearance-Status': '1'
             }
         }
-        url_string = self._l10n_sa_get_api_clearance(invoice)
+        url_string = self._l10n_sa_get_api_clearance_url(invoice)
         return self._l10n_sa_call_api(request_data, url_string, 'POST')
 
     # ====== Certificate Methods =======
@@ -566,11 +562,6 @@ class AccountJournal(models.Model):
     def _l10n_sa_call_api(self, request_data, request_url, method):
         """
             Helper function to make api calls to the ZATCA API Endpoint
-        :param dict request_data: data to be sent along with the request
-        :param str request_url: URI used for the request
-        :param str method: HTTP method used for the request (ex: POST, GET)
-        :return: Results of the API call
-        :rtype: dict
         """
         api_url = ZATCA_API_URLS[self.env.company.l10n_sa_api_mode]
         request_url = api_url + request_url
@@ -616,7 +607,6 @@ class AccountJournal(models.Model):
     def _l10n_sa_api_headers(self):
         """
             Return the base headers to be included in ZATCA API calls
-        :return:
         """
         return {
             'Content-Type': 'application/json',
@@ -627,8 +617,6 @@ class AccountJournal(models.Model):
     def _l10n_sa_authorization_header(self, CSID_data):
         """
             Compute the Authorization header by combining the CSID and the Secret key, then encode to Base64
-        :param CSID_data: Either CCSID or PCSID data
-        :return: Authorization Header
         """
         auth_data = CSID_data
         # if self.company_id.l10n_sa_api_mode == 'sandbox':
