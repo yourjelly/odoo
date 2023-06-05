@@ -17,7 +17,6 @@ class TestSaEdiCommon(AccountEdiTestCommon):
         cls.frozen_date = datetime(year=2022, month=9, day=5, hour=8, minute=20, second=2, tzinfo=timezone('Etc/GMT-3'))
         # Setup company
         cls.company = cls.company_data['company']
-        cls.company.name = 'SA Company'
         cls.company.country_id = cls.env.ref('base.sa')
         cls.company.email = "info@company.saexample.com"
         cls.company.phone = '+966 51 234 5678'
@@ -28,7 +27,6 @@ class TestSaEdiCommon(AccountEdiTestCommon):
         cls.company.l10n_sa_additional_identification_number = '2525252525252'
         cls.company.l10n_sa_additional_identification_scheme = 'CRN'
         cls.company.vat = '311111111111113'
-        cls.company.l10n_sa_private_key = cls.env['res.company']._l10n_sa_generate_private_key()
         cls.company.state_id = cls.env['res.country.state'].create({
             'name': 'riyadh',
             'code': 'RYA',
@@ -38,7 +36,6 @@ class TestSaEdiCommon(AccountEdiTestCommon):
         cls.company.city = 'المدينة المنورة'
         cls.company.zip = '42317'
         cls.customer_invoice_journal.l10n_sa_serial_number = '123456789'
-        cls.customer_invoice_journal.l10n_sa_regen_csr()
         cls.partner_us = cls.env['res.partner'].create({
             'name': 'Chichi Lboukla',
             'ref': 'Azure Interior',
@@ -94,7 +91,6 @@ class TestSaEdiCommon(AccountEdiTestCommon):
             'default_code': 'P0002',
         })
 
-        cls.remove_ubl_extensions_xpath = '''<xpath expr="//*[local-name()='UBLExtensions']" position="replace"/>'''
 
     def _create_invoice(self, **kwargs):
         vals = {
