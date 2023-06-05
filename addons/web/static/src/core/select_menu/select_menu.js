@@ -11,6 +11,7 @@ import { TagsList } from "@web/core/tags_list/tags_list";
 
 export class SelectMenu extends Component {
     static template = "web.SelectMenu";
+    static choiceItemTemplate = "web.SelectMenu.ChoiceItem";
 
     static components = { Dropdown, DropdownItem, TagsList };
 
