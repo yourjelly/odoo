@@ -2,10 +2,9 @@
 from datetime import datetime
 from pytz import timezone
 
-from odoo import Command, fields
+from odoo import Command
 from odoo.tests import tagged
 from odoo.addons.account_edi.tests.common import AccountEdiTestCommon
-from odoo.modules.module import get_resource_path
 
 
 @tagged('post_install_l10n', '-at_install', 'post_install')
