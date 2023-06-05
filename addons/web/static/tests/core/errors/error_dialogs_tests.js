@@ -242,7 +242,7 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
     let footerButtons = target.querySelectorAll("footer button");
     assert.deepEqual(
         [...footerButtons].map((el) => el.textContent),
-        ["Buy book on cryptography", "Cancel"]
+        ["Buy book on cryptography", "Discard"]
     );
     await click(footerButtons[0]); // click on "Buy book on cryptography"
     assert.verifySteps(["buy_action_id", "dialog-closed"]);
