@@ -22,7 +22,6 @@
     'license': 'LGPL-3',
     'data': [
         'security/ir.model.access.csv',
-        'data/account_tax_template.xml',
         'data/account_edi_format.xml',
         'data/ubl_21_zatca.xml',
         'data/res_country_data.xml',
@@ -41,6 +40,5 @@
         'web.assets_backend': [
             'l10n_sa_edi/static/src/scss/form_view.scss',
         ]
-    },
-    'post_init_hook': '_l10n_sa_edi_post_init',
+    }
 }

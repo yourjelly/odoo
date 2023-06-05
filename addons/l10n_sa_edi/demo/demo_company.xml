@@ -42,12 +42,11 @@
         <field name="l10n_sa_additional_identification_number">123456789</field>
     </record>
 
-    <function model="account.journal" name="write">
+    <function model="account.journal" name="_l10n_sa_load_edi_demo_data">
         <value model="account.journal"
                eval="obj().search([
                     ('type', '=', 'sale'),
                     ('company_id', '=', ref('l10n_sa.demo_company_sa'))], limit=1).ids"/>
-        <value eval="{'l10n_sa_serial_number': 'SIDI3-CBMPR-L2D8X-KM0KN-X4ISJ'}"/>
     </function>
 
 </odoo>

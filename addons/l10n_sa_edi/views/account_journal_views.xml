@@ -79,8 +79,7 @@
                                         class="btn-info" context="{'default_l10n_sa_renewal': True}">
                                     Renew Production CSID
                                 </button>
-                                <button name="%(l10n_sa_edi_otp_wizard_act_window)d" type="action" icon="fa-refresh"
-                                    groups="base.group_no_one" class="btn-warning ml-2"
+                                <button name="%(l10n_sa_edi_otp_wizard_act_window)d" type="action" icon="fa-refresh" class="btn-warning ml-2"
                                     confirm="Are you sure you wish to re-onboard the Journal?">
                                     Re-Onboard
                                 </button>
