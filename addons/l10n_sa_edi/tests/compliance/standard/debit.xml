@@ -37,7 +37,7 @@
                 <cbc:ID schemeID="CRN">2525252525252</cbc:ID>
             </cac:PartyIdentification>
             <cac:PartyName>
-                <cbc:Name>SA Company</cbc:Name>
+                <cbc:Name>SA Company Test</cbc:Name>
             </cac:PartyName>
             <cac:PostalAddress>
                 <cbc:StreetName>Al Amir Mohammed Bin Abdul Aziz Street</cbc:StreetName>
@@ -46,7 +46,7 @@
                 <cbc:CitySubdivisionName>Testomania</cbc:CitySubdivisionName>
                 <cbc:CityName>&#1575;&#1604;&#1605;&#1583;&#1610;&#1606;&#1577; &#1575;&#1604;&#1605;&#1606;&#1608;&#1585;&#1577;</cbc:CityName>
                 <cbc:PostalZone>42317</cbc:PostalZone>
-                <cbc:CountrySubentity>riyadh</cbc:CountrySubentity>
+                <cbc:CountrySubentity>Riyadh</cbc:CountrySubentity>
                 <cbc:CountrySubentityCode>RYA</cbc:CountrySubentityCode>
                 <cac:Country>
                     <cbc:IdentificationCode>SA</cbc:IdentificationCode>
@@ -54,7 +54,7 @@
                 </cac:Country>
             </cac:PostalAddress>
             <cac:PartyTaxScheme>
-                <cbc:RegistrationName>SA Company</cbc:RegistrationName>
+                <cbc:RegistrationName>SA Company Test</cbc:RegistrationName>
                 <cbc:CompanyID>311111111111113</cbc:CompanyID>
                 <cac:RegistrationAddress>
                 <cbc:StreetName>Al Amir Mohammed Bin Abdul Aziz Street</cbc:StreetName>
@@ -63,7 +63,7 @@
                 <cbc:CitySubdivisionName>Testomania</cbc:CitySubdivisionName>
                 <cbc:CityName>&#1575;&#1604;&#1605;&#1583;&#1610;&#1606;&#1577; &#1575;&#1604;&#1605;&#1606;&#1608;&#1585;&#1577;</cbc:CityName>
                 <cbc:PostalZone>42317</cbc:PostalZone>
-                <cbc:CountrySubentity>riyadh</cbc:CountrySubentity>
+                <cbc:CountrySubentity>Riyadh</cbc:CountrySubentity>
                 <cbc:CountrySubentityCode>RYA</cbc:CountrySubentityCode>
                 <cac:Country>
                     <cbc:IdentificationCode>SA</cbc:IdentificationCode>
@@ -75,7 +75,7 @@
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>
             <cac:PartyLegalEntity>
-                <cbc:RegistrationName>SA Company</cbc:RegistrationName>
+                <cbc:RegistrationName>SA Company Test</cbc:RegistrationName>
                 <cbc:CompanyID>311111111111113</cbc:CompanyID>
                 <cac:RegistrationAddress>
                 <cbc:StreetName>Al Amir Mohammed Bin Abdul Aziz Street</cbc:StreetName>
@@ -84,7 +84,7 @@
                 <cbc:CitySubdivisionName>Testomania</cbc:CitySubdivisionName>
                 <cbc:CityName>&#1575;&#1604;&#1605;&#1583;&#1610;&#1606;&#1577; &#1575;&#1604;&#1605;&#1606;&#1608;&#1585;&#1577;</cbc:CityName>
                 <cbc:PostalZone>42317</cbc:PostalZone>
-                <cbc:CountrySubentity>riyadh</cbc:CountrySubentity>
+                <cbc:CountrySubentity>Riyadh</cbc:CountrySubentity>
                 <cbc:CountrySubentityCode>RYA</cbc:CountrySubentityCode>
                 <cac:Country>
                     <cbc:IdentificationCode>SA</cbc:IdentificationCode>
@@ -94,7 +94,7 @@
             </cac:PartyLegalEntity>
             <cac:Contact>
                 <cbc:ID>547</cbc:ID>
-                <cbc:Name>SA Company</cbc:Name>
+                <cbc:Name>SA Company Test</cbc:Name>
                 <cbc:Telephone>+966 51 234 5678</cbc:Telephone>
                 <cbc:ElectronicMail>info@company.saexample.com</cbc:ElectronicMail>
             </cac:Contact>
@@ -147,29 +147,12 @@
             </cac:Contact>
         </cac:Party>
     </cac:AccountingCustomerParty>
-    <cac:Delivery>
-        <cbc:ActualDeliveryDate>2022-09-05</cbc:ActualDeliveryDate>
-        <cac:DeliveryLocation>
-            <cac:Address>
-                <cac:Country/>
-            </cac:Address>
-        </cac:DeliveryLocation>
-    </cac:Delivery>
     <cac:PaymentMeans>
         <cbc:PaymentMeansCode listID="UN/ECE 4461">1</cbc:PaymentMeansCode>
         <cbc:PaymentDueDate>2022-09-05</cbc:PaymentDueDate>
         <cbc:InstructionID>INV/2022/00015</cbc:InstructionID>
         <cbc:InstructionNote>INV/2022/00015, Totes forgot</cbc:InstructionNote>
         <cbc:PaymentID>INV/2022/00015</cbc:PaymentID>
-        <cac:PayeeFinancialAccount>
-            <cac:FinancialInstitutionBranch>
-                <cac:FinancialInstitution>
-                <cac:Address>
-                    <cac:Country/>
-                </cac:Address>
-                </cac:FinancialInstitution>
-            </cac:FinancialInstitutionBranch>
-        </cac:PayeeFinancialAccount>
     </cac:PaymentMeans>
     <cac:TaxTotal>
         <cbc:TaxAmount currencyID="SAR">2.37</cbc:TaxAmount>
