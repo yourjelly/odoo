@@ -47,6 +47,15 @@ export class FormRenderer extends Component {
                     if (!rootEl) {
                         return;
                     }
+                    const descriptionField = rootRef.el.querySelector(this.htmlFieldQuerySelector);
+                    if (descriptionField) {
+                        const editor = descriptionField.querySelector('.note-editable');
+                        const elementToResize = editor || descriptionField;
+                        const formSheetHeight = document.getElementsByClassName('o_form_sheet')[0].clientHeight;
+                        const { bottom, top } = elementToResize.getBoundingClientRect();
+                        const minHeight = (document.documentElement.clientHeight - top) - ((bottom - formSheetHeight) * 2 / 3);
+                        this.options = {'element': elementToResize , 'maxHeight': `${bottom}px`, 'minHeight': `${minHeight}px`};
+                    }
                     let elementToFocus;
                     if (isVirtual) {
                         const focusableSelectors = ['input[type="text"]', 'textarea', '[contenteditable]'];
