@@ -256,7 +256,7 @@
                     <cac:AdditionalDocumentReference t-if="invoice._l10n_sa_is_simplified()">
                         <cbc:ID>QR</cbc:ID>
                         <cac:Attachment>
-                            <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain"/>
+                            <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">N/A</cbc:EmbeddedDocumentBinaryObject>
                         </cac:Attachment>
                     </cac:AdditionalDocumentReference>
                     <!-- Add Previous Invoice Hash in compliance with rule BR-KSA-61 -->
