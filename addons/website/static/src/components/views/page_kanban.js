@@ -3,6 +3,7 @@
 import {PageControllerMixin, PageRendererMixin} from "./page_views_mixin";
 import {registry} from '@web/core/registry';
 import {kanbanView} from "@web/views/kanban/kanban_view";
+import { WebsiteSearchBar } from "@website/components/views/website_search_bar";
 
 
 export class PageKanbanController extends PageControllerMixin(kanbanView.Controller) {
@@ -14,6 +15,7 @@ export class PageKanbanController extends PageControllerMixin(kanbanView.Control
     }
 }
 PageKanbanController.template = 'website.PageKanbanView';
+PageKanbanController.components = { ...kanbanView.Controller.components, WebsiteSearchBar};
 
 export class PageKanbanRenderer extends PageRendererMixin(kanbanView.Renderer) {}
 PageKanbanRenderer.props = [
