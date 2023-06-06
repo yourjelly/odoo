@@ -16253,10 +16253,21 @@
             function computeValueAndFormat(...args) {
                 const computeValue = descr.compute.bind(this);
                 const computeFormat = descr.computeFormat ? descr.computeFormat.bind(this) : () => undefined;
-                return {
-                    value: computeValue(...extractArgValuesFromArgs(args)),
-                    format: computeFormat(...args),
-                };
+                const value = computeValue(...extractArgValuesFromArgs(args));
+                const format = computeFormat(...args);
+                if (isMatrix(value)) {
+                    return {
+                        value,
+                        format,
+                    };
+                }
+                if (!isMatrix(format)) {
+                    return {
+                        value,
+                        format,
+                    };
+                }
+                throw new Error("A format matrix should never be associated with a scalar value");
             }
             this.mapping[name] = computeValueAndFormat;
             super.add(name, descr);
@@ -18332,12 +18343,14 @@
         static template = "o-spreadsheet-LineBarPieDesignPanel";
         static components = { ColorPickerWidget };
         state = owl.useState({
+            title: "",
             fillColorTool: false,
         });
         onClick(ev) {
             this.state.fillColorTool = false;
         }
         setup() {
+            this.state.title = this.props.definition.title;
             owl.useExternalListener(window, "click", this.onClick);
         }
         toggleColorPicker() {
@@ -18350,7 +18363,7 @@
         }
         updateTitle(ev) {
             this.props.updateChart(this.props.figureId, {
-                title: ev.target.value,
+                title: this.state.title,
             });
         }
         updateSelect(attr, ev) {
@@ -35418,29 +35431,24 @@
             }
         }
         handleEvent(event) {
-            switch (event.type) {
-                case "HeadersSelected":
-                case "AlterZone":
-                    break;
-                case "ZonesSelected":
-                    let { col, row } = findCellInNewZone(event.previousAnchor.zone, event.anchor.zone);
-                    if (event.mode === "updateAnchor") {
-                        const oldZone = event.previousAnchor.zone;
-                        const newZone = event.anchor.zone;
-                        // altering a zone should not move the viewport in a dimension that wasn't changed
-                        const { top, bottom, left, right } = this.getters.getActiveMainViewport();
-                        if (oldZone.left === newZone.left && oldZone.right === newZone.right) {
-                            col = left > col || col > right ? left : col;
-                        }
-                        if (oldZone.top === newZone.top && oldZone.bottom === newZone.bottom) {
-                            row = top > row || row > bottom ? top : row;
-                        }
+            if (event.options.scrollIntoView) {
+                let { col, row } = findCellInNewZone(event.previousAnchor.zone, event.anchor.zone);
+                if (event.mode === "updateAnchor") {
+                    const oldZone = event.previousAnchor.zone;
+                    const newZone = event.anchor.zone;
+                    // altering a zone should not move the viewport in a dimension that wasn't changed
+                    const { top, bottom, left, right } = this.getters.getActiveMainViewport();
+                    if (oldZone.left === newZone.left && oldZone.right === newZone.right) {
+                        col = left > col || col > right ? left : col;
                     }
-                    const sheetId = this.getters.getActiveSheetId();
-                    col = Math.min(col, this.getters.getNumberCols(sheetId) - 1);
-                    row = Math.min(row, this.getters.getNumberRows(sheetId) - 1);
-                    this.refreshViewport(this.getters.getActiveSheetId(), { col, row });
-                    break;
+                    if (oldZone.top === newZone.top && oldZone.bottom === newZone.bottom) {
+                        row = top > row || row > bottom ? top : row;
+                    }
+                }
+                const sheetId = this.getters.getActiveSheetId();
+                col = Math.min(col, this.getters.getNumberCols(sheetId) - 1);
+                row = Math.min(row, this.getters.getNumberRows(sheetId) - 1);
+                this.refreshViewport(this.getters.getActiveSheetId(), { col, row });
             }
         }
         handle(cmd) {
@@ -38783,7 +38791,7 @@
             const inputSheetId = this.activeSheet;
             const sheetId = this.getters.getActiveSheetId();
             const zone = event.anchor.zone;
-            const range = this.getters.getRangeFromZone(sheetId, event.type === "HeadersSelected" ? this.getters.getUnboundedZone(sheetId, zone) : zone);
+            const range = this.getters.getRangeFromZone(sheetId, event.options.unbounded ? this.getters.getUnboundedZone(sheetId, zone) : zone);
             this.add([this.getters.getSelectionRangeString(range, inputSheetId)]);
         }
         handle(cmd) {
@@ -40445,7 +40453,7 @@
             if (height > 1 || width > 1 || isCutOperation) {
                 const zones = this.pastedZones(target, width, height);
                 const newZone = isCutOperation ? zones[0] : union(...zones);
-                this.selection.selectZone({ cell: { col, row }, zone: newZone });
+                this.selection.selectZone({ cell: { col, row }, zone: newZone }, { scrollIntoView: false });
             }
         }
         /**
@@ -40837,7 +40845,7 @@
                 right: activeCol + numberOfCols - 1,
                 bottom: activeRow + numberOfRows - 1,
             };
-            this.selection.selectZone({ cell: { col: activeCol, row: activeRow }, zone });
+            this.selection.selectZone({ cell: { col: activeCol, row: activeRow }, zone }, { scrollIntoView: false });
         }
         getClipboardContent() {
             return {
@@ -41244,7 +41252,7 @@
             }
             const sheetId = this.getters.getActiveSheetId();
             let unboundedZone;
-            if (event.type === "HeadersSelected") {
+            if (event.options.unbounded) {
                 unboundedZone = this.getters.getUnboundedZone(sheetId, event.anchor.zone);
             }
             else {
@@ -41930,7 +41938,7 @@
                     break;
             }
             this.setSelectionMixin(event.anchor, zones);
-            /** Any change to the selection has to be  reflected in the selection processor. */
+            /** Any change to the selection has to be reflected in the selection processor. */
             this.selection.resetDefaultAnchor(this, deepCopy(this.gridSelection.anchor));
             const { col, row } = this.gridSelection.anchor.cell;
             this.moveClient({
@@ -45702,30 +45710,30 @@
         getBackToDefault() {
             this.stream.getBackToDefault();
         }
-        /**
-         * Select a new anchor
-         */
-        selectZone(anchor) {
-            return this.modifyAnchor(anchor, "overrideSelection", "ZonesSelected");
-        }
-        modifyAnchor(anchor, mode, eventType) {
+        modifyAnchor(anchor, mode, options) {
             const sheetId = this.getters.getActiveSheetId();
             anchor = {
                 ...anchor,
                 zone: this.getters.expandZone(sheetId, anchor.zone),
             };
             return this.processEvent({
-                type: eventType,
+                options,
                 anchor,
                 mode,
             });
+        }
+        /**
+         * Select a new anchor
+         */
+        selectZone(anchor, options = { scrollIntoView: true }) {
+            return this.modifyAnchor(anchor, "overrideSelection", options);
         }
         /**
          * Select a single cell as the new anchor.
          */
         selectCell(col, row) {
             const zone = positionToZone({ col, row });
-            return this.selectZone({ zone, cell: { col, row } });
+            return this.selectZone({ zone, cell: { col, row } }, { scrollIntoView: true });
         }
         /**
          * Set the selection to one of the cells adjacent to the current anchor cell.
@@ -45753,9 +45761,9 @@
             const expandedZone = this.getters.expandZone(sheetId, zone);
             const anchor = { zone: expandedZone, cell: { col: anchorCol, row: anchorRow } };
             return this.processEvent({
-                type: "AlterZone",
                 mode: "updateAnchor",
                 anchor: anchor,
+                options: { scrollIntoView: false },
             });
         }
         /**
@@ -45766,7 +45774,7 @@
             ({ col, row } = this.getters.getMainCellPosition({ sheetId, col, row }));
             const zone = this.getters.expandZone(sheetId, positionToZone({ col, row }));
             return this.processEvent({
-                type: "ZonesSelected",
+                options: { scrollIntoView: true },
                 anchor: { zone, cell: { col, row } },
                 mode: "newAnchor",
             });
@@ -45824,7 +45832,7 @@
                 result = result ? organizeZone(result) : result;
                 if (result && !isEqual(result, anchor.zone)) {
                     return this.processEvent({
-                        type: "ZonesSelected",
+                        options: { scrollIntoView: true },
                         mode: "updateAnchor",
                         anchor: { zone: result, cell: { col: anchorCol, row: anchorRow } },
                     });
@@ -45845,9 +45853,9 @@
             result = expand(union(currentZone, zoneWithDelta));
             const newAnchor = { zone: result, cell: { col: anchorCol, row: anchorRow } };
             return this.processEvent({
-                type: "ZonesSelected",
                 anchor: newAnchor,
                 mode: "updateAnchor",
+                options: { scrollIntoView: true },
             });
         }
         selectColumn(index, mode) {
@@ -45868,7 +45876,10 @@
                     break;
             }
             return this.processEvent({
-                type: "HeadersSelected",
+                options: {
+                    scrollIntoView: false,
+                    unbounded: true,
+                },
                 anchor: { zone, cell: { col, row } },
                 mode,
             });
@@ -45891,7 +45902,10 @@
                     break;
             }
             return this.processEvent({
-                type: "HeadersSelected",
+                options: {
+                    scrollIntoView: false,
+                    unbounded: true,
+                },
                 anchor: { zone, cell: { col, row } },
                 mode,
             });
@@ -45907,11 +45921,15 @@
             const anchor = this.anchor;
             // The whole sheet is selected, select the anchor cell
             if (isEqual(this.anchor.zone, this.getters.getSheetZone(sheetId))) {
-                return this.modifyAnchor({ ...anchor, zone: positionToZone(anchor.cell) }, "updateAnchor", "AlterZone");
+                return this.modifyAnchor({ ...anchor, zone: positionToZone(anchor.cell) }, "updateAnchor", {
+                    scrollIntoView: false,
+                });
             }
             const tableZone = this.expandZoneToTable(anchor.zone);
             return !deepEquals(tableZone, anchor.zone)
-                ? this.modifyAnchor({ ...anchor, zone: tableZone }, "updateAnchor", "AlterZone")
+                ? this.modifyAnchor({ ...anchor, zone: tableZone }, "updateAnchor", {
+                    scrollIntoView: false,
+                })
                 : this.selectAll();
         }
         /**
@@ -45921,7 +45939,9 @@
          */
         selectTableAroundSelection() {
             const tableZone = this.expandZoneToTable(this.anchor.zone);
-            return this.modifyAnchor({ ...this.anchor, zone: tableZone }, "updateAnchor", "AlterZone");
+            return this.modifyAnchor({ ...this.anchor, zone: tableZone }, "updateAnchor", {
+                scrollIntoView: false,
+            });
         }
         /**
          * Select the entire sheet
@@ -45932,9 +45952,11 @@
             const right = this.getters.getNumberCols(sheetId) - 1;
             const zone = { left: 0, top: 0, bottom, right };
             return this.processEvent({
-                type: "HeadersSelected",
                 mode: "overrideSelection",
                 anchor: { zone, cell: this.anchor.cell },
+                options: {
+                    scrollIntoView: false,
+                },
             });
         }
         /**
@@ -48374,8 +48396,8 @@
 
 
     __info__.version = '16.4.0-alpha.3';
-    __info__.date = '2023-06-02T10:56:24.014Z';
-    __info__.hash = '059d66a';
+    __info__.date = '2023-06-06T06:02:56.207Z';
+    __info__.hash = 'd30ce8a';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

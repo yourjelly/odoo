@@ -2364,7 +2364,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="env._t(props.definition.title)"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -2436,7 +2436,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="env._t(props.definition.title)"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -2630,7 +2630,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="env._t(props.definition.title)"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -2747,7 +2747,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="props.definition.title"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -2896,7 +2896,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="env._t(props.definition.title)"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -3861,6 +3861,6 @@
 </odoo>
 <!--
   __info__.version = '16.4.0-alpha.3';
-  __info__.date = '2023-06-02T10:56:27.729Z';
-  __info__.hash = '059d66a';
+  __info__.date = '2023-06-06T06:02:59.578Z';
+  __info__.hash = 'd30ce8a';
 -->
