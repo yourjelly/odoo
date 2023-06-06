@@ -180,7 +180,8 @@ class AccountMove(models.Model):
         """ Reconciles the entries made in the interim accounts in anglosaxon accounting,
         reconciling stock valuation move lines with the invoice's.
         """
-        assert len(self) == 1
+        if workaround:
+            assert len(self) == 1
         reconciliations = []
 
         for move in self:

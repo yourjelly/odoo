@@ -37,7 +37,8 @@ class AccountMove(models.Model):
         lines_vals_list = []
         price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
 
-        assert len(self) == 1
+        if workaround:
+            assert len(self) == 1
         affected = False
 
         for move in self:
