@@ -20,6 +20,12 @@
         cursor: pointer;
       }
     }
+
+      // Correctly align sub dropdowns items with its parent's
+    .o-dropdown > .o-dropdown--menu {
+      margin-top: calc(-.5rem);
+      margin-bottom: calc(-.5rem);
+    }
   }
   /*!rtl:begin:ignore*/
   &.dropup > .o-dropdown--menu,

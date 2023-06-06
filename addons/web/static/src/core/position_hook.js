@@ -149,13 +149,13 @@ function getBestPosition(target, popper, iframe, { container, margin, position }
     /** @type {VariantsData} */
     const variantsData = {
         vf: iframeBox.left + targetBox.left,
-        vs: iframeBox.left + targetBox.left,
+        vs: iframeBox.left + targetBox.left + popMargins.left,
         vm: iframeBox.left + targetBox.left + targetBox.width / 2 + -popBox.width / 2,
-        ve: iframeBox.left + targetBox.right - popBox.width,
+        ve: iframeBox.left + targetBox.right - popMargins.right - popBox.width,
         hf: iframeBox.top + targetBox.top,
-        hs: iframeBox.top + targetBox.top,
+        hs: iframeBox.top + targetBox.top + popMargins.top,
         hm: iframeBox.top + targetBox.top + targetBox.height / 2 + -popBox.height / 2,
-        he: iframeBox.top + targetBox.bottom - popBox.height,
+        he: iframeBox.top + targetBox.bottom - popMargins.bottom - popBox.height,
     };
 
     function getPositioningData(d = directions[0], v = variants[0], containerRestricted = false) {
