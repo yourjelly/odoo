@@ -106,9 +106,9 @@ class AccountJournal(models.Model):
         """ Return the list of fields required to generate a valid CSR as per ZATCA requirements """
         return ['l10n_sa_private_key', 'vat', 'name', 'city', 'country_id', 'state_id']
 
-    def _l10n_sa_generate_csr(self):
+    def _l10n_sa_get_csr_str(self):
         """
-            Generate a ZATCA compliant CSR request that will be sent to the Compliance API in order to get back
+            Return s string representation of a ZATCA compliant CSR that will be sent to the Compliance API in order to get back
             a signed X509 certificate
         """
         self.ensure_one()
@@ -190,7 +190,7 @@ class AccountJournal(models.Model):
                 " - %s" % self.company_id._fields[f].string for f in self._l10n_sa_csr_required_fields() if
                 not self.company_id[f]))
         self._l10n_sa_reset_certificates()
-        self.l10n_sa_csr = self._l10n_sa_generate_csr()
+        self.l10n_sa_csr = self._l10n_sa_get_csr_str()
 
     # ====== Certificate Methods =======
 
@@ -234,7 +234,7 @@ class AccountJournal(models.Model):
             # STEP 2: Once we have the CCSID, we preform the compliance checks
             self._l10n_sa_run_compliance_checks()
             # STEP 3: Once the compliance checks are completed, we request the PCSID
-            self._l10n_sa_api_get_production_CSID()
+            self._l10n_sa_get_production_CSID()
             # Once all three steps are completed, we set the errors field to False
             self.l10n_sa_csr_errors = False
         except (RequestException, HTTPError, UserError) as e:
@@ -247,7 +247,7 @@ class AccountJournal(models.Model):
         """
             Request a Compliance Cryptographic Stamp Identifier (CCSID) from ZATCA
         """
-        CCSID_data = self._l10n_sa_generate_compliance_csid(otp)
+        CCSID_data = self._l10n_sa_request_compliance_csid(otp)
         if CCSID_data.get('error'):
             raise UserError(_("Could not obtain Compliance CSID: %s") % CCSID_data['error'])
         self.sudo().write({
@@ -256,7 +256,7 @@ class AccountJournal(models.Model):
             'l10n_sa_compliance_checks_passed': False,
         })
 
-    def _l10n_sa_api_get_production_CSID(self, OTP=None):
+    def _l10n_sa_get_production_CSID(self, OTP=None):
         """
             Request a Production Cryptographic Stamp Identifier (PCSID) from ZATCA
         """
@@ -279,7 +279,7 @@ class AccountJournal(models.Model):
                 raise UserError(_("The Production CSID is still valid. You can only renew it once it has expired."))
 
         CCSID_data = json.loads(self_sudo.l10n_sa_compliance_csid_json)
-        PCSID_data = self_sudo._l10n_sa_generate_production_csid(CCSID_data, renew, OTP)
+        PCSID_data = self_sudo._l10n_sa_request_production_csid(CCSID_data, renew, OTP)
         if PCSID_data.get('error'):
             raise UserError(_("Could not obtain Production CSID: %s") % PCSID_data['error'])
         self_sudo.l10n_sa_production_csid_json = json.dumps(PCSID_data)
@@ -514,7 +514,7 @@ class AccountJournal(models.Model):
 
     # ====== Certificate Methods =======
 
-    def _l10n_sa_generate_compliance_csid(self, otp):
+    def _l10n_sa_request_compliance_csid(self, otp):
         """
             Generate company Compliance CSID data
         """
@@ -532,7 +532,7 @@ class AccountJournal(models.Model):
         x509_certificate = load_der_x509_certificate(b64decode(b64_decoded_pcsid.decode()), default_backend())
         return x509_certificate.not_valid_after
 
-    def _l10n_sa_generate_production_csid(self, csid_data, renew=False, otp=None):
+    def _l10n_sa_request_production_csid(self, csid_data, renew=False, otp=None):
         """
             Generate company Production CSID data
         """

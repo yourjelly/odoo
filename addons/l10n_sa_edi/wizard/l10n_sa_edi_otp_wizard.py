@@ -26,5 +26,5 @@ class RequestZATCAOtp(models.TransientModel):
             raise UserError(_("You need to provide an OTP to be able to request a CCSID"))
         journal_id = self.env['account.journal'].browse(self.env.context.get('active_id'))
         if self.l10n_sa_renewal:
-            return journal_id._l10n_sa_api_get_production_CSID(self.l10n_sa_otp)
+            return journal_id._l10n_sa_get_production_CSID(self.l10n_sa_otp)
         journal_id._l10n_sa_api_onboard_journal(self.l10n_sa_otp)
