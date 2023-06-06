@@ -214,11 +214,6 @@
                 </cac:InvoiceLine>
             </xpath>
 
-<!--            todo: remove &lt;!&ndash; Add UBL Extensions &ndash;&gt;-->
-<!--            <xpath expr="//*[local-name()='UBLVersionID']" position="before">-->
-<!--                <t t-call="l10n_sa_edi.export_sa_zatca_ubl_extensions"/>-->
-<!--            </xpath>-->
-
             <!-- Remove Order Reference if None -->
             <xpath expr="//*[local-name()='OrderReference']" position="replace">
                 <cac:OrderReference t-if="vals.get('order_reference')"

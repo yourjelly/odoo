@@ -6,8 +6,6 @@ class RequestZATCAOtp(models.TransientModel):
     _name = 'l10n_sa_edi.otp.wizard'
     _description = 'Request ZATCA OTP'
 
-    # journal_id = fields.Many2one("account.journal")
-
     l10n_sa_renewal = fields.Boolean("PCSID Renewal",
                                      help="Used to decide whether we should call the PCSID renewal API or the CCSID API",
                                      default=False)
