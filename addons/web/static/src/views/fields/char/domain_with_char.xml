@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web.DomainCharField" t-inherit="web.CharField" t-inherit-mode="primary" owl="1">
+        <xpath expr="//input" position="replace">
+            <div class="o_row">
+                <ModelFieldSelector t-props="domainSelectorProps"/>
+                <button class="text-nowrap btn btn-primary o_clipboard_button" t-on-click="onCopy">
+                    <span class="fa fa-clipboard"/>
+                    Copy
+                </button>
+            </div>
+        </xpath>
+    </t>
+</templates>
