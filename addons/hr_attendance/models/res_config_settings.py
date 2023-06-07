@@ -21,6 +21,10 @@ class ResConfigSettings(models.TransientModel):
     attendance_barcode_source = fields.Selection(related='company_id.attendance_barcode_source', readonly=False)
     attendance_kiosk_delay = fields.Integer(related='company_id.attendance_kiosk_delay', readonly=False)
 
+    mandatory_break_management = fields.Boolean(related='company_id.mandatory_break_management', readonly=False)
+    attendance_mandatory_break_ids = fields.One2many(related='company_id.attendance_mandatory_break_ids', readonly=False)
+    attendance_minimal_pause_time = fields.Integer(related='company_id.attendance_minimal_pause_time', readonly=False)
+
     @api.model
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()

@@ -55,6 +55,25 @@
                             </div>
                         </setting>
                     </block>
+                    <block title="Mandatory Break Management" name="mandatory_pause_settings">
+                        <setting company_dependent="1" help="Define the rules for mandatory break time management.">
+                            <field name="mandatory_break_management"/>
+                        </setting>
+
+                        <setting attrs="{'invisible': [('mandatory_break_management', '=', False)]}" company_dependent="1" >
+                            <field name="attendance_minimal_pause_time" class="text-center" style="width: 10%; min-width: 4rem;"/><span> minutes</span>
+                        </setting>
+
+                        <setting attrs="{'invisible': [('mandatory_break_management', '=', False)]}" company_dependent="1">
+                            <field name="attendance_mandatory_break_ids" style="width: 100%; min-width: 30rem;">
+                                <tree editable="bottom">
+                                    <field name="working_time"/>
+                                    <field name="corresponding_mandatory_pause_time"/>
+                                </tree>
+                            </field>
+                        </setting>
+                    </block>
+
                 </app>
             </xpath>
         </field>
