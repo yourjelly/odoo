@@ -7,9 +7,9 @@ import { onMounted, useRef, useState } from "@odoo/owl";
 export class DatePickerPopup extends AbstractAwaitablePopup {
     static template = "DatePickerPopup";
     static defaultProps = {
-        confirmText: _lt("Confirm"),
-        cancelText: _lt("Discard"),
-        title: _lt("DatePicker"),
+        confirmText: _t("Confirm"),
+        cancelText: _t("Discard"),
+        title: _t("DatePicker"),
     };
 
     setup() {

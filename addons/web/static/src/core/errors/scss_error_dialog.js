@@ -5,10 +5,10 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { _lt } from "@web/core/l10n/translation";
 import { Component } from "@odoo/owl";
 
-class ScssErrorDialog extends Component {}
+class ScssErrorDialog extends Component { }
 ScssErrorDialog.template = "web.ScssErrorDialog";
 ScssErrorDialog.components = { Dialog };
-ScssErrorDialog.title = _lt("Style error");
+ScssErrorDialog.title = _t("Style error");
 
 const scssErrorDisplayService = {
     dependencies: ["dialog"],

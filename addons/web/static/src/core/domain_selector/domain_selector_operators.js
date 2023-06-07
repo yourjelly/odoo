@@ -11,25 +11,25 @@ export const OPERATOR_DESCRIPTIONS = [
     { key: "greater_than", label: ">", symbol: ">", valueCount: 1 },
     { key: "greater_equal", label: ">=", symbol: ">=", valueCount: 1 },
     { key: "equal_question", label: "=?", symbol: "=?", valueCount: 1 },
-    { key: "equal_like", label: _lt("=like"), symbol: "=like", valueCount: 1 },
-    { key: "equal_ilike", label: _lt("=ilike"), symbol: "=ilike", valueCount: 1 },
-    { key: "like", label: _lt("like"), symbol: "like", valueCount: 1 },
-    { key: "not_like", label: _lt("not like"), symbol: "not like", valueCount: 1 },
-    { key: "ilike", label: _lt("contains"), symbol: "ilike", valueCount: 1 },
-    { key: "not_ilike", label: _lt("does not contain"), symbol: "not ilike", valueCount: 1 },
-    { key: "in", label: _lt("in"), symbol: "in", valueCount: "variable" },
-    { key: "not_in", label: _lt("not in"), symbol: "not in", valueCount: "variable" },
-    { key: "child_of", label: _lt("child of"), symbol: "child_of", valueCount: 1 },
-    { key: "parent_of", label: _lt("parent of"), symbol: "parent_of", valueCount: 1 },
+    { key: "equal_like", label: _t("=like"), symbol: "=like", valueCount: 1 },
+    { key: "equal_ilike", label: _t("=ilike"), symbol: "=ilike", valueCount: 1 },
+    { key: "like", label: _t("like"), symbol: "like", valueCount: 1 },
+    { key: "not_like", label: _t("not like"), symbol: "not like", valueCount: 1 },
+    { key: "ilike", label: _t("contains"), symbol: "ilike", valueCount: 1 },
+    { key: "not_ilike", label: _t("does not contain"), symbol: "not ilike", valueCount: 1 },
+    { key: "in", label: _t("in"), symbol: "in", valueCount: "variable" },
+    { key: "not_in", label: _t("not in"), symbol: "not in", valueCount: "variable" },
+    { key: "child_of", label: _t("child of"), symbol: "child_of", valueCount: 1 },
+    { key: "parent_of", label: _t("parent of"), symbol: "parent_of", valueCount: 1 },
 
     // virtual operators (replace = and != in some cases)
-    { key: "is", label: _lt("is"), symbol: "=", valueCount: 1 },
-    { key: "is_not", label: _lt("is not"), symbol: "!=", valueCount: 1 },
-    { key: "set", label: _lt("is set"), symbol: "!=", valueCount: 0 },
-    { key: "not_set", label: _lt("is not set"), symbol: "=", valueCount: 0 },
+    { key: "is", label: _t("is"), symbol: "=", valueCount: 1 },
+    { key: "is_not", label: _t("is not"), symbol: "!=", valueCount: 1 },
+    { key: "set", label: _t("is set"), symbol: "!=", valueCount: 0 },
+    { key: "not_set", label: _t("is not set"), symbol: "=", valueCount: 0 },
 
     // virtual operator (equivalent to a couple (>=,<=))
-    { key: "between", label: _lt("is between"), symbol: "between", valueCount: 2 },
+    { key: "between", label: _t("is between"), symbol: "between", valueCount: 2 },
 ];
 
 export function findOperator(key) {

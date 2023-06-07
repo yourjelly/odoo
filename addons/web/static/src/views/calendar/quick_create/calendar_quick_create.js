@@ -14,7 +14,7 @@ export class CalendarQuickCreate extends Component {
     }
 
     get dialogTitle() {
-        return _lt("New Event");
+        return _t("New Event");
     }
 
     get recordTitle() {

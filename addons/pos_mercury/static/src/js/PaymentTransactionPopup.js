@@ -7,8 +7,8 @@ import { useState } from "@odoo/owl";
 export class PaymentTransactionPopup extends AbstractAwaitablePopup {
     static template = "PaymentTransactionPopup";
     static defaultProps = {
-        confirmText: _lt("Ok"),
-        title: _lt("Online Payment"),
+        confirmText: _t("Ok"),
+        title: _t("Online Payment"),
         body: "",
         cancelKey: false,
     };

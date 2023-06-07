@@ -7,8 +7,8 @@ import { useState } from "@odoo/owl";
 export class SelectionPopup extends AbstractAwaitablePopup {
     static template = "SelectionPopup";
     static defaultProps = {
-        cancelText: _lt("Cancel"),
-        title: _lt("Select"),
+        cancelText: _t("Cancel"),
+        title: _t("Select"),
         body: "",
         list: [],
         confirmKey: false,

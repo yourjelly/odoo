@@ -38,7 +38,7 @@ export class IframeWrapperField extends Component {
 
 export const iframeWrapperField = {
     component: IframeWrapperField,
-    displayName: _lt("Wrap raw html within an iframe"),
+    displayName: _t("Wrap raw html within an iframe"),
     // If HTML, don't forget to adjust the sanitize options to avoid stripping most of the metadata
     supportedTypes: ["text", "html"],
 };

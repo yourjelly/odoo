@@ -37,10 +37,10 @@ export class FloatTimeField extends Component {
 
 export const floatTimeField = {
     component: FloatTimeField,
-    displayName: _lt("Time"),
+    displayName: _t("Time"),
     supportedOptions: [
         {
-            label: _lt("Type"),
+            label: _t("Type"),
             name: "type",
             type: "string",
         },

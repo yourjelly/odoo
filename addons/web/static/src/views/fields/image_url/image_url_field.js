@@ -51,16 +51,16 @@ export class ImageUrlField extends Component {
 
 export const imageUrlField = {
     component: ImageUrlField,
-    displayName: _lt("Image"),
+    displayName: _t("Image"),
     supportedOptions: [
         {
-            label: _lt("Size"),
+            label: _t("Size"),
             name: "size",
             type: "selection",
             choices: [
-                { label: _lt("Small"), value: "[0,90]" },
-                { label: _lt("Medium"), value: "[0,180]" },
-                { label: _lt("Large"), value: "[0,270]" },
+                { label: _t("Small"), value: "[0,90]" },
+                { label: _t("Medium"), value: "[0,180]" },
+                { label: _t("Large"), value: "[0,270]" },
             ],
         },
     ],

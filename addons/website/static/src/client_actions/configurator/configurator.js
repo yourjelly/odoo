@@ -3,9 +3,9 @@
 import concurrency from 'web.concurrency';
 import utils from 'web.utils';
 import weUtils from 'web_editor.utils';
-import {ColorpickerWidget} from 'web.Colorpicker';
-import {_lt} from 'web.core';
-import {svgToPNG} from 'website.utils';
+import { ColorpickerWidget } from 'web.Colorpicker';
+import { _lt } from 'web.core';
+import { svgToPNG } from 'website.utils';
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
@@ -19,19 +19,19 @@ const ROUTES = {
 };
 
 const WEBSITE_TYPES = {
-    1: {id: 1, label: _lt("a business website"), name: 'business'},
-    2: {id: 2, label: _lt("an online store"), name: 'online_store'},
-    3: {id: 3, label: _lt("a blog"), name: 'blog'},
-    4: {id: 4, label: _lt("an event website"), name: 'event'},
-    5: {id: 5, label: _lt("an elearning platform"), name: 'elearning'},
+    1: { id: 1, label: _t("a business website"), name: 'business' },
+    2: { id: 2, label: _t("an online store"), name: 'online_store' },
+    3: { id: 3, label: _t("a blog"), name: 'blog' },
+    4: { id: 4, label: _t("an event website"), name: 'event' },
+    5: { id: 5, label: _t("an elearning platform"), name: 'elearning' },
 };
 
 const WEBSITE_PURPOSES = {
-    1: {id: 1, label: _lt("get leads"), name: 'get_leads'},
-    2: {id: 2, label: _lt("develop the brand"), name: 'develop_brand'},
-    3: {id: 3, label: _lt("sell more"), name: 'sell_more'},
-    4: {id: 4, label: _lt("inform customers"), name: 'inform_customers'},
-    5: {id: 5, label: _lt("schedule appointments"), name: 'schedule_appointments'},
+    1: { id: 1, label: _t("get leads"), name: 'get_leads' },
+    2: { id: 2, label: _t("develop the brand"), name: 'develop_brand' },
+    3: { id: 3, label: _t("sell more"), name: 'sell_more' },
+    4: { id: 4, label: _t("inform customers"), name: 'inform_customers' },
+    5: { id: 5, label: _t("schedule appointments"), name: 'schedule_appointments' },
 };
 
 const PALETTE_NAMES = [
@@ -65,7 +65,7 @@ const CUSTOM_BG_COLOR_ATTRS = ['menu', 'footer'];
 // Components
 //------------------------------------------------------------------------------
 
-class SkipButton extends Component {}
+class SkipButton extends Component { }
 SkipButton.template = 'website.Configurator.SkipButton';
 
 class WelcomeScreen extends Component {
@@ -79,7 +79,7 @@ class WelcomeScreen extends Component {
 }
 
 Object.assign(WelcomeScreen, {
-    components: {SkipButton},
+    components: { SkipButton },
     template: 'website.Configurator.WelcomeScreen',
 });
 
@@ -167,8 +167,8 @@ class DescriptionScreen extends Component {
             // "restaurant" remains available even if there are 30 specific
             // sub-types that have a higher hit count.
             matches = matches.sort((x, y) => x.wordCount - y.wordCount)
-                             .slice(0, limit)
-                             .sort((x, y) => x.hitCountOrder - y.hitCountOrder);
+                .slice(0, limit)
+                .sort((x, y) => x.hitCountOrder - y.hitCountOrder);
         }
         this.labelToId = {};
         let labels;
@@ -226,7 +226,7 @@ class DescriptionScreen extends Component {
     }
 
     checkDescriptionCompletion() {
-        const {selectedType, selectedPurpose, selectedIndustry} = this.state;
+        const { selectedType, selectedPurpose, selectedIndustry } = this.state;
         if (selectedType && selectedPurpose && selectedIndustry) {
             // If the industry name is not known by the server, send it to the
             // IAP server.
@@ -241,7 +241,7 @@ class DescriptionScreen extends Component {
 }
 
 Object.assign(DescriptionScreen, {
-    components: {SkipButton},
+    components: { SkipButton },
     template: 'website.Configurator.DescriptionScreen',
 });
 
@@ -295,7 +295,7 @@ class PaletteSelectionScreen extends Component {
         const [color1, color2] = await this.orm.call('base.document.layout',
             'extract_image_primary_secondary_colors',
             [img],
-            {mitigate: 255},
+            { mitigate: 255 },
         );
         this.state.setRecommendedPalette(color1, color2);
     }
@@ -307,7 +307,7 @@ class PaletteSelectionScreen extends Component {
 }
 
 Object.assign(PaletteSelectionScreen, {
-    components: {SkipButton},
+    components: { SkipButton },
     template: 'website.Configurator.PaletteSelectionScreen',
 });
 
@@ -409,7 +409,7 @@ export class FeaturesSelectionScreen extends ApplyConfiguratorScreen {
 }
 
 Object.assign(FeaturesSelectionScreen, {
-    components: {SkipButton},
+    components: { SkipButton },
     template: 'website.Configurator.FeatureSelection',
 });
 
@@ -434,10 +434,10 @@ class ThemeSelectionScreen extends ApplyConfiguratorScreen {
                     proms.push(new Promise((resolve, reject) => {
                         imgEl.addEventListener('load', () => {
                             resolve(imgEl);
-                        }, {once: true});
+                        }, { once: true });
                         imgEl.addEventListener('error', () => {
                             reject(imgEl);
-                        }, {once: true});
+                        }, { once: true });
                     }));
                 }
                 $(this.themeSVGPreviews[idx].el).append(svgEl);
@@ -693,12 +693,12 @@ export class Configurator extends Component {
                     'palette': localState.selectedPalette,
                 });
             }
-            return Object.assign(r, {...localState, palettes, themes});
+            return Object.assign(r, { ...localState, palettes, themes });
         }
 
         const features = {};
         results.features.forEach(feature => {
-            features[feature.id] = Object.assign({}, feature, {selected: feature.module_state === 'installed'});
+            features[feature.id] = Object.assign({}, feature, { selected: feature.module_state === 'installed' });
             const wtp = features[feature.id]['website_config_preselection'];
             features[feature.id]['website_config_preselection'] = wtp ? wtp.split(',') : [];
         });

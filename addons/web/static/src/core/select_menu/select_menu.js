@@ -19,10 +19,10 @@ export class SelectMenu extends Component {
         class: "",
         togglerClass: "",
         multiSelect: false,
-        onSelect: () => {},
+        onSelect: () => { },
         required: false,
         searchable: true,
-        searchPlaceholder: _lt("Search..."),
+        searchPlaceholder: _t("Search..."),
         choices: [],
         groups: [],
     };

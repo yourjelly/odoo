@@ -65,7 +65,7 @@ export const many2ManyBinaryField = {
     component: Many2ManyBinaryField,
     supportedOptions: [
         {
-            label: _lt("Accepted file extensions"),
+            label: _t("Accepted file extensions"),
             name: "accepted_file_extensions",
             type: "string",
         },

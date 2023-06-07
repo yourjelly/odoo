@@ -13,12 +13,12 @@ const commandProviderRegistry = registry.category("command_provider");
 // -----------------------------------------------------------------------------
 commandSetupRegistry.add("@", {
     debounceDelay: 200,
-    emptyMessage: _lt("No user found"),
-    name: _lt("users"),
-    placeholder: _lt("Search for a user..."),
+    emptyMessage: _t("No user found"),
+    name: _t("users"),
+    placeholder: _t("Search for a user..."),
 });
 
-class DialogCommand extends Component {}
+class DialogCommand extends Component { }
 DialogCommand.template = xml`
     <div class="o_command_default d-flex align-items-center justify-content-between px-4 py-2 cursor-pointer">
         <t t-slot="name"/>
@@ -56,9 +56,9 @@ commandProviderRegistry.add("mail.partner", {
 
 commandSetupRegistry.add("#", {
     debounceDelay: 200,
-    emptyMessage: _lt("No channel found"),
-    name: _lt("channels"),
-    placeholder: _lt("Search for a channel..."),
+    emptyMessage: _t("No channel found"),
+    name: _t("channels"),
+    placeholder: _t("Search for a channel..."),
 });
 
 commandProviderRegistry.add("discuss.channel", {

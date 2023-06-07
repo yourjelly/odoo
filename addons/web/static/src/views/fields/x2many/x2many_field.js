@@ -54,12 +54,12 @@ export class X2ManyField extends Component {
             this.creates = creates.length
                 ? creates
                 : [
-                      {
-                          type: "create",
-                          string: this.props.addLabel || this.env._t("Add"),
-                          class: "o-kanban-button-new",
-                      },
-                  ];
+                    {
+                        type: "create",
+                        string: this.props.addLabel || this.env._t("Add"),
+                        class: "o-kanban-button-new",
+                    },
+                ];
         }
         const subViewActiveActions = activeActions;
         this.activeActions = useActiveActions({
@@ -277,7 +277,7 @@ export class X2ManyField extends Component {
 
 export const x2ManyField = {
     component: X2ManyField,
-    displayName: _lt("Relational table"),
+    displayName: _t("Relational table"),
     supportedTypes: ["one2many", "many2many"],
     useSubView: true,
     extractProps: ({ attrs, viewMode, views, widget, options, string }, dynamicInfo) => {

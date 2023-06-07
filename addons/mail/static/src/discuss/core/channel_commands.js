@@ -7,15 +7,15 @@ const commandRegistry = registry.category("discuss.channel_commands");
 
 commandRegistry
     .add("help", {
-        help: _lt("Show a helper message"),
+        help: _t("Show a helper message"),
         methodName: "execute_command_help",
     })
     .add("leave", {
-        help: _lt("Leave this channel"),
+        help: _t("Leave this channel"),
         methodName: "execute_command_leave",
     })
     .add("who", {
         channel_types: ["channel", "chat", "group"],
-        help: _lt("List users in the current channel"),
+        help: _t("List users in the current channel"),
         methodName: "execute_command_who",
     });

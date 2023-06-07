@@ -29,7 +29,7 @@ export class LabelSelectionField extends Component {
 
 export const labelSelectionField = {
     component: LabelSelectionField,
-    displayName: _lt("Label Selection"),
+    displayName: _t("Label Selection"),
     supportedTypes: ["selection"],
     extractProps: ({ options }) => ({
         classesObj: options.classes,

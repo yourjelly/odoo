@@ -14,7 +14,7 @@ export class Many2OneBarcodeField extends Many2OneField {
 export const many2OneBarcodeField = {
     ...many2OneField,
     component: Many2OneBarcodeField,
-    displayName: _lt("Many2OneBarcode"),
+    displayName: _t("Many2OneBarcode"),
     extractProps() {
         const props = many2OneField.extractProps(...arguments);
         props.canScanBarcode = true;

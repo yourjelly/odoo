@@ -66,7 +66,7 @@ export class TextField extends Component {
 
 export const textField = {
     component: TextField,
-    displayName: _lt("Multiline Text"),
+    displayName: _t("Multiline Text"),
     supportedTypes: ["html", "text"],
     extractProps: ({ attrs, options }) => ({
         placeholder: attrs.placeholder,

@@ -9,7 +9,7 @@ import { useAutoresize } from "@web/core/utils/autoresize";
 export class TodoEditableBreadcrumbName extends CharField {
     setup() {
         super.setup();
-        this.placeholder = _lt("Untitled to-do");;
+        this.placeholder = _t("Untitled to-do");;
         this.input = useRef("input");
 
         this.stateTodo = useState({

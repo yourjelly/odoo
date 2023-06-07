@@ -38,7 +38,7 @@ export class BadgeField extends Component {
 
 export const badgeField = {
     component: BadgeField,
-    displayName: _lt("Badge"),
+    displayName: _t("Badge"),
     supportedTypes: ["selection", "many2one", "char"],
     extractProps: ({ decorations }) => {
         return { decorations };

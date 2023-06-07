@@ -24,7 +24,7 @@ debugRegistry.category("view").add("viewSeparator", viewSeparator);
 // Get view
 //------------------------------------------------------------------------------
 
-class GetViewDialog extends Component {}
+class GetViewDialog extends Component { }
 GetViewDialog.template = xml`
 <Dialog title="this.constructor.title">
     <pre t-esc="props.arch"/>
@@ -34,7 +34,7 @@ GetViewDialog.props = {
     arch: { type: String },
     close: { type: Function },
 };
-GetViewDialog.title = _lt("Get View");
+GetViewDialog.title = _t("Get View");
 
 export function getView({ component, env }) {
     let { arch } = component.props;

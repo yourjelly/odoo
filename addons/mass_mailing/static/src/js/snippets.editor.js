@@ -1,6 +1,6 @@
 /** @odoo-module alias=mass_mailing.snippets.editor **/
 
-import {_lt} from "web.core";
+import { _lt } from "web.core";
 import snippetsEditor from "web_editor.snippet.editor";
 
 const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
@@ -17,7 +17,7 @@ const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
         DESIGN: 'design',
     }),
     optionsTabStructure: [
-        ['design-options', _lt("Design Options")],
+        ['design-options', _t("Design Options")],
     ],
 
     //--------------------------------------------------------------------------
@@ -50,7 +50,7 @@ const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
     /**
      * @override
      */
-    _updateRightPanelContent: function ({content, tab}) {
+    _updateRightPanelContent: function ({ content, tab }) {
         this._super(...arguments);
         this.$('.o_we_customize_design_btn').toggleClass('active', tab === this.tabs.DESIGN);
     },

@@ -73,7 +73,7 @@ var M2ODialog = Dialog.extend({
 });
 
 var FieldMany2One = AbstractField.extend({
-    description: _lt("Many2one"),
+    description: _t("Many2one"),
     supportedFieldTypes: ['many2one'],
     template: 'FieldMany2One',
     custom_events: Object.assign({}, AbstractField.prototype.custom_events, {
@@ -123,7 +123,7 @@ var FieldMany2One = AbstractField.extend({
         this.m2o_value = this._formatValue(this.value);
         // 'recordParams' is a dict of params used when calling functions
         // 'getDomain' and 'getContext' on this.record
-        this.recordParams = {fieldName: this.name, viewType: this.viewType};
+        this.recordParams = { fieldName: this.name, viewType: this.viewType };
         // We need to know if the widget is dirty (i.e. if the user has changed
         // the value, and those changes haven't been acknowledged yet by the
         // environment), to prevent erasing that new value on a reset (e.g.
@@ -134,7 +134,7 @@ var FieldMany2One = AbstractField.extend({
         // List of autocomplete sources
         this._autocompleteSources = [];
         // Add default search method for M20 (name_search)
-        this._addAutocompleteSource(this._search, {placeholder: _t('Loading...'), order: 1});
+        this._addAutocompleteSource(this._search, { placeholder: _t('Loading...'), order: 1 });
 
         // list of last autocomplete suggestions
         this.suggestions = [];
@@ -237,7 +237,7 @@ var FieldMany2One = AbstractField.extend({
     _addAutocompleteSource: function (method, params) {
         this._autocompleteSources.push({
             method: method,
-            placeholder: (params.placeholder ? _t(params.placeholder) : _t('Loading...')) + '<i class="fa fa-spin fa-circle-o-notch float-end"></i>' ,
+            placeholder: (params.placeholder ? _t(params.placeholder) : _t('Loading...')) + '<i class="fa fa-spin fa-circle-o-notch float-end"></i>',
             validation: params.validation,
             loading: false,
             order: params.order || 999
@@ -297,7 +297,7 @@ var FieldMany2One = AbstractField.extend({
                 var item = ui.item;
                 self.floating = false;
                 if (item.id) {
-                    self.reinitialize({id: item.id, display_name: item.name});
+                    self.reinitialize({ id: item.id, display_name: item.name });
                 } else if (item.action) {
                     item.action();
                 }
@@ -341,17 +341,17 @@ var FieldMany2One = AbstractField.extend({
             classes: {
                 "ui-autocomplete": "dropdown-menu",
             },
-            create: function() {
-                $(this).data('ui-autocomplete')._renderMenu = function(ulWrapper, entries) {
-                  var render = this;
-                  $.each(entries, function(index, entry) {
-                    render._renderItemData(ulWrapper, entry);
-                  });
-                  $(ulWrapper).find( "li > a" ).addClass( "dropdown-item" );
+            create: function () {
+                $(this).data('ui-autocomplete')._renderMenu = function (ulWrapper, entries) {
+                    var render = this;
+                    $.each(entries, function (index, entry) {
+                        render._renderItemData(ulWrapper, entry);
+                    });
+                    $(ulWrapper).find("li > a").addClass("dropdown-item");
                 }
             },
         });
-        this.$input.autocomplete("option", "position", { my : "left top", at: "left bottom" });
+        this.$input.autocomplete("option", "position", { my: "left top", at: "left bottom" });
         this.autocomplete_bound = true;
     },
     /**
@@ -420,11 +420,11 @@ var FieldMany2One = AbstractField.extend({
      *
      * @private
      */
-    _getSearchCreatePopupOptions: function(view, ids, context, dynamicFilters) {
+    _getSearchCreatePopupOptions: function (view, ids, context, dynamicFilters) {
         var self = this;
         return {
             resModel: this.field.relation,
-            domain: this.record.getDomain({fieldName: this.name}),
+            domain: this.record.getDomain({ fieldName: this.name }),
             context: Object.assign({}, this.record.getContext(this.recordParams), context || {}),
             dynamicFilters: dynamicFilters || [],
             title: sprintf((view === 'search' ? _t("Search: %s") : _t("Create: %s")), this.string),
@@ -543,7 +543,7 @@ var FieldMany2One = AbstractField.extend({
                 }, { onClose: createDone });
             };
             if (self.nodeOptions.quick_create) {
-                const prom = self.reinitialize({id: false, display_name: name});
+                const prom = self.reinitialize({ id: false, display_name: name });
                 prom.guardedCatch(reason => {
                     reason.event.preventDefault();
                     slowCreate();
@@ -798,7 +798,7 @@ var FieldMany2One = AbstractField.extend({
                     args: [[this.value.res_id]],
                     context: this.record.getContext(this.recordParams),
                 }).then(function (action) {
-                    self.trigger_up('do_action', {action: action});
+                    self.trigger_up('do_action', { action: action });
                 });
             }
         }
@@ -825,11 +825,11 @@ var FieldMany2One = AbstractField.extend({
         var self = this;
         var context = this.record.getContext(this.recordParams);
         this._rpc({
-                model: this.field.relation,
-                method: 'get_formview_id',
-                args: [[this.value.res_id]],
-                context: context,
-            })
+            model: this.field.relation,
+            method: 'get_formview_id',
+            args: [[this.value.res_id]],
+            context: context,
+        })
             .then(function (view_id) {
                 owl.Component.env.services.dialog.add(FormViewDialog, {
                     title: _t("Open: ") + self.string,
@@ -888,8 +888,8 @@ var FieldMany2One = AbstractField.extend({
         // close autocomplete if no autocomplete item is selected and user presses TAB
         // s.t. we properly move to the next field in this case
         if (ev.which === $.ui.keyCode.TAB &&
-                $autocomplete.is(":visible") &&
-                !$autocomplete.find('.ui-menu-item .ui-state-active').length) {
+            $autocomplete.is(":visible") &&
+            !$autocomplete.find('.ui-menu-item .ui-state-active').length) {
             this.$input.autocomplete("close");
         }
         if (ev.which === $.ui.keyCode.ENTER || ev.which === $.ui.keyCode.TAB) {
@@ -976,7 +976,7 @@ const Many2OneAvatar = FieldMany2One.extend({
 //------------------------------------------------------------------------------
 
 var FieldMany2ManyTags = AbstractField.extend({
-    description: _lt("Tags"),
+    description: _t("Tags"),
     tag_template: "FieldMany2ManyTag",
     className: "o_field_many2manytags",
     supportedFieldTypes: ['many2many'],
@@ -987,7 +987,7 @@ var FieldMany2ManyTags = AbstractField.extend({
         'click .o_delete': '_onDeleteTag',
     }),
     relatedFields: {
-        display_name: {type: 'char'},
+        display_name: { type: 'char' },
     },
     limit: 1000,
 
@@ -1130,7 +1130,7 @@ var FieldMany2ManyTags = AbstractField.extend({
         var _getSearchCreatePopupOptions = this.many2one._getSearchCreatePopupOptions;
         this.many2one._getSearchCreatePopupOptions = function (view, ids, context, dynamicFilters) {
             var options = _getSearchCreatePopupOptions.apply(this, arguments);
-            var domain = this.record.getDomain({fieldName: this.name});
+            var domain = this.record.getDomain({ fieldName: this.name });
             var m2mRecords = [];
             return Object.assign({}, options, {
                 domain: domain.concat(["!", ["id", "in", self.value.res_ids]]),
@@ -1185,8 +1185,8 @@ var FieldMany2ManyTags = AbstractField.extend({
         var newValue = ev.data.changes[this.name];
         if (newValue) {
             this._addTag(newValue)
-                .then(ev.data.onSuccess || function () {})
-                .guardedCatch(ev.data.onFailure || function () {});
+                .then(ev.data.onSuccess || function () { })
+                .guardedCatch(ev.data.onFailure || function () { });
             this.many2one.reinitialize(false);
         }
     },
@@ -1416,7 +1416,7 @@ var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
  * of type 'selection' and 'many2one'.
  */
 var FieldSelection = AbstractField.extend({
-    description: _lt("Selection"),
+    description: _t("Selection"),
     template: 'web.Legacy.FieldSelection',
     specialData: "_fetchSpecialRelation",
     supportedFieldTypes: ['selection'],
@@ -1474,7 +1474,7 @@ var FieldSelection = AbstractField.extend({
     _renderEdit: function () {
         this.$el.empty();
         var required = this.attrs.modifiersValue && this.attrs.modifiersValue.required;
-        for (var i = 0 ; i < this.values.length ; i++) {
+        for (var i = 0; i < this.values.length; i++) {
             var disabled = required && this.values[i][0] === false;
 
             this.$el.append($('<option/>', {
@@ -1493,7 +1493,7 @@ var FieldSelection = AbstractField.extend({
         this.$el.empty().text(this._formatValue(this.value));
         this.$el.attr('raw-value', this._getRawValue());
     },
-    _getRawValue: function() {
+    _getRawValue: function () {
         var raw_value = this.value;
         if (this.field.type === 'many2one' && raw_value) {
             raw_value = raw_value.data.id;
@@ -1538,7 +1538,7 @@ var FieldSelection = AbstractField.extend({
         var res_id = JSON.parse(this.$el.val());
         if (this.field.type === 'many2one') {
             var value = this.values.find(val => val[0] === res_id);
-            this._setValue({id: res_id, display_name: value[1]});
+            this._setValue({ id: res_id, display_name: value[1] });
         } else {
             this._setValue(res_id);
         }
@@ -1546,7 +1546,7 @@ var FieldSelection = AbstractField.extend({
 });
 
 var FieldRadio = FieldSelection.extend({
-    description: _lt("Radio"),
+    description: _t("Radio"),
     template: null,
     className: 'o_field_radio',
     tagName: 'div',
@@ -1608,7 +1608,7 @@ var FieldRadio = FieldSelection.extend({
 
         const index = $target.data('index');
         const value = this.values[index];
-        return {value};
+        return { value };
     },
 
     /**
@@ -1680,7 +1680,7 @@ var FieldRadio = FieldSelection.extend({
      */
     _saveValue: function (value) {
         if (this.field.type === 'many2one') {
-            this._setValue({id: value[0], display_name: value[1]});
+            this._setValue({ id: value[0], display_name: value[1] });
         } else {
             this._setValue(value[0]);
         }

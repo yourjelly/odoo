@@ -31,12 +31,12 @@ class DomainNode {
 
 const TITLES = {
     AND: {
-        false: _lt("all"),
-        true: _lt("not all"),
+        false: _t("all"),
+        true: _t("not all"),
     },
     OR: {
-        false: _lt("any"),
-        true: _lt("none"),
+        false: _t("any"),
+        true: _t("none"),
     },
 };
 

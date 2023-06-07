@@ -42,8 +42,8 @@ export class TicketScreen extends Component {
         reuseSavedUIState: false,
         ui: {},
     };
-    static numpadActionName = _lt("Refund");
-    static searchPlaceholder = _lt("Search Orders...");
+    static numpadActionName = _t("Refund");
+    static searchPlaceholder = _t("Search Orders...");
 
     setup() {
         super.setup();
@@ -62,11 +62,11 @@ export class TicketScreen extends Component {
         const defaultUIState = this.props.reuseSavedUIState
             ? this._state.ui
             : {
-                  selectedSyncedOrderId: null,
-                  searchDetails: this.pos.globalState.getDefaultSearchDetails(),
-                  filter: null,
-                  selectedOrderlineIds: {},
-              };
+                selectedSyncedOrderId: null,
+                searchDetails: this.pos.globalState.getDefaultSearchDetails(),
+                filter: null,
+                selectedOrderlineIds: {},
+            };
         Object.assign(this._state.ui, defaultUIState, this.props.ui || {});
 
         onMounted(this.onMounted);

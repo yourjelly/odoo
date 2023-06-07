@@ -9,8 +9,8 @@ import { onMounted, useRef, useState } from "@odoo/owl";
 export class TextAreaPopup extends AbstractAwaitablePopup {
     static template = "TextAreaPopup";
     static defaultProps = {
-        confirmText: _lt("Add"),
-        cancelText: _lt("Discard"),
+        confirmText: _t("Add"),
+        cancelText: _t("Discard"),
         title: "",
         body: "",
     };

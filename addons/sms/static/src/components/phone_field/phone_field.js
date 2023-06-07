@@ -27,7 +27,7 @@ const patchDescr = {
         return props;
     },
     supportedOptions: [{
-        label: _lt("Enable SMS"),
+        label: _t("Enable SMS"),
         name: "enable_sms",
         type: "boolean",
         default: true,

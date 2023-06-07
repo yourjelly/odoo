@@ -99,12 +99,12 @@ export const gaugeField = {
     component: GaugeField,
     supportedOptions: [
         {
-            label: _lt("Title"),
+            label: _t("Title"),
             name: "title",
             type: "string",
         },
         {
-            label: _lt("Max value field"),
+            label: _t("Max value field"),
             name: "max_value",
             type: "field",
             availableTypes: ["integer", "float"],

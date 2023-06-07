@@ -36,7 +36,7 @@ PasswordField.template = "auth_password_policy.PasswordField";
 
 export const passwordField = {
     component: PasswordField,
-    displayName: _lt("Password"),
+    displayName: _t("Password"),
     supportedTypes: ["char"],
 };
 

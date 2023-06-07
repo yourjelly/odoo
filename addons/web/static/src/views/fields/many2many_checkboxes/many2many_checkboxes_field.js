@@ -41,7 +41,7 @@ export class Many2ManyCheckboxesField extends Component {
 
 export const many2ManyCheckboxesField = {
     component: Many2ManyCheckboxesField,
-    displayName: _lt("Checkboxes"),
+    displayName: _t("Checkboxes"),
     supportedTypes: ["many2many"],
     isEmpty: () => false,
     legacySpecialData: "_fetchSpecialRelation",

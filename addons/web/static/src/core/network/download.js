@@ -371,7 +371,7 @@ function _download(data, filename, mimetype) {
             anchor.href = url;
             anchor.setAttribute("download", fileName);
             anchor.className = "download-js-link";
-            anchor.innerText = _lt("downloading...");
+            anchor.innerText = _t("downloading...");
             anchor.style.display = "none";
             document.body.appendChild(anchor);
             setTimeout(() => {

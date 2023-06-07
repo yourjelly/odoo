@@ -8,8 +8,8 @@ import { onMounted, useRef, useState } from "@odoo/owl";
 export class TextInputPopup extends AbstractAwaitablePopup {
     static template = "TextInputPopup";
     static defaultProps = {
-        confirmText: _lt("Confirm"),
-        cancelText: _lt("Discard"),
+        confirmText: _t("Confirm"),
+        cancelText: _t("Discard"),
         confirmKey: "Enter",
         title: "",
         body: "",

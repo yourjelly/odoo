@@ -41,7 +41,7 @@ export class FontSelectionField extends Component {
 
 export const fontSelectionField = {
     component: FontSelectionField,
-    displayName: _lt("Font Selection"),
+    displayName: _t("Font Selection"),
     supportedTypes: ["selection"],
     extractProps({ attrs }, dynamicInfo) {
         return {

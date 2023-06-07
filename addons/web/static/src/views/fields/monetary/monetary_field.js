@@ -83,7 +83,7 @@ export class MonetaryField extends Component {
 export const monetaryField = {
     component: MonetaryField,
     supportedTypes: ["monetary", "float"],
-    displayName: _lt("Monetary"),
+    displayName: _t("Monetary"),
     extractProps: ({ attrs, options }) => ({
         currencyField: options.currency_field,
         inputType: attrs.type,

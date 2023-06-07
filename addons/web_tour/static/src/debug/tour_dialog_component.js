@@ -40,4 +40,4 @@ export default class ToursDialog extends Component {
 }
 ToursDialog.template = "web_tour.ToursDialog";
 ToursDialog.components = { Dialog };
-ToursDialog.title = _lt("Tours");
+ToursDialog.title = _t("Tours");

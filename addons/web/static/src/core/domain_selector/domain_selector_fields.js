@@ -171,8 +171,8 @@ const BOOLEAN = {
             value,
             update,
             options: [
-                [true, _lt("set")],
-                [false, _lt("not set")],
+                [true, _t("set")],
+                [false, _t("not set")],
             ],
         })),
     },
@@ -331,7 +331,7 @@ const PROPERTIES_RELATIONAL = {
 // ----------------------------------------------------------------------------
 
 const JSON_FIELD = {
-    operators: ["equal", "not_equal", "ilike", "not_ilike","set", "not_set"],
+    operators: ["equal", "not_equal", "ilike", "not_ilike", "set", "not_set"],
     editors: {
         default: makeEditor(Input),
     },

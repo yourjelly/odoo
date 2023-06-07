@@ -80,7 +80,7 @@ export const kanbanMany2OneAvatarUserField = {
     supportedOptions: [
         ...(kanbanMany2OneAvatarField.supportedOptions || []),
         {
-            label: _lt("Display avatar name"),
+            label: _t("Display avatar name"),
             name: "display_avatar_name",
             type: "boolean",
         },

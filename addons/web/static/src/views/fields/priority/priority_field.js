@@ -91,7 +91,7 @@ export class PriorityField extends Component {
 
 export const priorityField = {
     component: PriorityField,
-    displayName: _lt("Priority"),
+    displayName: _t("Priority"),
     supportedTypes: ["selection"],
     extractProps({ options, viewType }, dynamicInfo) {
         return {

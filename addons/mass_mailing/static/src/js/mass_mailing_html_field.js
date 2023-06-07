@@ -139,7 +139,7 @@ export class MassMailingHtmlField extends HtmlField {
             this.wysiwyg.odooEditor.historyRevertCurrentStep();
 
             const fieldName = this.props.inlineField;
-            await this.props.record.update({[fieldName]: this._unWrap(inlineHtml)});
+            await this.props.record.update({ [fieldName]: this._unWrap(inlineHtml) });
         })();
         return this._pendingCommitChanges;
     }
@@ -268,8 +268,8 @@ export class MassMailingHtmlField extends HtmlField {
             this._themeClassNames = "";
             const displayableThemes =
                 device.isMobile ?
-                $themes.filter(theme => !$(theme).data("hideFromMobile")) :
-                $themes;
+                    $themes.filter(theme => !$(theme).data("hideFromMobile")) :
+                    $themes;
             this._themeParams = Array.from(displayableThemes).map((theme) => {
                 const $theme = $(theme);
                 const name = $theme.data("name");
@@ -282,7 +282,7 @@ export class MassMailingHtmlField extends HtmlField {
                     Object.assign({
                         module: "mass_mailing",
                         format: "jpg"
-                        },
+                    },
                         imagesInfo.all,
                         info
                     );
@@ -421,7 +421,7 @@ export class MassMailingHtmlField extends HtmlField {
                 img: "",
                 template: this.wysiwyg.$iframeBody.find('.o_layout').addClass('o_mass_mailing_no_theme').clone().find('oe_structure').empty().end().html().trim(),
                 nowrap: true,
-                get_image_info: function () {}
+                get_image_info: function () { }
             });
             selectedTheme = this._getSelectedTheme(themesParams);
         }
@@ -599,7 +599,7 @@ export class MassMailingHtmlField extends HtmlField {
         this._switchingTheme = false;
     }
     async _getWysiwygClass() {
-        return getWysiwygClass({moduleName: 'mass_mailing.wysiwyg'});
+        return getWysiwygClass({ moduleName: 'mass_mailing.wysiwyg' });
     }
     /**
      * @override
@@ -623,9 +623,9 @@ MassMailingHtmlField.props = {
 export const massMailingHtmlField = {
     ...htmlField,
     component: MassMailingHtmlField,
-    displayName: _lt("Email"),
+    displayName: _t("Email"),
     supportedOptions: [...htmlField.supportedOptions, {
-        label: _lt("Filter templates"),
+        label: _t("Filter templates"),
         name: "filterTemplates",
         type: "boolean"
     }],

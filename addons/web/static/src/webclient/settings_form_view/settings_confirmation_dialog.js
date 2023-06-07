@@ -12,7 +12,7 @@ export class SettingsConfirmationDialog extends ConfirmationDialog {
     }
 }
 SettingsConfirmationDialog.defaultProps = {
-    title: _lt("Unsaved changes"),
+    title: _t("Unsaved changes"),
 };
 SettingsConfirmationDialog.template = "web.SettingsConfirmationDialog";
 SettingsConfirmationDialog.props = {

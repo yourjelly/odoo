@@ -8,7 +8,7 @@ import { DefaultCommandItem } from "@web/core/commands/command_palette";
 
 import { Component } from "@odoo/owl";
 
-class AppIconCommand extends Component {}
+class AppIconCommand extends Component { }
 AppIconCommand.template = "web.AppIconCommand";
 AppIconCommand.props = {
     webIconData: { type: String, optional: true },
@@ -22,9 +22,9 @@ commandCategoryRegistry.add("menu_items", { namespace: "/" }, { sequence: 20 });
 
 const commandSetupRegistry = registry.category("command_setup");
 commandSetupRegistry.add("/", {
-    emptyMessage: _lt("No menu found"),
-    name: _lt("menus"),
-    placeholder: _lt("Search for a menu..."),
+    emptyMessage: _t("No menu found"),
+    name: _t("menus"),
+    placeholder: _t("Search for a menu..."),
 });
 
 const commandProviderRegistry = registry.category("command_provider");

@@ -12,7 +12,7 @@ const viewRegistry = registry.category("views");
 
 export const graphView = {
     type: "graph",
-    display_name: _lt("Graph"),
+    display_name: _t("Graph"),
     icon: "fa fa-area-chart",
     multiRecord: true,
     Controller: GraphController,
@@ -42,7 +42,7 @@ export const graphView = {
                 resModel: resModel,
                 stacked: "stacked" in archInfo ? archInfo.stacked : true,
                 cumulated: archInfo.cumulated || false,
-                title: archInfo.title || _lt("Untitled"),
+                title: archInfo.title || _t("Untitled"),
             };
         }
 

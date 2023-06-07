@@ -78,7 +78,7 @@ function extractProps({ attrs }) {
 
 export const copyClipboardButtonField = {
     component: CopyClipboardButtonField,
-    displayName: _lt("Copy to Clipboard"),
+    displayName: _t("Copy to Clipboard"),
     extractProps,
 };
 
@@ -86,7 +86,7 @@ registry.category("fields").add("CopyClipboardButton", copyClipboardButtonField)
 
 export const copyClipboardCharField = {
     component: CopyClipboardCharField,
-    displayName: _lt("Copy Text to Clipboard"),
+    displayName: _t("Copy Text to Clipboard"),
     supportedTypes: ["char"],
     extractProps,
 };
@@ -95,7 +95,7 @@ registry.category("fields").add("CopyClipboardChar", copyClipboardCharField);
 
 export const copyClipboardTextField = {
     component: CopyClipboardTextField,
-    displayName: _lt("Copy Multiline Text to Clipboard"),
+    displayName: _t("Copy Multiline Text to Clipboard"),
     supportedTypes: ["text"],
     extractProps,
 };
@@ -104,7 +104,7 @@ registry.category("fields").add("CopyClipboardText", copyClipboardTextField);
 
 export const copyClipboardURLField = {
     component: CopyClipboardURLField,
-    displayName: _lt("Copy URL to Clipboard"),
+    displayName: _t("Copy URL to Clipboard"),
     supportedTypes: ["char"],
     extractProps,
 };

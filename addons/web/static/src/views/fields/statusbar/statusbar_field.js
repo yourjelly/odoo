@@ -63,13 +63,13 @@ export class StatusBarField extends Component {
                     const options = this.computeItems(false);
                     const nextOption =
                         options[
-                            options.findIndex(
-                                (option) =>
-                                    option.id ===
-                                    (this.type === "many2one"
-                                        ? this.props.record.data[this.props.name][0]
-                                        : this.props.record.data[this.props.name])
-                            ) + 1
+                        options.findIndex(
+                            (option) =>
+                                option.id ===
+                                (this.type === "many2one"
+                                    ? this.props.record.data[this.props.name][0]
+                                    : this.props.record.data[this.props.name])
+                        ) + 1
                         ];
                     this.selectItem(nextOption);
                 },
@@ -82,9 +82,9 @@ export class StatusBarField extends Component {
                             !this.props.readonly &&
                             !this.props.isDisabled &&
                             options[options.length - 1].id !==
-                                (this.type === "many2one"
-                                    ? this.props.record.data[this.props.name][0]
-                                    : this.props.record.data[this.props.name])
+                            (this.type === "many2one"
+                                ? this.props.record.data[this.props.name][0]
+                                : this.props.record.data[this.props.name])
                         );
                     },
                 }
@@ -219,15 +219,15 @@ export class StatusBarField extends Component {
 
 export const statusBarField = {
     component: StatusBarField,
-    displayName: _lt("Status"),
+    displayName: _t("Status"),
     supportedOptions: [
         {
-            label: _lt("Clickable"),
+            label: _t("Clickable"),
             name: "clickable",
             type: "boolean",
         },
         {
-            label: _lt("Fold field"),
+            label: _t("Fold field"),
             name: "fold_field",
             type: "string",
         },

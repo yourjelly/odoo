@@ -15,7 +15,7 @@ export class HandleField extends Component {
 
 export const handleField = {
     component: HandleField,
-    displayName: _lt("Handle"),
+    displayName: _t("Handle"),
     supportedTypes: ["integer"],
     isEmpty: () => false,
 };

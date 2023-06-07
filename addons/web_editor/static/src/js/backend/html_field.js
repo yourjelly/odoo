@@ -65,13 +65,12 @@ export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
             ) ||
             JSON.stringify(lastRecordInfo) !== JSON.stringify(newRecordInfo) ||
             JSON.stringify(lastCollaborationChannel) !== JSON.stringify(newCollaborationChannel)
-            )
-        {
+        ) {
             this.widget.resetEditor(newValue, newProps.widgetArgs[0]);
             this.env.onWysiwygReset && this.env.onWysiwygReset();
         }
     }
-    renderWidget() {}
+    renderWidget() { }
 }
 
 export class HtmlField extends Component {
@@ -89,7 +88,7 @@ export class HtmlField extends Component {
         }
         this.rpc = useService("rpc");
 
-        this.onIframeUpdated = this.env.onIframeUpdated || (() => {});
+        this.onIframeUpdated = this.env.onIframeUpdated || (() => { });
 
         this.state = useState({
             showCodeView: false,
@@ -195,10 +194,10 @@ export class HtmlField extends Component {
     get isTranslatable() {
         return this.props.record.fields[this.props.name].translate;
     }
-    get markupValue () {
+    get markupValue() {
         return this.props.record.data[this.props.name];
     }
-    get showIframe () {
+    get showIframe() {
         return (this.sandboxedPreview && !this.state.showCodeView) || (this.props.readonly && this.props.cssReadonlyAssetId);
     }
     get wysiwygOptions() {
@@ -297,7 +296,7 @@ export class HtmlField extends Component {
         `;
     }
 
-    getEditingValue () {
+    getEditingValue() {
         const codeViewEl = this._getCodeViewEl();
         if (codeViewEl) {
             return codeViewEl.value;
@@ -478,12 +477,12 @@ export class HtmlField extends Component {
                         .write(
                             '<!DOCTYPE html><html>' +
                             '<head>' +
-                                '<meta charset="utf-8"/>' +
-                                '<meta http-equiv="X-UA-Compatible" content="IE=edge"/>\n' +
-                                '<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>\n' +
+                            '<meta charset="utf-8"/>' +
+                            '<meta http-equiv="X-UA-Compatible" content="IE=edge"/>\n' +
+                            '<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>\n' +
                             '</head>\n' +
                             '<body class="o_in_iframe o_readonly" style="overflow: hidden;">\n' +
-                                '<div id="iframe_target"></div>\n' +
+                            '<div id="iframe_target"></div>\n' +
                             '</body>' +
                             '</html>');
                 }
@@ -513,7 +512,7 @@ export class HtmlField extends Component {
                     script.setAttribute('type', 'text/javascript');
                     const scriptTextNode = document.createTextNode(
                         `if (window.top.${this._onUpdateIframeId}) {` +
-                            `window.top.${this._onUpdateIframeId}(${_avoidDoubleLoad})` +
+                        `window.top.${this._onUpdateIframeId}(${_avoidDoubleLoad})` +
                         `}`
                     );
                     script.append(scriptTextNode);
@@ -684,7 +683,7 @@ HtmlField.props = {
     cssReadonlyAssetId: { type: String, optional: true },
     cssEditAssetId: { type: String, optional: true },
     isInlineStyle: { type: Boolean, optional: true },
-    sandboxedPreview: {type: Boolean, optional: true},
+    sandboxedPreview: { type: Boolean, optional: true },
     wrapper: { type: String, optional: true },
     wysiwygOptions: { type: Object },
     hasReadonlyModifiers: { type: Boolean, optional: true },
@@ -692,46 +691,46 @@ HtmlField.props = {
 
 export const htmlField = {
     component: HtmlField,
-    displayName: _lt("Html"),
+    displayName: _t("Html"),
     supportedOptions: [{
-        label: _lt("CSS Edit"),
+        label: _t("CSS Edit"),
         name: "cssEdit",
         type: "string"
     }, {
-        label: _lt("Height"),
+        label: _t("Height"),
         name: "height",
         type: "string"
     }, {
-        label: _lt("Min height"),
+        label: _t("Min height"),
         name: "minHeight",
         type: "string"
     }, {
-        label: _lt("Max height"),
+        label: _t("Max height"),
         name: "maxHeight",
         type: "string"
     }, {
-        label: _lt("Snippets"),
+        label: _t("Snippets"),
         name: "snippets",
         type: "string"
     }, {
-        label: _lt("No videos"),
+        label: _t("No videos"),
         name: "noVideos",
         type: "boolean",
         default: true
     }, {
-        label: _lt("Resizable"),
+        label: _t("Resizable"),
         name: "resizable",
         type: "boolean",
     }, {
-        label: _lt("Dynamic placeholder"),
+        label: _t("Dynamic placeholder"),
         name: "dynamic_placeholder",
         type: "boolean",
     }, {
-        label: _lt("Collaborative"),
+        label: _t("Collaborative"),
         name: "collaborative",
         type: "boolean",
     }, {
-        label: _lt("Codeview"),
+        label: _t("Codeview"),
         name: "codeview",
         type: "boolean",
     }],
@@ -763,9 +762,9 @@ export const htmlField = {
             // 'focus': Join when the editable has focus
             wysiwygOptions.collaborativeTrigger = options.collaborative_trigger || 'focus';
         }
-	    if ('style-inline' in options) {
-	        wysiwygOptions.inlineStyle = Boolean(options.styleInline);
-	    }
+        if ('style-inline' in options) {
+            wysiwygOptions.inlineStyle = Boolean(options.styleInline);
+        }
         if ('allowCommandImage' in options) {
             // Set the option only if it is explicitly set in the view so a default
             // can be set elsewhere otherwise.

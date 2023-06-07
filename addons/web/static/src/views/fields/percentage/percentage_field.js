@@ -44,7 +44,7 @@ export class PercentageField extends Component {
 
 export const percentageField = {
     component: PercentageField,
-    displayName: _lt("Percentage"),
+    displayName: _t("Percentage"),
     supportedTypes: ["integer", "float"],
     extractProps: ({ attrs, options }) => {
         // Sadly, digits param was available as an option and an attr.

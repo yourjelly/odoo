@@ -30,7 +30,7 @@
     };
     const _lt = function (str, ...values) {
         // casts the object to unknown then to string to trick typescript into thinking that the object it receives is actually a string
-        // this way it will be typed correctly (behaves like a string) but tests like typeof _lt("whatever") will be object and not string !
+        // this way it will be typed correctly (behaves like a string) but tests like typeof _t("whatever") will be object and not string !
         return new LazyTranslatedString(str, values);
     };
     class LazyTranslatedString extends String {
@@ -78,22 +78,22 @@
     }
     class CircularDependencyError extends EvaluationError {
         constructor() {
-            super(CellErrorType.CircularDependency, _lt("Circular reference"));
+            super(CellErrorType.CircularDependency, _t("Circular reference"));
         }
     }
     class InvalidReferenceError extends EvaluationError {
         constructor() {
-            super(CellErrorType.InvalidReference, _lt("Invalid reference"));
+            super(CellErrorType.InvalidReference, _t("Invalid reference"));
         }
     }
     class NotAvailableError extends EvaluationError {
         constructor(errorMessage = undefined) {
-            super(CellErrorType.NotAvailable, errorMessage || _lt("Data not available"), errorMessage ? CellErrorLevel.error : CellErrorLevel.silent);
+            super(CellErrorType.NotAvailable, errorMessage || _t("Data not available"), errorMessage ? CellErrorLevel.error : CellErrorLevel.silent);
         }
     }
     class UnknownFunctionError extends EvaluationError {
         constructor(fctName) {
-            super(CellErrorType.UnknownFunction, _lt('Unknown function: "%s"', fctName));
+            super(CellErrorType.UnknownFunction, _t('Unknown function: "%s"', fctName));
         }
     }
 
@@ -268,7 +268,7 @@
     const FORBIDDEN_IN_EXCEL_REGEX = /'|\*|\?|\/|\\|\[|\]/;
     // Cells
     const FORMULA_REF_IDENTIFIER = "|";
-    const DEFAULT_ERROR_MESSAGE = _lt("Invalid expression");
+    const DEFAULT_ERROR_MESSAGE = _t("Invalid expression");
     // Components
     var ComponentsImportance;
     (function (ComponentsImportance) {
@@ -1620,27 +1620,27 @@
     // TODO in the future : remove these constants MONTHS/DAYS, and use a library such as luxon to handle it
     // + possibly handle automatic translation of day/month
     const MONTHS = {
-        0: _lt("January"),
-        1: _lt("February"),
-        2: _lt("March"),
-        3: _lt("April"),
-        4: _lt("May"),
-        5: _lt("June"),
-        6: _lt("July"),
-        7: _lt("August"),
-        8: _lt("September"),
-        9: _lt("October"),
-        10: _lt("November"),
-        11: _lt("December"),
+        0: _t("January"),
+        1: _t("February"),
+        2: _t("March"),
+        3: _t("April"),
+        4: _t("May"),
+        5: _t("June"),
+        6: _t("July"),
+        7: _t("August"),
+        8: _t("September"),
+        9: _t("October"),
+        10: _t("November"),
+        11: _t("December"),
     };
     const DAYS$1 = {
-        0: _lt("Sunday"),
-        1: _lt("Monday"),
-        2: _lt("Tuesday"),
-        3: _lt("Wednesday"),
-        4: _lt("Thursday"),
-        5: _lt("Friday"),
-        6: _lt("Saturday"),
+        0: _t("Sunday"),
+        1: _t("Monday"),
+        2: _t("Tuesday"),
+        3: _t("Wednesday"),
+        4: _t("Thursday"),
+        5: _t("Friday"),
+        6: _t("Saturday"),
     };
     // -----------------------------------------------------------------------------
     // FORMAT REPRESENTATION CACHE
@@ -1878,34 +1878,34 @@
         const parts = sep ? format.split(sep) : [format];
         return parts
             .map((p) => {
-            switch (p) {
-                case "d":
-                    return jsDate.getDate();
-                case "dd":
-                    return jsDate.getDate().toString().padStart(2, "0");
-                case "ddd":
-                    return DAYS$1[jsDate.getDay()].slice(0, 3);
-                case "dddd":
-                    return DAYS$1[jsDate.getDay()];
-                case "m":
-                    return jsDate.getMonth() + 1;
-                case "mm":
-                    return String(jsDate.getMonth() + 1).padStart(2, "0");
-                case "mmm":
-                    return MONTHS[jsDate.getMonth()].slice(0, 3);
-                case "mmmm":
-                    return MONTHS[jsDate.getMonth()];
-                case "mmmmm":
-                    return MONTHS[jsDate.getMonth()].slice(0, 1);
-                case "yy":
-                    const fullYear = String(jsDate.getFullYear()).replace("-", "").padStart(2, "0");
-                    return fullYear.slice(fullYear.length - 2);
-                case "yyyy":
-                    return jsDate.getFullYear();
-                default:
-                    throw new Error(`invalid format: ${format}`);
-            }
-        })
+                switch (p) {
+                    case "d":
+                        return jsDate.getDate();
+                    case "dd":
+                        return jsDate.getDate().toString().padStart(2, "0");
+                    case "ddd":
+                        return DAYS$1[jsDate.getDay()].slice(0, 3);
+                    case "dddd":
+                        return DAYS$1[jsDate.getDay()];
+                    case "m":
+                        return jsDate.getMonth() + 1;
+                    case "mm":
+                        return String(jsDate.getMonth() + 1).padStart(2, "0");
+                    case "mmm":
+                        return MONTHS[jsDate.getMonth()].slice(0, 3);
+                    case "mmmm":
+                        return MONTHS[jsDate.getMonth()];
+                    case "mmmmm":
+                        return MONTHS[jsDate.getMonth()].slice(0, 1);
+                    case "yy":
+                        const fullYear = String(jsDate.getFullYear()).replace("-", "").padStart(2, "0");
+                        return fullYear.slice(fullYear.length - 2);
+                    case "yyyy":
+                        return jsDate.getFullYear();
+                    default:
+                        throw new Error(`invalid format: ${format}`);
+                }
+            })
             .join(sep);
     }
     function formatJSTime(jsDate, format) {
@@ -1921,20 +1921,20 @@
         }
         return (parts
             .map((p) => {
-            switch (p) {
-                case "hhhh":
-                    const helapsedHours = Math.floor((jsDate.getTime() - INITIAL_1900_DAY) / (60 * 60 * 1000));
-                    return helapsedHours.toString();
-                case "hh":
-                    return hours.toString().padStart(2, "0");
-                case "mm":
-                    return jsDate.getMinutes().toString().padStart(2, "0");
-                case "ss":
-                    return jsDate.getSeconds().toString().padStart(2, "0");
-                default:
-                    throw new Error(`invalid format: ${format}`);
-            }
-        })
+                switch (p) {
+                    case "hhhh":
+                        const helapsedHours = Math.floor((jsDate.getTime() - INITIAL_1900_DAY) / (60 * 60 * 1000));
+                        return helapsedHours.toString();
+                    case "hh":
+                        return hours.toString().padStart(2, "0");
+                    case "mm":
+                        return jsDate.getMinutes().toString().padStart(2, "0");
+                    case "ss":
+                        return jsDate.getSeconds().toString().padStart(2, "0");
+                    default:
+                        throw new Error(`invalid format: ${format}`);
+                }
+            })
             .join(":") + meridian);
     }
     // -----------------------------------------------------------------------------
@@ -1988,24 +1988,24 @@
         const internalFormat = parseFormat(format || "#,##0");
         const largeNumberFormat = internalFormat
             .map((formatPart) => {
-            if (formatPart.type === "NUMBER") {
-                return [
-                    {
-                        ...formatPart,
-                        format: {
-                            ...formatPart.format,
-                            magnitude,
-                            decimalPart: undefined,
+                if (formatPart.type === "NUMBER") {
+                    return [
+                        {
+                            ...formatPart,
+                            format: {
+                                ...formatPart.format,
+                                magnitude,
+                                decimalPart: undefined,
+                            },
                         },
-                    },
-                    {
-                        type: "STRING",
-                        format: postFix,
-                    },
-                ];
-            }
-            return formatPart;
-        })
+                        {
+                            type: "STRING",
+                            format: postFix,
+                        },
+                    ];
+                }
+                return formatPart;
+            })
             .flat();
         return convertInternalFormatToFormat(largeNumberFormat);
     }
@@ -2388,7 +2388,7 @@
         else if (bottom !== undefined && right !== undefined) {
             return isOneCell ? toXC(left, top) : `${toXC(left, top)}:${toXC(right, bottom)}`;
         }
-        throw new Error(_lt("Bad zone format"));
+        throw new Error(_t("Bad zone format"));
     }
     /**
      * Expand a zone after inserting columns or rows.
@@ -2549,10 +2549,10 @@
         const columns = mergePositionsIntoColumns(positionToKeep);
         return mergeAlignedColumns(columns)
             .map((zone) => ({
-            ...zone,
-            bottom: zone.bottom === maxBottom + 1 ? undefined : zone.bottom,
-            right: zone.right === maxRight + 1 ? undefined : zone.right,
-        }))
+                ...zone,
+                bottom: zone.bottom === maxBottom + 1 ? undefined : zone.bottom,
+                right: zone.right === maxRight + 1 ? undefined : zone.right,
+            }))
             .map(zoneToXc);
     }
     /**
@@ -2717,10 +2717,10 @@
         return zones
             .reverse()
             .filter((zone, index, self) => index ===
-            self.findIndex((z) => z.top === zone.top &&
-                z.bottom === zone.bottom &&
-                z.left === zone.left &&
-                z.right === zone.right))
+                self.findIndex((z) => z.top === zone.top &&
+                    z.bottom === zone.bottom &&
+                    z.left === zone.left &&
+                    z.right === zone.right))
             .reverse();
     }
     /**
@@ -2857,7 +2857,7 @@
             else if (right === undefined && bottom !== undefined) {
                 return { bottom, left, top, right: this.getSheetSize(this.sheetId).numberOfCols - 1 };
             }
-            throw new Error(_lt("Bad zone format"));
+            throw new Error(_t("Bad zone format"));
         }
         static getRangeParts(xc, zone) {
             const parts = xc.split(":").map((p) => {
@@ -2988,21 +2988,21 @@
                 if (zone.right) {
                     for (let j = zone.left; j <= zone.right; ++j) {
                         postProcessedRanges.push(`${sheetPrefix}${zoneToXc({
-                        left: j,
-                        right: j,
-                        top: zone.top,
-                        bottom: zone.bottom,
-                    })}`);
+                            left: j,
+                            right: j,
+                            top: zone.top,
+                            bottom: zone.bottom,
+                        })}`);
                     }
                 }
                 else {
                     for (let j = zone.top; j <= zone.bottom; ++j) {
                         postProcessedRanges.push(`${sheetPrefix}${zoneToXc({
-                        left: zone.left,
-                        right: zone.right,
-                        top: j,
-                        bottom: j,
-                    })}`);
+                            left: zone.left,
+                            right: zone.right,
+                            top: j,
+                            bottom: j,
+                        })}`);
                     }
                 }
             }
@@ -3618,7 +3618,7 @@
         },
         urlRepresentation(url, getters) {
             const sheetId = parseSheetUrl(url);
-            return getters.tryGetSheetName(sheetId) || _lt("Invalid sheet");
+            return getters.tryGetSheetName(sheetId) || _t("Invalid sheet");
         },
         open(url, env) {
             const sheetId = parseSheetUrl(url);
@@ -3672,11 +3672,11 @@
     // -----------------------------------------------------------------------------
     // FORMAT FUNCTIONS
     // -----------------------------------------------------------------------------
-    const expectNumberValueError = (value) => _lt("The function [[FUNCTION_NAME]] expects a number value, but '%s' is a string, and cannot be coerced to a number.", value);
-    const expectNumberRangeError = (lowerBound, upperBound, value) => _lt("The function [[FUNCTION_NAME]] expects a number value between %s and %s inclusive, but receives %s.", lowerBound.toString(), upperBound.toString(), value.toString());
+    const expectNumberValueError = (value) => _t("The function [[FUNCTION_NAME]] expects a number value, but '%s' is a string, and cannot be coerced to a number.", value);
+    const expectNumberRangeError = (lowerBound, upperBound, value) => _t("The function [[FUNCTION_NAME]] expects a number value between %s and %s inclusive, but receives %s.", lowerBound.toString(), upperBound.toString(), value.toString());
     const expectStringSetError = (stringSet, value) => {
         const stringSetString = stringSet.map((str) => `'${str}'`).join(", ");
-        return _lt("The function [[FUNCTION_NAME]] has an argument with value '%s'. It should be one of: %s.", value, stringSetString);
+        return _t("The function [[FUNCTION_NAME]] has an argument with value '%s'. It should be one of: %s.", value, stringSetString);
     };
     function toNumber(value) {
         switch (typeof value) {
@@ -3707,7 +3707,7 @@
         return Math.trunc(strictToNumber(value));
     }
     function assertNumberGreaterThanOrEqualToOne(value) {
-        assert(() => value >= 1, _lt("The function [[FUNCTION_NAME]] expects a number value to be greater than or equal to 1, but receives %s.", value.toString()));
+        assert(() => value >= 1, _t("The function [[FUNCTION_NAME]] expects a number value to be greater than or equal to 1, but receives %s.", value.toString()));
     }
     function toString(value) {
         switch (typeof value) {
@@ -3735,7 +3735,7 @@
     function normalizeValue(value) {
         return typeof value === "string" ? normalizeString(value) : value;
     }
-    const expectBooleanValueError = (value) => _lt("The function [[FUNCTION_NAME]] expects a boolean value, but '%s' is a text, and cannot be coerced to a number.", value);
+    const expectBooleanValueError = (value) => _t("The function [[FUNCTION_NAME]] expects a boolean value, but '%s' is a text, and cannot be coerced to a number.", value);
     function toBoolean(value) {
         switch (typeof value) {
             case "boolean":
@@ -4021,7 +4021,7 @@
     function visitMatchingRanges(args, cb, isQuery = false) {
         const countArg = args.length;
         if (countArg % 2 === 1) {
-            throw new Error(_lt(`Function [[FUNCTION_NAME]] expects criteria_range and criterion to be in pairs.`));
+            throw new Error(_t(`Function [[FUNCTION_NAME]] expects criteria_range and criterion to be in pairs.`));
         }
         const dimRow = args[0].length;
         const dimCol = args[0][0].length;
@@ -4031,7 +4031,7 @@
             if (!Array.isArray(criteriaRange) ||
                 criteriaRange.length !== dimRow ||
                 criteriaRange[0].length !== dimCol) {
-                throw new Error(_lt(`Function [[FUNCTION_NAME]] expects criteria_range to have the same dimension`));
+                throw new Error(_t(`Function [[FUNCTION_NAME]] expects criteria_range to have the same dimension`));
             }
             const description = toString(args[i + 1]);
             predicates.push(getPredicate(description, isQuery));
@@ -4640,99 +4640,99 @@
     const autofillModifiersRegistry = new Registry();
     autofillModifiersRegistry
         .add("ALPHANUMERIC_INCREMENT_MODIFIER", {
-        apply: (rule, data) => {
-            rule.current += rule.increment;
-            const content = `${rule.prefix}${rule.current
-            .toString()
-            .padStart(rule.numberPostfixLength || 0, "0")}`;
-            return {
-                cellData: {
-                    border: data.border,
-                    style: data.cell && data.cell.style,
-                    format: data.cell && data.cell.format,
-                    content,
-                },
-                tooltip: { props: { content } },
-            };
-        },
-    })
+            apply: (rule, data) => {
+                rule.current += rule.increment;
+                const content = `${rule.prefix}${rule.current
+                    .toString()
+                    .padStart(rule.numberPostfixLength || 0, "0")}`;
+                return {
+                    cellData: {
+                        border: data.border,
+                        style: data.cell && data.cell.style,
+                        format: data.cell && data.cell.format,
+                        content,
+                    },
+                    tooltip: { props: { content } },
+                };
+            },
+        })
         .add("INCREMENT_MODIFIER", {
-        apply: (rule, data) => {
-            rule.current += rule.increment;
-            const content = rule.current.toString();
-            const tooltipValue = formatValue(rule.current, data.cell?.format);
-            return {
-                cellData: {
-                    border: data.border,
-                    style: data.cell && data.cell.style,
-                    format: data.cell && data.cell.format,
-                    content,
-                },
-                tooltip: content ? { props: { content: tooltipValue } } : undefined,
-            };
-        },
-    })
+            apply: (rule, data) => {
+                rule.current += rule.increment;
+                const content = rule.current.toString();
+                const tooltipValue = formatValue(rule.current, data.cell?.format);
+                return {
+                    cellData: {
+                        border: data.border,
+                        style: data.cell && data.cell.style,
+                        format: data.cell && data.cell.format,
+                        content,
+                    },
+                    tooltip: content ? { props: { content: tooltipValue } } : undefined,
+                };
+            },
+        })
         .add("COPY_MODIFIER", {
-        apply: (rule, data, getters) => {
-            const content = data.cell?.content || "";
-            return {
-                cellData: {
-                    border: data.border,
-                    style: data.cell && data.cell.style,
-                    format: data.cell && data.cell.format,
-                    content,
-                },
-                tooltip: content
-                    ? {
-                        props: {
-                            content: evaluateLiteral(data.cell?.content, data.cell?.format).formattedValue,
-                        },
-                    }
-                    : undefined,
-            };
-        },
-    })
+            apply: (rule, data, getters) => {
+                const content = data.cell?.content || "";
+                return {
+                    cellData: {
+                        border: data.border,
+                        style: data.cell && data.cell.style,
+                        format: data.cell && data.cell.format,
+                        content,
+                    },
+                    tooltip: content
+                        ? {
+                            props: {
+                                content: evaluateLiteral(data.cell?.content, data.cell?.format).formattedValue,
+                            },
+                        }
+                        : undefined,
+                };
+            },
+        })
         .add("FORMULA_MODIFIER", {
-        apply: (rule, data, getters, direction) => {
-            rule.current += rule.increment;
-            let x = 0;
-            let y = 0;
-            switch (direction) {
-                case "up" /* DIRECTION.UP */:
-                    x = 0;
-                    y = -rule.current;
-                    break;
-                case "down" /* DIRECTION.DOWN */:
-                    x = 0;
-                    y = rule.current;
-                    break;
-                case "left" /* DIRECTION.LEFT */:
-                    x = -rule.current;
-                    y = 0;
-                    break;
-                case "right" /* DIRECTION.RIGHT */:
-                    x = rule.current;
-                    y = 0;
-                    break;
-            }
-            const cell = data.cell;
-            if (!cell || !cell.isFormula) {
-                return { cellData: {} };
-            }
-            const sheetId = data.sheetId;
-            const ranges = getters.createAdaptedRanges(cell.dependencies, x, y, sheetId);
-            const content = getters.buildFormulaContent(sheetId, cell, ranges);
-            return {
-                cellData: {
-                    border: data.border,
-                    style: cell.style,
-                    format: cell.format,
-                    content,
-                },
-                tooltip: content ? { props: { content } } : undefined,
-            };
-        },
-    });
+            apply: (rule, data, getters, direction) => {
+                rule.current += rule.increment;
+                let x = 0;
+                let y = 0;
+                switch (direction) {
+                    case "up" /* DIRECTION.UP */:
+                        x = 0;
+                        y = -rule.current;
+                        break;
+                    case "down" /* DIRECTION.DOWN */:
+                        x = 0;
+                        y = rule.current;
+                        break;
+                    case "left" /* DIRECTION.LEFT */:
+                        x = -rule.current;
+                        y = 0;
+                        break;
+                    case "right" /* DIRECTION.RIGHT */:
+                        x = rule.current;
+                        y = 0;
+                        break;
+                }
+                const cell = data.cell;
+                if (!cell || !cell.isFormula) {
+                    return { cellData: {} };
+                }
+                const sheetId = data.sheetId;
+                const ranges = getters.createAdaptedRanges(cell.dependencies, x, y, sheetId);
+                const content = getters.buildFormulaContent(sheetId, cell, ranges);
+                return {
+                    cellData: {
+                        border: data.border,
+                        style: cell.style,
+                        format: cell.format,
+                        content,
+                    },
+                    tooltip: content ? { props: { content } } : undefined,
+                };
+            },
+        });
 
     const autofillRulesRegistry = new Registry();
     const numberPostfixRegExp = /(\d+)$/;
@@ -4787,65 +4787,65 @@
     }
     autofillRulesRegistry
         .add("simple_value_copy", {
-        condition: (cell, cells) => {
-            return (cells.length === 1 && !cell.isFormula && !(cell.format && isDateTimeFormat(cell.format)));
-        },
-        generateRule: () => {
-            return { type: "COPY_MODIFIER" };
-        },
-        sequence: 10,
-    })
+            condition: (cell, cells) => {
+                return (cells.length === 1 && !cell.isFormula && !(cell.format && isDateTimeFormat(cell.format)));
+            },
+            generateRule: () => {
+                return { type: "COPY_MODIFIER" };
+            },
+            sequence: 10,
+        })
         .add("increment_alphanumeric_value", {
-        condition: (cell) => !cell.isFormula &&
-            evaluateLiteral(cell.content).type === CellValueType.text &&
-            alphaNumericValueRegExp.test(cell.content),
-        generateRule: (cell, cells) => {
-            const numberPostfix = parseInt(cell.content.match(numberPostfixRegExp)[0]);
-            const prefix = cell.content.match(stringPrefixRegExp)[0];
-            const numberPostfixLength = cell.content.length - prefix.length;
-            const group = getGroup(cell, cells, (evaluatedCell) => evaluatedCell.type === CellValueType.text &&
-                alphaNumericValueRegExp.test(evaluatedCell.value)) // get consecutive alphanumeric cells, no matter what the prefix is
-                .filter((cell) => prefix === cell.value.toString().match(stringPrefixRegExp)[0])
-                .map((cell) => parseInt(cell.value.toString().match(numberPostfixRegExp)[0]));
-            const increment = calculateIncrementBasedOnGroup(group);
-            return {
-                type: "ALPHANUMERIC_INCREMENT_MODIFIER",
-                prefix,
-                current: numberPostfix,
-                increment,
-                numberPostfixLength,
-            };
-        },
-        sequence: 15,
-    })
+            condition: (cell) => !cell.isFormula &&
+                evaluateLiteral(cell.content).type === CellValueType.text &&
+                alphaNumericValueRegExp.test(cell.content),
+            generateRule: (cell, cells) => {
+                const numberPostfix = parseInt(cell.content.match(numberPostfixRegExp)[0]);
+                const prefix = cell.content.match(stringPrefixRegExp)[0];
+                const numberPostfixLength = cell.content.length - prefix.length;
+                const group = getGroup(cell, cells, (evaluatedCell) => evaluatedCell.type === CellValueType.text &&
+                    alphaNumericValueRegExp.test(evaluatedCell.value)) // get consecutive alphanumeric cells, no matter what the prefix is
+                    .filter((cell) => prefix === cell.value.toString().match(stringPrefixRegExp)[0])
+                    .map((cell) => parseInt(cell.value.toString().match(numberPostfixRegExp)[0]));
+                const increment = calculateIncrementBasedOnGroup(group);
+                return {
+                    type: "ALPHANUMERIC_INCREMENT_MODIFIER",
+                    prefix,
+                    current: numberPostfix,
+                    increment,
+                    numberPostfixLength,
+                };
+            },
+            sequence: 15,
+        })
         .add("copy_text", {
-        condition: (cell) => !cell.isFormula && evaluateLiteral(cell.content).type === CellValueType.text,
-        generateRule: () => {
-            return { type: "COPY_MODIFIER" };
-        },
-        sequence: 20,
-    })
+            condition: (cell) => !cell.isFormula && evaluateLiteral(cell.content).type === CellValueType.text,
+            generateRule: () => {
+                return { type: "COPY_MODIFIER" };
+            },
+            sequence: 20,
+        })
         .add("update_formula", {
-        condition: (cell) => cell.isFormula,
-        generateRule: (_, cells) => {
-            return { type: "FORMULA_MODIFIER", increment: cells.length, current: 0 };
-        },
-        sequence: 30,
-    })
+            condition: (cell) => cell.isFormula,
+            generateRule: (_, cells) => {
+                return { type: "FORMULA_MODIFIER", increment: cells.length, current: 0 };
+            },
+            sequence: 30,
+        })
         .add("increment_number", {
-        condition: (cell) => !cell.isFormula && evaluateLiteral(cell.content).type === CellValueType.number,
-        generateRule: (cell, cells) => {
-            const group = getGroup(cell, cells, (evaluatedCell) => evaluatedCell.type === CellValueType.number).map((cell) => Number(cell.value));
-            const increment = calculateIncrementBasedOnGroup(group);
-            const evaluation = evaluateLiteral(cell.content);
-            return {
-                type: "INCREMENT_MODIFIER",
-                increment,
-                current: evaluation.type === CellValueType.number ? evaluation.value : 0,
-            };
-        },
-        sequence: 40,
-    });
+            condition: (cell) => !cell.isFormula && evaluateLiteral(cell.content).type === CellValueType.number,
+            generateRule: (cell, cells) => {
+                const group = getGroup(cell, cells, (evaluatedCell) => evaluatedCell.type === CellValueType.number).map((cell) => Number(cell.value));
+                const increment = calculateIncrementBasedOnGroup(group);
+                const evaluation = evaluateLiteral(cell.content);
+                return {
+                    type: "INCREMENT_MODIFIER",
+                    increment,
+                    current: evaluation.type === CellValueType.number ? evaluation.value : 0,
+                };
+            },
+            sequence: 40,
+        });
 
     const ERROR_TOOLTIP_MAX_HEIGHT = 80;
     const ERROR_TOOLTIP_WIDTH = 180;
@@ -5872,7 +5872,7 @@
     };
 
     const linkSheet = {
-        name: _lt("Link sheet"),
+        name: _t("Link sheet"),
         children: [
             (env) => {
                 const sheets = env.model.getters
@@ -5887,16 +5887,16 @@
         ],
     };
     const deleteSheet = {
-        name: _lt("Delete"),
+        name: _t("Delete"),
         isVisible: (env) => {
             return env.model.getters.getSheetIds().length > 1;
         },
-        execute: (env) => env.askConfirmation(_lt("Are you sure you want to delete this sheet ?"), () => {
+        execute: (env) => env.askConfirmation(_t("Are you sure you want to delete this sheet ?"), () => {
             env.model.dispatch("DELETE_SHEET", { sheetId: env.model.getters.getActiveSheetId() });
         }),
     };
     const duplicateSheet = {
-        name: _lt("Duplicate"),
+        name: _t("Duplicate"),
         execute: (env) => {
             const sheetIdFrom = env.model.getters.getActiveSheetId();
             const sheetIdTo = env.model.uuidGenerator.uuidv4();
@@ -5909,12 +5909,12 @@
     };
     const renameSheet = (args) => {
         return {
-            name: _lt("Rename"),
+            name: _t("Rename"),
             execute: args.renameSheetCallback,
         };
     };
     const sheetMoveRight = {
-        name: _lt("Move right"),
+        name: _t("Move right"),
         isVisible: (env) => {
             const sheetId = env.model.getters.getActiveSheetId();
             const sheetIds = env.model.getters.getVisibleSheetIds();
@@ -5926,7 +5926,7 @@
         }),
     };
     const sheetMoveLeft = {
-        name: _lt("Move left"),
+        name: _t("Move left"),
         isVisible: (env) => {
             const sheetId = env.model.getters.getActiveSheetId();
             return env.model.getters.getVisibleSheetIds()[0] !== sheetId;
@@ -5937,7 +5937,7 @@
         }),
     };
     const hideSheet = {
-        name: _lt("Hide sheet"),
+        name: _t("Hide sheet"),
         isVisible: (env) => env.model.getters.getVisibleSheetIds().length !== 1,
         execute: (env) => env.model.dispatch("HIDE_SHEET", { sheetId: env.model.getters.getActiveSheetId() }),
     };
@@ -6634,76 +6634,76 @@
 
     const CfTerms = {
         Errors: {
-            [25 /* CommandResult.InvalidRange */]: _lt("The range is invalid"),
-            [51 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
-            [52 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
-            [53 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
-            [54 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
-            [55 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
-            [56 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
-            [57 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
-            [47 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
-            [50 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
-            [49 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
-            [48 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
-            [58 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
-            [60 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
-            [59 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
-            [61 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
-            [62 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
-            [24 /* CommandResult.EmptyRange */]: _lt("A range needs to be defined"),
-            Unexpected: _lt("The rule is invalid for an unknown reason"),
+            [25 /* CommandResult.InvalidRange */]: _t("The range is invalid"),
+            [51 /* CommandResult.FirstArgMissing */]: _t("The argument is missing. Please provide a value"),
+            [52 /* CommandResult.SecondArgMissing */]: _t("The second argument is missing. Please provide a value"),
+            [53 /* CommandResult.MinNaN */]: _t("The minpoint must be a number"),
+            [54 /* CommandResult.MidNaN */]: _t("The midpoint must be a number"),
+            [55 /* CommandResult.MaxNaN */]: _t("The maxpoint must be a number"),
+            [56 /* CommandResult.ValueUpperInflectionNaN */]: _t("The first value must be a number"),
+            [57 /* CommandResult.ValueLowerInflectionNaN */]: _t("The second value must be a number"),
+            [47 /* CommandResult.MinBiggerThanMax */]: _t("Minimum must be smaller then Maximum"),
+            [50 /* CommandResult.MinBiggerThanMid */]: _t("Minimum must be smaller then Midpoint"),
+            [49 /* CommandResult.MidBiggerThanMax */]: _t("Midpoint must be smaller then Maximum"),
+            [48 /* CommandResult.LowerBiggerThanUpper */]: _t("Lower inflection point must be smaller than upper inflection point"),
+            [58 /* CommandResult.MinInvalidFormula */]: _t("Invalid Minpoint formula"),
+            [60 /* CommandResult.MaxInvalidFormula */]: _t("Invalid Maxpoint formula"),
+            [59 /* CommandResult.MidInvalidFormula */]: _t("Invalid Midpoint formula"),
+            [61 /* CommandResult.ValueUpperInvalidFormula */]: _t("Invalid upper inflection point formula"),
+            [62 /* CommandResult.ValueLowerInvalidFormula */]: _t("Invalid lower inflection point formula"),
+            [24 /* CommandResult.EmptyRange */]: _t("A range needs to be defined"),
+            Unexpected: _t("The rule is invalid for an unknown reason"),
         },
-        ColorScale: _lt("Color scale"),
-        IconSet: _lt("Icon set"),
+        ColorScale: _t("Color scale"),
+        IconSet: _t("Icon set"),
     };
     const CellIsOperators = {
-        IsEmpty: _lt("Is empty"),
-        IsNotEmpty: _lt("Is not empty"),
-        ContainsText: _lt("Contains"),
-        NotContains: _lt("Does not contain"),
-        BeginsWith: _lt("Starts with"),
-        EndsWith: _lt("Ends with"),
-        Equal: _lt("Is equal to"),
-        NotEqual: _lt("Is not equal to"),
-        GreaterThan: _lt("Is greater than"),
-        GreaterThanOrEqual: _lt("Is greater than or equal to"),
-        LessThan: _lt("Is less than"),
-        LessThanOrEqual: _lt("Is less than or equal to"),
-        Between: _lt("Is between"),
-        NotBetween: _lt("Is not between"),
+        IsEmpty: _t("Is empty"),
+        IsNotEmpty: _t("Is not empty"),
+        ContainsText: _t("Contains"),
+        NotContains: _t("Does not contain"),
+        BeginsWith: _t("Starts with"),
+        EndsWith: _t("Ends with"),
+        Equal: _t("Is equal to"),
+        NotEqual: _t("Is not equal to"),
+        GreaterThan: _t("Is greater than"),
+        GreaterThanOrEqual: _t("Is greater than or equal to"),
+        LessThan: _t("Is less than"),
+        LessThanOrEqual: _t("Is less than or equal to"),
+        Between: _t("Is between"),
+        NotBetween: _t("Is not between"),
     };
     const ChartTerms = {
-        Series: _lt("Series"),
+        Series: _t("Series"),
         Errors: {
-            Unexpected: _lt("The chart definition is invalid for an unknown reason"),
+            Unexpected: _t("The chart definition is invalid for an unknown reason"),
             // BASIC CHART ERRORS (LINE | BAR | PIE)
-            [32 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
-            [33 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
+            [32 /* CommandResult.InvalidDataSet */]: _t("The dataset is invalid"),
+            [33 /* CommandResult.InvalidLabelRange */]: _t("Labels are invalid"),
             // SCORECARD CHART ERRORS
-            [34 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
-            [35 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
+            [34 /* CommandResult.InvalidScorecardKeyValue */]: _t("The key value is invalid"),
+            [35 /* CommandResult.InvalidScorecardBaseline */]: _t("The baseline value is invalid"),
             // GAUGE CHART ERRORS
-            [36 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
-            [37 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
-            [38 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
-            [39 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
-            [40 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
-            [41 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
-            [42 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
-            [43 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
+            [36 /* CommandResult.InvalidGaugeDataRange */]: _t("The data range is invalid"),
+            [37 /* CommandResult.EmptyGaugeRangeMin */]: _t("A minimum range limit value is needed"),
+            [38 /* CommandResult.GaugeRangeMinNaN */]: _t("The minimum range limit value must be a number"),
+            [39 /* CommandResult.EmptyGaugeRangeMax */]: _t("A maximum range limit value is needed"),
+            [40 /* CommandResult.GaugeRangeMaxNaN */]: _t("The maximum range limit value must be a number"),
+            [41 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _t("Minimum range limit must be smaller than maximum range limit"),
+            [42 /* CommandResult.GaugeLowerInflectionPointNaN */]: _t("The lower inflection point value must be a number"),
+            [43 /* CommandResult.GaugeUpperInflectionPointNaN */]: _t("The upper inflection point value must be a number"),
         },
     };
     const CustomCurrencyTerms = {
-        Custom: _lt("Custom"),
+        Custom: _t("Custom"),
     };
-    const MergeErrorMessage = _lt("Merged cells are preventing this operation. Unmerge those cells and try again.");
+    const MergeErrorMessage = _t("Merged cells are preventing this operation. Unmerge those cells and try again.");
     const SplitToColumnsTerms = {
         Errors: {
-            Unexpected: _lt("Cannot split the selection for an unknown reason"),
-            [91 /* CommandResult.NoSplitSeparatorInSelection */]: _lt("There is no match for the selected separator in the selection"),
-            [88 /* CommandResult.MoreThanOneColumnSelected */]: _lt("Only a selection from a single column can be split"),
-            [90 /* CommandResult.SplitWillOverwriteContent */]: _lt("Splitting will overwrite existing content"),
+            Unexpected: _t("Cannot split the selection for an unknown reason"),
+            [91 /* CommandResult.NoSplitSeparatorInSelection */]: _t("There is no match for the selected separator in the selection"),
+            [88 /* CommandResult.MoreThanOneColumnSelected */]: _t("Only a selection from a single column can be split"),
+            [90 /* CommandResult.SplitWillOverwriteContent */]: _t("Splitting will overwrite existing content"),
         },
     };
 
@@ -7329,9 +7329,9 @@
         needleInflectionPoint
             .sort((a, b) => a.value - b.value)
             .map((point) => {
-            data.push(point.value);
-            backgroundColor.push(point.color);
-        });
+                data.push(point.value);
+                backgroundColor.push(point.color);
+            });
         // There's a bug in gauge lib when the last element in `data` is 0 (i.e. when the range maximum is 0).
         // The value wrongly fallbacks to 1 because 0 is falsy
         // See https://github.com/haiiaaa/chartjs-gauge/pull/33
@@ -8116,7 +8116,7 @@
         validateChartDefinition: (validator, definition) => BarChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => BarChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => BarChart.getDefinitionFromContextCreation(context),
-        name: _lt("Bar"),
+        name: _t("Bar"),
         sequence: 10,
     });
     chartRegistry.add("line", {
@@ -8126,7 +8126,7 @@
         validateChartDefinition: (validator, definition) => LineChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => LineChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => LineChart.getDefinitionFromContextCreation(context),
-        name: _lt("Line"),
+        name: _t("Line"),
         sequence: 20,
     });
     chartRegistry.add("pie", {
@@ -8136,7 +8136,7 @@
         validateChartDefinition: (validator, definition) => PieChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => PieChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => PieChart.getDefinitionFromContextCreation(context),
-        name: _lt("Pie"),
+        name: _t("Pie"),
         sequence: 30,
     });
     chartRegistry.add("scorecard", {
@@ -8146,7 +8146,7 @@
         validateChartDefinition: (validator, definition) => ScorecardChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => ScorecardChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => ScorecardChart.getDefinitionFromContextCreation(context),
-        name: _lt("Scorecard"),
+        name: _t("Scorecard"),
         sequence: 40,
     });
     chartRegistry.add("gauge", {
@@ -8156,7 +8156,7 @@
         validateChartDefinition: (validator, definition) => GaugeChart.validateChartDefinition(validator, definition),
         transformDefinition: (definition, executed) => GaugeChart.transformDefinition(definition, executed),
         getChartDefinitionFromContextCreation: (context) => GaugeChart.getDefinitionFromContextCreation(context),
-        name: _lt("Gauge"),
+        name: _t("Gauge"),
         sequence: 50,
     });
     const chartComponentRegistry = new Registry();
@@ -8272,7 +8272,7 @@
         const menuItemSpecs = [
             {
                 id: "edit",
-                name: _lt("Edit"),
+                name: _t("Edit"),
                 sequence: 1,
                 execute: () => {
                     env.model.dispatch("SELECT_FIGURE", { id: figureId });
@@ -8291,7 +8291,7 @@
             getCutMenuItem(figureId, env),
             {
                 id: "reset_size",
-                name: _lt("Reset size"),
+                name: _t("Reset size"),
                 sequence: 4,
                 execute: () => {
                     const size = env.model.getters.getImageSize(figureId);
@@ -8311,7 +8311,7 @@
     function getCopyMenuItem(figureId, env) {
         return {
             id: "copy",
-            name: _lt("Copy"),
+            name: _t("Copy"),
             sequence: 2,
             description: "Ctrl+C",
             execute: async () => {
@@ -8324,7 +8324,7 @@
     function getCutMenuItem(figureId, env) {
         return {
             id: "cut",
-            name: _lt("Cut"),
+            name: _t("Cut"),
             sequence: 3,
             description: "Ctrl+X",
             execute: async () => {
@@ -8337,7 +8337,7 @@
     function getDeleteMenuItem(figureId, onFigureDeleted, env) {
         return {
             id: "delete",
-            name: _lt("Delete"),
+            name: _t("Delete"),
             sequence: 10,
             execute: () => {
                 env.model.dispatch("DELETE_FIGURE", {
@@ -8447,8 +8447,8 @@
     }
 
     const AddMergeInteractiveContent = {
-        MergeIsDestructive: _lt("Merging these cells will only preserve the top-leftmost value. Merge anyway?"),
-        MergeInFilter: _lt("You can't merge cells inside of an existing filter."),
+        MergeIsDestructive: _t("Merging these cells will only preserve the top-leftmost value. Merge anyway?"),
+        MergeInFilter: _t("You can't merge cells inside of an existing filter."),
     };
     function interactiveAddMerge(env, sheetId, target) {
         const result = env.model.dispatch("ADD_MERGE", { sheetId, target });
@@ -8630,16 +8630,16 @@
         const inverse = sortDirection === "descending" ? -1 : 1;
         return nonEmptyCells
             .sort((left, right) => {
-            let typeOrder = SORT_TYPES.indexOf(left.type) - SORT_TYPES.indexOf(right.type);
-            if (typeOrder === 0) {
-                if (left.type === CellValueType.text || left.type === CellValueType.error) {
-                    typeOrder = left.value.localeCompare(right.value);
+                let typeOrder = SORT_TYPES.indexOf(left.type) - SORT_TYPES.indexOf(right.type);
+                if (typeOrder === 0) {
+                    if (left.type === CellValueType.text || left.type === CellValueType.error) {
+                        typeOrder = left.value.localeCompare(right.value);
+                    }
+                    else
+                        typeOrder = left.value - right.value;
                 }
-                else
-                    typeOrder = left.value - right.value;
-            }
-            return inverse * typeOrder;
-        })
+                return inverse * typeOrder;
+            })
             .concat(emptyCells);
     }
     function interactiveSortSelection(env, sheetId, anchor, zone, sortDirection) {
@@ -8681,7 +8681,7 @@
                 });
             }
             else {
-                env.askConfirmation(_lt("We found data next to your selection. Since this data was not selected, it will not be sorted. Do you want to extend your selection?"), () => {
+                env.askConfirmation(_t("We found data next to your selection. Since this data was not selected, it will not be sorted. Do you want to extend your selection?"), () => {
                     zone = contiguousZone;
                     result = env.model.dispatch("SORT_CELLS", {
                         sheetId,
@@ -8704,7 +8704,7 @@
         if (result.isCancelledBecause(63 /* CommandResult.InvalidSortZone */)) {
             const { col, row } = anchor;
             env.model.selection.selectZone({ cell: { col, row }, zone });
-            env.raiseError(_lt("Cannot sort. To sort, select only cells or only merges that have the same size."));
+            env.raiseError(_t("Cannot sort. To sort, select only cells or only merges that have the same size."));
         }
     }
 
@@ -8712,15 +8712,15 @@
         const result = env.model.dispatch("CUT");
         if (!result.isSuccessful) {
             if (result.isCancelledBecause(19 /* CommandResult.WrongCutSelection */)) {
-                env.raiseError(_lt("This operation is not allowed with multiple selections."));
+                env.raiseError(_t("This operation is not allowed with multiple selections."));
             }
         }
     }
 
     const AddFilterInteractiveContent = {
-        filterOverlap: _lt("You cannot create overlapping filters."),
-        nonContinuousTargets: _lt("A filter can only be created on a continuous selection."),
-        mergeInFilter: _lt("You can't create a filter over a range that contains a merge."),
+        filterOverlap: _t("You cannot create overlapping filters."),
+        nonContinuousTargets: _t("A filter can only be created on a continuous selection."),
+        mergeInFilter: _t("You can't create a filter over a range that contains a merge."),
     };
     function interactiveAddFilter(env, sheetId, target) {
         const result = env.model.dispatch("CREATE_FILTER_TABLE", { target, sheetId });
@@ -8736,10 +8736,10 @@
     }
 
     const PasteInteractiveContent = {
-        wrongPasteSelection: _lt("This operation is not allowed with multiple selections."),
-        willRemoveExistingMerge: _lt("This operation is not possible due to a merge. Please remove the merges first than try again."),
-        wrongFigurePasteOption: _lt("Cannot do a special paste of a figure."),
-        frozenPaneOverlap: _lt("Cannot paste merged cells over a frozen pane."),
+        wrongPasteSelection: _t("This operation is not allowed with multiple selections."),
+        willRemoveExistingMerge: _t("This operation is not possible due to a merge. Please remove the merges first than try again."),
+        wrongFigurePasteOption: _t("Cannot do a special paste of a figure."),
+        frozenPaneOverlap: _t("Cannot paste merged cells over a frozen pane."),
     };
     function handlePasteResult(env, result) {
         if (!result.isSuccessful) {
@@ -8832,10 +8832,10 @@
                 }
                 break;
             case "notImplemented":
-                env.raiseError(_lt("Pasting from the context menu is not supported in this browser. Use keyboard shortcuts ctrl+c / ctrl+v instead."));
+                env.raiseError(_t("Pasting from the context menu is not supported in this browser. Use keyboard shortcuts ctrl+c / ctrl+v instead."));
                 break;
             case "permissionDenied":
-                env.raiseError(_lt("Access to the clipboard denied by the browser. Please enable clipboard permission for this page in your browser settings."));
+                env.raiseError(_t("Access to the clipboard denied by the browser. Please enable clipboard permission for this page in your browser settings."));
                 break;
         }
     }
@@ -8860,7 +8860,7 @@
     //------------------------------------------------------------------------------
     const DELETE_CONTENT_ROWS_NAME = (env) => {
         if (env.model.getters.getSelectedZones().length > 1) {
-            return _lt("Clear rows");
+            return _t("Clear rows");
         }
         let first;
         let last;
@@ -8875,9 +8875,9 @@
             last = zone.bottom;
         }
         if (first === last) {
-            return _lt("Clear row %s", (first + 1).toString());
+            return _t("Clear row %s", (first + 1).toString());
         }
-        return _lt("Clear rows %s - %s", (first + 1).toString(), (last + 1).toString());
+        return _t("Clear rows %s - %s", (first + 1).toString(), (last + 1).toString());
     };
     const DELETE_CONTENT_ROWS_ACTION = (env) => {
         const sheetId = env.model.getters.getActiveSheetId();
@@ -8889,7 +8889,7 @@
     };
     const DELETE_CONTENT_COLUMNS_NAME = (env) => {
         if (env.model.getters.getSelectedZones().length > 1) {
-            return _lt("Clear columns");
+            return _t("Clear columns");
         }
         let first;
         let last;
@@ -8904,9 +8904,9 @@
             last = zone.right;
         }
         if (first === last) {
-            return _lt("Clear column %s", numberToLetters(first));
+            return _t("Clear column %s", numberToLetters(first));
         }
-        return _lt("Clear columns %s - %s", numberToLetters(first), numberToLetters(last));
+        return _t("Clear columns %s - %s", numberToLetters(first), numberToLetters(last));
     };
     const DELETE_CONTENT_COLUMNS_ACTION = (env) => {
         const sheetId = env.model.getters.getActiveSheetId();
@@ -8918,7 +8918,7 @@
     };
     const REMOVE_ROWS_NAME = (env) => {
         if (env.model.getters.getSelectedZones().length > 1) {
-            return _lt("Delete rows");
+            return _t("Delete rows");
         }
         let first;
         let last;
@@ -8933,9 +8933,9 @@
             last = zone.bottom;
         }
         if (first === last) {
-            return _lt("Delete row %s", (first + 1).toString());
+            return _t("Delete row %s", (first + 1).toString());
         }
-        return _lt("Delete rows %s - %s", (first + 1).toString(), (last + 1).toString());
+        return _t("Delete rows %s - %s", (first + 1).toString(), (last + 1).toString());
     };
     const REMOVE_ROWS_ACTION = (env) => {
         let rows = [...env.model.getters.getActiveRows()];
@@ -8953,7 +8953,7 @@
     };
     const REMOVE_COLUMNS_NAME = (env) => {
         if (env.model.getters.getSelectedZones().length > 1) {
-            return _lt("Delete columns");
+            return _t("Delete columns");
         }
         let first;
         let last;
@@ -8968,9 +8968,9 @@
             last = zone.right;
         }
         if (first === last) {
-            return _lt("Delete column %s", numberToLetters(first));
+            return _t("Delete column %s", numberToLetters(first));
         }
-        return _lt("Delete columns %s - %s", numberToLetters(first), numberToLetters(last));
+        return _t("Delete columns %s - %s", numberToLetters(first), numberToLetters(last));
     };
     const NOT_ALL_VISIBLE_ROWS_SELECTED = (env) => {
         const sheetId = env.model.getters.getActiveSheetId();
@@ -9018,25 +9018,25 @@
     };
     const MENU_INSERT_ROWS_NAME = (env) => {
         const number = getRowsNumber(env);
-        return number === 1 ? _lt("Insert row") : _lt("Insert %s rows", number.toString());
+        return number === 1 ? _t("Insert row") : _t("Insert %s rows", number.toString());
     };
     const MENU_INSERT_ROWS_BEFORE_NAME = (env) => {
         const number = getRowsNumber(env);
         if (number === 1) {
-            return _lt("Row above");
+            return _t("Row above");
         }
-        return _lt("%s Rows above", number.toString());
+        return _t("%s Rows above", number.toString());
     };
     const ROW_INSERT_ROWS_BEFORE_NAME = (env) => {
         const number = getRowsNumber(env);
-        return number === 1 ? _lt("Insert row above") : _lt("Insert %s rows above", number.toString());
+        return number === 1 ? _t("Insert row above") : _t("Insert %s rows above", number.toString());
     };
     const CELL_INSERT_ROWS_BEFORE_NAME = (env) => {
         const number = getRowsNumber(env);
         if (number === 1) {
-            return _lt("Insert row");
+            return _t("Insert row");
         }
-        return _lt("Insert %s rows", number.toString());
+        return _t("Insert %s rows", number.toString());
     };
     const INSERT_ROWS_BEFORE_ACTION = (env) => {
         const activeRows = env.model.getters.getActiveRows();
@@ -9062,13 +9062,13 @@
     const MENU_INSERT_ROWS_AFTER_NAME = (env) => {
         const number = getRowsNumber(env);
         if (number === 1) {
-            return _lt("Row below");
+            return _t("Row below");
         }
-        return _lt("%s Rows below", number.toString());
+        return _t("%s Rows below", number.toString());
     };
     const ROW_INSERT_ROWS_AFTER_NAME = (env) => {
         const number = getRowsNumber(env);
-        return number === 1 ? _lt("Insert row below") : _lt("Insert %s rows below", number.toString());
+        return number === 1 ? _t("Insert row below") : _t("Insert %s rows below", number.toString());
     };
     const INSERT_ROWS_AFTER_ACTION = (env) => {
         const activeRows = env.model.getters.getActiveRows();
@@ -9094,26 +9094,26 @@
     const MENU_INSERT_COLUMNS_BEFORE_NAME = (env) => {
         const number = getColumnsNumber(env);
         if (number === 1) {
-            return _lt("Column left");
+            return _t("Column left");
         }
-        return _lt("%s Columns left", number.toString());
+        return _t("%s Columns left", number.toString());
     };
     const MENU_INSERT_COLUMNS_NAME = (env) => {
         const number = getColumnsNumber(env);
-        return number === 1 ? _lt("Insert column") : _lt("Insert %s columns", number.toString());
+        return number === 1 ? _t("Insert column") : _t("Insert %s columns", number.toString());
     };
     const COLUMN_INSERT_COLUMNS_BEFORE_NAME = (env) => {
         const number = getColumnsNumber(env);
         return number === 1
-            ? _lt("Insert column left")
-            : _lt("Insert %s columns left", number.toString());
+            ? _t("Insert column left")
+            : _t("Insert %s columns left", number.toString());
     };
     const CELL_INSERT_COLUMNS_BEFORE_NAME = (env) => {
         const number = getColumnsNumber(env);
         if (number === 1) {
-            return _lt("Insert column");
+            return _t("Insert column");
         }
-        return _lt("Insert %s columns", number.toString());
+        return _t("Insert %s columns", number.toString());
     };
     const INSERT_COLUMNS_BEFORE_ACTION = (env) => {
         const activeCols = env.model.getters.getActiveCols();
@@ -9139,15 +9139,15 @@
     const MENU_INSERT_COLUMNS_AFTER_NAME = (env) => {
         const number = getColumnsNumber(env);
         if (number === 1) {
-            return _lt("Column right");
+            return _t("Column right");
         }
-        return _lt("%s Columns right", number.toString());
+        return _t("%s Columns right", number.toString());
     };
     const COLUMN_INSERT_COLUMNS_AFTER_NAME = (env) => {
         const number = getColumnsNumber(env);
         return number === 1
-            ? _lt("Insert column right")
-            : _lt("Insert %s columns right", number.toString());
+            ? _t("Insert column right")
+            : _t("Insert %s columns right", number.toString());
     };
     const INSERT_COLUMNS_AFTER_ACTION = (env) => {
         const activeCols = env.model.getters.getActiveCols();
@@ -9175,13 +9175,13 @@
         let first = cols[0];
         let last = cols[cols.length - 1];
         if (cols.length === 1) {
-            return _lt("Hide column %s", numberToLetters(first).toString());
+            return _t("Hide column %s", numberToLetters(first).toString());
         }
         else if (last - first + 1 === cols.length) {
-            return _lt("Hide columns %s - %s", numberToLetters(first).toString(), numberToLetters(last).toString());
+            return _t("Hide columns %s - %s", numberToLetters(first).toString(), numberToLetters(last).toString());
         }
         else {
-            return _lt("Hide columns");
+            return _t("Hide columns");
         }
     };
     const HIDE_COLUMNS_ACTION = (env) => {
@@ -9213,13 +9213,13 @@
         let first = rows[0];
         let last = rows[rows.length - 1];
         if (rows.length === 1) {
-            return _lt("Hide row %s", (first + 1).toString());
+            return _t("Hide row %s", (first + 1).toString());
         }
         else if (last - first + 1 === rows.length) {
-            return _lt("Hide rows %s - %s", (first + 1).toString(), (last + 1).toString());
+            return _t("Hide rows %s - %s", (first + 1).toString(), (last + 1).toString());
         }
         else {
-            return _lt("Hide rows");
+            return _t("Hide rows");
         }
     };
     const HIDE_ROWS_ACTION = (env) => {
@@ -9288,7 +9288,7 @@
             return await env.imageProvider.requestImage();
         }
         catch {
-            env.raiseError(_lt("An unexpected error occurred during the image transfer"));
+            env.raiseError(_t("An unexpected error occurred during the image transfer"));
             return undefined;
         }
     }
@@ -9391,61 +9391,61 @@
     };
 
     const undo = {
-        name: _lt("Undo"),
+        name: _t("Undo"),
         description: "Ctrl+Z",
         execute: UNDO_ACTION,
         isEnabled: (env) => env.model.getters.canUndo(),
         icon: "o-spreadsheet-Icon.UNDO",
     };
     const redo = {
-        name: _lt("Redo"),
+        name: _t("Redo"),
         description: "Ctrl+Y",
         execute: REDO_ACTION,
         isEnabled: (env) => env.model.getters.canRedo(),
         icon: "o-spreadsheet-Icon.REDO",
     };
     const copy = {
-        name: _lt("Copy"),
+        name: _t("Copy"),
         description: "Ctrl+C",
         isReadonlyAllowed: true,
         execute: COPY_ACTION,
         icon: "o-spreadsheet-Icon.COPY",
     };
     const cut = {
-        name: _lt("Cut"),
+        name: _t("Cut"),
         description: "Ctrl+X",
         execute: CUT_ACTION,
         icon: "o-spreadsheet-Icon.CUT",
     };
     const paste = {
-        name: _lt("Paste"),
+        name: _t("Paste"),
         description: "Ctrl+V",
         execute: PASTE_ACTION,
         icon: "o-spreadsheet-Icon.PASTE",
     };
     const pasteSpecial = {
-        name: _lt("Paste special"),
+        name: _t("Paste special"),
         isVisible: IS_NOT_CUT_OPERATION,
         icon: "o-spreadsheet-Icon.PASTE",
     };
     const pasteSpecialValue = {
-        name: _lt("Paste value only"),
+        name: _t("Paste value only"),
         description: "Ctrl+Shift+V",
         execute: PASTE_VALUE_ACTION,
     };
     const pasteSpecialFormat = {
-        name: _lt("Paste format only"),
+        name: _t("Paste format only"),
         execute: PASTE_FORMAT_ACTION,
     };
     const findAndReplace = {
-        name: _lt("Find and replace"),
+        name: _t("Find and replace"),
         description: "Ctrl+H",
         isReadonlyAllowed: true,
         execute: OPEN_FAR_SIDEPANEL_ACTION,
         icon: "o-spreadsheet-Icon.FIND_AND_REPLACE",
     };
     const deleteValues = {
-        name: _lt("Delete values"),
+        name: _t("Delete values"),
         execute: DELETE_CONTENT_ACTION,
     };
     const deleteRows = {
@@ -9475,19 +9475,19 @@
         execute: DELETE_CONTENT_COLUMNS_ACTION,
     };
     const deleteCells = {
-        name: _lt("Delete cells"),
+        name: _t("Delete cells"),
         isVisible: IS_ONLY_ONE_RANGE,
     };
     const deleteCellShiftUp = {
-        name: _lt("Delete cell and shift up"),
+        name: _t("Delete cell and shift up"),
         execute: DELETE_CELL_SHIFT_UP,
     };
     const deleteCellShiftLeft = {
-        name: _lt("Delete cell and shift left"),
+        name: _t("Delete cell and shift left"),
         execute: DELETE_CELL_SHIFT_LEFT,
     };
     const mergeCells = {
-        name: _lt("Merge cells"),
+        name: _t("Merge cells"),
         isEnabled: (env) => !cannotMerge(env),
         isActive: (env) => isInMerge(env),
         execute: (env) => toggleMerge(env),
@@ -9699,15 +9699,15 @@
         let previousArgDefault = false;
         for (let current of args) {
             if (current.type.includes("META") && current.type.length > 1) {
-                throw new Error(_lt("Function ${name} has an argument that has been declared with more than one type whose type 'META'. The 'META' type can only be declared alone."));
+                throw new Error(_t("Function ${name} has an argument that has been declared with more than one type whose type 'META'. The 'META' type can only be declared alone."));
             }
             if (previousArgRepeating && !current.repeating) {
-                throw new Error(_lt("Function ${name} has no-repeatable arguments declared after repeatable ones. All repeatable arguments must be declared last."));
+                throw new Error(_t("Function ${name} has no-repeatable arguments declared after repeatable ones. All repeatable arguments must be declared last."));
             }
             const previousIsOptional = previousArgOptional || previousArgRepeating || previousArgDefault;
             const currentIsntOptional = !(current.optional || current.repeating || current.default);
             if (previousIsOptional && currentIsntOptional) {
-                throw new Error(_lt("Function ${name} has at mandatory arguments declared after optional ones. All optional arguments must be after all mandatory arguments."));
+                throw new Error(_t("Function ${name} has at mandatory arguments declared after optional ones. All optional arguments must be after all mandatory arguments."));
             }
             previousArgRepeating = current.repeating;
             previousArgOptional = current.optional;
@@ -9719,10 +9719,10 @@
     // FORMAT.LARGE.NUMBER
     // -----------------------------------------------------------------------------
     const FORMAT_LARGE_NUMBER = {
-        description: _lt(`Apply a large number format`),
+        description: _t(`Apply a large number format`),
         args: [
-            arg("value (number)", _lt("The number.")),
-            arg("unit (string, optional)", _lt("The formatting unit. Use 'k', 'm', or 'b' to force the unit")),
+            arg("value (number)", _t("The number.")),
+            arg("unit (string, optional)", _t("The formatting unit. Use 'k', 'm', or 'b' to force the unit")),
         ],
         returns: ["NUMBER"],
         computeFormat: (arg, unit) => {
@@ -9738,7 +9738,7 @@
                     case "b":
                         return createLargeNumberFormat(format, 1e9, "b");
                     default:
-                        throw new Error(_lt("The formatting unit should be 'k', 'm' or 'b'."));
+                        throw new Error(_t("The formatting unit should be 'k', 'm' or 'b'."));
                 }
             }
             if (value < 1e5) {
@@ -9771,8 +9771,8 @@
     // ABS
     // -----------------------------------------------------------------------------
     const ABS = {
-        description: _lt("Absolute value of a number."),
-        args: [arg("value (number)", _lt("The number of which to return the absolute value."))],
+        description: _t("Absolute value of a number."),
+        args: [arg("value (number)", _t("The number of which to return the absolute value."))],
         returns: ["NUMBER"],
         compute: function (value) {
             return Math.abs(toNumber(value));
@@ -9783,14 +9783,14 @@
     // ACOS
     // -----------------------------------------------------------------------------
     const ACOS = {
-        description: _lt("Inverse cosine of a value, in radians."),
+        description: _t("Inverse cosine of a value, in radians."),
         args: [
-            arg("value (number)", _lt("The value for which to calculate the inverse cosine. Must be between -1 and 1, inclusive.")),
+            arg("value (number)", _t("The value for which to calculate the inverse cosine. Must be between -1 and 1, inclusive.")),
         ],
         returns: ["NUMBER"],
         compute: function (value) {
             const _value = toNumber(value);
-            assert(() => Math.abs(_value) <= 1, _lt("The value (%s) must be between -1 and 1 inclusive.", _value.toString()));
+            assert(() => Math.abs(_value) <= 1, _t("The value (%s) must be between -1 and 1 inclusive.", _value.toString()));
             return Math.acos(_value);
         },
         isExported: true,
@@ -9799,14 +9799,14 @@
     // ACOSH
     // -----------------------------------------------------------------------------
     const ACOSH = {
-        description: _lt("Inverse hyperbolic cosine of a number."),
+        description: _t("Inverse hyperbolic cosine of a number."),
         args: [
-            arg("value (number)", _lt("The value for which to calculate the inverse hyperbolic cosine. Must be greater than or equal to 1.")),
+            arg("value (number)", _t("The value for which to calculate the inverse hyperbolic cosine. Must be greater than or equal to 1.")),
         ],
         returns: ["NUMBER"],
         compute: function (value) {
             const _value = toNumber(value);
-            assert(() => _value >= 1, _lt("The value (%s) must be greater than or equal to 1.", _value.toString()));
+            assert(() => _value >= 1, _t("The value (%s) must be greater than or equal to 1.", _value.toString()));
             return Math.acosh(_value);
         },
         isExported: true,
@@ -9815,8 +9815,8 @@
     // ACOT
     // -----------------------------------------------------------------------------
     const ACOT = {
-        description: _lt("Inverse cotangent of a value."),
-        args: [arg("value (number)", _lt("The value for which to calculate the inverse cotangent."))],
+        description: _t("Inverse cotangent of a value."),
+        args: [arg("value (number)", _t("The value for which to calculate the inverse cotangent."))],
         returns: ["NUMBER"],
         compute: function (value) {
             const _value = toNumber(value);
@@ -9832,14 +9832,14 @@
     // ACOTH
     // -----------------------------------------------------------------------------
     const ACOTH = {
-        description: _lt("Inverse hyperbolic cotangent of a value."),
+        description: _t("Inverse hyperbolic cotangent of a value."),
         args: [
-            arg("value (number)", _lt("The value for which to calculate the inverse hyperbolic cotangent. Must not be between -1 and 1, inclusive.")),
+            arg("value (number)", _t("The value for which to calculate the inverse hyperbolic cotangent. Must not be between -1 and 1, inclusive.")),
         ],
         returns: ["NUMBER"],
         compute: function (value) {
             const _value = toNumber(value);
-            assert(() => Math.abs(_value) > 1, _lt("The value (%s) cannot be between -1 and 1 inclusive.", _value.toString()));
+            assert(() => Math.abs(_value) > 1, _t("The value (%s) cannot be between -1 and 1 inclusive.", _value.toString()));
             return Math.log((_value + 1) / (_value - 1)) / 2;
         },
         isExported: true,
@@ -9848,14 +9848,14 @@
     // ASIN
     // -----------------------------------------------------------------------------
     const ASIN = {
-        description: _lt("Inverse sine of a value, in radians."),
+        description: _t("Inverse sine of a value, in radians."),
         args: [
-            arg("value (number)", _lt("The value for which to calculate the inverse sine. Must be between -1 and 1, inclusive.")),
+            arg("value (number)", _t("The value for which to calculate the inverse sine. Must be between -1 and 1, inclusive.")),
         ],
         returns: ["NUMBER"],
         compute: function (value) {
             const _value = toNumber(value);
-            assert(() => Math.abs(_value) <= 1, _lt("The value (%s) must be between -1 and 1 inclusive.", _value.toString()));
+            assert(() => Math.abs(_value) <= 1, _t("The value (%s) must be between -1 and 1 inclusive.", _value.toString()));
             return Math.asin(_value);
         },
         isExported: true,
@@ -9864,9 +9864,9 @@
     // ASINH
     // -----------------------------------------------------------------------------
     const ASINH = {
-        description: _lt("Inverse hyperbolic sine of a number."),
+        description: _t("Inverse hyperbolic sine of a number."),
         args: [
-            arg("value (number)", _lt("The value for which to calculate the inverse hyperbolic sine.")),
+            arg("value (number)", _t("The value for which to calculate the inverse hyperbolic sine.")),
         ],
         returns: ["NUMBER"],
         compute: function (value) {
@@ -9878,8 +9878,8 @@
     // ATAN
     // -----------------------------------------------------------------------------
     const ATAN = {
-        description: _lt("Inverse tangent of a value, in radians."),
-        args: [arg("value (number)", _lt("The value for which to calculate the inverse tangent."))],
+        description: _t("Inverse tangent of a value, in radians."),
+        args: [arg("value (number)", _t("The value for which to calculate the inverse tangent."))],
         returns: ["NUMBER"],
         compute: function (value) {
             return Math.atan(toNumber(value));
@@ -9890,16 +9890,16 @@
     // ATAN2
     // -----------------------------------------------------------------------------
     const ATAN2 = {
-        description: _lt("Angle from the X axis to a point (x,y), in radians."),
+        description: _t("Angle from the X axis to a point (x,y), in radians."),
         args: [
-            arg("x (number)", _lt("The x coordinate of the endpoint of the line segment for which to calculate the angle from the x-axis.")),
-            arg("y (number)", _lt("The y coordinate of the endpoint of the line segment for which to calculate the angle from the x-axis.")),
+            arg("x (number)", _t("The x coordinate of the endpoint of the line segment for which to calculate the angle from the x-axis.")),
+            arg("y (number)", _t("The y coordinate of the endpoint of the line segment for which to calculate the angle from the x-axis.")),
         ],
         returns: ["NUMBER"],
         compute: function (x, y) {
             const _x = toNumber(x);
             const _y = toNumber(y);
-            assert(() => _x !== 0 || _y !== 0, _lt(`Function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => _x !== 0 || _y !== 0, _t(`Function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return Math.atan2(_y, _x);
         },
         isExported: true,
@@ -9908,14 +9908,14 @@
     // ATANH
     // -----------------------------------------------------------------------------
     const ATANH = {
-        description: _lt("Inverse hyperbolic tangent of a number."),
+        description: _t("Inverse hyperbolic tangent of a number."),
         args: [
-            arg("value (number)", _lt("The value for which to calculate the inverse hyperbolic tangent. Must be between -1 and 1, exclusive.")),
+            arg("value (number)", _t("The value for which to calculate the inverse hyperbolic tangent. Must be between -1 and 1, exclusive.")),
         ],
         returns: ["NUMBER"],
         compute: function (value) {
             const _value = toNumber(value);
-            assert(() => Math.abs(_value) < 1, _lt("The value (%s) must be between -1 and 1 exclusive.", _value.toString()));
+            assert(() => Math.abs(_value) < 1, _t("The value (%s) must be between -1 and 1 exclusive.", _value.toString()));
             return Math.atanh(_value);
         },
         isExported: true,
@@ -9924,17 +9924,17 @@
     // CEILING
     // -----------------------------------------------------------------------------
     const CEILING = {
-        description: _lt(`Rounds number up to nearest multiple of factor.`),
+        description: _t(`Rounds number up to nearest multiple of factor.`),
         args: [
-            arg("value (number)", _lt("The value to round up to the nearest integer multiple of factor.")),
-            arg(`factor (number, default=${DEFAULT_FACTOR})`, _lt("The number to whose multiples value will be rounded.")),
+            arg("value (number)", _t("The value to round up to the nearest integer multiple of factor.")),
+            arg(`factor (number, default=${DEFAULT_FACTOR})`, _t("The number to whose multiples value will be rounded.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value) => value?.format,
         compute: function (value, factor = DEFAULT_FACTOR) {
             const _value = toNumber(value);
             const _factor = toNumber(factor);
-            assert(() => _factor >= 0 || _value <= 0, _lt("The factor (%s) must be positive when the value (%s) is positive.", _factor.toString(), _value.toString()));
+            assert(() => _factor >= 0 || _value <= 0, _t("The factor (%s) must be positive when the value (%s) is positive.", _factor.toString(), _value.toString()));
             return _factor ? Math.ceil(_value / _factor) * _factor : 0;
         },
         isExported: true,
@@ -9943,11 +9943,11 @@
     // CEILING.MATH
     // -----------------------------------------------------------------------------
     const CEILING_MATH = {
-        description: _lt(`Rounds number up to nearest multiple of factor.`),
+        description: _t(`Rounds number up to nearest multiple of factor.`),
         args: [
-            arg("number (number)", _lt("The value to round up to the nearest integer multiple of significance.")),
-            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _lt("The number to whose multiples number will be rounded. The sign of significance will be ignored.")),
-            arg(`mode (number, default=${DEFAULT_MODE})`, _lt("If number is negative, specifies the rounding direction. If 0 or blank, it is rounded towards zero. Otherwise, it is rounded away from zero.")),
+            arg("number (number)", _t("The value to round up to the nearest integer multiple of significance.")),
+            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _t("The number to whose multiples number will be rounded. The sign of significance will be ignored.")),
+            arg(`mode (number, default=${DEFAULT_MODE})`, _t("If number is negative, specifies the rounding direction. If 0 or blank, it is rounded towards zero. Otherwise, it is rounded away from zero.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (number) => number?.format,
@@ -9973,10 +9973,10 @@
     // CEILING.PRECISE
     // -----------------------------------------------------------------------------
     const CEILING_PRECISE = {
-        description: _lt(`Rounds number up to nearest multiple of factor.`),
+        description: _t(`Rounds number up to nearest multiple of factor.`),
         args: [
-            arg("number (number)", _lt("The value to round up to the nearest integer multiple of significance.")),
-            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _lt("The number to whose multiples number will be rounded.")),
+            arg("number (number)", _t("The value to round up to the nearest integer multiple of significance.")),
+            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _t("The number to whose multiples number will be rounded.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (number) => number?.format,
@@ -9989,8 +9989,8 @@
     // COS
     // -----------------------------------------------------------------------------
     const COS = {
-        description: _lt("Cosine of an angle provided in radians."),
-        args: [arg("angle (number)", _lt("The angle to find the cosine of, in radians."))],
+        description: _t("Cosine of an angle provided in radians."),
+        args: [arg("angle (number)", _t("The angle to find the cosine of, in radians."))],
         returns: ["NUMBER"],
         compute: function (angle) {
             return Math.cos(toNumber(angle));
@@ -10001,8 +10001,8 @@
     // COSH
     // -----------------------------------------------------------------------------
     const COSH = {
-        description: _lt("Hyperbolic cosine of any real number."),
-        args: [arg("value (number)", _lt("Any real value to calculate the hyperbolic cosine of."))],
+        description: _t("Hyperbolic cosine of any real number."),
+        args: [arg("value (number)", _t("Any real value to calculate the hyperbolic cosine of."))],
         returns: ["NUMBER"],
         compute: function (value) {
             return Math.cosh(toNumber(value));
@@ -10013,12 +10013,12 @@
     // COT
     // -----------------------------------------------------------------------------
     const COT = {
-        description: _lt("Cotangent of an angle provided in radians."),
-        args: [arg("angle (number)", _lt("The angle to find the cotangent of, in radians."))],
+        description: _t("Cotangent of an angle provided in radians."),
+        args: [arg("angle (number)", _t("The angle to find the cotangent of, in radians."))],
         returns: ["NUMBER"],
         compute: function (angle) {
             const _angle = toNumber(angle);
-            assert(() => _angle !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => _angle !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return 1 / Math.tan(_angle);
         },
         isExported: true,
@@ -10027,12 +10027,12 @@
     // COTH
     // -----------------------------------------------------------------------------
     const COTH = {
-        description: _lt("Hyperbolic cotangent of any real number."),
-        args: [arg("value (number)", _lt("Any real value to calculate the hyperbolic cotangent of."))],
+        description: _t("Hyperbolic cotangent of any real number."),
+        args: [arg("value (number)", _t("Any real value to calculate the hyperbolic cotangent of."))],
         returns: ["NUMBER"],
         compute: function (value) {
             const _value = toNumber(value);
-            assert(() => _value !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => _value !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return 1 / Math.tanh(_value);
         },
         isExported: true,
@@ -10041,10 +10041,10 @@
     // COUNTBLANK
     // -----------------------------------------------------------------------------
     const COUNTBLANK = {
-        description: _lt("Number of empty values."),
+        description: _t("Number of empty values."),
         args: [
-            arg("value1 (any, range)", _lt("The first value or range in which to count the number of blanks.")),
-            arg("value2 (any, range, repeating)", _lt("Additional values or ranges in which to count the number of blanks.")),
+            arg("value1 (any, range)", _t("The first value or range in which to count the number of blanks.")),
+            arg("value2 (any, range, repeating)", _t("Additional values or ranges in which to count the number of blanks.")),
         ],
         returns: ["NUMBER"],
         compute: function (...argsValues) {
@@ -10056,10 +10056,10 @@
     // COUNTIF
     // -----------------------------------------------------------------------------
     const COUNTIF = {
-        description: _lt("A conditional count across a range."),
+        description: _t("A conditional count across a range."),
         args: [
-            arg("range (range)", _lt("The range that is tested against criterion.")),
-            arg("criterion (string)", _lt("The pattern or test to apply to range.")),
+            arg("range (range)", _t("The range that is tested against criterion.")),
+            arg("criterion (string)", _t("The pattern or test to apply to range.")),
         ],
         returns: ["NUMBER"],
         compute: function (...argsValues) {
@@ -10075,12 +10075,12 @@
     // COUNTIFS
     // -----------------------------------------------------------------------------
     const COUNTIFS = {
-        description: _lt("Count values depending on multiple criteria."),
+        description: _t("Count values depending on multiple criteria."),
         args: [
-            arg("criteria_range1 (range)", _lt("The range to check against criterion1.")),
-            arg("criterion1 (string)", _lt("The pattern or test to apply to criteria_range1.")),
-            arg("criteria_range2 (any, range, repeating)", _lt("Additional ranges over which to evaluate the additional criteria. The filtered set will be the intersection of the sets produced by each criterion-range pair.")),
-            arg("criterion2 (string, repeating)", _lt("Additional criteria to check.")),
+            arg("criteria_range1 (range)", _t("The range to check against criterion1.")),
+            arg("criterion1 (string)", _t("The pattern or test to apply to criteria_range1.")),
+            arg("criteria_range2 (any, range, repeating)", _t("Additional ranges over which to evaluate the additional criteria. The filtered set will be the intersection of the sets produced by each criterion-range pair.")),
+            arg("criterion2 (string, repeating)", _t("Additional criteria to check.")),
         ],
         returns: ["NUMBER"],
         compute: function (...argsValues) {
@@ -10108,10 +10108,10 @@
         }
     }
     const COUNTUNIQUE = {
-        description: _lt("Counts number of unique values in a range."),
+        description: _t("Counts number of unique values in a range."),
         args: [
-            arg("value1 (any, range)", _lt("The first value or range to consider for uniqueness.")),
-            arg("value2 (any, range, repeating)", _lt("Additional values or ranges to consider for uniqueness.")),
+            arg("value1 (any, range)", _t("The first value or range to consider for uniqueness.")),
+            arg("value2 (any, range, repeating)", _t("Additional values or ranges to consider for uniqueness.")),
         ],
         returns: ["NUMBER"],
         compute: function (...argsValues) {
@@ -10122,13 +10122,13 @@
     // COUNTUNIQUEIFS
     // -----------------------------------------------------------------------------
     const COUNTUNIQUEIFS = {
-        description: _lt("Counts number of unique values in a range, filtered by a set of criteria."),
+        description: _t("Counts number of unique values in a range, filtered by a set of criteria."),
         args: [
-            arg("range (range)", _lt("The range of cells from which the number of unique values will be counted.")),
-            arg("criteria_range1 (range)", _lt("The range of cells over which to evaluate criterion1.")),
-            arg("criterion1 (string)", _lt("The pattern or test to apply to criteria_range1, such that each cell that evaluates to TRUE will be included in the filtered set.")),
-            arg("criteria_range2 (any, range, repeating)", _lt("Additional ranges over which to evaluate the additional criteria. The filtered set will be the intersection of the sets produced by each criterion-range pair.")),
-            arg("criterion2 (string, repeating)", _lt("The pattern or test to apply to criteria_range2.")),
+            arg("range (range)", _t("The range of cells from which the number of unique values will be counted.")),
+            arg("criteria_range1 (range)", _t("The range of cells over which to evaluate criterion1.")),
+            arg("criterion1 (string)", _t("The pattern or test to apply to criteria_range1, such that each cell that evaluates to TRUE will be included in the filtered set.")),
+            arg("criteria_range2 (any, range, repeating)", _t("Additional ranges over which to evaluate the additional criteria. The filtered set will be the intersection of the sets produced by each criterion-range pair.")),
+            arg("criterion2 (string, repeating)", _t("The pattern or test to apply to criteria_range2.")),
         ],
         returns: ["NUMBER"],
         compute: function (range, ...argsValues) {
@@ -10146,12 +10146,12 @@
     // CSC
     // -----------------------------------------------------------------------------
     const CSC = {
-        description: _lt("Cosecant of an angle provided in radians."),
-        args: [arg("angle (number)", _lt("The angle to find the cosecant of, in radians."))],
+        description: _t("Cosecant of an angle provided in radians."),
+        args: [arg("angle (number)", _t("The angle to find the cosecant of, in radians."))],
         returns: ["NUMBER"],
         compute: function (angle) {
             const _angle = toNumber(angle);
-            assert(() => _angle !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => _angle !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return 1 / Math.sin(_angle);
         },
         isExported: true,
@@ -10160,12 +10160,12 @@
     // CSCH
     // -----------------------------------------------------------------------------
     const CSCH = {
-        description: _lt("Hyperbolic cosecant of any real number."),
-        args: [arg("value (number)", _lt("Any real value to calculate the hyperbolic cosecant of."))],
+        description: _t("Hyperbolic cosecant of any real number."),
+        args: [arg("value (number)", _t("Any real value to calculate the hyperbolic cosecant of."))],
         returns: ["NUMBER"],
         compute: function (value) {
             const _value = toNumber(value);
-            assert(() => _value !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => _value !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return 1 / Math.sinh(_value);
         },
         isExported: true,
@@ -10174,16 +10174,16 @@
     // DECIMAL
     // -----------------------------------------------------------------------------
     const DECIMAL = {
-        description: _lt("Converts from another base to decimal."),
+        description: _t("Converts from another base to decimal."),
         args: [
-            arg("value (string)", _lt("The number to convert.")),
-            arg(",base (number)", _lt("The base to convert the value from.")),
+            arg("value (string)", _t("The number to convert.")),
+            arg(",base (number)", _t("The base to convert the value from.")),
         ],
         returns: ["NUMBER"],
         compute: function (value, base) {
             let _base = toNumber(base);
             _base = Math.floor(_base);
-            assert(() => 2 <= _base && _base <= 36, _lt("The base (%s) must be between 2 and 36 inclusive.", _base.toString()));
+            assert(() => 2 <= _base && _base <= 36, _t("The base (%s) must be between 2 and 36 inclusive.", _base.toString()));
             const _value = toString(value);
             if (_value === "") {
                 return 0;
@@ -10193,9 +10193,9 @@
              * Return error if 'value' is positive.
              * Remove '-?' in the next regex to catch this error.
              */
-            assert(() => !!DECIMAL_REPRESENTATION.test(_value), _lt("The value (%s) must be a valid base %s representation.", _value, _base.toString()));
+            assert(() => !!DECIMAL_REPRESENTATION.test(_value), _t("The value (%s) must be a valid base %s representation.", _value, _base.toString()));
             const deci = parseInt(_value, _base);
-            assert(() => !isNaN(deci), _lt("The value (%s) must be a valid base %s representation.", _value, _base.toString()));
+            assert(() => !isNaN(deci), _t("The value (%s) must be a valid base %s representation.", _value, _base.toString()));
             return deci;
         },
         isExported: true,
@@ -10204,8 +10204,8 @@
     // DEGREES
     // -----------------------------------------------------------------------------
     const DEGREES = {
-        description: _lt(`Converts an angle value in radians to degrees.`),
-        args: [arg("angle (number)", _lt("The angle to convert from radians to degrees."))],
+        description: _t(`Converts an angle value in radians to degrees.`),
+        args: [arg("angle (number)", _t("The angle to convert from radians to degrees."))],
         returns: ["NUMBER"],
         compute: function (angle) {
             return (toNumber(angle) * 180) / Math.PI;
@@ -10216,8 +10216,8 @@
     // EXP
     // -----------------------------------------------------------------------------
     const EXP = {
-        description: _lt(`Euler's number, e (~2.718) raised to a power.`),
-        args: [arg("value (number)", _lt("The exponent to raise e."))],
+        description: _t(`Euler's number, e (~2.718) raised to a power.`),
+        args: [arg("value (number)", _t("The exponent to raise e."))],
         returns: ["NUMBER"],
         compute: function (value) {
             return Math.exp(toNumber(value));
@@ -10228,17 +10228,17 @@
     // FLOOR
     // -----------------------------------------------------------------------------
     const FLOOR = {
-        description: _lt(`Rounds number down to nearest multiple of factor.`),
+        description: _t(`Rounds number down to nearest multiple of factor.`),
         args: [
-            arg("value (number)", _lt("The value to round down to the nearest integer multiple of factor.")),
-            arg(`factor (number, default=${DEFAULT_FACTOR})`, _lt("The number to whose multiples value will be rounded.")),
+            arg("value (number)", _t("The value to round down to the nearest integer multiple of factor.")),
+            arg(`factor (number, default=${DEFAULT_FACTOR})`, _t("The number to whose multiples value will be rounded.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value) => value?.format,
         compute: function (value, factor = DEFAULT_FACTOR) {
             const _value = toNumber(value);
             const _factor = toNumber(factor);
-            assert(() => _factor >= 0 || _value <= 0, _lt("The factor (%s) must be positive when the value (%s) is positive.", _factor.toString(), _value.toString()));
+            assert(() => _factor >= 0 || _value <= 0, _t("The factor (%s) must be positive when the value (%s) is positive.", _factor.toString(), _value.toString()));
             return _factor ? Math.floor(_value / _factor) * _factor : 0;
         },
         isExported: true,
@@ -10247,11 +10247,11 @@
     // FLOOR.MATH
     // -----------------------------------------------------------------------------
     const FLOOR_MATH = {
-        description: _lt(`Rounds number down to nearest multiple of factor.`),
+        description: _t(`Rounds number down to nearest multiple of factor.`),
         args: [
-            arg("number (number)", _lt("The value to round down to the nearest integer multiple of significance.")),
-            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _lt("The number to whose multiples number will be rounded. The sign of significance will be ignored.")),
-            arg(`mode (number, default=${DEFAULT_MODE})`, _lt("If number is negative, specifies the rounding direction. If 0 or blank, it is rounded away from zero. Otherwise, it is rounded towards zero.")),
+            arg("number (number)", _t("The value to round down to the nearest integer multiple of significance.")),
+            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _t("The number to whose multiples number will be rounded. The sign of significance will be ignored.")),
+            arg(`mode (number, default=${DEFAULT_MODE})`, _t("If number is negative, specifies the rounding direction. If 0 or blank, it is rounded away from zero. Otherwise, it is rounded towards zero.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (number) => number?.format,
@@ -10277,10 +10277,10 @@
     // FLOOR.PRECISE
     // -----------------------------------------------------------------------------
     const FLOOR_PRECISE = {
-        description: _lt(`Rounds number down to nearest multiple of factor.`),
+        description: _t(`Rounds number down to nearest multiple of factor.`),
         args: [
-            arg("number (number)", _lt("The value to round down to the nearest integer multiple of significance.")),
-            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _lt("The number to whose multiples number will be rounded.")),
+            arg("number (number)", _t("The value to round down to the nearest integer multiple of significance.")),
+            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _t("The number to whose multiples number will be rounded.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (number) => number?.format,
@@ -10293,8 +10293,8 @@
     // ISEVEN
     // -----------------------------------------------------------------------------
     const ISEVEN = {
-        description: _lt(`Whether the provided value is even.`),
-        args: [arg("value (number)", _lt("The value to be verified as even."))],
+        description: _t(`Whether the provided value is even.`),
+        args: [arg("value (number)", _t("The value to be verified as even."))],
         returns: ["BOOLEAN"],
         compute: function (value) {
             const _value = strictToNumber(value);
@@ -10306,10 +10306,10 @@
     // ISO.CEILING
     // -----------------------------------------------------------------------------
     const ISO_CEILING = {
-        description: _lt(`Rounds number up to nearest multiple of factor.`),
+        description: _t(`Rounds number up to nearest multiple of factor.`),
         args: [
-            arg("number (number)", _lt("The value to round up to the nearest integer multiple of significance.")),
-            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _lt("The number to whose multiples number will be rounded.")),
+            arg("number (number)", _t("The value to round up to the nearest integer multiple of significance.")),
+            arg(`significance (number, default=${DEFAULT_SIGNIFICANCE})`, _t("The number to whose multiples number will be rounded.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (number) => number?.format,
@@ -10322,8 +10322,8 @@
     // ISODD
     // -----------------------------------------------------------------------------
     const ISODD = {
-        description: _lt(`Whether the provided value is even.`),
-        args: [arg("value (number)", _lt("The value to be verified as even."))],
+        description: _t(`Whether the provided value is even.`),
+        args: [arg("value (number)", _t("The value to be verified as even."))],
         returns: ["BOOLEAN"],
         compute: function (value) {
             const _value = strictToNumber(value);
@@ -10335,12 +10335,12 @@
     // LN
     // -----------------------------------------------------------------------------
     const LN = {
-        description: _lt(`The logarithm of a number, base e (euler's number).`),
-        args: [arg("value (number)", _lt("The value for which to calculate the logarithm, base e."))],
+        description: _t(`The logarithm of a number, base e (euler's number).`),
+        args: [arg("value (number)", _t("The value for which to calculate the logarithm, base e."))],
         returns: ["NUMBER"],
         compute: function (value) {
             const _value = toNumber(value);
-            assert(() => _value > 0, _lt("The value (%s) must be strictly positive.", _value.toString()));
+            assert(() => _value > 0, _t("The value (%s) must be strictly positive.", _value.toString()));
             return Math.log(_value);
         },
         isExported: true,
@@ -10349,16 +10349,16 @@
     // MOD
     // -----------------------------------------------------------------------------
     const MOD = {
-        description: _lt(`Modulo (remainder) operator.`),
+        description: _t(`Modulo (remainder) operator.`),
         args: [
-            arg("dividend (number)", _lt("The number to be divided to find the remainder.")),
-            arg("divisor (number)", _lt("The number to divide by.")),
+            arg("dividend (number)", _t("The number to be divided to find the remainder.")),
+            arg("divisor (number)", _t("The number to divide by.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (dividend) => dividend?.format,
         compute: function (dividend, divisor) {
             const _divisor = toNumber(divisor);
-            assert(() => _divisor !== 0, _lt("The divisor must be different from 0."));
+            assert(() => _divisor !== 0, _t("The divisor must be different from 0."));
             const _dividend = toNumber(dividend);
             const modulus = _dividend % _divisor;
             // -42 % 10 = -2 but we want 8, so need the code below
@@ -10373,8 +10373,8 @@
     // ODD
     // -----------------------------------------------------------------------------
     const ODD = {
-        description: _lt(`Rounds a number up to the nearest odd integer.`),
-        args: [arg("value (number)", _lt("The value to round to the next greatest odd number."))],
+        description: _t(`Rounds a number up to the nearest odd integer.`),
+        args: [arg("value (number)", _t("The value to round to the next greatest odd number."))],
         returns: ["NUMBER"],
         computeFormat: (number) => number?.format,
         compute: function (value) {
@@ -10389,7 +10389,7 @@
     // PI
     // -----------------------------------------------------------------------------
     const PI = {
-        description: _lt(`The number pi.`),
+        description: _t(`The number pi.`),
         args: [],
         returns: ["NUMBER"],
         compute: function () {
@@ -10401,17 +10401,17 @@
     // POWER
     // -----------------------------------------------------------------------------
     const POWER = {
-        description: _lt(`A number raised to a power.`),
+        description: _t(`A number raised to a power.`),
         args: [
-            arg("base (number)", _lt("The number to raise to the exponent power.")),
-            arg("exponent (number)", _lt("The exponent to raise base to.")),
+            arg("base (number)", _t("The number to raise to the exponent power.")),
+            arg("exponent (number)", _t("The exponent to raise base to.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (base) => base?.format,
         compute: function (base, exponent) {
             const _base = toNumber(base);
             const _exponent = toNumber(exponent);
-            assert(() => _base >= 0 || Number.isInteger(_exponent), _lt("The exponent (%s) must be an integer when the base is negative.", _exponent.toString()));
+            assert(() => _base >= 0 || Number.isInteger(_exponent), _t("The exponent (%s) must be an integer when the base is negative.", _exponent.toString()));
             return Math.pow(_base, _exponent);
         },
         isExported: true,
@@ -10420,10 +10420,10 @@
     // PRODUCT
     // -----------------------------------------------------------------------------
     const PRODUCT = {
-        description: _lt("Result of multiplying a series of numbers together."),
+        description: _t("Result of multiplying a series of numbers together."),
         args: [
-            arg("factor1 (number, range<number>)", _lt("The first number or range to calculate for the product.")),
-            arg("factor2 (number, range<number>, repeating)", _lt("More numbers or ranges to calculate for the product.")),
+            arg("factor1 (number, range<number>)", _t("The first number or range to calculate for the product.")),
+            arg("factor2 (number, range<number>, repeating)", _t("More numbers or ranges to calculate for the product.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (factor1) => {
@@ -10459,7 +10459,7 @@
     // RAND
     // -----------------------------------------------------------------------------
     const RAND = {
-        description: _lt("A random number between 0 inclusive and 1 exclusive."),
+        description: _t("A random number between 0 inclusive and 1 exclusive."),
         args: [],
         returns: ["NUMBER"],
         compute: function () {
@@ -10471,10 +10471,10 @@
     // RANDBETWEEN
     // -----------------------------------------------------------------------------
     const RANDBETWEEN = {
-        description: _lt("Random integer between two values, inclusive."),
+        description: _t("Random integer between two values, inclusive."),
         args: [
-            arg("low (number)", _lt("The low end of the random range.")),
-            arg("high (number)", _lt("The high end of the random range.")),
+            arg("low (number)", _t("The low end of the random range.")),
+            arg("high (number)", _t("The high end of the random range.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (low) => low?.format,
@@ -10487,7 +10487,7 @@
             if (!Number.isInteger(_high)) {
                 _high = Math.floor(_high);
             }
-            assert(() => _low <= _high, _lt("The high (%s) must be greater than or equal to the low (%s).", _high.toString(), _low.toString()));
+            assert(() => _low <= _high, _t("The high (%s) must be greater than or equal to the low (%s).", _high.toString(), _low.toString()));
             return _low + Math.ceil((_high - _low + 1) * Math.random()) - 1;
         },
         isExported: true,
@@ -10496,10 +10496,10 @@
     // ROUND
     // -----------------------------------------------------------------------------
     const ROUND = {
-        description: _lt("Rounds a number according to standard rules."),
+        description: _t("Rounds a number according to standard rules."),
         args: [
-            arg("value (number)", _lt("The value to round to places number of places.")),
-            arg(`places (number, default=${DEFAULT_PLACES})`, _lt("The number of decimal places to which to round.")),
+            arg("value (number)", _t("The value to round to places number of places.")),
+            arg(`places (number, default=${DEFAULT_PLACES})`, _t("The number of decimal places to which to round.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value) => value?.format,
@@ -10525,10 +10525,10 @@
     // ROUNDDOWN
     // -----------------------------------------------------------------------------
     const ROUNDDOWN = {
-        description: _lt(`Rounds down a number.`),
+        description: _t(`Rounds down a number.`),
         args: [
-            arg("value (number)", _lt("The value to round to places number of places, always rounding down.")),
-            arg(`places (number, default=${DEFAULT_PLACES})`, _lt("The number of decimal places to which to round.")),
+            arg("value (number)", _t("The value to round to places number of places, always rounding down.")),
+            arg(`places (number, default=${DEFAULT_PLACES})`, _t("The number of decimal places to which to round.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value) => value?.format,
@@ -10554,10 +10554,10 @@
     // ROUNDUP
     // -----------------------------------------------------------------------------
     const ROUNDUP = {
-        description: _lt(`Rounds up a number.`),
+        description: _t(`Rounds up a number.`),
         args: [
-            arg("value (number)", _lt("The value to round to places number of places, always rounding up.")),
-            arg(`places (number, default=${DEFAULT_PLACES})`, _lt("The number of decimal places to which to round.")),
+            arg("value (number)", _t("The value to round to places number of places, always rounding up.")),
+            arg(`places (number, default=${DEFAULT_PLACES})`, _t("The number of decimal places to which to round.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value) => value?.format,
@@ -10583,8 +10583,8 @@
     // SEC
     // -----------------------------------------------------------------------------
     const SEC = {
-        description: _lt("Secant of an angle provided in radians."),
-        args: [arg("angle (number)", _lt("The angle to find the secant of, in radians."))],
+        description: _t("Secant of an angle provided in radians."),
+        args: [arg("angle (number)", _t("The angle to find the secant of, in radians."))],
         returns: ["NUMBER"],
         compute: function (angle) {
             return 1 / Math.cos(toNumber(angle));
@@ -10595,8 +10595,8 @@
     // SECH
     // -----------------------------------------------------------------------------
     const SECH = {
-        description: _lt("Hyperbolic secant of any real number."),
-        args: [arg("value (number)", _lt("Any real value to calculate the hyperbolic secant of."))],
+        description: _t("Hyperbolic secant of any real number."),
+        args: [arg("value (number)", _t("Any real value to calculate the hyperbolic secant of."))],
         returns: ["NUMBER"],
         compute: function (value) {
             return 1 / Math.cosh(toNumber(value));
@@ -10607,8 +10607,8 @@
     // SIN
     // -----------------------------------------------------------------------------
     const SIN = {
-        description: _lt("Sine of an angle provided in radians."),
-        args: [arg("angle (number)", _lt("The angle to find the sine of, in radians."))],
+        description: _t("Sine of an angle provided in radians."),
+        args: [arg("angle (number)", _t("The angle to find the sine of, in radians."))],
         returns: ["NUMBER"],
         compute: function (angle) {
             return Math.sin(toNumber(angle));
@@ -10619,8 +10619,8 @@
     // SINH
     // -----------------------------------------------------------------------------
     const SINH = {
-        description: _lt("Hyperbolic sine of any real number."),
-        args: [arg("value (number)", _lt("Any real value to calculate the hyperbolic sine of."))],
+        description: _t("Hyperbolic sine of any real number."),
+        args: [arg("value (number)", _t("Any real value to calculate the hyperbolic sine of."))],
         returns: ["NUMBER"],
         compute: function (value) {
             return Math.sinh(toNumber(value));
@@ -10631,13 +10631,13 @@
     // SQRT
     // -----------------------------------------------------------------------------
     const SQRT = {
-        description: _lt("Positive square root of a positive number."),
-        args: [arg("value (number)", _lt("The number for which to calculate the positive square root."))],
+        description: _t("Positive square root of a positive number."),
+        args: [arg("value (number)", _t("The number for which to calculate the positive square root."))],
         returns: ["NUMBER"],
         computeFormat: (value) => value?.format,
         compute: function (value) {
             const _value = toNumber(value);
-            assert(() => _value >= 0, _lt("The value (%s) must be positive or null.", _value.toString()));
+            assert(() => _value >= 0, _t("The value (%s) must be positive or null.", _value.toString()));
             return Math.sqrt(_value);
         },
         isExported: true,
@@ -10646,10 +10646,10 @@
     // SUM
     // -----------------------------------------------------------------------------
     const SUM = {
-        description: _lt("Sum of a series of numbers and/or cells."),
+        description: _t("Sum of a series of numbers and/or cells."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first number or range to add together.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional numbers or ranges to add to value1.")),
+            arg("value1 (number, range<number>)", _t("The first number or range to add together.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional numbers or ranges to add to value1.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1) => {
@@ -10664,11 +10664,11 @@
     // SUMIF
     // -----------------------------------------------------------------------------
     const SUMIF = {
-        description: _lt("A conditional sum across a range."),
+        description: _t("A conditional sum across a range."),
         args: [
-            arg("criteria_range (range)", _lt("The range which is tested against criterion.")),
-            arg("criterion (string)", _lt("The pattern or test to apply to range.")),
-            arg("sum_range (range, default=criteria_range)", _lt("The range to be summed, if different from range.")),
+            arg("criteria_range (range)", _t("The range which is tested against criterion.")),
+            arg("criterion (string)", _t("The pattern or test to apply to range.")),
+            arg("sum_range (range, default=criteria_range)", _t("The range to be summed, if different from range.")),
         ],
         returns: ["NUMBER"],
         compute: function (criteriaRange, criterion, sumRange = undefined) {
@@ -10690,13 +10690,13 @@
     // SUMIFS
     // -----------------------------------------------------------------------------
     const SUMIFS = {
-        description: _lt("Sums a range depending on multiple criteria."),
+        description: _t("Sums a range depending on multiple criteria."),
         args: [
-            arg("sum_range (range)", _lt("The range to sum.")),
-            arg("criteria_range1 (range)", _lt("The range to check against criterion1.")),
-            arg("criterion1 (string)", _lt("The pattern or test to apply to criteria_range1.")),
-            arg("criteria_range2 (any, range, repeating)", _lt("Additional ranges to check.")),
-            arg("criterion2 (string, repeating)", _lt("Additional criteria to check.")),
+            arg("sum_range (range)", _t("The range to sum.")),
+            arg("criteria_range1 (range)", _t("The range to check against criterion1.")),
+            arg("criterion1 (string)", _t("The pattern or test to apply to criteria_range1.")),
+            arg("criteria_range2 (any, range, repeating)", _t("Additional ranges to check.")),
+            arg("criterion2 (string, repeating)", _t("Additional criteria to check.")),
         ],
         returns: ["NUMBER"],
         compute: function (sumRange, ...criters) {
@@ -10715,8 +10715,8 @@
     // TAN
     // -----------------------------------------------------------------------------
     const TAN = {
-        description: _lt("Tangent of an angle provided in radians."),
-        args: [arg("angle (number)", _lt("The angle to find the tangent of, in radians."))],
+        description: _t("Tangent of an angle provided in radians."),
+        args: [arg("angle (number)", _t("The angle to find the tangent of, in radians."))],
         returns: ["NUMBER"],
         compute: function (angle) {
             return Math.tan(toNumber(angle));
@@ -10727,8 +10727,8 @@
     // TANH
     // -----------------------------------------------------------------------------
     const TANH = {
-        description: _lt("Hyperbolic tangent of any real number."),
-        args: [arg("value (number)", _lt("Any real value to calculate the hyperbolic tangent of."))],
+        description: _t("Hyperbolic tangent of any real number."),
+        args: [arg("value (number)", _t("Any real value to calculate the hyperbolic tangent of."))],
         returns: ["NUMBER"],
         compute: function (value) {
             return Math.tanh(toNumber(value));
@@ -10739,10 +10739,10 @@
     // TRUNC
     // -----------------------------------------------------------------------------
     const TRUNC = {
-        description: _lt("Truncates a number."),
+        description: _t("Truncates a number."),
         args: [
-            arg("value (number)", _lt("The value to be truncated.")),
-            arg(`places (number, default=${DEFAULT_PLACES})`, _lt("The number of significant digits to the right of the decimal point to retain.")),
+            arg("value (number)", _t("The value to be truncated.")),
+            arg(`places (number, default=${DEFAULT_PLACES})`, _t("The number of significant digits to the right of the decimal point to retain.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value) => value?.format,
@@ -10833,7 +10833,7 @@
             flatDataX.push(x);
             lenX += 1;
         });
-        assert(() => lenY === lenX, _lt("[[FUNCTION_NAME]] has mismatched argument count %s vs %s.", lenY.toString(), lenX.toString()));
+        assert(() => lenY === lenX, _t("[[FUNCTION_NAME]] has mismatched argument count %s vs %s.", lenY.toString(), lenX.toString()));
         let count = 0;
         let sumY = 0;
         let sumX = 0;
@@ -10846,7 +10846,7 @@
                 sumX += valueX;
             }
         }
-        assert(() => count !== 0 && (!isSample || count !== 1), _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+        assert(() => count !== 0 && (!isSample || count !== 1), _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
         const averageY = sumY / count;
         const averageX = sumX / count;
         let acc = 0;
@@ -10867,14 +10867,14 @@
             count += 1;
             return acc + a;
         }, 0);
-        assert(() => count !== 0 && (!isSample || count !== 1), _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+        assert(() => count !== 0 && (!isSample || count !== 1), _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
         const average = sum / count;
         return (reduceFunction(args, (acc, a) => acc + Math.pow(a - average, 2), 0) /
             (count - (isSample ? 1 : 0)));
     }
     function centile(data, percent, isInclusive) {
         const _percent = toNumber(percent);
-        assert(() => (isInclusive ? 0 <= _percent && _percent <= 1 : 0 < _percent && _percent < 1), _lt(`Function [[FUNCTION_NAME]] parameter 2 value is out of range.`));
+        assert(() => (isInclusive ? 0 <= _percent && _percent <= 1 : 0 < _percent && _percent < 1), _t(`Function [[FUNCTION_NAME]] parameter 2 value is out of range.`));
         let sortedArray = [];
         let index;
         let count = 0;
@@ -10885,10 +10885,10 @@
                 count++;
             }
         });
-        assert(() => count !== 0, _lt(`[[FUNCTION_NAME]] has no valid input data.`));
+        assert(() => count !== 0, _t(`[[FUNCTION_NAME]] has no valid input data.`));
         if (!isInclusive) {
             // 2nd argument must be between 1/(n+1) and n/(n+1) with n the number of data
-            assert(() => 1 / (count + 1) <= _percent && _percent <= count / (count + 1), _lt(`Function [[FUNCTION_NAME]] parameter 2 value is out of range.`));
+            assert(() => 1 / (count + 1) <= _percent && _percent <= count / (count + 1), _t(`Function [[FUNCTION_NAME]] parameter 2 value is out of range.`));
         }
         return percentile(sortedArray, _percent, isInclusive);
     }
@@ -10896,10 +10896,10 @@
     // AVEDEV
     // -----------------------------------------------------------------------------
     const AVEDEV = {
-        description: _lt("Average magnitude of deviations from mean."),
+        description: _t("Average magnitude of deviations from mean."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the sample.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the sample.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the sample.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the sample.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -10908,7 +10908,7 @@
                 count += 1;
                 return acc + a;
             }, 0);
-            assert(() => count !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => count !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             const average = sum / count;
             return reduceNumbers(values, (acc, a) => acc + Math.abs(average - a), 0) / count;
         },
@@ -10918,10 +10918,10 @@
     // AVERAGE
     // -----------------------------------------------------------------------------
     const AVERAGE = {
-        description: _lt(`Numerical average value in a dataset, ignoring text.`),
+        description: _t(`Numerical average value in a dataset, ignoring text.`),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range to consider when calculating the average value.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to consider when calculating the average value.")),
+            arg("value1 (number, range<number>)", _t("The first value or range to consider when calculating the average value.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to consider when calculating the average value.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1) => {
@@ -10933,7 +10933,7 @@
                 count += 1;
                 return acc + a;
             }, 0);
-            assert(() => count !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => count !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return sum / count;
         },
         isExported: true,
@@ -10941,15 +10941,15 @@
     // -----------------------------------------------------------------------------
     // AVERAGE.WEIGHTED
     // -----------------------------------------------------------------------------
-    const rangeError = _lt(`[[FUNCTION_NAME]] has mismatched range sizes.`);
-    const negativeWeightError = _lt(`[[FUNCTION_NAME]] expects the weight to be positive or equal to 0.`);
+    const rangeError = _t(`[[FUNCTION_NAME]] has mismatched range sizes.`);
+    const negativeWeightError = _t(`[[FUNCTION_NAME]] expects the weight to be positive or equal to 0.`);
     const AVERAGE_WEIGHTED = {
-        description: _lt(`Weighted average.`),
+        description: _t(`Weighted average.`),
         args: [
-            arg("values (number, range<number>)", _lt("Values to average.")),
-            arg("weights (number, range<number>)", _lt("Weights for each corresponding value.")),
-            arg("additional_values (number, range<number>, repeating)", _lt("Additional values to average.")),
-            arg("additional_weights (number, range<number>, repeating)", _lt("Additional weights.")),
+            arg("values (number, range<number>)", _t("Values to average.")),
+            arg("weights (number, range<number>)", _t("Weights for each corresponding value.")),
+            arg("additional_values (number, range<number>, repeating)", _t("Additional values to average.")),
+            arg("additional_weights (number, range<number>, repeating)", _t("Additional weights.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (values) => {
@@ -10960,7 +10960,7 @@
             let count = 0;
             let value;
             let weight;
-            assert(() => values.length % 2 === 0, _lt(`Wrong number of Argument[]. Expected an even number of Argument[].`));
+            assert(() => values.length % 2 === 0, _t(`Wrong number of Argument[]. Expected an even number of Argument[].`));
             for (let n = 0; n < values.length - 1; n += 2) {
                 value = values[n];
                 weight = values[n + 1];
@@ -10979,7 +10979,7 @@
                             let subValueIsNumber = typeof subValue === "number";
                             let subWeightIsNumber = typeof subWeight === "number";
                             // typeof subValue or subWeight can be 'number' or 'undefined'
-                            assert(() => subValueIsNumber === subWeightIsNumber, _lt(`[[FUNCTION_NAME]] expects number values.`));
+                            assert(() => subValueIsNumber === subWeightIsNumber, _t(`[[FUNCTION_NAME]] expects number values.`));
                             if (subWeightIsNumber) {
                                 assert(() => subWeight >= 0, negativeWeightError);
                                 sum += subValue * subWeight;
@@ -10996,7 +10996,7 @@
                     count += weight;
                 }
             }
-            assert(() => count !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => count !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return sum / count;
         },
     };
@@ -11004,10 +11004,10 @@
     // AVERAGEA
     // -----------------------------------------------------------------------------
     const AVERAGEA = {
-        description: _lt(`Numerical average value in a dataset.`),
+        description: _t(`Numerical average value in a dataset.`),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range to consider when calculating the average value.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to consider when calculating the average value.")),
+            arg("value1 (number, range<number>)", _t("The first value or range to consider when calculating the average value.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to consider when calculating the average value.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1) => {
@@ -11019,7 +11019,7 @@
                 count += 1;
                 return acc + a;
             }, 0);
-            assert(() => count !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => count !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return sum / count;
         },
         isExported: true,
@@ -11028,11 +11028,11 @@
     // AVERAGEIF
     // -----------------------------------------------------------------------------
     const AVERAGEIF = {
-        description: _lt(`Average of values depending on criteria.`),
+        description: _t(`Average of values depending on criteria.`),
         args: [
-            arg("criteria_range (range)", _lt("The range to check against criterion.")),
-            arg("criterion (string)", _lt("The pattern or test to apply to criteria_range.")),
-            arg("average_range (range, default=criteria_range)", _lt("The range to average. If not included, criteria_range is used for the average instead.")),
+            arg("criteria_range (range)", _t("The range to check against criterion.")),
+            arg("criterion (string)", _t("The pattern or test to apply to criteria_range.")),
+            arg("average_range (range, default=criteria_range)", _t("The range to average. If not included, criteria_range is used for the average instead.")),
         ],
         returns: ["NUMBER"],
         compute: function (criteriaRange, criterion, averageRange) {
@@ -11048,7 +11048,7 @@
                     sum += value;
                 }
             });
-            assert(() => count !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => count !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return sum / count;
         },
         isExported: true,
@@ -11057,13 +11057,13 @@
     // AVERAGEIFS
     // -----------------------------------------------------------------------------
     const AVERAGEIFS = {
-        description: _lt(`Average of values depending on multiple criteria.`),
+        description: _t(`Average of values depending on multiple criteria.`),
         args: [
-            arg("average_range (range)", _lt("The range to average.")),
-            arg("criteria_range1 (range)", _lt("The range to check against criterion1.")),
-            arg("criterion1 (string)", _lt("The pattern or test to apply to criteria_range1.")),
-            arg("criteria_range2 (any, range, repeating)", _lt("Additional criteria_range and criterion to check.")),
-            arg("criterion2 (string, repeating)", _lt("The pattern or test to apply to criteria_range2.")),
+            arg("average_range (range)", _t("The range to average.")),
+            arg("criteria_range1 (range)", _t("The range to check against criterion1.")),
+            arg("criterion1 (string)", _t("The pattern or test to apply to criteria_range1.")),
+            arg("criteria_range2 (any, range, repeating)", _t("Additional criteria_range and criterion to check.")),
+            arg("criterion2 (string, repeating)", _t("The pattern or test to apply to criteria_range2.")),
         ],
         returns: ["NUMBER"],
         compute: function (averageRange, ...values) {
@@ -11076,7 +11076,7 @@
                     sum += value;
                 }
             });
-            assert(() => count !== 0, _lt(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
+            assert(() => count !== 0, _t(`Evaluation of function [[FUNCTION_NAME]] caused a divide by zero error.`));
             return sum / count;
         },
         isExported: true,
@@ -11085,10 +11085,10 @@
     // COUNT
     // -----------------------------------------------------------------------------
     const COUNT = {
-        description: _lt(`The number of numeric values in dataset.`),
+        description: _t(`The number of numeric values in dataset.`),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range to consider when counting.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to consider when counting.")),
+            arg("value1 (number, range<number>)", _t("The first value or range to consider when counting.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to consider when counting.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11115,10 +11115,10 @@
     // COUNTA
     // -----------------------------------------------------------------------------
     const COUNTA = {
-        description: _lt(`The number of values in a dataset.`),
+        description: _t(`The number of values in a dataset.`),
         args: [
-            arg("value1 (any, range)", _lt("The first value or range to consider when counting.")),
-            arg("value2 (any, range, repeating)", _lt("Additional values or ranges to consider when counting.")),
+            arg("value1 (any, range)", _t("The first value or range to consider when counting.")),
+            arg("value2 (any, range, repeating)", _t("Additional values or ranges to consider when counting.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11132,10 +11132,10 @@
     // Note: Unlike the VAR function which corresponds to the variance over a sample (VAR.S),
     // the COVAR function corresponds to the covariance over an entire population (COVAR.P)
     const COVAR = {
-        description: _lt(`The covariance of a dataset.`),
+        description: _t(`The covariance of a dataset.`),
         args: [
-            arg("data_y (any, range)", _lt("The range representing the array or matrix of dependent data.")),
-            arg("data_x (any, range)", _lt("The range representing the array or matrix of independent data.")),
+            arg("data_y (any, range)", _t("The range representing the array or matrix of dependent data.")),
+            arg("data_x (any, range)", _t("The range representing the array or matrix of independent data.")),
         ],
         returns: ["NUMBER"],
         compute: function (dataY, dataX) {
@@ -11147,10 +11147,10 @@
     // COVARIANCE.P
     // -----------------------------------------------------------------------------
     const COVARIANCE_P = {
-        description: _lt(`The covariance of a dataset.`),
+        description: _t(`The covariance of a dataset.`),
         args: [
-            arg("data_y (any, range)", _lt("The range representing the array or matrix of dependent data.")),
-            arg("data_x (any, range)", _lt("The range representing the array or matrix of independent data.")),
+            arg("data_y (any, range)", _t("The range representing the array or matrix of dependent data.")),
+            arg("data_x (any, range)", _t("The range representing the array or matrix of independent data.")),
         ],
         returns: ["NUMBER"],
         compute: function (dataY, dataX) {
@@ -11162,10 +11162,10 @@
     // COVARIANCE.S
     // -----------------------------------------------------------------------------
     const COVARIANCE_S = {
-        description: _lt(`The sample covariance of a dataset.`),
+        description: _t(`The sample covariance of a dataset.`),
         args: [
-            arg("data_y (any, range)", _lt("The range representing the array or matrix of dependent data.")),
-            arg("data_x (any, range)", _lt("The range representing the array or matrix of independent data.")),
+            arg("data_y (any, range)", _t("The range representing the array or matrix of dependent data.")),
+            arg("data_x (any, range)", _t("The range representing the array or matrix of independent data.")),
         ],
         returns: ["NUMBER"],
         compute: function (dataY, dataX) {
@@ -11177,10 +11177,10 @@
     // LARGE
     // -----------------------------------------------------------------------------
     const LARGE = {
-        description: _lt("Nth largest element from a data set."),
+        description: _t("Nth largest element from a data set."),
         args: [
-            arg("data (any, range)", _lt("Array or range containing the dataset to consider.")),
-            arg("n (number)", _lt("The rank from largest to smallest of the element to return.")),
+            arg("data (any, range)", _t("Array or range containing the dataset to consider.")),
+            arg("n (number)", _t("The rank from largest to smallest of the element to return.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (data) => {
@@ -11203,8 +11203,8 @@
                 }
             });
             const result = largests.shift();
-            assert(() => result !== undefined, _lt(`[[FUNCTION_NAME]] has no valid input data.`));
-            assert(() => count >= _n, _lt("Function [[FUNCTION_NAME]] parameter 2 value (%s) is out of range.", _n.toString()));
+            assert(() => result !== undefined, _t(`[[FUNCTION_NAME]] has no valid input data.`));
+            assert(() => count >= _n, _t("Function [[FUNCTION_NAME]] parameter 2 value (%s) is out of range.", _n.toString()));
             return result;
         },
         isExported: true,
@@ -11213,10 +11213,10 @@
     // MAX
     // -----------------------------------------------------------------------------
     const MAX = {
-        description: _lt("Maximum value in a numeric dataset."),
+        description: _t("Maximum value in a numeric dataset."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range to consider when calculating the maximum value.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to consider when calculating the maximum value.")),
+            arg("value1 (number, range<number>)", _t("The first value or range to consider when calculating the maximum value.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to consider when calculating the maximum value.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1) => {
@@ -11232,10 +11232,10 @@
     // MAXA
     // -----------------------------------------------------------------------------
     const MAXA = {
-        description: _lt("Maximum numeric value in a dataset."),
+        description: _t("Maximum numeric value in a dataset."),
         args: [
-            arg("value1 (any, range)", _lt("The first value or range to consider when calculating the maximum value.")),
-            arg("value2 (any, range, repeating)", _lt("Additional values or ranges to consider when calculating the maximum value.")),
+            arg("value1 (any, range)", _t("The first value or range to consider when calculating the maximum value.")),
+            arg("value2 (any, range, repeating)", _t("Additional values or ranges to consider when calculating the maximum value.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1) => {
@@ -11253,13 +11253,13 @@
     // MAXIFS
     // -----------------------------------------------------------------------------
     const MAXIFS = {
-        description: _lt("Returns the maximum value in a range of cells, filtered by a set of criteria."),
+        description: _t("Returns the maximum value in a range of cells, filtered by a set of criteria."),
         args: [
-            arg("range (range)", _lt("The range of cells from which the maximum will be determined.")),
-            arg("criteria_range1 (range)", _lt("The range of cells over which to evaluate criterion1.")),
-            arg("criterion1 (string)", _lt("The pattern or test to apply to criteria_range1, such that each cell that evaluates to TRUE will be included in the filtered set.")),
-            arg("criteria_range2 (any, range, repeating)", _lt("Additional ranges over which to evaluate the additional criteria. The filtered set will be the intersection of the sets produced by each criterion-range pair.")),
-            arg("criterion2 (string, repeating)", _lt("The pattern or test to apply to criteria_range2.")),
+            arg("range (range)", _t("The range of cells from which the maximum will be determined.")),
+            arg("criteria_range1 (range)", _t("The range of cells over which to evaluate criterion1.")),
+            arg("criterion1 (string)", _t("The pattern or test to apply to criteria_range1, such that each cell that evaluates to TRUE will be included in the filtered set.")),
+            arg("criteria_range2 (any, range, repeating)", _t("Additional ranges over which to evaluate the additional criteria. The filtered set will be the intersection of the sets produced by each criterion-range pair.")),
+            arg("criterion2 (string, repeating)", _t("The pattern or test to apply to criteria_range2.")),
         ],
         returns: ["NUMBER"],
         compute: function (range, ...args) {
@@ -11278,10 +11278,10 @@
     // MEDIAN
     // -----------------------------------------------------------------------------
     const MEDIAN = {
-        description: _lt("Median value in a numeric dataset."),
+        description: _t("Median value in a numeric dataset."),
         args: [
-            arg("value1 (any, range)", _lt("The first value or range to consider when calculating the median value.")),
-            arg("value2 (any, range, repeating)", _lt("Additional values or ranges to consider when calculating the median value.")),
+            arg("value1 (any, range)", _t("The first value or range to consider when calculating the median value.")),
+            arg("value2 (any, range, repeating)", _t("Additional values or ranges to consider when calculating the median value.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1) => {
@@ -11300,10 +11300,10 @@
     // MIN
     // -----------------------------------------------------------------------------
     const MIN = {
-        description: _lt("Minimum value in a numeric dataset."),
+        description: _t("Minimum value in a numeric dataset."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range to consider when calculating the minimum value.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to consider when calculating the minimum value.")),
+            arg("value1 (number, range<number>)", _t("The first value or range to consider when calculating the minimum value.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to consider when calculating the minimum value.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1) => {
@@ -11319,10 +11319,10 @@
     // MINA
     // -----------------------------------------------------------------------------
     const MINA = {
-        description: _lt("Minimum numeric value in a dataset."),
+        description: _t("Minimum numeric value in a dataset."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range to consider when calculating the minimum value.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to consider when calculating the minimum value.")),
+            arg("value1 (number, range<number>)", _t("The first value or range to consider when calculating the minimum value.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to consider when calculating the minimum value.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1) => {
@@ -11340,13 +11340,13 @@
     // MINIFS
     // -----------------------------------------------------------------------------
     const MINIFS = {
-        description: _lt("Returns the minimum value in a range of cells, filtered by a set of criteria."),
+        description: _t("Returns the minimum value in a range of cells, filtered by a set of criteria."),
         args: [
-            arg("range (range)", _lt("The range of cells from which the minimum will be determined.")),
-            arg("criteria_range1 (range)", _lt("The range of cells over which to evaluate criterion1.")),
-            arg("criterion1 (string)", _lt("The pattern or test to apply to criteria_range1, such that each cell that evaluates to TRUE will be included in the filtered set.")),
-            arg("criteria_range2 (any, range, repeating)", _lt("Additional ranges over which to evaluate the additional criteria. The filtered set will be the intersection of the sets produced by each criterion-range pair.")),
-            arg("criterion2 (string, repeating)", _lt("The pattern or test to apply to criteria_range2.")),
+            arg("range (range)", _t("The range of cells from which the minimum will be determined.")),
+            arg("criteria_range1 (range)", _t("The range of cells over which to evaluate criterion1.")),
+            arg("criterion1 (string)", _t("The pattern or test to apply to criteria_range1, such that each cell that evaluates to TRUE will be included in the filtered set.")),
+            arg("criteria_range2 (any, range, repeating)", _t("Additional ranges over which to evaluate the additional criteria. The filtered set will be the intersection of the sets produced by each criterion-range pair.")),
+            arg("criterion2 (string, repeating)", _t("The pattern or test to apply to criteria_range2.")),
         ],
         returns: ["NUMBER"],
         compute: function (range, ...args) {
@@ -11365,10 +11365,10 @@
     // PERCENTILE
     // -----------------------------------------------------------------------------
     const PERCENTILE = {
-        description: _lt("Value at a given percentile of a dataset."),
+        description: _t("Value at a given percentile of a dataset."),
         args: [
-            arg("data (any, range)", _lt("The array or range containing the dataset to consider.")),
-            arg("percentile (number)", _lt("The percentile whose value within data will be calculated and returned.")),
+            arg("data (any, range)", _t("The array or range containing the dataset to consider.")),
+            arg("percentile (number)", _t("The percentile whose value within data will be calculated and returned.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (data) => {
@@ -11383,10 +11383,10 @@
     // PERCENTILE.EXC
     // -----------------------------------------------------------------------------
     const PERCENTILE_EXC = {
-        description: _lt("Value at a given percentile of a dataset exclusive of 0 and 1."),
+        description: _t("Value at a given percentile of a dataset exclusive of 0 and 1."),
         args: [
-            arg("data (any, range)", _lt("The array or range containing the dataset to consider.")),
-            arg("percentile (number)", _lt("The percentile, exclusive of 0 and 1, whose value within 'data' will be calculated and returned.")),
+            arg("data (any, range)", _t("The array or range containing the dataset to consider.")),
+            arg("percentile (number)", _t("The percentile, exclusive of 0 and 1, whose value within 'data' will be calculated and returned.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (data) => {
@@ -11401,10 +11401,10 @@
     // PERCENTILE.INC
     // -----------------------------------------------------------------------------
     const PERCENTILE_INC = {
-        description: _lt("Value at a given percentile of a dataset."),
+        description: _t("Value at a given percentile of a dataset."),
         args: [
-            arg("data (any, range)", _lt("The array or range containing the dataset to consider.")),
-            arg("percentile (number)", _lt("The percentile whose value within data will be calculated and returned.")),
+            arg("data (any, range)", _t("The array or range containing the dataset to consider.")),
+            arg("percentile (number)", _t("The percentile whose value within data will be calculated and returned.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (data) => {
@@ -11419,10 +11419,10 @@
     // QUARTILE
     // -----------------------------------------------------------------------------
     const QUARTILE = {
-        description: _lt("Value nearest to a specific quartile of a dataset."),
+        description: _t("Value nearest to a specific quartile of a dataset."),
         args: [
-            arg("data (any, range)", _lt("The array or range containing the dataset to consider.")),
-            arg("quartile_number (number)", _lt("Which quartile value to return.")),
+            arg("data (any, range)", _t("The array or range containing the dataset to consider.")),
+            arg("quartile_number (number)", _t("Which quartile value to return.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (data) => {
@@ -11437,10 +11437,10 @@
     // QUARTILE.EXC
     // -----------------------------------------------------------------------------
     const QUARTILE_EXC = {
-        description: _lt("Value nearest to a specific quartile of a dataset exclusive of 0 and 4."),
+        description: _t("Value nearest to a specific quartile of a dataset exclusive of 0 and 4."),
         args: [
-            arg("data (any, range)", _lt("The array or range containing the dataset to consider.")),
-            arg("quartile_number (number)", _lt("Which quartile value, exclusive of 0 and 4, to return.")),
+            arg("data (any, range)", _t("The array or range containing the dataset to consider.")),
+            arg("quartile_number (number)", _t("Which quartile value, exclusive of 0 and 4, to return.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (data) => {
@@ -11456,10 +11456,10 @@
     // QUARTILE.INC
     // -----------------------------------------------------------------------------
     const QUARTILE_INC = {
-        description: _lt("Value nearest to a specific quartile of a dataset."),
+        description: _t("Value nearest to a specific quartile of a dataset."),
         args: [
-            arg("data (any, range)", _lt("The array or range containing the dataset to consider.")),
-            arg("quartile_number (number)", _lt("Which quartile value to return.")),
+            arg("data (any, range)", _t("The array or range containing the dataset to consider.")),
+            arg("quartile_number (number)", _t("Which quartile value to return.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (data) => {
@@ -11475,10 +11475,10 @@
     // SMALL
     // -----------------------------------------------------------------------------
     const SMALL = {
-        description: _lt("Nth smallest element in a data set."),
+        description: _t("Nth smallest element in a data set."),
         args: [
-            arg("data (any, range)", _lt("The array or range containing the dataset to consider.")),
-            arg("n (number)", _lt("The rank from smallest to largest of the element to return.")),
+            arg("data (any, range)", _t("The array or range containing the dataset to consider.")),
+            arg("n (number)", _t("The rank from smallest to largest of the element to return.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (data) => {
@@ -11501,8 +11501,8 @@
                 }
             });
             const result = largests.pop();
-            assert(() => result !== undefined, _lt(`[[FUNCTION_NAME]] has no valid input data.`));
-            assert(() => count >= _n, _lt("Function [[FUNCTION_NAME]] parameter 2 value (%s) is out of range.", _n.toString()));
+            assert(() => result !== undefined, _t(`[[FUNCTION_NAME]] has no valid input data.`));
+            assert(() => count >= _n, _t("Function [[FUNCTION_NAME]] parameter 2 value (%s) is out of range.", _n.toString()));
             return result;
         },
         isExported: true,
@@ -11511,10 +11511,10 @@
     // STDEV
     // -----------------------------------------------------------------------------
     const STDEV = {
-        description: _lt("Standard deviation."),
+        description: _t("Standard deviation."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the sample.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the sample.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the sample.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the sample.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11526,10 +11526,10 @@
     // STDEV.P
     // -----------------------------------------------------------------------------
     const STDEV_P = {
-        description: _lt("Standard deviation of entire population."),
+        description: _t("Standard deviation of entire population."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the population.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the population.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the population.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the population.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11541,10 +11541,10 @@
     // STDEV.S
     // -----------------------------------------------------------------------------
     const STDEV_S = {
-        description: _lt("Standard deviation."),
+        description: _t("Standard deviation."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the sample.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the sample.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the sample.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the sample.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11556,10 +11556,10 @@
     // STDEVA
     // -----------------------------------------------------------------------------
     const STDEVA = {
-        description: _lt("Standard deviation of sample (text as 0)."),
+        description: _t("Standard deviation of sample (text as 0)."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the sample.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the sample.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the sample.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the sample.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11571,10 +11571,10 @@
     // STDEVP
     // -----------------------------------------------------------------------------
     const STDEVP = {
-        description: _lt("Standard deviation of entire population."),
+        description: _t("Standard deviation of entire population."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the population.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the population.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the population.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the population.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11586,10 +11586,10 @@
     // STDEVPA
     // -----------------------------------------------------------------------------
     const STDEVPA = {
-        description: _lt("Standard deviation of entire population (text as 0)."),
+        description: _t("Standard deviation of entire population (text as 0)."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the population.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the population.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the population.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the population.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11601,10 +11601,10 @@
     // VAR
     // -----------------------------------------------------------------------------
     const VAR = {
-        description: _lt("Variance."),
+        description: _t("Variance."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the sample.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the sample.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the sample.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the sample.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11616,10 +11616,10 @@
     // VAR.P
     // -----------------------------------------------------------------------------
     const VAR_P = {
-        description: _lt("Variance of entire population."),
+        description: _t("Variance of entire population."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the population.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the population.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the population.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the population.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11631,10 +11631,10 @@
     // VAR.S
     // -----------------------------------------------------------------------------
     const VAR_S = {
-        description: _lt("Variance."),
+        description: _t("Variance."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the sample.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the sample.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the sample.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the sample.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11646,10 +11646,10 @@
     // VARA
     // -----------------------------------------------------------------------------
     const VARA = {
-        description: _lt("Variance of sample (text as 0)."),
+        description: _t("Variance of sample (text as 0)."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the sample.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the sample.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the sample.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the sample.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11661,10 +11661,10 @@
     // VARP
     // -----------------------------------------------------------------------------
     const VARP = {
-        description: _lt("Variance of entire population."),
+        description: _t("Variance of entire population."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the population.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the population.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the population.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the population.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11676,10 +11676,10 @@
     // VARPA
     // -----------------------------------------------------------------------------
     const VARPA = {
-        description: _lt("Variance of entire population (text as 0)."),
+        description: _t("Variance of entire population (text as 0)."),
         args: [
-            arg("value1 (number, range<number>)", _lt("The first value or range of the population.")),
-            arg("value2 (number, range<number>, repeating)", _lt("Additional values or ranges to include in the population.")),
+            arg("value1 (number, range<number>)", _t("The first value or range of the population.")),
+            arg("value2 (number, range<number>, repeating)", _t("Additional values or ranges to include in the population.")),
         ],
         returns: ["NUMBER"],
         compute: function (...values) {
@@ -11751,27 +11751,27 @@
         // first row of database or a numeric index indicating which column to consider,
         // where the first column has the value 1.
         if (typeof field !== "number" && typeof field !== "string") {
-            throw new Error(_lt("The field must be a number or a string"));
+            throw new Error(_t("The field must be a number or a string"));
         }
         let index;
         if (typeof field === "number") {
             index = Math.trunc(field) - 1;
             if (index < 0 || dimRowDB - 1 < index) {
-                throw new Error(_lt("The field (%s) must be one of %s or must be a number between 1 and %s inclusive.", field.toString(), dimRowDB.toString()));
+                throw new Error(_t("The field (%s) must be one of %s or must be a number between 1 and %s inclusive.", field.toString(), dimRowDB.toString()));
             }
         }
         else {
             const colName = toString(field).toUpperCase();
             index = indexColNameDB.get(colName) ?? -1;
             if (index === -1) {
-                throw new Error(_lt("The field (%s) must be one of %s.", toString(field), [...indexColNameDB.keys()].toString()));
+                throw new Error(_t("The field (%s) must be one of %s.", toString(field), [...indexColNameDB.keys()].toString()));
             }
         }
         // Example continuation: index = 2
         // 3 - For each criteria row, find database row that correspond ----------------------------------
         const dimColCriteria = criteria[0].length;
         if (dimColCriteria < 2) {
-            throw new Error(_lt("The criteria range contains %s row, it must be at least 2 rows.", dimColCriteria.toString()));
+            throw new Error(_t("The criteria range contains %s row, it must be at least 2 rows.", dimColCriteria.toString()));
         }
         let matchingRows = new Set();
         const dimColDB = database[0].length;
@@ -11817,15 +11817,15 @@
         return matchingCells;
     }
     const databaseArgs = [
-        arg("database (range)", _lt("The array or range containing the data to consider, structured in such a way that the first row contains the labels for each column's values.")),
-        arg("field (any)", _lt("Indicates which column in database contains the values to be extracted and operated on.")),
-        arg("criteria (range)", _lt("An array or range containing zero or more criteria to filter the database values by before operating.")),
+        arg("database (range)", _t("The array or range containing the data to consider, structured in such a way that the first row contains the labels for each column's values.")),
+        arg("field (any)", _t("Indicates which column in database contains the values to be extracted and operated on.")),
+        arg("criteria (range)", _t("An array or range containing zero or more criteria to filter the database values by before operating.")),
     ];
     // -----------------------------------------------------------------------------
     // DAVERAGE
     // -----------------------------------------------------------------------------
     const DAVERAGE = {
-        description: _lt("Average of a set of values from a table-like range."),
+        description: _t("Average of a set of values from a table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11838,7 +11838,7 @@
     // DCOUNT
     // -----------------------------------------------------------------------------
     const DCOUNT = {
-        description: _lt("Counts values from a table-like range."),
+        description: _t("Counts values from a table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11851,7 +11851,7 @@
     // DCOUNTA
     // -----------------------------------------------------------------------------
     const DCOUNTA = {
-        description: _lt("Counts values and text from a table-like range."),
+        description: _t("Counts values and text from a table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11864,12 +11864,12 @@
     // DGET
     // -----------------------------------------------------------------------------
     const DGET = {
-        description: _lt("Single value from a table-like range."),
+        description: _t("Single value from a table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
             const cells = getMatchingCells(database, field, criteria);
-            assert(() => cells.length === 1, _lt("More than one match found in DGET evaluation."));
+            assert(() => cells.length === 1, _t("More than one match found in DGET evaluation."));
             return cells[0];
         },
         isExported: true,
@@ -11878,7 +11878,7 @@
     // DMAX
     // -----------------------------------------------------------------------------
     const DMAX = {
-        description: _lt("Maximum of values from a table-like range."),
+        description: _t("Maximum of values from a table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11891,7 +11891,7 @@
     // DMIN
     // -----------------------------------------------------------------------------
     const DMIN = {
-        description: _lt("Minimum of values from a table-like range."),
+        description: _t("Minimum of values from a table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11904,7 +11904,7 @@
     // DPRODUCT
     // -----------------------------------------------------------------------------
     const DPRODUCT = {
-        description: _lt("Product of values from a table-like range."),
+        description: _t("Product of values from a table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11917,7 +11917,7 @@
     // DSTDEV
     // -----------------------------------------------------------------------------
     const DSTDEV = {
-        description: _lt("Standard deviation of population sample from table."),
+        description: _t("Standard deviation of population sample from table."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11930,7 +11930,7 @@
     // DSTDEVP
     // -----------------------------------------------------------------------------
     const DSTDEVP = {
-        description: _lt("Standard deviation of entire population from table."),
+        description: _t("Standard deviation of entire population from table."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11943,7 +11943,7 @@
     // DSUM
     // -----------------------------------------------------------------------------
     const DSUM = {
-        description: _lt("Sum of values from a table-like range."),
+        description: _t("Sum of values from a table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11956,7 +11956,7 @@
     // DVAR
     // -----------------------------------------------------------------------------
     const DVAR = {
-        description: _lt("Variance of population sample from table-like range."),
+        description: _t("Variance of population sample from table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -11969,7 +11969,7 @@
     // DVARP
     // -----------------------------------------------------------------------------
     const DVARP = {
-        description: _lt("Variance of a population from a table-like range."),
+        description: _t("Variance of a population from a table-like range."),
         args: databaseArgs,
         returns: ["NUMBER"],
         compute: function (database, field, criteria) {
@@ -12010,11 +12010,11 @@
     // DATE
     // -----------------------------------------------------------------------------
     const DATE = {
-        description: _lt("Converts year/month/day into a date."),
+        description: _t("Converts year/month/day into a date."),
         args: [
-            arg("year (number)", _lt("The year component of the date.")),
-            arg("month (number)", _lt("The month component of the date.")),
-            arg("day (number)", _lt("The day component of the date.")),
+            arg("year (number)", _t("The year component of the date.")),
+            arg("month (number)", _t("The month component of the date.")),
+            arg("day (number)", _t("The day component of the date.")),
         ],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
@@ -12023,14 +12023,14 @@
             const _month = Math.trunc(toNumber(month));
             const _day = Math.trunc(toNumber(day));
             // For years less than 0 or greater than 10000, return #ERROR.
-            assert(() => 0 <= _year && _year <= 9999, _lt("The year (%s) must be between 0 and 9999 inclusive.", _year.toString()));
+            assert(() => 0 <= _year && _year <= 9999, _t("The year (%s) must be between 0 and 9999 inclusive.", _year.toString()));
             // Between 0 and 1899, we add that value to 1900 to calculate the year
             if (_year < 1900) {
                 _year += 1900;
             }
             const jsDate = new Date(_year, _month - 1, _day);
             const result = jsDateToRoundNumber(jsDate);
-            assert(() => result >= 0, _lt(`The function [[FUNCTION_NAME]] result must be greater than or equal 01/01/1900.`));
+            assert(() => result >= 0, _t(`The function [[FUNCTION_NAME]] result must be greater than or equal 01/01/1900.`));
             return result;
         },
         isExported: true,
@@ -12039,11 +12039,11 @@
     // DATEDIF
     // -----------------------------------------------------------------------------
     const DATEDIF = {
-        description: _lt("Calculates the number of days, months, or years between two dates."),
+        description: _t("Calculates the number of days, months, or years between two dates."),
         args: [
-            arg("start_date (date)", _lt("The start date to consider in the calculation. Must be a reference to a cell containing a DATE, a function returning a DATE type, or a number.")),
-            arg("end_date (date)", _lt("The end date to consider in the calculation. Must be a reference to a cell containing a DATE, a function returning a DATE type, or a number.")),
-            arg("unit (string)", _lt(`A text abbreviation for unit of time. Accepted values are "Y" (the number of whole years between start_date and end_date), "M" (the number of whole months between start_date and end_date), "D" (the number of days between start_date and end_date), "MD" (the number of days between start_date and end_date after subtracting whole months), "YM" (the number of whole months between start_date and end_date after subtracting whole years), "YD" (the number of days between start_date and end_date, assuming start_date and end_date were no more than one year apart).`)),
+            arg("start_date (date)", _t("The start date to consider in the calculation. Must be a reference to a cell containing a DATE, a function returning a DATE type, or a number.")),
+            arg("end_date (date)", _t("The end date to consider in the calculation. Must be a reference to a cell containing a DATE, a function returning a DATE type, or a number.")),
+            arg("unit (string)", _t(`A text abbreviation for unit of time. Accepted values are "Y" (the number of whole years between start_date and end_date), "M" (the number of whole months between start_date and end_date), "D" (the number of days between start_date and end_date), "MD" (the number of days between start_date and end_date after subtracting whole months), "YM" (the number of whole months between start_date and end_date after subtracting whole years), "YD" (the number of days between start_date and end_date, assuming start_date and end_date were no more than one year apart).`)),
         ],
         returns: ["NUMBER"],
         compute: function (startDate, endDate, unit) {
@@ -12053,7 +12053,7 @@
             const _endDate = Math.trunc(toNumber(endDate));
             const jsStartDate = numberToJsDate(_startDate);
             const jsEndDate = numberToJsDate(_endDate);
-            assert(() => _endDate >= _startDate, _lt("start_date (%s) should be on or before end_date (%s).", jsStartDate.toLocaleDateString(), jsEndDate.toLocaleDateString()));
+            assert(() => _endDate >= _startDate, _t("start_date (%s) should be on or before end_date (%s).", jsStartDate.toLocaleDateString(), jsEndDate.toLocaleDateString()));
             switch (_unit) {
                 case TIME_UNIT.WHOLE_YEARS:
                     return getTimeDifferenceInWholeYears(jsStartDate, jsEndDate);
@@ -12096,13 +12096,13 @@
     // DATEVALUE
     // -----------------------------------------------------------------------------
     const DATEVALUE = {
-        description: _lt("Converts a date string to a date value."),
-        args: [arg("date_string (string)", _lt("The string representing the date."))],
+        description: _t("Converts a date string to a date value."),
+        args: [arg("date_string (string)", _t("The string representing the date."))],
         returns: ["NUMBER"],
         compute: function (dateString) {
             const _dateString = toString(dateString);
             const internalDate = parseDateTime(_dateString);
-            assert(() => internalDate !== null, _lt("The date_string (%s) cannot be parsed to date/time.", _dateString.toString()));
+            assert(() => internalDate !== null, _t("The date_string (%s) cannot be parsed to date/time.", _dateString.toString()));
             return Math.trunc(internalDate.value);
         },
         isExported: true,
@@ -12111,8 +12111,8 @@
     // DAY
     // -----------------------------------------------------------------------------
     const DAY = {
-        description: _lt("Day of the month that a specific date falls on."),
-        args: [arg("date (string)", _lt("The date from which to extract the day."))],
+        description: _t("Day of the month that a specific date falls on."),
+        args: [arg("date (string)", _t("The date from which to extract the day."))],
         returns: ["NUMBER"],
         compute: function (date) {
             return toJsDate(date).getDate();
@@ -12123,10 +12123,10 @@
     // DAYS
     // -----------------------------------------------------------------------------
     const DAYS = {
-        description: _lt("Number of days between two dates."),
+        description: _t("Number of days between two dates."),
         args: [
-            arg("end_date (date)", _lt("The end of the date range.")),
-            arg("start_date (date)", _lt("The start of the date range.")),
+            arg("end_date (date)", _t("The end of the date range.")),
+            arg("start_date (date)", _t("The start of the date range.")),
         ],
         returns: ["NUMBER"],
         compute: function (endDate, startDate) {
@@ -12142,11 +12142,11 @@
     // -----------------------------------------------------------------------------
     const DEFAULT_DAY_COUNT_METHOD = 0;
     const DAYS360 = {
-        description: _lt("Number of days between two dates on a 360-day year (months of 30 days)."),
+        description: _t("Number of days between two dates on a 360-day year (months of 30 days)."),
         args: [
-            arg("start_date (date)", _lt("The start date to consider in the calculation.")),
-            arg("end_date (date)", _lt("The end date to consider in the calculation.")),
-            arg(`method (number, default=${DEFAULT_DAY_COUNT_METHOD})`, _lt("An indicator of what day count method to use. (0) US NASD method (1) European method")),
+            arg("start_date (date)", _t("The start date to consider in the calculation.")),
+            arg("end_date (date)", _t("The end date to consider in the calculation.")),
+            arg(`method (number, default=${DEFAULT_DAY_COUNT_METHOD})`, _t("An indicator of what day count method to use. (0) US NASD method (1) European method")),
         ],
         returns: ["NUMBER"],
         compute: function (startDate, endDate, method = DEFAULT_DAY_COUNT_METHOD) {
@@ -12162,10 +12162,10 @@
     // EDATE
     // -----------------------------------------------------------------------------
     const EDATE = {
-        description: _lt("Date a number of months before/after another date."),
+        description: _t("Date a number of months before/after another date."),
         args: [
-            arg("start_date (date)", _lt("The date from which to calculate the result.")),
-            arg("months (number)", _lt("The number of months before (negative) or after (positive) 'start_date' to calculate.")),
+            arg("start_date (date)", _t("The date from which to calculate the result.")),
+            arg("months (number)", _t("The number of months before (negative) or after (positive) 'start_date' to calculate.")),
         ],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
@@ -12181,10 +12181,10 @@
     // EOMONTH
     // -----------------------------------------------------------------------------
     const EOMONTH = {
-        description: _lt("Last day of a month before or after a date."),
+        description: _t("Last day of a month before or after a date."),
         args: [
-            arg("start_date (date)", _lt("The date from which to calculate the result.")),
-            arg("months (number)", _lt("The number of months before (negative) or after (positive) 'start_date' to consider.")),
+            arg("start_date (date)", _t("The date from which to calculate the result.")),
+            arg("months (number)", _t("The number of months before (negative) or after (positive) 'start_date' to consider.")),
         ],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
@@ -12202,8 +12202,8 @@
     // HOUR
     // -----------------------------------------------------------------------------
     const HOUR = {
-        description: _lt("Hour component of a specific time."),
-        args: [arg("time (date)", _lt("The time from which to calculate the hour component."))],
+        description: _t("Hour component of a specific time."),
+        args: [arg("time (date)", _t("The time from which to calculate the hour component."))],
         returns: ["NUMBER"],
         compute: function (date) {
             return toJsDate(date).getHours();
@@ -12214,9 +12214,9 @@
     // ISOWEEKNUM
     // -----------------------------------------------------------------------------
     const ISOWEEKNUM = {
-        description: _lt("ISO week number of the year."),
+        description: _t("ISO week number of the year."),
         args: [
-            arg("date (date)", _lt("The date for which to determine the ISO week number. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
+            arg("date (date)", _t("The date for which to determine the ISO week number. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
         ],
         returns: ["NUMBER"],
         compute: function (date) {
@@ -12288,8 +12288,8 @@
     // MINUTE
     // -----------------------------------------------------------------------------
     const MINUTE = {
-        description: _lt("Minute component of a specific time."),
-        args: [arg("time (date)", _lt("The time from which to calculate the minute component."))],
+        description: _t("Minute component of a specific time."),
+        args: [arg("time (date)", _t("The time from which to calculate the minute component."))],
         returns: ["NUMBER"],
         compute: function (date) {
             return toJsDate(date).getMinutes();
@@ -12300,8 +12300,8 @@
     // MONTH
     // -----------------------------------------------------------------------------
     const MONTH = {
-        description: _lt("Month of the year a specific date falls in"),
-        args: [arg("date (date)", _lt("The date from which to extract the month."))],
+        description: _t("Month of the year a specific date falls in"),
+        args: [arg("date (date)", _t("The date from which to extract the month."))],
         returns: ["NUMBER"],
         compute: function (date) {
             return toJsDate(date).getMonth() + 1;
@@ -12312,11 +12312,11 @@
     // NETWORKDAYS
     // -----------------------------------------------------------------------------
     const NETWORKDAYS = {
-        description: _lt("Net working days between two provided days."),
+        description: _t("Net working days between two provided days."),
         args: [
-            arg("start_date (date)", _lt("The start date of the period from which to calculate the number of net working days.")),
-            arg("end_date (date)", _lt("The end date of the period from which to calculate the number of net working days.")),
-            arg("holidays (date, range<date>, optional)", _lt("A range or array constant containing the date serial numbers to consider holidays.")),
+            arg("start_date (date)", _t("The start date of the period from which to calculate the number of net working days.")),
+            arg("end_date (date)", _t("The end date of the period from which to calculate the number of net working days.")),
+            arg("holidays (date, range<date>, optional)", _t("A range or array constant containing the date serial numbers to consider holidays.")),
         ],
         returns: ["NUMBER"],
         compute: function (startDate, endDate, holidays) {
@@ -12361,7 +12361,7 @@
                     }
                 }
                 return true;
-            }, _lt('When weekend is a string (%s) it must be composed of "0" or "1".', weekend));
+            }, _t('When weekend is a string (%s) it must be composed of "0" or "1".', weekend));
             let result = [];
             for (let i = 0; i < 7; i++) {
                 if (weekend[i] === "1") {
@@ -12372,7 +12372,7 @@
         }
         //case "number"
         if (typeof weekend === "number") {
-            assert(() => (1 <= weekend && weekend <= 7) || (11 <= weekend && weekend <= 17), _lt("The weekend (%s) must be a string or a number in the range 1-7 or 11-17.", weekend.toString()));
+            assert(() => (1 <= weekend && weekend <= 7) || (11 <= weekend && weekend <= 17), _t("The weekend (%s) must be a string or a number in the range 1-7 or 11-17.", weekend.toString()));
             // case 1 <= weekend <= 7
             if (weekend <= 7) {
                 // 1 = Saturday/Sunday are weekends
@@ -12388,15 +12388,15 @@
             // 17 = Saturday is the only weekend.
             return [weekend - 11];
         }
-        throw Error(_lt("The weekend must be a number or a string."));
+        throw Error(_t("The weekend must be a number or a string."));
     }
     const NETWORKDAYS_INTL = {
-        description: _lt("Net working days between two dates (specifying weekends)."),
+        description: _t("Net working days between two dates (specifying weekends)."),
         args: [
-            arg("start_date (date)", _lt("The start date of the period from which to calculate the number of net working days.")),
-            arg("end_date (date)", _lt("The end date of the period from which to calculate the number of net working days.")),
-            arg(`weekend (any, default=${DEFAULT_WEEKEND})`, _lt("A number or string representing which days of the week are considered weekends.")),
-            arg("holidays (date, range<date>, optional)", _lt("A range or array constant containing the dates to consider as holidays.")),
+            arg("start_date (date)", _t("The start date of the period from which to calculate the number of net working days.")),
+            arg("end_date (date)", _t("The end date of the period from which to calculate the number of net working days.")),
+            arg(`weekend (any, default=${DEFAULT_WEEKEND})`, _t("A number or string representing which days of the week are considered weekends.")),
+            arg("holidays (date, range<date>, optional)", _t("A range or array constant containing the dates to consider as holidays.")),
         ],
         returns: ["NUMBER"],
         compute: function (startDate, endDate, weekend = DEFAULT_WEEKEND, holidays) {
@@ -12431,7 +12431,7 @@
     // NOW
     // -----------------------------------------------------------------------------
     const NOW = {
-        description: _lt("Current date and time as a date value."),
+        description: _t("Current date and time as a date value."),
         args: [],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy hh:mm:ss",
@@ -12448,8 +12448,8 @@
     // SECOND
     // -----------------------------------------------------------------------------
     const SECOND = {
-        description: _lt("Minute component of a specific time."),
-        args: [arg("time (date)", _lt("The time from which to calculate the second component."))],
+        description: _t("Minute component of a specific time."),
+        args: [arg("time (date)", _t("The time from which to calculate the second component."))],
         returns: ["NUMBER"],
         compute: function (date) {
             return toJsDate(date).getSeconds();
@@ -12460,11 +12460,11 @@
     // TIME
     // -----------------------------------------------------------------------------
     const TIME = {
-        description: _lt("Converts hour/minute/second into a time."),
+        description: _t("Converts hour/minute/second into a time."),
         args: [
-            arg("hour (number)", _lt("The hour component of the time.")),
-            arg("minute (number)", _lt("The minute component of the time.")),
-            arg("second (number)", _lt("The second component of the time.")),
+            arg("hour (number)", _t("The hour component of the time.")),
+            arg("minute (number)", _t("The minute component of the time.")),
+            arg("second (number)", _t("The second component of the time.")),
         ],
         returns: ["DATE"],
         computeFormat: () => "hh:mm:ss a",
@@ -12477,7 +12477,7 @@
             _hour += Math.floor(_minute / 60);
             _minute = (_minute % 60) + (_minute < 0 ? 60 : 0);
             _hour %= 24;
-            assert(() => _hour >= 0, _lt(`The function [[FUNCTION_NAME]] result cannot be negative`));
+            assert(() => _hour >= 0, _t(`The function [[FUNCTION_NAME]] result cannot be negative`));
             return _hour / 24 + _minute / (24 * 60) + _second / (24 * 60 * 60);
         },
         isExported: true,
@@ -12486,13 +12486,13 @@
     // TIMEVALUE
     // -----------------------------------------------------------------------------
     const TIMEVALUE = {
-        description: _lt("Converts a time string into its serial number representation."),
-        args: [arg("time_string (string)", _lt("The string that holds the time representation."))],
+        description: _t("Converts a time string into its serial number representation."),
+        args: [arg("time_string (string)", _t("The string that holds the time representation."))],
         returns: ["NUMBER"],
         compute: function (timeString) {
             const _timeString = toString(timeString);
             const internalDate = parseDateTime(_timeString);
-            assert(() => internalDate !== null, _lt("The time_string (%s) cannot be parsed to date/time.", _timeString));
+            assert(() => internalDate !== null, _t("The time_string (%s) cannot be parsed to date/time.", _timeString));
             const result = internalDate.value - Math.trunc(internalDate.value);
             return result < 0 ? 1 + result : result;
         },
@@ -12502,7 +12502,7 @@
     // TODAY
     // -----------------------------------------------------------------------------
     const TODAY = {
-        description: _lt("Current date as a date value."),
+        description: _t("Current date as a date value."),
         args: [],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
@@ -12517,17 +12517,17 @@
     // WEEKDAY
     // -----------------------------------------------------------------------------
     const WEEKDAY = {
-        description: _lt("Day of the week of the date provided (as number)."),
+        description: _t("Day of the week of the date provided (as number)."),
         args: [
-            arg("date (date)", _lt("The date for which to determine the day of the week. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
-            arg(`type (number, default=${DEFAULT_TYPE})`, _lt("A number indicating which numbering system to use to represent weekdays. By default, counts starting with Sunday = 1.")),
+            arg("date (date)", _t("The date for which to determine the day of the week. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
+            arg(`type (number, default=${DEFAULT_TYPE})`, _t("A number indicating which numbering system to use to represent weekdays. By default, counts starting with Sunday = 1.")),
         ],
         returns: ["NUMBER"],
         compute: function (date, type = DEFAULT_TYPE) {
             const _date = toJsDate(date);
             const _type = Math.round(toNumber(type));
             const m = _date.getDay();
-            assert(() => [1, 2, 3].includes(_type), _lt("The type (%s) must be 1, 2 or 3.", _type.toString()));
+            assert(() => [1, 2, 3].includes(_type), _t("The type (%s) must be 1, 2 or 3.", _type.toString()));
             if (_type === 1)
                 return m + 1;
             if (_type === 2)
@@ -12540,16 +12540,16 @@
     // WEEKNUM
     // -----------------------------------------------------------------------------
     const WEEKNUM = {
-        description: _lt("Week number of the year."),
+        description: _t("Week number of the year."),
         args: [
-            arg("date (date)", _lt("The date for which to determine the week number. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
-            arg(`type (number, default=${DEFAULT_TYPE})`, _lt("A number representing the day that a week starts on. Sunday = 1.")),
+            arg("date (date)", _t("The date for which to determine the week number. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
+            arg(`type (number, default=${DEFAULT_TYPE})`, _t("A number representing the day that a week starts on. Sunday = 1.")),
         ],
         returns: ["NUMBER"],
         compute: function (date, type = DEFAULT_TYPE) {
             const _date = toJsDate(date);
             const _type = Math.round(toNumber(type));
-            assert(() => _type === 1 || _type === 2 || (11 <= _type && _type <= 17) || _type === 21, _lt("The type (%s) is out of range.", _type.toString()));
+            assert(() => _type === 1 || _type === 2 || (11 <= _type && _type <= 17) || _type === 21, _t("The type (%s) is out of range.", _type.toString()));
             if (_type === 21) {
                 return ISOWEEKNUM.compute(date);
             }
@@ -12580,11 +12580,11 @@
     // WORKDAY
     // -----------------------------------------------------------------------------
     const WORKDAY = {
-        description: _lt("Date after a number of workdays."),
+        description: _t("Date after a number of workdays."),
         args: [
-            arg("start_date (date)", _lt("The date from which to begin counting.")),
-            arg("num_days (number)", _lt("The number of working days to advance from start_date. If negative, counts backwards.")),
-            arg("holidays (date, range<date>, optional)", _lt("A range or array constant containing the dates to consider holidays.")),
+            arg("start_date (date)", _t("The date from which to begin counting.")),
+            arg("num_days (number)", _t("The number of working days to advance from start_date. If negative, counts backwards.")),
+            arg("holidays (date, range<date>, optional)", _t("A range or array constant containing the dates to consider holidays.")),
         ],
         returns: ["NUMBER"],
         computeFormat: () => "m/d/yyyy",
@@ -12597,12 +12597,12 @@
     // WORKDAY.INTL
     // -----------------------------------------------------------------------------
     const WORKDAY_INTL = {
-        description: _lt("Date after a number of workdays (specifying weekends)."),
+        description: _t("Date after a number of workdays (specifying weekends)."),
         args: [
-            arg("start_date (date)", _lt("The date from which to begin counting.")),
-            arg("num_days (number)", _lt("The number of working days to advance from start_date. If negative, counts backwards.")),
-            arg(`weekend (any, default=${DEFAULT_WEEKEND})`, _lt("A number or string representing which days of the week are considered weekends.")),
-            arg("holidays (date, range<date>, optional)", _lt("A range or array constant containing the dates to consider holidays.")),
+            arg("start_date (date)", _t("The date from which to begin counting.")),
+            arg("num_days (number)", _t("The number of working days to advance from start_date. If negative, counts backwards.")),
+            arg(`weekend (any, default=${DEFAULT_WEEKEND})`, _t("A number or string representing which days of the week are considered weekends.")),
+            arg("holidays (date, range<date>, optional)", _t("A range or array constant containing the dates to consider holidays.")),
         ],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
@@ -12610,7 +12610,7 @@
             let _startDate = toJsDate(startDate);
             let _numDays = Math.trunc(toNumber(numDays));
             if (typeof weekend === "string") {
-                assert(() => weekend !== "1111111", _lt("The weekend (%s) must be different from '1111111'.", weekend));
+                assert(() => weekend !== "1111111", _t("The weekend (%s) must be different from '1111111'.", weekend));
             }
             const daysWeekend = weekendToDayNumber(weekend);
             let timesHoliday = new Set();
@@ -12640,8 +12640,8 @@
     // YEAR
     // -----------------------------------------------------------------------------
     const YEAR = {
-        description: _lt("Year specified by a given date."),
-        args: [arg("date (date)", _lt("The date from which to extract the year."))],
+        description: _t("Year specified by a given date."),
+        args: [arg("date (date)", _t("The date from which to extract the year."))],
         returns: ["NUMBER"],
         compute: function (date) {
             return toJsDate(date).getFullYear();
@@ -12653,20 +12653,20 @@
     // -----------------------------------------------------------------------------
     const DEFAULT_DAY_COUNT_CONVENTION$1 = 0;
     const YEARFRAC = {
-        description: _lt("Exact number of years between two dates."),
+        description: _t("Exact number of years between two dates."),
         args: [
-            arg("start_date (date)", _lt("The start date to consider in the calculation. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
-            arg("end_date (date)", _lt("The end date to consider in the calculation. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION$1})`, _lt("An indicator of what day count method to use.")),
+            arg("start_date (date)", _t("The start date to consider in the calculation. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
+            arg("end_date (date)", _t("The end date to consider in the calculation. Must be a reference to a cell containing a date, a function returning a date type, or a number.")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION$1})`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (startDate, endDate, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION$1) {
             let _startDate = Math.trunc(toNumber(startDate));
             let _endDate = Math.trunc(toNumber(endDate));
             const _dayCountConvention = Math.trunc(toNumber(dayCountConvention));
-            assert(() => _startDate >= 0, _lt("The start_date (%s) must be positive or null.", _startDate.toString()));
-            assert(() => _endDate >= 0, _lt("The end_date (%s) must be positive or null.", _endDate.toString()));
-            assert(() => 0 <= _dayCountConvention && _dayCountConvention <= 4, _lt("The day_count_convention (%s) must be between 0 and 4 inclusive.", _dayCountConvention.toString()));
+            assert(() => _startDate >= 0, _t("The start_date (%s) must be positive or null.", _startDate.toString()));
+            assert(() => _endDate >= 0, _t("The end_date (%s) must be positive or null.", _endDate.toString()));
+            assert(() => 0 <= _dayCountConvention && _dayCountConvention <= 4, _t("The day_count_convention (%s) must be between 0 and 4 inclusive.", _dayCountConvention.toString()));
             return getYearFrac(_startDate, _endDate, _dayCountConvention);
         },
     };
@@ -12674,8 +12674,8 @@
     // MONTH.START
     // -----------------------------------------------------------------------------
     const MONTH_START = {
-        description: _lt("First day of the month preceding a date."),
-        args: [arg("date (date)", _lt("The date from which to calculate the result."))],
+        description: _t("First day of the month preceding a date."),
+        args: [arg("date (date)", _t("The date from which to calculate the result."))],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
         compute: function (date) {
@@ -12690,8 +12690,8 @@
     // MONTH.END
     // -----------------------------------------------------------------------------
     const MONTH_END = {
-        description: _lt("Last day of the month following a date."),
-        args: [arg("date (date)", _lt("The date from which to calculate the result."))],
+        description: _t("Last day of the month following a date."),
+        args: [arg("date (date)", _t("The date from which to calculate the result."))],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
         compute: function (date) {
@@ -12702,8 +12702,8 @@
     // QUARTER
     // -----------------------------------------------------------------------------
     const QUARTER = {
-        description: _lt("Quarter of the year a specific date falls in"),
-        args: [arg("date (date)", _lt("The date from which to extract the quarter."))],
+        description: _t("Quarter of the year a specific date falls in"),
+        args: [arg("date (date)", _t("The date from which to extract the quarter."))],
         returns: ["NUMBER"],
         compute: function (date) {
             return Math.ceil((toJsDate(date).getMonth() + 1) / 3);
@@ -12713,8 +12713,8 @@
     // QUARTER.START
     // -----------------------------------------------------------------------------
     const QUARTER_START = {
-        description: _lt("First day of the quarter of the year a specific date falls in."),
-        args: [arg("date (date)", _lt("The date from which to calculate the start of quarter."))],
+        description: _t("First day of the quarter of the year a specific date falls in."),
+        args: [arg("date (date)", _t("The date from which to calculate the start of quarter."))],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
         compute: function (date) {
@@ -12728,8 +12728,8 @@
     // QUARTER.END
     // -----------------------------------------------------------------------------
     const QUARTER_END = {
-        description: _lt("Last day of the quarter of the year a specific date falls in."),
-        args: [arg("date (date)", _lt("The date from which to calculate the end of quarter."))],
+        description: _t("Last day of the quarter of the year a specific date falls in."),
+        args: [arg("date (date)", _t("The date from which to calculate the end of quarter."))],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
         compute: function (date) {
@@ -12743,8 +12743,8 @@
     // YEAR.START
     // -----------------------------------------------------------------------------
     const YEAR_START = {
-        description: _lt("First day of the year a specific date falls in."),
-        args: [arg("date (date)", _lt("The date from which to calculate the start of the year."))],
+        description: _t("First day of the year a specific date falls in."),
+        args: [arg("date (date)", _t("The date from which to calculate the start of the year."))],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
         compute: function (date) {
@@ -12757,8 +12757,8 @@
     // YEAR.END
     // -----------------------------------------------------------------------------
     const YEAR_END = {
-        description: _lt("Last day of the year a specific date falls in."),
-        args: [arg("date (date)", _lt("The date from which to calculate the end of the year."))],
+        description: _t("Last day of the year a specific date falls in."),
+        args: [arg("date (date)", _t("The date from which to calculate the end of the year."))],
         returns: ["DATE"],
         computeFormat: () => "m/d/yyyy",
         compute: function (date) {
@@ -12809,10 +12809,10 @@
     // DELTA
     // -----------------------------------------------------------------------------
     const DELTA = {
-        description: _lt("Compare two numeric values, returning 1 if they're equal."),
+        description: _t("Compare two numeric values, returning 1 if they're equal."),
         args: [
-            arg(" (number)", _lt("The first number to compare.")),
-            arg(` (number, default=${DEFAULT_DELTA_ARG})`, _lt("The second number to compare.")),
+            arg(" (number)", _t("The first number to compare.")),
+            arg(` (number, default=${DEFAULT_DELTA_ARG})`, _t("The second number to compare.")),
         ],
         returns: ["NUMBER"],
         compute: function (number1, number2 = DEFAULT_DELTA_ARG) {
@@ -12830,77 +12830,77 @@
 
     /** Assert maturity date > settlement date */
     function assertMaturityAndSettlementDatesAreValid(settlement, maturity) {
-        assert(() => settlement < maturity, _lt("The maturity (%s) must be strictly greater than the settlement (%s).", maturity.toString(), settlement.toString()));
+        assert(() => settlement < maturity, _t("The maturity (%s) must be strictly greater than the settlement (%s).", maturity.toString(), settlement.toString()));
     }
     /** Assert settlement date > issue date */
     function assertSettlementAndIssueDatesAreValid(settlement, issue) {
-        assert(() => issue < settlement, _lt("The settlement date (%s) must be strictly greater than the issue date (%s).", settlement.toString(), issue.toString()));
+        assert(() => issue < settlement, _t("The settlement date (%s) must be strictly greater than the issue date (%s).", settlement.toString(), issue.toString()));
     }
     /** Assert coupon frequency is in [1, 2, 4] */
     function assertCouponFrequencyIsValid(frequency) {
-        assert(() => [1, 2, 4].includes(frequency), _lt("The frequency (%s) must be one of %s", frequency.toString(), [1, 2, 4].toString()));
+        assert(() => [1, 2, 4].includes(frequency), _t("The frequency (%s) must be one of %s", frequency.toString(), [1, 2, 4].toString()));
     }
     /** Assert dayCountConvention is between 0 and 4 */
     function assertDayCountConventionIsValid(dayCountConvention) {
-        assert(() => 0 <= dayCountConvention && dayCountConvention <= 4, _lt("The day_count_convention (%s) must be between 0 and 4 inclusive.", dayCountConvention.toString()));
+        assert(() => 0 <= dayCountConvention && dayCountConvention <= 4, _t("The day_count_convention (%s) must be between 0 and 4 inclusive.", dayCountConvention.toString()));
     }
     function assertRedemptionStrictlyPositive(redemption) {
-        assert(() => redemption > 0, _lt("The redemption (%s) must be strictly positive.", redemption.toString()));
+        assert(() => redemption > 0, _t("The redemption (%s) must be strictly positive.", redemption.toString()));
     }
     function assertPriceStrictlyPositive(price) {
-        assert(() => price > 0, _lt("The price (%s) must be strictly positive.", price.toString()));
+        assert(() => price > 0, _t("The price (%s) must be strictly positive.", price.toString()));
     }
     function assertNumberOfPeriodsStrictlyPositive(nPeriods) {
-        assert(() => nPeriods > 0, _lt("The number_of_periods (%s) must be greater than 0.", nPeriods.toString()));
+        assert(() => nPeriods > 0, _t("The number_of_periods (%s) must be greater than 0.", nPeriods.toString()));
     }
     function assertRateStrictlyPositive(rate) {
-        assert(() => rate > 0, _lt("The rate (%s) must be strictly positive.", rate.toString()));
+        assert(() => rate > 0, _t("The rate (%s) must be strictly positive.", rate.toString()));
     }
     function assertLifeStrictlyPositive(life) {
-        assert(() => life > 0, _lt("The life (%s) must be strictly positive.", life.toString()));
+        assert(() => life > 0, _t("The life (%s) must be strictly positive.", life.toString()));
     }
     function assertCostStrictlyPositive(cost) {
-        assert(() => cost > 0, _lt("The cost (%s) must be strictly positive.", cost.toString()));
+        assert(() => cost > 0, _t("The cost (%s) must be strictly positive.", cost.toString()));
     }
     function assertCostPositiveOrZero(cost) {
-        assert(() => cost >= 0, _lt("The cost (%s) must be positive or null.", cost.toString()));
+        assert(() => cost >= 0, _t("The cost (%s) must be positive or null.", cost.toString()));
     }
     function assertPeriodStrictlyPositive(period) {
-        assert(() => period > 0, _lt("The period (%s) must be strictly positive.", period.toString()));
+        assert(() => period > 0, _t("The period (%s) must be strictly positive.", period.toString()));
     }
     function assertPeriodPositiveOrZero(period) {
-        assert(() => period >= 0, _lt("The period (%s) must be positive or null.", period.toString()));
+        assert(() => period >= 0, _t("The period (%s) must be positive or null.", period.toString()));
     }
     function assertSalvagePositiveOrZero(salvage) {
-        assert(() => salvage >= 0, _lt("The salvage (%s) must be positive or null.", salvage.toString()));
+        assert(() => salvage >= 0, _t("The salvage (%s) must be positive or null.", salvage.toString()));
     }
     function assertSalvageSmallerOrEqualThanCost(salvage, cost) {
-        assert(() => salvage <= cost, _lt("The salvage (%s) must be smaller or equal than the cost (%s).", salvage.toString(), cost.toString()));
+        assert(() => salvage <= cost, _t("The salvage (%s) must be smaller or equal than the cost (%s).", salvage.toString(), cost.toString()));
     }
     function assertPresentValueStrictlyPositive(pv) {
-        assert(() => pv > 0, _lt("The present value (%s) must be strictly positive.", pv.toString()));
+        assert(() => pv > 0, _t("The present value (%s) must be strictly positive.", pv.toString()));
     }
     function assertPeriodSmallerOrEqualToLife(period, life) {
-        assert(() => period <= life, _lt("The period (%s) must be less than or equal life (%s).", period.toString(), life.toString()));
+        assert(() => period <= life, _t("The period (%s) must be less than or equal life (%s).", period.toString(), life.toString()));
     }
     function assertInvestmentStrictlyPositive(investment) {
-        assert(() => investment > 0, _lt("The investment (%s) must be strictly positive.", investment.toString()));
+        assert(() => investment > 0, _t("The investment (%s) must be strictly positive.", investment.toString()));
     }
     function assertDiscountStrictlyPositive(discount) {
-        assert(() => discount > 0, _lt("The discount (%s) must be strictly positive.", discount.toString()));
+        assert(() => discount > 0, _t("The discount (%s) must be strictly positive.", discount.toString()));
     }
     function assertDiscountStrictlySmallerThanOne(discount) {
-        assert(() => discount < 1, _lt("The discount (%s) must be smaller than 1.", discount.toString()));
+        assert(() => discount < 1, _t("The discount (%s) must be smaller than 1.", discount.toString()));
     }
     function assertDeprecationFactorStrictlyPositive(factor) {
-        assert(() => factor > 0, _lt("The depreciation factor (%s) must be strictly positive.", factor.toString()));
+        assert(() => factor > 0, _t("The depreciation factor (%s) must be strictly positive.", factor.toString()));
     }
     function assertSettlementLessThanOneYearBeforeMaturity(settlement, maturity) {
         const startDate = toJsDate(settlement);
         const endDate = toJsDate(maturity);
         const startDatePlusOneYear = new Date(startDate);
         startDatePlusOneYear.setFullYear(startDate.getFullYear() + 1);
-        assert(() => endDate.getTime() <= startDatePlusOneYear.getTime(), _lt("The settlement date (%s) must at most one year after the maturity date (%s).", settlement.toString(), maturity.toString()));
+        assert(() => endDate.getTime() <= startDatePlusOneYear.getTime(), _t("The settlement date (%s) must at most one year after the maturity date (%s).", settlement.toString(), maturity.toString()));
     }
     /**
      * Check if the given periods are valid. This will assert :
@@ -12912,10 +12912,10 @@
      */
     function assertFirstAndLastPeriodsAreValid(firstPeriod, lastPeriod, numberOfPeriods) {
         assertNumberOfPeriodsStrictlyPositive(numberOfPeriods);
-        assert(() => firstPeriod > 0, _lt("The first_period (%s) must be strictly positive.", firstPeriod.toString()));
-        assert(() => lastPeriod > 0, _lt("The last_period (%s) must be strictly positive.", lastPeriod.toString()));
-        assert(() => firstPeriod <= lastPeriod, _lt("The first_period (%s) must be smaller or equal to the last_period (%s).", firstPeriod.toString(), lastPeriod.toString()));
-        assert(() => lastPeriod <= numberOfPeriods, _lt("The last_period (%s) must be smaller or equal to the number_of_periods (%s).", firstPeriod.toString(), numberOfPeriods.toString()));
+        assert(() => firstPeriod > 0, _t("The first_period (%s) must be strictly positive.", firstPeriod.toString()));
+        assert(() => lastPeriod > 0, _t("The last_period (%s) must be strictly positive.", lastPeriod.toString()));
+        assert(() => firstPeriod <= lastPeriod, _t("The first_period (%s) must be smaller or equal to the last_period (%s).", firstPeriod.toString(), lastPeriod.toString()));
+        assert(() => lastPeriod <= numberOfPeriods, _t("The last_period (%s) must be smaller or equal to the number_of_periods (%s).", firstPeriod.toString(), numberOfPeriods.toString()));
     }
     /**
      * Check if the given periods are valid. This will assert :
@@ -12927,32 +12927,32 @@
      */
     function assertStartAndEndPeriodAreValid(startPeriod, endPeriod, life) {
         assertLifeStrictlyPositive(life);
-        assert(() => startPeriod >= 0, _lt("The start_period (%s) must be greater or equal than 0.", startPeriod.toString()));
-        assert(() => endPeriod >= 0, _lt("The end_period (%s) must be greater or equal than 0.", endPeriod.toString()));
-        assert(() => startPeriod <= endPeriod, _lt("The start_period (%s) must be smaller or equal to the end_period (%s).", startPeriod.toString(), endPeriod.toString()));
-        assert(() => endPeriod <= life, _lt("The end_period (%s) must be smaller or equal to the life (%s).", startPeriod.toString(), life.toString()));
+        assert(() => startPeriod >= 0, _t("The start_period (%s) must be greater or equal than 0.", startPeriod.toString()));
+        assert(() => endPeriod >= 0, _t("The end_period (%s) must be greater or equal than 0.", endPeriod.toString()));
+        assert(() => startPeriod <= endPeriod, _t("The start_period (%s) must be smaller or equal to the end_period (%s).", startPeriod.toString(), endPeriod.toString()));
+        assert(() => endPeriod <= life, _t("The end_period (%s) must be smaller or equal to the life (%s).", startPeriod.toString(), life.toString()));
     }
     function assertRateGuessStrictlyGreaterThanMinusOne(guess) {
-        assert(() => guess > -1, _lt("The rate_guess (%s) must be strictly greater than -1.", guess.toString()));
+        assert(() => guess > -1, _t("The rate_guess (%s) must be strictly greater than -1.", guess.toString()));
     }
     function assertCashFlowsAndDatesHaveSameDimension(cashFlows, dates) {
-        assert(() => cashFlows.length === dates.length && cashFlows[0].length === dates[0].length, _lt("The cashflow_amounts and cashflow_dates ranges must have the same dimensions."));
+        assert(() => cashFlows.length === dates.length && cashFlows[0].length === dates[0].length, _t("The cashflow_amounts and cashflow_dates ranges must have the same dimensions."));
     }
     function assertCashFlowsHavePositiveAndNegativesValues(cashFlow) {
-        assert(() => cashFlow.some((val) => val > 0) && cashFlow.some((val) => val < 0), _lt("There must be both positive and negative values in cashflow_amounts."));
+        assert(() => cashFlow.some((val) => val > 0) && cashFlow.some((val) => val < 0), _t("There must be both positive and negative values in cashflow_amounts."));
     }
     function assertEveryDateGreaterThanFirstDateOfCashFlowDates(dates) {
-        assert(() => dates.every((date) => date >= dates[0]), _lt("All the dates should be greater or equal to the first date in cashflow_dates (%s).", dates[0].toString()));
+        assert(() => dates.every((date) => date >= dates[0]), _t("All the dates should be greater or equal to the first date in cashflow_dates (%s).", dates[0].toString()));
     }
 
     const DEFAULT_DAY_COUNT_CONVENTION = 0;
     const DEFAULT_END_OR_BEGINNING = 0;
     const DEFAULT_FUTURE_VALUE = 0;
     const COUPON_FUNCTION_ARGS = [
-        arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-        arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-        arg("frequency (number)", _lt("The number of interest or coupon payments per year (1, 2, or 4).")),
-        arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+        arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+        arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+        arg("frequency (number)", _t("The number of interest or coupon payments per year (1, 2, or 4).")),
+        arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
     ];
     /**
      * Use the Newton–Raphson method to find a root of the given function in an iterative manner.
@@ -12977,7 +12977,7 @@
         do {
             y = func(x);
             if (isNaN(y)) {
-                assert(() => count < maxIterations && nanFallback !== undefined, _lt(`Function [[FUNCTION_NAME]] didn't find any result.`));
+                assert(() => count < maxIterations && nanFallback !== undefined, _t(`Function [[FUNCTION_NAME]] didn't find any result.`));
                 count++;
                 x = nanFallback(previousFallback);
                 previousFallback = x;
@@ -12987,7 +12987,7 @@
             xDelta = Math.abs(newX - x);
             x = newX;
             yEqual0 = xDelta < epsMax || Math.abs(y) < epsMax;
-            assert(() => count < maxIterations, _lt(`Function [[FUNCTION_NAME]] didn't find any result.`));
+            assert(() => count < maxIterations, _t(`Function [[FUNCTION_NAME]] didn't find any result.`));
             count++;
         } while (!yEqual0);
         return x;
@@ -12996,13 +12996,13 @@
     // ACCRINTM
     // -----------------------------------------------------------------------------
     const ACCRINTM = {
-        description: _lt("Accrued interest of security paying at maturity."),
+        description: _t("Accrued interest of security paying at maturity."),
         args: [
-            arg("issue (date)", _lt("The date the security was initially issued.")),
-            arg("maturity (date)", _lt("The maturity date of the security.")),
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("redemption (number)", _lt("The redemption amount per 100 face value, or par.")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("issue (date)", _t("The date the security was initially issued.")),
+            arg("maturity (date)", _t("The maturity date of the security.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("redemption (number)", _t("The redemption amount per 100 face value, or par.")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (issue, maturity, rate, redemption, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13025,15 +13025,15 @@
     // AMORLINC
     // -----------------------------------------------------------------------------
     const AMORLINC = {
-        description: _lt("Depreciation for an accounting period."),
+        description: _t("Depreciation for an accounting period."),
         args: [
-            arg("cost (number)", _lt("The initial cost of the asset.")),
-            arg("purchase_date (date)", _lt("The date the asset was purchased.")),
-            arg("first_period_end (date)", _lt("The date the first period ended.")),
-            arg("salvage (number)", _lt("The value of the asset at the end of depreciation.")),
-            arg("period (number)", _lt("The single period within life for which to calculate depreciation.")),
-            arg("rate (number)", _lt("The deprecation rate.")),
-            arg(" (number, optional)", _lt("An indicator of what day count method to use.")),
+            arg("cost (number)", _t("The initial cost of the asset.")),
+            arg("purchase_date (date)", _t("The date the asset was purchased.")),
+            arg("first_period_end (date)", _t("The date the first period ended.")),
+            arg("salvage (number)", _t("The value of the asset at the end of depreciation.")),
+            arg("period (number)", _t("The single period within life for which to calculate depreciation.")),
+            arg("rate (number)", _t("The deprecation rate.")),
+            arg(" (number, optional)", _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (cost, purchaseDate, firstPeriodEnd, salvage, period, rate, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13051,7 +13051,7 @@
             assertPeriodPositiveOrZero(_period);
             assertRateStrictlyPositive(_rate);
             assertDayCountConventionIsValid(_dayCountConvention);
-            assert(() => _purchaseDate <= _firstPeriodEnd, _lt("The purchase_date (%s) must be before the first_period_end (%s).", _purchaseDate.toString(), _firstPeriodEnd.toString()));
+            assert(() => _purchaseDate <= _firstPeriodEnd, _t("The purchase_date (%s) must be before the first_period_end (%s).", _purchaseDate.toString(), _firstPeriodEnd.toString()));
             /**
              * https://wiki.documentfoundation.org/Documentation/Calc_Functions/AMORLINC
              *
@@ -13081,7 +13081,7 @@
     // COUPDAYS
     // -----------------------------------------------------------------------------
     const COUPDAYS = {
-        description: _lt("Days in coupon period containing settlement date."),
+        description: _t("Days in coupon period containing settlement date."),
         args: COUPON_FUNCTION_ARGS,
         returns: ["NUMBER"],
         compute: function (settlement, maturity, frequency, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13108,7 +13108,7 @@
     // COUPDAYBS
     // -----------------------------------------------------------------------------
     const COUPDAYBS = {
-        description: _lt("Days from settlement until next coupon."),
+        description: _t("Days from settlement until next coupon."),
         args: COUPON_FUNCTION_ARGS,
         returns: ["NUMBER"],
         compute: function (settlement, maturity, frequency, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13165,7 +13165,7 @@
     // COUPDAYSNC
     // -----------------------------------------------------------------------------
     const COUPDAYSNC = {
-        description: _lt("Days from settlement until next coupon."),
+        description: _t("Days from settlement until next coupon."),
         args: COUPON_FUNCTION_ARGS,
         returns: ["NUMBER"],
         compute: function (settlement, maturity, frequency, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13195,7 +13195,7 @@
     // COUPNCD
     // -----------------------------------------------------------------------------
     const COUPNCD = {
-        description: _lt("Next coupon date after the settlement date."),
+        description: _t("Next coupon date after the settlement date."),
         args: COUPON_FUNCTION_ARGS,
         returns: ["NUMBER"],
         computeFormat: () => "m/d/yyyy",
@@ -13219,7 +13219,7 @@
     // COUPNUM
     // -----------------------------------------------------------------------------
     const COUPNUM = {
-        description: _lt("Number of coupons between settlement and maturity."),
+        description: _t("Number of coupons between settlement and maturity."),
         args: COUPON_FUNCTION_ARGS,
         returns: ["NUMBER"],
         compute: function (settlement, maturity, frequency, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13246,7 +13246,7 @@
     // COUPPCD
     // -----------------------------------------------------------------------------
     const COUPPCD = {
-        description: _lt("Last coupon date prior to or on the settlement date."),
+        description: _t("Last coupon date prior to or on the settlement date."),
         args: COUPON_FUNCTION_ARGS,
         returns: ["NUMBER"],
         computeFormat: () => "m/d/yyyy",
@@ -13270,14 +13270,14 @@
     // CUMIPMT
     // -----------------------------------------------------------------------------
     const CUMIPMT = {
-        description: _lt("Cumulative interest paid over a set of periods."),
+        description: _t("Cumulative interest paid over a set of periods."),
         args: [
-            arg("rate (number)", _lt("The interest rate.")),
-            arg("number_of_periods (number)", _lt("The number of payments to be made.")),
-            arg("present_value (number)", _lt("The current value of the annuity.")),
-            arg("first_period (number)", _lt("The number of the payment period to begin the cumulative calculation.")),
-            arg("last_period (number)", _lt("The number of the payment period to end the cumulative calculation.")),
-            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _lt("Whether payments are due at the end (0) or beginning (1) of each period.")),
+            arg("rate (number)", _t("The interest rate.")),
+            arg("number_of_periods (number)", _t("The number of payments to be made.")),
+            arg("present_value (number)", _t("The current value of the annuity.")),
+            arg("first_period (number)", _t("The number of the payment period to begin the cumulative calculation.")),
+            arg("last_period (number)", _t("The number of the payment period to end the cumulative calculation.")),
+            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _t("Whether payments are due at the end (0) or beginning (1) of each period.")),
         ],
         returns: ["NUMBER"],
         compute: function (rate, numberOfPeriods, presentValue, firstPeriod, lastPeriod, endOrBeginning = DEFAULT_END_OR_BEGINNING) {
@@ -13302,14 +13302,14 @@
     // CUMPRINC
     // -----------------------------------------------------------------------------
     const CUMPRINC = {
-        description: _lt("Cumulative principal paid over a set of periods."),
+        description: _t("Cumulative principal paid over a set of periods."),
         args: [
-            arg("rate (number)", _lt("The interest rate.")),
-            arg("number_of_periods (number)", _lt("The number of payments to be made.")),
-            arg("present_value (number)", _lt("The current value of the annuity.")),
-            arg("first_period (number)", _lt("The number of the payment period to begin the cumulative calculation.")),
-            arg("last_period (number)", _lt("The number of the payment period to end the cumulative calculation.")),
-            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _lt("Whether payments are due at the end (0) or beginning (1) of each period.")),
+            arg("rate (number)", _t("The interest rate.")),
+            arg("number_of_periods (number)", _t("The number of payments to be made.")),
+            arg("present_value (number)", _t("The current value of the annuity.")),
+            arg("first_period (number)", _t("The number of the payment period to begin the cumulative calculation.")),
+            arg("last_period (number)", _t("The number of the payment period to end the cumulative calculation.")),
+            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _t("Whether payments are due at the end (0) or beginning (1) of each period.")),
         ],
         returns: ["NUMBER"],
         compute: function (rate, numberOfPeriods, presentValue, firstPeriod, lastPeriod, endOrBeginning = DEFAULT_END_OR_BEGINNING) {
@@ -13334,13 +13334,13 @@
     // DB
     // -----------------------------------------------------------------------------
     const DB = {
-        description: _lt("Depreciation via declining balance method."),
+        description: _t("Depreciation via declining balance method."),
         args: [
-            arg("cost (number)", _lt("The initial cost of the asset.")),
-            arg("salvage (number)", _lt("The value of the asset at the end of depreciation.")),
-            arg("life (number)", _lt("The number of periods over which the asset is depreciated.")),
-            arg("period (number)", _lt("The single period within life for which to calculate depreciation.")),
-            arg("month (number, optional)", _lt("The number of months in the first year of depreciation.")),
+            arg("cost (number)", _t("The initial cost of the asset.")),
+            arg("salvage (number)", _t("The value of the asset at the end of depreciation.")),
+            arg("life (number)", _t("The number of periods over which the asset is depreciated.")),
+            arg("period (number)", _t("The single period within life for which to calculate depreciation.")),
+            arg("month (number, optional)", _t("The number of months in the first year of depreciation.")),
         ],
         returns: ["NUMBER"],
         // to do: replace by dollar format
@@ -13356,8 +13356,8 @@
             assertSalvagePositiveOrZero(_salvage);
             assertPeriodStrictlyPositive(_period);
             assertLifeStrictlyPositive(_life);
-            assert(() => 1 <= _month && _month <= 12, _lt("The month (%s) must be between 1 and 12 inclusive.", _month.toString()));
-            assert(() => _period <= lifeLimit, _lt("The period (%s) must be less than or equal to %s.", _period.toString(), lifeLimit.toString()));
+            assert(() => 1 <= _month && _month <= 12, _t("The month (%s) must be between 1 and 12 inclusive.", _month.toString()));
+            assert(() => _period <= lifeLimit, _t("The period (%s) must be less than or equal to %s.", _period.toString(), lifeLimit.toString()));
             const monthPart = _month / 12;
             let rate = 1 - Math.pow(_salvage / _cost, 1 / _life);
             // round to 3 decimal places
@@ -13380,13 +13380,13 @@
     // -----------------------------------------------------------------------------
     const DEFAULT_DDB_DEPRECIATION_FACTOR = 2;
     const DDB = {
-        description: _lt("Depreciation via double-declining balance method."),
+        description: _t("Depreciation via double-declining balance method."),
         args: [
-            arg("cost (number)", _lt("The initial cost of the asset.")),
-            arg("salvage (number)", _lt("The value of the asset at the end of depreciation.")),
-            arg("life (number)", _lt("The number of periods over which the asset is depreciated.")),
-            arg("period (number)", _lt("The single period within life for which to calculate depreciation.")),
-            arg(`factor (number, default=${DEFAULT_DDB_DEPRECIATION_FACTOR})`, _lt("The factor by which depreciation decreases.")),
+            arg("cost (number)", _t("The initial cost of the asset.")),
+            arg("salvage (number)", _t("The value of the asset at the end of depreciation.")),
+            arg("life (number)", _t("The number of periods over which the asset is depreciated.")),
+            arg("period (number)", _t("The single period within life for which to calculate depreciation.")),
+            arg(`factor (number, default=${DEFAULT_DDB_DEPRECIATION_FACTOR})`, _t("The factor by which depreciation decreases.")),
         ],
         returns: ["NUMBER"],
         computeFormat: () => "#,##0.00",
@@ -13423,13 +13423,13 @@
     // DISC
     // -----------------------------------------------------------------------------
     const DISC = {
-        description: _lt("Discount rate of a security based on price."),
+        description: _t("Discount rate of a security based on price."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("price (number)", _lt("The price at which the security is bought per 100 face value.")),
-            arg("redemption (number)", _lt("The redemption amount per 100 face value, or par.")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("price (number)", _t("The price at which the security is bought per 100 face value.")),
+            arg("redemption (number)", _t("The redemption amount per 100 face value, or par.")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, price, redemption, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13462,16 +13462,16 @@
     // DOLLARDE
     // -----------------------------------------------------------------------------
     const DOLLARDE = {
-        description: _lt("Convert a decimal fraction to decimal value."),
+        description: _t("Convert a decimal fraction to decimal value."),
         args: [
-            arg("fractional_price (number)", _lt("The price quotation given using fractional decimal conventions.")),
-            arg("unit (number)", _lt("The units of the fraction, e.g. 8 for 1/8ths or 32 for 1/32nds.")),
+            arg("fractional_price (number)", _t("The price quotation given using fractional decimal conventions.")),
+            arg("unit (number)", _t("The units of the fraction, e.g. 8 for 1/8ths or 32 for 1/32nds.")),
         ],
         returns: ["NUMBER"],
         compute: function (fractionalPrice, unit) {
             const price = toNumber(fractionalPrice);
             const _unit = Math.trunc(toNumber(unit));
-            assert(() => _unit > 0, _lt("The unit (%s) must be strictly positive.", _unit.toString()));
+            assert(() => _unit > 0, _t("The unit (%s) must be strictly positive.", _unit.toString()));
             const truncatedPrice = Math.trunc(price);
             const priceFractionalPart = price - truncatedPrice;
             const frac = 10 ** Math.ceil(Math.log10(_unit)) / _unit;
@@ -13483,16 +13483,16 @@
     // DOLLARFR
     // -----------------------------------------------------------------------------
     const DOLLARFR = {
-        description: _lt("Convert a decimal value to decimal fraction."),
+        description: _t("Convert a decimal value to decimal fraction."),
         args: [
-            arg("decimal_price (number)", _lt("The price quotation given as a decimal value.")),
-            arg("unit (number)", _lt("The units of the desired fraction, e.g. 8 for 1/8ths or 32 for 1/32nds.")),
+            arg("decimal_price (number)", _t("The price quotation given as a decimal value.")),
+            arg("unit (number)", _t("The units of the desired fraction, e.g. 8 for 1/8ths or 32 for 1/32nds.")),
         ],
         returns: ["NUMBER"],
         compute: function (decimalPrice, unit) {
             const price = toNumber(decimalPrice);
             const _unit = Math.trunc(toNumber(unit));
-            assert(() => _unit > 0, _lt("The unit (%s) must be strictly positive.", _unit.toString()));
+            assert(() => _unit > 0, _t("The unit (%s) must be strictly positive.", _unit.toString()));
             const truncatedPrice = Math.trunc(price);
             const priceFractionalPart = price - truncatedPrice;
             const frac = _unit / 10 ** Math.ceil(Math.log10(_unit));
@@ -13504,14 +13504,14 @@
     // DURATION
     // -----------------------------------------------------------------------------
     const DURATION = {
-        description: _lt("Number of periods for an investment to reach a value."),
+        description: _t("Number of periods for an investment to reach a value."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("yield (number)", _lt("The expected annual yield of the security.")),
-            arg("frequency (number)", _lt("The number of interest or coupon payments per year (1, 2, or 4).")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("yield (number)", _t("The expected annual yield of the security.")),
+            arg("frequency (number)", _t("The number of interest or coupon payments per year (1, 2, or 4).")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, rate, securityYield, frequency, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13525,8 +13525,8 @@
             assertMaturityAndSettlementDatesAreValid(start, end);
             assertCouponFrequencyIsValid(_frequency);
             assertDayCountConventionIsValid(_dayCountConvention);
-            assert(() => _rate >= 0, _lt("The rate (%s) must be positive or null.", _rate.toString()));
-            assert(() => _yield >= 0, _lt("The yield (%s) must be positive or null.", _yield.toString()));
+            assert(() => _rate >= 0, _t("The rate (%s) must be positive or null.", _rate.toString()));
+            assert(() => _yield >= 0, _t("The yield (%s) must be positive or null.", _yield.toString()));
             const years = YEARFRAC.compute(start, end, _dayCountConvention);
             const timeFirstYear = years - Math.trunc(years) || 1 / _frequency;
             const nbrCoupons = Math.ceil(years * _frequency);
@@ -13550,17 +13550,17 @@
     // EFFECT
     // -----------------------------------------------------------------------------
     const EFFECT = {
-        description: _lt("Annual effective interest rate."),
+        description: _t("Annual effective interest rate."),
         args: [
-            arg("nominal_rate (number)", _lt("The nominal interest rate per year.")),
-            arg("periods_per_year (number)", _lt("The number of compounding periods per year.")),
+            arg("nominal_rate (number)", _t("The nominal interest rate per year.")),
+            arg("periods_per_year (number)", _t("The number of compounding periods per year.")),
         ],
         returns: ["NUMBER"],
         compute: function (nominal_rate, periods_per_year) {
             const nominal = toNumber(nominal_rate);
             const periods = Math.trunc(toNumber(periods_per_year));
-            assert(() => nominal > 0, _lt("The nominal rate (%s) must be strictly greater than 0.", nominal.toString()));
-            assert(() => periods > 0, _lt("The number of periods by year (%s) must strictly greater than 0.", periods.toString()));
+            assert(() => nominal > 0, _t("The nominal rate (%s) must be strictly greater than 0.", nominal.toString()));
+            assert(() => periods > 0, _t("The number of periods by year (%s) must strictly greater than 0.", periods.toString()));
             // https://en.wikipedia.org/wiki/Nominal_interest_rate#Nominal_versus_effective_interest_rate
             return Math.pow(1 + nominal / periods, periods) - 1;
         },
@@ -13571,13 +13571,13 @@
     // -----------------------------------------------------------------------------
     const DEFAULT_PRESENT_VALUE = 0;
     const FV = {
-        description: _lt("Future value of an annuity investment."),
+        description: _t("Future value of an annuity investment."),
         args: [
-            arg("rate (number)", _lt("The interest rate.")),
-            arg("number_of_periods (number)", _lt("The number of payments to be made.")),
-            arg("payment_amount (number)", _lt("The amount per period to be paid.")),
-            arg(`present_value (number, default=${DEFAULT_PRESENT_VALUE})`, _lt("The current value of the annuity.")),
-            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _lt("Whether payments are due at the end (0) or beginning (1) of each period.")),
+            arg("rate (number)", _t("The interest rate.")),
+            arg("number_of_periods (number)", _t("The number of payments to be made.")),
+            arg("payment_amount (number)", _t("The amount per period to be paid.")),
+            arg(`present_value (number, default=${DEFAULT_PRESENT_VALUE})`, _t("The current value of the annuity.")),
+            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _t("Whether payments are due at the end (0) or beginning (1) of each period.")),
         ],
         returns: ["NUMBER"],
         // to do: replace by dollar format
@@ -13598,10 +13598,10 @@
     // FVSCHEDULE
     // -----------------------------------------------------------------------------
     const FVSCHEDULE = {
-        description: _lt("Future value of principal from series of rates."),
+        description: _t("Future value of principal from series of rates."),
         args: [
-            arg("principal (number)", _lt("The amount of initial capital or value to compound against.")),
-            arg("rate_schedule (number, range<number>)", _lt("A series of interest rates to compound against the principal.")),
+            arg("principal (number)", _t("The amount of initial capital or value to compound against.")),
+            arg("rate_schedule (number, range<number>)", _t("A series of interest rates to compound against the principal.")),
         ],
         returns: ["NUMBER"],
         compute: function (principalAmount, rateSchedule) {
@@ -13614,13 +13614,13 @@
     // INTRATE
     // -----------------------------------------------------------------------------
     const INTRATE = {
-        description: _lt("Calculates effective interest rate."),
+        description: _t("Calculates effective interest rate."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("investment (number)", _lt("The amount invested in the security.")),
-            arg("redemption (number)", _lt("The amount to be received at maturity.")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("investment (number)", _t("The amount invested in the security.")),
+            arg("redemption (number)", _t("The amount to be received at maturity.")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, investment, redemption, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13647,14 +13647,14 @@
     // IPMT
     // -----------------------------------------------------------------------------
     const IPMT = {
-        description: _lt("Payment on the principal of an investment."),
+        description: _t("Payment on the principal of an investment."),
         args: [
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("period (number)", _lt("The amortization period, in terms of number of periods.")),
-            arg("number_of_periods (number)", _lt("The number of payments to be made.")),
-            arg("present_value (number)", _lt("The current value of the annuity.")),
-            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _lt("The future value remaining after the final payment has been made.")),
-            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _lt("Whether payments are due at the end (0) or beginning (1) of each period.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("period (number)", _t("The amortization period, in terms of number of periods.")),
+            arg("number_of_periods (number)", _t("The number of payments to be made.")),
+            arg("present_value (number)", _t("The current value of the annuity.")),
+            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _t("The future value remaining after the final payment has been made.")),
+            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _t("Whether payments are due at the end (0) or beginning (1) of each period.")),
         ],
         returns: ["NUMBER"],
         computeFormat: () => "#,##0.00",
@@ -13670,10 +13670,10 @@
     // -----------------------------------------------------------------------------
     const DEFAULT_RATE_GUESS = 0.1;
     const IRR = {
-        description: _lt("Internal rate of return given periodic cashflows."),
+        description: _t("Internal rate of return given periodic cashflows."),
         args: [
-            arg("cashflow_amounts (number, range<number>)", _lt("An array or range containing the income or payments associated with the investment.")),
-            arg(`rate_guess (number, default=${DEFAULT_RATE_GUESS})`, _lt("An estimate for what the internal rate of return will be.")),
+            arg("cashflow_amounts (number, range<number>)", _t("An array or range containing the income or payments associated with the investment.")),
+            arg(`rate_guess (number, default=${DEFAULT_RATE_GUESS})`, _t("An estimate for what the internal rate of return will be.")),
         ],
         returns: ["NUMBER"],
         computeFormat: () => "0%",
@@ -13692,7 +13692,7 @@
                     negative = true;
                 amounts.push(amount);
             });
-            assert(() => positive && negative, _lt("The cashflow_amounts must include negative and positive values."));
+            assert(() => positive && negative, _t("The cashflow_amounts must include negative and positive values."));
             const firstAmount = amounts.shift();
             // The result of IRR is the rate at which the NPV() function will return zero with the given values.
             // This algorithm uses the Newton's method on the NPV function to determine the result
@@ -13728,12 +13728,12 @@
     // ISPMT
     // -----------------------------------------------------------------------------
     const ISPMT = {
-        description: _lt("Returns the interest paid at a particular period of an investment."),
+        description: _t("Returns the interest paid at a particular period of an investment."),
         args: [
-            arg("rate (number)", _lt("The interest rate.")),
-            arg("period (number)", _lt("The period for which you want to view the interest payment.")),
-            arg("number_of_periods (number)", _lt("The number of payments to be made.")),
-            arg("present_value (number)", _lt("The current value of the annuity.")),
+            arg("rate (number)", _t("The interest rate.")),
+            arg("period (number)", _t("The period for which you want to view the interest payment.")),
+            arg("number_of_periods (number)", _t("The number of payments to be made.")),
+            arg("present_value (number)", _t("The current value of the annuity.")),
         ],
         returns: ["NUMBER"],
         compute: function (rate, currentPeriod, numberOfPeriods, presentValue) {
@@ -13741,7 +13741,7 @@
             const period = toNumber(currentPeriod);
             const nOfPeriods = toNumber(numberOfPeriods);
             const investment = toNumber(presentValue);
-            assert(() => nOfPeriods !== 0, _lt("The number of periods must be different than 0.", nOfPeriods.toString()));
+            assert(() => nOfPeriods !== 0, _t("The number of periods must be different than 0.", nOfPeriods.toString()));
             const currentInvestment = investment - investment * (period / nOfPeriods);
             return -1 * currentInvestment * interestRate;
         },
@@ -13751,14 +13751,14 @@
     // MDURATION
     // -----------------------------------------------------------------------------
     const MDURATION = {
-        description: _lt("Modified Macaulay duration."),
+        description: _t("Modified Macaulay duration."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("yield (number)", _lt("The expected annual yield of the security.")),
-            arg("frequency (number)", _lt("The number of interest or coupon payments per year (1, 2, or 4).")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("yield (number)", _t("The expected annual yield of the security.")),
+            arg("frequency (number)", _t("The number of interest or coupon payments per year (1, 2, or 4).")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, rate, securityYield, frequency, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13773,11 +13773,11 @@
     // MIRR
     // -----------------------------------------------------------------------------
     const MIRR = {
-        description: _lt("Modified internal rate of return."),
+        description: _t("Modified internal rate of return."),
         args: [
-            arg("cashflow_amounts (range<number>)", _lt("A range containing the income or payments associated with the investment. The array should contain bot payments and incomes.")),
-            arg("financing_rate (number)", _lt("The interest rate paid on funds invested.")),
-            arg("reinvestment_return_rate (number)", _lt("The return (as a percentage) earned on reinvestment of income received from the investment.")),
+            arg("cashflow_amounts (range<number>)", _t("A range containing the income or payments associated with the investment. The array should contain bot payments and incomes.")),
+            arg("financing_rate (number)", _t("The interest rate paid on funds invested.")),
+            arg("reinvestment_return_rate (number)", _t("The return (as a percentage) earned on reinvestment of income received from the investment.")),
         ],
         returns: ["NUMBER"],
         compute: function (cashflowAmount, financingRate, reinvestmentRate) {
@@ -13813,7 +13813,7 @@
                     pv += amount / (fRate + 1) ** i;
                 }
             }
-            assert(() => pv !== 0 && fv !== 0, _lt("There must be both positive and negative values in cashflow_amounts."));
+            assert(() => pv !== 0 && fv !== 0, _t("There must be both positive and negative values in cashflow_amounts."));
             const exponent = 1 / (n - 1);
             return (-fv / pv) ** exponent - 1;
         },
@@ -13823,17 +13823,17 @@
     // NOMINAL
     // -----------------------------------------------------------------------------
     const NOMINAL = {
-        description: _lt("Annual nominal interest rate."),
+        description: _t("Annual nominal interest rate."),
         args: [
-            arg("effective_rate (number)", _lt("The effective interest rate per year.")),
-            arg("periods_per_year (number)", _lt("The number of compounding periods per year.")),
+            arg("effective_rate (number)", _t("The effective interest rate per year.")),
+            arg("periods_per_year (number)", _t("The number of compounding periods per year.")),
         ],
         returns: ["NUMBER"],
         compute: function (effective_rate, periods_per_year) {
             const effective = toNumber(effective_rate);
             const periods = Math.trunc(toNumber(periods_per_year));
-            assert(() => effective > 0, _lt("The effective rate (%s) must must strictly greater than 0.", effective.toString()));
-            assert(() => periods > 0, _lt("The number of periods by year (%s) must strictly greater than 0.", periods.toString()));
+            assert(() => effective > 0, _t("The effective rate (%s) must must strictly greater than 0.", effective.toString()));
+            assert(() => periods > 0, _t("The number of periods by year (%s) must strictly greater than 0.", periods.toString()));
             // https://en.wikipedia.org/wiki/Nominal_interest_rate#Nominal_versus_effective_interest_rate
             return (Math.pow(effective + 1, 1 / periods) - 1) * periods;
         },
@@ -13843,13 +13843,13 @@
     // NPER
     // -----------------------------------------------------------------------------
     const NPER = {
-        description: _lt("Number of payment periods for an investment."),
+        description: _t("Number of payment periods for an investment."),
         args: [
-            arg("rate (number)", _lt("The interest rate.")),
-            arg("payment_amount (number)", _lt("The amount of each payment made.")),
-            arg("present_value (number)", _lt("The current value of the annuity.")),
-            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _lt("The future value remaining after the final payment has been made.")),
-            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _lt("Whether payments are due at the end (0) or beginning (1) of each period.")),
+            arg("rate (number)", _t("The interest rate.")),
+            arg("payment_amount (number)", _t("The amount of each payment made.")),
+            arg("present_value (number)", _t("The current value of the annuity.")),
+            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _t("The future value remaining after the final payment has been made.")),
+            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _t("Whether payments are due at the end (0) or beginning (1) of each period.")),
         ],
         returns: ["NUMBER"],
         compute: function (rate, paymentAmount, presentValue, futureValue = DEFAULT_FUTURE_VALUE, endOrBeginning = DEFAULT_END_OR_BEGINNING) {
@@ -13893,18 +13893,18 @@
         }, startValue);
     }
     const NPV = {
-        description: _lt("The net present value of an investment based on a series of periodic cash flows and a discount rate."),
+        description: _t("The net present value of an investment based on a series of periodic cash flows and a discount rate."),
         args: [
-            arg("discount (number)", _lt("The discount rate of the investment over one period.")),
-            arg("cashflow1 (number, range<number>)", _lt("The first future cash flow.")),
-            arg("cashflow2 (number, range<number>, repeating)", _lt("Additional future cash flows.")),
+            arg("discount (number)", _t("The discount rate of the investment over one period.")),
+            arg("cashflow1 (number, range<number>)", _t("The first future cash flow.")),
+            arg("cashflow2 (number, range<number>, repeating)", _t("Additional future cash flows.")),
         ],
         returns: ["NUMBER"],
         // to do: replace by dollar format
         computeFormat: () => "#,##0.00",
         compute: function (discount, ...values) {
             const _discount = toNumber(discount);
-            assert(() => _discount !== -1, _lt("The discount (%s) must be different from -1.", _discount.toString()));
+            assert(() => _discount !== -1, _t("The discount (%s) must be different from -1.", _discount.toString()));
             return npvResult(_discount, 0, values);
         },
         isExported: true,
@@ -13913,11 +13913,11 @@
     // PDURATION
     // -----------------------------------------------------------------------------
     const PDURATION = {
-        description: _lt("Computes the number of periods needed for an investment to reach a value."),
+        description: _t("Computes the number of periods needed for an investment to reach a value."),
         args: [
-            arg("rate (number)", _lt("The rate at which the investment grows each period.")),
-            arg("present_value (number)", _lt("The investment's current value.")),
-            arg("future_value (number)", _lt("The investment's desired future value.")),
+            arg("rate (number)", _t("The rate at which the investment grows each period.")),
+            arg("present_value (number)", _t("The investment's current value.")),
+            arg("future_value (number)", _t("The investment's desired future value.")),
         ],
         returns: ["NUMBER"],
         compute: function (rate, presentValue, futureValue) {
@@ -13925,8 +13925,8 @@
             const _presentValue = toNumber(presentValue);
             const _futureValue = toNumber(futureValue);
             assertRateStrictlyPositive(_rate);
-            assert(() => _presentValue > 0, _lt("The present_value (%s) must be strictly positive.", _presentValue.toString()));
-            assert(() => _futureValue > 0, _lt("The future_value (%s) must be strictly positive.", _futureValue.toString()));
+            assert(() => _presentValue > 0, _t("The present_value (%s) must be strictly positive.", _presentValue.toString()));
+            assert(() => _futureValue > 0, _t("The future_value (%s) must be strictly positive.", _futureValue.toString()));
             return (Math.log(_futureValue) - Math.log(_presentValue)) / Math.log(1 + _rate);
         },
         isExported: true,
@@ -13935,13 +13935,13 @@
     // PMT
     // -----------------------------------------------------------------------------
     const PMT = {
-        description: _lt("Periodic payment for an annuity investment."),
+        description: _t("Periodic payment for an annuity investment."),
         args: [
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("number_of_periods (number)", _lt("The number of payments to be made.")),
-            arg("present_value (number)", _lt("The current value of the annuity.")),
-            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _lt("The future value remaining after the final payment has been made.")),
-            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _lt("Whether payments are due at the end (0) or beginning (1) of each period.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("number_of_periods (number)", _t("The number of payments to be made.")),
+            arg("present_value (number)", _t("The current value of the annuity.")),
+            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _t("The future value remaining after the final payment has been made.")),
+            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _t("Whether payments are due at the end (0) or beginning (1) of each period.")),
         ],
         returns: ["NUMBER"],
         computeFormat: () => "#,##0.00",
@@ -13974,14 +13974,14 @@
     // PPMT
     // -----------------------------------------------------------------------------
     const PPMT = {
-        description: _lt("Payment on the principal of an investment."),
+        description: _t("Payment on the principal of an investment."),
         args: [
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("period (number)", _lt("The amortization period, in terms of number of periods.")),
-            arg("number_of_periods (number)", _lt("The number of payments to be made.")),
-            arg("present_value (number)", _lt("The current value of the annuity.")),
-            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _lt("The future value remaining after the final payment has been made.")),
-            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _lt("Whether payments are due at the end (0) or beginning (1) of each period.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("period (number)", _t("The amortization period, in terms of number of periods.")),
+            arg("number_of_periods (number)", _t("The number of payments to be made.")),
+            arg("present_value (number)", _t("The current value of the annuity.")),
+            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _t("The future value remaining after the final payment has been made.")),
+            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _t("Whether payments are due at the end (0) or beginning (1) of each period.")),
         ],
         returns: ["NUMBER"],
         computeFormat: () => "#,##0.00",
@@ -13995,7 +13995,7 @@
             const fv = toNumber(futureValue);
             const pv = toNumber(presentValue);
             assertNumberOfPeriodsStrictlyPositive(n);
-            assert(() => period > 0 && period <= n, _lt("The period must be between 1 and number_of_periods", n.toString()));
+            assert(() => period > 0 && period <= n, _t("The period must be between 1 and number_of_periods", n.toString()));
             const payment = PMT.compute(r, n, pv, fv, endOrBeginning);
             if (type === 1 && period === 1)
                 return payment;
@@ -14011,13 +14011,13 @@
     // PV
     // -----------------------------------------------------------------------------
     const PV = {
-        description: _lt("Present value of an annuity investment."),
+        description: _t("Present value of an annuity investment."),
         args: [
-            arg("rate (number)", _lt("The interest rate.")),
-            arg("number_of_periods (number)", _lt("The number of payments to be made.")),
-            arg("payment_amount (number)", _lt("The amount per period to be paid.")),
-            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _lt("The future value remaining after the final payment has been made.")),
-            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _lt("Whether payments are due at the end (0) or beginning (1) of each period.")),
+            arg("rate (number)", _t("The interest rate.")),
+            arg("number_of_periods (number)", _t("The number of payments to be made.")),
+            arg("payment_amount (number)", _t("The amount per period to be paid.")),
+            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _t("The future value remaining after the final payment has been made.")),
+            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _t("Whether payments are due at the end (0) or beginning (1) of each period.")),
         ],
         returns: ["NUMBER"],
         // to do: replace by dollar format
@@ -14039,15 +14039,15 @@
     // PRICE
     // -----------------------------------------------------------------------------
     const PRICE = {
-        description: _lt("Price of a security paying periodic interest."),
+        description: _t("Price of a security paying periodic interest."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("yield (number)", _lt("The expected annual yield of the security.")),
-            arg("redemption (number)", _lt("The redemption amount per 100 face value, or par.")),
-            arg("frequency (number)", _lt("The number of interest or coupon payments per year (1, 2, or 4).")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("yield (number)", _t("The expected annual yield of the security.")),
+            arg("redemption (number)", _t("The redemption amount per 100 face value, or par.")),
+            arg("frequency (number)", _t("The number of interest or coupon payments per year (1, 2, or 4).")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, rate, securityYield, redemption, frequency, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -14062,8 +14062,8 @@
             assertMaturityAndSettlementDatesAreValid(_settlement, _maturity);
             assertCouponFrequencyIsValid(_frequency);
             assertDayCountConventionIsValid(_dayCountConvention);
-            assert(() => _rate >= 0, _lt("The rate (%s) must be positive or null.", _rate.toString()));
-            assert(() => _yield >= 0, _lt("The yield (%s) must be positive or null.", _yield.toString()));
+            assert(() => _rate >= 0, _t("The rate (%s) must be positive or null.", _rate.toString()));
+            assert(() => _yield >= 0, _t("The yield (%s) must be positive or null.", _yield.toString()));
             assertRedemptionStrictlyPositive(_redemption);
             const years = YEARFRAC.compute(_settlement, _maturity, _dayCountConvention);
             const nbrRealCoupons = years * _frequency;
@@ -14089,13 +14089,13 @@
     // PRICEDISC
     // -----------------------------------------------------------------------------
     const PRICEDISC = {
-        description: _lt("Price of a discount security."),
+        description: _t("Price of a discount security."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("discount (number)", _lt("The discount rate of the security at time of purchase.")),
-            arg("redemption (number)", _lt("The redemption amount per 100 face value, or par.")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("discount (number)", _t("The discount rate of the security at time of purchase.")),
+            arg("redemption (number)", _t("The redemption amount per 100 face value, or par.")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, discount, redemption, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -14126,14 +14126,14 @@
     // PRICEMAT
     // -----------------------------------------------------------------------------
     const PRICEMAT = {
-        description: _lt("Calculates the price of a security paying interest at maturity, based on expected yield."),
+        description: _t("Calculates the price of a security paying interest at maturity, based on expected yield."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("issue (date)", _lt("The date the security was initially issued.")),
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("yield (number)", _lt("The expected annual yield of the security.")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("issue (date)", _t("The date the security was initially issued.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("yield (number)", _t("The expected annual yield of the security.")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, issue, rate, securityYield, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -14147,8 +14147,8 @@
             assertSettlementAndIssueDatesAreValid(_settlement, _issue);
             assertMaturityAndSettlementDatesAreValid(_settlement, _maturity);
             assertDayCountConventionIsValid(_dayCount);
-            assert(() => _rate >= 0, _lt("The rate (%s) must be positive or null.", _rate.toString()));
-            assert(() => _yield >= 0, _lt("The yield (%s) must be positive or null.", _yield.toString()));
+            assert(() => _rate >= 0, _t("The rate (%s) must be positive or null.", _rate.toString()));
+            assert(() => _yield >= 0, _t("The yield (%s) must be positive or null.", _yield.toString()));
             /**
              * https://support.microsoft.com/en-us/office/pricemat-function-52c3b4da-bc7e-476a-989f-a95f675cae77
              *
@@ -14190,14 +14190,14 @@
     // -----------------------------------------------------------------------------
     const RATE_GUESS_DEFAULT = 0.1;
     const RATE = {
-        description: _lt("Interest rate of an annuity investment."),
+        description: _t("Interest rate of an annuity investment."),
         args: [
-            arg("number_of_periods (number)", _lt("The number of payments to be made.")),
-            arg("payment_per_period (number)", _lt("The amount per period to be paid.")),
-            arg("present_value (number)", _lt("The current value of the annuity.")),
-            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _lt("The future value remaining after the final payment has been made.")),
-            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _lt("Whether payments are due at the end (0) or beginning (1) of each period.")),
-            arg(`rate_guess (number, default=${RATE_GUESS_DEFAULT})`, _lt("An estimate for what the interest rate will be.")),
+            arg("number_of_periods (number)", _t("The number of payments to be made.")),
+            arg("payment_per_period (number)", _t("The amount per period to be paid.")),
+            arg("present_value (number)", _t("The current value of the annuity.")),
+            arg(`future_value (number, default=${DEFAULT_FUTURE_VALUE})`, _t("The future value remaining after the final payment has been made.")),
+            arg(`end_or_beginning (number, default=${DEFAULT_END_OR_BEGINNING})`, _t("Whether payments are due at the end (0) or beginning (1) of each period.")),
+            arg(`rate_guess (number, default=${RATE_GUESS_DEFAULT})`, _t("An estimate for what the interest rate will be.")),
         ],
         returns: ["NUMBER"],
         computeFormat: () => "0%",
@@ -14212,7 +14212,7 @@
             let fv = toNumber(futureValue);
             let pv = toNumber(presentValue);
             assertNumberOfPeriodsStrictlyPositive(n);
-            assert(() => [payment, pv, fv].some((val) => val > 0) && [payment, pv, fv].some((val) => val < 0), _lt("There must be both positive and negative values in [payment_amount, present_value, future_value].", n.toString()));
+            assert(() => [payment, pv, fv].some((val) => val > 0) && [payment, pv, fv].some((val) => val < 0), _t("There must be both positive and negative values in [payment_amount, present_value, future_value].", n.toString()));
             assertRateGuessStrictlyGreaterThanMinusOne(guess);
             fv -= payment * type;
             pv += payment * type;
@@ -14238,13 +14238,13 @@
     // RECEIVED
     // -----------------------------------------------------------------------------
     const RECEIVED = {
-        description: _lt("Amount received at maturity for a security."),
+        description: _t("Amount received at maturity for a security."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("investment (number)", _lt("The amount invested (irrespective of face value of each security).")),
-            arg("discount (number)", _lt("The discount rate of the security invested in.")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("investment (number)", _t("The amount invested (irrespective of face value of each security).")),
+            arg("discount (number)", _t("The discount rate of the security invested in.")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, investment, discount, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -14278,11 +14278,11 @@
     // RRI
     // -----------------------------------------------------------------------------
     const RRI = {
-        description: _lt("Computes the rate needed for an investment to reach a specific value within a specific number of periods."),
+        description: _t("Computes the rate needed for an investment to reach a specific value within a specific number of periods."),
         args: [
-            arg("number_of_periods (number)", _lt("The number of periods.")),
-            arg("present_value (number)", _lt("The present value of the investment.")),
-            arg("future_value (number)", _lt("The future value of the investment.")),
+            arg("number_of_periods (number)", _t("The number of periods.")),
+            arg("present_value (number)", _t("The present value of the investment.")),
+            arg("future_value (number)", _t("The future value of the investment.")),
         ],
         returns: ["NUMBER"],
         compute: function (numberOfPeriods, presentValue, futureValue) {
@@ -14303,11 +14303,11 @@
     // SLN
     // -----------------------------------------------------------------------------
     const SLN = {
-        description: _lt("Depreciation of an asset using the straight-line method."),
+        description: _t("Depreciation of an asset using the straight-line method."),
         args: [
-            arg("cost (number)", _lt("The initial cost of the asset.")),
-            arg("salvage (number)", _lt("The value of the asset at the end of depreciation.")),
-            arg("life (number)", _lt("The number of periods over which the asset is depreciated.")),
+            arg("cost (number)", _t("The initial cost of the asset.")),
+            arg("salvage (number)", _t("The value of the asset at the end of depreciation.")),
+            arg("life (number)", _t("The number of periods over which the asset is depreciated.")),
         ],
         returns: ["NUMBER"],
         computeFormat: () => "#,##0.00",
@@ -14325,12 +14325,12 @@
     // SYD
     // -----------------------------------------------------------------------------
     const SYD = {
-        description: _lt("Depreciation via sum of years digit method."),
+        description: _t("Depreciation via sum of years digit method."),
         args: [
-            arg("cost (number)", _lt("The initial cost of the asset.")),
-            arg("salvage (number)", _lt("The value of the asset at the end of depreciation.")),
-            arg("life (number)", _lt("The number of periods over which the asset is depreciated.")),
-            arg("period (number)", _lt("The single period within life for which to calculate depreciation.")),
+            arg("cost (number)", _t("The initial cost of the asset.")),
+            arg("salvage (number)", _t("The value of the asset at the end of depreciation.")),
+            arg("life (number)", _t("The number of periods over which the asset is depreciated.")),
+            arg("period (number)", _t("The single period within life for which to calculate depreciation.")),
         ],
         returns: ["NUMBER"],
         computeFormat: () => "#,##0.00",
@@ -14360,11 +14360,11 @@
     // TBILLPRICE
     // -----------------------------------------------------------------------------
     const TBILLPRICE = {
-        description: _lt("Price of a US Treasury bill."),
+        description: _t("Price of a US Treasury bill."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("discount (number)", _lt("The discount rate of the bill at time of purchase.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("discount (number)", _t("The discount rate of the bill at time of purchase.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, discount) {
@@ -14393,11 +14393,11 @@
     // TBILLEQ
     // -----------------------------------------------------------------------------
     const TBILLEQ = {
-        description: _lt("Equivalent rate of return for a US Treasury bill."),
+        description: _t("Equivalent rate of return for a US Treasury bill."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("discount (number)", _lt("The discount rate of the bill at time of purchase.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("discount (number)", _t("The discount rate of the bill at time of purchase.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, discount) {
@@ -14451,11 +14451,11 @@
     // TBILLYIELD
     // -----------------------------------------------------------------------------
     const TBILLYIELD = {
-        description: _lt("The yield of a US Treasury bill based on price."),
+        description: _t("The yield of a US Treasury bill based on price."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("price (number)", _lt("The price at which the security is bought per 100 face value.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("price (number)", _t("The price at which the security is bought per 100 face value.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, price) {
@@ -14487,15 +14487,15 @@
     // -----------------------------------------------------------------------------
     const DEFAULT_VDB_NO_SWITCH = false;
     const VDB = {
-        description: _lt("Variable declining balance. WARNING : does not handle decimal periods."),
+        description: _t("Variable declining balance. WARNING : does not handle decimal periods."),
         args: [
-            arg("cost (number)", _lt("The initial cost of the asset.")),
-            arg("salvage (number)", _lt("The value of the asset at the end of depreciation.")),
-            arg("life (number)", _lt("The number of periods over which the asset is depreciated.")),
-            arg("start (number)", _lt("Starting period to calculate depreciation.")),
-            arg("end (number)", _lt("Ending period to calculate depreciation.")),
-            arg(`factor (number, default=${DEFAULT_DDB_DEPRECIATION_FACTOR})`, _lt("The number of months in the first year of depreciation.")),
-            arg(`no_switch (number, default=${DEFAULT_VDB_NO_SWITCH})`, _lt("Whether to switch to straight-line depreciation when the depreciation is greater than the declining balance calculation.")),
+            arg("cost (number)", _t("The initial cost of the asset.")),
+            arg("salvage (number)", _t("The value of the asset at the end of depreciation.")),
+            arg("life (number)", _t("The number of periods over which the asset is depreciated.")),
+            arg("start (number)", _t("Starting period to calculate depreciation.")),
+            arg("end (number)", _t("Ending period to calculate depreciation.")),
+            arg(`factor (number, default=${DEFAULT_DDB_DEPRECIATION_FACTOR})`, _t("The number of months in the first year of depreciation.")),
+            arg(`no_switch (number, default=${DEFAULT_VDB_NO_SWITCH})`, _t("Whether to switch to straight-line depreciation when the depreciation is greater than the declining balance calculation.")),
         ],
         returns: ["NUMBER"],
         compute: function (cost, salvage, life, startPeriod, endPeriod, factor = DEFAULT_DDB_DEPRECIATION_FACTOR, noSwitch = DEFAULT_VDB_NO_SWITCH) {
@@ -14556,11 +14556,11 @@
     // XIRR
     // -----------------------------------------------------------------------------
     const XIRR = {
-        description: _lt("Internal rate of return given non-periodic cash flows."),
+        description: _t("Internal rate of return given non-periodic cash flows."),
         args: [
-            arg("cashflow_amounts (range<number>)", _lt("An range containing the income or payments associated with the investment.")),
-            arg("cashflow_dates (range<number>)", _lt("An range with dates corresponding to the cash flows in cashflow_amounts.")),
-            arg(`rate_guess (number, default=${RATE_GUESS_DEFAULT})`, _lt("An estimate for what the internal rate of return will be.")),
+            arg("cashflow_amounts (range<number>)", _t("An range containing the income or payments associated with the investment.")),
+            arg("cashflow_dates (range<number>)", _t("An range with dates corresponding to the cash flows in cashflow_amounts.")),
+            arg(`rate_guess (number, default=${RATE_GUESS_DEFAULT})`, _t("An estimate for what the internal rate of return will be.")),
         ],
         returns: ["NUMBER"],
         compute: function (cashflowAmounts, cashflowDates, rateGuess = RATE_GUESS_DEFAULT) {
@@ -14628,11 +14628,11 @@
     // XNPV
     // -----------------------------------------------------------------------------
     const XNPV = {
-        description: _lt("Net present value given to non-periodic cash flows.."),
+        description: _t("Net present value given to non-periodic cash flows.."),
         args: [
-            arg("discount (number)", _lt("The discount rate of the investment over one period.")),
-            arg("cashflow_amounts (number, range<number>)", _lt("An range containing the income or payments associated with the investment.")),
-            arg("cashflow_dates (number, range<number>)", _lt("An range with dates corresponding to the cash flows in cashflow_amounts.")),
+            arg("discount (number)", _t("The discount rate of the investment over one period.")),
+            arg("cashflow_amounts (number, range<number>)", _t("An range containing the income or payments associated with the investment.")),
+            arg("cashflow_dates (number, range<number>)", _t("An range with dates corresponding to the cash flows in cashflow_amounts.")),
         ],
         returns: ["NUMBER"],
         compute: function (discount, cashflowAmounts, cashflowDates) {
@@ -14647,7 +14647,7 @@
                 assertCashFlowsAndDatesHaveSameDimension(cashflowAmounts, cashflowDates);
             }
             else {
-                assert(() => _cashFlows.length === _dates.length, _lt("There must be the same number of values in cashflow_amounts and cashflow_dates."));
+                assert(() => _cashFlows.length === _dates.length, _t("There must be the same number of values in cashflow_amounts and cashflow_dates."));
             }
             assertEveryDateGreaterThanFirstDateOfCashFlowDates(_dates);
             assertRateStrictlyPositive(rate);
@@ -14691,15 +14691,15 @@
     // YIELD
     // -----------------------------------------------------------------------------
     const YIELD = {
-        description: _lt("Annual yield of a security paying periodic interest."),
+        description: _t("Annual yield of a security paying periodic interest."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("price (number)", _lt("The price at which the security is bought per 100 face value.")),
-            arg("redemption (number)", _lt("The redemption amount per 100 face value, or par.")),
-            arg("frequency (number)", _lt("The number of interest or coupon payments per year (1, 2, or 4).")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("price (number)", _t("The price at which the security is bought per 100 face value.")),
+            arg("redemption (number)", _t("The redemption amount per 100 face value, or par.")),
+            arg("frequency (number)", _t("The number of interest or coupon payments per year (1, 2, or 4).")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, rate, price, redemption, frequency, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -14714,7 +14714,7 @@
             assertMaturityAndSettlementDatesAreValid(_settlement, _maturity);
             assertCouponFrequencyIsValid(_frequency);
             assertDayCountConventionIsValid(_dayCountConvention);
-            assert(() => _rate >= 0, _lt("The rate (%s) must be positive or null.", _rate.toString()));
+            assert(() => _rate >= 0, _t("The rate (%s) must be positive or null.", _rate.toString()));
             assertPriceStrictlyPositive(_price);
             assertRedemptionStrictlyPositive(_redemption);
             const years = YEARFRAC.compute(_settlement, _maturity, _dayCountConvention);
@@ -14736,7 +14736,7 @@
             function priceNumerator(price, timeFirstCoupon, nbrFullCoupons, yieldFactorPerPeriod, cashFlowFromCoupon, redemption) {
                 let result = redemption -
                     (price + cashFlowFromCoupon * (1 - timeFirstCoupon)) *
-                        yieldFactorPerPeriod ** (nbrFullCoupons - 1 + timeFirstCoupon);
+                    yieldFactorPerPeriod ** (nbrFullCoupons - 1 + timeFirstCoupon);
                 for (let i = 1; i <= nbrFullCoupons; i++) {
                     result += cashFlowFromCoupon * yieldFactorPerPeriod ** (i - 1);
                 }
@@ -14768,13 +14768,13 @@
     // YIELDDISC
     // -----------------------------------------------------------------------------
     const YIELDDISC = {
-        description: _lt("Annual yield of a discount security."),
+        description: _t("Annual yield of a discount security."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("price (number)", _lt("The price at which the security is bought per 100 face value.")),
-            arg("redemption (number)", _lt("The redemption amount per 100 face value, or par.")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("price (number)", _t("The price at which the security is bought per 100 face value.")),
+            arg("redemption (number)", _t("The redemption amount per 100 face value, or par.")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, price, redemption, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -14804,14 +14804,14 @@
     // YIELDMAT
     // -----------------------------------------------------------------------------
     const YIELDMAT = {
-        description: _lt("Annual yield of a security paying interest at maturity."),
+        description: _t("Annual yield of a security paying interest at maturity."),
         args: [
-            arg("settlement (date)", _lt("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
-            arg("maturity (date)", _lt("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
-            arg("issue (date)", _lt("The date the security was initially issued.")),
-            arg("rate (number)", _lt("The annualized rate of interest.")),
-            arg("price (number)", _lt("The price at which the security is bought.")),
-            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _lt("An indicator of what day count method to use.")),
+            arg("settlement (date)", _t("The settlement date of the security, the date after issuance when the security is delivered to the buyer.")),
+            arg("maturity (date)", _t("The maturity or end date of the security, when it can be redeemed at face, or par value.")),
+            arg("issue (date)", _t("The date the security was initially issued.")),
+            arg("rate (number)", _t("The annualized rate of interest.")),
+            arg("price (number)", _t("The price at which the security is bought.")),
+            arg(`day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} )`, _t("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (settlement, maturity, issue, rate, price, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -14824,8 +14824,8 @@
             const _dayCountConvention = Math.trunc(toNumber(dayCountConvention));
             assertMaturityAndSettlementDatesAreValid(_settlement, _maturity);
             assertDayCountConventionIsValid(_dayCountConvention);
-            assert(() => _settlement >= _issue, _lt("The settlement (%s) must be greater than or equal to the issue (%s).", _settlement.toString(), _issue.toString()));
-            assert(() => _rate >= 0, _lt("The rate (%s) must be positive or null.", _rate.toString()));
+            assert(() => _settlement >= _issue, _t("The settlement (%s) must be greater than or equal to the issue (%s).", _settlement.toString(), _issue.toString()));
+            assert(() => _rate >= 0, _t("The rate (%s) must be positive or null.", _rate.toString()));
             assertPriceStrictlyPositive(_price);
             const issueToMaturity = YEARFRAC.compute(_issue, _maturity, _dayCountConvention);
             const issueToSettlement = YEARFRAC.compute(_issue, _settlement, _dayCountConvention);
@@ -14893,8 +14893,8 @@
     // ISERR
     // -----------------------------------------------------------------------------
     const ISERR = {
-        description: _lt("Whether a value is an error other than #N/A."),
-        args: [arg("value (any, lazy)", _lt("The value to be verified as an error type."))],
+        description: _t("Whether a value is an error other than #N/A."),
+        args: [arg("value (any, lazy)", _t("The value to be verified as an error type."))],
         returns: ["BOOLEAN"],
         compute: function (value) {
             try {
@@ -14911,8 +14911,8 @@
     // ISERROR
     // -----------------------------------------------------------------------------
     const ISERROR = {
-        description: _lt("Whether a value is an error."),
-        args: [arg("value (any, lazy)", _lt("The value to be verified as an error type."))],
+        description: _t("Whether a value is an error."),
+        args: [arg("value (any, lazy)", _t("The value to be verified as an error type."))],
         returns: ["BOOLEAN"],
         compute: function (value) {
             try {
@@ -14929,8 +14929,8 @@
     // ISLOGICAL
     // -----------------------------------------------------------------------------
     const ISLOGICAL = {
-        description: _lt("Whether a value is `true` or `false`."),
-        args: [arg("value (any, lazy)", _lt("The value to be verified as a logical TRUE or FALSE."))],
+        description: _t("Whether a value is `true` or `false`."),
+        args: [arg("value (any, lazy)", _t("The value to be verified as a logical TRUE or FALSE."))],
         returns: ["BOOLEAN"],
         compute: function (value) {
             try {
@@ -14946,8 +14946,8 @@
     // ISNA
     // -----------------------------------------------------------------------------
     const ISNA = {
-        description: _lt("Whether a value is the error #N/A."),
-        args: [arg("value (any, lazy)", _lt("The value to be verified as an error type."))],
+        description: _t("Whether a value is the error #N/A."),
+        args: [arg("value (any, lazy)", _t("The value to be verified as an error type."))],
         returns: ["BOOLEAN"],
         compute: function (value) {
             try {
@@ -14964,8 +14964,8 @@
     // ISNONTEXT
     // -----------------------------------------------------------------------------
     const ISNONTEXT = {
-        description: _lt("Whether a value is non-textual."),
-        args: [arg("value (any, lazy)", _lt("The value to be checked."))],
+        description: _t("Whether a value is non-textual."),
+        args: [arg("value (any, lazy)", _t("The value to be checked."))],
         returns: ["BOOLEAN"],
         compute: function (value) {
             try {
@@ -14981,8 +14981,8 @@
     // ISNUMBER
     // -----------------------------------------------------------------------------
     const ISNUMBER = {
-        description: _lt("Whether a value is a number."),
-        args: [arg("value (any, lazy)", _lt("The value to be verified as a number."))],
+        description: _t("Whether a value is a number."),
+        args: [arg("value (any, lazy)", _t("The value to be verified as a number."))],
         returns: ["BOOLEAN"],
         compute: function (value) {
             try {
@@ -14998,8 +14998,8 @@
     // ISTEXT
     // -----------------------------------------------------------------------------
     const ISTEXT = {
-        description: _lt("Whether a value is text."),
-        args: [arg("value (any, lazy)", _lt("The value to be verified as text."))],
+        description: _t("Whether a value is text."),
+        args: [arg("value (any, lazy)", _t("The value to be verified as text."))],
         returns: ["BOOLEAN"],
         compute: function (value) {
             try {
@@ -15015,9 +15015,9 @@
     // ISBLANK
     // -----------------------------------------------------------------------------
     const ISBLANK = {
-        description: _lt("Whether the referenced cell is empty"),
+        description: _t("Whether the referenced cell is empty"),
         args: [
-            arg("value (any, lazy)", _lt("Reference to the cell that will be checked for emptiness.")),
+            arg("value (any, lazy)", _t("Reference to the cell that will be checked for emptiness.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (value) {
@@ -15035,7 +15035,7 @@
     // NA
     // -----------------------------------------------------------------------------
     const NA = {
-        description: _lt("Returns the error value #N/A."),
+        description: _t("Returns the error value #N/A."),
         args: [],
         returns: ["BOOLEAN"],
         compute: function (value) {
@@ -15061,10 +15061,10 @@
     // AND
     // -----------------------------------------------------------------------------
     const AND = {
-        description: _lt("Logical `and` operator."),
+        description: _t("Logical `and` operator."),
         args: [
-            arg("logical_expression1 (boolean, range<boolean>)", _lt("An expression or reference to a cell containing an expression that represents some logical value, i.e. TRUE or FALSE, or an expression that can be coerced to a logical value.")),
-            arg("logical_expression2 (boolean, range<boolean>, repeating)", _lt("More expressions that represent logical values.")),
+            arg("logical_expression1 (boolean, range<boolean>)", _t("An expression or reference to a cell containing an expression that represents some logical value, i.e. TRUE or FALSE, or an expression that can be coerced to a logical value.")),
+            arg("logical_expression2 (boolean, range<boolean>, repeating)", _t("More expressions that represent logical values.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (...logicalExpressions) {
@@ -15075,7 +15075,7 @@
                 acc = acc && arg;
                 return acc;
             });
-            assert(() => foundBoolean, _lt(`[[FUNCTION_NAME]] has no valid input data.`));
+            assert(() => foundBoolean, _t(`[[FUNCTION_NAME]] has no valid input data.`));
             return acc;
         },
         isExported: true,
@@ -15084,11 +15084,11 @@
     // IF
     // -----------------------------------------------------------------------------
     const IF = {
-        description: _lt("Returns value depending on logical expression."),
+        description: _t("Returns value depending on logical expression."),
         args: [
-            arg("logical_expression (boolean)", _lt("An expression or reference to a cell containing an expression that represents some logical value, i.e. TRUE or FALSE.")),
-            arg("value_if_true (any, lazy)", _lt("The value the function returns if logical_expression is TRUE.")),
-            arg("value_if_false (any, lazy, default=FALSE)", _lt("The value the function returns if logical_expression is FALSE.")),
+            arg("logical_expression (boolean)", _t("An expression or reference to a cell containing an expression that represents some logical value, i.e. TRUE or FALSE.")),
+            arg("value_if_true (any, lazy)", _t("The value the function returns if logical_expression is TRUE.")),
+            arg("value_if_false (any, lazy, default=FALSE)", _t("The value the function returns if logical_expression is FALSE.")),
         ],
         returns: ["ANY"],
         compute: function (logicalExpression, valueIfTrue, valueIfFalse = () => false) {
@@ -15101,10 +15101,10 @@
     // IFERROR
     // -----------------------------------------------------------------------------
     const IFERROR = {
-        description: _lt("Value if it is not an error, otherwise 2nd argument."),
+        description: _t("Value if it is not an error, otherwise 2nd argument."),
         args: [
-            arg("value (any, lazy)", _lt("The value to return if value itself is not an error.")),
-            arg(`value_if_error (any, lazy, default="empty")`, _lt("The value the function returns if value is an error.")),
+            arg("value (any, lazy)", _t("The value to return if value itself is not an error.")),
+            arg(`value_if_error (any, lazy, default="empty")`, _t("The value the function returns if value is an error.")),
         ],
         returns: ["ANY"],
         computeFormat: (value, valueIfError = () => ({ value: "" })) => {
@@ -15131,10 +15131,10 @@
     // IFNA
     // -----------------------------------------------------------------------------
     const IFNA = {
-        description: _lt("Value if it is not an #N/A error, otherwise 2nd argument."),
+        description: _t("Value if it is not an #N/A error, otherwise 2nd argument."),
         args: [
-            arg("value (any, lazy)", _lt("The value to return if value itself is not #N/A an error.")),
-            arg(`value_if_error (any, lazy, default="empty")`, _lt("The value the function returns if value is an #N/A error.")),
+            arg("value (any, lazy)", _t("The value to return if value itself is not #N/A an error.")),
+            arg(`value_if_error (any, lazy, default="empty")`, _t("The value the function returns if value is an #N/A error.")),
         ],
         returns: ["ANY"],
         compute: function (value, valueIfError = () => "") {
@@ -15158,23 +15158,23 @@
     // IFS
     // -----------------------------------------------------------------------------
     const IFS = {
-        description: _lt("Returns a value depending on multiple logical expressions."),
+        description: _t("Returns a value depending on multiple logical expressions."),
         args: [
-            arg("condition1 (boolean, lazy)", _lt("The first condition to be evaluated. This can be a boolean, a number, an array, or a reference to any of those.")),
-            arg("value1 (any, lazy)", _lt("The returned value if condition1 is TRUE.")),
-            arg("condition2 (boolean, lazy, repeating)", _lt("Additional conditions to be evaluated if the previous ones are FALSE.")),
-            arg("value2 (any, lazy, repeating)", _lt("Additional values to be returned if their corresponding conditions are TRUE.")),
+            arg("condition1 (boolean, lazy)", _t("The first condition to be evaluated. This can be a boolean, a number, an array, or a reference to any of those.")),
+            arg("value1 (any, lazy)", _t("The returned value if condition1 is TRUE.")),
+            arg("condition2 (boolean, lazy, repeating)", _t("Additional conditions to be evaluated if the previous ones are FALSE.")),
+            arg("value2 (any, lazy, repeating)", _t("Additional values to be returned if their corresponding conditions are TRUE.")),
         ],
         returns: ["ANY"],
         compute: function (...values) {
-            assert(() => values.length % 2 === 0, _lt(`Wrong number of arguments. Expected an even number of arguments.`));
+            assert(() => values.length % 2 === 0, _t(`Wrong number of arguments. Expected an even number of arguments.`));
             for (let n = 0; n < values.length - 1; n += 2) {
                 if (toBoolean(values[n]())) {
                     const returnValue = values[n + 1]();
                     return returnValue !== null ? returnValue : "";
                 }
             }
-            throw new Error(_lt(`No match.`));
+            throw new Error(_t(`No match.`));
         },
         isExported: true,
     };
@@ -15182,9 +15182,9 @@
     // NOT
     // -----------------------------------------------------------------------------
     const NOT = {
-        description: _lt("Returns opposite of provided logical value."),
+        description: _t("Returns opposite of provided logical value."),
         args: [
-            arg("logical_expression (boolean)", _lt("An expression or reference to a cell holding an expression that represents some logical value.")),
+            arg("logical_expression (boolean)", _t("An expression or reference to a cell holding an expression that represents some logical value.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (logicalExpression) {
@@ -15196,10 +15196,10 @@
     // OR
     // -----------------------------------------------------------------------------
     const OR = {
-        description: _lt("Logical `or` operator."),
+        description: _t("Logical `or` operator."),
         args: [
-            arg("logical_expression1 (boolean, range<boolean>)", _lt("An expression or reference to a cell containing an expression that represents some logical value, i.e. TRUE or FALSE, or an expression that can be coerced to a logical value.")),
-            arg("logical_expression2 (boolean, range<boolean>, repeating)", _lt("More expressions that evaluate to logical values.")),
+            arg("logical_expression1 (boolean, range<boolean>)", _t("An expression or reference to a cell containing an expression that represents some logical value, i.e. TRUE or FALSE, or an expression that can be coerced to a logical value.")),
+            arg("logical_expression2 (boolean, range<boolean>, repeating)", _t("More expressions that evaluate to logical values.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (...logicalExpressions) {
@@ -15210,7 +15210,7 @@
                 acc = acc || arg;
                 return !acc;
             });
-            assert(() => foundBoolean, _lt(`[[FUNCTION_NAME]] has no valid input data.`));
+            assert(() => foundBoolean, _t(`[[FUNCTION_NAME]] has no valid input data.`));
             return acc;
         },
         isExported: true,
@@ -15219,10 +15219,10 @@
     // XOR
     // -----------------------------------------------------------------------------
     const XOR = {
-        description: _lt("Logical `xor` operator."),
+        description: _t("Logical `xor` operator."),
         args: [
-            arg("logical_expression1 (boolean, range<boolean>)", _lt("An expression or reference to a cell containing an expression that represents some logical value, i.e. TRUE or FALSE, or an expression that can be coerced to a logical value.")),
-            arg("logical_expression2 (boolean, range<boolean>, repeating)", _lt("More expressions that evaluate to logical values.")),
+            arg("logical_expression1 (boolean, range<boolean>)", _t("An expression or reference to a cell containing an expression that represents some logical value, i.e. TRUE or FALSE, or an expression that can be coerced to a logical value.")),
+            arg("logical_expression2 (boolean, range<boolean>, repeating)", _t("More expressions that evaluate to logical values.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (...logicalExpressions) {
@@ -15233,7 +15233,7 @@
                 acc = acc ? !arg : arg;
                 return true; // no stop condition
             });
-            assert(() => foundBoolean, _lt(`[[FUNCTION_NAME]] has no valid input data.`));
+            assert(() => foundBoolean, _t(`[[FUNCTION_NAME]] has no valid input data.`));
             return acc;
         },
         isExported: true,
@@ -15257,20 +15257,20 @@
     const DEFAULT_ABSOLUTE_RELATIVE_MODE = 1;
     function assertAvailable(variable, searchKey) {
         if (variable === undefined) {
-            throw new NotAvailableError(_lt("Did not find value '%s' in [[FUNCTION_NAME]] evaluation.", toString(searchKey)));
+            throw new NotAvailableError(_t("Did not find value '%s' in [[FUNCTION_NAME]] evaluation.", toString(searchKey)));
         }
     }
     // -----------------------------------------------------------------------------
     // ADDRESS
     // -----------------------------------------------------------------------------
     const ADDRESS = {
-        description: _lt("Returns a cell reference as a string. "),
+        description: _t("Returns a cell reference as a string. "),
         args: [
-            arg("row (number)", _lt("The row number of the cell reference. ")),
-            arg("column (number)", _lt("The column number (not name) of the cell reference. A is column number 1. ")),
-            arg(`absolute_relative_mode (number, default=${DEFAULT_ABSOLUTE_RELATIVE_MODE})`, _lt("An indicator of whether the reference is row/column absolute. 1 is row and column absolute (e.g. $A$1), 2 is row absolute and column relative (e.g. A$1), 3 is row relative and column absolute (e.g. $A1), and 4 is row and column relative (e.g. A1).")),
-            arg("use_a1_notation (boolean, default=TRUE)", _lt("A boolean indicating whether to use A1 style notation (TRUE) or R1C1 style notation (FALSE).")),
-            arg("sheet (string, optional)", _lt("A string indicating the name of the sheet into which the address points.")),
+            arg("row (number)", _t("The row number of the cell reference. ")),
+            arg("column (number)", _t("The column number (not name) of the cell reference. A is column number 1. ")),
+            arg(`absolute_relative_mode (number, default=${DEFAULT_ABSOLUTE_RELATIVE_MODE})`, _t("An indicator of whether the reference is row/column absolute. 1 is row and column absolute (e.g. $A$1), 2 is row absolute and column relative (e.g. A$1), 3 is row relative and column absolute (e.g. $A1), and 4 is row and column relative (e.g. A1).")),
+            arg("use_a1_notation (boolean, default=TRUE)", _t("A boolean indicating whether to use A1 style notation (TRUE) or R1C1 style notation (FALSE).")),
+            arg("sheet (string, optional)", _t("A string indicating the name of the sheet into which the address points.")),
         ],
         returns: ["STRING"],
         compute: function (row, column, absoluteRelativeMode = DEFAULT_ABSOLUTE_RELATIVE_MODE, useA1Notation = true, sheet) {
@@ -15305,9 +15305,9 @@
     // COLUMN
     // -----------------------------------------------------------------------------
     const COLUMN = {
-        description: _lt("Column number of a specified cell."),
+        description: _t("Column number of a specified cell."),
         args: [
-            arg("cell_reference (meta, default='this cell')", _lt("The cell whose column number will be returned. Column A corresponds to 1. By default, the function use the cell in which the formula is entered.")),
+            arg("cell_reference (meta, default='this cell')", _t("The cell whose column number will be returned. Column A corresponds to 1. By default, the function use the cell in which the formula is entered.")),
         ],
         returns: ["NUMBER"],
         compute: function (cellReference) {
@@ -15322,8 +15322,8 @@
     // COLUMNS
     // -----------------------------------------------------------------------------
     const COLUMNS = {
-        description: _lt("Number of columns in a specified array or range."),
-        args: [arg("range (meta)", _lt("The range whose column count will be returned."))],
+        description: _t("Number of columns in a specified array or range."),
+        args: [arg("range (meta)", _t("The range whose column count will be returned."))],
         returns: ["NUMBER"],
         compute: function (range) {
             const zone = toZone(range);
@@ -15335,18 +15335,18 @@
     // HLOOKUP
     // -----------------------------------------------------------------------------
     const HLOOKUP = {
-        description: _lt(`Horizontal lookup`),
+        description: _t(`Horizontal lookup`),
         args: [
-            arg("search_key (any)", _lt("The value to search for. For example, 42, 'Cats', or I24.")),
-            arg("range (range)", _lt("The range to consider for the search. The first row in the range is searched for the key specified in search_key.")),
-            arg("index (number)", _lt("The row index of the value to be returned, where the first row in range is numbered 1.")),
-            arg(`is_sorted (boolean, default=${DEFAULT_IS_SORTED})`, _lt("Indicates whether the row to be searched (the first row of the specified range) is sorted, in which case the closest match for search_key will be returned.")),
+            arg("search_key (any)", _t("The value to search for. For example, 42, 'Cats', or I24.")),
+            arg("range (range)", _t("The range to consider for the search. The first row in the range is searched for the key specified in search_key.")),
+            arg("index (number)", _t("The row index of the value to be returned, where the first row in range is numbered 1.")),
+            arg(`is_sorted (boolean, default=${DEFAULT_IS_SORTED})`, _t("Indicates whether the row to be searched (the first row of the specified range) is sorted, in which case the closest match for search_key will be returned.")),
         ],
         returns: ["ANY"],
         compute: function (searchKey, range, index, isSorted = DEFAULT_IS_SORTED) {
             const _index = Math.trunc(toNumber(index));
             const _searchKey = normalizeValue(searchKey);
-            assert(() => 1 <= _index && _index <= range[0].length, _lt("[[FUNCTION_NAME]] evaluates to an out of bounds range."));
+            assert(() => 1 <= _index && _index <= range[0].length, _t("[[FUNCTION_NAME]] evaluates to an out of bounds range."));
             const _isSorted = toBoolean(isSorted);
             let colIndex;
             if (_isSorted) {
@@ -15365,11 +15365,11 @@
     // LOOKUP
     // -----------------------------------------------------------------------------
     const LOOKUP = {
-        description: _lt(`Look up a value.`),
+        description: _t(`Look up a value.`),
         args: [
-            arg("search_key (any)", _lt("The value to search for. For example, 42, 'Cats', or I24.")),
-            arg("search_array (range)", _lt("One method of using this function is to provide a single sorted row or column search_array to look through for the search_key with a second argument result_range. The other way is to combine these two arguments into one search_array where the first row or column is searched and a value is returned from the last row or column in the array. If search_key is not found, a non-exact match may be returned.")),
-            arg("result_range (range, optional)", _lt("The range from which to return a result. The value returned corresponds to the location where search_key is found in search_range. This range must be only a single row or column and should not be used if using the search_result_array method.")),
+            arg("search_key (any)", _t("The value to search for. For example, 42, 'Cats', or I24.")),
+            arg("search_array (range)", _t("One method of using this function is to provide a single sorted row or column search_array to look through for the search_key with a second argument result_range. The other way is to combine these two arguments into one search_array where the first row or column is searched and a value is returned from the last row or column in the array. If search_key is not found, a non-exact match may be returned.")),
+            arg("result_range (range, optional)", _t("The range from which to return a result. The value returned corresponds to the location where search_key is found in search_range. This range must be only a single row or column and should not be used if using the search_result_array method.")),
         ],
         returns: ["ANY"],
         compute: function (searchKey, searchArray, resultRange) {
@@ -15392,12 +15392,12 @@
             }
             nbCol = resultRange.length;
             nbRow = resultRange[0].length;
-            assert(() => nbCol === 1 || nbRow === 1, _lt("The result_range must be a single row or a single column."));
+            assert(() => nbCol === 1 || nbRow === 1, _t("The result_range must be a single row or a single column."));
             if (nbCol > 1) {
-                assert(() => index <= nbCol - 1, _lt("[[FUNCTION_NAME]] evaluates to an out of range row value %s.", (index + 1).toString()));
+                assert(() => index <= nbCol - 1, _t("[[FUNCTION_NAME]] evaluates to an out of range row value %s.", (index + 1).toString()));
                 return resultRange[index][0];
             }
-            assert(() => index <= nbRow - 1, _lt("[[FUNCTION_NAME]] evaluates to an out of range column value %s.", (index + 1).toString()));
+            assert(() => index <= nbRow - 1, _t("[[FUNCTION_NAME]] evaluates to an out of range column value %s.", (index + 1).toString()));
             return resultRange[0][index];
         },
         isExported: true,
@@ -15407,11 +15407,11 @@
     // -----------------------------------------------------------------------------
     const DEFAULT_SEARCH_TYPE = 1;
     const MATCH = {
-        description: _lt(`Position of item in range that matches value.`),
+        description: _t(`Position of item in range that matches value.`),
         args: [
-            arg("search_key (any)", _lt("The value to search for. For example, 42, 'Cats', or I24.")),
-            arg("range (any, range)", _lt("The one-dimensional array to be searched.")),
-            arg(`search_type (number, default=${DEFAULT_SEARCH_TYPE})`, _lt("The search method. 1 (default) finds the largest value less than or equal to search_key when range is sorted in ascending order. 0 finds the exact value when range is unsorted. -1 finds the smallest value greater than or equal to search_key when range is sorted in descending order.")),
+            arg("search_key (any)", _t("The value to search for. For example, 42, 'Cats', or I24.")),
+            arg("range (any, range)", _t("The one-dimensional array to be searched.")),
+            arg(`search_type (number, default=${DEFAULT_SEARCH_TYPE})`, _t("The search method. 1 (default) finds the largest value less than or equal to search_key when range is sorted in ascending order. 0 finds the exact value when range is unsorted. -1 finds the smallest value greater than or equal to search_key when range is sorted in descending order.")),
         ],
         returns: ["NUMBER"],
         compute: function (searchKey, range, searchType = DEFAULT_SEARCH_TYPE) {
@@ -15419,7 +15419,7 @@
             const _searchKey = normalizeValue(searchKey);
             const nbCol = range.length;
             const nbRow = range[0].length;
-            assert(() => nbCol === 1 || nbRow === 1, _lt("The range must be a single row or a single column."));
+            assert(() => nbCol === 1 || nbRow === 1, _t("The range must be a single row or a single column."));
             let index = -1;
             const getElement = nbCol === 1 ? getNormalizedValueFromColumnRange : getNormalizedValueFromRowRange;
             const rangeLen = nbCol === 1 ? range[0].length : range.length;
@@ -15444,9 +15444,9 @@
     // ROW
     // -----------------------------------------------------------------------------
     const ROW = {
-        description: _lt("Row number of a specified cell."),
+        description: _t("Row number of a specified cell."),
         args: [
-            arg("cell_reference (meta, default='this cell')", _lt("The cell whose row number will be returned. By default, this function uses the cell in which the formula is entered.")),
+            arg("cell_reference (meta, default='this cell')", _t("The cell whose row number will be returned. By default, this function uses the cell in which the formula is entered.")),
         ],
         returns: ["NUMBER"],
         compute: function (cellReference) {
@@ -15461,8 +15461,8 @@
     // ROWS
     // -----------------------------------------------------------------------------
     const ROWS = {
-        description: _lt("Number of rows in a specified array or range."),
-        args: [arg("range (meta)", _lt("The range whose row count will be returned."))],
+        description: _t("Number of rows in a specified array or range."),
+        args: [arg("range (meta)", _t("The range whose row count will be returned."))],
         returns: ["NUMBER"],
         compute: function (range) {
             const zone = toZone(range);
@@ -15474,18 +15474,18 @@
     // VLOOKUP
     // -----------------------------------------------------------------------------
     const VLOOKUP = {
-        description: _lt(`Vertical lookup.`),
+        description: _t(`Vertical lookup.`),
         args: [
-            arg("search_key (any)", _lt("The value to search for. For example, 42, 'Cats', or I24.")),
-            arg("range (any, range)", _lt("The range to consider for the search. The first column in the range is searched for the key specified in search_key.")),
-            arg("index (number)", _lt("The column index of the value to be returned, where the first column in range is numbered 1.")),
-            arg(`is_sorted (boolean, default=${DEFAULT_IS_SORTED})`, _lt("Indicates whether the column to be searched (the first column of the specified range) is sorted, in which case the closest match for search_key will be returned.")),
+            arg("search_key (any)", _t("The value to search for. For example, 42, 'Cats', or I24.")),
+            arg("range (any, range)", _t("The range to consider for the search. The first column in the range is searched for the key specified in search_key.")),
+            arg("index (number)", _t("The column index of the value to be returned, where the first column in range is numbered 1.")),
+            arg(`is_sorted (boolean, default=${DEFAULT_IS_SORTED})`, _t("Indicates whether the column to be searched (the first column of the specified range) is sorted, in which case the closest match for search_key will be returned.")),
         ],
         returns: ["ANY"],
         compute: function (searchKey, range, index, isSorted = DEFAULT_IS_SORTED) {
             const _index = Math.trunc(toNumber(index));
             const _searchKey = normalizeValue(searchKey);
-            assert(() => 1 <= _index && _index <= range.length, _lt("[[FUNCTION_NAME]] evaluates to an out of bounds range."));
+            assert(() => 1 <= _index && _index <= range.length, _t("[[FUNCTION_NAME]] evaluates to an out of bounds range."));
             const _isSorted = toBoolean(isSorted);
             let rowIndex;
             if (_isSorted) {
@@ -15504,14 +15504,14 @@
     // XLOOKUP
     // -----------------------------------------------------------------------------
     const XLOOKUP = {
-        description: _lt(`Search a range for a match and return the corresponding item from a second range.`),
+        description: _t(`Search a range for a match and return the corresponding item from a second range.`),
         args: [
-            arg("search_key (any)", _lt("The value to search for.")),
-            arg("lookup_range (any, range)", _lt("The range to consider for the search. Should be a single column or a single row.")),
-            arg("return_range (any, range)", _lt("The range containing the return value. Should have the same dimensions as lookup_range.")),
-            arg("if_not_found (any, lazy, optional)", _lt("If a valid match is not found, return this value.")),
-            arg(`match_mode (any, default=${DEFAULT_MATCH_MODE})`, _lt("(0) Exact match. (-1) Return next smaller item if no match. (1) Return next greater item if no match.")),
-            arg(`search_mode (any, default=${DEFAULT_SEARCH_MODE})`, _lt("(1) Search starting at first item. \
+            arg("search_key (any)", _t("The value to search for.")),
+            arg("lookup_range (any, range)", _t("The range to consider for the search. Should be a single column or a single row.")),
+            arg("return_range (any, range)", _t("The range containing the return value. Should have the same dimensions as lookup_range.")),
+            arg("if_not_found (any, lazy, optional)", _t("If a valid match is not found, return this value.")),
+            arg(`match_mode (any, default=${DEFAULT_MATCH_MODE})`, _t("(0) Exact match. (-1) Return next smaller item if no match. (1) Return next greater item if no match.")),
+            arg(`search_mode (any, default=${DEFAULT_SEARCH_MODE})`, _t("(1) Search starting at first item. \
       (-1) Search starting at last item. \
       (2) Perform a binary search that relies on lookup_array being sorted in ascending order. If not sorted, invalid results will be returned. \
       (-2) Perform a binary search that relies on lookup_array being sorted in descending order. If not sorted, invalid results will be returned.\
@@ -15522,12 +15522,12 @@
             const _matchMode = Math.trunc(toNumber(matchMode));
             const _searchMode = Math.trunc(toNumber(searchMode));
             const _searchKey = normalizeValue(searchKey);
-            assert(() => lookupRange.length === 1 || lookupRange[0].length === 1, _lt("lookup_range should be either a single row or single column."));
-            assert(() => returnRange.length === 1 || returnRange[0].length === 1, _lt("return_range should be either a single row or single column."));
+            assert(() => lookupRange.length === 1 || lookupRange[0].length === 1, _t("lookup_range should be either a single row or single column."));
+            assert(() => returnRange.length === 1 || returnRange[0].length === 1, _t("return_range should be either a single row or single column."));
             assert(() => returnRange.length === lookupRange.length &&
-                returnRange[0].length === lookupRange[0].length, _lt("return_range should have the same dimensions as lookup_range."));
-            assert(() => [-1, 1, -2, 2].includes(_searchMode), _lt("searchMode should be a value in [-1, 1, -2, 2]."));
-            assert(() => [-1, 0, 1].includes(_matchMode), _lt("matchMode should be a value in [-1, 0, 1]."));
+                returnRange[0].length === lookupRange[0].length, _t("return_range should have the same dimensions as lookup_range."));
+            assert(() => [-1, 1, -2, 2].includes(_searchMode), _t("searchMode should be a value in [-1, 1, -2, 2]."));
+            assert(() => [-1, 0, 1].includes(_matchMode), _t("matchMode should be a value in [-1, 0, 1]."));
             const getElement = lookupRange.length === 1 ? getNormalizedValueFromColumnRange : getNormalizedValueFromRowRange;
             const rangeLen = lookupRange.length === 1 ? lookupRange[0].length : lookupRange.length;
             const mode = _matchMode === 0 ? "strict" : _matchMode === 1 ? "nextGreater" : "nextSmaller";
@@ -15568,10 +15568,10 @@
     // ADD
     // -----------------------------------------------------------------------------
     const ADD = {
-        description: _lt(`Sum of two numbers.`),
+        description: _t(`Sum of two numbers.`),
         args: [
-            arg("value1 (number)", _lt("The first addend.")),
-            arg("value2 (number)", _lt("The second addend.")),
+            arg("value1 (number)", _t("The first addend.")),
+            arg("value2 (number)", _t("The second addend.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1, value2) => value1?.format || value2?.format,
@@ -15583,10 +15583,10 @@
     // CONCAT
     // -----------------------------------------------------------------------------
     const CONCAT = {
-        description: _lt(`Concatenation of two values.`),
+        description: _t(`Concatenation of two values.`),
         args: [
-            arg("value1 (string)", _lt("The value to which value2 will be appended.")),
-            arg("value2 (string)", _lt("The value to append to value1.")),
+            arg("value1 (string)", _t("The value to which value2 will be appended.")),
+            arg("value2 (string)", _t("The value to append to value1.")),
         ],
         returns: ["STRING"],
         compute: function (value1, value2) {
@@ -15598,16 +15598,16 @@
     // DIVIDE
     // -----------------------------------------------------------------------------
     const DIVIDE = {
-        description: _lt(`One number divided by another.`),
+        description: _t(`One number divided by another.`),
         args: [
-            arg("dividend (number)", _lt("The number to be divided.")),
-            arg("divisor (number)", _lt("The number to divide by.")),
+            arg("dividend (number)", _t("The number to be divided.")),
+            arg("divisor (number)", _t("The number to divide by.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (dividend, divisor) => dividend?.format || divisor?.format,
         compute: function (dividend, divisor) {
             const _divisor = toNumber(divisor);
-            assert(() => _divisor !== 0, _lt("The divisor must be different from zero."));
+            assert(() => _divisor !== 0, _t("The divisor must be different from zero."));
             return toNumber(dividend) / _divisor;
         },
     };
@@ -15619,10 +15619,10 @@
     }
     const getNeutral = { number: 0, string: "", boolean: false };
     const EQ = {
-        description: _lt(`Equal.`),
+        description: _t(`Equal.`),
         args: [
-            arg("value1 (any)", _lt("The first value.")),
-            arg("value2 (any)", _lt("The value to test against value1 for equality.")),
+            arg("value1 (any)", _t("The first value.")),
+            arg("value2 (any)", _t("The value to test against value1 for equality.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
@@ -15660,10 +15660,10 @@
         return cb(value1, value2);
     }
     const GT = {
-        description: _lt(`Strictly greater than.`),
+        description: _t(`Strictly greater than.`),
         args: [
-            arg("value1 (any)", _lt("The value to test as being greater than value2.")),
-            arg("value2 (any)", _lt("The second value.")),
+            arg("value1 (any)", _t("The value to test as being greater than value2.")),
+            arg("value2 (any)", _t("The second value.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
@@ -15676,10 +15676,10 @@
     // GTE
     // -----------------------------------------------------------------------------
     const GTE = {
-        description: _lt(`Greater than or equal to.`),
+        description: _t(`Greater than or equal to.`),
         args: [
-            arg("value1 (any)", _lt("The value to test as being greater than or equal to value2.")),
-            arg("value2 (any)", _lt("The second value.")),
+            arg("value1 (any)", _t("The value to test as being greater than or equal to value2.")),
+            arg("value2 (any)", _t("The second value.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
@@ -15692,10 +15692,10 @@
     // LT
     // -----------------------------------------------------------------------------
     const LT = {
-        description: _lt(`Less than.`),
+        description: _t(`Less than.`),
         args: [
-            arg("value1 (any)", _lt("The value to test as being less than value2.")),
-            arg("value2 (any)", _lt("The second value.")),
+            arg("value1 (any)", _t("The value to test as being less than value2.")),
+            arg("value2 (any)", _t("The second value.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
@@ -15706,10 +15706,10 @@
     // LTE
     // -----------------------------------------------------------------------------
     const LTE = {
-        description: _lt(`Less than or equal to.`),
+        description: _t(`Less than or equal to.`),
         args: [
-            arg("value1 (any)", _lt("The value to test as being less than or equal to value2.")),
-            arg("value2 (any)", _lt("The second value.")),
+            arg("value1 (any)", _t("The value to test as being less than or equal to value2.")),
+            arg("value2 (any)", _t("The second value.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
@@ -15720,10 +15720,10 @@
     // MINUS
     // -----------------------------------------------------------------------------
     const MINUS = {
-        description: _lt(`Difference of two numbers.`),
+        description: _t(`Difference of two numbers.`),
         args: [
-            arg("value1 (number)", _lt("The minuend, or number to be subtracted from.")),
-            arg("value2 (number)", _lt("The subtrahend, or number to subtract from value1.")),
+            arg("value1 (number)", _t("The minuend, or number to be subtracted from.")),
+            arg("value2 (number)", _t("The subtrahend, or number to subtract from value1.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (value1, value2) => value1?.format || value2?.format,
@@ -15735,10 +15735,10 @@
     // MULTIPLY
     // -----------------------------------------------------------------------------
     const MULTIPLY = {
-        description: _lt(`Product of two numbers`),
+        description: _t(`Product of two numbers`),
         args: [
-            arg("factor1 (number)", _lt("The first multiplicand.")),
-            arg("factor2 (number)", _lt("The second multiplicand.")),
+            arg("factor1 (number)", _t("The first multiplicand.")),
+            arg("factor2 (number)", _t("The second multiplicand.")),
         ],
         returns: ["NUMBER"],
         computeFormat: (factor1, factor2) => factor1?.format || factor2?.format,
@@ -15750,10 +15750,10 @@
     // NE
     // -----------------------------------------------------------------------------
     const NE = {
-        description: _lt(`Not equal.`),
+        description: _t(`Not equal.`),
         args: [
-            arg("value1 (any)", _lt("The first value.")),
-            arg("value2 (any)", _lt("The value to test against value1 for inequality.")),
+            arg("value1 (any)", _t("The first value.")),
+            arg("value2 (any)", _t("The value to test against value1 for inequality.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
@@ -15764,10 +15764,10 @@
     // POW
     // -----------------------------------------------------------------------------
     const POW = {
-        description: _lt(`A number raised to a power.`),
+        description: _t(`A number raised to a power.`),
         args: [
-            arg("base (number)", _lt("The number to raise to the exponent power.")),
-            arg("exponent (number)", _lt("The exponent to raise base to.")),
+            arg("base (number)", _t("The number to raise to the exponent power.")),
+            arg("exponent (number)", _t("The exponent to raise base to.")),
         ],
         returns: ["NUMBER"],
         compute: function (base, exponent) {
@@ -15778,9 +15778,9 @@
     // UMINUS
     // -----------------------------------------------------------------------------
     const UMINUS = {
-        description: _lt(`A number with the sign reversed.`),
+        description: _t(`A number with the sign reversed.`),
         args: [
-            arg("value (number)", _lt("The number to have its sign reversed. Equivalently, the number to multiply by -1.")),
+            arg("value (number)", _t("The number to have its sign reversed. Equivalently, the number to multiply by -1.")),
         ],
         computeFormat: (value) => value?.format,
         returns: ["NUMBER"],
@@ -15792,8 +15792,8 @@
     // UNARY_PERCENT
     // -----------------------------------------------------------------------------
     const UNARY_PERCENT = {
-        description: _lt(`Value interpreted as a percentage.`),
-        args: [arg("percentage (number)", _lt("The value to interpret as a percentage."))],
+        description: _t(`Value interpreted as a percentage.`),
+        args: [arg("percentage (number)", _t("The value to interpret as a percentage."))],
         returns: ["NUMBER"],
         compute: function (percentage) {
             return toNumber(percentage) / 100;
@@ -15803,8 +15803,8 @@
     // UPLUS
     // -----------------------------------------------------------------------------
     const UPLUS = {
-        description: _lt(`A specified number, unchanged.`),
-        args: [arg("value (any)", _lt("The number to return."))],
+        description: _t(`A specified number, unchanged.`),
+        args: [arg("value (any)", _t("The number to return."))],
         returns: ["ANY"],
         computeFormat: (value) => value?.format,
         compute: function (value) {
@@ -15838,14 +15838,14 @@
     // CHAR
     // -----------------------------------------------------------------------------
     const CHAR = {
-        description: _lt("Gets character associated with number."),
+        description: _t("Gets character associated with number."),
         args: [
-            arg("table_number (number)", _lt("The number of the character to look up from the current Unicode table in decimal format.")),
+            arg("table_number (number)", _t("The number of the character to look up from the current Unicode table in decimal format.")),
         ],
         returns: ["STRING"],
         compute: function (tableNumber) {
             const _tableNumber = Math.trunc(toNumber(tableNumber));
-            assert(() => _tableNumber >= 1, _lt("The table_number (%s) is out of range.", _tableNumber.toString()));
+            assert(() => _tableNumber >= 1, _t("The table_number (%s) is out of range.", _tableNumber.toString()));
             return String.fromCharCode(_tableNumber);
         },
         isExported: true,
@@ -15854,8 +15854,8 @@
     // CLEAN
     // -----------------------------------------------------------------------------
     const CLEAN = {
-        description: _lt("Remove non-printable characters from a piece of text."),
-        args: [arg("text (string)", _lt("The text whose non-printable characters are to be removed."))],
+        description: _t("Remove non-printable characters from a piece of text."),
+        args: [arg("text (string)", _t("The text whose non-printable characters are to be removed."))],
         returns: ["STRING"],
         compute: function (text) {
             const _text = toString(text);
@@ -15873,10 +15873,10 @@
     // CONCATENATE
     // -----------------------------------------------------------------------------
     const CONCATENATE = {
-        description: _lt("Appends strings to one another."),
+        description: _t("Appends strings to one another."),
         args: [
-            arg("string1 (string, range<string>)", _lt("The initial string.")),
-            arg("string2 (string, range<string>, repeating)", _lt("More strings to append in sequence.")),
+            arg("string1 (string, range<string>)", _t("The initial string.")),
+            arg("string2 (string, range<string>, repeating)", _t("More strings to append in sequence.")),
         ],
         returns: ["STRING"],
         compute: function (...values) {
@@ -15888,10 +15888,10 @@
     // EXACT
     // -----------------------------------------------------------------------------
     const EXACT = {
-        description: _lt("Tests whether two strings are identical."),
+        description: _t("Tests whether two strings are identical."),
         args: [
-            arg("string1 (string)", _lt("The first string to compare.")),
-            arg("string2 (string)", _lt("The second string to compare.")),
+            arg("string1 (string)", _t("The first string to compare.")),
+            arg("string2 (string)", _t("The second string to compare.")),
         ],
         returns: ["BOOLEAN"],
         compute: function (string1, string2) {
@@ -15903,21 +15903,21 @@
     // FIND
     // -----------------------------------------------------------------------------
     const FIND = {
-        description: _lt("First position of string found in text, case-sensitive."),
+        description: _t("First position of string found in text, case-sensitive."),
         args: [
-            arg("search_for (string)", _lt("The string to look for within text_to_search.")),
-            arg("text_to_search (string)", _lt("The text to search for the first occurrence of search_for.")),
-            arg(`starting_at (number, default=${DEFAULT_STARTING_AT})`, _lt("The character within text_to_search at which to start the search.")),
+            arg("search_for (string)", _t("The string to look for within text_to_search.")),
+            arg("text_to_search (string)", _t("The text to search for the first occurrence of search_for.")),
+            arg(`starting_at (number, default=${DEFAULT_STARTING_AT})`, _t("The character within text_to_search at which to start the search.")),
         ],
         returns: ["NUMBER"],
         compute: function (searchFor, textToSearch, startingAt = DEFAULT_STARTING_AT) {
             const _searchFor = toString(searchFor);
             const _textToSearch = toString(textToSearch);
             const _startingAt = toNumber(startingAt);
-            assert(() => _textToSearch !== "", _lt(`The text_to_search must be non-empty.`));
-            assert(() => _startingAt >= 1, _lt("The starting_at (%s) must be greater than or equal to 1.", _startingAt.toString()));
+            assert(() => _textToSearch !== "", _t(`The text_to_search must be non-empty.`));
+            assert(() => _startingAt >= 1, _t("The starting_at (%s) must be greater than or equal to 1.", _startingAt.toString()));
             const result = _textToSearch.indexOf(_searchFor, _startingAt - 1);
-            assert(() => result >= 0, _lt("In [[FUNCTION_NAME]] evaluation, cannot find '%s' within '%s'.", _searchFor.toString(), _textToSearch));
+            assert(() => result >= 0, _t("In [[FUNCTION_NAME]] evaluation, cannot find '%s' within '%s'.", _searchFor.toString(), _textToSearch));
             return result + 1;
         },
         isExported: true,
@@ -15926,11 +15926,11 @@
     // JOIN
     // -----------------------------------------------------------------------------
     const JOIN = {
-        description: _lt("Concatenates elements of arrays with delimiter."),
+        description: _t("Concatenates elements of arrays with delimiter."),
         args: [
-            arg("delimiter (string)", _lt("The character or string to place between each concatenated value.")),
-            arg("value_or_array1 (string, range<string>)", _lt("The value or values to be appended using delimiter.")),
-            arg("value_or_array2 (string, range<string>, repeating)", _lt("More values to be appended using delimiter.")),
+            arg("delimiter (string)", _t("The character or string to place between each concatenated value.")),
+            arg("value_or_array1 (string, range<string>)", _t("The value or values to be appended using delimiter.")),
+            arg("value_or_array2 (string, range<string>, repeating)", _t("More values to be appended using delimiter.")),
         ],
         returns: ["STRING"],
         compute: function (delimiter, ...valuesOrArrays) {
@@ -15942,15 +15942,15 @@
     // LEFT
     // -----------------------------------------------------------------------------
     const LEFT = {
-        description: _lt("Substring from beginning of specified string."),
+        description: _t("Substring from beginning of specified string."),
         args: [
-            arg("text (string)", _lt("The string from which the left portion will be returned.")),
-            arg("number_of_characters (number, optional)", _lt("The number of characters to return from the left side of string.")),
+            arg("text (string)", _t("The string from which the left portion will be returned.")),
+            arg("number_of_characters (number, optional)", _t("The number of characters to return from the left side of string.")),
         ],
         returns: ["STRING"],
         compute: function (text, ...args) {
             const _numberOfCharacters = args.length ? toNumber(args[0]) : 1;
-            assert(() => _numberOfCharacters >= 0, _lt("The number_of_characters (%s) must be positive or null.", _numberOfCharacters.toString()));
+            assert(() => _numberOfCharacters >= 0, _t("The number_of_characters (%s) must be positive or null.", _numberOfCharacters.toString()));
             return toString(text).substring(0, _numberOfCharacters);
         },
         isExported: true,
@@ -15959,8 +15959,8 @@
     // LEN
     // -----------------------------------------------------------------------------
     const LEN = {
-        description: _lt("Length of a string."),
-        args: [arg("text (string)", _lt("The string whose length will be returned."))],
+        description: _t("Length of a string."),
+        args: [arg("text (string)", _t("The string whose length will be returned."))],
         returns: ["NUMBER"],
         compute: function (text) {
             return toString(text).length;
@@ -15971,8 +15971,8 @@
     // LOWER
     // -----------------------------------------------------------------------------
     const LOWER = {
-        description: _lt("Converts a specified string to lowercase."),
-        args: [arg("text (string)", _lt("The string to convert to lowercase."))],
+        description: _t("Converts a specified string to lowercase."),
+        args: [arg("text (string)", _t("The string to convert to lowercase."))],
         returns: ["STRING"],
         compute: function (text) {
             return toString(text).toLowerCase();
@@ -15983,19 +15983,19 @@
     // MID
     // -----------------------------------------------------------------------------
     const MID = {
-        description: _lt("A segment of a string."),
+        description: _t("A segment of a string."),
         args: [
-            arg("text (string)", _lt("The string to extract a segment from.")),
-            arg(" (number)", _lt("The index from the left of string from which to begin extracting. The first character in string has the index 1.")),
-            arg(" (number)", _lt("The length of the segment to extract.")),
+            arg("text (string)", _t("The string to extract a segment from.")),
+            arg(" (number)", _t("The index from the left of string from which to begin extracting. The first character in string has the index 1.")),
+            arg(" (number)", _t("The length of the segment to extract.")),
         ],
         returns: ["STRING"],
         compute: function (text, starting_at, extract_length) {
             const _text = toString(text);
             const _starting_at = toNumber(starting_at);
             const _extract_length = toNumber(extract_length);
-            assert(() => _starting_at >= 1, _lt("The starting_at argument (%s) must be positive greater than one.", _starting_at.toString()));
-            assert(() => _extract_length >= 0, _lt("The extract_length argument (%s) must be positive or null.", _extract_length.toString()));
+            assert(() => _starting_at >= 1, _t("The starting_at argument (%s) must be positive greater than one.", _starting_at.toString()));
+            assert(() => _extract_length >= 0, _t("The extract_length argument (%s) must be positive or null.", _extract_length.toString()));
             return _text.slice(_starting_at - 1, _starting_at + _extract_length - 1);
         },
         isExported: true,
@@ -16004,9 +16004,9 @@
     // PROPER
     // -----------------------------------------------------------------------------
     const PROPER = {
-        description: _lt("Capitalizes each word in a specified string."),
+        description: _t("Capitalizes each word in a specified string."),
         args: [
-            arg("text_to_capitalize (string)", _lt("The text which will be returned with the first letter of each word in uppercase and all other letters in lowercase.")),
+            arg("text_to_capitalize (string)", _t("The text which will be returned with the first letter of each word in uppercase and all other letters in lowercase.")),
         ],
         returns: ["STRING"],
         compute: function (text) {
@@ -16021,17 +16021,17 @@
     // REPLACE
     // -----------------------------------------------------------------------------
     const REPLACE = {
-        description: _lt("Replaces part of a text string with different text."),
+        description: _t("Replaces part of a text string with different text."),
         args: [
-            arg("text (string)", _lt("The text, a part of which will be replaced.")),
-            arg("position (number)", _lt("The position where the replacement will begin (starting from 1).")),
-            arg("length (number)", _lt("The number of characters in the text to be replaced.")),
-            arg("new_text (string)", _lt("The text which will be inserted into the original text.")),
+            arg("text (string)", _t("The text, a part of which will be replaced.")),
+            arg("position (number)", _t("The position where the replacement will begin (starting from 1).")),
+            arg("length (number)", _t("The number of characters in the text to be replaced.")),
+            arg("new_text (string)", _t("The text which will be inserted into the original text.")),
         ],
         returns: ["STRING"],
         compute: function (text, position, length, newText) {
             const _position = toNumber(position);
-            assert(() => _position >= 1, _lt("The position (%s) must be greater than or equal to 1.", _position.toString()));
+            assert(() => _position >= 1, _t("The position (%s) must be greater than or equal to 1.", _position.toString()));
             const _text = toString(text);
             const _length = toNumber(length);
             const _newText = toString(newText);
@@ -16043,15 +16043,15 @@
     // RIGHT
     // -----------------------------------------------------------------------------
     const RIGHT = {
-        description: _lt("A substring from the end of a specified string."),
+        description: _t("A substring from the end of a specified string."),
         args: [
-            arg("text (string)", _lt("The string from which the right portion will be returned.")),
-            arg("number_of_characters (number, optional)", _lt("The number of characters to return from the right side of string.")),
+            arg("text (string)", _t("The string from which the right portion will be returned.")),
+            arg("number_of_characters (number, optional)", _t("The number of characters to return from the right side of string.")),
         ],
         returns: ["STRING"],
         compute: function (text, ...args) {
             const _numberOfCharacters = args.length ? toNumber(args[0]) : 1;
-            assert(() => _numberOfCharacters >= 0, _lt("The number_of_characters (%s) must be positive or null.", _numberOfCharacters.toString()));
+            assert(() => _numberOfCharacters >= 0, _t("The number_of_characters (%s) must be positive or null.", _numberOfCharacters.toString()));
             const _text = toString(text);
             const stringLength = _text.length;
             return _text.substring(stringLength - _numberOfCharacters, stringLength);
@@ -16062,21 +16062,21 @@
     // SEARCH
     // -----------------------------------------------------------------------------
     const SEARCH = {
-        description: _lt("First position of string found in text, ignoring case."),
+        description: _t("First position of string found in text, ignoring case."),
         args: [
-            arg("search_for (string)", _lt("The string to look for within text_to_search.")),
-            arg("text_to_search (string)", _lt("The text to search for the first occurrence of search_for.")),
-            arg(`starting_at (number, default=${DEFAULT_STARTING_AT})`, _lt("The character within text_to_search at which to start the search.")),
+            arg("search_for (string)", _t("The string to look for within text_to_search.")),
+            arg("text_to_search (string)", _t("The text to search for the first occurrence of search_for.")),
+            arg(`starting_at (number, default=${DEFAULT_STARTING_AT})`, _t("The character within text_to_search at which to start the search.")),
         ],
         returns: ["NUMBER"],
         compute: function (searchFor, textToSearch, startingAt = DEFAULT_STARTING_AT) {
             const _searchFor = toString(searchFor).toLowerCase();
             const _textToSearch = toString(textToSearch).toLowerCase();
             const _startingAt = toNumber(startingAt);
-            assert(() => _textToSearch !== "", _lt(`The text_to_search must be non-empty.`));
-            assert(() => _startingAt >= 1, _lt("The starting_at (%s) must be greater than or equal to 1.", _startingAt.toString()));
+            assert(() => _textToSearch !== "", _t(`The text_to_search must be non-empty.`));
+            assert(() => _startingAt >= 1, _t("The starting_at (%s) must be greater than or equal to 1.", _startingAt.toString()));
             const result = _textToSearch.indexOf(_searchFor, _startingAt - 1);
-            assert(() => result >= 0, _lt("In [[FUNCTION_NAME]] evaluation, cannot find '%s' within '%s'.", _searchFor, _textToSearch));
+            assert(() => result >= 0, _t("In [[FUNCTION_NAME]] evaluation, cannot find '%s' within '%s'.", _searchFor, _textToSearch));
             return result + 1;
         },
         isExported: true,
@@ -16085,17 +16085,17 @@
     // SUBSTITUTE
     // -----------------------------------------------------------------------------
     const SUBSTITUTE = {
-        description: _lt("Replaces existing text with new text in a string."),
+        description: _t("Replaces existing text with new text in a string."),
         args: [
-            arg("text_to_search (string)", _lt("The text within which to search and replace.")),
-            arg("search_for (string)", _lt("The string to search for within text_to_search.")),
-            arg("replace_with (string)", _lt("The string that will replace search_for.")),
-            arg("occurrence_number (number, optional)", _lt("The instance of search_for within text_to_search to replace with replace_with. By default, all occurrences of search_for are replaced; however, if occurrence_number is specified, only the indicated instance of search_for is replaced.")),
+            arg("text_to_search (string)", _t("The text within which to search and replace.")),
+            arg("search_for (string)", _t("The string to search for within text_to_search.")),
+            arg("replace_with (string)", _t("The string that will replace search_for.")),
+            arg("occurrence_number (number, optional)", _t("The instance of search_for within text_to_search to replace with replace_with. By default, all occurrences of search_for are replaced; however, if occurrence_number is specified, only the indicated instance of search_for is replaced.")),
         ],
         returns: ["NUMBER"],
         compute: function (textToSearch, searchFor, replaceWith, occurrenceNumber) {
             const _occurrenceNumber = toNumber(occurrenceNumber);
-            assert(() => _occurrenceNumber >= 0, _lt("The occurrenceNumber (%s) must be positive or null.", _occurrenceNumber.toString()));
+            assert(() => _occurrenceNumber >= 0, _t("The occurrenceNumber (%s) must be positive or null.", _occurrenceNumber.toString()));
             const _textToSearch = toString(textToSearch);
             const _searchFor = toString(searchFor);
             if (_searchFor === "") {
@@ -16115,12 +16115,12 @@
     // TEXTJOIN
     // -----------------------------------------------------------------------------
     const TEXTJOIN = {
-        description: _lt("Combines text from multiple strings and/or arrays."),
+        description: _t("Combines text from multiple strings and/or arrays."),
         args: [
-            arg("delimiter (string)", _lt(" A string, possible empty, or a reference to a valid string. If empty, the text will be simply concatenated.")),
-            arg("ignore_empty (boolean)", _lt("A boolean; if TRUE, empty cells selected in the text arguments won't be included in the result.")),
-            arg("text1 (string, range<string>)", _lt("Any text item. This could be a string, or an array of strings in a range.")),
-            arg("text2 (string, range<string>, repeating)", _lt("Additional text item(s).")),
+            arg("delimiter (string)", _t(" A string, possible empty, or a reference to a valid string. If empty, the text will be simply concatenated.")),
+            arg("ignore_empty (boolean)", _t("A boolean; if TRUE, empty cells selected in the text arguments won't be included in the result.")),
+            arg("text1 (string, range<string>)", _t("Any text item. This could be a string, or an array of strings in a range.")),
+            arg("text2 (string, range<string>, repeating)", _t("Additional text item(s).")),
         ],
         returns: ["STRING"],
         compute: function (delimiter, ignoreEmpty, ...textsOrArrays) {
@@ -16135,9 +16135,9 @@
     // TRIM
     // -----------------------------------------------------------------------------
     const TRIM = {
-        description: _lt("Removes space characters."),
+        description: _t("Removes space characters."),
         args: [
-            arg("text (string)", _lt("The text or reference to a cell containing text to be trimmed.")),
+            arg("text (string)", _t("The text or reference to a cell containing text to be trimmed.")),
         ],
         returns: ["STRING"],
         compute: function (text) {
@@ -16149,8 +16149,8 @@
     // UPPER
     // -----------------------------------------------------------------------------
     const UPPER = {
-        description: _lt("Converts a specified string to uppercase."),
-        args: [arg("text (string)", _lt("The string to convert to uppercase."))],
+        description: _t("Converts a specified string to uppercase."),
+        args: [arg("text (string)", _t("The string to convert to uppercase."))],
         returns: ["STRING"],
         compute: function (text) {
             return toString(text).toUpperCase();
@@ -16161,10 +16161,10 @@
     // TEXT
     // -----------------------------------------------------------------------------
     const TEXT = {
-        description: _lt("Converts a number to text according to a specified format."),
+        description: _t("Converts a number to text according to a specified format."),
         args: [
-            arg("number (number)", _lt("The number, date or time to format.")),
-            arg("format (string)", _lt("The pattern by which to format the number, enclosed in quotation marks.")),
+            arg("number (number)", _t("The number, date or time to format.")),
+            arg("format (string)", _t("The pattern by which to format the number, enclosed in quotation marks.")),
         ],
         returns: ["STRING"],
         compute: function (number, format) {
@@ -16201,10 +16201,10 @@
     // HYPERLINK
     // -----------------------------------------------------------------------------
     const HYPERLINK = {
-        description: _lt("Creates a hyperlink in a cell."),
+        description: _t("Creates a hyperlink in a cell."),
         args: [
-            arg("url (string)", _lt("The full URL of the link enclosed in quotation marks.")),
-            arg("link_label (string, optional)", _lt("The text to display in the cell, enclosed in quotation marks.")),
+            arg("url (string)", _t("The full URL of the link enclosed in quotation marks.")),
+            arg("link_label (string, optional)", _t("The text to display in the cell, enclosed in quotation marks.")),
         ],
         returns: ["STRING"],
         compute: function (url, linkLabel) {
@@ -16223,19 +16223,19 @@
     });
 
     const categories = [
-        { name: _lt("Database"), functions: database },
-        { name: _lt("Date"), functions: date },
-        { name: _lt("Financial"), functions: financial },
-        { name: _lt("Info"), functions: info },
-        { name: _lt("Lookup"), functions: lookup },
-        { name: _lt("Logical"), functions: logical },
-        { name: _lt("Math"), functions: math },
-        { name: _lt("Misc"), functions: misc$1 },
-        { name: _lt("Operator"), functions: operators },
-        { name: _lt("Statistical"), functions: statistical },
-        { name: _lt("Text"), functions: text },
-        { name: _lt("Engineering"), functions: engineering },
-        { name: _lt("Web"), functions: web },
+        { name: _t("Database"), functions: database },
+        { name: _t("Date"), functions: date },
+        { name: _t("Financial"), functions: financial },
+        { name: _t("Info"), functions: info },
+        { name: _t("Lookup"), functions: lookup },
+        { name: _t("Logical"), functions: logical },
+        { name: _t("Math"), functions: math },
+        { name: _t("Misc"), functions: misc$1 },
+        { name: _t("Operator"), functions: operators },
+        { name: _t("Statistical"), functions: statistical },
+        { name: _t("Text"), functions: text },
+        { name: _t("Engineering"), functions: engineering },
+        { name: _t("Web"), functions: web },
     ];
     const functionNameRegex = /^[A-Z0-9\_\.]+$/;
     //------------------------------------------------------------------------------
@@ -16246,7 +16246,7 @@
         add(name, addDescr) {
             name = name.toUpperCase();
             if (!functionNameRegex.test(name)) {
-                throw new Error(_lt("Invalid function name %s. Function names can exclusively contain alphanumerical values separated by dots (.) or underscore (_)", name));
+                throw new Error(_t("Invalid function name %s. Function names can exclusively contain alphanumerical values separated by dots (.) or underscore (_)", name));
             }
             const descr = addMetaInfoFromArg(addDescr);
             validateArguments(descr.args);
@@ -16361,62 +16361,62 @@
         execute: INSERT_COLUMNS_AFTER_ACTION,
     };
     const insertCell = {
-        name: _lt("Insert cells"),
+        name: _t("Insert cells"),
         isVisible: (env) => IS_ONLY_ONE_RANGE(env) &&
             env.model.getters.getActiveCols().size === 0 &&
             env.model.getters.getActiveRows().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_CELL",
     };
     const insertCellShiftDown = {
-        name: _lt("Insert cells and shift down"),
+        name: _t("Insert cells and shift down"),
         execute: INSERT_CELL_SHIFT_DOWN,
         isVisible: (env) => env.model.getters.getActiveRows().size === 0 && env.model.getters.getActiveCols().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_CELL_SHIFT_DOWN",
     };
     const insertCellShiftRight = {
-        name: _lt("Insert cells and shift right"),
+        name: _t("Insert cells and shift right"),
         execute: INSERT_CELL_SHIFT_RIGHT,
         isVisible: (env) => env.model.getters.getActiveRows().size === 0 && env.model.getters.getActiveCols().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_CELL_SHIFT_RIGHT",
     };
     const insertChart = {
-        name: _lt("Chart"),
+        name: _t("Chart"),
         execute: CREATE_CHART,
         icon: "o-spreadsheet-Icon.INSERT_CHART",
     };
     const insertImage = {
-        name: _lt("Image"),
+        name: _t("Image"),
         description: "Ctrl+O",
         execute: CREATE_IMAGE,
         isVisible: (env) => env.imageProvider !== undefined,
         icon: "o-spreadsheet-Icon.INSERT_IMAGE",
     };
     const insertFunction = {
-        name: _lt("Function"),
+        name: _t("Function"),
         icon: "o-spreadsheet-Icon.SHOW_HIDE_FORMULA",
     };
     const insertFunctionSum = {
-        name: _lt("SUM"),
+        name: _t("SUM"),
         execute: (env) => env.startCellEdition(`=SUM(`),
     };
     const insertFunctionAverage = {
-        name: _lt("AVERAGE"),
+        name: _t("AVERAGE"),
         execute: (env) => env.startCellEdition(`=AVERAGE(`),
     };
     const insertFunctionCount = {
-        name: _lt("COUNT"),
+        name: _t("COUNT"),
         execute: (env) => env.startCellEdition(`=COUNT(`),
     };
     const insertFunctionMax = {
-        name: _lt("MAX"),
+        name: _t("MAX"),
         execute: (env) => env.startCellEdition(`=MAX(`),
     };
     const insertFunctionMin = {
-        name: _lt("MIN"),
+        name: _t("MIN"),
         execute: (env) => env.startCellEdition(`=MIN(`),
     };
     const categorieFunctionAll = {
-        name: _lt("All"),
+        name: _t("All"),
         children: allFunctionListMenuBuilder(),
     };
     function allFunctionListMenuBuilder() {
@@ -16435,12 +16435,12 @@
         });
     };
     const insertLink = {
-        name: _lt("Link"),
+        name: _t("Link"),
         execute: INSERT_LINK,
         icon: "o-spreadsheet-Icon.INSERT_LINK",
     };
     const insertSheet = {
-        name: _lt("Insert sheet"),
+        name: _t("Insert sheet"),
         execute: CREATE_SHEET_ACTION,
         icon: "o-spreadsheet-Icon.INSERT_SHEET",
     };
@@ -16460,118 +16460,118 @@
     const cellMenuRegistry = new MenuItemRegistry();
     cellMenuRegistry
         .add("cut", {
-        ...cut,
-        sequence: 10,
-    })
+            ...cut,
+            sequence: 10,
+        })
         .add("copy", {
-        ...copy,
-        sequence: 20,
-    })
+            ...copy,
+            sequence: 20,
+        })
         .add("paste", {
-        ...paste,
-        sequence: 30,
-    })
+            ...paste,
+            sequence: 30,
+        })
         .add("paste_special", {
-        ...pasteSpecial,
-        sequence: 40,
-        separator: true,
-    })
+            ...pasteSpecial,
+            sequence: 40,
+            separator: true,
+        })
         .addChild("paste_value_only", ["paste_special"], {
-        ...pasteSpecialValue,
-        sequence: 10,
-    })
+            ...pasteSpecialValue,
+            sequence: 10,
+        })
         .addChild("paste_format_only", ["paste_special"], {
-        ...pasteSpecialFormat,
-        sequence: 20,
-    })
+            ...pasteSpecialFormat,
+            sequence: 20,
+        })
         .add("add_row_before", {
-        ...cellInsertRowsBefore,
-        sequence: 70,
-    })
+            ...cellInsertRowsBefore,
+            sequence: 70,
+        })
         .add("add_column_before", {
-        ...cellInsertColsBefore,
-        sequence: 90,
-    })
+            ...cellInsertColsBefore,
+            sequence: 90,
+        })
         .add("insert_cell", {
-        ...insertCell,
-        sequence: 100,
-        separator: true,
-    })
+            ...insertCell,
+            sequence: 100,
+            separator: true,
+        })
         .addChild("insert_cell_down", ["insert_cell"], {
-        ...insertCellShiftDown,
-        name: _lt("Shift down"),
-        sequence: 10,
-    })
+            ...insertCellShiftDown,
+            name: _t("Shift down"),
+            sequence: 10,
+        })
         .addChild("insert_cell_right", ["insert_cell"], {
-        ...insertCellShiftRight,
-        name: _lt("Shift right"),
-        sequence: 20,
-    })
+            ...insertCellShiftRight,
+            name: _t("Shift right"),
+            sequence: 20,
+        })
         .add("delete_row", {
-        ...deleteRow,
-        sequence: 110,
-        icon: "o-spreadsheet-Icon.DELETE",
-    })
+            ...deleteRow,
+            sequence: 110,
+            icon: "o-spreadsheet-Icon.DELETE",
+        })
         .add("delete_column", {
-        ...deleteCol,
-        sequence: 120,
-        icon: "o-spreadsheet-Icon.DELETE",
-    })
+            ...deleteCol,
+            sequence: 120,
+            icon: "o-spreadsheet-Icon.DELETE",
+        })
         .add("delete_cell", {
-        ...deleteCells,
-        sequence: 130,
-        separator: true,
-        icon: "o-spreadsheet-Icon.DELETE",
-    })
+            ...deleteCells,
+            sequence: 130,
+            separator: true,
+            icon: "o-spreadsheet-Icon.DELETE",
+        })
         .addChild("delete_cell_up", ["delete_cell"], {
-        ...deleteCellShiftUp,
-        name: _lt("Shift up"),
-        sequence: 10,
-        icon: "o-spreadsheet-Icon.DELETE_CELL_SHIFT_UP",
-    })
+            ...deleteCellShiftUp,
+            name: _t("Shift up"),
+            sequence: 10,
+            icon: "o-spreadsheet-Icon.DELETE_CELL_SHIFT_UP",
+        })
         .addChild("delete_cell_left", ["delete_cell"], {
-        ...deleteCellShiftLeft,
-        name: _lt("Shift left"),
-        sequence: 20,
-        icon: "o-spreadsheet-Icon.DELETE_CELL_SHIFT_LEFT",
-    })
+            ...deleteCellShiftLeft,
+            name: _t("Shift left"),
+            sequence: 20,
+            icon: "o-spreadsheet-Icon.DELETE_CELL_SHIFT_LEFT",
+        })
         .add("insert_link", {
-        ...insertLink,
-        name: _lt("Insert link"),
-        sequence: 150,
-        separator: true,
-    });
+            ...insertLink,
+            name: _t("Insert link"),
+            sequence: 150,
+            separator: true,
+        });
 
     const sortRange = {
-        name: _lt("Sort range"),
+        name: _t("Sort range"),
         isVisible: IS_ONLY_ONE_RANGE,
         icon: "o-spreadsheet-Icon.SORT_RANGE",
     };
     const sortAscending = {
-        name: _lt("Ascending (A ⟶ Z)"),
+        name: _t("Ascending (A ⟶ Z)"),
         execute: SORT_CELLS_ASCENDING,
         icon: "o-spreadsheet-Icon.SORT_ASCENDING",
     };
     const sortDescending = {
-        name: _lt("Descending (Z ⟶ A)"),
+        name: _t("Descending (Z ⟶ A)"),
         execute: SORT_CELLS_DESCENDING,
         icon: "o-spreadsheet-Icon.SORT_DESCENDING",
     };
     const addDataFilter = {
-        name: _lt("Create filter"),
+        name: _t("Create filter"),
         execute: FILTERS_CREATE_FILTER_TABLE,
         isVisible: (env) => !SELECTION_CONTAINS_FILTER(env),
         isEnabled: (env) => SELECTION_IS_CONTINUOUS(env),
         icon: "o-spreadsheet-Icon.MENU_FILTER_ICON",
     };
     const removeDataFilter = {
-        name: _lt("Remove filter"),
+        name: _t("Remove filter"),
         execute: FILTERS_REMOVE_FILTER_TABLE,
         isVisible: SELECTION_CONTAINS_FILTER,
         icon: "o-spreadsheet-Icon.MENU_FILTER_ICON",
     };
     const splitToColumns = {
-        name: _lt("Split text to columns"),
+        name: _t("Split text to columns"),
         sequence: 1,
         execute: (env) => env.openSidePanel("SplitToColumns", {}),
         isEnabled: (env) => env.model.getters.isSingleColSelected(),
@@ -16579,70 +16579,70 @@
     };
 
     const formatNumberAutomatic = {
-        name: _lt("Automatic"),
+        name: _t("Automatic"),
         execute: FORMAT_AUTOMATIC_ACTION,
         isActive: (env) => isAutomaticFormatSelected(env),
     };
     const formatNumberNumber = {
-        name: _lt("Number"),
+        name: _t("Number"),
         description: "1,000.12",
         execute: FORMAT_NUMBER_ACTION,
         isActive: (env) => isFormatSelected(env, "#,##0.00"),
     };
     const formatPercent = {
-        name: _lt("Format as percent"),
+        name: _t("Format as percent"),
         execute: FORMAT_PERCENT_ACTION,
         icon: "o-spreadsheet-Icon.PERCENT",
     };
     const formatNumberPercent = {
-        name: _lt("Percent"),
+        name: _t("Percent"),
         description: "10.12%",
         execute: FORMAT_PERCENT_ACTION,
         isActive: (env) => isFormatSelected(env, "0.00%"),
     };
     const formatNumberCurrency = {
-        name: _lt("Currency"),
+        name: _t("Currency"),
         description: "$1,000.12",
         execute: FORMAT_CURRENCY_ACTION,
         isActive: (env) => isFormatSelected(env, "[$$]#,##0.00"),
     };
     const formatNumberCurrencyRounded = {
-        name: _lt("Currency rounded"),
+        name: _t("Currency rounded"),
         description: "$1,000",
         execute: FORMAT_CURRENCY_ROUNDED_ACTION,
         isActive: (env) => isFormatSelected(env, "[$$]#,##0"),
     };
     const formatCustomCurrency = {
-        name: _lt("Custom currency"),
+        name: _t("Custom currency"),
         isVisible: (env) => env.loadCurrencies !== undefined,
         execute: OPEN_CUSTOM_CURRENCY_SIDEPANEL_ACTION,
     };
     const formatNumberDate = {
-        name: _lt("Date"),
+        name: _t("Date"),
         description: "9/26/2008",
         execute: FORMAT_DATE_ACTION,
         isActive: (env) => isFormatSelected(env, "m/d/yyyy"),
     };
     const formatNumberTime = {
-        name: _lt("Time"),
+        name: _t("Time"),
         description: "10:43:00 PM",
         execute: FORMAT_TIME_ACTION,
         isActive: (env) => isFormatSelected(env, "hh:mm:ss a"),
     };
     const formatNumberDateTime = {
-        name: _lt("Date time"),
+        name: _t("Date time"),
         description: "9/26/2008 22:43:00",
         execute: FORMAT_DATE_TIME_ACTION,
         isActive: (env) => isFormatSelected(env, "m/d/yyyy hh:mm:ss"),
     };
     const formatNumberDuration = {
-        name: _lt("Duration"),
+        name: _t("Duration"),
         description: "27:51:38",
         execute: FORMAT_DURATION_ACTION,
         isActive: (env) => isFormatSelected(env, "hhhh:mm:ss"),
     };
     const incraseDecimalPlaces = {
-        name: _lt("Increase decimal places"),
+        name: _t("Increase decimal places"),
         icon: "o-spreadsheet-Icon.INCREASE_DECIMAL",
         execute: (env) => env.model.dispatch("SET_DECIMAL", {
             sheetId: env.model.getters.getActiveSheetId(),
@@ -16651,7 +16651,7 @@
         }),
     };
     const decraseDecimalPlaces = {
-        name: _lt("Decrease decimal places"),
+        name: _t("Decrease decimal places"),
         icon: "o-spreadsheet-Icon.DECRASE_DECIMAL",
         execute: (env) => env.model.dispatch("SET_DECIMAL", {
             sheetId: env.model.getters.getActiveSheetId(),
@@ -16660,125 +16660,125 @@
         }),
     };
     const formatBold = {
-        name: _lt("Bold"),
+        name: _t("Bold"),
         description: "Ctrl+B",
         execute: FORMAT_BOLD_ACTION,
         icon: "o-spreadsheet-Icon.BOLD",
         isActive: (env) => !!env.model.getters.getCurrentStyle().bold,
     };
     const formatItalic = {
-        name: _lt("Italic"),
+        name: _t("Italic"),
         description: "Ctrl+I",
         execute: FORMAT_ITALIC_ACTION,
         icon: "o-spreadsheet-Icon.ITALIC",
         isActive: (env) => !!env.model.getters.getCurrentStyle().italic,
     };
     const formatUnderline = {
-        name: _lt("Underline"),
+        name: _t("Underline"),
         description: "Ctrl+U",
         execute: FORMAT_UNDERLINE_ACTION,
         icon: "o-spreadsheet-Icon.UNDERLINE",
         isActive: (env) => !!env.model.getters.getCurrentStyle().underline,
     };
     const formatStrikethrough = {
-        name: _lt("Strikethrough"),
+        name: _t("Strikethrough"),
         execute: FORMAT_STRIKETHROUGH_ACTION,
         icon: "o-spreadsheet-Icon.STRIKE",
         isActive: (env) => !!env.model.getters.getCurrentStyle().strikethrough,
     };
     const formatFontSize = {
-        name: _lt("Font size"),
+        name: _t("Font size"),
         children: fontSizeMenuBuilder(),
         icon: "o-spreadsheet-Icon.FONT_SIZE",
     };
     const formatAlignment = {
-        name: _lt("Alignment"),
+        name: _t("Alignment"),
         icon: "o-spreadsheet-Icon.ALIGN_LEFT",
     };
     const formatAlignmentHorizontal = {
-        name: _lt("Horizontal align"),
+        name: _t("Horizontal align"),
         icon: "o-spreadsheet-Icon.ALIGN_LEFT",
     };
     const formatAlignmentLeft = {
-        name: _lt("Left"),
+        name: _t("Left"),
         description: "Ctrl+Shift+L",
         execute: (env) => setStyle(env, { align: "left" }),
         isActive: (env) => getHorizontalAlign(env) === "left",
         icon: "o-spreadsheet-Icon.ALIGN_LEFT",
     };
     const formatAlignmentCenter = {
-        name: _lt("Center"),
+        name: _t("Center"),
         description: "Ctrl+Shift+E",
         execute: (env) => setStyle(env, { align: "center" }),
         isActive: (env) => getHorizontalAlign(env) === "center",
         icon: "o-spreadsheet-Icon.ALIGN_CENTER",
     };
     const formatAlignmentRight = {
-        name: _lt("Right"),
+        name: _t("Right"),
         description: "Ctrl+Shift+R",
         execute: (env) => setStyle(env, { align: "right" }),
         isActive: (env) => getHorizontalAlign(env) === "right",
         icon: "o-spreadsheet-Icon.ALIGN_RIGHT",
     };
     const formatAlignmentVertical = {
-        name: _lt("Vertical align"),
+        name: _t("Vertical align"),
         icon: "o-spreadsheet-Icon.ALIGN_MIDDLE",
     };
     const formatAlignmentTop = {
-        name: _lt("Top"),
+        name: _t("Top"),
         execute: (env) => setStyle(env, { verticalAlign: "top" }),
         isActive: (env) => (env.model.getters.getCurrentStyle().verticalAlign || DEFAULT_VERTICAL_ALIGN) === "top",
         icon: "o-spreadsheet-Icon.ALIGN_TOP",
     };
     const formatAlignmentMiddle = {
-        name: _lt("Middle"),
+        name: _t("Middle"),
         execute: (env) => setStyle(env, { verticalAlign: "middle" }),
         isActive: (env) => (env.model.getters.getCurrentStyle().verticalAlign || DEFAULT_VERTICAL_ALIGN) === "middle",
         icon: "o-spreadsheet-Icon.ALIGN_MIDDLE",
     };
     const formatAlignmentBottom = {
-        name: _lt("Bottom"),
+        name: _t("Bottom"),
         execute: (env) => setStyle(env, { verticalAlign: "bottom" }),
         isActive: (env) => (env.model.getters.getCurrentStyle().verticalAlign || DEFAULT_VERTICAL_ALIGN) === "bottom",
         icon: "o-spreadsheet-Icon.ALIGN_BOTTOM",
     };
     const formatWrapping = {
-        name: _lt("Wrapping"),
+        name: _t("Wrapping"),
         icon: "o-spreadsheet-Icon.WRAPPING_OVERFLOW",
     };
     const formatWrappingOverflow = {
-        name: _lt("Overflow"),
+        name: _t("Overflow"),
         execute: (env) => setStyle(env, { wrapping: "overflow" }),
         isActive: (env) => (env.model.getters.getCurrentStyle().wrapping || "overflow") === "overflow",
         icon: "o-spreadsheet-Icon.WRAPPING_OVERFLOW",
     };
     const formatWrappingWrap = {
-        name: _lt("Wrap"),
+        name: _t("Wrap"),
         execute: (env) => setStyle(env, { wrapping: "wrap" }),
         isActive: (env) => env.model.getters.getCurrentStyle().wrapping === "wrap",
         icon: "o-spreadsheet-Icon.WRAPPING_WRAP",
     };
     const formatWrappingClip = {
-        name: _lt("Clip"),
+        name: _t("Clip"),
         execute: (env) => setStyle(env, { wrapping: "clip" }),
         isActive: (env) => env.model.getters.getCurrentStyle().wrapping === "clip",
         icon: "o-spreadsheet-Icon.WRAPPING_CLIP",
     };
     const textColor = {
-        name: _lt("Text Color"),
+        name: _t("Text Color"),
         icon: "o-spreadsheet-Icon.TEXT_COLOR",
     };
     const fillColor = {
-        name: _lt("Fill Color"),
+        name: _t("Fill Color"),
         icon: "o-spreadsheet-Icon.FILL_COLOR",
     };
     const formatCF = {
-        name: _lt("Conditional formatting"),
+        name: _t("Conditional formatting"),
         execute: OPEN_CF_SIDEPANEL_ACTION,
         icon: "o-spreadsheet-Icon.CONDITIONAL_FORMAT",
     };
     const paintFormat = {
-        name: _lt("Paint Format"),
+        name: _t("Paint Format"),
         execute: (env) => env.model.dispatch("ACTIVATE_PAINT_FORMAT", {
             target: env.model.getters.getSelectedZones(),
         }),
@@ -16786,7 +16786,7 @@
         isActive: (env) => env.model.getters.isPaintingFormat(),
     };
     const clearFormat = {
-        name: _lt("Clear formatting"),
+        name: _t("Clear formatting"),
         description: "Ctrl+<",
         execute: FORMAT_CLEARFORMAT_ACTION,
         icon: "o-spreadsheet-Icon.CLEAR_FORMAT",
@@ -16879,7 +16879,7 @@
         icon: "o-spreadsheet-Icon.HIDE_COL",
     };
     const unhideCols = {
-        name: _lt("Unhide columns"),
+        name: _t("Unhide columns"),
         execute: UNHIDE_COLUMNS_ACTION,
         isVisible: (env) => {
             const hiddenCols = env.model.getters
@@ -16890,7 +16890,7 @@
         },
     };
     const unhideAllCols = {
-        name: _lt("Unhide all columns"),
+        name: _t("Unhide all columns"),
         execute: UNHIDE_ALL_COLUMNS_ACTION,
         isVisible: (env) => env.model.getters.getHiddenColsGroups(env.model.getters.getActiveSheetId()).length > 0,
     };
@@ -16901,7 +16901,7 @@
         icon: "o-spreadsheet-Icon.HIDE_ROW",
     };
     const unhideRows = {
-        name: _lt("Unhide rows"),
+        name: _t("Unhide rows"),
         execute: UNHIDE_ROWS_ACTION,
         isVisible: (env) => {
             const hiddenRows = env.model.getters
@@ -16912,12 +16912,12 @@
         },
     };
     const unhideAllRows = {
-        name: _lt("Unhide all rows"),
+        name: _t("Unhide all rows"),
         execute: UNHIDE_ALL_ROWS_ACTION,
         isVisible: (env) => env.model.getters.getHiddenRowsGroups(env.model.getters.getActiveSheetId()).length > 0,
     };
     const unFreezePane = {
-        name: _lt("Unfreeze"),
+        name: _t("Unfreeze"),
         isVisible: (env) => {
             const { xSplit, ySplit } = env.model.getters.getPaneDivisions(env.model.getters.getActiveSheetId());
             return xSplit + ySplit > 0;
@@ -16928,11 +16928,11 @@
         icon: "o-spreadsheet-Icon.UNFREEZE",
     };
     const freezePane = {
-        name: _lt("Freeze"),
+        name: _t("Freeze"),
         icon: "o-spreadsheet-Icon.FREEZE",
     };
     const unFreezeRows = {
-        name: _lt("No rows"),
+        name: _t("No rows"),
         execute: (env) => env.model.dispatch("UNFREEZE_ROWS", {
             sheetId: env.model.getters.getActiveSheetId(),
         }),
@@ -16940,17 +16940,17 @@
         isVisible: (env) => !!env.model.getters.getPaneDivisions(env.model.getters.getActiveSheetId()).ySplit,
     };
     const freezeFirstRow = {
-        name: _lt("1 row"),
+        name: _t("1 row"),
         execute: (env) => interactiveFreezeColumnsRows(env, "ROW", 1),
         isReadonlyAllowed: true,
     };
     const freezeSecondRow = {
-        name: _lt("2 rows"),
+        name: _t("2 rows"),
         execute: (env) => interactiveFreezeColumnsRows(env, "ROW", 2),
         isReadonlyAllowed: true,
     };
     const freezeCurrentRow = {
-        name: _lt("Up to current row"),
+        name: _t("Up to current row"),
         execute: (env) => {
             const { bottom } = env.model.getters.getSelectedZone();
             interactiveFreezeColumnsRows(env, "ROW", bottom + 1);
@@ -16958,7 +16958,7 @@
         isReadonlyAllowed: true,
     };
     const unFreezeCols = {
-        name: _lt("No columns"),
+        name: _t("No columns"),
         execute: (env) => env.model.dispatch("UNFREEZE_COLUMNS", {
             sheetId: env.model.getters.getActiveSheetId(),
         }),
@@ -16966,17 +16966,17 @@
         isVisible: (env) => !!env.model.getters.getPaneDivisions(env.model.getters.getActiveSheetId()).xSplit,
     };
     const freezeFirstCol = {
-        name: _lt("1 column"),
+        name: _t("1 column"),
         execute: (env) => interactiveFreezeColumnsRows(env, "COL", 1),
         isReadonlyAllowed: true,
     };
     const freezeSecondCol = {
-        name: _lt("2 columns"),
+        name: _t("2 columns"),
         execute: (env) => interactiveFreezeColumnsRows(env, "COL", 2),
         isReadonlyAllowed: true,
     };
     const freezeCurrentCol = {
-        name: _lt("Up to current column"),
+        name: _t("Up to current column"),
         execute: (env) => {
             const { right } = env.model.getters.getSelectedZone();
             interactiveFreezeColumnsRows(env, "COL", right + 1);
@@ -16985,19 +16985,19 @@
     };
     const viewGridlines = {
         name: (env) => env.model.getters.getGridLinesVisibility(env.model.getters.getActiveSheetId())
-            ? _lt("Hide gridlines")
-            : _lt("Show gridlines"),
+            ? _t("Hide gridlines")
+            : _t("Show gridlines"),
         execute: SET_GRID_LINES_VISIBILITY_ACTION,
         icon: "o-spreadsheet-Icon.SHOW_HIDE_GRID",
     };
     const viewFormulas = {
-        name: (env) => env.model.getters.shouldShowFormulas() ? _lt("Hide formulas") : _lt("Show formulas"),
+        name: (env) => env.model.getters.shouldShowFormulas() ? _t("Hide formulas") : _t("Show formulas"),
         execute: SET_FORMULA_VISIBILITY_ACTION,
         isReadonlyAllowed: true,
         icon: "o-spreadsheet-Icon.SHOW_HIDE_FORMULA",
     };
     const createRemoveFilter = {
-        name: (env) => selectionContainsFilter(env) ? _lt("Remove selected filters") : _lt("Create filter"),
+        name: (env) => selectionContainsFilter(env) ? _t("Remove selected filters") : _t("Create filter"),
         isActive: (env) => selectionContainsFilter(env),
         isEnabled: (env) => !cannotCreateFilter(env),
         execute: (env) => createRemoveFilterAction(env),
@@ -17054,125 +17054,125 @@
     const colMenuRegistry = new MenuItemRegistry();
     colMenuRegistry
         .add("cut", {
-        ...cut,
-        sequence: 10,
-    })
+            ...cut,
+            sequence: 10,
+        })
         .add("copy", {
-        ...copy,
-        sequence: 20,
-    })
+            ...copy,
+            sequence: 20,
+        })
         .add("paste", {
-        ...paste,
-        sequence: 30,
-    })
+            ...paste,
+            sequence: 30,
+        })
         .add("paste_special", {
-        ...pasteSpecial,
-        sequence: 40,
-        separator: true,
-    })
+            ...pasteSpecial,
+            sequence: 40,
+            separator: true,
+        })
         .addChild("paste_value_only", ["paste_special"], {
-        ...pasteSpecialValue,
-        sequence: 10,
-    })
+            ...pasteSpecialValue,
+            sequence: 10,
+        })
         .addChild("paste_format_only", ["paste_special"], {
-        ...pasteSpecialFormat,
-        sequence: 20,
-    })
+            ...pasteSpecialFormat,
+            sequence: 20,
+        })
         .add("sort_columns", {
-        ...sortRange,
-        name: (env) => env.model.getters.getActiveCols().size > 1 ? _lt("Sort columns") : _lt("Sort column"),
-        sequence: 50,
-        separator: true,
-    })
+            ...sortRange,
+            name: (env) => env.model.getters.getActiveCols().size > 1 ? _t("Sort columns") : _t("Sort column"),
+            sequence: 50,
+            separator: true,
+        })
         .addChild("sort_ascending", ["sort_columns"], {
-        ...sortAscending,
-        sequence: 10,
-    })
+            ...sortAscending,
+            sequence: 10,
+        })
         .addChild("sort_descending", ["sort_columns"], {
-        ...sortDescending,
-        sequence: 20,
-    })
+            ...sortDescending,
+            sequence: 20,
+        })
         .add("add_column_before", {
-        ...colInsertColsBefore,
-        sequence: 70,
-    })
+            ...colInsertColsBefore,
+            sequence: 70,
+        })
         .add("add_column_after", {
-        ...colInsertColsAfter,
-        sequence: 80,
-    })
+            ...colInsertColsAfter,
+            sequence: 80,
+        })
         .add("delete_column", {
-        ...deleteCols,
-        sequence: 90,
-        icon: "o-spreadsheet-Icon.DELETE",
-    })
+            ...deleteCols,
+            sequence: 90,
+            icon: "o-spreadsheet-Icon.DELETE",
+        })
         .add("clear_column", {
-        ...clearCols,
-        sequence: 100,
-        icon: "o-spreadsheet-Icon.CLEAR",
-    })
+            ...clearCols,
+            sequence: 100,
+            icon: "o-spreadsheet-Icon.CLEAR",
+        })
         .add("hide_columns", {
-        ...hideCols,
-        sequence: 105,
-        separator: true,
-    })
+            ...hideCols,
+            sequence: 105,
+            separator: true,
+        })
         .add("unhide_columns", {
-        ...unhideCols,
-        sequence: 106,
-        separator: true,
-    })
+            ...unhideCols,
+            sequence: 106,
+            separator: true,
+        })
         .add("conditional_formatting", {
-        ...formatCF,
-        sequence: 110,
-    });
+            ...formatCF,
+            sequence: 110,
+        });
 
     const numberFormatMenuRegistry = new MenuItemRegistry();
     numberFormatMenuRegistry
         .add("format_number_automatic", {
-        ...formatNumberAutomatic,
-        sequence: 10,
-        separator: true,
-    })
+            ...formatNumberAutomatic,
+            sequence: 10,
+            separator: true,
+        })
         .add("format_number_number", {
-        ...formatNumberNumber,
-        sequence: 20,
-    })
+            ...formatNumberNumber,
+            sequence: 20,
+        })
         .add("format_number_percent", {
-        ...formatNumberPercent,
-        sequence: 30,
-        separator: true,
-    })
+            ...formatNumberPercent,
+            sequence: 30,
+            separator: true,
+        })
         .add("format_number_currency", {
-        ...formatNumberCurrency,
-        sequence: 40,
-    })
+            ...formatNumberCurrency,
+            sequence: 40,
+        })
         .add("format_number_currency_rounded", {
-        ...formatNumberCurrencyRounded,
-        sequence: 50,
-    })
+            ...formatNumberCurrencyRounded,
+            sequence: 50,
+        })
         .add("format_custom_currency", {
-        ...formatCustomCurrency,
-        sequence: 60,
-        separator: true,
-    })
+            ...formatCustomCurrency,
+            sequence: 60,
+            separator: true,
+        })
         .add("format_number_date", {
-        ...formatNumberDate,
-        sequence: 70,
-    })
+            ...formatNumberDate,
+            sequence: 70,
+        })
         .add("format_number_time", {
-        ...formatNumberTime,
-        sequence: 80,
-    })
+            ...formatNumberTime,
+            sequence: 80,
+        })
         .add("format_number_date_time", {
-        ...formatNumberDateTime,
-        sequence: 90,
-    })
+            ...formatNumberDateTime,
+            sequence: 90,
+        })
         .add("format_number_duration", {
-        ...formatNumberDuration,
-        sequence: 100,
-        separator: true,
-    });
+            ...formatNumberDuration,
+            sequence: 100,
+            separator: true,
+        });
     const formatNumberMenuItemSpec = {
-        name: _lt("More formats"),
+        name: _t("More formats"),
         icon: "o-spreadsheet-Icon.NUMBER_FORMATS",
         children: [() => numberFormatMenuRegistry.getAll()],
     };
@@ -17180,90 +17180,90 @@
     const rowMenuRegistry = new MenuItemRegistry();
     rowMenuRegistry
         .add("cut", {
-        ...cut,
-        sequence: 10,
-    })
+            ...cut,
+            sequence: 10,
+        })
         .add("copy", {
-        ...copy,
-        sequence: 20,
-    })
+            ...copy,
+            sequence: 20,
+        })
         .add("paste", {
-        ...paste,
-        sequence: 30,
-    })
+            ...paste,
+            sequence: 30,
+        })
         .add("paste_special", {
-        ...pasteSpecial,
-        sequence: 40,
-        separator: true,
-    })
+            ...pasteSpecial,
+            sequence: 40,
+            separator: true,
+        })
         .addChild("paste_value_only", ["paste_special"], {
-        ...pasteSpecialValue,
-        sequence: 10,
-    })
+            ...pasteSpecialValue,
+            sequence: 10,
+        })
         .addChild("paste_format_only", ["paste_special"], {
-        ...pasteSpecialFormat,
-        sequence: 20,
-    })
+            ...pasteSpecialFormat,
+            sequence: 20,
+        })
         .add("add_row_before", {
-        ...rowInsertRowBefore,
-        sequence: 50,
-    })
+            ...rowInsertRowBefore,
+            sequence: 50,
+        })
         .add("add_row_after", {
-        ...rowInsertRowsAfter,
-        sequence: 60,
-    })
+            ...rowInsertRowsAfter,
+            sequence: 60,
+        })
         .add("delete_row", {
-        ...deleteRows,
-        sequence: 70,
-        icon: "o-spreadsheet-Icon.DELETE",
-    })
+            ...deleteRows,
+            sequence: 70,
+            icon: "o-spreadsheet-Icon.DELETE",
+        })
         .add("clear_row", {
-        ...clearRows,
-        sequence: 80,
-        icon: "o-spreadsheet-Icon.CLEAR",
-    })
+            ...clearRows,
+            sequence: 80,
+            icon: "o-spreadsheet-Icon.CLEAR",
+        })
         .add("hide_rows", {
-        ...hideRows,
-        sequence: 85,
-        separator: true,
-    })
+            ...hideRows,
+            sequence: 85,
+            separator: true,
+        })
         .add("unhide_rows", {
-        ...unhideRows,
-        sequence: 86,
-        separator: true,
-    })
+            ...unhideRows,
+            sequence: 86,
+            separator: true,
+        })
         .add("conditional_formatting", {
-        ...formatCF,
-        sequence: 90,
-    });
+            ...formatCF,
+            sequence: 90,
+        });
 
     function getSheetMenuRegistry(args) {
         const sheetMenuRegistry = new MenuItemRegistry();
         sheetMenuRegistry
             .add("delete", {
-            ...deleteSheet,
-            sequence: 10,
-        })
+                ...deleteSheet,
+                sequence: 10,
+            })
             .add("duplicate", {
-            ...duplicateSheet,
-            sequence: 20,
-        })
+                ...duplicateSheet,
+                sequence: 20,
+            })
             .add("rename", {
-            ...renameSheet(args),
-            sequence: 30,
-        })
+                ...renameSheet(args),
+                sequence: 30,
+            })
             .add("move_right", {
-            ...sheetMoveRight,
-            sequence: 40,
-        })
+                ...sheetMoveRight,
+                sequence: 40,
+            })
             .add("move_left", {
-            ...sheetMoveLeft,
-            sequence: 50,
-        })
+                ...sheetMoveLeft,
+                sequence: 50,
+            })
             .add("hide_sheet", {
-            ...hideSheet,
-            sequence: 60,
-        });
+                ...hideSheet,
+                sequence: 60,
+            });
         return sheetMenuRegistry;
     }
 
@@ -17273,360 +17273,360 @@
         // FILE MENU ITEMS
         // ---------------------------------------------------------------------
         .add("file", {
-        name: _lt("File"),
-        sequence: 10,
-    })
+            name: _t("File"),
+            sequence: 10,
+        })
         // ---------------------------------------------------------------------
         // EDIT MENU ITEMS
         // ---------------------------------------------------------------------
         .add("edit", {
-        name: _lt("Edit"),
-        sequence: 20,
-    })
+            name: _t("Edit"),
+            sequence: 20,
+        })
         .addChild("undo", ["edit"], {
-        ...undo,
-        sequence: 10,
-    })
+            ...undo,
+            sequence: 10,
+        })
         .addChild("redo", ["edit"], {
-        ...redo,
-        sequence: 20,
-        separator: true,
-    })
+            ...redo,
+            sequence: 20,
+            separator: true,
+        })
         .addChild("copy", ["edit"], {
-        ...copy,
-        sequence: 30,
-    })
+            ...copy,
+            sequence: 30,
+        })
         .addChild("cut", ["edit"], {
-        ...cut,
-        sequence: 40,
-    })
+            ...cut,
+            sequence: 40,
+        })
         .addChild("paste", ["edit"], {
-        ...paste,
-        sequence: 50,
-    })
+            ...paste,
+            sequence: 50,
+        })
         .addChild("paste_special", ["edit"], {
-        ...pasteSpecial,
-        sequence: 60,
-        separator: true,
-    })
+            ...pasteSpecial,
+            sequence: 60,
+            separator: true,
+        })
         .addChild("paste_special_value", ["edit", "paste_special"], {
-        ...pasteSpecialValue,
-        sequence: 10,
-    })
+            ...pasteSpecialValue,
+            sequence: 10,
+        })
         .addChild("paste_special_format", ["edit", "paste_special"], {
-        ...pasteSpecialFormat,
-        sequence: 20,
-    })
+            ...pasteSpecialFormat,
+            sequence: 20,
+        })
         .addChild("find_and_replace", ["edit"], {
-        ...findAndReplace,
-        sequence: 65,
-        separator: true,
-    })
+            ...findAndReplace,
+            sequence: 65,
+            separator: true,
+        })
         .addChild("delete", ["edit"], {
-        name: _lt("Delete"),
-        icon: "o-spreadsheet-Icon.DELETE",
-        sequence: 70,
-    })
+            name: _t("Delete"),
+            icon: "o-spreadsheet-Icon.DELETE",
+            sequence: 70,
+        })
         .addChild("edit_delete_cell_values", ["edit", "delete"], {
-        ...deleteValues,
-        sequence: 10,
-    })
+            ...deleteValues,
+            sequence: 10,
+        })
         .addChild("edit_delete_row", ["edit", "delete"], {
-        ...deleteRows,
-        sequence: 20,
-    })
+            ...deleteRows,
+            sequence: 20,
+        })
         .addChild("edit_delete_column", ["edit", "delete"], {
-        ...deleteCols,
-        sequence: 30,
-    })
+            ...deleteCols,
+            sequence: 30,
+        })
         .addChild("edit_delete_cell_shift_up", ["edit", "delete"], {
-        ...deleteCellShiftUp,
-        sequence: 40,
-    })
+            ...deleteCellShiftUp,
+            sequence: 40,
+        })
         .addChild("edit_delete_cell_shift_left", ["edit", "delete"], {
-        ...deleteCellShiftLeft,
-        sequence: 50,
-    })
+            ...deleteCellShiftLeft,
+            sequence: 50,
+        })
         .addChild("edit_unhide_columns", ["edit"], {
-        ...unhideAllCols,
-        sequence: 80,
-    })
+            ...unhideAllCols,
+            sequence: 80,
+        })
         .addChild("edit_unhide_rows", ["edit"], {
-        ...unhideAllRows,
-        sequence: 80,
-    })
+            ...unhideAllRows,
+            sequence: 80,
+        })
         // ---------------------------------------------------------------------
         // VIEW MENU ITEMS
         // ---------------------------------------------------------------------
         .add("view", {
-        name: _lt("View"),
-        sequence: 30,
-    })
+            name: _t("View"),
+            sequence: 30,
+        })
         .addChild("unfreeze_panes", ["view"], {
-        ...unFreezePane,
-        sequence: 4,
-    })
+            ...unFreezePane,
+            sequence: 4,
+        })
         .addChild("freeze_panes", ["view"], {
-        ...freezePane,
-        sequence: 5,
-        separator: true,
-    })
+            ...freezePane,
+            sequence: 5,
+            separator: true,
+        })
         .addChild("unfreeze_rows", ["view", "freeze_panes"], {
-        ...unFreezeRows,
-        sequence: 5,
-    })
+            ...unFreezeRows,
+            sequence: 5,
+        })
         .addChild("freeze_first_row", ["view", "freeze_panes"], {
-        ...freezeFirstRow,
-        sequence: 10,
-    })
+            ...freezeFirstRow,
+            sequence: 10,
+        })
         .addChild("freeze_second_row", ["view", "freeze_panes"], {
-        ...freezeSecondRow,
-        sequence: 15,
-    })
+            ...freezeSecondRow,
+            sequence: 15,
+        })
         .addChild("freeze_current_row", ["view", "freeze_panes"], {
-        ...freezeCurrentRow,
-        sequence: 20,
-        separator: true,
-    })
+            ...freezeCurrentRow,
+            sequence: 20,
+            separator: true,
+        })
         .addChild("unfreeze_columns", ["view", "freeze_panes"], {
-        ...unFreezeCols,
-        sequence: 25,
-    })
+            ...unFreezeCols,
+            sequence: 25,
+        })
         .addChild("freeze_first_col", ["view", "freeze_panes"], {
-        ...freezeFirstCol,
-        sequence: 30,
-    })
+            ...freezeFirstCol,
+            sequence: 30,
+        })
         .addChild("freeze_second_col", ["view", "freeze_panes"], {
-        ...freezeSecondCol,
-        sequence: 35,
-    })
+            ...freezeSecondCol,
+            sequence: 35,
+        })
         .addChild("freeze_current_col", ["view", "freeze_panes"], {
-        ...freezeCurrentCol,
-        sequence: 40,
-    })
+            ...freezeCurrentCol,
+            sequence: 40,
+        })
         .addChild("view_gridlines", ["view"], {
-        ...viewGridlines,
-        sequence: 10,
-    })
+            ...viewGridlines,
+            sequence: 10,
+        })
         .addChild("view_formulas", ["view"], {
-        ...viewFormulas,
-        sequence: 15,
-    })
+            ...viewFormulas,
+            sequence: 15,
+        })
         // ---------------------------------------------------------------------
         // INSERT MENU ITEMS
         // ---------------------------------------------------------------------
         .add("insert", {
-        name: _lt("Insert"),
-        sequence: 40,
-    })
+            name: _t("Insert"),
+            sequence: 40,
+        })
         .addChild("insert_row", ["insert"], {
-        ...insertRow,
-        sequence: 10,
-    })
+            ...insertRow,
+            sequence: 10,
+        })
         .addChild("insert_row_before", ["insert", "insert_row"], {
-        ...topBarInsertRowsBefore,
-        sequence: 10,
-    })
+            ...topBarInsertRowsBefore,
+            sequence: 10,
+        })
         .addChild("insert_row_after", ["insert", "insert_row"], {
-        ...topBarInsertRowsAfter,
-        sequence: 20,
-    })
+            ...topBarInsertRowsAfter,
+            sequence: 20,
+        })
         .addChild("insert_column", ["insert"], {
-        ...insertCol,
-        sequence: 20,
-    })
+            ...insertCol,
+            sequence: 20,
+        })
         .addChild("insert_column_before", ["insert", "insert_column"], {
-        ...topBarInsertColsBefore,
-        sequence: 10,
-    })
+            ...topBarInsertColsBefore,
+            sequence: 10,
+        })
         .addChild("insert_column_after", ["insert", "insert_column"], {
-        ...topBarInsertColsAfter,
-        sequence: 20,
-    })
+            ...topBarInsertColsAfter,
+            sequence: 20,
+        })
         .addChild("insert_cell", ["insert"], {
-        ...insertCell,
-        sequence: 43,
-    })
+            ...insertCell,
+            sequence: 43,
+        })
         .addChild("insert_cell_down", ["insert", "insert_cell"], {
-        ...insertCellShiftDown,
-        name: _lt("Shift down"),
-        sequence: 10,
-    })
+            ...insertCellShiftDown,
+            name: _t("Shift down"),
+            sequence: 10,
+        })
         .addChild("insert_cell_right", ["insert", "insert_cell"], {
-        ...insertCellShiftRight,
-        name: _lt("Shift right"),
-        sequence: 20,
-    })
+            ...insertCellShiftRight,
+            name: _t("Shift right"),
+            sequence: 20,
+        })
         .addChild("insert_sheet", ["insert"], {
-        ...insertSheet,
-        sequence: 80,
-        separator: true,
-    })
+            ...insertSheet,
+            sequence: 80,
+            separator: true,
+        })
         .addChild("insert_chart", ["insert"], {
-        ...insertChart,
-        sequence: 50,
-    })
+            ...insertChart,
+            sequence: 50,
+        })
         .addChild("insert_image", ["insert"], {
-        ...insertImage,
-        sequence: 55,
-    })
+            ...insertImage,
+            sequence: 55,
+        })
         .addChild("insert_function", ["insert"], {
-        ...insertFunction,
-        sequence: 60,
-    })
+            ...insertFunction,
+            sequence: 60,
+        })
         .addChild("insert_function_sum", ["insert", "insert_function"], {
-        ...insertFunctionSum,
-        sequence: 0,
-    })
+            ...insertFunctionSum,
+            sequence: 0,
+        })
         .addChild("insert_function_average", ["insert", "insert_function"], {
-        ...insertFunctionAverage,
-        sequence: 10,
-    })
+            ...insertFunctionAverage,
+            sequence: 10,
+        })
         .addChild("insert_function_count", ["insert", "insert_function"], {
-        ...insertFunctionCount,
-        sequence: 20,
-    })
+            ...insertFunctionCount,
+            sequence: 20,
+        })
         .addChild("insert_function_max", ["insert", "insert_function"], {
-        ...insertFunctionMax,
-        sequence: 30,
-    })
+            ...insertFunctionMax,
+            sequence: 30,
+        })
         .addChild("insert_function_min", ["insert", "insert_function"], {
-        ...insertFunctionMin,
-        sequence: 40,
-        separator: true,
-    })
+            ...insertFunctionMin,
+            sequence: 40,
+            separator: true,
+        })
         .addChild("categorie_function_all", ["insert", "insert_function"], {
-        ...categorieFunctionAll,
-        sequence: 50,
-    })
+            ...categorieFunctionAll,
+            sequence: 50,
+        })
         .addChild("categories_function_list", ["insert", "insert_function"], categoriesFunctionListMenuBuilder)
         .addChild("insert_link", ["insert"], {
-        ...insertLink,
-        separator: true,
-        sequence: 70,
-    })
+            ...insertLink,
+            separator: true,
+            sequence: 70,
+        })
         // ---------------------------------------------------------------------
         // FORMAT MENU ITEMS
         // ---------------------------------------------------------------------
-        .add("format", { name: _lt("Format"), sequence: 50 })
+        .add("format", { name: _t("Format"), sequence: 50 })
         .addChild("format_number", ["format"], {
-        ...formatNumberMenuItemSpec,
-        name: _lt("Number"),
-        sequence: 10,
-        separator: true,
-    })
+            ...formatNumberMenuItemSpec,
+            name: _t("Number"),
+            sequence: 10,
+            separator: true,
+        })
         .addChild("format_bold", ["format"], {
-        ...formatBold,
-        sequence: 20,
-    })
+            ...formatBold,
+            sequence: 20,
+        })
         .addChild("format_italic", ["format"], {
-        ...formatItalic,
-        sequence: 30,
-    })
+            ...formatItalic,
+            sequence: 30,
+        })
         .addChild("format_underline", ["format"], {
-        ...formatUnderline,
-        sequence: 40,
-    })
+            ...formatUnderline,
+            sequence: 40,
+        })
         .addChild("format_strikethrough", ["format"], {
-        ...formatStrikethrough,
-        sequence: 50,
-        separator: true,
-    })
+            ...formatStrikethrough,
+            sequence: 50,
+            separator: true,
+        })
         .addChild("format_font_size", ["format"], {
-        ...formatFontSize,
-        sequence: 60,
-        separator: true,
-    })
+            ...formatFontSize,
+            sequence: 60,
+            separator: true,
+        })
         .addChild("format_alignment", ["format"], {
-        ...formatAlignment,
-        sequence: 70,
-    })
+            ...formatAlignment,
+            sequence: 70,
+        })
         .addChild("format_alignment_left", ["format", "format_alignment"], {
-        ...formatAlignmentLeft,
-        sequence: 10,
-    })
+            ...formatAlignmentLeft,
+            sequence: 10,
+        })
         .addChild("format_alignment_center", ["format", "format_alignment"], {
-        ...formatAlignmentCenter,
-        sequence: 20,
-    })
+            ...formatAlignmentCenter,
+            sequence: 20,
+        })
         .addChild("format_alignment_right", ["format", "format_alignment"], {
-        ...formatAlignmentRight,
-        sequence: 30,
-        separator: true,
-    })
+            ...formatAlignmentRight,
+            sequence: 30,
+            separator: true,
+        })
         .addChild("format_alignment_top", ["format", "format_alignment"], {
-        ...formatAlignmentTop,
-        sequence: 40,
-    })
+            ...formatAlignmentTop,
+            sequence: 40,
+        })
         .addChild("format_alignment_middle", ["format", "format_alignment"], {
-        ...formatAlignmentMiddle,
-        sequence: 50,
-    })
+            ...formatAlignmentMiddle,
+            sequence: 50,
+        })
         .addChild("format_alignment_bottom", ["format", "format_alignment"], {
-        ...formatAlignmentBottom,
-        sequence: 60,
-        separator: true,
-    })
+            ...formatAlignmentBottom,
+            sequence: 60,
+            separator: true,
+        })
         .addChild("format_wrapping", ["format"], {
-        ...formatWrapping,
-        sequence: 80,
-        separator: true,
-    })
+            ...formatWrapping,
+            sequence: 80,
+            separator: true,
+        })
         .addChild("format_wrapping_overflow", ["format", "format_wrapping"], {
-        ...formatWrappingOverflow,
-        sequence: 10,
-    })
+            ...formatWrappingOverflow,
+            sequence: 10,
+        })
         .addChild("format_wrapping_wrap", ["format", "format_wrapping"], {
-        ...formatWrappingWrap,
-        sequence: 20,
-    })
+            ...formatWrappingWrap,
+            sequence: 20,
+        })
         .addChild("format_wrapping_clip", ["format", "format_wrapping"], {
-        ...formatWrappingClip,
-        sequence: 30,
-    })
+            ...formatWrappingClip,
+            sequence: 30,
+        })
         .addChild("format_cf", ["format"], {
-        ...formatCF,
-        sequence: 90,
-        separator: true,
-    })
+            ...formatCF,
+            sequence: 90,
+            separator: true,
+        })
         .addChild("format_clearFormat", ["format"], {
-        ...clearFormat,
-        sequence: 100,
-        separator: true,
-    })
+            ...clearFormat,
+            sequence: 100,
+            separator: true,
+        })
         // ---------------------------------------------------------------------
         // DATA MENU ITEMS
         // ---------------------------------------------------------------------
         .add("data", {
-        name: _lt("Data"),
-        sequence: 60,
-    })
+            name: _t("Data"),
+            sequence: 60,
+        })
         .addChild("sort_range", ["data"], {
-        ...sortRange,
-        sequence: 10,
-        separator: true,
-    })
+            ...sortRange,
+            sequence: 10,
+            separator: true,
+        })
         .addChild("sort_ascending", ["data", "sort_range"], {
-        ...sortAscending,
-        sequence: 10,
-    })
+            ...sortAscending,
+            sequence: 10,
+        })
         .addChild("sort_descending", ["data", "sort_range"], {
-        ...sortDescending,
-        sequence: 20,
-    })
+            ...sortDescending,
+            sequence: 20,
+        })
         .addChild("split_to_columns", ["data"], {
-        ...splitToColumns,
-        sequence: 20,
-        separator: true,
-    })
+            ...splitToColumns,
+            sequence: 20,
+            separator: true,
+        })
         .addChild("add_data_filter", ["data"], {
-        ...addDataFilter,
-        sequence: 30,
-    })
+            ...addDataFilter,
+            sequence: 30,
+        })
         .addChild("remove_data_filter", ["data"], {
-        ...removeDataFilter,
-        sequence: 30,
-    });
+            ...removeDataFilter,
+            sequence: 30,
+        });
 
     class OTRegistry extends Registry {
         /**
@@ -18668,25 +18668,25 @@
     const chartSidePanelComponentRegistry = new Registry();
     chartSidePanelComponentRegistry
         .add("line", {
-        configuration: LineConfigPanel,
-        design: LineChartDesignPanel,
-    })
+            configuration: LineConfigPanel,
+            design: LineChartDesignPanel,
+        })
         .add("bar", {
-        configuration: BarConfigPanel,
-        design: BarChartDesignPanel,
-    })
+            configuration: BarConfigPanel,
+            design: BarChartDesignPanel,
+        })
         .add("pie", {
-        configuration: LineBarPieConfigPanel,
-        design: LineBarPieDesignPanel,
-    })
+            configuration: LineBarPieConfigPanel,
+            design: LineBarPieDesignPanel,
+        })
         .add("gauge", {
-        configuration: GaugeChartConfigPanel,
-        design: GaugeChartDesignPanel,
-    })
+            configuration: GaugeChartConfigPanel,
+            design: GaugeChartDesignPanel,
+        })
         .add("scorecard", {
-        configuration: ScorecardChartConfigPanel,
-        design: ScorecardChartDesignPanel,
-    });
+            configuration: ScorecardChartConfigPanel,
+            design: ScorecardChartDesignPanel,
+        });
 
     css /* scss */ `
   .o-chart {
@@ -19838,7 +19838,7 @@
     };
 
     const SplitToColumnsInteractiveContent = {
-        SplitIsDestructive: _lt("This will overwrite data in the subsequent columns. Split anyway?"),
+        SplitIsDestructive: _t("This will overwrite data in the subsequent columns. Split anyway?"),
     };
     function interactiveSplitToColumns(env, separator, addNewColumns) {
         let result = env.model.dispatch("SPLIT_TEXT_INTO_COLUMNS", { separator, addNewColumns });
@@ -19855,12 +19855,12 @@
     }
 
     const SEPARATORS = [
-        { name: _lt("Detect automatically"), value: "auto" },
-        { name: _lt("Custom separator"), value: "custom" },
-        { name: _lt("Space"), value: " " },
-        { name: _lt("Comma"), value: "," },
-        { name: _lt("Semicolon"), value: ";" },
-        { name: _lt("Line Break"), value: NEWLINE },
+        { name: _t("Detect automatically"), value: "auto" },
+        { name: _t("Custom separator"), value: "custom" },
+        { name: _t("Space"), value: " " },
+        { name: _t("Comma"), value: "," },
+        { name: _t("Semicolon"), value: ";" },
+        { name: _t("Line Break"), value: NEWLINE },
     ];
     class SplitIntoColumnsPanel extends owl.Component {
         static template = "o-spreadsheet-SplitIntoColumnsPanel";
@@ -19948,23 +19948,23 @@
 
     const sidePanelRegistry = new Registry();
     sidePanelRegistry.add("ConditionalFormatting", {
-        title: _lt("Conditional formatting"),
+        title: _t("Conditional formatting"),
         Body: ConditionalFormattingPanel,
     });
     sidePanelRegistry.add("ChartPanel", {
-        title: _lt("Chart"),
+        title: _t("Chart"),
         Body: ChartPanel,
     });
     sidePanelRegistry.add("FindAndReplace", {
-        title: _lt("Find and Replace"),
+        title: _t("Find and Replace"),
         Body: FindAndReplacePanel,
     });
     sidePanelRegistry.add("CustomCurrency", {
-        title: _lt("Custom currency format"),
+        title: _t("Custom currency format"),
         Body: CustomCurrencyPanel,
     });
     sidePanelRegistry.add("SplitToColumns", {
-        title: _lt("Split text into columns"),
+        title: _t("Split text into columns"),
         Body: SplitIntoColumnsPanel,
     });
 
@@ -21197,11 +21197,11 @@
             let values = Object.entries(functionRegistry.content)
                 .filter(([_, { hidden }]) => !hidden)
                 .map(([text, { description }]) => {
-                return {
-                    text,
-                    description,
-                };
-            });
+                    return {
+                        text,
+                        description,
+                    };
+                });
             if (searchTerm) {
                 values = fuzzyLookup(searchTerm, values, (t) => t.text);
             }
@@ -21295,7 +21295,7 @@
                             ["LEFT_PAREN", "RIGHT_PAREN"].includes(tokenAtCursor.type) &&
                             tokenAtCursor.parenIndex &&
                             tokenAtCursor.parenIndex === token.parenIndex) {
-                            result.push({ value: token.value, color: tokenColors.MATCHING_PAREN  });
+                            result.push({ value: token.value, color: tokenColors.MATCHING_PAREN });
                         }
                         else {
                             result.push({ value: token.value, color: tokenColors[token.type] || "#000" });
@@ -22227,10 +22227,10 @@
                 .map((id) => this.getVisibleFigures().find((fig) => fig.id === id))
                 .filter(isDefined$1)
                 .map((fig) => {
-                const figOnSCreen = internalFigureToScreen(this.env.model.getters, fig);
-                const container = this.getFigureContainer(fig);
-                return rectIntersection(figOnSCreen, this.getContainerRect(container));
-            })
+                    const figOnSCreen = internalFigureToScreen(this.env.model.getters, fig);
+                    const container = this.getFigureContainer(fig);
+                    return rectIntersection(figOnSCreen, this.getContainerRect(container));
+                })
                 .filter(isDefined$1);
             const containerRect = rectUnion(this.dnd.draggedFigure, ...figureVisibleRects);
             return {
@@ -23984,7 +23984,7 @@
             }
         }
         displayWarningCopyPasteNotSupported() {
-            this.env.raiseError(_lt("Copy/Paste is not supported in this browser."));
+            this.env.raiseError(_t("Copy/Paste is not supported in this browser."));
         }
         clearFormatting() {
             this.env.model.dispatch("CLEAR_FORMATTING", {
@@ -25503,10 +25503,10 @@
                         throw new UnknownFunctionError(current.value);
                     }
                 }
-                throw new BadExpressionError(_lt("Invalid formula"));
+                throw new BadExpressionError(_t("Invalid formula"));
             case "LEFT_PAREN":
                 const result = parseExpression(tokens);
-                consumeOrThrow(tokens, "RIGHT_PAREN", _lt("Missing closing parenthesis"));
+                consumeOrThrow(tokens, "RIGHT_PAREN", _t("Missing closing parenthesis"));
                 return result;
             case "OPERATOR":
                 const operator = current.value;
@@ -25517,13 +25517,13 @@
                         operand: parseExpression(tokens, OP_PRIORITY[operator]),
                     };
                 }
-                throw new BadExpressionError(_lt("Unexpected token: %s", current.value));
+                throw new BadExpressionError(_t("Unexpected token: %s", current.value));
             default:
-                throw new BadExpressionError(_lt("Unexpected token: %s", current.value));
+                throw new BadExpressionError(_t("Unexpected token: %s", current.value));
         }
     }
     function parseFunctionArgs(tokens) {
-        consumeOrThrow(tokens, "LEFT_PAREN", _lt("Missing opening parenthesis"));
+        consumeOrThrow(tokens, "LEFT_PAREN", _t("Missing opening parenthesis"));
         const nextToken = tokens[0];
         if (nextToken?.type === "RIGHT_PAREN") {
             consumeOrThrow(tokens, "RIGHT_PAREN");
@@ -25532,7 +25532,7 @@
         const args = [];
         args.push(parseOneFunctionArg(tokens));
         while (tokens[0]?.type !== "RIGHT_PAREN") {
-            consumeOrThrow(tokens, "COMMA", _lt("Wrong function call"));
+            consumeOrThrow(tokens, "COMMA", _t("Wrong function call"));
             args.push(parseOneFunctionArg(tokens));
         }
         consumeOrThrow(tokens, "RIGHT_PAREN");
@@ -25872,10 +25872,10 @@
             const ast = parseTokens([...tokens]);
             const scope = new Scope();
             if (ast.type === "BIN_OPERATION" && ast.value === ":") {
-                throw new BadExpressionError(_lt("Invalid formula"));
+                throw new BadExpressionError(_t("Invalid formula"));
             }
             if (ast.type === "EMPTY") {
-                throw new BadExpressionError(_lt("Invalid formula"));
+                throw new BadExpressionError(_t("Invalid formula"));
             }
             const compiledAST = compileAST(ast);
             const code = new FunctionCodeBuilder();
@@ -25883,9 +25883,9 @@
             code.append(compiledAST);
             code.append(`return ${compiledAST.returnExpression};`);
             let baseFunction = new Function("deps", // the dependencies in the current formula
-            "ref", // a function to access a certain dependency at a given index
-            "range", // same as above, but guarantee that the result is in the form of a range
-            "ctx", code.toString());
+                "ref", // a function to access a certain dependency at a given index
+                "range", // same as above, but guarantee that the result is in the form of a range
+                "ctx", code.toString());
             functionCache[cacheKey] = {
                 // @ts-ignore
                 execute: baseFunction,
@@ -25917,7 +25917,7 @@
                     const isRangeOnly = argTypes.every((t) => isRangeType(t));
                     if (isRangeOnly) {
                         if (!isRangeInput(currentArg)) {
-                            throw new BadExpressionError(_lt("Function %s expects the parameter %s to be reference to a cell or range, not a %s.", functionName, (i + 1).toString(), currentArg.type.toLowerCase()));
+                            throw new BadExpressionError(_t("Function %s expects the parameter %s to be reference to a cell or range, not a %s.", functionName, (i + 1).toString(), currentArg.type.toLowerCase()));
                         }
                     }
                     const compiledAST = compileAST(currentArg, isMeta, hasRange, {
@@ -25944,7 +25944,7 @@
                 const code = new FunctionCodeBuilder(scope);
                 if (ast.type !== "REFERENCE" && !(ast.type === "BIN_OPERATION" && ast.value === ":")) {
                     if (isMeta) {
-                        throw new BadExpressionError(_lt(`Argument must be a reference to a cell or range.`));
+                        throw new BadExpressionError(_t(`Argument must be a reference to a cell or range.`));
                     }
                 }
                 if (ast.debug) {
@@ -26077,17 +26077,17 @@
         const functionName = ast.value.toUpperCase();
         const functionDefinition = functions$1[functionName];
         if (nbrArg < functionDefinition.minArgRequired) {
-            throw new BadExpressionError(_lt("Invalid number of arguments for the %s function. Expected %s minimum, but got %s instead.", functionName, functionDefinition.minArgRequired.toString(), nbrArg.toString()));
+            throw new BadExpressionError(_t("Invalid number of arguments for the %s function. Expected %s minimum, but got %s instead.", functionName, functionDefinition.minArgRequired.toString(), nbrArg.toString()));
         }
         if (nbrArg > functionDefinition.maxArgPossible) {
-            throw new BadExpressionError(_lt("Invalid number of arguments for the %s function. Expected %s maximum, but got %s instead.", functionName, functionDefinition.maxArgPossible.toString(), nbrArg.toString()));
+            throw new BadExpressionError(_t("Invalid number of arguments for the %s function. Expected %s maximum, but got %s instead.", functionName, functionDefinition.maxArgPossible.toString(), nbrArg.toString()));
         }
         const repeatableArgs = functionDefinition.nbrArgRepeating;
         if (repeatableArgs > 1) {
             const unrepeatableArgs = functionDefinition.args.length - repeatableArgs;
             const repeatingArgs = nbrArg - unrepeatableArgs;
             if (repeatingArgs % repeatableArgs !== 0) {
-                throw new BadExpressionError(_lt("Invalid number of arguments for the %s function. Expected all arguments after position %s to be supplied by groups of %s arguments", functionName, unrepeatableArgs.toString(), repeatableArgs.toString()));
+                throw new BadExpressionError(_t("Invalid number of arguments for the %s function. Expected all arguments after position %s to be supplied by groups of %s arguments", functionName, unrepeatableArgs.toString(), repeatableArgs.toString()));
             }
         }
     }
@@ -26646,8 +26646,8 @@
                 };
                 newFormula =
                     newFormula.slice(0, match.index) +
-                        toXC(offsettedPosition.col, offsettedPosition.row, rangePart) +
-                        newFormula.slice(match.index + match[0].length);
+                    toXC(offsettedPosition.col, offsettedPosition.row, rangePart) +
+                    newFormula.slice(match.index + match[0].length);
             }
         } while (match);
         return newFormula;
@@ -26959,8 +26959,8 @@
                             const convertedRef = convertTableReference(reference, table, xc);
                             cell.content =
                                 cell.content.slice(0, refIndex) +
-                                    convertedRef +
-                                    cell.content.slice(tabRef.length + refIndex + endIndex + 1);
+                                convertedRef +
+                                cell.content.slice(tabRef.length + refIndex + endIndex + 1);
                         }
                     }
                 }
@@ -27713,26 +27713,26 @@
     class XlsxPivotExtractor extends XlsxBaseExtractor {
         getPivotTable() {
             return this.mapOnElements(
-            // Use :root instead of "pivotTableDefinition" because others pivotTableDefinition elements are present inside the root
-            // pivotTableDefinition elements.
-            { query: ":root", parent: this.rootFile.file.xml }, (pivotElement) => {
-                return {
-                    displayName: this.extractAttr(pivotElement, "name", { required: true }).asString(),
-                    id: this.extractAttr(pivotElement, "name", { required: true }).asString(),
-                    ref: this.extractChildAttr(pivotElement, "location", "ref", {
-                        required: true,
-                    }).asString(),
-                    headerRowCount: this.extractChildAttr(pivotElement, "location", "firstDataRow", {
-                        default: 0,
-                    }).asNum(),
-                    totalsRowCount: 1,
-                    cols: [],
-                    style: {
-                        showFirstColumn: true,
-                        showRowStripes: true,
-                    },
-                };
-            })[0];
+                // Use :root instead of "pivotTableDefinition" because others pivotTableDefinition elements are present inside the root
+                // pivotTableDefinition elements.
+                { query: ":root", parent: this.rootFile.file.xml }, (pivotElement) => {
+                    return {
+                        displayName: this.extractAttr(pivotElement, "name", { required: true }).asString(),
+                        id: this.extractAttr(pivotElement, "name", { required: true }).asString(),
+                        ref: this.extractChildAttr(pivotElement, "location", "ref", {
+                            required: true,
+                        }).asString(),
+                        headerRowCount: this.extractChildAttr(pivotElement, "location", "firstDataRow", {
+                            default: 0,
+                        }).asNum(),
+                        totalsRowCount: 1,
+                        cols: [],
+                        style: {
+                            showFirstColumn: true,
+                            showRowStripes: true,
+                        },
+                    };
+                })[0];
         }
     }
 
@@ -27916,10 +27916,10 @@
                 return Object.values(this.relationships)
                     .filter((relationship) => relationship.type.endsWith("pivotTable"))
                     .map((pivotRelationship) => {
-                    const pivotFile = this.getTargetXmlFile(pivotRelationship);
-                    const pivot = new XlsxPivotExtractor(pivotFile, this.xlsxFileStructure, this.warningManager).getPivotTable();
-                    return pivot;
-                });
+                        const pivotFile = this.getTargetXmlFile(pivotRelationship);
+                        const pivot = new XlsxPivotExtractor(pivotFile, this.xlsxFileStructure, this.warningManager).getPivotTable();
+                        return pivot;
+                    });
             }
             catch (e) {
                 this.catchErrorOnElement(e);
@@ -28304,8 +28304,8 @@
             const sheets = xlsxFileStructure.sheets
                 .sort((a, b) => a.file.fileName.localeCompare(b.file.fileName, undefined, { numeric: true }))
                 .map((sheetFile) => {
-                return new XlsxSheetExtractor(sheetFile, xlsxFileStructure, this.warningManager, theme).getSheet();
-            });
+                    return new XlsxSheetExtractor(sheetFile, xlsxFileStructure, this.warningManager, theme).getSheet();
+                });
             const externalBooks = xlsxFileStructure.externalLinks.map((externalLinkFile) => {
                 return new XlsxExternalBookExtractor(externalLinkFile, xlsxFileStructure, this.warningManager).getExternalBook();
             });
@@ -28336,7 +28336,7 @@
                 externalLinks: getXLSXFilesOfType(CONTENT_TYPES.externalLink, this.xmls),
             };
             if (!xlsxFileStructure.workbook.rels) {
-                throw Error(_lt("Cannot find workbook relations file"));
+                throw Error(_t("Cannot find workbook relations file"));
             }
             return xlsxFileStructure;
         }
@@ -29243,11 +29243,11 @@
                 .filter((col) => col >= start)
                 .sort((a, b) => (delta < 0 ? a - b : b - a)) // start by the end when moving up
                 .forEach((col) => {
-                if ((col === start && moveFirstLeftBorder) || col !== start) {
-                    this.moveBordersOfColumn(sheetId, col, delta, "vertical");
-                }
-                this.moveBordersOfColumn(sheetId, col, delta, "horizontal");
-            });
+                    if ((col === start && moveFirstLeftBorder) || col !== start) {
+                        this.moveBordersOfColumn(sheetId, col, delta, "vertical");
+                    }
+                    this.moveBordersOfColumn(sheetId, col, delta, "horizontal");
+                });
         }
         /**
          * Move borders of a sheet vertically.
@@ -29268,11 +29268,11 @@
                 .filter((row) => row >= start)
                 .sort((a, b) => (delta < 0 ? a - b : b - a)) // start by the end when moving up
                 .forEach((row) => {
-                if ((row === start && moveFirstTopBorder) || row !== start) {
-                    this.moveBordersOfRow(sheetId, row, delta, "horizontal");
-                }
-                this.moveBordersOfRow(sheetId, row, delta, "vertical");
-            });
+                    if ((row === start && moveFirstTopBorder) || row !== start) {
+                        this.moveBordersOfRow(sheetId, row, delta, "horizontal");
+                    }
+                    this.moveBordersOfRow(sheetId, row, delta, "vertical");
+                });
         }
         /**
          * Moves the borders (left if `vertical` or top if `horizontal` depending on
@@ -30378,7 +30378,7 @@
                     ]), this.checkOperatorArgsNumber(0, ["IsEmpty", "IsNotEmpty"]));
                 case "ColorScaleRule": {
                     return this.checkValidations(rule, this.chainValidations(this.checkThresholds(this.checkFormulaCompilation)), this.chainValidations(this.checkThresholds(this.checkNaN), this.batchValidations(this.checkMinBiggerThanMax, this.checkMinBiggerThanMid, this.checkMidBiggerThanMax
-                    // Those three validations can be factorized further
+                        // Those three validations can be factorized further
                     )));
                 }
                 case "IconSetRule": {
@@ -32197,7 +32197,7 @@
                     right: range.isFullRow
                         ? range.unboundedZone.right
                         : range.unboundedZone.right +
-                            ((range.parts[1] || range.parts[0]).colFixed ? 0 : offsetX),
+                        ((range.parts[1] || range.parts[0]).colFixed ? 0 : offsetX),
                     // Don't shift up if the range is a column row without header
                     top: range.isFullCol && !range.unboundedZone.hasHeader
                         ? range.unboundedZone.top
@@ -32206,7 +32206,7 @@
                     bottom: range.isFullCol
                         ? range.unboundedZone.bottom
                         : range.unboundedZone.bottom +
-                            ((range.parts[1] || range.parts[0]).rowFixed ? 0 : offsetY),
+                        ((range.parts[1] || range.parts[0]).rowFixed ? 0 : offsetY),
                 };
                 return range.clone({ sheetId: copySheetId, zone: unboundZone }).orderZone();
             });
@@ -32885,7 +32885,7 @@
             if (deltaIndex === 0) {
                 return currentIndex;
             }
-            throw new Error(_lt("There is not enough visible sheets"));
+            throw new Error(_t("There is not enough visible sheets"));
         }
         checkSheetName(cmd) {
             const { orderedSheetIds, sheets } = this;
@@ -32990,7 +32990,7 @@
         getDuplicateSheetName(sheetName) {
             let i = 1;
             const names = this.orderedSheetIds.map(this.getSheetName.bind(this));
-            const baseName = _lt("Copy of %s", sheetName);
+            const baseName = _t("Copy of %s", sheetName);
             let name = baseName.toString();
             while (names.includes(name)) {
                 name = `${baseName} (${i})`;
@@ -33322,17 +33322,17 @@
             // if the formula definition could have accepted a range, we would pass through the _range function and not here
             if (range.zone.bottom !== range.zone.top || range.zone.left !== range.zone.right) {
                 throw new Error(paramNumber
-                    ? _lt("Function %s expects the parameter %s to be a single value or a single cell reference, not a range.", functionName.toString(), paramNumber.toString())
-                    : _lt("Function %s expects its parameters to be single values or single cell references, not ranges.", functionName.toString()));
+                    ? _t("Function %s expects the parameter %s to be a single value or a single cell reference, not a range.", functionName.toString(), paramNumber.toString())
+                    : _t("Function %s expects its parameters to be single values or single cell references, not ranges.", functionName.toString()));
             }
             if (range.invalidSheetName) {
-                throw new Error(_lt("Invalid sheet name: %s", range.invalidSheetName));
+                throw new Error(_t("Invalid sheet name: %s", range.invalidSheetName));
             }
             return this.readCell(range);
         }
         readCell(range) {
             if (!this.getters.tryGetSheet(range.sheetId)) {
-                throw new Error(_lt("Invalid sheet name"));
+                throw new Error(_t("Invalid sheet name"));
             }
             const position = { sheetId: range.sheetId, col: range.zone.left, row: range.zone.top };
             const evaluatedCell = this.getEvaluatedCellIfNotEmpty(position);
@@ -33730,9 +33730,9 @@
             this.assertSheetHasEnoughSpaceToSpreadFormulaResult(formulaPosition, computedValue);
             forEachSpreadPositionInMatrix(computedValue, this.updateSpreadRelation(formulaPosition));
             forEachSpreadPositionInMatrix(computedValue, this.checkCollision(formulaPosition));
-            forEachSpreadPositionInMatrix(computedValue, 
-            // due the isMatrix check above, we know that formulaReturn is MatrixFunctionReturn
-            this.spreadValues(formulaPosition, formulaReturn));
+            forEachSpreadPositionInMatrix(computedValue,
+                // due the isMatrix check above, we know that formulaReturn is MatrixFunctionReturn
+                this.spreadValues(formulaPosition, formulaReturn));
             const formatFromPosition = formatFromPositionAccess(computedFormat);
             return createEvaluatedCell(computedValue[0][0], cellData.format || formatFromPosition(0, 0));
         }
@@ -33745,12 +33745,12 @@
                 return;
             }
             if (enoughCols) {
-                throw new Error(_lt("Result couldn't be automatically expanded. Please insert more rows."));
+                throw new Error(_t("Result couldn't be automatically expanded. Please insert more rows."));
             }
             if (enoughRows) {
-                throw new Error(_lt("Result couldn't be automatically expanded. Please insert more columns."));
+                throw new Error(_t("Result couldn't be automatically expanded. Please insert more columns."));
             }
-            throw new Error(_lt("Result couldn't be automatically expanded. Please insert more columns and rows."));
+            throw new Error(_t("Result couldn't be automatically expanded. Please insert more columns and rows."));
         }
         updateSpreadRelation({ sheetId, col, row, }) {
             const arrayFormulaPositionId = this.encodePosition({ sheetId, col, row });
@@ -33768,7 +33768,7 @@
                 if (rawCell?.content ||
                     this.getters.getEvaluatedCell(position).type !== CellValueType.empty) {
                     this.blockedArrayFormulas.add(formulaPositionId);
-                    throw new Error(_lt("Array result was not expanded because it would overwrite data in %s.", toXC(position.col, position.row)));
+                    throw new Error(_t("Array result was not expanded because it would overwrite data in %s.", toXC(position.col, position.row)));
                 }
                 this.blockedArrayFormulas.delete(formulaPositionId);
             };
@@ -34279,10 +34279,10 @@
             }
             return sortWithClusters([
                 ...new Set(
-                // remove duplicates first to check validity on a reduced
-                // set of colors, then normalize to HEX and remove duplicates
-                // again
-                [...new Set([...usedColors, ...this.customColors])].filter(isColorValid).map(toHex)),
+                    // remove duplicates first to check validity on a reduced
+                    // set of colors, then normalize to HEX and remove duplicates
+                    // again
+                    [...new Set([...usedColors, ...this.customColors])].filter(isColorValid).map(toHex)),
             ]).filter((color) => !COLOR_PICKER_DEFAULTS.includes(color));
         }
         getColorsFromCells(sheetId) {
@@ -34725,7 +34725,7 @@
                         }
                         return cell.value === values[0];
                     default:
-                        console.warn(_lt("Not implemented operator %s for kind of conditional formatting:  %s", rule.operator, rule.type));
+                        console.warn(_t("Not implemented operator %s for kind of conditional formatting:  %s", rule.operator, rule.type));
                 }
                 return false;
             },
@@ -35074,14 +35074,14 @@
             let width = lastColEnd - this.offsetCorrectionX;
             if (this.canScrollHorizontally) {
                 width += Math.max(DEFAULT_CELL_WIDTH, // leave some minimal space to let the user know they scrolled all the way
-                Math.min(leftColSize, this.viewportWidth - lastColSize) // Add pixels that allows the snapping at maximum horizontal scroll
+                    Math.min(leftColSize, this.viewportWidth - lastColSize) // Add pixels that allows the snapping at maximum horizontal scroll
                 );
                 width = Math.max(width, this.viewportWidth); // if the viewport grid size is smaller than its client width, return client width
             }
             let height = lastRowEnd - this.offsetCorrectionY;
             if (this.canScrollVertically) {
                 height += Math.max(DEFAULT_CELL_HEIGHT + 5, // leave some space to let the user know they scrolled all the way
-                Math.min(topRowSize, this.viewportHeight - lastRowSize) // Add pixels that allows the snapping at maximum vertical scroll
+                    Math.min(topRowSize, this.viewportHeight - lastRowSize) // Add pixels that allows the snapping at maximum vertical scroll
                 );
                 height = Math.max(height, this.viewportHeight); // if the viewport grid size is smaller than its client height, return client height
             }
@@ -35312,7 +35312,7 @@
             }
             this.offsetX =
                 this.getters.getColDimensions(sheetId, this.left).start -
-                    this.getters.getColDimensions(sheetId, this.boundaries.left).start;
+                this.getters.getColDimensions(sheetId, this.boundaries.left).start;
         }
         /** Updates the pane zone and snapped offset based on its vertical
          * offset (will find Top) and its width (will find Bottom) */
@@ -35325,7 +35325,7 @@
             }
             this.offsetY =
                 this.getters.getRowDimensions(sheetId, this.top).start -
-                    this.getters.getRowDimensions(sheetId, this.boundaries.top).start;
+                this.getters.getRowDimensions(sheetId, this.boundaries.top).start;
         }
     }
 
@@ -36992,17 +36992,17 @@
             if (executed.type === "REMOVE_COLUMNS_ROWS") {
                 elements = elements
                     .map((element) => {
-                    if (executed.elements.includes(element)) {
-                        return undefined;
-                    }
-                    const executedElements = executed.elements.sort((a, b) => b - a);
-                    for (let removedElement of executedElements) {
-                        if (element > removedElement) {
-                            element--;
+                        if (executed.elements.includes(element)) {
+                            return undefined;
                         }
-                    }
-                    return element;
-                })
+                        const executedElements = executed.elements.sort((a, b) => b - a);
+                        for (let removedElement of executedElements) {
+                            if (element > removedElement) {
+                                element--;
+                            }
+                        }
+                        return element;
+                    })
                     .filter(isDefined$1);
             }
             if (executed.type === "ADD_COLUMNS_ROWS") {
@@ -38010,19 +38010,19 @@
         prepareHighlights(highlights) {
             return highlights
                 .filter((x) => x.zone.top >= 0 &&
-                x.zone.left >= 0 &&
-                x.zone.bottom < this.getters.getNumberRows(x.sheetId) &&
-                x.zone.right < this.getters.getNumberCols(x.sheetId))
+                    x.zone.left >= 0 &&
+                    x.zone.bottom < this.getters.getNumberRows(x.sheetId) &&
+                    x.zone.right < this.getters.getNumberCols(x.sheetId))
                 .map((highlight) => {
-                const { numberOfRows, numberOfCols } = zoneToDimension(highlight.zone);
-                const zone = numberOfRows * numberOfCols === 1
-                    ? this.getters.expandZone(highlight.sheetId, highlight.zone)
-                    : highlight.zone;
-                return {
-                    ...highlight,
-                    zone,
-                };
-            });
+                    const { numberOfRows, numberOfCols } = zoneToDimension(highlight.zone);
+                    const zone = numberOfRows * numberOfCols === 1
+                        ? this.getters.expandZone(highlight.sheetId, highlight.zone)
+                        : highlight.zone;
+                    return {
+                        ...highlight,
+                        zone,
+                    };
+                });
         }
         // ---------------------------------------------------------------------------
         // Grid rendering
@@ -38041,9 +38041,9 @@
              * opacity, we filter highlights to remove duplicates.
              */
             const highlights = this.getHighlights();
-            for (let h of highlights.filter((highlight, index) => 
-            // For every highlight in the sheet, deduplicated by zone
-            highlights.findIndex((h) => isEqual(h.zone, highlight.zone) && h.sheetId === sheetId) ===
+            for (let h of highlights.filter((highlight, index) =>
+                // For every highlight in the sheet, deduplicated by zone
+                highlights.findIndex((h) => isEqual(h.zone, highlight.zone) && h.sheetId === sheetId) ===
                 index)) {
                 const { x, y, width, height } = this.getters.getVisibleRect(h.zone);
                 if (width > 0 && height > 0) {
@@ -38296,8 +38296,8 @@
                     else if (align === "right") {
                         x +=
                             box.width -
-                                MIN_CELL_TEXT_MARGIN -
-                                (box.isFilterHeader ? ICON_EDGE_LENGTH + FILTER_ICON_MARGIN : 0);
+                            MIN_CELL_TEXT_MARGIN -
+                            (box.isFilterHeader ? ICON_EDGE_LENGTH + FILTER_ICON_MARGIN : 0);
                     }
                     else {
                         x += box.width / 2;
@@ -39114,7 +39114,7 @@
             switch (cmd.type) {
                 case "SORT_CELLS":
                     if (!isInside(cmd.col, cmd.row, cmd.zone)) {
-                        throw new Error(_lt("The anchor must be part of the provided zone"));
+                        throw new Error(_t("The anchor must be part of the provided zone"));
                     }
                     return this.checkValidations(cmd, this.checkMerge, this.checkMergeSizes);
             }
@@ -40618,10 +40618,10 @@
         getPlainTextContent() {
             return (this.cells
                 .map((cells) => {
-                return cells
-                    .map((c) => c.cell ? this.getters.getCellText(c.position, this.getters.shouldShowFormulas()) : "")
-                    .join("\t");
-            })
+                    return cells
+                        .map((c) => c.cell ? this.getters.getCellText(c.position, this.getters.shouldShowFormulas()) : "")
+                        .join("\t");
+                })
                 .join("\n") || "\t");
         }
         getHTMLContent() {
@@ -41186,7 +41186,7 @@
         return xc.startsWith("$") && xc.length > 1 && xc.slice(1).includes("$");
     }
 
-    const CELL_DELETED_MESSAGE = _lt("The cell you are trying to edit has been deleted.");
+    const CELL_DELETED_MESSAGE = _t("The cell you are trying to edit has been deleted.");
     class EditionPlugin extends UIPlugin {
         static getters = [
             "getEditionMode",
@@ -41319,15 +41319,15 @@
                     const previousRefToken = this.currentTokens
                         .filter((token) => token.type === "REFERENCE")
                         .find((token) => {
-                        const { xc, sheetName: sheet } = splitReference(token.value);
-                        const sheetName = sheet || this.getters.getSheetName(this.sheetId);
-                        const activeSheetId = this.getters.getActiveSheetId();
-                        if (this.getters.getSheetName(activeSheetId) !== sheetName) {
-                            return false;
-                        }
-                        const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
-                        return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), range.zone);
-                    });
+                            const { xc, sheetName: sheet } = splitReference(token.value);
+                            const sheetName = sheet || this.getters.getSheetName(this.sheetId);
+                            const activeSheetId = this.getters.getActiveSheetId();
+                            if (this.getters.getSheetName(activeSheetId) !== sheetName) {
+                                return false;
+                            }
+                            const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
+                            return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), range.zone);
+                        });
                     this.previousRef = previousRefToken.value;
                     this.previousRange = this.getters.getRangeFromSheetXC(this.getters.getActiveSheetId(), this.previousRef);
                     this.selectionInitialStart = previousRefToken.start;
@@ -41639,7 +41639,7 @@
                     if (raise) {
                         this.ui.notifyUI({
                             type: "ERROR",
-                            text: _lt("This formula has over 100 parts. It can't be processed properly, consider splitting it into multiple cells"),
+                            text: _t("This formula has over 100 parts. It can't be processed properly, consider splitting it into multiple cells"),
                         });
                     }
                 }
@@ -41697,7 +41697,7 @@
         replaceText(text, start, end) {
             this.currentContent =
                 this.currentContent.slice(0, start) +
-                    this.currentContent.slice(end, this.currentContent.length);
+                this.currentContent.slice(end, this.currentContent.length);
             this.insertText(text, start);
         }
         /**
@@ -41820,32 +41820,32 @@
 
     const selectionStatisticFunctions = [
         {
-            name: _lt("Sum"),
+            name: _t("Sum"),
             types: [CellValueType.number],
             compute: (values) => SUM.compute([values]),
         },
         {
-            name: _lt("Avg"),
+            name: _t("Avg"),
             types: [CellValueType.number],
             compute: (values) => AVERAGE.compute([values]),
         },
         {
-            name: _lt("Min"),
+            name: _t("Min"),
             types: [CellValueType.number],
             compute: (values) => MIN.compute([values]),
         },
         {
-            name: _lt("Max"),
+            name: _t("Max"),
             types: [CellValueType.number],
             compute: (values) => MAX.compute([values]),
         },
         {
-            name: _lt("Count"),
+            name: _t("Count"),
             types: [CellValueType.number, CellValueType.text, CellValueType.boolean, CellValueType.error],
             compute: (values) => COUNTA.compute([values]),
         },
         {
-            name: _lt("Count Numbers"),
+            name: _t("Count Numbers"),
             types: [CellValueType.number, CellValueType.text, CellValueType.boolean, CellValueType.error],
             compute: (values) => COUNT.compute([values]),
         },
@@ -42727,13 +42727,13 @@
             return;
         const result = env.model.dispatch("RENAME_SHEET", { sheetId, name });
         if (result.reasons.includes(10 /* CommandResult.MissingSheetName */)) {
-            env.raiseError(_lt("The sheet name cannot be empty."), errorCallback);
+            env.raiseError(_t("The sheet name cannot be empty."), errorCallback);
         }
         else if (result.reasons.includes(11 /* CommandResult.DuplicatedSheetName */)) {
-            env.raiseError(_lt("A sheet with the name %s already exists. Please select another name.", name), errorCallback);
+            env.raiseError(_t("A sheet with the name %s already exists. Please select another name.", name), errorCallback);
         }
         else if (result.reasons.includes(13 /* CommandResult.ForbiddenCharactersInSheetName */)) {
-            env.raiseError(_lt("Some used characters are not allowed in a sheet name (Forbidden characters are %s).", FORBIDDEN_SHEET_CHARS.join(" ")), errorCallback);
+            env.raiseError(_t("Some used characters are not allowed in a sheet name (Forbidden characters are %s).", FORBIDDEN_SHEET_CHARS.join(" ")), errorCallback);
         }
     }
 
@@ -43380,11 +43380,11 @@
             return Array.from(this.bottomBarRef.el.querySelectorAll(`.o-sheet`))
                 .map((sheetEl) => sheetEl.getBoundingClientRect())
                 .map((rect) => ({
-                x: rect.x,
-                width: rect.width - 1,
-                y: rect.y,
-                height: rect.height,
-            }));
+                    x: rect.x,
+                    width: rect.width - 1,
+                    y: rect.y,
+                    height: rect.height,
+                }));
         }
         getSheetClasses(sheetId) {
             let classes = "";
@@ -44620,7 +44620,7 @@
                     return;
                 }
                 this.env.notifyUser({
-                    text: _lt("The current window is too small to display this sheet properly. Consider resizing your browser window or adjusting frozen rows and columns."),
+                    text: _t("The current window is too small to display this sheet properly. Consider resizing your browser window or adjusting frozen rows and columns."),
                     tag: "viewportTooSmall",
                 });
                 this.isViewportTooSmall = true;
@@ -46249,7 +46249,7 @@
             line: { color: "000000" },
         });
         // <manualLayout/> to manually position the chart in the figure container
-        let title = escapeXml ``;
+        let title = escapeXml``;
         if (chart.data.title) {
             title = escapeXml /*xml*/ `
       <c:title>
@@ -46259,7 +46259,7 @@
     `;
         }
         // switch on chart type
-        let plot = escapeXml ``;
+        let plot = escapeXml``;
         switch (chart.data.type) {
             case "bar":
                 plot = addBarChart(chart.data);
@@ -46446,9 +46446,9 @@
           <c:symbol val="circle" />
           <c:size val="5"/>
         </c:marker>
-        ${dataset.label ? escapeXml `<c:tx>${stringRef(dataset.label)}</c:tx>` : ""}
+        ${dataset.label ? escapeXml`<c:tx>${stringRef(dataset.label)}</c:tx>` : ""}
         ${dataShapeProperty}
-        ${chart.labelRange ? escapeXml `<c:cat>${stringRef(chart.labelRange)}</c:cat>` : ""} <!-- x-coordinate values -->
+        ${chart.labelRange ? escapeXml`<c:cat>${stringRef(chart.labelRange)}</c:cat>` : ""} <!-- x-coordinate values -->
         <c:val> <!-- x-coordinate values -->
           ${numberRef(dataset.range)}
         </c:val>
@@ -46496,10 +46496,10 @@
       <c:ser>
         <c:idx val="${dsIndex}"/>
         <c:order val="${dsIndex}"/>
-        ${dataset.label ? escapeXml `<c:tx>${stringRef(dataset.label)}</c:tx>` : ""}
+        ${dataset.label ? escapeXml`<c:tx>${stringRef(dataset.label)}</c:tx>` : ""}
         ${joinXmlNodes(dataPoints)}
         ${insertDataLabels({ showLeaderLines: true })}
-        ${chart.labelRange ? escapeXml `<c:cat>${stringRef(chart.labelRange)}</c:cat>` : ""}
+        ${chart.labelRange ? escapeXml`<c:cat>${stringRef(chart.labelRange)}</c:cat>` : ""}
         <c:val>
           ${numberRef(dataset.range)}
         </c:val>
@@ -46587,8 +46587,8 @@
     function addFormula(cell) {
         const formula = cell.content;
         const attrs = [];
-        let node = escapeXml ``;
-        let cycle = escapeXml ``;
+        let node = escapeXml``;
+        let cycle = escapeXml``;
         const XlsxFormula = adaptFormulaToExcel(formula);
         // hack for cycles : if we don't set a value (be it 0 or #VALUE!), it will appear as invisible on excel,
         // Making it very hard for the client to find where the recursion is.
@@ -47132,8 +47132,8 @@
       ${font.strike ? escapeXml /*xml*/ `<strike />` : ""}
       ${font.size ? escapeXml /*xml*/ `<sz val="${font.size}" />` : ""}
       ${font.color && font.color.rgb
-        ? escapeXml /*xml*/ `<color rgb="${toXlsxHexColor(font.color.rgb)}" />`
-        : ""}
+                ? escapeXml /*xml*/ `<color rgb="${toXlsxHexColor(font.color.rgb)}" />`
+                : ""}
       ${font.name ? escapeXml /*xml*/ `<name val="${font.name}" />` : ""}
     </font>
   `;
@@ -47203,13 +47203,13 @@
     }
     function formatBorderAttribute(description) {
         if (!description) {
-            return escapeXml ``;
+            return escapeXml``;
         }
         return formatAttributes([["style", description.style]]);
     }
     function addBorderColor(description) {
         if (!description) {
-            return escapeXml ``;
+            return escapeXml``;
         }
         return escapeXml /*xml*/ `
     <color ${formatAttributes([["rgb", toXlsxHexColor(description.color.rgb)]])}/>
@@ -47256,11 +47256,11 @@
     ) {
         const dxfNodes = [];
         for (const dxf of dxfs) {
-            let fontNode = escapeXml ``;
+            let fontNode = escapeXml``;
             if (dxf.font) {
                 fontNode = addFont(dxf.font);
             }
-            let fillNode = escapeXml ``;
+            let fillNode = escapeXml``;
             if (dxf.fill) {
                 fillNode = escapeXml /*xml*/ `
         <fill>
@@ -47359,7 +47359,7 @@
 
     function addColumns(cols) {
         if (!Object.values(cols).length) {
-            return escapeXml ``;
+            return escapeXml``;
         }
         const colNodes = [];
         for (let [id, col] of Object.entries(cols)) {
@@ -47398,7 +47398,7 @@
                     const id = normalizeStyle(construct, extractStyle(cell, data));
                     attributes.push(["s", id]);
                     let additionalAttrs = [];
-                    let cellNode = escapeXml ``;
+                    let cellNode = escapeXml``;
                     // Either formula or static value inside the cell
                     if (cell.isFormula) {
                         ({ attrs: additionalAttrs, node: cellNode } = addFormula(cell));
@@ -47469,7 +47469,7 @@
             }
         }
         if (!linkNodes.length) {
-            return escapeXml ``;
+            return escapeXml``;
         }
         return escapeXml /*xml*/ `
     <hyperlinks>
@@ -47487,7 +47487,7 @@
     `;
         }
         else
-            return escapeXml ``;
+            return escapeXml``;
     }
     function addSheetViews(sheet) {
         const panes = sheet.panes;
@@ -47495,11 +47495,11 @@
         if (panes && (panes.xSplit || panes.ySplit)) {
             const xc = toXC(panes.xSplit, panes.ySplit);
             //workbookViewId should be defined in the workbook file but it seems like Excel has a default behaviour.
-            const xSplit = panes.xSplit ? escapeXml `xSplit="${panes.xSplit}"` : "";
-            const ySplit = panes.ySplit ? escapeXml `ySplit="${panes.ySplit}"` : "";
-            const topRight = panes.xSplit ? escapeXml `<selection pane="topRight"/>` : "";
-            const bottomLeft = panes.ySplit ? escapeXml `<selection pane="bottomLeft"/>` : "";
-            const bottomRight = panes.xSplit && panes.ySplit ? escapeXml `<selection pane="bottomRight"/>` : "";
+            const xSplit = panes.xSplit ? escapeXml`xSplit="${panes.xSplit}"` : "";
+            const ySplit = panes.ySplit ? escapeXml`ySplit="${panes.ySplit}"` : "";
+            const topRight = panes.xSplit ? escapeXml`<selection pane="topRight"/>` : "";
+            const bottomLeft = panes.ySplit ? escapeXml`<selection pane="bottomLeft"/>` : "";
+            const bottomRight = panes.xSplit && panes.ySplit ? escapeXml`<selection pane="bottomRight"/>` : "";
             splitPanes = escapeXml /*xml*/ `
     <pane
       ${xSplit}
@@ -47591,7 +47591,7 @@
             const tablesNode = createTablesForSheet(sheet, sheetIndex, currentTableIndex, construct, files);
             currentTableIndex += sheet.filterTables.length;
             // Figures and Charts
-            let drawingNode = escapeXml ``;
+            let drawingNode = escapeXml``;
             const drawingRelIds = [];
             for (const chart of sheet.charts) {
                 const xlsxChartId = convertChartId(chart.id);
@@ -47996,7 +47996,7 @@
         setupConfig(config) {
             const client = config.client || {
                 id: this.uuidGenerator.uuidv4(),
-                name: _lt("Anonymous").toString(),
+                name: _t("Anonymous").toString(),
             };
             const transportService = config.transportService || new LocalTransportService();
             return {

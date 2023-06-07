@@ -28,7 +28,7 @@ export class BooleanFavoriteField extends Component {
 
 export const booleanFavoriteField = {
     component: BooleanFavoriteField,
-    displayName: _lt("Favorite"),
+    displayName: _t("Favorite"),
     supportedTypes: ["boolean"],
     isEmpty: () => false,
     extractProps: ({ attrs, options }) => ({

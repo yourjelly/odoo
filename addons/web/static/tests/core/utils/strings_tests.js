@@ -94,12 +94,12 @@ QUnit.module("utils", () => {
             two: "två",
         });
 
-        assert.deepEqual(sprintf("Hello %s", _lt("one")), "Hello en");
-        assert.deepEqual(sprintf("Hello %s %s", _lt("one"), _lt("two")), "Hello en två");
+        assert.deepEqual(sprintf("Hello %s", _t("one")), "Hello en");
+        assert.deepEqual(sprintf("Hello %s %s", _t("one"), _t("two")), "Hello en två");
 
         const vals = {
-            one: _lt("one"),
-            two: _lt("two"),
+            one: _t("one"),
+            two: _t("two"),
         };
         assert.deepEqual(sprintf("Hello %(two)s %(one)s", vals), "Hello två en");
     });

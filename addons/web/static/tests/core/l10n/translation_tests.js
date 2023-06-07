@@ -16,7 +16,7 @@ const { DateTime, Settings } = luxon;
 
 const terms = { Hello: "Bonjour" };
 const serviceRegistry = registry.category("services");
-class TestComponent extends Component {}
+class TestComponent extends Component { }
 
 /**
  * Patches the 'lang' of the user session and context.
@@ -70,7 +70,7 @@ QUnit.test("can lazy translate", async (assert) => {
     assert.expect(3);
 
     TestComponent.template = xml`<div><t t-esc="constructor.someLazyText" /></div>`;
-    TestComponent.someLazyText = _lt("Hello");
+    TestComponent.someLazyText = _t("Hello");
     assert.strictEqual(TestComponent.someLazyText.toString(), "Hello");
     assert.strictEqual(TestComponent.someLazyText.valueOf(), "Hello");
 

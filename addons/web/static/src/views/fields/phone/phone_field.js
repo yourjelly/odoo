@@ -21,7 +21,7 @@ export class PhoneField extends Component {
 
 export const phoneField = {
     component: PhoneField,
-    displayName: _lt("Phone"),
+    displayName: _t("Phone"),
     supportedTypes: ["char"],
     extractProps: ({ attrs }) => ({
         placeholder: attrs.placeholder,

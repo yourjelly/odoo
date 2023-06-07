@@ -21,15 +21,15 @@ import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog
 const { Component, useState, useRef, useExternalListener, onWillUpdateProps, onWillStart, onPatched } = owl;
 
 const PLAN_APPLICABILITY = {
-    mandatory: _lt("Mandatory"),
-    optional: _lt("Optional"),
+    mandatory: _t("Mandatory"),
+    optional: _t("Optional"),
 }
 const PLAN_STATUS = {
-    invalid: _lt("Invalid"),
-    ok: _lt("OK"),
+    invalid: _t("Invalid"),
+    ok: _t("OK"),
 }
 export class AnalyticDistribution extends Component {
-    setup(){
+    setup() {
         this.orm = useService("orm");
 
         this.state = useState({
@@ -119,7 +119,7 @@ export class AnalyticDistribution extends Component {
         const data = nextProps.record.data[nextProps.name];
         const analytic_account_ids = Object.keys(data).map((id) => parseInt(id));
         const records = analytic_account_ids.length ? await this.fetchAnalyticAccounts([["id", "in", analytic_account_ids]]) : [];
-        let widgetData = Object.assign({}, ...this.allPlans.map((plan) => ({[plan.id]: {...plan, distribution: []}})));
+        let widgetData = Object.assign({}, ...this.allPlans.map((plan) => ({ [plan.id]: { ...plan, distribution: [] } })));
         records.map((record) => {
             if (!widgetData[record.root_plan_id[0]]) {
                 // plans might not have been retrieved
@@ -173,11 +173,11 @@ export class AnalyticDistribution extends Component {
 
     async fetchAllPlans(nextProps) {
         // TODO: Optimize to execute once for all records when `force_applicability` is set
-        const argsPlan =  this.fetchPlansArgs(nextProps);
+        const argsPlan = this.fetchPlansArgs(nextProps);
         this.allPlans = await this.orm.call("account.analytic.plan", "get_relevant_plans", [], argsPlan);
     }
 
-    async fetchAnalyticAccounts(domain, limit=null) {
+    async fetchAnalyticAccounts(domain, limit = null) {
         const args = {
             domain: domain,
             fields: ["id", "display_name", "root_plan_id", "color"],
@@ -201,13 +201,13 @@ export class AnalyticDistribution extends Component {
     optionsSourceAnalytic(groupId) {
         return {
             placeholder: this.env._t("Loading..."),
-            options:(searchTerm) => this.loadOptionsSourceAnalytic(groupId, searchTerm),
+            options: (searchTerm) => this.loadOptionsSourceAnalytic(groupId, searchTerm),
         };
     }
 
-    analyticAccountDomain(groupId=null) {
+    analyticAccountDomain(groupId = null) {
         let domain = [['id', 'not in', this.existingAnalyticAccountIDs]];
-        if (this.props.record.data.company_id){
+        if (this.props.record.data.company_id) {
             domain.push(
                 '|',
                 ['company_id', '=', this.props.record.data.company_id[0]],
@@ -305,7 +305,7 @@ export class AnalyticDistribution extends Component {
                 }
                 this.autoFill();
             },
-            onCreateEdit: () => {},
+            onCreateEdit: () => { },
         }, {
             onClose: () => {
                 if (!editedTag.analytic_account_id) {
@@ -351,7 +351,7 @@ export class AnalyticDistribution extends Component {
         const nextTag = allTags[(currentTagIndex + 1) % allTags.length];
         // remove the tag from the groups distribution
         this.list[fromGroup].distribution = this.list[fromGroup].distribution.filter((dist_tag) => dist_tag.id != id);
-        if (!this.isDropdownOpen){
+        if (!this.isDropdownOpen) {
             this.save();
         } else {
             this.setFocusSelector(`.tag_${nextTag.id} .o_analytic_account_name`);
@@ -373,7 +373,7 @@ export class AnalyticDistribution extends Component {
 
     get listForJson() {
         let res = {};
-        this.listReady.map(({analytic_account_id, percentage}) => {
+        this.listReady.map(({ analytic_account_id, percentage }) => {
             res[parseInt(analytic_account_id)] = percentage;
         });
         return res;
@@ -407,7 +407,7 @@ export class AnalyticDistribution extends Component {
     get sortedList() {
         return Object.values(this.list).sort((a, b) => {
             const aApp = a.applicability,
-                  bApp = b.applicability;
+                bApp = b.applicability;
             return aApp > bApp ? 1 : aApp < bApp ? -1 : 0;
         });
     }
@@ -449,7 +449,7 @@ export class AnalyticDistribution extends Component {
         return this.list[id].distribution.filter((tag) => this.tagIsReady(tag));
     }
 
-    tagIsReady({analytic_account_id, percentage}) {
+    tagIsReady({ analytic_account_id, percentage }) {
         return !!analytic_account_id && !!percentage;
     }
 
@@ -497,7 +497,7 @@ export class AnalyticDistribution extends Component {
     }
 
     cleanUp() {
-        for (const group_id in this.list){
+        for (const group_id in this.list) {
             this.list[group_id].distribution = this.listReadyByGroup(group_id);
         }
     }
@@ -508,9 +508,11 @@ export class AnalyticDistribution extends Component {
     }
 
     onSaveNew() {
-        this.openTemplate({ resId: false, context: {
-            'default_analytic_distribution': this.listForJson,
-        }});
+        this.openTemplate({
+            resId: false, context: {
+                'default_analytic_distribution': this.listForJson,
+            }
+        });
         this.closeAnalyticEditor();
     }
 
@@ -535,7 +537,7 @@ export class AnalyticDistribution extends Component {
         }
         this.autoFill();
         const incompletePlan = this.firstIncompletePlanId;
-        this.setFocusSelector(incompletePlan ? `#plan_${incompletePlan} .incomplete`: ".analytic_json_popup");
+        this.setFocusSelector(incompletePlan ? `#plan_${incompletePlan} .incomplete` : ".analytic_json_popup");
         this.state.showDropdown = true;
     }
 
@@ -580,7 +582,7 @@ export class AnalyticDistribution extends Component {
 
     focusAdjacent(direction) {
         const elementToFocus = this.adjacentElementToFocus(direction);
-        if (elementToFocus){
+        if (elementToFocus) {
             this.focus(elementToFocus);
             return true;
         }
@@ -683,7 +685,7 @@ AnalyticDistribution.props = {
 export const analyticDistribution = {
     component: AnalyticDistribution,
     supportedTypes: ["char", "text"],
-    fieldDependencies: [{ name:"analytic_precision", type: "integer" }],
+    fieldDependencies: [{ name: "analytic_precision", type: "integer" }],
     extractProps: ({ attrs, options }) => ({
         business_domain: options.business_domain,
         account_field: options.account_field,

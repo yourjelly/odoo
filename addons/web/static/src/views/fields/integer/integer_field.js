@@ -41,15 +41,15 @@ export class IntegerField extends Component {
 
 export const integerField = {
     component: IntegerField,
-    displayName: _lt("Integer"),
+    displayName: _t("Integer"),
     supportedOptions: [
         {
-            label: _lt("Type"),
+            label: _t("Type"),
             name: "type",
             type: "string",
         },
         {
-            label: _lt("Step"),
+            label: _t("Step"),
             name: "step",
             type: "number",
         },

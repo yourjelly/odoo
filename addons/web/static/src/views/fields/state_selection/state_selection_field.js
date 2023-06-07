@@ -81,7 +81,7 @@ export class StateSelectionField extends Component {
 
 export const stateSelectionField = {
     component: StateSelectionField,
-    displayName: _lt("Label Selection"),
+    displayName: _t("Label Selection"),
     supportedTypes: ["selection"],
     extractProps({ options, viewType }, dynamicInfo) {
         return {

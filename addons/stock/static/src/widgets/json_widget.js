@@ -7,8 +7,8 @@ import { useService } from "@web/core/utils/hooks";
 const { Component, onWillStart, onWillUpdateProps } = owl;
 
 export class JsonPopOver extends Component {
-    
-    setup(){
+
+    setup() {
         this.jsonValue = JSON.parse(this.props.record.data[this.props.name]);
         onWillUpdateProps(nextProps => {
             this.jsonValue = JSON.parse(nextProps.record.data[nextProps.name]);
@@ -18,7 +18,7 @@ export class JsonPopOver extends Component {
 
 export const jsonPopOver = {
     component: JsonPopOver,
-    displayName: _lt("Json Popup"),
+    displayName: _t("Json Popup"),
     supportedTypes: ["char"],
 };
 
@@ -59,7 +59,7 @@ export const popOverLeadDays = {
 };
 registry.category("fields").add("lead_days_widget", popOverLeadDays);
 
-export class ReplenishmentHistoryWidget extends JsonPopOver {}
+export class ReplenishmentHistoryWidget extends JsonPopOver { }
 ReplenishmentHistoryWidget.template = "stock.replenishmentHistory";
 
 export const replenishmentHistoryWidget = {

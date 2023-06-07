@@ -67,7 +67,7 @@ AccountFileUploader.components = {
 AccountFileUploader.template = "account.AccountFileUploader";
 AccountFileUploader.props = {
     ...standardWidgetProps,
-    record: { type: Object, optional: true},
+    record: { type: Object, optional: true },
     togglerTemplate: { type: String, optional: true },
     btnClass: { type: String, optional: true },
     linkText: { type: String, optional: true },
@@ -80,7 +80,7 @@ export const accountFileUploader = {
     extractProps: ({ attrs }) => ({
         togglerTemplate: attrs.template || "account.JournalUploadLink",
         btnClass: attrs.btnClass || "",
-        linkText: attrs.linkText || _lt("Upload"),
+        linkText: attrs.linkText || _t("Upload"),
     }),
     fieldDependencies: [
         { name: "id", type: "integer" },
@@ -114,7 +114,7 @@ export class AccountDropZone extends Component {
     }
 }
 AccountDropZone.defaultProps = {
-    hideZone: () => {},
+    hideZone: () => { },
 };
 AccountDropZone.template = "account.DropZone";
 
@@ -131,7 +131,7 @@ AccountMoveUploadListRenderer.components = {
     AccountDropZone,
 };
 
-export class AccountMoveUploadListController extends ListController {}
+export class AccountMoveUploadListController extends ListController { }
 AccountMoveUploadListController.components = {
     ...ListController.components,
     AccountFileUploader,
@@ -157,7 +157,7 @@ AccountMoveUploadKanbanRenderer.components = {
     AccountDropZone,
 };
 
-export class AccountMoveUploadKanbanController extends KanbanController {}
+export class AccountMoveUploadKanbanController extends KanbanController { }
 AccountMoveUploadKanbanController.components = {
     ...KanbanController.components,
     AccountFileUploader,
@@ -195,7 +195,7 @@ DashboardKanbanRecord.components = {
 };
 DashboardKanbanRecord.template = "account.DashboardKanbanRecord";
 
-export class DashboardKanbanRenderer extends KanbanRenderer {}
+export class DashboardKanbanRenderer extends KanbanRenderer { }
 DashboardKanbanRenderer.components = {
     ...KanbanRenderer.components,
     KanbanRecord: DashboardKanbanRecord,

@@ -14,7 +14,7 @@ const { toString, toBoolean } = spreadsheet.helpers;
 featurePluginRegistry.add("odooAccountingAggregates", AccountingPlugin);
 
 cellMenuRegistry.add("move_lines_see_records", {
-    name: _lt("See records"),
+    name: _t("See records"),
     sequence: 176,
     async execute(env) {
         const position = env.model.getters.getActivePosition();

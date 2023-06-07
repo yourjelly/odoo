@@ -6,7 +6,7 @@ import { _lt } from "@web/core/l10n/translation";
 export class AlertPopup extends AbstractAwaitablePopup {
     static template = "AlertPopup";
     static defaultProps = {
-        confirmText: _lt("Ok"),
+        confirmText: _t("Ok"),
         title: "",
         body: "",
         cancelKey: false,

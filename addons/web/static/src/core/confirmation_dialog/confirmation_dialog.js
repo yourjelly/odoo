@@ -72,12 +72,12 @@ ConfirmationDialog.props = {
     cancelLabel: { type: String, optional: true },
 };
 ConfirmationDialog.defaultProps = {
-    confirmLabel: _lt("Ok"),
-    cancelLabel: _lt("Cancel"),
-    title: _lt("Confirmation"),
+    confirmLabel: _t("Ok"),
+    cancelLabel: _t("Cancel"),
+    title: _t("Confirmation"),
 };
 
-export class AlertDialog extends ConfirmationDialog {}
+export class AlertDialog extends ConfirmationDialog { }
 AlertDialog.template = "web.AlertDialog";
 AlertDialog.props = {
     ...ConfirmationDialog.props,
@@ -85,5 +85,5 @@ AlertDialog.props = {
 };
 AlertDialog.defaultProps = {
     ...ConfirmationDialog.defaultProps,
-    title: _lt("Alert"),
+    title: _t("Alert"),
 };

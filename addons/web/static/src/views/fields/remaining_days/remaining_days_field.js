@@ -38,7 +38,7 @@ export class RemainingDaysField extends Component {
 
 export const remainingDaysField = {
     component: RemainingDaysField,
-    displayName: _lt("Remaining Days"),
+    displayName: _t("Remaining Days"),
     supportedTypes: ["date", "datetime"],
 };
 

@@ -21,7 +21,7 @@ export class EmailField extends Component {
 
 export const emailField = {
     component: EmailField,
-    displayName: _lt("Email"),
+    displayName: _t("Email"),
     supportedTypes: ["char"],
     extractProps: ({ attrs }) => ({
         placeholder: attrs.placeholder,

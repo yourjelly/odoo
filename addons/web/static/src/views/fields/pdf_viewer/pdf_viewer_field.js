@@ -46,11 +46,11 @@ export class PdfViewerField extends Component {
         const page = this.props.record.data[`${this.props.name}_page`] || 1;
         const file = encodeURIComponent(
             this.state.objectUrl ||
-                url("/web/content", {
-                    model: this.props.record.resModel,
-                    field: this.props.previewImage || this.props.name,
-                    id: this.props.record.resId,
-                })
+            url("/web/content", {
+                model: this.props.record.resModel,
+                field: this.props.previewImage || this.props.name,
+                id: this.props.record.resId,
+            })
         );
         return `/web/static/lib/pdfjs/web/viewer.html?file=${file}#page=${page}`;
     }
@@ -87,7 +87,7 @@ export class PdfViewerField extends Component {
 
 export const pdfViewerField = {
     component: PdfViewerField,
-    displayName: _lt("PDF Viewer"),
+    displayName: _t("PDF Viewer"),
     supportedTypes: ["binary"],
     extractProps: ({ attrs, options }) => ({
         fileNameField: attrs.filename,

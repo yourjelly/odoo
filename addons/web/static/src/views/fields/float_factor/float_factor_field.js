@@ -33,7 +33,7 @@ export const floatFactorField = {
     supportedOptions: [
         ...floatField.supportedOptions,
         {
-            label: _lt("Factor"),
+            label: _t("Factor"),
             name: "factor",
             type: "number",
         },

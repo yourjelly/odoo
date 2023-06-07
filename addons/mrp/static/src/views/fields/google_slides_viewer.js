@@ -22,7 +22,7 @@ export class SlidesViewer extends CharField {
     }
 
     _get_slide_page() {
-        return this.props.record.data[this.props.name+'_page'] ? this.props.record.data[this.props.name+'_page'] : this.page;
+        return this.props.record.data[this.props.name + '_page'] ? this.props.record.data[this.props.name + '_page'] : this.page;
     }
 
     get url() {
@@ -56,7 +56,7 @@ SlidesViewer.template = "mrp.SlidesViewer";
 export const slidesViewer = {
     ...charField,
     component: SlidesViewer,
-    displayName: _lt("Google Slides Viewer"),
+    displayName: _t("Google Slides Viewer"),
 };
 
 registry.category("fields").add("embed_viewer", slidesViewer);

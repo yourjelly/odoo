@@ -11,7 +11,7 @@ import { loadSpreadsheetDependencies } from "../helpers/helpers";
 import { migrate } from "../o_spreadsheet/migration";
 
 registries.topbarMenuRegistry.addChild("download_public_excel", ["file"], {
-    name: _lt("Download"),
+    name: _t("Download"),
     execute: (env) => env.downloadExcel(),
     isReadonlyAllowed: true,
 });

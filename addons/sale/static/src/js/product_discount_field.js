@@ -6,13 +6,13 @@ import { FloatField, floatField } from "@web/views/fields/float/float_field";
 import { _lt } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
- /**
-    * Dialog called if user changes a value in the sale order line.
-    * The wizard will open only if
-    *  (1) Sale order line is 3 or more
-    *  (2) First sale order line is changed
-    *  (3) value is the same in all other sale order line
- */
+/**
+   * Dialog called if user changes a value in the sale order line.
+   * The wizard will open only if
+   *  (1) Sale order line is 3 or more
+   *  (2) First sale order line is changed
+   *  (3) value is the same in all other sale order line
+*/
 
 export class ProductDiscountField extends FloatField {
     setup() {
@@ -31,19 +31,19 @@ export class ProductDiscountField extends FloatField {
         const isFirstOrderLine = this.props.record.data.id === orderLines[0].data.id;
         if (isFirstOrderLine && sameValue(orderLines)) {
             this.dialogService.add(ConfirmationDialog, {
-                body: _lt("Do you want to apply this value to all lines?"),
+                body: _t("Do you want to apply this value to all lines?"),
                 confirm: () => {
                     const commands = orderLines.slice(1).map((line) => {
                         return {
                             operation: "UPDATE",
                             record: line,
-                            data: {["discount"]: this.props.record.data[this.props.name]},
+                            data: { ["discount"]: this.props.record.data[this.props.name] },
                         };
                     });
 
                     x2mList.applyCommands('order_line', commands);
                 },
-                cancel: () => {},
+                cancel: () => { },
             });
         }
     }
@@ -62,7 +62,7 @@ ProductDiscountField.template = "sale.ProductDiscountField";
 export const productDiscountField = {
     ...floatField,
     component: ProductDiscountField,
-    displayName: _lt("Disc.%"),
+    displayName: _t("Disc.%"),
 };
 
 registry.category("fields").add("sol_discount", productDiscountField)

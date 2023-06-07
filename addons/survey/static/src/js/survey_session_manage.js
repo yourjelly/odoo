@@ -5,16 +5,16 @@ import SurveyPreloadImageMixin from "survey.preload_image_mixin";
 import SurveySessionChart from "survey.session_chart";
 import SurveySessionTextAnswers from "survey.session_text_answers";
 import SurveySessionLeaderBoard from "survey.session_leaderboard";
-import {_lt} from "web.core";
+import { _lt } from "web.core";
 
 const nextPageTooltips = {
-    closingWords: _lt('End of Survey'),
-    leaderboard: _lt('Show Leaderboard'),
-    leaderboardFinal: _lt('Show Final Leaderboard'),
-    nextQuestion: _lt('Next'),
-    results: _lt('Show Correct Answer(s)'),
-    startScreen: _lt('Start'),
-    userInputs: _lt('Show Results'),
+    closingWords: _t('End of Survey'),
+    leaderboard: _t('Show Leaderboard'),
+    leaderboardFinal: _t('Show Final Leaderboard'),
+    nextQuestion: _t('Next'),
+    results: _t('Show Correct Answer(s)'),
+    startScreen: _t('Start'),
+    userInputs: _t('Show Results'),
 };
 
 publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPreloadImageMixin, {
@@ -61,7 +61,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
             // Background Management
             self.refreshBackground = self.$el.data('refreshBackground');
             // Copy link tooltip
-            self.$('.o_survey_session_copy').tooltip({delay: 0, title: 'Click to copy link', placement: 'right'});
+            self.$('.o_survey_session_copy').tooltip({ delay: 0, title: 'Click to copy link', placement: 'right' });
 
             var isRpcCall = self.$el.data('isRpcCall');
             if (!isRpcCall) {
@@ -102,7 +102,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
             container: 'body',
             offset: '0, 3',
             content: function () {
-                return _lt("Copied!");
+                return _t("Copied!");
             }
         });
 
@@ -175,7 +175,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
             clearInterval(this.resultsRefreshInterval);
             delete this.resultsRefreshInterval;
         } else if (['leaderboard', 'leaderboardFinal'].includes(screenToDisplay)
-                   && !['leaderboard', 'leaderboardFinal'].includes(this.currentScreen)) {
+            && !['leaderboard', 'leaderboardFinal'].includes(this.currentScreen)) {
             if (this.isLastQuestion) {
                 this.$('.o_survey_session_navigation_next').addClass('d-none');
             }
@@ -300,11 +300,11 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
         if (this.currentScreen === 'userInputs' && this.isScoredQuestion) {
             return 'question';
         } else if ((this.currentScreen === 'results' && this.isScoredQuestion) ||
-                  (this.currentScreen === 'leaderboard' && !this.isScoredQuestion) ||
-                  (this.currentScreen === 'leaderboardFinal' && this.isScoredQuestion)) {
+            (this.currentScreen === 'leaderboard' && !this.isScoredQuestion) ||
+            (this.currentScreen === 'leaderboardFinal' && this.isScoredQuestion)) {
             return 'userInputs';
         } else if ((this.currentScreen === 'leaderboard' && this.isScoredQuestion) ||
-                  (this.currentScreen === 'leaderboardFinal' && !this.isScoredQuestion)){
+            (this.currentScreen === 'leaderboardFinal' && !this.isScoredQuestion)) {
             return 'results';
         }
 
@@ -372,7 +372,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
         });
     },
 
-    _displaySessionClosedPage:function () {
+    _displaySessionClosedPage: function () {
         this.$('.o_survey_question_header').addClass('invisible');
         this.$('.o_survey_session_results, .o_survey_session_navigation_previous, .o_survey_session_navigation_next')
             .addClass('d-none');
@@ -412,7 +412,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
             // Display last screen if leaderboard activated
             this.isLastQuestion = true;
             this._setupLeaderboard().then(function () {
-                self.$('.o_survey_session_leaderboard_title').text(_lt('Final Leaderboard'));
+                self.$('.o_survey_session_leaderboard_title').text(_t('Final Leaderboard'));
                 self.$('.o_survey_session_navigation_next').addClass('d-none');
                 self.$('.o_survey_leaderboard_buttons').removeClass('d-none');
                 self.leaderBoard.showLeaderboard(false, false);
@@ -511,7 +511,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend(SurveyPre
             method: 'read',
             args: [[self.surveyId], ['session_answer_count']],
         }).then(function (result) {
-            if (result && result.length === 1){
+            if (result && result.length === 1) {
                 self.$('.o_survey_session_attendees_count').text(
                     result[0].session_answer_count
                 );

@@ -66,7 +66,7 @@ export class CharField extends Component {
 
 export const charField = {
     component: CharField,
-    displayName: _lt("Text"),
+    displayName: _t("Text"),
     supportedTypes: ["char"],
     extractProps: ({ attrs, options }) => ({
         isPassword: archParseBoolean(attrs.password),

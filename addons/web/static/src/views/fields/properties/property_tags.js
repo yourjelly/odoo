@@ -11,14 +11,14 @@ import { TagsList } from "@web/core/tags_list/tags_list";
 
 import { Component } from "@odoo/owl";
 
-class PropertyTagsColorListPopover extends Component {}
+class PropertyTagsColorListPopover extends Component { }
 PropertyTagsColorListPopover.template = "web.PropertyTagsColorListPopover";
 PropertyTagsColorListPopover.components = {
     ColorList,
 };
 
 // property tags does not really need timeout because it does not make RPC calls
-export class PropertyTagAutoComplete extends AutoComplete {}
+export class PropertyTagAutoComplete extends AutoComplete { }
 Object.assign(PropertyTagAutoComplete, { timeout: 0 });
 
 export class PropertyTags extends Component {
@@ -114,7 +114,7 @@ export class PropertyTags extends Component {
                             (!request ||
                                 !request.length ||
                                 tag[1].toLocaleLowerCase().indexOf(request.toLocaleLowerCase()) >=
-                                    0)
+                                0)
                     );
                     if (!tagsFiltered || !tagsFiltered.length) {
                         // no result, ask the user if he want to create a new tag
@@ -122,7 +122,7 @@ export class PropertyTags extends Component {
                             return [
                                 {
                                     value: null,
-                                    label: _lt("Start typing..."),
+                                    label: _t("Start typing..."),
                                     classList: "fst-italic",
                                 },
                             ];
@@ -130,7 +130,7 @@ export class PropertyTags extends Component {
                             return [
                                 {
                                     value: null,
-                                    label: _lt("No result"),
+                                    label: _t("No result"),
                                     classList: "fst-italic",
                                 },
                             ];
@@ -139,7 +139,7 @@ export class PropertyTags extends Component {
                         return [
                             {
                                 value: { toCreate: true, value: request },
-                                label: sprintf(_lt('Create "%s"'), request),
+                                label: sprintf(_t('Create "%s"'), request),
                                 classList: "o_field_property_dropdown_add",
                             },
                         ];
@@ -195,7 +195,7 @@ export class PropertyTags extends Component {
 
         if (!(await this.props.checkDefinitionWriteAccess())) {
             this.notification.add(
-                _lt("You need to be able to edit parent first to add property tags"),
+                _t("You need to be able to edit parent first to add property tags"),
                 { type: "warning" }
             );
             return;
@@ -205,7 +205,7 @@ export class PropertyTags extends Component {
 
         const existingTag = this.props.tags.find((tag) => tag[0] === newValue);
         if (existingTag) {
-            this.notification.add(_lt("This tag is already available"), {
+            this.notification.add(_t("This tag is already available"), {
                 type: "warning",
             });
             return;

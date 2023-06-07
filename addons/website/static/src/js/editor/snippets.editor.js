@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.snippet.editor **/
 
-import {qweb, _t, _lt} from "web.core";
+import { qweb, _t, _lt } from "web.core";
 import Dialog from "web.Dialog";
 import weSnippetEditor from "web_editor.snippet.editor";
 import wSnippetOptions from "website.editor.snippets.options";
@@ -25,9 +25,9 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
         THEME: 'theme',
     }),
     optionsTabStructure: [
-        ['theme-colors', _lt("Theme Colors")],
-        ['theme-options', _lt("Theme Options")],
-        ['website-settings', _lt("Website Settings")],
+        ['theme-colors', _t("Theme Colors")],
+        ['theme-options', _t("Theme Options")],
+        ['website-settings', _t("Website Settings")],
     ],
 
     /**
@@ -85,7 +85,7 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
      * @param {boolean} [alwaysReconfigure=false]
      * @param {boolean} [configureIfNecessary=false]
      */
-    async _configureGMapAPI({alwaysReconfigure, configureIfNecessary}) {
+    async _configureGMapAPI({ alwaysReconfigure, configureIfNecessary }) {
         if (!alwaysReconfigure && !configureIfNecessary) {
             // TODO should review, parameters are weird... only one necessary?
             return false;
@@ -129,32 +129,34 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
                 size: 'medium',
                 title: _t("Google Map API Key"),
                 buttons: [
-                    {text: _t("Save"), classes: 'btn-primary', click: async (ev) => {
-                        const valueAPIKey = dialog.$('#api_key_input').val();
-                        if (!valueAPIKey) {
-                            applyError.call(dialog.$el, _t("Enter an API Key"));
-                            return;
+                    {
+                        text: _t("Save"), classes: 'btn-primary', click: async (ev) => {
+                            const valueAPIKey = dialog.$('#api_key_input').val();
+                            if (!valueAPIKey) {
+                                applyError.call(dialog.$el, _t("Enter an API Key"));
+                                return;
+                            }
+                            const $button = $(ev.currentTarget);
+                            $button.prop('disabled', true);
+                            const res = await this._validateGMapAPIKey(valueAPIKey);
+                            if (res.isValid) {
+                                await this._rpc({
+                                    model: 'website',
+                                    method: 'write',
+                                    args: [
+                                        [websiteId],
+                                        { google_maps_api_key: valueAPIKey },
+                                    ],
+                                });
+                                invalidated = true;
+                                dialog.close();
+                            } else {
+                                applyError.call(dialog.$el, res.message);
+                            }
+                            $button.prop("disabled", false);
                         }
-                        const $button = $(ev.currentTarget);
-                        $button.prop('disabled', true);
-                        const res = await this._validateGMapAPIKey(valueAPIKey);
-                        if (res.isValid) {
-                            await this._rpc({
-                                model: 'website',
-                                method: 'write',
-                                args: [
-                                    [websiteId],
-                                    {google_maps_api_key: valueAPIKey},
-                                ],
-                            });
-                            invalidated = true;
-                            dialog.close();
-                        } else {
-                            applyError.call(dialog.$el, res.message);
-                        }
-                        $button.prop("disabled", false);
-                    }},
-                    {text: _t("Cancel"), close: true}
+                    },
+                    { text: _t("Cancel"), close: true }
                 ],
                 $content: $content,
             });
@@ -216,7 +218,7 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
     /**
      * @override
      */
-    _updateRightPanelContent: function ({content, tab}) {
+    _updateRightPanelContent: function ({ content, tab }) {
         this._super(...arguments);
         this.$('.o_we_customize_theme_btn').toggleClass('active', tab === this.tabs.THEME);
     },

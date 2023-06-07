@@ -74,7 +74,7 @@ export class BadgeSelectionField extends Component {
 
 export const badgeSelectionField = {
     component: BadgeSelectionField,
-    displayName: _lt("Badges"),
+    displayName: _t("Badges"),
     supportedTypes: ["many2one", "selection"],
     isEmpty: (record, fieldName) => record.data[fieldName] === false,
     legacySpecialData: "_fetchSpecialMany2ones",

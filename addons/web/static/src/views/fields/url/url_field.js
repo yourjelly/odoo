@@ -38,7 +38,7 @@ export class UrlField extends Component {
 
 export const urlField = {
     component: UrlField,
-    displayName: _lt("URL"),
+    displayName: _t("URL"),
     supportedTypes: ["char"],
     extractProps: ({ attrs, options }) => ({
         text: attrs.text,

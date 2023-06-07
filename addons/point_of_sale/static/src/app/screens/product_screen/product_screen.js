@@ -29,7 +29,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         OrderWidget,
         ProductsWidget,
     };
-    static numpadActionName = _lt("Payment");
+    static numpadActionName = _t("Payment");
 
     setup() {
         super.setup();

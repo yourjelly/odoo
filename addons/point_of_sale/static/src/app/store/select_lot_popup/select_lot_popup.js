@@ -42,8 +42,8 @@ export class EditListPopup extends AbstractAwaitablePopup {
     static components = { EditListInput };
     static template = "EditListPopup";
     static defaultProps = {
-        confirmText: _lt("Add"),
-        cancelText: _lt("Discard"),
+        confirmText: _t("Add"),
+        cancelText: _t("Discard"),
         array: [],
         isSingleItem: false,
     };

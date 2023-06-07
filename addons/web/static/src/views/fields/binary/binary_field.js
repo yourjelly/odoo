@@ -67,10 +67,10 @@ export class BinaryField extends Component {
 
 export const binaryField = {
     component: BinaryField,
-    displayName: _lt("File"),
+    displayName: _t("File"),
     supportedOptions: [
         {
-            label: _lt("Accepted file extensions"),
+            label: _t("Accepted file extensions"),
             name: "accepted_file_extensions",
             type: "string",
         },

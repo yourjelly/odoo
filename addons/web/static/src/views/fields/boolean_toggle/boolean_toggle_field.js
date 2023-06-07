@@ -22,7 +22,7 @@ export class BooleanToggleField extends BooleanField {
 export const booleanToggleField = {
     ...booleanField,
     component: BooleanToggleField,
-    displayName: _lt("Toggle"),
+    displayName: _t("Toggle"),
     extractProps({ options }, dynamicInfo) {
         return {
             autosave: "autosave" in options ? Boolean(options.autosave) : true,

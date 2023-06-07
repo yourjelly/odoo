@@ -6,7 +6,7 @@ import { _lt } from "@web/core/l10n/translation";
 export class OrderImportPopup extends AbstractAwaitablePopup {
     static template = "OrderImportPopup";
     static defaultProps = {
-        confirmText: _lt("Ok"),
+        confirmText: _t("Ok"),
         cancelKey: false,
         body: "",
     };
@@ -17,5 +17,5 @@ export class OrderImportPopup extends AbstractAwaitablePopup {
             (this.props.report.unpaid_skipped_session || 0)
         );
     }
-    getPayload() {}
+    getPayload() { }
 }

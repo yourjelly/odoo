@@ -147,26 +147,26 @@ export class ProgressBarField extends Component {
 
 export const progressBarField = {
     component: ProgressBarField,
-    displayName: _lt("Progress Bar"),
+    displayName: _t("Progress Bar"),
     supportedOptions: [
         {
-            label: _lt("Editable"),
+            label: _t("Editable"),
             name: "editable",
             type: "boolean",
         },
         {
-            label: _lt("Edit max value"),
+            label: _t("Edit max value"),
             name: "edit_max_value",
             type: "boolean",
         },
         {
-            label: _lt("Current value field"),
+            label: _t("Current value field"),
             name: "current_value",
             type: "field",
             availableTypes: ["integer", "float"],
         },
         {
-            label: _lt("Max value field"),
+            label: _t("Max value field"),
             name: "max_value",
             type: "field",
             availableTypes: ["integer", "float"],

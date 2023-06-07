@@ -8,13 +8,13 @@ import { usePos } from "@point_of_sale/app/store/pos_hook";
 export class ErrorTracebackPopup extends ErrorPopup {
     static template = "ErrorTracebackPopup";
     static defaultProps = {
-        confirmText: _lt("Ok"),
-        cancelText: _lt("Cancel"),
+        confirmText: _t("Ok"),
+        cancelText: _t("Cancel"),
         confirmKey: false,
-        title: _lt("Error with Traceback"),
+        title: _t("Error with Traceback"),
         body: "",
         exitButtonIsShown: false,
-        exitButtonText: _lt("Exit Pos"),
+        exitButtonText: _t("Exit Pos"),
     };
 
     setup() {
@@ -34,11 +34,11 @@ export class ErrorTracebackPopup extends ErrorPopup {
         const subject = this.env._t("IMPORTANT: Bug Report From Odoo Point Of Sale");
         window.open(
             "mailto:" +
-                address +
-                "?subject=" +
-                (subject ? window.encodeURIComponent(subject) : "") +
-                "&body=" +
-                (this.props.body ? window.encodeURIComponent(this.props.body) : "")
+            address +
+            "?subject=" +
+            (subject ? window.encodeURIComponent(subject) : "") +
+            "&body=" +
+            (this.props.body ? window.encodeURIComponent(this.props.body) : "")
         );
     }
 }

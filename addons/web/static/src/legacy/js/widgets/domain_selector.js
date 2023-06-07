@@ -16,26 +16,26 @@ var _lt = core._lt;
 // are only used if user entered them manually or if got from demo data
 var operator_mapping = {
     "=": "=",
-    "!=": _lt("is not ="),
+    "!=": _t("is not ="),
     ">": ">",
     "<": "<",
     ">=": ">=",
     "<=": "<=",
-    "ilike": _lt("contains"),
-    "not ilike": _lt("does not contain"),
-    "in": _lt("in"),
-    "not in": _lt("not in"),
+    "ilike": _t("contains"),
+    "not ilike": _t("does not contain"),
+    "in": _t("in"),
+    "not in": _t("not in"),
 
-    "child_of": _lt("child of"),
-    "parent_of": _lt("parent of"),
+    "child_of": _t("child of"),
+    "parent_of": _t("parent of"),
     "like": "like",
     "not like": "not like",
     "=like": "=like",
     "=ilike": "=ilike",
 
     // custom
-    "set": _lt("is set"),
-    "not set": _lt("is not set"),
+    "set": _t("is set"),
+    "not set": _t("is not set"),
 };
 
 /**
@@ -93,7 +93,7 @@ var DomainNode = Widget.extend({
      * @abstract
      * @returns {boolean}
      */
-    isValid: function () {},
+    isValid: function () { },
     /**
      * Should return the prefix domain the widget is currently representing
      * (an array).
@@ -101,7 +101,7 @@ var DomainNode = Widget.extend({
      * @abstract
      * @returns {Array}
      */
-    getDomain: function () {},
+    getDomain: function () { },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -116,7 +116,7 @@ var DomainNode = Widget.extend({
     _onAddButtonClick: function (e) {
         e.preventDefault();
         e.stopPropagation();
-        this.trigger_up("add_node_clicked", {newBranch: !!$(e.currentTarget).data("branch"), child: this});
+        this.trigger_up("add_node_clicked", { newBranch: !!$(e.currentTarget).data("branch"), child: this });
     },
     /**
      * Called when the delete button is clicked -> trigger_up an event to ask
@@ -127,7 +127,7 @@ var DomainNode = Widget.extend({
     _onDeleteButtonClick: function (e) {
         e.preventDefault();
         e.stopPropagation();
-        this.trigger_up("delete_node_clicked", {child: this});
+        this.trigger_up("delete_node_clicked", { child: this });
     },
     /**
      * Called when a "controlpanel" button is hovered -> add classes to the
@@ -208,7 +208,7 @@ var DomainTree = DomainNode.extend({
      * @returns {boolean}
      */
     isValid: function () {
-        for (var i = 0 ; i < this.children.length ; i++) {
+        for (var i = 0; i < this.children.length; i++) {
             var cValid = this.children[i].isValid();
             if (!cValid) {
                 return cValid;
@@ -255,8 +255,8 @@ var DomainTree = DomainNode.extend({
         var i = afterNode ? this.children.indexOf(afterNode) : this.children.length;
         if (i < 0) return false;
 
-        this.children.splice(i+1, 0, instantiateNode(this, this.model, domain, this.options));
-        this.trigger_up("domain_changed", {child: this});
+        this.children.splice(i + 1, 0, instantiateNode(this, this.model, domain, this.options));
+        this.trigger_up("domain_changed", { child: this });
         return true;
     },
     /**
@@ -296,7 +296,7 @@ var DomainTree = DomainNode.extend({
      */
     _changeOperator: function (operator, silent) {
         this.operator = operator;
-        if (!silent) this.trigger_up("domain_changed", {child: this});
+        if (!silent) this.trigger_up("domain_changed", { child: this });
     },
     /**
      * @see DomainTree.init
@@ -313,7 +313,7 @@ var DomainTree = DomainNode.extend({
         // Add flattened children by search the appropriate number of children
         // in the rest of the domain (after the operator)
         var nbLeafsToFind = 1;
-        for (var i = 1 ; i < domain.length ; i++) {
+        for (var i = 1; i < domain.length; i++) {
             if (domain[i] === "&" || domain[i] === "|") {
                 nbLeafsToFind++;
             } else if (domain[i] !== "!") {
@@ -321,8 +321,8 @@ var DomainTree = DomainNode.extend({
             }
 
             if (!nbLeafsToFind) {
-                var partLeft = domain.slice(1, i+1);
-                var partRight = domain.slice(i+1);
+                var partLeft = domain.slice(1, i + 1);
+                var partRight = domain.slice(i + 1);
                 if (partLeft.length) {
                     this._addFlattenedChildren(partLeft);
                 }
@@ -363,7 +363,7 @@ var DomainTree = DomainNode.extend({
 
         this.children[i].destroy();
         this.children.splice(i, 1);
-        this.trigger_up("domain_changed", {child: this});
+        this.trigger_up("domain_changed", { child: this });
         return true;
     },
     /**
@@ -389,7 +389,7 @@ var DomainTree = DomainNode.extend({
         ).then((function () {
             children.forEach((child) => {
                 child.$el.appendTo($to); // Forced to do it this way so that the
-                                         // children are not misordered
+                // children are not misordered
             });
         }).bind(this));
     },
@@ -580,11 +580,11 @@ var DomainSelector = DomainTree.extend({
             oldChildren.forEach((child) => { child.destroy(); });
             this.renderElement();
             this._postRender();
-                this.children.forEach(
-                    ((child) => {
-                        child.$el.appendTo(this.$childrenContainer);
-                    }).bind(this)
-                );
+            this.children.forEach(
+                ((child) => {
+                    child.$el.appendTo(this.$childrenContainer);
+                }).bind(this)
+            );
         }).bind(this));
     },
 
@@ -722,7 +722,7 @@ var DomainLeaf = DomainNode.extend({
                     if (selectedField && !selectedField.relation && !Array.isArray(this.value)) {
                         this.displayValue = field_utils.format[selectedField.type](this.value, selectedField);
                     }
-                } catch {/**/}
+                } catch {/**/ }
                 this.displayOperator = this.operator;
                 if (selectedField.type === "boolean") {
                     this.displayValue = this.value ? "1" : "0";
@@ -809,7 +809,7 @@ var DomainLeaf = DomainNode.extend({
             }
             this._changeValue(this.value, true);
 
-            if (!silent) this.trigger_up("domain_changed", {child: this});
+            if (!silent) this.trigger_up("domain_changed", { child: this });
         }).bind(this));
     },
     /**
@@ -838,7 +838,7 @@ var DomainLeaf = DomainNode.extend({
             this._changeValue(this.value, true);
         }
 
-        if (!silent) this.trigger_up("domain_changed", {child: this});
+        if (!silent) this.trigger_up("domain_changed", { child: this });
     },
     /**
      * Handles a formatted value change in the domain. In that case, the value
@@ -884,7 +884,7 @@ var DomainLeaf = DomainNode.extend({
             }
         }
 
-        if (!silent) this.trigger_up("domain_changed", {child: this});
+        if (!silent) this.trigger_up("domain_changed", { child: this });
     },
     /**
      * Returns the mapping of "technical operator" to "display operator value"

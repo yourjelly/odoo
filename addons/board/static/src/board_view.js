@@ -60,7 +60,7 @@ export class BoardArchParser extends XMLParser {
 
 export const boardView = {
     type: "form",
-    display_name: _lt("Board"),
+    display_name: _t("Board"),
     Controller: BoardController,
 
     props: (genericProps, view) => {

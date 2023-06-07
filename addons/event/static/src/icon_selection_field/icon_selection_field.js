@@ -25,7 +25,7 @@ IconSelectionField.props = {
 
 export const iconSelectionField = {
     component: IconSelectionField,
-    displayName: _lt("Icon Selection"),
+    displayName: _t("Icon Selection"),
     supportedTypes: ["char", "text", "selection"],
     extractProps: ({ options }) => ({
         icons: options,

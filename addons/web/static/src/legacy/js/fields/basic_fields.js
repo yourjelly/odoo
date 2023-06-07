@@ -62,7 +62,7 @@ var TranslatableFieldMixin = {
 
 var FieldBoolean = AbstractField.extend({
     className: 'o_field_boolean',
-    description: _lt("Checkbox"),
+    description: _t("Checkbox"),
     events: Object.assign({}, AbstractField.prototype.events, {
         change: '_onChange',
     }),
@@ -299,7 +299,7 @@ var DebouncedField = AbstractField.extend({
      * @private
      * @returns {*}
      */
-    _getValue: function () {},
+    _getValue: function () { },
     /**
      * Should make an action on lost focus.
      *
@@ -307,7 +307,7 @@ var DebouncedField = AbstractField.extend({
      * @private
      * @returns {*}
      */
-    _onBlur: function () {},
+    _onBlur: function () { },
 });
 
 var InputField = DebouncedField.extend({
@@ -317,7 +317,7 @@ var InputField = DebouncedField.extend({
     events: Object.assign({}, DebouncedField.prototype.events, {
         'input': '_onInput',
         'change': '_onChange',
-        'blur' : '_onBlur',
+        'blur': '_onBlur',
     }),
 
     /**
@@ -423,7 +423,7 @@ var InputField = DebouncedField.extend({
             inputAttrs = Object.assign(inputAttrs, { type: 'password', autocomplete: this.attrs.autocomplete || 'new-password' });
             inputVal = this.value || '';
         } else {
-            inputAttrs = Object.assign(inputAttrs, { type: 'text', autocomplete: this.attrs.autocomplete || 'off'});
+            inputAttrs = Object.assign(inputAttrs, { type: 'text', autocomplete: this.attrs.autocomplete || 'off' });
             inputVal = this._formatValue(this.value);
         }
 
@@ -503,11 +503,11 @@ var InputField = DebouncedField.extend({
                 || (ev.data.direction === "right" && (selecting || input.selectionStart !== input.value.length))) {
                 ev.stopPropagation();
             }
-            if (ev.data.direction ==='next' &&
+            if (ev.data.direction === 'next' &&
                 this.attrs.modifiersValue &&
                 this.attrs.modifiersValue.required &&
                 this.viewType !== 'list') {
-                if (!this.$input.val()){
+                if (!this.$input.val()) {
                     this.setInvalidClass();
                     ev.stopPropagation();
                 } else {
@@ -571,7 +571,7 @@ var NumericField = InputField.extend({
         var val = expr.replace(new RegExp(/( )/g), '');
         var safeEvalString = '';
         for (let v of val.split(new RegExp(/([-+*/()^])/g))) {
-            if (!['+','-','*','/','(',')','^'].includes(v) && v.length) {
+            if (!['+', '-', '*', '/', '(', ')', '^'].includes(v) && v.length) {
                 // check if this is a float and take into account user delimiter preference
                 v = field_utils.parse.float(v);
             }
@@ -628,10 +628,10 @@ var NumericField = InputField.extend({
     _prepareInput: function ($input) {
         var result = this._super.apply(this, arguments);
         if (this.nodeOptions.type === 'number') {
-            this.$input.attr({type: 'number'});
+            this.$input.attr({ type: 'number' });
         }
         if (this.nodeOptions.step) {
-            this.$input.attr({step: this.nodeOptions.step});
+            this.$input.attr({ step: this.nodeOptions.step });
         }
         return result;
     },
@@ -707,7 +707,7 @@ var NumericField = InputField.extend({
 });
 
 var FieldChar = InputField.extend(TranslatableFieldMixin, {
-    description: _lt("Text"),
+    description: _t("Text"),
     className: 'o_field_char',
     tagName: 'span',
     supportedFieldTypes: ['char'],
@@ -751,7 +751,7 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
 });
 
 var FieldDate = InputField.extend({
-    description: _lt("Date"),
+    description: _t("Date"),
     className: "o_field_date",
     tagName: "span",
     supportedFieldTypes: ['date', 'datetime'],
@@ -899,7 +899,7 @@ var FieldDate = InputField.extend({
                 if (this.datewidget.type_of_date === "datetime") {
                     value.add(-this.getSession().getTZOffset(value), "minutes");
                 }
-            } catch {}
+            } catch { }
             await this._setValue(value);
             this._render();
         }
@@ -907,7 +907,7 @@ var FieldDate = InputField.extend({
 });
 
 var FieldDateTime = FieldDate.extend({
-    description: _lt("Date & Time"),
+    description: _t("Date & Time"),
     supportedFieldTypes: ['datetime'],
     isQuickEditable: true,
 
@@ -968,7 +968,7 @@ var FieldDateTime = FieldDate.extend({
 });
 
 var FieldMonetary = NumericField.extend({
-    description: _lt("Monetary"),
+    description: _t("Monetary"),
     className: 'o_field_monetary o_field_number',
     tagName: 'span',
     supportedFieldTypes: ['float', 'monetary'],
@@ -1039,7 +1039,7 @@ var FieldMonetary = NumericField.extend({
 
         if (this.currency && !this.nodeOptions.no_symbol) {
             // Prepare and add the currency symbol
-            var $currencySymbol = $('<span>', {text: this.currency.symbol});
+            var $currencySymbol = $('<span>', { text: this.currency.symbol });
             if (this.currency.position === "after") {
                 this.$el.append($currencySymbol);
             } else {
@@ -1081,7 +1081,7 @@ var FieldMonetary = NumericField.extend({
 });
 
 var FieldInteger = NumericField.extend({
-    description: _lt("Integer"),
+    description: _t("Integer"),
     className: 'o_field_integer o_field_number',
     supportedFieldTypes: ['integer'],
     isQuickEditable: true,
@@ -1116,7 +1116,7 @@ var FieldInteger = NumericField.extend({
 });
 
 var FieldFloat = NumericField.extend({
-    description: _lt("Decimal"),
+    description: _t("Decimal"),
     className: 'o_field_float o_field_number',
     supportedFieldTypes: ['float'],
     isQuickEditable: true,
@@ -1136,7 +1136,7 @@ var FieldFloat = NumericField.extend({
 });
 
 var FieldFloatTime = FieldFloat.extend({
-    description: _lt("Time"),
+    description: _t("Time"),
     // this is not strictly necessary, as for this widget to be used, the 'widget'
     // attrs must be set to 'float_time', so the formatType is automatically
     // 'float_time', but for the sake of clarity, we explicitely define a
@@ -1181,7 +1181,7 @@ var FieldFloatFactor = FieldFloat.extend({
     init: function () {
         this._super.apply(this, arguments);
         // default values
-        if (!this.nodeOptions.factor){
+        if (!this.nodeOptions.factor) {
             this.nodeOptions.factor = 1;
         }
         // use as format and parse options
@@ -1223,10 +1223,10 @@ var FieldFloatToggle = AbstractField.extend({
             this.nodeOptions.digits = JSON.parse(this.attrs.digits);
         }
         // default values
-        if (!this.nodeOptions.factor){
+        if (!this.nodeOptions.factor) {
             this.nodeOptions.factor = 1;
         }
-        if (!this.nodeOptions.range){
+        if (!this.nodeOptions.range) {
             this.nodeOptions.range = [0.0, 0.5, 1.0];
         }
 
@@ -1282,7 +1282,7 @@ var FieldFloatToggle = AbstractField.extend({
      */
     _nextValue: function () {
         var range = this.nodeOptions.range;
-        var val =  utils.closestNumber(this._getDisplayedValue(), range);
+        var val = utils.closestNumber(this._getDisplayedValue(), range);
         var index = range.indexOf(val);
         if (index !== -1) {
             if (index + 1 < range.length) {
@@ -1303,7 +1303,7 @@ var FieldFloatToggle = AbstractField.extend({
      * @private
      * @param {OdooEvent} ev
      */
-    _onClick: function(ev) {
+    _onClick: function (ev) {
         // force the button to work in readonly mode
         if (this.mode === 'edit' || this.nodeOptions.force_button) {
             ev.stopPropagation();
@@ -1324,7 +1324,7 @@ var FieldFloatToggle = AbstractField.extend({
 
 var FieldPercentage = FieldFloat.extend({
     className: 'o_field_float_percentage o_field_number',
-    description: _lt("Percentage"),
+    description: _t("Percentage"),
 
     /**
      * @constructor
@@ -1361,7 +1361,7 @@ var FieldPercentage = FieldFloat.extend({
 });
 
 var FieldText = InputField.extend(TranslatableFieldMixin, {
-    description: _lt("Multiline Text"),
+    description: _t("Multiline Text"),
     className: 'o_field_text',
     supportedFieldTypes: ['text', 'html'],
     tagName: 'span',
@@ -1376,7 +1376,7 @@ var FieldText = InputField.extend(TranslatableFieldMixin, {
         if (this.mode === 'edit') {
             this.tagName = 'textarea';
         }
-        this.autoResizeOptions = {parent: this};
+        this.autoResizeOptions = { parent: this };
     },
     /**
      * As it it done in the start function, the autoresize is done only once.
@@ -1427,7 +1427,7 @@ var FieldText = InputField.extend(TranslatableFieldMixin, {
 });
 
 var UrlWidget = InputField.extend({
-    description: _lt("URL"),
+    description: _t("URL"),
     className: 'o_field_url',
     events: Object.assign({}, InputField.prototype.events, {
         'click': '_onClick',
@@ -1601,12 +1601,12 @@ var AbstractFieldBinary = AbstractField.extend({
      *
      * @private
      */
-    _clearFile: function (){
+    _clearFile: function () {
         var self = this;
         this.$('.o_input_file').val('');
         this.set_filename('');
         if (!this.isDestroyed()) {
-            this._setValue(false).then(function() {
+            this._setValue(false).then(function () {
                 self._render();
             });
         }
@@ -1627,7 +1627,7 @@ var AbstractFieldBinary = AbstractField.extend({
 });
 
 var FieldBinaryFile = AbstractFieldBinary.extend({
-    description: _lt("File"),
+    description: _t("File"),
     template: 'FieldBinaryFile',
     events: Object.assign({}, AbstractFieldBinary.prototype.events, {
         'click': function (event) {
@@ -1650,8 +1650,8 @@ var FieldBinaryFile = AbstractFieldBinary.extend({
         this.do_toggle(visible);
         if (visible) {
             this.$el.css('cursor', 'pointer')
-                    .text(this.filename_value || '')
-                    .prepend($('<span class="fa fa-download"/>'), ' ');
+                .text(this.filename_value || '')
+                .prepend($('<span class="fa fa-download"/>'), ' ');
         }
     },
     _renderEdit: function () {
@@ -1704,7 +1704,7 @@ var FieldBinaryFile = AbstractFieldBinary.extend({
  * switching between a green bullet / gray bullet.
 */
 var FieldToggleBoolean = AbstractField.extend({
-    description: _lt("Button"),
+    description: _t("Button"),
     template: "toggle_button",
     events: {
         'click': '_onToggleButton'

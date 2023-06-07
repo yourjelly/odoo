@@ -6,7 +6,7 @@ import { _lt } from "@web/core/l10n/translation";
 export class ControlButtonPopup extends AbstractAwaitablePopup {
     static template = "ControlButtonPopup";
     static defaultProps = {
-        cancelText: _lt("Back"),
+        cancelText: _t("Back"),
         controlButtons: [],
         confirmKey: false,
     };

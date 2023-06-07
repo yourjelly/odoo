@@ -244,25 +244,25 @@ const END_DATE_FIELD_OPTION = "end_date_field";
 
 export const dateField = {
     component: DateTimeField,
-    displayName: _lt("Date"),
+    displayName: _t("Date"),
     supportedOptions: [
         {
-            label: _lt("Earliest accepted date"),
+            label: _t("Earliest accepted date"),
             name: "min_date",
             type: "string",
-            help: _lt(`ISO-formatted date (e.g. "2018-12-31") or "today".`),
+            help: _t(`ISO-formatted date (e.g. "2018-12-31") or "today".`),
         },
         {
-            label: _lt("Latest accepted date"),
+            label: _t("Latest accepted date"),
             name: "max_date",
             type: "string",
-            help: _lt(`ISO-formatted date (e.g. "2018-12-31") or "today".`),
+            help: _t(`ISO-formatted date (e.g. "2018-12-31") or "today".`),
         },
         {
-            label: _lt("Warning for future dates"),
+            label: _t("Warning for future dates"),
             name: "warn_future",
             type: "boolean",
-            help: _lt(`Displays a warning icon if the input dates are in the future.`),
+            help: _t(`Displays a warning icon if the input dates are in the future.`),
         },
     ],
     supportedTypes: ["date"],
@@ -294,15 +294,15 @@ export const dateField = {
 
 export const dateTimeField = {
     ...dateField,
-    displayName: _lt("Date & Time"),
+    displayName: _t("Date & Time"),
     supportedOptions: [
         ...dateField.supportedOptions,
         {
-            label: _lt("Rounding"),
+            label: _t("Rounding"),
             name: "rounding",
             type: "number",
             default: 5,
-            help: _lt(`Increment used in the minutes selection dropdown.`),
+            help: _t(`Increment used in the minutes selection dropdown.`),
         },
     ],
     supportedTypes: ["datetime"],
@@ -310,17 +310,17 @@ export const dateTimeField = {
 
 export const dateRangeField = {
     ...dateTimeField,
-    displayName: _lt("Date Range"),
+    displayName: _t("Date Range"),
     supportedOptions: [
         ...dateTimeField.supportedOptions,
         {
-            label: _lt("Start date field"),
+            label: _t("Start date field"),
             name: START_DATE_FIELD_OPTION,
             type: "field",
             availableTypes: ["date", "datetime"],
         },
         {
-            label: _lt("End date field"),
+            label: _t("End date field"),
             name: END_DATE_FIELD_OPTION,
             type: "field",
             availableTypes: ["date", "datetime"],

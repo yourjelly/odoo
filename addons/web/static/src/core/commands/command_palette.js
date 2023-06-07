@@ -22,8 +22,8 @@ import {
     useExternalListener,
 } from "@odoo/owl";
 
-const DEFAULT_PLACEHOLDER = _lt("Search...");
-const DEFAULT_EMPTY_MESSAGE = _lt("No result found");
+const DEFAULT_PLACEHOLDER = _t("Search...");
+const DEFAULT_EMPTY_MESSAGE = _t("No result found");
 const FUZZY_NAMESPACES = ["default"];
 
 /**
@@ -86,7 +86,7 @@ export function splitCommandName(name, searchValue) {
     return [];
 }
 
-export class DefaultCommandItem extends Component {}
+export class DefaultCommandItem extends Component { }
 DefaultCommandItem.template = "web.DefaultCommandItem";
 DefaultCommandItem.props = {
     slots: { type: Object, optional: true },

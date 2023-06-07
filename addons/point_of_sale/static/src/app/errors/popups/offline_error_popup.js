@@ -12,9 +12,9 @@ export class OfflineErrorPopup extends ErrorPopup {
     static template = "OfflineErrorPopup";
     static dontShow = false;
     static defaultProps = {
-        confirmText: _lt("Continue with limited functionalities"),
-        title: _lt("You're offline"),
-        body: _lt(
+        confirmText: _t("Continue with limited functionalities"),
+        title: _t("You're offline"),
+        body: _t(
             "Meanwhile connection is back, Odoo Point of Sale will operate limited operations. Check your connection or continue with limited functionalities"
         ),
     };

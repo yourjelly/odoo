@@ -22,20 +22,20 @@ export class UncaughtError extends Error {
 }
 
 export class UncaughtClientError extends UncaughtError {
-    constructor(message = _lt("Uncaught Javascript Error")) {
+    constructor(message = _t("Uncaught Javascript Error")) {
         super(message);
     }
 }
 
 export class UncaughtPromiseError extends UncaughtError {
-    constructor(message = _lt("Uncaught Promise")) {
+    constructor(message = _t("Uncaught Promise")) {
         super(message);
         this.unhandledRejectionEvent = null;
     }
 }
 
 export class UncaughtCorsError extends UncaughtError {
-    constructor(message = _lt("Uncaught CORS Error")) {
+    constructor(message = _t("Uncaught CORS Error")) {
         super(message);
     }
 }
@@ -87,9 +87,9 @@ export const errorService = {
                 uncaughtError = new UncaughtCorsError();
                 uncaughtError.traceback = env._t(
                     `Unknown CORS error\n\n` +
-                        `An unknown CORS error occured.\n` +
-                        `The error probably originates from a JavaScript file served from a different origin.\n` +
-                        `(Opening your browser console might give you a hint on the error.)`
+                    `An unknown CORS error occured.\n` +
+                    `The error probably originates from a JavaScript file served from a different origin.\n` +
+                    `(Opening your browser console might give you a hint on the error.)`
                 );
             } else {
                 uncaughtError = new UncaughtClientError();

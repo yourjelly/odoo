@@ -178,9 +178,9 @@ export class Many2OneField extends Component {
     get extraLines() {
         return this.value
             ? this.value[1]
-                  .split("\n")
-                  .map((line) => line.trim())
-                  .slice(1)
+                .split("\n")
+                .map((line) => line.trim())
+                .slice(1)
             : [];
     }
     get resId() {
@@ -310,25 +310,25 @@ export class Many2OneField extends Component {
 
 export const many2OneField = {
     component: Many2OneField,
-    displayName: _lt("Many2one"),
+    displayName: _t("Many2one"),
     supportedOptions: [
         {
-            label: _lt("Disable creation"),
+            label: _t("Disable creation"),
             name: "no_create",
             type: "boolean",
         },
         {
-            label: _lt("Disable opening"),
+            label: _t("Disable opening"),
             name: "no_opening",
             type: "boolean",
         },
         {
-            label: _lt("No quick create"),
+            label: _t("No quick create"),
             name: "no_quick_create",
             type: "boolean",
         },
         {
-            label: _lt("No create edit"),
+            label: _t("No create edit"),
             name: "no_create_edit",
             type: "boolean",
         },

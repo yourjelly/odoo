@@ -11,7 +11,7 @@ export class AttachmentImageField extends Component {
 
 export const attachmentImageField = {
     component: AttachmentImageField,
-    displayName: _lt("Attachment Image"),
+    displayName: _t("Attachment Image"),
     supportedTypes: ["many2one"],
 };
 

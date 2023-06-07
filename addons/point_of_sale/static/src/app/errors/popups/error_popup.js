@@ -9,8 +9,8 @@ import { onMounted } from "@odoo/owl";
 export class ErrorPopup extends AbstractAwaitablePopup {
     static template = "ErrorPopup";
     static defaultProps = {
-        confirmText: _lt("Ok"),
-        title: _lt("Error"),
+        confirmText: _t("Ok"),
+        title: _t("Error"),
         body: "",
         cancelKey: false,
     };

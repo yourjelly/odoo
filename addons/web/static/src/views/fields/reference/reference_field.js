@@ -128,7 +128,7 @@ export class ReferenceField extends Component {
 
 export const referenceField = {
     component: ReferenceField,
-    displayName: _lt("Reference"),
+    displayName: _t("Reference"),
     supportedTypes: ["reference", "char"],
     legacySpecialData: "_fetchSpecialReference",
     extractProps({ options }) {

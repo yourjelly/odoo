@@ -24,7 +24,7 @@ export class BooleanField extends Component {
 
 export const booleanField = {
     component: BooleanField,
-    displayName: _lt("Checkbox"),
+    displayName: _t("Checkbox"),
     supportedTypes: ["boolean"],
     isEmpty: () => false,
 };

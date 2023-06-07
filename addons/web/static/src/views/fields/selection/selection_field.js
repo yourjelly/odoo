@@ -75,7 +75,7 @@ export class SelectionField extends Component {
 
 export const selectionField = {
     component: SelectionField,
-    displayName: _lt("Selection"),
+    displayName: _t("Selection"),
     supportedTypes: ["many2one", "selection"],
     legacySpecialData: "_fetchSpecialRelation",
     isEmpty: (record, fieldName) => record.data[fieldName] === false,

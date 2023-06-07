@@ -24,15 +24,15 @@ export const standardErrorDialogProps = {
 
 export const odooExceptionTitleMap = new Map(
     Object.entries({
-        "odoo.addons.base.models.ir_mail_server.MailDeliveryException": _lt(
+        "odoo.addons.base.models.ir_mail_server.MailDeliveryException": _t(
             "MailDeliveryException"
         ),
-        "odoo.exceptions.AccessDenied": _lt("Access Denied"),
-        "odoo.exceptions.MissingError": _lt("Missing Record"),
-        "odoo.exceptions.UserError": _lt("User Error"),
-        "odoo.exceptions.ValidationError": _lt("Validation Error"),
-        "odoo.exceptions.AccessError": _lt("Access Error"),
-        "odoo.exceptions.Warning": _lt("Warning"),
+        "odoo.exceptions.AccessDenied": _t("Access Denied"),
+        "odoo.exceptions.MissingError": _t("Missing Record"),
+        "odoo.exceptions.UserError": _t("User Error"),
+        "odoo.exceptions.ValidationError": _t("Validation Error"),
+        "odoo.exceptions.AccessError": _t("Access Error"),
+        "odoo.exceptions.Warning": _t("Warning"),
     })
 );
 
@@ -53,20 +53,20 @@ export class ErrorDialog extends Component {
 }
 ErrorDialog.template = "web.ErrorDialog";
 ErrorDialog.components = { Dialog };
-ErrorDialog.title = _lt("Odoo Error");
+ErrorDialog.title = _t("Odoo Error");
 ErrorDialog.props = { ...standardErrorDialogProps };
 
 // -----------------------------------------------------------------------------
 // Client Error Dialog
 // -----------------------------------------------------------------------------
-export class ClientErrorDialog extends ErrorDialog {}
-ClientErrorDialog.title = _lt("Odoo Client Error");
+export class ClientErrorDialog extends ErrorDialog { }
+ClientErrorDialog.title = _t("Odoo Client Error");
 
 // -----------------------------------------------------------------------------
 // Network Error Dialog
 // -----------------------------------------------------------------------------
-export class NetworkErrorDialog extends ErrorDialog {}
-NetworkErrorDialog.title = _lt("Odoo Network Error");
+export class NetworkErrorDialog extends ErrorDialog { }
+NetworkErrorDialog.title = _t("Odoo Network Error");
 
 // -----------------------------------------------------------------------------
 // RPC Error Dialog
@@ -167,10 +167,10 @@ RedirectWarningDialog.props = { ...standardErrorDialogProps };
 // -----------------------------------------------------------------------------
 // Error 504 Dialog
 // -----------------------------------------------------------------------------
-export class Error504Dialog extends Component {}
+export class Error504Dialog extends Component { }
 Error504Dialog.template = "web.Error504Dialog";
 Error504Dialog.components = { Dialog };
-Error504Dialog.title = _lt("Request timeout");
+Error504Dialog.title = _t("Request timeout");
 Error504Dialog.props = { ...standardErrorDialogProps };
 
 // -----------------------------------------------------------------------------
@@ -183,7 +183,7 @@ export class SessionExpiredDialog extends Component {
 }
 SessionExpiredDialog.template = "web.SessionExpiredDialog";
 SessionExpiredDialog.components = { Dialog };
-SessionExpiredDialog.title = _lt("Odoo Session Expired");
+SessionExpiredDialog.title = _t("Odoo Session Expired");
 SessionExpiredDialog.props = { ...standardErrorDialogProps };
 
 registry

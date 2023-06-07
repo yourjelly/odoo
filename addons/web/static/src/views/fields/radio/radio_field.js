@@ -69,10 +69,10 @@ export class RadioField extends Component {
 
 export const radioField = {
     component: RadioField,
-    displayName: _lt("Radio"),
+    displayName: _t("Radio"),
     supportedOptions: [
         {
-            label: _lt("Display horizontally"),
+            label: _t("Display horizontally"),
             name: "horizontal",
             type: "boolean",
         },

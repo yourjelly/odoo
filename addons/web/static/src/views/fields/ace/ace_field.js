@@ -68,10 +68,10 @@ export class AceField extends Component {
 
 export const aceField = {
     component: AceField,
-    displayName: _lt("Ace Editor"),
+    displayName: _t("Ace Editor"),
     supportedOptions: [
         {
-            label: _lt("Mode"),
+            label: _t("Mode"),
             name: "mode",
             type: "string",
         },

@@ -48,5 +48,5 @@ ListConfirmationDialog.props = {
     fieldNodes: Object,
 };
 ListConfirmationDialog.defaultProps = {
-    title: _lt("Confirmation"),
+    title: _t("Confirmation"),
 };
