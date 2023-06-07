@@ -192,19 +192,26 @@ class IrRule(models.Model):
 
         model = records._name
         description = self.env['ir.model']._get(model).name or model
-        msg_heads = {
-            # Messages are declared in extenso so they are properly exported in translation terms
-            'read':   _("Due to security restrictions, you are not allowed to access '%(document_kind)s' (%(document_model)s) records.", document_kind=description, document_model=model),
-            'write':  _("Due to security restrictions, you are not allowed to modify '%(document_kind)s' (%(document_model)s) records.", document_kind=description, document_model=model),
-            'create': _("Due to security restrictions, you are not allowed to create '%(document_kind)s' (%(document_model)s) records.", document_kind=description, document_model=model),
-            'unlink': _("Due to security restrictions, you are not allowed to delete '%(document_kind)s' (%(document_model)s) records.", document_kind=description, document_model=model)
+        operation_error = _("Uh-oh! Looks like you have stumled upon some top-secret %ss.", description)
+        resolution_info_per_operation = {
+            'read':   _("If you really, really need access, go bribe your friendly administrator"),
+            'write':  _("But don’t worry, a little birdie told me that if you try to charm the administrators with some humor, they might just grant you that coveted access you seek!"),
+            'create': _("The administrators hold the keys to creation, so flash them a charming smile, ask nicely, and they might grant you the power to bring new records to life! "),
+            'unlink': _("The administrators are the gatekeepers of this power. Approach them kindly and they may grant you the ability to delete records responsibly."),
         }
-        operation_error = msg_heads[operation]
-        resolution_info = _("Contact your administrator to request access if necessary.")
-
+        resolution_info = resolution_info_per_operation[operation]
         if not self.env.user.has_group('base.group_no_one') or not self.env.user.has_group('base.group_user'):
             records.invalidate_recordset()
             return AccessError(f"{operation_error}\n\n{resolution_info}")
+
+        user_description = f'{self.env.user.name} (id={self.env.user.id})'
+        user_msg_per_operation = {
+            # Messages are declared in extenso so they are properly exported in translation terms
+            'read':   _("\n\nSorry, my friend %s don't have the clearance for that kind of fun.", user_description),
+            'write':  _("\n\nSorry my friend, %s doesn’t have the VIP pass for record-editing fun.", user_description),
+            'create': _("\n\nHey, %(description)s creator! %(user_description)s is missing the magic wand to conjure new %(description)ss.", description=description, user_description=user_description),
+            'unlink': _("\n\nSorry my friend, %s is missing the secret sauce to perform the mystical art of %s deletion.", user_description, description),
+        }
 
         # This extended AccessError is only displayed in debug mode.
         # Note that by default, public and portal users do not have
@@ -219,24 +226,43 @@ class IrRule(models.Model):
             # If the user has access to the company of the record, add this
             # information in the description to help them to change company
             if company_related and 'company_id' in rec and rec.company_id in self.env.user.company_ids:
-                return f'{rec.display_name} (id={rec.id}, company={rec.company_id.display_name})'
-            return f'{rec.display_name} (id={rec.id})'
+                return f'{description}, {rec.display_name} ({model}: {rec.id}, company={rec.company_id.display_name})'
+            return f'{description}, {rec.display_name} ({model}: {rec.id})'
 
-        records_description = ', '.join(get_record_description(rec) for rec in records_sudo)
-        failing_records = _("Records: %s", records_description)
-
-        user_description = f'{self.env.user.name} (id={self.env.user.id})'
-        failing_user = _("User: %s", user_description)
+        failing_records = '\n '.join(f'- {get_record_description(rec)}' for rec in records_sudo)
 
         rules_description = '\n'.join(f'- {rule.name}' for rule in rules)
-        failing_rules = _("This restriction is due to the following rules:\n%s", rules_description)
+        failing_rules = _("Blame the following rules:\n%s", rules_description)
+
         if company_related:
-            failing_rules += "\n\n" + _('Note: this might be a multi-company issue.')
+            msg_heads = {
+                'read':   _("Uh-oh! You've stumbled upon a %s trapped in a multi-company mystery.", description),
+                'write':  _("Uh-oh! You're trying to edit a %s trapped in a multi-company mystery.", description),
+                'create': _("Uh-oh! %s doesn’t have the power to create a record outside of your company’s boundaries.", user_description),
+                'unlink': _("Uh-oh! You're trying to delete a %s trapped in a multi-company mystery.", description),
+            }
+            user_msg_per_operation = {
+                'read':   _("\n\nThis %s belongs to a company that is strictly off-limits for %s access.", description, user_description),
+                'write':  _("\n\nSorry my friend, this record belongs to a company that is strictly off %s limits.", user_description),
+                'create': _(""),
+                'unlink': _("\n\nSorry my friend, %s is missing the secret sauce to delete a record that's off-limits for our record-deleting  escapades.", user_description)
+            }
+
+            operation_error = msg_heads[operation]
+            read_write_resolution = _("But don't lose heart! There are plenty of other captivating records within your own company's boundaries, waiting to be discorvered.")
+            resolution_info_per_operation = {
+                'read': read_write_resolution,
+                'write': read_write_resolution,
+                'create': _("Let's focus on the exciting record-creating opportunities within our own company instead! Adventure awaits!"),
+                'unlink': "",
+            }
+            resolution_info = resolution_info_per_operation[operation]
+        user_message = user_msg_per_operation[operation]
 
         # clean up the cache of records prefetched with display_name above
         records_sudo.invalidate_recordset()
 
-        msg = f"{operation_error}\n\n{failing_records}\n{failing_user}\n\n{failing_rules}\n\n{resolution_info}"
+        msg = f"{operation_error}\n{failing_records}{user_message}\n\n{failing_rules}\n\n{resolution_info}"
         return AccessError(msg)
 
 

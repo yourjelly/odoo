@@ -29,7 +29,7 @@ export const odooExceptionTitleMap = new Map(
         ),
         "odoo.exceptions.AccessDenied": _lt("Access Denied"),
         "odoo.exceptions.MissingError": _lt("Missing Record"),
-        "odoo.exceptions.UserError": _lt("User Error"),
+        "odoo.exceptions.UserError": _lt("Invalid Operation"),
         "odoo.exceptions.ValidationError": _lt("Validation Error"),
         "odoo.exceptions.AccessError": _lt("Access Error"),
         "odoo.exceptions.Warning": _lt("Warning"),

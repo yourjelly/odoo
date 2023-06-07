@@ -113,7 +113,7 @@ class PurchaseOrder(models.Model):
             if alternative_po_ids:
                 view = self.env.ref('purchase_requisition.purchase_requisition_alternative_warning_form')
                 return {
-                    'name': _('Alternative Warning'),
+                    'name': _("What to do with alternative Requests for Quotations?"),
                     'type': 'ir.actions.act_window',
                     'view_mode': 'form',
                     'res_model': 'purchase.requisition.alternative.warning',

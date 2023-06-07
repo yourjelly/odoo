@@ -183,10 +183,9 @@ class TestIRRuleFeedback(Feedback):
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
-            """Due to security restrictions, you are not allowed to modify 'Object For Test Access Right' (test_access_right.some_obj) records.
+            """Uh-oh! Looks like you have stumled upon some top-secret Object For Test Access Rights.
 
-Contact your administrator to request access if necessary.""")
-
+But don’t worry, a little birdie told me that if you try to charm the administrators with some humor, they might just grant you that coveted access you seek!""")
         # debug mode
         self.env.ref('base.group_no_one').write({'users': [Command.link(self.user.id)]})
         self.env.ref('base.group_user').write({'users': [Command.link(self.user.id)]})
@@ -194,18 +193,16 @@ Contact your administrator to request access if necessary.""")
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
-            """Due to security restrictions, you are not allowed to modify 'Object For Test Access Right' (test_access_right.some_obj) records.
+            """Uh-oh! Looks like you have stumled upon some top-secret Object For Test Access Rights.
+- Object For Test Access Right, %s (test_access_right.some_obj: %s)
 
-Records: %s (id=%s)
-User: %s (id=%s)
+Sorry my friend, %s (id=%s) doesn’t have the VIP pass for record-editing fun.
 
-This restriction is due to the following rules:
+Blame the following rules:
 - rule 0
 
-Contact your administrator to request access if necessary.""" % (self.record.display_name, self.record.id, self.user.name, self.user.id)
-        )
-
-
+But don’t worry, a little birdie told me that if you try to charm the administrators with some humor, they might just grant you that coveted access you seek!"""
+        % (self.record.display_name, self.record.id, self.user.name, self.user.id))
 
         p = self.env['test_access_right.parent'].create({'obj_id': self.record.id})
         with self.assertRaisesRegex(
@@ -223,17 +220,17 @@ Contact your administrator to request access if necessary.""" % (self.record.dis
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
-            """Due to security restrictions, you are not allowed to modify 'Object For Test Access Right' (test_access_right.some_obj) records.
+            """Uh-oh! Looks like you have stumled upon some top-secret Object For Test Access Rights.
+- Object For Test Access Right, %s (test_access_right.some_obj: %s)
 
-Records: %s (id=%s)
-User: %s (id=%s)
+Sorry my friend, %s (id=%s) doesn’t have the VIP pass for record-editing fun.
 
-This restriction is due to the following rules:
+Blame the following rules:
 - rule 0
 - rule 1
 
-Contact your administrator to request access if necessary.""" % (self.record.display_name, self.record.id, self.user.name, self.user.id)
-        )
+But don’t worry, a little birdie told me that if you try to charm the administrators with some humor, they might just grant you that coveted access you seek!"""
+        % (self.record.display_name, self.record.id, self.user.name, self.user.id))
 
     def test_globals_all(self):
         self.env.ref('base.group_no_one').write({'users': [Command.link(self.user.id)]})
@@ -244,17 +241,17 @@ Contact your administrator to request access if necessary.""" % (self.record.dis
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
-            """Due to security restrictions, you are not allowed to modify 'Object For Test Access Right' (test_access_right.some_obj) records.
+            """Uh-oh! Looks like you have stumled upon some top-secret Object For Test Access Rights.
+- Object For Test Access Right, %s (test_access_right.some_obj: %s)
 
-Records: %s (id=%s)
-User: %s (id=%s)
+Sorry my friend, %s (id=%s) doesn’t have the VIP pass for record-editing fun.
 
-This restriction is due to the following rules:
+Blame the following rules:
 - rule 0
 - rule 1
 
-Contact your administrator to request access if necessary.""" % (self.record.display_name, self.record.id, self.user.name, self.user.id)
-        )
+But don’t worry, a little birdie told me that if you try to charm the administrators with some humor, they might just grant you that coveted access you seek!"""
+        % (self.record.display_name, self.record.id, self.user.name, self.user.id))
 
     def test_globals_any(self):
         """ Global rules are AND-eded together, so when an access fails it
@@ -268,16 +265,16 @@ Contact your administrator to request access if necessary.""" % (self.record.dis
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
-            """Due to security restrictions, you are not allowed to modify 'Object For Test Access Right' (test_access_right.some_obj) records.
+            """Uh-oh! Looks like you have stumled upon some top-secret Object For Test Access Rights.
+- Object For Test Access Right, %s (test_access_right.some_obj: %s)
 
-Records: %s (id=%s)
-User: %s (id=%s)
+Sorry my friend, %s (id=%s) doesn’t have the VIP pass for record-editing fun.
 
-This restriction is due to the following rules:
+Blame the following rules:
 - rule 0
 
-Contact your administrator to request access if necessary.""" % (self.record.display_name, self.record.id, self.user.name, self.user.id)
-        )
+But don’t worry, a little birdie told me that if you try to charm the administrators with some humor, they might just grant you that coveted access you seek!"""
+        % (self.record.display_name, self.record.id, self.user.name, self.user.id))
 
     def test_combination(self):
         self.env.ref('base.group_no_one').write({'users': [Command.link(self.user.id)]})
@@ -290,18 +287,18 @@ Contact your administrator to request access if necessary.""" % (self.record.dis
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
-            """Due to security restrictions, you are not allowed to modify 'Object For Test Access Right' (test_access_right.some_obj) records.
+            """Uh-oh! Looks like you have stumled upon some top-secret Object For Test Access Rights.
+- Object For Test Access Right, %s (test_access_right.some_obj: %s)
 
-Records: %s (id=%s)
-User: %s (id=%s)
+Sorry my friend, %s (id=%s) doesn’t have the VIP pass for record-editing fun.
 
-This restriction is due to the following rules:
+Blame the following rules:
 - rule 0
 - rule 2
 - rule 3
 
-Contact your administrator to request access if necessary.""" % (self.record.display_name, self.record.id, self.user.name, self.user.id)
-        )
+But don’t worry, a little birdie told me that if you try to charm the administrators with some humor, they might just grant you that coveted access you seek!"""
+        % (self.record.display_name, self.record.id, self.user.name, self.user.id))
 
     def test_warn_company_no_access(self):
         """ If one of the failing rules mentions company_id, add a note that
@@ -316,18 +313,16 @@ Contact your administrator to request access if necessary.""" % (self.record.dis
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
-            """Due to security restrictions, you are not allowed to modify 'Object For Test Access Right' (test_access_right.some_obj) records.
+            """Uh-oh! You're trying to edit a Object For Test Access Right trapped in a multi-company mystery.
+- Object For Test Access Right, %s (test_access_right.some_obj: %s)
 
-Records: %s (id=%s)
-User: %s (id=%s)
+Sorry my friend, this record belongs to a company that is strictly off %s (id=%s) limits.
 
-This restriction is due to the following rules:
+Blame the following rules:
 - rule 0
 
-Note: this might be a multi-company issue.
-
-Contact your administrator to request access if necessary.""" % (self.record.display_name, self.record.id, self.user.name, self.user.id)
-        )
+But don't lose heart! There are plenty of other captivating records within your own company's boundaries, waiting to be discorvered."""
+        % (self.record.display_name, self.record.id, self.user.name, self.user.id))
 
     def test_warn_company_no_company_field(self):
         """ If one of the failing rules mentions company_id, add a note that
@@ -351,18 +346,16 @@ Contact your administrator to request access if necessary.""" % (self.record.dis
             _ = child_record.parent_id
         self.assertEqual(
             ctx.exception.args[0],
-            """Due to security restrictions, you are not allowed to access 'Object for testing company ir rule' (test_access_right.child) records.
+            """Uh-oh! You've stumbled upon a Object for testing company ir rule trapped in a multi-company mystery.
+- Object for testing company ir rule, %s (test_access_right.child: %s)
 
-Records: %s (id=%s)
-User: %s (id=%s)
+This Object for testing company ir rule belongs to a company that is strictly off-limits for %s (id=%s) access.
 
-This restriction is due to the following rules:
+Blame the following rules:
 - rule 0
 
-Note: this might be a multi-company issue.
-
-Contact your administrator to request access if necessary.""" % (child_record.display_name, child_record.id, self.user.name, self.user.id)
-        )
+But don't lose heart! There are plenty of other captivating records within your own company's boundaries, waiting to be discorvered."""
+        % (child_record.display_name, child_record.id, self.user.name, self.user.id))
 
     def test_warn_company_access(self):
         """ because of prefetching, read() goes through a different codepath
@@ -377,18 +370,17 @@ Contact your administrator to request access if necessary.""" % (child_record.di
             _ = self.record.val
         self.assertEqual(
             ctx.exception.args[0],
-            """Due to security restrictions, you are not allowed to access 'Object For Test Access Right' (test_access_right.some_obj) records.
+            """Uh-oh! You've stumbled upon a Object For Test Access Right trapped in a multi-company mystery.
+- Object For Test Access Right, %s (test_access_right.some_obj: %s, company=%s)
 
-Records: %s (id=%s, company=%s)
-User: %s (id=%s)
+This Object For Test Access Right belongs to a company that is strictly off-limits for %s (id=%s) access.
 
-This restriction is due to the following rules:
+Blame the following rules:
 - rule 0
 
-Note: this might be a multi-company issue.
+But don't lose heart! There are plenty of other captivating records within your own company's boundaries, waiting to be discorvered."""
+        % (self.record.display_name, self.record.id, self.record.sudo().company_id.display_name, self.user.name, self.user.id))
 
-Contact your administrator to request access if necessary.""" % (self.record.display_name, self.record.id, self.record.sudo().company_id.display_name, self.user.name, self.user.id)
-        )
         p = self.env['test_access_right.parent'].create({'obj_id': self.record.id})
         self.env.flush_all()
         self.env.invalidate_all()

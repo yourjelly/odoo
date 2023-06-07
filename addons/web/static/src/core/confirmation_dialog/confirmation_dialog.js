@@ -1,10 +1,14 @@
 /** @odoo-module */
 
 import { Dialog } from "../dialog/dialog";
-import { _lt } from "../l10n/translation";
+import { _t, _lt } from "../l10n/translation";
 import { useChildRef } from "@web/core/utils/hooks";
 
 import { Component } from "@odoo/owl";
+
+export const deleteConfirmationMessage = _t(
+    "Ready to make your record disappear into thin air? Are you sure? \nPoof! It'll be gone forever! \n\nThink twice before you click that 'Delete' button!"
+);
 
 export class ConfirmationDialog extends Component {
     setup() {
@@ -73,8 +77,8 @@ ConfirmationDialog.props = {
 };
 ConfirmationDialog.defaultProps = {
     confirmLabel: _lt("Ok"),
-    cancelLabel: _lt("Cancel"),
-    title: _lt("Confirmation"),
+    cancelLabel: _lt("No, save it"),
+    title: _lt("Bye-bye, record!"),
 };
 
 export class AlertDialog extends ConfirmationDialog {}

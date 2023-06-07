@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { deleteConfirmationMessage, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t, _lt } from "@web/core/l10n/translation";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
@@ -181,7 +181,7 @@ export class CalendarController extends Component {
     deleteRecord(record) {
         this.displayDialog(ConfirmationDialog, {
             title: this.env._t("Confirmation"),
-            body: this.env._t("Are you sure you want to delete this record?"),
+            body: deleteConfirmationMessage,
             confirm: () => {
                 this.model.unlinkRecord(record.id);
             },

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { ColorList } from "@web/core/colorlist/colorlist";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { deleteConfirmationMessage, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
@@ -308,7 +308,7 @@ export class KanbanRecord extends Component {
                 const listOrGroup = group || list;
                 if (listOrGroup.deleteRecords) {
                     this.dialog.add(ConfirmationDialog, {
-                        body: env._t("Are you sure you want to delete this record?"),
+                        body: deleteConfirmationMessage,
                         confirm: () => listOrGroup.deleteRecords([record]),
                         confirmLabel: env._t("Delete"),
                         cancel: () => {},

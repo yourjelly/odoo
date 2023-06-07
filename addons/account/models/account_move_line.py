@@ -1489,7 +1489,7 @@ class AccountMoveLine(models.Model):
     def _unlink_except_posted(self):
         # Prevent deleting lines on posted entries
         if not self._context.get('force_delete') and any(m.state == 'posted' for m in self.move_id):
-            raise UserError(_('You cannot delete an item linked to a posted entry.'))
+            raise UserError(_("You can not delete a posted journal item. Don’t play Jenga with your accounting records; reset the journal entry to draft before deleting."))
 
     @api.ondelete(at_uninstall=False)
     def _prevent_automatic_line_deletion(self):

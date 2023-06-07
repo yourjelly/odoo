@@ -665,6 +665,8 @@ class HolidaysRequest(models.Model):
                 if not conflicting_holidays_list:
                     return
                 conflicting_holidays_strings = []
+                error_message_first_line = "You already booked these time offs that overlap with this period"
+                error_message_second_line = "Attempting to double-book your time-off won't magically make your vacation 2x better!"
                 if holidays_only_have_uid:
                     for conflicting_holiday_data in conflicting_holidays_list:
                         conflicting_holidays_string = _('From %(date_from)s To %(date_to)s - %(state)s',
@@ -672,8 +674,8 @@ class HolidaysRequest(models.Model):
                                                         date_to=conflicting_holiday_data['date_to'],
                                                         state=conflicting_holiday_data['state'])
                         conflicting_holidays_strings.append(conflicting_holidays_string)
-                    raise ValidationError(_('You can not set two time off that overlap on the same day.\nExisting time off:\n%s') %
-                                          ('\n'.join(conflicting_holidays_strings)))
+                    conflicting_holidays_strings = "\n".join(conflicting_holidays_strings)
+                    raise ValidationError(_("%s:\n - %s\n\n%s", error_message_first_line, conflicting_holidays_strings, error_message_second_line))
                 for conflicting_holiday_data in conflicting_holidays_list:
                     conflicting_holidays_string = _('%(employee_name)s - From %(date_from)s To %(date_to)s - %(state)s',
                                                     employee_name=conflicting_holiday_data['employee_name'],
@@ -681,13 +683,14 @@ class HolidaysRequest(models.Model):
                                                     date_to=conflicting_holiday_data['date_to'],
                                                     state=conflicting_holiday_data['state'])
                     conflicting_holidays_strings.append(conflicting_holidays_string)
+                    conflicting_holidays_strings = "\n".join(conflicting_holidays_strings)
                 conflicting_employees = set(employee_ids) - set(conflicting_holidays.employee_id.ids)
                 # Only one employee has a conflicting holiday
                 if len(conflicting_employees) == len(employee_ids) - 1:
-                    raise ValidationError(_('You can not set two time off that overlap on the same day for the same employee.\nExisting time off:\n%s') %
-                                          ('\n'.join(conflicting_holidays_strings)))
-                raise ValidationError(_('You can not set two time off that overlap on the same day for the same employees.\nExisting time off:\n%s') %
-                                      ('\n'.join(conflicting_holidays_strings)))
+                    error_message_first_line += " for this employee"
+                else:
+                    error_message_first_line += " for these employees"
+                raise ValidationError(_("%s:\n - %s\n\n%s", error_message_first_line, conflicting_holidays_strings, error_message_second_line))
 
     @api.constrains('state', 'number_of_days', 'holiday_status_id')
     def _check_holidays(self):

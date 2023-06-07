@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { hasTouch } from "@web/core/browser/feature_detection";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { deleteConfirmationMessage, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
 import { useDebugCategory } from "@web/core/debug/debug_context";
 import { registry } from "@web/core/registry";
@@ -396,7 +396,7 @@ export class FormController extends Component {
 
     get deleteConfirmationDialogProps() {
         return {
-            body: this.env._t("Are you sure you want to delete this record?"),
+            body: deleteConfirmationMessage,
             confirm: async () => {
                 await this.model.root.delete();
                 if (!this.model.root.resId) {
