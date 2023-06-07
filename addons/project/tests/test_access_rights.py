@@ -34,6 +34,11 @@ class TestCRUDVisibilityFollowers(TestAccessRights):
         with self.assertRaises(AccessError, msg="%s should not be able to write on the project" % self.env.user.name):
             self.project_pigs.with_user(self.env.user).name = "Take over the world"
 
+        self.project_pigs.message_unsubscribe(partner_ids=[self.env.user.partner_id.id])
+        self.task.message_subscribe(partner_ids=[self.env.user.partner_id.id])
+        with self.assertRaises(AccessError, msg="%s should not be able to write on the project" % self.env.user.name):
+            self.project_pigs.with_user(self.env.user).name = "Take over the world"
+
     @users('Internal user', 'Portal user')
     def test_project_no_unlink(self):
         self.project_pigs.task_ids.unlink()
@@ -49,6 +54,9 @@ class TestCRUDVisibilityFollowers(TestAccessRights):
     def test_project_no_read(self):
         with self.assertRaises(AccessError, msg="%s should not be able to read the project" % self.env.user.name):
             self.project_pigs.with_user(self.env.user).name
+
+        self.task.message_subscribe(partner_ids=[self.env.user.partner_id.id])
+        self.assertEqual(self.project_pigs.name, self.project_pigs.with_user(self.env.user).name, f"{self.env.user.name} should be able to read the project")
 
     @users('Portal user')
     def test_project_allowed_portal_no_read(self):
@@ -69,6 +77,8 @@ class TestCRUDVisibilityFollowers(TestAccessRights):
     def test_task_no_read(self):
         with self.assertRaises(AccessError, msg="%s should not be able to read the task" % self.env.user.name):
             self.task.with_user(self.env.user).name
+        self.task.message_subscribe(partner_ids=[self.env.user.partner_id.id])
+        self.assertEqual(self.task.name, self.task.with_user(self.env.user).name, f"{self.env.user.name} should be able to read the task")
 
     @users('Portal user')
     def test_task_allowed_portal_no_read(self):
@@ -94,6 +104,11 @@ class TestCRUDVisibilityFollowers(TestAccessRights):
         with self.assertRaises(AccessError, msg="%s should not be able to write on the task" % self.env.user.name):
             self.task.with_user(self.env.user).name = "Paint the world in black & white"
 
+        self.project_pigs.message_unsubscribe(partner_ids=[self.env.user.partner_id.id])
+        self.task.message_subscribe(partner_ids=[self.env.user.partner_id.id])
+        with self.assertRaises(AccessError, msg="%s should not be able to write on the task" % self.env.user.name):
+            self.task.with_user(self.env.user).name = "Paint the world in black & white"
+
     @users('Internal user', 'Portal user')
     def test_task_no_create(self):
         with self.assertRaises(AccessError, msg="%s should not be able to create a task" % self.env.user.name):
@@ -103,12 +118,22 @@ class TestCRUDVisibilityFollowers(TestAccessRights):
         with self.assertRaises(AccessError, msg="%s should not be able to create a task" % self.env.user.name):
             self.create_task("Archive the world, it's not needed anymore")
 
+        self.project_pigs.message_unsubscribe(partner_ids=[self.env.user.partner_id.id])
+        self.task.message_subscribe(partner_ids=[self.env.user.partner_id.id])
+        with self.assertRaises(AccessError, msg="%s should not be able to create a task" % self.env.user.name):
+            self.create_task("Archive the world, it's not needed anymore")
+
     @users('Internal user', 'Portal user')
     def test_task_no_unlink(self):
         with self.assertRaises(AccessError, msg="%s should not be able to unlink the task" % self.env.user.name):
             self.task.with_user(self.env.user).unlink()
 
         self.project_pigs.message_subscribe(partner_ids=[self.env.user.partner_id.id])
+        with self.assertRaises(AccessError, msg="%s should not be able to unlink the task" % self.env.user.name):
+            self.task.with_user(self.env.user).unlink()
+
+        self.project_pigs.message_unsubscribe(partner_ids=[self.env.user.partner_id.id])
+        self.task.message_subscribe(partner_ids=[self.env.user.partner_id.id])
         with self.assertRaises(AccessError, msg="%s should not be able to unlink the task" % self.env.user.name):
             self.task.with_user(self.env.user).unlink()
 

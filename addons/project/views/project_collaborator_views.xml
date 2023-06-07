@@ -37,7 +37,7 @@
                 No collaborators found
             </p>
             <p>
-                Collaborate efficiently with key stakeholders by sharing with them the Kanban view of your tasks. Collaborators will be able to edit parts of tasks and send messages.
+                Facilitate efficient collaboration with key stakeholders by sharing the project with them. Collaborators will have the ability to edit tasks, send messages, and access the Kanban view of tasks. To invite new collaborators to the project, share it with them in edit mode.
             </p>
         </field>
     </record>

@@ -45,26 +45,32 @@
             <t t-set="is_uom_day" t-value="timesheet_ids._is_timesheet_encode_uom_day()"/>
         </xpath>
         <xpath expr="//thead/tr/t[@t-set='number_of_header']" position="attributes">
-            <attribute name="t-value">9</attribute>
+            <t t-if="allow_timesheets">
+                <attribute name="t-value">9</attribute>
+            </t>
         </xpath>
         <xpath expr="//thead/tr/th[@name='project_portal_milestones']" position="after">
-            <th t-if="is_uom_day" class="text-end">Days Spent</th>
-            <th t-else="" class="text-end">Hours Spent</th>
+            <t t-if="allow_timesheets">
+                <th t-if="is_uom_day" class="text-end">Days Spent</th>
+                <th t-else="" class="text-end">Hours Spent</th>
+            </t>
         </xpath>
         <xpath expr="//tbody/t/tr/td[@name='project_portal_milestones']" position="after">
-            <td class="text-end">
-                <t t-if="is_uom_day">
-                    <t t-out="timesheet_ids._convert_hours_to_days(task.effective_hours)"/>
-                    <span t-if="task.planned_hours > 0"> / <t t-out="timesheet_ids._convert_hours_to_days(task.planned_hours)"/></span>
-                </t>
-                <t t-else="">
-                    <span t-field="task.effective_hours" t-options='{"widget": "float_time"}'/>
-                    <t t-if="task.planned_hours > 0">
-                        /
-                        <span t-field="task.planned_hours" t-options='{"widget": "float_time"}'/>
+            <t t-if="allow_timesheets">
+                <td class="text-end">
+                    <t t-if="is_uom_day">
+                        <t t-out="timesheet_ids._convert_hours_to_days(task.effective_hours)"/>
+                        <span t-if="task.planned_hours > 0"> / <t t-out="timesheet_ids._convert_hours_to_days(task.planned_hours)"/></span>
                     </t>
-                </t>
-            </td>
+                    <t t-else="">
+                        <span t-field="task.effective_hours" t-options='{"widget": "float_time"}'/>
+                        <t t-if="task.planned_hours > 0">
+                            /
+                            <span t-field="task.planned_hours" t-options='{"widget": "float_time"}'/>
+                        </t>
+                    </t>
+                </td>
+            </t>
         </xpath>
     </template>
 

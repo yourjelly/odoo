@@ -8,20 +8,30 @@
             <form string="Share Project">
                 <field name="res_model" invisible="1"/>
                 <field name="res_id" invisible="1"/>
+                <field name="lang" invisible="1"/>
+                <field name="render_model" invisible="1"/>
                 <field name="display_access_mode" invisible="1" />
                 <p class="alert alert-warning" attrs="{'invisible': [('access_warning', '=', '')]}" role="alert"><field name="access_warning"/></p>
                 <group>
                     <field options="{'horizontal': true}" name="access_mode" widget="radio" attrs="{'invisible': [('display_access_mode', '=', False)]}" class="mb-4"/>
-                    <field name="share_link" widget="CopyClipboardChar" options="{'string': 'Copy Link'}" attrs="{'invisible': [('access_mode', '=', 'edit')]}" string="Link" class="mb-4"/>
-                    <div class="o_td_label mb-4">
+                    <field name="share_link" widget="CopyClipboardChar" options="{'string': 'Copy Link'}" attrs="{'invisible': [('access_mode', '=', 'edit')]}" string="Project Link" class="mb-4"/>
+                    <field string="Send by Email" name="send_email" widget="boolean_toggle" options="{'autosave': False}" attrs="{'invisible': [('display_access_mode', '=', False)]}"/>
+                    <div class="o_td_label mb-4" attrs="{'invisible': [('send_email', '=', False)]}">
                         <label for="partner_ids" string="Invite People" attrs="{'invisible': [('access_mode', '=', 'read')]}"/>
                         <label for="partner_ids" attrs="{'invisible': [('access_mode', '=', 'edit')]}"/>
                     </div>
-                    <field name="partner_ids" widget="many2many_tags_email" placeholder="Add contacts to share the project..." nolabel="1" context="{'show_email': True}" class="mb-4"/>
+                    <field name="partner_ids" widget="many2many_tags_email" placeholder="add the contacts you would like to share the project with..." options="{'no_create': True}" attrs="{'invisible': [('send_email', '=', False)]}" nolabel="1" context="{'force_email': True, 'show_email': True}" class="mb-4"/>
+                    <field name="subject" attrs="{'invisible': [('send_email', '=', False)]}"/>
                 </group>
-                <field name="note" placeholder="Add a note" nolabel="1"/>
+                <field name="body" class="oe-bordered-editor border border-1 m-3 p-0 flex-fill"
+                        options="{'style-inline': true, 'height': 380}"
+                        attrs="{'invisible': [('send_email', '=', False)]}" force_save="1"/>
+                <group>
+                    <field name="note" placeholder="Include additional information in the invitation email sent to collaborators" attrs="{'invisible': [('display_access_mode', '=', True)]}" nolabel="1"/>
+                    <field name="template_id" label="Use template" attrs="{'invisible': [('send_email', '=', False)]}" options="{'no_create': True}"/>
+                </group>
                 <footer>
-                    <button string="Send" name="action_send_mail" attrs="{'invisible': [('access_warning', '!=', '')]}" type="object" class="btn-primary" data-hotkey="q"/>
+                    <button string="Send invitation" name="action_send_mail" attrs="{'invisible': [('access_warning', '!=', '')]}" type="object" class="btn-primary" data-hotkey="q"/>
                     <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="z" />
                 </footer>
             </form>
@@ -29,13 +39,11 @@
     </record>
 
     <record id="project_share_wizard_action" model="ir.actions.act_window">
-        <field name="name">Share Project</field>
+        <field name="name">Share a Project</field>
         <field name="res_model">project.share.wizard</field>
         <field name="binding_model_id" ref="model_project_project"/>
         <field name="view_mode">form</field>
-        <field name="context">{'dialog_size': 'medium'}</field>
         <field name="target">new</field>
-        <field name="context">{'dialog_size': 'medium'}</field>
     </record>
 
 </odoo>

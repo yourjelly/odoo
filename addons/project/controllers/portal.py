@@ -62,6 +62,9 @@ class ProjectCustomerPortal(CustomerPortal):
             'name': {'label': _('Name'), 'order': 'name'},
         }
 
+    def _get_allow_timesheet(self, grouped_tasks):
+        return True
+
     @http.route(['/my/projects', '/my/projects/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_projects(self, page=1, date_begin=None, date_end=None, sortby=None, **kw):
         values = self._prepare_portal_layout_values()
@@ -70,7 +73,7 @@ class ProjectCustomerPortal(CustomerPortal):
 
         searchbar_sortings = self._prepare_searchbar_sortings()
         if not sortby:
-            sortby = 'date'
+            sortby = 'name'
         order = searchbar_sortings[sortby]['order']
 
         if date_begin and date_end:
@@ -366,7 +369,7 @@ class ProjectCustomerPortal(CustomerPortal):
         values = self._prepare_portal_layout_values()
 
         Task = request.env['project.task']
-        milestone_domain = AND([domain, [('allow_milestones', '=', 'True')]])
+        milestone_domain = AND([domain, [('allow_milestones', '=', 'True')], [('milestone_id', '!=', False)]])
         milestones_allowed = Task.sudo().search_count(milestone_domain, limit=1) == 1
         searchbar_sortings = dict(sorted(self._task_get_searchbar_sortings(milestones_allowed, project).items(),
                                          key=lambda item: item[1]["sequence"]))
@@ -402,6 +405,9 @@ class ProjectCustomerPortal(CustomerPortal):
 
         # content according to pager and archive selected
         order = self._task_get_order(order, groupby)
+
+        if request.env.user.share:
+            domain += [('message_partner_ids.email', '=', request.env.user.email)]
 
         def get_grouped_tasks(pager_offset):
             tasks = Task_sudo.search(domain, order=order, limit=self._items_per_page, offset=pager_offset)
@@ -501,8 +507,10 @@ class ProjectCustomerPortal(CustomerPortal):
         pager_vals['url_args'].update(filterby=filterby)
         pager = portal_pager(**pager_vals)
 
+        grouped_tasks = values['grouped_tasks'](pager['offset'])
         values.update({
-            'grouped_tasks': values['grouped_tasks'](pager['offset']),
+            'grouped_tasks': grouped_tasks,
+            'allow_timesheets': self._get_allow_timesheet(grouped_tasks),
             'pager': pager,
             'searchbar_filters': OrderedDict(sorted(searchbar_filters.items())),
             'filterby': filterby,

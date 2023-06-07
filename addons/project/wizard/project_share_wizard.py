@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 
 
 class ProjectShareWizard(models.TransientModel):
     _name = 'project.share.wizard'
-    _inherit = 'portal.share'
+    _inherit = ['portal.share', 'mail.composer.mixin']
     _description = 'Project Sharing'
 
     @api.model
@@ -24,8 +24,27 @@ class ProjectShareWizard(models.TransientModel):
         project_model = self.env['ir.model']._get('project.project')
         return [(project_model.model, project_model.name)]
 
-    access_mode = fields.Selection([('read', 'Readonly'), ('edit', 'Edit')])
+    access_mode = fields.Selection([('read', 'Read-only'), ('edit', 'Edit')])
+    send_email = fields.Boolean()
     display_access_mode = fields.Boolean()
+    emails = fields.Text(string='Additional emails')
+
+    @api.depends('template_id')
+    def _compute_body(self):
+        for share_wizard in self:
+            langs = set(share_wizard.partner_ids.mapped('lang')) - {False}
+            if len(langs) == 1:
+                share_wizard = share_wizard.with_context(lang=langs.pop())
+            super(ProjectShareWizard, share_wizard)._compute_body()
+
+
+    @api.depends('template_id')
+    def _compute_subject(self):
+        for share_wizard in self:
+            if share_wizard.subject:
+                continue
+            else:
+                share_wizard.subject = _(f"Participate to {share_wizard.resource_ref.name} project.")
 
     @api.depends('res_model', 'res_id')
     def _compute_resource_ref(self):

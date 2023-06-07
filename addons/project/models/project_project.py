@@ -338,7 +338,8 @@ class Project(models.Model):
     def _compute_access_instruction_message(self):
         for project in self:
             if project.privacy_visibility == 'portal':
-                project.access_instruction_message = _('Grant portal users access to your project or tasks by adding them as followers. Customers automatically get access to their tasks in their portal.')
+                project.access_instruction_message = _('Grant portal users access to your project by adding them as followers. In order for a user to have access to specific tasks of a project, the user should be a '
+                                                       'follower of each specific task. Customers automatically get access to their tasks in their portal.')
             elif project.privacy_visibility == 'followers':
                 project.access_instruction_message = _('Grant employees access to your project or tasks by adding them as followers. Employees automatically get access to the tasks they are assigned to.')
             else:
@@ -582,6 +583,20 @@ class Project(models.Model):
             'delete': False,
         }
         action['display_name'] = self.name
+        return action
+
+    def action_open_share_project_wizard(self):
+        template = self.env.ref('project.mail_template_project_sharing', raise_if_not_found=False)
+
+        local_context = dict(
+            self.env.context,
+            default_template_id=template and template.id or False,
+            default_email_layout_xmlid='mail.mail_notification_light',
+        )
+        action = self.env["ir.actions.actions"]._for_xml_id("project.project_share_wizard_action")
+        if self.env.context.get('default_access_mode', False):
+            action['name'] = _("Share project")
+        action['context'] = local_context
         return action
 
     def toggle_favorite(self):
