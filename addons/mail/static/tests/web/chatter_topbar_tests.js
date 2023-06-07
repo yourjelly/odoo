@@ -62,8 +62,8 @@ QUnit.test("rendering with multiple partner followers", async (assert) => {
     await click(".o-mail-Followers-button");
     assert.containsOnce($, ".o-mail-Followers-dropdown");
     assert.containsN($, ".o-mail-Follower", 2);
-    assert.strictEqual($(".o-mail-Follower:eq(0)").text().trim(), "Jean Michang");
-    assert.strictEqual($(".o-mail-Follower:eq(1)").text().trim(), "Eden Hazard");
+    assert.strictEqual($(".o-mail-Follower:eq(0)").text().trim(), "Eden Hazard");
+    assert.strictEqual($(".o-mail-Follower:eq(1)").text().trim(), "Jean Michang");
 });
 
 QUnit.test("log note toggling", async (assert) => {

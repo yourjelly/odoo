@@ -32,7 +32,7 @@
                         </t>
                     </FileUploader>
                     <t t-else="" t-call="mail.Chatter.attachFiles"/>
-                    <Dropdown t-if="props.hasFollowers" position="'bottom-end'" disabled="isDisabled" class="'o-mail-Followers d-flex me-1'" menuClass="'o-mail-Followers-dropdown flex-column px-0 py-1'" menuDisplay="'d-flex'" title="followerButtonLabel" togglerClass="'o-mail-Followers-button btn btn-link text-action px-1 ' + (props.compactHeight ? '' : 'my-2')">
+                    <Dropdown t-if="props.hasFollowers" position="'bottom-end'" disabled="isDisabled" class="'o-mail-Followers d-flex me-1'" menuClass="'o-mail-Followers-dropdown flex-column px-0 py-1'" menuDisplay="'d-flex'" title="followerButtonLabel" togglerClass="'o-mail-Followers-button btn btn-link text-action px-1 ' + (props.compactHeight ? '' : 'my-2')" onStateChanged="state => this.onActionStateChanged(state)">
                         <t t-set-slot="toggler">
                             <i class="fa fa-user-o" role="img"/>
                             <span class="o-mail-Followers-counter ps-1" t-esc="state.thread.followers.size"/>
@@ -45,20 +45,40 @@
                                 <div t-if="state.thread.followers.size > 0" role="separator" class="dropdown-divider"/>
                             </t>
                             <t t-if="state.thread.followers.size > 0">
-                                <div t-foreach="[...state.thread.followers]" t-as="follower" t-key="follower.id" class="dropdown-item o-mail-Follower d-flex justify-content-between p-0">
-                                    <a class="o-mail-Follower-details d-flex align-items-center flex-grow-1 px-3 text-700 o-min-width-0" t-att-class="{ 'o-inactive fst-italic opacity-25': !follower.isActive }" href="#" role="menuitem" t-on-click.prevent="(ev) => this.onClickDetails(ev, follower)">
-                                        <img class="o-mail-Follower-avatar me-2 rounded" t-att-src="threadService.avatarUrl(follower.partner, state.thread)" alt=""/>
-                                        <span class="flex-shrink text-truncate" t-esc="follower.partner.name"/>
+                                <div t-if="props.hasFollowers and state.thread.followerOfSelf" class="dropdown-item o-mail-Follower d-flex justify-content-between p-0">
+                                    <a class="o-mail-Follower-details d-flex align-items-center flex-grow-1 px-3 text-700 o-min-width-0" t-att-class="{ 'o-inactive fst-italic opacity-25': !state.thread.followerOfSelf.isActive }" href="#" role="menuitem" t-on-click.prevent="(ev) => this.onClickDetails(ev, state.thread.followerOfSelf)">
+                                        <img class="o-mail-Follower-avatar me-2 rounded" t-att-src="threadService.avatarUrl(state.thread.followerOfSelf.partner, state.thread)" alt=""/>
+                                        <span class="flex-shrink text-truncate" t-esc="state.thread.followerOfSelf.partner.name"/>
                                     </a>
-                                    <t t-if="follower.isEditable">
-                                        <button class="o-mail-Follower-action btn btn-icon rounded-0" title="Edit subscription" aria-label="Edit subscription" t-on-click="(ev) => this.onClickEdit(ev, follower)">
+                                    <t t-if="state.thread.followerOfSelf.isEditable">
+                                        <button class="o-mail-Follower-action btn btn-icon rounded-0" title="Edit subscription" aria-label="Edit subscription" t-on-click="(ev) => this.onClickEdit(ev, state.thread.followerOfSelf)">
                                             <i class="fa fa-pencil"/>
                                         </button>
-                                        <button class="o-mail-Follower-action btn btn-icon rounded-0" title="Remove this follower" aria-label="Remove this follower" t-on-click="(ev) => this.onClickRemove(ev, follower)">
+                                        <button class="o-mail-Follower-action btn btn-icon rounded-0" title="Remove this follower" aria-label="Remove this follower" t-on-click="(ev) => this.onClickRemove(ev, state.thread.followerOfSelf)">
                                             <i class="fa fa-remove"/>
                                         </button>
                                     </t>
                                 </div>
+                                <div t-if="state.thread.followers.size > 1 and state.thread.followerOfSelf" role="separator" class="dropdown-divider"/>
+                                <t t-foreach="orderFollowers" t-as="follower" t-key="follower.id">
+                                        <div class="dropdown-item o-mail-Follower d-flex justify-content-between p-0">
+                                            <a class="o-mail-Follower-details d-flex align-items-center flex-grow-1 px-3 text-700 o-min-width-0" t-att-class="{ 'o-inactive fst-italic opacity-25': !follower.isActive }" href="#" role="menuitem" t-on-click.prevent="(ev) => this.onClickDetails(ev, follower)">
+                                                <img class="o-mail-Follower-avatar me-2 rounded" t-att-src="threadService.avatarUrl(follower.partner, state.thread)" alt=""/>
+                                                <span class="flex-shrink text-truncate" t-esc="follower.partner.name"/>
+                                            </a>
+                                            <t t-if="follower.isEditable">
+                                                <button class="o-mail-Follower-action btn btn-icon rounded-0" title="Edit subscription" aria-label="Edit subscription" t-on-click="(ev) => this.onClickEdit(ev, follower)">
+                                                    <i class="fa fa-pencil"/>
+                                                </button>
+                                                <button class="o-mail-Follower-action btn btn-icon rounded-0" title="Remove this follower" aria-label="Remove this follower" t-on-click="(ev) => this.onClickRemove(ev, follower)">
+                                                    <i class="fa fa-remove"/>
+                                                </button>
+                                            </t>
+                                        </div>
+                                </t>
+                                <button t-if="state.thread.followers.size > this.state.limit" t-on-click.prevent="onLoadFollowers" class="dropdown-item">
+                                    Load More
+                                </button>
                             </t>
                             <div t-elif="!state.thread.hasWriteAccess" class="dropdown-item disabled">
                                 No Followers

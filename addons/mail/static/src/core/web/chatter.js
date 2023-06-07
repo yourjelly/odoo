@@ -96,6 +96,8 @@ export class Chatter extends Component {
         this.state = useState({
             isAttachmentBoxOpened: this.props.isAttachmentBoxVisibleInitially,
             jumpThreadPresent: 0,
+            limit: 20,
+            maxLimit: 20,
             showActivities: true,
             /** @type {import("@mail/core/common/thread_model").Thread} */
             thread: undefined,
@@ -201,7 +203,7 @@ export class Chatter extends Component {
      * @returns {string}
      */
     get toRecipientsText() {
-        const followers = [...this.state.thread.followers].slice(0, 5).map(({ partner }) => {
+        const followers = this.sortRecipients.slice(0, 5).map(({ partner }) => {
             if (partner === this.store.self) {
                 return `<span class="text-muted" title="${escape(partner.email)}">me</span>`;
             }
@@ -217,6 +219,19 @@ export class Chatter extends Component {
             followers.push("…");
         }
         return markup(formatter.format(followers));
+    }
+
+    get orderFollowers(){
+        const orderedFollower = [...this.state.thread.followers].sort((a, b) => (a.partner.name.toString().localeCompare(b.partner.name.toString())))
+        if (this.state.thread.followerOfSelf) {
+            let index = orderedFollower.findIndex((f) => f.partner == this.state.thread.followerOfSelf.partner);
+            orderedFollower.splice(index,1)
+        }
+        return orderedFollower.slice(0,this.state.limit)
+    }
+
+    get sortRecipients(){
+        return [...this.state.thread.followers].sort((a, b) => (a.partner.email.toString().localeCompare(b.partner.email.toString())))
     }
 
     /**
@@ -436,6 +451,16 @@ export class Chatter extends Component {
         if (this.recipientsPopover.isOpen) {
             return this.recipientsPopover.close();
         }
-        this.recipientsPopover.open(ev.target, { thread: this.state.thread });
+        this.recipientsPopover.open(ev.target, { thread: this.sortRecipients });
+    }
+
+    onLoadFollowers() {
+        this.state.limit = this.state.thread.followers.size
+    }
+
+    onActionStateChanged(state){
+        if (!state.open){
+            this.state.limit = this.state.maxLimit
+        }
     }
 }
