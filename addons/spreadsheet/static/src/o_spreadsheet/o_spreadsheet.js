@@ -720,12 +720,20 @@
             2 * PADDING_AUTORESIZE_VERTICAL);
     }
     function computeTextWidth(context, text, style) {
-        context.save();
-        context.font = computeTextFont(style);
-        const textWidth = context.measureText(text).width;
-        context.restore();
-        return textWidth;
+        const font = computeTextFont(style);
+        if (!textWidthCache[font]) {
+            textWidthCache[font] = {};
+        }
+        if (textWidthCache[font][text] === undefined) {
+            context.save();
+            context.font = font;
+            const textWidth = context.measureText(text).width;
+            context.restore();
+            textWidthCache[font][text] = textWidth;
+        }
+        return textWidthCache[font][text];
     }
+    const textWidthCache = {};
     function computeTextFont(style) {
         const italic = style.italic ? "italic " : "";
         const weight = style.bold ? "bold" : DEFAULT_FONT_WEIGHT;
@@ -42802,8 +42810,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.12';
-    __info__.date = '2023-06-02T10:15:35.826Z';
-    __info__.hash = '9718465';
+    __info__.date = '2023-06-07T16:18:13.754Z';
+    __info__.hash = '8f3c082';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
