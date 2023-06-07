@@ -4,20 +4,21 @@
         <t t-foreach="lines" t-as="line" t-key="line.uuid">
             <div
                 t-attf-class="o_self_order_item_card position-relative d-flex align-items-start w-100 bg-white px-3 py-2 overflow-hidden"
-                t-on-click="() => this.clickOnLine(line.product_id)"
+                t-on-click="() => this.clickOnLine(line)"
                 >
                 <div class="d-flex w-100 py-1 justify-content-between">
                     <div t-attf-class="d-flex {{ line.qty ? 'flex-column align-items-start' : 'flex-row align-items-center' }} text-900 fw-bold fs-6">
-                        <h3 class="mb-0" t-esc="selfOrder.productByIds[line.product_id].name" />
+                        <t t-set="lineName" t-value="getNameAndDescription(line)" />
+                        <h3 class="mb-0" t-esc="lineName.productName" />
                         <span
                             t-if="line.qty"
                             class="flex-grow-1 me-3 small text-muted"
                             t-esc="`${line.qty} x ${selfOrder.formatMonetary(selfOrder.productByIds[line.product_id].priceWithTax)}`"
                             />
                         <span
-                            t-if="line.description"
+                            t-if="lineName.attributes"
                             class="m-0 text-muted small break-line"
-                            t-esc="line.description"
+                            t-esc="lineName.attributes"
                             />
                         <div t-if="line.customer_note" class="d-inline-block m-0 text-muted small break-line">
                             <i class="fa fa-pencil-square-o" aria-hidden="true" />

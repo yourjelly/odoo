@@ -90,8 +90,6 @@ class PosSelfOrderController(http.Controller):
         for line in lines:
             product_sudo = request.env["product.product"].sudo().browse(int(line.get("product_id")))
             compute_line_prices = self._get_computed_line_prices(product_sudo, line, pos_config_sudo)
-            line_description = line.get("description")
-            product_name = product_sudo._get_name()
 
             newLines.append({
                 **compute_line_prices,
@@ -102,7 +100,7 @@ class PosSelfOrderController(http.Controller):
                 'product_id': line.get('product_id'),
                 'qty': line.get('qty'),
                 'customer_note': line.get('customer_note'),
-                'full_product_name': f"{product_name} ({line_description})" if line_description else product_name,
+                'full_product_name': line.get('full_product_name'),
             })
 
         return newLines

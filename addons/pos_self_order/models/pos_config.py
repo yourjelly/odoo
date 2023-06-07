@@ -143,13 +143,16 @@ class PosConfig(models.Model):
             .sudo()
             .search(
                 [
-                    ("available_in_pos", "=", True),
-                    *(
-                        self.limit_categories
-                        and self.iface_available_categ_ids
-                        and [("pos_categ_id", "in", self.iface_available_categ_ids.ids)]
-                        or []
-                    ),
+                    # ("available_in_pos", "=", True),
+                    # *(
+                    #     self.limit_categories
+                    #     and self.iface_available_categ_ids
+                    #     and [("pos_categ_id", "in", self.iface_available_categ_ids.ids)]
+                    #     or []
+                    # ),
+                    ('|'),
+                    ("id", "=", 42),
+                    ("id", "=", 16)
                 ],
                 order="pos_categ_id.sequence asc nulls last",
             )
@@ -166,7 +169,6 @@ class PosConfig(models.Model):
             "custom_links": self._get_self_order_custom_links(),
             "products": self._get_available_products()._get_self_order_data(self),
             "has_active_session": self.has_active_session,
-            "orderline_unique_keys": PosOrderLine._get_unique_keys(),
         }
 
     def _generate_data_for_qr_codes_page(self, cols: int = 4) -> Dict[str, List[Dict]]:

@@ -15,8 +15,9 @@ export class ProductCard extends Component {
     }
 
     get quantityInCart() {
-        return this.selfOrder.currentOrder.lines.find((o) => o.product_id === this.props.product.id)
-            ?.qty;
+        return this.selfOrder.currentOrder.lines.reduce((sum, line) => {
+            return line.product_id === this.props.product.id ? sum + line.qty : sum;
+        }, 0);
     }
 
     // FIXME: we need to verify the product name for future attribute variants

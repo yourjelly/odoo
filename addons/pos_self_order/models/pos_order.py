@@ -17,30 +17,6 @@ class PosOrderLine(models.Model):
             **super()._export_for_ui(orderline),
         }
 
-    def _get_description(self):
-        """
-        The pos sends a "description" key to the backend, which is a string containing the selected value for
-        each attribute of the product, separated by a comma. In the db we end up storing the
-        "full_product_name", which is composed of the product name and the description.
-        :line.full_product_name: ex: "Desk Organizer (M, Leather)"
-        :return: ex: "M, Leather"
-        """
-        self.ensure_one()
-        description = re.findall(r"\(([^)]+)\)", self.full_product_name)
-        if description:
-            # It might happen that the product has a name with parenthesis. ex: "Salad (Vegie)"
-            # In that case the full_product_name will be "Salad (Vegie) (Small)", but are interested in returning the variant "Small"
-            # That's why we return the last element of the list
-            return description[-1]
-        return ""
-
-    @staticmethod
-    def _get_unique_keys():
-        """
-        These are the keys that define the uniqueness of an orderline.
-        We use them to check if 2 orderlines can be merged or not.
-        """
-        return ["product_id", "description", "customer_note"]
 
 class PosOrder(models.Model):
     _inherit = "pos.order"
@@ -66,7 +42,7 @@ class PosOrder(models.Model):
                     "uuid": line.uuid,
                     "qty": line.qty,
                     "customer_note": line.customer_note,
-                    "description": line._get_description(),
+                    "full_product_name": line.full_product_name,
                 }
                 for line in self.lines
             ],
