@@ -97,7 +97,7 @@ class IrAsset(models.Model):
         """
         return {}
 
-    def _get_asset_extra(self, extra):
+    def _get_asset_extra(self, extra, **_params):
         """
         This method can be overriden to use param as keyword arguments
         Return the extra based on additionnal assets_params
@@ -225,7 +225,7 @@ class IrAsset(models.Model):
             # this should never happen
             raise ValueError("Unexpected directive")
 
-    def _get_related_assets(self, domain):
+    def _get_related_assets(self, domain, **_params):
         """
         Returns a set of assets matching the domain, regardless of their
         active state. This method can be overridden to filter the results.
@@ -258,7 +258,7 @@ class IrAsset(models.Model):
 
         return root_bundle
 
-    def _get_active_addons_list(self):
+    def _get_active_addons_list(self, **_params):
         """Can be overridden to filter the returned list of active modules."""
         return self._get_installed_addons_list()
 

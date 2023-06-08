@@ -16,7 +16,7 @@ class IrAsset(models.Model):
         return params
 
     def _get_asset_extra(self, extra, website_id=None, **params):
-        extra = super()._get_asset_extra(extra, **params)
+        extra = super()._get_asset_extra(extra, website_id=website_id, **params)
         if extra == '%':
             return extra
         website_id_path = website_id and ('%s/' % website_id) or ''
@@ -25,12 +25,12 @@ class IrAsset(models.Model):
     def _get_related_assets(self, domain, website_id=None, **params):
         if website_id:
             domain += self.env['website'].website_domain(website_id)
-        assets = super()._get_related_assets(domain, **params)
+        assets = super()._get_related_assets(domain, website_id=website_id, **params)
         return assets.filter_duplicate(website_id)
 
     def _get_active_addons_list(self, website_id=None, **params):
         """Overridden to discard inactive themes."""
-        addons_list = super()._get_active_addons_list(**params)
+        addons_list = super()._get_active_addons_list(website_id=website_id, **params)
 
         if not website_id:
             return addons_list
