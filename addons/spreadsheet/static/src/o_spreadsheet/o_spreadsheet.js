@@ -4297,6 +4297,7 @@
         "FREEZE_COLUMNS",
         "FREEZE_ROWS",
         "UNFREEZE_COLUMNS_ROWS",
+        "CHANGE_SHEET_DIRECTION",
         /** MERGE */
         "ADD_MERGE",
         "REMOVE_MERGE",
@@ -5219,6 +5220,14 @@
             }
         }
     }
+    function getElementScrollTop(el) {
+        return el?.scrollTop || 0;
+    }
+    function setElementScrollTop(el, scroll) {
+        if (!el)
+            return;
+        el.scrollTop = scroll;
+    }
     function getOpenedMenus() {
         return Array.from(document.querySelectorAll(".o-spreadsheet .o-menu"));
     }
@@ -5450,6 +5459,7 @@
             const actualWidth = Math.min(maxWidth, elDims.width);
             const shouldRenderAtBottom = this.shouldRenderAtBottom(elDims.height);
             const shouldRenderAtRight = this.shouldRenderAtRight(elDims.width);
+            //Working
             verticalOffset = shouldRenderAtBottom ? verticalOffset : -verticalOffset;
             const cssProperties = {
                 "max-height": maxHeight + "px",
@@ -16764,6 +16774,34 @@
         isActive: (env) => env.model.getters.getCurrentStyle().wrapping === "clip",
         icon: "o-spreadsheet-Icon.WRAPPING_CLIP",
     };
+    const formatDirection = {
+        name: _lt("Direction"),
+        icon: "o-spreadsheet-Icon.ALIGN_LEFT",
+    };
+    const formatDirectionLeft = {
+        name: _lt("Cell left to right"),
+        description: "Ctrl+Shift+L",
+        execute: (env) => setStyle(env, { direction: "ltr", align: "left" }),
+        isActive: (env) => getCellDirection(env) === "ltr",
+    };
+    const formatDirectionRight = {
+        name: _lt("Cell right to left"),
+        description: "Ctrl+Shift+L",
+        execute: (env) => setStyle(env, { direction: "rtl", align: "right" }),
+        isActive: (env) => getCellDirection(env) === "rtl",
+    };
+    const formatDirectionSheetLeft = {
+        name: (env) => !env.model.getters.isSheetDirectionRtl(env.model.getters.getActiveSheetId())
+            ? _lt("Sheet Right to left")
+            : _lt("Sheet left to Right"),
+        description: "Ctrl+Shift+L",
+        execute: (env) => {
+            env.model.dispatch("CHANGE_SHEET_DIRECTION", {
+                sheetId: env.model.getters.getActiveSheetId(),
+                directionStatus: !env.model.getters.isSheetDirectionRtl(env.model.getters.getActiveSheetId()),
+            });
+        },
+    };
     const textColor = {
         name: _lt("Text Color"),
         icon: "o-spreadsheet-Icon.TEXT_COLOR",
@@ -16822,6 +16860,13 @@
         const cell = env.model.getters.getActiveCell();
         return cell.defaultAlign;
     }
+    function getCellDirection(env) {
+        const style = env.model.getters.getCurrentStyle();
+        if (style.direction) {
+            return style.direction;
+        }
+        return "ltr";
+    }
 
     var ACTION_FORMAT = /*#__PURE__*/Object.freeze({
         __proto__: null,
@@ -16856,6 +16901,10 @@
         formatWrappingOverflow: formatWrappingOverflow,
         formatWrappingWrap: formatWrappingWrap,
         formatWrappingClip: formatWrappingClip,
+        formatDirection: formatDirection,
+        formatDirectionLeft: formatDirectionLeft,
+        formatDirectionRight: formatDirectionRight,
+        formatDirectionSheetLeft: formatDirectionSheetLeft,
         textColor: textColor,
         fillColor: fillColor,
         formatCF: formatCF,
@@ -17584,14 +17633,31 @@
         ...formatWrappingClip,
         sequence: 30,
     })
+        .addChild("direction", ["format"], {
+        ...formatDirection,
+        sequence: 90,
+    })
+        .addChild("direction", ["format", "direction"], {
+        ...formatDirectionSheetLeft,
+        sequence: 10,
+        separator: true,
+    })
+        .addChild("direction", ["format", "direction"], {
+        ...formatDirectionLeft,
+        sequence: 20,
+    })
+        .addChild("direction", ["format", "direction"], {
+        ...formatDirectionRight,
+        sequence: 30,
+    })
         .addChild("format_cf", ["format"], {
         ...formatCF,
-        sequence: 90,
+        sequence: 100,
         separator: true,
     })
         .addChild("format_clearFormat", ["format"], {
         ...clearFormat,
-        sequence: 100,
+        sequence: 110,
         separator: true,
     })
         // ---------------------------------------------------------------------
@@ -17659,13 +17725,40 @@
         ArrowRight: "right",
         ArrowUp: "up",
     };
-    function updateSelectionWithArrowKeys(ev, selection) {
+    function updateSelectionWithArrowKeys(ev, env) {
         const direction = arrowMap[ev.key];
+        const isRtl = env.model.getters.isSheetDirectionRtl(env.model.getters.getActiveSheetId());
         if (ev.shiftKey) {
-            selection.resizeAnchorZone(direction, ev.ctrlKey ? "end" : 1);
+            // Flip the arrow direction horizontally
+            let resizeDirection = direction;
+            if (isRtl && (direction === "left" || direction === "right")) {
+                if (direction === "left") {
+                    resizeDirection = "right";
+                }
+                else {
+                    resizeDirection = "left";
+                }
+                env.model.selection.resizeAnchorZone(resizeDirection, ev.ctrlKey ? "end" : 1);
+            }
+            else {
+                env.model.selection.resizeAnchorZone(direction, ev.ctrlKey ? "end" : 1);
+            }
         }
         else {
-            selection.moveAnchorCell(direction, ev.ctrlKey ? "end" : 1);
+            // Flip the column index horizontally
+            let moveDirection = direction;
+            if (isRtl && (direction === "left" || direction === "right")) {
+                if (direction === "left") {
+                    moveDirection = "right";
+                }
+                else {
+                    moveDirection = "left";
+                }
+                env.model.selection.moveAnchorCell(moveDirection, ev.ctrlKey ? "end" : 1);
+            }
+            else {
+                env.model.selection.moveAnchorCell(direction, ev.ctrlKey ? "end" : 1);
+            }
         }
     }
 
@@ -17812,7 +17905,7 @@
                 ev.stopPropagation();
                 if (this.state.mode === "select-range") {
                     ev.preventDefault();
-                    updateSelectionWithArrowKeys(ev, this.env.model.selection);
+                    updateSelectionWithArrowKeys(ev, this.env);
                 }
             }
             else if (ev.key === "Enter") {
@@ -20097,6 +20190,15 @@
                 "z-index": String(ComponentsImportance.Figure + (this.isSelected ? 1 : 0)),
             });
         }
+        get figureDirection() {
+            let tempProperty = "";
+            if (this.env.model.getters.isSheetDirectionRtl(this.env.model.getters.getActiveSheetId())) {
+                tempProperty = cssPropertiesToCss({
+                    transform: "scaleX(-1)",
+                });
+            }
+            return this.props.style + "" + tempProperty;
+        }
         getResizerPosition(resizer) {
             const anchorCenteringOffset = (ANCHOR_SIZE - ACTIVE_BORDER_WIDTH) / 2;
             let style = {};
@@ -20558,23 +20660,12 @@
          */
         selectRange(start, end) {
             let selection = window.getSelection();
-            const { start: currentStart, end: currentEnd } = this.getCurrentSelection();
-            if (currentStart === start && currentEnd === end) {
-                return;
-            }
-            const currentRange = selection.getRangeAt(0);
-            let range;
-            if (this.el.contains(currentRange.startContainer)) {
-                range = currentRange;
-            }
-            else {
-                range = document.createRange();
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
+            this.removeSelection();
+            let range = document.createRange();
             if (start == end && start === 0) {
                 range.setStart(this.el, 0);
                 range.setEnd(this.el, 0);
+                selection.addRange(range);
             }
             else {
                 const textLength = this.getText().length;
@@ -20590,6 +20681,7 @@
                 let startNode = this.findChildAtCharacterIndex(start);
                 let endNode = this.findChildAtCharacterIndex(end);
                 range.setStart(startNode.node, startNode.offset);
+                selection.addRange(range);
                 selection.extend(endNode.node, endNode.offset);
             }
         }
@@ -20629,54 +20721,26 @@
             return { node: previous, offset: usedCharacters };
         }
         /**
-         * Sets (or Replaces all) the text inside the root element in the form of distinctive paragraphs and
+         * Sets (or Replaces all) the text inside the root element in the form of distinctive
          * span for each element provided in `contents`.
          *
-         * The function will apply the diff between the current content and the new content to avoid the systematic
-         * destruction of DOM elements which interferes with IME[1]
-         *
-         * Each line of text will be encapsulated in a paragraph element.
          * Each span will have its own fontcolor and specific class if provided in the HtmlContent object.
-         *
-         * [1] https://developer.mozilla.org/en-US/docs/Glossary/Input_method_editor
          */
         setText(contents) {
+            this.el.innerHTML = "";
             if (contents.length === 0) {
-                this.removeAll();
                 return;
             }
-            const childElements = Array.from(this.el.childNodes);
-            const contentLength = contents.length;
-            for (let i = 0; i < contentLength; i++) {
-                const line = contents[i];
-                const childElement = childElements[i];
-                let newChild = false;
-                let p;
-                if (childElement && childElement.nodeName === "P") {
-                    p = childElement;
+            for (const line of contents) {
+                const p = document.createElement("p");
+                // Empty line
+                if (line.length === 0 || line.every((content) => !content.value && !content.class)) {
+                    p.appendChild(document.createElement("br"));
+                    this.el.appendChild(p);
+                    continue;
                 }
-                else {
-                    newChild = true;
-                    p = document.createElement("p");
-                }
-                const lineLength = line.length;
-                const existingChildren = Array.from(p.childNodes);
-                for (let j = 0; j < lineLength; j++) {
-                    const content = line[j];
-                    const child = existingChildren[j];
-                    // child nodes can be multiple types of nodes: Span, Text, Div, etc...
-                    // We can only modify a node in place if it has the same type as the content
-                    // that we would insert, which are spans.
-                    // Otherwise, it means that the node has been input by the user, through the keyboard or a copy/paste
-                    // @ts-ignore (somehow required because jest does not like child.tagName despite the prior check)
-                    const childIsSpan = child && "tagName" in child && child.tagName === "SPAN";
-                    if (childIsSpan && compareContentToSpanElement(content, child)) {
-                        continue;
-                    }
-                    // this is an empty line in the content
+                for (const content of line) {
                     if (!content.value && !content.class) {
-                        if (child)
-                            p.removeChild(child);
                         continue;
                     }
                     const span = document.createElement("span");
@@ -20685,38 +20749,9 @@
                     if (content.class) {
                         span.classList.add(content.class);
                     }
-                    if (child) {
-                        p.replaceChild(span, child);
-                    }
-                    else {
-                        p.appendChild(span);
-                    }
-                }
-                if (existingChildren.length > lineLength) {
-                    for (let i = lineLength; i < existingChildren.length; i++) {
-                        p.removeChild(existingChildren[i]);
-                    }
-                }
-                // Empty line
-                if (!p.hasChildNodes()) {
-                    const span = document.createElement("span");
-                    span.appendChild(document.createElement("br"));
                     p.appendChild(span);
                 }
-                // replace p if necessary
-                if (newChild) {
-                    if (childElement) {
-                        this.el.replaceChild(p, childElement);
-                    }
-                    else {
-                        this.el.appendChild(p);
-                    }
-                }
-            }
-            if (childElements.length > contentLength) {
-                for (let i = contentLength; i < childElements.length; i++) {
-                    this.el.removeChild(childElements[i]);
-                }
+                this.el.appendChild(p);
             }
         }
         scrollSelectionIntoView() {
@@ -20725,6 +20760,13 @@
                 return;
             const element = focusedNode instanceof HTMLElement ? focusedNode : focusedNode.parentElement;
             element?.scrollIntoView({ block: "nearest" });
+        }
+        /**
+         * remove the current selection of the user
+         * */
+        removeSelection() {
+            let selection = window.getSelection();
+            selection.removeAllRanges();
         }
         removeAll() {
             if (this.el) {
@@ -20856,14 +20898,6 @@
             return text;
         }
     }
-    function compareContentToSpanElement(content, node) {
-        const contentColor = content.color ? toHex(content.color) : "";
-        const nodeColor = node.style?.color ? toHex(node.style.color) : "";
-        const sameColor = contentColor === nodeColor;
-        const sameClass = deepEquals([content.class], [...node.classList]);
-        const sameContent = node.innerText === content.value;
-        return sameColor && sameClass && sameContent;
-    }
 
     // -----------------------------------------------------------------------------
     // Formula Assistant component
@@ -20952,10 +20986,8 @@
       overflow-x: hidden;
       word-break: break-all;
       padding-right: 2px;
-
       box-sizing: border-box;
       font-family: ${DEFAULT_FONT};
-
       caret-color: black;
       padding-left: 3px;
       padding-right: 3px;
@@ -21008,6 +21040,7 @@
             functionDescription: {},
             argToFocus: 0,
         });
+        isKeyStillDown = false;
         compositionActive = false;
         get assistantStyle() {
             if (this.props.delimitation && this.props.rect) {
@@ -21042,18 +21075,21 @@
             F2: () => console.warn("Not implemented"),
             F4: this.processF4Key,
             Tab: (ev) => this.processTabKey(ev),
-            " ": (ev) => this.processSpaceKey(ev),
         };
         setup() {
             owl.onMounted(() => {
                 const el = this.composerRef.el;
                 this.contentHelper.updateEl(el);
+                this.processContent();
+                this.contentHelper.scrollSelectionIntoView();
             });
             owl.onWillUnmount(() => {
                 this.props.onComposerUnmounted?.();
             });
-            owl.useEffect(() => {
-                this.processContent();
+            owl.onPatched(() => {
+                if (!this.isKeyStillDown) {
+                    this.processContent();
+                }
             });
         }
         // ---------------------------------------------------------------------------
@@ -21065,7 +21101,7 @@
                 // Prevent the default content editable behavior which moves the cursor
                 ev.preventDefault();
                 ev.stopPropagation();
-                updateSelectionWithArrowKeys(ev, this.env.model.selection);
+                updateSelectionWithArrowKeys(ev, this.env);
                 return;
             }
             const content = this.env.model.getters.getCurrentContent();
@@ -21106,25 +21142,32 @@
                     return;
                 }
             }
+            else {
+                // when completing with tab, if there is no value to complete, the active cell will be moved to the right.
+                // we can't let the model think that it is for a ref selection.
+                // todo: check if this can be removed someday
+                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
+            }
             const direction = ev.shiftKey ? "left" : "right";
             this.env.model.dispatch("STOP_EDITION");
             this.env.model.selection.moveAnchorCell(direction, 1);
-        }
-        processSpaceKey(ev) {
-            if (ev.ctrlKey) {
-                ev.preventDefault();
-                ev.stopPropagation();
-                this.showAutocomplete("");
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-            }
         }
         processEnterKey(ev) {
             ev.preventDefault();
             ev.stopPropagation();
             if (ev.altKey || ev.ctrlKey) {
-                this.composerRef.el?.dispatchEvent(new InputEvent("input", { inputType: "insertParagraph", bubbles: true, isComposing: false }));
+                const selection = this.contentHelper.getCurrentSelection();
+                const currentContent = this.env.model.getters.getCurrentContent();
+                const content = currentContent.slice(0, selection.start) + NEWLINE + currentContent.slice(selection.end);
+                this.env.model.dispatch("SET_CURRENT_CONTENT", {
+                    content,
+                    selection: { start: selection.start + 1, end: selection.start + 1 },
+                });
+                this.processContent();
+                this.contentHelper.scrollSelectionIntoView();
                 return;
             }
+            this.isKeyStillDown = false;
             if (this.autoCompleteState.showProvider) {
                 const autoCompleteValue = this.autoCompleteState.values[this.autoCompleteState.selectedIndex]?.text;
                 if (autoCompleteValue) {
@@ -21157,42 +21200,56 @@
             else {
                 ev.stopPropagation();
             }
+            const { start, end } = this.contentHelper.getCurrentSelection();
+            if (!this.env.model.getters.isSelectingForComposer() &&
+                !(ev.key === "Enter" && (ev.altKey || ev.ctrlKey))) {
+                this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", { start, end });
+                this.isKeyStillDown = true;
+            }
         }
         /*
          * Triggered automatically by the content-editable between the keydown and key up
          * */
-        onInput(ev) {
+        onInput() {
             if (this.props.focus === "inactive" || !this.shouldProcessInputEvents) {
                 return;
             }
-            let content = this.contentHelper.getText();
-            let selection = this.contentHelper.getCurrentSelection();
-            if (ev.inputType === "insertParagraph") {
-                const start = Math.min(selection.start, selection.end);
-                const end = Math.max(selection.start, selection.end);
-                content = content.slice(0, start) + NEWLINE + content.slice(end);
-                selection = { start: start + 1, end: start + 1 };
-            }
             this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
             this.env.model.dispatch("SET_CURRENT_CONTENT", {
-                content,
-                selection,
+                content: this.contentHelper.getText(),
+                selection: this.contentHelper.getCurrentSelection(),
             });
-            this.processTokenAtCursor();
         }
-        onKeyup() {
-            if (this.contentHelper.el === document.activeElement) {
-                const { start: oldStart, end: oldEnd } = this.env.model.getters.getComposerSelection();
-                const { start, end } = this.contentHelper.getCurrentSelection();
-                if (start !== oldStart || end !== oldEnd) {
-                    this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", { start, end });
-                }
-            }
-        }
-        showAutocomplete(searchTerm) {
-            if (!this.env.model.getters.getCurrentContent().startsWith("=")) {
+        onKeyup(ev) {
+            this.isKeyStillDown = false;
+            if (this.props.focus === "inactive" ||
+                ["Control", "Alt", "Shift", "Tab", "Enter", "F4"].includes(ev.key)) {
                 return;
             }
+            if (this.autoCompleteState.showProvider && ["ArrowUp", "ArrowDown"].includes(ev.key)) {
+                return; // already processed in keydown
+            }
+            if (this.env.model.getters.isSelectingForComposer() &&
+                ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(ev.key)) {
+                return; // already processed in keydown
+            }
+            ev.preventDefault();
+            ev.stopPropagation();
+            this.autoCompleteState.showProvider = false;
+            if (ev.ctrlKey && ev.key === " ") {
+                this.showAutocomplete("");
+                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
+                return;
+            }
+            const { start: oldStart, end: oldEnd } = this.env.model.getters.getComposerSelection();
+            const { start, end } = this.contentHelper.getCurrentSelection();
+            if (start !== oldStart || end !== oldEnd) {
+                this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", this.contentHelper.getCurrentSelection());
+            }
+            this.processTokenAtCursor();
+            this.processContent();
+        }
+        showAutocomplete(searchTerm) {
             this.autoCompleteState.showProvider = true;
             let values = Object.entries(functionRegistry.content)
                 .filter(([_, { hidden }]) => !hidden)
@@ -21212,6 +21269,13 @@
             this.autoCompleteState.values = values.slice(0, 10);
             this.autoCompleteState.selectedIndex = 0;
         }
+        onMousedown(ev) {
+            if (ev.button > 0) {
+                // not main button, probably a context menu
+                return;
+            }
+            this.contentHelper.removeSelection();
+        }
         onClick() {
             if (this.env.model.getters.isReadonly()) {
                 return;
@@ -21224,6 +21288,9 @@
             this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", newSelection);
             this.processTokenAtCursor();
         }
+        onBlur() {
+            this.isKeyStillDown = false;
+        }
         // ---------------------------------------------------------------------------
         // Private
         // ---------------------------------------------------------------------------
@@ -21231,19 +21298,22 @@
             if (this.compositionActive) {
                 return;
             }
+            const oldScroll = getElementScrollTop(this.composerRef.el);
+            this.contentHelper.removeAll(); // removes the content of the composer, to be added just after
             this.shouldProcessInputEvents = false;
             if (this.props.focus !== "inactive") {
                 this.contentHelper.el.focus();
+                this.contentHelper.selectRange(0, 0); // move the cursor inside the composer at 0 0.
             }
             const content = this.getContentLines();
-            this.contentHelper.setText(content);
             if (content.length !== 0 && content.length[0] !== 0) {
+                this.contentHelper.setText(content);
+                const { start, end } = this.env.model.getters.getComposerSelection();
                 if (this.props.focus !== "inactive") {
                     // Put the cursor back where it was before the rendering
-                    const { start, end } = this.env.model.getters.getComposerSelection();
                     this.contentHelper.selectRange(start, end);
                 }
-                this.contentHelper.scrollSelectionIntoView();
+                setElementScrollTop(this.composerRef.el, oldScroll);
             }
             this.shouldProcessInputEvents = true;
         }
@@ -21479,6 +21549,9 @@
         rect;
         isCellReferenceVisible;
         composerState;
+        state = owl.useState({
+            direction: "ltr",
+        });
         setup() {
             this.gridComposerRef = owl.useRef("gridComposer");
             this.composerState = owl.useState({
@@ -21498,9 +21571,14 @@
                     height: el.clientHeight,
                 };
                 this.composerState.delimitation = {
-                    width: this.props.gridDims.width,
-                    height: this.props.gridDims.height,
+                    width: el.parentElement.clientWidth,
+                    height: el.parentElement.clientHeight,
                 };
+            });
+            owl.onPatched(() => {
+                this.state.direction =
+                    this.env.model.getters.getCellComputedStyle(this.env.model.getters.getActivePosition())
+                        .direction || "ltr";
             });
             owl.onWillUpdateProps(() => {
                 if (this.isCellReferenceVisible) {
@@ -21529,6 +21607,29 @@
                 left: `${left - COMPOSER_BORDER_WIDTH}px`,
                 top: `${top - GRID_CELL_REFERENCE_TOP_OFFSET}px`,
             });
+        }
+        get getDirection() {
+            const isRTL = this.env.model.getters.isSheetDirectionRtl(this.env.model.getters.getActiveSheetId());
+            const isFormula = this.env.model.getters.getCurrentContent().startsWith("=");
+            if (!isFormula || isRTL) {
+                if (!this.env.model.getters.getCellComputedStyle(this.env.model.getters.getActivePosition())
+                    .align &&
+                    this.state.direction === "rtl") {
+                    this.env.model.dispatch("SET_FORMATTING", {
+                        sheetId: this.env.model.getters.getActiveSheetId(),
+                        target: this.env.model.getters.getSelectedZones(),
+                        style: { align: "right" },
+                    });
+                }
+                const cssProperties = {
+                    direction: this.state.direction,
+                    "text-align": this.state.direction === "ltr" ? "left !important" : "right !important",
+                    transform: isRTL ? "scaleX(-1)" : "none",
+                };
+                return cssPropertiesToCss(cssProperties) + " " + this.containerStyle;
+            }
+            else
+                return this.containerStyle;
         }
         get containerStyle() {
             const isFormula = this.env.model.getters.getCurrentContent().startsWith("=");
@@ -23217,7 +23318,7 @@
             shiftingMode: "none",
         });
         onResizeHighlight(isLeft, isTop) {
-            const activeSheetId = this.env.model.getters.getActiveSheetId();
+            const activeSheet = this.env.model.getters.getActiveSheet();
             this.highlightState.shiftingMode = "isResizing";
             const z = this.props.zone;
             const pivotCol = isLeft ? z.right : z.left;
@@ -23226,10 +23327,11 @@
             let lastRow = isTop ? z.top : z.bottom;
             let currentZone = z;
             this.env.model.dispatch("START_CHANGE_HIGHLIGHT", {
-                range: this.env.model.getters.getRangeDataFromZone(activeSheetId, currentZone),
+                range: this.env.model.getters.getRangeDataFromZone(activeSheet.id, currentZone),
             });
             const mouseMove = (col, row) => {
                 if (lastCol !== col || lastRow !== row) {
+                    const activeSheetId = this.env.model.getters.getActiveSheetId();
                     lastCol = clip(col === -1 ? lastCol : col, 0, this.env.model.getters.getNumberCols(activeSheetId) - 1);
                     lastRow = clip(row === -1 ? lastRow : row, 0, this.env.model.getters.getNumberRows(activeSheetId) - 1);
                     let newZone = {
@@ -23241,7 +23343,7 @@
                     newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
                         this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeFromZone(activeSheetId, this.env.model.getters.getUnboundedZone(activeSheetId, newZone)).rangeData,
+                            range: this.env.model.getters.getRangeDataFromZone(activeSheet.id, newZone),
                         });
                         currentZone = newZone;
                     }
@@ -23288,7 +23390,7 @@
                     newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
                         this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeFromZone(activeSheetId, this.env.model.getters.getUnboundedZone(activeSheetId, newZone)).rangeData,
+                            range: this.env.model.getters.getRangeDataFromZone(activeSheetId, newZone),
                         });
                         currentZone = newZone;
                     }
@@ -23557,6 +23659,14 @@
                 width: `calc(100% - ${HEADER_WIDTH + SCROLLBAR_WIDTH}px)`,
             });
         }
+        get getStyle() {
+            if (this.env.model.getters.isSheetDirectionRtl(this.env.model.getters.getActiveSheetId())) {
+                return cssPropertiesToCss({
+                    transform: "scaleX(-1)",
+                });
+            }
+            return;
+        }
         onClosePopover() {
             if (this.env.model.getters.hasOpenedPopover()) {
                 this.closeOpenedPopover();
@@ -23810,6 +23920,11 @@
             let prevCol = col;
             let prevRow = row;
             const onMouseMove = (col, row) => {
+                if (this.env.model.getters.isSheetDirectionRtl(this.env.model.getters.getActiveSheetId())) {
+                    const visibleCols = this.env.model.getters.getSheetViewVisibleCols();
+                    const lastVisibleCol = visibleCols[visibleCols.length - 1];
+                    col = lastVisibleCol - col;
+                }
                 if ((col !== prevCol && col != -1) || (row !== prevRow && row != -1)) {
                     prevCol = col === -1 ? prevCol : col;
                     prevRow = row === -1 ? prevRow : row;
@@ -23849,7 +23964,7 @@
             if (this.env.model.getters.hasOpenedPopover()) {
                 this.closeOpenedPopover();
             }
-            updateSelectionWithArrowKeys(ev, this.env.model.selection);
+            updateSelectionWithArrowKeys(ev, this.env);
             if (this.env.model.getters.isPaintingFormat()) {
                 this.env.model.dispatch("PASTE", {
                     target: this.env.model.getters.getSelectedZones(),
@@ -24610,16 +24725,6 @@
         63: "333333",
         64: "000000",
         65: "FFFFFF", // system background
-    };
-    const IMAGE_MIMETYPE_EXTENSION_MAPPING = {
-        "image/avif": "avif",
-        "image/bmp": "bmp",
-        "image/gif": "gif",
-        "image/vnd.microsoft.icon": "ico",
-        "image/jpeg": "jpeg",
-        "image/png": "png",
-        "image/tiff": "tiff",
-        "image/webp": "webp",
     };
 
     /**
@@ -26661,6 +26766,7 @@
             return {
                 id: sheet.sheetName,
                 areGridLinesVisible: sheetOptions ? sheetOptions.showGridLines : true,
+                directionStatus: sheetOptions ? sheetOptions.sheetDirection : true,
                 name: sheet.sheetName,
                 colNumber: sheetDims[0],
                 rowNumber: sheetDims[1],
@@ -27100,11 +27206,6 @@
     function createOverride(partName, contentType) {
         return escapeXml /*xml*/ `
     <Override ContentType="${contentType}" PartName="${partName}" />
-  `;
-    }
-    function createDefaultXMLElement(extension, contentType) {
-        return escapeXml /*xml*/ `
-    <Default Extension="${extension}" ContentType="${contentType}" />
   `;
     }
     function joinXmlNodes(xmlNodes) {
@@ -27842,6 +27943,9 @@
                         default: false,
                     }).asBool(),
                     showGridLines: this.extractAttr(sheetViewElement, "showGridLines", {
+                        default: true,
+                    }).asBool(),
+                    sheetDirection: this.extractAttr(sheetViewElement, "sheetDirection", {
                         default: true,
                     }).asBool(),
                     showRowColHeaders: this.extractAttr(sheetViewElement, "showRowColHeaders", {
@@ -31548,7 +31652,6 @@
             "getMerge",
             "getMergesInZone",
             "isSingleCellOrMerge",
-            "getSelectionRangeString",
         ];
         nextId = 1;
         merges = {};
@@ -31635,26 +31738,6 @@
             return Array.from(mergeIds)
                 .map((mergeId) => this.getMergeById(sheetId, mergeId))
                 .filter(isDefined$1);
-        }
-        /**
-         * Same as `getRangeString` but add all necessary merge to the range to make it a valid selection
-         */
-        getSelectionRangeString(range, forSheetId) {
-            const rangeImpl = RangeImpl.fromRange(range, this.getters);
-            const expandedZone = this.getters.expandZone(rangeImpl.sheetId, rangeImpl.zone);
-            const expandedRange = rangeImpl.clone({
-                zone: {
-                    ...expandedZone,
-                    bottom: rangeImpl.isFullCol ? undefined : expandedZone.bottom,
-                    right: rangeImpl.isFullRow ? undefined : expandedZone.right,
-                },
-            });
-            const rangeString = this.getters.getRangeString(expandedRange, forSheetId);
-            if (this.isSingleCellOrMerge(rangeImpl.sheetId, rangeImpl.zone)) {
-                const { sheetName, xc } = splitReference(rangeString);
-                return `${sheetName !== undefined ? getCanonicalSheetName(sheetName) + "!" : ""}${xc.split(":")[0]}`;
-            }
-            return rangeString;
         }
         /**
          * Return true if the zone intersects an existing merge:
@@ -31988,12 +32071,12 @@
         }
         static getters = [
             "getRangeString",
+            "getSelectionRangeString",
             "getRangeFromSheetXC",
             "createAdaptedRanges",
             "getRangeDataFromXc",
             "getRangeDataFromZone",
             "getRangeFromRangeData",
-            "getRangeFromZone",
         ];
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -32243,6 +32326,21 @@
             return new RangeImpl(rangeInterface, this.getters.getSheetSize).orderZone();
         }
         /**
+         * Same as `getRangeString` but add all necessary merge to the range to make it a valid selection
+         */
+        getSelectionRangeString(range, forSheetId) {
+            const rangeImpl = RangeImpl.fromRange(range, this.getters);
+            const expandedZone = this.getters.expandZone(rangeImpl.sheetId, rangeImpl.zone);
+            const expandedRange = rangeImpl.clone({
+                zone: {
+                    ...expandedZone,
+                    bottom: rangeImpl.isFullCol ? undefined : expandedZone.bottom,
+                    right: rangeImpl.isFullRow ? undefined : expandedZone.right,
+                },
+            });
+            return this.getRangeString(expandedRange, forSheetId);
+        }
+        /**
          * Gets the string that represents the range as it is at the moment of the call.
          * The string will be prefixed with the sheet name if the call specified a sheet id in `forSheetId`
          * different than the sheet on which the range has been created.
@@ -32297,17 +32395,6 @@
         }
         getRangeDataFromZone(sheetId, zone) {
             return { _sheetId: sheetId, _zone: zone };
-        }
-        getRangeFromZone(sheetId, zone) {
-            return new RangeImpl({
-                sheetId,
-                zone,
-                parts: [
-                    { colFixed: false, rowFixed: false },
-                    { colFixed: false, rowFixed: false },
-                ],
-                prefixSheet: false,
-            }, this.getters.getSheetSize);
         }
         getRangeFromRangeData(data) {
             const rangeInterface = {
@@ -32387,6 +32474,7 @@
             "getNumberRows",
             "getNumberHeaders",
             "getGridLinesVisibility",
+            "isSheetDirectionRtl",
             "getNextSheetName",
             "isEmpty",
             "getSheetSize",
@@ -32394,7 +32482,6 @@
             "getPaneDivisions",
             "checkZonesExistInSheet",
             "getCommandZones",
-            "getUnboundedZone",
         ];
         sheetIdsMapName = {};
         orderedSheetIds = [];
@@ -32469,6 +32556,9 @@
             switch (cmd.type) {
                 case "SET_GRID_LINES_VISIBILITY":
                     this.setGridLinesVisibility(cmd.sheetId, cmd.areGridLinesVisible);
+                    break;
+                case "CHANGE_SHEET_DIRECTION":
+                    this.setSheetDirection(cmd.sheetId, cmd.directionStatus);
                     break;
                 case "DELETE_CONTENT":
                     this.clearZones(cmd.sheetId, cmd.target);
@@ -32550,6 +32640,7 @@
                     numberOfCols: colNumber,
                     rows: createDefaultRows(rowNumber),
                     areGridLinesVisible: sheetData.areGridLinesVisible === undefined ? true : sheetData.areGridLinesVisible,
+                    directionStatus: sheetData.directionStatus === undefined ? false : sheetData.directionStatus,
                     isVisible: sheetData.isVisible,
                     panes: {
                         xSplit: sheetData.panes?.xSplit || 0,
@@ -32576,6 +32667,7 @@
                     figures: [],
                     filterTables: [],
                     areGridLinesVisible: sheet.areGridLinesVisible === undefined ? true : sheet.areGridLinesVisible,
+                    directionStatus: sheet.directionStatus === undefined ? false : sheet.directionStatus,
                     isVisible: sheet.isVisible,
                 };
                 if (sheet.panes.xSplit || sheet.panes.ySplit) {
@@ -32595,6 +32687,9 @@
         // ---------------------------------------------------------------------------
         getGridLinesVisibility(sheetId) {
             return this.getSheet(sheetId).areGridLinesVisible;
+        }
+        isSheetDirectionRtl(sheetId) {
+            return this.getSheet(sheetId).directionStatus;
         }
         tryGetSheet(sheetId) {
             return this.sheets[sheetId];
@@ -32720,16 +32815,6 @@
                 right: this.getNumberCols(sheetId) - 1,
             };
         }
-        getUnboundedZone(sheetId, zone) {
-            const isFullRow = zone.left === 0 && zone.right === this.getNumberCols(sheetId) - 1;
-            const isFullCol = zone.top === 0 && zone.bottom === this.getNumberRows(sheetId) - 1;
-            return {
-                ...zone,
-                bottom: isFullCol ? undefined : zone.bottom,
-                // cannot be unbounded in the 2 dimensions at once
-                right: isFullRow && !isFullCol ? undefined : zone.right,
-            };
-        }
         getPaneDivisions(sheetId) {
             return this.getSheet(sheetId).panes;
         }
@@ -32822,6 +32907,9 @@
         setGridLinesVisibility(sheetId, areGridLinesVisible) {
             this.history.update("sheets", sheetId, "areGridLinesVisible", areGridLinesVisible);
         }
+        setSheetDirection(sheetId, directionStatus) {
+            this.history.update("sheets", sheetId, "directionStatus", directionStatus);
+        }
         clearZones(sheetId, zones) {
             for (let zone of zones) {
                 for (let col = zone.left; col <= zone.right; col++) {
@@ -32846,6 +32934,7 @@
                 numberOfCols: colNumber,
                 rows: createDefaultRows(rowNumber),
                 areGridLinesVisible: true,
+                directionStatus: false,
                 isVisible: true,
                 panes: {
                     xSplit: 0,
@@ -38280,7 +38369,7 @@
             for (let box of this.boxes) {
                 if (box.content) {
                     const style = box.style || {};
-                    const align = box.content.align || "left";
+                    let align = box.content.align || "left";
                     // compute font and textColor
                     const font = computeTextFont(style);
                     if (font !== currentFont) {
@@ -38289,6 +38378,12 @@
                     }
                     ctx.fillStyle = style.textColor || "#000";
                     // compute horizontal align start point parameter
+                    if (this.getters.isSheetDirectionRtl(this.getters.getActiveSheetId())) {
+                        if (align === "left")
+                            align = "right";
+                        else if (align === "right")
+                            align = "left";
+                    }
                     let x = box.x;
                     if (align === "left") {
                         x += MIN_CELL_TEXT_MARGIN + (box.image ? box.image.size + MIN_CF_ICON_MARGIN : 0);
@@ -38319,7 +38414,26 @@
                     // use the horizontal and the vertical start points to:
                     // fill text / fill strikethrough / fill underline
                     for (let brokenLine of box.content.textLines) {
-                        ctx.fillText(brokenLine, Math.round(x), Math.round(y));
+                        if (this.getters.isSheetDirectionRtl(this.getters.getActiveSheetId())) {
+                            ctx.save();
+                            ctx.scale(-1, 1); // Flip horizontally
+                            const textWidth = ctx.measureText(brokenLine).width;
+                            let adjustedX;
+                            if (align === "left") {
+                                adjustedX = -(Math.round(x) + textWidth);
+                            }
+                            else if (align === "right") {
+                                adjustedX = -(Math.round(x) - textWidth);
+                            }
+                            else {
+                                adjustedX = -Math.round(x);
+                            }
+                            ctx.fillText(brokenLine, adjustedX, Math.round(y));
+                            ctx.restore();
+                        }
+                        else {
+                            ctx.fillText(brokenLine, Math.round(x), Math.round(y));
+                        }
                         if (style.strikethrough || style.underline) {
                             const lineWidth = computeTextWidth(ctx, brokenLine, style);
                             let _x = x;
@@ -38462,16 +38576,39 @@
                 const colName = numberToLetters(i);
                 ctx.fillStyle = activeCols.has(i) ? "#fff" : TEXT_HEADER_COLOR;
                 let colStart = this.getHeaderOffset("COL", left, i);
-                ctx.fillText(colName, colStart + colSize / 2, HEADER_HEIGHT / 2);
                 ctx.moveTo(colStart + colSize, 0);
                 ctx.lineTo(colStart + colSize, HEADER_HEIGHT);
+                if (this.getters.isSheetDirectionRtl(this.getters.getActiveSheetId())) {
+                    ctx.save();
+                    ctx.translate(colStart + colSize / 2, HEADER_HEIGHT / 2);
+                    ctx.scale(-1, 1); // Flip horizontally
+                    ctx.fillText(colName, 0, 0);
+                    ctx.restore();
+                }
+                else {
+                    ctx.fillText(colName, colStart + colSize / 2, HEADER_HEIGHT / 2);
+                }
             }
             // row text + separator
             for (const i of visibleRows) {
                 const rowSize = this.getters.getRowSize(sheetId, i);
                 ctx.fillStyle = activeRows.has(i) ? "#fff" : TEXT_HEADER_COLOR;
                 let rowStart = this.getHeaderOffset("ROW", top, i);
-                ctx.fillText(String(i + 1), HEADER_WIDTH / 2, rowStart + rowSize / 2);
+                if (this.getters.isSheetDirectionRtl(this.getters.getActiveSheetId())) {
+                    ctx.save();
+                    ctx.translate(HEADER_WIDTH / 2, rowStart + rowSize / 2);
+                    ctx.scale(-1, 1); // Flip vertically
+                    ctx.fillText(String(i + 1), 0, 0);
+                    ctx.restore();
+                }
+                else {
+                    ctx.fillText(String(i + 1), HEADER_WIDTH / 2, rowStart + rowSize / 2);
+                }
+            }
+            // row separator
+            for (const i of visibleRows) {
+                const rowSize = this.getters.getRowSize(sheetId, i);
+                let rowStart = this.getHeaderOffset("ROW", top, i);
                 ctx.moveTo(0, rowStart + rowSize);
                 ctx.lineTo(HEADER_WIDTH, rowStart + rowSize);
             }
@@ -38780,11 +38917,11 @@
             return 0 /* CommandResult.Success */;
         }
         handleEvent(event) {
+            const xc = zoneToXc(event.anchor.zone);
             const inputSheetId = this.activeSheet;
             const sheetId = this.getters.getActiveSheetId();
-            const zone = event.anchor.zone;
-            const range = this.getters.getRangeFromZone(sheetId, event.type === "HeadersSelected" ? this.getters.getUnboundedZone(sheetId, zone) : zone);
-            this.add([this.getters.getSelectionRangeString(range, inputSheetId)]);
+            const sheetName = this.getters.getSheetName(sheetId);
+            this.add([sheetId === inputSheetId ? xc : `${getCanonicalSheetName(sheetName)}!${xc}`]);
         }
         handle(cmd) {
             switch (cmd.type) {
@@ -41242,20 +41379,12 @@
             if (this.mode !== "selecting") {
                 return;
             }
-            const sheetId = this.getters.getActiveSheetId();
-            let unboundedZone;
-            if (event.type === "HeadersSelected") {
-                unboundedZone = this.getters.getUnboundedZone(sheetId, event.anchor.zone);
-            }
-            else {
-                unboundedZone = event.anchor.zone;
-            }
             switch (event.mode) {
                 case "newAnchor":
-                    this.insertSelectedRange(unboundedZone);
+                    this.insertSelectedRange(event.anchor.zone);
                     break;
                 default:
-                    this.replaceSelectedRanges(unboundedZone);
+                    this.replaceSelectedRanges(event.anchor.zone);
                     break;
             }
         }
@@ -41312,9 +41441,7 @@
                     }
                     break;
                 case "START_CHANGE_HIGHLIGHT":
-                    // FIXME: thiws whole ordeal could be handled with the Selection Processor which would extend the feature to selection inputs
                     this.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-                    // FIXME: we should check range SheetId compared to this.activeSheetId r maybe not have a sheetId in the payload ??
                     const range = this.getters.getRangeFromRangeData(cmd.range);
                     const previousRefToken = this.currentTokens
                         .filter((token) => token.type === "REFERENCE")
@@ -41668,11 +41795,14 @@
             const ref = this.getZoneReference(zone);
             this.replaceText(ref, this.selectionInitialStart, this.selectionEnd);
         }
-        getZoneReference(zone) {
-            const inputSheetId = this.getters.getCurrentEditedCell().sheetId;
+        getZoneReference(zone, fixedParts = [{ colFixed: false, rowFixed: false }]) {
             const sheetId = this.getters.getActiveSheetId();
-            const range = this.getters.getRangeFromZone(sheetId, zone);
-            return this.getters.getSelectionRangeString(range, inputSheetId);
+            let selectedXc = this.getters.zoneToXC(sheetId, zone, fixedParts);
+            if (this.getters.getCurrentEditedCell().sheetId !== this.getters.getActiveSheetId()) {
+                const sheetName = getCanonicalSheetName(this.getters.getSheetName(this.getters.getActiveSheetId()));
+                selectedXc = `${sheetName}!${selectedXc}`;
+            }
+            return selectedXc;
         }
         getRangeReference(range, fixedParts = [{ colFixed: false, rowFixed: false }]) {
             let _fixedParts = [...fixedParts];
@@ -42526,7 +42656,7 @@
             const file = await this.getImageFromUser();
             const path = await this.fileStore.upload(file);
             const size = await this.getImageSize(path);
-            return { path, size, mimetype: file.type };
+            return { path, size };
         }
         getImageFromUser() {
             return new Promise((resolve, reject) => {
@@ -43454,6 +43584,12 @@
             const sheetId = this.env.model.getters.getActiveSheetId();
             const { right } = this.env.model.getters.getSheetZone(sheetId);
             const { end } = this.env.model.getters.getColDimensions(sheetId, right);
+            const isRtl = this.env.model.getters.isSheetDirectionRtl(sheetId);
+            if (isRtl) {
+                return cssPropertiesToCss({ "max-width": `${end}px`,
+                    transform: "scaleX(-1)"
+                });
+            }
             return cssPropertiesToCss({ "max-width": `${end}px` });
         }
         get gridOverlayDimensions() {
@@ -47514,6 +47650,7 @@
         }
         const sheetViewAttrs = [
             ["showGridLines", sheet.areGridLinesVisible ? 1 : 0],
+            ["sheetDirection", sheet.directionStatus ? 0 : 1],
             ["workbookViewId", 0],
         ];
         let sheetView = escapeXml /*xml*/ `
@@ -47593,7 +47730,8 @@
             // Figures and Charts
             let drawingNode = escapeXml ``;
             const drawingRelIds = [];
-            for (const chart of sheet.charts) {
+            const charts = sheet.charts;
+            for (const chart of charts) {
                 const xlsxChartId = convertChartId(chart.id);
                 const chartRelId = addRelsToFile(construct.relsFiles, `xl/drawings/_rels/drawing${sheetIndex}.xml.rels`, {
                     target: `../charts/chart${xlsxChartId}.xml`,
@@ -47602,27 +47740,20 @@
                 drawingRelIds.push(chartRelId);
                 files.push(createXMLFile(createChart(chart, sheetIndex, data), `xl/charts/chart${xlsxChartId}.xml`, "chart"));
             }
-            for (const image of sheet.images) {
-                const mimeType = image.data.mimetype;
-                if (mimeType === undefined)
-                    continue;
-                const extension = IMAGE_MIMETYPE_EXTENSION_MAPPING[mimeType];
-                // only support exporting images with mimetypes specified in the mapping
-                if (extension === undefined)
-                    continue;
+            const images = sheet.images;
+            for (const image of images) {
                 const xlsxImageId = convertImageId(image.id);
-                let imageFileName = `image${xlsxImageId}.${extension}`;
                 const imageRelId = addRelsToFile(construct.relsFiles, `xl/drawings/_rels/drawing${sheetIndex}.xml.rels`, {
-                    target: `../media/${imageFileName}`,
+                    target: `../media/image${xlsxImageId}`,
                     type: XLSX_RELATION_TYPE.image,
                 });
                 drawingRelIds.push(imageRelId);
                 files.push({
-                    path: `xl/media/${imageFileName}`,
-                    imageSrc: image.data.path,
+                    path: `xl/media/image${xlsxImageId}`,
+                    imagePath: image.data.path,
                 });
             }
-            const drawings = [...sheet.charts, ...sheet.images];
+            const drawings = [...charts, ...images];
             if (drawings.length) {
                 const drawingRelId = addRelsToFile(construct.relsFiles, `xl/worksheets/_rels/sheet${sheetIndex}.xml.rels`, {
                     target: `../drawings/drawing${sheetIndex}.xml`,
@@ -47741,8 +47872,6 @@
     }
     function createContentTypes(files) {
         const overrideNodes = [];
-        // hard-code supported image mimetypes
-        const imageDefaultNodes = Object.entries(IMAGE_MIMETYPE_EXTENSION_MAPPING).map(([mimetype, extension]) => createDefaultXMLElement(extension, mimetype));
         for (const file of files) {
             if ("contentType" in file && file.contentType) {
                 overrideNodes.push(createOverride("/" + file.path, CONTENT_TYPES[file.contentType]));
@@ -47758,7 +47887,6 @@
         ];
         const xml = escapeXml /*xml*/ `
     <Types xmlns="${NAMESPACE["Types"]}">
-      ${joinXmlNodes(Object.values(imageDefaultNodes))}
       <Default ${formatAttributes(relsAttributes)} />
       <Default ${formatAttributes(xmlAttributes)} />
       ${joinXmlNodes(overrideNodes)}
@@ -47850,7 +47978,7 @@
             this.coreGetters.getRangeDataFromXc = this.range.getRangeDataFromXc.bind(this.range);
             this.coreGetters.getRangeDataFromZone = this.range.getRangeDataFromZone.bind(this.range);
             this.coreGetters.getRangeFromRangeData = this.range.getRangeFromRangeData.bind(this.range);
-            this.coreGetters.getRangeFromZone = this.range.getRangeFromZone.bind(this.range);
+            this.coreGetters.getSelectionRangeString = this.range.getSelectionRangeString.bind(this.range);
             this.getters = {
                 isReadonly: () => this.config.mode === "readonly" || this.config.mode === "dashboard",
                 isDashboard: () => this.config.mode === "dashboard",
@@ -48373,9 +48501,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.4.0-alpha.3';
-    __info__.date = '2023-06-02T10:56:24.014Z';
-    __info__.hash = '059d66a';
+    __info__.version = '16.4.0-alpha.2';
+    __info__.date = '2023-06-09T10:19:15.666Z';
+    __info__.hash = '8f7572d';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
