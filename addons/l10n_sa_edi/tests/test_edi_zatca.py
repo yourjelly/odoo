@@ -22,7 +22,8 @@ class TestEdiZatca(TestSaEdiCommon):
             expected_tree = self.get_xml_tree_from_string(standard_invoice)
             expected_tree = self.with_applied_xpath(expected_tree, self.invoice_applied_xpath)
 
-            move = self._create_invoice(name='INV/2022/00014', date='2022-09-05', date_due='2022-09-22', partner_id=self.partner_us, product_id=self.product_a, price=320.0)
+            move = self._create_invoice(name='INV/2022/00014', date='2022-09-05', date_due='2022-09-22', partner_id=self.partner_us,
+                                        product_id=self.product_a, price=320.0)
             move._l10n_sa_generate_unsigned_data()
             generated_file = self.env['account.edi.format']._l10n_sa_generate_zatca_template(move)
             current_tree = self.get_xml_tree_from_string(generated_file)
@@ -44,7 +45,8 @@ class TestEdiZatca(TestSaEdiCommon):
             expected_tree = self.get_xml_tree_from_string(standard_credit_note)
             expected_tree = self.with_applied_xpath(expected_tree, applied_xpath)
 
-            credit_note = self._create_credit_note(name='INV/2022/00014', date='2022-09-05', date_due='2022-09-22', partner_id=self.partner_us, product_id=self.product_a, price=320.0)
+            credit_note = self._create_credit_note(name='INV/2022/00014', date='2022-09-05', date_due='2022-09-22',
+                                                   partner_id=self.partner_us, product_id=self.product_a, price=320.0)
             credit_note._l10n_sa_generate_unsigned_data()
             generated_file = self.env['account.edi.format']._l10n_sa_generate_zatca_template(credit_note)
             current_tree = self.get_xml_tree_from_string(generated_file)
@@ -65,7 +67,8 @@ class TestEdiZatca(TestSaEdiCommon):
             expected_tree = self.get_xml_tree_from_string(standard_debit_note)
             expected_tree = self.with_applied_xpath(expected_tree, applied_xpath)
 
-            debit_note = self._create_debit_note(name='INV/2022/00001', date='2022-09-05', date_due='2022-09-22', partner_id=self.partner_us, product_id=self.product_b, price=15.80)
+            debit_note = self._create_debit_note(name='INV/2022/00001', date='2022-09-05', date_due='2022-09-22',
+                                                 partner_id=self.partner_us, product_id=self.product_b, price=15.80)
             debit_note._l10n_sa_generate_unsigned_data()
             generated_file = self.env['account.edi.format']._l10n_sa_generate_zatca_template(debit_note)
             current_tree = self.get_xml_tree_from_string(generated_file)
@@ -79,7 +82,8 @@ class TestEdiZatca(TestSaEdiCommon):
             expected_tree = self.get_xml_tree_from_string(simplified_invoice)
             expected_tree = self.with_applied_xpath(expected_tree, self.invoice_applied_xpath)
 
-            move = self._create_invoice(name='INV/2023/00034', date='2023-03-10', date_due='2023-03-10', partner_id=self.partner_sa_simplified, product_id=self.product_burger, price=265.00, quantity=3.0)
+            move = self._create_invoice(name='INV/2023/00034', date='2023-03-10', date_due='2023-03-10', partner_id=self.partner_sa_simplified,
+                                        product_id=self.product_burger, price=265.00, quantity=3.0)
             move._l10n_sa_generate_unsigned_data()
             generated_file = self.env['account.edi.format']._l10n_sa_generate_zatca_template(move)
             current_tree = self.get_xml_tree_from_string(generated_file)
@@ -93,7 +97,9 @@ class TestEdiZatca(TestSaEdiCommon):
             expected_tree = self.get_xml_tree_from_string(simplified_credit_note)
             expected_tree = self.with_applied_xpath(expected_tree, self.credit_note_applied_xpath)
 
-            move = self._create_credit_note(name='INV/2023/00034', date='2023-03-10', date_due='2023-03-10', partner_id=self.partner_sa_simplified, product_id=self.product_burger, price=265.00, quantity=3.0)
+            move = self._create_credit_note(name='INV/2023/00034', date='2023-03-10', date_due='2023-03-10',
+                                            partner_id=self.partner_sa_simplified, product_id=self.product_burger,
+                                            price=265.00, quantity=3.0)
             move._l10n_sa_generate_unsigned_data()
             generated_file = self.env['account.edi.format']._l10n_sa_generate_zatca_template(move)
             current_tree = self.get_xml_tree_from_string(generated_file)
@@ -107,7 +113,9 @@ class TestEdiZatca(TestSaEdiCommon):
             expected_tree = self.get_xml_tree_from_string(simplified_credit_note)
             expected_tree = self.with_applied_xpath(expected_tree, self.debit_note_applied_xpath)
 
-            move = self._create_debit_note(name='INV/2023/00034', date='2023-03-10', date_due='2023-03-10', partner_id=self.partner_sa_simplified, product_id=self.product_burger, price=265.00, quantity=2.0)
+            move = self._create_debit_note(name='INV/2023/00034', date='2023-03-10', date_due='2023-03-10',
+                                           partner_id=self.partner_sa_simplified, product_id=self.product_burger,
+                                           price=265.00, quantity=2.0)
             move._l10n_sa_generate_unsigned_data()
             generated_file = self.env['account.edi.format']._l10n_sa_generate_zatca_template(move)
             current_tree = self.get_xml_tree_from_string(generated_file)

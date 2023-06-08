@@ -145,6 +145,9 @@
       </cac:Contact>
     </cac:Party>
   </cac:AccountingCustomerParty>
+  <cac:Delivery>
+    <cbc:ActualDeliveryDate>2023-03-10</cbc:ActualDeliveryDate>
+  </cac:Delivery>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode listID="UN/ECE 4461">1</cbc:PaymentMeansCode>
     <cbc:PaymentDueDate>2023-03-10</cbc:PaymentDueDate>

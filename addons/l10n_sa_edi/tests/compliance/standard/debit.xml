@@ -147,6 +147,9 @@
             </cac:Contact>
         </cac:Party>
     </cac:AccountingCustomerParty>
+    <cac:Delivery>
+      <cbc:ActualDeliveryDate>2022-09-05</cbc:ActualDeliveryDate>
+    </cac:Delivery>
     <cac:PaymentMeans>
         <cbc:PaymentMeansCode listID="UN/ECE 4461">1</cbc:PaymentMeansCode>
         <cbc:PaymentDueDate>2022-09-05</cbc:PaymentDueDate>
