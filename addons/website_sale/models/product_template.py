@@ -402,11 +402,10 @@ class ProductTemplate(models.Model):
             if product.id:
                 product.website_url = "/shop/%s" % slug(product)
 
-
     def _get_website_ribbon(self):
         if self.website_ribbon_id:
             return self.website_ribbon_id
-        return self.product_tag_ids.ribbon_id[:1] or self.product_variant_ids.additional_product_tag_ids.ribbon_id[:1]
+        return self.env['product.ribbon']
 
     @api.model
     def _get_alternative_product_filter(self):
@@ -442,11 +441,14 @@ class ProductTemplate(models.Model):
         with_price = options['displayDetail']
         domains = [website.sale_product_domain()]
         category = options.get('category')
+        tags = options.get('tags')
         min_price = options.get('min_price')
         max_price = options.get('max_price')
         attrib_values = options.get('attrib_values')
         if category:
             domains.append([('public_categ_ids', 'child_of', unslug(category)[1])])
+        if tags:
+            domains.append([('product_variant_ids.all_product_tag_ids', 'in', tags)])
         if min_price:
             domains.append([('list_price', '>=', min_price)])
         if max_price:
@@ -567,3 +569,9 @@ class ProductTemplate(models.Model):
     def _website_show_quick_add(self):
         website = self.env['website'].get_current_website()
         return self.sale_ok and (not website.prevent_zero_price_sale or self._get_contextual_price())
+
+    def write(self, vals):
+        res = super(ProductTemplate, self).write(vals)
+        if 'website_ribbon_id' in vals:
+            self.mapped('product_variant_ids').write({'website_product_ribbon_id': vals.get('website_ribbon_id')})
+        return res

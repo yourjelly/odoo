@@ -116,6 +116,12 @@
                          data-dependencies="attributes_opt, attributes_opt_top"
                          data-no-preview="true"
                          data-reload="/"/>
+            <we-checkbox string="Product Tags Filter"
+                         class="o_we_sublevel_1"
+                         data-customize-website-views="website_sale.filter_products_tags"
+                         data-dependencies="attributes_opt, attributes_opt_top"
+                         data-no-preview="true"
+                         data-reload="/"/>
             <we-row string="Top Bar" class="o_we_full_row">
                 <we-button string="Sort by"
                            data-customize-website-views="website_sale.sort"
@@ -238,6 +244,10 @@
                 <we-button data-name="variants_options_opt" data-customize-website-views="">Options</we-button>
                 <we-button data-name="variants_products_list_opt" data-customize-website-views="website_sale.product_variants">Products List</we-button>
             </we-select>
+            <we-checkbox string="Product Tags"
+                data-customize-website-views="website_sale.product_tags"
+                data-no-preview="true"
+                data-reload="/"/>
             <we-row string="Cart" class="o_we_full_row" data-name="o_wsale_buy_now_opt">
                 <we-button title="Buy Now" class="o_we_buy_now_btn"
                            data-customize-website-views="website_sale.product_buy_now"

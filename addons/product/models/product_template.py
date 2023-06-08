@@ -5,7 +5,7 @@ import itertools
 import logging
 from collections import defaultdict
 
-from odoo import api, fields, models, tools, _, SUPERUSER_ID
+from odoo import api, fields, models, tools, Command, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError, RedirectWarning, UserError
 from odoo.osv import expression
 
@@ -142,7 +142,7 @@ class ProductTemplate(models.Model):
         ('1', 'Favorite'),
     ], default='0', string="Favorite")
 
-    product_tag_ids = fields.Many2many('product.tag', 'product_tag_product_template_rel', string='Product Tags')
+    product_tag_ids = fields.Many2many('product.tag', string='Product Tags')
 
     def _compute_item_count(self):
         for template in self:
@@ -457,6 +457,8 @@ class ProductTemplate(models.Model):
             uom_po_id = self.env['uom.uom'].browse(vals.get('uom_po_id')) or self.uom_po_id
             if uom_id and uom_po_id and uom_id.category_id != uom_po_id.category_id:
                 vals['uom_po_id'] = uom_id.id
+        if 'product_tag_ids' in vals:
+            old_ids = set(self.product_tag_ids.ids)
         res = super(ProductTemplate, self).write(vals)
         if 'attribute_line_ids' in vals or (vals.get('active') and len(self.product_variant_ids) == 0):
             self._create_variant_ids()
@@ -471,6 +473,15 @@ class ProductTemplate(models.Model):
                 'image_128',
                 'can_image_1024_be_zoomed',
             ])
+        if 'product_tag_ids' in vals:
+            new_ids = set(self.product_tag_ids.ids)
+            to_delete = self.env['product.tag'].browse(list(old_ids - new_ids))
+            to_add = self.env['product.tag'].browse(list(new_ids - old_ids))
+            vars_ids = self.mapped('product_variant_ids')
+            if to_delete:
+                vars_ids.write({'all_product_tag_ids': [Command.unlink(t.id) for t in to_delete]})
+            if to_add:
+                vars_ids.write({'all_product_tag_ids': [Command.link(t.id) for t in to_add]})
         return res
 
     @api.returns('self', lambda value: value.id)

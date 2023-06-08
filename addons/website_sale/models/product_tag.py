@@ -7,4 +7,7 @@ class ProductTag(models.Model):
     _name = 'product.tag'
     _inherit = ['website.multi.mixin', 'product.tag']
 
-    ribbon_id = fields.Many2one('product.ribbon', string='Ribbon')
+    product_variant_image_ids = fields.One2many('product.image', 'product_variant_id', string="Extra Variant Images")
+    ecommerce_visibility = fields.Boolean(default=True,
+        help="By checking this field this tag will be displayed for users.")
+    product_tag_image = fields.Image("Image", max_width=50, max_height=50)

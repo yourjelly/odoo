@@ -9,29 +9,20 @@ class ProductTag(models.Model):
     _name = 'product.tag'
     _description = 'Product Tag'
 
-    def _get_default_color(self):
-        return randint(1, 11)
-
     name = fields.Char('Tag Name', required=True, translate=True)
-    color = fields.Integer('Color', default=_get_default_color)
+    color = fields.Char('Color')
 
-    product_template_ids = fields.Many2many('product.template', 'product_tag_product_template_rel')
-    product_product_ids = fields.Many2many('product.product', 'product_tag_product_product_rel')
+    def _get_default_ids(self):
+        pt_id = self.env.context.get('product_template_id')
+        product_template = self.env['product.template'].browse(pt_id)
+        return product_template.product_variant_ids
+
     product_ids = fields.Many2many(
-        'product.product', string='All Product Variants using this Tag',
-        compute='_compute_product_ids', search='_search_product_ids'
-    )
+        'product.product',
+        'product_tag_product_product_rel',
+        string="All Product Variants using this Tag",
+        default=_get_default_ids)
 
     _sql_constraints = [
         ('name_uniq', 'unique (name)', "Tag name already exists!"),
     ]
-
-    @api.depends('product_template_ids', 'product_product_ids')
-    def _compute_product_ids(self):
-        for tag in self:
-            tag.product_ids = tag.product_template_ids.product_variant_ids | tag.product_product_ids
-
-    def _search_product_ids(self, operator, operand):
-        if operator in expression.NEGATIVE_TERM_OPERATORS:
-            return [('product_template_ids.product_variant_ids', operator, operand), ('product_product_ids', operator, operand)]
-        return ['|', ('product_template_ids.product_variant_ids', operator, operand), ('product_product_ids', operator, operand)]

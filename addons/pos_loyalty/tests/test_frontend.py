@@ -279,7 +279,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'reward_type': 'product',
                 'reward_product_tag_id': self.env['product.tag'].create({
                     'name': 'reward_product_tag',
-                    'product_product_ids': (self.desk_pad | self.monitor_stand).ids,
+                    'product_ids': (self.desk_pad | self.monitor_stand).ids,
                 }).id,
                 'reward_product_qty': 1,
                 'required_points': 2,

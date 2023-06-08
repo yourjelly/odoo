@@ -226,7 +226,7 @@ class WebsiteSale(http.Controller):
                 yield {'loc': loc}
 
     def _get_search_options(
-        self, category=None, attrib_values=None, min_price=0.0, max_price=0.0, conversion_rate=1, **post
+        self, category=None, attrib_values=None, tags='', min_price=0.0, max_price=0.0, conversion_rate=1, **post
     ):
         return {
             'displayDescription': True,
@@ -236,6 +236,7 @@ class WebsiteSale(http.Controller):
             'displayImage': True,
             'allowFuzzy': not post.get('noFuzzy'),
             'category': str(category.id) if category else None,
+            'tags': tags,
             'min_price': min_price / conversion_rate,
             'max_price': max_price / conversion_rate,
             'attrib_values': attrib_values,
@@ -297,11 +298,12 @@ class WebsiteSale(http.Controller):
             search_result = search_result.filtered(lambda tmpl: filter_template(tmpl, possible_attrib_values_list))
         return fuzzy_search_term, product_count, search_result
 
-    def _shop_get_query_url_kwargs(self, category, search, min_price, max_price, attrib=None, order=None, **post):
+    def _shop_get_query_url_kwargs(self, category, search, min_price, max_price, attrib=None, order=None, tags=None, **post):
         return {
             'category': category,
             'search': search,
             'attrib': attrib,
+            'tags': tags,
             'min_price': min_price,
             'max_price': max_price,
             'order': order,
@@ -352,6 +354,13 @@ class WebsiteSale(http.Controller):
         attrib_values = [[int(x) for x in v.split("-")] for v in attrib_list if v]
         attributes_ids = {v[0] for v in attrib_values}
         attrib_set = {v[1] for v in attrib_values}
+
+        filter_by_tags_enabled = website.is_view_active('website_sale.filter_products_tags')
+        if filter_by_tags_enabled:
+            tags = request.httprequest.args.getlist('tags')
+            if tags and all([tag.isnumeric() for tag in tags]):
+                post['tags'] = tags
+                tags = {int(tag) for tag in tags}
 
         keep = QueryURL('/shop', **self._shop_get_query_url_kwargs(category and int(category), search, min_price, max_price, **post))
 
@@ -421,6 +430,14 @@ class WebsiteSale(http.Controller):
                     max_price = max_price if max_price >= available_min_price else available_max_price
                     post['max_price'] = max_price
 
+        if filter_by_tags_enabled:
+            ProductTag = request.env['product.tag']
+            ids = [pv.id for product in search_product for pv in product.product_variant_ids]
+            all_tags = ProductTag.search(
+                [('product_ids', 'in', ids + search_product.ids),
+                 ('ecommerce_visibility', '=', True),
+                ])
+
         website_domain = website.website_domain()
         categs_domain = [('parent_id', '=', False)] + website_domain
         if search:
@@ -489,6 +506,11 @@ class WebsiteSale(http.Controller):
             values['max_price'] = max_price or available_max_price
             values['available_min_price'] = tools.float_round(available_min_price, 2)
             values['available_max_price'] = tools.float_round(available_max_price, 2)
+        if filter_by_tags_enabled:
+            values.update({
+                'all_tags': all_tags,
+                'tags': tags,
+                })
         if category:
             values['main_object'] = category
         values.update(self._get_additional_shop_values(values))
@@ -652,6 +674,7 @@ class WebsiteSale(http.Controller):
             'category': category,
             'search': search,
             'attrib': attrib,
+            'tags': kwargs.get('tags'),
             'min_price': kwargs.get('min_price'),
             'max_price': kwargs.get('max_price'),
         }
@@ -678,7 +701,7 @@ class WebsiteSale(http.Controller):
         # Needed to trigger the recently viewed product rpc
         view_track = request.website.viewref("website_sale.product").track
 
-        return {
+        values = {
             'search': search,
             'category': category,
             'pricelist': request.website.get_current_pricelist(),
@@ -691,6 +714,17 @@ class WebsiteSale(http.Controller):
             'add_qty': 1,
             'view_track': view_track,
         }
+
+        website = request.env['website'].get_current_website()
+        if website.is_view_active('website_sale.product_tags'):
+            ProductTag = request.env['product.tag']
+            all_product_tags = ProductTag.search([
+                ('product_ids', 'in', [product.id] + product.product_variant_ids.ids),
+                ('ecommerce_visibility', '=', True),
+                ])
+            values['all_product_tags'] = all_product_tags
+
+        return values
 
     @http.route(['/shop/change_pricelist/<model("product.pricelist"):pricelist>'], type='http', auth="public", website=True, sitemap=False)
     def pricelist_change(self, pricelist, **post):

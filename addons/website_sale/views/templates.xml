@@ -275,6 +275,7 @@
             <t t-set="opt_wsale_categories" t-value="is_view_active('website_sale.products_categories')"/>
             <t t-set="opt_wsale_attributes" t-value="is_view_active('website_sale.products_attributes')"/>
             <t t-set="opt_wsale_filter_price" t-value="is_view_active('website_sale.filter_products_price')"/>
+            <t t-set="opt_wsale_filter_tags" t-value="is_view_active('website_sale.filter_products_tags')"/>
 
             <t t-set="opt_wsale_categories_top" t-value="is_view_active('website_sale.products_categories_top')"/>
             <t t-set="opt_wsale_attributes_top" t-value="is_view_active('website_sale.products_attributes_top')"/>
@@ -340,7 +341,7 @@
                                         data-bs-toggle="offcanvas"
                                         data-bs-target="#o_wsale_offcanvas">
                                     <i class="fa fa-sliders"/>
-                                    <span t-if="isFilteringByPrice or attrib_set" t-attf-class="position-absolute top-0 start-100 translate-middle badge border border-{{navClass}} rounded-circle bg-danger p-1"><span class="visually-hidden">filters active</span></span>
+                                    <span t-if="isFilteringByPrice or attrib_set or tags" t-attf-class="position-absolute top-0 start-100 translate-middle badge border border-{{navClass}} rounded-circle bg-danger p-1"><span class="visually-hidden">filters active</span></span>
                                 </button>
                             </div>
 
@@ -649,6 +650,38 @@
                             </div>
                         </div>
                     </t>
+                    <t t-if="opt_wsale_filter_tags and (opt_wsale_attributes or opt_wsale_attributes_top)">
+                        <t t-set="_status" t-value="'inactive'"/>
+                        <t t-foreach="all_tags" t-as="v" t-if="v.id in tags" t-set="_status" t-value="'active'"/>
+                        <div t-if="all_tags">
+                            <h2 class="accordion-header mb-0" t-attf-id="o_wsale_offcanvas_tags_header">
+                                <button t-attf-class="o_wsale_offcanvas_title accordion-button border-top rounded-0 {{ not tags and 'collapsed'}}"
+                                        type="button"
+                                        t-att-data-status="_status"
+                                        data-bs-toggle="collapse"
+                                        t-attf-data-bs-target="#o_wsale_offcanvas_tags"
+                                        t-att-aria-expanded="_status == 'active' and 'True' or 'False'"
+                                        t-attf-aria-controls="o_wsale_offcanvas_tags">
+                                        <b>Tags</b>
+                                </button>
+                            </h2>
+                            <div t-attf-id="o_wsale_offcanvas_tags"
+                                 t-attf-class="accordion-collapse collapse {{ (_status == 'active') and 'show'}}"
+                                 t-att-aria-expanded="(_status == 'active') and 'True' or 'False'"
+                                 t-attf-aria-labelledby="o_wsale_offcanvas_tags_header">
+                                <div class="accordion-body pt-0">
+                                    <div class="list-group list-group-flush">
+                                        <t t-foreach="all_tags" t-as="tag" class="list-group-item border-0 ps-0 pb-0">
+                                            <div class="form-check mb-1">
+                                                <input type="checkbox" name="tags" class="form-check-input" t-att-id="tag.id" t-att-value="tag.id" t-att-checked="'checked' if tag.id in tags else None"/>
+                                                <label class="form-check-label fw-normal" t-att-for="tag.id" t-field="tag.name"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
                 </form>
 
                 <t t-if="opt_wsale_filter_price and (opt_wsale_attributes or opt_wsale_attributes_top)"
@@ -658,8 +691,8 @@
                 </t>
             </div>
             <div class="offcanvas-body d-flex justify-content-between flex-grow-0 border-top overflow-hidden">
-                <a t-attf-class="btn btn-{{navClass}} d-flex py-1 mb-2 {{(not attrib_values and not isFilteringByPrice) and 'disabled' }}"
-                   t-att-aria-disabled="(not attrib_values and not isFilteringByPrice) and 'true' or 'false'"
+                <a t-attf-class="btn btn-{{navClass}} d-flex py-1 mb-2 {{(not attrib_values and not isFilteringByPrice and not tags) and 'disabled' }}"
+                   t-att-aria-disabled="(not attrib_values and not isFilteringByPrice and not tags) and 'true' or 'false'"
                    href="/shop"
                    title="Clear Filters">
                     Clear Filters
@@ -804,7 +837,7 @@
                     <input t-if="category" type="hidden" name="category" t-att-value="category.id" />
                     <input type="hidden" name="search" t-att-value="search" />
                     <input type="hidden" name="order" t-att-value="order"/>
-                    <a t-if="attrib_values" t-att-href="keep('/shop'+ ('/category/'+slug(category)) if category else None, attrib=0)" t-attf-class="btn btn-{{navClass}} d-flex py-1 mb-2">
+                    <a t-if="attrib_values or tags" t-att-href="keep('/shop'+ ('/category/'+slug(category)) if category else None, attrib=0, tags=0)" t-attf-class="btn btn-{{navClass}} d-flex py-1 mb-2">
                         <small class="mx-auto"><b>Clear Filters</b></small>
                         <i class="oi oi-close"/>
                     </a>
@@ -842,6 +875,23 @@
                             </div>
                         </div>
                     </t>
+                    <t t-if="opt_wsale_filter_tags and opt_wsale_attributes"
+                        t-call="website_sale.filter_products_tags">
+                        <t t-set="all_tags" t-value="all_tags"/>
+                    </t>
+                        <!-- <div t-if="all_tags">
+                            <h6 class="mb-3">
+                                <b>Tags</b>
+                            </h6>
+                            <div class="flex-column mb-3">
+                                <t t-foreach="all_tags" t-as="tag">
+                                    <div class="form-check mb-1">
+                                        <input type="checkbox" name="tags" class="form-check-input" t-att-id="tag.id" t-att-value="tag.id" t-att-checked="'checked' if tag.id in tags else None"/>
+                                        <label class="form-check-label fw-normal" t-att-for="tag.id" t-field="tag.name"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div> -->
                 </form>
             </div>
         </xpath>
@@ -860,6 +910,22 @@
                    t-att-data-currency-position="website.currency_id.position"
                    t-att-step="website.currency_id.rounding" t-att-min="'%f' % (available_min_price)"
                    t-att-max="'%f' % (available_max_price)" t-att-value="'%f,%f' % (min_price, max_price)"/>
+        </div>
+    </template>
+
+    <template id="filter_products_tags" name="Filter by Tags" active="True">
+        <div t-if="all_tags">
+            <h6 class="mb-3">
+                <b>Tags</b>
+            </h6>
+            <div class="flex-column mb-3">
+                <t t-foreach="all_tags" t-as="tag">
+                    <div class="form-check mb-1">
+                        <input type="checkbox" name="tags" class="form-check-input" t-att-id="tag.id" t-att-value="tag.id" t-att-checked="'checked' if tag.id in tags else None"/>
+                        <label class="form-check-label fw-normal" t-att-for="tag.id" t-field="tag.name"/>
+                    </div>
+                </t>
+            </div>
         </div>
     </template>
 
@@ -1011,7 +1077,10 @@
                                     </t>
                                 </table>
                             </div>
-                            <div id="o_product_terms_and_share" class="d-flex justify-content-between flex-column flex-md-row align-items-md-end mb-3">
+                            <t t-if="is_view_active('website_sale.product_tags')" t-call="website_sale.product_tags">
+                                <t t-set="all_product_tags" t-value="all_product_tags"/>
+                            </t>
+                                <div id="o_product_terms_and_share" class="d-flex justify-content-between flex-column flex-md-row align-items-md-end mb-3">
                             </div>
                         </div>
                     </div>
@@ -1021,6 +1090,26 @@
             </div>
         </t>
     </t>
+    </template>
+
+    <template id="product_tags" name="Product Tags" active="True">
+        <t t-foreach="all_product_tags" t-as="tag" class="form-check mb-1">
+            <span t-if="tag.product_tag_image"
+                    t-field="tag.product_tag_image"
+                    class="mb-2"
+                    t-options="{'widget': 'image',
+                                'style': 'border-radius: 40% !important;
+                                            height: 30px;
+                                            width: 45px;
+                                            vertical-align: bottom;
+                                            border:1px solid;}',
+                                'align': 'center'}"/>
+            <span t-else=""
+                class="badge rounded-pill bg-secondary align-text-middle"
+                t-attf-style="background-color: #{tag.color} !important; height: 30px  !important;" t-field="tag.name"
+            />
+        </t>
+
     </template>
 
     <template id="alternative_products" name="Alternative Products" inherit_id="website_sale.product" active="True">

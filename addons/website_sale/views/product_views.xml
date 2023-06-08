@@ -21,6 +21,7 @@
             <field name="name" position="after">
                 <field name="website_id" groups="website.group_multi_website" optional="show"/>
                 <field name="is_published" string="Is Published" optional="hide"/>
+                <field name="website_product_ribbon_id" options="{'no_quick_create': True}"/>
             </field>
         </field>
     </record>
@@ -160,11 +161,14 @@
                     <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
                     <field name="website_sequence" groups="base.group_no_one"/>
                     <field name="public_categ_ids" widget="many2many_tags" string="Categories"/>
-                    <field name="website_ribbon_id" groups="base.group_no_one" options="{'no_quick_create': True}"/>
+                    <field name="website_ribbon_id" options="{'no_quick_create': True}"/>
                 </group>
                 <group name="product_template_images" string="Extra Product Media" attrs="{'invisible': [('sale_ok','=',False)]}">
                     <field name="product_template_image_ids" class="o_website_sale_image_list" context="{'default_name': name}" mode="kanban" add-label="Add a Media" nolabel="1"/>
                 </group>
+            </xpath>
+            <xpath expr="//div[hasclass('product_tag_ids')]" position="inside">
+                <button name="%(product_public_tags_action)d" icon="oi-arrow-right" type="action" class="btn-link"/>
             </xpath>
         </field>
     </record>
@@ -174,6 +178,9 @@
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
         <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('all_product_tag_ids')]" position="inside">
+                <button name="%(product_public_tags_action)d" icon="oi-arrow-right" type="action" class="btn-link"/>
+            </xpath>
             <group name="pricing" position="inside">
                 <label for="base_unit_count" groups="website_sale.group_show_uom_price"/>
                 <div name="base_unit_price" groups="website_sale.group_show_uom_price" class="d-flex flex-row">
@@ -187,6 +194,9 @@
             <group name="packaging" position="after">
                 <group name="product_variant_images" string="Extra Variant Media">
                     <field name="product_variant_image_ids" class="o_website_sale_image_list" context="{'default_name': name}" mode="kanban" add-label="Add a Media" nolabel="1"/>
+                </group>
+                <group name="sales" string="Sales">
+                    <field name="website_product_ribbon_id" options="{'no_quick_create': True}"/>
                 </group>
             </group>
         </field>
@@ -207,11 +217,6 @@
                         <group>
                             <field name="html_class"/>
                             <field name="bg_color"/>
-                        </group>
-                    </group>
-                    <group string="Products">
-                        <group>
-                            <field name="product_tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_edit_color': 1}"/>
                         </group>
                     </group>
                 </sheet>
