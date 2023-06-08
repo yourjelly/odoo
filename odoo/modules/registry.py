@@ -121,6 +121,7 @@ class Registry(Mapping):
 
         ready = False
         init_kwargs = {}
+        is_cli_upgrade = bool(tools.config['update'])
         while not ready:
             registry = object.__new__(cls)
             registry.init(db_name, **init_kwargs)
@@ -131,17 +132,25 @@ class Registry(Mapping):
             # if an exception is raised.
             cls.delete(db_name)
             cls.registries[db_name] = registry  # pylint: disable=unsupported-assignment-operation
+
             try:
                 registry.setup_signaling()
-                try:
-                    odoo.modules.load_modules(registry, update_module=update_module, force_test=force_test, force_demo_=force_demo)
-                except Exception:
-                    odoo.modules.reset_modules_state(db_name)
-                    raise
             except Exception:
-                _logger.error('Failed to load registry')
+                _logger.exception('Failed to setup signaling')
                 del cls.registries[db_name]  # pylint: disable=unsupported-delete-operation
                 raise
+
+            try:
+                odoo.modules.load_modules(registry, update_module=update_module, force_test=force_test, force_demo_=force_demo)
+            except Exception as e:
+                odoo.modules.reset_modules_state(db_name)
+                _logger.error('Some error happen while loading registry: %s', e)
+                tools.config['init'] = {}
+                tools.config['update'] = {}
+                if is_cli_upgrade:
+                    del cls.registries[db_name]  # pylint: disable=unsupported-delete-operation
+                    raise
+                # reload the registry
 
             # Not all modules can be loaded/updated at once, for example
             # 1. module A is marked 'to install' by the pre_init_hook of module B
