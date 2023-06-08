@@ -97,6 +97,9 @@ class StockPicking(models.Model):
         self.ensure_one()
         move_subcontracted = self.move_ids.filtered(lambda m: m.is_subcontract)
         for move in move_subcontracted:
+            temp = move._get_subcontract_production()
+            temp.qty_producing = temp.product_qty
+            temp = temp._onchange_producing()
             production = move._subcontrating_should_be_record()
             if production:
                 return move._action_record_components()

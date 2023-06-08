@@ -119,6 +119,8 @@ class MrpProduction(models.Model):
                 rounding = ml.product_uom_id.rounding
                 if float_compare(quantity, 0, precision_rounding=rounding) <= 0:
                     break
+                if quantity == sum(move_lines.mapped('qty_done')):
+                    return
                 quantity_to_process = min(quantity, ml.reserved_uom_qty - ml.qty_done)
                 quantity -= quantity_to_process
 
