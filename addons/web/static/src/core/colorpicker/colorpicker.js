@@ -1,49 +1,107 @@
 /** @odoo-module **/
 
-import core from "web.core";
-import utils from "web.utils";
-import Widget from "web.Widget";
+import {
+    convertCSSColorToRgba,
+    convertRgbaToCSSColor,
+    convertRgbToHsl,
+    convertHslToRgb,
+} from '@web/core/utils/colors';
+
+import {
+    Component,
+    useRef,
+    onWillStart,
+    onMounted,
+    onWillUpdateProps,
+    onWillDestroy,
+} from "@odoo/owl";
 import { uniqueId } from "@web/core/utils/functions";
 import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 
-var _t = core._t;
 
-var ColorpickerWidget = Widget.extend({
-    template: 'Colorpicker',
-    events: {
-        'click': '_onClick',
-        'keypress': '_onKeypress',
-        'mousedown .o_color_pick_area': '_onMouseDownPicker',
-        'mousedown .o_color_slider': '_onMouseDownSlider',
-        'mousedown .o_opacity_slider': '_onMouseDownOpacitySlider',
-        'change .o_color_picker_inputs': '_onChangeInputs',
-    },
+/**
+ * Confines a value inside an interval
+ *
+ * @param {number} [val] the value to confine
+ * @param {number} [min] the minimum of the interval
+ * @param {number} [max] the maximum of the interval
+ * @return {number} val if val is in [min, max], min if val < min and max
+ *   otherwise
+ */
+function confine(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+}
 
-    /**
-     * @constructor
-     * @param {Widget} parent
-     * @param {Object} [options]
-     * @param {string} [options.defaultColor='#FF0000']
-     * @param {string} [options.noTransparency=false]
-     * @param {boolean} [options.stopClickPropagation=false]
-     */
-    init: function (parent, options) {
-        this._super(...arguments);
-        options = options || {};
+export class Colorpicker extends Component {
+    static template = 'web.Colorpicker';
+    static props = {
+        document: { type: Object, optional: true },
+        defaultColor: { type: String, optional: true },
+        selectedColor: { type: String, optional: true },
+        noTransparency: { type: Boolean, optional: true },
+        colorPreview: { type: Boolean, optional: true },
+        stopClickPropagation: { type: Boolean, optional: true },
+        onColorpickerSelect: { type: Function, optional: true },
+        onColorpickerPreview: { type: Function, optional: true },
+        onEnterColorpicker: { type: Function, optional: true },
+    };
+    static defaultProps = {
+        document: window.document,
+        defaultColor: '#FF0000',
+        noTransparency: false,
+        colorPreview: false,
+        stopClickPropagation: false,
+        onColorpickerSelect: () => {},
+        onColorpickerPreview: () => {},
+        onEnterColorpicker: () => {},
+    };
 
+    elRef = useRef('el');
+
+    setup() {
+        onWillStart(() => {
+            this.init();
+        });
+        onMounted(() => {
+            // Todo: at the time this method is called, the ref is not yet
+            // in the dom and this.elRef.el returns null as the getter check
+            // the node with `inOwnerDocument`.
+            // This hack allows to get the node without the check.
+            this.el = this.__owl__.refs.el;
+            const $el = $(this.el);
+            this.$ = $el.find.bind($el);
+
+            $el.on('click', this._onClick.bind(this));
+            $el.on('keypress', this._onKeypress.bind(this));
+            $el.on('mousedown', '.o_color_pick_area', this._onMouseDownPicker.bind(this));
+            $el.on('mousedown', '.o_color_slider', this._onMouseDownSlider.bind(this));
+            $el.on('mousedown', '.o_opacity_slider', this._onMouseDownOpacitySlider.bind(this));
+            $el.on('change', '.o_color_picker_inputs', this._onChangeInputs.bind(this));
+
+            this.start();
+        });
+        onWillUpdateProps((newProps) => {
+            if (newProps.selectedColor) {
+                this.setSelectedColor(newProps.selectedColor);
+            }
+        });
+        onWillDestroy(() => {
+            this.destroy();
+        });
+    }
+
+    init() {
         this.pickerFlag = false;
         this.sliderFlag = false;
         this.opacitySliderFlag = false;
         this.colorComponents = {};
         this.uniqueId = uniqueId("colorpicker");
         this.selectedHexValue = '';
-
-        this.options = Object.assign({}, options);
-    },
+    }
     /**
      * @override
      */
-    start: function () {
+    start() {
         this.$colorpickerArea = this.$('.o_color_pick_area');
         this.$colorpickerPointer = this.$('.o_picker_pointer');
         this.$colorSlider = this.$('.o_color_slider');
@@ -51,8 +109,7 @@ var ColorpickerWidget = Widget.extend({
         this.$opacitySlider = this.$('.o_opacity_slider');
         this.$opacitySliderPointer = this.$('.o_opacity_pointer');
 
-        var defaultColor = this.options.defaultColor || '#FF0000';
-        var rgba = ColorpickerWidget.convertCSSColorToRgba(defaultColor);
+        var rgba = convertCSSColorToRgba(this.props.defaultColor);
         if (rgba) {
             this._updateRgba(rgba.red, rgba.green, rgba.blue, rgba.opacity);
         }
@@ -105,25 +162,23 @@ var ColorpickerWidget = Widget.extend({
         }, 10));
 
         this.previewActive = true;
-        return this._super.apply(this, arguments);
-    },
+    }
     /**
      * @override
      */
-    destroy: function () {
-        this._super.apply(this, arguments);
+    destroy() {
         if (this.throttleOnMouseMove) {
             this.$documents.off(`.${this.uniqueId}`);
             this.throttleOnMouseMove.cancel();
         }
-    },
+    }
     /**
      * Sets the currently selected color
      *
      * @param {string} color rgb[a]
      */
-    setSelectedColor: function (color) {
-        var rgba = ColorpickerWidget.convertCSSColorToRgba(color);
+    setSelectedColor(color) {
+        var rgba = convertCSSColorToRgba(color);
         if (rgba) {
             const oldPreviewActive = this.previewActive;
             this.previewActive = false;
@@ -131,7 +186,7 @@ var ColorpickerWidget = Widget.extend({
             this.previewActive = oldPreviewActive;
             this._updateUI();
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -142,7 +197,7 @@ var ColorpickerWidget = Widget.extend({
      *
      * @private
      */
-    _updateUI: function () {
+    _updateUI() {
         var self = this;
 
         // Update inputs
@@ -170,7 +225,7 @@ var ColorpickerWidget = Widget.extend({
         var y = this.colorComponents.hue * height / 360;
         this.$colorSliderPointer.css('top', Math.round(y - 2));
 
-        if (! this.options.noTransparency) {
+        if (!this.props.noTransparency) {
             // Update opacity slider position
             var heightOpacity = this.$opacitySlider.height();
             var z = heightOpacity * (1 - this.colorComponents.opacity / 100.0);
@@ -179,25 +234,25 @@ var ColorpickerWidget = Widget.extend({
             // Add gradient color on opacity slider
             this.$opacitySlider.css('background', 'linear-gradient(' + this.colorComponents.hex + ' 0%, transparent 100%)');
         }
-    },
+    }
     /**
      * Updates colors according to given hex value. Opacity is left unchanged.
      *
      * @private
      * @param {string} hex - hexadecimal code
      */
-    _updateHex: function (hex) {
-        var rgb = ColorpickerWidget.convertCSSColorToRgba(hex);
+    _updateHex(hex) {
+        var rgb = convertCSSColorToRgba(hex);
         if (!rgb) {
             return;
         }
         Object.assign(this.colorComponents,
             {hex: hex},
             rgb,
-            ColorpickerWidget.convertRgbToHsl(rgb.red, rgb.green, rgb.blue)
+            convertRgbToHsl(rgb.red, rgb.green, rgb.blue)
         );
         this._updateCssColor();
-    },
+    }
     /**
      * Updates colors according to given RGB values.
      *
@@ -207,7 +262,7 @@ var ColorpickerWidget = Widget.extend({
      * @param {integer} b
      * @param {integer} [a]
      */
-    _updateRgba: function (r, g, b, a) {
+    _updateRgba(r, g, b, a) {
         // Remove full transparency in case some lightness is added
         const opacity = a || this.colorComponents.opacity;
         if (opacity < 0.1 && (r > 0.1 || g > 0.1 || b > 0.1)) {
@@ -217,7 +272,7 @@ var ColorpickerWidget = Widget.extend({
         // We update the hexadecimal code by transforming into a css color and
         // ignoring the opacity (we don't display opacity component in hexa as
         // not supported on all browsers)
-        var hex = ColorpickerWidget.convertRgbaToCSSColor(r, g, b);
+        var hex = convertRgbaToCSSColor(r, g, b);
         if (!hex) {
             return;
         }
@@ -225,10 +280,10 @@ var ColorpickerWidget = Widget.extend({
             {red: r, green: g, blue: b},
             a === undefined ? {} : {opacity: a},
             {hex: hex},
-            ColorpickerWidget.convertRgbToHsl(r, g, b)
+            convertRgbToHsl(r, g, b)
         );
         this._updateCssColor();
-    },
+    }
     /**
      * Updates colors according to given HSL values.
      *
@@ -237,19 +292,19 @@ var ColorpickerWidget = Widget.extend({
      * @param {integer} s
      * @param {integer} l
      */
-    _updateHsl: function (h, s, l) {
+    _updateHsl(h, s, l) {
         // Remove full transparency in case some lightness is added
         let a = this.colorComponents.opacity;
         if (a < 0.1 && l > 0.1) {
             a = 100;
         }
 
-        var rgb = ColorpickerWidget.convertHslToRgb(h, s, l);
+        var rgb = convertHslToRgb(h, s, l);
         if (!rgb) {
             return;
         }
         // We receive an hexa as we ignore the opacity
-        const hex = ColorpickerWidget.convertRgbaToCSSColor(rgb.red, rgb.green, rgb.blue);
+        const hex = convertRgbaToCSSColor(rgb.red, rgb.green, rgb.blue);
         Object.assign(this.colorComponents,
             {hue: h, saturation: s, lightness: l},
             rgb,
@@ -257,14 +312,14 @@ var ColorpickerWidget = Widget.extend({
             {opacity: a},
         );
         this._updateCssColor();
-    },
+    }
     /**
      * Updates color opacity.
      *
      * @private
      * @param {integer} a
      */
-    _updateOpacity: function (a) {
+    _updateOpacity (a) {
         if (a < 0 || a > 100) {
             return;
         }
@@ -272,32 +327,32 @@ var ColorpickerWidget = Widget.extend({
             {opacity: a}
         );
         this._updateCssColor();
-    },
+    }
     /**
      * Trigger an event to annonce that the widget value has changed
      *
      * @private
      */
-    _colorSelected: function () {
-        this.trigger_up('colorpicker_select', this.colorComponents);
-    },
+    _colorSelected () {
+        this.props.onColorpickerSelect(this.colorComponents);
+    }
     /**
      * Updates css color representation.
      *
      * @private
      */
-    _updateCssColor: function () {
+    _updateCssColor () {
         const r = this.colorComponents.red;
         const g = this.colorComponents.green;
         const b = this.colorComponents.blue;
         const a = this.colorComponents.opacity;
         Object.assign(this.colorComponents,
-            {cssColor: ColorpickerWidget.convertRgbaToCSSColor(r, g, b, a)}
+            {cssColor: convertRgbaToCSSColor(r, g, b, a)}
         );
         if (this.previewActive) {
-            this.trigger_up('colorpicker_preview', this.colorComponents);
+            this.props.onColorpickerPreview(this.colorComponents);
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -307,20 +362,20 @@ var ColorpickerWidget = Widget.extend({
      * @private
      * @param {Event} ev
      */
-    _onKeypress: function (ev) {
+    _onKeypress(ev) {
         if (ev.charCode === $.ui.keyCode.ENTER) {
             if (ev.target.tagName === 'INPUT') {
                 this._onChangeInputs(ev);
             }
             ev.preventDefault();
-            this.trigger_up('enter_key_color_colorpicker');
+            this.props.onEnterColorpicker();
         }
-    },
+    }
     /**
      * @param {Event} ev
      */
-    _onClick: function (ev) {
-        if (this.options.stopClickPropagation) {
+    _onClick(ev) {
+        if (this.props.stopClickPropagation) {
             ev.stopPropagation();
         }
         ev.originalEvent.__isColorpickerClick = true;
@@ -331,25 +386,25 @@ var ColorpickerWidget = Widget.extend({
             return;
         }
         this.selectedHexValue = '';
-    },
+    }
     /**
      * Updates color when the user starts clicking on the picker.
      *
      * @private
      * @param {Event} ev
      */
-    _onMouseDownPicker: function (ev) {
+    _onMouseDownPicker(ev) {
         this.pickerFlag = true;
         ev.preventDefault();
         this._onMouseMovePicker(ev);
-    },
+    }
     /**
      * Updates saturation and lightness values on mouse drag over picker.
      *
      * @private
      * @param {Event} ev
      */
-    _onMouseMovePicker: function (ev) {
+    _onMouseMovePicker(ev) {
         if (!this.pickerFlag) {
             return;
         }
@@ -359,70 +414,70 @@ var ColorpickerWidget = Widget.extend({
         var left = ev.pageX - offset.left;
         var saturation = Math.round(100 * left / this.$colorpickerArea.width());
         var lightness = Math.round(100 * (this.$colorpickerArea.height() - top) / this.$colorpickerArea.height());
-        saturation = utils.confine(saturation, 0, 100);
-        lightness = utils.confine(lightness, 0, 100);
+        saturation = confine(saturation, 0, 100);
+        lightness = confine(lightness, 0, 100);
 
         this._updateHsl(this.colorComponents.hue, saturation, lightness);
         this._updateUI();
-    },
+    }
     /**
      * Updates color when user starts clicking on slider.
      *
      * @private
      * @param {Event} ev
      */
-    _onMouseDownSlider: function (ev) {
+    _onMouseDownSlider(ev) {
         this.sliderFlag = true;
         ev.preventDefault();
         this._onMouseMoveSlider(ev);
-    },
+    }
     /**
      * Updates hue value on mouse drag over slider.
      *
      * @private
      * @param {Event} ev
      */
-    _onMouseMoveSlider: function (ev) {
+    _onMouseMoveSlider(ev) {
         if (!this.sliderFlag) {
             return;
         }
 
         var y = ev.pageY - this.$colorSlider.offset().top;
         var hue = Math.round(360 * y / this.$colorSlider.height());
-        hue = utils.confine(hue, 0, 360);
+        hue = confine(hue, 0, 360);
 
         this._updateHsl(hue, this.colorComponents.saturation, this.colorComponents.lightness);
         this._updateUI();
-    },
+    }
     /**
      * Updates opacity when user starts clicking on opacity slider.
      *
      * @private
      * @param {Event} ev
      */
-    _onMouseDownOpacitySlider: function (ev) {
+    _onMouseDownOpacitySlider(ev) {
         this.opacitySliderFlag = true;
         ev.preventDefault();
         this._onMouseMoveOpacitySlider(ev);
-    },
+    }
     /**
      * Updates opacity value on mouse drag over opacity slider.
      *
      * @private
      * @param {Event} ev
      */
-    _onMouseMoveOpacitySlider: function (ev) {
-        if (!this.opacitySliderFlag || this.options.noTransparency) {
+    _onMouseMoveOpacitySlider(ev) {
+        if (!this.opacitySliderFlag || this.props.noTransparency) {
             return;
         }
 
         var y = ev.pageY - this.$opacitySlider.offset().top;
         var opacity = Math.round(100 * (1 - y / this.$opacitySlider.height()));
-        opacity = utils.confine(opacity, 0, 100);
+        opacity = confine(opacity, 0, 100);
 
         this._updateOpacity(opacity);
         this._updateUI();
-    },
+    }
     /**
      * Called when input value is changed -> Updates UI: Set picker and slider
      * position and set colors.
@@ -430,7 +485,7 @@ var ColorpickerWidget = Widget.extend({
      * @private
      * @param {Event} ev
      */
-    _onChangeInputs: function (ev) {
+    _onChangeInputs(ev) {
         switch ($(ev.target).data('colorMethod')) {
             case 'hex':
                 this._updateHex(this.$('.o_hex_input').val());
@@ -455,5 +510,5 @@ var ColorpickerWidget = Widget.extend({
         }
         this._updateUI();
         this._colorSelected();
-    },
-});
+    }
+}

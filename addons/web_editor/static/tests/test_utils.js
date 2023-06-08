@@ -4,8 +4,7 @@ import ajax from "web.ajax";
 import MockServer from "web.MockServer";
 import testUtils from "web.test_utils";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
-import Widget from "web.Widget";
-import Wysiwyg from "web_editor.wysiwyg";
+import { Wysiwyg } from '@web_editor/js/wysiwyg/wysiwyg';
 import options from "web_editor.snippets.options";
 import { range } from "@web/core/utils/numbers";
 import { TABLE_ATTRIBUTES, TABLE_STYLES } from '@web_editor/js/backend/convert_inline';
@@ -145,26 +144,6 @@ options.registry.option_test = options.Class.extend({
     },
 });
 
-
-/**
- * Constructor WysiwygTest why editable and unbreakable node used in test.
- */
-var WysiwygTest = Wysiwyg.extend({
-    _parentToDestroyForTest: null,
-    /**
-     * Override 'destroy' of discuss so that it calls 'destroy' on the parent.
-     *
-     * @override
-     */
-    destroy: function () {
-        unpatch();
-        this._super();
-        this.$target.remove();
-        this._parentToDestroyForTest.destroy();
-    },
-});
-
-
 function patch() {
     testUtils.mock.patch(ajax, {
         loadAsset: function (xmlId) {
@@ -296,52 +275,6 @@ function wysiwygData(data) {
         },
     }, data);
 }
-
-/**
- * Create the wysiwyg instance for test (contains patch, usefull ir.ui.view, snippets).
- *
- * @param {object} params
- */
-async function createWysiwyg(params) {
-    patch();
-    params.data = wysiwygData(params.data);
-
-    var parent = new Widget();
-    await testUtils.mock.addMockEnvironment(parent, params);
-
-    var wysiwygOptions = Object.assign({}, params.wysiwygOptions, {
-        recordInfo: {
-            context: {},
-            res_model: 'module.test',
-            res_id: 1,
-        },
-        useOnlyTestUnbreakable: params.useOnlyTestUnbreakable,
-    });
-
-    var wysiwyg = new WysiwygTest(parent, wysiwygOptions);
-    wysiwyg._parentToDestroyForTest = parent;
-
-    var $textarea = $('<textarea/>');
-    if (wysiwygOptions.value) {
-        $textarea.val(wysiwygOptions.value);
-    }
-    var selector = params.debug ? 'body' : '#qunit-fixture';
-    $textarea.prependTo($(selector));
-    if (params.debug) {
-        $('body').addClass('debug');
-    }
-    return wysiwyg.attachTo($textarea).then(function () {
-        if (wysiwygOptions.snippets) {
-            var defSnippets = testUtils.makeTestPromise();
-            testUtils.mock.intercept(wysiwyg, "snippets_loaded", function () {
-                defSnippets.resolve(wysiwyg);
-            });
-            return defSnippets;
-        }
-        return wysiwyg;
-    });
-}
-
 
 /**
  * Char codes.
@@ -882,7 +815,6 @@ function removeComments(html, removeMsoHide=true) {
 
 export default {
     wysiwygData: wysiwygData,
-    createWysiwyg: createWysiwyg,
     testKeyboard: testKeyboard,
     select: select,
     keydown: keydown,
