@@ -1,47 +1,83 @@
 /** @odoo-module alias=wysiwyg.widgets.Link **/
 
-import core from "web.core";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
-import Widget from "web.Widget";
 import {isColorGradient} from "web_editor.utils";
+import {
+    Component,
+    onWillStart,
+    onMounted,
+    onWillUpdateProps,
+    onWillDestroy,
+    useState,
+    useRef,
+} from "@odoo/owl";
 
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getInSelection = OdooEditorLib.getInSelection;
-const _t = core._t;
+import { _t } from "@web/core/l10n/translation";
 
 /**
  * Allows to customize link content and style.
  */
-const Link = Widget.extend({
-    events: {
-        'input': '_onAnyChange',
-        'change': '_onAnyChange',
-        'input input[name="url"]': '__onURLInput',
-        'change input[name="url"]': '_onURLInputChange',
-    },
+export class Link extends Component {
+    static props = {
+        editable: true,
+        link: true,
+        needLabel: { type: Boolean, optional: true },
+        forceNewWindow: { type: Boolean, optional: true },
+        initialIsNewWindow: { type: Boolean, optional: true },
+        shouldFocusUrl: { type: Boolean, optional: true },
+    };
+    static defaultProps = {
+        needLabel: true,
+        forceNewWindow: false,
+        initialIsNewWindow: false,
+        shouldFocusUrl: false,
+    }
+    linkComponentWrapperRef = useRef("linkComponentWrapper");
+    setup() {
+        this.state = useState({});
 
-    /**
-     * @constructor
-     * @param {Boolean} data.isButton - whether if the target is a button element.
-     */
-    init: function (parent, options, editable, data, $button, link) {
-        this.options = options || {};
-        this._super(parent, Object.assign({
-            title: _t("Link to"),
-        }, this.options));
+        onWillStart(() => this.onWillStart());
+        let started = false;
+        onMounted(async () => {
+            if (started) {
+                return;
+            }
+            started = true;
+            // Todo: at the time this method is called, the ref is not yet in
+            // the dom and this.linkComponentWrapperRef.el returns null as the
+            // getter check the node with `inOwnerDocument`. This hack allows to
+            // get the node without the check.
+            this.$el = $(this.__owl__.refs.linkComponentWrapper);
 
-        this.data = data || {};
-        this.isButton = this.data.isButton;
-        this.$button = $button;
-        this.noFocusUrl = this.options.noFocusUrl;
+            this.$ = this.$el.find.bind(this.$el);
 
-        this.data.className = this.data.className || "";
-        this.data.iniClassName = this.data.iniClassName || "";
-        this.needLabel = this.data.needLabel || false;
+            this.$el.find('input, select').on('input', this._onAnyChange.bind(this));
+            this.$el.find('input, select').on('change', this._onAnyChange.bind(this));
+            this.$el.find('[name="url"]').on('input', this.__onURLInput.bind(this));
+            this.$el.find('[name="url"]').on('change', this._onURLInputChange.bind(this));
+
+            await this.start();
+        });
+        onWillUpdateProps((newProps) => {
+            this.state.url = newProps.link.getAttribute('href') || '';
+            this._setUrl({ shouldFocus: newProps.shouldFocusUrl });
+        });
+        onWillDestroy(() => {
+            this.destroy();
+        });
+    }
+    async onWillStart() {
+        this.initialNewWindow = this.props.initialIsNewWindow;
+
+        this.state.className = "";
+        this.state.iniClassName = "";
 
         // Using explicit type 'link' to preserve style when the target is <button class="...btn-link"/>.
+
         this.colorsData = [
-            {type: this.isButton ? 'link' : '', label: _t("Link"), btnPreview: 'link'},
+            {type: '', label: _t("Link"), btnPreview: 'link'},
             {type: 'primary', label: _t("Primary"), btnPreview: 'primary'},
             {type: 'secondary', label: _t("Secondary"), btnPreview: 'secondary'},
             {type: 'custom', label: _t("Custom"), btnPreview: 'custom'},
@@ -56,21 +92,21 @@ const Link = Widget.extend({
         // we make sure the options system works with them.
         this.toleratedClasses = ['btn-link', 'btn-success'];
 
-        this.editable = editable;
-        this.$editable = $(editable);
+        this.editable = this.props.editable;
+        this.$editable = $(this.editable);
 
-        if (link) {
+        if (this.props.link) {
             const range = document.createRange();
-            range.selectNodeContents(link);
-            this.data.range = range;
-            this.$link = $(link);
-            this.linkEl = link;
+            range.selectNodeContents(this.props.link);
+            this.state.range = range;
+            this.$link = $(this.props.link);
+            this.linkEl = this.props.link;
         }
 
-        if (this.data.range) {
+        if (this.state.range) {
             this.$link = this.$link || $(OdooEditorLib.getInSelection(this.editable.ownerDocument, 'a'));
             this.linkEl = this.$link[0];
-            this.data.iniClassName = this.$link.attr('class') || '';
+            this.state.iniClassName = this.$link.attr('class') || '';
             this.colorCombinationClass = false;
             let $node = this.$link;
             while ($node.length && !$node.is('body')) {
@@ -82,106 +118,60 @@ const Link = Widget.extend({
                 }
                 $node = $node.parent();
             }
-            const linkNode = this.$link[0] || this.data.range.cloneContents();
+            const linkNode = this.$link[0] || this.state.range.cloneContents();
             const linkText = linkNode.innerText;
-            this.data.content = linkText.replace(/[ \t\r\n]+/g, ' ');
-            this.data.originalText = this.data.content;
+            this.state.initialContent = linkText.replace(/[ \t\r\n]+/g, ' ');
+            this.state.originalText = this.state.initialContent;
             if (linkNode instanceof DocumentFragment) {
-                this.data.originalHTML = $('<fakeEl>').append(linkNode).html();
+                this.state.originalHTML = $('<fakeEl>').append(linkNode).html();
             } else {
-                this.data.originalHTML = linkNode.innerHTML;
+                this.state.originalHTML = linkNode.innerHTML;
             }
-            this.data.url = this.$link.attr('href') || '';
+            this.state.url = this.$link.attr('href') || '';
         } else {
-            this.data.content = this.data.content ? this.data.content.replace(/[ \t\r\n]+/g, ' ') : '';
+            this.state.initialContent = this.state.initialContent ? this.state.initialContent.replace(/[ \t\r\n]+/g, ' ') : '';
         }
 
-        if (!this.data.url) {
-            const urls = this.data.content.match(OdooEditorLib.URL_REGEX_WITH_INFOS);
+
+        if (!this.state.url) {
+            const urls = this.state.initialContent.match(OdooEditorLib.URL_REGEX_WITH_INFOS);
             if (urls) {
-                this.data.url = urls[0];
+                this.state.url = urls[0];
             }
         }
 
         if (this.linkEl) {
-            this.data.isNewWindow = this.data.isNewWindow || this.linkEl.target === '_blank';
+            this.initialNewWindow = this.initialNewWindow || this.linkEl.target === '_blank';
         }
 
         const classesToKeep = [
             'text-wrap', 'text-nowrap', 'text-start', 'text-center', 'text-end',
             'text-truncate',
         ];
-        const keptClasses = this.data.iniClassName.split(' ').filter(className => classesToKeep.includes(className));
+        const keptClasses = this.state.iniClassName.split(' ').filter(className => classesToKeep.includes(className));
         const allBtnColorPrefixes = /(^|\s+)(bg|text|border)(-[a-z0-9_-]*)?/gi;
         const allBtnClassSuffixes = /(^|\s+)btn(-[a-z0-9_-]*)?/gi;
         const allBtnShapes = /\s*(rounded-circle|flat)\s*/gi;
-        this.data.className = this.data.iniClassName
+        this.state.className = this.state.iniClassName
             .replace(allBtnColorPrefixes, ' ')
             .replace(allBtnClassSuffixes, ' ')
             .replace(allBtnShapes, ' ');
-        this.data.className += ' ' + keptClasses.join(' ');
+        this.state.className += ' ' + keptClasses.join(' ');
         // 'o_submit' class will force anchor to be handled as a button in linkdialog.
-        if (/(?:s_website_form_send|o_submit)/.test(this.data.className)) {
-            this.isButton = true;
+        if (/(?:s_website_form_send|o_submit)/.test(this.state.className)) {
+            this.state.isButton = true;
         }
-
-        this.renderingPromise = new Promise(resolve => this._renderingResolver = resolve);
-    },
+    }
     /**
      * @override
      */
-    start: async function () {
-        for (const option of this._getLinkOptions()) {
-            const $option = $(option);
-            const value = $option.is('input') ? $option.val() : $option.data('value') || option.getAttribute('value');
-            let active = false;
-            if (value) {
-                const subValues = value.split(',');
-                let subActive = true;
-                for (let subValue of subValues) {
-                    const classPrefix = new RegExp('(^|btn-| |btn-outline-|btn-fill-)' + subValue);
-                    subActive = subActive && classPrefix.test(this.data.iniClassName);
-                }
-                active = subActive;
-            } else {
-                active = !this.data.iniClassName
-                         || this.toleratedClasses.some(val => this.data.iniClassName.split(' ').includes(val))
-                         || !this.data.iniClassName.includes('btn-');
-            }
-            this._setSelectOption($option, active);
-        }
-
-        const _super = this._super.bind(this);
+    async start() {
+        this._setSelectOptionFromLink();
 
         this._updateOptionsUI();
 
-        if (this.data.url) {
-            var match = /mailto:(.+)/.exec(this.data.url);
-            this.$('input[name="url"]').val(match ? match[1] : this.data.url);
-            this._onURLInput();
-            this._savedURLInputOnDestroy = false;
-        }
-
-        if (!this.noFocusUrl) {
-            this.focusUrl();
-        }
-
-        return _super(...arguments);
-    },
-    /**
-     * @private
-     */
-    async _widgetRenderAndInsert() {
-        const res = await this._super(...arguments);
-
-        // TODO find a better solution than this during the upcoming refactoring
-        // of the link tools / link dialog.
-        if (this._renderingResolver) {
-            this._renderingResolver();
-        }
-
-        return res;
-    },
+        this._setUrl({ shouldFocus: this.props.shouldFocusUrl });
+    }
     /**
      * @override
      */
@@ -189,8 +179,7 @@ const Link = Widget.extend({
         if (this._savedURLInputOnDestroy) {
             this._adaptPreview();
         }
-        this._super(...arguments);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -201,7 +190,7 @@ const Link = Widget.extend({
      *
      * @param {object} data
      */
-    applyLinkToDom: function (data) {
+    applyLinkToDom(data) {
         // Some mass mailing template use <a class="btn btn-link"> instead of just a simple <a>.
         // And we need to keep the classes because the a.btn.btn-link have some special css rules.
         // Same thing for the "btn-success" class, this class cannot be added
@@ -209,7 +198,7 @@ const Link = Widget.extend({
         // it exists in a template (e.g. "Newsletter Block" snippet).
         if (!data.classes.split(' ').includes('btn')) {
             for (const linkClass of this.toleratedClasses) {
-                if (this.data.iniClassName && this.data.iniClassName.split(' ').includes(linkClass)) {
+                if (this.state.iniClassName && this.state.iniClassName.split(' ').includes(linkClass)) {
                     data.classes += " btn " + linkClass;
                 }
             }
@@ -231,7 +220,7 @@ const Link = Widget.extend({
             this.$link.css('border-style', '');
             this.$link.css('border-color', '');
         }
-        const attrs = Object.assign({}, this.data.oldAttributes, {
+        const attrs = Object.assign({}, this.state.oldAttributes, {
             href: data.url,
             target: data.isNewWindow ? '_blank' : '',
         });
@@ -248,43 +237,63 @@ const Link = Widget.extend({
             this.$link[0].removeAttribute('target');
         }
         this._updateLinkContent(this.$link, data);
-    },
+    }
     /**
      * Focuses the url input.
      */
     focusUrl() {
-        const urlInput = this.el.querySelector('input[name="url"]');
+        const urlInput = this.linkComponentWrapperRef.el.querySelector('input[name="url"]');
         urlInput.focus();
         urlInput.select();
-    },
-
-    /**
-     * Return the link element to edit. Create one from selection if none was
-     * present in selection.
-     *
-     * @param {Node} [options.containerNode]
-     * @param {Node} [options.startNode]
-     * @returns {Object}
-     */
-    getOrCreateLink (options) {
-        Link.getOrCreateLink(options);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
+    _setUrl({ shouldFocus } = {}) {
+        if (this.state.url) {
+            var match = /mailto:(.+)/.exec(this.state.url);
+            this.$('input[name="url"]').val(match ? match[1] : this.state.url);
+            this._onURLInput();
+            this._savedURLInputOnDestroy = false;
+        }
+        if (shouldFocus) {
+            this.focusUrl();
+        }
+    }
+    _setSelectOptionFromLink() {
+        for (const option of this._getLinkOptions()) {
+            const $option = $(option);
+            const value = $option.is('input') ? $option.val() : $option.data('value') || option.getAttribute('value');
+            let active = false;
+            if (value) {
+                const subValues = value.split(',');
+                let subActive = true;
+                for (let subValue of subValues) {
+                    const classPrefix = new RegExp('(^|btn-| |btn-outline-|btn-fill-)' + subValue);
+                    subActive = subActive && classPrefix.test(this.state.iniClassName);
+                }
+                active = subActive;
+            } else {
+                active = !this.state.iniClassName
+                         || this.toleratedClasses.some(val => this.state.iniClassName.split(' ').includes(val))
+                         || !this.state.iniClassName.includes('btn-');
+            }
+            this._setSelectOption($option, active);
+        }
+    }
     /**
      * Abstract method: adapt the link to changes.
      *
      * @abstract
      * @private
      */
-    _adaptPreview: function () {},
+    _adaptPreview() {}
     /**
      * @private
      */
-    _correctLink: function (url) {
+    _correctLink(url) {
         if (url.indexOf('mailto:') === 0 || url.indexOf('tel:') === 0) {
             url = url.replace(/^tel:([0-9]+)$/, 'tel://$1');
         } else if (url.indexOf('@') !== -1 && url.indexOf(':') === -1) {
@@ -294,7 +303,7 @@ const Link = Widget.extend({
             url = 'http://' + url;
         }
         return url;
-    },
+    }
     /**
      * Abstract method: return true if the URL should be stripped of its domain.
      *
@@ -302,19 +311,19 @@ const Link = Widget.extend({
      * @private
      * @returns {boolean}
      */
-    _doStripDomain: function () {},
+    _doStripDomain() {}
     /**
      * Get the link's data (url, content and styles).
      *
      * @private
      * @returns {Object} {content: String, url: String, classes: String, isNewWindow: Boolean}
      */
-    _getData: function () {
+    _getData() {
         var $url = this.$('input[name="url"]');
         var url = $url.val();
         var content = this.$('input[name="label"]').val() || url;
 
-        if (!this.isButton && $url.prop('required') && (!url || !$url[0].checkValidity())) {
+        if (!this.state.isButton && $url.prop('required') && (!url || !$url[0].checkValidity())) {
             return null;
         }
 
@@ -330,7 +339,7 @@ const Link = Widget.extend({
         const shapes = shape ? shape.split(',') : [];
         const style = ['outline', 'fill'].includes(shapes[0]) ? `${shapes[0]}-` : '';
         const shapeClasses = shapes.slice(style ? 1 : 0).join(' ');
-        const classes = (this.data.className || '') +
+        const classes = (this.state.className || '') +
             (type ? (` btn btn-${style}${type}`) : '') +
             (type === 'custom' ? customClasses : '') +
             (type && shapeClasses ? (` ${shapeClasses}`) : '') +
@@ -356,11 +365,11 @@ const Link = Widget.extend({
             customBorder: customBorder,
             customBorderWidth: customBorderWidth,
             customBorderStyle: customBorderStyle,
-            oldAttributes: this.data.oldAttributes,
+            oldAttributes: this.state.oldAttributes,
             isNewWindow: isNewWindow,
             doStripDomain: doStripDomain,
         };
-    },
+    }
     /**
      * Return a list of all the descendants of a given element.
      *
@@ -368,14 +377,14 @@ const Link = Widget.extend({
      * @param {Node} rootNode
      * @returns {Node[]}
      */
-    _getDescendants: function (rootNode) {
+    _getDescendants(rootNode) {
         const nodes = [];
         for (const node of rootNode.childNodes) {
             nodes.push(node);
             nodes.push(...this._getDescendants(node));
         }
         return nodes;
-    },
+    }
     /**
      * Abstract method: return a JQuery object containing the UI elements
      * holding the "Open in new window" option's row of the link.
@@ -384,7 +393,7 @@ const Link = Widget.extend({
      * @private
      * @returns {JQuery}
      */
-    _getIsNewWindowFormRow() {},
+    _getIsNewWindowFormRow() {}
     /**
      * Abstract method: return a JQuery object containing the UI elements
      * holding the styling options of the link (eg: color, size, shape).
@@ -393,7 +402,7 @@ const Link = Widget.extend({
      * @private
      * @returns {JQuery}
      */
-    _getLinkOptions: function () {},
+    _getLinkOptions() {}
     /**
      * Abstract method: return the shape(s) to apply to the link (eg:
      * "outline", "rounded-circle", "outline,rounded-circle").
@@ -402,7 +411,7 @@ const Link = Widget.extend({
      * @private
      * @returns {string}
      */
-    _getLinkShape: function () {},
+    _getLinkShape() {}
     /**
      * Abstract method: return the size to apply to the link (eg:
      * "sm", "lg").
@@ -410,7 +419,7 @@ const Link = Widget.extend({
      * @private
      * @returns {string}
      */
-    _getLinkSize: function () {},
+    _getLinkSize() {}
     /**
      * Abstract method: return the type to apply to the link (eg:
      * "primary", "secondary").
@@ -418,7 +427,7 @@ const Link = Widget.extend({
      * @private
      * @returns {string}
      */
-    _getLinkType: function () {},
+    _getLinkType() {}
     /**
      * Returns the custom text color for custom type.
      *
@@ -426,7 +435,7 @@ const Link = Widget.extend({
      * @private
      * @returns {string}
      */
-    _getLinkCustomTextColor: function () {},
+    _getLinkCustomTextColor() {}
     /**
      * Returns the custom border color for custom type.
      *
@@ -434,7 +443,7 @@ const Link = Widget.extend({
      * @private
      * @returns {string}
      */
-    _getLinkCustomBorder: function () {},
+    _getLinkCustomBorder() {}
     /**
      * Returns the custom border width for custom type.
      *
@@ -442,7 +451,7 @@ const Link = Widget.extend({
      * @private
      * @returns {string}
      */
-    _getLinkCustomBorderWidth: function () {},
+    _getLinkCustomBorderWidth() {}
     /**
      * Returns the custom border style for custom type.
      *
@@ -450,7 +459,7 @@ const Link = Widget.extend({
      * @private
      * @returns {string}
      */
-    _getLinkCustomBorderStyle: function () {},
+    _getLinkCustomBorderStyle() {}
     /**
      * Returns the custom fill color for custom type.
      *
@@ -458,7 +467,7 @@ const Link = Widget.extend({
      * @private
      * @returns {string}
      */
-    _getLinkCustomFill: function () {},
+    _getLinkCustomFill() {}
     /**
      * Returns the custom text, fill and border color classes for custom type.
      *
@@ -466,11 +475,11 @@ const Link = Widget.extend({
      * @private
      * @returns {string}
      */
-    _getLinkCustomClasses: function () {},
+    _getLinkCustomClasses() {}
     /**
      * @private
      */
-    _isFromAnotherHostName: function (url) {
+    _isFromAnotherHostName(url) {
         if (url.includes(window.location.hostname)) {
             return false;
         }
@@ -481,7 +490,7 @@ const Link = Widget.extend({
         } catch {
             return true;
         }
-    },
+    }
     /**
      * Abstract method: return true if the link should open in a new window.
      *
@@ -489,7 +498,7 @@ const Link = Widget.extend({
      * @private
      * @returns {boolean}
      */
-    _isNewWindow: function (url) {},
+    _isNewWindow(url) {}
     /**
      * Abstract method: mark one or several options as active or inactive.
      *
@@ -498,7 +507,7 @@ const Link = Widget.extend({
      * @param {JQuery} $option
      * @param {boolean} [active]
      */
-    _setSelectOption: function ($option, active) {},
+    _setSelectOption($option, active) {}
     /**
      * Update the link content.
      *
@@ -508,9 +517,9 @@ const Link = Widget.extend({
      * @param {boolean} force
      */
     _updateLinkContent($link, linkInfos, { force = false } = {}) {
-        if (force || (this.needLabel && (linkInfos.content !== this.data.originalText || linkInfos.url !== this.data.url))) {
-            if (linkInfos.content === this.data.originalText) {
-                $link.html(this.data.originalHTML);
+        if (force || (this.props.needLabel && (linkInfos.content !== this.state.originalText || linkInfos.url !== this.state.url))) {
+            if (linkInfos.content === this.state.originalText) {
+                $link.html(this.state.originalHTML);
             } else if (linkInfos.content && linkInfos.content.length) {
                 let contentWrapperEl = $link[0];
                 // Update the first child element that has the same inner text
@@ -525,12 +534,12 @@ const Link = Widget.extend({
                 $link.text(linkInfos.url);
             }
         }
-    },
+    }
     /**
      * @abstract
      * @private
      */
-    _updateOptionsUI: function () {},
+    _updateOptionsUI() {}
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -539,11 +548,11 @@ const Link = Widget.extend({
     /**
      * @private
      */
-    _onAnyChange: function (e) {
+    _onAnyChange(e) {
         if (!e.target.closest('input[type="text"]')) {
             this._adaptPreview();
         }
-    },
+    }
     /**
      * @todo Adapt in master: in stable _onURLInput was both used as an event
      * handler responding to url input events + a private method called at the
@@ -558,28 +567,28 @@ const Link = Widget.extend({
      *
      * @private
      */
-    __onURLInput: function () {
+    __onURLInput() {
         this._onURLInput(...arguments);
-    },
+    }
     /**
      * @private
      */
-    _onURLInput: function () {
+    _onURLInput() {
         this._savedURLInputOnDestroy = true;
         var $linkUrlInput = this.$('#o_link_dialog_url_input');
         let value = $linkUrlInput.val();
         let isLink = value.indexOf('@') < 0;
         this._getIsNewWindowFormRow().toggleClass('d-none', !isLink);
         this.$('.o_strip_domain').toggleClass('d-none', value.indexOf(window.location.origin) !== 0);
-    },
+    }
     /**
      * @private
      */
-    _onURLInputChange: function () {
+    _onURLInputChange() {
         this._adaptPreview();
         this._savedURLInputOnDestroy = false;
-    },
-});
+    }
+}
 
 /**
  * Return the link element to edit. Create one from selection if none was
@@ -589,8 +598,7 @@ const Link = Widget.extend({
  * @param {Node} [options.startNode]
  * @returns {Object}
  */
-Link.getOrCreateLink = ({ containerNode, startNode } = {})  => {
-
+export function getOrCreateLink({ containerNode, startNode } = {}) {
     if (startNode) {
         if ($(startNode).is('a')) {
             return { link: startNode, needLabel: false };
@@ -633,5 +641,3 @@ Link.getOrCreateLink = ({ containerNode, startNode } = {})  => {
     }
     return { link, needLabel };
 };
-
-export default Link;

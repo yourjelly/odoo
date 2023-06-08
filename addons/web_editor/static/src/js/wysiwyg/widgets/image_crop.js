@@ -1,62 +1,97 @@
-/** @odoo-module alias=wysiwyg.widgets.ImageCropWidget **/
+/** @odoo-module **/
 
-import core from "web.core";
-import Widget from "web.Widget";
 import {applyModifications, cropperDataFields, activateCropper, loadImage, loadImageInfo} from "web_editor.image_processing";
+import { _t } from "@web/core/l10n/translation";
+import {
+    Component,
+    useRef,
+    useState,
+    onMounted,
+    onWillDestroy,
+    onWillUpdateProps,
+} from "@odoo/owl";
 
-const _t = core._t;
-
-const ImageCropWidget = Widget.extend({
-    template: ['wysiwyg.widgets.crop'],
-    events: {
-        'click.crop_options [data-action]': '_onCropOptionClick',
-        // zoom event is triggered by the cropperjs library when the user zooms.
-        'zoom': '_onCropZoom',
-    },
+export class ImageCrop extends Component {
+    static template = 'web_editor.ImageCrop';
+    static props = {
+        rpc: Function,
+        showCount: { type: Number, optional: true },
+        activeOnStart: { type: Boolean, optional: true },
+        media: { optional: true },
+        mimetype: { type: String, optional: true },
+    };
+    static defaultProps = {
+        activeOnStart: false,
+        showCount: 0,
+    };
+    aspectRatios = {
+        "0/0": {label: _t("Flexible"), value: 0},
+        "16/9": {label: "16:9", value: 16 / 9},
+        "4/3": {label: "4:3", value: 4 / 3},
+        "1/1": {label: "1:1", value: 1},
+        "2/3": {label: "2:3", value: 2 / 3},
+    };
+    state = useState({
+        active: false,
+    });
+    elRef = useRef('el');
+    setup() {
+        this.mountedPromise = new Promise((resolve) => {
+            this.mountedResolve = resolve;
+        });
+        onMounted(async () => {
+            const $el = $(this.elRef.el);
+            this.$ = $el.find.bind($el);
+            this.$('[data-action]').on('click', this._onCropOptionClick.bind(this));
+            $el.on('zoom', this._onCropZoom.bind(this));
+            if (this.props.activeOnStart) {
+                this.state.active = true;
+                await this._show(this.props);
+            }
+            this.mountedResolve();
+        });
+        onWillUpdateProps((newProps) => {
+            if (newProps.showCount !== this.props.showCount) {
+                this.state.active = true;
+            }
+            return this._show(newProps);
+        });
+        onWillDestroy(() => {
+            this.destroyed = true;
+        });
+    }
 
     /**
-     * @constructor
+     * @override
      */
-    init(parent, media, options = {}) {
-        this._super(...arguments);
-        this.media = media;
-        this.$media = $(media);
+    async _show(props) {
+        if (!props.media || !this.state.active) {
+            return;
+        }
+        this.destroyed = false;
+        this.media = props.media;
+        this.$media = $(this.media);
         // Needed for editors in iframes.
-        this.document = media.ownerDocument;
+        this.document = this.media.ownerDocument;
         // key: ratio identifier, label: displayed to user, value: used by cropper lib
-        this.aspectRatios = {
-            "0/0": {label: _t("Flexible"), value: 0},
-            "16/9": {label: "16:9", value: 16 / 9},
-            "4/3": {label: "4:3", value: 4 / 3},
-            "1/1": {label: "1:1", value: 1},
-            "2/3": {label: "2:3", value: 2 / 3},
-        };
         const src = this.media.getAttribute('src');
-        const data = Object.assign({}, media.dataset);
+        const data = {...this.media.dataset};
         this.initialSrc = src;
         this.aspectRatio = data.aspectRatio || "0/0";
         const mimetype = data.mimetype || src.endsWith('.png') ? 'image/png' : 'image/jpeg';
-        this.mimetype = options.mimetype || mimetype;
-    },
-    /**
-     * @override
-     */
-    async willStart() {
-        await this._super.apply(this, arguments);
-        await loadImageInfo(this.media, this._rpc.bind(this));
+        this.mimetype = props.mimetype || mimetype;
+
+        await loadImageInfo(this.media, this.props.rpc);
         const isIllustration = /^\/web_editor\/shape\/illustration\//.test(this.media.dataset.originalSrc);
+        this.uncroppable = false;
         if (this.media.dataset.originalSrc && !isIllustration) {
             this.originalSrc = this.media.dataset.originalSrc;
             this.originalId = this.media.dataset.originalId;
-            return;
+        } else {
+            // Couldn't find an attachment: not croppable.
+            this.uncroppable = true;
         }
-        // Couldn't find an attachment: not croppable.
-        this.uncroppable = true;
-    },
-    /**
-     * @override
-     */
-    async start() {
+
         if (this.uncroppable) {
             this.displayNotification({
               type: 'warning',
@@ -65,7 +100,6 @@ const ImageCropWidget = Widget.extend({
             });
             return this.destroy();
         }
-        const _super = this._super.bind(this);
         const $cropperWrapper = this.$('.o_we_cropper_wrapper');
 
         // Replacing the src with the original's so that the layout is correct.
@@ -78,29 +112,31 @@ const ImageCropWidget = Widget.extend({
         const offset = this.$media.offset();
         offset.left += parseInt(this.$media.css('padding-left'));
         offset.top += parseInt(this.$media.css('padding-right'));
-        $cropperWrapper.offset(offset);
+        $cropperWrapper[0].style.left = `${offset.left}px`;
+        $cropperWrapper[0].style.top = `${offset.top}px`;
 
         await loadImage(this.originalSrc, cropperImage);
+
+        // We need to remove the d-none class for the cropper library to work.
+        this.elRef.el.classList.remove('d-none');
         await activateCropper(cropperImage, this.aspectRatios[this.aspectRatio].value, this.media.dataset);
 
         this._onDocumentMousedown = this._onDocumentMousedown.bind(this);
         // We use capture so that the handler is called before other editor handlers
         // like save, such that we can restore the src before a save.
         this.document.addEventListener('mousedown', this._onDocumentMousedown, {capture: true});
-        return _super(...arguments);
-    },
-    /**
-     * @override
-     */
+    }
     destroy() {
+        if (this.destroyed) return;
+        this.destroyed = true;
         if (this.$cropperImage) {
             this.$cropperImage.cropper('destroy');
             this.document.removeEventListener('mousedown', this._onDocumentMousedown, {capture: true});
         }
         this.media.setAttribute('src', this.initialSrc);
         this.$media.trigger('image_cropper_destroyed');
-        return this._super(...arguments);
-    },
+        this.state.active = false;
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -118,7 +154,7 @@ const ImageCropWidget = Widget.extend({
             }
             await this._save(false);
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -148,7 +184,7 @@ const ImageCropWidget = Widget.extend({
         this.media.classList.toggle('o_we_image_cropped', cropped);
         this.$media.trigger('image_cropped');
         this.destroy();
-    },
+    }
     /**
      * Returns an attribute's value for saving.
      *
@@ -159,7 +195,7 @@ const ImageCropWidget = Widget.extend({
             return this.$cropperImage.cropper('getData')[attr];
         }
         return this[attr];
-    },
+    }
     /**
      * Resets the crop box to prevent it going outside the image.
      *
@@ -168,7 +204,7 @@ const ImageCropWidget = Widget.extend({
     _resetCropBox() {
         this.$cropperImage.cropper('clear');
         this.$cropperImage.cropper('crop');
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -205,7 +241,7 @@ const ImageCropWidget = Widget.extend({
             case 'discard':
                 return this.destroy();
         }
-    },
+    }
     /**
      * Discards crop if the user clicks outside of the widget.
      *
@@ -216,7 +252,7 @@ const ImageCropWidget = Widget.extend({
         if (document.body.contains(ev.target) && this.$(ev.target).length === 0) {
             return this.destroy();
         }
-    },
+    }
     /**
      * Resets the cropbox on zoom to prevent crop box overflowing.
      *
@@ -226,7 +262,5 @@ const ImageCropWidget = Widget.extend({
         // Wait for the zoom event to be fully processed before reseting.
         await new Promise(res => setTimeout(res, 0));
         this._resetCropBox();
-    },
-});
-
-export default ImageCropWidget;
+    }
+}

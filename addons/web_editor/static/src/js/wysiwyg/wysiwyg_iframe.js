@@ -1,60 +1,40 @@
 /** @odoo-module **/
 
-import Wysiwyg from "web_editor.wysiwyg";
-import ajax from "web.ajax";
-import core from "web.core";
-import config from "web.config";
+import { Wysiwyg } from '@web_editor/js/wysiwyg/wysiwyg';
+import { patch } from "@web/core/utils/patch";
+import { getBundle } from "@web/core/assets";
+import { getWysiwygIframeContent } from "@web_editor/js/wysiwyg/wysiwyg_iframe_content";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 
-var qweb = core.qweb;
 var promiseJsAssets;
-
 
 /**
  * Add option (inIframe) to load Wysiwyg in an iframe.
  **/
-Wysiwyg.include({
+
+patch(Wysiwyg.prototype, 'wysiwyg_iframe.js', {
     /**
      * Add options to load Wysiwyg in an iframe.
      *
      * @override
      * @param {boolean} options.inIframe
      **/
-    init: function (parent, options) {
-        this._super.apply(this, arguments);
+    init() {
+        this._super();
         if (this.options.inIframe) {
             this._onUpdateIframeId = 'onLoad_' + this.id;
         }
     },
     /**
-     * Load assets to inject into iframe.
-     *
      * @override
      **/
-    willStart: async function () {
-        if (!this.options.inIframe) {
-            return this._super();
-        }
-
-        promiseJsAssets = promiseJsAssets || ajax.loadAsset('web_editor.wysiwyg_iframe_editor_assets');
-        const assetsPromises = [promiseJsAssets];
-        if (this.options.iframeCssAssets) {
-            assetsPromises.push(ajax.loadAsset(this.options.iframeCssAssets));
-        }
-        this.defAsset = Promise.all(assetsPromises);
-
-        const _super = this._super.bind(this);
-        await this.defAsset;
-        await _super();
-    },
-
-    /**
-     * @override
-     **/
-    startEdition: async function () {
+    async startEdition() {
         const _super = this._super.bind(this);
         if (!this.options.inIframe) {
             return _super();
         } else {
+            this.defAsset = this._getAssets();
+            await this.defAsset;
             await this._loadIframe();
             return _super();
         }
@@ -67,7 +47,7 @@ Wysiwyg.include({
     /**
      * @override
      **/
-    _getEditorOptions: function () {
+    _getEditorOptions() {
         const options = this._super.apply(this, arguments);
         options.getContextFromParentRect = () => {
             return this.$iframe && this.$iframe.length ? this.$iframe[0].getBoundingClientRect() : { top: 0, left: 0 };
@@ -81,7 +61,7 @@ Wysiwyg.include({
      * @private
      * @returns {Promise}
      */
-    _loadIframe: function () {
+    _loadIframe() {
         var self = this;
         const isEditableRoot = this.$editable === this.$root;
         this.$editable = $('<div class="note-editable oe_structure odoo-editor-editable"></div>');
@@ -110,7 +90,7 @@ Wysiwyg.include({
                 $targetClone.find('script').remove();
                 $iframeTarget.html($targetClone.html());
                 self.$iframeBody = $iframeTarget;
-                $iframeTarget.attr("isMobile", config.device.isMobile);
+                $iframeTarget.attr("isMobile", isMobileOS());
                 const $utilsZone = $('<div class="iframe-utils-zone">');
                 self.$utilsZone = $utilsZone;
 
@@ -145,7 +125,7 @@ Wysiwyg.include({
                     return;
                 }
 
-                var iframeContent = qweb.render('wysiwyg.iframeContent', {
+                const iframeContent = getWysiwygIframeContent({
                     assets: assets,
                     updateIframeId: self._onUpdateIframeId,
                     avoidDoubleLoad: _avoidDoubleLoad
@@ -166,12 +146,26 @@ Wysiwyg.include({
         });
     },
 
-    _insertSnippetMenu: function () {
+    _insertSnippetMenu() {
         if (this.options.inIframe) {
             return this.snippetsMenu.appendTo(this.$utilsZone);
         } else {
             return this._super.apply(this, arguments);
         }
+    },
+    /**
+     * Get assets for the iframe.
+     *
+     * @private
+     * @returns {Promise}
+     */
+    async _getAssets() {
+        promiseJsAssets = promiseJsAssets || await getBundle('web_editor.wysiwyg_iframe_editor_assets');
+        const assetsPromises = [promiseJsAssets];
+        if (this.options.iframeCssAssets) {
+            assetsPromises.push(getBundle(this.options.iframeCssAssets));
+        }
+        return Promise.all(assetsPromises);
     },
 
     /**
@@ -180,7 +174,7 @@ Wysiwyg.include({
      *
      * @override
      */
-    _bindOnBlur: function () {
+    _bindOnBlur() {
         if (!this.options.inIframe) {
             this._super.apply(this, arguments);
         } else {

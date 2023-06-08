@@ -7,7 +7,7 @@ import dom from "web.dom";
 import {Markup, confine} from "web.utils";
 import Widget from "web.Widget";
 import options from "web_editor.snippets.options";
-import {ColorPaletteWidget} from "web_editor.ColorPalette";
+import { ColorPalette } from '@web_editor/js/wysiwyg/widgets/color_palette';
 import SmoothScrollOnDrag from "web.smooth_scroll_on_drag";
 import {getCSSVariableValue} from "web_editor.utils";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
@@ -18,111 +18,11 @@ import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { uniqueId } from "@web/core/utils/functions";
 import { sortBy, unique } from "@web/core/utils/arrays";
 import { browser } from "@web/core/browser/browser";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 
 var _t = core._t;
 
 let cacheSnippetTemplate = {};
-
-// jQuery extensions
-$.extend($.expr[':'], {
-    o_editable: function (node, i, m) {
-        while (node) {
-            if (node.className && typeof node.className === "string") {
-                if (node.className.indexOf('o_not_editable') !== -1) {
-                    return false;
-                }
-                if (node.className.indexOf('o_editable') !== -1) {
-                    return true;
-                }
-            }
-            node = node.parentNode;
-        }
-        return false;
-    },
-});
-
-function firstChild(node) {
-    while (node.firstChild) {
-        node = node.firstChild;
-    }
-    return node;
-}
-function lastChild(node) {
-    while (node.lastChild) {
-        node = node.lastChild;
-    }
-    return node;
-}
-function nodeLength(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
-        return node.nodeValue.length;
-    } else {
-        return node.childNodes.length;
-    }
-}
-
-
-$.fn.extend({
-    focusIn: function () {
-        if (this.length) {
-            const selection = this[0].ownerDocument.getSelection();
-            selection.removeAllRanges();
-
-            const range = new Range();
-            const node = firstChild(this[0]);
-            range.setStart(node, 0);
-            range.setEnd(node, 0);
-            selection.addRange(range);
-        }
-        return this;
-    },
-    focusInEnd: function () {
-        if (this.length) {
-            const selection = this[0].ownerDocument.getSelection();
-            selection.removeAllRanges();
-
-            const range = new Range();
-            const node = lastChild(this[0]);
-            const length = nodeLength(node);
-
-            range.setStart(node, length);
-            range.setEnd(node, length);
-            selection.addRange(range);
-        }
-        return this;
-    },
-    selectContent: function () {
-        if (this.length && !this[0].hasChildNodes()) {
-            return this.selectElement();
-        }
-        if (this.length) {
-            const selection = this[0].ownerDocument.getSelection();
-            selection.removeAllRanges();
-
-            const range = new Range();
-            range.setStart(this[0].firstChild, 0);
-            range.setEnd(this[0].lastChild, this[0].lastChild.length);
-            selection.addRange(range);
-        }
-        return this;
-    },
-    selectElement: function () {
-        if (this.length) {
-            const selection = this[0].ownerDocument.getSelection();
-            selection.removeAllRanges();
-
-            const element = this[0];
-            const parent = element.parentNode;
-            const offsetStart = Array.from(parent.childNodes).indexOf(element);
-
-            const range = new Range();
-            range.setStart(parent, offsetStart);
-            range.setEnd(parent, offsetStart + 1);
-            selection.addRange(range);
-        }
-        return this;
-    },
-});
 
 var globalSelector = {
     closest: () => $(),
@@ -352,7 +252,7 @@ var SnippetEditor = Widget.extend({
      * Makes the editor overlay cover the associated snippet.
      */
     cover: function () {
-        if (!this.isShown() || !this.$target.length) {
+        if (!this.isShown() || !this.$target[0]?.ownerDocument.defaultView) {
             return;
         }
 
@@ -1774,7 +1674,6 @@ var SnippetsMenu = Widget.extend({
         'snippet_option_update': '_onSnippetOptionUpdate',
         'snippet_option_visibility_update': '_onSnippetOptionVisibilityUpdate',
         'snippet_thumbnail_url_request': '_onSnippetThumbnailURLRequest',
-        'reload_snippet_dropzones': '_disableUndroppableSnippets',
         'request_save': '_onSaveRequest',
         'hide_overlay': '_onHideOverlay',
         'block_preview_overlays': '_onBlockPreviewOverlays',
@@ -1847,7 +1746,13 @@ var SnippetsMenu = Widget.extend({
         // widget have huge chances of being used by the user (clicking on any
         // text will load it). The colorpalette itself will do the actual
         // waiting of the loading completion.
-        ColorPaletteWidget.loadDependencies(this);
+        ColorPalette.loadDependencies(() => {
+            return this._rpc({
+                model: 'ir.ui.view',
+                method: 'render_public_asset',
+                args: ['web_editor.colorpicker', {}],
+            });
+        });
         return this._super(...arguments);
     },
     /**
@@ -2264,6 +2169,9 @@ var SnippetsMenu = Widget.extend({
     execWithLoadingEffect(action, contentLoading = true, delay = 500) {
         return this._execWithLoadingEffect(...arguments);
     },
+    reload_snippet_dropzones() {
+        this._disableUndroppableSnippets();
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -2482,12 +2390,7 @@ var SnippetsMenu = Widget.extend({
             this.invisibleDOMMap = new Map();
             const $invisibleDOMPanelEl = $(this.invisibleDOMPanelEl);
             $invisibleDOMPanelEl.find('.o_we_invisible_entry').remove();
-            let isMobile;
-            this.trigger_up('service_context_get', {
-                callback: (ctx) => {
-                    isMobile = ctx['isMobile'];
-                },
-            });
+            const isMobile = isMobileOS();
             const invisibleSelector = `.o_snippet_invisible, ${isMobile ? '.o_snippet_mobile_invisible' : '.o_snippet_desktop_invisible'}`;
             const $invisibleSnippets = globalSelector.all().find(invisibleSelector).addBack(invisibleSelector);
 
@@ -4278,22 +4181,40 @@ var SnippetsMenu = Widget.extend({
                 break;
         }
 
-        this.options.wysiwyg.toolbar.el.classList.remove('oe-floating');
+        this.options.wysiwyg.toolbarEl.classList.remove('oe-floating');
 
         // Create toolbar custom container.
         this._$toolbarContainer = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_editor_toolbar_container"/>');
         const $title = $("<we-title><span>" + titleText + "</span></we-title>");
         this._$toolbarContainer.append($title);
-        this._$toolbarContainer.append(this.options.wysiwyg.toolbar.$el);
+        // In case, the snippetEditor is inside an iframe, change the prototype
+        // of the element. This is required as the toolbar element is used as a
+        // reference to position the dropdown. The library popper.js check if
+        // the element is an HTMLElement. If that check returns false, the
+        // calculation err.
+        this.options.wysiwyg.toolbarEl.__proto__ = this.options.wysiwyg.toolbarEl.ownerDocument.defaultView.HTMLDivElement.prototype;
+        // In case, the snippetEditor is inside an iframe, rebind the dropdown
+        // from the iframe.
+        for (const dropdown of this.options.wysiwyg.toolbarEl.querySelectorAll('.colorpicker-group')) {
+            const $ = dropdown.ownerDocument.defaultView.$;
+            const $dropdown = $(dropdown);
+            $dropdown.off('show.bs.dropdown');
+            $dropdown.on('show.bs.dropdown', () => {
+                this.options.wysiwyg.onColorpaletteDropdownShow(dropdown.dataset.colorType);
+            });
+            $dropdown.off('hide.bs.dropdown');
+            $dropdown.on('hide.bs.dropdown', (ev) => this.options.wysiwyg.onColorpaletteDropdownHide(ev));
+        }
+        this._$toolbarContainer.append(this.options.wysiwyg.toolbar$El);
         $(this.customizePanel).append(this._$toolbarContainer);
 
         // Create table-options custom container.
         const $customizeTableBlock = $(QWeb.render('web_editor.toolbar.table-options'));
         this.options.wysiwyg.odooEditor.bindExecCommand($customizeTableBlock[0]);
         $(this.customizePanel).append($customizeTableBlock);
-        this._$removeFormatButton = this.options.wysiwyg.toolbar.$el.find('#removeFormat');
+        this._$removeFormatButton = this.options.wysiwyg.toolbar$El.find('#removeFormat');
         $title.append(this._$removeFormatButton);
-        this._$toolbarContainer.append(this.options.wysiwyg.toolbar.$el);
+        this._$toolbarContainer.append(this.options.wysiwyg.toolbar$El);
 
         this._checkEditorToolbarVisibility();
     },

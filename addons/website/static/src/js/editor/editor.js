@@ -1,9 +1,15 @@
 /** @odoo-module **/
 
-import weWidgets from "web_editor.widget";
-import wUtils from "website.utils";
+import { LinkDialog } from "@web_editor/js/wysiwyg/widgets/link_dialog";
+import { patch } from "@web/core/utils/patch";
+import { useService } from "@web/core/utils/hooks";
+import wUtils from 'website.utils';
 
-weWidgets.LinkDialog.include({
+patch(LinkDialog.prototype, "editor.js", {
+    setup() {
+        this._super(...arguments);
+        this.rpc = useService("rpc");
+    },
     /**
      * Allows the URL input to propose existing website pages.
      *
@@ -11,10 +17,14 @@ weWidgets.LinkDialog.include({
      */
     start: async function () {
         const options = {
-            body: this.linkWidget.$link && this.linkWidget.$link[0].ownerDocument.body,
+            body: this.$link && this.$link[0].ownerDocument.body,
         };
         const result = await this._super.apply(this, arguments);
-        wUtils.autocompleteWithPages(this, this.$('input[name="url"]'), options);
+        const fakeWidget = {
+            _rpc: ({ route, params }) => this.rpc(route, params),
+            trigger_up: () => {},
+        };
+        wUtils.autocompleteWithPages(fakeWidget, this.$('input[name="url"]'), options);
         return result;
     },
 });

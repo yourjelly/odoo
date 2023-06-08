@@ -38,8 +38,17 @@ wTourUtils.registerWebsitePreviewTour('link_tools', {
         trigger: 'iframe .s_text_image a[href="http://odoo.com"]:contains("odoo.com")',
     },
     {
+        content: "Label value should contain odoo.com",
+        trigger: '#o_link_dialog_label_input',
+        run: () => {
+            if ($('#o_link_dialog_label_input').val() !== 'odoo.com') {
+                throw new Error('Label value should contain odoo.com');
+            }
+        },
+    },
+    {
         content: "Change content (editing the label input) to odoo website_2",
-        trigger: '#o_link_dialog_label_input[value="odoo.com"]',
+        trigger: '#o_link_dialog_label_input',
         run: 'text odoo website_2',
     },
     {
@@ -57,9 +66,13 @@ wTourUtils.registerWebsitePreviewTour('link_tools', {
         trigger: 'iframe .s_text_image a[href="http://odoo.com"]:contains("odoo website")',
     },
     {
-        content: "Check that the label input contains the new content",
-        trigger: '#o_link_dialog_label_input[value="odoo website"]',
-        run: () => null, // it's a check
+        content: "Label value should contain odoo website",
+        trigger: '#o_link_dialog_label_input',
+        run: () => {
+            if ($('#o_link_dialog_label_input').val() !== 'odoo website') {
+                throw new Error('Label value should contain odoo website');
+            }
+        },
     },
     {
         content: "Link tools, should be open, change the url",
