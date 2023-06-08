@@ -1688,96 +1688,113 @@ X[]
                 });
                 it('should not break unbreakables', async () => {
                     await testEditor(BasicEditor, {
-                        contentBefore: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">[]<br></div>` +
-                            `<div class="oe_unbreakable">abc</div></div></div></div>`,
+                        contentBefore: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">[]<br></div>` +
+                            `<div class="oe_unbreakable">abc</div>` +
+                            `</div>`,
                         stepFunction: deleteBackward,
-                        contentAfter: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">[]<br></div>` +
-                            `<div class="oe_unbreakable">abc</div></div></div></div>`,
+                        contentAfter: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">[]<br></div>` +
+                            `<div class="oe_unbreakable">abc</div>` +
+                            `</div>`,
                     });
                     await testEditor(BasicEditor, {
                         contentBefore: `<div class="oe_unbreakable">` +
                             `<div class="oe_unbreakable">[ab</div>` +
                             `<div class="oe_unbreakable">cd</div>` +
-                            `<div class="oe_unbreakable">e]f</div>` +
+                            `<div class="oe_unbreakable">e]f1</div>` +
+                            `</div>`,
+                        stepFunction: deleteBackward,
+                        contentAfter: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">[]f1</div>` +
+                            `</div>`,
+                    });
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">a[b</div>` +
+                            `<div class="oe_unbreakable">cd</div>` +
+                            `<div class="oe_unbreakable">e]f2</div>` +
+                            `</div>`,
+                        stepFunction: deleteBackward,
+                        contentAfter: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">a[]</div>` +
+                            `<div class="oe_unbreakable">f2</div>` +
+                            `</div>`,
+                    });
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">3a[b</div>` +
+                            `<div class="oe_unbreakable">cd</div>` +
+                            `<div class="oe_unbreakable">ef]</div>` +
+                            `</div>`,
+                        stepFunction: deleteBackward,
+                        contentAfter: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">3a[]</div>` +
+                            `</div>`,
+                    });
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">[ab</div>` +
+                            `<div class="oe_unbreakable">cd</div>` +
+                            `<div class="oe_unbreakable">ef4]</div>` +
                             `</div>`,
                         stepFunction: deleteBackward,
                         contentAfter: `<div class="oe_unbreakable">` +
                             `<div class="oe_unbreakable">[]<br></div>` +
-                            `<div class="oe_unbreakable">f</div>` +
                             `</div>`,
                     });
                     await testEditor(BasicEditor, {
-                        contentBefore: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">a[b</div>` +
+                        contentBefore: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">[ab</div>` +
                             `<div class="oe_unbreakable">cd</div>` +
-                            `<div class="oe_unbreakable">e]f</div></div></div></div>`,
-                        stepFunction: deleteBackward,
-                        contentAfter: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">a[]</div>` +
-                            `<div class="oe_unbreakable">f</div></div></div></div>`,
-                    });
-                    await testEditor(BasicEditor, {
-                        contentBefore: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">a[b</div>` +
-                            `<div class="oe_unbreakable">cd</div>` +
-                            `<div class="oe_unbreakable">ef]</div></div></div></div>`,
-                        stepFunction: deleteBackward,
-                        contentAfter: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">a[]</div>` +
-                            `</div></div></div>`,
-                    });
-                    await testEditor(BasicEditor, {
-                        contentBefore: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">[ab</div>` +
-                            `<div class="oe_unbreakable">cd</div>` +
-                            `<div class="oe_unbreakable">ef]</div></div></div></div>`,
-                        stepFunction: deleteBackward,
-                        contentAfter: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">[]<br></div>` +
-                            `</div></div></div>`,
-                    });
-                    await testEditor(BasicEditor, {
-                        contentBefore: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">[ab</div>` +
-                            `<div class="oe_unbreakable">cd</div>` +
-                            `<div class="oe_unbreakable">ef</div></div>` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">gh</div>` +
+                            `<div class="oe_unbreakable">ef</div>` +
+                            `</div>` +
+                            `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">gh</div>` +
                             `<div class="oe_unbreakable">ij</div>` +
-                            `<div class="oe_unbreakable">k]l</div></div></div></div>`,
+                            `<div class="oe_unbreakable">k]l5</div>` +
+                            `</div>`,
                         stepFunction: deleteBackward,
-                        contentAfter: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">[]<br></div>` +
-                            `</div><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable">l</div></div></div></div>`,
+                        contentAfter: `<div class="oe_unbreakable">` +
+                            `</div>` +
+                            `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">[]l5</div>` +
+                            `</div>`,
                     });
                     await testEditor(BasicEditor, {
-                        contentBefore: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">a[b</div>` +
+                        contentBefore: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">a[b</div>` +
                             `<div class="oe_unbreakable">cd</div>` +
-                            `<div class="oe_unbreakable">ef</div></div>` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">gh</div>` +
+                            `<div class="oe_unbreakable">ef</div>` +
+                            `</div>` +
+                            `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">gh</div>` +
                             `<div class="oe_unbreakable">ij</div>` +
-                            `<div class="oe_unbreakable">k]l</div></div></div></div>`,
+                            `<div class="oe_unbreakable">k]l6</div>` +
+                            `</div>`,
                         stepFunction: deleteBackward,
-                        contentAfter: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">a[]</div>` +
-                            `</div><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable">l</div></div></div></div>`,
+                        contentAfter: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">a[]</div>` +
+                            `</div>` +
+                            `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">l6</div>` +
+                            `</div>`,
                     });
                     await testEditor(BasicEditor, {
-                        contentBefore: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">a[b</div>` +
+                        contentBefore: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">7a[b</div>` +
                             `<div class="oe_unbreakable">cd</div>` +
-                            `<div class="oe_unbreakable">ef</div></div>` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">gh</div>` +
+                            `<div class="oe_unbreakable">ef</div>` +
+                            `</div>` +
+                            `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">gh</div>` +
                             `<div class="oe_unbreakable">ij</div>` +
-                            `<div class="oe_unbreakable">kl]</div></div></div></div>`,
+                            `<div class="oe_unbreakable">kl]</div>` +
+                            `</div>`,
                         stepFunction: editor => deleteBackward(editor),
-                        contentAfter: `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                            `<div class="oe_unbreakable"><div class="oe_unbreakable">a[]</div>` +
-                            `</div></div></div>`,
+                        contentAfter: `<div class="oe_unbreakable">` +
+                            `<div class="oe_unbreakable">7a[]</div>` +
+                            `</div>`,
                     });
                 });
                 it('should merge the following inline text node', async () => {
