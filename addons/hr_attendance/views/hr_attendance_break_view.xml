@@ -9,6 +9,5 @@
                 <field name="corresponding_mandatory_pause_time"/>
             </tree>
         </field>
-
     </record>
 </odoo>

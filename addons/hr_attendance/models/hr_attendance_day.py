@@ -1,57 +1,62 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import pytz
-
-from collections import defaultdict
 from datetime import datetime, timedelta
 import calendar
-from operator import itemgetter
-from pytz import timezone
-
 from odoo import models, fields, api, exceptions, _
-from odoo.addons.resource.models.utils import Intervals
-from odoo.tools import format_datetime
-from odoo.osv.expression import AND, OR
-from odoo.tools.float_utils import float_is_zero
-from odoo.exceptions import AccessError
 from collections import defaultdict
 
 
-class HrAttendanceSheet(models.Model):
-    _name = "hr.attendance.sheet"
-    _description = "Attendance Sheet"
+class HrAttendanceDay(models.Model):
+    _name = "hr.attendance.day"
+    _description = "Attendance Day"
 
     def _get_selection(self):
         current_year = datetime.now().year
         return [(str(i), i) for i in range(2010, current_year + 1)]
 
-    year = fields.Selection(
-        selection='_get_selection', string='Year', required=True,
-        default=lambda x: str(datetime.now().year))
-
-    month = fields.Selection([
-        ('1', 'January'),
-        ('2', 'February'),
-        ('3', 'March'),
-        ('4', 'April'),
-        ('5', 'May'),
-        ('6', 'June'),
-        ('7', 'July'),
-        ('8', 'August'),
-        ('9', 'September'),
-        ('10', 'October'),
-        ('11', 'November'),
-        ('12', 'December'),
-    ], string='Month',
-        default='1')
-
+    attendance_day = fields.Date(string="Day", required=True)
     employee_id = fields.Many2one('hr.employee', string="Employee", default=lambda self: self.env.user.employee_id,
                                   required=True, ondelete='cascade', index=True)
-    attendance_day_ids = fields.One2many('hr.attendance.day', 'attendance_sheet_id')
+    attendance_ids = fields.One2many('hr.attendance', 'attendance_day_id', compute='_compute_attendance_days')
+    first_check_in = fields.Datetime(string="First Check-In", compute="_compute_day_results")
+    last_check_out = fields.Datetime(string="Last Check-out")
+    duration = fields.Float(string="Duration", compute='_compute_duration')
+    work_time = fields.Float(string="Work Time", compute='_compute_work_break_time')
+    break_time = fields.Float(string='Break Time', compute='_compute_work_break_time')
 
+    @api.depends('first_check_in', 'last_check_out')
+    def _compute_duration(self):
+        for record in self:
+            record.duration = (record.last_check_out - record.first_check_int).seconds
+
+    @api.depends('attendance_ids')
+    def _compute_work_break_time(self):
+        for record in self:
+            attendance_number = len(record.attendance_ids)
+            break_time = 0
+            if attendance_number > 1:
+                for i in range(attendance_number-1):
+                    break_time += (record.attendance_ids[i + 1].check_in - record.attendance_ids[i].check_out).seconds
+
+            record.work_time = record.duration - break_time
+            record.break_time = break_time
+
+    @api.depends('employee_id.attendance_state', 'attendance_day')
+    def _compute_attendance_days(self):
+        for record in self:
+            attendances = self.env['hr.attendance'].search([('check_in', '>=', record.attendance_day),
+                                                                      ('check_out', '<=', record.attendance_day),
+                                                                      ('employee_id', '=', record.employee_id.id)])
+
+            if attendances:
+                record.attendance_ids = attendances.ids
+            else:
+                record.attendance_ids = False
 
     def action_generate_attendance_days(self):
+        return
+        """
         for sheet in self:
             last_day = calendar.monthrange(int(sheet.year), int(sheet.month))[1]
             attendances = self.env['hr.attendance'].search([
@@ -101,19 +106,4 @@ class HrAttendanceSheet(models.Model):
                     "paid_worked_time": paid_worked_hours / 3600,
                     "unpaid_pause_time": unpaid_pause_time/3600
                 }])
-
-
-
-class HrAttendanceDay(models.Model):
-    _name = "hr.attendance.day"
-    _description = "Attendance Day"
-
-    attendance_sheet_id = fields.Many2one('hr.attendance.sheet')
-    attendance_day = fields.Date(string="Day", required=True)
-    shift_start = fields.Datetime(string="Shift start")
-    shift_end = fields.Datetime(string="Shift end")
-    total_shift = fields.Float(string="Total Shift Duration")
-    checked_in_time = fields.Float(string="Checked in time")
-    pause_time = fields.Float(string="Voluntary Pause Time")
-    paid_worked_time = fields.Float(string="Paid Worked time")
-    unpaid_pause_time = fields.Float(string="Unpaid Pause Time")
+        """

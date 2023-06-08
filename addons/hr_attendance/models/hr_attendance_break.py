@@ -11,3 +11,4 @@ class HrAttendanceBreak(models.Model):
     working_time = fields.Integer(string="Worked hours")
     corresponding_mandatory_pause_time = fields.Integer(string="Break Time (Minutes)")
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company)
+
