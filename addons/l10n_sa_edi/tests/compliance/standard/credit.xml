@@ -21,6 +21,12 @@
         </cac:InvoiceDocumentReference>
     </cac:BillingReference>
     <cac:AdditionalDocumentReference>
+        <cbc:ID>QR</cbc:ID>
+        <cac:Attachment>
+            <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">AQpTQSBDb21wYW55Ag8zMTExMTExMTExMTExMTMDGTIwMjItMDktMDVUMDk6Mzk6MTUrMDM6MDAEBjM2OC4wMAUFNDguMDA=</cbc:EmbeddedDocumentBinaryObject>
+        </cac:Attachment>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
         <cbc:ID>PIH</cbc:ID>
         <cac:Attachment>
             <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">
