@@ -18361,9 +18361,9 @@
                 background: color,
             });
         }
-        updateTitle(ev) {
+        updateTitle() {
             this.props.updateChart(this.props.figureId, {
-                title: this.state.title,
+                title: _t(this.state.title),
             });
         }
         updateSelect(attr, ev) {
@@ -48396,8 +48396,8 @@
 
 
     __info__.version = '16.4.0-alpha.3';
-    __info__.date = '2023-06-06T06:02:56.207Z';
-    __info__.hash = 'd30ce8a';
+    __info__.date = '2023-06-08T13:07:14.007Z';
+    __info__.hash = '792520c';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
