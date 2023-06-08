@@ -30,10 +30,6 @@ class TestEdiZatca(TestSaEdiCommon):
             current_tree = self.get_xml_tree_from_string(generated_file)
             current_tree = self.with_applied_xpath(current_tree, self.remove_ubl_extensions_xpath)
 
-            with open('/home/odoo/Desktop/current.xml', 'wb') as f:
-                current_tree.getroottree().write(f)
-
-
             self.assertXmlTreeEqual(current_tree, expected_tree)
 
     def testCreditNoteStandard(self):
@@ -56,9 +52,6 @@ class TestEdiZatca(TestSaEdiCommon):
             generated_file = self.env['account.edi.format']._l10n_sa_generate_zatca_template(credit_note)
             current_tree = self.get_xml_tree_from_string(generated_file)
             current_tree = self.with_applied_xpath(current_tree, self.remove_ubl_extensions_xpath)
-
-            with open('/home/odoo/Desktop/current.xml', 'wb') as f:
-                current_tree.getroottree().write(f)
 
             self.assertXmlTreeEqual(current_tree, expected_tree)
 
@@ -97,9 +90,6 @@ class TestEdiZatca(TestSaEdiCommon):
             current_tree = self.get_xml_tree_from_string(generated_file)
             current_tree = self.with_applied_xpath(current_tree, self.remove_ubl_extensions_xpath)
 
-            with open('/home/odoo/Desktop/current.xml', 'wb') as f:
-                current_tree.getroottree().write(f)
-
             self.assertXmlTreeEqual(current_tree, expected_tree)
 
     def testCreditNoteSimplified(self):
@@ -115,12 +105,6 @@ class TestEdiZatca(TestSaEdiCommon):
             current_tree = self.get_xml_tree_from_string(generated_file)
             current_tree = self.with_applied_xpath(current_tree, self.remove_ubl_extensions_xpath)
 
-            with open('/home/odoo/Desktop/current.xml', 'wb') as f:
-                current_tree.getroottree().write(f)
-
-            with open('/home/odoo/Desktop/expected.xml', 'wb') as f:
-                expected_tree.getroottree().write(f)
-
             self.assertXmlTreeEqual(current_tree, expected_tree)
 
     def testDebitNoteSimplified(self):
@@ -135,11 +119,5 @@ class TestEdiZatca(TestSaEdiCommon):
             generated_file = self.env['account.edi.format']._l10n_sa_generate_zatca_template(move)
             current_tree = self.get_xml_tree_from_string(generated_file)
             current_tree = self.with_applied_xpath(current_tree, self.remove_ubl_extensions_xpath)
-
-            with open('/home/odoo/Desktop/current.xml', 'wb') as f:
-                current_tree.getroottree().write(f)
-
-            with open('/home/odoo/Desktop/expected.xml', 'wb') as f:
-                expected_tree.getroottree().write(f)
 
             self.assertXmlTreeEqual(current_tree, expected_tree)
