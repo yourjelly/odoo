@@ -353,7 +353,10 @@ export class HtmlField extends Component {
             let dynamicPlaceholder = "object." + chain.join('.');
             dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''` : '';
             const t = document.createElement('T');
+            const span = document.createElement('SPAN');
             t.setAttribute('t-out', dynamicPlaceholder);
+            span.textContent = dynamicPlaceholder;
+            t.append(span);
             this.wysiwyg.odooEditor.execCommand('insert', t);
             // Ensure the dynamic placeholder <t> element is sanitized.
             this.wysiwyg.odooEditor.sanitize(t);
