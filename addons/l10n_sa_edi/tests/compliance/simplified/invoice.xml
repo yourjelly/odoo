@@ -6,15 +6,11 @@
   <cbc:IssueDate>2023-03-10</cbc:IssueDate>
   <cbc:IssueTime>14:56:55</cbc:IssueTime>
   <cbc:InvoiceTypeCode name="0200000">388</cbc:InvoiceTypeCode>
-  <cbc:Note/>
   <cbc:DocumentCurrencyCode>SAR</cbc:DocumentCurrencyCode>
   <cbc:TaxCurrencyCode>SAR</cbc:TaxCurrencyCode>
   <cbc:BuyerReference>Mohammed Ali</cbc:BuyerReference>
   <cac:AdditionalDocumentReference>
     <cbc:ID>QR</cbc:ID>
-    <cac:Attachment>
-      <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain"/>
-    </cac:Attachment>
   </cac:AdditionalDocumentReference>
   <cac:AdditionalDocumentReference>
     <cbc:ID>PIH</cbc:ID>
@@ -33,37 +29,37 @@
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PartyIdentification>
-        <cbc:ID schemeID="CRN">3231231</cbc:ID>
+        <cbc:ID schemeID="CRN">2525252525252</cbc:ID>
       </cac:PartyIdentification>
       <cac:PartyName>
-        <cbc:Name>&#1575;&#1594;&#1593;&#1578; &#1575;&#1594;&#1593;&#1578;</cbc:Name>
+        <cbc:Name>SA Company Test</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:StreetName>Discovery street</cbc:StreetName>
-        <cbc:BuildingNumber>1231</cbc:BuildingNumber>
-        <cbc:PlotIdentification>4423</cbc:PlotIdentification>
-        <cbc:CitySubdivisionName>Test</cbc:CitySubdivisionName>
-        <cbc:CityName>Dubai</cbc:CityName>
-        <cbc:PostalZone>00000</cbc:PostalZone>
-        <cbc:CountrySubentity>Mecca</cbc:CountrySubentity>
-        <cbc:CountrySubentityCode>MCA</cbc:CountrySubentityCode>
+        <cbc:StreetName>Al Amir Mohammed Bin Abdul Aziz Street</cbc:StreetName>
+        <cbc:BuildingNumber>1234</cbc:BuildingNumber>
+        <cbc:PlotIdentification>1234</cbc:PlotIdentification>
+        <cbc:CitySubdivisionName>Testomania</cbc:CitySubdivisionName>
+        <cbc:CityName>&#1575;&#1604;&#1605;&#1583;&#1610;&#1606;&#1577; &#1575;&#1604;&#1605;&#1606;&#1608;&#1585;&#1577;</cbc:CityName>
+        <cbc:PostalZone>42317</cbc:PostalZone>
+        <cbc:CountrySubentity>Riyadh</cbc:CountrySubentity>
+        <cbc:CountrySubentityCode>RYA</cbc:CountrySubentityCode>
         <cac:Country>
           <cbc:IdentificationCode>SA</cbc:IdentificationCode>
           <cbc:Name>Saudi Arabia</cbc:Name>
         </cac:Country>
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
-        <cbc:RegistrationName>&#1575;&#1594;&#1593;&#1578; &#1575;&#1594;&#1593;&#1578;</cbc:RegistrationName>
-        <cbc:CompanyID>311271218900003</cbc:CompanyID>
+        <cbc:RegistrationName>SA Company Test</cbc:RegistrationName>
+        <cbc:CompanyID>311111111111113</cbc:CompanyID>
         <cac:RegistrationAddress>
-          <cbc:StreetName>Discovery street</cbc:StreetName>
-          <cbc:BuildingNumber>1231</cbc:BuildingNumber>
-          <cbc:PlotIdentification>4423</cbc:PlotIdentification>
-          <cbc:CitySubdivisionName>Test</cbc:CitySubdivisionName>
-          <cbc:CityName>Dubai</cbc:CityName>
-          <cbc:PostalZone>00000</cbc:PostalZone>
-          <cbc:CountrySubentity>Mecca</cbc:CountrySubentity>
-          <cbc:CountrySubentityCode>MCA</cbc:CountrySubentityCode>
+          <cbc:StreetName>Al Amir Mohammed Bin Abdul Aziz Street</cbc:StreetName>
+          <cbc:BuildingNumber>1234</cbc:BuildingNumber>
+          <cbc:PlotIdentification>1234</cbc:PlotIdentification>
+          <cbc:CitySubdivisionName>Testomania</cbc:CitySubdivisionName>
+          <cbc:CityName>&#1575;&#1604;&#1605;&#1583;&#1610;&#1606;&#1577; &#1575;&#1604;&#1605;&#1606;&#1608;&#1585;&#1577;</cbc:CityName>
+          <cbc:PostalZone>42317</cbc:PostalZone>
+          <cbc:CountrySubentity>Riyadh</cbc:CountrySubentity>
+          <cbc:CountrySubentityCode>RYA</cbc:CountrySubentityCode>
           <cac:Country>
             <cbc:IdentificationCode>SA</cbc:IdentificationCode>
             <cbc:Name>Saudi Arabia</cbc:Name>
@@ -74,17 +70,17 @@
         </cac:TaxScheme>
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
-        <cbc:RegistrationName>&#1575;&#1594;&#1593;&#1578; &#1575;&#1594;&#1593;&#1578;</cbc:RegistrationName>
-        <cbc:CompanyID>311271218900003</cbc:CompanyID>
+        <cbc:RegistrationName>SA Company Test</cbc:RegistrationName>
+        <cbc:CompanyID>311111111111113</cbc:CompanyID>
         <cac:RegistrationAddress>
-          <cbc:StreetName>Discovery street</cbc:StreetName>
-          <cbc:BuildingNumber>1231</cbc:BuildingNumber>
-          <cbc:PlotIdentification>4423</cbc:PlotIdentification>
-          <cbc:CitySubdivisionName>Test</cbc:CitySubdivisionName>
-          <cbc:CityName>Dubai</cbc:CityName>
-          <cbc:PostalZone>00000</cbc:PostalZone>
-          <cbc:CountrySubentity>Mecca</cbc:CountrySubentity>
-          <cbc:CountrySubentityCode>MCA</cbc:CountrySubentityCode>
+          <cbc:StreetName>Al Amir Mohammed Bin Abdul Aziz Street</cbc:StreetName>
+          <cbc:BuildingNumber>1234</cbc:BuildingNumber>
+          <cbc:PlotIdentification>1234</cbc:PlotIdentification>
+          <cbc:CitySubdivisionName>Testomania</cbc:CitySubdivisionName>
+          <cbc:CityName>&#1575;&#1604;&#1605;&#1583;&#1610;&#1606;&#1577; &#1575;&#1604;&#1605;&#1606;&#1608;&#1585;&#1577;</cbc:CityName>
+          <cbc:PostalZone>42317</cbc:PostalZone>
+          <cbc:CountrySubentity>Riyadh</cbc:CountrySubentity>
+          <cbc:CountrySubentityCode>RYA</cbc:CountrySubentityCode>
           <cac:Country>
             <cbc:IdentificationCode>SA</cbc:IdentificationCode>
             <cbc:Name>Saudi Arabia</cbc:Name>
@@ -93,7 +89,9 @@
       </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:ID>1</cbc:ID>
-        <cbc:Name>&#1575;&#1594;&#1593;&#1578; &#1575;&#1594;&#1593;&#1578;</cbc:Name>
+        <cbc:Name>SA Company Test</cbc:Name>
+        <cbc:Telephone>+966 51 234 5678</cbc:Telephone>
+        <cbc:ElectronicMail>info@company.saexample.com</cbc:ElectronicMail>
       </cac:Contact>
     </cac:Party>
   </cac:AccountingSupplierParty>
@@ -106,8 +104,8 @@
         <cbc:Name>Mohammed Ali</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:CountrySubentity>Mecca</cbc:CountrySubentity>
-        <cbc:CountrySubentityCode>MCA</cbc:CountrySubentityCode>
+        <cbc:CountrySubentity>Riyadh</cbc:CountrySubentity>
+        <cbc:CountrySubentityCode>RYA</cbc:CountrySubentityCode>
         <cac:Country>
           <cbc:IdentificationCode>SA</cbc:IdentificationCode>
           <cbc:Name>Saudi Arabia</cbc:Name>
@@ -116,8 +114,8 @@
       <cac:PartyTaxScheme>
         <cbc:RegistrationName>Mohammed Ali</cbc:RegistrationName>
         <cac:RegistrationAddress>
-          <cbc:CountrySubentity>Mecca</cbc:CountrySubentity>
-          <cbc:CountrySubentityCode>MCA</cbc:CountrySubentityCode>
+          <cbc:CountrySubentity>Riyadh</cbc:CountrySubentity>
+          <cbc:CountrySubentityCode>RYA</cbc:CountrySubentityCode>
           <cac:Country>
             <cbc:IdentificationCode>SA</cbc:IdentificationCode>
             <cbc:Name>Saudi Arabia</cbc:Name>
@@ -130,8 +128,8 @@
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Mohammed Ali</cbc:RegistrationName>
         <cac:RegistrationAddress>
-          <cbc:CountrySubentity>Mecca</cbc:CountrySubentity>
-          <cbc:CountrySubentityCode>MCA</cbc:CountrySubentityCode>
+          <cbc:CountrySubentity>Riyadh</cbc:CountrySubentity>
+          <cbc:CountrySubentityCode>RYA</cbc:CountrySubentityCode>
           <cac:Country>
             <cbc:IdentificationCode>SA</cbc:IdentificationCode>
             <cbc:Name>Saudi Arabia</cbc:Name>
@@ -144,33 +142,11 @@
       </cac:Contact>
     </cac:Party>
   </cac:AccountingCustomerParty>
-  <cac:Delivery>
-    <cbc:ActualDeliveryDate>2023-03-10</cbc:ActualDeliveryDate>
-    <cac:DeliveryLocation>
-      <cac:Address>
-        <cbc:CountrySubentity>Mecca</cbc:CountrySubentity>
-        <cbc:CountrySubentityCode>MCA</cbc:CountrySubentityCode>
-        <cac:Country>
-          <cbc:IdentificationCode>SA</cbc:IdentificationCode>
-          <cbc:Name>Saudi Arabia</cbc:Name>
-        </cac:Country>
-      </cac:Address>
-    </cac:DeliveryLocation>
-  </cac:Delivery>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode listID="UN/ECE 4461">1</cbc:PaymentMeansCode>
     <cbc:PaymentDueDate>2023-03-10</cbc:PaymentDueDate>
     <cbc:InstructionID>INV/2023/00034</cbc:InstructionID>
     <cbc:PaymentID>INV/2023/00034</cbc:PaymentID>
-    <cac:PayeeFinancialAccount>
-      <cac:FinancialInstitutionBranch>
-        <cac:FinancialInstitution>
-          <cac:Address>
-            <cac:Country/>
-          </cac:Address>
-        </cac:FinancialInstitution>
-      </cac:FinancialInstitutionBranch>
-    </cac:PayeeFinancialAccount>
   </cac:PaymentMeans>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="SAR">119.25</cbc:TaxAmount>
