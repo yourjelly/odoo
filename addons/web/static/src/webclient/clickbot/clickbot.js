@@ -119,7 +119,7 @@
      */
     function waitForCondition(stopCondition, tl = 30000) {
         return new Promise(function (resolve, reject) {
-            const interval = 250;
+            const interval = 500;
             let timeLimit = tl;
 
             function checkCondition() {
