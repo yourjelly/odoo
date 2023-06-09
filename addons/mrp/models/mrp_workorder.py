@@ -835,6 +835,7 @@ class MrpWorkorder(models.Model):
             lambda move: move.product_id == self.product_id and
             move.state not in ('done', 'cancel')
         )
+        self("MRP_update_finished_move_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+")
         if not production_move:
             return
         if production_move.product_id.tracking != 'none':

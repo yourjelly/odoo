@@ -79,11 +79,11 @@ class MrpProduction(models.Model):
         consumption_issues = self._get_consumption_issues()
         if consumption_issues:
             return self._action_generate_consumption_wizard(consumption_issues)
-
+        print("subcontracting_record_component_______________________________")
         self._update_finished_move()
         self.subcontracting_has_been_recorded = True
-
         quantity_issues = self._get_quantity_produced_issues()
+        # breakpoint()
         if quantity_issues:
             backorder = self.sudo()._split_productions()[1:]
             # No qty to consume to avoid propagate additional move
@@ -91,9 +91,12 @@ class MrpProduction(models.Model):
             backorder.move_raw_ids.filtered(lambda m: m.additional).product_uom_qty = 0.0
 
             backorder.qty_producing = backorder.product_qty
+            # backorder.product_qty = backorder.qty_producing
             backorder._set_qty_producing()
 
             self.product_qty = self.qty_producing
+            # Remove any additional backorders
+            # self.sudo()._split_productions()[1:].unlink()
             action = self._get_subcontract_move().filtered(lambda m: m.state not in ('done', 'cancel'))._action_record_components()
             action['res_id'] = backorder.id
             return action
@@ -108,6 +111,8 @@ class MrpProduction(models.Model):
         """ After producing, set the move line on the subcontract picking. """
         self.ensure_one()
         subcontract_move_id = self._get_subcontract_move().filtered(lambda m: m.state not in ('done', 'cancel'))
+        breakpoint()
+        print("__________________update_finished_move_")
         if subcontract_move_id:
             quantity = self.qty_producing
             if self.lot_producing_id:
@@ -115,12 +120,14 @@ class MrpProduction(models.Model):
             else:
                 move_lines = subcontract_move_id.move_line_ids.filtered(lambda ml: not ml.lot_id)
             # Update reservation and quantity done
+            if quantity == sum(move_lines.mapped('qty_done')):
+                return
+            if self.qty_producing < self.product_qty:
+                return
             for ml in move_lines:
                 rounding = ml.product_uom_id.rounding
                 if float_compare(quantity, 0, precision_rounding=rounding) <= 0:
                     break
-                if quantity == sum(move_lines.mapped('qty_done')):
-                    return
                 quantity_to_process = min(quantity, ml.reserved_uom_qty - ml.qty_done)
                 quantity -= quantity_to_process
 

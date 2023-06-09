@@ -367,6 +367,7 @@ class StockMove(models.Model):
             """Prioritize decrease the ml without reserved qty"""
             res_mls = move._get_move_lines().sorted(lambda ml: float_is_zero(ml.reserved_uom_qty, precision_rounding=ml.product_uom_id.rounding), reverse=True)
             qty_to_unreserve = move.reserved_availability - move.product_uom_qty
+            # breakpoint()
             for ml in res_mls:
                 if float_is_zero(quantity, precision_rounding=move.product_uom.rounding):
                     break

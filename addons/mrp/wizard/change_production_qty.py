@@ -32,6 +32,7 @@ class ChangeProductionQty(models.TransientModel):
         their quantity according the unit_ratio. It does not use the BoM, BoM
         modification during production would not be taken into consideration.
         """
+        print("_update_finished_moves+++++++++++++++++++++++++++++++++++++++++")
         modification = {}
         push_moves = self.env['stock.move']
         for move in production.move_finished_ids:
@@ -83,6 +84,7 @@ class ChangeProductionQty(models.TransientModel):
                         else:
                             documents[key] = [value]
             production._log_manufacture_exception(documents)
+            print('change_prod_qty___________________________________________')
             self._update_finished_moves(production, new_production_qty - qty_produced, old_production_qty - qty_produced)
             production.write({'product_qty': new_production_qty})
 
