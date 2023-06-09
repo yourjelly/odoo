@@ -41,6 +41,7 @@ const rgbToHex = OdooEditorLib.rgbToHex;
 const preserveCursor = OdooEditorLib.preserveCursor;
 const closestElement = OdooEditorLib.closestElement;
 const setSelection = OdooEditorLib.setSelection;
+const getAdjacentPreviousSiblings = OdooEditorLib.getAdjacentPreviousSiblings;
 const endPos = OdooEditorLib.endPos;
 const hasValidSelection = OdooEditorLib.hasValidSelection;
 const parseHTML = OdooEditorLib.parseHTML;
@@ -2090,7 +2091,7 @@ const Wysiwyg = Widget.extend({
                     iconClass: iconClass
                 }))[0]
                 this.odooEditor.execCommand('insert', bannerHTML);
-                setSelection(this.odooEditor._latestComputedSelectionInEditable.focusNode.previousSibling.querySelector('.o_editor_banner > div'), 0);
+                setSelection(bannerHTML.querySelector('.o_editor_banner > div'), 0)
             },
         }
     },
@@ -2102,7 +2103,7 @@ const Wysiwyg = Widget.extend({
      */
     _filterCommandInBanner: function () {
         let anchor = document.getSelection().anchorNode;
-        if (anchor.nodeType !== Node.ELEMENT_NODE) {
+        if (anchor && anchor.nodeType && anchor.nodeType !== Node.ELEMENT_NODE) {
             anchor = anchor.parentElement;
         }
         if (anchor && anchor.closest('.o_editor_banner')) {
