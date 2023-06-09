@@ -23,7 +23,7 @@ class ProjectProductEmployeeMap(models.Model):
     sale_order_id = fields.Many2one(related="project_id.sale_order_id")
     company_id = fields.Many2one('res.company', string='Company', related='project_id.company_id')
     partner_id = fields.Many2one(related='project_id.partner_id')
-    price_unit = fields.Float("Unit Price", compute='_compute_price_unit', store=True, readonly=True)
+    price_unit = fields.Float("Unit Price", compute='_compute_price_unit', store=True, readonly=False)
     currency_id = fields.Many2one('res.currency', string="Currency", compute='_compute_currency_id', store=True, readonly=False)
     cost = fields.Monetary(currency_field='cost_currency_id', compute='_compute_cost', store=True, readonly=False,
                            help="This cost overrides the employee's default employee hourly wage in employee's HR Settings")
@@ -124,6 +124,11 @@ class ProjectProductEmployeeMap(models.Model):
         return maps
 
     def write(self, values):
+        if (price_unit := values.get('price_unit')):
+            for line in self:
+                if line.sale_line_id and line.sale_line_id.price_unit != price_unit:
+                    if self.search([('sale_line_id', '=', line.sale_line_id)], limit=1):
+                        line.sale_line_id = line.sale_line_id.copy({'price_unit': price_unit})
         res = super(ProjectProductEmployeeMap, self).write(values)
         self._update_project_timesheet()
         return res
