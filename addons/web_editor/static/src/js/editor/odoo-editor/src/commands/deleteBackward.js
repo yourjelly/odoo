@@ -47,8 +47,6 @@ const isDeletable = (node) => {
 }
 
 HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, offsetLimit) {
-    console.log('HTMLElement.prototype.oDeleteBackward', this, offset);
-    console.log('===> ', this.closest('[contenteditable="true"]')?.innerHTML);
     const contentIsZWS = this.textContent === '\u200B';
     let moveDest;
     if (offset) {
@@ -138,18 +136,13 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
          *        <h3>abc</h3><h1>[]def</h1> + BACKSPACE
          *   <=>  <h3>abc[]def</h3>
         */
-        console.log('previousElementSibling', this.previousElementSibling);
         const previousElementSiblingClosestBlock = closestBlock(this.previousElementSibling);
-        console.log('previousElementSiblingClosestBlock', previousElementSiblingClosestBlock);
-        console.log('isEmptyBlock(previousElementSiblingClosestBlock)', isEmptyBlock(previousElementSiblingClosestBlock));
         if (
             (isEmptyBlock(previousElementSiblingClosestBlock) || previousElementSiblingClosestBlock?.textContent === '\u200B') &&
             !['TR','TD','TABLE','TBODY','UL','OL','LI'].includes(this.nodeName)
         ) {
-            console.log(' ======== del back remove empty block');
             previousElementSiblingClosestBlock.remove();
             setSelection(this, 0);
-            console.log('===> ', this.closest('[contenteditable="true"]')?.innerHTML);
             return;
 
             // take all the current node children and add them in the previous node.

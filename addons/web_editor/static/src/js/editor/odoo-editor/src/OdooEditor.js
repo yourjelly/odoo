@@ -1894,21 +1894,14 @@ export class OdooEditor extends EventTarget {
             // Eg, <h1><font>[...]</font></h1> will preserve the styles of the
             // <font> node. If it remains empty, it will be cleaned up later by
             // the sanitizer.
-            console.log(' insert ZWS ');
             const zws = document.createTextNode('\u200B');
             range.startContainer.before(zws);
             insertedZws = zws;
         }
-        console.log('step 0 \n==> ', this.editable.innerHTML);
         let start = range.startContainer,
             end = range.endContainer,
             startElement = closestBlock(start),
             endElement = closestBlock(end);
-
-        console.log('range start ', range.startContainer, range.startContainer.textContent);
-        console.log('range end ', range.endContainer, range.endContainer.textContent);
-        console.log('start element', startElement, startElement.outerHTML);
-        console.log('end element', endElement, endElement.outerHTML);
         // Let the DOM split and delete the range.
         const doJoin =
             (closestBlock(start) !== closestBlock(range.commonAncestorContainer) ||
@@ -1924,7 +1917,6 @@ export class OdooEditor extends EventTarget {
             n.textContent = '';
         });
 
-        console.log('before end while \n==> ', this.editable.innerHTML);
         // If the end container was fully selected, extractContents may have
         // emptied it without removing it. Ensure it's gone.
         const isRemovableInvisible = (node, noBlocks = true) =>
@@ -1936,7 +1928,6 @@ export class OdooEditor extends EventTarget {
             end = parent;
         }
         // Same with the start container
-        console.log('before start while \n==> ', this.editable.innerHTML);
         while (
             start &&
             isRemovableInvisible(start) &&
@@ -1953,7 +1944,6 @@ export class OdooEditor extends EventTarget {
         //     start = this.editable.firstChild;
         //     setSelection(start, 0);
         // }
-        console.log('after start while \n==> ', this.editable.innerHTML);
         // Ensure empty blocks be given a <br> child.
         if (start) {
             fillEmpty(closestBlock(start));
@@ -1969,8 +1959,6 @@ export class OdooEditor extends EventTarget {
             joinWith.textContent = oldText.replace(/ $/, '\u00A0');
             setSelection(joinWith, nodeSize(joinWith));
         }
-        console.log('end', end, end?.outerHTML);
-        console.log('before delete range loop \n==> ', this.editable.innerHTML);
         // Rejoin blocks that extractContents may have split in two.
         while (
             doJoin &&
@@ -1978,10 +1966,6 @@ export class OdooEditor extends EventTarget {
             !(next.previousSibling && next.previousSibling === joinWith) &&
             this.editable.contains(next)
         ) {
-            console.log('\n\n======================= LOOP ==============================');
-            console.log('next', next);
-            console.log('joinWith', joinWith);
-            console.log('end element', endElement);
             const restore = preserveCursor(this.document);
             this.observerFlush();
             // if the delete range create and empty block,
@@ -1992,7 +1976,6 @@ export class OdooEditor extends EventTarget {
                 endElement && !isEmptyBlock(endElement) &&
                 !['TR','TD','TABLE','TBODY','UL','OL','LI'].includes(endElement.nodeName)
             ) {
-                console.log('custom remove');
                 closestBlock(joinWith).remove();
                 setSelection(endElement, 0);
                 fillEmpty(endElement);
@@ -2008,12 +1991,10 @@ export class OdooEditor extends EventTarget {
                 }
             }, this._currentStep.mutations.length);
             if ([UNBREAKABLE_ROLLBACK_CODE, UNREMOVABLE_ROLLBACK_CODE].includes(res)) {
-                console.log('unbreakable restore');
                 restore();
                 break;
             }
         }
-        console.log('after while \n==> ', this.editable.innerHTML);
         if (insertedZws) {
             // Remove the zero-width space (zws) that was added to preserve the
             // parent styles, then call `fillEmpty` to properly add a flagged
@@ -2022,7 +2003,6 @@ export class OdooEditor extends EventTarget {
             insertedZws.remove();
             el && fillEmpty(el);
         }
-        console.log('after while2 \n==> ', this.editable.innerHTML);
         next = range.endContainer && rightLeafOnlyNotBlockPath(range.endContainer).next().value;
         if (
             shouldPreserveSpace && next && !(next && next.nodeType === Node.TEXT_NODE && next.textContent.startsWith(' '))
@@ -2031,12 +2011,10 @@ export class OdooEditor extends EventTarget {
             joinWith.textContent = oldText;
             setSelection(joinWith, nodeSize(joinWith));
         }
-        console.log('after while3 \n==> ', this.editable.innerHTML);
         if (joinWith) {
             const el = closestElement(joinWith);
             el && fillEmpty(el);
         }
-        console.log('after while4 \n==> ', this.editable.innerHTML);
     }
 
     /**
