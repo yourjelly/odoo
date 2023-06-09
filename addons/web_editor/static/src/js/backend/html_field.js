@@ -76,7 +76,6 @@ export class HtmlField extends Component {
     setup() {
         this.containsComplexHTML = this.computeContainsComplexHTML();
         this.sandboxedPreview = this.props.sandboxedPreview || this.containsComplexHTML;
-
         this.readonlyElementRef = useRef("readonlyElement");
         this.codeViewRef = useRef("codeView");
         this.iframeRef = useRef("iframe");
@@ -489,6 +488,17 @@ export class HtmlField extends Component {
                     }
                 }
 
+                // const script = cwindow.document.createElement('script');
+                // script.setAttribute('type', 'text/javascript');
+                // const scriptTextNode = document.createTextNode(
+                //     `if (window.top.${this._onUpdateIframeId}) {` +
+                //         `window.top.${this._onUpdateIframeId}(${_avoidDoubleLoad})` +
+                //     `}`
+                // );
+                // script.append(scriptTextNode);
+                // cwindow.document.body.append(script);
+                
+                
                 if (!this.sandboxedPreview) {
                     const iframeTarget = cwindow.document.querySelector('#iframe_target');
                     iframeTarget.innerHTML = value;
@@ -503,6 +513,7 @@ export class HtmlField extends Component {
                     script.append(scriptTextNode);
                     cwindow.document.body.append(script);
                 } else {
+                    debugger;
                     cwindow.document.documentElement.innerHTML = value;
                 }
 
@@ -735,7 +746,12 @@ function stripHistoryIds(value) {
 }
 
 // Ensure all external links are opened in a new tab.
+// href="http://localhost:8069/document/share/6/8958229b-115c-4cde-8c1c-9f8fa0efa321"
+// href="'mailto:%s' % info@yourcompany.com"
+// href="'%s' % http://www.example.com"
+// href="https://www.odoo.com/app/documents"
 const retargetLinks = (container) => {
+    debugger;
     for (const externalLink of container.querySelectorAll(`a:not([href^="${location.origin}"]):not([href^="/"])`)) {
         externalLink.setAttribute('target', '_blank');
         externalLink.setAttribute('rel', 'noreferrer');
