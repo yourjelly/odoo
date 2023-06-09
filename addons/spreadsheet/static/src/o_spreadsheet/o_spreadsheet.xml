@@ -313,7 +313,7 @@
             <div
               t-if="isSameColor(props.currentColor, color)"
               align="center"
-              t-attf-style="color:{{getCheckMarkColor()}}">
+              t-attf-style="color:{{checkmarkColor}}">
               ✓
             </div>
           </div>
@@ -339,38 +339,46 @@
             t-attf-style="background-color:{{color}};"
             t-on-click="() => this.onColorClick(color)">
             <div
-              t-if="props.currentColor === color"
+              t-if="isSameColor(props.currentColor, color)"
               align="center"
-              t-attf-style="color:{{getCheckMarkColor()}}">
+              t-attf-style="color:{{checkmarkColor}}">
               ✓
             </div>
           </div>
         </div>
         <div t-if="state.showGradient" class="o-custom-selector">
-          <div class="o-magnifier-glass" t-att-style="magnifyingGlassStyle"/>
           <div
             class="o-gradient"
-            t-on-click.stop="computeCustomColor"
-            t-on-mouseout="hideMagnifier"
-            t-on-mousemove="moveMagnifier"
-            t-on-mouseover="showMagnifier"
-          />
+            t-on-click.stop=""
+            t-on-mousedown="dragGradientPointer"
+            t-att-style="gradientHueStyle">
+            <div class="saturation w-100 h-100 position-absolute pe-none"/>
+            <div class="lightness w-100 h-100 position-absolute pe-none"/>
+            <div class="magnifier pe-none" t-att-style="pointerStyle"/>
+          </div>
+          <div class="o-hue-container" t-on-mousedown="dragHuePointer">
+            <div class="o-hue-picker" t-on-click.stop=""/>
+            <div class="o-hue-slider pe-none" t-att-style="sliderStyle">
+              <t t-call="o-spreadsheet-Icon.TRIANGLE_UP"/>
+            </div>
+          </div>
           <div class="o-custom-input-preview">
             <input
               type="text"
-              t-att-class="{'o-wrong-color': state.isCurrentColorInvalid }"
+              t-att-class="{'o-wrong-color': !isHexColorValid }"
               t-on-click.stop=""
-              t-model="state.currentColor"
+              t-att-value="state.customHexColor"
+              t-on-input="setHexColor"
             />
-            <div class="o-color-preview" t-attf-style="background-color:{{state.currentColor}}"/>
+            <div class="o-color-preview" t-att-style="colorPreviewStyle"/>
           </div>
           <div class="o-custom-input-buttons">
-            <button class="o-add-button" t-on-click="setCustomColor">Add</button>
+            <button class="o-add-button" t-on-click.stop="addCustomColor">Add</button>
           </div>
         </div>
         <div class="o-separator"/>
         <div class="o-buttons">
-          <button t-on-click="resetColor" class="o-cancel">Reset</button>
+          <button t-on-click="resetColor" class="o-cancel">No Color</button>
         </div>
       </div>
     </Popover>
@@ -3861,6 +3869,6 @@
 </odoo>
 <!--
   __info__.version = '16.4.0-alpha.3';
-  __info__.date = '2023-06-02T10:56:27.729Z';
-  __info__.hash = '059d66a';
+  __info__.date = '2023-06-09T07:03:31.038Z';
+  __info__.hash = '8a126b7';
 -->
