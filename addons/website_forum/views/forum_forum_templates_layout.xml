@@ -332,6 +332,15 @@
             <t t-out="tag.name"/>
         </a>
     </div>
+    <div t-if="related_forums" class="o_wforum_sidebar_section pt-3">
+        <div class="px-3 pb-1 fw-bold">Forums</div>
+        <t t-foreach="related_forums.sorted(lambda f: f.name.lower())" t-as="related_forum">
+            <a t-attf-class="nav-link my-1 py-1 text-reset" t-attf-href="/forum/#{slug(related_forum)}">
+                <i t-attf-class="fa fa-file-o fa-fw opacity-50"/>
+                <t t-out="related_forum.name"/>
+            </a>
+        </t>
+    </div>
 </template>
 
 <template id="header_welcome_message" inherit_id="website_forum.header" name="Forum Welcome Message (oe_structure_forum_top)">

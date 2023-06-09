@@ -27,6 +27,7 @@ class WebsiteForum(WebsiteProfile):
 
     def _prepare_user_values(self, **kwargs):
         values = super(WebsiteForum, self)._prepare_user_values(**kwargs)
+        Forum = request.env['forum.forum']
         values['forum_welcome_message'] = request.httprequest.cookies.get('forum_welcome_message', False)
         values.update({
             'header': kwargs.get('header', dict()),
@@ -35,7 +36,11 @@ class WebsiteForum(WebsiteProfile):
         if kwargs.get('forum'):
             values['forum'] = kwargs.get('forum')
         elif kwargs.get('forum_id'):
-            values['forum'] = request.env['forum.forum'].browse(int(kwargs.pop('forum_id')))
+            values['forum'] = Forum.browse(int(kwargs.pop('forum_id')))
+        forum = values.get('forum')
+        if isinstance(forum, Forum.__class__) and len(forum) == 1:
+            values['related_forums'] = Forum.search(
+                expression.AND([request.website.website_domain(), [('id', '!=', forum.id)]]))
         return values
 
     def _prepare_mark_as_offensive_values(self, post, **kwargs):
