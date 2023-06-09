@@ -2110,7 +2110,7 @@ describe('List', () => {
                     });
                 });
                 describe('Indented', () => {
-                    it('should merge an indented list item into a non-indented list item', async () => {
+                    it('should merge an indented list item into a non-indented list item 1', async () => {
                         await testEditor(BasicEditor, {
                             contentBefore:
                                 '<ol><li>abc[]</li><li class="oe-nested"><ol><li>def</li><li>ghi</li></ol></li></ol>',
