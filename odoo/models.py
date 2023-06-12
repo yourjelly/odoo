@@ -5628,6 +5628,8 @@ class BaseModel(metaclass=MetaModel):
                         continue
                     records = model.browse(ids)
                     values = list(self.env.cache.get_values(records, field))
+                    if not values:
+                        continue
                     assert len(values) == len(records), \
                         f"Could not find all values of {field} to flush them\n" \
                         f"    Context: {self.env.context}\n" \
