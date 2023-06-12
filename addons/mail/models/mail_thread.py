@@ -187,6 +187,7 @@ class MailThread(models.AbstractModel):
                                     (cp.seen_message_id IS NULL OR cp.seen_message_id < msg.id))
                                  WHERE msg.model = %s AND msg.res_id = ANY(%s) AND
                                         msg.message_type != 'user_notification' AND
+                                        msg.body != '' AND
                                        (msg.author_id IS NULL OR msg.author_id != %s) AND
                                        (msg.message_type not in ('notification', 'user_notification') OR msg.model != 'mail.channel')""",
                              (partner_id, self._name, list(self.ids), partner_id,))
