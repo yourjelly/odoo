@@ -24,6 +24,7 @@ const wysiwygUtils = require('@web_editor/js/common/wysiwyg_utils');
 const weUtils = require('web_editor.utils');
 const { PeerToPeer } = require('@web_editor/js/wysiwyg/PeerToPeer');
 const { Mutex } = require('web.concurrency');
+const { debounce } = require('@web/core/utils/timing');
 
 var _t = core._t;
 const QWeb = core.qweb;
@@ -347,6 +348,8 @@ const Wysiwyg = Widget.extend({
         // _createPalette.
         this._configureToolbar(options);
 
+        this._debouncedUpdateEditorUI = debounce(this._updateEditorUI.bind(this), 500);
+        this.odooEditor.document.addEventListener('selectionchange', this._debouncedUpdateEditorUI);
         $(this.odooEditor.editable).on('mouseup', this._updateEditorUI.bind(this));
         $(this.odooEditor.editable).on('keydown', this._updateEditorUI.bind(this));
         $(this.odooEditor.editable).on('keydown', this._handleShortcuts.bind(this));
@@ -706,6 +709,8 @@ const Wysiwyg = Widget.extend({
             this.odooEditor.document.removeEventListener("keydown", this._signalOnline, true);
             this.odooEditor.document.removeEventListener("keyup", this._signalOnline, true);
             this.odooEditor.document.removeEventListener('selectionchange', this._onSelectionChange);
+            this.odooEditor.document.removeEventListener('selectionchange', this._debouncedUpdateEditorUI);
+            this._debouncedUpdateEditorUI.cancel();
             for (const observer of this._oNotEditableObservers.values()) {
                 observer.disconnect();
             }
@@ -1907,6 +1912,9 @@ const Wysiwyg = Widget.extend({
             range.selectNode(this.lastMediaClicked);
             selection.removeAllRanges();
             selection.addRange(range);
+            // Avoid this method being called on 'selectionchange', as it would
+            // result in isInMedia being false.
+            setTimeout(this._debouncedUpdateEditorUI.cancel);
             // Always hide the unlink button on media.
             this.toolbar.$el.find('#unlink').toggleClass('d-none', true);
             // Show the floatingtoolbar on the topleft of the media.
