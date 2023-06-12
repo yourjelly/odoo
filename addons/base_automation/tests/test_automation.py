@@ -10,17 +10,22 @@ class TestAutomation(TransactionCase):
 
     def test_01_on_create(self):
         """ Simple on_create with admin user """
-        self.env["base.automation"].create({
-            "name": "Force Archived Contacts",
-            "trigger": "on_create_or_write",
-            "model_id": self.env.ref("base.model_res_partner").id,
-            "type": "ir.actions.server",
-            "trigger_field_ids": [(6, 0, [self.env.ref("base.field_res_partner__name").id])],
+        model = self.env.ref("base.model_res_partner")
+        action = self.env["ir.actions.server"].create({
+            "name": "Set Active To False",
+            "model_id": model.id,
             "fields_lines": [(0, 0, {
                 "col1": self.env.ref("base.field_res_partner__active").id,
                 "evaluation_type": "equation",
                 "value": "False",
             })],
+        })
+        self.env["base.automation"].create({
+            "name": "Force Archived Contacts",
+            "trigger": "on_create_or_write",
+            "model_id": model.id,
+            "action_server_ids": [action.id],
+            "trigger_field_ids": [(6, 0, [self.env.ref("base.field_res_partner__name").id])],
         })
 
         # verify the partner can be created and the action still runs
@@ -35,20 +40,25 @@ class TestAutomation(TransactionCase):
 
     def test_02_on_create_restricted(self):
         """ on_create action with low portal user """
-        action = self.env["base.automation"].create({
-            "name": "Force Archived Filters",
-            "trigger": "on_create_or_write",
-            "model_id": self.env.ref("base.model_ir_filters").id,
-            "type": "ir.actions.server",
-            "trigger_field_ids": [(6, 0, [self.env.ref("base.field_ir_filters__name").id])],
+        model = self.env.ref("base.model_ir_filters")
+        action = self.env["ir.actions.server"].create({
+            "name": "Set Active To False",
+            "model_id": model.id,
             "fields_lines": [(0, 0, {
                 "col1": self.env.ref("base.field_ir_filters__active").id,
                 "evaluation_type": "equation",
                 "value": "False",
             })],
         })
+        automation = self.env["base.automation"].create({
+            "name": "Force Archived Filters",
+            "trigger": "on_create_or_write",
+            "model_id": model.id,
+            "action_server_ids": [action.id],
+            "trigger_field_ids": [(6, 0, [self.env.ref("base.field_ir_filters__name").id])],
+        })
         # action cached was cached with admin, force CacheMiss
-        action.env.clear()
+        automation.env.clear()
 
         self_portal = self.env["ir.filters"].with_user(self.env.ref("base.user_demo").id)
         # verify the portal user can create ir.filters but can not read base.automation
@@ -71,17 +81,22 @@ class TestAutomation(TransactionCase):
 
     def test_03_on_change_restricted(self):
         """ on_create action with low portal user """
-        action = self.env["base.automation"].create({
-            "name": "Force Archived Filters",
-            "trigger": "on_change",
-            "model_id": self.env.ref("base.model_ir_filters").id,
-            "type": "ir.actions.server",
-            "on_change_field_ids": [(6, 0, [self.env.ref("base.field_ir_filters__name").id])],
+        model = self.env.ref("base.model_ir_filters")
+        action = self.env["ir.actions.server"].create({
+            "name": "Set Active To False",
+            "model_id": model.id,
             "state": "code",
             "code": """action = {'value': {'active': False}}""",
         })
+        automation = self.env["base.automation"].create({
+            "name": "Force Archived Filters",
+            "trigger": "on_change",
+            "model_id": model.id,
+            "action_server_ids": [action.id],
+            "on_change_field_ids": [(6, 0, [self.env.ref("base.field_ir_filters__name").id])],
+        })
         # action cached was cached with admin, force CacheMiss
-        action.env.clear()
+        automation.env.clear()
 
         self_portal = self.env["ir.filters"].with_user(self.env.ref("base.user_demo").id)
 

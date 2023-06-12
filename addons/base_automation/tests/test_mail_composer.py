@@ -25,12 +25,17 @@ class TestMailFullComposer(HttpCase):
             'password': 'testuser',
         })
 
+        server_action = self.env['ir.actions.server'].create({
+            'name': 'Test',
+            'state': 'code',
+            'model_id': self.env.ref('mail.model_mail_compose_message').id,
+        })
         automated_action = self.env['base.automation'].create({
             'name': 'Test',
             'active': True,
             'trigger': 'on_change',
             'on_change_field_ids': (4, self.ref('mail.field_mail_compose_message__template_id'),),
-            'state': 'code',
+            'action_server_ids': [server_action.id],
             'model_id': self.env.ref('mail.model_mail_compose_message').id,
         })
 

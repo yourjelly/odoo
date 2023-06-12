@@ -1,0 +1,17 @@
+.o-base-automation-kanban-view {
+    .o_kanban_renderer {
+        &.o_kanban_ungrouped {
+            padding: 0 !important;
+
+            .o_kanban_record {
+                width: 100%;
+                margin: 0;
+                border-top: 0 !important;
+            }
+        }
+    }
+
+    .o_x2m_control_panel {
+        margin-bottom: #{$o-horizontal-padding};
+    }
+}

@@ -16,88 +16,124 @@ class BaseAutomationTest(TransactionCaseWithUserDemo):
         super(BaseAutomationTest, self).setUp()
         self.user_root = self.env.ref('base.user_root')
         self.user_admin = self.env.ref('base.user_admin')
+        primary_model = self.env.ref('test_base_automation.model_base_automation_lead_test')
+        secondary_model = self.env.ref('test_base_automation.model_base_automation_line_test')
 
         self.test_mail_template_automation = self.env['mail.template'].create({
             'name': 'Template Automation',
-            'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+            'model_id': primary_model.id,
             'body_html': """&lt;div&gt;Email automation&lt;/div&gt;""",
         })
 
         self.res_partner_1 = self.env['res.partner'].create({'name': 'My Partner'})
-        self.env['base.automation'].create([
+
+        actions = [
             {
-                'name': 'Base Automation: test rule on create',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'usage': 'base_automation',
+                'name': 'Server Action: replace user_id',
+                'model_id': primary_model.id,
                 'state': 'code',
                 'code': "records.write({'user_id': %s})" % (self.user_demo.id),
-                'trigger': 'on_create',
-                'active': True,
-                'filter_domain': "[('state', '=', 'draft')]",
-            }, {
-                'name': 'Base Automation: test rule on write',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+            },
+            {
+                'usage': 'base_automation',
+                'name': 'Server Action: replace user_id (secondary model)',
+                'model_id': secondary_model.id,
                 'state': 'code',
                 'code': "records.write({'user_id': %s})" % (self.user_demo.id),
-                'trigger': 'on_write',
-                'active': True,
-                'filter_domain': "[('state', '=', 'done')]",
-                'filter_pre_domain': "[('state', '=', 'open')]",
             }, {
-                'name': 'Base Automation: test rule on recompute',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
-                'state': 'code',
-                'code': "records.write({'user_id': %s})" % (self.user_demo.id),
-                'trigger': 'on_write',
-                'active': True,
-                'filter_domain': "[('employee', '=', True)]",
-            }, {
-                'name': 'Base Automation: test recursive rule',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'usage': 'base_automation',
+                'name': 'Server Action: set to draft',
+                'model_id': primary_model.id,
                 'state': 'code',
                 'code': """
 record = model.browse(env.context['active_id'])
 if 'partner_id' in env.context['old_values'][record.id]:
     record.write({'state': 'draft'})""",
-                'trigger': 'on_write',
-                'active': True,
             }, {
-                'name': 'Base Automation: test rule on secondary model',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_line_test').id,
-                'state': 'code',
-                'code': "records.write({'user_id': %s})" % (self.user_demo.id),
-                'trigger': 'on_create',
-                'active': True,
-            }, {
-                'name': 'Base Automation: test rule on write check context',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'usage': 'base_automation',
+                'name': 'Server Action: set is_assigned_to_admin',
+                'model_id': primary_model.id,
                 'state': 'code',
                 'code': """
 record = model.browse(env.context['active_id'])
 if 'user_id' in env.context['old_values'][record.id]:
     record.write({'is_assigned_to_admin': (record.user_id.id == 1)})""",
-                'trigger': 'on_write',
-                'active': True,
             }, {
-                'name': 'Base Automation: test rule with trigger',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
-                'trigger_field_ids': [(4, self.env.ref('test_base_automation.field_base_automation_lead_test__state').id)],
+                'usage': 'base_automation',
+                'name': 'Server Action: add name suffix',
+                'model_id': primary_model.id,
                 'state': 'code',
                 'code': """
 record = model.browse(env.context['active_id'])
 record['name'] = record.name + 'X'""",
+            }, {
+                'usage': 'base_automation',
+                'name': 'Server Action: send an email',
+                'model_id': primary_model.id,
+                'state': 'mail_post',
+                'mail_post_method': 'email',
+                'template_id': self.test_mail_template_automation.id,
+            },
+        ]
+
+        self.env['base.automation'].create([
+            {
+                'name': 'Base Automation: test rule on create',
+                'model_id': primary_model.id,
+                'trigger': 'on_create',
+                'action_server_ids': [self.env["ir.actions.server"].create(actions[0]).id],
+                'active': True,
+                'filter_domain': "[('state', '=', 'draft')]",
+            }, {
+                'name': 'Base Automation: test rule on write',
+                'model_id': primary_model.id,
                 'trigger': 'on_write',
+                'action_server_ids': [self.env["ir.actions.server"].create(actions[0]).id],
+                'active': True,
+                'filter_domain': "[('state', '=', 'done')]",
+                'filter_pre_domain': "[('state', '=', 'open')]",
+            }, {
+                'name': 'Base Automation: test rule on recompute',
+                'model_id': primary_model.id,
+                'trigger': 'on_write',
+                'action_server_ids': [self.env["ir.actions.server"].create(actions[0]).id],
+                'active': True,
+                'filter_domain': "[('employee', '=', True)]",
+            }, {
+                'name': 'Base Automation: test recursive rule',
+                'model_id': primary_model.id,
+                'trigger': 'on_write',
+                'action_server_ids': [self.env["ir.actions.server"].create(actions[2]).id],
+                'active': True,
+            }, {
+                'name': 'Base Automation: test rule on secondary model',
+                'model_id': secondary_model.id,
+                'trigger': 'on_create',
+                'action_server_ids': [self.env["ir.actions.server"].create(actions[1]).id],
+                'active': True,
+            }, {
+                'name': 'Base Automation: test rule on write check context',
+                'model_id': primary_model.id,
+                'trigger': 'on_write',
+                'action_server_ids': [self.env["ir.actions.server"].create(actions[3]).id],
+                'active': True,
+            }, {
+                'name': 'Base Automation: test rule with trigger',
+                'model_id': primary_model.id,
+                'trigger_field_ids': [(4, self.env.ref('test_base_automation.field_base_automation_lead_test__state').id)],
+                'trigger': 'on_write',
+                'action_server_ids': [self.env["ir.actions.server"].create(actions[4]).id],
                 'active': True,
             }, {
                 'name': 'Base Automation: test send an email',
-                'mail_post_method': 'email',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
-                'template_id': self.test_mail_template_automation.id,
+                'model_id': primary_model.id,
                 'trigger_field_ids': [(4, self.env.ref('test_base_automation.field_base_automation_lead_test__deadline').id)],
-                'state': 'mail_post',
-                'code': """
-record = model.browse(env.context['active_id'])
-record['name'] = record.name + 'X'""",
+#                 'code': """
+# record = model.browse(env.context['active_id'])
+# record['name'] = record.name + 'X'""",
                 'trigger': 'on_write',
+                'action_server_ids': [self.env["ir.actions.server"].create(actions[5]).id],
                 'active': True,
                 'filter_domain': "[('deadline', '!=', False)]",
                 'filter_pre_domain': "[('deadline', '=', False)]",
@@ -206,10 +242,10 @@ record['name'] = record.name + 'X'""",
         mail_automation = self.env['base.automation'].search([('name', '=', 'Base Automation: test send an email')])
         send_mail_count = 0
 
-        def _patched_get_actions(*args, **kwargs):
+        def _patched_get_automations(*args, **kwargs):
             obj = args[0]
-            if '__action_done' not in obj._context:
-                obj = obj.with_context(__action_done={})
+            if '__automation_done' not in obj._context:
+                obj = obj.with_context(__automation_done={})
             return mail_automation.with_env(obj.env)
 
         def _patched_send_mail(*args, **kwargs):
@@ -217,7 +253,7 @@ record['name'] = record.name + 'X'""",
             send_mail_count += 1
 
         patchers = [
-            patch('odoo.addons.base_automation.models.base_automation.BaseAutomation._get_actions', _patched_get_actions),
+            patch('odoo.addons.base_automation.models.base_automation.BaseAutomation._get_automations', _patched_get_automations),
             patch('odoo.addons.mail.models.mail_template.MailTemplate.send_mail', _patched_send_mail),
         ]
 
@@ -322,14 +358,19 @@ record['name'] = record.name + 'X'""",
             Comodel.with_user(self.user_demo).check_access_rights('read')
 
         # check base automation with filter that performs Comodel.search()
+        action = self.env['ir.actions.server'].create({
+            'name': 'Server Action: return an action',
+            'model_id': self.env['ir.model']._get_id("base.automation.link.test"),
+            'state': 'code',
+            'code': "action = [rec.name for rec in records]"
+        })
         self.env['base.automation'].create({
             'name': 'test no access',
             'model_id': self.env['ir.model']._get_id("base.automation.link.test"),
             'trigger': 'on_create_or_write',
+            'action_server_ids': [action.id],
             'filter_pre_domain': "[('linked_id.another_field', '=', 'something')]",
-            'state': 'code',
             'active': True,
-            'code': "action = [rec.name for rec in records]"
         })
         Comodel.create([
             {'name': 'a first record', 'another_field': 'something'},
@@ -345,10 +386,9 @@ record['name'] = record.name + 'X'""",
             'name': 'test no name access',
             'model_id': self.env['ir.model']._get_id("base.automation.link.test"),
             'trigger': 'on_create_or_write',
+            'action_server_ids': [action.id],
             'filter_pre_domain': "[('linked_id', '=', 'whatever')]",
-            'state': 'code',
             'active': True,
-            'code': "action = [rec.name for rec in records]"
         })
         rec3 = Model.create({'name': 'a random record'})
         rec3.write({'name': 'a first record'})
@@ -386,11 +426,16 @@ class TestCompute(common.TransactionCase):
         r.parent_id = company2
         self.assertEqual(r.display_name, 'Awiclo, Bob')
 
+        action = {
+            'name': 'Server Action: no-op action',
+            'model_id': self.env.ref('base.model_res_partner').id,
+            'state': 'code',
+        }
         self.env['base.automation'].create({
             'name': "test rule",
             'filter_pre_domain': False,
             'trigger': 'on_create_or_write',
-            'state': 'code', # no-op action
+            'action_server_ids': [self.env['ir.actions.server'].create(action).id],
             'model_id': self.env.ref('base.model_res_partner').id,
         })
         r.parent_id = company1
@@ -400,7 +445,7 @@ class TestCompute(common.TransactionCase):
             'name': "test rule",
             'filter_pre_domain': '[]',
             'trigger': 'on_create_or_write',
-            'state': 'code', # no-op action
+            'action_server_ids': [self.env['ir.actions.server'].create(action).id],
             'model_id': self.env.ref('base.model_res_partner').id,
         })
         r.parent_id = company2
@@ -409,12 +454,17 @@ class TestCompute(common.TransactionCase):
     def test_recursion(self):
         project = self.env['test_base_automation.project'].create({})
 
+        action = self.env['ir.actions.server'].create({
+            'name': 'Server Action: no-op action',
+            'model_id': self.env['ir.model']._get_id('test_base_automation.task'),
+            'state': 'code',
+        })
         # this action is executed every time a task is assigned to project
         self.env['base.automation'].create({
             'name': 'dummy',
             'model_id': self.env['ir.model']._get_id('test_base_automation.task'),
-            'state': 'code',
             'trigger': 'on_create_or_write',
+            'action_server_ids': [action.id],
             'filter_domain': repr([('project_id', '=', project.id)]),
         })
 
@@ -425,16 +475,16 @@ class TestCompute(common.TransactionCase):
         subtasks.flush_model()
 
         # This test checks what happens when a stored recursive computed field
-        # is marked to compute on many records, and automated actions are
+        # is marked to compute on many records, and automation rules are
         # triggered depending on that field.  In this case, we trigger the
         # recomputation of 'project_id' on 'subtasks' by deleting their parent
         # task.
         #
-        # An issue occurs when the domain of automated actions is evaluated by
+        # An issue occurs when the domain of automation rules is evaluated by
         # method search(), because the latter flushes the fields to search on,
         # which are also the ones being recomputed.  Combined with the fact
         # that recursive fields are not computed in batch, this leads to a huge
-        # amount of recursive calls between the automated action and flush().
+        # amount of recursive calls between the automation rule and flush().
         #
         # The execution of task.unlink() looks like this:
         # - mark 'project_id' to compute on subtasks

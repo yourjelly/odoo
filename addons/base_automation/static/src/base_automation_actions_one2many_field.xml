@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+    <t t-name="base_automation.ActionsOne2ManyField" owl="1">
+        <div class="d-flex" t-ref="root">
+            <t t-if="currentActions.length === 0">
+                <span class="text-muted">no action defined...</span>
+            </t>
+            <t t-foreach="currentActions" t-as="action" t-key="action.id">
+                <div style="min-width: fit-content;" t-att-data-action-id="action.id">
+                    <div class="fs-5"><t t-esc="getActionType(action)" /></div>
+                    <div class="fs-2"><t t-esc="action.data.name" /></div>
+
+                    <t t-set="actionTemplate" t-value="getActionTemplate(action)"/>
+                    <t t-if="actionTemplate" t-call="{{ actionTemplate }}" t-call-context="action.data" />
+                </div>
+                <div t-if="!action_last" class="px-3 align-self-center" t-att-data-action-id="action.id">
+                    <i class="fa fa-lg fa-plus text-primary"></i>
+                </div>
+            </t>
+            <t t-if="hiddenActionsCount">
+                <div class="px-3 align-self-center">
+                    <i class="fa fa-lg fa-fw fa-ellipsis-h text-secondary" t-att-data-tooltip="moreText"></i>
+                </div>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="base_automation.ActionsOne2ManyField.Action.ObjectCreateOrWrite" owl="1">
+        <div t-if="crud_model_id" t-esc="crud_model_id[1]"/>
+        <div>
+            <t t-esc="fields_lines.records.length"/> data
+        </div>
+    </t>
+</templates>

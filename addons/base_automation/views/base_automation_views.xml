@@ -5,57 +5,213 @@
         <record id="view_base_automation_form" model="ir.ui.view">
             <field name="name">Automations</field>
             <field name="model">base.automation</field>
-            <field name="mode">primary</field>
-            <field name="inherit_id" ref="base.view_server_action_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//button[@name='create_action']" position="replace">
-                </xpath>
-                <xpath expr="//button[@name='unlink_action']" position="replace">
-                </xpath>
-                <xpath expr="//button[@name='run']" position="replace">
-                </xpath>
-                <xpath expr="//field[@name='partner_ids']" position='attributes'>
+                <form string="Automation Rule">
+                    <sheet>
+                        <field name="active" invisible="1" />
+                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="e.g. Support flow"/></h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="model_id" options="{'no_create': True}" />
+                                <field name="model_name" invisible="1" />
+                                <field name="trigger" widget="base_automation.trigger_selection" />
+                                <field name="smart_details" invisible="1" />
+                                <field name="trigger_field_ids"
+                                    options="{'no_open': True, 'no_create': True}"
+                                    domain="[('model_id', '=', model_id)]"
+                                    attrs="{'invisible': [('trigger', 'not in', ['on_write', 'on_create_or_write'])]}" widget="many2many_tags"/>
+                                <field name="filter_pre_domain" widget="domain" groups="base.group_no_one"
+                                       options="{'model': 'model_name', 'in_dialog': True}"
+                                       attrs="{'invisible': [('trigger', 'not in', ['on_write', 'on_create_or_write'])]}"
+                                />
+                                <field name="filter_domain" widget="domain" options="{'model': 'model_name', 'in_dialog': True}"/>
+                                <field name="on_change_field_ids" string="Trigger Fields"
+                                    options="{'no_open': True, 'no_create': True}"
+                                    domain="[('model_id', '=', model_id)]"
+                                    attrs="{'invisible': [('trigger', '!=', 'on_change')], 'required': [('trigger', '=', 'on_change')]}"
+                                    widget='many2many_tags'/>
+                                <field name="trg_date_id" string="Date Field"
+                                    options="{'no_open': True, 'no_create': True}"
+                                    attrs="{'invisible': [('trigger', '!=', 'on_time')], 'required': [('trigger', '=', 'on_time')]}"/>
+                                <label for="trg_date_range" string="Delay"
+                                    attrs="{'invisible': [('trigger', '!=', 'on_time')]}"/>
+                                <div class="o_row" attrs="{'invisible': [('trigger', '!=', 'on_time')]}">
+                                    <field name="trg_date_range" attrs="{'required': [('trigger','=','on_time')]}"/>
+                                    <field name="trg_date_range_type" attrs="{'required': [('trigger','=','on_time')]}"/>
+                                </div>
+                                <field name="trg_date_calendar_id"
+                                    options="{'no_open': True, 'no_create': True}"
+                                    attrs="{'invisible': ['|', ('trg_date_id','=',False), ('trg_date_range_type', '!=', 'day')]}"/>
+                                <label for="least_delay_msg"  attrs="{'invisible': [('trigger', '!=', 'on_time')]}" string="" />
+                                <div class="alert alert-info" role="alert" attrs="{'invisible': [('trigger', '!=', 'on_time')]}">
+                                    <field name="least_delay_msg"/>
+                                </div>
+                            </group>
+                        </group>
+                        <notebook attrs="{ 'invisible': [('model_id', '=', False)] }">
+                            <page string="Actions To Do" name="actions">
+                                <field
+                                    name="action_server_ids"
+                                    class="o-base-automation-kanban-view"
+                                    context="{
+                                        'form_view_ref': 'base_automation.view_server_action_form',
+                                        'default_model_id': model_id,
+                                        'default_usage': 'base_automation',
+                                        'default_base_automation_id': id,
+                                    }"
+                                >
+                                    <kanban>
+                                        <control>
+                                            <create string="Add a new action" />
+                                        </control>
+                                        <templates>
+                                            <t t-name="kanban-box">
+                                                <div class="oe_kanban_global_click row g-0 align-items-center">
+                                                    <div class="col-6 col-md-4 d-flex align-items-center">
+                                                        <field name="sequence" widget="handle" class="px-3" />
+                                                        <field name="sequence" class="px-3" />
+                                                        <div class="px-3 flex-grow-1 d-flex flex-column">
+                                                            <div class="fs-4 d-flex align-items-center">
+                                                                <!-- Icon section -->
+                                                                <t t-set="state" t-value="record.state.raw_value" />
+                                                                <i
+                                                                    data-name="server_action_icon"
+                                                                    t-att-title="record.state.value"
+                                                                    class="fa"
+                                                                    t-attf-class="
+                                                                        {{ state === 'code' and 'fa-file-code-o' }}
+                                                                        {{ state === 'object_create' and 'fa-edit' }}
+                                                                        {{ state === 'object_write' and 'fa-refresh' }}
+                                                                        {{ state === 'multi' and 'fa-list-ul' }}
+                                                                        {{ state === 'next_activity' and 'fa-clock-o' }}
+                                                                        {{ state === 'mail_post' and 'fa-envelope' }}
+                                                                        {{ state === 'followers' and 'fa-user-o' }}
+                                                                    "
+                                                                />
+                                                                <field name="state" class="ps-2 text-truncate w-0 flex-grow-1" />
+                                                            </div>
+                                                            <div class="fs-2 d-flex align-items-center">
+                                                                <field name="name" class="text-truncate w-0 flex-grow-1"/>
+                                                            </div>
+                                                            <!-- <div class="fs-5 d-flex align-items-center" groups="base.group_no_one">
+                                                                <span>(linked to: <field name="base_automation_id"/>)</span>
+                                                                <span>(model: <field name="model_id"/>)</span>
+                                                                <span>(usage: <field name="usage" />)</span>
+                                                            </div> -->
+                                                        </div>
+                                                    </div>
+                                                    <!-- More info section -->
+                                                    <div class="col-5 col-md-7 d-flex align-items-center" data-name="more-info">
+                                                        <t t-set="state" t-value="record.state.raw_value" />
+                                                        <!-- <div t-if="state === 'code'">
+                                                            <field name="code" />
+                                                        </div> -->
+                                                        <div t-if="state === 'object_create'">
+                                                            <label for="crud_model_id">
+                                                                Target Model
+                                                                <field name="crud_model_id" />
+                                                            </label><br />
+                                                            <label for="link_field_id">
+                                                                Link Field
+                                                                <field name="link_field_id" />
+                                                            </label><br />
+                                                            <label for="fields_lines">
+                                                                Data to Write
+                                                                <field name="fields_lines" />
+                                                            </label>
+                                                        </div>
+                                                        <div t-if="state === 'object_write'">
+                                                            <label for="fields_lines">
+                                                                Data to Write
+                                                                <field name="fields_lines"/>
+                                                            </label>
+                                                        </div>
+                                                        <div t-if="state === 'multi'">
+                                                            <label for="child_ids">
+                                                                Actions
+                                                                <field name="child_ids" />
+                                                            </label>
+                                                        </div>
+                                                        <div t-if="state === 'followers'">
+                                                            <label for="partner_ids">
+                                                                Followers
+                                                                <field name="partner_ids" />
+                                                            </label>
+                                                        </div>
+                                                        <div t-if="state === 'mail_post'">
+                                                            <label for="template_id">
+                                                                Template
+                                                                <field name="template_id" />
+                                                            </label>
+                                                            <label for="mail_post_method">
+                                                                Method
+                                                                <field name="mail_post_method" />
+                                                            </label>
+                                                        </div>
+                                                        <div t-if="state === 'next_activity'">
+                                                            <label for="activity_type_id">
+                                                                Activity Type
+                                                                <field name="activity_type_id" />
+                                                            </label><br />
+                                                            <label for="activity_summary">
+                                                                Activity Summary
+                                                                <field name="activity_summary" />
+                                                            </label><br />
+                                                            <label for="activity_note">
+                                                                Activity Note
+                                                                <field name="activity_note" />
+                                                            </label><br />
+                                                            <label for="activity_date_deadline_range">
+                                                                Activity Deadline
+                                                                <field name="activity_date_deadline_range" />
+                                                                <field name="activity_date_deadline_range_type" />
+                                                            </label><br />
+                                                            <label for="activity_user_id">
+                                                                Activity Responsible
+                                                                <field name="activity_user_id" />
+                                                            </label><br />
+                                                            <label for="activity_user_type">
+                                                                Activity Responsible Type
+                                                                <field name="activity_user_type" />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-1 d-flex justify-content-end">
+                                                        <button type="delete" name="delete" class="btn fa fa-trash fa-xl px-3" title="Delete Action" />
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </templates>
+                                    </kanban>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+                <!-- <xpath expr="//field[@name='partner_ids']" position='attributes'>
                     <attribute name="options">{'no_create': True}</attribute>
                 </xpath>
                 <xpath expr="//field[@name='template_id']" position='attributes'>
                     <attribute name="context">{'default_model_id': model_id}</attribute>
-                </xpath>
-                <xpath expr="//page[@name='security']" position='attributes'>
-                    <attribute name='invisible'>1</attribute>
-                </xpath>
-                <xpath expr="//group[@name='action_content']" position="inside">
-                    <field name="active" widget="boolean_toggle"/>
-                    <field name="trigger"/>
-                    <field name="trigger_field_ids"
-                        options="{'no_open': True, 'no_create': True}"
-                        domain="[('model_id', '=', model_id)]"
-                        attrs="{'invisible': [('trigger', 'not in', ['on_write', 'on_create_or_write'])]}" widget="many2many_tags"/>
-                    <field name="on_change_field_ids" string="Trigger Fields"
-                        options="{'no_open': True, 'no_create': True}"
-                        domain="[('model_id', '=', model_id)]"
-                        attrs="{'invisible': [('trigger', '!=', 'on_change')], 'required': [('trigger', '=', 'on_change')]}"
-                        widget='many2many_tags'/>
+                </xpath> -->
+            </field>
+        </record>
 
-                    <field name="filter_pre_domain" widget="domain" options="{'model': 'model_name', 'in_dialog': True}"
-                           attrs="{'invisible': [('trigger', 'not in', ['on_write', 'on_create_or_write'])]}"/>
-                    <field name="filter_domain" widget="domain" options="{'model': 'model_name', 'in_dialog': True}"/>
-                    <field name="trg_date_id"
-                        options="{'no_open': True, 'no_create': True}"
-                        attrs="{'invisible': [('trigger', '!=', 'on_time')], 'required': [('trigger', '=', 'on_time')]}"/>
-                    <label for="trg_date_range"
-                        attrs="{'invisible': [('trigger', '!=', 'on_time')]}"/>
-                    <div class="o_row" attrs="{'invisible': [('trigger', '!=', 'on_time')]}">
-                        <field name="trg_date_range" attrs="{'required': [('trigger','=','on_time')]}"/>
-                        <field name="trg_date_range_type" attrs="{'required': [('trigger','=','on_time')]}"/>
-                    </div>
-                    <field name="trg_date_calendar_id"
-                        options="{'no_open': True, 'no_create': True}"
-                        attrs="{'invisible': ['|', ('trg_date_id','=',False), ('trg_date_range_type', '!=', 'day')]}"/>
+        <!-- Automation: Server Action Form View -->
+        <record id="view_server_action_form" model="ir.ui.view">
+            <field name="name">base.automation.server.action.form</field>
+            <field name="model">ir.actions.server</field>
+            <field name="mode">primary</field>
+            <field name="inherit_id" ref="base.view_server_action_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="attributes">
+                    <attribute name="invisible">1</attribute>
                 </xpath>
-                <xpath expr="//group[@name='action_wrapper']" position="after">
-                    <div class="alert alert-info" role="alert" attrs="{'invisible': [('trigger', '!=', 'on_time')]}">
-                        <field name="least_delay_msg"/>
-                    </div>
+                <xpath expr="//field[@name='model_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
                 </xpath>
             </field>
         </record>
@@ -65,12 +221,43 @@
             <field name="name">base.automation.tree</field>
             <field name="model">base.automation</field>
             <field name="arch" type="xml">
-                <tree string="Automation">
-                    <field name="sequence" widget="handle"/>
+                <tree string="Automation Rules">
                     <field name="name"/>
                     <field name="trigger"/>
                     <field name="model_id"/>
                 </tree>
+            </field>
+        </record>
+
+        <!-- automation Kanban View -->
+        <record id="view_base_automation_kanban" model="ir.ui.view">
+            <field name="name">base.automation.kanban</field>
+            <field name="model">base.automation</field>
+            <field name="arch" type="xml">
+                <kanban string="Automation Rules" class="o-base-automation-kanban-view">
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click d-flex">
+                                <div class="px-3 d-flex" style="min-width: fit-content;">
+                                    <div class="pe-3 flex-fill d-flex flex-column">
+                                        <div class="fs-3 d-flex align-items-center">
+                                            <field name="active" widget="boolean_toggle" />
+                                            <field name="name" class="ps-2 flex-grow-1"/>
+                                        </div>
+                                        <field name="trigger"/>
+                                        <field name="model_id"/>
+                                        <field name="model_name"/>
+                                        <field name="filter_domain" widget="domain" options="{'model': 'model_name', 'in_dialog': True}" />
+                                    </div>
+                                    <i class="fa fa-2x fa-arrow-right text-primary align-self-center" title="Actions" />
+                                </div>
+                                <div class="px-3 flex-fill d-flex" data-name="more-info">
+                                    <field name="action_server_ids" widget="base_automation_actions_one2many" class="align-self-center w-100" />
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
             </field>
         </record>
 
@@ -89,15 +276,15 @@
 
         <!-- automation Action -->
         <record id="base_automation_act" model="ir.actions.act_window">
-            <field name="name">Automated Actions</field>
+            <field name="name">Automation Rules</field>
             <field name="res_model">base.automation</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_base_automation_tree"/>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_id" ref="view_base_automation_kanban"/>
             <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
-                Setup a new automated automation
+                Setup a new automation rule
               </p><p>
-                Use automated actions to automatically trigger actions for
+                Use automation rules to automatically trigger rules for
                 various screens. Example: a lead created by a specific user may
                 be automatically set to a specific Sales Team, or an
                 opportunity which still has status pending after 14 days might
