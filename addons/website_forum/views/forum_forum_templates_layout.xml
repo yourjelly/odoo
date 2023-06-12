@@ -17,22 +17,14 @@
 
 <!-- PAGE INDEX -->
 <!-- ============================================================ -->
-<template id="model_nav">
+<template id="forum_model_nav">
+    <!-- allows to be overridden such as in website_slides_forum -->
+    <t t-set="breadcrumb_kind" t-valuef="base"/>
     <nav id="o_wforum_nav" t-attf-class="navbar d-flex align-items-center gap-2 #{_page_name == 'single_question' and 'mw-xl-75 mw-xxl-100'} px-0" aria-label="breadcrumb">
         <t t-if="_page_name == 'single_question'">
             <div class="flex-grow-1">
-                <div class="row g-0">
-                    <ol t-if="_is_slide_channel" class="breadcrumb col-10 col-lg-6 mb-0 p-0">
-                        <li class="breadcrumb-item">
-                            <h5 class="mb-0">
-                                <a t-attf-href="/slides/#{slug(forum.slide_channel_id)}#{'/' + slug(category) if category else ''}" t-out="forum.name"/>
-                            </h5>
-                        </li>
-                        <li class="breadcrumb-item text-nowrap">
-                            <h5 class="mb-0"><a t-attf-href="/forum/#{ slug(forum) }">Forum</a></h5>
-                        </li>
-                    </ol>
-                    <div t-else="" class="col-10">
+                <div class="o_wforum_breadcrumb_root_single row g-0">
+                    <div t-if="breadcrumb_kind == 'base'" class="col-10">
                         <a class="btn btn-lg btn-link px-0 pb-2" t-attf-href="/forum/#{ slug(forum) }">
                             <i class="d-inline-block oi oi-chevron-left me-1 small lh-50"/><t t-out="forum.name"/>
                         </a>
@@ -73,20 +65,12 @@
         </t>
         <t t-elif="_page_name == 'list_questions' or is_edit">
             <t t-set="target" t-value="post.parent_id if is_answer else post"/>
-            <ol t-if="_is_slide_channel" class="breadcrumb col-10 col-lg flex-grow-1 mb-0 p-0">
-                <li class="breadcrumb-item text-nowrap">
-                    <h5 class="mb-0">
-                        <a t-attf-href="/slides/#{slug(forum.slide_channel_id)}#{'/' + slug(category) if category else ''}" t-out="forum.name"/>
-                    </h5>
-                </li>
-                <li class="breadcrumb-item text-nowrap">
-                    <h5 class="mb-0"><strong>Forum</strong></h5>
-                </li>
-            </ol>
-            <div t-else="" class="col-10 col-lg flex-grow-1">
-                <h5 t-if="not is_edit" class="fw-bold mb-0" t-out="forum.name"/>
-                <h5 t-elif="not is_answer" class="fw-bold mb-0">Edit Question</h5>
-                <h5 t-else="is_answer" class="fw-bold mb-0">Edit Answer</h5>
+            <div class="o_wforum_breadcrumb_root_list_or_edit d-flex">
+                <div t-if="breadcrumb_kind=='base'" class="col-10 col-lg flex-grow-1">
+                    <h5 t-if="not is_edit" class="fw-bold mb-0" t-out="forum.name"/>
+                    <h5 t-elif="not is_answer" class="fw-bold mb-0">Edit Question</h5>
+                    <h5 t-else="is_answer" class="fw-bold mb-0">Edit Answer</h5>
+                </div>
             </div>
         </t>
         <ol t-else="_page_name" class="breadcrumb col-10 col-lg flex-grow-1 mb-0 p-0">
@@ -217,7 +201,7 @@
                         <t t-set="additional_validation_email_message"> and join this Forum</t>
                         <t t-set="additional_validated_email_message"> You may now participate in our forums.</t>
                     </t>
-                    <t t-call="website_forum.model_nav"/>
+                    <t t-call="website_forum.forum_model_nav"/>
                     <t t-out="0"/>
                 </div>
             </div>
