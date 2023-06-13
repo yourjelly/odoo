@@ -65,6 +65,9 @@ export const stripeMixin = {
             defaultValues: {
                 billingDetails: this.txContext.billingDetails,
             },
+            fields: {
+                billingDetails: 'never',
+            },
             layout: {
                 type: 'accordion',
                 defaultCollapsed: false,

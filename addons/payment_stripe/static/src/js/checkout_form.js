@@ -23,6 +23,9 @@ checkoutForm.include({
             elements: this.stripeElement,
             clientSecret: processingValues.client_secret,
             confirmParams: {
+                payment_method_data: {
+                    billing_details: this.txContext.billingDetails,
+                },
                 return_url: processingValues.return_url,
             },
         });
