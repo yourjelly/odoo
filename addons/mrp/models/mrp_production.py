@@ -2124,7 +2124,7 @@ class MrpProduction(models.Model):
         return max(self.product_qty - self.qty_producing, 0)
     # def _get_quantity_to_backorder(self):
     #     self.ensure_one()
-    #     return max(self.product_qty - sum(self.move_finished_ids.mapped('quantity_done')), 0)
+        # return max(self.product_qty - sum(self.move_finished_ids.mapped('quantity_done')), 0)
 
     def _check_sn_uniqueness(self):
         """ Alert the user if the serial number as already been consumed/produced """

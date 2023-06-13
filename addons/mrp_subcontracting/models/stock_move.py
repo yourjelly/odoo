@@ -153,9 +153,10 @@ class StockMove(models.Model):
             bom = move._get_subcontract_bom()
             if not bom:
                 continue
-            if float_is_zero(move.product_qty, precision_rounding=move.product_uom.rounding) and\
-                    move.picking_id.immediate_transfer is True or not move.move_line_ids.qty_done and not move.quantity_done:
-                raise UserError(_("To subcontract, use a planned transfer."))
+
+            if (float_is_zero(move.product_qty, precision_rounding=move.product_uom.rounding) or \
+                    not move.quantity_done) and move.picking_id.immediate_transfer is True:
+                raise UserError(("To subcontract, use a planned transfer."))
             move.write({
                 'is_subcontract': True,
                 'location_id': move.picking_id.partner_id.with_company(move.company_id).property_stock_subcontractor.id

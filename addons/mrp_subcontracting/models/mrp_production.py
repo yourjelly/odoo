@@ -111,7 +111,7 @@ class MrpProduction(models.Model):
         """ After producing, set the move line on the subcontract picking. """
         self.ensure_one()
         subcontract_move_id = self._get_subcontract_move().filtered(lambda m: m.state not in ('done', 'cancel'))
-        breakpoint()
+        # breakpoint()
         print("__________________update_finished_move_")
         if subcontract_move_id:
             quantity = self.qty_producing
@@ -122,8 +122,13 @@ class MrpProduction(models.Model):
             # Update reservation and quantity done
             if quantity == sum(move_lines.mapped('qty_done')):
                 return
-            if self.qty_producing < self.product_qty:
+            # if self.qty_producing <= self.product_qty:
+            print("quantity ===>  ", quantity)
+            print("sum(move_lines.mapped('qty_done')) ===>  ", sum(move_lines.mapped('qty_done')))
+            if self.qty_producing <= self.product_qty:
                 return
+            # elif self.qty_producing < self.product_qty:
+            #     self.product_qty -= quantity
             for ml in move_lines:
                 rounding = ml.product_uom_id.rounding
                 if float_compare(quantity, 0, precision_rounding=rounding) <= 0:
@@ -132,6 +137,7 @@ class MrpProduction(models.Model):
                 quantity -= quantity_to_process
 
                 new_quantity_done = (ml.qty_done + quantity_to_process)
+                # breakpoint()
 
                 # on which lot of finished product
                 if float_compare(new_quantity_done, ml.reserved_uom_qty, precision_rounding=rounding) >= 0:
