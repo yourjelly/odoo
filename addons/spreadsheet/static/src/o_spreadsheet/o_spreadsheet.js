@@ -17868,6 +17868,9 @@
                 }
             }
             else if (ev.key === "Enter") {
+                if (!this.isConfirmable) {
+                    return; // Return if the dataset is invalid
+                }
                 const target = ev.target;
                 target.blur();
                 this.confirm();
@@ -48538,8 +48541,8 @@
 
 
     __info__.version = '16.4.0-alpha.4';
-    __info__.date = '2023-06-12T14:15:11.459Z';
-    __info__.hash = '251a52e';
+    __info__.date = '2023-06-13T12:27:17.006Z';
+    __info__.hash = 'b14d8fd';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
