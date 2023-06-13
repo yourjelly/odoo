@@ -28,6 +28,20 @@ class StripeController(http.Controller):
     _apple_pay_domain_association_url = '/.well-known/apple-developer-merchantid-domain-association'
     WEBHOOK_AGE_TOLERANCE = 10*60  # seconds
 
+    @http.route('/payment/stripe/payment_info', type='json', auth='public')
+    def stripe_provider_info(self, provider_id):
+        """ Return public information on the payment.
+
+        :param int provider_id: The provider handling the transaction, as a `payment.provider` id
+        :return: Public information on the payment, namely: the client secret
+        :rtype: str
+        """
+        provider_sudo = request.env['payment.provider'].sudo().browse(provider_id).exists()
+        intent =
+        return {
+            'client_key': provider_sudo.adyen_client_key,
+        }
+
     @http.route(_return_url, type='http', auth='public', csrf=False, save_session=False)
     def stripe_return(self, **data):
         """ Process the notification data sent by Stripe after redirection from payment.

@@ -241,6 +241,112 @@ class PaymentProvider(models.Model):
 
     # === BUSINESS METHODS - PAYMENT FLOW === #
 
+    def _stripe_create_intent(self, operation, **kwargs):
+        response = self._stripe_make_request(
+            'setup_intents' if operation == 'validation' else 'payment_intents',
+            payload=self._stripe_prepare_intent_payload(operation, **kwargs),
+        )
+
+        if 'error' not in response:
+            intent = response
+        else:  # COMP VCR Handling error in provider is not as precise as in transactionz
+            intent = response['error'].get('payment_intent', response['error'].get('setup_intent'))
+
+        return intent
+
+    def _stripe_prepare_intent_payload(self, operation, amount, currency_id, tokenize, **kwargs):
+        # COMP VCR A lot of parameters are needed to fine tune the creation of intent. We need
+        # partners information to create customers (for saving the payment method)
+        if operation == 'validation':
+            customer = self._stripe_create_customer()
+            return {
+                'customer': customer['id'],
+                'description': self.reference,
+                'payment_method_types[]': 'card',
+                **self._stripe_get_mandate_options(),
+            }
+        else:
+            payment_intent_payload = {
+                'amount': payment_utils.to_minor_currency_units(amount, currency_id),
+                'currency': currency_id.name.lower(),
+                # COMP VCR no description, no reconciliation :(
+                'capture_method': 'manual' if self.capture_manually else 'automatic',
+            }
+            if operation in ['offline', 'online_token']:
+                payment_intent_payload.update(
+                    confirm=True,
+                    off_session=True,
+                    payment_method=self.token_id.stripe_payment_method,
+                    customer=self.token_id.provider_ref,
+                    mandate=self.token_id.stripe_mandate_id,
+                )
+            else:
+                payment_intent_payload.update({
+                    'automatic_payment_methods[enabled]': True,
+                })
+                if tokenize:
+                    customer = self._stripe_create_customer()
+                    payment_intent_payload.update(
+                        customer=customer['id'],
+                        setup_future_usage='off_session',
+                        **self._stripe_get_mandate_options(),
+                    )
+            return payment_intent_payload
+
+    def _stripe_prepare_setup_intent_payload(self):
+        """ Prepare the payload for the creation of a setup intent in Stripe format.
+
+        Note: This method serves as a hook for modules that would fully implement Stripe Connect.
+        Note: self.ensure_one()
+
+        :return: The Stripe-formatted payload for the setup intent request
+        :rtype: dict
+        """
+        customer = self._stripe_create_customer()
+        return {
+            'customer': customer['id'],
+            'description': self.reference,
+            'payment_method_types[]': 'card',
+            **self._stripe_get_mandate_options(),
+        }
+
+    def _stripe_prepare_payment_intent_payload(self, payment_by_token=False):
+        """ Prepare the payload for the creation of a payment intent in Stripe format.
+
+        Note: This method serves as a hook for modules that would fully implement Stripe Connect.
+        Note: self.ensure_one()
+
+        :param boolean payment_by_token: Whether the payment is made by token or not.
+        :return: The Stripe-formatted payload for the payment intent request
+        :rtype: dict
+        """
+        payment_intent_payload = {
+            'amount': payment_utils.to_minor_currency_units(self.amount, self.currency_id),
+            'currency': self.currency_id.name.lower(),
+            'description': self.reference,
+            'capture_method': 'manual' if self.provider_id.capture_manually else 'automatic',
+        }
+        if payment_by_token:
+            payment_intent_payload.update(
+                confirm=True,
+                customer=self.token_id.provider_ref,
+                off_session=True,
+                payment_method=self.token_id.stripe_payment_method,
+                mandate=self.token_id.stripe_mandate_id,
+            )
+        else:
+            payment_intent_payload.update({
+                'automatic_payment_methods[enabled]': True,
+            })
+            if self.tokenize:
+                customer = self._stripe_create_customer()
+                payment_intent_payload.update(
+                    customer=customer['id'],
+                    setup_future_usage='off_session',
+                    **self._stripe_get_mandate_options(),
+                )
+        return payment_intent_payload
+
     def _stripe_make_request(
         self, endpoint, payload=None, method='POST', offline=False, idempotency_key=None
     ):
