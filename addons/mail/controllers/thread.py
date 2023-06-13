@@ -62,6 +62,8 @@ class ThreadController(http.Controller):
 
     @http.route("/mail/message/post", methods=["POST"], type="json", auth="public")
     def mail_message_post(self, thread_model, thread_id, post_data, context=None):
+        post_data['attachment_ids'] = list(request.env['ir.attachment'].browse(post_data['attachment_ids']).filtered(lambda x:x.create_uid.id == request.env.uid).ids) 
+        # you should not be able to post attachments that you did not create. Silentely dismiss them.
         if context:
             request.update_context(**context)
         thread = request.env[thread_model]._get_from_request_or_raise(request, int(thread_id))
