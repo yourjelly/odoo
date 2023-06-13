@@ -15122,6 +15122,18 @@
         isExported: true,
     };
     // -----------------------------------------------------------------------------
+    // FALSE
+    // -----------------------------------------------------------------------------
+    const FALSE = {
+        description: _lt("Logical value `false`."),
+        args: [],
+        returns: ["BOOLEAN"],
+        compute: function () {
+            return false;
+        },
+        isExported: true,
+    };
+    // -----------------------------------------------------------------------------
     // IF
     // -----------------------------------------------------------------------------
     const IF = {
@@ -15257,6 +15269,18 @@
         isExported: true,
     };
     // -----------------------------------------------------------------------------
+    // TRUE
+    // -----------------------------------------------------------------------------
+    const TRUE = {
+        description: _lt("Logical value `true`."),
+        args: [],
+        returns: ["BOOLEAN"],
+        compute: function () {
+            return true;
+        },
+        isExported: true,
+    };
+    // -----------------------------------------------------------------------------
     // XOR
     // -----------------------------------------------------------------------------
     const XOR = {
@@ -15283,12 +15307,14 @@
     var logical = /*#__PURE__*/Object.freeze({
         __proto__: null,
         AND: AND,
+        FALSE: FALSE,
         IF: IF,
         IFERROR: IFERROR,
         IFNA: IFNA,
         IFS: IFS,
         NOT: NOT,
         OR: OR,
+        TRUE: TRUE,
         XOR: XOR
     });
 
@@ -21095,7 +21121,7 @@
         argToFocus: Number,
     };
 
-    const functions$3 = functionRegistry.content;
+    const functions$2 = functionRegistry.content;
     const ASSISTANT_WIDTH = 300;
     const selectionIndicatorClass = "selector-flag";
     const selectionIndicatorColor = "#a9a9a9";
@@ -21358,7 +21384,10 @@
             }
         }
         showAutocomplete(searchTerm) {
-            if (!this.env.model.getters.getCurrentContent().startsWith("=")) {
+            const searchTermUpperCase = searchTerm.toUpperCase();
+            if (!this.env.model.getters.getCurrentContent().startsWith("=") ||
+                searchTermUpperCase === "TRUE" ||
+                searchTermUpperCase === "FALSE") {
                 return;
             }
             this.autoCompleteState.showProvider = true;
@@ -21438,7 +21467,6 @@
                 switch (token.type) {
                     case "OPERATOR":
                     case "NUMBER":
-                    case "FUNCTION":
                     case "COMMA":
                     case "STRING":
                         result.push({ value: token.value, color: tokenColors[token.type] || "#000" });
@@ -21448,9 +21476,13 @@
                         result.push({ value: token.value, color: this.rangeColor(xc, sheetName) || "#000" });
                         break;
                     case "SYMBOL":
-                        let value = token.value;
-                        if (["TRUE", "FALSE"].includes(value.toUpperCase())) {
+                        const value = token.value;
+                        const upperCaseValue = value.toUpperCase();
+                        if (upperCaseValue === "TRUE" || upperCaseValue === "FALSE") {
                             result.push({ value: token.value, color: tokenColors.NUMBER });
+                        }
+                        else if (upperCaseValue in functionRegistry.content) {
+                            result.push({ value: token.value, color: tokenColors.FUNCTION });
                         }
                         else {
                             result.push({ value: token.value, color: "#000" });
@@ -21547,25 +21579,28 @@
             this.autoCompleteState.showProvider = false;
             this.functionDescriptionState.showDescription = false;
             if (content.startsWith("=")) {
-                const tokenAtCursor = this.env.model.getters.getTokenAtCursor();
-                if (tokenAtCursor) {
-                    const { xc } = splitReference(tokenAtCursor.value);
-                    if (tokenAtCursor.type === "FUNCTION" ||
-                        (tokenAtCursor.type === "SYMBOL" && !rangeReference.test(xc))) {
-                        // initialize Autocomplete Dropdown
-                        this.showAutocomplete(tokenAtCursor.value);
-                    }
-                    else if (tokenAtCursor.functionContext && tokenAtCursor.type !== "UNKNOWN") {
-                        // initialize Formula Assistant
-                        const tokenContext = tokenAtCursor.functionContext;
-                        const parentFunction = tokenContext.parent.toUpperCase();
-                        const description = functions$3[parentFunction];
-                        const argPosition = tokenContext.argPosition;
-                        this.functionDescriptionState.functionName = parentFunction;
-                        this.functionDescriptionState.functionDescription = description;
-                        this.functionDescriptionState.argToFocus = description.getArgToFocus(argPosition + 1) - 1;
-                        this.functionDescriptionState.showDescription = true;
-                    }
+                const token = this.env.model.getters.getTokenAtCursor();
+                if (!token) {
+                    return;
+                }
+                if (token.type === "SYMBOL") {
+                    // initialize Autocomplete Dropdown
+                    this.showAutocomplete(token.value);
+                    return;
+                }
+                const tokenContext = token.functionContext;
+                const parentFunction = tokenContext?.parent.toUpperCase();
+                if (tokenContext &&
+                    parentFunction &&
+                    parentFunction in functions$2 &&
+                    token.type !== "UNKNOWN") {
+                    // initialize Formula Assistant
+                    const description = functions$2[parentFunction];
+                    const argPosition = tokenContext.argPosition;
+                    this.functionDescriptionState.functionName = parentFunction;
+                    this.functionDescriptionState.functionDescription = description;
+                    this.functionDescriptionState.argToFocus = description.getArgToFocus(argPosition + 1) - 1;
+                    this.functionDescriptionState.showDescription = true;
                 }
             }
         }
@@ -27480,7 +27515,6 @@
      * is useful for the composer, which needs to be able to work with incomplete
      * formulas.
      */
-    const functions$2 = functionRegistry.content;
     const POSTFIX_UNARY_OPERATORS = ["%"];
     const OPERATORS = "+,-,*,/,:,=,<>,>=,>,<=,<,^,&".split(",").concat(POSTFIX_UNARY_OPERATORS);
     function tokenize(str) {
@@ -27603,17 +27637,11 @@
         }
         if (result.length) {
             const value = result;
-            const isFunction = value.toUpperCase() in functions$2;
-            if (isFunction) {
-                return { type: "FUNCTION", value };
-            }
             const isReference = rangeReference.test(value);
             if (isReference) {
                 return { type: "REFERENCE", value };
             }
-            else {
-                return { type: "SYMBOL", value };
-            }
+            return { type: "SYMBOL", value };
         }
         return null;
     }
@@ -29077,9 +29105,6 @@
                 return { type: "NUMBER", value: parseNumber(current.value) };
             case "STRING":
                 return { type: "STRING", value: removeStringQuotes(current.value) };
-            case "FUNCTION":
-                const args = parseFunctionArgs(tokens);
-                return { type: "FUNCALL", value: current.value, args };
             case "INVALID_REFERENCE":
                 throw new InvalidReferenceError();
             case "REFERENCE":
@@ -29096,13 +29121,15 @@
                     value: current.value,
                 };
             case "SYMBOL":
-                if (["TRUE", "FALSE"].includes(current.value.toUpperCase())) {
-                    return { type: "BOOLEAN", value: current.value.toUpperCase() === "TRUE" };
+                const value = current.value;
+                const nextToken = tokens[0];
+                if (nextToken?.type === "LEFT_PAREN" && functionRegex.test(current.value)) {
+                    const args = parseFunctionArgs(tokens);
+                    return { type: "FUNCALL", value: value, args };
                 }
-                if (current.value) {
-                    if (functionRegex.test(current.value) && tokens[0]?.type === "LEFT_PAREN") {
-                        throw new UnknownFunctionError(current.value);
-                    }
+                const upperCaseValue = value.toUpperCase();
+                if (upperCaseValue === "TRUE" || upperCaseValue === "FALSE") {
+                    return { type: "BOOLEAN", value: upperCaseValue === "TRUE" };
                 }
                 throw new BadExpressionError(_lt("Invalid formula"));
             case "LEFT_PAREN":
@@ -29199,41 +29226,51 @@
         }
         return result;
     }
+    function visitAst(ast, fn) {
+        mapAst(ast, (ast) => {
+            fn(ast);
+            return ast;
+        });
+    }
     /**
      * Allows to visit all nodes of an AST and apply a mapping function
      * to nodes of a specific type.
      * Useful if you want to convert some part of a formula.
      *
-     * e.g.
-     * ```ts
+     * @example
      * convertAstNodes(ast, "FUNCALL", convertFormulaToExcel)
      *
      * function convertFormulaToExcel(ast: ASTFuncall) {
      *   // ...
      *   return modifiedAst
      * }
-     * ```
      */
     function convertAstNodes(ast, type, fn) {
-        if (type === ast.type) {
-            ast = fn(ast);
-        }
+        return mapAst(ast, (ast) => {
+            if (ast.type === type) {
+                return fn(ast);
+            }
+            return ast;
+        });
+    }
+    function mapAst(ast, fn) {
+        ast = fn(ast);
         switch (ast.type) {
             case "FUNCALL":
                 return {
                     ...ast,
-                    args: ast.args.map((child) => convertAstNodes(child, type, fn)),
+                    args: ast.args.map((child) => mapAst(child, fn)),
                 };
             case "UNARY_OPERATION":
                 return {
                     ...ast,
-                    operand: convertAstNodes(ast.operand, type, fn),
+                    operand: mapAst(ast.operand, fn),
                 };
             case "BIN_OPERATION":
                 return {
                     ...ast,
-                    right: convertAstNodes(ast.right, type, fn),
-                    left: convertAstNodes(ast.left, type, fn),
+                    right: mapAst(ast.right, fn),
+                    left: mapAst(ast.left, fn),
                 };
             default:
                 return ast;
@@ -29364,6 +29401,9 @@
                 const { args } = ast;
                 const functionName = ast.value.toUpperCase();
                 const functionDefinition = functions$1[functionName];
+                if (!functionDefinition) {
+                    throw new UnknownFunctionError(ast.value);
+                }
                 assertEnoughArgs(ast);
                 const compiledArgs = [];
                 for (let i = 0; i < args.length; i++) {
@@ -29622,7 +29662,7 @@
                 functionStarted = "";
             }
             switch (token.type) {
-                case "FUNCTION":
+                case "SYMBOL":
                     functionStarted = token.value;
                     break;
                 case "LEFT_PAREN":
@@ -29657,6 +29697,25 @@
     function composerTokenize(formula) {
         const tokens = rangeTokenize(formula);
         return mapParentFunction(mapParenthesis(enrichTokens(tokens)));
+    }
+
+    const functions = functionRegistry.content;
+    function isExportableToExcel(tokens) {
+        try {
+            let isExported = true;
+            visitAst(parseTokens(tokens), (ast) => {
+                if (ast.type === "FUNCALL") {
+                    const func = functions[ast.value.toUpperCase()];
+                    if (!func?.isExported) {
+                        isExported = false;
+                    }
+                }
+            });
+            return isExported;
+        }
+        catch (error) {
+            return false;
+        }
     }
 
     /**
@@ -34131,7 +34190,6 @@
         }
     }
 
-    const functions = functionRegistry.content;
     //#region
     // ---------------------------------------------------------------------------
     // INTRODUCTION
@@ -34347,9 +34405,7 @@
                 let isExported = true;
                 const formulaCell = this.getCorrespondingFormulaCell(position);
                 if (formulaCell) {
-                    isExported = formulaCell.compiledFormula.tokens
-                        .filter((tk) => tk.type === "FUNCTION")
-                        .every((tk) => functions[tk.value.toUpperCase()].isExported);
+                    isExported = isExportableToExcel(formulaCell.compiledFormula.tokens);
                     isFormula = isExported;
                     if (!isExported) {
                         newContent = value.toString();
@@ -48538,8 +48594,8 @@
 
 
     __info__.version = '16.4.0-alpha.4';
-    __info__.date = '2023-06-12T14:15:11.459Z';
-    __info__.hash = '251a52e';
+    __info__.date = '2023-06-13T12:20:20.598Z';
+    __info__.hash = '8d30ba4';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
