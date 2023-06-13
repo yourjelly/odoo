@@ -16,6 +16,32 @@ export const stripeMixin = {
         }
     },
 
+    _show_terms() {
+        const paymentElement = this.stripeElement.getElement('payment');
+        paymentElement.update({
+            terms: {
+                'bancontact': 'always',
+                'card': 'always',
+                'ideal': 'always',
+                'sofort': 'always',
+                // sepa, ach and BECS are voluntary ommited bc we want to keep the 'auto' behavior.
+            },
+        });
+    },
+
+    _hide_terms() {
+        const paymentElement = this.stripeElement.getElement('payment');
+        paymentElement.update({
+            terms: {
+                'bancontact': 'never',
+                'card': 'never',
+                'ideal': 'never',
+                'sofort': 'never',
+                // sepa, ach and BECS are voluntary ommited bc we want to keep the 'auto' behavior.
+            },
+        });
+    },
+
     async _stripe_confirm(processingValues) {},
 
     /**
@@ -74,19 +100,10 @@ export const stripeMixin = {
                 radios: false,
                 spacedAccordionItems: true,
             },
-            terms: {
-                'auBecsDebit': 'never',
-                'bancontact': 'never',
-                'card': 'never',
-                'ideal': 'never',
-                'sepaDebit': 'never',
-                'sofort': 'never',
-                'usBankAccount': 'never',
-            },
         });
+        this.txContext.isTokenizationRequired || this.formType == 'manage' ? this._show_terms() : this._hide_terms();
         paymentElement.mount(stripeInlineForm);
-        if (this.formType == 'checkout' && !this.txContext.isTokenizationRequired) paymentElement.on('change', (ev) => {
-            this.selectedPaymentMethod = ev.value.type;
+        if (this.formType == 'checkout' && !this.txContext.isTokenizationRequired) {
             const stripeTokenCheckbox = document.getElementById(
                 `o_payment_provider_inline_${this.formType}_form_${paymentOptionId}`
             ).querySelector("input[name='o_payment_save_as_token']");
