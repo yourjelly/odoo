@@ -13,6 +13,7 @@ class IrDemo(models.TransientModel):
 
     @assert_log_admin_access
     def install_demo(self):
+        self.env.su = True
         force_demo(self.env)
         return {
             'type': 'ir.actions.act_url',
