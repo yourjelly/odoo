@@ -30,7 +30,7 @@ class Product(models.Model):
     stock_move_ids = fields.One2many('stock.move', 'product_id') # used to compute quantities
     qty_available = fields.Float(
         'Quantity On Hand', compute='_compute_quantities', search='_search_qty_available',
-        digits='Product Unit of Measure', compute_sudo=False,
+        digits='Product Unit of Measure', compute_sudo=False, store=True,
         help="Current quantity of products.\n"
              "In a context with a single Stock Location, this includes "
              "goods stored at this Location, or any of its children.\n"
@@ -55,7 +55,7 @@ class Product(models.Model):
              "with 'internal' type.")
     free_qty = fields.Float(
         'Free To Use Quantity ', compute='_compute_quantities', search='_search_free_qty',
-        digits='Product Unit of Measure', compute_sudo=False,
+        digits='Product Unit of Measure', compute_sudo=False, store=True,
         help="Forecast quantity (computed as Quantity On Hand "
              "- reserved quantity)\n"
              "In a context with a single Stock Location, this includes "
@@ -67,7 +67,7 @@ class Product(models.Model):
              "with 'internal' type.")
     incoming_qty = fields.Float(
         'Incoming', compute='_compute_quantities', search='_search_incoming_qty',
-        digits='Product Unit of Measure', compute_sudo=False,
+        digits='Product Unit of Measure', compute_sudo=False, store=True,
         help="Quantity of planned incoming products.\n"
              "In a context with a single Stock Location, this includes "
              "goods arriving to this Location, or any of its children.\n"
@@ -78,7 +78,7 @@ class Product(models.Model):
              "Location with 'internal' type.")
     outgoing_qty = fields.Float(
         'Outgoing', compute='_compute_quantities', search='_search_outgoing_qty',
-        digits='Product Unit of Measure', compute_sudo=False,
+        digits='Product Unit of Measure', compute_sudo=False, store=True,
         help="Quantity of planned outgoing products.\n"
              "In a context with a single Stock Location, this includes "
              "goods leaving this Location, or any of its children.\n"
