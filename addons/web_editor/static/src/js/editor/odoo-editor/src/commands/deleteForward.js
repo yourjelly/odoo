@@ -82,6 +82,8 @@ Text.prototype.oDeleteForward = function (offset, alreadyMoved = false) {
 };
 
 HTMLElement.prototype.oDeleteForward = function (offset) {
+    console.warn('HTMLElement.prototype.oDeleteForward');
+    console.log('EL > ', this, offset);
     const filterFunc = node =>
         isVisibleEmpty(node) || isContentTextNode(node) || isNotEditableNode(node);
 
@@ -153,4 +155,35 @@ HTMLElement.prototype.oDeleteForward = function (offset) {
         node.oDeleteBackward(offset);
         return;
     }
+};
+
+HTMLLIElement.prototype.oDeleteForward = function (offset) {
+    console.log('HTML : \n', this.closest(".odoo-editor-editable").innerHTML);
+    console.log('HTMLLIElement.prototype.oDeleteForward', offset, this);
+    console.log('this.parentElement', this.parentElement);
+    console.log('childNodes', this.childNodes.length);
+    console.log('nextSibling', this.nextSibling);
+    console.log('nextSibling.nodeType', this.nextSibling.nodeType);
+    console.log('nextSibling.tagName', this.nextSibling.tagName);
+    console.log('nextSibling.childNodes.length', this.nextSibling.childNodes.length);
+    if (
+        offset === this.childNodes.length &&
+        this.parentElement &&
+        this.nextSibling &&
+        this.nextSibling.firstChild &&
+        this.nextSibling.firstChild.nodeType === Node.ELEMENT_NODE &&
+        ['UL', 'OL'].includes(this.nextSibling.firstChild.tagName) &&
+        this.nextSibling.firstChild.childNodes.length
+    ) {
+        console.log('ca passe ====================================');
+        const nextSiblingLi = this.nextSibling.firstChild.firstChild;
+        console.log('nextSiblingLi', nextSiblingLi);
+        // Add the first LI from the next sibbling list to the current list.
+        this.after(nextSiblingLi);
+        HTMLElement.prototype.oDeleteBackward.call(nextSiblingLi, 0, true);
+        return;
+    }
+
+
+    HTMLElement.prototype.oDeleteForward.call(this, offset);
 };
