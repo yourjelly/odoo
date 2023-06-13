@@ -17319,22 +17319,22 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        await triggerEvent(document.querySelector('.o_field_x2many_list_row_add a'), null, "click");
+        await triggerEvent(document.querySelector(".o_field_x2many_list_row_add a"), null, "click");
 
         const input = document.activeElement;
-        input.value = 'alu';
-        triggerEvent(document.activeElement, null, "input"),
+        input.value = "alu";
+        triggerEvent(input, null, "input");
         await nextTick();
 
-        input.value = 'alue';
-        triggerEvent(document.activeElement, null, "input"),
-        triggerHotkey("Enter"),
+        input.value = "alue";
+        triggerEvent(input, null, "input");
+        triggerHotkey("Enter");
         await nextTick();
 
         deferred.resolve();
         await nextTick();
 
         assert.strictEqual(input, document.activeElement);
-        assert.strictEqual(input.value, 'Value 1');
+        assert.strictEqual(input.value, "Value 1");
     });
 });

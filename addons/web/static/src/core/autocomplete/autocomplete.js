@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { Deferred } from "@web/core/utils/concurrency";
 import { useForwardRefToParent, useService } from "@web/core/utils/hooks";
 import { useDebounced } from "@web/core/utils/timing";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
@@ -25,24 +24,7 @@ export class AutoComplete extends Component {
         this.inputRef = useForwardRefToParent("input");
         this.root = useRef("root");
 
-        this.debouncedProcessInput = useDebounced(async () => {
-            const currentPromise = this.pendingPromise;
-            this.pendingPromise = null;
-            this.props.onInput({
-                inputValue: this.inputRef.el.value,
-            });
-            try {
-                await this.open(true);
-                currentPromise.resolve();
-            } catch {
-                currentPromise.reject();
-            } finally {
-                if (currentPromise === this.loadingPromise) {
-                    this.loadingPromise = null;
-                }
-            }
-        }, this.constructor.timeout);
-
+        this.debouncedProcessInput = useDebounced(this.processInput, this.constructor.timeout);
 
         useExternalListener(window, "scroll", this.onWindowScroll, true);
 
@@ -214,6 +196,13 @@ export class AutoComplete extends Component {
         }
     }
 
+    processInput() {
+        this.props.onInput({
+            inputValue: this.inputRef.el.value,
+        });
+        return this.open(true);
+    }
+
     onInputBlur() {
         const value = this.inputRef.el.value;
         if (
@@ -242,27 +231,21 @@ export class AutoComplete extends Component {
             inputValue: this.inputRef.el.value,
         });
     }
-    async onInput() {
-        this.pendingPromise = this.pendingPromise || new Deferred();
-        this.loadingPromise = this.pendingPromise;
-        this.debouncedProcessInput();
+    onInput() {
+        this.inputProcessing = this.debouncedProcessInput().then(() => {
+            this.inputProcessing = null;
+        });
     }
 
     async onInputKeydown(ev) {
         const hotkey = getActiveHotkey(ev);
-        const isSelectKey = hotkey === "enter" || hotkey === "tab";
-
-        if (this.loadingPromise && isSelectKey) {
-            if (hotkey === "enter") {
-                ev.stopPropagation();
-                ev.preventDefault();
-            }
-
-            await this.loadingPromise;
-        }
-
         switch (hotkey) {
             case "enter":
+                if (this.inputProcessing) {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                    await this.inputProcessing;
+                }
                 if (!this.isOpened || !this.state.activeSourceOption) {
                     return;
                 }
@@ -275,6 +258,9 @@ export class AutoComplete extends Component {
                 this.close();
                 break;
             case "tab":
+                if (this.inputProcessing) {
+                    await this.inputProcessing;
+                }
                 if (!this.isOpened) {
                     return;
                 }
