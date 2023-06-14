@@ -754,11 +754,15 @@ export class ColorPalette extends Component {
         if (weUtils.areCssValuesEqual(gradient, this.selectedColor) && !isPreview) {
             return;
         }
-        const method = isPreview ? this.props.onColorHover : this.props.onColorPicked;
-        method({
+        const params = {
             ...this._getSelectedColors(),
             color: gradient,
-        });
+        };
+        if (isPreview) {
+            this.props.onColorHover(params);
+        } else {
+            this.props.onColorPicked(params);
+        }
     }
     /**
      * Marks the selected colors.
