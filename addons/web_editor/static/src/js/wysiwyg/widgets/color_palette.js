@@ -808,7 +808,7 @@ export class ColorPalette extends Component {
      * Updates a gradient color from a selection in the color picker.
      *
      * @private
-     * @param {Event} ev from gradient's colorpicker
+     * @param {Object} params
      * @param {boolean} isPreview
      */
     _updateGradientColor(params, isPreview) {
