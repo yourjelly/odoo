@@ -53,6 +53,7 @@
             <t t-if="props.type === 'datetime'">
                 <t t-foreach="state.timeValues" t-as="timeValue" t-key="timeValue_index">
                     <div
+                        t-if="timeValue"
                         class="o_time_picker d-flex align-items-center justify-content-center gap-1"
                     >
                         <t t-call="web.DateTimePicker.Select">
