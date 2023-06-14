@@ -121,13 +121,19 @@ var VariantMixin = {
         var $variantContainer;
         var $customInput = false;
         if ($target.is('input[type=radio]') && $target.is(':checked')) {
-            $variantContainer = $target.closest('ul').closest('li');
-            $customInput = $target;
+            if($target.is('.d-none.js_variant_change')){
+                $variantContainer = $target.closest('li').parent();
+                debugger;
+                $customInput = $target;
+            }else{
+                $variantContainer = $target.closest('ul').closest('li');
+                $customInput = $target;
+            }
         } else if ($target.is('select')) {
             $variantContainer = $target.closest('li');
             $customInput = $target
                 .find('option[value="' + $target.val() + '"]');
-        }
+        } 
 
         if ($variantContainer) {
             if ($customInput && $customInput.data('is_custom') === 'True') {
@@ -301,7 +307,6 @@ var VariantMixin = {
         $container.find(variantsValuesSelectors.join(', ')).toArray().forEach((el) => {
             values.push(+$(el).val());
         });
-
         return values.concat(unchangedValues);
     },
 
@@ -527,16 +532,18 @@ var VariantMixin = {
      */
     _onChangeCombination: function (ev, $parent, combination) {
         var self = this;
-        var $price = $parent.find(".oe_price:first .oe_currency_value");
-        var $default_price = $parent.find(".oe_default_price:first .oe_currency_value");
-        var $optional_price = $parent.find(".oe_optional:first .oe_currency_value");
+        var $price = $parent.find(".oe_price .oe_currency_value");
+        var $default_price = $parent.find(".oe_default_price .oe_currency_value");
+        var $optional_price = $parent.find(".oe_optional .oe_currency_value");
         $price.text(self._priceToStr(combination.price));
         $default_price.text(self._priceToStr(combination.list_price));
-
+        
         var isCombinationPossible = true;
         if (typeof combination.is_combination_possible !== "undefined") {
             isCombinationPossible = combination.is_combination_possible;
         }
+        // console.log(parentCombination);
+        // $('#selectedItem').html(combination.carousel);
         this._toggleDisable($parent, isCombinationPossible);
 
         if (combination.has_discounted_price && !combination.compare_list_price) {

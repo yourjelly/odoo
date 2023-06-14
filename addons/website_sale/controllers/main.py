@@ -495,6 +495,14 @@ class WebsiteSale(http.Controller):
     def product(self, product, category='', search='', **kwargs):
         return request.render("website_sale.product", self._prepare_product_values(product, category, search, **kwargs))
 
+    @http.route(['/shop/<model("product.template"):product>/get-attr'], type='json', auth='public', website=True)
+    def get_attrs(self,product,category='', search='',**kwargs):
+        product_attrs = request.env['product.template'].browse(product)
+        return request.env['ir.ui.view']._render_template(
+            "website_sale.dynamic_product_variant", {
+                'product': product
+            })
+
     @http.route(['/shop/product/<model("product.template"):product>'], type='http', auth="public", website=True, sitemap=False)
     def old_product(self, product, category='', search='', **kwargs):
         # Compatibility pre-v14

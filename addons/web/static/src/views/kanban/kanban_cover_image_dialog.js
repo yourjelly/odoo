@@ -29,6 +29,7 @@ export class KanbanCoverImageDialog extends Component {
                 ],
                 ["id"]
             );
+            debugger;
             this.state.selectFile = this.props.autoOpen && this.attachments.length;
         });
     }
@@ -56,14 +57,12 @@ export class KanbanCoverImageDialog extends Component {
         this.state.selectedAttachmentId = null;
         this.setCover();
     }
-
     async setCover() {
         const id = this.state.selectedAttachmentId ? [this.state.selectedAttachmentId] : false;
         await this.props.record.update({ [this.props.fieldName]: id });
         await this.props.record.save();
         this.props.close();
     }
-
     uploadImage() {
         this.state.selectFile = true;
     }

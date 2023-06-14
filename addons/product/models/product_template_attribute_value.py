@@ -59,6 +59,7 @@ class ProductTemplateAttributeValue(models.Model):
     html_color = fields.Char(string="HTML Color Index", related='product_attribute_value_id.html_color')
     is_custom = fields.Boolean(related='product_attribute_value_id.is_custom')
     display_type = fields.Selection(related='product_attribute_value_id.display_type')
+    image_1920 = fields.Binary(related='product_attribute_value_id.image_1920')
     color = fields.Integer(string="Color", default=_get_default_color)
 
     _sql_constraints = [

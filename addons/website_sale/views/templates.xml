@@ -960,7 +960,8 @@
                                         <input type="hidden" class="product_template_id" name="product_template_id" t-att-value="product.id" />
                                         <input t-if="product.public_categ_ids.ids" type="hidden" class="product_category_id" name="product_category_id" t-att-value="product.public_categ_ids.ids[0]" />
                                         <input t-if="product.product_tag_ids.ids" type="hidden" class="product_tag_id" name="product_tag_id" t-att-value="product.product_tag_ids.ids[0]" />
-                                        <t t-if="combination" t-call="website_sale.variants">
+                                        
+                                        <t t-if="combination" t-call="website_sale.dynamic_product_variant">
                                             <t t-set="ul_class" t-valuef="flex-column" />
                                             <t t-set="parent_combination" t-value="None" />
                                         </t>
@@ -1154,7 +1155,7 @@
     <template id="product_price">
         <div itemprop="offers" itemscope="itemscope" itemtype="http://schema.org/Offer" t-attf-class="product_price mt-2 mb-3 {{'d-none' if combination_info['prevent_zero_price_sale'] else 'd-inline-block'}}">
             <h3 class="css_editable_mode_hidden">
-                <span class="oe_price" style="white-space: nowrap;" t-esc="combination_info['price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                <span class="oe_price" style="white-space: nowrap;" t-esc="combination_info['list_price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
                 <span itemprop="price" style="display:none;" t-esc="combination_info['price']"/>
                 <span itemprop="priceCurrency" style="display:none;" t-esc="website.currency_id.name"/>
                 <span t-attf-class="text-danger oe_default_price ms-1 h5 {{'' if combination_info['has_discounted_price'] and not combination_info['compare_list_price'] else 'd-none'}}"

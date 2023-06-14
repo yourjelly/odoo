@@ -31,6 +31,7 @@
         'views/templates.xml',
         'views/snippets/snippets.xml',
         'views/snippets/s_add_to_cart.xml',
+        'views/snippets/s_dynamic_product_variant.xml',
         'views/snippets/s_dynamic_snippet_products.xml',
         'views/res_config_settings_views.xml',
         'views/website_sale_visitor_views.xml',

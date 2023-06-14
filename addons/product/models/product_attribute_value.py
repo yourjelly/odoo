@@ -10,6 +10,7 @@ class ProductAttributeValue(models.Model):
     _name = 'product.attribute.value'
     # if you change this _order, keep it in sync with the method
     # `_sort_key_variant` in `product.template'
+    _inherit = ['image.mixin']
     _order = 'attribute_id, sequence, id'
     _description = "Attribute Value"
 
@@ -25,7 +26,6 @@ class ProductAttributeValue(models.Model):
         ondelete='cascade',
         required=True,
         index=True)
-
     pav_attribute_line_ids = fields.Many2many(
         comodel_name='product.template.attribute.line',
         relation='product_attribute_value_product_template_attribute_line_rel',
@@ -43,7 +43,6 @@ class ProductAttributeValue(models.Model):
             " to display the color if the attribute type is 'Color'.")
     display_type = fields.Selection(related='attribute_id.display_type')
     color = fields.Integer(string="Color Index", default=_get_default_color)
-
     _sql_constraints = [
         ('value_company_uniq',
          'unique (name, attribute_id)',
