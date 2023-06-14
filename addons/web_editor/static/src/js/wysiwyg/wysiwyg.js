@@ -2634,8 +2634,6 @@ export class Wysiwyg extends Component {
         return new Promise(function () {});
     }
     _onAttachmentChange(attachment) {
-        // todo: to remove when removing the legacy field_html
-        // this.trigger_up('attachment_changed', attachment);
         if (this.options.onAttachmentChange) {
             this.options.onAttachmentChange(attachment);
         }
@@ -2671,8 +2669,6 @@ export class Wysiwyg extends Component {
             this._shouldDelayBlur = true;
         } else {
             if (this._pendingBlur && !e.target.closest('.o_wysiwyg_wrapper')) {
-                // todo: to remove when removing the legacy field_html
-                // this.trigger_up('wysiwyg_blur');
                 this.options.onWysiwygBlur && this.options.onWysiwygBlur();
                 this._pendingBlur = false;
             }
@@ -2683,8 +2679,6 @@ export class Wysiwyg extends Component {
         if (this._shouldDelayBlur) {
             this._pendingBlur = true;
         } else {
-            // todo: to remove when removing the legacy field_html
-            // this.trigger_up('wysiwyg_blur');
             this.options.onWysiwygBlur && this.options.onWysiwygBlur();
         }
     }
