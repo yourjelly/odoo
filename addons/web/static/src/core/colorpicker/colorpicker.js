@@ -109,7 +109,7 @@ export class Colorpicker extends Component {
         this.$opacitySlider = this.$('.o_opacity_slider');
         this.$opacitySliderPointer = this.$('.o_opacity_pointer');
 
-        var rgba = convertCSSColorToRgba(this.props.defaultColor);
+        const rgba = convertCSSColorToRgba(this.props.defaultColor);
         if (rgba) {
             this._updateRgba(rgba.red, rgba.green, rgba.blue, rgba.opacity);
         }
@@ -178,7 +178,7 @@ export class Colorpicker extends Component {
      * @param {string} color rgb[a]
      */
     setSelectedColor(color) {
-        var rgba = convertCSSColorToRgba(color);
+        const rgba = convertCSSColorToRgba(color);
         if (rgba) {
             const oldPreviewActive = this.previewActive;
             this.previewActive = false;
@@ -198,11 +198,9 @@ export class Colorpicker extends Component {
      * @private
      */
     _updateUI() {
-        var self = this;
-
         // Update inputs
         for (const [color, value] of Object.entries(this.colorComponents)) {
-            self.$(`.o_${color}_input`).val(value);
+            this.$(`.o_${color}_input`).val(value);
         }
 
         // Update preview
@@ -213,22 +211,22 @@ export class Colorpicker extends Component {
             "background-color",
             `hsl(${this.colorComponents.hue}, 100%, 50%)`
         );
-        var top = (100 - this.colorComponents.lightness) * this.$colorpickerArea.height() / 100;
-        var left = this.colorComponents.saturation * this.$colorpickerArea.width() / 100;
+        const top = (100 - this.colorComponents.lightness) * this.$colorpickerArea.height() / 100;
+        const left = this.colorComponents.saturation * this.$colorpickerArea.width() / 100;
         this.$colorpickerPointer.css({
             top: (top - 5) + 'px',
             left: (left - 5) + 'px',
         });
 
         // Update color slider position
-        var height = this.$colorSlider.height();
-        var y = this.colorComponents.hue * height / 360;
+        const height = this.$colorSlider.height();
+        const y = this.colorComponents.hue * height / 360;
         this.$colorSliderPointer.css('top', Math.round(y - 2));
 
         if (!this.props.noTransparency) {
             // Update opacity slider position
-            var heightOpacity = this.$opacitySlider.height();
-            var z = heightOpacity * (1 - this.colorComponents.opacity / 100.0);
+            const heightOpacity = this.$opacitySlider.height();
+            const z = heightOpacity * (1 - this.colorComponents.opacity / 100.0);
             this.$opacitySliderPointer.css('top', Math.round(z - 2));
 
             // Add gradient color on opacity slider
@@ -242,7 +240,7 @@ export class Colorpicker extends Component {
      * @param {string} hex - hexadecimal code
      */
     _updateHex(hex) {
-        var rgb = convertCSSColorToRgba(hex);
+        const rgb = convertCSSColorToRgba(hex);
         if (!rgb) {
             return;
         }
@@ -272,7 +270,7 @@ export class Colorpicker extends Component {
         // We update the hexadecimal code by transforming into a css color and
         // ignoring the opacity (we don't display opacity component in hexa as
         // not supported on all browsers)
-        var hex = convertRgbaToCSSColor(r, g, b);
+        const hex = convertRgbaToCSSColor(r, g, b);
         if (!hex) {
             return;
         }
@@ -299,7 +297,7 @@ export class Colorpicker extends Component {
             a = 100;
         }
 
-        var rgb = convertHslToRgb(h, s, l);
+        const rgb = convertHslToRgb(h, s, l);
         if (!rgb) {
             return;
         }
@@ -409,11 +407,11 @@ export class Colorpicker extends Component {
             return;
         }
 
-        var offset = this.$colorpickerArea.offset();
-        var top = ev.pageY - offset.top;
-        var left = ev.pageX - offset.left;
-        var saturation = Math.round(100 * left / this.$colorpickerArea.width());
-        var lightness = Math.round(100 * (this.$colorpickerArea.height() - top) / this.$colorpickerArea.height());
+        const offset = this.$colorpickerArea.offset();
+        const top = ev.pageY - offset.top;
+        const left = ev.pageX - offset.left;
+        let saturation = Math.round(100 * left / this.$colorpickerArea.width());
+        let lightness = Math.round(100 * (this.$colorpickerArea.height() - top) / this.$colorpickerArea.height());
         saturation = confine(saturation, 0, 100);
         lightness = confine(lightness, 0, 100);
 
@@ -442,8 +440,8 @@ export class Colorpicker extends Component {
             return;
         }
 
-        var y = ev.pageY - this.$colorSlider.offset().top;
-        var hue = Math.round(360 * y / this.$colorSlider.height());
+        const y = ev.pageY - this.$colorSlider.offset().top;
+        let hue = Math.round(360 * y / this.$colorSlider.height());
         hue = confine(hue, 0, 360);
 
         this._updateHsl(hue, this.colorComponents.saturation, this.colorComponents.lightness);
@@ -471,8 +469,8 @@ export class Colorpicker extends Component {
             return;
         }
 
-        var y = ev.pageY - this.$opacitySlider.offset().top;
-        var opacity = Math.round(100 * (1 - y / this.$opacitySlider.height()));
+        const y = ev.pageY - this.$opacitySlider.offset().top;
+        let opacity = Math.round(100 * (1 - y / this.$opacitySlider.height()));
         opacity = confine(opacity, 0, 100);
 
         this._updateOpacity(opacity);
