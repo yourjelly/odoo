@@ -1084,7 +1084,8 @@ section, .oe_img_bg, [data-oe-shape-data] {
 }
 
 .o_editor_banner {
-    i {
-        padding-top: 0.125rem
+    // force margin to ensure vertical center alignment in correlation with icon
+    p, h1, h2, h3 {
+        margin-bottom: 1rem;
     }
 }

@@ -2089,9 +2089,9 @@ const Wysiwyg = Widget.extend({
                     label: title,
                     alertClass: alertClass,
                     iconClass: iconClass
-                }))[0]
+                }))[0];
                 this.odooEditor.execCommand('insert', bannerHTML);
-                setSelection(bannerHTML.querySelector('.o_editor_banner > div'), 0)
+                setSelection(bannerHTML.querySelector('.o_editor_banner > div'), 0);
             },
         }
     },
