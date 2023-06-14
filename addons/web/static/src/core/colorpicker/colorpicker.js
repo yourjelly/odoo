@@ -63,11 +63,7 @@ export class Colorpicker extends Component {
             this.init();
         });
         onMounted(() => {
-            // Todo: at the time this method is called, the ref is not yet
-            // in the dom and this.elRef.el returns null as the getter check
-            // the node with `inOwnerDocument`.
-            // This hack allows to get the node without the check.
-            this.el = this.__owl__.refs.el;
+            this.el = this.elRef.el;
             const $el = $(this.el);
             this.$ = $el.find.bind($el);
 

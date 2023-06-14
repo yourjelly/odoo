@@ -46,11 +46,7 @@ export class Link extends Component {
                 return;
             }
             started = true;
-            // Todo: at the time this method is called, the ref is not yet in
-            // the dom and this.linkComponentWrapperRef.el returns null as the
-            // getter check the node with `inOwnerDocument`. This hack allows to
-            // get the node without the check.
-            this.$el = $(this.__owl__.refs.linkComponentWrapper);
+            this.$el = $(this.linkComponentWrapperRef.el);
 
             this.$ = this.$el.find.bind(this.$el);
 
