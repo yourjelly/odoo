@@ -27,11 +27,11 @@ let colorpickerTemplateProm;
 
 export class ColorPalette extends Component {
      /**
-     * Load ColorPalette dependencies. This allows to load them without
-     * instantiating the widget itself.
-     *
-     * @static
-     */
+      * Load ColorPalette dependencies. This allows to load them without
+      * instantiating the widget itself.
+      *
+      * @static
+      */
     static async loadDependencies(getArch) {
         // Public user using the editor may have a colorpalette but with
         // the default wysiwyg ones.
