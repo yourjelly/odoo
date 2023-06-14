@@ -1495,9 +1495,6 @@ export class Wysiwyg extends Component {
                             removeHintClasses();
                             this.linkToolsInfos.onDestroy();
                         }
-                        // onSave: (data) => {
-
-                        // },
                     };
                 }
                 const _onClick = ev => {
