@@ -3,39 +3,7 @@
 
     <t t-name="web_editor.Wysiwyg" owl="1">
         <div style="display: contents;" t-ref="toolbar">
-            <Toolbar t-props="this.toolbarProps" t-att-class="{'d-none': !this.showToolbar}">
-
-                <!-- dropDirection="this.props.options.toolbarDropDirection"
-
-                showChecklist="this.props.options.toolbarShowChecklist"
-                showAnimateText="this.props.options.toolbarShowAnimateText"
-
-                showColors="this.props.options.toolbarShowColors"
-                showFontSize="this.props.options.toolbarShowFontSize"
-                showHistory="this.props.options.toolbarShowHistory"
-
-                showStyle="this.props.options.toolbarShowStyle"
-                showJustify="this.props.options.toolbarShowJustify"
-                showList="this.props.options.toolbarShowList"
-                showLink="this.props.options.toolbarShowLink"
-
-                showImageShape="this.props.options.toolbarShowImageShape"
-                showImagePadding="this.props.options.toolbarShowImagePadding"
-                showImageWidth="this.props.options.toolbarShowImageWidth"
-                showImageEdit="this.props.options.toolbarShowImageEdit"
-
-                showHeading1="this.props.options.toolbarShowHeading1"
-                showHeading2="this.props.options.toolbarShowHeading2"
-                showHeading3="this.props.options.toolbarShowHeading3"
-                showHeading4="this.props.options.toolbarShowHeading4"
-                showHeading5="this.props.options.toolbarShowHeading5"
-                showHeading6="this.props.options.toolbarShowHeading6"
-
-                onColorpaletteDropdownShow.bind="this.onColorpaletteDropdownShow"
-                onColorpaletteDropdownHide.bind="this.onColorpaletteDropdownHide"
-                colorPaletteTextProps="this.colorPalettesProps.text"
-                colorPaletteBackgroundProps="this.colorPalettesProps.background" -->
-
+            <Toolbar t-props="this.state.toolbarProps" t-if="this.state.showToolbar">
                 <t t-if="state.linkToolProps">
                     <LinkTools t-props="state.linkToolProps" />
                 </t>
