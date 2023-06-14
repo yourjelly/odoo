@@ -113,6 +113,8 @@ export class Wysiwyg extends Component {
     });
     state = useState({
         linkToolProps: false,
+        showToolbar: true,
+        toolbarProps: {},
     });
 
     setup() {
@@ -187,6 +189,7 @@ export class Wysiwyg extends Component {
             onCustomColorPicked: getOnColorPicked('background'),
             onColorHover: getOnColorHover('background'),
         });
+        this._setToolbarProps(this.props);
 
         onWillStart(() => {
             this.init();
@@ -208,6 +211,8 @@ export class Wysiwyg extends Component {
             this.destroy();
         });
         onWillUpdateProps((newProps) => {
+            this._setToolbarProps(newProps);
+
             const lastValue = String(this.props.options.value || '');
             const lastRecordInfo = this.props.options.recordInfo;
             const lastCollaborationChannel = this.props.options.collaborationChannel;
@@ -1692,6 +1697,40 @@ export class Wysiwyg extends Component {
             wysiwyg: this,
             selectorEditableArea: '.o_editable',
         }, options));
+    }
+    _setToolbarProps(props) {
+        this.state.toolbarProps = {
+            dropDirection: props.options.toolbarDropDirection,
+
+            showChecklist: props.options.toolbarShowChecklist,
+            showAnimateText: props.options.toolbarShowAnimateText,
+
+            showColors: props.options.toolbarShowColors,
+            showFontSize: props.options.toolbarShowFontSize,
+            showHistory: props.options.toolbarShowHistory,
+
+            showStyle: props.options.toolbarShowStyle,
+            showJustify: props.options.toolbarShowJustify,
+            showList: props.options.toolbarShowList,
+            showLink: props.options.toolbarShowLink,
+
+            showImageShape: props.options.toolbarShowImageShape,
+            showImagePadding: props.options.toolbarShowImagePadding,
+            showImageWidth: props.options.toolbarShowImageWidth,
+            showImageEdit: props.options.toolbarShowImageEdit,
+
+            showHeading1: props.options.toolbarShowHeading1,
+            showHeading2: props.options.toolbarShowHeading2,
+            showHeading3: props.options.toolbarShowHeading3,
+            showHeading4: props.options.toolbarShowHeading4,
+            showHeading5: props.options.toolbarShowHeading5,
+            showHeading6: props.options.toolbarShowHeading6,
+
+            onColorpaletteDropdownShow: this.onColorpaletteDropdownShow.bind(this),
+            onColorpaletteDropdownHide: this.onColorpaletteDropdownHide.bind(this),
+            colorPaletteTextProps: this.colorPalettesProps.text,
+            colorPaletteBackgroundProps: this.colorPalettesProps.background,
+        }
     }
     _configureToolbar(options) {
         const $toolbar = this.toolbar$El;
