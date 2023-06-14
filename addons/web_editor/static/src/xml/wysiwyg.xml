@@ -12,8 +12,7 @@
         <div style="display: contents;" t-ref="imageCrop">
             <ImageCrop t-props="this.imageCropProps"/>
         </div>
-        <div style="display: contents;" t-ref="el">
-        </div>
+        <div t-ref="el"/>
     </t>
 
     <!--=================-->
