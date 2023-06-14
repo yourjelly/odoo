@@ -195,11 +195,8 @@ export class Wysiwyg extends Component {
             this.init();
         });
         onMounted(async () => {
-            const div = document.createElement('div');
-            div.classList.add('o_default_editable');
-            this.elRef.el.append(div);
-            this.el = div
-            this.$el = $(div);
+            this.el = this.elRef.el
+            this.$el = $(this.elRef.el);
             this._renderElement();
             if (this.props.startWysiwyg) {
                 await this.props.startWysiwyg(this);
