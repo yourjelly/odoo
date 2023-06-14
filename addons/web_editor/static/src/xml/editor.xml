@@ -54,22 +54,22 @@
             </div>
 
             <div t-if="props.showColors" id="colorInputButtonGroup" class="btn-group">
-                <div class="colorpicker-group note-fore-color-preview" data-name="color"  t-ref="textDropdown" data-color-type="text">
+                <div class="colorpicker-group note-fore-color-preview" data-name="color"  t-ref="textColorpickerDropdown" data-color-type="text">
                     <div id="oe-text-color" class="btn color-button dropdown-toggle editor-ignore"
                         data-bs-toggle="dropdown" tabindex="-1">
                         <i class="fa fa-font color-indicator fore-color" title="Font Color"></i>
                     </div>
                     <ul class="dropdown-menu colorpicker-menu">
-                        <li><ColorPalette t-props="props.colorPaletteTextProps" /></li>
+                        <li><ColorPalette t-props="props.textColorPaletteProps" /></li>
                     </ul>
                 </div>
-                <div class="colorpicker-group note-back-color-preview" data-name="color"  t-ref="backgroundDropdown" data-color-type="background">
+                <div class="colorpicker-group note-back-color-preview" data-name="color"  t-ref="backgroundColorpaletteDropdown" data-color-type="background">
                     <button id="oe-fore-color" type="button" class="btn dropdown-toggle editor-ignore"
                         data-bs-toggle="dropdown" tabindex="-1">
                         <i class="fa fa-paint-brush color-indicator hilite-color" title="Background Color"></i>
                     </button>
                     <ul class="dropdown-menu colorpicker-menu">
-                        <li><ColorPalette t-props="props.colorPaletteBackgroundProps" /></li>
+                        <li><ColorPalette t-props="props.backgroundColorPaletteProps" /></li>
                     </ul>
                 </div>
             </div>
