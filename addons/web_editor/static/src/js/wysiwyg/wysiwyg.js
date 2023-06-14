@@ -658,7 +658,6 @@ export class Wysiwyg extends Component {
                     get_start_time: () => this._startCollaborationTime,
                     get_client_name: async () => {
                         if (!this._userName) {
-                            // todo: test me
                             const [user] = await this.orm.read(
                                 'res.users',
                                 [session.uid],
