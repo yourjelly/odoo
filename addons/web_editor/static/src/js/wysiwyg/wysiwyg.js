@@ -286,9 +286,7 @@ export class Wysiwyg extends Component {
 
         const options = this.options;
 
-        if (!this.$editable) {
-            this.$editable = this.$el;
-        }
+        this.$editable ??= this.$el;
         if (options.value) {
             this.$editable.html(options.value);
         }
