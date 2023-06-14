@@ -6,10 +6,6 @@ import { ComponentWrapper } from "web.OwlCompatibility";
 import Dialog from "web.Dialog";
 import { Colorpicker } from '@web/core/colorpicker/colorpicker';
 
-// --------------------------------------------------------------------------
-// Static
-// --------------------------------------------------------------------------
-
 export const ColorpickerDialog = Dialog.extend({
     /**
      * @override
