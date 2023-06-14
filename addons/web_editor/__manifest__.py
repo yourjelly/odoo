@@ -97,7 +97,6 @@ Odoo Web Editor widget.
             'web_editor/static/src/js/wysiwyg/wysiwyg_jquery_extention.js',
             'web_editor/static/src/js/wysiwyg/wysiwyg.js',
             'web_editor/static/src/js/wysiwyg/wysiwyg_iframe.js',
-            'web_editor/static/src/js/wysiwyg/wysiwyg_iframe_content.js',
 
             'web_editor/static/src/xml/editor.xml',
             'web_editor/static/src/xml/grid_layout.xml',
