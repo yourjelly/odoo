@@ -3,8 +3,9 @@
 
     <t t-name="web_editor.Wysiwyg" owl="1">
         <div style="display: contents;" t-ref="toolbar">
-            <Toolbar
-                dropDirection="this.props.options.toolbarDropDirection"
+            <Toolbar t-props="this.toolbarProps" t-att-class="{'d-none': !this.showToolbar}">
+
+                <!-- dropDirection="this.props.options.toolbarDropDirection"
 
                 showChecklist="this.props.options.toolbarShowChecklist"
                 showAnimateText="this.props.options.toolbarShowAnimateText"
@@ -33,7 +34,7 @@
                 onColorpaletteDropdownShow.bind="this.onColorpaletteDropdownShow"
                 onColorpaletteDropdownHide.bind="this.onColorpaletteDropdownHide"
                 colorPaletteTextProps="this.colorPalettesProps.text"
-                colorPaletteBackgroundProps="this.colorPalettesProps.background">
+                colorPaletteBackgroundProps="this.colorPalettesProps.background" -->
 
                 <t t-if="state.linkToolProps">
                     <LinkTools t-props="state.linkToolProps" />
