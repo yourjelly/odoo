@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 import json
 
-from odoo import api, fields, models, _, SUPERUSER_ID
+from odoo import api, fields, models, _, SUPERUSER_ID, Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_compare, float_round, format_datetime
 
@@ -24,6 +24,7 @@ class MrpWorkorder(models.Model):
     name = fields.Char(
         'Work Order', required=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
+    barcode = fields.Char(compute='_compute_barcode', store=True)
     workcenter_id = fields.Many2one(
         'mrp.workcenter', 'Work Center', required=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)], 'progress': [('readonly', True)]},
@@ -316,6 +317,11 @@ class MrpWorkorder(models.Model):
                 order.duration_percent = max(-2147483648, min(2147483647, 100 * (order.duration_expected - order.duration) / order.duration_expected))
             else:
                 order.duration_percent = 0
+
+    @api.depends('production_id.name')
+    def _compute_barcode(self):
+        for wo in self:
+            wo.barcode = wo.production_id.name + '/' + str(wo.id)
 
     def _set_duration(self):
 
@@ -663,6 +669,7 @@ class MrpWorkorder(models.Model):
         return True
 
     def end_all(self):
+        self.employee_ids = [Command.clear()]
         return self.end_previous(doall=True)
 
     def button_pending(self):
