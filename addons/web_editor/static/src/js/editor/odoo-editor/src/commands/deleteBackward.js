@@ -251,13 +251,14 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
 HTMLLIElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
     console.warn('HTMLL >I< Element.prototype.oDeleteBackward');
     console.log('i >', this, offset, alreadyMoved);
-    if (offset > 0 || this.previousElementSibling) {
+    if (offset > 0 /*|| this.previousElementSibling*/) {
         // If backspace inside li content or if the li is not the first one,
         // it behaves just like in a normal element.
+        console.log(' no shiftTab');
         HTMLElement.prototype.oDeleteBackward.call(this, offset, alreadyMoved);
         return;
     }
-    this.oShiftTab(offset);
+    this.oToggleList(offset);
 };
 
 HTMLBRElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {

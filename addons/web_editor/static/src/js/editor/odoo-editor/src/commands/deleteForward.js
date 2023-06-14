@@ -22,7 +22,7 @@ import {
     isZWS,
     childNodeIndex,
     boundariesOut,
-    isEditorTab,
+    isEditorTab, isVisible
 } from '../utils/utils.js';
 
 /**
@@ -144,6 +144,44 @@ HTMLElement.prototype.oDeleteForward = function (offset) {
         firstLeafNode.oDeleteBackward(Math.min(1, nodeSize(firstLeafNode)));
         return;
     }
+
+    const nextSibling = this.nextSibling;
+    console.log('HTML : \n', this.closest(".odoo-editor-editable").innerHTML);
+    console.log('IOLD I Stuff .prototype.oDeleteForward');
+    console.log('this.parentElement', this.parentElement);
+    console.log('childNodes', this.childNodes.length);
+    console.log('nextSibling', nextSibling);
+    console.log('==firstLeafNode', firstLeafNode);
+    console.log('nextSibling.nodeType', nextSibling?.nodeType);
+    console.log('nextSibling.tagName', nextSibling?.tagName);
+    console.log('nextSibling.childNodes.length', nextSibling?.childNodes.length);
+    if (
+        (offset === this.childNodes.length || (this.childNodes.length === 1 && this.childNodes[0].tagName === 'BR')) &&
+        this.parentElement &&
+        nextSibling &&
+        ['LI', 'UL', 'OL'].includes(nextSibling.tagName)
+    ) {
+        console.log('  => IN IF');
+        const nextSiblingNestedLi = nextSibling.querySelector('li:first-child');
+        console.log('  => nextSiblingNestedLi', nextSiblingNestedLi);
+        if (nextSiblingNestedLi) {
+            // Add the first LI from the next sibbling list to the current list.
+            this.after(nextSiblingNestedLi);
+            // Remove the next sibbling list if it's empty.
+            console.log('   => nextSibling is visible', isVisible(nextSibling, false));
+            console.log('   => nextSibling.textContent', nextSibling.textContent);
+            if (!isVisible(nextSibling, false) || nextSibling.textContent === '') {
+                nextSibling.remove();
+            }
+
+            HTMLElement.prototype.oDeleteBackward.call(nextSiblingNestedLi, 0, true);
+        } else {
+            console.log('  => nextSiblin', nextSibling, nextSibling.outerHTML);
+            HTMLElement.prototype.oDeleteBackward.call(nextSibling, 0);
+        }
+        return;
+    }
+
     const firstOutNode = findNode(
         rightLeafOnlyPathNotBlockNotEditablePath(
             ...(firstLeafNode ? rightPos(firstLeafNode) : [this, offset]),
@@ -152,38 +190,14 @@ HTMLElement.prototype.oDeleteForward = function (offset) {
     );
     if (firstOutNode) {
         const [node, offset] = leftPos(firstOutNode);
+        // If the next node is a <LI> we call directly the htmlElement
+        // oDeleteBackward : because we don't want the special cases of
+        // deleteBackward for LI when we comme from a deleteForward.
+        if (node.tagName === 'LI') {
+            HTMLElement.prototype.oDeleteBackward.call(node, offset);
+            return;
+        }
         node.oDeleteBackward(offset);
         return;
     }
-};
-
-HTMLLIElement.prototype.oDeleteForward = function (offset) {
-    console.log('HTML : \n', this.closest(".odoo-editor-editable").innerHTML);
-    console.log('HTMLLIElement.prototype.oDeleteForward', offset, this);
-    console.log('this.parentElement', this.parentElement);
-    console.log('childNodes', this.childNodes.length);
-    console.log('nextSibling', this.nextSibling);
-    console.log('nextSibling.nodeType', this.nextSibling.nodeType);
-    console.log('nextSibling.tagName', this.nextSibling.tagName);
-    console.log('nextSibling.childNodes.length', this.nextSibling.childNodes.length);
-    if (
-        offset === this.childNodes.length &&
-        this.parentElement &&
-        this.nextSibling &&
-        this.nextSibling.firstChild &&
-        this.nextSibling.firstChild.nodeType === Node.ELEMENT_NODE &&
-        ['UL', 'OL'].includes(this.nextSibling.firstChild.tagName) &&
-        this.nextSibling.firstChild.childNodes.length
-    ) {
-        console.log('ca passe ====================================');
-        const nextSiblingLi = this.nextSibling.firstChild.firstChild;
-        console.log('nextSiblingLi', nextSiblingLi);
-        // Add the first LI from the next sibbling list to the current list.
-        this.after(nextSiblingLi);
-        HTMLElement.prototype.oDeleteBackward.call(nextSiblingLi, 0, true);
-        return;
-    }
-
-
-    HTMLElement.prototype.oDeleteForward.call(this, offset);
 };
