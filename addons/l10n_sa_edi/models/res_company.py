@@ -82,8 +82,12 @@ class ResCompany(models.Model):
     def _l10n_sa_check_organization_unit(self):
         """
             Check company Organization Unit according to ZATCA specifications
+            Standards:
+                BR-KSA-39
+                BR-KSA-40
+            See https://zatca.gov.sa/ar/RulesRegulations/Taxes/Documents/20210528_ZATCA_Electronic_Invoice_XML_Implementation_Standard_vShared.pdf
         """
         self.ensure_one()
-        if self.vat and self.vat[10] == '1':
-            return bool(re.match(r'^[0-9]{10}$', (self.vat or '')[:10]))
-        return bool((self.vat or '')[:10])
+        if not self.vat:
+            return False
+        return len(self.vat) == 15 and bool(re.match(r'^3\d{13}3$', self.vat))

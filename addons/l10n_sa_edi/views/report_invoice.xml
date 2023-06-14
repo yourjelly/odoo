@@ -2,7 +2,7 @@
 <odoo>
     <data>
 
-        <template id="arabic_english_invoice" inherit_id="l10n_sa.arabic_english_invoice">
+        <template id="arabic_english_invoice" inherit_id="l10n_sa_invoice.arabic_english_invoice">
 
             <!--    Add Currency Exchange rate if different currency than SAR    -->
             <xpath expr="//div[hasclass('clearfix')]" position="after">
@@ -59,6 +59,7 @@
                     </t>
                 </span>
             </xpath>
+
         </template>
 
     </data>

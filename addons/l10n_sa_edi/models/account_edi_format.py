@@ -224,7 +224,10 @@ class AccountEdiFormat(models.Model):
         unsigned_xml = xml_content or self._l10n_sa_generate_zatca_template(invoice)
 
         # Load PCISD data and X509 certificate
-        PCSID_data = invoice.journal_id._l10n_sa_api_get_pcsid()
+        try:
+            PCSID_data = invoice.journal_id._l10n_sa_api_get_pcsid()
+        except UserError as e:
+            return {'error': _("Could not generate PCSID values: \n") + e.args[0], 'blocking_level': 'error'}
         x509_cert = PCSID_data['binarySecurityToken']
 
         # Apply Signature/QR code on the generated XML document
@@ -350,6 +353,7 @@ class AccountEdiFormat(models.Model):
                 }
             }
 
+
         # Once submission is done with no errors, check submission status
         cleared_xml = self._l10n_sa_postprocess_einvoice_submission(invoice, submitted_xml, response_data)
 
@@ -370,7 +374,18 @@ class AccountEdiFormat(models.Model):
             }
         }
 
+
     # ====== EDI Format Overrides =======
+
+    def _is_required_for_invoice(self, invoice):
+        """
+            Override to add ZATCA edi checks on required invoices
+        """
+        self.ensure_one()
+        if self.code != 'sa_zatca':
+            return super()._is_required_for_invoice(invoice)
+
+        return invoice.is_sale_document() and invoice.country_code == 'SA'
 
     def _check_move_configuration(self, invoice):
         """
@@ -397,12 +412,9 @@ class AccountEdiFormat(models.Model):
             errors.append(
                 _("- Finish the Onboarding procees for journal %s by requesting the CSIDs and completing the checks.") % journal.name)
 
-        if not company.vat:
-            errors.append(
-                _("- The company VAT identification must contain 15 digits, with the first and last digits being '3' as per the BR-KSA-39 ZATCA KSA business rule."))
         if not company._l10n_sa_check_organization_unit():
             errors.append(
-                _("- The eleventh digit of your company VAT identification is equal to 1, in this case, the company's Organisation Unit must be a 10-digit TIN."))
+                _("- The company VAT identification must contain 15 digits, with the first and last digits being '3' as per the BR-KSA-39 and BR-KSA-40 of ZATCA KSA business rule."))
         if not company.sudo().l10n_sa_private_key:
             errors.append(
                 _("- No Private Key was generated for company %s. A Private Key is mandatory in order to generate Certificate Signing Requests (CSR).") % company.name)
@@ -440,24 +452,15 @@ class AccountEdiFormat(models.Model):
             return super()._is_compatible_with_journal(journal)
         return journal.type == 'sale' and journal.country_code == 'SA'
 
-    def _l10n_sa_get_invoice_content_edi(self, invoice):
+    def _post_invoice_edi(self, invoices):
         """
-            Return contents of the submitted UBL file or generate it if the invoice has not been submitted yet
-        """
-        doc = invoice.edi_document_ids.filtered(lambda d: d.edi_format_id.code == 'sa_zatca' and d.state == 'sent')
-        if doc is not None and doc.attachment_id.datas:
-            return {invoice: {'xml_file': doc.attachment_id.datas.decode()}}
-        return {invoice: {'xml_file': self._l10n_sa_generate_zatca_template(invoice)}}
-
-    def _get_move_applicability(self, move):
-        """
-            Override to process ZATCA einvoices submission
+            Override to post ZATCA edi formats
         """
         self.ensure_one()
-        if self.code != 'sa_zatca' or move.country_code != 'SA' or move.move_type not in ('out_invoice', 'out_refund'):
-            return super()._get_move_applicability(move)
-
-        return {
-            'post': self._l10n_sa_post_zatca_edi,
-            'edi_content': self._l10n_sa_get_invoice_content_edi,
-        }
+        invoice = invoices
+        if self.code != 'sa_zatca' or invoice.company_id.country_code != 'SA':
+            return super()._post_invoice_edi(invoices)
+        if not invoice.journal_id.l10n_sa_compliance_checks_passed:
+            return {invoice: {'error': _("ZATCA Compliance Checks need to be completed for the current journal "
+                                         "before invoices can be submitted to the Authority")}}
+        return {invoice: self._l10n_sa_post_zatca_edi(invoice)}

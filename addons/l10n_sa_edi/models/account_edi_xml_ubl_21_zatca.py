@@ -90,11 +90,11 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
 
     def _get_delivery_vals_list(self, invoice):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
-        res = super()._get_delivery_vals_list(invoice)
-        if 'partner_shipping_id' in invoice._fields:
-            for vals in res:
-                vals['actual_delivery_date'] = invoice.l10n_sa_delivery_date
-        return res
+        shipping_address = False
+        if 'partner_shipping_id' in invoice._fields and invoice.partner_shipping_id:
+            shipping_address = invoice.partner_shipping_id
+        return [{'actual_delivery_date': invoice.l10n_sa_delivery_date,
+                 'delivery_address_vals': self._get_partner_address_vals(shipping_address) if shipping_address else {},}]
 
     def _get_partner_party_identification_vals_list(self, partner):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
@@ -176,14 +176,13 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
             return super()._get_partner_party_tax_scheme_vals_list(partner, role)
         return []
 
-    def _apply_invoice_tax_filter(self, base_line, tax_values):
+    def _apply_invoice_tax_filter(self, tax_values):
         """ Override to filter out withholding tax """
-        tax_id = self.env['account.tax'].browse(tax_values['id'])
-        res = not tax_id.l10n_sa_is_retention
+        res = not tax_values['tax_id'].l10n_sa_is_retention
         # If the move that is being sent is not a down payment invoice, and the sale module is installed
         # we need to make sure the line is neither retention, nor a down payment line
-        if not base_line['record'].move_id._is_downpayment():
-            return not tax_id.l10n_sa_is_retention and not base_line['record']._get_downpayment_lines()
+        if not tax_values['base_line_id'].move_id._is_downpayment():
+            return not tax_values['tax_id'].l10n_sa_is_retention and not tax_values['base_line_id']._get_downpayment_lines()
         return res
 
     def _apply_invoice_line_filter(self, invoice_line):
@@ -194,11 +193,11 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
 
     def _l10n_sa_get_prepaid_amount(self, invoice, vals):
         """ Calculate the down-payment amount according to ZATCA rules """
-        downpayment_lines = invoice.line_ids.filtered(lambda l: l._get_downpayment_lines()) if not invoice._is_downpayment() else []
+        downpayment_lines = False if invoice._is_downpayment() else invoice.line_ids.filtered(lambda l: l._get_downpayment_lines())
         if downpayment_lines:
-            tax_vals = invoice._prepare_edi_tax_details(filter_to_apply=lambda l, t: not self.env['account.tax'].browse(t['id']).l10n_sa_is_retention)
-            base_amount = abs(sum(tax_vals['tax_details_per_record'][l]['base_amount_currency'] for l in downpayment_lines))
-            tax_amount = abs(sum(tax_vals['tax_details_per_record'][l]['tax_amount_currency'] for l in downpayment_lines))
+            tax_vals = invoice._prepare_edi_tax_details(filter_to_apply=lambda t: not t['tax_id'].l10n_sa_is_retention)
+            base_amount = abs(sum(tax_vals['invoice_line_tax_details'][l]['base_amount_currency'] for l in downpayment_lines))
+            tax_amount = abs(sum(tax_vals['invoice_line_tax_details'][l]['tax_amount_currency'] for l in downpayment_lines))
             return {
                 'total_amount': base_amount + tax_amount,
                 'base_amount': base_amount,
@@ -315,20 +314,14 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
     def _get_invoice_line_vals(self, line, taxes_vals):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
 
-        def grouping_key_generator(base_line, tax_values):
-            tax = tax_values['tax_repartition_line'].tax_id
+        def grouping_key_generator(tax_values):
+            tax = tax_values['tax_id']
             tax_category_vals = self._get_tax_category_list(line.move_id, tax)[0]
-            grouping_key = {
+            return {
                 'tax_category_id': tax_category_vals['id'],
                 'tax_category_percent': tax_category_vals['percent'],
                 '_tax_category_vals_': tax_category_vals,
-                'tax_amount_type': tax.amount_type,
             }
-            # If the tax is fixed, we want to have one group per tax
-            # s.t. when the invoice is imported, we can try to guess the fixed taxes
-            if tax.amount_type == 'fixed':
-                grouping_key['tax_name'] = tax.name
-            return grouping_key
 
         if not line.move_id._is_downpayment() and line._get_downpayment_lines():
             # When we initially calculate the taxes_vals, we filter out the down payment lines, which means we have no
@@ -338,7 +331,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
             # we set the values for the down payment line, and we do not pass any filters to the _prepare_edi_tax_details
             # method
             line_taxes = line.move_id._prepare_edi_tax_details(grouping_key_generator=grouping_key_generator)
-            taxes_vals = line_taxes['tax_details_per_record'][line]
+            taxes_vals = line_taxes['invoice_line_tax_details'][line]
 
         line_vals = super()._get_invoice_line_vals(line, taxes_vals)
         total_amount_sa = abs(taxes_vals['tax_amount_currency'] + taxes_vals['base_amount_currency'])

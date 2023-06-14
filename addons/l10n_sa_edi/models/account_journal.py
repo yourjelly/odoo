@@ -14,17 +14,18 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import Encoding, load_pem_private_key
+from urllib.parse import urljoin
 
 ZATCA_API_URLS = {
-    "sandbox": "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal",
-    "preprod": "https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation",
-    "prod": "https://gw-fatoora.zatca.gov.sa/e-invoicing/core",
+    "sandbox": "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/",
+    "preprod": "https://gw-fatoora.zatca.gov.sa/e-invoicing/simulation/",
+    "prod": "https://gw-fatoora.zatca.gov.sa/e-invoicing/core/",
     "apis": {
-        "ccsid": "/compliance",
-        "pcsid": "/production/csids",
-        "compliance": "/compliance/invoices",
-        "reporting": "/invoices/reporting/single",
-        "clearance": "/invoices/clearance/single",
+        "ccsid": "compliance",
+        "pcsid": "production/csids",
+        "compliance": "compliance/invoices",
+        "reporting": "invoices/reporting/single",
+        "clearance": "invoices/clearance/single",
     }
 }
 
@@ -33,7 +34,7 @@ CERT_TEMPLATE_NAME = {
     'sandbox': b'\x13\x15PREZATCA-Code-Signing',
     'preprod': b'\x13\x15PREZATCA-Code-Signing',
 }
-
+# This SANDBOX_AUTH is only used for testing purposes, and is shared to all users of the sandbox environment
 SANDBOX_AUTH = {
     'binarySecurityToken': "TUlJRDFEQ0NBM21nQXdJQkFnSVRid0FBZTNVQVlWVTM0SS8rNVFBQkFBQjdkVEFLQmdncWhrak9QUVFEQWpCak1SVXdFd1lLQ1pJbWlaUHlMR1FCR1JZRmJHOWpZV3d4RXpBUkJnb0praWFKay9Jc1pBRVpGZ05uYjNZeEZ6QVZCZ29Ka2lhSmsvSXNaQUVaRmdkbGVIUm5ZWHAwTVJ3d0dnWURWUVFERXhOVVUxcEZTVTVXVDBsRFJTMVRkV0pEUVMweE1CNFhEVEl5TURZeE1qRTNOREExTWxvWERUSTBNRFl4TVRFM05EQTFNbG93U1RFTE1Ba0dBMVVFQmhNQ1UwRXhEakFNQmdOVkJBb1RCV0ZuYVd4bE1SWXdGQVlEVlFRTEV3MW9ZWGxoSUhsaFoyaHRiM1Z5TVJJd0VBWURWUVFERXdreE1qY3VNQzR3TGpFd1ZqQVFCZ2NxaGtqT1BRSUJCZ1VyZ1FRQUNnTkNBQVRUQUs5bHJUVmtvOXJrcTZaWWNjOUhEUlpQNGI5UzR6QTRLbTdZWEorc25UVmhMa3pVMEhzbVNYOVVuOGpEaFJUT0hES2FmdDhDL3V1VVk5MzR2dU1ObzRJQ0p6Q0NBaU13Z1lnR0ExVWRFUVNCZ0RCK3BId3dlakViTUJrR0ExVUVCQXdTTVMxb1lYbGhmREl0TWpNMGZETXRNVEV5TVI4d0hRWUtDWkltaVpQeUxHUUJBUXdQTXpBd01EYzFOVGc0TnpBd01EQXpNUTB3Q3dZRFZRUU1EQVF4TVRBd01SRXdEd1lEVlFRYURBaGFZWFJqWVNBeE1qRVlNQllHQTFVRUR3d1BSbTl2WkNCQ2RYTnphVzVsYzNNek1CMEdBMVVkRGdRV0JCU2dtSVdENmJQZmJiS2ttVHdPSlJYdkliSDlIakFmQmdOVkhTTUVHREFXZ0JSMllJejdCcUNzWjFjMW5jK2FyS2NybVRXMUx6Qk9CZ05WSFI4RVJ6QkZNRU9nUWFBL2hqMW9kSFJ3T2k4dmRITjBZM0pzTG5waGRHTmhMbWR2ZGk1ellTOURaWEowUlc1eWIyeHNMMVJUV2tWSlRsWlBTVU5GTFZOMVlrTkJMVEV1WTNKc01JR3RCZ2dyQmdFRkJRY0JBUVNCb0RDQm5UQnVCZ2dyQmdFRkJRY3dBWVppYUhSMGNEb3ZMM1J6ZEdOeWJDNTZZWFJqWVM1bmIzWXVjMkV2UTJWeWRFVnVjbTlzYkM5VVUxcEZhVzUyYjJsalpWTkRRVEV1WlhoMFoyRjZkQzVuYjNZdWJHOWpZV3hmVkZOYVJVbE9WazlKUTBVdFUzVmlRMEV0TVNneEtTNWpjblF3S3dZSUt3WUJCUVVITUFHR0gyaDBkSEE2THk5MGMzUmpjbXd1ZW1GMFkyRXVaMjkyTG5OaEwyOWpjM0F3RGdZRFZSMFBBUUgvQkFRREFnZUFNQjBHQTFVZEpRUVdNQlFHQ0NzR0FRVUZCd01DQmdnckJnRUZCUWNEQXpBbkJna3JCZ0VFQVlJM0ZRb0VHakFZTUFvR0NDc0dBUVVGQndNQ01Bb0dDQ3NHQVFVRkJ3TURNQW9HQ0NxR1NNNDlCQU1DQTBrQU1FWUNJUUNWd0RNY3E2UE8rTWNtc0JYVXovdjFHZGhHcDdycVNhMkF4VEtTdjgzOElBSWhBT0JOREJ0OSszRFNsaWpvVmZ4enJkRGg1MjhXQzM3c21FZG9HV1ZyU3BHMQ==",
     'secret': "Xlj15LyMCgSC66ObnEO/qVPfhSbs3kDTjWnGheYhfSs="
@@ -68,7 +69,7 @@ class AccountJournal(models.Model):
 
     l10n_sa_csr = fields.Binary(attachment=True, copy=False, groups="base.group_system",
                                 help="The Certificate Signing Request that is submitted to the Compliance API")
-    l10n_sa_csr_errors = fields.Html("Onboarding Errors")
+    l10n_sa_csr_errors = fields.Html("Onboarding Errors", copy=False)
 
     l10n_sa_compliance_csid_json = fields.Char("CCSID JSON", copy=False, groups="base.group_system",
                                                help="Compliance CSID data received from the Compliance CSID API "
@@ -184,8 +185,6 @@ class AccountJournal(models.Model):
             Generate a CSR for the Journal to be used for the Onboarding process and Invoice submissions
         """
         self.ensure_one()
-        if not self.l10n_sa_serial_number:
-            raise UserError(_("Please set a Serial Number on the journal before proceeding"))
         if any(not self.company_id[f] for f in self._l10n_sa_csr_required_fields()):
             raise UserError(_("Please, make sure all the following fields have been correctly set on the Company: \n")
                             + "\n".join(
@@ -249,7 +248,7 @@ class AccountJournal(models.Model):
         """
             Request a Compliance Cryptographic Stamp Identifier (CCSID) from ZATCA
         """
-        CCSID_data = self._l10n_sa_request_compliance_csid(otp)
+        CCSID_data = self._l10n_sa_api_get_compliance_CSID(otp)
         if CCSID_data.get('error'):
             raise UserError(_("Could not obtain Compliance CSID: %s") % CCSID_data['error'])
         self.sudo().write({
@@ -420,7 +419,6 @@ class AccountJournal(models.Model):
             raise UserError(_("Please, set a valid OTP to be used for Onboarding"))
         if not self.l10n_sa_csr:
             raise UserError(_("Please, generate a CSR before requesting a CCSID"))
-
         request_data = {
             'body': json.dumps({'csr': self.l10n_sa_csr.decode()}),
             'header': {'OTP': otp}
@@ -444,8 +442,8 @@ class AccountJournal(models.Model):
             Requires an expired Production CSIDPCSID_data
         """
         self.ensure_one()
-        # For renewal, the sandbox API expects a specific Username/Password, which are set in the SANDBOX_AUTH dict
         auth_data = PCSID_data
+        # For renewal, the sandbox API expects a specific Username/Password, which are set in the SANDBOX_AUTH dict
         if self.company_id.l10n_sa_api_mode == 'sandbox':
             auth_data = SANDBOX_AUTH
         request_data = {
@@ -516,16 +514,6 @@ class AccountJournal(models.Model):
 
     # ====== Certificate Methods =======
 
-    def _l10n_sa_request_compliance_csid(self, otp):
-        """
-            Generate company Compliance CSID data
-        """
-        self.ensure_one()
-        CCSID_data = self._l10n_sa_api_get_compliance_CSID(otp)
-        if not CCSID_data.get('error'):
-            json.dumps(CCSID_data)
-        return CCSID_data
-
     def _l10n_sa_get_pcsid_validity(self, PCSID_data):
         """
             Return PCSID expiry date
@@ -539,11 +527,11 @@ class AccountJournal(models.Model):
             Generate company Production CSID data
         """
         self.ensure_one()
-        if renew:
-            PCSID_data = self._l10n_sa_api_renew_production_CSID(csid_data, otp)
-        else:
-            PCSID_data = self._l10n_sa_api_get_production_CSID(csid_data)
-        return PCSID_data
+        return (
+            self._l10n_sa_api_renew_production_CSID(csid_data, otp)
+            if renew
+            else self._l10n_sa_api_get_production_CSID(csid_data)
+        )
 
     def _l10n_sa_api_get_pcsid(self):
         """
@@ -551,8 +539,8 @@ class AccountJournal(models.Model):
         """
         self.ensure_one()
         if not self.l10n_sa_production_csid_json:
-            raise UserError("Please, make a request to obtain the Compliance CSID and Production CSID before sending "
-                            "documents to ZATCA")
+            raise UserError(_("Please, make a request to obtain the Compliance CSID and Production CSID before sending "
+                            "documents to ZATCA"))
         pcsid_validity = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_get_zatca_datetime(self.l10n_sa_production_csid_validity)
         time_now = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_get_zatca_datetime(datetime.now())
         if pcsid_validity < time_now and self.company_id.l10n_sa_api_mode != 'sandbox':
@@ -566,7 +554,7 @@ class AccountJournal(models.Model):
             Helper function to make api calls to the ZATCA API Endpoint
         """
         api_url = ZATCA_API_URLS[self.env.company.l10n_sa_api_mode]
-        request_url = api_url + request_url
+        request_url = urljoin(api_url, request_url)
         try:
             request_response = requests.request(method, request_url, data=request_data.get('body'),
                                                 headers={
@@ -621,8 +609,6 @@ class AccountJournal(models.Model):
             Compute the Authorization header by combining the CSID and the Secret key, then encode to Base64
         """
         auth_data = CSID_data
-        # if self.company_id.l10n_sa_api_mode == 'sandbox':
-        #     auth_data = SANDBOX_AUTH
         auth_str = "%s:%s" % (auth_data['binarySecurityToken'], auth_data['secret'])
         return 'Basic ' + b64encode(auth_str.encode()).decode()
 

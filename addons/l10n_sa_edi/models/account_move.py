@@ -1,7 +1,7 @@
 import uuid
 import json
 from markupsafe import Markup
-from odoo import fields, models, api
+from odoo import _, fields, models, api
 from odoo.tools import float_repr
 from datetime import datetime
 from base64 import b64decode, b64encode
@@ -14,7 +14,7 @@ from cryptography.x509 import load_der_x509_certificate
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    l10n_sa_uuid = fields.Char(string='Document UUID', copy=False, help="Universally unique identifier of the Invoice")
+    l10n_sa_uuid = fields.Char(string='Document UUID (SA)', copy=False, help="Universally unique identifier of the Invoice")
 
     l10n_sa_invoice_signature = fields.Char("Unsigned XML Signature", copy=False)
 
@@ -151,35 +151,37 @@ class AccountMove(models.Model):
             Save submitted invoice XML hash in case of either Rejection or Acceptance.
         """
         self.ensure_one()
-        self.journal_id.l10n_sa_latest_submission_hash = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(xml_content)
-        cls, title, content = ("success", "Invoice Successfully Submitted to ZATCA", "" if (not error or not response_data) else response_data)
+        self.journal_id.l10n_sa_latest_submission_hash = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(
+            xml_content)
+        bootstrap_cls, title, content = ("success", _("Invoice Successfully Submitted to ZATCA"),
+                                         "" if (not error or not response_data) else response_data)
         if error:
-            cls, title = ("danger", "Invoice was rejected by ZATCA")
+            bootstrap_cls, title = ("danger", _("Invoice was rejected by ZATCA"))
             content = Markup("""
                 <p class='mb-0'>
-                    The invoice was rejected by ZATCA. Please, check the response below:
+                    %s
                 </p>
                 <hr>
                 <p class='mb-0'>
                     %s
                 </p>
-            """) % response_data
+            """) % (_('The invoice was rejected by ZATCA. Please, check the response below:'), response_data)
         if response_data and response_data.get('validationResults', {}).get('warningMessages'):
-            cls, title = ("warning", "Invoice was Accepted by ZATCA (with Warnings)")
+            bootstrap_cls, title = ("warning", _("Invoice was Accepted by ZATCA (with Warnings)"))
             content = Markup("""
                 <p class='mb-0'>
-                    The invoice was accepted by ZATCA, but returned warnings. Please, check the response below:
+                    %s
                 </p>
                 <hr>
                 <p class='mb-0'>
                     %s
                 </p>
-            """) % "<br/>".join([Markup("<b>%s</b> : %s") % (m['code'], m['message']) for m in response_data['validationResults']['warningMessages']])
+            """) % (_('The invoice was accepted by ZATCA, but returned warnings. Please, check the response below:'), "<br/>".join([Markup("<b>%s</b> : %s") % (m['code'], m['message']) for m in response_data['validationResults']['warningMessages']]))
         self.message_post(body=Markup("""
             <div role='alert' class='alert alert-%s'>
                 <h4 class='alert-heading'>%s</h4>%s
             </div>
-        """) % (cls, title, content))
+        """) % (bootstrap_cls, title, content))
 
     def _l10n_sa_is_in_chain(self):
         """

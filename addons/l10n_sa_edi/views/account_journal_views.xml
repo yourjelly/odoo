@@ -58,7 +58,7 @@
                         <div class="alert alert-danger d-flex flex-column align-items-end" role="alert"
                              attrs="{'invisible':['|', '|', ('l10n_sa_csr_errors', '=', False), ('l10n_sa_compliance_csid_json', '!=', False), ('l10n_sa_production_csid_json', '!=', False)]}">
                             <div class="w-100">
-                                <h4 role="alert" class="alert-heading">Journal could not be onboarded</h4>
+                                <h4 role="alert" class="alert-heading">Journal could not be onboarded. Please make sure the Company VAT/Identification Number are correct.</h4>
                                 <field name="l10n_sa_csr_errors" nolabel="1" readonly="1"/>
                                 <hr/>
                             </div>
