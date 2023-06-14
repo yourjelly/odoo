@@ -100,13 +100,7 @@ export class ColorPalette extends Component {
                 await ColorPalette.loadDependencies(this.props.getArch);
             }
         });
-        let started = false;
         onMounted(async () => {
-            if (started) {
-                return;
-            }
-            started = true;
-
             // Todo: at the time this method is called, the ref is not yet
             // in the dom and this.elRef.el returns null as the getter check
             // the node with `inOwnerDocument`.
