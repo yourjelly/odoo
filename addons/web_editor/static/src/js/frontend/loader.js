@@ -11,7 +11,6 @@ export async function loadLegacyWysiwygAssets(additionnalAssets=[]) {
 }
 
 export async function requireLegacyModule(moduleName, loadCallback = () => {}) {
-    if (!moduleName) throw new Error("Missing moduleName.");
     if (!(await odoo.ready(moduleName))) {
         await loadCallback();
         await odoo.ready(moduleName);
