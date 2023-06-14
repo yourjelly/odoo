@@ -6104,6 +6104,7 @@ registry.ImageTools = ImageHandlerOption.extend({
         await imageCropWrapper.mount(imageCropWrapperElement);
         await imageCropWrapper.componentRef.comp.mountedPromise;
         await imageCropWrapper.componentRef.comp.reset();
+        imageCropWrapper.unmount();
         imageCropWrapperElement.remove();
 
         await this._reapplyCurrentShape();
