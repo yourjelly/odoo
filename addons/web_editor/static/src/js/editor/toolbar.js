@@ -40,8 +40,8 @@ export class Toolbar extends Component {
 
         onColorpaletteDropdownShow: { type: Function, optional: true },
         onColorpaletteDropdownHide: { type: Function, optional: true },
-        colorPaletteTextProps: { type: Object },
-        colorPaletteBackgroundProps: { type: Object },
+        textColorPaletteProps: { type: Object },
+        backgroundColorPaletteProps: { type: Object },
 
         slots: { type: Object, optional: true },
     };
@@ -76,8 +76,8 @@ export class Toolbar extends Component {
     };
 
     colorDropdownRef = {
-        text: useRef("textDropdown"),
-        background: useRef("backgroundDropdown"),
+        text: useRef("textColorpickerDropdown"),
+        background: useRef("backgroundColorpaletteDropdown"),
     }
 
     setup() {

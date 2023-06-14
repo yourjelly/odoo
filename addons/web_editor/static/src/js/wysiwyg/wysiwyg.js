@@ -1723,8 +1723,8 @@ export class Wysiwyg extends Component {
 
             onColorpaletteDropdownShow: this.onColorpaletteDropdownShow.bind(this),
             onColorpaletteDropdownHide: this.onColorpaletteDropdownHide.bind(this),
-            colorPaletteTextProps: this.colorPalettesProps.text,
-            colorPaletteBackgroundProps: this.colorPalettesProps.background,
+            textColorPaletteProps: this.colorPalettesProps.text,
+            backgroundColorPaletteProps: this.colorPalettesProps.background,
         }
     }
     _configureToolbar(options) {

@@ -77,8 +77,8 @@ export class MassMailingWysiwyg extends Wysiwyg {
 
                     onColorpaletteDropdownShow: this.onColorpaletteDropdownShow.bind(this),
                     onColorpaletteDropdownHide: this.onColorpaletteDropdownHide,
-                    colorPaletteTextProps: this.colorPalettesProps.text,
-                    colorPaletteBackgroundProps: this.colorPalettesProps.background,
+                    textColorPaletteProps: this.colorPalettesProps.text,
+                    backgroundColorPaletteProps: this.colorPalettesProps.background,
                 });
 
                 // The wysiwyg can be instanciated inside an iframe. The dialog
