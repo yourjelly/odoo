@@ -2971,7 +2971,6 @@ export class Wysiwyg extends Component {
             const [route, params, settings = {}] = args;
             if (params && params.kwargs) {
                 params.kwargs.context = {
-                    // ...this.env.session.user_context,
                     ...this.env.services.user.context,
                     ...params.kwargs.context,
                 };
@@ -2981,7 +2980,7 @@ export class Wysiwyg extends Component {
             return;
         }
         const service = this.env.services[payload.service];
-        //If the service doesn't exist it means that it was translated to Owl
+        // If the service doesn't exist it means that it was translated to Owl
         if (service) {
             const result = service[payload.method].apply(service, args);
             payload.callback(result);
