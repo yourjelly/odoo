@@ -317,7 +317,7 @@ export class Colorpicker extends Component {
      * @private
      * @param {integer} a
      */
-    _updateOpacity (a) {
+    _updateOpacity(a) {
         if (a < 0 || a > 100) {
             return;
         }
@@ -331,7 +331,7 @@ export class Colorpicker extends Component {
      *
      * @private
      */
-    _colorSelected () {
+    _colorSelected() {
         this.props.onColorpickerSelect(this.colorComponents);
     }
     /**
@@ -339,7 +339,7 @@ export class Colorpicker extends Component {
      *
      * @private
      */
-    _updateCssColor () {
+    _updateCssColor() {
         const r = this.colorComponents.red;
         const g = this.colorComponents.green;
         const b = this.colorComponents.blue;
