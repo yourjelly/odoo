@@ -1726,7 +1726,7 @@ var BasicModel = AbstractModel.extend({
                 // use case: an onchange sends a create command for a one2many,
                 // in the dict of values, there is a value for a field that is
                 // not in the one2many list, but that is in the one2many form.
-                record._rawChanges[name] = val;
+                // record._rawChanges[name] = val;
                 // LPE TODO 1 taskid-2261084: remove this entire comment including code snippet
                 // when the change in behavior has been thoroughly tested.
                 // It is impossible to distinguish between values returned by the default_get
