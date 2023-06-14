@@ -135,7 +135,6 @@ export class Wysiwyg extends Component {
                     this.odooEditor.document.getSelection().collapseToStart();
                 }
                 this._updateEditorUI(this.lastMediaClicked && { target: this.lastMediaClicked });
-                // colorpicker.off('color_leave');
             };
         }
 
@@ -156,8 +155,6 @@ export class Wysiwyg extends Component {
         const colorPaletteCommonOptions = {
             excluded: ['transparent_grayscale'],
             getDocument: ()=> this.props.options.document,
-            // $editable: $(this.odooEditor.editable), // Our parent is the root widget, we can't retrieve the editable section from it...
-            // selectedColor: selectedColor,
             selectedTab: 'theme-colors',
             withGradients: true,
             onColorLeave: () => {
