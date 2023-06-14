@@ -881,7 +881,8 @@ export class Wysiwyg extends Component {
             this.odooEditor.destroy();
         }
         if (this.snippetsMenu) {
-            setTimeout(()=>this.snippetsMenu.destroy());
+            this.snippetsMenu.destroy();
+            // setTimeout(()=>this.snippetsMenu.destroy());
         }
         // If peer to peer is initializing, wait for properly closing it.
         if (this._peerToPeerLoading) {
