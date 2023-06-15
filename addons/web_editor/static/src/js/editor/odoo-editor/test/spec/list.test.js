@@ -3844,13 +3844,25 @@ describe('List', () => {
                                 contentAfter: '<ul><li>abc[]def</li></ul>',
                             });
                         });
-                        it('should merge a bold list item into a non-formatted list item', async () => {
+                        it('should not merge a bold list item into a non-formatted list item', async () => {
                             await testEditor(BasicEditor, {
                                 contentBefore:
-                                    '<ul><li>abc</li><li><b>de</b>fg</li><li><b>[]hij</b>klm</li><li>nop</li></ul>',
+                                    '<ul>' +
+                                        '<li>abc</li>' +
+                                        '<li><b>de</b>fg</li>' +
+                                        '<li><b>[]hij</b>klm</li>' +
+                                        '<li>nop</li>' +
+                                    '</ul>',
                                 stepFunction: deleteBackward,
                                 contentAfter:
-                                    '<ul><li>abc</li><li><b>de</b>fg[]<b>hij</b>klm</li><li>nop</li></ul>',
+                                    '<ul>' +
+                                        '<li>abc</li>' +
+                                        '<li><b>de</b>fg</li>' +
+                                    '</ul>' +
+                                    '<p><b>[]hij</b>klm</p>' +
+                                    '<ul>' +
+                                        '<li>nop</li>' +
+                                    '</ul>',
                             });
                         });
                         it('should merge a paragraph starting with bold text into a list item with ending without formatting', async () => {
@@ -4274,10 +4286,18 @@ describe('List', () => {
                         it('should outdent the list item without removing the header tag', async () => {
                             await testEditor(BasicEditor, {
                                 contentBefore:
-                                    '<ul><li>abc</li><li class="oe-nested"><ul><li><h1>[]def</h1></li></ul></li></ul>',
+                                    '<ul>' +
+                                        '<li>abc</li>' +
+                                        '<li class="oe-nested"><ul>' +
+                                            '<li><h1>[]def</h1></li>' +
+                                        '</ul></li>' +
+                                    '</ul>',
                                 stepFunction: deleteBackward,
                                 contentAfter:
-                                    '<ul><li>abc</li><li><h1>[]def</h1></li></ul>',
+                                    '<ul>' +
+                                        '<li>abc</li>' +
+                                    '</ul>' +
+                                    '<h1>[]def</h1>',
                             });
                         });
                         it.skip('should outdent while nested within a list item', async () => {
@@ -4430,10 +4450,22 @@ describe('List', () => {
                             await testEditor(BasicEditor, {
                                 removeCheckIds: true,
                                 contentBefore:
-                                    '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg</li><li class="o_checked"><b>[]hij</b>klm</li><li class="o_checked">nop</li></ul>',
+                                    '<ul class="o_checklist">' +
+                                        '<li class="o_checked">abc</li>' +
+                                        '<li class="o_checked"><b>de</b>fg</li>' +
+                                        '<li class="o_checked"><b>[]hij</b>klm</li>' +
+                                        '<li class="o_checked">nop</li>' +
+                                    '</ul>',
                                 stepFunction: deleteBackward,
                                 contentAfter:
-                                    '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]<b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
+                                    '<ul class="o_checklist">' +
+                                        '<li class="o_checked">abc</li>' +
+                                        '<li class="o_checked"><b>de</b>fg</li>' +
+                                    '</ul>' +
+                                    '<p><b>[]hij</b>klm</p>' +
+                                    '<ul class="o_checklist">' +
+                                        '<li class="o_checked">nop</li>' +
+                                    '</ul>',
                             });
                         });
                         it('should merge a paragraph starting with bold text into a list item with ending without formatting', async () => {
@@ -5669,8 +5701,8 @@ describe('List', () => {
                     stepFunction: deleteBackward,
                     contentAfter: unformat(`
                         <p class="oe_unbreakable">a[]</p>
+                        <p>ef</p>
                         <ol>
-                            <li>ef</li>
                             <li>ghi</li>
                         </ol>`),
                 });
@@ -5688,8 +5720,8 @@ describe('List', () => {
                         <div class="oe_unbreakable">
                             <p>a[]</p>
                         </div>
+                        <p>ef</p>
                         <ol>
-                            <li>ef</li>
                             <li>ghi</li>
                         </ol>`),
                 });
