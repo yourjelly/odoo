@@ -140,6 +140,7 @@ export class Dropdown extends Component {
             navigation: {},
             popover: {},
         },
+        enabled: true,
         state: undefined,
     };
 
