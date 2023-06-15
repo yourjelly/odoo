@@ -4270,16 +4270,16 @@ var SnippetsMenu = Widget.extend({
             $dropdown.off('hide.bs.dropdown');
             $dropdown.on('hide.bs.dropdown', (ev) => this.options.wysiwyg.onColorpaletteDropdownHide(ev));
         }
-        this._$toolbarContainer.append(this.options.wysiwyg.toolbar$El);
+        this._$toolbarContainer.append(this.options.wysiwyg.$toolbarEl);
         $(this.customizePanel).append(this._$toolbarContainer);
 
         // Create table-options custom container.
         const $customizeTableBlock = $(QWeb.render('web_editor.toolbar.table-options'));
         this.options.wysiwyg.odooEditor.bindExecCommand($customizeTableBlock[0]);
         $(this.customizePanel).append($customizeTableBlock);
-        this._$removeFormatButton = this.options.wysiwyg.toolbar$El.find('#removeFormat');
+        this._$removeFormatButton = this.options.wysiwyg.$toolbarEl.find('#removeFormat');
         $title.append(this._$removeFormatButton);
-        this._$toolbarContainer.append(this.options.wysiwyg.toolbar$El);
+        this._$toolbarContainer.append(this.options.wysiwyg.$toolbarEl);
 
         this._checkEditorToolbarVisibility();
     },

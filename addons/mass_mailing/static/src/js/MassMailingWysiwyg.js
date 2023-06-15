@@ -21,7 +21,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
             }
         });
         this.snippetsMenuToolbarEl = this.toolbarEl;
-        this.snippetsMenuToolbar$El = this.toolbar$El;
+        this.$snippetsMenuToolbarEl = this.$toolbarEl;
         return res;
     }
 
@@ -88,9 +88,9 @@ export class MassMailingWysiwyg extends Wysiwyg {
                 document.body.append(toolbarWrapperElement);
                 await toolbarWrapper.mount(toolbarWrapperElement);
                 this.toolbarEl = toolbarWrapperElement.firstChild;
-                this.toolbar$El = $(this.toolbarEl);
+                this.$toolbarEl = $(this.toolbarEl);
                 this.floatingToolbarEl = this.toolbarEl;
-                this.floatingToolbar$El = this.toolbar$El;
+                this.floating$toolbarEl = this.$toolbarEl;
 
                 this._configureToolbar({ snippets: false });
                 this._updateEditorUI();
@@ -103,7 +103,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
                 }
             } else {
                 this.toolbarEl = this.floatingToolbarEl;
-                this.toolbar$El = this.floatingToolbar$El;
+                this.$toolbarEl = this.floating$toolbarEl;
             }
             this.toolbarEl.classList.remove('d-none');
             this.odooEditor.autohideToolbar = true;
@@ -111,7 +111,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
         } else {
             this.snippetsMenu.setFolded(false);
             this.toolbarEl = this.snippetsMenuToolbarEl;
-            this.toolbar$El = this.snippetsMenuToolbar$El;
+            this.$toolbarEl = this.$snippetsMenuToolbarEl;
 
             this.odooEditor.autohideToolbar = false;
             if (this.floatingToolbarEl) {
@@ -180,7 +180,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
         const range = selection.rangeCount && selection.getRangeAt(0);
         const isWithinBackgroundImage = !!range && !!closestElement(range.startContainer, '[style*=background-image]');
         if (isWithinBackgroundImage) {
-            this.toolbar$El.find('#create-link').toggleClass('d-none', true);
+            this.$toolbarEl.find('#create-link').toggleClass('d-none', true);
         }
     }
 }

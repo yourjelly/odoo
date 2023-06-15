@@ -313,7 +313,7 @@ export class HtmlField extends Component {
                     </button>
                 </div>
             `);
-            this.wysiwyg.toolbar$El.append($codeviewButtonToolbar);
+            this.wysiwyg.$toolbarEl.append($codeviewButtonToolbar);
             $codeviewButtonToolbar.click(this.toggleCodeView.bind(this));
         }
         this.wysiwyg.odooEditor.addEventListener("historyStep", () =>

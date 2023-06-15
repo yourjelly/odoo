@@ -144,7 +144,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
             options.allowCommandImage = hasFullEdit;
             loadWysiwygFromTextarea(self, $textarea[0], options).then(wysiwyg => {
                 if (!hasFullEdit) {
-                    wysiwyg.toolbar$El.find('#link, #media').remove();
+                    wysiwyg.$toolbarEl.find('#link, #media').remove();
                 }
                 // float-start class messes up the post layout OPW 769721
                 $form.find('.note-editable').find('img.float-start').removeClass('float-start');
