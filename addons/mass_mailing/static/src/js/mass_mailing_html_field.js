@@ -61,8 +61,14 @@ export class MassMailingHtmlField extends HtmlField {
             onIframeUpdated: () => this.onIframeUpdated(),
             snippets: 'mass_mailing.email_designer_snippets',
             resizable: false,
-            linkInitialIsNewWindow: true,
-            toolbarDropDirection: 'dropup',
+            linkOptions: {
+                ...super.wysiwygOptions.linkOptions,
+                initialIsNewWindow: true,
+            },
+            toolbarOptions: {
+                ...super.wysiwygOptions.toolbarOptions,
+                dropDirection: 'dropup',
+            },
             onWysiwygBlur: () => {
                 this.commitChanges();
                 this.wysiwyg.odooEditor.toolbarHide();

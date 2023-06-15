@@ -48,38 +48,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
             this.snippetsMenu.setFolded(true);
             if (!this.floatingToolbar) {
                 // Instantiate and configure new toolbar.
-                const toolbarWrapper = new ComponentWrapper({}, Toolbar, {
-                    dropDirection: this.options.toolbarDropDirection,
-
-                    showChecklist: this.options.toolbarShowChecklist,
-                    showAnimateText: this.options.toolbarShowAnimateText,
-
-                    showColors: this.options.toolbarShowColors,
-                    showFontSize: this.options.toolbarShowFontSize,
-                    showHistory: this.options.toolbarShowHistory,
-
-                    showStyle: this.options.toolbarShowStyle,
-                    showJustify: this.options.toolbarShowJustify,
-                    showList: this.options.toolbarShowList,
-                    showLink: this.options.toolbarShowLink,
-
-                    showImageShape: this.options.toolbarShowImageShape,
-                    showImagePadding: this.options.toolbarShowImagePadding,
-                    showImageWidth: this.options.toolbarShowImageWidth,
-                    showImageEdit: this.options.toolbarShowImageEdit,
-
-                    showHeading1: this.options.toolbarShowHeading1,
-                    showHeading2: this.options.toolbarShowHeading2,
-                    showHeading3: this.options.toolbarShowHeading3,
-                    showHeading4: this.options.toolbarShowHeading4,
-                    showHeading5: this.options.toolbarShowHeading5,
-                    showHeading6: this.options.toolbarShowHeading6,
-
-                    onColorpaletteDropdownShow: this.onColorpaletteDropdownShow.bind(this),
-                    onColorpaletteDropdownHide: this.onColorpaletteDropdownHide,
-                    textColorPaletteProps: this.colorPalettesProps.text,
-                    backgroundColorPaletteProps: this.colorPalettesProps.background,
-                });
+                const toolbarWrapper = new ComponentWrapper({}, Toolbar, this.state.toolbarProps);
 
                 // The wysiwyg can be instanciated inside an iframe. The dialog
                 // component is mounted on the global document.

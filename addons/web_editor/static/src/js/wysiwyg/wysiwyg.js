@@ -1402,11 +1402,10 @@ export class Wysiwyg extends Component {
 
                     addHintClasses();
                     this.state.linkToolProps = {
+                        ...this.options.linkOptions,
                         wysiwyg: this,
                         editable: this.odooEditor.editable,
                         link,
-                        forceNewWindow: this.options.linkForceNewWindow,
-                        initialIsNewWindow: this.options.linkInitialIsNewWindow,
                         // If the link contains an image or an icon do not
                         // display the label input (e.g. some mega menu links).
                         needLabel: !link.querySelector('.fa, img'),
@@ -1453,10 +1452,9 @@ export class Wysiwyg extends Component {
                 return
             }
             this.env.services.dialog.add(LinkDialog, {
+                ...this.options.linkOptions,
                 editable: this.odooEditor.editable,
                 link,
-                forceNewWindow: this.options.linkForceNewWindow,
-                initialIsNewWindow: this.options.linkInitialIsNewWindow,
                 needLabel: true,
                 focusField: link.innerHTML ? 'url' : '',
                 onSave: (data) => {
@@ -1724,31 +1722,7 @@ export class Wysiwyg extends Component {
     }
     _setToolbarProps(props) {
         this.state.toolbarProps = {
-            dropDirection: props.options.toolbarDropDirection,
-
-            showChecklist: props.options.toolbarShowChecklist,
-            showAnimateText: props.options.toolbarShowAnimateText,
-
-            showColors: props.options.toolbarShowColors,
-            showFontSize: props.options.toolbarShowFontSize,
-            showHistory: props.options.toolbarShowHistory,
-
-            showStyle: props.options.toolbarShowStyle,
-            showJustify: props.options.toolbarShowJustify,
-            showList: props.options.toolbarShowList,
-            showLink: props.options.toolbarShowLink,
-
-            showImageShape: props.options.toolbarShowImageShape,
-            showImagePadding: props.options.toolbarShowImagePadding,
-            showImageWidth: props.options.toolbarShowImageWidth,
-            showImageEdit: props.options.toolbarShowImageEdit,
-
-            showHeading1: props.options.toolbarShowHeading1,
-            showHeading2: props.options.toolbarShowHeading2,
-            showHeading3: props.options.toolbarShowHeading3,
-            showHeading4: props.options.toolbarShowHeading4,
-            showHeading5: props.options.toolbarShowHeading5,
-            showHeading6: props.options.toolbarShowHeading6,
+            ...props.options.toolbarOptions,
 
             onColorpaletteDropdownShow: this.onColorpaletteDropdownShow.bind(this),
             onColorpaletteDropdownHide: this.onColorpaletteDropdownHide.bind(this),

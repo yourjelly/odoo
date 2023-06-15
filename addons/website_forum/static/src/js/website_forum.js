@@ -121,12 +121,14 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
 
             var options = {
                 toolbarTemplate: 'website_forum.web_editor_toolbar',
-                toolbarShowColors: false,
-                toolbarShowFontSize: false,
-                toolbarShowHistory: true,
-                toolbarShowHeading1: false,
-                toolbarShowHeading2: false,
-                toolbarShowHeading3: false,
+                toolbarOptions: {
+                    showColors: false,
+                    showFontSize: false,
+                    showHistory: true,
+                    showHeading1: false,
+                    showHeading2: false,
+                    showHeading3: false,
+                },
                 recordInfo: {
                     context: self._getContext(),
                     res_model: 'forum.post',
