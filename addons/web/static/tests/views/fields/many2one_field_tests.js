@@ -1968,7 +1968,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("list in form: create with one2many with many2one", async function (assert) {
         serverData.models.partner.fields.p.default = [
-            [0, 0, { display_name: "new record", p: [] }],
+            [0, 0, { display_name: "new record" }],
         ];
 
         await makeView({
@@ -2007,7 +2007,7 @@ QUnit.module("Fields", (hooks) => {
             // except that the value for the many2one is explicitely set to false,
             // which is stupid, but this happens, so we have to handle it
             serverData.models.partner.fields.p.default = [
-                [0, 0, { display_name: "new record", trululu: false, p: [] }],
+                [0, 0, { display_name: "new record", trululu: false }],
             ];
 
             await makeView({
@@ -2048,7 +2048,7 @@ QUnit.module("Fields", (hooks) => {
             // on this empty field, it should not assume that this record should be
             // abandonned, since it has been added (even though it is a new record).
             serverData.models.partner.fields.p.default = [
-                [0, 0, { display_name: "new record", trululu: false, p: [] }],
+                [0, 0, { display_name: "new record", trululu: false }],
             ];
 
             await makeView({
@@ -2118,8 +2118,8 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("list in form: name_get with unique ids (default_get)", async function (assert) {
         serverData.models.partner.records[0].display_name = "MyTrululu";
         serverData.models.partner.fields.p.default = [
-            [0, 0, { trululu: 1, p: [] }],
-            [0, 0, { trululu: 1, p: [] }],
+            [0, 0, { trululu: 1 }],
+            [0, 0, { trululu: 1 }],
         ];
 
         await makeView({
@@ -2154,8 +2154,8 @@ QUnit.module("Fields", (hooks) => {
         "list in form: show name of many2one fields in multi-page (default_get)",
         async function (assert) {
             serverData.models.partner.fields.p.default = [
-                [0, 0, { display_name: "record1", trululu: 1, p: [] }],
-                [0, 0, { display_name: "record2", trululu: 2, p: [] }],
+                [0, 0, { display_name: "record1", trululu: 1 }],
+                [0, 0, { display_name: "record2", trululu: 2 }],
             ];
 
             await makeView({
@@ -2474,7 +2474,7 @@ QUnit.module("Fields", (hooks) => {
         assert.expect(3);
 
         serverData.models.partner.fields.timmy.default = [
-            [0, 0, { display_name: "brandon is the new timmy", name: "brandon" }],
+            [0, 0, { display_name: "brandon is the new timmy" }],
         ];
         serverData.models.partner.onchanges.timmy = (obj) => {
             obj.int_field = obj.timmy.length;

@@ -3816,8 +3816,8 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("make default record with non empty one2many", async function (assert) {
         serverData.models.partner.fields.p.default = [
             [6, 0, []], // replace with zero ids
-            [0, 0, { foo: "new foo1", product_id: 41, p: [] }], // create a new value
-            [0, 0, { foo: "new foo2", product_id: 37, p: [] }], // create a new value
+            [0, 0, { foo: "new foo1", product_id: 41 }], // create a new value
+            [0, 0, { foo: "new foo2", product_id: 37 }], // create a new value
         ];
 
         let nameGetCount = 0;

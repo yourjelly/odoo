@@ -4318,7 +4318,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("one2many and default_get (with date)", async function (assert) {
-        serverData.models.partner.fields.p.default = [[0, false, { date: "2017-10-08", p: [] }]];
+        serverData.models.partner.fields.p.default = [[0, false, { date: "2017-10-08" }]];
 
         await makeView({
             type: "form",
@@ -8111,7 +8111,7 @@ QUnit.module("Fields", (hooks) => {
         "one2many with default value: edit line to make it invalid",
         async function (assert) {
             serverData.models.partner.fields.p.default = [
-                [0, false, { foo: "coucou", int_field: 5, p: [] }],
+                [0, false, { foo: "coucou", int_field: 5 }],
             ];
 
             await makeView({

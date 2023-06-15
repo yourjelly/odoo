@@ -108,16 +108,16 @@ class Discussion(models.Model):
     @api.onchange('name')
     def _onchange_name(self):
         # test onchange modifying one2many field values
-        if self.env.context.get('generate_dummy_message') and self.name == '{generate_dummy_message}':
-            # update body of existings messages and emails
-            for message in self.messages:
-                message.body = 'not last dummy message'
-            for message in self.important_messages:
-                message.body = 'not last dummy message'
-            # add new dummy message
-            message_vals = self.messages._add_missing_default_values({'body': 'dummy message', 'important': True})
-            self.messages |= self.messages.new(message_vals)
-            self.important_messages |= self.messages.new(message_vals)
+        #if self.env.context.get('generate_dummy_message') and self.name == '{generate_dummy_message}':
+        # update body of existings messages and emails
+        for message in self.messages:
+            message.body = 'not last dummy message'
+        for message in self.important_messages:
+            message.body = 'not last dummy message'
+        # add new dummy message
+        message_vals = self.messages._add_missing_default_values({'body': 'dummy message', 'important': True})
+        self.messages |= self.messages.new(message_vals)
+        self.important_messages |= self.messages.new(message_vals)
 
     @api.onchange('moderator')
     def _onchange_moderator(self):
@@ -143,7 +143,7 @@ class Message(models.Model):
     author_partner = fields.Many2one(
         'res.partner', compute='_compute_author_partner',
         search='_search_author_partner')
-    important = fields.Boolean()
+    important = fields.Boolean(default=True)
     label = fields.Char(translate=True)
     priority = fields.Integer()
     active = fields.Boolean(default=True)

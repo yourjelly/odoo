@@ -5,11 +5,11 @@ import odoo.tests
 from odoo.addons.product_matrix.tests.common import TestMatrixCommon
 
 
-@odoo.tests.tagged('post_install', '-at_install')
+@odoo.tests.tagged('post_install', '-at_install', 'aab')
 class TestPurchaseMatrixUi(TestMatrixCommon):
 
     def test_purchase_matrix_ui(self):
-        self.start_tour("/web", 'purchase_matrix_tour', login="admin")
+        self.start_tour("/web", 'purchase_matrix_tour', login="admin", watch=True)
 
         # Ensures some dynamic create variants have been created by the matrix
         # Ensures a PO has been created with exactly x lines ...
