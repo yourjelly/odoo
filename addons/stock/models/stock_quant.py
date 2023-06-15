@@ -125,6 +125,25 @@ class StockQuant(models.Model):
     user_id = fields.Many2one(
         'res.users', 'Assigned To', help="User assigned to do product count.")
 
+    lot_properties = fields.Properties(
+        compute='_compute_lot_properties',
+        definition='lot_id.lot_properties_definition',
+    )
+
+    @api.model
+    def _search(self, domain, *args, **kwargs):
+        domain = [
+            line if not isinstance(line, (list, tuple)) or not line[0].startswith('lot_properties.')
+            else ['lot_id', 'any', [line]]
+            for line in domain
+        ]
+        return super()._search(domain, *args, **kwargs)
+
+    @api.depends('lot_id.lot_properties')
+    def _compute_lot_properties(self):
+        for rec in self:
+            rec.lot_properties = rec.lot_id.lot_properties
+
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):
         for quant in self:
