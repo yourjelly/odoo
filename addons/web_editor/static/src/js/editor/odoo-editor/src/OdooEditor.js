@@ -1900,7 +1900,6 @@ export class OdooEditor extends EventTarget {
         }
         let start = range.startContainer,
             end = range.endContainer,
-            startElement = closestBlock(start),
             endElement = closestBlock(end);
         // Let the DOM split and delete the range.
         const doJoin =
