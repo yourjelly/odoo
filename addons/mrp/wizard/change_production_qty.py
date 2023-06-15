@@ -32,6 +32,7 @@ class ChangeProductionQty(models.TransientModel):
         their quantity according the unit_ratio. It does not use the BoM, BoM
         modification during production would not be taken into consideration.
         """
+        # breakpoint()
         print("_update_finished_moves+++++++++++++++++++++++++++++++++++++++++")
         modification = {}
         push_moves = self.env['stock.move']
@@ -56,6 +57,7 @@ class ChangeProductionQty(models.TransientModel):
 
     def change_prod_qty(self):
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        # breakpoint()
         for wizard in self:
             production = wizard.mo_id
             produced = sum(production.move_finished_ids.filtered(lambda m: m.product_id == production.product_id).mapped('quantity_done'))

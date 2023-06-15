@@ -79,7 +79,7 @@ class MrpProduction(models.Model):
         consumption_issues = self._get_consumption_issues()
         if consumption_issues:
             return self._action_generate_consumption_wizard(consumption_issues)
-        print("subcontracting_record_component_______________________________")
+        print("sle")
         self._update_finished_move()
         self.subcontracting_has_been_recorded = True
         quantity_issues = self._get_quantity_produced_issues()
@@ -95,6 +95,7 @@ class MrpProduction(models.Model):
             backorder._set_qty_producing()
 
             self.product_qty = self.qty_producing
+            
             # Remove any additional backorders
             # self.sudo()._split_productions()[1:].unlink()
             action = self._get_subcontract_move().filtered(lambda m: m.state not in ('done', 'cancel'))._action_record_components()
@@ -120,15 +121,16 @@ class MrpProduction(models.Model):
             else:
                 move_lines = subcontract_move_id.move_line_ids.filtered(lambda ml: not ml.lot_id)
             # Update reservation and quantity done
-            if quantity == sum(move_lines.mapped('qty_done')):
+            if quantity == sum(move_lines.mapped('qty_done')) and subcontract_move_id.picking_id.immediate_transfer:
                 return
             # if self.qty_producing <= self.product_qty:
             print("quantity ===>  ", quantity)
             print("sum(move_lines.mapped('qty_done')) ===>  ", sum(move_lines.mapped('qty_done')))
-            if self.qty_producing <= self.product_qty:
-                return
+            # if self.qty_producing == self.product_qty:
+            #     return
             # elif self.qty_producing < self.product_qty:
             #     self.product_qty -= quantity
+            breakpoint()
             for ml in move_lines:
                 rounding = ml.product_uom_id.rounding
                 if float_compare(quantity, 0, precision_rounding=rounding) <= 0:
@@ -137,7 +139,8 @@ class MrpProduction(models.Model):
                 quantity -= quantity_to_process
 
                 new_quantity_done = (ml.qty_done + quantity_to_process)
-                # breakpoint()
+                # if self.qty_produced > 0:
+                #     new_quantity_done += self.qty_produced
 
                 # on which lot of finished product
                 if float_compare(new_quantity_done, ml.reserved_uom_qty, precision_rounding=rounding) >= 0:
