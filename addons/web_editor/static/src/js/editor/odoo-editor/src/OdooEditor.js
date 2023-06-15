@@ -1972,7 +1972,10 @@ export class OdooEditor extends EventTarget {
             // and the range end in another element,
             // we delete the block and move the cursor to the next block.
             if(
-                (isEmptyBlock(closestBlock(joinWith)) || joinWith?.textContent === '\u200B') &&
+                (
+                    isEmptyBlock(closestBlock(joinWith)) ||
+                    (joinWith && joinWith.textContent === '\u200B')
+                ) &&
                 endElement && !isEmptyBlock(endElement) &&
                 !['TR','TD','TABLE','TBODY','UL','OL','LI'].includes(endElement.nodeName)
             ) {
