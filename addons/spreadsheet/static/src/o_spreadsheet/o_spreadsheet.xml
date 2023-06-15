@@ -452,6 +452,7 @@
         t-on-paste.stop=""
         t-on-compositionstart="onCompositionStart"
         t-on-compositionend="onCompositionEnd"
+        t-on-dblclick="onDblClick"
       />
 
       <div
@@ -3872,6 +3873,6 @@
 </odoo>
 <!--
   __info__.version = '16.4.0-alpha.4';
-  __info__.date = '2023-06-12T14:15:15.398Z';
-  __info__.hash = '251a52e';
+  __info__.date = '2023-06-15T15:05:45.882Z';
+  __info__.hash = 'abad13b';
 -->
