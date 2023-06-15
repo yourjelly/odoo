@@ -676,7 +676,9 @@ export const htmlField = {
                 noVideos: 'noVideos' in options ? options.noVideos : true,
                 useMediaLibrary: true,
             },
-            linkForceNewWindow: true,
+            linkOptions: {
+                forceNewWindow: true,
+            },
             tabsize: 0,
             height: options.height,
             minHeight: options.minHeight,

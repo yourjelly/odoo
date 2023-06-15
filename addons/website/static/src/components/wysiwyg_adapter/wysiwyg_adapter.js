@@ -353,8 +353,11 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                 data_res_model: 'website',
                 data_res_id: this._context.website_id,
             },
-            toolbarShowChecklist: false,
-            toolbarShowAnimateText: true,
+            toolbarOptions: {
+                ...options.toolbarOptions,
+                showChecklist: false,
+                showAnimateText: true,
+            },
             context: this._context,
             editable: this.$editable,
             discardButton: true,
