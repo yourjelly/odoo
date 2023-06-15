@@ -80,8 +80,7 @@
         </div>
         <div class="o_colorpicker_sections pt-2 px-2 pb-3" data-color-tab="color-combinations">
             <!-- List all Presets -->
-            <t t-foreach="[1, 2, 3, 4, 5]" t-as="i" t-key="i">
-                <t t-set="number" t-value="i"/>
+            <t t-foreach="[1, 2, 3, 4, 5]" t-as="number" t-key="number">
                 <button type="button" class="o_we_color_btn o_we_color_combination_btn"
                         t-att-data-color="number" t-attf-title="Preset #{number}">
                     <t t-call="web_editor.color.combination.preview"/>
