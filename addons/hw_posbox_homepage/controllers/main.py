@@ -252,6 +252,11 @@ class IoTboxHomepage(web.Home):
             'loading_message': 'Configure Domain Server'
         })
 
+    # Get password
+    @http.route('/hw_posbox_homepage/password', type='json', auth='none', method=['POST'])
+    def view_password(self):
+        return helpers.generate_password()
+
     @http.route('/remote_connect', type='http', auth='none', cors='*')
     def remote_connect(self):
         """
