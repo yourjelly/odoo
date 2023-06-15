@@ -990,7 +990,7 @@ header {
         z-index: $zindex-website-header;
     }
     &:not(.o_header_no_transition) {
-        #top_menu_container {
+        #o_main_nav {
             transition: all $-transition-duration;
         }
         .navbar-brand {
@@ -1029,7 +1029,7 @@ header {
         $-is-hamburger: o-website-value('header-template') == 'hamburger';
         @include media-breakpoint-up(md) {
             @if $-is-hamburger {
-                #top_menu_container {
+                #o_main_nav {
                     padding-top: $spacer * 0.5;
                     padding-bottom: $spacer * 0.5;
                 }
@@ -1037,7 +1037,7 @@ header {
         }
     }
 
-    #top_menu_container {
+    #o_main_nav {
         flex-direction: inherit;
     }
 
@@ -1094,7 +1094,7 @@ header {
                         max-width: 100%;
                         padding: 0 0 $spacer 0;
                     }
-                    #top_menu_container {
+                    #o_main_nav {
                         flex-direction: column;
                         align-items: start;
                         padding: 0;
