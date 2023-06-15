@@ -82,8 +82,6 @@ Text.prototype.oDeleteForward = function (offset, alreadyMoved = false) {
 };
 
 HTMLElement.prototype.oDeleteForward = function (offset) {
-    console.warn('HTMLElement.prototype.oDeleteForward');
-    console.log('EL > ', this, offset);
     const filterFunc = node =>
         isVisibleEmpty(node) || isContentTextNode(node) || isNotEditableNode(node);
 
@@ -146,37 +144,23 @@ HTMLElement.prototype.oDeleteForward = function (offset) {
     }
 
     const nextSibling = this.nextSibling;
-    console.log('HTML : \n', this.closest(".odoo-editor-editable").innerHTML);
-    console.log('IOLD I Stuff .prototype.oDeleteForward');
-    console.log('this.parentElement', this.parentElement);
-    console.log('childNodes', this.childNodes.length);
-    console.log('nextSibling', nextSibling);
-    console.log('==firstLeafNode', firstLeafNode);
-    console.log('nextSibling.nodeType', nextSibling?.nodeType);
-    console.log('nextSibling.tagName', nextSibling?.tagName);
-    console.log('nextSibling.childNodes.length', nextSibling?.childNodes.length);
     if (
         (offset === this.childNodes.length || (this.childNodes.length === 1 && this.childNodes[0].tagName === 'BR')) &&
         this.parentElement &&
         nextSibling &&
         ['LI', 'UL', 'OL'].includes(nextSibling.tagName)
     ) {
-        console.log('  => IN IF');
         const nextSiblingNestedLi = nextSibling.querySelector('li:first-child');
-        console.log('  => nextSiblingNestedLi', nextSiblingNestedLi);
         if (nextSiblingNestedLi) {
             // Add the first LI from the next sibbling list to the current list.
             this.after(nextSiblingNestedLi);
             // Remove the next sibbling list if it's empty.
-            console.log('   => nextSibling is visible', isVisible(nextSibling, false));
-            console.log('   => nextSibling.textContent', nextSibling.textContent);
             if (!isVisible(nextSibling, false) || nextSibling.textContent === '') {
                 nextSibling.remove();
             }
 
             HTMLElement.prototype.oDeleteBackward.call(nextSiblingNestedLi, 0, true);
         } else {
-            console.log('  => nextSiblin', nextSibling, nextSibling.outerHTML);
             HTMLElement.prototype.oDeleteBackward.call(nextSibling, 0);
         }
         return;
