@@ -138,6 +138,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
         */
         const previousElementSiblingClosestBlock = closestBlock(this.previousElementSibling);
         if (
+            previousElementSiblingClosestBlock &&
             (isEmptyBlock(previousElementSiblingClosestBlock) ||
                 previousElementSiblingClosestBlock.textContent === '\u200B') &&
             !['TR','TD','TABLE','TBODY','UL','OL','LI'].includes(this.nodeName)
