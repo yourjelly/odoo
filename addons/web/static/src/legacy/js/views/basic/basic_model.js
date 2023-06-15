@@ -2263,8 +2263,10 @@ var BasicModel = AbstractModel.extend({
                     hasOnchange = true;
                 }
                 if (field.type === 'one2many' || field.type === 'many2many') {
-                    const view = fieldInfo.views[fieldInfo.mode];
-                    generateSpecs(view.fieldsInfo[view.type], view.fields, key + '.');
+                    const view = (fieldInfo.views || {})[fieldInfo.mode];
+                    if (view) {
+                        generateSpecs(view.fieldsInfo[view.type], view.fields, key + '.');
+                    }
                     // Object.values(fieldInfo.views || {}).forEach((view) => {
                     //     generateSpecs(view.fieldsInfo[view.type], view.fields, key + '.');
                     // });
