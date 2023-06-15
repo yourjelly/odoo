@@ -20,6 +20,8 @@ patch(LinkDialog.prototype, "editor.js", {
             body: this.$link && this.$link[0].ownerDocument.body,
         };
         const result = await this._super.apply(this, arguments);
+        // wUtils.autocompleteWithPages rely on a widget that has a _rpc and
+        // trigger_up method.
         const fakeWidget = {
             _rpc: ({ route, params }) => this.rpc(route, params),
             trigger_up: () => {},

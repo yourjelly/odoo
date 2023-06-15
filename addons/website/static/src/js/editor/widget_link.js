@@ -39,6 +39,8 @@ patch(LinkTools.prototype, 'website/static/src/js/editor/widget_link.js', {
             },
             body: this.$editable[0].ownerDocument.body,
         };
+        // wUtils.autocompleteWithPages rely on a widget that has a _rpc and
+        // trigger_up method.
         const fakeWidget = {
             _rpc: ({ route, params }) => this.rpc(route, params),
             trigger_up: this._onAutocompleteClose.bind(this),
