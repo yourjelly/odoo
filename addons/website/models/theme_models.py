@@ -222,6 +222,7 @@ class Theme(models.AbstractModel):
         'website.template_header_hamburger',
         'website.template_header_vertical',
         'website.template_header_sidebar',
+        'website.template_header_rounded_box',
         # Default one, keep it last
         'website.template_header_default',
     ]
