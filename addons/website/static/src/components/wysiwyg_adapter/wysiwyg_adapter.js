@@ -764,7 +764,9 @@ export class WysiwygAdapterComponent extends Wysiwyg {
 
         const evType = ev.name;
         const payload = ev.data;
-        if (evType === 'call_service') {
+        if (evType in triggers) {
+            triggers[evType](ev);
+        } else if (evType === 'call_service') {
             let args = payload.args || [];
             if (payload.service === 'ajax' && payload.method === 'rpc') {
                 // ajax service uses an extra 'target' argument for rpc
@@ -781,25 +783,8 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                         You should probably create a mapper in @web/legacy/utils`
                 );
             }
-        } else if (evType === 'get_session') {
-            if (payload.callback) {
-                payload.callback(this.env.session);
-            }
-        } else if (evType === 'load_views') {
-            const params = {
-                model: payload.modelName,
-                context: payload.context,
-                views_descr: payload.views,
-            };
-            this.env.dataManager
-                .load_views(params, payload.options || {})
-                .then(payload.on_success);
-        } else if (evType === 'load_filters') {
-            return this.env.dataManager
-                .load_filters(payload)
-                .then(payload.on_success);
-        } else if (evType in triggers) {
-            triggers[evType](ev);
+        } else {
+            super._trigger_up(...arguments);
         }
     }
     /**
