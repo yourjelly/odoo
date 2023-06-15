@@ -215,8 +215,7 @@ class AccountMove(models.Model):
                         if sum(correction_amls.mapped('balance')) > 0:
                             product_account_moves.with_context(no_exchange_difference=True).reconcile()
                         else:
-                            (invoice_aml | correction_amls).with_context(no_exchange_difference=True).reconcile()
-                            (invoice_aml.filtered(lambda aml: not aml.reconciled) | stock_aml).with_context(no_exchange_difference=True).reconcile()
+                            (invoice_aml | correction_amls | stock_aml).with_context(no_exchange_difference=True).reconcile()
                     else:
                         product_account_moves.reconcile()
 
