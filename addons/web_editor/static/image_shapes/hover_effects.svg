@@ -39,6 +39,49 @@
         </g>
     </g>
 
+    <!-- Image & Shape Zoom In-->
+    <g id="image_and_shape_zoom_in">
+        <g id="hoverEffects">
+            <animateTransform
+                xlink:href="#shapeImage"
+                attributeName="transform"
+                attributeType="XML"
+                type="scale"
+                calcMode="spline"
+                values="1.1;1.0"
+		        keySplines=".42,0,.58,1;"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"
+            />
+            <animateTransform
+                xlink:href="#clip-path"
+                attributeName="transform"
+                attributeType="XML"
+                type="scale"
+                calcMode="spline"
+                values="1;0.85"
+		        keySplines=".42,0,.58,1;"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+            <animateTransform
+                xlink:href="#useClipPath"
+                attributeName="transform"
+                attributeType="XML"
+                type="translate"
+                calcMode="spline"
+                values="0,0;0.09,0.09"
+		        keySplines=".42,0,.58,1;"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+        </g>
+    </g>
+
     <!-- Image Zoom Out -->
     <g id="image_zoom_out">
         <g id="hoverEffects">
@@ -88,6 +131,27 @@
                 transform: translate(0.05px, 0.05px);
             }
         </style>
+    </g>
+
+    <!-- Image Mirror Blur -->
+    <g id="image_mirror_blur">
+        <g id="hoverEffects">
+            <animateTransform
+                xlink:href="#shapeImage"
+                attributeName="transform"
+                attributeType="XML"
+                type="scale"
+                from="1"
+                to="0.91"
+                dur="0.3s"
+                fill="freeze"
+                repeatCount="1"
+                begin="indefinite"/>
+
+            <filter xmlns="http://www.w3.org/2000/svg" id="blurFilter">
+                <feGaussianBlur stdDeviation="3"/>
+            </filter>
+      </g>
     </g>
 
     <!-- Outline -->

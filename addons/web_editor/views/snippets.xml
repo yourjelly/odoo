@@ -727,6 +727,8 @@
                 <we-button data-select-data-attribute="">None</we-button>
                 <we-button data-select-data-attribute="image_zoom_in">Zoom In</we-button>
                 <we-button data-select-data-attribute="image_zoom_out">Zoom Out</we-button>
+                <we-button data-select-data-attribute="image_mirror_blur">Mirror Blur</we-button>
+                <we-button data-select-data-attribute="image_and_shape_zoom_in">Zoom In + Shape</we-button>
                 <we-button data-select-data-attribute="outline" data-name="hover_effect_outline_opt">Outline</we-button>
                 <we-button data-select-data-attribute="overlay" data-name="hover_effect_opacity_opt">Overlay</we-button>
             </we-select>

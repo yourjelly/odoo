@@ -6320,7 +6320,9 @@ registry.ImageTools = ImageHandlerOption.extend({
         };
         const imgDataURL = await applyModifications(img, options);
         svg.removeChild(svg.querySelector('#preview'));
-        svg.querySelector('image').setAttribute('xlink:href', imgDataURL);
+        svg.querySelectorAll('image').forEach(image => {
+            image.setAttribute('xlink:href', imgDataURL)
+        });
         // Force natural width & height (note: loading the original image is
         // needed for Safari where natural width & height of SVG does not return
         // the correct values).
@@ -6684,11 +6686,19 @@ registry.ImageTools = ImageHandlerOption.extend({
                 break;
             }
             case 'image_zoom_in':
+            case 'image_and_shape_zoom_in':
+            case 'image_mirror_blur':
             case 'image_zoom_out': {
                 svgEl.querySelector('#clip-path > use').setAttribute('id', 'useClipPath');
                 const image = svgEl.querySelector('image');
                 image.setAttribute('id', 'shapeImage');
                 image.setAttribute('style', 'transform-origin: center;');
+                if (hoverEffectName === 'image_mirror_blur') {
+                    const imageMirror = image.cloneNode()
+                    imageMirror.setAttribute('id', 'shapeImageMirror')
+                    imageMirror.setAttribute('filter', 'url(#blurFilter)');
+                    image.insertAdjacentElement("beforebegin", imageMirror);
+                }
                 break;
             }
         }
