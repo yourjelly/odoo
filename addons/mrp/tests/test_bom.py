@@ -1154,3 +1154,76 @@ class TestBoM(TestMrpCommon):
         self.assertEqual(p1.qty_available, 5.0)
         self.assertEqual(p2.qty_available, 10.0)
         self.assertEqual(p3.qty_available, 10.0)
+
+    def test_bom_change(self):
+        # Required to display `operation_ids` in the form view
+        self.env.user.groups_id += self.env.ref("mrp.group_mrp_routings")
+
+        product = self.env['product.product'].create({
+            'name': 'Manufacturable',
+            'type': 'product',
+        })
+        component = self.env['product.product'].create({
+            'name': 'Component',
+            'type': 'product',
+        })
+        # Create both bom for the same product, each with a different operation set.
+        bom_1 = self.env['mrp.bom'].create({
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'product_qty': 1,
+            'type': 'normal',
+            'code': '1',
+            'bom_line_ids': [
+                Command.create({
+                    'product_id': component.id,
+                    'product_qty': 1,
+                }),
+            ],
+            'operation_ids': [
+                Command.create({
+                    'name': 'OP_1',
+                    'workcenter_id': self.workcenter_2.id,
+                    'time_cycle_manual': 10,
+                }),
+            ],
+        })
+        bom_2 = self.env['mrp.bom'].create({
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'product_qty': 1,
+            'type': 'normal',
+            'code': '2',
+            'bom_line_ids': [
+                Command.create({
+                    'product_id': component.id,
+                    'product_qty': 1,
+                }),
+            ],
+            'operation_ids': [
+                Command.create({
+                    'name': 'OP_2',
+                    'workcenter_id': self.workcenter_2.id,
+                    'time_cycle_manual': 20,
+                }),
+            ],
+        })
+
+        # Create a MO using the first bom
+        with Form(self.env['mrp.production']) as mo_form:
+            mo_form.product_id = product
+            mo_form.bom_id = bom_1
+            production = mo_form.save()
+
+        # Update form, change the bom and update the new workorder's duration then save
+        with Form(production) as mo_form:
+            mo_form.bom_id = bom_2
+            with mo_form.workorder_ids.edit(1) as wo:
+                self.assertEqual(wo.name, 'OP_2')
+                wo.duration_expected = 5
+            mo_form.save()
+
+        # There's currently a bug that makes the old workorder from previous bom stay in the MO that is fixed in another PR,
+        # this is irrelevant to this issue (happens even after fixing that part).
+        op_2 = production.workorder_ids.filtered(lambda wo: wo.name == 'OP_2')
+
+        # Assert will fail as the compute is triggered and reset to the original 20.
+        self.assertEqual(op_2.duration_expected, 5)
