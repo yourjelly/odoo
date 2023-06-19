@@ -17,6 +17,7 @@ class ResPartner(models.Model):
             ('nlcius', "NLCIUS"),
             ('ubl_a_nz', "Peppol BIS Billing 3.0 A-NZ"),
             ('ubl_sg', "Peppol BIS Billing 3.0 SG"),
+            ('oioubl_201', "OIOUBL 2.01"),
         ],
         compute='_compute_ubl_cii_format',
         store=True,
@@ -183,3 +184,5 @@ class ResPartner(models.Model):
             return self.env['account.edi.xml.ubl_bis3']
         if self.ubl_cii_format == 'ubl_sg':
             return self.env['account.edi.xml.ubl_sg']
+        if self.ubl_cii_format == 'oioubl_201':
+            return self.env['account.edi.xml.oioubl_201']

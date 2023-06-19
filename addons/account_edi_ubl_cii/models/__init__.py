@@ -10,6 +10,7 @@ from . import account_edi_xml_ubl_nlcius
 from . import account_edi_xml_ubl_efff
 from . import account_edi_xml_ubl_a_nz
 from . import account_edi_xml_ubl_sg
+from . import account_edi_xml_oioubl_201
 from . import account_move_send
 from . import account_move
 from . import res_partner

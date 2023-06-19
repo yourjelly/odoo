@@ -189,6 +189,12 @@ class AccountMoveSend(models.Model):
         reader_buffer.close()
         writer_buffer.close()
 
+    def _additional_document_reference_get_custom_nodes(self, invoice):
+        edi_model = invoice.partner_id._get_edi_builder()
+        if hasattr(edi_model, "_additional_document_reference_get_custom_nodes"):
+            return edi_model._additional_document_reference_get_custom_nodes()
+        return ""
+
     def _postprocess_invoice_ubl_xml(self, invoice, invoice_data):
         # Add PDF to XML
         tree = etree.fromstring(invoice_data['ubl_cii_xml_attachment_values']['raw'])
@@ -198,12 +204,14 @@ class AccountMoveSend(models.Model):
 
         filename = invoice_data['pdf_attachment_values']['name']
         content = invoice_data['pdf_attachment_values']['raw']
+        additional_content = self._additional_document_reference_get_custom_nodes(invoice)
         to_inject = f'''
             <cac:AdditionalDocumentReference
                 xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                 xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
                 xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
                 <cbc:ID>{escape(filename)}</cbc:ID>
+                {additional_content}
                 <cac:Attachment>
                     <cbc:EmbeddedDocumentBinaryObject
                         mimeCode="application/pdf"
