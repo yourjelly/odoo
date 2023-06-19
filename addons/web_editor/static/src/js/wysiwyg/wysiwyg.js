@@ -169,7 +169,7 @@ export class Wysiwyg extends Component {
                 // dropdownToggle.hide();
             },
 
-            getArch: this._getColorpickerArch.bind(this),
+            getTemplate: this._getColorpickerTemplate.bind(this),
             getEditableCustomColors: () => {
                 if (!this.$editable) {
                     return [];

@@ -48,7 +48,7 @@ QUnit.module('field html', (hooks) => {
         setupViewRegistries();
 
         legacyTestUtils.mock.patch(Wysiwyg.prototype, {
-            async _getColorpickerArch() {
+            async _getColorpickerTemplate() {
                 return weTestUtils.COLOR_PICKER_TEMPLATE;
             },
             async _getAssets() {

@@ -66,7 +66,7 @@ QUnit.module('field html file upload', {
             }
         });
         patchWithCleanup(Wysiwyg.prototype, {
-            async _getColorpickerArch() {
+            async _getColorpickerTemplate() {
                 return weTestUtils.COLOR_PICKER_TEMPLATE;
             }
         });
