@@ -1779,7 +1779,7 @@ class MrpProduction(models.Model):
     def button_mark_done(self):
         self._button_mark_done_sanity_checks()
 
-        res = self._pre_button_mark_done()
+        res = self.pre_button_mark_done()
         if res is not True:
             return res
         if self.env.context.get('mo_ids_to_backorder'):
@@ -1859,7 +1859,7 @@ class MrpProduction(models.Model):
             })
         return action
 
-    def _pre_button_mark_done(self):
+    def pre_button_mark_done(self):
         for production in self:
             if float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
                 production._set_quantities()
