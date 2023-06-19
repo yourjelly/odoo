@@ -1093,23 +1093,23 @@
     </template>
 
     <template id="product_tags" name="Product Tags" active="True">
-        <t t-foreach="all_product_tags" t-as="tag" class="form-check mb-1">
-            <span t-if="tag.product_tag_image"
-                    t-field="tag.product_tag_image"
-                    class="mb-2"
-                    t-options="{'widget': 'image',
-                                'style': 'border-radius: 40% !important;
-                                            height: 30px;
-                                            width: 45px;
-                                            vertical-align: bottom;
-                                            border:1px solid;}',
-                                'align': 'center'}"/>
-            <span t-else=""
-                class="badge rounded-pill bg-secondary align-text-middle"
-                t-attf-style="background-color: #{tag.color} !important; height: 30px  !important;" t-field="tag.name"
-            />
-        </t>
-
+        <div class="o_product_tags o_field_tags d-flex flex-wrap align-items-center gap-2 mb16">
+            <t t-foreach="all_product_tags" t-as="tag">
+                <span t-if="tag.product_tag_image"
+                      t-field="tag.product_tag_image"
+                      t-options="{'widget': 'image',
+                                  'class': 'o_product_tag_img img-fluid'}"/>
+            </t>
+            <t t-foreach="all_product_tags" t-as="tag">
+                <span class="position-relative py-1 px-2">
+                    <span class="position-absolute top-0 start-0 w-100 h-100 rounded"
+                          t-attf-style="background-color: #{tag.color}; opacity: .2;"/>
+                    <span class="text-nowrap small"
+                          t-attf-style="color: #{tag.color}"
+                          t-field="tag.name"/>
+                </span>
+            </t>
+        </div>
     </template>
 
     <template id="alternative_products" name="Alternative Products" inherit_id="website_sale.product" active="True">
