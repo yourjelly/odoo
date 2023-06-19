@@ -266,6 +266,7 @@ class TestHttpStatic(TestHttpStaticCommon):
 
     def test_static16_public_access_rights(self):
         public_user = self.env.ref('base.public_user')
+        public_user.active = True
 
         with self.subTest('model access rights'):
             res = self.url_open(f'/web/content/res.users/{public_user.id}/image_128')
