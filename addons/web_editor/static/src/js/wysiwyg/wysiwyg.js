@@ -156,7 +156,7 @@ export class Wysiwyg extends Component {
 
         const colorPaletteCommonOptions = {
             excluded: ['transparent_grayscale'],
-            getDocument: ()=> this.props.options.document,
+            document: this.props.options.document,
             selectedTab: 'theme-colors',
             withGradients: true,
             onColorLeave: () => {
