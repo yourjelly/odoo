@@ -41,8 +41,8 @@ export class Colorpicker extends Component {
         noTransparency: { type: Boolean, optional: true },
         colorPreview: { type: Boolean, optional: true },
         stopClickPropagation: { type: Boolean, optional: true },
-        onColorpickerSelect: { type: Function, optional: true },
-        onColorpickerPreview: { type: Function, optional: true },
+        onColorSelect: { type: Function, optional: true },
+        onColorPreview: { type: Function, optional: true },
         onInputEnter: { type: Function, optional: true },
     };
     static defaultProps = {
@@ -51,8 +51,8 @@ export class Colorpicker extends Component {
         noTransparency: false,
         colorPreview: false,
         stopClickPropagation: false,
-        onColorpickerSelect: () => {},
-        onColorpickerPreview: () => {},
+        onColorSelect: () => {},
+        onColorPreview: () => {},
         onInputEnter: () => {},
     };
 
@@ -328,7 +328,7 @@ export class Colorpicker extends Component {
      * @private
      */
     _colorSelected() {
-        this.props.onColorpickerSelect(this.colorComponents);
+        this.props.onColorSelect(this.colorComponents);
     }
     /**
      * Updates css color representation.
@@ -344,7 +344,7 @@ export class Colorpicker extends Component {
             {cssColor: convertRgbaToCSSColor(r, g, b, a)}
         );
         if (this.previewActive) {
-            this.props.onColorpickerPreview(this.colorComponents);
+            this.props.onColorPreview(this.colorComponents);
         }
     }
 
