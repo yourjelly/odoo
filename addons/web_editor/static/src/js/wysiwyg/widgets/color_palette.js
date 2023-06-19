@@ -32,13 +32,13 @@ export class ColorPalette extends Component {
       *
       * @static
       */
-    static async loadDependencies(getArch) {
+    static async loadDependencies(getTemplate) {
         // Public user using the editor may have a colorpalette but with
         // the default wysiwyg ones.
         if (!session.is_website_user) {
             // We can call the colorPalette multiple times but only need 1 rpc
             if (!colorpickerTemplateProm && !colorpickerArch) {
-                colorpickerTemplateProm = getArch().then(arch => colorpickerArch = arch);
+                colorpickerTemplateProm = getTemplate().then(arch => colorpickerArch = arch);
 
             }
             return colorpickerTemplateProm;
@@ -58,7 +58,7 @@ export class ColorPalette extends Component {
         opacity: { type: Number, optional: true },
         selectedTab: { type: String, optional: true },
         withGradients: { type: Boolean, optional: true },
-        getArch: { type: Function,  optional: true },
+        getTemplate: { type: Function,  optional: true },
         onSetColorNames: { type: Function, optional: true },
         onColorHover: { type: Function, optional: true },
         onColorPicked: { type: Function, optional: true },
@@ -96,8 +96,8 @@ export class ColorPalette extends Component {
     setup() {
         this.init();
         onWillStart(async () => {
-            if (this.props.getArch) {
-                await ColorPalette.loadDependencies(this.props.getArch);
+            if (this.props.getTemplate) {
+                await ColorPalette.loadDependencies(this.props.getTemplate);
             }
         });
         onMounted(async () => {
