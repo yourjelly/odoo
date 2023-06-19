@@ -162,11 +162,9 @@ export class Wysiwyg extends Component {
             onColorLeave: () => {
                 this.odooEditor.historyRevertCurrentStep();
             },
-            onInputEnter: () => {
-                // todo: make it work
-                // const $childElement = $dropdown.children('.dropdown-toggle');
-                // const dropdownToggle = new Dropdown($childElement);
-                // dropdownToggle.hide();
+            onInputEnter: (ev) => {
+                const pickergroup = ev.target.closest('.colorpicker-group');
+                $(pickergroup.querySelector('.dropdown-toggle')).dropdown('hide');
             },
 
             getTemplate: this._getColorpickerTemplate.bind(this),

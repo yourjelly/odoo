@@ -362,7 +362,7 @@ export class Colorpicker extends Component {
                 this._onChangeInputs(ev);
             }
             ev.preventDefault();
-            this.props.onInputEnter();
+            this.props.onInputEnter(ev);
         }
     }
     /**
