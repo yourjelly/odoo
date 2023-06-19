@@ -131,11 +131,11 @@ export class QWebPlugin {
         });
     }
     _makeBranchingSelection() {
-        const document = this._options.document || window.document;
-        this._selectElWrapper = document.createElement('div');
+        const doc = this._document;
+        this._selectElWrapper = doc.createElement('div');
         this._selectElWrapper.classList.add('oe-qweb-select');
         this._selectElWrapper.innerHTML = '';
-        document.body.append(this._selectElWrapper);
+        doc.body.append(this._selectElWrapper);
         this._hideBranchingSelection();
     }
     _showBranchingSelection(target) {
@@ -179,13 +179,18 @@ export class QWebPlugin {
         );
     }
     _updateBranchingSelectionPosition(target) {
-        window.addEventListener('mousewheel', this._hideBranchingSelection);
+        const doc = this._document;
+        const localWindow = doc.defaultView;
+        localWindow.addEventListener('scroll', this._hideBranchingSelection);
 
         const box = target.getBoundingClientRect();
         const selBox = this._selectElWrapper.getBoundingClientRect();
 
-        this._selectElWrapper.style.left = `${window.scrollX + box.left}px`;
-        this._selectElWrapper.style.top = `${window.scrollY + box.top - selBox.height}px`;
+        this._selectElWrapper.style.left = `${localWindow.scrollX + box.left}px`;
+
+        // cannot be outside of the window
+        const top = Math.max(localWindow.scrollY + box.top - selBox.height, 0);
+        this._selectElWrapper.style.top = `${top}px`;
     }
     _renderBranchingSelection(target) {
         const selectEl = document.createElement('select');
