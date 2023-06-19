@@ -402,6 +402,7 @@ class AccountPartialReconcile(models.Model):
         for move_values in tax_cash_basis_values_per_move.values():
             move = move_values['move']
             pending_cash_basis_lines = []
+            analytics = move.line_ids.mapped('analytic_distribution')
 
             for partial_values in move_values['partials']:
                 partial = partial_values['partial']
@@ -449,11 +450,29 @@ class AccountPartialReconcile(models.Model):
                         # Tax line.
 
                         cb_line_vals = self._prepare_cash_basis_tax_line_vals(line, balance, amount_currency)
+                        cb_line_vals['analytic_distribution'] = {}
+                        if analytics:
+                            res = {}
+                            ratio = 1.0
+                            if move.amount_tax != 0:
+                                ratio = abs(line.balance / move.amount_tax)
+                            for distribution in analytics:
+                                if distribution:
+                                    for analytic_id, analytic_percent in distribution.items():
+                                        res[analytic_id] = res.get(analytic_id, 0.0) + analytic_percent * ratio
+                            cb_line_vals['analytic_distribution'] = res
                         grouping_key = self._get_cash_basis_tax_line_grouping_key_from_vals(cb_line_vals)
                     elif caba_treatment == 'base':
                         # Base line.
 
                         cb_line_vals = self._prepare_cash_basis_base_line_vals(line, balance, amount_currency)
+                        cb_line_vals['analytic_distribution'] = {}
+                        if line.analytic_distribution:
+                            ratio = 1.0
+                            if move.amount_untaxed != 0:
+                                ratio = abs(line.balance / move.amount_untaxed)
+                            for analytic_id, analytic_percent in line.analytic_distribution.items():
+                                cb_line_vals['analytic_distribution'][analytic_id] = cb_line_vals['analytic_distribution'].get(analytic_id, 0) + analytic_percent * ratio
                         grouping_key = self._get_cash_basis_base_line_grouping_key_from_vals(cb_line_vals)
 
                     if grouping_key in partial_lines_to_create:
@@ -467,6 +486,7 @@ class AccountPartialReconcile(models.Model):
                             'debit': balance if balance > 0 else 0,
                             'credit': -balance if balance < 0 else 0,
                             'amount_currency': aggregated_vals['amount_currency'] + cb_line_vals['amount_currency'],
+                            'analytic_distribution': {**aggregated_vals['analytic_distribution'], **cb_line_vals['analytic_distribution']},
                         })
 
                         if caba_treatment == 'tax':
@@ -503,6 +523,7 @@ class AccountPartialReconcile(models.Model):
                         tax_line = aggregated_vals['tax_line']
                         counterpart_line_vals = self._prepare_cash_basis_counterpart_tax_line_vals(tax_line, line_vals)
                         counterpart_line_vals['sequence'] = sequence + 1
+                        # counterpart_line_vals['analytic_distribution'] = line_vals['analytic_distribution']
 
                         if tax_line.account_id.reconcile:
                             move_index = len(moves_to_create)
@@ -513,6 +534,8 @@ class AccountPartialReconcile(models.Model):
 
                         counterpart_line_vals = self._prepare_cash_basis_counterpart_base_line_vals(line_vals)
                         counterpart_line_vals['sequence'] = sequence + 1
+
+                    counterpart_line_vals['analytic_distribution'] = line_vals['analytic_distribution']
 
                     sequence += 2
 
