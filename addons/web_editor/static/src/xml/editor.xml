@@ -74,7 +74,6 @@
                 </div>
             </div>
 
-            <!-- todo: to test -->
             <t t-if="!this.isMobile()">
                 <div t-if="props.showFontSize" id="font-size" t-attf-class="btn-group {{ props.dropDirection }}">
                     <button type="button" class="btn dropdown-toggle"
