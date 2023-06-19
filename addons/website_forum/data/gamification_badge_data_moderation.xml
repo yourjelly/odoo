@@ -60,7 +60,7 @@
             <field name="display_mode">boolean</field>
             <field name="model_id" ref="website_forum.model_forum_post"/>
             <field name="condition">higher</field>
-            <field name="domain">[('vote_count', '>=', 3), ('active', '=', False)]</field>
+            <field name="domain">[('vote_count', '>=', 3), ('state', '=', 'deleted')]</field>
             <field name="batch_mode">True</field>
             <field name="batch_distinctive_field" ref="website_forum.field_forum_post__create_uid"/>
             <field name="batch_user_expression">user.id</field>
@@ -167,7 +167,7 @@
             <field name="display_mode">boolean</field>
             <field name="model_id" ref="website_forum.model_forum_post"/>
             <field name="condition">higher</field>
-            <field name="domain">[('vote_count', '&lt;=', -3), ('active', '=', False)]</field>
+            <field name="domain">[('vote_count', '&lt;=', -3), ('state', '=', 'deleted')]</field>
             <field name="batch_mode">True</field>
             <field name="batch_distinctive_field" ref="website_forum.field_forum_post__create_uid"/>
             <field name="batch_user_expression">user.id</field>

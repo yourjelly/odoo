@@ -36,10 +36,9 @@ class Post(models.Model):
         [
             ('active', 'Active'), ('pending', 'Waiting Validation'),
             ('close', 'Closed'), ('offensive', 'Offensive'),
-            ('flagged', 'Flagged'),
+            ('flagged', 'Flagged'), ('deleted', 'Deleted')
         ], string='Status', default='active')
     views = fields.Integer('Views', default=0, readonly=True, copy=False)
-    active = fields.Boolean('Active', default=True)
     website_message_ids = fields.One2many(domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ['email', 'comment'])])
     website_url = fields.Char('Website URL', compute='_compute_website_url')
     website_id = fields.Many2one(related='forum_id.website_id', readonly=True)
@@ -259,7 +258,7 @@ class Post(models.Model):
             post.can_downvote = is_admin or user.karma >= post.forum_id.karma_downvote or post.user_vote == 1
             post.can_comment = is_admin or user.karma >= post.karma_comment
             post.can_comment_convert = is_admin or user.karma >= post.karma_comment_convert
-            post.can_view = is_admin or user.karma >= post.karma_close or (post_sudo.create_uid.karma > 0 and (post_sudo.active or post_sudo.create_uid == user))
+            post.can_view = is_admin or user.karma >= post.karma_close or (post_sudo.create_uid.karma > 0 and (post_sudo.state != 'deleted' or post_sudo.create_uid == user))
             post.can_display_biography = is_admin or post_sudo.create_uid.karma >= post.forum_id.karma_user_bio
             post.can_post = is_admin or user.karma >= post.forum_id.karma_post
             post.can_flag = is_admin or user.karma >= post.forum_id.karma_flag
@@ -289,7 +288,7 @@ class Post(models.Model):
                 or (p.create_uid != %s and f.karma_close_all <= %s)
                 or (
                     u.karma > 0
-                    and (p.active or p.create_uid = %s)
+                    and (p.state != deleted or p.create_uid = %s)
                 )
         """
 
@@ -323,7 +322,7 @@ class Post(models.Model):
 
         for post in posts:
             # deleted or closed questions
-            if post.parent_id and (post.parent_id.state == 'close' or post.parent_id.active is False):
+            if post.parent_id and (post.parent_id.state == 'close' or post.parent_id.state == 'deleted'):
                 raise UserError(_('Posting answer on a [Deleted] or [Closed] question is not possible.'))
             # karma-based access
             if not post.parent_id and not post.can_ask:
@@ -366,9 +365,9 @@ class Post(models.Model):
                     if not post.can_flag:
                         raise AccessError(_('%d karma required to flag a post.', post.forum_id.karma_flag))
                     trusted_keys += ['state', 'flag_user_id']
-            if 'active' in vals:
-                if not post.can_unlink:
-                    raise AccessError(_('%d karma required to delete or reactivate a post.', post.karma_unlink))
+                elif vals['state'] == 'deleted':
+                    if not post.can_unlink:
+                        raise AccessError(_('%d karma required to delete or reactivate a post.', post.karma_unlink))
             if 'is_correct' in vals:
                 if not post.can_accept:
                     raise AccessError(_('%d karma required to accept or refuse an answer.', post.karma_accept))
@@ -397,7 +396,7 @@ class Post(models.Model):
                     body, subtype_xmlid = _('Question Edited'), 'website_forum.mt_question_edit'
                     obj_id = post
                 obj_id.message_post(body=body, subtype_xmlid=subtype_xmlid)
-        if 'active' in vals:
+        if vals['state'] != 'deleted':
             answers = self.env['forum.post'].with_context(active_test=False).search([('parent_id', 'in', self.ids)])
             if answers:
                 answers.write({'active': vals['active']})
@@ -537,7 +536,6 @@ class Post(models.Model):
                 )
             post.write({
                 'state': 'active',
-                'active': True,
                 'moderator_id': self.env.user.id,
             })
             post.post_notification()
@@ -585,7 +583,6 @@ class Post(models.Model):
                 'moderator_id': self.env.user.id,
                 'closed_date': fields.Datetime.now(),
                 'closed_reason_id': reason_id,
-                'active': False,
             })
         return True
 
@@ -805,10 +802,12 @@ class Post(models.Model):
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
         }
-
+        values = options.get('values')
         domain = website.website_domain()
-        domain += [('parent_id', '=', False), ('state', '=', 'active'), ('can_view', '=', True)]
+        domain += [('parent_id', '=', False), ('can_view', '=', True)]
         forum = options.get('forum')
+        if values.get('user').karma < values.get('forum').karma_moderate:
+            domain += [('state', '=', 'active')]
         if forum:
             domain += [('forum_id', '=', unslug(forum)[1])]
         tags = options.get('tag')
@@ -821,6 +820,10 @@ class Post(models.Model):
             domain += [('has_validated_answer', '=', True)]
         elif filters == 'unsolved':
             domain += [('has_validated_answer', '=', False)]
+        if filters == 'deleted':
+            domain += [('state', '=', 'deleted')]
+        else:
+            domain += [('state', '!=', 'deleted')]
         user = self.env.user
         my = options.get('my')
         if my == 'mine':

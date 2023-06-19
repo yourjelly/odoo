@@ -14,14 +14,13 @@
                         </div>
                     </button>
                 </div>
-                <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" attrs="{'invisible': [('state', '1=', 'deleted')]}"/>
                 <label for="name"/>
                 <h1>
                     <field name="name" placeholder="e.g. When should I plant my tomatoes?"/>
                 </h1>
                 <group>
                     <group name="forum_details">
-                        <field name="active" invisible="1"/>
                         <field name="forum_id"/>
                         <field name="website_id" groups="website.group_multi_website"/>
                         <field name="parent_id"/>
@@ -84,7 +83,7 @@
             <filter name="filter_create_date" date="create_date"/>
             <filter name="filter_write_date" date="write_date"/>
             <separator/>
-            <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+            <filter string="Archived" name="inactive" domain="[('state','=','deleted')]"/>
             <group expand="0" string="Group By">
                 <filter string="Forum" name="forum" domain="[]" context="{'group_by': 'forum_id'}"/>
                 <filter string="Author" name="author" domain="[]" context="{'group_by': 'create_uid'}"/>
@@ -111,7 +110,6 @@
     <field name="priority">99</field>
     <field name="arch" type="xml">
         <tree js_class="website_pages_list" create="false" type="object" action="go_to_website">
-            <field name="active" invisible="1"/>
             <field name="name"/>
             <field name="website_url"/>
 

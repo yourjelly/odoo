@@ -76,7 +76,7 @@ class WebsiteForum(WebsiteProfile):
             if not qs or qs.lower() in loc:
                 yield {'loc': loc}
 
-    def _get_forum_port_search_options(self, forum=None, tag=None, filters=None, my=None, **post):
+    def _get_forum_port_search_options(self, forum=None, tag=None, filters=None, my=None, values=None, **post):
         return {
             'displayDescription': False,
             'displayDetail': False,
@@ -88,6 +88,7 @@ class WebsiteForum(WebsiteProfile):
             'tag': str(tag.id) if tag else None,
             'filters': filters,
             'my': my,
+            'values':values,
         }
 
     @http.route(['/forum/<model("forum.forum"):forum>',
@@ -109,12 +110,14 @@ class WebsiteForum(WebsiteProfile):
 
         if not sorting:
             sorting = forum.default_order
+        values = self._prepare_user_values(forum=forum, searches=post, header={'ask_hide': not forum.active})
 
         options = self._get_forum_port_search_options(
             forum=forum,
             tag=tag,
             filters=filters,
             my=my,
+            values=values,
             **post
         )
         question_count, details, fuzzy_search_term = request.website._search_with_fuzzy("forum_posts_only", search,
@@ -306,12 +309,12 @@ class WebsiteForum(WebsiteProfile):
 
     @http.route('/forum/<model("forum.forum"):forum>/question/<model("forum.post"):question>/delete', type='http', auth="user", methods=['POST'], website=True)
     def question_delete(self, forum, question, **kwarg):
-        question.active = False
+        question.state = 'deleted'
         return request.redirect("/forum/%s/%s" % (slug(forum), slug(question)))
 
     @http.route('/forum/<model("forum.forum"):forum>/question/<model("forum.post"):question>/undelete', type='http', auth="user", methods=['POST'], website=True)
     def question_undelete(self, forum, question, **kwarg):
-        question.active = True
+        question.state = 'active'
         return request.redirect("/forum/%s/%s" % (slug(forum), slug(question)))
 
     # Post
@@ -491,7 +494,7 @@ class WebsiteForum(WebsiteProfile):
             raise werkzeug.exceptions.NotFound()
 
         Post = request.env['forum.post']
-        domain = [('forum_id', '=', forum.id), ('state', '=', 'offensive'), ('active', '=', False)]
+        domain = [('forum_id', '=', forum.id), ('state', '=', 'offensive'), ('state', '=', 'deleted')]
         offensive_posts_ids = Post.search(domain, order='write_date DESC')
 
         values = self._prepare_user_values(forum=forum)
