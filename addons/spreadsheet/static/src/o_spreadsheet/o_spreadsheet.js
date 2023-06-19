@@ -9516,9 +9516,9 @@
         "META",
     ];
     function arg(definition, description = "") {
-        return makeArg(`${definition} ${description}`);
+        return makeArg(definition, description);
     }
-    function makeArg(str) {
+    function makeArg(str, description) {
         let parts = str.match(ARG_REGEXP);
         let name = parts[1].trim();
         let types = [];
@@ -9548,7 +9548,6 @@
                 defaultValue = param.trim().slice(8);
             }
         }
-        let description = parts[3].trim();
         const result = {
             name,
             description,
@@ -20929,6 +20928,7 @@
                         (this.autoCompleteState.selectedIndex + 1) % this.autoCompleteState.values.length;
                 }
             }
+            this.updateCursorIfNeeded();
         }
         processTabKey(ev) {
             ev.preventDefault();
@@ -20997,10 +20997,12 @@
             }
             else {
                 ev.stopPropagation();
+                this.updateCursorIfNeeded();
             }
-            const { start, end } = this.contentHelper.getCurrentSelection();
-            if (!this.env.model.getters.isSelectingForComposer() &&
-                !(ev.key === "Enter" && (ev.altKey || ev.ctrlKey))) {
+        }
+        updateCursorIfNeeded() {
+            if (!this.env.model.getters.isSelectingForComposer()) {
+                const { start, end } = this.contentHelper.getCurrentSelection();
                 this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", { start, end });
                 this.isKeyStillDown = true;
             }
@@ -21058,7 +21060,12 @@
                 };
             });
             if (searchTerm) {
-                values = fuzzyLookup(searchTerm, values, (t) => t.text);
+                if (searchTerm.toLowerCase() === "true" || searchTerm.toLowerCase() === "false") {
+                    values = [];
+                }
+                else {
+                    values = fuzzyLookup(searchTerm, values, (t) => t.text);
+                }
             }
             else {
                 // alphabetical order
@@ -34190,6 +34197,7 @@
         }
         exportForExcel(data) {
             for (const sheetData of data.sheets) {
+                const sheetId = sheetData.id;
                 for (const tableData of sheetData.filterTables) {
                     const tableZone = toZone(tableData.range);
                     const filters = [];
@@ -34205,20 +34213,20 @@
                         if (!filter)
                             continue;
                         const valuesInFilterZone = filter.filteredZone
-                            ? positions(filter.filteredZone)
-                                .map(({ col, row }) => this.getters.getEvaluatedCell({ sheetId: sheetData.id, col, row }))
-                                .filter((cell) => cell.type !== CellValueType.empty)
-                                .map((cell) => cell.formattedValue)
+                            ? positions(filter.filteredZone).map((position) => this.getters.getEvaluatedCell({ sheetId, ...position }).formattedValue)
                             : [];
-                        // In xlsx, filtered values = values that are displayed, not values that are hidden
-                        const xlsxFilteredValues = valuesInFilterZone.filter((val) => !filteredValues.includes(val));
-                        filters.push({ colId: i, filteredValues: [...new Set(xlsxFilteredValues)] });
-                        // In xlsx, filter header should ALWAYS be a string and should be unique
-                        const headerPosition = {
-                            col: filter.col,
-                            row: filter.zoneWithHeaders.top,
-                            sheetId: sheetData.id,
-                        };
+                        if (filteredValues.length) {
+                            const xlsxDisplayedValues = valuesInFilterZone
+                                .filter((val) => val)
+                                .filter((val) => !filteredValues.includes(val));
+                            filters.push({
+                                colId: i,
+                                displayedValues: [...new Set(xlsxDisplayedValues)],
+                                displayBlanks: !filteredValues.includes("") && valuesInFilterZone.some((val) => !val),
+                            });
+                        }
+                        // In xlsx, filter header should ALWAYS be a string and should be unique in the table
+                        const headerPosition = { col: filter.col, row: filter.zoneWithHeaders.top, sheetId };
                         const headerString = this.getters.getEvaluatedCell(headerPosition).formattedValue;
                         const headerName = this.getUniqueColNameForExcel(i, headerString, headerNames);
                         headerNames.push(headerName);
@@ -46546,15 +46554,10 @@
   `;
     }
     function addFilterColumns(table) {
-        const tableZone = toZone(table.range);
         const columns = [];
-        for (const i of range(0, zoneToDimension(tableZone).numberOfCols)) {
-            const filter = table.filters[i];
-            if (!filter || !filter.filteredValues.length) {
-                continue;
-            }
+        for (const filter of table.filters) {
             const colXml = escapeXml /*xml*/ `
-      <filterColumn ${formatAttributes([["colId", i]])}>
+      <filterColumn ${formatAttributes([["colId", filter.colId]])}>
         ${addFilter(filter)}
       </filterColumn>
       `;
@@ -46563,9 +46566,10 @@
         return columns;
     }
     function addFilter(filter) {
-        const filterValues = filter.filteredValues.map((val) => escapeXml /*xml*/ `<filter ${formatAttributes([["val", val]])}/>`);
+        const filterValues = filter.displayedValues.map((val) => escapeXml /*xml*/ `<filter ${formatAttributes([["val", val]])}/>`);
+        const filterAttributes = filter.displayBlanks ? [["blank", 1]] : [];
         return escapeXml /*xml*/ `
-  <filters>
+  <filters ${formatAttributes(filterAttributes)}>
       ${joinXmlNodes(filterValues)}
   </filters>
 `;
@@ -46684,8 +46688,13 @@
                     const sheetId = parseSheetUrl(url);
                     const sheet = data.sheets.find((sheet) => sheet.id === sheetId);
                     const location = sheet ? `${sheet.name}!A1` : INCORRECT_RANGE_STRING;
+                    const hyperlinkAttributes = [
+                        ["display", label],
+                        ["location", location],
+                        ["ref", xc],
+                    ];
                     linkNodes.push(escapeXml /*xml*/ `
-          <hyperlink display="${label}" location="${location}" ref="${xc}"/>
+          <hyperlink ${formatAttributes(hyperlinkAttributes)}/>
         `);
                 }
                 else {
@@ -46694,8 +46703,12 @@
                         type: XLSX_RELATION_TYPE.hyperlink,
                         targetMode: "External",
                     });
+                    const hyperlinkAttributes = [
+                        ["r:id", linkRelId],
+                        ["ref", xc],
+                    ];
                     linkNodes.push(escapeXml /*xml*/ `
-          <hyperlink r:id="${linkRelId}" ref="${xc}"/>
+          <hyperlink ${formatAttributes(hyperlinkAttributes)}/>
         `);
                 }
             }
@@ -47606,8 +47619,8 @@
 
 
     __info__.version = '16.3.3';
-    __info__.date = '2023-06-12T14:14:14.495Z';
-    __info__.hash = 'd3ab96f';
+    __info__.date = '2023-06-19T09:36:14.328Z';
+    __info__.hash = '7799c92';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
