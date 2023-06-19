@@ -2875,11 +2875,19 @@
         constructor(args, getSheetSize) {
             this.getSheetSize = getSheetSize;
             this._zone = args.zone;
-            this.parts = args.parts;
             this.prefixSheet = args.prefixSheet;
             this.invalidXc = args.invalidXc;
+            // FIXME - we never check the sanity of sheetId
             this.sheetId = args.sheetId;
             this.invalidSheetName = args.invalidSheetName;
+            let _fixedParts = [...args.parts];
+            if (args.parts.length === 1 && getZoneArea(this.zone) > 1) {
+                _fixedParts.push({ ...args.parts[0] });
+            }
+            else if (args.parts.length === 2 && getZoneArea(this.zone) === 1) {
+                _fixedParts.pop();
+            }
+            this.parts = _fixedParts;
         }
         static fromRange(range, getters) {
             if (range instanceof RangeImpl) {
@@ -4304,8 +4312,6 @@
         "START",
         "ACTIVATE_SHEET",
         "COPY",
-        "PREPARE_SELECTION_INPUT_EXPANSION",
-        "STOP_SELECTION_INPUT",
         "RESIZE_SHEETVIEW",
         "SET_VIEWPORT_OFFSET",
         "SELECT_SEARCH_NEXT_MATCH",
@@ -22828,7 +22834,6 @@
             const mouseUpSelect = () => {
                 this.state.isSelecting = false;
                 this.lastSelectedElementIndex = null;
-                this.env.model.dispatch(ev.ctrlKey ? "PREPARE_SELECTION_INPUT_EXPANSION" : "STOP_SELECTION_INPUT");
                 this._computeGrabDisplay(ev);
             };
             dragAndDropBeyondTheViewport(this.env, mouseMoveSelect, mouseUpSelect);
@@ -23393,9 +23398,7 @@
             let lastCol = isLeft ? z.left : z.right;
             let lastRow = isTop ? z.top : z.bottom;
             let currentZone = z;
-            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", {
-                range: this.env.model.getters.getRangeDataFromZone(activeSheetId, currentZone),
-            });
+            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", { zone: currentZone });
             const mouseMove = (col, row) => {
                 if (lastCol !== col || lastRow !== row) {
                     lastCol = clip(col === -1 ? lastCol : col, 0, this.env.model.getters.getNumberCols(activeSheetId) - 1);
@@ -23406,21 +23409,17 @@
                         right: Math.max(pivotCol, lastCol),
                         bottom: Math.max(pivotRow, lastRow),
                     };
-                    newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
-                        this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeFromZone(activeSheetId, this.env.model.getters.getUnboundedZone(activeSheetId, newZone)).rangeData,
-                        });
+                        this.env.model.selection.selectZone({
+                            cell: { col: newZone.left, row: newZone.top },
+                            zone: newZone,
+                        }, { unbounded: true });
                         currentZone = newZone;
                     }
                 }
             };
             const mouseUp = () => {
                 this.highlightState.shiftingMode = "none";
-                // To do:
-                // Command used here to restore focus to the current composer,
-                // to be changed when refactoring the 'edition' plugin
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
             };
             dragAndDropBeyondTheViewport(this.env, mouseMove, mouseUp);
         }
@@ -23436,9 +23435,7 @@
             const deltaRowMin = -z.top;
             const deltaRowMax = this.env.model.getters.getNumberRows(activeSheetId) - z.bottom - 1;
             let currentZone = z;
-            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", {
-                range: this.env.model.getters.getRangeDataFromZone(activeSheetId, currentZone),
-            });
+            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", { zone: currentZone });
             let lastCol = initCol;
             let lastRow = initRow;
             const mouseMove = (col, row) => {
@@ -23453,21 +23450,17 @@
                         right: z.right + deltaCol,
                         bottom: z.bottom + deltaRow,
                     };
-                    newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
-                        this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeFromZone(activeSheetId, this.env.model.getters.getUnboundedZone(activeSheetId, newZone)).rangeData,
-                        });
+                        this.env.model.selection.selectZone({
+                            cell: { col: newZone.left, row: newZone.top },
+                            zone: newZone,
+                        }, { unbounded: true });
                         currentZone = newZone;
                     }
                 }
             };
             const mouseUp = () => {
                 this.highlightState.shiftingMode = "none";
-                // To do:
-                // Command used here to restore focus to the current composer,
-                // to be changed when refactoring the 'edition' plugin
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
             };
             dragAndDropBeyondTheViewport(this.env, mouseMove, mouseUp);
         }
@@ -23957,9 +23950,6 @@
         // Zone selection with mouse
         // ---------------------------------------------------------------------------
         onCellClicked(col, row, { ctrlKey, shiftKey }) {
-            if (ctrlKey) {
-                this.env.model.dispatch("PREPARE_SELECTION_INPUT_EXPANSION");
-            }
             if (this.env.model.getters.hasOpenedPopover()) {
                 this.closeOpenedPopover();
             }
@@ -23985,7 +23975,6 @@
                 }
             };
             const onMouseUp = () => {
-                this.env.model.dispatch("STOP_SELECTION_INPUT");
                 if (this.env.model.getters.isPaintingFormat()) {
                     this.env.model.dispatch("PASTE", {
                         target: this.env.model.getters.getSelectedZones(),
@@ -37723,8 +37712,7 @@
         static getters = [];
         ranges = [];
         focusedRangeIndex = null;
-        activeSheet;
-        willAddNewRange = false;
+        inputSheetId;
         constructor(config, initialRanges, inputHasSingleRange) {
             if (inputHasSingleRange && initialRanges.length > 1) {
                 throw new Error("Input with a single range cannot be instantiated with several range references.");
@@ -37732,7 +37720,7 @@
             super(config);
             this.inputHasSingleRange = inputHasSingleRange;
             this.insertNewRange(0, initialRanges);
-            this.activeSheet = this.getters.getActiveSheetId();
+            this.inputSheetId = this.getters.getActiveSheetId();
             if (this.ranges.length === 0) {
                 this.insertNewRange(this.ranges.length, [""]);
                 this.focusLast();
@@ -37758,11 +37746,33 @@
             return 0 /* CommandResult.Success */;
         }
         handleEvent(event) {
-            const inputSheetId = this.activeSheet;
-            const sheetId = this.getters.getActiveSheetId();
-            const zone = event.anchor.zone;
-            const range = this.getters.getRangeFromZone(sheetId, event.options.unbounded ? this.getters.getUnboundedZone(sheetId, zone) : zone);
-            this.add([this.getters.getSelectionRangeString(range, inputSheetId)]);
+            if (this.focusedRangeIndex === null) {
+                return;
+            }
+            const inputSheetId = this.inputSheetId;
+            const activeSheetId = this.getters.getActiveSheetId();
+            const zone = event.options.unbounded
+                ? this.getters.getUnboundedZone(activeSheetId, event.anchor.zone)
+                : event.anchor.zone;
+            const range = this.getters.getRangeFromZone(activeSheetId, zone);
+            const willAddNewRange = event.mode === "newAnchor" &&
+                !this.inputHasSingleRange &&
+                this.ranges[this.focusedRangeIndex].xc.trim() !== "";
+            if (willAddNewRange) {
+                const xc = this.getters.getSelectionRangeString(range, inputSheetId);
+                this.insertNewRange(this.ranges.length, [xc]);
+                this.focusLast();
+            }
+            else {
+                let parts = range.parts;
+                const previousXc = this.ranges[this.focusedRangeIndex].xc.trim();
+                if (previousXc) {
+                    parts = RangeImpl.getRangeParts(previousXc, toUnboundedZone(previousXc));
+                }
+                const newRange = range.clone({ parts });
+                const xc = this.getters.getSelectionRangeString(newRange, inputSheetId);
+                this.setRange(this.focusedRangeIndex, [xc]);
+            }
         }
         handle(cmd) {
             switch (cmd.type) {
@@ -37798,16 +37808,6 @@
                         this.removeRange(index);
                     }
                     break;
-                case "STOP_SELECTION_INPUT":
-                    this.willAddNewRange = false;
-                    break;
-                case "PREPARE_SELECTION_INPUT_EXPANSION": {
-                    const index = this.focusedRangeIndex;
-                    if (index !== null && !this.inputHasSingleRange) {
-                        this.willAddNewRange = this.ranges[index].xc.trim() !== "";
-                    }
-                    break;
-                }
                 case "ACTIVATE_SHEET": {
                     if (cmd.sheetIdFrom !== cmd.sheetIdTo) {
                         const { col, row } = this.getters.getNextVisibleCellPosition({
@@ -37818,7 +37818,25 @@
                         const zone = this.getters.expandZone(cmd.sheetIdTo, positionToZone({ col, row }));
                         this.selection.resetAnchor(this, { cell: { col, row }, zone });
                     }
+                    break;
                 }
+                case "START_CHANGE_HIGHLIGHT":
+                    const activeSheetId = this.getters.getActiveSheetId();
+                    const focusIndex = this.ranges.findIndex((range) => {
+                        const { xc, sheetName: sheet } = splitReference(range.xc);
+                        const sheetName = sheet || this.getters.getSheetName(this.inputSheetId);
+                        if (this.getters.getSheetName(activeSheetId) !== sheetName) {
+                            return false;
+                        }
+                        const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
+                        return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), cmd.zone);
+                    });
+                    if (focusIndex !== -1) {
+                        this.focus(focusIndex);
+                        const { left, top } = cmd.zone;
+                        this.selection.resetAnchor(this, { cell: { col: left, row: top }, zone: cmd.zone });
+                    }
+                    break;
             }
         }
         // ---------------------------------------------------------------------------
@@ -37846,19 +37864,6 @@
         }
         unfocus() {
             this.focusedRangeIndex = null;
-        }
-        add(newRanges) {
-            if (this.focusedRangeIndex === null || newRanges.length === 0) {
-                return;
-            }
-            if (this.willAddNewRange) {
-                this.insertNewRange(this.ranges.length, newRanges);
-                this.focusLast();
-                this.willAddNewRange = false;
-            }
-            else {
-                this.setRange(this.focusedRangeIndex, newRanges);
-            }
         }
         setContent(index, xc) {
             this.ranges[index] = {
@@ -37905,12 +37910,12 @@
         inputToHighlights({ xc, color }) {
             const XCs = this.cleanInputs([xc])
                 .filter((range) => this.getters.isRangeValid(range))
-                .filter((reference) => this.shouldBeHighlighted(this.activeSheet, reference));
+                .filter((reference) => this.shouldBeHighlighted(this.inputSheetId, reference));
             return XCs.map((xc) => {
                 const { sheetName } = splitReference(xc);
                 return {
-                    zone: this.getters.getRangeFromSheetXC(this.activeSheet, xc).zone,
-                    sheetId: (sheetName && this.getters.getSheetIdByName(sheetName)) || this.activeSheet,
+                    zone: this.getters.getRangeFromSheetXC(this.inputSheetId, xc).zone,
+                    sheetId: (sheetName && this.getters.getSheetIdByName(sheetName)) || this.inputSheetId,
                     color,
                 };
             });
@@ -40222,10 +40227,7 @@
         currentTokens = [];
         selectionStart = 0;
         selectionEnd = 0;
-        selectionInitialStart = 0;
         initialContent = "";
-        previousRef = "";
-        previousRange = undefined;
         colorIndexByRange = {};
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -40254,9 +40256,6 @@
             }
         }
         handleEvent(event) {
-            if (this.mode !== "selecting") {
-                return;
-            }
             const sheetId = this.getters.getActiveSheetId();
             let unboundedZone;
             if (event.options.unbounded) {
@@ -40267,10 +40266,17 @@
             }
             switch (event.mode) {
                 case "newAnchor":
-                    this.insertSelectedRange(unboundedZone);
+                    if (this.mode === "selecting") {
+                        this.insertSelectedRange(unboundedZone);
+                    }
                     break;
                 default:
-                    this.replaceSelectedRanges(unboundedZone);
+                    if (this.mode === "selecting") {
+                        this.replaceSelectedRange(unboundedZone);
+                    }
+                    else {
+                        this.updateComposerRange(event.previousAnchor.zone, unboundedZone);
+                    }
                     break;
             }
         }
@@ -40327,35 +40333,12 @@
                     }
                     break;
                 case "START_CHANGE_HIGHLIGHT":
-                    // FIXME: thiws whole ordeal could be handled with the Selection Processor which would extend the feature to selection inputs
-                    this.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-                    // FIXME: we should check range SheetId compared to this.activeSheetId r maybe not have a sheetId in the payload ??
-                    const range = this.getters.getRangeFromRangeData(cmd.range);
-                    const previousRefToken = this.currentTokens
-                        .filter((token) => token.type === "REFERENCE")
-                        .find((token) => {
-                        const { xc, sheetName: sheet } = splitReference(token.value);
-                        const sheetName = sheet || this.getters.getSheetName(this.sheetId);
-                        const activeSheetId = this.getters.getActiveSheetId();
-                        if (this.getters.getSheetName(activeSheetId) !== sheetName) {
-                            return false;
-                        }
-                        const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
-                        return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), range.zone);
-                    });
-                    this.previousRef = previousRefToken.value;
-                    this.previousRange = this.getters.getRangeFromSheetXC(this.getters.getActiveSheetId(), this.previousRef);
-                    this.selectionInitialStart = previousRefToken.start;
-                    break;
-                case "CHANGE_HIGHLIGHT":
-                    const cmdRange = this.getters.getRangeFromRangeData(cmd.range);
-                    const newRef = this.getRangeReference(cmdRange, this.previousRange.parts);
-                    this.selectionStart = this.selectionInitialStart;
-                    this.selectionEnd = this.selectionInitialStart + this.previousRef.length;
-                    this.replaceSelection(newRef);
-                    this.previousRef = newRef;
-                    this.selectionStart = this.currentContent.length;
-                    this.selectionEnd = this.currentContent.length;
+                    const { left, top } = cmd.zone;
+                    // changing the highlight can conflit with the 'selecting' mode
+                    if (this.isSelectingForComposer()) {
+                        this.mode = "editing";
+                    }
+                    this.selection.resetAnchor(this, { cell: { col: left, row: top }, zone: cmd.zone });
                     break;
                 case "ACTIVATE_SHEET":
                     if (!this.currentContent.startsWith("=")) {
@@ -40513,7 +40496,6 @@
                 this.selection.resetAnchor(this, { cell: { col: this.col, row: this.row }, zone });
             }
             this.mode = "selecting";
-            this.selectionInitialStart = this.selectionStart;
         }
         /**
          * start the edition of a cell
@@ -40669,19 +40651,52 @@
             const ref = this.getZoneReference(zone);
             if (this.canStartComposerRangeSelection()) {
                 this.insertText(ref, start);
-                this.selectionInitialStart = start;
             }
             else {
                 this.insertText("," + ref, start);
-                this.selectionInitialStart = start + 1;
             }
         }
         /**
          * Replace the current reference selected by the new one.
          * */
-        replaceSelectedRanges(zone) {
+        replaceSelectedRange(zone) {
             const ref = this.getZoneReference(zone);
-            this.replaceText(ref, this.selectionInitialStart, this.selectionEnd);
+            const currentToken = this.getTokenAtCursor();
+            const start = currentToken?.type === "REFERENCE" ? currentToken.start : this.selectionStart;
+            this.replaceText(ref, start, this.selectionEnd);
+        }
+        /**
+         * Replace the reference of the old zone by the new one.
+         */
+        updateComposerRange(oldZone, newZone) {
+            const activeSheetId = this.getters.getActiveSheetId();
+            const tokentAtCursor = this.getTokenAtCursor();
+            const tokens = tokentAtCursor ? [tokentAtCursor, ...this.currentTokens] : this.currentTokens;
+            const previousRefToken = tokens
+                .filter((token) => token.type === "REFERENCE")
+                .find((token) => {
+                const { xc, sheetName: sheet } = splitReference(token.value);
+                const sheetName = sheet || this.getters.getSheetName(this.sheetId);
+                if (this.getters.getSheetName(activeSheetId) !== sheetName) {
+                    return false;
+                }
+                const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
+                return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), oldZone);
+            });
+            // this function assumes that the previous range is always found because
+            // it's called when changing a highlight, which exists by definition
+            let previousRange;
+            if (previousRefToken) {
+                previousRange = this.getters.getRangeFromSheetXC(activeSheetId, previousRefToken.value);
+                this.selectionStart = previousRefToken.start;
+                this.selectionEnd = this.selectionStart + previousRefToken.value.length;
+            }
+            else {
+                throw new Error("Previous range not found");
+            }
+            const newRange = this.getters.getRangeFromZone(activeSheetId, newZone);
+            const newRef = this.getRangeReference(newRange, previousRange?.parts);
+            this.replaceSelection(newRef);
         }
         getZoneReference(zone) {
             const inputSheetId = this.getters.getCurrentEditedCell().sheetId;
@@ -40689,14 +40704,8 @@
             const range = this.getters.getRangeFromZone(sheetId, zone);
             return this.getters.getSelectionRangeString(range, inputSheetId);
         }
-        getRangeReference(range, fixedParts = [{ colFixed: false, rowFixed: false }]) {
+        getRangeReference(range, fixedParts) {
             let _fixedParts = [...fixedParts];
-            if (fixedParts.length === 1 && getZoneArea(range.zone) > 1) {
-                _fixedParts.push({ ...fixedParts[0] });
-            }
-            else if (fixedParts.length === 2 && getZoneArea(range.zone) === 1) {
-                _fixedParts.pop();
-            }
             const newRange = range.clone({ parts: _fixedParts });
             return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell().sheetId);
         }
@@ -48538,8 +48547,8 @@
 
 
     __info__.version = '16.4.0-alpha.4';
-    __info__.date = '2023-06-12T14:15:11.459Z';
-    __info__.hash = '251a52e';
+    __info__.date = '2023-06-19T20:50:12.074Z';
+    __info__.hash = '221ca3d';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

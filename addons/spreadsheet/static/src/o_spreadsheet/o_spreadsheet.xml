@@ -971,11 +971,9 @@
       <t t-if="env.model.getters.getEditionMode() === 'inactive'">
         <Autofill position="getAutofillPosition()" isVisible="isAutofillVisible"/>
       </t>
-      <t t-if="env.model.getters.getEditionMode() !== 'inactive'">
-        <t t-foreach="env.model.getters.getHighlights()" t-as="highlight" t-key="highlight_index">
-          <t t-if="highlight.sheetId === env.model.getters.getActiveSheetId()">
-            <Highlight zone="highlight.zone" color="highlight.color"/>
-          </t>
+      <t t-foreach="env.model.getters.getHighlights()" t-as="highlight" t-key="highlight_index">
+        <t t-if="highlight.sheetId === env.model.getters.getActiveSheetId()">
+          <Highlight zone="highlight.zone" color="highlight.color"/>
         </t>
       </t>
       <Menu
@@ -3872,6 +3870,6 @@
 </odoo>
 <!--
   __info__.version = '16.4.0-alpha.4';
-  __info__.date = '2023-06-12T14:15:15.398Z';
-  __info__.hash = '251a52e';
+  __info__.date = '2023-06-19T20:50:16.758Z';
+  __info__.hash = '221ca3d';
 -->
