@@ -43,7 +43,7 @@ export class Colorpicker extends Component {
         stopClickPropagation: { type: Boolean, optional: true },
         onColorpickerSelect: { type: Function, optional: true },
         onColorpickerPreview: { type: Function, optional: true },
-        onEnterColorpicker: { type: Function, optional: true },
+        onInputEnter: { type: Function, optional: true },
     };
     static defaultProps = {
         document: window.document,
@@ -53,7 +53,7 @@ export class Colorpicker extends Component {
         stopClickPropagation: false,
         onColorpickerSelect: () => {},
         onColorpickerPreview: () => {},
-        onEnterColorpicker: () => {},
+        onInputEnter: () => {},
     };
 
     elRef = useRef('el');
@@ -362,7 +362,7 @@ export class Colorpicker extends Component {
                 this._onChangeInputs(ev);
             }
             ev.preventDefault();
-            this.props.onEnterColorpicker();
+            this.props.onInputEnter();
         }
     }
     /**
