@@ -46,7 +46,7 @@ export class ColorPalette extends Component {
     }
     static template = 'web_editor.snippet.option.colorpicker';
     static props = {
-        getDocument: { type: Function, optional: true },
+        document: { type: true, optional: true },
         resetTabCount: { type: Number, optional: true },
         selectedCC: { type: String, optional: true },
         selectedColor: { type: String, optional: true },
@@ -69,7 +69,7 @@ export class ColorPalette extends Component {
         getEditableCustomColors: { type: Function, optional: true },
     };
     static defaultProps = {
-        getDocument: () => window.document,
+        document: window.document,
         resetTabCount: 0,
         resetButton: true,
         excluded: [],
@@ -138,7 +138,7 @@ export class ColorPalette extends Component {
         });
     }
     init() {
-        const editableDocument = this.props.getDocument() || document;
+        const editableDocument = this.props.document;
         this.style = editableDocument.defaultView.getComputedStyle(editableDocument.documentElement);
         this.selectedColor = '';
         this.resetButton = this.props.resetButton;
