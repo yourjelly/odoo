@@ -1605,7 +1605,7 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
             onColorPicked: this._onColorPicked.bind(this),
             onColorHover: this._onColorHovered.bind(this),
             onColorLeave: this._onColorLeft.bind(this),
-            onEnterColorpicker: this._onEnterKey.bind(this),
+            onInputEnter: this._onEnterKey.bind(this),
         };
         if (this.options.dataAttributes.excluded) {
             options.excluded = this.options.dataAttributes.excluded.replace(/ /g, '').split(',');

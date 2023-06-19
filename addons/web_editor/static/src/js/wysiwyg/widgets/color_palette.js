@@ -64,7 +64,7 @@ export class ColorPalette extends Component {
         onColorPicked: { type: Function, optional: true },
         onCustomColorPicked: { type: Function, optional: true },
         onColorLeave: { type: Function, optional: true },
-        onEnterColorpicker: { type: Function, optional: true },
+        onInputEnter: { type: Function, optional: true },
         getCustomColors: { type: Function, optional: true },
         getEditableCustomColors: { type: Function, optional: true },
     };
@@ -84,7 +84,7 @@ export class ColorPalette extends Component {
         onColorPicked: () => {},
         onCustomColorPicked: () => {},
         onColorLeave: () => {},
-        onEnterColorpicker: () => {},
+        onInputEnter: () => {},
         getCustomColors: () => [],
         getEditableCustomColors: () => [],
     }

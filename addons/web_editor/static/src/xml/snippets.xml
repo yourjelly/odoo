@@ -97,7 +97,7 @@
                 selectedColor="this.state.customSelectedColor"
                 onColorpickerSelect.bind="_onColorPickerSelect"
                 onColorpickerPreview.bind="_onColorPickerPreview"
-                onEnterColorpicker="props.onEnterColorpicker"/>
+                onInputEnter="props.onInputEnter"/>
         </div>
         <div class="o_colorpicker_sections py-3 px-2" data-color-tab="gradients">
             <div class="o_colorpicker_section_container"/>
@@ -108,7 +108,7 @@
                     selectedColor="this.state.gradientSelectedColor"
                     onColorpickerSelect.bind="_onColorPickerSelectGradient"
                     onColorpickerPreview.bind="_onColorPickerPreviewGradient"
-                    onEnterColorpicker="props.onEnterColorpicker"/>
+                    onInputEnter="props.onInputEnter"/>
             </t>
         </div>
     </div>

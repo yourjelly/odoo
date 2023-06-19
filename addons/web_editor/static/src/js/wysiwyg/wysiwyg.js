@@ -162,7 +162,7 @@ export class Wysiwyg extends Component {
             onColorLeave: () => {
                 this.odooEditor.historyRevertCurrentStep();
             },
-            onEnterColorpicker: () => {
+            onInputEnter: () => {
                 // todo: make it work
                 // const $childElement = $dropdown.children('.dropdown-toggle');
                 // const dropdownToggle = new Dropdown($childElement);
@@ -2983,7 +2983,7 @@ export class Wysiwyg extends Component {
     _useService(serviceName) {
         return useService(serviceName);
     }
-    _getColorpickerArch() {
+    _getColorpickerTemplate() {
         return this.orm.call(
             'ir.ui.view',
             'render_public_asset',
