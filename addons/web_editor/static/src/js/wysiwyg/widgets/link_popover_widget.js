@@ -69,7 +69,6 @@ export class LinkPopoverWidget {
         template.innerHTML = this.template;
         this.el = template.content.firstElementChild;
         this.$el = $(this.el);
-        this.$ = this.$el.find.bind(this.$el);
 
         this.wysiwyg = params.wysiwyg;
         this.target = params.target;
@@ -85,11 +84,11 @@ export class LinkPopoverWidget {
      * @override
      */
     start() {
-        this.$urlLink = this.$('.o_we_url_link');
-        this.$previewFaviconImg = this.$('.o_we_preview_favicon img');
-        this.$previewFaviconFa = this.$('.o_we_preview_favicon .fa');
-        this.$copyLink = this.$('.o_we_copy_link');
-        this.$fullUrl = this.$('.o_we_full_url');
+        this.$urlLink = this.$el.find('.o_we_url_link');
+        this.$previewFaviconImg = this.$el.find('.o_we_preview_favicon img');
+        this.$previewFaviconFa = this.$el.find('.o_we_preview_favicon .fa');
+        this.$copyLink = this.$el.find('.o_we_copy_link');
+        this.$fullUrl = this.$el.find('.o_we_full_url');
 
         // Use the right ClipboardJS with respect to the prototype of this.el
         // since, starting with Firefox 109, a widget element prototype that is
@@ -101,8 +100,8 @@ export class LinkPopoverWidget {
                 : this.el.ownerDocument.defaultView.ClipboardJS;
         this.$urlLink.attr('href', this.href);
         this.$fullUrl.attr('href', this.href);
-        this.$(`.o_we_edit_link`).on('click', this._onEditLinkClick.bind(this));
-        this.$(`.o_we_remove_link`).on('click', this._onRemoveLinkClick.bind(this));
+        this.$el.find(`.o_we_edit_link`).on('click', this._onEditLinkClick.bind(this));
+        this.$el.find(`.o_we_remove_link`).on('click', this._onRemoveLinkClick.bind(this));
 
         // Copy onclick handler
         // ClipboardJS uses "instanceof" to verify the elements passed to its
@@ -127,13 +126,13 @@ export class LinkPopoverWidget {
         });
 
         // init tooltips & popovers
-        this.$('[data-bs-toggle="tooltip"]').tooltip({
+        this.$el.find('[data-bs-toggle="tooltip"]').tooltip({
             delay: 0,
             placement: 'bottom',
             container: this.container,
         });
         const tooltips = [];
-        for (const el of this.$('[data-bs-toggle="tooltip"]').toArray()) {
+        for (const el of this.$el.find('[data-bs-toggle="tooltip"]').toArray()) {
             tooltips.push(Tooltip.getOrCreateInstance(el));
         }
         let popoverShown = true;

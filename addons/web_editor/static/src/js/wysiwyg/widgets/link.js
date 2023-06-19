@@ -251,7 +251,7 @@ export class Link extends Component {
     _setUrl({ shouldFocus } = {}) {
         if (this.state.url) {
             var match = /mailto:(.+)/.exec(this.state.url);
-            this.$('input[name="url"]').val(match ? match[1] : this.state.url);
+            this.$el.find('input[name="url"]').val(match ? match[1] : this.state.url);
             this._onURLInput();
             this._savedURLInputOnDestroy = false;
         }
@@ -316,9 +316,9 @@ export class Link extends Component {
      * @returns {Object} {content: String, url: String, classes: String, isNewWindow: Boolean}
      */
     _getData() {
-        var $url = this.$('input[name="url"]');
+        var $url = this.$el.find('input[name="url"]');
         var url = $url.val();
-        var content = this.$('input[name="label"]').val() || url;
+        var content = this.$el.find('input[name="label"]').val() || url;
 
         if (!this.state.isButton && $url.prop('required') && (!url || !$url[0].checkValidity())) {
             return null;
@@ -572,11 +572,11 @@ export class Link extends Component {
      */
     _onURLInput() {
         this._savedURLInputOnDestroy = true;
-        var $linkUrlInput = this.$('#o_link_dialog_url_input');
+        var $linkUrlInput = this.$el.find('#o_link_dialog_url_input');
         let value = $linkUrlInput.val();
         let isLink = !EMAIL_REGEX.test(value);
         this._getIsNewWindowFormRow().toggleClass('d-none', !isLink);
-        this.$('.o_strip_domain').toggleClass('d-none', value.indexOf(window.location.origin) !== 0);
+        this.$el.find('.o_strip_domain').toggleClass('d-none', value.indexOf(window.location.origin) !== 0);
     }
     /**
      * @private
