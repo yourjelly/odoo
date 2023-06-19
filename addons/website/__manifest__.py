@@ -209,7 +209,7 @@
         ],
         'web_editor.assets_wysiwyg': [
             'website/static/src/js/editor/editor.js',
-            'website/static/src/xml/web_editor.editor.xml',
+            'website/static/src/xml/web_editor.xml',
         ],
         'website.assets_wysiwyg': [
             ('include', 'web._assets_helpers'),
