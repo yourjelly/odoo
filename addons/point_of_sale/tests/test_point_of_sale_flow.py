@@ -5,7 +5,7 @@ import time
 from freezegun import freeze_time
 
 import odoo
-from odoo import fields, tools
+from odoo import fields, Command
 from odoo.tools import float_compare, mute_logger, test_reports
 from odoo.tests.common import Form
 from odoo.addons.point_of_sale.tests.common import TestPointOfSaleCommon
@@ -900,7 +900,8 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'name': 'product5',
             'type': 'product',
             'categ_id': self.env.ref('product.product_category_all').id,
-            'taxes_id': dummy_50_perc_tax.ids
+            'taxes_id': [Command.set(dummy_50_perc_tax.ids)],
+            'company_id': self.company_data['company'].id,
         })
 
         # sell product thru pos
@@ -1168,7 +1169,8 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
                 'name': 'Dummy product',
                 'type': 'product',
                 'categ_id': self.env.ref('product.product_category_all').id,
-                'taxes_id': self.tax_sale_a.ids,
+                'taxes_id': [Command.set(self.tax_sale_a.ids)],
+                'company_id': self.company_data['company'].id,
             })
             self.pos_config.open_ui()
             pos_session = self.pos_config.current_session_id

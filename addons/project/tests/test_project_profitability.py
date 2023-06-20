@@ -39,7 +39,7 @@ class TestProjectProfitabilityCommon(TransactionCase):
         cls.foreign_currency = cls.env['res.currency'].create({
             'name': 'Chaos orb',
             'symbol': '☺',
-            'rounding': 0.001,
+            'rounding': 0.01,
             'position': 'after',
             'currency_unit_label': 'Chaos',
             'currency_subunit_label': 'orb',

@@ -827,11 +827,13 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
             {
                 'name': "Consumable to convert to service 1",
                 'standard_price': 10,
+                'company_id': self.company_data['company'].id,
             },
         ])
         product_2 = self.env['product.product'].create({
                 'name': "Consumable to convert to service 2",
                 'standard_price': 15,
+                'company_id': self.company_data['company'].id,
         })
 
         # Initial uom should be unit

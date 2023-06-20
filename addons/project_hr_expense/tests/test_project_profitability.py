@@ -46,7 +46,7 @@ class TestProjectHrExpenseProfitability(TestProjectProfitabilityCommon, TestProj
         expense = self.env['hr.expense'].create({
             'name': 'Car Travel Expenses',
             'employee_id': self.expense_employee.id,
-            'product_id': self.product_a.id,
+            'product_id': self.product_without_company_a.id,
             'unit_amount': 350.00,
             'company_id': self.env.company.id,
             'analytic_distribution': {self.project.analytic_account_id.id: 100},
@@ -76,7 +76,7 @@ class TestProjectHrExpenseProfitability(TestProjectProfitabilityCommon, TestProj
         expense_foreign = self.env['hr.expense'].create({
             'name': 'Car Travel Expenses foreign',
             'employee_id': foreign_employee.id,
-            'product_id': self.product_a.id,
+            'product_id': self.product_without_company_a.id,
             'unit_amount': 350.00,
             'company_id': foreign_company.id,
             'analytic_distribution': {self.project.analytic_account_id.id: 100},
@@ -113,8 +113,8 @@ class TestProjectHrExpenseProfitability(TestProjectProfitabilityCommon, TestProj
             self.project._get_profitability_items(False),
             {
                 'costs': {
-                    'data': [{'id': 'expenses', 'sequence': expense_sequence, 'to_bill': 0.0, 'billed': -expense_foreign.untaxed_amount * 0.2}],
-                    'total': {'to_bill': 0.0, 'billed': -expense_foreign.untaxed_amount * 0.2},
+                    'data': [{'id': 'expenses', 'sequence': expense_sequence, 'to_bill': 0.0, 'billed': self.foreign_currency.round(-expense_foreign.untaxed_amount * 0.2)}],
+                    'total': {'to_bill': 0.0, 'billed': self.foreign_currency.round(-expense_foreign.untaxed_amount * 0.2)},
                 },
                 'revenues': {'data': [], 'total': {'to_invoice': 0.0, 'invoiced': 0.0}},
             },

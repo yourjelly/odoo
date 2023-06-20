@@ -83,6 +83,7 @@ class AccountTestInvoicingCommon(TransactionCase):
             'property_account_income_id': cls.company_data['default_account_revenue'].id,
             'property_account_expense_id': cls.company_data['default_account_expense'].id,
             'taxes_id': [Command.set(cls.tax_sale_a.ids)],
+            'company_id': cls.company_data['company'].id,
             'supplier_taxes_id': [Command.set(cls.tax_purchase_a.ids)],
         })
         cls.product_b = cls.env['product.product'].create({
@@ -92,6 +93,23 @@ class AccountTestInvoicingCommon(TransactionCase):
             'standard_price': 160.0,
             'property_account_income_id': cls.copy_account(cls.company_data['default_account_revenue']).id,
             'property_account_expense_id': cls.copy_account(cls.company_data['default_account_expense']).id,
+            'taxes_id': [Command.set((cls.tax_sale_a + cls.tax_sale_b).ids)],
+            'company_id': cls.company_data['company'].id,
+            'supplier_taxes_id': [Command.set((cls.tax_purchase_a + cls.tax_purchase_b).ids)],
+        })
+        cls.product_without_company_a = cls.env['product.product'].create({
+            'name': 'product_without_company_a',
+            'uom_id': cls.env.ref('uom.product_uom_unit').id,
+            'lst_price': 1000.0,
+            'standard_price': 800.0,
+            'taxes_id': [Command.set(cls.tax_sale_a.ids)],
+            'supplier_taxes_id': [Command.set(cls.tax_purchase_a.ids)],
+        })
+        cls.product_without_company_b = cls.env['product.product'].create({
+            'name': 'product_without_company_b',
+            'uom_id': cls.env.ref('uom.product_uom_dozen').id,
+            'lst_price': 200.0,
+            'standard_price': 160.0,
             'taxes_id': [Command.set((cls.tax_sale_a + cls.tax_sale_b).ids)],
             'supplier_taxes_id': [Command.set((cls.tax_purchase_a + cls.tax_purchase_b).ids)],
         })

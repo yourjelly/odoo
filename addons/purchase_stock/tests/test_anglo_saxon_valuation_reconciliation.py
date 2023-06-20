@@ -351,6 +351,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
                 "categ_id": self.stock_account_product_categ.id,
                 "taxes_id": [(5, 0, 0)],
                 "supplier_taxes_id": [(6, 0, cash_basis_tax_a_third_amount.ids)],
+                'company_id': self.company_data['company'].id,
                 "lst_price": 100.0,
                 "standard_price": 10.0,
                 "property_account_income_id": self.company_data["default_account_revenue"].id,

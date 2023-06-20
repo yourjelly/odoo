@@ -31,6 +31,7 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         pricelist_item = self.env['product.pricelist.item'].create({
             'product_tmpl_id': self.product2.product_tmpl_id.id,
             'fixed_price': 12.99,
+            'pricelist_id': self.currency_pricelist.id,
         })
         self.config.pricelist_id.write({'item_ids': [(6, 0, (self.config.pricelist_id.item_ids | pricelist_item).ids)]})
 

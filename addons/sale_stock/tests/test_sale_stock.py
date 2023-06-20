@@ -1306,6 +1306,7 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
             'name': "Super Packaging",
             'product_id': self.product_a.id,
             'qty': 10.0,
+            'company_id': self.company_data['company'].id,
         })
 
         so_form = Form(self.env['sale.order'])

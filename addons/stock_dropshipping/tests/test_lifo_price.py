@@ -50,6 +50,7 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
         # product_form.categ_id.property_cost_method = 'fifo'
         product_form.categ_id.property_stock_account_input_categ_id = self.company_data['default_account_stock_in']
         product_form.categ_id.property_stock_account_output_categ_id = self.company_data['default_account_stock_out']
+        product_form.company_id = self.company_data['company']
         product_lifo_icecream = product_form.save()
 
         product_lifo_icecream.standard_price = 70.0

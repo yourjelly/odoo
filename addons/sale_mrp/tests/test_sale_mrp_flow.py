@@ -166,6 +166,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         p.detailed_type = 'product'
         p.uom_id = uom_id
         p.uom_po_id = uom_id
+        p.company_id = cls.company_data['company']
         p.route_ids.clear()
         for r in routes:
             p.route_ids.add(r)
@@ -177,6 +178,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         p.detailed_type = 'product'
         p.uom_id = uom_id
         p.uom_po_id = uom_id
+        p.company_id = self.company_data['company']
         p.route_ids.clear()
         for r in routes:
             p.route_ids.add(r)

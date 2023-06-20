@@ -508,6 +508,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
             'name': "Super Packaging",
             'product_id': self.product_a.id,
             'qty': 10.0,
+            'company_id': self.company_data['company'].id,
         })
 
         po_form = Form(self.env['purchase.order'])
@@ -539,13 +540,15 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         packOf10 = self.env['product.packaging'].create({
             'name': 'PackOf10',
             'product_id': self.product_a.id,
-            'qty': 10
+            'qty': 10,
+            'company_id': self.company_data['company'].id,
         })
 
         packOf20 = self.env['product.packaging'].create({
             'name': 'PackOf20',
             'product_id': self.product_a.id,
-            'qty': 20
+            'qty': 20,
+            'company_id': self.company_data['company'].id,
         })
 
         po = self.env['purchase.order'].create({

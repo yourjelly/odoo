@@ -1168,3 +1168,20 @@ class TestTax(TestTaxCommon):
             [x[0] for x in self.env["account.tax"].name_search("Ten \"tix\"")],
             ten_fixed_tax_tix.ids,
         )
+
+    def test_multi_company_product_tax(self):
+        """ Ensure default taxes are set for all companies on products with no company set. """
+        companies = self.env['res.company'].sudo().search([])
+        product_without_company = self.env['product.template'].create({
+            'name': 'Product Without a Company',
+        })
+        product_with_company = self.env['product.template'].create({
+            'name': 'Product With a Company',
+            'company_id': self.company_data['company'].id
+        })
+        # Product should have all the default taxes of the other companies.
+        self.assertEqual(product_without_company.taxes_id, companies.account_sale_tax_id)
+        self.assertEqual(product_without_company.supplier_taxes_id, companies.account_purchase_tax_id)
+        # Product should have only the default tax of the company it belongs to.
+        self.assertEqual(product_with_company.taxes_id, self.company_data['company'].account_sale_tax_id)
+        self.assertEqual(product_with_company.supplier_taxes_id, self.company_data['company'].account_purchase_tax_id)

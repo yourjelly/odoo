@@ -405,7 +405,7 @@ class TestWebsiteSaleCheckoutAddress(TransactionCaseWithUserDemo, HttpCaseWithUs
             'list_price': 100,
             'website_published': True,
             'sale_ok': True,
-            'taxes_id': [tax_10_incl.id]
+            'taxes_id': [Command.set(tax_10_incl.ids)],
         })
         so = self.env['sale.order'].create({
             'partner_id': partner.id,

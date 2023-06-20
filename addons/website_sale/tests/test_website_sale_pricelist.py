@@ -290,7 +290,7 @@ class TestWebsitePriceList(TransactionCase):
         product = self.env['product.template'].create({
             'name': 'Event Product',
             'list_price': 10.0,
-            'taxes_id': tax,
+            'taxes_id': [Command.set(tax.ids)],
         })
 
         prices = product._get_sales_prices(self.list_christmas)

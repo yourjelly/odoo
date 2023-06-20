@@ -12,8 +12,8 @@ class TestExpenseMultiCompany(TestExpenseCommon):
         self.expense_employee.company_id = self.company_data_2['company']
 
         # The expense employee is able to a create an expense sheet for company_2.
-        # product_a needs a standard_price in company_2
-        self.product_a.with_context(allowed_company_ids=self.company_data_2['company'].ids).standard_price = 100
+        # product_without_company_a needs a standard_price in company_2
+        self.product_without_company_a.with_context(allowed_company_ids=self.company_data_2['company'].ids).standard_price = 100
 
         expense_sheet = self.env['hr.expense.sheet']\
             .with_user(self.expense_user_employee)\
@@ -28,7 +28,7 @@ class TestExpenseMultiCompany(TestExpenseCommon):
                         # Expense without foreign currency but analytic account.
                         'name': 'expense_1',
                         'date': '2016-01-01',
-                        'product_id': self.product_a.id,
+                        'product_id': self.product_without_company_a.id,
                         'unit_amount': 1000.0,
                         'employee_id': self.expense_employee.id,
                     }),
@@ -90,7 +90,7 @@ class TestExpenseMultiCompany(TestExpenseCommon):
                         # Expense without foreign currency but analytic account.
                         'name': 'expense_1',
                         'date': '2016-01-01',
-                        'product_id': self.product_a.id,
+                        'product_id': self.product_without_company_a.id,
                         'unit_amount': 1000.0,
                         'employee_id': self.expense_employee.id,
                     }),

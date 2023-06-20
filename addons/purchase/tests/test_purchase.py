@@ -185,11 +185,13 @@ class TestPurchase(AccountTestInvoicingCommon):
             'name': "I'm a packaging",
             'product_id': self.product_a.id,
             'qty': 1.0,
+            'company_id': self.company_data['company'].id,
         })
         packaging_dozen = self.env['product.packaging'].create({
             'name': "I'm also a packaging",
             'product_id': self.product_a.id,
             'qty': 12.0,
+            'company_id': self.company_data['company'].id,
         })
 
         po = self.env['purchase.order'].create({

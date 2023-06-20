@@ -40,6 +40,7 @@ class TestAccountMoveStockCommon(AccountTestInvoicingCommon):
                 "categ_id": cls.auto_categ.id,
                 "taxes_id": [(5, 0, 0)],
                 "supplier_taxes_id": [(5, 0, 0)],
+                "company_id": cls.company_data['company'].id,
                 "lst_price": 100.0,
                 "standard_price": 10.0,
                 "property_account_income_id": cls.company_data["default_account_revenue"].id,

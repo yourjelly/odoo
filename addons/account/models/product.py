@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, fields, models, _
+from odoo import api, Command, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
 from odoo.tools import format_amount
@@ -117,6 +117,31 @@ class ProductTemplate(models.Model):
                 "This product is already being used in posted Journal Entries.\n"
                 "If you want to change its Unit of Measure, please archive this product and create a new one."
             ))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        # If no company was set for the product, the product will be available for all companies and therefore should
+        # have the default taxes of the other companies as well. sudo() is used since we're going to need to fetch all
+        # the other companies default taxes which the user may not have access to.
+        other_companies = self.env['res.company'].sudo().search([('id', '!=', self.env.company.id)])
+        if other_companies:
+            for vals in vals_list:
+                if not vals.get('company_id'):
+                    default_taxes_ids = [company.account_sale_tax_id.id for company in other_companies if company.account_sale_tax_id]
+                    default_supplier_taxes_ids = [company.account_purchase_tax_id.id for company in other_companies if company.account_purchase_tax_id]
+
+                    if self._context.get('default_taxes_id', True):
+                        if 'taxes_id' in vals:
+                            vals['taxes_id'] = vals['taxes_id'] + [Command.link(tax_id) for tax_id in default_taxes_ids] if vals['taxes_id'] else [Command.set(default_taxes_ids)]
+                        else:
+                            vals['taxes_id'] = [Command.set(default_taxes_ids + self.env.company.account_sale_tax_id.ids)]
+
+                    if self._context.get('default_supplier_taxes_id', True):
+                        if 'supplier_taxes_id' in vals:
+                            vals['supplier_taxes_id'] = vals['supplier_taxes_id'] + [Command.link(tax_id) for tax_id in default_supplier_taxes_ids] if vals['supplier_taxes_id'] else [Command.set(default_supplier_taxes_ids)]
+                        else:
+                            vals['supplier_taxes_id'] = [Command.set(default_supplier_taxes_ids + self.env.company.account_purchase_tax_id.ids)]
+        return super(ProductTemplate, self.sudo()).create(vals_list)
 
 
 class ProductProduct(models.Model):

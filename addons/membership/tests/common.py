@@ -18,6 +18,7 @@ class TestMembershipCommon(AccountTestInvoicingCommon):
             'membership_date_from': datetime.date.today() + relativedelta(days=-2),
             'membership_date_to': datetime.date.today() + relativedelta(months=1),
             'name': 'Basic Limited',
+            'company_id': cls.company_data['company'].id,
             'type': 'service',
             'list_price': 100.00,
         })
