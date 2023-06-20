@@ -295,7 +295,6 @@ export class Wysiwyg extends Component {
         this._bindOnBlur();
 
         this.toolbarEl = this.toolbarRef.el.firstChild;
-        this.$toolbarEl = $(this.toolbarEl);
 
         this.imageCropEL = this.imageCropRef.el.firstChild;
         options.document.body.append(this.imageCropEL);
@@ -577,9 +576,9 @@ export class Wysiwyg extends Component {
 
         if (this.options.autohideToolbar) {
             if (this.odooEditor.isMobile) {
-                $(this.odooEditor.editable).before(this.$toolbarEl);
+                this.odooEditor.editable.before(this.toolbarEl);
             } else {
-                $(document.body).append(this.$toolbarEl);
+                document.body.append(this.toolbarEl);
             }
         }
     }
@@ -899,7 +898,7 @@ export class Wysiwyg extends Component {
             $('#wrapwrap')[0].removeEventListener('scroll', this.odooEditor.multiselectionRefresh, { passive: true });
         }
         $(this.$root).off('click');
-        this.$toolbarEl?.remove();
+        this.toolbarEl?.remove();
         this.imageCropEL?.remove();
         if (this.linkPopover) {
             this.linkPopover.hide();
@@ -1341,7 +1340,7 @@ export class Wysiwyg extends Component {
                 return;
             }
             if (options.forceOpen || !this.state.linkToolProps) {
-                const $button = this.$toolbarEl.find('#create-link');
+                const $button = $(this.toolbarEl.querySelector('#create-link'));
                 if (!this.state.linkToolProps || ![options.link, ...wysiwygUtils.ancestors(options.link)].includes(this.linkToolsInfos.link)) {
                     const { link } = getOrCreateLink({
                         containerNode: this.odooEditor.editable,
@@ -1699,7 +1698,7 @@ export class Wysiwyg extends Component {
         }
     }
     _configureToolbar(options) {
-        const $toolbar = this.$toolbarEl;
+        const $toolbar = $(this.toolbarEl);
         // Prevent selection loss when interacting with the toolbar buttons.
         $toolbar.find('.btn-group').on('mousedown', e => {
             if (
@@ -2017,35 +2016,40 @@ export class Wysiwyg extends Component {
         const editorWindow = this.odooEditor.document.defaultView;
         const $target = e ? editorWindow.$(e.target) : editorWindow.$();
         // Restore paragraph dropdown button's default ID.
-        this.$toolbarEl.find('#mediaParagraphDropdownButton').attr('id', 'paragraphDropdownButton');
+        this.toolbarEl.querySelector('#mediaParagraphDropdownButton')?.setAttribute('id', 'paragraphDropdownButton');
         // Only show the media tools in the toolbar if the current selected
         // snippet is a media.
         const isInMedia = $target.is(mediaSelector) && !$target.parent().hasClass('o_stars') && e.target &&
             (e.target.isContentEditable || (e.target.parentElement && e.target.parentElement.isContentEditable));
-        this.$toolbarEl.find([
+
+        for (const el of this.toolbarEl.querySelectorAll([
             '#image-preview',
             '#image-shape',
             '#image-width',
             '#image-padding',
             '#image-edit',
             '#media-replace',
-        ].join(',')).toggleClass('d-none', !isInMedia);
+            ].join(','))) {
+            el.classList.toggle('d-none', !isInMedia);
+        }
         // The image replace button is in the image options when the sidebar
         // exists.
         if (this.snippetsMenu && !this.snippetsMenu.folded && $target.is('img')) {
-            this.$toolbarEl.find('#media-replace').toggleClass('d-none', true);
+            this.toolbarEl.querySelector('#media-replace')?.classList.toggle('d-none', true);
         }
         // Only show the image-transform, image-crop and media-description
         // buttons if the current selected snippet is an image.
-        this.$toolbarEl.find([
+        for (const el of this.toolbarEl.querySelectorAll([
             '#image-transform',
             '#image-crop',
             '#media-description',
-        ].join(',')).toggleClass('d-none', !$target.is('img'));
+            ].join(','))) {
+            el.classList.toggle('d-none', !isInMedia || !$target.is('img'));
+        }
         this.lastMediaClicked = isInMedia && e.target;
         this.lastElement = $target[0];
         // Hide the irrelevant text buttons for media.
-        this.$toolbarEl.find([
+        for (const el of this.toolbarEl.querySelectorAll([
             '#style',
             '#decoration',
             '#font-size',
@@ -2054,17 +2058,25 @@ export class Wysiwyg extends Component {
             '#colorInputButtonGroup',
             '#create-link',
             '#media-insert', // "Insert media" should be replaced with "Replace media".
-        ].join(',')).toggleClass('d-none', isInMedia);
+        ].join(','))){
+            el.classList.toggle('d-none', isInMedia);
+        }
         // Some icons are relevant for icons, that aren't for other media.
-        this.$toolbarEl.find('#colorInputButtonGroup, #create-link').toggleClass('d-none', isInMedia && !$target.is('.fa'));
-        this.$toolbarEl.find('.only_fa').toggleClass('d-none', !$target.is('.fa'));
+        for (const el of this.toolbarEl.querySelectorAll('#colorInputButtonGroup, #create-link')) {
+            el.classList.toggle('d-none', isInMedia && !$target.is('.fa'));
+        }
+        for (const el of this.toolbarEl.querySelectorAll('.only_fa')) {
+            el.classList.toggle('d-none', !isInMedia || !$target.is('.fa'));
+        }
         // Hide unsuitable buttons for icon
         if ($target.is('.fa')) {
-            this.$toolbarEl.find([
+            for (const el of this.toolbarEl.querySelectorAll([
                 '#image-shape',
                 '#image-width',
                 '#image-edit',
-            ].join(',')).toggleClass('d-none', true);
+            ].join(','))) {
+                el.classList.toggle('d-none', true);
+            }
         }
         // Hide the create-link button if the selection spans several blocks.
         selection = this.odooEditor.document.getSelection();
@@ -2072,10 +2084,10 @@ export class Wysiwyg extends Component {
         const $rangeContainer = range && $(range.commonAncestorContainer);
         const spansBlocks = range && !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length;
         if (!range || spansBlocks) {
-            this.$toolbarEl.find('#create-link').toggleClass('d-none', true);
+            this.toolbarEl.querySelector('#create-link')?.classList.toggle('d-none', true);
         }
         // Toggle the toolbar arrow.
-        this.$toolbarEl.toggleClass('noarrow', isInMedia);
+        this.toolbarEl.classList.toggle('noarrow', isInMedia);
         // Unselect all media.
         this.$editable.find('.o_we_selected_image').removeClass('o_we_selected_image');
         if (isInMedia) {
@@ -2087,12 +2099,12 @@ export class Wysiwyg extends Component {
             selection.removeAllRanges();
             selection.addRange(range);
             // Always hide the unlink button on media.
-            this.$toolbarEl.find('#unlink').toggleClass('d-none', true);
+            this.toolbarEl.querySelector('#unlink')?.classList.toggle('d-none', true);
             // Toggle the 'active' class on the active image tool buttons.
-            for (const button of this.$toolbarEl.find('#image-shape div, #fa-spin')) {
+            for (const button of this.toolbarEl.querySelectorAll('#image-shape div, #fa-spin')) {
                 button.classList.toggle('active', $(e.target).hasClass(button.id));
             }
-            for (const button of this.$toolbarEl.find('#image-width div')) {
+            for (const button of this.toolbarEl.querySelectorAll('#image-width div')) {
                 button.classList.toggle('active', e.target.style.width === button.id);
             }
             this._updateMediaJustifyButton();
@@ -2131,7 +2143,7 @@ export class Wysiwyg extends Component {
         if (!this.lastMediaClicked) {
             return;
         }
-        const $paragraphDropdownButton = this.$toolbarEl.find('#paragraphDropdownButton, #mediaParagraphDropdownButton');
+        const $paragraphDropdownButton = $(this.toolbarEl).find('#paragraphDropdownButton, #mediaParagraphDropdownButton');
         // Change the ID to prevent OdooEditor from controlling it as this is
         // custom behavior for media.
         $paragraphDropdownButton.attr('id', 'mediaParagraphDropdownButton');
@@ -2147,7 +2159,6 @@ export class Wysiwyg extends Component {
             ) || [])[1];
             resetAlignment = !commandState;
         }
-        const $buttons = this.$toolbarEl.find('#justify div.btn');
         let newClass;
         if (commandState) {
             const direction = commandState.replace('justify', '').toLowerCase();
@@ -2156,7 +2167,7 @@ export class Wysiwyg extends Component {
                 this.lastMediaClicked.classList.contains(className)
             ));
         }
-        for (const button of $buttons) {
+        for (const button of this.toolbarEl.querySelectorAll('#justify div.btn')) {
             button.classList.toggle('active', !resetAlignment && button.id === commandState);
         }
         $paragraphDropdownButton.removeClass((index, className) => (
@@ -2173,10 +2184,9 @@ export class Wysiwyg extends Component {
         if (!this.lastMediaClicked) {
             return;
         }
-        const $buttons = this.$toolbarEl.find('#fa-resize div');
         const match = this.lastMediaClicked.className.match(/\s*fa-([0-9]+)x/);
         const value = match && match[1] ? match[1] : '1';
-        for (const button of $buttons) {
+        for (const button of this.toolbarEl.querySelectorAll('#fa-resize div')) {
             button.classList.toggle('active', button.dataset.value === value);
         }
     }

@@ -3496,8 +3496,7 @@ options.registry.WebsiteAnimate = options.Class.extend({
         if (this.isAnimatedText) {
             // For animated text, the animation options must be in the editor
             // toolbar.
-            const $toolbar = this.options.wysiwyg.$toolbarEl;
-            $toolbar.append(this.$el);
+            this.options.wysiwyg.toolbarEl.append(this.$el[0]);
             this.$optionsSection.addClass('d-none');
         }
     },

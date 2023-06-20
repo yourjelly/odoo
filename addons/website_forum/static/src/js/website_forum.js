@@ -128,6 +128,8 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                     showHeading1: false,
                     showHeading2: false,
                     showHeading3: false,
+                    showLink: hasFullEdit,
+                    showImageEdit: hasFullEdit,
                 },
                 recordInfo: {
                     context: self._getContext(),
@@ -145,9 +147,6 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
             options.allowCommandLink = hasFullEdit;
             options.allowCommandImage = hasFullEdit;
             loadWysiwygFromTextarea(self, $textarea[0], options).then(wysiwyg => {
-                if (!hasFullEdit) {
-                    wysiwyg.$toolbarEl.find('#link, #media').remove();
-                }
                 // float-start class messes up the post layout OPW 769721
                 $form.find('.note-editable').find('img.float-start').removeClass('float-start');
             });
