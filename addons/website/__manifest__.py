@@ -209,6 +209,7 @@
         ],
         'web_editor.assets_wysiwyg': [
             'website/static/src/js/editor/editor.js',
+            '/website/static/src/components/wysiwyg_adapter/toolbar_patch.js',
             'website/static/src/xml/web_editor.xml',
         ],
         'website.assets_wysiwyg': [

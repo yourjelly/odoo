@@ -16,7 +16,6 @@ export class Toolbar extends Component {
         dropDirection: { type: String, optional: true },
 
         showChecklist: { type: Boolean, optional: true },
-        showAnimateText: { type: Boolean, optional: true },
         showColors: { type: Boolean, optional: true },
         showFontSize: { type: Boolean, optional: true },
         showHistory: { type: Boolean, optional: true },
@@ -49,7 +48,6 @@ export class Toolbar extends Component {
         dropDirection: 'dropdown',
 
         showChecklist: true,
-        showAnimateText: false,
         showColors: true,
         showFontSize: true,
         showHistory: false,
