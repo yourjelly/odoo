@@ -1,13 +1,6 @@
 /** @odoo-module **/
 
-import {
-    Component,
-    onWillRender,
-    onWillStart,
-    onWillUpdateProps,
-    useRef,
-    useState,
-} from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, useRef, useState } from "@odoo/owl";
 import { useDateTimePicker } from "@web/core/datetime/datetime_hook";
 import {
     areDatesEqual,
@@ -64,12 +57,13 @@ export class DateTimeField extends Component {
         return this.props.endDateField || this.props.name;
     }
 
-    get field() {
-        return this.props.record.fields[this.props.name];
-    }
-
     get hasEmptyField() {
         return this.values.length < 2 || !this.values.every(Boolean);
+    }
+
+    /** @type {string[]} */
+    get refValues() {
+        return this.inputRefs.map((ref) => ref.el?.value);
     }
 
     get relatedField() {
@@ -93,12 +87,14 @@ export class DateTimeField extends Component {
     //-------------------------------------------------------------------------
 
     setup() {
+        const { name } = this.props; // should not change
+
         this.rootRef = useRef("root");
         this.inputRefs = [useRef("start-date"), useRef("end-date")];
 
         const state = useDateTimePicker({
             target: "root",
-            pickerProps: () => this.getPickerProps(),
+            pickerProps: (props) => this.getPickerProps(props),
             onChange: (value) => {
                 if (Array.isArray(value)) {
                     if (value.every(Boolean)) {
@@ -111,10 +107,9 @@ export class DateTimeField extends Component {
                         }
                     }
                 }
-                this.triggerIsDirty();
+                this.triggerIsDirty(this.props);
             },
             onApply: (value) => {
-                const { name } = this.props;
                 const toUpdate = {};
                 if (Array.isArray(value)) {
                     // Value is already a range
@@ -136,9 +131,8 @@ export class DateTimeField extends Component {
         });
         this.state = useState(state);
 
-        onWillStart(() => this.onPropsUpdated());
-        onWillUpdateProps(() => this.onPropsUpdated());
-        onWillRender(() => this.triggerIsDirty());
+        onWillStart(() => this.triggerIsDirty(this.props));
+        onWillUpdateProps((nextProps) => this.triggerIsDirty(nextProps));
     }
 
     //-------------------------------------------------------------------------
@@ -156,18 +150,44 @@ export class DateTimeField extends Component {
         if (typeof value === "string") {
             return value;
         }
-        return value
-            ? this.field.type === "date"
-                ? formatDate(value)
-                : formatDateTime(value)
-            : "";
+        return value ? (this.type === "date" ? formatDate(value) : formatDateTime(value)) : "";
     }
 
     /**
+     * @param {DateTimeFieldProps} props
+     */
+    getPickerProps(props) {
+        const { record, name, maxDate, minDate, rounding } = props;
+        const value = this.getValueFromProps(props);
+
+        // Compute own props
+        this.type = record.fields[name].type;
+        if (this.relatedField) {
+            this.emptyField =
+                !Array.isArray(value) &&
+                (record.data[this.relatedField] ? name : this.relatedField);
+        }
+
+        // Compute picker props
+        /** @type {DateTimePickerProps} */
+        const pickerProps = { value, type: this.type };
+        if (maxDate) {
+            pickerProps.maxDate = maxDate === "today" ? maxDate : this.parseLimitDate(maxDate);
+        }
+        if (minDate) {
+            pickerProps.minDate = minDate === "today" ? minDate : this.parseLimitDate(minDate);
+        }
+        if (!isNaN(rounding)) {
+            pickerProps.rounding = rounding;
+        }
+        return pickerProps;
+    }
+
+    /**
+     * @param {DateTimeFieldProps} props
      * @returns {DateTimePickerProps["value"]}
      */
-    getCurrentValue() {
-        const { endDateField, name, record, required, startDateField } = this.props;
+    getValueFromProps({ endDateField, name, record, required, startDateField }) {
         const value = record.data[name];
         const relatedField = startDateField || endDateField;
         if (relatedField) {
@@ -183,24 +203,6 @@ export class DateTimeField extends Component {
         return value;
     }
 
-    getPickerProps() {
-        /** @type {DateTimePickerProps} */
-        const pickerProps = {
-            value: this.getCurrentValue(),
-            type: this.field.type,
-        };
-        if (this.props.maxDate) {
-            pickerProps.maxDate = this.parseLimitDate(this.props.maxDate);
-        }
-        if (this.props.minDate) {
-            pickerProps.minDate = this.parseLimitDate(this.props.minDate);
-        }
-        if (!isNaN(this.props.rounding)) {
-            pickerProps.rounding = this.props.rounding;
-        }
-        return pickerProps;
-    }
-
     /**
      * @param {number} index
      */
@@ -212,10 +214,7 @@ export class DateTimeField extends Component {
      * @param {string} value
      */
     parseLimitDate(value) {
-        if (value === "today") {
-            return value;
-        }
-        return this.field.type === "date" ? deserializeDate(value) : deserializeDateTime(value);
+        return this.type === "date" ? deserializeDate(value) : deserializeDateTime(value);
     }
 
     /**
@@ -224,10 +223,10 @@ export class DateTimeField extends Component {
      *
      * @param {DateTimeFieldProps} props
      */
-    triggerIsDirty() {
-        this.props.record.model.bus.trigger(
+    triggerIsDirty(props) {
+        props.record.model.bus.trigger(
             "FIELD_IS_DIRTY",
-            !areDatesEqual(this.getCurrentValue(), this.state.value)
+            !areDatesEqual(this.getValueFromProps(props), this.state.value)
         );
     }
 
@@ -237,15 +236,6 @@ export class DateTimeField extends Component {
 
     onInput() {
         this.props.record.model.bus.trigger("FIELD_IS_DIRTY", true);
-    }
-
-    onPropsUpdated() {
-        const { name, record } = this.props;
-        if (this.relatedField) {
-            this.emptyField =
-                !Array.isArray(this.getCurrentValue()) &&
-                (record.data[this.relatedField] ? name : this.relatedField);
-        }
     }
 }
 
@@ -282,7 +272,7 @@ export const dateField = {
         minDate: options.min_date,
         placeholder: attrs.placeholder,
         required: Boolean(modifiers.required),
-        rounding: options.rounding ?? parseInt(options.rounding),
+        rounding: options.rounding ? parseInt(options.rounding) : undefined,
         startDateField: options[START_DATE_FIELD_OPTION],
         warnFuture: archParseBoolean(options.warn_future),
     }),
