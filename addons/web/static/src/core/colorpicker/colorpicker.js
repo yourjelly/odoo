@@ -35,7 +35,7 @@ function confine(val, min, max) {
 export class Colorpicker extends Component {
     static template = 'web.Colorpicker';
     static props = {
-        document: { type: Object, optional: true },
+        document: { type: true, optional: true },
         defaultColor: { type: String, optional: true },
         selectedColor: { type: String, optional: true },
         noTransparency: { type: Boolean, optional: true },
