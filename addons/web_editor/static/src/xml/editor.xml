@@ -131,7 +131,6 @@
                                 <div class="fa fa-check-square d-block small"/>
                             </div>
                         </div>
-                        <div t-if="props.showAnimateText" title="Animate text" class="btn fa fa-play fa-fw o_we_animate_text"/>
                     </div>
                 </div>
             </t>
@@ -145,7 +144,6 @@
                             <div class="fa fa-check-square d-block small"/>
                         </div>
                     </div>
-                    <div t-if="props.showAnimateText" title="Animate text" class="btn fa fa-play fa-fw o_we_animate_text"/>
                 </div>
             </t>
 
@@ -218,6 +216,14 @@
             <t t-slot="default"/>
         </div>
     </t>
+
+    <!-- Editor Toolbar -->
+    <!-- <t t-inherit="web_editor.toolbar" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[@id='checklist']" position="replace">aoeu</xpath>
+        <xpath expr="//div[@id='list']" position="inside">
+            <div title="Animate text" class="btn fa fa-play fa-fw o_we_animate_text"/>coucou4
+        </xpath>
+    </t> -->
 
     <t t-name="web_editor.toolbar.table-options">
         <we-customizeblock-options id="o-we-editor-table-container">

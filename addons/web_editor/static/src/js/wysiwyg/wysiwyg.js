@@ -187,10 +187,10 @@ export class Wysiwyg extends Component {
             onCustomColorPicked: getOnColorPicked('background'),
             onColorHover: getOnColorHover('background'),
         });
-        this._setToolbarProps(this.props);
 
         onWillStart(() => {
             this.init();
+            this._setToolbarProps(this.props);
         });
         onMounted(async () => {
             this.el = this.elRef.el
@@ -243,9 +243,8 @@ export class Wysiwyg extends Component {
         autostart: true,
     }
     init() {
-        const options = this.props.options;
         this.id = ++id;
-        this.options = this._getEditorOptions(options);
+        this.options = this._getEditorOptions(this.props.options);
         this.saving_mutex = new Mutex();
         // Keeps track of color palettes per event name.
         this.colorpickers = {};
@@ -1720,7 +1719,7 @@ export class Wysiwyg extends Component {
     }
     _setToolbarProps(props) {
         this.state.toolbarProps = {
-            ...props.options.toolbarOptions,
+            ...this.options.toolbarOptions,
 
             onColorpaletteDropdownShow: this.onColorpaletteDropdownShow.bind(this),
             onColorpaletteDropdownHide: this.onColorpaletteDropdownHide.bind(this),
