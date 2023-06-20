@@ -8487,6 +8487,15 @@
         ];
     }
 
+    function interactiveCut(env) {
+        const result = env.model.dispatch("CUT");
+        if (!result.isSuccessful) {
+            if (result.isCancelledBecause(19 /* CommandResult.WrongCutSelection */)) {
+                env.raiseError(_lt("This operation is not allowed with multiple selections."));
+            }
+        }
+    }
+
     const AddMergeInteractiveContent = {
         MergeIsDestructive: _lt("Merging these cells will only preserve the top-leftmost value. Merge anyway?"),
         MergeInFilter: _lt("You can't merge cells inside of an existing filter."),
@@ -8501,6 +8510,37 @@
                 env.model.dispatch("ADD_MERGE", { sheetId, target, force: true });
             });
         }
+    }
+
+    const PasteInteractiveContent = {
+        wrongPasteSelection: _lt("This operation is not allowed with multiple selections."),
+        willRemoveExistingMerge: _lt("This operation is not possible due to a merge. Please remove the merges first than try again."),
+        wrongFigurePasteOption: _lt("Cannot do a special paste of a figure."),
+        frozenPaneOverlap: _lt("Cannot paste merged cells over a frozen pane."),
+    };
+    function handlePasteResult(env, result) {
+        if (!result.isSuccessful) {
+            if (result.reasons.includes(20 /* CommandResult.WrongPasteSelection */)) {
+                env.raiseError(PasteInteractiveContent.wrongPasteSelection);
+            }
+            else if (result.reasons.includes(2 /* CommandResult.WillRemoveExistingMerge */)) {
+                env.raiseError(PasteInteractiveContent.willRemoveExistingMerge);
+            }
+            else if (result.reasons.includes(22 /* CommandResult.WrongFigurePasteOption */)) {
+                env.raiseError(PasteInteractiveContent.wrongFigurePasteOption);
+            }
+            else if (result.reasons.includes(75 /* CommandResult.FrozenPaneOverlap */)) {
+                env.raiseError(PasteInteractiveContent.frozenPaneOverlap);
+            }
+        }
+    }
+    function interactivePaste(env, target, pasteOption) {
+        const result = env.model.dispatch("PASTE", { target, pasteOption });
+        handlePasteResult(env, result);
+    }
+    function interactivePasteFromOS(env, target, text) {
+        const result = env.model.dispatch("PASTE_FROM_OS_CLIPBOARD", { target, text });
+        handlePasteResult(env, result);
     }
 
     /**
@@ -8650,186 +8690,9 @@
         };
     }
 
-    const SORT_TYPES = [
-        CellValueType.number,
-        CellValueType.error,
-        CellValueType.text,
-        CellValueType.boolean,
-    ];
-    function sortCells(cells, sortDirection, emptyCellAsZero) {
-        const cellsWithIndex = cells.map((cell, index) => ({
-            index,
-            type: cell.type,
-            value: cell.value,
-        }));
-        let emptyCells = cellsWithIndex.filter((x) => x.type === CellValueType.empty);
-        let nonEmptyCells = cellsWithIndex.filter((x) => x.type !== CellValueType.empty);
-        if (emptyCellAsZero) {
-            nonEmptyCells.push(...emptyCells.map((emptyCell) => ({ ...emptyCell, type: CellValueType.number, value: 0 })));
-            emptyCells = [];
-        }
-        const inverse = sortDirection === "descending" ? -1 : 1;
-        return nonEmptyCells
-            .sort((left, right) => {
-            let typeOrder = SORT_TYPES.indexOf(left.type) - SORT_TYPES.indexOf(right.type);
-            if (typeOrder === 0) {
-                if (left.type === CellValueType.text || left.type === CellValueType.error) {
-                    typeOrder = left.value.localeCompare(right.value);
-                }
-                else
-                    typeOrder = left.value - right.value;
-            }
-            return inverse * typeOrder;
-        })
-            .concat(emptyCells);
-    }
-    function interactiveSortSelection(env, sheetId, anchor, zone, sortDirection) {
-        let result = DispatchResult.Success;
-        //several columns => bypass the contiguity check
-        let multiColumns = zone.right > zone.left;
-        if (env.model.getters.doesIntersectMerge(sheetId, zone)) {
-            multiColumns = false;
-            let table;
-            for (let row = zone.top; row <= zone.bottom; row++) {
-                table = [];
-                for (let col = zone.left; col <= zone.right; col++) {
-                    let merge = env.model.getters.getMerge({ sheetId, col, row });
-                    if (merge && !table.includes(merge.id.toString())) {
-                        table.push(merge.id.toString());
-                    }
-                }
-                if (table.length >= 2) {
-                    multiColumns = true;
-                    break;
-                }
-            }
-        }
-        const { col, row } = anchor;
-        if (multiColumns) {
-            result = env.model.dispatch("SORT_CELLS", { sheetId, col, row, zone, sortDirection });
-        }
-        else {
-            // check contiguity
-            const contiguousZone = env.model.getters.getContiguousZone(sheetId, zone);
-            if (isEqual(contiguousZone, zone)) {
-                // merge as it is
-                result = env.model.dispatch("SORT_CELLS", {
-                    sheetId,
-                    col,
-                    row,
-                    zone,
-                    sortDirection,
-                });
-            }
-            else {
-                env.askConfirmation(_lt("We found data next to your selection. Since this data was not selected, it will not be sorted. Do you want to extend your selection?"), () => {
-                    zone = contiguousZone;
-                    result = env.model.dispatch("SORT_CELLS", {
-                        sheetId,
-                        col,
-                        row,
-                        zone,
-                        sortDirection,
-                    });
-                }, () => {
-                    result = env.model.dispatch("SORT_CELLS", {
-                        sheetId,
-                        col,
-                        row,
-                        zone,
-                        sortDirection,
-                    });
-                });
-            }
-        }
-        if (result.isCancelledBecause(63 /* CommandResult.InvalidSortZone */)) {
-            const { col, row } = anchor;
-            env.model.selection.selectZone({ cell: { col, row }, zone });
-            env.raiseError(_lt("Cannot sort. To sort, select only cells or only merges that have the same size."));
-        }
-    }
-
-    function interactiveCut(env) {
-        const result = env.model.dispatch("CUT");
-        if (!result.isSuccessful) {
-            if (result.isCancelledBecause(19 /* CommandResult.WrongCutSelection */)) {
-                env.raiseError(_lt("This operation is not allowed with multiple selections."));
-            }
-        }
-    }
-
-    const AddFilterInteractiveContent = {
-        filterOverlap: _lt("You cannot create overlapping filters."),
-        nonContinuousTargets: _lt("A filter can only be created on a continuous selection."),
-        mergeInFilter: _lt("You can't create a filter over a range that contains a merge."),
-    };
-    function interactiveAddFilter(env, sheetId, target) {
-        const result = env.model.dispatch("CREATE_FILTER_TABLE", { target, sheetId });
-        if (result.isCancelledBecause(78 /* CommandResult.FilterOverlap */)) {
-            env.raiseError(AddFilterInteractiveContent.filterOverlap);
-        }
-        else if (result.isCancelledBecause(80 /* CommandResult.MergeInFilter */)) {
-            env.raiseError(AddFilterInteractiveContent.mergeInFilter);
-        }
-        else if (result.isCancelledBecause(81 /* CommandResult.NonContinuousTargets */)) {
-            env.raiseError(AddFilterInteractiveContent.nonContinuousTargets);
-        }
-    }
-
-    const PasteInteractiveContent = {
-        wrongPasteSelection: _lt("This operation is not allowed with multiple selections."),
-        willRemoveExistingMerge: _lt("This operation is not possible due to a merge. Please remove the merges first than try again."),
-        wrongFigurePasteOption: _lt("Cannot do a special paste of a figure."),
-        frozenPaneOverlap: _lt("Cannot paste merged cells over a frozen pane."),
-    };
-    function handlePasteResult(env, result) {
-        if (!result.isSuccessful) {
-            if (result.reasons.includes(20 /* CommandResult.WrongPasteSelection */)) {
-                env.raiseError(PasteInteractiveContent.wrongPasteSelection);
-            }
-            else if (result.reasons.includes(2 /* CommandResult.WillRemoveExistingMerge */)) {
-                env.raiseError(PasteInteractiveContent.willRemoveExistingMerge);
-            }
-            else if (result.reasons.includes(22 /* CommandResult.WrongFigurePasteOption */)) {
-                env.raiseError(PasteInteractiveContent.wrongFigurePasteOption);
-            }
-            else if (result.reasons.includes(75 /* CommandResult.FrozenPaneOverlap */)) {
-                env.raiseError(PasteInteractiveContent.frozenPaneOverlap);
-            }
-        }
-    }
-    function interactivePaste(env, target, pasteOption) {
-        const result = env.model.dispatch("PASTE", { target, pasteOption });
-        handlePasteResult(env, result);
-    }
-    function interactivePasteFromOS(env, target, text) {
-        const result = env.model.dispatch("PASTE_FROM_OS_CLIPBOARD", { target, text });
-        handlePasteResult(env, result);
-    }
-
     //------------------------------------------------------------------------------
     // Helpers
     //------------------------------------------------------------------------------
-    function getColumnsNumber(env) {
-        const activeCols = env.model.getters.getActiveCols();
-        if (activeCols.size) {
-            return activeCols.size;
-        }
-        else {
-            const zone = env.model.getters.getSelectedZones()[0];
-            return zone.right - zone.left + 1;
-        }
-    }
-    function getRowsNumber(env) {
-        const activeRows = env.model.getters.getActiveRows();
-        if (activeRows.size) {
-            return activeRows.size;
-        }
-        else {
-            const zone = env.model.getters.getSelectedZones()[0];
-            return zone.bottom - zone.top + 1;
-        }
-    }
     function setFormatter(env, format) {
         env.model.dispatch("SET_FORMATTING", {
             sheetId: env.model.getters.getActiveSheetId(),
@@ -8847,16 +8710,6 @@
     //------------------------------------------------------------------------------
     // Simple actions
     //------------------------------------------------------------------------------
-    const UNDO_ACTION = (env) => env.model.dispatch("REQUEST_UNDO");
-    const REDO_ACTION = (env) => env.model.dispatch("REQUEST_REDO");
-    const COPY_ACTION = async (env) => {
-        env.model.dispatch("COPY");
-        await env.clipboard.write(env.model.getters.getClipboardContent());
-    };
-    const CUT_ACTION = async (env) => {
-        interactiveCut(env);
-        await env.clipboard.write(env.model.getters.getClipboardContent());
-    };
     const PASTE_ACTION = async (env) => paste$1(env);
     const PASTE_VALUE_ACTION = async (env) => paste$1(env, "onlyValue");
     async function paste$1(env, pasteOption) {
@@ -8880,22 +8733,6 @@
                 break;
         }
     }
-    const PASTE_FORMAT_ACTION = (env) => interactivePaste(env, env.model.getters.getSelectedZones(), "onlyFormat");
-    const DELETE_CONTENT_ACTION = (env) => env.model.dispatch("DELETE_CONTENT", {
-        sheetId: env.model.getters.getActiveSheetId(),
-        target: env.model.getters.getSelectedZones(),
-    });
-    const SET_FORMULA_VISIBILITY_ACTION = (env) => env.model.dispatch("SET_FORMULA_VISIBILITY", { show: !env.model.getters.shouldShowFormulas() });
-    const SET_GRID_LINES_VISIBILITY_ACTION = (env) => {
-        const sheetId = env.model.getters.getActiveSheetId();
-        env.model.dispatch("SET_GRID_LINES_VISIBILITY", {
-            sheetId,
-            areGridLinesVisible: !env.model.getters.getGridLinesVisibility(sheetId),
-        });
-    };
-    const IS_NOT_CUT_OPERATION = (env) => {
-        return !env.model.getters.isCutOperation();
-    };
     //------------------------------------------------------------------------------
     // Grid manipulations
     //------------------------------------------------------------------------------
@@ -9037,48 +8874,6 @@
         const selectedCols = env.model.getters.getElementsFromSelection("COL");
         return env.model.getters.canRemoveHeaders(sheetId, "COL", selectedCols);
     };
-    const INSERT_CELL_SHIFT_DOWN = (env) => {
-        const zone = env.model.getters.getSelectedZone();
-        const result = env.model.dispatch("INSERT_CELL", { zone, shiftDimension: "ROW" });
-        handlePasteResult(env, result);
-    };
-    const INSERT_CELL_SHIFT_RIGHT = (env) => {
-        const zone = env.model.getters.getSelectedZone();
-        const result = env.model.dispatch("INSERT_CELL", { zone, shiftDimension: "COL" });
-        handlePasteResult(env, result);
-    };
-    const DELETE_CELL_SHIFT_UP = (env) => {
-        const zone = env.model.getters.getSelectedZone();
-        const result = env.model.dispatch("DELETE_CELL", { zone, shiftDimension: "ROW" });
-        handlePasteResult(env, result);
-    };
-    const DELETE_CELL_SHIFT_LEFT = (env) => {
-        const zone = env.model.getters.getSelectedZone();
-        const result = env.model.dispatch("DELETE_CELL", { zone, shiftDimension: "COL" });
-        handlePasteResult(env, result);
-    };
-    const MENU_INSERT_ROWS_NAME = (env) => {
-        const number = getRowsNumber(env);
-        return number === 1 ? _lt("Insert row") : _lt("Insert %s rows", number.toString());
-    };
-    const MENU_INSERT_ROWS_BEFORE_NAME = (env) => {
-        const number = getRowsNumber(env);
-        if (number === 1) {
-            return _lt("Row above");
-        }
-        return _lt("%s Rows above", number.toString());
-    };
-    const ROW_INSERT_ROWS_BEFORE_NAME = (env) => {
-        const number = getRowsNumber(env);
-        return number === 1 ? _lt("Insert row above") : _lt("Insert %s rows above", number.toString());
-    };
-    const CELL_INSERT_ROWS_BEFORE_NAME = (env) => {
-        const number = getRowsNumber(env);
-        if (number === 1) {
-            return _lt("Insert row");
-        }
-        return _lt("Insert %s rows", number.toString());
-    };
     const INSERT_ROWS_BEFORE_ACTION = (env) => {
         const activeRows = env.model.getters.getActiveRows();
         let row;
@@ -9099,17 +8894,6 @@
             quantity,
             dimension: "ROW",
         });
-    };
-    const MENU_INSERT_ROWS_AFTER_NAME = (env) => {
-        const number = getRowsNumber(env);
-        if (number === 1) {
-            return _lt("Row below");
-        }
-        return _lt("%s Rows below", number.toString());
-    };
-    const ROW_INSERT_ROWS_AFTER_NAME = (env) => {
-        const number = getRowsNumber(env);
-        return number === 1 ? _lt("Insert row below") : _lt("Insert %s rows below", number.toString());
     };
     const INSERT_ROWS_AFTER_ACTION = (env) => {
         const activeRows = env.model.getters.getActiveRows();
@@ -9132,30 +8916,6 @@
             dimension: "ROW",
         });
     };
-    const MENU_INSERT_COLUMNS_BEFORE_NAME = (env) => {
-        const number = getColumnsNumber(env);
-        if (number === 1) {
-            return _lt("Column left");
-        }
-        return _lt("%s Columns left", number.toString());
-    };
-    const MENU_INSERT_COLUMNS_NAME = (env) => {
-        const number = getColumnsNumber(env);
-        return number === 1 ? _lt("Insert column") : _lt("Insert %s columns", number.toString());
-    };
-    const COLUMN_INSERT_COLUMNS_BEFORE_NAME = (env) => {
-        const number = getColumnsNumber(env);
-        return number === 1
-            ? _lt("Insert column left")
-            : _lt("Insert %s columns left", number.toString());
-    };
-    const CELL_INSERT_COLUMNS_BEFORE_NAME = (env) => {
-        const number = getColumnsNumber(env);
-        if (number === 1) {
-            return _lt("Insert column");
-        }
-        return _lt("Insert %s columns", number.toString());
-    };
     const INSERT_COLUMNS_BEFORE_ACTION = (env) => {
         const activeCols = env.model.getters.getActiveCols();
         let column;
@@ -9176,19 +8936,6 @@
             base: column,
             quantity,
         });
-    };
-    const MENU_INSERT_COLUMNS_AFTER_NAME = (env) => {
-        const number = getColumnsNumber(env);
-        if (number === 1) {
-            return _lt("Column right");
-        }
-        return _lt("%s Columns right", number.toString());
-    };
-    const COLUMN_INSERT_COLUMNS_AFTER_NAME = (env) => {
-        const number = getColumnsNumber(env);
-        return number === 1
-            ? _lt("Insert column right")
-            : _lt("Insert %s columns right", number.toString());
     };
     const INSERT_COLUMNS_AFTER_ACTION = (env) => {
         const activeCols = env.model.getters.getActiveCols();
@@ -9225,30 +8972,6 @@
             return _lt("Hide columns");
         }
     };
-    const HIDE_COLUMNS_ACTION = (env) => {
-        const columns = env.model.getters.getElementsFromSelection("COL");
-        env.model.dispatch("HIDE_COLUMNS_ROWS", {
-            sheetId: env.model.getters.getActiveSheetId(),
-            dimension: "COL",
-            elements: columns,
-        });
-    };
-    const UNHIDE_ALL_COLUMNS_ACTION = (env) => {
-        const sheetId = env.model.getters.getActiveSheetId();
-        env.model.dispatch("UNHIDE_COLUMNS_ROWS", {
-            sheetId,
-            dimension: "COL",
-            elements: Array.from(Array(env.model.getters.getNumberCols(sheetId)).keys()),
-        });
-    };
-    const UNHIDE_COLUMNS_ACTION = (env) => {
-        const columns = env.model.getters.getElementsFromSelection("COL");
-        env.model.dispatch("UNHIDE_COLUMNS_ROWS", {
-            sheetId: env.model.getters.getActiveSheetId(),
-            dimension: "COL",
-            elements: columns,
-        });
-    };
     const HIDE_ROWS_NAME = (env) => {
         const rows = env.model.getters.getElementsFromSelection("ROW");
         let first = rows[0];
@@ -9262,40 +8985,6 @@
         else {
             return _lt("Hide rows");
         }
-    };
-    const HIDE_ROWS_ACTION = (env) => {
-        const rows = env.model.getters.getElementsFromSelection("ROW");
-        env.model.dispatch("HIDE_COLUMNS_ROWS", {
-            sheetId: env.model.getters.getActiveSheetId(),
-            dimension: "ROW",
-            elements: rows,
-        });
-    };
-    const UNHIDE_ALL_ROWS_ACTION = (env) => {
-        const sheetId = env.model.getters.getActiveSheetId();
-        env.model.dispatch("UNHIDE_COLUMNS_ROWS", {
-            sheetId,
-            dimension: "ROW",
-            elements: Array.from(Array(env.model.getters.getNumberRows(sheetId)).keys()),
-        });
-    };
-    const UNHIDE_ROWS_ACTION = (env) => {
-        const columns = env.model.getters.getElementsFromSelection("ROW");
-        env.model.dispatch("UNHIDE_COLUMNS_ROWS", {
-            sheetId: env.model.getters.getActiveSheetId(),
-            dimension: "ROW",
-            elements: columns,
-        });
-    };
-    //------------------------------------------------------------------------------
-    // Sheets
-    //------------------------------------------------------------------------------
-    const CREATE_SHEET_ACTION = (env) => {
-        const activeSheetId = env.model.getters.getActiveSheetId();
-        const position = env.model.getters.getSheetIds().indexOf(activeSheetId) + 1;
-        const sheetId = env.model.uuidGenerator.uuidv4();
-        env.model.dispatch("CREATE_SHEET", { sheetId, position });
-        env.model.dispatch("ACTIVATE_SHEET", { sheetIdFrom: activeSheetId, sheetIdTo: sheetId });
     };
     //------------------------------------------------------------------------------
     // Charts
@@ -9355,36 +9044,12 @@
     //------------------------------------------------------------------------------
     // Style/Format
     //------------------------------------------------------------------------------
-    const FORMAT_AUTOMATIC_ACTION = (env) => setFormatter(env, "");
-    const FORMAT_NUMBER_ACTION = (env) => setFormatter(env, "#,##0.00");
     const FORMAT_PERCENT_ACTION = (env) => setFormatter(env, "0.00%");
-    const FORMAT_CURRENCY_ACTION = (env) => setFormatter(env, "[$$]#,##0.00");
-    const FORMAT_CURRENCY_ROUNDED_ACTION = (env) => setFormatter(env, "[$$]#,##0");
-    const FORMAT_DATE_ACTION = (env) => setFormatter(env, "m/d/yyyy");
-    const FORMAT_TIME_ACTION = (env) => setFormatter(env, "hh:mm:ss a");
-    const FORMAT_DATE_TIME_ACTION = (env) => setFormatter(env, "m/d/yyyy hh:mm:ss");
-    const FORMAT_DURATION_ACTION = (env) => setFormatter(env, "hhhh:mm:ss");
-    const FORMAT_BOLD_ACTION = (env) => setStyle(env, { bold: !env.model.getters.getCurrentStyle().bold });
-    const FORMAT_ITALIC_ACTION = (env) => setStyle(env, { italic: !env.model.getters.getCurrentStyle().italic });
-    const FORMAT_STRIKETHROUGH_ACTION = (env) => setStyle(env, { strikethrough: !env.model.getters.getCurrentStyle().strikethrough });
-    const FORMAT_UNDERLINE_ACTION = (env) => setStyle(env, { underline: !env.model.getters.getCurrentStyle().underline });
-    const FORMAT_CLEARFORMAT_ACTION = (env) => {
-        env.model.dispatch("CLEAR_FORMATTING", {
-            sheetId: env.model.getters.getActiveSheetId(),
-            target: env.model.getters.getSelectedZones(),
-        });
-    };
     //------------------------------------------------------------------------------
     // Side panel
     //------------------------------------------------------------------------------
     const OPEN_CF_SIDEPANEL_ACTION = (env) => {
         env.openSidePanel("ConditionalFormatting", { selection: env.model.getters.getSelectedZones() });
-    };
-    const OPEN_FAR_SIDEPANEL_ACTION = (env) => {
-        env.openSidePanel("FindAndReplace", {});
-    };
-    const OPEN_CUSTOM_CURRENCY_SIDEPANEL_ACTION = (env) => {
-        env.openSidePanel("CustomCurrency", {});
     };
     const INSERT_LINK = (env) => {
         let { col, row } = env.model.getters.getActivePosition();
@@ -9393,40 +9058,14 @@
     //------------------------------------------------------------------------------
     // Filters action
     //------------------------------------------------------------------------------
-    const FILTERS_CREATE_FILTER_TABLE = (env) => {
-        const sheetId = env.model.getters.getActiveSheetId();
-        const selection = env.model.getters.getSelection().zones;
-        interactiveAddFilter(env, sheetId, selection);
-    };
-    const FILTERS_REMOVE_FILTER_TABLE = (env) => {
-        const sheetId = env.model.getters.getActiveSheetId();
-        env.model.dispatch("REMOVE_FILTER_TABLE", {
-            sheetId,
-            target: env.model.getters.getSelectedZones(),
-        });
-    };
     const SELECTION_CONTAINS_FILTER = (env) => {
         const sheetId = env.model.getters.getActiveSheetId();
         const selectedZones = env.model.getters.getSelectedZones();
         return env.model.getters.doesZonesContainFilter(sheetId, selectedZones);
     };
-    const SELECTION_IS_CONTINUOUS = (env) => {
-        const selectedZones = env.model.getters.getSelectedZones();
-        return areZonesContinuous(...selectedZones);
-    };
     //------------------------------------------------------------------------------
     // Sorting action
     //------------------------------------------------------------------------------
-    const SORT_CELLS_ASCENDING = (env) => {
-        const { anchor, zones } = env.model.getters.getSelection();
-        const sheetId = env.model.getters.getActiveSheetId();
-        interactiveSortSelection(env, sheetId, anchor.cell, zones[0], "ascending");
-    };
-    const SORT_CELLS_DESCENDING = (env) => {
-        const { anchor, zones } = env.model.getters.getSelection();
-        const sheetId = env.model.getters.getActiveSheetId();
-        interactiveSortSelection(env, sheetId, anchor.cell, zones[0], "descending");
-    };
     const IS_ONLY_ONE_RANGE = (env) => {
         return env.model.getters.getSelectedZones().length === 1;
     };
@@ -9434,14 +9073,14 @@
     const undo = {
         name: _lt("Undo"),
         description: "Ctrl+Z",
-        execute: UNDO_ACTION,
+        execute: (env) => env.model.dispatch("REQUEST_UNDO"),
         isEnabled: (env) => env.model.getters.canUndo(),
         icon: "o-spreadsheet-Icon.UNDO",
     };
     const redo = {
         name: _lt("Redo"),
         description: "Ctrl+Y",
-        execute: REDO_ACTION,
+        execute: (env) => env.model.dispatch("REQUEST_REDO"),
         isEnabled: (env) => env.model.getters.canRedo(),
         icon: "o-spreadsheet-Icon.REDO",
     };
@@ -9449,13 +9088,19 @@
         name: _lt("Copy"),
         description: "Ctrl+C",
         isReadonlyAllowed: true,
-        execute: COPY_ACTION,
+        execute: async (env) => {
+            env.model.dispatch("COPY");
+            await env.clipboard.write(env.model.getters.getClipboardContent());
+        },
         icon: "o-spreadsheet-Icon.COPY",
     };
     const cut = {
         name: _lt("Cut"),
         description: "Ctrl+X",
-        execute: CUT_ACTION,
+        execute: async (env) => {
+            interactiveCut(env);
+            await env.clipboard.write(env.model.getters.getClipboardContent());
+        },
         icon: "o-spreadsheet-Icon.CUT",
     };
     const paste = {
@@ -9466,7 +9111,9 @@
     };
     const pasteSpecial = {
         name: _lt("Paste special"),
-        isVisible: IS_NOT_CUT_OPERATION,
+        isVisible: (env) => {
+            return !env.model.getters.isCutOperation();
+        },
         icon: "o-spreadsheet-Icon.PASTE",
     };
     const pasteSpecialValue = {
@@ -9476,18 +9123,23 @@
     };
     const pasteSpecialFormat = {
         name: _lt("Paste format only"),
-        execute: PASTE_FORMAT_ACTION,
+        execute: (env) => interactivePaste(env, env.model.getters.getSelectedZones(), "onlyFormat"),
     };
     const findAndReplace = {
         name: _lt("Find and replace"),
         description: "Ctrl+H",
         isReadonlyAllowed: true,
-        execute: OPEN_FAR_SIDEPANEL_ACTION,
+        execute: (env) => {
+            env.openSidePanel("FindAndReplace", {});
+        },
         icon: "o-spreadsheet-Icon.FIND_AND_REPLACE",
     };
     const deleteValues = {
         name: _lt("Delete values"),
-        execute: DELETE_CONTENT_ACTION,
+        execute: (env) => env.model.dispatch("DELETE_CONTENT", {
+            sheetId: env.model.getters.getActiveSheetId(),
+            target: env.model.getters.getSelectedZones(),
+        }),
     };
     const deleteRows = {
         name: REMOVE_ROWS_NAME,
@@ -9521,11 +9173,19 @@
     };
     const deleteCellShiftUp = {
         name: _lt("Delete cell and shift up"),
-        execute: DELETE_CELL_SHIFT_UP,
+        execute: (env) => {
+            const zone = env.model.getters.getSelectedZone();
+            const result = env.model.dispatch("DELETE_CELL", { zone, shiftDimension: "ROW" });
+            handlePasteResult(env, result);
+        },
     };
     const deleteCellShiftLeft = {
         name: _lt("Delete cell and shift left"),
-        execute: DELETE_CELL_SHIFT_LEFT,
+        execute: (env) => {
+            const zone = env.model.getters.getSelectedZone();
+            const result = env.model.dispatch("DELETE_CELL", { zone, shiftDimension: "COL" });
+            handlePasteResult(env, result);
+        },
     };
     const mergeCells = {
         name: _lt("Merge cells"),
@@ -9610,9 +9270,9 @@
         "META",
     ];
     function arg(definition, description = "") {
-        return makeArg(`${definition} ${description}`);
+        return makeArg(definition, description);
     }
-    function makeArg(str) {
+    function makeArg(str, description) {
         let parts = str.match(ARG_REGEXP);
         let name = parts[1].trim();
         let types = [];
@@ -9642,7 +9302,6 @@
                 defaultValue = param.trim().slice(8);
             }
         }
-        let description = parts[3].trim();
         const result = {
             name,
             description,
@@ -16338,14 +15997,20 @@
     }
 
     const insertRow = {
-        name: MENU_INSERT_ROWS_NAME,
+        name: (env) => {
+            const number = getRowsNumber(env);
+            return number === 1 ? _lt("Insert row") : _lt("Insert %s rows", number.toString());
+        },
         isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()) &&
             IS_ONLY_ONE_RANGE(env) &&
             env.model.getters.getActiveCols().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_ROW",
     };
     const rowInsertRowBefore = {
-        name: ROW_INSERT_ROWS_BEFORE_NAME,
+        name: (env) => {
+            const number = getRowsNumber(env);
+            return number === 1 ? _lt("Insert row above") : _lt("Insert %s rows above", number.toString());
+        },
         execute: INSERT_ROWS_BEFORE_ACTION,
         isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()) &&
             IS_ONLY_ONE_RANGE(env) &&
@@ -16354,17 +16019,32 @@
     };
     const topBarInsertRowsBefore = {
         ...rowInsertRowBefore,
-        name: MENU_INSERT_ROWS_BEFORE_NAME,
+        name: (env) => {
+            const number = getRowsNumber(env);
+            if (number === 1) {
+                return _lt("Row above");
+            }
+            return _lt("%s Rows above", number.toString());
+        },
     };
     const cellInsertRowsBefore = {
         ...rowInsertRowBefore,
-        name: CELL_INSERT_ROWS_BEFORE_NAME,
+        name: (env) => {
+            const number = getRowsNumber(env);
+            if (number === 1) {
+                return _lt("Insert row");
+            }
+            return _lt("Insert %s rows", number.toString());
+        },
         isVisible: IS_ONLY_ONE_RANGE,
         icon: "o-spreadsheet-Icon.INSERT_ROW_BEFORE",
     };
     const rowInsertRowsAfter = {
         execute: INSERT_ROWS_AFTER_ACTION,
-        name: ROW_INSERT_ROWS_AFTER_NAME,
+        name: (env) => {
+            const number = getRowsNumber(env);
+            return number === 1 ? _lt("Insert row below") : _lt("Insert %s rows below", number.toString());
+        },
         isVisible: (env) => isConsecutive(env.model.getters.getActiveRows()) &&
             IS_ONLY_ONE_RANGE(env) &&
             env.model.getters.getActiveCols().size === 0,
@@ -16372,17 +16052,31 @@
     };
     const topBarInsertRowsAfter = {
         ...rowInsertRowsAfter,
-        name: MENU_INSERT_ROWS_AFTER_NAME,
+        name: (env) => {
+            const number = getRowsNumber(env);
+            if (number === 1) {
+                return _lt("Row below");
+            }
+            return _lt("%s Rows below", number.toString());
+        },
     };
     const insertCol = {
-        name: MENU_INSERT_COLUMNS_NAME,
+        name: (env) => {
+            const number = getColumnsNumber(env);
+            return number === 1 ? _lt("Insert column") : _lt("Insert %s columns", number.toString());
+        },
         isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()) &&
             IS_ONLY_ONE_RANGE(env) &&
             env.model.getters.getActiveRows().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_COL",
     };
     const colInsertColsBefore = {
-        name: COLUMN_INSERT_COLUMNS_BEFORE_NAME,
+        name: (env) => {
+            const number = getColumnsNumber(env);
+            return number === 1
+                ? _lt("Insert column left")
+                : _lt("Insert %s columns left", number.toString());
+        },
         execute: INSERT_COLUMNS_BEFORE_ACTION,
         isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()) &&
             IS_ONLY_ONE_RANGE(env) &&
@@ -16391,16 +16085,33 @@
     };
     const topBarInsertColsBefore = {
         ...colInsertColsBefore,
-        name: MENU_INSERT_COLUMNS_BEFORE_NAME,
+        name: (env) => {
+            const number = getColumnsNumber(env);
+            if (number === 1) {
+                return _lt("Column left");
+            }
+            return _lt("%s Columns left", number.toString());
+        },
     };
     const cellInsertColsBefore = {
         ...colInsertColsBefore,
-        name: CELL_INSERT_COLUMNS_BEFORE_NAME,
+        name: (env) => {
+            const number = getColumnsNumber(env);
+            if (number === 1) {
+                return _lt("Insert column");
+            }
+            return _lt("Insert %s columns", number.toString());
+        },
         isVisible: IS_ONLY_ONE_RANGE,
         icon: "o-spreadsheet-Icon.INSERT_COL_BEFORE",
     };
     const colInsertColsAfter = {
-        name: COLUMN_INSERT_COLUMNS_AFTER_NAME,
+        name: (env) => {
+            const number = getColumnsNumber(env);
+            return number === 1
+                ? _lt("Insert column right")
+                : _lt("Insert %s columns right", number.toString());
+        },
         execute: INSERT_COLUMNS_AFTER_ACTION,
         isVisible: (env) => isConsecutive(env.model.getters.getActiveCols()) &&
             IS_ONLY_ONE_RANGE(env) &&
@@ -16409,7 +16120,13 @@
     };
     const topBarInsertColsAfter = {
         ...colInsertColsAfter,
-        name: MENU_INSERT_COLUMNS_AFTER_NAME,
+        name: (env) => {
+            const number = getColumnsNumber(env);
+            if (number === 1) {
+                return _lt("Column right");
+            }
+            return _lt("%s Columns right", number.toString());
+        },
         execute: INSERT_COLUMNS_AFTER_ACTION,
     };
     const insertCell = {
@@ -16421,13 +16138,21 @@
     };
     const insertCellShiftDown = {
         name: _lt("Insert cells and shift down"),
-        execute: INSERT_CELL_SHIFT_DOWN,
+        execute: (env) => {
+            const zone = env.model.getters.getSelectedZone();
+            const result = env.model.dispatch("INSERT_CELL", { zone, shiftDimension: "ROW" });
+            handlePasteResult(env, result);
+        },
         isVisible: (env) => env.model.getters.getActiveRows().size === 0 && env.model.getters.getActiveCols().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_CELL_SHIFT_DOWN",
     };
     const insertCellShiftRight = {
         name: _lt("Insert cells and shift right"),
-        execute: INSERT_CELL_SHIFT_RIGHT,
+        execute: (env) => {
+            const zone = env.model.getters.getSelectedZone();
+            const result = env.model.dispatch("INSERT_CELL", { zone, shiftDimension: "COL" });
+            handlePasteResult(env, result);
+        },
         isVisible: (env) => env.model.getters.getActiveRows().size === 0 && env.model.getters.getActiveCols().size === 0,
         icon: "o-spreadsheet-Icon.INSERT_CELL_SHIFT_RIGHT",
     };
@@ -16493,7 +16218,13 @@
     };
     const insertSheet = {
         name: _lt("Insert sheet"),
-        execute: CREATE_SHEET_ACTION,
+        execute: (env) => {
+            const activeSheetId = env.model.getters.getActiveSheetId();
+            const position = env.model.getters.getSheetIds().indexOf(activeSheetId) + 1;
+            const sheetId = env.model.uuidGenerator.uuidv4();
+            env.model.dispatch("CREATE_SHEET", { sheetId, position });
+            env.model.dispatch("ACTIVATE_SHEET", { sheetIdFrom: activeSheetId, sheetIdTo: sheetId });
+        },
         icon: "o-spreadsheet-Icon.INSERT_SHEET",
     };
     function createFormulaFunctions(fnNames) {
@@ -16504,6 +16235,26 @@
                 execute: (env) => env.startCellEdition(`=${fnName}(`),
             };
         });
+    }
+    function getRowsNumber(env) {
+        const activeRows = env.model.getters.getActiveRows();
+        if (activeRows.size) {
+            return activeRows.size;
+        }
+        else {
+            const zone = env.model.getters.getSelectedZones()[0];
+            return zone.bottom - zone.top + 1;
+        }
+    }
+    function getColumnsNumber(env) {
+        const activeCols = env.model.getters.getActiveCols();
+        if (activeCols.size) {
+            return activeCols.size;
+        }
+        else {
+            const zone = env.model.getters.getSelectedZones()[0];
+            return zone.right - zone.left + 1;
+        }
     }
 
     //------------------------------------------------------------------------------
@@ -16594,6 +16345,123 @@
         separator: true,
     });
 
+    const SORT_TYPES = [
+        CellValueType.number,
+        CellValueType.error,
+        CellValueType.text,
+        CellValueType.boolean,
+    ];
+    function sortCells(cells, sortDirection, emptyCellAsZero) {
+        const cellsWithIndex = cells.map((cell, index) => ({
+            index,
+            type: cell.type,
+            value: cell.value,
+        }));
+        let emptyCells = cellsWithIndex.filter((x) => x.type === CellValueType.empty);
+        let nonEmptyCells = cellsWithIndex.filter((x) => x.type !== CellValueType.empty);
+        if (emptyCellAsZero) {
+            nonEmptyCells.push(...emptyCells.map((emptyCell) => ({ ...emptyCell, type: CellValueType.number, value: 0 })));
+            emptyCells = [];
+        }
+        const inverse = sortDirection === "descending" ? -1 : 1;
+        return nonEmptyCells
+            .sort((left, right) => {
+            let typeOrder = SORT_TYPES.indexOf(left.type) - SORT_TYPES.indexOf(right.type);
+            if (typeOrder === 0) {
+                if (left.type === CellValueType.text || left.type === CellValueType.error) {
+                    typeOrder = left.value.localeCompare(right.value);
+                }
+                else
+                    typeOrder = left.value - right.value;
+            }
+            return inverse * typeOrder;
+        })
+            .concat(emptyCells);
+    }
+    function interactiveSortSelection(env, sheetId, anchor, zone, sortDirection) {
+        let result = DispatchResult.Success;
+        //several columns => bypass the contiguity check
+        let multiColumns = zone.right > zone.left;
+        if (env.model.getters.doesIntersectMerge(sheetId, zone)) {
+            multiColumns = false;
+            let table;
+            for (let row = zone.top; row <= zone.bottom; row++) {
+                table = [];
+                for (let col = zone.left; col <= zone.right; col++) {
+                    let merge = env.model.getters.getMerge({ sheetId, col, row });
+                    if (merge && !table.includes(merge.id.toString())) {
+                        table.push(merge.id.toString());
+                    }
+                }
+                if (table.length >= 2) {
+                    multiColumns = true;
+                    break;
+                }
+            }
+        }
+        const { col, row } = anchor;
+        if (multiColumns) {
+            result = env.model.dispatch("SORT_CELLS", { sheetId, col, row, zone, sortDirection });
+        }
+        else {
+            // check contiguity
+            const contiguousZone = env.model.getters.getContiguousZone(sheetId, zone);
+            if (isEqual(contiguousZone, zone)) {
+                // merge as it is
+                result = env.model.dispatch("SORT_CELLS", {
+                    sheetId,
+                    col,
+                    row,
+                    zone,
+                    sortDirection,
+                });
+            }
+            else {
+                env.askConfirmation(_lt("We found data next to your selection. Since this data was not selected, it will not be sorted. Do you want to extend your selection?"), () => {
+                    zone = contiguousZone;
+                    result = env.model.dispatch("SORT_CELLS", {
+                        sheetId,
+                        col,
+                        row,
+                        zone,
+                        sortDirection,
+                    });
+                }, () => {
+                    result = env.model.dispatch("SORT_CELLS", {
+                        sheetId,
+                        col,
+                        row,
+                        zone,
+                        sortDirection,
+                    });
+                });
+            }
+        }
+        if (result.isCancelledBecause(63 /* CommandResult.InvalidSortZone */)) {
+            const { col, row } = anchor;
+            env.model.selection.selectZone({ cell: { col, row }, zone });
+            env.raiseError(_lt("Cannot sort. To sort, select only cells or only merges that have the same size."));
+        }
+    }
+
+    const AddFilterInteractiveContent = {
+        filterOverlap: _lt("You cannot create overlapping filters."),
+        nonContinuousTargets: _lt("A filter can only be created on a continuous selection."),
+        mergeInFilter: _lt("You can't create a filter over a range that contains a merge."),
+    };
+    function interactiveAddFilter(env, sheetId, target) {
+        const result = env.model.dispatch("CREATE_FILTER_TABLE", { target, sheetId });
+        if (result.isCancelledBecause(78 /* CommandResult.FilterOverlap */)) {
+            env.raiseError(AddFilterInteractiveContent.filterOverlap);
+        }
+        else if (result.isCancelledBecause(80 /* CommandResult.MergeInFilter */)) {
+            env.raiseError(AddFilterInteractiveContent.mergeInFilter);
+        }
+        else if (result.isCancelledBecause(81 /* CommandResult.NonContinuousTargets */)) {
+            env.raiseError(AddFilterInteractiveContent.nonContinuousTargets);
+        }
+    }
+
     const sortRange = {
         name: _lt("Sort range"),
         isVisible: IS_ONLY_ONE_RANGE,
@@ -16601,24 +16469,45 @@
     };
     const sortAscending = {
         name: _lt("Ascending (A ⟶ Z)"),
-        execute: SORT_CELLS_ASCENDING,
+        execute: (env) => {
+            const { anchor, zones } = env.model.getters.getSelection();
+            const sheetId = env.model.getters.getActiveSheetId();
+            interactiveSortSelection(env, sheetId, anchor.cell, zones[0], "ascending");
+        },
         icon: "o-spreadsheet-Icon.SORT_ASCENDING",
     };
     const sortDescending = {
         name: _lt("Descending (Z ⟶ A)"),
-        execute: SORT_CELLS_DESCENDING,
+        execute: (env) => {
+            const { anchor, zones } = env.model.getters.getSelection();
+            const sheetId = env.model.getters.getActiveSheetId();
+            interactiveSortSelection(env, sheetId, anchor.cell, zones[0], "descending");
+        },
         icon: "o-spreadsheet-Icon.SORT_DESCENDING",
     };
     const addDataFilter = {
         name: _lt("Create filter"),
-        execute: FILTERS_CREATE_FILTER_TABLE,
+        execute: (env) => {
+            const sheetId = env.model.getters.getActiveSheetId();
+            const selection = env.model.getters.getSelection().zones;
+            interactiveAddFilter(env, sheetId, selection);
+        },
         isVisible: (env) => !SELECTION_CONTAINS_FILTER(env),
-        isEnabled: (env) => SELECTION_IS_CONTINUOUS(env),
+        isEnabled: (env) => {
+            const selectedZones = env.model.getters.getSelectedZones();
+            return areZonesContinuous(...selectedZones);
+        },
         icon: "o-spreadsheet-Icon.MENU_FILTER_ICON",
     };
     const removeDataFilter = {
         name: _lt("Remove filter"),
-        execute: FILTERS_REMOVE_FILTER_TABLE,
+        execute: (env) => {
+            const sheetId = env.model.getters.getActiveSheetId();
+            env.model.dispatch("REMOVE_FILTER_TABLE", {
+                sheetId,
+                target: env.model.getters.getSelectedZones(),
+            });
+        },
         isVisible: SELECTION_CONTAINS_FILTER,
         icon: "o-spreadsheet-Icon.MENU_FILTER_ICON",
     };
@@ -16632,13 +16521,13 @@
 
     const formatNumberAutomatic = {
         name: _lt("Automatic"),
-        execute: FORMAT_AUTOMATIC_ACTION,
+        execute: (env) => setFormatter(env, ""),
         isActive: (env) => isAutomaticFormatSelected(env),
     };
     const formatNumberNumber = {
         name: _lt("Number"),
         description: "1,000.12",
-        execute: FORMAT_NUMBER_ACTION,
+        execute: (env) => setFormatter(env, "#,##0.00"),
         isActive: (env) => isFormatSelected(env, "#,##0.00"),
     };
     const formatPercent = {
@@ -16655,42 +16544,42 @@
     const formatNumberCurrency = {
         name: _lt("Currency"),
         description: "$1,000.12",
-        execute: FORMAT_CURRENCY_ACTION,
+        execute: (env) => setFormatter(env, "[$$]#,##0.00"),
         isActive: (env) => isFormatSelected(env, "[$$]#,##0.00"),
     };
     const formatNumberCurrencyRounded = {
         name: _lt("Currency rounded"),
         description: "$1,000",
-        execute: FORMAT_CURRENCY_ROUNDED_ACTION,
+        execute: (env) => setFormatter(env, "[$$]#,##0"),
         isActive: (env) => isFormatSelected(env, "[$$]#,##0"),
     };
     const formatCustomCurrency = {
         name: _lt("Custom currency"),
         isVisible: (env) => env.loadCurrencies !== undefined,
-        execute: OPEN_CUSTOM_CURRENCY_SIDEPANEL_ACTION,
+        execute: (env) => env.openSidePanel("CustomCurrency", {}),
     };
     const formatNumberDate = {
         name: _lt("Date"),
         description: "9/26/2008",
-        execute: FORMAT_DATE_ACTION,
+        execute: (env) => setFormatter(env, "m/d/yyyy"),
         isActive: (env) => isFormatSelected(env, "m/d/yyyy"),
     };
     const formatNumberTime = {
         name: _lt("Time"),
         description: "10:43:00 PM",
-        execute: FORMAT_TIME_ACTION,
+        execute: (env) => setFormatter(env, "hh:mm:ss a"),
         isActive: (env) => isFormatSelected(env, "hh:mm:ss a"),
     };
     const formatNumberDateTime = {
         name: _lt("Date time"),
         description: "9/26/2008 22:43:00",
-        execute: FORMAT_DATE_TIME_ACTION,
+        execute: (env) => setFormatter(env, "m/d/yyyy hh:mm:ss"),
         isActive: (env) => isFormatSelected(env, "m/d/yyyy hh:mm:ss"),
     };
     const formatNumberDuration = {
         name: _lt("Duration"),
         description: "27:51:38",
-        execute: FORMAT_DURATION_ACTION,
+        execute: (env) => setFormatter(env, "hhhh:mm:ss"),
         isActive: (env) => isFormatSelected(env, "hhhh:mm:ss"),
     };
     const incraseDecimalPlaces = {
@@ -16714,27 +16603,27 @@
     const formatBold = {
         name: _lt("Bold"),
         description: "Ctrl+B",
-        execute: FORMAT_BOLD_ACTION,
+        execute: (env) => setStyle(env, { bold: !env.model.getters.getCurrentStyle().bold }),
         icon: "o-spreadsheet-Icon.BOLD",
         isActive: (env) => !!env.model.getters.getCurrentStyle().bold,
     };
     const formatItalic = {
         name: _lt("Italic"),
         description: "Ctrl+I",
-        execute: FORMAT_ITALIC_ACTION,
+        execute: (env) => setStyle(env, { italic: !env.model.getters.getCurrentStyle().italic }),
         icon: "o-spreadsheet-Icon.ITALIC",
         isActive: (env) => !!env.model.getters.getCurrentStyle().italic,
     };
     const formatUnderline = {
         name: _lt("Underline"),
         description: "Ctrl+U",
-        execute: FORMAT_UNDERLINE_ACTION,
+        execute: (env) => setStyle(env, { underline: !env.model.getters.getCurrentStyle().underline }),
         icon: "o-spreadsheet-Icon.UNDERLINE",
         isActive: (env) => !!env.model.getters.getCurrentStyle().underline,
     };
     const formatStrikethrough = {
         name: _lt("Strikethrough"),
-        execute: FORMAT_STRIKETHROUGH_ACTION,
+        execute: (env) => setStyle(env, { strikethrough: !env.model.getters.getCurrentStyle().strikethrough }),
         icon: "o-spreadsheet-Icon.STRIKE",
         isActive: (env) => !!env.model.getters.getCurrentStyle().strikethrough,
     };
@@ -16840,7 +16729,10 @@
     const clearFormat = {
         name: _lt("Clear formatting"),
         description: "Ctrl+<",
-        execute: FORMAT_CLEARFORMAT_ACTION,
+        execute: (env) => env.model.dispatch("CLEAR_FORMATTING", {
+            sheetId: env.model.getters.getActiveSheetId(),
+            target: env.model.getters.getSelectedZones(),
+        }),
         icon: "o-spreadsheet-Icon.CLEAR_FORMAT",
     };
     function fontSizeMenuBuilder() {
@@ -16926,13 +16818,27 @@
 
     const hideCols = {
         name: HIDE_COLUMNS_NAME,
-        execute: HIDE_COLUMNS_ACTION,
+        execute: (env) => {
+            const columns = env.model.getters.getElementsFromSelection("COL");
+            env.model.dispatch("HIDE_COLUMNS_ROWS", {
+                sheetId: env.model.getters.getActiveSheetId(),
+                dimension: "COL",
+                elements: columns,
+            });
+        },
         isVisible: NOT_ALL_VISIBLE_COLS_SELECTED,
         icon: "o-spreadsheet-Icon.HIDE_COL",
     };
     const unhideCols = {
         name: _lt("Unhide columns"),
-        execute: UNHIDE_COLUMNS_ACTION,
+        execute: (env) => {
+            const columns = env.model.getters.getElementsFromSelection("COL");
+            env.model.dispatch("UNHIDE_COLUMNS_ROWS", {
+                sheetId: env.model.getters.getActiveSheetId(),
+                dimension: "COL",
+                elements: columns,
+            });
+        },
         isVisible: (env) => {
             const hiddenCols = env.model.getters
                 .getHiddenColsGroups(env.model.getters.getActiveSheetId())
@@ -16943,18 +16849,39 @@
     };
     const unhideAllCols = {
         name: _lt("Unhide all columns"),
-        execute: UNHIDE_ALL_COLUMNS_ACTION,
+        execute: (env) => {
+            const sheetId = env.model.getters.getActiveSheetId();
+            env.model.dispatch("UNHIDE_COLUMNS_ROWS", {
+                sheetId,
+                dimension: "COL",
+                elements: Array.from(Array(env.model.getters.getNumberCols(sheetId)).keys()),
+            });
+        },
         isVisible: (env) => env.model.getters.getHiddenColsGroups(env.model.getters.getActiveSheetId()).length > 0,
     };
     const hideRows = {
         name: HIDE_ROWS_NAME,
-        execute: HIDE_ROWS_ACTION,
+        execute: (env) => {
+            const rows = env.model.getters.getElementsFromSelection("ROW");
+            env.model.dispatch("HIDE_COLUMNS_ROWS", {
+                sheetId: env.model.getters.getActiveSheetId(),
+                dimension: "ROW",
+                elements: rows,
+            });
+        },
         isVisible: NOT_ALL_VISIBLE_ROWS_SELECTED,
         icon: "o-spreadsheet-Icon.HIDE_ROW",
     };
     const unhideRows = {
         name: _lt("Unhide rows"),
-        execute: UNHIDE_ROWS_ACTION,
+        execute: (env) => {
+            const columns = env.model.getters.getElementsFromSelection("ROW");
+            env.model.dispatch("UNHIDE_COLUMNS_ROWS", {
+                sheetId: env.model.getters.getActiveSheetId(),
+                dimension: "ROW",
+                elements: columns,
+            });
+        },
         isVisible: (env) => {
             const hiddenRows = env.model.getters
                 .getHiddenRowsGroups(env.model.getters.getActiveSheetId())
@@ -16965,7 +16892,14 @@
     };
     const unhideAllRows = {
         name: _lt("Unhide all rows"),
-        execute: UNHIDE_ALL_ROWS_ACTION,
+        execute: (env) => {
+            const sheetId = env.model.getters.getActiveSheetId();
+            env.model.dispatch("UNHIDE_COLUMNS_ROWS", {
+                sheetId,
+                dimension: "ROW",
+                elements: Array.from(Array(env.model.getters.getNumberRows(sheetId)).keys()),
+            });
+        },
         isVisible: (env) => env.model.getters.getHiddenRowsGroups(env.model.getters.getActiveSheetId()).length > 0,
     };
     const unFreezePane = {
@@ -17039,12 +16973,18 @@
         name: (env) => env.model.getters.getGridLinesVisibility(env.model.getters.getActiveSheetId())
             ? _lt("Hide gridlines")
             : _lt("Show gridlines"),
-        execute: SET_GRID_LINES_VISIBILITY_ACTION,
+        execute: (env) => {
+            const sheetId = env.model.getters.getActiveSheetId();
+            env.model.dispatch("SET_GRID_LINES_VISIBILITY", {
+                sheetId,
+                areGridLinesVisible: !env.model.getters.getGridLinesVisibility(sheetId),
+            });
+        },
         icon: "o-spreadsheet-Icon.SHOW_HIDE_GRID",
     };
     const viewFormulas = {
         name: (env) => env.model.getters.shouldShowFormulas() ? _lt("Hide formulas") : _lt("Show formulas"),
-        execute: SET_FORMULA_VISIBILITY_ACTION,
+        execute: (env) => env.model.dispatch("SET_FORMULA_VISIBILITY", { show: !env.model.getters.shouldShowFormulas() }),
         isReadonlyAllowed: true,
         icon: "o-spreadsheet-Icon.SHOW_HIDE_FORMULA",
     };
@@ -40988,6 +40928,7 @@
         }
         exportForExcel(data) {
             for (const sheetData of data.sheets) {
+                const sheetId = sheetData.id;
                 for (const tableData of sheetData.filterTables) {
                     const tableZone = toZone(tableData.range);
                     const filters = [];
@@ -41003,20 +40944,20 @@
                         if (!filter)
                             continue;
                         const valuesInFilterZone = filter.filteredZone
-                            ? positions(filter.filteredZone)
-                                .map(({ col, row }) => this.getters.getEvaluatedCell({ sheetId: sheetData.id, col, row }))
-                                .filter((cell) => cell.type !== CellValueType.empty)
-                                .map((cell) => cell.formattedValue)
+                            ? positions(filter.filteredZone).map((position) => this.getters.getEvaluatedCell({ sheetId, ...position }).formattedValue)
                             : [];
-                        // In xlsx, filtered values = values that are displayed, not values that are hidden
-                        const xlsxFilteredValues = valuesInFilterZone.filter((val) => !filteredValues.includes(val));
-                        filters.push({ colId: i, filteredValues: [...new Set(xlsxFilteredValues)] });
-                        // In xlsx, filter header should ALWAYS be a string and should be unique
-                        const headerPosition = {
-                            col: filter.col,
-                            row: filter.zoneWithHeaders.top,
-                            sheetId: sheetData.id,
-                        };
+                        if (filteredValues.length) {
+                            const xlsxDisplayedValues = valuesInFilterZone
+                                .filter((val) => val)
+                                .filter((val) => !filteredValues.includes(val));
+                            filters.push({
+                                colId: i,
+                                displayedValues: [...new Set(xlsxDisplayedValues)],
+                                displayBlanks: !filteredValues.includes("") && valuesInFilterZone.some((val) => !val),
+                            });
+                        }
+                        // In xlsx, filter header should ALWAYS be a string and should be unique in the table
+                        const headerPosition = { col: filter.col, row: filter.zoneWithHeaders.top, sheetId };
                         const headerString = this.getters.getEvaluatedCell(headerPosition).formattedValue;
                         const headerName = this.getUniqueColNameForExcel(i, headerString, headerNames);
                         headerNames.push(headerName);
@@ -47478,15 +47419,10 @@
   `;
     }
     function addFilterColumns(table) {
-        const tableZone = toZone(table.range);
         const columns = [];
-        for (const i of range(0, zoneToDimension(tableZone).numberOfCols)) {
-            const filter = table.filters[i];
-            if (!filter || !filter.filteredValues.length) {
-                continue;
-            }
+        for (const filter of table.filters) {
             const colXml = escapeXml /*xml*/ `
-      <filterColumn ${formatAttributes([["colId", i]])}>
+      <filterColumn ${formatAttributes([["colId", filter.colId]])}>
         ${addFilter(filter)}
       </filterColumn>
       `;
@@ -47495,9 +47431,10 @@
         return columns;
     }
     function addFilter(filter) {
-        const filterValues = filter.filteredValues.map((val) => escapeXml /*xml*/ `<filter ${formatAttributes([["val", val]])}/>`);
+        const filterValues = filter.displayedValues.map((val) => escapeXml /*xml*/ `<filter ${formatAttributes([["val", val]])}/>`);
+        const filterAttributes = filter.displayBlanks ? [["blank", 1]] : [];
         return escapeXml /*xml*/ `
-  <filters>
+  <filters ${formatAttributes(filterAttributes)}>
       ${joinXmlNodes(filterValues)}
   </filters>
 `;
@@ -48538,8 +48475,8 @@
 
 
     __info__.version = '16.4.0-alpha.4';
-    __info__.date = '2023-06-12T14:15:11.459Z';
-    __info__.hash = '251a52e';
+    __info__.date = '2023-06-20T13:00:05.605Z';
+    __info__.hash = '114b1a1';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
