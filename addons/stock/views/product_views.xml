@@ -491,14 +491,14 @@
         <field name="arch" type="xml">
             <tree sample="1" js_class="stock_report_list_view">
                 <field name="id" invisible="1"/>
-                <field name="display_name" string="Product"/>
+                <field name="display_name" string="Product" options="{'allow_order': '1'}"/>
                 <field name="categ_id" optional="hide"/>
-                <field name="qty_available" string="On Hand" sum="Total On Hand"/>
+                <field name="qty_available" string="On Hand" sum="Total On Hand" options="{'allow_order': '1'}"/>
                 <button name="%(action_view_inventory_tree)d" title="Inventory Adjustment" type="action" class="btn-link"
                     icon="fa-pencil" context="{'search_default_product_id': id, 'default_product_id': id}"/>
-                <field name="free_qty" string="Free to Use" sum="Total Free to Use"/>
-                <field name="incoming_qty" optional="show" sum="Total Incoming"/>
-                <field name="outgoing_qty" optional="show" sum="Total Outgoing"/>
+                <field name="free_qty" string="Free to Use" sum="Total Free to Use" options="{'allow_order': '1'}"/>
+                <field name="incoming_qty" optional="show" sum="Total Incoming" options="{'allow_order': '1'}"/>
+                <field name="outgoing_qty" optional="show" sum="Total Outgoing" options="{'allow_order': '1'}"/>
                 <field name="virtual_available" string="Forecasted" optional="hide" sum="Total Forecasted"/>
                 <field name="uom_id" string="Unit" groups="uom.group_uom" options="{'no_create': True}"/>
                 <button name="%(stock_move_line_action)d" string="History" type="action" class="btn-link"
@@ -527,7 +527,7 @@
             </filter>
             <filter name="real_stock_negative" position="after">
                 <searchpanel>
-                    <field name="categ_id" icon="fa-filter" string="Category" select="multi"/>
+                    <field name="categ_id" icon="fa-filter" string="Category" enable_counters="1"/>
                 </searchpanel>
             </filter>
         </field>

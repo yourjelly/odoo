@@ -190,6 +190,15 @@ class StockMove(models.Model):
     product_packaging_id = fields.Many2one('product.packaging', 'Packaging', domain="[('product_id', '=', product_id)]", check_company=True)
     from_immediate_transfer = fields.Boolean(related="picking_id.immediate_transfer")
     show_reserved = fields.Boolean(compute='_compute_show_reserved')
+    child_location_ids = fields.One2many(related='location_dest_id.child_ids')
+    specific_location_id = fields.Many2one('stock.location', compute='_compute_specific_location_id')
+
+    def _compute_specific_location_id(self):
+        for rec in self:
+            if rec.picking_id.use_create_lots:
+                rec.specific_location_id = rec.picking_id.location_id
+            else:
+                rec.specific_location_id = ''
 
     @api.depends('product_id')
     def _compute_product_uom(self):
@@ -1879,6 +1888,7 @@ Please change the quantity done or the rounding precision of your unit of measur
                 qty_split = move.product_uom._compute_quantity(move.product_uom_qty - move.quantity_done, move.product_id.uom_id, rounding_method='HALF-UP')
                 new_move_vals = move._split(qty_split)
                 backorder_moves_vals += new_move_vals
+                # move.move_line_ids.write({'result_package_id': False})
         backorder_moves = self.env['stock.move'].create(backorder_moves_vals)
         # The backorder moves are not yet in their own picking. We do not want to check entire packs for those
         # ones as it could messed up the result_package_id of the moves being currently validated

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_form_picking_batch_no_qty_done" model="ir.ui.view">
+        <field name="name">stock.picking.batch.no.qty.done.view.form</field>
+        <field name="model">stock.picking.batch.no.qty.done</field>
+        <field name="arch" type="xml">
+            <form string="Warning?">
+                <p>Some transfers of this batch have no <strong>quantity done</strong></p>
+                <p><strong>Exclude them from the batch ?</strong></p>
+                <field name="picking_batch_id" invisible="context.get('hide_batch_id', True)"/>
+                <footer>
+                    <button name="confirm_batch" string="Confirm" type="object" class="btn-primary" data-hotkey="q"/>
+                    <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="z" />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

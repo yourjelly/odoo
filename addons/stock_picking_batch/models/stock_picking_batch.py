@@ -253,11 +253,21 @@ class StockPickingBatch(models.Model):
         context = {'skip_sanity_check': True, 'pickings_to_detach': empty_waiting_pickings.ids}
         if len(empty_pickings) == len(pickings):
             return pickings.with_context(**context).button_validate()
+        elif len(empty_pickings) == 0:
+            return pickings.with_context(skip_immediate=True, **context).button_validate()
         else:
             # If some pickings are at least partially done, other pickings (empty & waiting) will be removed from batch without being cancelled in case of no backorder
             pickings = pickings - self.env['stock.picking'].browse(empty_pickings)
             context['pickings_to_detach'] = context['pickings_to_detach'] + list(empty_pickings)
-            return pickings.with_context(skip_immediate=True, **context).button_validate()
+            view = self.env.ref('stock_picking_batch.view_form_picking_batch_no_qty_done')
+            return {
+                'name': _('No Quantity Done Warning'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'stock.picking.batch.no.qty.done',
+                'views': [(view.id, 'form')],
+                'target': 'new',
+                'context': {'default_picking_batch_id': self.id, 'hide_batch_id': 1, 'context': context, 'pickings': pickings.ids,}
+            }
 
     def action_assign(self):
         self.ensure_one()

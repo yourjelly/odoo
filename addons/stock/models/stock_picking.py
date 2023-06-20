@@ -441,10 +441,16 @@ class Picking(models.Model):
         ('late', 'Late')], compute='_compute_products_availability')
     show_set_qty_button = fields.Boolean(compute='_compute_show_qty_button')
     show_clear_qty_button = fields.Boolean(compute='_compute_show_qty_button')
+    destination_country_name = fields.Char(compute='_compute_destination_country', store=True)
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
+
+    @api.depends('location_dest_id.company_id.country_id')
+    def _compute_destination_country(self):
+        for picking in self:
+            picking.destination_country_name = picking.location_dest_id.company_id.country_id.name
 
     @api.depends('show_validate',
                  'move_ids.reserved_availability',
