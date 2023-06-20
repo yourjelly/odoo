@@ -1418,7 +1418,10 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
         // Build the select element with a custom span to hold the color preview
         this.colorPreviewEl = document.createElement('span');
         this.colorPreviewEl.classList.add('o_we_color_preview');
+        // todo: This div should be removed whenever possible (like when
+        // converting the uservaluewidget to owl).
         this.colorPaletteEl = document.createElement('div');
+        this.colorPaletteEl.classList.add('o_we_color_palette_wrapper');
         this.colorPaletteEl.style.display = 'contents';
         this.colorPaletteColorNames = [];
         this.options.childNodes = [this.colorPaletteEl];
