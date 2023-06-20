@@ -21,7 +21,6 @@ export class MassMailingWysiwyg extends Wysiwyg {
             }
         });
         this.snippetsMenuToolbarEl = this.toolbarEl;
-        this.$snippetsMenuToolbarEl = this.$toolbarEl;
         return res;
     }
 
@@ -57,9 +56,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
                 document.body.append(toolbarWrapperElement);
                 await toolbarWrapper.mount(toolbarWrapperElement);
                 this.toolbarEl = toolbarWrapperElement.firstChild;
-                this.$toolbarEl = $(this.toolbarEl);
                 this.floatingToolbarEl = this.toolbarEl;
-                this.floating$toolbarEl = this.$toolbarEl;
 
                 this._configureToolbar({ snippets: false });
                 this._updateEditorUI();
@@ -72,7 +69,6 @@ export class MassMailingWysiwyg extends Wysiwyg {
                 }
             } else {
                 this.toolbarEl = this.floatingToolbarEl;
-                this.$toolbarEl = this.floating$toolbarEl;
             }
             this.toolbarEl.classList.remove('d-none');
             this.odooEditor.autohideToolbar = true;
@@ -80,7 +76,6 @@ export class MassMailingWysiwyg extends Wysiwyg {
         } else {
             this.snippetsMenu.setFolded(false);
             this.toolbarEl = this.snippetsMenuToolbarEl;
-            this.$toolbarEl = this.$snippetsMenuToolbarEl;
 
             this.odooEditor.autohideToolbar = false;
             if (this.floatingToolbarEl) {
@@ -149,7 +144,7 @@ export class MassMailingWysiwyg extends Wysiwyg {
         const range = selection.rangeCount && selection.getRangeAt(0);
         const isWithinBackgroundImage = !!range && !!closestElement(range.startContainer, '[style*=background-image]');
         if (isWithinBackgroundImage) {
-            this.$toolbarEl.find('#create-link').toggleClass('d-none', true);
+            this.toolbarEl.querySelector('#create-link').classList.toggle('d-none', true);
         }
     }
 }
