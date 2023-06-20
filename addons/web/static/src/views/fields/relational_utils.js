@@ -797,8 +797,7 @@ export function useX2ManyCrud(getList, isMany2Many) {
 
     const updateRecord = async (record) => {
         if (isMany2Many) {
-            return record.save();
-            // Maybe add a _sort ???
+            await record.save();
         }
         // FIXME: incomplete, check updateRecord in BasicRelationalModel
         const list = getList();
