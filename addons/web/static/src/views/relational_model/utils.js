@@ -53,11 +53,11 @@ export function createPropertyActiveField(property) {
     if (type === "many2many") {
         activeField.related = {
             fields: {
-                id: { name: "id", type: "integer" },
+                id: { name: "id", type: "integer", readonly: true },
                 display_name: { name: "display_name", type: "char" },
             },
             activeFields: {
-                id: makeActiveField({ readonly: true }),
+                id: makeActiveField(),
                 display_name: makeActiveField(),
             },
         };
@@ -101,10 +101,8 @@ export function patchActiveFields(activeField, patch) {
 }
 
 export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
-    const activeFields = {
-        id: makeActiveField({ readonly: true, invisible: true }),
-    };
-    fields = { ...fields, id: { name: "id", type: "integer" } };
+    const activeFields = {};
+    fields = { ...fields };
     for (const fieldNode of Object.values(fieldNodes)) {
         const fieldName = fieldNode.name;
         const modifiers = fieldNode.modifiers || {};
@@ -124,7 +122,7 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                 activeField.limit = viewDescr.limit;
                 activeField.defaultOrderBy = viewDescr.defaultOrder;
                 if (fieldNode.views.form) {
-                    // we already know the form view (it is inline), so add its fields (in invisible)
+                    // we already know the form view (it is inline), so add its fields (in invisble)
                     // s.t. they will be sent in the spec for onchange, and create commands returned
                     // by the onchange could return values for those fields (that would be displayed
                     // later if the user opens the form view)
@@ -260,18 +258,16 @@ export function getFieldsSpec(
         const { related, limit, defaultOrderBy, invisible } = activeFields[fieldName];
         fieldsSpec[fieldName] = {};
         // X2M
-        if (["one2many", "many2many"].includes(fields[fieldName].type)) {
-            if (related && (invisible !== true || withInvisible)) {
-                fieldsSpec[fieldName].fields = getFieldsSpec(
-                    related.activeFields,
-                    related.fields,
-                    evalContext,
-                    { parentActiveFields: activeFields, withInvisible }
-                );
-                fieldsSpec[fieldName].limit = limit;
-                if (defaultOrderBy) {
-                    fieldsSpec[fieldName].order = orderByToString(defaultOrderBy);
-                }
+        if (related && (invisible !== true || withInvisible)) {
+            fieldsSpec[fieldName].fields = getFieldsSpec(
+                related.activeFields,
+                related.fields,
+                evalContext,
+                { parentActiveFields: activeFields, withInvisible }
+            );
+            fieldsSpec[fieldName].limit = limit;
+            if (defaultOrderBy) {
+                fieldsSpec[fieldName].order = orderByToString(defaultOrderBy);
             }
         }
         // Properties

@@ -322,7 +322,7 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
                 const archInfo = new ArchParser().parse(subArch, models, fields[name].relation);
                 views[viewType] = {
                     ...archInfo,
-                    limit: archInfo.limit || 2,
+                    limit: archInfo.limit || 40,
                     fields: models[fields[name].relation],
                 };
             }

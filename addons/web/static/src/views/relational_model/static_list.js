@@ -26,7 +26,7 @@ function compareRecords(r1, r2, orderBy, fields) {
         return 1;
     }
     if (orderBy.length > 1) {
-        return compareRecords(r1, r2, orderBy.slice(1), fields);
+        return compareRecords(r1, r2, orderBy.slice(1));
     }
     return 0;
 }
@@ -369,7 +369,7 @@ export class StaticList extends DataPoint {
                     break;
                 }
                 case LINK_TO: {
-                    const record = this._createRecordDatapoint({ ...command[2], id: command[1] });
+                    const record = this._createRecordDatapoint(command[2]);
                     if (!this.limit || this.records.length < this.limit) {
                         this.records.push(record);
                     }
@@ -569,26 +569,9 @@ export class StaticList extends DataPoint {
     async _load({ limit, offset, orderBy }) {
         const currentIds = this._currentIds.slice(offset, offset + limit);
         // FIXME: record in cache could be not yet loaded
-        const resIds = currentIds.filter((id) => {
-            if (typeof id === "string") {
-                // this is a virtual id, we don't want to read it
-                return false;
-            }
-            const record = this._cache[id];
-            if (!record) {
-                // record hasn't been loaded yet
-                return true;
-            }
-            // record has already been loaded -> check if we already read all orderBy fields
-            return (
-                intersection(this.fieldNames, record.fieldNames).length !== this.fieldNames.length
-            );
-        });
+        const resIds = currentIds.filter((id) => typeof id === "number" && !this._cache[id]);
         if (resIds.length) {
-            const records = await this.model._loadRecords(
-                { ...this.config, resIds },
-                this.evalContext
-            );
+            const records = await this.model._loadRecords({ ...this.config, resIds });
             for (const record of records) {
                 this._createRecordDatapoint(record);
             }
@@ -681,7 +664,7 @@ export class StaticList extends DataPoint {
             return intersection(record.fieldNames, fieldNames).length !== fieldNames.length;
         });
         if (resIds.length) {
-            const activeFields = pick(this.activeFields, ...fieldNames);
+            const activeFields = pick(this.activeFields, fieldNames);
             const config = { ...this.config, resIds, activeFields };
             const records = await this.model._loadRecords(config);
             for (const record of records) {
