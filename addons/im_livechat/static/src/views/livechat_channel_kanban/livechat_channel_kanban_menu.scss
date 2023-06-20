@@ -1,0 +1,22 @@
+$highlighted-kanban-color: #fcf8e3;
+$highlighted-kanban-border-color: mix($highlighted-kanban-color, map-get($grays, "100"));
+$highlighted-kanban-border-color-focus: mix($highlighted-kanban-color, map-get($grays, "400"));
+
+.o_kanban_record:has(.o-livechat-ChannelKanban-highlighted) {
+    & .oe_kanban_global_click {
+        background-color: $highlighted-kanban-color !important;
+    }
+
+    &:focus-visible,
+    &:focus-within {
+        outline-color: $highlighted-kanban-border-color-focus !important;
+    }
+}
+
+.o-livechat-ChannelKanban-highlighted {
+    background-color: $highlighted-kanban-color !important;
+
+    &::before {
+        background-color: $highlighted-kanban-color !important;
+    }
+}

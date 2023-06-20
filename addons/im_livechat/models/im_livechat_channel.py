@@ -17,11 +17,7 @@ class ImLivechatChannel(models.Model):
     _name = 'im_livechat.channel'
     _inherit = ['rating.parent.mixin']
     _description = 'Livechat Channel'
-    _rating_satisfaction_days = 7  # include only last 7 days to compute satisfaction
-
-    def _default_image(self):
-        image_path = modules.get_module_resource('im_livechat', 'static/src/img', 'default.png')
-        return base64.b64encode(open(image_path, 'rb').read())
+    _rating_satisfaction_days = 14  # include only last 14 days to compute satisfaction
 
     def _default_user_ids(self):
         return [(6, 0, [self._uid])]
@@ -52,10 +48,11 @@ class ImLivechatChannel(models.Model):
     script_external = fields.Html('Script (external)', compute='_compute_script_external', store=False, readonly=True, sanitize=False)
     nbr_channel = fields.Integer('Number of conversation', compute='_compute_nbr_channel', store=False, readonly=True)
 
-    image_128 = fields.Image("Image", max_width=128, max_height=128, default=_default_image)
+    image_128 = fields.Image("Image", max_width=128, max_height=128)
 
     # relationnal fields
     user_ids = fields.Many2many('res.users', 'im_livechat_channel_im_user', 'channel_id', 'user_id', string='Operators', default=_default_user_ids)
+    available_operator_ids = fields.Many2many('res.users', compute='_compute_available_operator_ids')
     channel_ids = fields.One2many('discuss.channel', 'livechat_channel_id', 'Sessions')
     chatbot_script_count = fields.Integer(string='Number of Chatbot', compute='_compute_chatbot_script_count')
     rule_ids = fields.One2many('im_livechat.channel.rule', 'channel_id', 'Rules')
@@ -63,6 +60,11 @@ class ImLivechatChannel(models.Model):
     def _are_you_inside(self):
         for channel in self:
             channel.are_you_inside = bool(self.env.uid in [u.id for u in channel.user_ids])
+
+    @api.depends('user_ids.im_status')
+    def _compute_available_operator_ids(self):
+        for record in self:
+            record.available_operator_ids = record.user_ids.filtered(lambda user: user.im_status == 'online')
 
     @api.depends('rule_ids.chatbot_script_id')
     def _compute_chatbot_script_count(self):
@@ -130,13 +132,6 @@ class ImLivechatChannel(models.Model):
     # --------------------------
     # Channel Methods
     # --------------------------
-    def _get_available_users(self):
-        """ get available user of a given channel
-            :retuns : return the res.users having their im_status online
-        """
-        self.ensure_one()
-        return self.user_ids.filtered(lambda user: user.im_status == 'online')
-
     def _get_livechat_discuss_channel_vals(self, anonymous_name, operator=None, chatbot_script=None, user_id=None, country_id=None):
         # partner to add to the discuss.channel
         operator_partner_id = operator.partner_id.id if operator else chatbot_script.operator_partner_id.id
@@ -190,10 +185,9 @@ class ImLivechatChannel(models.Model):
                     [('channel_id', 'in', self.ids)]).mapped('chatbot_script_id').ids:
                 return False
         elif previous_operator_id:
-            available_users = self._get_available_users()
             # previous_operator_id is the partner_id of the previous operator, need to convert to user
-            if previous_operator_id in available_users.mapped('partner_id').ids:
-                user_operator = next(available_user for available_user in available_users if available_user.partner_id.id == previous_operator_id)
+            if previous_operator_id in self.available_operator_ids.mapped('partner_id').ids:
+                user_operator = next(available_user for available_user in self.available_operator_ids if available_user.partner_id.id == previous_operator_id)
         if not user_operator and not chatbot_script:
             user_operator = self._get_random_operator()
         if not user_operator and not chatbot_script:
@@ -227,7 +221,7 @@ class ImLivechatChannel(models.Model):
         :return : user
         :rtype : res.users
         """
-        operators = self._get_available_users()
+        operators = self.available_operator_ids
         if len(operators) == 0:
             return False
 
@@ -278,7 +272,7 @@ class ImLivechatChannel(models.Model):
         if username is None:
             username = _('Visitor')
         info = {}
-        info['available'] = self.chatbot_script_count or len(self._get_available_users()) > 0
+        info['available'] = self.chatbot_script_count or len(self.available_operator_ids) > 0
         info['server_url'] = self.get_base_url()
         if info['available']:
             info['options'] = self._get_channel_infos()
