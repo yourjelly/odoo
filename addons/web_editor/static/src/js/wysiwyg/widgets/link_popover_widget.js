@@ -48,18 +48,18 @@ export class LinkPopoverWidget {
             <span class="me-2 o_we_preview_favicon"><i class="fa fa-globe"></i><img class="align-baseline d-none"></img></span>
             <div class="w-100">
                 <div class="d-flex">
-                    <a href="#" target="_blank" class="o_we_url_link fw-bold flex-grow-1 text-truncate" title="Open in a new tab"></a>
-                    <a href="#" class="mx-1 o_we_copy_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy Link">
+                    <a href="#" target="_blank" class="o_we_url_link fw-bold flex-grow-1 text-truncate" title="${_t('Open in a new tab')}"></a>
+                    <a href="#" class="mx-1 o_we_copy_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="${_t('Copy Link')}">
                         <i class="fa fa-clone"></i>
                     </a>
-                    <a href="#" class="mx-1 o_we_edit_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Link">
+                    <a href="#" class="mx-1 o_we_edit_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="${_t('Edit Link')}">
                         <i class="fa fa-edit"></i>
                     </a>
-                    <a href="#" class="ms-1 o_we_remove_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove Link">
+                    <a href="#" class="ms-1 o_we_remove_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="${_t('Remove Link')}">
                         <i class="fa fa-chain-broken"></i>
                     </a>
                 </div>
-                <a href="#" target="_blank" class="o_we_full_url mt-1 text-muted d-none" title="Open in a new tab"></a>
+                <a href="#" target="_blank" class="o_we_full_url mt-1 text-muted d-none" title="${_t('Open in a new tab')}"></a>
             </div>
         </div>
     `;
