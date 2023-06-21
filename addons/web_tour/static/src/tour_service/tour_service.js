@@ -58,12 +58,15 @@ export const tourService = {
     start: async (_env, { orm, effect, ui }) => {
         await whenReady();
         await odoo.ready("web.legacy_tranlations_loaded");
+        const consumedTours = new Set(session.web_tours);
 
         /** @type {{ [k: string]: Tour }} */
         const tours = {};
         const tourRegistry = registry.category("web_tour.tours");
         function register(name, tour) {
+            const wait_for = tour.wait_for || Promise.resolve();
             tours[name] = {
+                wait_for,
                 name: tour.saveAs || name,
                 steps: tour.steps,
                 url: tour.url,
@@ -72,9 +75,18 @@ export const tourService = {
                 fadeout: tour.fadeout || "medium",
                 sequence: tour.sequence || 1000,
                 test: tour.test,
-                wait_for: tour.wait_for || Promise.resolve(),
                 checkDelay: tour.checkDelay,
             };
+            wait_for.then(() => {
+                if (
+                    !tour.test &&
+                    !session.tour_disable &&
+                    !consumedTours.has(name) &&
+                    !tourState.getActiveTourNames().includes(name)
+                ) {
+                    startTour(name, { mode: "manual", redirect: false });
+                }
+            });
         }
         for (const [name, tour] of tourRegistry.getEntries()) {
             register(name, tour);
@@ -92,7 +104,6 @@ export const tourService = {
 
         const bus = new EventBus();
         const macroEngine = new MacroEngine({ target: document });
-        const consumedTours = new Set(session.web_tours);
 
         const pointers = reactive({});
 
@@ -135,7 +146,7 @@ export const tourService = {
         function shouldOmit(step, mode) {
             const isDefined = (key, obj) => key in obj && obj[key] !== undefined;
             const getEdition = () =>
-                session.server_version_info.slice(-1)[0] === "e" ? "enterprise" : "community";
+                (session.server_version_info || []).at(-1) === "e" ? "enterprise" : "community";
             const correctEdition = isDefined("edition", step)
                 ? step.edition === getEdition()
                 : true;
@@ -215,6 +226,9 @@ export const tourService = {
          * @param {'auto' | 'manual'} mode
          */
         function activateMacro(macro, mode) {
+            if (macro.test) {
+                macroEngine.macros = new Set(); // stop all other tours
+            }
             if (mode === "auto") {
                 transitionConfig.disabled = true;
             }
@@ -292,17 +306,6 @@ export const tourService = {
 
         odoo.startTour = startTour;
         odoo.isTourReady = (tourName) => tours[tourName].wait_for.then(() => true);
-
-        // Auto start unconsumed tours if tour is not disabled and if the user is not on mobile.
-        const isTourEnabled = "tour_disable" in session && !session.tour_disable;
-        if (isTourEnabled && !ui.isSmall) {
-            const sortedTours = getSortedTours().filter((tour) => !consumedTours.has(tour.name));
-            for (const tour of sortedTours) {
-                odoo.isTourReady(tour.name).then(() => {
-                    startTour(tour.name, { mode: "manual", redirect: false });
-                });
-            }
-        }
 
         return {
             bus,

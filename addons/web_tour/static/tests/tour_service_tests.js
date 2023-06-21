@@ -404,6 +404,7 @@ QUnit.module("Tour service", (hooks) => {
 
     QUnit.test("trigger an event when a step is consummed", async function (assert) {
         registry.category("web_tour.tours").add("tour1", {
+            test: true, // prevent tour service from auto-starting the tour
             sequence: 10,
             steps: [{ trigger: ".interval input" }],
         });
