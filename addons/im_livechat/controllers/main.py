@@ -234,7 +234,7 @@ class LivechatController(http.Controller):
             discuss_channel._close_livechat_session()
 
     @http.route('/im_livechat/chat_post', type="json", auth="public", cors="*")
-    def im_livechat_chat_post(self, uuid, message_content, context=None):
+    def im_livechat_chat_post(self, uuid, message_content, context=None, subtype_xmlid='mail.mt_comment'):
         if context:
             request.update_context(**context)
         channel = request.env["discuss.channel"].sudo().search([('uuid', '=', uuid)], limit=1)
@@ -255,7 +255,7 @@ class LivechatController(http.Controller):
             email_from=email_from,
             body=body,
             message_type='comment',
-            subtype_xmlid='mail.mt_comment'
+            subtype_xmlid=subtype_xmlid
         )
         message_format = message.message_format()[0]
         if 'temporary_id' in request.context:
