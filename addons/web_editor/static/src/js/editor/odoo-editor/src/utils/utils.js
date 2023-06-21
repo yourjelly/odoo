@@ -1486,6 +1486,41 @@ export function makeContentsInline(node) {
 }
 
 /**
+ * Wrap the element's content inline nodes in paragraphs.
+ *
+ * @param {Element} element
+ */
+export function makeContentsBlock(element) {
+    const childNodes = [...element.childNodes];
+    const tempEl = document.createElement('temp-container');
+    let currentP = document.createElement('p');
+    currentP.style.marginBottom = '0';
+    do {
+        const node = childNodes.shift();
+        const nodeIsBlock = isBlock(node);
+        const nodeIsBR = node.nodeName === 'BR';
+        // Append to the P unless child is block or an unneeded BR.
+        if (!(nodeIsBlock || (nodeIsBR && currentP.childNodes.length))) {
+            currentP.append(node);
+        }
+        // Break paragraphs on blocks and BR.
+        if (nodeIsBlock || nodeIsBR || childNodes.length === 0) {
+            // Ensure we don't add an empty P or a P containing only
+            // formating spaces that should not be visible.
+            if (currentP.childNodes.length && currentP.innerHTML.trim() !== '') {
+                tempEl.append(currentP);
+            }
+            currentP = currentP.cloneNode();
+            // Append block children directly to the template.
+            if (nodeIsBlock) {
+                tempEl.append(node);
+            }
+        }
+    } while (childNodes.length);
+    element.replaceChildren(...tempEl.childNodes);
+}
+
+/**
  * Returns an array of url infos for url matched in the given string.
  *
  * @param {String} string
