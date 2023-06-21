@@ -45,7 +45,7 @@ patch(LinkTools.prototype, 'website/static/src/js/editor/widget_link.js', {
             _rpc: ({ route, params }) => this.rpc(route, params),
             trigger_up: this._onAutocompleteClose.bind(this),
         };
-        wUtils.autocompleteWithPages(fakeWidget, this.$('input[name="url"]'), options);
+        wUtils.autocompleteWithPages(fakeWidget, this.$el.find('input[name="url"]'), options);
         this._adaptPageAnchor();
         return def;
     },
@@ -58,10 +58,10 @@ patch(LinkTools.prototype, 'website/static/src/js/editor/widget_link.js', {
      * @private
      */
     _adaptPageAnchor() {
-        const urlInputValue = this.$('input[name="url"]').val();
-        const $pageAnchor = this.$('.o_link_dialog_page_anchor');
+        const urlInputValue = this.$el.find('input[name="url"]').val();
+        const $pageAnchor = this.$el.find('.o_link_dialog_page_anchor');
         const isFromWebsite = urlInputValue[0] === '/';
-        const $selectMenu = this.$('we-selection-items[name="link_anchor"]');
+        const $selectMenu = this.$el.find('we-selection-items[name="link_anchor"]');
 
         if ($selectMenu.data("anchor-for") !== urlInputValue) { // avoid useless query
             $pageAnchor.toggleClass('d-none', !isFromWebsite);
@@ -104,7 +104,7 @@ patch(LinkTools.prototype, 'website/static/src/js/editor/widget_link.js', {
     _onPickSelectOption(ev) {
         if (ev.currentTarget.closest('[name="link_anchor"]')) {
             const anchorValue = $(ev.currentTarget).data('value');
-            const $urlInput = this.$('[name="url"]');
+            const $urlInput = this.$el.find('[name="url"]');
             let urlInputValue = $urlInput.val();
             if (urlInputValue.indexOf('#') > -1) {
                 urlInputValue = urlInputValue.substr(0, urlInputValue.indexOf('#'));

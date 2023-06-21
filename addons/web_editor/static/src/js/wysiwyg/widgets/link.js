@@ -58,8 +58,6 @@ export class Link extends Component {
             started = true;
             this.$el = $(this.linkComponentWrapperRef.el);
 
-            this.$ = this.$el.find.bind(this.$el);
-
             this.$el.find('input, select').on('input', this._onAnyChange.bind(this));
             this.$el.find('input, select').on('change', this._onAnyChange.bind(this));
             this.$el.find('[name="url"]').on('input', this.__onURLInput.bind(this));
