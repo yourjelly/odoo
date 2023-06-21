@@ -74,6 +74,7 @@ QUnit.module("Analytic", (hooks) => {
                         amount: { string: "Amount", type: "float" },
                         analytic_distribution: { string: "Analytic", type: "json" },
                         move_id: { string: "Account Move", type: "many2one", relation: "move" },
+                        analytic_precision: { string: "Analytic Precision", type: "integer" },
                     },
                     records: [
                         { id: 1, label: "Developer Time", amount: 100.00, analytic_distribution: {"1": 30.3, "3": 69.7}},
@@ -124,7 +125,7 @@ QUnit.module("Analytic", (hooks) => {
 
     QUnit.module("AnalyticDistribution");
 
-    QUnit.tttt("analytic field in form view basic features", async function (assert) {
+    QUnit.test("analytic field in form view basic features", async function (assert) {
         await makeView({
             type: "form",
             resModel: "aml",
@@ -329,7 +330,7 @@ QUnit.module("Analytic", (hooks) => {
         }
         assert.equal(popup.querySelector("table#plan_5 tr:last-of-type .o_analytic_account_name input").value, "",
             "Last tag's account is empty");
-
+        debugger
         // apply the changes to both move lines
         triggerHotkey("Escape");
         await nextTick();
