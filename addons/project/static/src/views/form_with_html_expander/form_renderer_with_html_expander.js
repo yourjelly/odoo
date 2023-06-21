@@ -12,15 +12,8 @@ export class FormRendererWithHtmlExpander extends FormRenderer {
         const ref = useRef('compiled_view_root');
         useEffect(
             (el, size) => {
-                if (el && size === 6) {
-                    const descriptionField = el.querySelector(this.htmlFieldQuerySelector);
-                    if (descriptionField) {
-                        const editor = descriptionField.querySelector('.note-editable');
-                        const elementToResize = editor || descriptionField;
-                        const { bottom, height } = elementToResize.getBoundingClientRect();
-                        const minHeight = document.documentElement.clientHeight - bottom - height;
-                        elementToResize.style.minHeight = `${minHeight}px`;
-                    }
+                if (el && size === 6 && this.options) {
+                    this.options.element.style.minHeight = this.options.minHeight;
                 }
             },
             () => [ref.el, this.ui.size, this.props.record.mode],
