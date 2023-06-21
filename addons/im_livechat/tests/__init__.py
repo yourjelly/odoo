@@ -9,5 +9,6 @@ from . import test_get_discuss_channel
 from . import test_get_random_operator
 from . import test_im_livechat_report
 from . import test_im_livechat_support_page
+from . import test_performance
 from . import test_js
 from . import test_message
