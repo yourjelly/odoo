@@ -142,11 +142,12 @@ class StockMove(models.Model):
             line = val_stock_move.account_move_ids.line_ids.filtered(lambda l: l.account_id == related_aml.account_id)
             assert(len(line) in [0, 1])
             if layers_values != 0 and len(line) == 1:
-                current_rate = self.env['res.currency']._get_conversion_rate(related_aml.company_currency_id, to_curr, related_aml.company_id, valuation_date)
-                used_rate = line.amount_currency / line.balance
                 from odoo.tools import float_compare
                 from datetime import timedelta
-                if workaround and float_compare(current_rate, used_rate, precision_digits=2) != 0:
+                current_rate = self.env['res.currency']._get_conversion_rate(related_aml.company_currency_id, to_curr, related_aml.company_id, valuation_date)
+                previous_rate = self.env['res.currency']._get_conversion_rate(related_aml.company_currency_id, to_curr, related_aml.company_id, valuation_date - timedelta(days=1))
+                used_rate = line.amount_currency / line.balance
+                if workaround and (float_compare(current_rate, used_rate, precision_digits=3) != 0 or float_compare(previous_rate, used_rate, precision_digits=4) == 0):
                     valuation_date -= timedelta(days=1)
                     affected = True
             valuation_price_unit_total += related_aml.company_currency_id._convert(
