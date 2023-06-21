@@ -59,8 +59,8 @@ export class LinkTools extends Link {
     /**
      * @override
      */
-    async onWillStart() {
-        await super.onWillStart(...arguments);
+    async _updateState() {
+        await super._updateState(...arguments);
         this._observer = new MutationObserver(async () => {
             this._updateLabelInput();
         });

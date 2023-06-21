@@ -36,10 +36,20 @@ export class Link extends Component {
         shouldFocusUrl: false,
     }
     linkComponentWrapperRef = useRef("linkComponentWrapper");
+    colorsData = [
+        {type: '', label: _t("Link"), btnPreview: 'link'},
+        {type: 'primary', label: _t("Primary"), btnPreview: 'primary'},
+        {type: 'secondary', label: _t("Secondary"), btnPreview: 'secondary'},
+        {type: 'custom', label: _t("Custom"), btnPreview: 'custom'},
+        // Note: by compatibility the dialog should be able to remove old
+        // colors that were suggested like the BS status colors or the
+        // alpha -> epsilon classes. This is currently done by removing
+        // all btn-* classes anyway.
+    ];
     setup() {
         this.state = useState({});
 
-        onWillStart(() => this.onWillStart());
+        onWillStart(() => this._updateState(this.props));
         let started = false;
         onMounted(async () => {
             if (started) {
@@ -58,106 +68,13 @@ export class Link extends Component {
             await this.start();
         });
         onWillUpdateProps((newProps) => {
+            this._updateState(newProps);
             this.state.url = newProps.link.getAttribute('href') || '';
             this._setUrl({ shouldFocus: newProps.shouldFocusUrl });
         });
         onWillDestroy(() => {
             this.destroy();
         });
-    }
-    async onWillStart() {
-        this.initialNewWindow = this.props.initialIsNewWindow;
-
-        this.state.className = "";
-        this.state.iniClassName = "";
-
-        // Using explicit type 'link' to preserve style when the target is <button class="...btn-link"/>.
-
-        this.colorsData = [
-            {type: '', label: _t("Link"), btnPreview: 'link'},
-            {type: 'primary', label: _t("Primary"), btnPreview: 'primary'},
-            {type: 'secondary', label: _t("Secondary"), btnPreview: 'secondary'},
-            {type: 'custom', label: _t("Custom"), btnPreview: 'custom'},
-            // Note: by compatibility the dialog should be able to remove old
-            // colors that were suggested like the BS status colors or the
-            // alpha -> epsilon classes. This is currently done by removing
-            // all btn-* classes anyway.
-        ];
-
-        // The classes in the following array should not be in editable areas
-        // but as there are still some (e.g. in the "newsletter block" snippet)
-        // we make sure the options system works with them.
-        this.toleratedClasses = ['btn-link', 'btn-success'];
-
-        this.editable = this.props.editable;
-        this.$editable = $(this.editable);
-
-        if (this.props.link) {
-            const range = document.createRange();
-            range.selectNodeContents(this.props.link);
-            this.state.range = range;
-            this.$link = $(this.props.link);
-            this.linkEl = this.props.link;
-        }
-
-        if (this.state.range) {
-            this.$link = this.$link || $(OdooEditorLib.getInSelection(this.editable.ownerDocument, 'a'));
-            this.linkEl = this.$link[0];
-            this.state.iniClassName = this.$link.attr('class') || '';
-            this.colorCombinationClass = false;
-            let $node = this.$link;
-            while ($node.length && !$node.is('body')) {
-                const className = $node.attr('class') || '';
-                const m = className.match(/\b(o_cc\d+)\b/g);
-                if (m) {
-                    this.colorCombinationClass = m[0];
-                    break;
-                }
-                $node = $node.parent();
-            }
-            const linkNode = this.$link[0] || this.state.range.cloneContents();
-            const linkText = linkNode.innerText;
-            this.state.initialContent = linkText.replace(/[ \t\r\n]+/g, ' ');
-            this.state.originalText = this.state.initialContent;
-            if (linkNode instanceof DocumentFragment) {
-                this.state.originalHTML = $('<fakeEl>').append(linkNode).html();
-            } else {
-                this.state.originalHTML = linkNode.innerHTML;
-            }
-            this.state.url = this.$link.attr('href') || '';
-        } else {
-            this.state.initialContent = this.state.initialContent ? this.state.initialContent.replace(/[ \t\r\n]+/g, ' ') : '';
-        }
-
-
-        if (!this.state.url) {
-            const urls = this.state.initialContent.match(OdooEditorLib.URL_REGEX_WITH_INFOS);
-            if (urls) {
-                this.state.url = urls[0];
-            }
-        }
-
-        if (this.linkEl) {
-            this.initialNewWindow = this.initialNewWindow || this.linkEl.target === '_blank';
-        }
-
-        const classesToKeep = [
-            'text-wrap', 'text-nowrap', 'text-start', 'text-center', 'text-end',
-            'text-truncate',
-        ];
-        const keptClasses = this.state.iniClassName.split(' ').filter(className => classesToKeep.includes(className));
-        const allBtnColorPrefixes = /(^|\s+)(bg|text|border)(-[a-z0-9_-]*)?/gi;
-        const allBtnClassSuffixes = /(^|\s+)btn(-[a-z0-9_-]*)?/gi;
-        const allBtnShapes = /\s*(rounded-circle|flat)\s*/gi;
-        this.state.className = this.state.iniClassName
-            .replace(allBtnColorPrefixes, ' ')
-            .replace(allBtnClassSuffixes, ' ')
-            .replace(allBtnShapes, ' ');
-        this.state.className += ' ' + keptClasses.join(' ');
-        // 'o_submit' class will force anchor to be handled as a button in linkdialog.
-        if (/(?:s_website_form_send|o_submit)/.test(this.state.className)) {
-            this.state.isButton = true;
-        }
     }
     /**
      * @override
@@ -537,6 +454,92 @@ export class Link extends Component {
      * @private
      */
     _updateOptionsUI() {}
+    /**
+     * Update the state.
+     *
+     * @private
+     */
+    async _updateState(props) {
+        this.initialNewWindow = props.initialIsNewWindow;
+
+        this.state.className = "";
+        this.state.iniClassName = "";
+
+        // The classes in the following array should not be in editable areas
+        // but as there are still some (e.g. in the "newsletter block" snippet)
+        // we make sure the options system works with them.
+        this.toleratedClasses = ['btn-link', 'btn-success'];
+
+        this.editable = props.editable;
+        this.$editable = $(this.editable);
+
+        if (props.link) {
+            const range = document.createRange();
+            range.selectNodeContents(props.link);
+            this.state.range = range;
+            this.$link = $(props.link);
+            this.linkEl = props.link;
+        }
+
+        if (this.state.range) {
+            this.$link = this.$link || $(OdooEditorLib.getInSelection(this.editable.ownerDocument, 'a'));
+            this.linkEl = this.$link[0];
+            this.state.iniClassName = this.$link.attr('class') || '';
+            this.colorCombinationClass = false;
+            let $node = this.$link;
+            while ($node.length && !$node.is('body')) {
+                const className = $node.attr('class') || '';
+                const m = className.match(/\b(o_cc\d+)\b/g);
+                if (m) {
+                    this.colorCombinationClass = m[0];
+                    break;
+                }
+                $node = $node.parent();
+            }
+            const linkNode = this.$link[0] || this.state.range.cloneContents();
+            const linkText = linkNode.innerText;
+            this.state.initialContent = linkText.replace(/[ \t\r\n]+/g, ' ');
+            this.state.originalText = this.state.initialContent;
+            if (linkNode instanceof DocumentFragment) {
+                this.state.originalHTML = $('<fakeEl>').append(linkNode).html();
+            } else {
+                this.state.originalHTML = linkNode.innerHTML;
+            }
+            this.state.url = this.$link.attr('href') || '';
+        } else {
+            this.state.initialContent = this.state.initialContent ? this.state.initialContent.replace(/[ \t\r\n]+/g, ' ') : '';
+        }
+
+
+        if (!this.state.url) {
+            const urls = this.state.initialContent.match(OdooEditorLib.URL_REGEX_WITH_INFOS);
+            if (urls) {
+                this.state.url = urls[0];
+            }
+        }
+
+        if (this.linkEl) {
+            this.initialNewWindow = this.initialNewWindow || this.linkEl.target === '_blank';
+        }
+
+        const classesToKeep = [
+            'text-wrap', 'text-nowrap', 'text-start', 'text-center', 'text-end',
+            'text-truncate',
+        ];
+        const keptClasses = this.state.iniClassName.split(' ').filter(className => classesToKeep.includes(className));
+        const allBtnColorPrefixes = /(^|\s+)(bg|text|border)(-[a-z0-9_-]*)?/gi;
+        const allBtnClassSuffixes = /(^|\s+)btn(-[a-z0-9_-]*)?/gi;
+        const allBtnShapes = /\s*(rounded-circle|flat)\s*/gi;
+        this.state.className = this.state.iniClassName
+            .replace(allBtnColorPrefixes, ' ')
+            .replace(allBtnClassSuffixes, ' ')
+            .replace(allBtnShapes, ' ');
+        this.state.className += ' ' + keptClasses.join(' ');
+        // 'o_submit' class will force anchor to be handled as a button in linkdialog.
+        if (/(?:s_website_form_send|o_submit)/.test(this.state.className)) {
+            this.state.isButton = true;
+        }
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
