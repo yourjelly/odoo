@@ -4423,88 +4423,89 @@
         CommandResult[CommandResult["NotEnoughElements"] = 8] = "NotEnoughElements";
         CommandResult[CommandResult["NotEnoughSheets"] = 9] = "NotEnoughSheets";
         CommandResult[CommandResult["MissingSheetName"] = 10] = "MissingSheetName";
-        CommandResult[CommandResult["DuplicatedSheetName"] = 11] = "DuplicatedSheetName";
-        CommandResult[CommandResult["DuplicatedSheetId"] = 12] = "DuplicatedSheetId";
-        CommandResult[CommandResult["ForbiddenCharactersInSheetName"] = 13] = "ForbiddenCharactersInSheetName";
-        CommandResult[CommandResult["WrongSheetMove"] = 14] = "WrongSheetMove";
-        CommandResult[CommandResult["WrongSheetPosition"] = 15] = "WrongSheetPosition";
-        CommandResult[CommandResult["InvalidAnchorZone"] = 16] = "InvalidAnchorZone";
-        CommandResult[CommandResult["SelectionOutOfBound"] = 17] = "SelectionOutOfBound";
-        CommandResult[CommandResult["TargetOutOfSheet"] = 18] = "TargetOutOfSheet";
-        CommandResult[CommandResult["WrongCutSelection"] = 19] = "WrongCutSelection";
-        CommandResult[CommandResult["WrongPasteSelection"] = 20] = "WrongPasteSelection";
-        CommandResult[CommandResult["WrongPasteOption"] = 21] = "WrongPasteOption";
-        CommandResult[CommandResult["WrongFigurePasteOption"] = 22] = "WrongFigurePasteOption";
-        CommandResult[CommandResult["EmptyClipboard"] = 23] = "EmptyClipboard";
-        CommandResult[CommandResult["EmptyRange"] = 24] = "EmptyRange";
-        CommandResult[CommandResult["InvalidRange"] = 25] = "InvalidRange";
-        CommandResult[CommandResult["InvalidZones"] = 26] = "InvalidZones";
-        CommandResult[CommandResult["InvalidSheetId"] = 27] = "InvalidSheetId";
-        CommandResult[CommandResult["InvalidFigureId"] = 28] = "InvalidFigureId";
-        CommandResult[CommandResult["InputAlreadyFocused"] = 29] = "InputAlreadyFocused";
-        CommandResult[CommandResult["MaximumRangesReached"] = 30] = "MaximumRangesReached";
-        CommandResult[CommandResult["InvalidChartDefinition"] = 31] = "InvalidChartDefinition";
-        CommandResult[CommandResult["InvalidDataSet"] = 32] = "InvalidDataSet";
-        CommandResult[CommandResult["InvalidLabelRange"] = 33] = "InvalidLabelRange";
-        CommandResult[CommandResult["InvalidScorecardKeyValue"] = 34] = "InvalidScorecardKeyValue";
-        CommandResult[CommandResult["InvalidScorecardBaseline"] = 35] = "InvalidScorecardBaseline";
-        CommandResult[CommandResult["InvalidGaugeDataRange"] = 36] = "InvalidGaugeDataRange";
-        CommandResult[CommandResult["EmptyGaugeRangeMin"] = 37] = "EmptyGaugeRangeMin";
-        CommandResult[CommandResult["GaugeRangeMinNaN"] = 38] = "GaugeRangeMinNaN";
-        CommandResult[CommandResult["EmptyGaugeRangeMax"] = 39] = "EmptyGaugeRangeMax";
-        CommandResult[CommandResult["GaugeRangeMaxNaN"] = 40] = "GaugeRangeMaxNaN";
-        CommandResult[CommandResult["GaugeRangeMinBiggerThanRangeMax"] = 41] = "GaugeRangeMinBiggerThanRangeMax";
-        CommandResult[CommandResult["GaugeLowerInflectionPointNaN"] = 42] = "GaugeLowerInflectionPointNaN";
-        CommandResult[CommandResult["GaugeUpperInflectionPointNaN"] = 43] = "GaugeUpperInflectionPointNaN";
-        CommandResult[CommandResult["GaugeLowerBiggerThanUpper"] = 44] = "GaugeLowerBiggerThanUpper";
-        CommandResult[CommandResult["InvalidAutofillSelection"] = 45] = "InvalidAutofillSelection";
-        CommandResult[CommandResult["WrongComposerSelection"] = 46] = "WrongComposerSelection";
-        CommandResult[CommandResult["MinBiggerThanMax"] = 47] = "MinBiggerThanMax";
-        CommandResult[CommandResult["LowerBiggerThanUpper"] = 48] = "LowerBiggerThanUpper";
-        CommandResult[CommandResult["MidBiggerThanMax"] = 49] = "MidBiggerThanMax";
-        CommandResult[CommandResult["MinBiggerThanMid"] = 50] = "MinBiggerThanMid";
-        CommandResult[CommandResult["FirstArgMissing"] = 51] = "FirstArgMissing";
-        CommandResult[CommandResult["SecondArgMissing"] = 52] = "SecondArgMissing";
-        CommandResult[CommandResult["MinNaN"] = 53] = "MinNaN";
-        CommandResult[CommandResult["MidNaN"] = 54] = "MidNaN";
-        CommandResult[CommandResult["MaxNaN"] = 55] = "MaxNaN";
-        CommandResult[CommandResult["ValueUpperInflectionNaN"] = 56] = "ValueUpperInflectionNaN";
-        CommandResult[CommandResult["ValueLowerInflectionNaN"] = 57] = "ValueLowerInflectionNaN";
-        CommandResult[CommandResult["MinInvalidFormula"] = 58] = "MinInvalidFormula";
-        CommandResult[CommandResult["MidInvalidFormula"] = 59] = "MidInvalidFormula";
-        CommandResult[CommandResult["MaxInvalidFormula"] = 60] = "MaxInvalidFormula";
-        CommandResult[CommandResult["ValueUpperInvalidFormula"] = 61] = "ValueUpperInvalidFormula";
-        CommandResult[CommandResult["ValueLowerInvalidFormula"] = 62] = "ValueLowerInvalidFormula";
-        CommandResult[CommandResult["InvalidSortZone"] = 63] = "InvalidSortZone";
-        CommandResult[CommandResult["WaitingSessionConfirmation"] = 64] = "WaitingSessionConfirmation";
-        CommandResult[CommandResult["MergeOverlap"] = 65] = "MergeOverlap";
-        CommandResult[CommandResult["TooManyHiddenElements"] = 66] = "TooManyHiddenElements";
-        CommandResult[CommandResult["Readonly"] = 67] = "Readonly";
-        CommandResult[CommandResult["InvalidViewportSize"] = 68] = "InvalidViewportSize";
-        CommandResult[CommandResult["InvalidScrollingDirection"] = 69] = "InvalidScrollingDirection";
-        CommandResult[CommandResult["FigureDoesNotExist"] = 70] = "FigureDoesNotExist";
-        CommandResult[CommandResult["InvalidConditionalFormatId"] = 71] = "InvalidConditionalFormatId";
-        CommandResult[CommandResult["InvalidCellPopover"] = 72] = "InvalidCellPopover";
-        CommandResult[CommandResult["EmptyTarget"] = 73] = "EmptyTarget";
-        CommandResult[CommandResult["InvalidFreezeQuantity"] = 74] = "InvalidFreezeQuantity";
-        CommandResult[CommandResult["FrozenPaneOverlap"] = 75] = "FrozenPaneOverlap";
-        CommandResult[CommandResult["ValuesNotChanged"] = 76] = "ValuesNotChanged";
-        CommandResult[CommandResult["InvalidFilterZone"] = 77] = "InvalidFilterZone";
-        CommandResult[CommandResult["FilterOverlap"] = 78] = "FilterOverlap";
-        CommandResult[CommandResult["FilterNotFound"] = 79] = "FilterNotFound";
-        CommandResult[CommandResult["MergeInFilter"] = 80] = "MergeInFilter";
-        CommandResult[CommandResult["NonContinuousTargets"] = 81] = "NonContinuousTargets";
-        CommandResult[CommandResult["DuplicatedFigureId"] = 82] = "DuplicatedFigureId";
-        CommandResult[CommandResult["InvalidSelectionStep"] = 83] = "InvalidSelectionStep";
-        CommandResult[CommandResult["DuplicatedChartId"] = 84] = "DuplicatedChartId";
-        CommandResult[CommandResult["ChartDoesNotExist"] = 85] = "ChartDoesNotExist";
-        CommandResult[CommandResult["InvalidHeaderIndex"] = 86] = "InvalidHeaderIndex";
-        CommandResult[CommandResult["InvalidQuantity"] = 87] = "InvalidQuantity";
-        CommandResult[CommandResult["MoreThanOneColumnSelected"] = 88] = "MoreThanOneColumnSelected";
-        CommandResult[CommandResult["EmptySplitSeparator"] = 89] = "EmptySplitSeparator";
-        CommandResult[CommandResult["SplitWillOverwriteContent"] = 90] = "SplitWillOverwriteContent";
-        CommandResult[CommandResult["NoSplitSeparatorInSelection"] = 91] = "NoSplitSeparatorInSelection";
-        CommandResult[CommandResult["NoActiveSheet"] = 92] = "NoActiveSheet";
+        CommandResult[CommandResult["UnchangedSheetName"] = 11] = "UnchangedSheetName";
+        CommandResult[CommandResult["DuplicatedSheetName"] = 12] = "DuplicatedSheetName";
+        CommandResult[CommandResult["DuplicatedSheetId"] = 13] = "DuplicatedSheetId";
+        CommandResult[CommandResult["ForbiddenCharactersInSheetName"] = 14] = "ForbiddenCharactersInSheetName";
+        CommandResult[CommandResult["WrongSheetMove"] = 15] = "WrongSheetMove";
+        CommandResult[CommandResult["WrongSheetPosition"] = 16] = "WrongSheetPosition";
+        CommandResult[CommandResult["InvalidAnchorZone"] = 17] = "InvalidAnchorZone";
+        CommandResult[CommandResult["SelectionOutOfBound"] = 18] = "SelectionOutOfBound";
+        CommandResult[CommandResult["TargetOutOfSheet"] = 19] = "TargetOutOfSheet";
+        CommandResult[CommandResult["WrongCutSelection"] = 20] = "WrongCutSelection";
+        CommandResult[CommandResult["WrongPasteSelection"] = 21] = "WrongPasteSelection";
+        CommandResult[CommandResult["WrongPasteOption"] = 22] = "WrongPasteOption";
+        CommandResult[CommandResult["WrongFigurePasteOption"] = 23] = "WrongFigurePasteOption";
+        CommandResult[CommandResult["EmptyClipboard"] = 24] = "EmptyClipboard";
+        CommandResult[CommandResult["EmptyRange"] = 25] = "EmptyRange";
+        CommandResult[CommandResult["InvalidRange"] = 26] = "InvalidRange";
+        CommandResult[CommandResult["InvalidZones"] = 27] = "InvalidZones";
+        CommandResult[CommandResult["InvalidSheetId"] = 28] = "InvalidSheetId";
+        CommandResult[CommandResult["InvalidFigureId"] = 29] = "InvalidFigureId";
+        CommandResult[CommandResult["InputAlreadyFocused"] = 30] = "InputAlreadyFocused";
+        CommandResult[CommandResult["MaximumRangesReached"] = 31] = "MaximumRangesReached";
+        CommandResult[CommandResult["InvalidChartDefinition"] = 32] = "InvalidChartDefinition";
+        CommandResult[CommandResult["InvalidDataSet"] = 33] = "InvalidDataSet";
+        CommandResult[CommandResult["InvalidLabelRange"] = 34] = "InvalidLabelRange";
+        CommandResult[CommandResult["InvalidScorecardKeyValue"] = 35] = "InvalidScorecardKeyValue";
+        CommandResult[CommandResult["InvalidScorecardBaseline"] = 36] = "InvalidScorecardBaseline";
+        CommandResult[CommandResult["InvalidGaugeDataRange"] = 37] = "InvalidGaugeDataRange";
+        CommandResult[CommandResult["EmptyGaugeRangeMin"] = 38] = "EmptyGaugeRangeMin";
+        CommandResult[CommandResult["GaugeRangeMinNaN"] = 39] = "GaugeRangeMinNaN";
+        CommandResult[CommandResult["EmptyGaugeRangeMax"] = 40] = "EmptyGaugeRangeMax";
+        CommandResult[CommandResult["GaugeRangeMaxNaN"] = 41] = "GaugeRangeMaxNaN";
+        CommandResult[CommandResult["GaugeRangeMinBiggerThanRangeMax"] = 42] = "GaugeRangeMinBiggerThanRangeMax";
+        CommandResult[CommandResult["GaugeLowerInflectionPointNaN"] = 43] = "GaugeLowerInflectionPointNaN";
+        CommandResult[CommandResult["GaugeUpperInflectionPointNaN"] = 44] = "GaugeUpperInflectionPointNaN";
+        CommandResult[CommandResult["GaugeLowerBiggerThanUpper"] = 45] = "GaugeLowerBiggerThanUpper";
+        CommandResult[CommandResult["InvalidAutofillSelection"] = 46] = "InvalidAutofillSelection";
+        CommandResult[CommandResult["WrongComposerSelection"] = 47] = "WrongComposerSelection";
+        CommandResult[CommandResult["MinBiggerThanMax"] = 48] = "MinBiggerThanMax";
+        CommandResult[CommandResult["LowerBiggerThanUpper"] = 49] = "LowerBiggerThanUpper";
+        CommandResult[CommandResult["MidBiggerThanMax"] = 50] = "MidBiggerThanMax";
+        CommandResult[CommandResult["MinBiggerThanMid"] = 51] = "MinBiggerThanMid";
+        CommandResult[CommandResult["FirstArgMissing"] = 52] = "FirstArgMissing";
+        CommandResult[CommandResult["SecondArgMissing"] = 53] = "SecondArgMissing";
+        CommandResult[CommandResult["MinNaN"] = 54] = "MinNaN";
+        CommandResult[CommandResult["MidNaN"] = 55] = "MidNaN";
+        CommandResult[CommandResult["MaxNaN"] = 56] = "MaxNaN";
+        CommandResult[CommandResult["ValueUpperInflectionNaN"] = 57] = "ValueUpperInflectionNaN";
+        CommandResult[CommandResult["ValueLowerInflectionNaN"] = 58] = "ValueLowerInflectionNaN";
+        CommandResult[CommandResult["MinInvalidFormula"] = 59] = "MinInvalidFormula";
+        CommandResult[CommandResult["MidInvalidFormula"] = 60] = "MidInvalidFormula";
+        CommandResult[CommandResult["MaxInvalidFormula"] = 61] = "MaxInvalidFormula";
+        CommandResult[CommandResult["ValueUpperInvalidFormula"] = 62] = "ValueUpperInvalidFormula";
+        CommandResult[CommandResult["ValueLowerInvalidFormula"] = 63] = "ValueLowerInvalidFormula";
+        CommandResult[CommandResult["InvalidSortZone"] = 64] = "InvalidSortZone";
+        CommandResult[CommandResult["WaitingSessionConfirmation"] = 65] = "WaitingSessionConfirmation";
+        CommandResult[CommandResult["MergeOverlap"] = 66] = "MergeOverlap";
+        CommandResult[CommandResult["TooManyHiddenElements"] = 67] = "TooManyHiddenElements";
+        CommandResult[CommandResult["Readonly"] = 68] = "Readonly";
+        CommandResult[CommandResult["InvalidViewportSize"] = 69] = "InvalidViewportSize";
+        CommandResult[CommandResult["InvalidScrollingDirection"] = 70] = "InvalidScrollingDirection";
+        CommandResult[CommandResult["FigureDoesNotExist"] = 71] = "FigureDoesNotExist";
+        CommandResult[CommandResult["InvalidConditionalFormatId"] = 72] = "InvalidConditionalFormatId";
+        CommandResult[CommandResult["InvalidCellPopover"] = 73] = "InvalidCellPopover";
+        CommandResult[CommandResult["EmptyTarget"] = 74] = "EmptyTarget";
+        CommandResult[CommandResult["InvalidFreezeQuantity"] = 75] = "InvalidFreezeQuantity";
+        CommandResult[CommandResult["FrozenPaneOverlap"] = 76] = "FrozenPaneOverlap";
+        CommandResult[CommandResult["ValuesNotChanged"] = 77] = "ValuesNotChanged";
+        CommandResult[CommandResult["InvalidFilterZone"] = 78] = "InvalidFilterZone";
+        CommandResult[CommandResult["FilterOverlap"] = 79] = "FilterOverlap";
+        CommandResult[CommandResult["FilterNotFound"] = 80] = "FilterNotFound";
+        CommandResult[CommandResult["MergeInFilter"] = 81] = "MergeInFilter";
+        CommandResult[CommandResult["NonContinuousTargets"] = 82] = "NonContinuousTargets";
+        CommandResult[CommandResult["DuplicatedFigureId"] = 83] = "DuplicatedFigureId";
+        CommandResult[CommandResult["InvalidSelectionStep"] = 84] = "InvalidSelectionStep";
+        CommandResult[CommandResult["DuplicatedChartId"] = 85] = "DuplicatedChartId";
+        CommandResult[CommandResult["ChartDoesNotExist"] = 86] = "ChartDoesNotExist";
+        CommandResult[CommandResult["InvalidHeaderIndex"] = 87] = "InvalidHeaderIndex";
+        CommandResult[CommandResult["InvalidQuantity"] = 88] = "InvalidQuantity";
+        CommandResult[CommandResult["MoreThanOneColumnSelected"] = 89] = "MoreThanOneColumnSelected";
+        CommandResult[CommandResult["EmptySplitSeparator"] = 90] = "EmptySplitSeparator";
+        CommandResult[CommandResult["SplitWillOverwriteContent"] = 91] = "SplitWillOverwriteContent";
+        CommandResult[CommandResult["NoSplitSeparatorInSelection"] = 92] = "NoSplitSeparatorInSelection";
+        CommandResult[CommandResult["NoActiveSheet"] = 93] = "NoActiveSheet";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
     const borderStyles = ["thin", "medium", "thick", "dashed", "dotted"];
@@ -5110,10 +5111,10 @@
             this.state.selectedValue = value.string;
         }
         selectAll() {
-            this.state.values.forEach((value) => (value.checked = true));
+            this.displayedValues.forEach((value) => (value.checked = true));
         }
         clearAll() {
-            this.state.values.forEach((value) => (value.checked = false));
+            this.displayedValues.forEach((value) => (value.checked = false));
         }
         get filterTable() {
             const sheetId = this.env.model.getters.getActiveSheetId();
@@ -6576,11 +6577,11 @@
         if (definition.dataSets) {
             const invalidRanges = definition.dataSets.find((range) => !rangeReference.test(range)) !== undefined;
             if (invalidRanges) {
-                return 32 /* CommandResult.InvalidDataSet */;
+                return 33 /* CommandResult.InvalidDataSet */;
             }
             const zones = definition.dataSets.map(toUnboundedZone);
             if (zones.some((zone) => zone.top !== zone.bottom && isFullRow(zone))) {
-                return 32 /* CommandResult.InvalidDataSet */;
+                return 33 /* CommandResult.InvalidDataSet */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -6589,7 +6590,7 @@
         if (definition.labelRange) {
             const invalidLabels = !rangeReference.test(definition.labelRange || "");
             if (invalidLabels) {
-                return 33 /* CommandResult.InvalidLabelRange */;
+                return 34 /* CommandResult.InvalidLabelRange */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -6675,24 +6676,24 @@
 
     const CfTerms = {
         Errors: {
-            [25 /* CommandResult.InvalidRange */]: _lt("The range is invalid"),
-            [51 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
-            [52 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
-            [53 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
-            [54 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
-            [55 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
-            [56 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
-            [57 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
-            [47 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
-            [50 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
-            [49 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
-            [48 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
-            [58 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
-            [60 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
-            [59 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
-            [61 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
-            [62 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
-            [24 /* CommandResult.EmptyRange */]: _lt("A range needs to be defined"),
+            [26 /* CommandResult.InvalidRange */]: _lt("The range is invalid"),
+            [52 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
+            [53 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
+            [54 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
+            [55 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
+            [56 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
+            [57 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
+            [58 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
+            [48 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
+            [51 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
+            [50 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
+            [49 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
+            [59 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
+            [61 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
+            [60 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
+            [62 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
+            [63 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
+            [25 /* CommandResult.EmptyRange */]: _lt("A range needs to be defined"),
             Unexpected: _lt("The rule is invalid for an unknown reason"),
         },
         ColorScale: _lt("Color scale"),
@@ -6719,20 +6720,20 @@
         Errors: {
             Unexpected: _lt("The chart definition is invalid for an unknown reason"),
             // BASIC CHART ERRORS (LINE | BAR | PIE)
-            [32 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
-            [33 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
+            [33 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
+            [34 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
             // SCORECARD CHART ERRORS
-            [34 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
-            [35 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
+            [35 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
+            [36 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
             // GAUGE CHART ERRORS
-            [36 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
-            [37 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
-            [38 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
-            [39 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
-            [40 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
-            [41 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
-            [42 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
-            [43 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
+            [37 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
+            [38 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
+            [39 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
+            [40 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
+            [41 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
+            [42 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
+            [43 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
+            [44 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
         },
     };
     const CustomCurrencyTerms = {
@@ -6742,9 +6743,9 @@
     const SplitToColumnsTerms = {
         Errors: {
             Unexpected: _lt("Cannot split the selection for an unknown reason"),
-            [91 /* CommandResult.NoSplitSeparatorInSelection */]: _lt("There is no match for the selected separator in the selection"),
-            [88 /* CommandResult.MoreThanOneColumnSelected */]: _lt("Only a selection from a single column can be split"),
-            [90 /* CommandResult.SplitWillOverwriteContent */]: _lt("Splitting will overwrite existing content"),
+            [92 /* CommandResult.NoSplitSeparatorInSelection */]: _lt("There is no match for the selected separator in the selection"),
+            [89 /* CommandResult.MoreThanOneColumnSelected */]: _lt("Only a selection from a single column can be split"),
+            [91 /* CommandResult.SplitWillOverwriteContent */]: _lt("Splitting will overwrite existing content"),
         },
     };
 
@@ -7148,7 +7149,7 @@
 
     function isDataRangeValid(definition) {
         return definition.dataRange && !rangeReference.test(definition.dataRange)
-            ? 36 /* CommandResult.InvalidGaugeDataRange */
+            ? 37 /* CommandResult.InvalidGaugeDataRange */
             : 0 /* CommandResult.Success */;
     }
     function checkRangeLimits(check, batchValidations) {
@@ -7180,7 +7181,7 @@
     function checkRangeMinBiggerThanRangeMax(definition) {
         if (definition.sectionRule) {
             if (Number(definition.sectionRule.rangeMin) >= Number(definition.sectionRule.rangeMax)) {
-                return 41 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */;
+                return 42 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -7189,9 +7190,9 @@
         if (value === "") {
             switch (valueName) {
                 case "rangeMin":
-                    return 37 /* CommandResult.EmptyGaugeRangeMin */;
+                    return 38 /* CommandResult.EmptyGaugeRangeMin */;
                 case "rangeMax":
-                    return 39 /* CommandResult.EmptyGaugeRangeMax */;
+                    return 40 /* CommandResult.EmptyGaugeRangeMax */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -7200,13 +7201,13 @@
         if (isNaN(value)) {
             switch (valueName) {
                 case "rangeMin":
-                    return 38 /* CommandResult.GaugeRangeMinNaN */;
+                    return 39 /* CommandResult.GaugeRangeMinNaN */;
                 case "rangeMax":
-                    return 40 /* CommandResult.GaugeRangeMaxNaN */;
+                    return 41 /* CommandResult.GaugeRangeMaxNaN */;
                 case "lowerInflectionPointValue":
-                    return 42 /* CommandResult.GaugeLowerInflectionPointNaN */;
+                    return 43 /* CommandResult.GaugeLowerInflectionPointNaN */;
                 case "upperInflectionPointValue":
-                    return 43 /* CommandResult.GaugeUpperInflectionPointNaN */;
+                    return 44 /* CommandResult.GaugeUpperInflectionPointNaN */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -7982,12 +7983,12 @@
 
     function checkKeyValue(definition) {
         return definition.keyValue && !rangeReference.test(definition.keyValue)
-            ? 34 /* CommandResult.InvalidScorecardKeyValue */
+            ? 35 /* CommandResult.InvalidScorecardKeyValue */
             : 0 /* CommandResult.Success */;
     }
     function checkBaseline(definition) {
         return definition.baseline && !rangeReference.test(definition.baseline)
-            ? 35 /* CommandResult.InvalidScorecardBaseline */
+            ? 36 /* CommandResult.InvalidScorecardBaseline */
             : 0 /* CommandResult.Success */;
     }
     class ScorecardChart extends AbstractChart {
@@ -8493,7 +8494,7 @@
     };
     function interactiveAddMerge(env, sheetId, target) {
         const result = env.model.dispatch("ADD_MERGE", { sheetId, target });
-        if (result.isCancelledBecause(80 /* CommandResult.MergeInFilter */)) {
+        if (result.isCancelledBecause(81 /* CommandResult.MergeInFilter */)) {
             env.raiseError(AddMergeInteractiveContent.MergeInFilter);
         }
         else if (result.isCancelledBecause(3 /* CommandResult.MergeIsDestructive */)) {
@@ -8742,7 +8743,7 @@
                 });
             }
         }
-        if (result.isCancelledBecause(63 /* CommandResult.InvalidSortZone */)) {
+        if (result.isCancelledBecause(64 /* CommandResult.InvalidSortZone */)) {
             const { col, row } = anchor;
             env.model.selection.selectZone({ cell: { col, row }, zone });
             env.raiseError(_lt("Cannot sort. To sort, select only cells or only merges that have the same size."));
@@ -8752,7 +8753,7 @@
     function interactiveCut(env) {
         const result = env.model.dispatch("CUT");
         if (!result.isSuccessful) {
-            if (result.isCancelledBecause(19 /* CommandResult.WrongCutSelection */)) {
+            if (result.isCancelledBecause(20 /* CommandResult.WrongCutSelection */)) {
                 env.raiseError(_lt("This operation is not allowed with multiple selections."));
             }
         }
@@ -8765,13 +8766,13 @@
     };
     function interactiveAddFilter(env, sheetId, target) {
         const result = env.model.dispatch("CREATE_FILTER_TABLE", { target, sheetId });
-        if (result.isCancelledBecause(78 /* CommandResult.FilterOverlap */)) {
+        if (result.isCancelledBecause(79 /* CommandResult.FilterOverlap */)) {
             env.raiseError(AddFilterInteractiveContent.filterOverlap);
         }
-        else if (result.isCancelledBecause(80 /* CommandResult.MergeInFilter */)) {
+        else if (result.isCancelledBecause(81 /* CommandResult.MergeInFilter */)) {
             env.raiseError(AddFilterInteractiveContent.mergeInFilter);
         }
-        else if (result.isCancelledBecause(81 /* CommandResult.NonContinuousTargets */)) {
+        else if (result.isCancelledBecause(82 /* CommandResult.NonContinuousTargets */)) {
             env.raiseError(AddFilterInteractiveContent.nonContinuousTargets);
         }
     }
@@ -8784,16 +8785,16 @@
     };
     function handlePasteResult(env, result) {
         if (!result.isSuccessful) {
-            if (result.reasons.includes(20 /* CommandResult.WrongPasteSelection */)) {
+            if (result.reasons.includes(21 /* CommandResult.WrongPasteSelection */)) {
                 env.raiseError(PasteInteractiveContent.wrongPasteSelection);
             }
             else if (result.reasons.includes(2 /* CommandResult.WillRemoveExistingMerge */)) {
                 env.raiseError(PasteInteractiveContent.willRemoveExistingMerge);
             }
-            else if (result.reasons.includes(22 /* CommandResult.WrongFigurePasteOption */)) {
+            else if (result.reasons.includes(23 /* CommandResult.WrongFigurePasteOption */)) {
                 env.raiseError(PasteInteractiveContent.wrongFigurePasteOption);
             }
-            else if (result.reasons.includes(75 /* CommandResult.FrozenPaneOverlap */)) {
+            else if (result.reasons.includes(76 /* CommandResult.FrozenPaneOverlap */)) {
                 env.raiseError(PasteInteractiveContent.frozenPaneOverlap);
             }
         }
@@ -8802,8 +8803,8 @@
         const result = env.model.dispatch("PASTE", { target, pasteOption });
         handlePasteResult(env, result);
     }
-    function interactivePasteFromOS(env, target, text) {
-        const result = env.model.dispatch("PASTE_FROM_OS_CLIPBOARD", { target, text });
+    function interactivePasteFromOS(env, target, text, pasteOption) {
+        const result = env.model.dispatch("PASTE_FROM_OS_CLIPBOARD", { target, text, pasteOption });
         handlePasteResult(env, result);
     }
 
@@ -8866,10 +8867,13 @@
             case "ok":
                 const target = env.model.getters.getSelectedZones();
                 if (osClipboard && osClipboard.content !== spreadsheetClipboard) {
-                    interactivePasteFromOS(env, target, osClipboard.content);
+                    interactivePasteFromOS(env, target, osClipboard.content, pasteOption);
                 }
                 else {
                     interactivePaste(env, target, pasteOption);
+                }
+                if (env.model.getters.isCutOperation() && pasteOption !== "onlyValue") {
+                    await env.clipboard.write({ [ClipboardMIMEType.PlainText]: "" });
                 }
                 break;
             case "notImplemented":
@@ -8880,7 +8884,7 @@
                 break;
         }
     }
-    const PASTE_FORMAT_ACTION = (env) => interactivePaste(env, env.model.getters.getSelectedZones(), "onlyFormat");
+    const PASTE_FORMAT_ACTION = (env) => paste$1(env, "onlyFormat");
     const DELETE_CONTENT_ACTION = (env) => env.model.dispatch("DELETE_CONTENT", {
         sheetId: env.model.getters.getActiveSheetId(),
         target: env.model.getters.getSelectedZones(),
@@ -9610,9 +9614,9 @@
         "META",
     ];
     function arg(definition, description = "") {
-        return makeArg(`${definition} ${description}`);
+        return makeArg(definition, description);
     }
-    function makeArg(str) {
+    function makeArg(str, description) {
         let parts = str.match(ARG_REGEXP);
         let name = parts[1].trim();
         let types = [];
@@ -9642,7 +9646,6 @@
                 defaultValue = param.trim().slice(8);
             }
         }
-        let description = parts[3].trim();
         const result = {
             name,
             description,
@@ -16919,7 +16922,7 @@
         const sheetId = env.model.getters.getActiveSheetId();
         const cmd = dimension === "COL" ? "FREEZE_COLUMNS" : "FREEZE_ROWS";
         const result = env.model.dispatch(cmd, { sheetId, quantity: base });
-        if (result.isCancelledBecause(65 /* CommandResult.MergeOverlap */)) {
+        if (result.isCancelledBecause(66 /* CommandResult.MergeOverlap */)) {
             env.raiseError(MergeErrorMessage);
         }
     }
@@ -18008,10 +18011,10 @@
             return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
         }
         get isDatasetInvalid() {
-            return !!this.state.datasetDispatchResult?.isCancelledBecause(32 /* CommandResult.InvalidDataSet */);
+            return !!this.state.datasetDispatchResult?.isCancelledBecause(33 /* CommandResult.InvalidDataSet */);
         }
         get isLabelInvalid() {
-            return !!this.state.labelsDispatchResult?.isCancelledBecause(33 /* CommandResult.InvalidLabelRange */);
+            return !!this.state.labelsDispatchResult?.isCancelledBecause(34 /* CommandResult.InvalidLabelRange */);
         }
         onUpdateDataSetsHaveTitle(ev) {
             this.props.updateChart(this.props.figureId, {
@@ -18642,12 +18645,14 @@
         static template = "o-spreadsheet-LineBarPieDesignPanel";
         static components = { ColorPickerWidget };
         state = owl.useState({
+            title: "",
             fillColorTool: false,
         });
         onClick(ev) {
             this.state.fillColorTool = false;
         }
         setup() {
+            this.state.title = _t(this.props.definition.title);
             owl.useExternalListener(window, "click", this.onClick);
         }
         toggleColorPicker() {
@@ -18658,9 +18663,9 @@
                 background: color,
             });
         }
-        updateTitle(ev) {
+        updateTitle() {
             this.props.updateChart(this.props.figureId, {
-                title: ev.target.value,
+                title: this.state.title,
             });
         }
         updateSelect(attr, ev) {
@@ -18692,7 +18697,7 @@
             return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
         }
         get isDataRangeInvalid() {
-            return !!this.state.dataRangeDispatchResult?.isCancelledBecause(36 /* CommandResult.InvalidGaugeDataRange */);
+            return !!this.state.dataRangeDispatchResult?.isCancelledBecause(37 /* CommandResult.InvalidGaugeDataRange */);
         }
         onDataRangeChanged(ranges) {
             this.dataRange = ranges[0];
@@ -18751,11 +18756,13 @@
         static template = "o-spreadsheet-GaugeChartDesignPanel";
         static components = { ColorPickerWidget, SidePanelErrors };
         state = owl.useState({
+            title: "",
             openedMenu: undefined,
             sectionRuleDispatchResult: undefined,
             sectionRule: deepCopy(this.props.definition.sectionRule),
         });
         setup() {
+            this.state.title = _t(this.props.definition.title);
             owl.useExternalListener(window, "click", this.closeMenus);
         }
         get designErrorMessages() {
@@ -18768,31 +18775,31 @@
                 background: color,
             });
         }
-        updateTitle(ev) {
+        updateTitle() {
             this.props.updateChart(this.props.figureId, {
-                title: ev.target.value,
+                title: this.state.title,
             });
         }
         isRangeMinInvalid() {
-            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(37 /* CommandResult.EmptyGaugeRangeMin */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(38 /* CommandResult.GaugeRangeMinNaN */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(41 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */));
+            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(38 /* CommandResult.EmptyGaugeRangeMin */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(39 /* CommandResult.GaugeRangeMinNaN */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(42 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */));
         }
         isRangeMaxInvalid() {
-            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(39 /* CommandResult.EmptyGaugeRangeMax */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(40 /* CommandResult.GaugeRangeMaxNaN */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(41 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */));
+            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(40 /* CommandResult.EmptyGaugeRangeMax */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(41 /* CommandResult.GaugeRangeMaxNaN */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(42 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */));
         }
         // ---------------------------------------------------------------------------
         // COLOR_SECTION_TEMPLATE
         // ---------------------------------------------------------------------------
         get isLowerInflectionPointInvalid() {
-            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(42 /* CommandResult.GaugeLowerInflectionPointNaN */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(44 /* CommandResult.GaugeLowerBiggerThanUpper */));
+            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(43 /* CommandResult.GaugeLowerInflectionPointNaN */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(45 /* CommandResult.GaugeLowerBiggerThanUpper */));
         }
         get isUpperInflectionPointInvalid() {
-            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(43 /* CommandResult.GaugeUpperInflectionPointNaN */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(44 /* CommandResult.GaugeLowerBiggerThanUpper */));
+            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(44 /* CommandResult.GaugeUpperInflectionPointNaN */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(45 /* CommandResult.GaugeLowerBiggerThanUpper */));
         }
         updateSectionColor(target, color) {
             const sectionRule = deepCopy(this.state.sectionRule);
@@ -18875,10 +18882,10 @@
             return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
         }
         get isKeyValueInvalid() {
-            return !!this.state.keyValueDispatchResult?.isCancelledBecause(34 /* CommandResult.InvalidScorecardKeyValue */);
+            return !!this.state.keyValueDispatchResult?.isCancelledBecause(35 /* CommandResult.InvalidScorecardKeyValue */);
         }
         get isBaselineInvalid() {
-            return !!this.state.keyValueDispatchResult?.isCancelledBecause(35 /* CommandResult.InvalidScorecardBaseline */);
+            return !!this.state.keyValueDispatchResult?.isCancelledBecause(36 /* CommandResult.InvalidScorecardBaseline */);
         }
         onKeyValueRangeChanged(ranges) {
             this.keyValue = ranges[0];
@@ -18923,14 +18930,16 @@
         static template = "o-spreadsheet-ScorecardChartDesignPanel";
         static components = { ColorPickerWidget };
         state = owl.useState({
+            title: "",
             openedColorPicker: undefined,
         });
         setup() {
+            this.state.title = _t(this.props.definition.title);
             owl.useExternalListener(window, "click", this.closeMenus);
         }
-        updateTitle(ev) {
+        updateTitle() {
             this.props.updateChart(this.props.figureId, {
-                title: ev.target.value,
+                title: this.state.title,
             });
         }
         updateBaselineDescr(ev) {
@@ -19552,7 +19561,7 @@
             return this.env.model.getters.getConditionalFormats(this.env.model.getters.getActiveSheetId());
         }
         get isRangeValid() {
-            return this.state.errors.includes(24 /* CommandResult.EmptyRange */);
+            return this.state.errors.includes(25 /* CommandResult.EmptyRange */);
         }
         errorMessage(error) {
             return CfTerms.Errors[error] || CfTerms.Errors.Unexpected;
@@ -19611,7 +19620,7 @@
             if (this.state.currentCF) {
                 const invalidRanges = this.state.currentCF.ranges.some((xc) => !xc.match(rangeReference));
                 if (invalidRanges) {
-                    this.state.errors = [25 /* CommandResult.InvalidRange */];
+                    this.state.errors = [26 /* CommandResult.InvalidRange */];
                     return;
                 }
                 const sheetId = this.env.model.getters.getActiveSheetId();
@@ -19766,10 +19775,10 @@
          * Cell Is Rule
          ****************************************************************************/
         get isValue1Invalid() {
-            return !!this.state.errors?.includes(51 /* CommandResult.FirstArgMissing */);
+            return !!this.state.errors?.includes(52 /* CommandResult.FirstArgMissing */);
         }
         get isValue2Invalid() {
-            return !!this.state.errors?.includes(52 /* CommandResult.SecondArgMissing */);
+            return !!this.state.errors?.includes(53 /* CommandResult.SecondArgMissing */);
         }
         toggleStyle(tool) {
             const style = this.state.rules.cellIs.style;
@@ -19786,17 +19795,17 @@
         isValueInvalid(threshold) {
             switch (threshold) {
                 case "minimum":
-                    return (this.state.errors.includes(58 /* CommandResult.MinInvalidFormula */) ||
-                        this.state.errors.includes(50 /* CommandResult.MinBiggerThanMid */) ||
-                        this.state.errors.includes(47 /* CommandResult.MinBiggerThanMax */) ||
-                        this.state.errors.includes(53 /* CommandResult.MinNaN */));
+                    return (this.state.errors.includes(59 /* CommandResult.MinInvalidFormula */) ||
+                        this.state.errors.includes(51 /* CommandResult.MinBiggerThanMid */) ||
+                        this.state.errors.includes(48 /* CommandResult.MinBiggerThanMax */) ||
+                        this.state.errors.includes(54 /* CommandResult.MinNaN */));
                 case "midpoint":
-                    return (this.state.errors.includes(59 /* CommandResult.MidInvalidFormula */) ||
-                        this.state.errors.includes(54 /* CommandResult.MidNaN */) ||
-                        this.state.errors.includes(49 /* CommandResult.MidBiggerThanMax */));
+                    return (this.state.errors.includes(60 /* CommandResult.MidInvalidFormula */) ||
+                        this.state.errors.includes(55 /* CommandResult.MidNaN */) ||
+                        this.state.errors.includes(50 /* CommandResult.MidBiggerThanMax */));
                 case "maximum":
-                    return (this.state.errors.includes(60 /* CommandResult.MaxInvalidFormula */) ||
-                        this.state.errors.includes(55 /* CommandResult.MaxNaN */));
+                    return (this.state.errors.includes(61 /* CommandResult.MaxInvalidFormula */) ||
+                        this.state.errors.includes(56 /* CommandResult.MaxNaN */));
                 default:
                     return false;
             }
@@ -19844,13 +19853,13 @@
         isInflectionPointInvalid(inflectionPoint) {
             switch (inflectionPoint) {
                 case "lowerInflectionPoint":
-                    return (this.state.errors.includes(57 /* CommandResult.ValueLowerInflectionNaN */) ||
-                        this.state.errors.includes(62 /* CommandResult.ValueLowerInvalidFormula */) ||
-                        this.state.errors.includes(48 /* CommandResult.LowerBiggerThanUpper */));
+                    return (this.state.errors.includes(58 /* CommandResult.ValueLowerInflectionNaN */) ||
+                        this.state.errors.includes(63 /* CommandResult.ValueLowerInvalidFormula */) ||
+                        this.state.errors.includes(49 /* CommandResult.LowerBiggerThanUpper */));
                 case "upperInflectionPoint":
-                    return (this.state.errors.includes(56 /* CommandResult.ValueUpperInflectionNaN */) ||
-                        this.state.errors.includes(61 /* CommandResult.ValueUpperInvalidFormula */) ||
-                        this.state.errors.includes(48 /* CommandResult.LowerBiggerThanUpper */));
+                    return (this.state.errors.includes(57 /* CommandResult.ValueUpperInflectionNaN */) ||
+                        this.state.errors.includes(62 /* CommandResult.ValueUpperInvalidFormula */) ||
+                        this.state.errors.includes(49 /* CommandResult.LowerBiggerThanUpper */));
                 default:
                     return true;
             }
@@ -20160,7 +20169,7 @@
     };
     function interactiveSplitToColumns(env, separator, addNewColumns) {
         let result = env.model.dispatch("SPLIT_TEXT_INTO_COLUMNS", { separator, addNewColumns });
-        if (result.isCancelledBecause(90 /* CommandResult.SplitWillOverwriteContent */)) {
+        if (result.isCancelledBecause(91 /* CommandResult.SplitWillOverwriteContent */)) {
             env.askConfirmation(SplitToColumnsInteractiveContent.SplitIsDestructive, () => {
                 result = env.model.dispatch("SPLIT_TEXT_INTO_COLUMNS", {
                     separator,
@@ -20224,8 +20233,8 @@
             const errors = new Set();
             for (const reason of cancelledReasons) {
                 switch (reason) {
-                    case 90 /* CommandResult.SplitWillOverwriteContent */:
-                    case 89 /* CommandResult.EmptySplitSeparator */:
+                    case 91 /* CommandResult.SplitWillOverwriteContent */:
+                    case 90 /* CommandResult.EmptySplitSeparator */:
                         break;
                     default:
                         errors.add(SplitToColumnsTerms.Errors[reason] || SplitToColumnsTerms.Errors.Unexpected);
@@ -20240,8 +20249,8 @@
                 addNewColumns: this.state.addNewColumns,
                 force: false,
             }).reasons;
-            if (cancelledReasons.includes(90 /* CommandResult.SplitWillOverwriteContent */)) {
-                warnings.push(SplitToColumnsTerms.Errors[90 /* CommandResult.SplitWillOverwriteContent */]);
+            if (cancelledReasons.includes(91 /* CommandResult.SplitWillOverwriteContent */)) {
+                warnings.push(SplitToColumnsTerms.Errors[91 /* CommandResult.SplitWillOverwriteContent */]);
             }
             return warnings;
         }
@@ -20894,6 +20903,13 @@
             const element = focusedNode instanceof HTMLElement ? focusedNode : focusedNode.parentElement;
             element?.scrollIntoView({ block: "nearest" });
         }
+        /**
+         * remove the current selection of the user
+         * */
+        removeSelection() {
+            let selection = window.getSelection();
+            selection.removeAllRanges();
+        }
         removeAll() {
             if (this.el) {
                 while (this.el.firstChild) {
@@ -21379,6 +21395,21 @@
             }
             this.autoCompleteState.values = values.slice(0, 10);
             this.autoCompleteState.selectedIndex = 0;
+        }
+        /**
+         * This is required to ensure the content helper selection is
+         * properly updated on "onclick" events. Depending on the browser,
+         * the callback onClick from the composer will be executed before
+         * the selection was updated in the dom, which means we capture an
+         * wrong selection which is then forced upon the content helper on
+         * patchContent.
+         */
+        onMousedown(ev) {
+            if (ev.button > 0) {
+                // not main button, probably a context menu
+                return;
+            }
+            this.contentHelper.removeSelection();
         }
         onClick() {
             if (this.env.model.getters.isReadonly()) {
@@ -24129,7 +24160,7 @@
             }
             ev.preventDefault();
         }
-        paste(ev) {
+        async paste(ev) {
             if (!this.gridEl.contains(document.activeElement)) {
                 return;
             }
@@ -24148,6 +24179,9 @@
                 }
                 else {
                     interactivePasteFromOS(this.env, target, content);
+                }
+                if (this.env.model.getters.isCutOperation()) {
+                    await this.env.clipboard.write({ [ClipboardMIMEType.PlainText]: "" });
                 }
             }
         }
@@ -30088,9 +30122,9 @@
         checkCellOutOfSheet(sheetId, col, row) {
             const sheet = this.getters.tryGetSheet(sheetId);
             if (!sheet)
-                return 27 /* CommandResult.InvalidSheetId */;
+                return 28 /* CommandResult.InvalidSheetId */;
             const sheetZone = this.getters.getSheetZone(sheetId);
-            return isInside(col, row, sheetZone) ? 0 /* CommandResult.Success */ : 18 /* CommandResult.TargetOutOfSheet */;
+            return isInside(col, row, sheetZone) ? 0 /* CommandResult.Success */ : 19 /* CommandResult.TargetOutOfSheet */;
         }
     }
     class FormulaCellWithDependencies {
@@ -30313,13 +30347,13 @@
         }
         checkChartDuplicate(cmd) {
             return this.getters.getFigureSheetId(cmd.id)
-                ? 84 /* CommandResult.DuplicatedChartId */
+                ? 85 /* CommandResult.DuplicatedChartId */
                 : 0 /* CommandResult.Success */;
         }
         checkChartExists(cmd) {
             return this.getters.getFigureSheetId(cmd.id)
                 ? 0 /* CommandResult.Success */
-                : 85 /* CommandResult.ChartDoesNotExist */;
+                : 86 /* CommandResult.ChartDoesNotExist */;
         }
     }
 
@@ -30528,18 +30562,18 @@
         }
         checkValidReordering(cfId, direction, sheetId) {
             if (!this.cfRules[sheetId])
-                return 27 /* CommandResult.InvalidSheetId */;
+                return 28 /* CommandResult.InvalidSheetId */;
             const ruleIndex = this.cfRules[sheetId].findIndex((cf) => cf.id === cfId);
             if (ruleIndex === -1)
-                return 71 /* CommandResult.InvalidConditionalFormatId */;
+                return 72 /* CommandResult.InvalidConditionalFormatId */;
             const cfIndex2 = direction === "up" ? ruleIndex - 1 : ruleIndex + 1;
             if (cfIndex2 < 0 || cfIndex2 >= this.cfRules[sheetId].length) {
-                return 71 /* CommandResult.InvalidConditionalFormatId */;
+                return 72 /* CommandResult.InvalidConditionalFormatId */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkEmptyRange(cmd) {
-            return cmd.ranges.length ? 0 /* CommandResult.Success */ : 24 /* CommandResult.EmptyRange */;
+            return cmd.ranges.length ? 0 /* CommandResult.Success */ : 25 /* CommandResult.EmptyRange */;
         }
         checkCFRule(cmd) {
             const rule = cmd.cf.rule;
@@ -30575,10 +30609,10 @@
                     const errors = [];
                     const isEmpty = (value) => value === undefined || value === "";
                     if (expectedNumber >= 1 && isEmpty(rule.values[0])) {
-                        errors.push(51 /* CommandResult.FirstArgMissing */);
+                        errors.push(52 /* CommandResult.FirstArgMissing */);
                     }
                     if (expectedNumber >= 2 && isEmpty(rule.values[1])) {
-                        errors.push(52 /* CommandResult.SecondArgMissing */);
+                        errors.push(53 /* CommandResult.SecondArgMissing */);
                     }
                     return errors.length ? errors : 0 /* CommandResult.Success */;
                 }
@@ -30590,15 +30624,15 @@
                 (threshold.value === "" || isNaN(threshold.value))) {
                 switch (thresholdName) {
                     case "min":
-                        return 53 /* CommandResult.MinNaN */;
+                        return 54 /* CommandResult.MinNaN */;
                     case "max":
-                        return 55 /* CommandResult.MaxNaN */;
+                        return 56 /* CommandResult.MaxNaN */;
                     case "mid":
-                        return 54 /* CommandResult.MidNaN */;
+                        return 55 /* CommandResult.MidNaN */;
                     case "upperInflectionPoint":
-                        return 56 /* CommandResult.ValueUpperInflectionNaN */;
+                        return 57 /* CommandResult.ValueUpperInflectionNaN */;
                     case "lowerInflectionPoint":
-                        return 57 /* CommandResult.ValueLowerInflectionNaN */;
+                        return 58 /* CommandResult.ValueLowerInflectionNaN */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -30612,15 +30646,15 @@
             catch (error) {
                 switch (thresholdName) {
                     case "min":
-                        return 58 /* CommandResult.MinInvalidFormula */;
+                        return 59 /* CommandResult.MinInvalidFormula */;
                     case "max":
-                        return 60 /* CommandResult.MaxInvalidFormula */;
+                        return 61 /* CommandResult.MaxInvalidFormula */;
                     case "mid":
-                        return 59 /* CommandResult.MidInvalidFormula */;
+                        return 60 /* CommandResult.MidInvalidFormula */;
                     case "upperInflectionPoint":
-                        return 61 /* CommandResult.ValueUpperInvalidFormula */;
+                        return 62 /* CommandResult.ValueUpperInvalidFormula */;
                     case "lowerInflectionPoint":
-                        return 62 /* CommandResult.ValueLowerInvalidFormula */;
+                        return 63 /* CommandResult.ValueLowerInvalidFormula */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -30637,7 +30671,7 @@
             if (["number", "percentage", "percentile"].includes(rule.lowerInflectionPoint.type) &&
                 rule.lowerInflectionPoint.type === rule.upperInflectionPoint.type &&
                 Number(minValue) > Number(maxValue)) {
-                return 48 /* CommandResult.LowerBiggerThanUpper */;
+                return 49 /* CommandResult.LowerBiggerThanUpper */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -30647,7 +30681,7 @@
             if (["number", "percentage", "percentile"].includes(rule.minimum.type) &&
                 rule.minimum.type === rule.maximum.type &&
                 stringToNumber(minValue) >= stringToNumber(maxValue)) {
-                return 47 /* CommandResult.MinBiggerThanMax */;
+                return 48 /* CommandResult.MinBiggerThanMax */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -30658,7 +30692,7 @@
                 ["number", "percentage", "percentile"].includes(rule.midpoint.type) &&
                 rule.midpoint.type === rule.maximum.type &&
                 stringToNumber(midValue) >= stringToNumber(maxValue)) {
-                return 49 /* CommandResult.MidBiggerThanMax */;
+                return 50 /* CommandResult.MidBiggerThanMax */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -30669,7 +30703,7 @@
                 ["number", "percentage", "percentile"].includes(rule.midpoint.type) &&
                 rule.minimum.type === rule.midpoint.type &&
                 stringToNumber(minValue) >= stringToNumber(midValue)) {
-                return 50 /* CommandResult.MinBiggerThanMid */;
+                return 51 /* CommandResult.MinBiggerThanMid */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -30799,13 +30833,13 @@
         }
         checkFigureExists(sheetId, figureId) {
             if (this.figures[sheetId]?.[figureId] === undefined) {
-                return 70 /* CommandResult.FigureDoesNotExist */;
+                return 71 /* CommandResult.FigureDoesNotExist */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkFigureDuplicate(figureId) {
             if (Object.values(this.figures).find((sheet) => sheet?.[figureId])) {
-                return 82 /* CommandResult.DuplicatedFigureId */;
+                return 83 /* CommandResult.DuplicatedFigureId */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -30917,12 +30951,12 @@
             switch (cmd.type) {
                 case "CREATE_FILTER_TABLE":
                     if (!areZonesContinuous(...cmd.target)) {
-                        return 81 /* CommandResult.NonContinuousTargets */;
+                        return 82 /* CommandResult.NonContinuousTargets */;
                     }
                     const zone = union(...cmd.target);
                     const checkFilterOverlap = () => {
                         if (this.getFilterTables(cmd.sheetId).some((filter) => overlap(filter.zone, zone))) {
-                            return 78 /* CommandResult.FilterOverlap */;
+                            return 79 /* CommandResult.FilterOverlap */;
                         }
                         return 0 /* CommandResult.Success */;
                     };
@@ -30930,7 +30964,7 @@
                         const mergesInTarget = this.getters.getMergesInZone(cmd.sheetId, zone);
                         for (let merge of mergesInTarget) {
                             if (overlap(zone, merge)) {
-                                return 80 /* CommandResult.MergeInFilter */;
+                                return 81 /* CommandResult.MergeInFilter */;
                             }
                         }
                         return 0 /* CommandResult.Success */;
@@ -30940,7 +30974,7 @@
                     for (let merge of cmd.target) {
                         for (let filterTable of this.getFilterTables(cmd.sheetId)) {
                             if (overlap(filterTable.zone, merge)) {
-                                return 80 /* CommandResult.MergeInFilter */;
+                                return 81 /* CommandResult.MergeInFilter */;
                             }
                         }
                     }
@@ -31411,7 +31445,7 @@
             switch (cmd.type) {
                 case "HIDE_COLUMNS_ROWS": {
                     if (!this.getters.tryGetSheet(cmd.sheetId)) {
-                        return 27 /* CommandResult.InvalidSheetId */;
+                        return 28 /* CommandResult.InvalidSheetId */;
                     }
                     const hiddenGroup = cmd.dimension === "COL"
                         ? this.getHiddenColsGroups(cmd.sheetId)
@@ -31421,10 +31455,10 @@
                         : this.getters.getNumberRows(cmd.sheetId);
                     const hiddenElements = new Set((hiddenGroup || []).flat().concat(cmd.elements));
                     if (hiddenElements.size >= elements) {
-                        return 66 /* CommandResult.TooManyHiddenElements */;
+                        return 67 /* CommandResult.TooManyHiddenElements */;
                     }
                     else if (Math.min(...cmd.elements) < 0 || Math.max(...cmd.elements) > elements) {
-                        return 86 /* CommandResult.InvalidHeaderIndex */;
+                        return 87 /* CommandResult.InvalidHeaderIndex */;
                     }
                     else {
                         return 0 /* CommandResult.Success */;
@@ -31432,7 +31466,7 @@
                 }
                 case "REMOVE_COLUMNS_ROWS":
                     if (!this.getters.tryGetSheet(cmd.sheetId)) {
-                        return 27 /* CommandResult.InvalidSheetId */;
+                        return 28 /* CommandResult.InvalidSheetId */;
                     }
                     if (!this.canRemoveHeaders(cmd.sheetId, cmd.dimension, cmd.elements)) {
                         return 8 /* CommandResult.NotEnoughElements */;
@@ -31600,7 +31634,7 @@
             switch (cmd.type) {
                 case "CREATE_IMAGE":
                     if (this.getters.getFigure(cmd.sheetId, cmd.figureId)) {
-                        return 28 /* CommandResult.InvalidFigureId */;
+                        return 29 /* CommandResult.InvalidFigureId */;
                     }
                     return 0 /* CommandResult.Success */;
                 default:
@@ -31988,7 +32022,7 @@
             for (const zone of target) {
                 for (const zone2 of target) {
                     if (zone !== zone2 && overlap(zone, zone2)) {
-                        return 65 /* CommandResult.MergeOverlap */;
+                        return 66 /* CommandResult.MergeOverlap */;
                     }
                 }
             }
@@ -32002,7 +32036,7 @@
             for (const zone of target) {
                 if ((zone.left < xSplit && zone.right >= xSplit) ||
                     (zone.top < ySplit && zone.bottom >= ySplit)) {
-                    return 75 /* CommandResult.FrozenPaneOverlap */;
+                    return 76 /* CommandResult.FrozenPaneOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -32196,7 +32230,7 @@
         // ---------------------------------------------------------------------------
         allowDispatch(cmd) {
             if (cmd.type === "MOVE_RANGES") {
-                return cmd.target.length === 1 ? 0 /* CommandResult.Success */ : 26 /* CommandResult.InvalidZones */;
+                return cmd.target.length === 1 ? 0 /* CommandResult.Success */ : 27 /* CommandResult.InvalidZones */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -32621,7 +32655,7 @@
                         return 0 /* CommandResult.Success */;
                     }
                     catch (e) {
-                        return 14 /* CommandResult.WrongSheetMove */;
+                        return 15 /* CommandResult.WrongSheetMove */;
                     }
                 case "RENAME_SHEET":
                     return this.isRenameAllowed(cmd);
@@ -32634,10 +32668,10 @@
                         ? this.getNumberCols(cmd.sheetId)
                         : this.getNumberRows(cmd.sheetId);
                     if (cmd.base < 0 || cmd.base > elements) {
-                        return 86 /* CommandResult.InvalidHeaderIndex */;
+                        return 87 /* CommandResult.InvalidHeaderIndex */;
                     }
                     else if (cmd.quantity <= 0) {
-                        return 87 /* CommandResult.InvalidQuantity */;
+                        return 88 /* CommandResult.InvalidQuantity */;
                     }
                     return 0 /* CommandResult.Success */;
                 case "REMOVE_COLUMNS_ROWS": {
@@ -32645,7 +32679,7 @@
                         ? this.getNumberCols(cmd.sheetId)
                         : this.getNumberRows(cmd.sheetId);
                     if (Math.min(...cmd.elements) < 0 || Math.max(...cmd.elements) > elements) {
-                        return 86 /* CommandResult.InvalidHeaderIndex */;
+                        return 87 /* CommandResult.InvalidHeaderIndex */;
                     }
                     else {
                         return 0 /* CommandResult.Success */;
@@ -32972,12 +33006,12 @@
          */
         checkZonesExistInSheet(sheetId, zones) {
             if (!zones.every(isZoneValid))
-                return 25 /* CommandResult.InvalidRange */;
+                return 26 /* CommandResult.InvalidRange */;
             if (zones.length) {
                 const sheetZone = this.getSheetZone(sheetId);
                 return zones.every((zone) => isZoneInside(zone, sheetZone))
                     ? 0 /* CommandResult.Success */
-                    : 18 /* CommandResult.TargetOutOfSheet */;
+                    : 19 /* CommandResult.TargetOutOfSheet */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -33084,38 +33118,42 @@
             throw new Error(_lt("There is not enough visible sheets"));
         }
         checkSheetName(cmd) {
+            const originalSheetName = this.getters.tryGetSheetName(cmd.sheetId);
+            if (originalSheetName !== undefined && cmd.name === originalSheetName) {
+                return 11 /* CommandResult.UnchangedSheetName */;
+            }
             const { orderedSheetIds, sheets } = this;
             const name = cmd.name && cmd.name.trim().toLowerCase();
-            if (orderedSheetIds.find((id) => sheets[id]?.name.toLowerCase() === name)) {
-                return 11 /* CommandResult.DuplicatedSheetName */;
+            if (orderedSheetIds.find((id) => sheets[id]?.name.toLowerCase() === name && id !== cmd.sheetId)) {
+                return 12 /* CommandResult.DuplicatedSheetName */;
             }
             if (FORBIDDEN_IN_EXCEL_REGEX.test(name)) {
-                return 13 /* CommandResult.ForbiddenCharactersInSheetName */;
+                return 14 /* CommandResult.ForbiddenCharactersInSheetName */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkSheetPosition(cmd) {
             const { orderedSheetIds } = this;
             if (cmd.position > orderedSheetIds.length || cmd.position < 0) {
-                return 15 /* CommandResult.WrongSheetPosition */;
+                return 16 /* CommandResult.WrongSheetPosition */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkRowFreezeQuantity(cmd) {
             return cmd.quantity >= 1 && cmd.quantity < this.getNumberRows(cmd.sheetId)
                 ? 0 /* CommandResult.Success */
-                : 74 /* CommandResult.InvalidFreezeQuantity */;
+                : 75 /* CommandResult.InvalidFreezeQuantity */;
         }
         checkColFreezeQuantity(cmd) {
             return cmd.quantity >= 1 && cmd.quantity < this.getNumberCols(cmd.sheetId)
                 ? 0 /* CommandResult.Success */
-                : 74 /* CommandResult.InvalidFreezeQuantity */;
+                : 75 /* CommandResult.InvalidFreezeQuantity */;
         }
         checkRowFreezeOverlapMerge(cmd) {
             const merges = this.getters.getMerges(cmd.sheetId);
             for (let merge of merges) {
                 if (merge.top < cmd.quantity && cmd.quantity <= merge.bottom) {
-                    return 65 /* CommandResult.MergeOverlap */;
+                    return 66 /* CommandResult.MergeOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -33124,7 +33162,7 @@
             const merges = this.getters.getMerges(cmd.sheetId);
             for (let merge of merges) {
                 if (merge.left < cmd.quantity && cmd.quantity <= merge.right) {
-                    return 65 /* CommandResult.MergeOverlap */;
+                    return 66 /* CommandResult.MergeOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -33140,8 +33178,8 @@
             const oldName = sheet.name;
             this.history.update("sheets", sheet.id, "name", name.trim());
             const sheetIdsMapName = Object.assign({}, this.sheetIdsMapName);
-            sheetIdsMapName[name] = sheet.id;
             delete sheetIdsMapName[oldName];
+            sheetIdsMapName[name] = sheet.id;
             this.history.update("sheetIdsMapName", sheetIdsMapName);
         }
         hideSheet(sheetId) {
@@ -33435,10 +33473,10 @@
          */
         checkSheetExists(cmd) {
             if (cmd.type !== "CREATE_SHEET" && "sheetId" in cmd && this.sheets[cmd.sheetId] === undefined) {
-                return 27 /* CommandResult.InvalidSheetId */;
+                return 28 /* CommandResult.InvalidSheetId */;
             }
             else if (cmd.type === "CREATE_SHEET" && this.sheets[cmd.sheetId] !== undefined) {
-                return 12 /* CommandResult.DuplicatedSheetId */;
+                return 13 /* CommandResult.DuplicatedSheetId */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -34999,7 +35037,7 @@
                     if (this.lastCellSelected.col !== undefined && this.lastCellSelected.row !== undefined) {
                         return 0 /* CommandResult.Success */;
                     }
-                    return 45 /* CommandResult.InvalidAutofillSelection */;
+                    return 46 /* CommandResult.InvalidAutofillSelection */;
                 case "AUTOFILL_AUTO":
                     const zone = this.getters.getSelectedZone();
                     return zone.top === zone.bottom
@@ -35616,7 +35654,7 @@
                         cellPopoverRegistry.get(cmd.popoverType);
                     }
                     catch (error) {
-                        return 72 /* CommandResult.InvalidCellPopover */;
+                        return 73 /* CommandResult.InvalidCellPopover */;
                     }
                     return 0 /* CommandResult.Success */;
                 default:
@@ -37746,12 +37784,12 @@
                 case "ADD_RANGE":
                 case "ADD_EMPTY_RANGE":
                     if (this.inputHasSingleRange && this.ranges.length === 1) {
-                        return 30 /* CommandResult.MaximumRangesReached */;
+                        return 31 /* CommandResult.MaximumRangesReached */;
                     }
                     break;
                 case "CHANGE_RANGE":
                     if (this.inputHasSingleRange && cmd.value.split(",").length > 1) {
-                        return 30 /* CommandResult.MaximumRangesReached */;
+                        return 31 /* CommandResult.MaximumRangesReached */;
                     }
                     break;
             }
@@ -37980,7 +38018,7 @@
                 case "FOCUS_RANGE":
                     const index = this.currentInput?.getIndex(cmd.rangeId);
                     if (this.focusedInputId === cmd.id && this.currentInput?.focusedRangeIndex === index) {
-                        return 29 /* CommandResult.InputAlreadyFocused */;
+                        return 30 /* CommandResult.InputAlreadyFocused */;
                     }
                     break;
             }
@@ -38112,7 +38150,7 @@
             /*Test the presence of single cells*/
             const singleCells = positions(zone).some(({ col, row }) => !this.getters.isInMerge({ sheetId, col, row }));
             if (singleCells) {
-                return 63 /* CommandResult.InvalidSortZone */;
+                return 64 /* CommandResult.InvalidSortZone */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -38131,7 +38169,7 @@
                 ];
                 return widthCurrent === widthFirst && heightCurrent === heightFirst;
             })) {
-                return 63 /* CommandResult.InvalidSortZone */;
+                return 64 /* CommandResult.InvalidSortZone */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -38624,7 +38662,7 @@
          */
         checkSheetExists(cmd) {
             if ("sheetId" in cmd && this.getters.tryGetSheet(cmd.sheetId) === undefined) {
-                return 27 /* CommandResult.InvalidSheetId */;
+                return 28 /* CommandResult.InvalidSheetId */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -38636,7 +38674,7 @@
             const sheetId = "sheetId" in cmd ? cmd.sheetId : this.getters.tryGetActiveSheetId();
             const zones = this.getters.getCommandZones(cmd);
             if (!sheetId && zones.length > 0) {
-                return 92 /* CommandResult.NoActiveSheet */;
+                return 93 /* CommandResult.NoActiveSheet */;
             }
             if (sheetId && zones.length > 0) {
                 return this.getters.checkZonesExistInSheet(sheetId, zones);
@@ -39118,13 +39156,13 @@
         }
         checkSingleColSelected() {
             if (!this.getters.isSingleColSelected()) {
-                return 88 /* CommandResult.MoreThanOneColumnSelected */;
+                return 89 /* CommandResult.MoreThanOneColumnSelected */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkNonEmptySelector(cmd) {
             if (cmd.separator === "") {
-                return 89 /* CommandResult.EmptySplitSeparator */;
+                return 90 /* CommandResult.EmptySplitSeparator */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -39135,7 +39173,7 @@
             const selection = this.getters.getSelectedZones()[0];
             const splitted = this.getSplittedCols(selection, cmd.separator);
             if (this.willSplittedColsOverwriteContent(selection, splitted)) {
-                return 90 /* CommandResult.SplitWillOverwriteContent */;
+                return 91 /* CommandResult.SplitWillOverwriteContent */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -39146,7 +39184,7 @@
                     return 0 /* CommandResult.Success */;
                 }
             }
-            return 91 /* CommandResult.NoSplitSeparatorInSelection */;
+            return 92 /* CommandResult.NoSplitSeparatorInSelection */;
         }
     }
 
@@ -39261,7 +39299,7 @@
         }
         isCutAllowed(target) {
             if (target.length !== 1) {
-                return 19 /* CommandResult.WrongCutSelection */;
+                return 20 /* CommandResult.WrongCutSelection */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -39269,13 +39307,13 @@
             const sheetId = this.getters.getActiveSheetId();
             if (this.operation === "CUT" && clipboardOption?.pasteOption !== undefined) {
                 // cannot paste only format or only value if the previous operation is a CUT
-                return 21 /* CommandResult.WrongPasteOption */;
+                return 22 /* CommandResult.WrongPasteOption */;
             }
             if (target.length > 1) {
                 // cannot paste if we have a clipped zone larger than a cell and multiple
                 // zones selected
                 if (this.cells.length > 1 || this.cells[0].length > 1) {
-                    return 20 /* CommandResult.WrongPasteSelection */;
+                    return 21 /* CommandResult.WrongPasteSelection */;
                 }
             }
             const clipboardHeight = this.cells.length;
@@ -39293,7 +39331,7 @@
             for (const zone of this.getPasteZones(target)) {
                 if ((zone.left < xSplit && zone.right >= xSplit) ||
                     (zone.top < ySplit && zone.bottom >= ySplit)) {
-                    return 75 /* CommandResult.FrozenPaneOverlap */;
+                    return 76 /* CommandResult.FrozenPaneOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -39361,6 +39399,13 @@
                 });
             }
             this.pasteCopiedTables(target);
+            this.cells.forEach((row) => {
+                row.forEach((c) => {
+                    if (c.cell) {
+                        c.cell = undefined;
+                    }
+                });
+            });
         }
         /**
          * The clipped zone is copied as many times as it fits in the target.
@@ -39593,7 +39638,9 @@
             return (this.cells
                 .map((cells) => {
                 return cells
-                    .map((c) => c.cell ? this.getters.getCellText(c.position, this.getters.shouldShowFormulas()) : "")
+                    .map((c) => this.getters.shouldShowFormulas() && c.cell?.isFormula
+                    ? c.cell?.content || ""
+                    : c.evaluatedCell?.formattedValue || "")
                     .join("\t");
             })
                 .join("\n") || "\t");
@@ -39724,10 +39771,10 @@
         }
         isPasteAllowed(target, option) {
             if (target.length === 0) {
-                return 73 /* CommandResult.EmptyTarget */;
+                return 74 /* CommandResult.EmptyTarget */;
             }
             if (option?.pasteOption !== undefined) {
-                return 22 /* CommandResult.WrongFigurePasteOption */;
+                return 23 /* CommandResult.WrongFigurePasteOption */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -39829,7 +39876,10 @@
             }
             return 0 /* CommandResult.Success */;
         }
-        paste(target) {
+        paste(target, clipboardOption) {
+            if (clipboardOption?.pasteOption === "onlyFormat") {
+                return;
+            }
             const values = this.values;
             const pasteZone = this.getPasteZone(target);
             const { left: activeCol, top: activeRow } = pasteZone;
@@ -39890,6 +39940,7 @@
         state;
         lastPasteState;
         _isPaintingFormat = false;
+        originSheetId;
         // ---------------------------------------------------------------------------
         // Command Handling
         // ---------------------------------------------------------------------------
@@ -39901,13 +39952,13 @@
                     return state.isCutAllowed(zones);
                 case "PASTE":
                     if (!this.state) {
-                        return 23 /* CommandResult.EmptyClipboard */;
+                        return 24 /* CommandResult.EmptyClipboard */;
                     }
                     const pasteOption = cmd.pasteOption || (this._isPaintingFormat ? "onlyFormat" : undefined);
                     return this.state.isPasteAllowed(cmd.target, { pasteOption });
                 case "PASTE_FROM_OS_CLIPBOARD": {
                     const state = new ClipboardOsState(cmd.text, this.getters, this.dispatch, this.selection);
-                    return state.isPasteAllowed(cmd.target);
+                    return state.isPasteAllowed(cmd.target, { pasteOption: cmd.pasteOption });
                 }
                 case "INSERT_CELL": {
                     const { cut, paste } = this.getInsertCellsTargets(cmd.zone, cmd.shiftDimension);
@@ -39929,6 +39980,7 @@
                     const zones = ("cutTarget" in cmd && cmd.cutTarget) || this.getters.getSelectedZones();
                     this.state = this.getClipboardState(zones, cmd.type);
                     this.status = "visible";
+                    this.originSheetId = this.getters.getActiveSheetId();
                     break;
                 case "PASTE":
                     if (!this.state) {
@@ -39937,9 +39989,6 @@
                     const pasteOption = cmd.pasteOption || (this._isPaintingFormat ? "onlyFormat" : undefined);
                     this._isPaintingFormat = false;
                     this.state.paste(cmd.target, { pasteOption, shouldPasteCF: true, selectTarget: true });
-                    if (this.state.operation === "CUT") {
-                        this.state = undefined;
-                    }
                     this.lastPasteState = this.state;
                     this.status = "invisible";
                     break;
@@ -39994,7 +40043,7 @@
                 }
                 case "PASTE_FROM_OS_CLIPBOARD":
                     this.state = new ClipboardOsState(cmd.text, this.getters, this.dispatch, this.selection);
-                    this.state.paste(cmd.target);
+                    this.state.paste(cmd.target, { pasteOption: cmd.pasteOption });
                     this.lastPasteState = this.state;
                     this.status = "invisible";
                     break;
@@ -40013,6 +40062,15 @@
                     this.status = "visible";
                     break;
                 }
+                case "DELETE_SHEET":
+                    if (this.state?.operation !== "CUT") {
+                        return;
+                    }
+                    if (this.originSheetId === cmd.sheetId) {
+                        this.state = undefined;
+                        this.status = "invisible";
+                    }
+                    break;
                 default:
                     if (isCoreCommand(cmd)) {
                         this.status = "invisible";
@@ -40471,7 +40529,7 @@
         validateSelection(length, start, end) {
             return start >= 0 && start <= length && end >= 0 && end <= length
                 ? 0 /* CommandResult.Success */
-                : 46 /* CommandResult.WrongComposerSelection */;
+                : 47 /* CommandResult.WrongComposerSelection */;
         }
         onColumnsRemoved(cmd) {
             if (cmd.elements.includes(this.col) && this.mode !== "inactive") {
@@ -40847,7 +40905,7 @@
             switch (cmd.type) {
                 case "UPDATE_FILTER":
                     if (!this.getters.getFilterId(cmd)) {
-                        return 79 /* CommandResult.FilterNotFound */;
+                        return 80 /* CommandResult.FilterNotFound */;
                     }
                     break;
             }
@@ -40988,6 +41046,7 @@
         }
         exportForExcel(data) {
             for (const sheetData of data.sheets) {
+                const sheetId = sheetData.id;
                 for (const tableData of sheetData.filterTables) {
                     const tableZone = toZone(tableData.range);
                     const filters = [];
@@ -41003,20 +41062,20 @@
                         if (!filter)
                             continue;
                         const valuesInFilterZone = filter.filteredZone
-                            ? positions(filter.filteredZone)
-                                .map(({ col, row }) => this.getters.getEvaluatedCell({ sheetId: sheetData.id, col, row }))
-                                .filter((cell) => cell.type !== CellValueType.empty)
-                                .map((cell) => cell.formattedValue)
+                            ? positions(filter.filteredZone).map((position) => this.getters.getEvaluatedCell({ sheetId, ...position }).formattedValue)
                             : [];
-                        // In xlsx, filtered values = values that are displayed, not values that are hidden
-                        const xlsxFilteredValues = valuesInFilterZone.filter((val) => !filteredValues.includes(val));
-                        filters.push({ colId: i, filteredValues: [...new Set(xlsxFilteredValues)] });
-                        // In xlsx, filter header should ALWAYS be a string and should be unique
-                        const headerPosition = {
-                            col: filter.col,
-                            row: filter.zoneWithHeaders.top,
-                            sheetId: sheetData.id,
-                        };
+                        if (filteredValues.length) {
+                            const xlsxDisplayedValues = valuesInFilterZone
+                                .filter((val) => val)
+                                .filter((val) => !filteredValues.includes(val));
+                            filters.push({
+                                colId: i,
+                                displayedValues: [...new Set(xlsxDisplayedValues)],
+                                displayBlanks: !filteredValues.includes("") && valuesInFilterZone.some((val) => !val),
+                            });
+                        }
+                        // In xlsx, filter header should ALWAYS be a string and should be unique in the table
+                        const headerPosition = { col: filter.col, row: filter.zoneWithHeaders.top, sheetId };
                         const headerString = this.getters.getEvaluatedCell(headerPosition).formattedValue;
                         const headerName = this.getUniqueColNameForExcel(i, headerString, headerNames);
                         headerNames.push(headerName);
@@ -41135,7 +41194,7 @@
                         break;
                     }
                     catch (error) {
-                        return 27 /* CommandResult.InvalidSheetId */;
+                        return 28 /* CommandResult.InvalidSheetId */;
                     }
                 case "MOVE_COLUMNS_ROWS":
                     return this.isMoveElementAllowed(cmd);
@@ -42438,7 +42497,7 @@
         }
         checkPositiveDimension(cmd) {
             if (cmd.width < 0 || cmd.height < 0) {
-                return 68 /* CommandResult.InvalidViewportSize */;
+                return 69 /* CommandResult.InvalidViewportSize */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -42448,7 +42507,7 @@
                 cmd.gridOffsetY === this.gridOffsetY &&
                 cmd.width === width &&
                 cmd.height === height) {
-                return 76 /* CommandResult.ValuesNotChanged */;
+                return 77 /* CommandResult.ValuesNotChanged */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -42456,7 +42515,7 @@
             const pane = this.getMainInternalViewport(this.getters.getActiveSheetId());
             if ((!pane.canScrollHorizontally && offsetX > 0) ||
                 (!pane.canScrollVertically && offsetY > 0)) {
-                return 69 /* CommandResult.InvalidScrollingDirection */;
+                return 70 /* CommandResult.InvalidScrollingDirection */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -42883,17 +42942,16 @@
     };
 
     function interactiveRenameSheet(env, sheetId, name, errorCallback) {
-        const originalSheetName = env.model.getters.getSheetName(sheetId);
-        if (name === null || name === originalSheetName)
+        if (name === null)
             return;
         const result = env.model.dispatch("RENAME_SHEET", { sheetId, name });
         if (result.reasons.includes(10 /* CommandResult.MissingSheetName */)) {
             env.raiseError(_lt("The sheet name cannot be empty."), errorCallback);
         }
-        else if (result.reasons.includes(11 /* CommandResult.DuplicatedSheetName */)) {
+        else if (result.reasons.includes(12 /* CommandResult.DuplicatedSheetName */)) {
             env.raiseError(_lt("A sheet with the name %s already exists. Please select another name.", name), errorCallback);
         }
-        else if (result.reasons.includes(13 /* CommandResult.ForbiddenCharactersInSheetName */)) {
+        else if (result.reasons.includes(14 /* CommandResult.ForbiddenCharactersInSheetName */)) {
             env.raiseError(_lt("Some used characters are not allowed in a sheet name (Forbidden characters are %s).", FORBIDDEN_SHEET_CHARS.join(" ")), errorCallback);
         }
     }
@@ -45882,7 +45940,7 @@
          */
         moveAnchorCell(direction, step = 1) {
             if (step !== "end" && step <= 0) {
-                return new DispatchResult(83 /* CommandResult.InvalidSelectionStep */);
+                return new DispatchResult(84 /* CommandResult.InvalidSelectionStep */);
             }
             const { col, row } = this.getNextAvailablePosition(direction, step);
             return this.selectCell(col, row);
@@ -45928,7 +45986,7 @@
          */
         resizeAnchorZone(direction, step = 1) {
             if (step !== "end" && step <= 0) {
-                return new DispatchResult(83 /* CommandResult.InvalidSelectionStep */);
+                return new DispatchResult(84 /* CommandResult.InvalidSelectionStep */);
             }
             const sheetId = this.getters.getActiveSheetId();
             const anchor = this.anchor;
@@ -46122,20 +46180,20 @@
         checkAnchorZone(anchor) {
             const { cell, zone } = anchor;
             if (!isInside(cell.col, cell.row, zone)) {
-                return 16 /* CommandResult.InvalidAnchorZone */;
+                return 17 /* CommandResult.InvalidAnchorZone */;
             }
             const { left, right, top, bottom } = zone;
             const sheetId = this.getters.getActiveSheetId();
             const refCol = this.getters.findVisibleHeader(sheetId, "COL", left, right);
             const refRow = this.getters.findVisibleHeader(sheetId, "ROW", top, bottom);
             if (refRow === undefined || refCol === undefined) {
-                return 17 /* CommandResult.SelectionOutOfBound */;
+                return 18 /* CommandResult.SelectionOutOfBound */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkAnchorZoneOrThrow(anchor) {
             const result = this.checkAnchorZone(anchor);
-            if (result === 16 /* CommandResult.InvalidAnchorZone */) {
+            if (result === 17 /* CommandResult.InvalidAnchorZone */) {
                 throw new Error(_t("The provided anchor is invalid. The cell must be part of the zone."));
             }
         }
@@ -47478,15 +47536,10 @@
   `;
     }
     function addFilterColumns(table) {
-        const tableZone = toZone(table.range);
         const columns = [];
-        for (const i of range(0, zoneToDimension(tableZone).numberOfCols)) {
-            const filter = table.filters[i];
-            if (!filter || !filter.filteredValues.length) {
-                continue;
-            }
+        for (const filter of table.filters) {
             const colXml = escapeXml /*xml*/ `
-      <filterColumn ${formatAttributes([["colId", i]])}>
+      <filterColumn ${formatAttributes([["colId", filter.colId]])}>
         ${addFilter(filter)}
       </filterColumn>
       `;
@@ -47495,9 +47548,10 @@
         return columns;
     }
     function addFilter(filter) {
-        const filterValues = filter.filteredValues.map((val) => escapeXml /*xml*/ `<filter ${formatAttributes([["val", val]])}/>`);
+        const filterValues = filter.displayedValues.map((val) => escapeXml /*xml*/ `<filter ${formatAttributes([["val", val]])}/>`);
+        const filterAttributes = filter.displayBlanks ? [["blank", 1]] : [];
         return escapeXml /*xml*/ `
-  <filters>
+  <filters ${formatAttributes(filterAttributes)}>
       ${joinXmlNodes(filterValues)}
   </filters>
 `;
@@ -47616,8 +47670,13 @@
                     const sheetId = parseSheetUrl(url);
                     const sheet = data.sheets.find((sheet) => sheet.id === sheetId);
                     const location = sheet ? `${sheet.name}!A1` : INCORRECT_RANGE_STRING;
+                    const hyperlinkAttributes = [
+                        ["display", label],
+                        ["location", location],
+                        ["ref", xc],
+                    ];
                     linkNodes.push(escapeXml /*xml*/ `
-          <hyperlink display="${label}" location="${location}" ref="${xc}"/>
+          <hyperlink ${formatAttributes(hyperlinkAttributes)}/>
         `);
                 }
                 else {
@@ -47626,8 +47685,12 @@
                         type: XLSX_RELATION_TYPE.hyperlink,
                         targetMode: "External",
                     });
+                    const hyperlinkAttributes = [
+                        ["r:id", linkRelId],
+                        ["ref", xc],
+                    ];
                     linkNodes.push(escapeXml /*xml*/ `
-          <hyperlink r:id="${linkRelId}" ref="${xc}"/>
+          <hyperlink ${formatAttributes(hyperlinkAttributes)}/>
         `);
                 }
             }
@@ -48251,10 +48314,10 @@
             const command = createCommand(type, payload);
             let status = this.status;
             if (this.getters.isReadonly() && !canExecuteInReadonly(command)) {
-                return new DispatchResult(67 /* CommandResult.Readonly */);
+                return new DispatchResult(68 /* CommandResult.Readonly */);
             }
             if (!this.session.canApplyOptimisticUpdate()) {
-                return new DispatchResult(64 /* CommandResult.WaitingSessionConfirmation */);
+                return new DispatchResult(65 /* CommandResult.WaitingSessionConfirmation */);
             }
             switch (status) {
                 case 0 /* Status.Ready */:
@@ -48538,8 +48601,8 @@
 
 
     __info__.version = '16.4.0-alpha.4';
-    __info__.date = '2023-06-12T14:15:11.459Z';
-    __info__.hash = '251a52e';
+    __info__.date = '2023-06-21T07:50:41.366Z';
+    __info__.hash = '90777ef';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

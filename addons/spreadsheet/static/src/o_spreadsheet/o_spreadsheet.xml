@@ -447,6 +447,7 @@
         t-on-keydown="onKeydown"
         t-on-mousewheel.stop=""
         t-on-input="onInput"
+        t-on-mousedown="onMousedown"
         t-on-click="onClick"
         t-on-keyup="onKeyup"
         t-on-paste.stop=""
@@ -2377,7 +2378,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="env._t(props.definition.title)"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -2448,7 +2449,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="env._t(props.definition.title)"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -2642,7 +2643,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="env._t(props.definition.title)"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -2758,7 +2759,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="props.definition.title"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -2908,7 +2909,7 @@
         <div class="o-section-title">Title</div>
         <input
           type="text"
-          t-att-value="env._t(props.definition.title)"
+          t-model="state.title"
           t-on-change="updateTitle"
           class="o-input o-optional"
           placeholder="New Chart"
@@ -3872,6 +3873,6 @@
 </odoo>
 <!--
   __info__.version = '16.4.0-alpha.4';
-  __info__.date = '2023-06-12T14:15:15.398Z';
-  __info__.hash = '251a52e';
+  __info__.date = '2023-06-21T07:50:44.261Z';
+  __info__.hash = '90777ef';
 -->
