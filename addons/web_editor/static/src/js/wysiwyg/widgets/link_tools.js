@@ -78,12 +78,12 @@ export class LinkTools extends Link {
     async start() {
         const ret = await super.start(...arguments);
 
-        this.$('we-select we-button').on('click', this._onPickSelectOption.bind(this));
-        this.$('we-checkbox').on('click', this._onClickCheckbox.bind(this));
-        this.$('.link-custom-color-border input').on('change', this._onChangeCustomBorderWidth.bind(this));
-        this.$('.link-custom-color-border input').on('keypress', this._onKeyPressCustomBorderWidth.bind(this));
-        this.$('we-select [name="link_border_style"] we-button').on('click', this._onBorderStyleSelectOption.bind(this));
-        this.$('input[name="label"]').on('input', this._onLabelInput.bind(this));
+        this.$el.find('we-select we-button').on('click', this._onPickSelectOption.bind(this));
+        this.$el.find('we-checkbox').on('click', this._onClickCheckbox.bind(this));
+        this.$el.find('.link-custom-color-border input').on('change', this._onChangeCustomBorderWidth.bind(this));
+        this.$el.find('.link-custom-color-border input').on('keypress', this._onKeyPressCustomBorderWidth.bind(this));
+        this.$el.find('we-select [name="link_border_style"] we-button').on('click', this._onBorderStyleSelectOption.bind(this));
+        this.$el.find('input[name="label"]').on('input', this._onLabelInput.bind(this));
 
         this._setSelectOptionFromLink();
         this._updateOptionsUI();
@@ -149,13 +149,13 @@ export class LinkTools extends Link {
      * @override
      */
     _doStripDomain() {
-        return this.$('we-checkbox[name="do_strip_domain"]').closest('we-button.o_we_checkbox_wrapper').hasClass('active');
+        return this.$el.find('we-checkbox[name="do_strip_domain"]').closest('we-button.o_we_checkbox_wrapper').hasClass('active');
     }
     /**
      * @override
      */
     _getIsNewWindowFormRow() {
-        return this.$('we-checkbox[name="is_new_window"]').closest('we-row');
+        return this.$el.find('we-checkbox[name="is_new_window"]').closest('we-row');
     }
     /**
      * @override
@@ -166,25 +166,25 @@ export class LinkTools extends Link {
             'we-selection-items[name="link_style_size"] > we-button',
             'we-selection-items[name="link_style_shape"] > we-button',
         ];
-        return this.$(options.join(','));
+        return this.$el.find(options.join(','));
     }
     /**
      * @override
      */
     _getLinkShape() {
-        return this.$('we-selection-items[name="link_style_shape"] we-button.active').data('value') || '';
+        return this.$el.find('we-selection-items[name="link_style_shape"] we-button.active').data('value') || '';
     }
     /**
      * @override
      */
     _getLinkSize() {
-        return this.$('we-selection-items[name="link_style_size"] we-button.active').data('value') || '';
+        return this.$el.find('we-selection-items[name="link_style_size"] we-button.active').data('value') || '';
     }
     /**
      * @override
      */
     _getLinkType() {
-        return this.$('we-selection-items[name="link_style_color"] we-button.active').data('value') || '';
+        return this.$el.find('we-selection-items[name="link_style_color"] we-button.active').data('value') || '';
     }
     /**
      * @override
@@ -202,13 +202,13 @@ export class LinkTools extends Link {
      * @override
      */
     _getLinkCustomBorderWidth() {
-        return this.$('.link-custom-color-border input').val() || '';
+        return this.$el.find('.link-custom-color-border input').val() || '';
     }
     /**
      * @override
      */
     _getLinkCustomBorderStyle() {
-        return this.$('.link-custom-color-border we-button.active').data('value') || '';
+        return this.$el.find('.link-custom-color-border we-button.active').data('value') || '';
     }
     /**
      * @override
@@ -247,7 +247,7 @@ export class LinkTools extends Link {
         if (this.props.forceNewWindow) {
             return this._isFromAnotherHostName(url);
         } else {
-            return this.$('we-checkbox[name="is_new_window"]').closest('we-button.o_we_checkbox_wrapper').hasClass('active');
+            return this.$el.find('we-checkbox[name="is_new_window"]').closest('we-button.o_we_checkbox_wrapper').hasClass('active');
         }
     }
     /**
@@ -270,9 +270,9 @@ export class LinkTools extends Link {
             this.colorCombinationClass = el.dataset.value;
             this.props.onColorCombinationClassChange(this.colorCombinationClass);
             // Hide the size and shape options if the link is an unstyled anchor.
-            this.$('.link-size-row, .link-shape-row').toggleClass('d-none', !this.colorCombinationClass);
+            this.$el.find('.link-size-row, .link-shape-row').toggleClass('d-none', !this.colorCombinationClass);
             // Show custom colors only for Custom style.
-            this.$('.link-custom-color').toggleClass('d-none', el.dataset.value !== 'custom');
+            this.$el.find('.link-custom-color').toggleClass('d-none', el.dataset.value !== 'custom');
 
             this._updateColorpicker('color');
             this._updateColorpicker('background-color');
@@ -280,12 +280,12 @@ export class LinkTools extends Link {
 
             const borderWidth = this.linkEl.style['border-width'];
             const numberAndUnit = getNumericAndUnit(borderWidth);
-            this.$('.link-custom-color-border input').val(numberAndUnit ? numberAndUnit[0] : "1");
+            this.$el.find('.link-custom-color-border input').val(numberAndUnit ? numberAndUnit[0] : "1");
             let borderStyle = this.linkEl.style['border-style'];
             if (!borderStyle || borderStyle === 'none') {
                 borderStyle = 'solid';
             }
-            const $activeBorderStyleButton = this.$(`.link-custom-color-border [name="link_border_style"] we-button[data-value="${borderStyle}"]`);
+            const $activeBorderStyleButton = this.$el.find(`.link-custom-color-border [name="link_border_style"] we-button[data-value="${borderStyle}"]`);
             $activeBorderStyleButton.addClass('active');
             $activeBorderStyleButton.siblings('we-button').removeClass("active");
             const $activeBorderStyleToggler = $activeBorderStyleButton.closest('we-select').find('we-toggler');
@@ -326,7 +326,7 @@ export class LinkTools extends Link {
         }
 
         // Update preview.
-        const $colorPreview = this.$('.link-custom-color-' + (cssProperty === 'border-color' ? 'border' : cssProperty === 'color' ? 'text' : 'fill') + ' .o_we_color_preview');
+        const $colorPreview = this.$el.find('.link-custom-color-' + (cssProperty === 'border-color' ? 'border' : cssProperty === 'color' ? 'text' : 'fill') + ' .o_we_color_preview');
         const previewClasses = computeColorClasses(colorNames, 'bg-');
         $colorPreview[0].classList.remove(...previewClasses);
         if (isColorClass) {

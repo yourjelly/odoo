@@ -26,7 +26,7 @@ patch(LinkDialog.prototype, "editor.js", {
             _rpc: ({ route, params }) => this.rpc(route, params),
             trigger_up: () => {},
         };
-        wUtils.autocompleteWithPages(fakeWidget, this.$('input[name="url"]'), options);
+        wUtils.autocompleteWithPages(fakeWidget, this.$el.find('input[name="url"]'), options);
         return result;
     },
 });
