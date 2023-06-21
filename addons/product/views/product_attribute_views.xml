@@ -31,6 +31,7 @@
                     </button>
                 </div>
                 <group name="main_fields" class="o_label_nowrap">
+                    <field name="field3"/>
                     <label for="name" string="Attribute Name"/>
                     <field name="name" nolabel="1"/>
                     <field name="display_type" widget="radio"/>
@@ -45,6 +46,8 @@
                                 <field name="display_type" invisible="1"/>
                                 <field name="is_custom" groups="product.group_product_variant"/>
                                 <field name="html_color" attrs="{'column_invisible': [('parent.display_type', '!=', 'color')]}" widget="color"/>
+                                <field name="field1"/>
+                                <field name="field2"/>
                             </tree>
                         </field>
                     </page>

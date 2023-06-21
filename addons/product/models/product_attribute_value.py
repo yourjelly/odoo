@@ -44,6 +44,13 @@ class ProductAttributeValue(models.Model):
     display_type = fields.Selection(related='attribute_id.display_type')
     color = fields.Integer(string="Color Index", default=_get_default_color)
 
+    field1 = fields.Boolean()
+    field2 = fields.Boolean(compute="_compute_field2")
+    @api.depends('field1')
+    def _compute_field2(self):
+        for record in self:
+            record.field2 = record.field1
+
     _sql_constraints = [
         ('value_company_uniq',
          'unique (name, attribute_id)',

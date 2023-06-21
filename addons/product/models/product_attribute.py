@@ -52,6 +52,11 @@ class ProductAttribute(models.Model):
         compute='_compute_products',
         store=True)
     number_related_products = fields.Integer(compute='_compute_number_related_products')
+        
+    field3 = fields.Boolean(compute="_compute_field3")
+    @api.depends("value_ids")
+    def _compute_field3(self):
+        self.field3 = True
 
     @api.depends('product_tmpl_ids')
     def _compute_number_related_products(self):
