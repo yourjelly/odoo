@@ -160,7 +160,8 @@ class LivechatController(http.Controller):
             chatbot_script=chatbot_script,
             user_id=user_id,
             country_id=country_id,
-            persisted=persisted
+            persisted=persisted,
+            lang=request.httprequest.cookies.get('frontend_lang', None if request.env.user._is_public() else request.env.user.lang)
         )
 
     def _post_feedback_message(self, channel, rating, reason):
