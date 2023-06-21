@@ -322,6 +322,7 @@ export class HtmlField extends Component {
         if (this.wysiwyg) {
             this.wysiwyg.odooEditor.observerUnactive('toggleCodeView');
             if (this.state.showCodeView) {
+                this.wysiwyg.$editable.remove();
                 this.wysiwyg.odooEditor.toolbarHide();
                 const value = this.wysiwyg.getValue();
                 this.props.record.update({ [this.props.name]: value });
