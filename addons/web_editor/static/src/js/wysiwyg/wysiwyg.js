@@ -190,7 +190,7 @@ export class Wysiwyg extends Component {
 
         onWillStart(() => {
             this.init();
-            this._setToolbarProps(this.props);
+            this._setToolbarProps();
         });
         onMounted(async () => {
             this.el = this.elRef.el
@@ -206,7 +206,8 @@ export class Wysiwyg extends Component {
             this.destroy();
         });
         onWillUpdateProps((newProps) => {
-            this._setToolbarProps(newProps);
+            this.options = this._getEditorOptions(newProps);
+            this._setToolbarProps();
 
             const lastValue = String(this.props.options.value || '');
             const lastRecordInfo = this.props.options.recordInfo;
@@ -1716,7 +1717,7 @@ export class Wysiwyg extends Component {
             selectorEditableArea: '.o_editable',
         }, options));
     }
-    _setToolbarProps(props) {
+    _setToolbarProps() {
         this.state.toolbarProps = {
             ...this.options.toolbarOptions,
 
