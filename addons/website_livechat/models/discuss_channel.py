@@ -63,7 +63,7 @@ class DiscussChannel(models.Model):
             message = _("""%s has started a conversation with %s.
                         The chat request has been canceled.""") % (name, operator or _('an operator'))
         else:
-            message = _('%s left the conversation.', name)
+            message = _('Visitor #%d left the conversation.', self.livechat_visitor_id.id)
 
         return message
 
