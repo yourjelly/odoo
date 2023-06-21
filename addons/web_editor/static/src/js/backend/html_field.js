@@ -266,14 +266,6 @@ export class HtmlField extends Component {
         }
         return selectionIsInForbidenSnippet ? commands.filter((o) => o.title !== "Dynamic Placeholder") : commands;
     }
-    get translationButtonWrapperStyle() {
-        return `
-            font-size: 15px;
-            position: absolute;
-            right: ${this.props.codeview ? '40px' : '5px'};
-            top: 5px;
-        `;
-    }
 
     getEditingValue () {
         const codeViewEl = this._getCodeViewEl();
