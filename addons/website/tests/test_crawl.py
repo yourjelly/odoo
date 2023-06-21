@@ -84,12 +84,29 @@ class Crawler(HttpCaseWithUserDemo):
                     continue
 
                 self.crawl(href, seen, msg)
+
+        if r.headers['Content-Type'].startswith('application/xml') and re.match(r'/sitemap(-\d+)?(-\d+)?.xml', url):
+            base_url = self.base_url()
+            sitemap_html = lxml.html.fromstring(r.content)
+            for split_sitemap_loc in sitemap_html.xpath('//sitemapindex/sitemap/loc'):
+                split_sitemap_url = split_sitemap_loc.text
+                if split_sitemap_url.startswith(base_url):
+                    split_sitemap_url = split_sitemap_url[len(base_url):]
+                self.crawl(split_sitemap_url, seen, msg)
+
+            for url_loc in sitemap_html.xpath('//urlset/url/loc'):
+                url = url_loc.text
+                if url.startswith(base_url):
+                    url = url[len(base_url):]
+                self.crawl(url, seen, msg)
+
         return seen
 
     def test_10_crawl_public(self):
         t0 = time.time()
         t0_sql = self.registry.test_cr.sql_log_count
         seen = self.crawl('/', msg='Anonymous Coward')
+        seen = self.crawl('/sitemap.xml', seen=seen, msg='Anonymous Coward (sitemap)')
         count = len(seen)
         duration = time.time() - t0
         sql = self.registry.test_cr.sql_log_count - t0_sql
@@ -100,6 +117,7 @@ class Crawler(HttpCaseWithUserDemo):
         t0_sql = self.registry.test_cr.sql_log_count
         self.authenticate('demo', 'demo')
         seen = self.crawl('/', msg='demo')
+        seen = self.crawl('/sitemap.xml', seen=seen, msg='demo (sitemap)')
         count = len(seen)
         duration = time.time() - t0
         sql = self.registry.test_cr.sql_log_count - t0_sql
@@ -110,6 +128,7 @@ class Crawler(HttpCaseWithUserDemo):
         t0_sql = self.registry.test_cr.sql_log_count
         self.authenticate('admin', 'admin')
         seen = self.crawl('/', msg='admin')
+        seen = self.crawl('/sitemap.xml', seen=seen, msg='admin (sitemap)')
         count = len(seen)
         duration = time.time() - t0
         sql = self.registry.test_cr.sql_log_count - t0_sql
