@@ -71,6 +71,7 @@ Odoo Web Editor widget.
             'web_editor/static/src/js/wysiwyg/linkDialogCommand.js',
             'web_editor/static/src/js/wysiwyg/PeerToPeer.js',
             'web_editor/static/src/js/wysiwyg/conflict_dialog.js',
+            'web_editor/static/src/js/wysiwyg/conflict_dialog.xml',
 
             # odoo utils
             ('include', 'web._assets_helpers'),
