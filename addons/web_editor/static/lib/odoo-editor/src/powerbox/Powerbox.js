@@ -1,6 +1,7 @@
 /** @odoo-module **/
 import { patienceDiff } from './patienceDiff.js';
 import { getRangePosition } from '../utils/utils.js';
+import { fuzzyLookup } from '@web/core/utils/search';
 
 /**
  * Make `num` cycle from 0 to `max`.
@@ -332,14 +333,8 @@ export class Powerbox {
         }
         term = term.replace(/\s/g, '\\s');
         term = term.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
-        const exactRegex = new RegExp(term, 'i');
-        const fuzzyRegex = new RegExp(term.match(/\\.|./g).join('.*'), 'i');
         if (term.length) {
-            commands = initialCommands.filter(command => {
-                const commandText = (command.groupName + ' ' + command.title);
-                const commandDescription = command.description.replace(/\s/g, '');
-                return commandText.match(fuzzyRegex) || commandDescription.match(exactRegex);
-            });
+            commands = fuzzyLookup(term, commands, (categories) => categories.title + categories.description)
         }
         return commands;
     }
