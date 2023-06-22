@@ -55,6 +55,14 @@ class PosOrder(models.Model):
             for line in order.lines.filtered(lambda l: l.product_id == order.config_id.down_payment_product_id and l.qty != 0 and (l.sale_order_origin_id or l.refunded_orderline_id.sale_order_origin_id)):
                 sale_lines = line.sale_order_origin_id.order_line or line.refunded_orderline_id.sale_order_origin_id.order_line
                 sale_order_origin = line.sale_order_origin_id or line.refunded_orderline_id.sale_order_origin_id
+                if not any(line.display_type and line.is_downpayment for line in sale_lines):
+                    self.env['sale.order.line'].create(
+                        self.env['sale.advance.payment.inv']._prepare_down_payment_section_values(sale_order_origin)
+                    )
+                # getting last record because SOL is not created yet
+                # Because in multiple down payment with same sale.order we don't know for which pos.order.line SOL is created
+                order_reference = line.sale_order_origin_id.pos_order_line_ids[-1].name
+                sale_order_line_description = _("Down payment (ref: %(order_reference)s on \n %(date)s)", order_reference=order_reference, date=line.order_id.date_order.strftime('%m-%d-%y'))
                 sale_line = self.env['sale.order.line'].create({
                     'order_id': sale_order_origin.id,
                     'product_id': line.product_id.id,
@@ -63,7 +71,8 @@ class PosOrder(models.Model):
                     'tax_id': [(6, 0, line.tax_ids.ids)],
                     'is_downpayment': True,
                     'discount': line.discount,
-                    'sequence': sale_lines and sale_lines[-1].sequence + 1 or 10,
+                    'sequence': sale_lines and sale_lines[-1].sequence + 2 or 10,
+                    'name': sale_order_line_description
                 })
                 line.sale_order_line_id = sale_line
 
