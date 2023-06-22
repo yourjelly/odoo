@@ -23,7 +23,8 @@ import { Field } from "@web/views/fields/field";
 import { CogMenu } from "@web/search/cog_menu/cog_menu";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 
-import { Component, onRendered, useEffect, useRef } from "@odoo/owl";
+import { CallbackRecorder } from "@web/webclient/actions/action_hook";
+import { Component, onRendered, onWillUpdateProps, useEffect, useRef, useSubEnv } from "@odoo/owl";
 import { useViewCompiler } from "../view_compiler";
 import { FormCompiler } from "./form_compiler";
 import { evalDomain } from "../utils";
@@ -109,6 +110,10 @@ export class FormController extends Component {
         this.viewService = useService("view");
         this.ui = useService("ui");
         useBus(this.ui.bus, "resize", this.render);
+        useSubEnv({
+            __fieldsEnsureSave__: new CallbackRecorder(),
+        });
+        this.shouldEnsureSave = true;
 
         this.archInfo = this.props.archInfo;
         const activeFields = this.archInfo.activeFields;
@@ -241,6 +246,10 @@ export class FormController extends Component {
             this.env.config.setDisplayName(this.displayName());
         });
 
+        onWillUpdateProps(() => {
+            this.shouldEnsureSave = true;
+        });
+
         const { disableAutofocus } = this.archInfo;
         if (!disableAutofocus) {
             useEffect(
@@ -284,6 +293,15 @@ export class FormController extends Component {
         return this.model.root.data.display_name || this.env._t("New");
     }
 
+    ensureSaveCallbacks() {
+        const callbacks = this.env.__fieldsEnsureSave__.callbacks;
+        const promises = [];
+        for (const callback of callbacks) {
+            promises.push(callback());
+        }
+        return Promise.all(promises);
+    }
+
     async onPagerUpdate({ offset, resIds }) {
         await this.model.root.askChanges(); // ensures that isDirty is correct
         let canProceed = true;
@@ -299,6 +317,9 @@ export class FormController extends Component {
     }
 
     async beforeLeave() {
+        if (this.shouldEnsureSave) {
+            await this.ensureSaveCallbacks();
+        }
         if (this.model.root.isDirty) {
             return this.model.root.save({
                 noReload: true,
@@ -309,6 +330,9 @@ export class FormController extends Component {
     }
 
     async beforeUnload(ev) {
+        if (this.shouldEnsureSave) {
+            await this.ensureSaveCallbacks();
+        }
         const isValid = await this.model.root.urgentSave();
         if (!isValid) {
             ev.preventDefault();
@@ -484,6 +508,7 @@ export class FormController extends Component {
     }
 
     async discard() {
+        this.shouldEnsureSave = false;
         if (this.props.discardRecord) {
             this.props.discardRecord(this.model.root);
             return;

@@ -35,6 +35,7 @@ import {
     onWillUnmount,
 } from "@odoo/owl";
 import { uniqueId } from '@web/core/utils/functions';
+import { useCallbackRecorder } from "@web/webclient/actions/action_hook";
 
 export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
     setup() {
@@ -95,6 +96,10 @@ export class HtmlField extends Component {
             showCodeView: false,
             iframeVisible: false,
         });
+
+        if (this.env.__fieldsEnsureSave__) {
+            useCallbackRecorder(this.env.__fieldsEnsureSave__, this.commitChanges.bind(this));
+        }
 
         const { model } = this.props.record;
         useBus(model.bus, "WILL_SAVE_URGENTLY", () =>
