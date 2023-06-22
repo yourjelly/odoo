@@ -1467,7 +1467,7 @@ export class Order extends PosModel {
         this.partner = partner;
 
         this.temporary = false; // FIXME
-        this.to_invoice = false; // FIXME
+        this.to_invoice = json.to_invoice || false;
         this.shippingDate = json.shipping_date;
 
         var orderlines = json.lines;
