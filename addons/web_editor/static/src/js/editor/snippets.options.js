@@ -4072,9 +4072,16 @@ const SnippetOptionWidget = Widget.extend({
     _select: async function (previewMode, widget) {
         let $applyTo = null;
 
-        if (previewMode === true) {
-            this.options.wysiwyg.odooEditor.automaticStepUnactive('preview_option');
+        if (previewMode === true || previewMode === 'reset') {
+            // this.options.wysiwyg.odooEditor.automaticStepUnactive('preview_option');
+            this.options.wysiwyg.odooEditor.observerUnactive('preview_option');
         }
+
+        console.log("=============");
+        console.log("previewMode:", previewMode);
+        console.log("_observerTimeoutUnactive:", this.options.wysiwyg.odooEditor._observerTimeoutUnactive);
+        console.log("_observerUnactiveLabels:", this.options.wysiwyg.odooEditor._observerUnactiveLabels);
+        console.log("=============");
 
         // Call each option method sequentially
         for (const methodName of widget.getMethodsNames()) {
@@ -4095,8 +4102,12 @@ const SnippetOptionWidget = Widget.extend({
             }
         }
 
-        if (previewMode === 'reset' || previewMode === false) {
-            this.options.wysiwyg.odooEditor.automaticStepActive('preview_option');
+        // if (previewMode === 'reset' || previewMode === false) {
+        //     this.options.wysiwyg.odooEditor.automaticStepActive('preview_option');
+        // }
+        if (previewMode === true || previewMode === 'reset') {
+            // this.options.wysiwyg.odooEditor.automaticStepUnactive('preview_option');
+            this.options.wysiwyg.odooEditor.observerActive('preview_option');
         }
 
         // We trigger the event on elements targeted by apply-to if any as
