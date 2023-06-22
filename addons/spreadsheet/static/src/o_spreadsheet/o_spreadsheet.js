@@ -1824,7 +1824,6 @@
         }
         return numberString.slice(0, i + 1) || undefined;
     }
-    const leadingZeroesRegexp = /^0+/;
     /**
      * Limit the size of the decimal part of a number to the given number of digits.
      */
@@ -1835,24 +1834,17 @@
         // but it has very strange behaviour. Ex: 12.345.toFixed(2) => "12.35", but 1.345.toFixed(2) => "1.34"
         let slicedDecimalDigits = decimalDigits.slice(0, maxDecimals);
         const i = maxDecimals;
-        if (Number(decimalDigits[i]) < 5) {
+        if (Number(Number(decimalDigits[i]) < 5)) {
             return { integerDigits, decimalDigits: slicedDecimalDigits };
         }
         // round up
-        const leadingZeroes = slicedDecimalDigits.match(leadingZeroesRegexp)?.[0] || "";
         const slicedRoundedUp = (Number(slicedDecimalDigits) + 1).toString();
-        const withoutLeadingZeroes = slicedDecimalDigits.slice(leadingZeroes.length);
-        // e.g. carry over from 99 to 100
-        const carryOver = slicedRoundedUp.length > withoutLeadingZeroes.length;
-        if (carryOver && !leadingZeroes) {
-            integerDigits = "1";
+        if (slicedRoundedUp.length > slicedDecimalDigits.length) {
+            integerDigits = (Number(integerDigits) + 1).toString();
             resultDecimalDigits = undefined;
         }
-        else if (carryOver) {
-            resultDecimalDigits = leadingZeroes.slice(0, -1) + slicedRoundedUp;
-        }
         else {
-            resultDecimalDigits = leadingZeroes + slicedRoundedUp;
+            resultDecimalDigits = slicedRoundedUp;
         }
         return { integerDigits, decimalDigits: resultDecimalDigits };
     }
@@ -4761,8 +4753,7 @@
                 return { cellData: {} };
             }
             const sheetId = data.sheetId;
-            const ranges = getters.createAdaptedRanges(cell.dependencies, x, y, sheetId);
-            const content = getters.buildFormulaContent(sheetId, cell, ranges);
+            const content = getters.getTranslatedCellFormula(sheetId, x, y, cell);
             return {
                 cellData: {
                     border: data.border,
@@ -29670,8 +29661,8 @@
             "zoneToXC",
             "getCells",
             "getFormulaCellContent",
+            "getTranslatedCellFormula",
             "getCellStyle",
-            "buildFormulaContent",
             "getCellById",
         ];
         nextId = 1;
@@ -29870,7 +29861,7 @@
         /*
          * Reconstructs the original formula string based on a normalized form and its dependencies
          */
-        buildFormulaContent(sheetId, cell, dependencies) {
+        getFormulaCellContent(sheetId, cell, dependencies) {
             const ranges = dependencies || [...cell.dependencies];
             return concat(cell.compiledFormula.tokens.map((token) => {
                 if (token.type === "REFERENCE") {
@@ -29880,8 +29871,13 @@
                 return token.value;
             }));
         }
-        getFormulaCellContent(sheetId, cell) {
-            return this.buildFormulaContent(sheetId, cell);
+        /*
+         * Constructs a formula string based on an initial formula and a translation vector
+         */
+        getTranslatedCellFormula(sheetId, offsetX, offsetY, formulaCell) {
+            const dependencies = this.getters.createAdaptedRanges(formulaCell.dependencies ||
+                formulaCell.compiledFormula.dependencies.map((d) => this.getters.getRangeFromSheetXC(sheetId, d)), offsetX, offsetY, sheetId);
+            return this.getFormulaCellContent(sheetId, { ...formulaCell, dependencies });
         }
         getCellStyle(position) {
             return this.getters.getCell(position)?.style || {};
@@ -30066,7 +30062,7 @@
          */
         createFormulaCellWithDependencies(id, compiledFormula, format, style, sheetId) {
             const dependencies = compiledFormula.dependencies.map((xc) => this.getters.getRangeFromSheetXC(sheetId, xc));
-            return new FormulaCellWithDependencies(id, compiledFormula, format, style, dependencies, sheetId, this.buildFormulaContent.bind(this));
+            return new FormulaCellWithDependencies(id, compiledFormula, format, style, dependencies, sheetId, this.getFormulaCellContent.bind(this));
         }
         createErrorFormula(id, content, format, style, error) {
             return {
@@ -30100,19 +30096,19 @@
         style;
         dependencies;
         sheetId;
-        buildFormulaContent;
+        getFormulaCellContent;
         isFormula = true;
-        constructor(id, compiledFormula, format, style, dependencies, sheetId, buildFormulaContent) {
+        constructor(id, compiledFormula, format, style, dependencies, sheetId, getFormulaCellContent) {
             this.id = id;
             this.compiledFormula = compiledFormula;
             this.format = format;
             this.style = style;
             this.dependencies = dependencies;
             this.sheetId = sheetId;
-            this.buildFormulaContent = buildFormulaContent;
+            this.getFormulaCellContent = getFormulaCellContent;
         }
         get content() {
-            return this.buildFormulaContent(this.sheetId, {
+            return this.getFormulaCellContent(this.sheetId, {
                 dependencies: this.dependencies,
                 compiledFormula: this.compiledFormula,
             });
@@ -34688,13 +34684,21 @@
                             }
                             break;
                         case "CellIsRule":
+                            const formulas = cf.rule.values.map((value) => value.startsWith("=") ? compile(value) : undefined);
                             for (let ref of cf.ranges) {
                                 const zone = this.getters.getRangeFromSheetXC(sheetId, ref).zone;
                                 for (let row = zone.top; row <= zone.bottom; row++) {
                                     for (let col = zone.left; col <= zone.right; col++) {
                                         const pr = this.rulePredicate[cf.rule.type];
-                                        let cell = this.getters.getEvaluatedCell({ sheetId, col, row });
-                                        if (pr && pr(cell, cf.rule)) {
+                                        const target = { sheetId, col, row };
+                                        const values = cf.rule.values.map((value, i) => {
+                                            const compiledFormula = formulas[i];
+                                            if (compiledFormula !== undefined) {
+                                                return this.getters.getTranslatedCellFormula(sheetId, col - zone.left, row - zone.top, { compiledFormula });
+                                            }
+                                            return value;
+                                        });
+                                        if (pr && pr(target, { ...cf.rule, values })) {
                                             if (!computedStyle[col])
                                                 computedStyle[col] = [];
                                             // we must combine all the properties of all the CF rules applied to the given cell
@@ -34862,11 +34866,17 @@
          * Execute the predicate to know if a conditional formatting rule should be applied to a cell
          */
         rulePredicate = {
-            CellIsRule: (cell, rule) => {
+            CellIsRule: (target, rule) => {
+                const cell = this.getters.getEvaluatedCell(target);
                 if (cell.type === CellValueType.error) {
                     return false;
                 }
-                const values = rule.values.map(parseLiteral);
+                const values = rule.values.map((value) => {
+                    if (value.startsWith("=")) {
+                        return this.getters.evaluateFormula(target.sheetId, value);
+                    }
+                    return parseLiteral(value);
+                });
                 switch (rule.operator) {
                     case "IsEmpty":
                         return cell.value.toString().trim() === "";
@@ -38335,10 +38345,8 @@
                         let content = cell.content;
                         if (cell.isFormula) {
                             const position = this.getters.getCellPosition(cell.id);
-                            const offsetY = newRow - position.row;
                             // we only have a vertical offset
-                            const ranges = this.getters.createAdaptedRanges(cell.dependencies, 0, offsetY, sheetId);
-                            content = this.getters.buildFormulaContent(sheetId, cell, ranges);
+                            content = this.getters.getTranslatedCellFormula(sheetId, 0, newRow - position.row, cell);
                         }
                         newCellValues.style = cell.style;
                         newCellValues.content = content;
@@ -39504,9 +39512,7 @@
                 }
                 let content = origin.cell.content;
                 if (origin.cell.isFormula && operation === "COPY") {
-                    const offsetX = col - origin.position.col;
-                    const offsetY = row - origin.position.row;
-                    content = this.getUpdatedContent(sheetId, origin.cell, offsetX, offsetY, operation);
+                    content = this.getters.getTranslatedCellFormula(sheetId, col - origin.position.col, row - origin.position.row, origin.cell);
                 }
                 this.dispatch("UPDATE_CELL", {
                     ...target,
@@ -39526,13 +39532,6 @@
                     this.dispatch("CLEAR_CELL", target);
                 }
             }
-        }
-        /**
-         * Get the newly updated formula, after applying offsets
-         */
-        getUpdatedContent(sheetId, cell, offsetX, offsetY, operation) {
-            const ranges = this.getters.createAdaptedRanges(cell.dependencies, offsetX, offsetY, sheetId);
-            return this.getters.buildFormulaContent(sheetId, cell, ranges);
         }
         /**
          * If the origin position given is the top left of a merge, merge the target
@@ -48537,9 +48536,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.4.0-alpha.4';
-    __info__.date = '2023-06-12T14:15:11.459Z';
-    __info__.hash = '251a52e';
+    __info__.version = '16.4.0-alpha.3';
+    __info__.date = '2023-06-22T11:53:41.530Z';
+    __info__.hash = '27ae6cc';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
