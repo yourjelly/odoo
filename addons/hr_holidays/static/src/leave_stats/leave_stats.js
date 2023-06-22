@@ -1,11 +1,12 @@
 /* @odoo-module */
 
-import { useService } from '@web/core/utils/hooks';
-import { registry } from '@web/core/registry'
+import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
+import { onWillUpdateRecord } from "@web/views/relational_model/utils";
 
 import { formatDate } from "@web/core/l10n/dates";
 
-const { Component, useState, onWillStart, onWillUpdateProps } = owl;
+const { Component, useState, onWillStart } = owl;
 const { DateTime } = luxon;
 
 export class LeaveStatsComponent extends Component {
@@ -25,24 +26,28 @@ export class LeaveStatsComponent extends Component {
             await this.loadLeaves(this.date, this.employee);
             await this.loadDepartmentLeaves(this.date, this.department, this.employee);
         });
-        onWillUpdateProps(async (nextProps) => {
-            const dateFrom = nextProps.record.data.date_from || DateTime.now();
-            const dateChanged = this.date !== dateFrom;
-            const employee = nextProps.record.data.employee_id;
-            const department = nextProps.record.data.department_id;
 
-            if (dateChanged || employee && (this.employee && this.employee[0]) !== employee[0]) {
+        onWillUpdateRecord(async (record) => {
+            const dateFrom = record.data.date_from || DateTime.now();
+            const dateChanged = this.date !== dateFrom;
+            const employee = record.data.employee_id;
+            const department = record.data.department_id;
+
+            if (dateChanged || (employee && (this.employee && this.employee[0]) !== employee[0])) {
                 await this.loadLeaves(dateFrom, employee);
             }
 
-            if (dateChanged || department && (this.department && this.department[0]) !== department[0]) {
+            if (
+                dateChanged ||
+                (department && (this.department && this.department[0]) !== department[0])
+            ) {
                 await this.loadDepartmentLeaves(dateFrom, department, employee);
             }
 
             this.date = dateFrom;
             this.employee = employee;
             this.department = department;
-        })
+        });
     }
 
     get thisYear() {

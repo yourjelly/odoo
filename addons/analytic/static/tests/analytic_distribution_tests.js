@@ -141,7 +141,7 @@ QUnit.module("Analytic", (hooks) => {
                         </group>
                     </sheet>
                 </form>`,
-            mockRPC(route, { kwargs, method, model }) {
+            mockRPC(route, { method, model }) {
                 if (method === "get_relevant_plans" && model === "account.analytic.plan") {
                     return Promise.resolve(
                         serverData.models['plan'].records.filter((r) => !r.parent_id && r.applicability !== "unavailable")
@@ -210,7 +210,7 @@ QUnit.module("Analytic", (hooks) => {
         assert.containsN(target, ".badge", 3, "should contain 3 tags");
     });
 
-    QUnit.tttt("analytic field in multi_edit list view + search more", async function (assert) {
+    QUnit.test("analytic field in multi_edit list view + search more", async function (assert) {
         await makeView({
             type: "list",
             resModel: "aml",
@@ -330,7 +330,7 @@ QUnit.module("Analytic", (hooks) => {
         }
         assert.equal(popup.querySelector("table#plan_5 tr:last-of-type .o_analytic_account_name input").value, "",
             "Last tag's account is empty");
-        debugger
+
         // apply the changes to both move lines
         triggerHotkey("Escape");
         await nextTick();
