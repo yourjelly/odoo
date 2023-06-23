@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
-import options from "web_editor.snippets.options";
-import Wysiwyg from "website.wysiwyg";
-import { ComponentWrapper } from "web.OwlCompatibility";
+import options from "@web_editor/js/editor/snippets.options";
+import Wysiwyg from "@website/js/editor/wysiwyg";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { MediaDialog, MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog";
 import { useWowlService } from "@web/legacy/utils";
-import {qweb, _t} from "web.core";
-import {Markup} from "web.utils";
-import Dialog from "web.Dialog";
+import {qweb, _t} from "@web/legacy/js/services/core";
+import { Markup } from "@web/legacy/js/core/utils";
+import Dialog from "@web/legacy/js/core/dialog";
 
 const { onRendered } = owl;
 
@@ -968,7 +968,7 @@ options.registry.ReplaceMedia.include({
     },
     /**
      * Change sequence of product page images
-     * 
+     *
      */
     async setPosition(previewMode, widgetValue, params) {
         this._rpc({

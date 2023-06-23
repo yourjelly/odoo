@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog";
-import { ComponentWrapper } from "web.OwlCompatibility";
-import core from "web.core";
-import options from "web_editor.snippets.options";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
+import core from "@web/legacy/js/services/core";
+import options from "@web_editor/js/editor/snippets.options";
 
 var _t = core._t;
 var qweb = core.qweb;

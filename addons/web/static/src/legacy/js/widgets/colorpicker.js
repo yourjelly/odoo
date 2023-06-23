@@ -1,15 +1,15 @@
-/** @odoo-module alias=web.Colorpicker **/
+/** @odoo-module **/
 
-import core from "web.core";
-import utils from "web.utils";
-import Dialog from "web.Dialog";
-import Widget from "web.Widget";
+import core from "@web/legacy/js/services/core";
+import utils from "@web/legacy/js/core/utils";
+import Dialog from "@web/legacy/js/core/dialog";
+import Widget from "@web/legacy/js/core/widget";
 import { uniqueId } from "@web/core/utils/functions";
 import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 
 var _t = core._t;
 
-var ColorpickerWidget = Widget.extend({
+export var ColorpickerWidget = Widget.extend({
     template: 'Colorpicker',
     events: {
         'click': '_onClick',
@@ -711,7 +711,7 @@ ColorpickerWidget.mixCssColors = function (cssColor1, cssColor2, weight) {
     return ColorpickerWidget.convertRgbaToCSSColor(r, g, b);
 };
 
-const ColorpickerDialog = Dialog.extend({
+export const ColorpickerDialog = Dialog.extend({
     /**
      * @override
      */

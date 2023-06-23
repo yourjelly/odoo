@@ -1,8 +1,8 @@
 /** @odoo-module */
 /* global Stripe */
 
-import checkoutForm from 'payment.checkout_form';
-import manageForm from 'payment.manage_form';
+import checkoutForm from '@payment/js/checkout_form';
+import manageForm from '@payment/js/manage_form';
 import { StripeOptions } from '@payment_stripe/js/stripe_options';
 
 const stripeMixin = {
@@ -10,7 +10,7 @@ const stripeMixin = {
     /**
      * Redirect the customer to Stripe hosted payment page.
      *
-     * @override method from payment.payment_form_mixin
+     * @override method from @payment/js/payment_form_mixin
      * @private
      * @param {string} code - The code of the payment option
      * @param {number} paymentOptionId - The id of the payment option handling the transaction

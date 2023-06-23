@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.test_utils_dom **/
-    
-    import concurrency from "web.concurrency";
-    import Widget from "web.Widget";
+/** @odoo-module **/
+
+    import concurrency from "@web/legacy/js/core/concurrency";
+    import Widget from "@web/legacy/js/core/widget";
 
     const { Component } = owl;
 
@@ -131,7 +131,7 @@
      * @param {boolean} [options.last=false] if true, clicks on the last element
      * @returns {Promise}
      */
-    async function click(el, options = {}) {
+    export async function click(el, options = {}) {
         let matches, target;
         let selectorMsg = "";
         if (typeof el === 'string') {
@@ -323,7 +323,7 @@
      * @param {number | string} [elFinder=0]
      * @returns {Element | null}
      */
-    function findItem(el, selector, elFinder = 0) {
+    export function findItem(el, selector, elFinder = 0) {
         const elements = [...getNode(el).querySelectorAll(selector)];
         if (!elements.length) {
             throw new Error(`No element found with selector "${selector}".`);
@@ -367,7 +367,7 @@
      * @param {(Component|Widget|jQuery|HTMLCollection|HTMLElement|string)} target
      * @returns {EventTarget}
      */
-    function getNode(target) {
+    export function getNode(target) {
         let nodes;
         if (target instanceof Component || target instanceof Widget) {
             nodes = [target.el];
@@ -430,7 +430,7 @@
      * @param {Boolean} [fast=false] true if the trigger event have to wait for a single tick instead of waiting for the next animation frame
      * @returns {Promise}
      */
-    async function triggerEvent(el, eventType, eventAttrs = {}, fast = false) {
+    export async function triggerEvent(el, eventType, eventAttrs = {}, fast = false) {
         let matches;
         let selectorMsg = "";
         if (_isEventTarget(el)) {

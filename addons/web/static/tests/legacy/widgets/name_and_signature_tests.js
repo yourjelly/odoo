@@ -1,6 +1,6 @@
 /** @odoo-module **/
-    
-    import { NameAndSignature } from "web.name_and_signature";
+
+    import { NameAndSignature } from "@web/legacy/js/widgets/name_and_signature";
     import testUtils from "web.test_utils";
     const MockedNameAndSignature = NameAndSignature.extend({
         events: {

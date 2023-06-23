@@ -1,18 +1,18 @@
-/** @odoo-module alias=web.core **/
+/** @odoo-module **/
 
-import Bus from "web.Bus";
-import config from "web.config";
-import Class from "web.Class";
-import QWeb from "web.QWeb";
-import Registry from "web.Registry";
-import translation from "web.translation";
+import Bus from "@web/legacy/js/core/bus";
+import config from "@web/legacy/js/services/config";
+import Class from "@web/legacy/js/core/class";
+import QWeb from "@web/legacy/js/core/qweb";
+import Registry from "@web/legacy/js/core/registry";
+import translation from "@web/legacy/js/core/translation";
 
 /**
  * Whether the client is currently in "debug" mode
  *
  * @type Boolean
  */
-var bus = new Bus();
+export var bus = new Bus();
 
 ["click","dblclick","keydown","keypress","keyup"].forEach((evtype) => {
     $('html').on(evtype, function (ev) {
@@ -25,22 +25,31 @@ var bus = new Bus();
     });
 });
 
+export const _t = translation._t;
+export const _lt = translation._lt;
+export const qweb = new QWeb(config.isDebug());
+export const action_registry = new Registry();
+export const crash_registry = new Registry();
+export const serviceRegistry = new Registry();
+export const csrf_token = odoo.csrf_token;
+export const main_bus = new Bus();
+
 export default {
-    qweb: new QWeb(config.isDebug()),
+    qweb: qweb,
 
     // core classes and functions
     Class: Class,
     bus: bus,
-    main_bus: new Bus(),
-    _t: translation._t,
-    _lt: translation._lt,
+    main_bus: main_bus,
+    _t: _t,
+    _lt: _lt,
 
     // registries
-    action_registry: new Registry(),
-    crash_registry: new Registry(),
-    serviceRegistry: new Registry(),
+    action_registry: action_registry,
+    crash_registry: crash_registry,
+    serviceRegistry: serviceRegistry,
     /**
      * @type {String}
      */
-    csrf_token: odoo.csrf_token,
+    csrf_token: csrf_token,
 };

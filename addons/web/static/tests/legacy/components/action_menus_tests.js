@@ -1,7 +1,7 @@
 /** @odoo-module **/
-    
-    import ActionMenus from "web.ActionMenus";
-    import Registry from "web.Registry";
+
+    import ActionMenus from "@web/legacy/js/components/action_menus";
+    import Registry from "@web/legacy/js/core/registry";
     import testUtils from "web.test_utils";
 
     const { Component } = owl;

@@ -1,7 +1,7 @@
-/** @odoo-module alias=web.ControlPanel **/
-    
-    import ActionMenus from "web.ActionMenus";
-    import Pager from "web.Pager";
+/** @odoo-module **/
+
+    import ActionMenus from "@web/legacy/js/components/action_menus";
+    import Pager from "@web/legacy/js/components/pager";
     import { LegacyComponent } from "@web/legacy/legacy_component";
     import { sprintf } from "@web/core/utils/strings";
 

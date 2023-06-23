@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.BasicModel **/
+/** @odoo-module **/
 
 /**
  * Basic Model
@@ -86,14 +86,14 @@ import { intersection, sortBy, unique } from "@web/core/utils/arrays";
 import { uniqueId } from "@web/core/utils/functions";
 import { omit, pick } from "@web/core/utils/objects";
 import { sprintf } from "@web/core/utils/strings";
-import AbstractModel from "web.AbstractModel";
-import concurrency from "web.concurrency";
-import Context from "web.Context";
-import core from "web.core";
-import Domain from "web.Domain";
+import AbstractModel from "@web/legacy/js/views/abstract_model";
+import concurrency from "@web/legacy/js/core/concurrency";
+import Context from "@web/legacy/js/core/context";
+import core from "@web/legacy/js/services/core";
+import Domain from "@web/legacy/js/core/domain";
 import session from "web.session";
-import utils from "web.utils";
-import viewUtils from "web.viewUtils";
+import utils from "@web/legacy/js/core/utils";
+import viewUtils from "@web/legacy/js/views/view_utils";
 
 var _t = core._t;
 
@@ -1218,7 +1218,7 @@ var BasicModel = AbstractModel.extend({
                                 resolve(changedFields);
                             }
                         }).guardedCatch(reject);
-                        
+
                 } else {
                     resolve(changedFields);
                 }
@@ -2447,7 +2447,7 @@ var BasicModel = AbstractModel.extend({
                 });
                 // Checks the case where the data on the backend side are not synchronized
                 // (modelFieldName != referenceFieldName) when opening the edit view (!_changes).
-                // We want to avoid resynchronization in order not to modify the data 
+                // We want to avoid resynchronization in order not to modify the data
                 // without being requested.
                 if (!record._changes && record.data[fieldName]
                     && result[0].model !== this.localData[record.data[fieldName]].model) {

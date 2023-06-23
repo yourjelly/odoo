@@ -1,12 +1,12 @@
 /** @odoo-module **/
-import fieldRegistry from "web.field_registry";
-import { parseArch } from "web.viewUtils";
-import { parse } from "web.field_utils";
-import { traverse } from "web.utils";
+import fieldRegistry from "@web/legacy/js/fields/field_registry";
+import viewUtils from "@web/legacy/js/views/view_utils";
+import fieldUtils from "@web/legacy/js/fields/field_utils";
+import { traverse } from "@web/legacy/js/core/utils";
 
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 
-const { date: parseDate, datetime: parseDateTime } = parse;
+const { date: parseDate, datetime: parseDateTime } = fieldUtils.parse;
 
 export function mapWowlValueToLegacy(value, type) {
     switch (type) {
@@ -36,7 +36,7 @@ export function mapWowlValueToLegacy(value, type) {
 export function mapViews(views, env) {
     const res = {};
     for (const [viewType, viewDescr] of Object.entries(views || {})) {
-        const arch = parseArch(viewDescr.__rawArch);
+        const arch = viewUtils.parseArch(viewDescr.__rawArch);
         traverse(arch, function (node) {
             if (typeof node === "string") {
                 return false;

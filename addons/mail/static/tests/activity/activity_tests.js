@@ -9,7 +9,7 @@ import {
     waitUntil,
 } from "@mail/../tests/helpers/test_utils";
 
-import { date_to_str } from "web.time";
+import { date_to_str } from "@web/legacy/js/core/time";
 import {
     mockTimeout,
     patchDate,

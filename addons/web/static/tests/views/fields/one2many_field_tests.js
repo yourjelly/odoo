@@ -33,7 +33,7 @@ import { RelationalModel } from "@web/views/relational_model";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { rpcService } from "@web/core/network/rpc_service";
 import { pick } from "@web/core/utils/objects";
-import BasicModel from "web.BasicModel";
+import BasicModel from "@web/legacy/js/views/basic/basic_model";
 import { getPickerCell } from "../../core/datetime/datetime_test_helpers";
 
 let serverData;

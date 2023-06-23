@@ -2,7 +2,7 @@
 
 import { useService } from '@web/core/utils/hooks';
 import { debounce } from '@web/core/utils/timing';
-import { qweb } from 'web.core';
+import { qweb } from "@web/legacy/js/services/core";
 
 import { Component, useState, useRef, onMounted, onWillStart } from "@odoo/owl";
 

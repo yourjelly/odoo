@@ -1,6 +1,6 @@
 /** @odoo-module **/
-    
-    import DropdownMenu from "web.DropdownMenu";
+
+    import DropdownMenu from "@web/legacy/js/components/dropdown_menu";
     import testUtils from "web.test_utils";
 
     const { createComponent } = testUtils;

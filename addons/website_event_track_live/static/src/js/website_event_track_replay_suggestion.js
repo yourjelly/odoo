@@ -1,6 +1,6 @@
-/** @odoo-module alias=website_event_track_live.website_event_track_replay_suggestion **/
+/** @odoo-module **/
 
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 
 /**
  * The widget will have the responsibility to manage the interactions between the

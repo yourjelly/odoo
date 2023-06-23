@@ -1,8 +1,8 @@
-/** @odoo-module alias=wysiwyg.widgets.Dialog **/
+/** @odoo-module **/
 
-import config from "web.config";
-import core from "web.core";
-import Dialog from "web.Dialog";
+import config from "@web/legacy/js/services/config";
+import core from "@web/legacy/js/services/core";
+import Dialog from "@web/legacy/js/core/dialog";
 
 var _t = core._t;
 
@@ -37,7 +37,7 @@ var WysiwygDialog = Dialog.extend({
         var self = this;
         this.opened(function () {
             const selector = options.focusField
-                ? `input[name=${options.focusField}]` 
+                ? `input[name=${options.focusField}]`
                 : 'input:visible:first';
             self.$(selector).focus();
             self.$el.closest('.modal').addClass('o_web_editor_dialog');

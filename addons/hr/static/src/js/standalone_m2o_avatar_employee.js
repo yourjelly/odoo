@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-    import StandaloneFieldManagerMixin from 'web.StandaloneFieldManagerMixin';
-    import Widget from 'web.Widget';
+    import StandaloneFieldManagerMixin from '@web/legacy/js/views/standalone_field_manager_mixin';
+    import Widget from '@web/legacy/js/core/widget';
 
     import { Many2OneAvatarEmployee } from '@hr/js/m2x_avatar_employee';
 

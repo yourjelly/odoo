@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { zip } from "@web/core/utils/arrays";
 import { TourError } from "@web_tour/tour_service/tour_utils";
 
-import surveySessionTools from "survey.session_tour_tools";
+import surveySessionTools from "@survey/../tests/tours/survey_tour_session_tools";
 
 /**
  * Since the chart is rendered using SVG, we can't use jQuery triggers to check if everything

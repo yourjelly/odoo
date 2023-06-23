@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from '@web/core/registry';
-import { getWysiwygClass } from 'web_editor.loader';
+import { getWysiwygClass } from '@web_editor/js/frontend/loader';
 
 import { FullscreenIndication } from '../components/fullscreen_indication/fullscreen_indication';
 import { WebsiteLoader } from '../components/website_loader/website_loader';
@@ -222,7 +222,7 @@ export const websiteService = {
             async loadWysiwyg() {
                 if (!Wysiwyg) {
                     Wysiwyg = await getWysiwygClass({
-                        moduleName: 'website.wysiwyg',
+                        moduleName: '@website/js/editor/wysiwyg',
                         additionnalAssets: ['website.assets_wysiwyg']
                     });
                 }

@@ -8,8 +8,8 @@ import testUtils from 'web.test_utils';
 import { uploadService } from '@web_editor/components/upload_progress_toast/upload_service';
 import { unsplashService } from '@web_unsplash/services/unsplash_service';
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
-import weTestUtils from 'web_editor.test_utils';
-import Wysiwyg from 'web_editor.wysiwyg';
+import weTestUtils from '@web_editor/../tests/test_utils';
+import Wysiwyg from '@web_editor/js/wysiwyg/wysiwyg';
 
 const { useEffect } = owl;
 

@@ -1,7 +1,7 @@
-/** @odoo-module alias=mass_mailing.fix.LinkDialog **/
+/** @odoo-module **/
 
 import { pick } from "@web/core/utils/objects";
-import LinkDialog from "wysiwyg.widgets.LinkDialog";
+import LinkDialog from "@web_editor/js/wysiwyg/widgets/link_dialog";
 
 /**
  * Primary and link buttons are "hacked" by mailing themes scss. We thus

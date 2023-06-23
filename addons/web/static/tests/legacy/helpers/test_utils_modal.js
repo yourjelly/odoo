@@ -1,5 +1,5 @@
-/** @odoo-module alias=web.test_utils_modal **/
-    
+/** @odoo-module **/
+
     /**
      * Modal Test Utils
      *
@@ -9,8 +9,8 @@
      * testUtils file.
      */
 
-    import { _t } from "web.core";
-    import testUtilsDom from "web.test_utils_dom";
+    import { _t } from "@web/legacy/js/services/core";
+    import testUtilsDom from "@web/../tests/legacy/helpers/test_utils_dom";
 
     /**
      * Click on a button in the footer of a modal (which contains a given string).

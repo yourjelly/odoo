@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import Context from "web.Context";
-import core from "web.core";
-import { ComponentAdapter } from "web.OwlCompatibility";
+import Context from "@web/legacy/js/core/context";
+import core from "@web/legacy/js/services/core";
+import { ComponentAdapter } from "@web/legacy/js/owl_compatibility";
 import { objectToQuery } from "../core/browser/router_service";
 import { useDebugCategory } from "../core/debug/debug_context";
 import { Dialog } from "../core/dialog/dialog";

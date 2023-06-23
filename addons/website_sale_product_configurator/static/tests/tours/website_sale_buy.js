@@ -4,7 +4,7 @@
  * by the product configurator module.
  */
 import { registry } from "@web/core/registry";
-import "website_sale.tour";
+import "@website_sale/../tests/tours/website_sale_buy";
 
 var addCartStepIndex = registry.category("web_tour.tours").get("shop_buy_product").steps.findIndex(step => step.id === 'add_cart_step');
 

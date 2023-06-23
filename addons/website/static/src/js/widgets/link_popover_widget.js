@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import weWidgets from 'wysiwyg.widgets';
-import {_t} from 'web.core';
+import weWidgets from '@web_editor/js/wysiwyg/widgets/widgets';
+import {_t} from "@web/legacy/js/services/core";
 weWidgets.LinkPopoverWidget.include({
     /**
      * @override

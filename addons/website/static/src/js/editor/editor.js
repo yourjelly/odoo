@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import weWidgets from "web_editor.widget";
-import wUtils from "website.utils";
+import weWidgets from "@web_editor/js/wysiwyg/widget";
+import wUtils from "@website/js/utils";
 
 weWidgets.LinkDialog.include({
     /**

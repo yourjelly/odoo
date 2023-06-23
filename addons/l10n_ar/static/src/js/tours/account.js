@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-    import "account.tour";
+    import "@account/js/tours";
     import { registry } from "@web/core/registry";
     let account_tour = registry.category("web_tour.tours").get("account_tour");
     // Remove the step suggesting to change the name as it is done another way (document number)

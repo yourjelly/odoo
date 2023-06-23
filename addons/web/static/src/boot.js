@@ -34,12 +34,7 @@
             if (!Array.isArray(arg1)) {
                 // odoo.define is called without explicit dependencies. this is
                 // deprecated and support for this should be removed in the future
-                factory = arg1;
-                deps = [];
-                factory
-                    .toString()
-                    .replace(commentRegExp, "")
-                    .replace(cjsRequireRegExp, (match, dep) => deps.push(dep));
+                throw new Error(`Missing dependencies list for module: ${name}`);
             }
             if (typeof name !== "string") {
                 throw new Error(`Invalid name definition: ${name} (should be a string)"`);

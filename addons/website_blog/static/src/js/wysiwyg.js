@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 
-import Wysiwyg from "website.wysiwyg";
-import "website.editor.snippets.options";
+import Wysiwyg from "@website/js/editor/wysiwyg";
+import "@website/js/editor/snippets.options";
 
 Wysiwyg.include({
     custom_events: Object.assign({}, Wysiwyg.prototype.custom_events, {

@@ -1,4 +1,4 @@
-odoo.define('web.test_utils', ["web.session", "web.test_utils_create", "web.test_utils_control_panel", "web.test_utils_dom", "web.test_utils_fields", "web.test_utils_file", "web.test_utils_form", "web.test_utils_graph", "web.test_utils_kanban", "web.test_utils_mock", "web.test_utils_modal", "web.test_utils_pivot", "web.tools"], async function (require) {
+odoo.define('web.test_utils', ["web.session", "@web/../tests/legacy/helpers/test_utils_create", "@web/../tests/legacy/helpers/test_utils_control_panel", "@web/../tests/legacy/helpers/test_utils_dom", "@web/../tests/legacy/helpers/test_utils_fields", "@web/../tests/legacy/helpers/test_utils_file", "@web/../tests/legacy/helpers/test_utils_form", "@web/../tests/legacy/helpers/test_utils_graph", "@web/../tests/legacy/helpers/test_utils_kanban", "@web/../tests/legacy/helpers/test_utils_mock", "@web/../tests/legacy/helpers/test_utils_modal", "@web/../tests/legacy/helpers/test_utils_pivot", "@web/legacy/js/tools/tools"], async function (require) {
     "use strict";
 
     /**
@@ -11,18 +11,18 @@ odoo.define('web.test_utils', ["web.session", "web.test_utils_create", "web.test
      */
 
     const session = require('web.session');
-    const testUtilsCreate = require('web.test_utils_create');
-    const testUtilsControlPanel = require('web.test_utils_control_panel');
-    const testUtilsDom = require('web.test_utils_dom');
-    const testUtilsFields = require('web.test_utils_fields');
-    const testUtilsFile = require('web.test_utils_file');
-    const testUtilsForm = require('web.test_utils_form');
-    const testUtilsGraph = require('web.test_utils_graph');
-    const testUtilsKanban = require('web.test_utils_kanban');
-    const testUtilsMock = require('web.test_utils_mock');
-    const testUtilsModal = require('web.test_utils_modal');
-    const testUtilsPivot = require('web.test_utils_pivot');
-    const tools = require('web.tools');
+    const testUtilsCreate = require('@web/../tests/legacy/helpers/test_utils_create')[Symbol.for('default')];
+    const testUtilsControlPanel = require('@web/../tests/legacy/helpers/test_utils_control_panel')[Symbol.for('default')];
+    const testUtilsDom = require('@web/../tests/legacy/helpers/test_utils_dom')[Symbol.for('default')];
+    const testUtilsFields = require('@web/../tests/legacy/helpers/test_utils_fields')[Symbol.for('default')];
+    const testUtilsFile = require('@web/../tests/legacy/helpers/test_utils_file')[Symbol.for('default')];
+    const testUtilsForm = require('@web/../tests/legacy/helpers/test_utils_form')[Symbol.for('default')];
+    const testUtilsGraph = require('@web/../tests/legacy/helpers/test_utils_graph')[Symbol.for('default')];
+    const testUtilsKanban = require('@web/../tests/legacy/helpers/test_utils_kanban')[Symbol.for('default')];
+    const testUtilsMock = require('@web/../tests/legacy/helpers/test_utils_mock')[Symbol.for('default')];
+    const testUtilsModal = require('@web/../tests/legacy/helpers/test_utils_modal')[Symbol.for('default')];
+    const testUtilsPivot = require('@web/../tests/legacy/helpers/test_utils_pivot')[Symbol.for('default')];
+    const tools = require('@web/legacy/js/tools/tools')[Symbol.for('default')];
 
 
     function deprecated(fn, type) {

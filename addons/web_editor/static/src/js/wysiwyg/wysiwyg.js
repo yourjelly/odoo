@@ -1,27 +1,27 @@
-/** @odoo-module alias=web_editor.wysiwyg **/
+/** @odoo-module **/
 
-import { ComponentWrapper } from "web.OwlCompatibility";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog";
 import { VideoSelector } from "@web_editor/components/media_dialog/video_selector";
-import dom from "web.dom";
-import core from "web.core";
+import dom from "@web/legacy/js/core/dom";
+import core from "@web/legacy/js/services/core";
 import { browser } from "@web/core/browser/browser";
-import Widget from "web.Widget";
-import Dialog from "web.Dialog";
-import customColors from "web_editor.custom_colors";
-import {ColorPaletteWidget} from "web_editor.ColorPalette";
-import {ColorpickerWidget} from "web.Colorpicker";
-import concurrency from "web.concurrency";
-import { device } from "web.config";
+import Widget from "@web/legacy/js/core/widget";
+import Dialog from "@web/legacy/js/core/dialog";
+import customColors from "@web_editor/js/editor/custom_colors";
+import {ColorPaletteWidget} from "@web_editor/js/wysiwyg/widgets/color_palette";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
+import concurrency from "@web/legacy/js/core/concurrency";
+import config from "@web/legacy/js/services/config";
 import { localization } from "@web/core/l10n/localization";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
-import snippetsEditor from "web_editor.snippet.editor";
-import snippetsOptions from "web_editor.snippets.options";
-import Toolbar from "web_editor.toolbar";
-import weWidgets from "wysiwyg.widgets";
-import Link from "wysiwyg.widgets.Link";
+import snippetsEditor from "@web_editor/js/editor/snippets.editor";
+import snippetsOptions from "@web_editor/js/editor/snippets.options";
+import Toolbar from "@web_editor/js/editor/toolbar";
+import weWidgets from "@web_editor/js/wysiwyg/widgets/widgets";
+import Link from "@web_editor/js/wysiwyg/widgets/link";
 import * as wysiwygUtils from "@web_editor/js/common/wysiwyg_utils";
-import weUtils from "web_editor.utils";
+import weUtils from "@web_editor/js/common/utils";
 import { PeerToPeer } from "@web_editor/js/wysiwyg/PeerToPeer";
 import { uniqueId } from "@web/core/utils/functions";
 import { groupBy } from "@web/core/utils/arrays";
@@ -32,6 +32,7 @@ import { FileViewer } from "@web/core/file_viewer/file_viewer";
 var _t = core._t;
 const QWeb = core.qweb;
 
+const { device } = config
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
 const getInSelection = OdooEditorLib.getInSelection;
@@ -73,7 +74,7 @@ let ICE_SERVERS = null;
 
 let fileViewerId = 0;
 
-const Wysiwyg = Widget.extend({
+export const Wysiwyg = Widget.extend({
     defaultOptions: {
         lang: 'odoo',
         colors: customColors,

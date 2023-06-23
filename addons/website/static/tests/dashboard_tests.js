@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import ControlPanel from "web.ControlPanel";
-import Dashboard from "website.backend.dashboard";
+import ControlPanel from "@web/legacy/js/control_panel/control_panel";
+import Dashboard from "@website/js/backend/dashboard";
 import testUtils from "web.test_utils";
-import { patch, unpatch } from "web.utils";
+import { patch, unpatch } from '@web/legacy/js/core/utils';
 
 const { createParent, nextTick, prepareTarget } = testUtils;
 

@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_utils_form **/
+/** @odoo-module **/
 
 /**
  * Form Test Utils
@@ -9,7 +9,7 @@
  * testUtils file.
  */
 
-import testUtilsDom from "web.test_utils_dom";
+import testUtilsDom from "@web/../tests/legacy/helpers/test_utils_dom";
 
 /**
  * Clicks on the Edit button in a form view, to set it to edit mode. Note that

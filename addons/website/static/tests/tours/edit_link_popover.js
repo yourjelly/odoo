@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import wTourUtils from "website.tour_utils";
+import wTourUtils from "@website/js/tours/tour_utils";
 
 const FIRST_PARAGRAPH = 'iframe #wrap .s_text_image p:nth-child(2)';
 

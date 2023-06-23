@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import KeyboardNavigationMixin from "web.KeyboardNavigationMixin";
+import KeyboardNavigationMixin from "@web/legacy/frontend/keyboard_navigation_mixin";
 import testUtils from "web.test_utils";
-import Widget from "web.Widget";
+import Widget from "@web/legacy/js/core/widget";
 
 QUnit.module('KeyboardNavigationMixin', function () {
     QUnit.test('aria-keyshortcuts is added on elements with accesskey', async function (assert) {

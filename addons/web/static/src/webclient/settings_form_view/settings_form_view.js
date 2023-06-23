@@ -6,7 +6,7 @@ import { formView } from "@web/views/form/form_view";
 import { SettingsFormController } from "./settings_form_controller";
 import { SettingsFormRenderer } from "./settings_form_renderer";
 import { SettingsFormCompiler } from "./settings_form_compiler";
-import BasicModel from "web.BasicModel";
+import BasicModel from "@web/legacy/js/views/basic/basic_model";
 import { SettingsArchParser } from "./settings_form_arch_parser";
 
 const BaseSettingsModel = BasicModel.extend({

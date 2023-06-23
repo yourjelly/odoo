@@ -1,6 +1,6 @@
-/** @odoo-module alias=web_editor.widget **/
+/** @odoo-module **/
 
-import Dialog from "wysiwyg.widgets.Dialog";
-import LinkDialog from "wysiwyg.widgets.LinkDialog";
+import Dialog from "@web_editor/js/wysiwyg/dialog";
+import LinkDialog from "@web_editor/js/wysiwyg/widgets/link_dialog";
 
 export default { Dialog, LinkDialog };

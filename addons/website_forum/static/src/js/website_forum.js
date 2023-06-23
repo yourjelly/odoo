@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import dom from "web.dom";
-import core from "web.core";
-import {setCookie} from "web.utils.cookies";
-import Dialog from "web.Dialog";
-import wysiwygLoader from "web_editor.loader";
-import publicWidget from "web.public.widget";
-import { Markup } from "web.utils";
+import dom from "@web/legacy/js/core/dom";
+import core from "@web/legacy/js/services/core";
+import {setCookie} from "@web/legacy/js/core/cookie_utils";
+import Dialog from "@web/legacy/js/core/dialog";
+import wysiwygLoader from "@web_editor/js/frontend/loader";
+import publicWidget from "@web/legacy/js/public/public_widget";
+import { Markup } from '@web/legacy/js/core/utils';
 import session from "web.session";
 import { escape } from "@web/core/utils/strings";
 var qweb = core.qweb;

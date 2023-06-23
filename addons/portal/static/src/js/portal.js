@@ -1,8 +1,8 @@
-/** @odoo-module alias=portal.portal **/
+/** @odoo-module **/
 
-import publicWidget from "web.public.widget";
-import Dialog from "web.Dialog";
-import {_t, qweb} from "web.core";
+import publicWidget from "@web/legacy/js/public/public_widget";
+import Dialog from "@web/legacy/js/core/dialog";
+import {_t, qweb} from "@web/legacy/js/services/core";
 import session from "web.session";
 
 publicWidget.registry.portalDetails = publicWidget.Widget.extend({
@@ -52,7 +52,7 @@ publicWidget.registry.portalDetails = publicWidget.Widget.extend({
     },
 });
 
-publicWidget.registry.PortalHomeCounters = publicWidget.Widget.extend({
+export const PortalHomeCounters = publicWidget.Widget.extend({
     selector: '.o_portal_my_home',
 
     /**
@@ -115,6 +115,8 @@ publicWidget.registry.PortalHomeCounters = publicWidget.Widget.extend({
         });
     },
 });
+
+publicWidget.registry.PortalHomeCounters = PortalHomeCounters;
 
 publicWidget.registry.portalSearchPanel = publicWidget.Widget.extend({
     selector: '.o_portal_search_panel',
@@ -295,7 +297,7 @@ publicWidget.registry.portalSecurity = publicWidget.Widget.extend({
  * @param {Promise} wrapped promise to check for an identity check request
  * @returns {Promise} result of the original call
  */
-function handleCheckIdentity(rpc, wrapped) {
+export function handleCheckIdentity(rpc, wrapped) {
     return wrapped.then((r) => {
         if (!(r.type === "ir.actions.act_window" && r.res_model === "res.users.identitycheck")) {
             return r;
