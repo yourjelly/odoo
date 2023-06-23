@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_move_form_inherit" model="ir.ui.view">
+            <field name="name">stock.move.form.inherit</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside" >
+                    <field name="currency_id" invisible="1"/>
+                    <!-- <field name="move_partner_id" invisible="1"/> -->
+                    <field name="salesman_id" invisible="1"/>
+                    <field name="display_type" invisible="1"/>
+                    <field name="price_unit" invisible="1"/>
+                    <field name="pricelist_item_id" invisible="1"/>
+                    <field name="discount" invisible="1"/>
+                    <field name="tax_id" string="Taxes" widget="many2many_tags"/>
+                    <field name="price_subtotal"/>
+                    <field name="price_tax"/>
+                    <field name="price_total"/>
+                    <!-- <field name="price_reduce_taxexcl" invisible="1"/>
+                    <field name="price_reduce_taxinc" invisible="1"/> -->
+                </xpath>
+            </field>
+        </record>
+
+
+
+        <record id="stock_picking_form_view" model="ir.ui.view">
+            <field name="name">stock.picking.form.view</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='button_validate'][hasclass('o_btn_validate')]" position="before">
+                    <field name="partner_shipping_id" invisible="1"/>
+                    <field name="fiscal_position_id" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="pricelist_id" invisible="1"/>
+                    <field name="currency_rate" invisible="1"/>
+                    <field name="amount_untaxed" invisible="1"/>
+                    <field name="amount_tax" invisible="1"/>
+                    <field name="amount_total" invisible="1"/>
+                    <!-- <field name="tax_totals" invisible="1"/> -->
+
+                </xpath>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>
