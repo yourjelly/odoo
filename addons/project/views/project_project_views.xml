@@ -77,7 +77,7 @@
                     </group>
                     <notebook>
                         <page name="description" string="Description">
-                            <field name="description" options="{'resizable': false}" placeholder="Project description..."/>
+                            <field name="description" options="{'resizable': false, 'displayFullSize': true}" placeholder="Project description..."/>
                         </page>
                         <page name="settings" string="Settings">
                             <group>

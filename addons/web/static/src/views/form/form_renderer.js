@@ -57,6 +57,19 @@ export class FormRenderer extends Component {
                     if (!rootEl) {
                         return;
                     }
+                    debugger
+                    if(rootRef.el && this.props.record.activeFields.description.options.displayFullSize){
+                        const descriptionField = rootRef.el.querySelector(this.htmlFieldQuerySelector);
+                        debugger
+                        if (descriptionField) {
+                            const editor = descriptionField.querySelector('.note-editable');
+                            const elementToResize = editor || descriptionField;
+                            const formSheetHeight = document.getElementsByClassName('o_form_sheet')[0].clientHeight;
+                            const { bottom, top } = elementToResize.getBoundingClientRect();
+                            const minHeight = (document.documentElement.clientHeight - top) - ((bottom - formSheetHeight) * 2 / 3);
+                            elementToResize.style.minHeight = `${minHeight}px`;
+                        }
+                    }
                     let elementToFocus;
                     if (isNew) {
                         const focusableSelectors = [
@@ -79,6 +92,10 @@ export class FormRenderer extends Component {
                 () => [this.props.record.isNew, rootRef.el]
             );
         }
+    }
+
+    get htmlFieldQuerySelector() {
+        return '.oe_form_field.oe_form_field_html';
     }
 
     get shouldAutoFocus() {
