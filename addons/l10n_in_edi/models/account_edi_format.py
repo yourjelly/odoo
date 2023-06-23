@@ -6,6 +6,7 @@ import json
 import pytz
 import markupsafe
 
+from datetime import datetime
 from collections import defaultdict
 from markupsafe import Markup
 
@@ -81,7 +82,7 @@ class AccountEdiFormat(models.Model):
             return super()._check_move_configuration(move)
         error_message = []
         error_message += self._l10n_in_validate_partner(move.partner_id)
-        error_message += self._l10n_in_validate_partner(move.company_id.partner_id, is_company=True)
+        error_message += self._l10n_in_validate_partner(move.company_id.partner_id)
         if not re.match("^.{1,16}$", move.name):
             error_message.append(_("Invoice number should not be more than 16 characters"))
         all_base_tags = self._get_l10n_in_base_tags()
@@ -230,7 +231,7 @@ class AccountEdiFormat(models.Model):
             })
             return {invoice: {"success": True, "attachment": attachment}}
 
-    def _l10n_in_validate_partner(self, partner, is_company=False):
+    def _l10n_in_validate_partner(self, partner):
         self.ensure_one()
         message = []
         if not re.match("^.{3,100}$", partner.street or ""):
@@ -239,7 +240,7 @@ class AccountEdiFormat(models.Model):
             message.append(_("\n- Street2 should be min 3 and max 100 characters"))
         if not re.match("^.{3,100}$", partner.city or ""):
             message.append(_("\n- City required min 3 and max 100 characters"))
-        if not re.match("^.{3,50}$", partner.state_id.name or ""):
+        if partner.country_id.code == "IN" and not re.match("^.{3,50}$", partner.state_id.name or ""):
             message.append(_("\n- State required min 3 and max 50 characters"))
         if partner.country_id.code == "IN" and not re.match("^[0-9]{6,}$", partner.zip or ""):
             message.append(_("\n- Zip code required 6 digits"))
@@ -252,6 +253,8 @@ class AccountEdiFormat(models.Model):
             or not re.match("^.{6,100}$", partner.email)
         ):
             message.append(_("\n- Email address should be valid and not more then 100 characters"))
+        if message:
+            message.insert(0, _("Partner %s is not valid. Please check below points:") % (partner.name))
         return message
 
     def _get_l10n_in_edi_saler_buyer_party(self, move):
@@ -711,3 +714,11 @@ class AccountEdiFormat(models.Model):
             "json_payload": json_payload,
         }
         return self._l10n_in_edi_connect_to_server(company, url_path="/iap/l10n_in_edi/1/cancel", params=params)
+
+    def _indian_timezone_to_odoo_utc(self, str_date, time_format="%Y-%m-%d %H:%M:%S"):
+        """
+            This method is used to convert date from Indian timezone to UTC
+        """
+        local_time = datetime.strptime(str_date, time_format)
+        utc_time = local_time.astimezone(pytz.utc)
+        return fields.Datetime.to_string(utc_time)
