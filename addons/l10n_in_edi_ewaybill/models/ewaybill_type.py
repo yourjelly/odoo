@@ -7,6 +7,7 @@ from odoo import api, fields, models, _
 class EWayBillType(models.Model):
     _name = "l10n.in.ewaybill.type"
     _description = "E-Waybill Document Type"
+    _rec_name = "sub_type"
 
     name = fields.Char("Type")
     code = fields.Char("Type Code")
