@@ -232,7 +232,7 @@
             <field name="name">account.tax.group.tree</field>
             <field name="model">account.tax.group</field>
             <field name="arch" type="xml">
-                <tree string="Account Tax Group" editable="bottom" create="false">
+                <tree string="Account Tax Group">
                     <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="country_id"/>
