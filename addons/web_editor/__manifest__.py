@@ -106,7 +106,8 @@ Odoo Web Editor widget.
             ('include', 'web_editor.assets_legacy_wysiwyg'),
         ],
         'web_editor.assets_media_dialog': [
-            'web_editor/static/src/components/**/*',
+            'web_editor/static/src/components/media_dialog/**/*',
+            'web_editor/static/src/components/upload_progress_toast/**/*',
         ],
         'web_editor.assets_tests_styles': [
             ('include', 'web._assets_helpers'),
@@ -169,6 +170,10 @@ Odoo Web Editor widget.
             # widgets & plugins
             'web_editor/static/src/js/wysiwyg/widgets/**/*',
             'web_editor/static/src/js/editor/toolbar.js',
+
+            # snippets menu
+            'web_editor/static/src/components/snippets_menu/**/*',
+            'web_editor/static/src/utils/**/*',
 
             # Launcher
             'web_editor/static/src/js/wysiwyg/wysiwyg_jquery_extention.js',

@@ -443,6 +443,9 @@ export class WebsitePreview extends Component {
         this.iframe.el.contentDocument.addEventListener('keyup', ev => {
             this.iframe.el.dispatchEvent(new KeyboardEvent('keyup', ev));
         });
+        this.iframe.el.contentWindow.addEventListener("pointerup", ev => {
+            this.iframe.el.dispatchEvent(new PointerEvent("pointerup", ev));
+        });
     }
 
     /**

@@ -155,6 +155,13 @@ patch(Wysiwyg.prototype, {
         });
     },
 
+    get snippetsMenuProps() {
+        const props = super.snippetsMenuProps;
+        props.inIframe = this.options.inIframe;
+        props.iframeZone = props.inIframe && this.$utilsZone[0];
+        return props;
+    },
+
     _insertSnippetMenu() {
         if (this.options.inIframe) {
             return this.snippetsMenu.appendTo(this.$utilsZone);

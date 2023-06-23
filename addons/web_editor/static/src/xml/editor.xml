@@ -6,7 +6,7 @@
 
     <!-- Editor toolbar -->
     <t t-name="web_editor.toolbar">
-        <div id="toolbar" class="oe-toolbar oe-floating">
+        <div id="toolbar" class="oe-toolbar" t-att-class="{'oe-floating': this.props.float}">
             <div t-if="props.showStyle" id="style" t-attf-class="btn-group {{ props.dropDirection }}">
                 <button type="button" class="btn dropdown-toggle"
                     data-bs-toggle="dropdown" data-bs-original-title="Text style" tabindex="-1" aria-expanded="false">
@@ -226,7 +226,7 @@
     </t> -->
 
     <t t-name="web_editor.toolbar.table-options">
-        <we-customizeblock-options id="o-we-editor-table-container">
+        <we-customizeblock-options t-att-class="{'d-none': !state.showTable}" t-ref="table-container" id="o-we-editor-table-container">
             <we-title>
                 <span>Table Options</span>
                 <div id="oe-table-delete-table" data-call="deleteTable" class="o_we_hover_danger">

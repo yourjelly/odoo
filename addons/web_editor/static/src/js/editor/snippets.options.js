@@ -3101,12 +3101,6 @@ const SnippetOptionWidget = Widget.extend({
      * @type {boolean}
      */
     forceNoDeleteButton: false,
-    /**
-     * The option needs the handles overlay to be displayed on the snippet.
-     *
-     * @type {boolean}
-     */
-    displayOverlayOptions: false,
 
     /**
      * The option `$el` is supposed to be the associated DOM UI element.
@@ -4927,107 +4921,6 @@ registry['sizing_grid'] = registry.sizing.extend({
  * Controls box properties.
  */
 registry.Box = SnippetOptionWidget.extend({
-
-    //--------------------------------------------------------------------------
-    // Options
-    //--------------------------------------------------------------------------
-
-    /**
-     * TODO this should be reviewed in master to avoid the need of using the
-     * 'reset' previewMode and having to remember the previous box-shadow value.
-     * We are forced to remember the previous box shadow before applying a new
-     * one as the whole box-shadow value is handled by multiple widgets.
-     *
-     * @see this.selectClass for parameters
-     */
-    async setShadow(previewMode, widgetValue, params) {
-        // Check if the currently configured shadow is not using the same shadow
-        // mode, in which case nothing has to be done.
-        const styles = window.getComputedStyle(this.$target[0]);
-        const currentBoxShadow = styles['box-shadow'] || 'none';
-        const currentMode = currentBoxShadow === 'none'
-            ? ''
-            : currentBoxShadow.includes('inset') ? 'inset' : 'outset';
-        if (currentMode === widgetValue) {
-            return;
-        }
-
-        if (previewMode === true) {
-            this._prevBoxShadow = currentBoxShadow;
-        }
-
-        // Add/remove the shadow class
-        this.$target.toggleClass(params.shadowClass, !!widgetValue);
-
-        // Change the mode of the old box shadow. If no shadow was currently
-        // set then get the shadow value that is supposed to be set according
-        // to the shadow mode. Try to apply it via the selectStyle method so
-        // that it is either ignored because the shadow class had its effect or
-        // forced (to the shadow value or none) if toggling the class is not
-        // enough (e.g. if the item has a default shadow coming from CSS rules,
-        // removing the shadow class won't be enough to remove the shadow but in
-        // most other cases it will).
-        let shadow = 'none';
-        if (previewMode === 'reset') {
-            shadow = this._prevBoxShadow;
-        } else {
-            if (currentBoxShadow === 'none') {
-                shadow = this._getDefaultShadow(widgetValue, params.shadowClass);
-            } else {
-                if (widgetValue === 'outset') {
-                    shadow = currentBoxShadow.replace('inset', '').trim();
-                } else if (widgetValue === 'inset') {
-                    shadow = currentBoxShadow + ' inset';
-                }
-            }
-        }
-        await this.selectStyle(previewMode, shadow, Object.assign({cssProperty: 'box-shadow'}, params));
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    _computeWidgetState(methodName, params) {
-        if (methodName === 'setShadow') {
-            const shadowValue = this.$target.css('box-shadow');
-            if (!shadowValue || shadowValue === 'none') {
-                return '';
-            }
-            return this.$target.css('box-shadow').includes('inset') ? 'inset' : 'outset';
-        }
-        return this._super(...arguments);
-    },
-    /**
-     * @override
-     */
-    async _computeWidgetVisibility(widgetName, params) {
-        if (widgetName === 'fake_inset_shadow_opt') {
-            return false;
-        }
-        return this._super(...arguments);
-    },
-    /**
-     * @private
-     * @param {string} type
-     * @param {string} shadowClass
-     * @returns {string}
-     */
-    _getDefaultShadow(type, shadowClass) {
-        if (!type) {
-            return 'none';
-        }
-
-        const el = document.createElement('div');
-        el.classList.add(shadowClass);
-        document.body.appendChild(el);
-        const shadow = `${$(el).css('box-shadow')}${type === 'inset' ? ' inset' : ''}`;
-        el.remove();
-        return shadow;
-    },
 });
 
 
@@ -5349,77 +5242,6 @@ registry.vAlignment = SnippetOptionWidget.extend({
             return 'align-items-stretch';
         }
         return value;
-    },
-});
-
-/**
- * Allows snippets to be moved before the preceding element or after the following.
- */
-registry.SnippetMove = SnippetOptionWidget.extend({
-    displayOverlayOptions: true,
-
-    /**
-     * @override
-     */
-    start: function () {
-        var $buttons = this.$el.find('we-button');
-        var $overlayArea = this.$overlay.find('.o_overlay_move_options');
-        // Putting the arrows side by side.
-        $overlayArea.prepend($buttons[1]);
-        $overlayArea.prepend($buttons[0]);
-
-        return this._super(...arguments);
-    },
-
-    //--------------------------------------------------------------------------
-    // Options
-    //--------------------------------------------------------------------------
-
-    /**
-     * Moves the snippet around.
-     *
-     * @see this.selectClass for parameters
-     */
-    moveSnippet: function (previewMode, widgetValue, params) {
-        const isNavItem = this.$target[0].classList.contains('nav-item');
-        const $tabPane = isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
-        switch (widgetValue) {
-            case 'prev':
-                this.$target.prev().before(this.$target);
-                if (isNavItem) {
-                    $tabPane.prev().before($tabPane);
-                }
-                break;
-            case 'next':
-                this.$target.next().after(this.$target);
-                if (isNavItem) {
-                    $tabPane.next().after($tabPane);
-                }
-                break;
-        }
-        if (!this.$target.is(this.data.noScroll)
-                && (params.name === 'move_up_opt' || params.name === 'move_down_opt')) {
-            const mainScrollingEl = $().getScrollingElement()[0];
-            const elTop = this.$target[0].getBoundingClientRect().top;
-            const heightDiff = mainScrollingEl.offsetHeight - this.$target[0].offsetHeight;
-            const bottomHidden = heightDiff < elTop;
-            const hidden = elTop < 0 || bottomHidden;
-            if (hidden) {
-                dom.scrollTo(this.$target[0], {
-                    extraOffset: 50,
-                    forcedOffset: bottomHidden ? heightDiff - 50 : undefined,
-                    easing: 'linear',
-                    duration: 500,
-                });
-            }
-        }
-        this.trigger_up('option_update', {
-            optionName: 'StepsConnector',
-            name: 'move_snippet',
-        });
-        // Update the "Invisible Elements" panel as the order of invisible
-        // snippets could have changed on the page.
-        this.trigger_up("update_invisible_dom");
     },
 });
 

@@ -43,6 +43,8 @@ export class Toolbar extends Component {
         backgroundColorPaletteProps: { type: Object },
 
         slots: { type: Object, optional: true },
+
+        float: { type: Boolean, optional: true },
     };
     static defaultProps = {
         dropDirection: 'dropdown',
@@ -71,6 +73,8 @@ export class Toolbar extends Component {
 
         onColorpaletteDropdownShow: () => {},
         onColorpaletteDropdownHide: () => {},
+
+        float: true,
     };
 
     colorDropdownRef = {

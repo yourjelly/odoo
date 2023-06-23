@@ -13,6 +13,7 @@ import { isMediaElement } from '@web_editor/js/editor/odoo-editor/src/utils/util
 import { EditMenuDialog, MenuDialog } from "../dialog/edit_menu";
 import { WebsiteDialog } from '../dialog/dialog';
 import { PageOption } from "./page_options";
+import { useExternalListener, useSubEnv } from "@odoo/owl";
 
 const { onWillStart, useEffect, onWillUnmount } = owl;
 
@@ -80,6 +81,10 @@ export class WysiwygAdapterComponent extends Wysiwyg {
 
         useBus(this.websiteService.bus, 'LEAVE-EDIT-MODE', (ev) => this.leaveEditMode(ev.detail));
 
+        useSubEnv({
+            isWebsite: true,
+        });
+
         this.oeStructureSelector = '#wrapwrap .oe_structure[data-oe-xpath][data-oe-id]';
         this.oeFieldSelector = '#wrapwrap [data-oe-field]:not([data-oe-sanitize-prevent-edition])';
         this.oeCoverSelector = '#wrapwrap .s_cover[data-res-model], #wrapwrap .o_record_cover_container[data-res-model]';
@@ -91,6 +96,16 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         this.pageOptions = {};
         // Disable command palette since LinkTools take over that shortcut
         useHotkey('control+k', () => {});
+
+        useExternalListener(this.websiteService.contentWindow, "pointermove", (ev) => {
+            const iframeBoundingRect = this.websiteService.contentWindow.frameElement.getBoundingClientRect();
+            const pointerMove = new PointerEvent("pointermove", {
+                ...ev,
+                clientX: ev.clientX + iframeBoundingRect.left,
+                clientY: ev.clientY + iframeBoundingRect.top,
+            });
+            window.dispatchEvent(pointerMove);
+        });
 
         onWillStart(() => {
             const pageOptionEls = this.websiteService.pageDocument.querySelectorAll('.o_page_option_data');
@@ -144,6 +159,15 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                 weUtils.setEditableWindow(window);
             }
         });
+    }
+    get snippetsMenuProps() {
+        const props = super.snippetsMenuProps;
+        props.requestSave = this._onSaveRequest.bind(this);
+        props.requestCancel = this._onCancelRequest.bind(this);
+        props.readyToCleanForSave = (data) => {
+            this._trigger_up({name: "ready_to_clean_for_save", data});
+        }
+        return props;
     }
     /**
      * @override
@@ -769,7 +793,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             'snippet_will_be_cloned': this._onSnippetWillBeCloned.bind(this),
             'snippet_cloned': this._onSnippetCloned.bind(this),
             'snippet_dropped': this._onSnippetDropped.bind(this),
-            'snippet_removed': this._onSnippetRemoved.bind(this),
+            //'snippet_removed': this._onSnippetRemoved.bind(this),
             'reload_bundles': this._reloadBundles.bind(this),
             'menu_dialog': this._onMenuDialogRequest.bind(this),
             'update_color_previews': this._onColorPreviewsUpdate.bind(this),
@@ -955,45 +979,45 @@ export class WysiwygAdapterComponent extends Wysiwyg {
      * callbacks are given, leaves the editor, otherwise, perform
      * the callback.
      *
-     * @param event
-     * @param [event.data.onSuccess] {Function} Async callback
-     * @param [event.data.reload] {boolean}
-     * @param [event.data.reloadEditor] {boolean} reloads the editor.
-     * @param [event.data.reloadWebClient] reloads the Webclient.
+     * @param options
+     * @param [options.onSuccess] {Function} Async callback
+     * @param [options.reload] {boolean}
+     * @param [options.reloadEditor] {boolean} reloads the editor.
+     * @param [options.reloadWebClient] reloads the Webclient.
      * @returns {Promise<unknown>}
      * @private
      */
-    async _onSaveRequest(event) {
+    async _onSaveRequest(options) {
         let callback = () => this.leaveEditMode({ forceLeave: true });
-        if (event.data.reload || event.data.reloadEditor) {
+        if (options.reload || options.reloadEditor) {
             this.props.willReload(this._getDummmySnippetsEl());
             callback = async () => {
-                if (event.data.onSuccess) {
-                    await event.data.onSuccess();
+                if (options.onSuccess) {
+                    await options.onSuccess();
                 }
                 return this.props.reloadCallback({
-                    snippetOptionSelector: event.data.optionSelector,
-                    url: event.data.url,
-                    invalidateSnippetCache: event.data.invalidateSnippetCache
+                    snippetOptionSelector: options.optionSelector,
+                    url: options.url,
+                    invalidateSnippetCache: options.invalidateSnippetCache
                 });
             };
-        } else if (event.data.onSuccess) {
-            callback = event.data.onSuccess;
-        } else if (event.data.reloadWebClient) {
+        } else if (options.onSuccess) {
+            callback = options.onSuccess;
+        } else if (options.reloadWebClient) {
             const currentPath = encodeURIComponent(window.location.pathname);
             const websiteId = this.websiteService.currentWebsite.id;
             callback = () => window.location = `/web#action=website.website_preview&website_id=${encodeURIComponent(websiteId)}&path=${currentPath}&enable_editor=1`;
-        } else if (event.data.action) {
+        } else if (options.action) {
             callback = () => {
                 this.leaveEditMode({
-                    onLeave: () => this.action.doAction(event.data.action),
+                    onLeave: () => this.action.doAction(options.action),
                     forceLeave: true,
                     reloadIframe: false,
                 });
             };
         }
         if (this._isDirty()) {
-            return this.save().then(callback, event.data.onFailure);
+            return this.save().then(callback, options.onFailure);
         } else {
             return callback();
         }
@@ -1023,12 +1047,12 @@ export class WysiwygAdapterComponent extends Wysiwyg {
     /**
      * Discards changes and reload the iframe.
      *
-     * @param event
+     * @param options
      * @returns {*}
      * @private
      */
-    _onCancelRequest(event) {
-        this.leaveEditMode({ onStay: event.data.onReject });
+    _onCancelRequest(options) {
+        this.leaveEditMode({ onStay: options.onReject });
     }
     /**
      * Called when a snippet is about to be cloned in the page. Notifies the
@@ -1084,7 +1108,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
      * @param event
      * @private
      */
-    _onSnippetRemoved(event) {
+    snippetRemoved(event) {
         const $empty = this.$editable.find('.oe_empty');
         if (!$empty.children().length) {
             $empty.empty(); // Remove any superfluous whitespace

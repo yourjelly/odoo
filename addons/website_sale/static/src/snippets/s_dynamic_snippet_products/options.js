@@ -9,7 +9,7 @@ const alternativeSnippetRemovedOptions = [
     'filter_opt', 'product_category_opt', 'product_tag_opt', 'product_names_opt',
 ]
 
-const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend({
+const dynamicSnippetProductsOptions = {
 
     /**
      *
@@ -87,7 +87,7 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
         this._setOptionValue('productCategoryId', 'all');
         this._super.apply(this, arguments);
     },
-});
+};
 
 options.registry.dynamic_snippet_products = dynamicSnippetProductsOptions;
 

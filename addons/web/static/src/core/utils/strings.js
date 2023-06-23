@@ -363,6 +363,16 @@ export function unaccent(str, caseSensitive) {
     });
     return caseSensitive ? str : str.toLowerCase();
 }
+/**
+ * Transforms a camelCased string to return its kebab-cased version.
+ * Typically used to generate CSS properties from JS objects.
+ *
+ * @param {string} str
+ * @returns {string}
+ */
+export function camelToKebab(str) {
+    return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+}
 
 /**
  * @param {string} value

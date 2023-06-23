@@ -8,6 +8,11 @@
         <div style="display: contents;" t-ref="imageCrop">
             <ImageCrop t-props="this.imageCropProps"/>
         </div>
+        <t t-slot="snippets">
+            <t t-if="this.state.showSnippetsMenu">
+                <t t-component="this.snippetsMenuComponent" t-props="this.snippetsMenuProps"/>
+            </t>
+        </t>
         <div t-ref="el"/>
     </t>
 

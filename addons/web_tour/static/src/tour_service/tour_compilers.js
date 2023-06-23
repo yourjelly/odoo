@@ -303,6 +303,7 @@ export function compileStepAuto(stepIndex, step, options) {
         },
         {
             trigger: () => {
+                if (step.buggyStep) debugger;
                 const { triggerEl, altEl, extraTriggerOkay, skipEl } = findStepTriggers(step);
 
                 let stepEl = extraTriggerOkay && (triggerEl || altEl);

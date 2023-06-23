@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="website.s_dynamic_snippet_options">
+        <WeSelect name="'filter_opt'" attributeName="'filterId'" noPreview="true">
+            <t t-set-slot="title">Filter</t>
+            <t t-foreach="this.dynamicFilters" t-as="dynamicFilterId" t-key="dynamicFilterId">
+                <WeButton selectDataAttribute="dynamicFilterId" t-out="dynamicFilterId_value.name" img="dynamicFilterId_value.thumb"/>
+            </t>
+        </WeSelect>
+        <WeSelect name="'template_opt'" attributeName="'templateKey'" noPreview="true">
+            <t t-set-slot="title">Template</t>
+            <t t-foreach="this.dynamicFilterTemplates" t-as="templateId" t-key="templateId">
+                <WeButton selectDataAttribute="templateId" t-out="templateId_value.name" img="templateId_value.thumb || undefined"/>
+            </t>
+        </WeSelect>
+    </t>
+</templates>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template id="template" xml:space="preserve">
+<t t-name="web_editor.LoadingEffect">
+    <div class="o_we_ui_loading d-flex justify-content-center align-items-center">
+        <img src="/web/static/img/spin.svg"/>
+    </div>
+</t>
+<t t-name="web_editor.SnippetsMenu">
+    <div id="oe_snippets" t-ref="main" class="o_loaded">
+        <div class="o_we_website_top_actions">
+            <div class="o_we_external_history_buttons d-flex">
+                <button type="button" t-on-click="this.props.undo" class="btn btn-secondary fa fa-undo" t-att-disabled="this.state.canUndo ? false: 'true'"/>
+                <button type="button" t-on-click="this.props.redo" class="btn btn-secondary fa fa-repeat" t-att-disabled="this.state.canRedo ? false : 'true'"/>
+            </div>
+            <form t-ref="action-buttons" class="ms-auto d-flex" t-if="this.props.requestSave &amp;&amp; this.props.requestCancel">
+                <!-- Uncomment the following line when the mobile preview will be available. -->
+                <!-- <button type="button" class="btn btn-secondary fa fa-mobile" name="mobile" data-action="mobilePreview"/> -->
+                <button type="button"
+                        class="btn btn-secondary"
+                        t-att="{'disabled': this.state.buttonAction}"
+                        data-action="cancel"
+                        title="Discard record"
+                        accesskey="j"
+                        t-on-click="onDiscardClick">
+                    Discard
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        t-att-class="{'fa fa-spin fa-refresh': this.editionState.saving}"
+                        t-att="{'disabled': this.state.buttonAction}"
+                        data-action="save"
+                        title="Save record"
+                        accesskey="s"
+                        t-on-click="onSaveRequest">
+                    Save
+                </button>
+            </form>
+        </div>
+        <div id="snippets_menu">
+            <button class="o_we_add_snippet_btn text-uppercase" accesskey="1"
+                    t-on-click="() => state.activeTab = tabs.BLOCKS" type="button" tabindex="1"
+                    t-att-class="{'active': state.activeTab === tabs.BLOCKS}"
+            >
+                <span>Blocks</span>
+            </button>
+            <button type="button" tabindex="2" class="o_we_customize_snippet_btn text-uppercase"
+                    t-on-click="() => state.activeTab = tabs.OPTIONS"
+                    t-att-class="{'active': state.activeTab === tabs.OPTIONS}"
+            >
+                <span>Customize</span>
+            </button>
+        </div>
+
+        <div class="o_snippet_search_filter" t-att-class="{'d-none': state.activeTab !== tabs.BLOCKS}">
+            <input type="text" class="o_snippet_search_filter_input" t-model="state.searchValue" placeholder="Search for a block (e.g. numbers, image wall, ...)"/>
+            <i role="button" class="fa fa-times o_snippet_search_filter_reset" t-att-class="{'d-none': searchValue !== ''}"/>
+        </div>
+
+        <div id="o_scroll" t-ref="o_scroll" t-att-class="{'d-none': state.activeTab !== tabs.BLOCKS}">
+            <t t-foreach="this.state.snippetSections" t-as="snippetSection" t-key="snippetSection.name">
+                <t t-if="snippetSection.snippets.length > 0 &amp;&amp; snippetSection.visible">
+                    <div class="o_panel">
+                        <div class="o_panel_header"><t t-out="snippetSection.header"/></div>
+                        <div class="o_panel_body">
+                            <t t-foreach="snippetSection.snippets" t-as="snippet" t-key="snippet.id">
+                                <div t-if="snippet.visible" class="oe_snippet" t-att-name="snippet.name" t-att-data-oe-snippet-id="snippet.id" t-on-click.synthetic="displaySnippetPopover">
+                                    <div class="oe_snippet_thumbnail" t-att-data-snippet="snippet.baseBody.dataset.snippet">
+                                        <div class="oe_snippet_thumbnail_img" t-attf-style="background-image: url({{snippet.thumbnail}});"/>
+                                        <span class="oe_snippet_thumbnail_title"><t t-esc="snippet.name"/></span>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </div>
+        <div class="o_we_customize_panel" t-ref="customize-panel" t-att-class="{'d-none': state.activeTab !== tabs.OPTIONS}">
+            <t t-if="state.snippetEditorsProps.length">
+                <t t-foreach="state.snippetEditorsProps" t-as="props" t-key="props.id">
+                    <t t-component="getSnippetEditorClass()" t-props="props"
+                        t-on-click.synthetic="() => this.toggleOverlay(props.id, true)"/>
+                </t>
+                <we-customizeblock-options t-att-class="{'d-none': !this.state.showToolbar &amp;&amp; !this.state.showTable}"
+                                           id="o_we_editor_toolbar_container"
+                                           t-ref="toolbar-container">
+                    <we-title>
+                        <span>
+                            Inline Text
+                        </span>
+                    </we-title>
+                    <div style="display: contents;">
+                        <Toolbar t-props="props.wysiwygState.toolbarProps">
+                            <t t-if="props.wysiwygState.linkToolProps">
+                                <LinkTools t-props="props.wysiwygState.linkToolProps"/>
+                            </t>
+                        </Toolbar>
+                    </div>
+                </we-customizeblock-options>
+                <t t-call="web_editor.toolbar.table-options"/>
+            </t>
+            <t t-else="">
+                <div class="text-center pt-5">Select a block on your page to style it.</div>
+            </t>
+        </div>
+        <t t-if="state.contentLoading">
+            <t t-call="web_editor.LoadingEffect"/>
+        </t>
+    </div>
+</t>
+</template>

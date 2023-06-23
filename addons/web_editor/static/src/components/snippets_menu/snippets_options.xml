@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="web_editor.TestOption">
+        <WeRow>
+            <t t-set-slot="title">Test Option</t>
+            <WeButton name="'test_widget'" selectClass="'test'">Test Class</WeButton>
+            <WeButton wait="2000" noPreview="true">Wait 2 second</WeButton>
+        </WeRow>
+        <WeRow>
+            <t t-set-slot="title">
+                Background test
+            </t>
+            <WeColorPicker selectStyle="''"
+                           colorPrefix="'bg-'"
+                           cssProperty="'background-color'"
+                           withCombinations="'selectColorCombination'"
+                           withGradients="true"
+                           selectedTab="'gradients'"/>
+<!--            />-->
+            <WeImagePicker testImg="true" buttonStyle="true">
+                Image
+            </WeImagePicker>
+        </WeRow>
+        <WeDatetimePicker name="'test_date'" testTimedate="true">
+            <t t-set-slot="title">
+                DateTime Test
+            </t>
+        </WeDatetimePicker>
+        <WeDatePicker name="'test_date'" testTimedate="true">
+            <t t-set-slot="title">
+                Date Test
+            </t>
+        </WeDatePicker>
+        <WeRange testRange="['value1', 'value2', 'value3']">
+            <t t-set-slot="title">
+                Range
+            </t>
+        </WeRange>
+        <div>
+            Range value: <t t-out="this.range"/>
+        </div>
+        <WeInput placeholder="'auto'" testInput="'auto'">
+            <t t-set-slot="title">
+                Test input
+            </t>
+        </WeInput>
+        <div>
+            Input Value: <t t-out="this.input"/>
+        </div>
+        <WeButton toggleButton="'active'">
+            Toggle Button
+        </WeButton>
+        <WeList renderListItems="true" records="this.records" editable="false" inputs="[{idMode: 'name', display: 'display_name'}]"/>
+        <WeMany2one testMany2one="true" model="'website.page'" fields="['view_id', 'is_in_menu', 'header_color']" domain="[['is_visible', '=', true]]">
+            Many2one Test
+        </WeMany2one>
+        <WeMany2Many testMany2many="true" m2oModel="'website.page'" fields="['view_id', 'is_in_menu', 'header_color']" domain="[['is_visible', '=', true]]"/>
+    </t>
+    <t t-name="web_editor.TestChildOption">
+        <WeRow>
+            <t t-set-slot="title">Only when width small</t>
+            <WeButton test="dependencies" dependencies="['container_small']">
+                dependencies
+            </WeButton>
+        </WeRow>
+    </t>
+    <t t-name="web_editor.SnippetSave">
+        <t t-set="warnMessage">This is a test warning</t>
+        <WeButton class="'fa fa-fw fa-save o_we_link o_we_hover_warning'"
+                  warnMessage="warnMessage"
+                  saveSnippet="true"
+                  noPreview="true">
+            Save the block and use it elsewhere
+        </WeButton>
+    </t>
+    <t t-name="web_editor.snippet_options_background_color_widget">
+            <WeColorPicker
+                    name="'bg_color_opt'"
+                    selectColorCombination="props.data.withColorCombinations ? '' : undefined"
+                    selectStyle="true"
+                    cssProperty="'background-color'"
+                    colorPrefix="'bg-'"
+                    withCombinations="props.data.withColorCombinations ? 'selectColorCombination' : undefined"
+                    withGradients="props.data.withGradients ? true : undefined"
+                    cssCompatible="props.data.cssCompatible ? true : undefined">
+                <t t-if="showTitle">Color</t>
+            </WeColorPicker>
+    </t>
+    <t t-name="web_editor.ColoredLevelBackground">
+        <WeRow t-if="props.data.withColors || props.data.withImages" class="'o_we_full_row'">
+            <t t-set-slot="title">
+                Background
+            </t>
+            <t t-if="props.data.withColors">
+                <t t-call="web_editor.snippet_options_background_color_widget">
+                    <t t-set="showTitle" value="false"/>
+                </t>
+            </t>
+        </WeRow>
+    </t>
+</templates>

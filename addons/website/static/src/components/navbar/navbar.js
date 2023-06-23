@@ -32,6 +32,7 @@ patch(NavBar.prototype, {
         };
         useEffect(
             (adaptCounter) => {
+                this.root.el.classList.add("test_website");
                 // We do not want to adapt on the first render
                 // as the super class already does it.
                 if (adaptCounter > 0) {

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="web_editor.snippet_overlay">
+        <div class="oe_overlay">
+            <div class="o_handles">
+                <!-- Visible overlay borders + allow to resize when not readonly -->
+                <div class="o_handle n readonly"/>
+                <div class="o_handle e readonly"/>
+                <div class="o_handle w readonly"/>
+                <div class="o_handle s readonly"/>
+
+                <!-- Grid resize handles -->
+                <div class="o_handle o_grid_handle n d-none"/>
+                <div class="o_handle o_grid_handle e d-none"/>
+                <div class="o_handle o_grid_handle w d-none"/>
+                <div class="o_handle o_grid_handle s d-none"/>
+                <div class="o_handle o_grid_handle ne d-none"/>
+                <div class="o_handle o_grid_handle nw d-none"/>
+                <div class="o_handle o_grid_handle se d-none"/>
+                <div class="o_handle o_grid_handle sw d-none"/>
+
+                <div class="o_overlay_options_wrap">
+                    <!-- Overlay move specific section -->
+                    <div class="o_overlay_move_options">
+                        <!-- Button-like handle to drag and drop -->
+                        <div class="o_front_back o_send_back d-none"/>
+                        <div class="o_front_back o_bring_front d-none"/>
+                        <div class="o_move_handle"/>
+                    </div>
+                    <div class="o_overlay_edit_options">
+                        <button type="button" class="oe_snippet_remove fa fa-trash"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="web_editor.customize_block_options_section">
+        <we-customizeblock-options t-att-class="{'d-none': !this.visible}"
+            t-on-mouseenter="() => this.props.toggleOverlay(this.props.id, true, true)"
+            t-on-mouseleave="() => this.props.toggleOverlay(this.props.id, false, true)">
+            <we-title>
+                <span t-out="this.state.name"/>
+                <we-top-button-group>
+                    <t t-foreach="this.topOptions" t-as="option" t-key="option.props.id">
+                        <we-customizeblock-option t-att-data-name="option.name" t-att-class="{'d-none': !option.visible}">
+                            <t t-component="option.component" t-props="option.props"/>
+                        </we-customizeblock-option>
+                    </t>
+                    <t t-if="!this.forceNoDeleteButton">
+                        <we-button class="fa fa-fw fa-clone oe_snippet_clone o_we_link o_we_hover_success"
+                                   title="Duplicate Container"
+                                   aria-label="Duplicate Container"
+                                   t-on-click.prevent.stop="() => this.clone()"/>
+                        <we-button class="fa fa-fw fa-trash oe_snippet_remove o_we_link o_we_hover_danger"
+                                   t-att-class="{'d-none': !this.isTargetRemovable}"
+                                   title="Remove Block"
+                                   t-on-click.prevent.stop="() => this.removeSnippet()"
+                                   aria-label="Remove Block"/>
+                    </t>
+                </we-top-button-group>
+            </we-title>
+            <t t-foreach="this.options" t-as="option" t-key="option.props.id">
+                <we-customizeblock-option t-att-data-name="option.name" t-att-class="{'d-none': !option.props.visible}">
+                    <t t-component="option.component" t-props="option.props"/>
+                </we-customizeblock-option>
+            </t>
+        </we-customizeblock-options>
+    </t>
+</templates>

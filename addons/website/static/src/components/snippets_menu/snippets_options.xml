@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="website.ContainerWidth">
+        <WeButtonGroup>
+            <t t-set-slot="title">Content Width</t>
+            <WeButton selectClass="'o_container_small'"
+                      name="'container_small'"
+                      img="'/website/static/src/img/snippets_options/content_width_small.svg'">
+                Small
+            </WeButton>
+            <WeButton selectClass="'container'"
+                      img="'/website/static/src/img/snippets_options/content_width_normal.svg'">
+                Regular
+            </WeButton>
+            <WeButton selectClass="'container-fluid'"
+                      img="'/website/static/src/img/snippets_options/content_width_full.svg'">
+                Full
+            </WeButton>
+        </WeButtonGroup>
+    </t>
+    <t t-name="website.Carousel">
+        <WeRow>
+            <t t-set-slot="title">Slide</t>
+            <WeButton addSlide="true" noPreview="true" class="'o_we_bg_brand_primary'">Add Slide</WeButton>
+        </WeRow>
+        <WeSelect>
+            <t t-set-slot="title">Style</t>
+            <WeButton selectClass="'s_carousel_default'">Default</WeButton>
+            <WeButton selectClass="'s_carousel_bordered'">Bordered</WeButton>
+            <WeButton selectClass="'s_carousel_boxed'">Boxed</WeButton>
+            <WeButton selectClass="'s_carousel_rounded'">Rounded</WeButton>
+        </WeSelect>
+        <WeSelect>
+            <t t-set-slot="title">Transition</t>
+            <WeButton selectClass="'slide'">Slide</WeButton>
+            <WeButton selectClass="'carousel-fade slide'">Fade</WeButton>
+            <we-divider/>
+            <WeButton selectClass="">None</WeButton>
+        </WeSelect>
+        <WeInput selectDataAttribute="'0s'" attributeName="'bsInterval'"
+                 unit="'s'" saveUnit="'ms'" step="0.1">
+            <t t-set-slot="title">Speed</t>
+        </WeInput>
+    </t>
+    <t t-name="website.CarouselItem">
+        <WeButton class="'fa fa-fw fa-angle-left'" switchToSlide="'left'" noPreview="true">
+            <t t-set-slot="title">Move Backward</t>
+        </WeButton>
+        <WeButton class="'fa fa-fw fa-angle-right me-2'" switchToSlide="'right'" noPreview="true">
+            <t t-set-slot="title">Move Forward</t>
+        </WeButton>
+        <WeButton class="'fa fa-fw fa-plus o_we_bg_success'" addSlideItem="true" noPreview="true">
+            <t t-set-slot="title">Add Slide</t>
+        </WeButton>
+        <WeButton class="'fa fa-fw fa-minus o_we_bg_danger'" removeSlide="true" noPreview="true" >
+            <t t-set-slot="title">Remove Slide</t>
+        </WeButton>
+    </t>
+    <t t-name="website.GalleryElement">
+        <WeRow>
+            <t t-set-slot="title">Re-order</t>
+            <WeButton noPreview="true" class="'fa fa-fw fa-angle-double-left'" position="'first'">
+                <t t-set-slot="title">Move to first</t>
+            </WeButton>
+            <WeButton noPreview="true" class="'fa fa-fw fa-angle-left'" position="'prev'">
+                <t t-set-slot="title">Move to previous</t>
+            </WeButton>
+            <WeButton noPreview="true" class="'fa fa-fw fa-angle-right'" position="'next'">
+                <t t-set-slot="title">Move to next</t>
+            </WeButton>
+            <WeButton noPreview="true" class="'fa fa-fw fa-angle-double-right'" position="'last'">
+                <t t-set-slot="title">Move to last</t>
+            </WeButton>
+        </WeRow>
+    </t>
+
+    <t t-name="website.snippet_options_shadow_widgets">
+        <WeButtonGroup shadowClass="'shadow'" variable="shadow_variable">
+            <t t-set-slot="title">Shadow</t>
+            <WeButton setShadow="''">None</WeButton>
+            <WeButton setShadow="'outset'"
+                       img="'/website/static/src/img/snippets_options/shadow_out.svg'"
+                       name="'shadow_active_opt'">
+                Outset
+            </WeButton>
+            <WeButton setShadow="'inset'"
+                       img="'/website/static/src/img/snippets_options/shadow_in.svg'"
+                       name="'shadow_inset_opt'">
+                Inset
+            </WeButton>
+        </WeButtonGroup>
+        <WeMulti name="'test_multi'" cssProperty="'box-shadow'" dependencies="['shadow_active_opt', 'shadow_inset_opt']">
+            <WeColorPicker class="'o_we_sublevel_1'" selectStyle="true" cssCompatible="true" sequence="1">Color</WeColorPicker>
+            <WeRow class="'o_we_sublevel_1'">
+                <t t-set-slot="title">Offset (X, Y)</t>
+                <WeInput name="'test_we_multi'" selectStyle="true" unit="'px'" sequence="2"/>
+                <WeInput selectStyle="true" unit="'px'" sequence="3"/>
+            </WeRow>
+            <WeInput class="'o_we_sublevel_1'" selectStyle="true" unit="'px'" sequence="4">
+                    <t t-set-slot="title">Blur</t>
+            </WeInput>
+            <WeInput class="'o_we_sublevel_1'" selectStyle="true" unit="'px'" sequence="5">
+                <t t-set-slot="title">Spread</t>
+            </WeInput>
+        </WeMulti>
+    </t>
+    <t t-name="website.snippet_options_border_line_widgets">
+        <WeRow>
+            <t t-set-slot="title">
+                <t t-out="label"/>
+            </t>
+            <WeInput name="'border_width_opt'"
+                     applyTo="apply_to"
+                     selectStyle="0"
+                     cssProperty="`border-${direction and (direction + '-') or ''}width`"
+                     unit="'px'"
+                     extraClass="with_bs_class and 'border'"
+                     variable="width_variable"/>
+            <WeSelect cssProperty="`border-${direction and (direction + '-') or ''}style`"
+                      dependencies="['border_width_opt']"
+                      applyTo="apply_to"
+                      variable="style_variable">
+                <WeButton title="Solid" selectStyle="'solid'"><div class="o_we_fake_img_item o_we_border_preview" style="border-style: solid;"/></WeButton>
+                <WeButton title="Dashed" selectStyle="'dashed'"><div class="o_we_fake_img_item o_we_border_preview" style="border-style: dashed;"/></WeButton>
+                <WeButton title="Dotted" selectStyle="'dotted'"><div class="o_we_fake_img_item o_we_border_preview" style="border-style: dotted;"/></WeButton>
+                <WeButton title="Double" selectStyle="'double'"><div class="o_we_fake_img_item o_we_border_preview" style="border-style: double; border-left: none; border-right: none;"/></WeButton>
+            </WeSelect>
+            <WeColorPicker dependencies="['border_width_opt']"
+                           applyTo="apply_to"
+                           selectStyle="true"
+                           cssProperty="`border-${direction and (direction + '-') or ''}color`"
+                           colorPrefix="'border-'"
+                           color="color_variable"/>
+        </WeRow>
+    </t>
+    <t t-name="website.snippet_options_border_widgets">
+        <t t-call="website.snippet_options_border_line_widgets">
+            <t t-set="label">Border</t>
+            <t t-set="with_bs_class" t-value="true"/>
+        </t>
+        <WeInput applyTo="apply_to"
+                 dependencies="so_rounded_no_dependencies and ['border_width_opt','bg_color_opt']"
+                 selectStyle="0" cssProperty="'border-radius'"
+                 unit="'px'" extraClass="'rounded'"
+                 variable="radius_variable">
+            <t t-set-slot="title">Round Corners</t>
+        </WeInput>
+    </t>
+
+    <t t-name="website.Box">
+        <t t-call="website.snippet_options_border_widgets"/>
+        <t t-call="website.snippet_options_shadow_widgets"/>
+    </t>
+    <t t-name="website.CardBox">
+        <WeColorPicker selectStyle="true"
+                       cssProperty="'background-color'"
+                       colorPrefix="'bg-'">
+                Colors
+        </WeColorPicker>
+        <t t-call="website.snippet_options_border_widgets">
+            <t t-set="so_rounded_no_dependencies" t-value="true"/>
+        </t>
+        <t t-call="website.snippet_options_shadow_widgets"/>
+    </t>
+    <t t-name="website.LayoutColumn">
+        <WeRow>
+            <WeButtonGroup noPreview="true">
+                <t t-set-slot="title">Layout</t>
+                <WeButton selectLayout="'grid'" name="'grid_mode'">Grid</WeButton>
+                <WeButton selectLayout="'normal'" name="'normal_mode'">Cols</WeButton>
+            </WeButtonGroup>
+            <WeSelect class="'o_grid'" noPreview="true" name="'column_count_opt'" dependencies="['normal_mode']">
+                <WeButton selectCount="0" name="'zero_cols_opt'">None</WeButton>
+                <WeButton selectCount="1">1</WeButton>
+                <WeButton selectCount="2">2</WeButton>
+                <WeButton selectCount="3">3</WeButton>
+                <WeButton selectCount="4">4</WeButton>
+                <WeButton selectCount="5">5</WeButton>
+                <WeButton selectCount="6">6</WeButton>
+            </WeSelect>
+        </WeRow>
+        <WeButtonGroup class="'o_we_sublevel_1'" dependencies="['grid_mode']">
+            <t t-set-slot="title">Add elements</t>
+            <WeButton class="'o_we_bg_brand_primary o_grid'" addElement="'image'" noPreview="true">Image</WeButton>
+            <WeButton class="'o_we_bg_brand_primary o_grid'" addElement="'text'" noPreview="true">Text</WeButton>
+            <WeButton class="'o_we_bg_brand_primary o_grid'" addElement="'button'" noPreview="true">Button</WeButton>
+        </WeButtonGroup>
+        <WeRow class="'o_we_sublevel_1'">
+            <t t-set-slot="title">Padding (Y, X)</t>
+            <WeInput selectStyle="true" cssProperty="'--grid-item-padding-y'" unit="'px'" applyTo="'.row'" dependencies="['grid_mode']"/>
+            <WeInput selectStyle="true" cssProperty="'--grid-item-padding-x'" unit="'px'" applyTo="'.row'" dependencies="['grid_mode']"/>
+        </WeRow>
+    </t>
+    <t t-name="website.move_horizontally_opt">
+        <WeButton class="'fa fa-fw fa-angle-left'" moveSnippet="'prev'" noPreview="true" name="'move_left_opt'"/>
+        <WeButton class="'fa fa-fw fa-angle-right'" moveSnippet="'next'" noPreview="true" name="'move_right_opt'"/>
+    </t>
+    <t t-name="website.VerticalAlignment">
+        <WeButtonGroup class="'o_we_sublevel_1'" dependencies="['normal_mode']">
+            <t t-set-slot="title">Vert. Alignment</t>
+            <WeButton selectClass="'align-items-start'"
+                      img="'/website/static/src/img/snippets_options/align_top.svg'">
+                Align Top
+            </WeButton>
+            <WeButton selectClass="'align-items-center'"
+                      img="'/website/static/src/img/snippets_options/align_middle.svg'">
+                Align Middle
+            </WeButton>
+            <WeButton selectClass="'align-items-end'"
+                      img="'/website/static/src/img/snippets_options/align_bottom.svg'">
+                Align Bottom
+            </WeButton>
+            <WeButton selectClass="'align-items-stretch'"
+                      img="'/website/static/src/img/snippets_options/align_stretch.svg'">
+                Stretch To Equal Height
+            </WeButton>
+        </WeButtonGroup>
+    </t>
+    <t t-name="website.ScrollButton">
+        <!-- Min height of section -->
+        <WeButtonGroup showScrollButton="true">
+            <t t-set-slot="title">
+                <t t-if="this.target.dataset.snippet === 's_image_gallery'">
+                    Min. Height
+                </t>
+                <t t-else="">
+                    Height
+                </t>
+            </t>
+            <WeButton name="'minheight_auto_opt'" selectClass="">
+                <t t-set-slot="title">Fit content</t>
+                Auto
+            </WeButton>
+            <WeButton selectClass="'o_half_screen_height'">
+                <t t-set-slot="title">Half screen</t>
+                50%
+            </WeButton>
+            <WeButton selectClass="'o_full_screen_height'" name="'full_height_opt'" showScrollButton="true">
+                <t t-set-slot="title">Full screen</t>
+                100%
+            </WeButton>
+        </WeButtonGroup>
+
+        <WeInput class="'o_we_sublevel_1'"
+                 name="'fixed_height_opt'"
+                 dependencies="['minheight_auto_opt']"
+                 selectStyle="''"
+                 unit="'px'"
+                 cssProperty="'height'"
+                 forceStyle="''">
+            <t t-set-slot="title">
+                Height
+            </t>
+        </WeInput>
+        <!--    ↑ ↑ ↑
+        For this setting, we need to always force the style (= if the block
+        is naturally 800px tall and the user enters 800px for this setting,
+        we set 800px as inline style anyway). Indeed, this snippet's style
+        is based on the height that is forced but once the related public
+        widgets are started, the inner carousel items receive a min-height
+        which makes it so the snippet "natural" height is equal to the
+        initially forced height... so if the style is not forced, it would
+        ultimately be removed by mistake thinking it is not necessary.
+        Note: this is forced as not important as we still need the height to
+        be reset to 'auto' in mobile (generic css rules).
+        -->
+
+        <WeCheckbox toggleButton="true"
+                    noPreview="true"
+                    dependencies="['full_height_opt']"
+                    name="'scroll_button_opt'">
+            Scroll down button
+        </WeCheckbox>
+        <WeRow class="'o_we_sublevel_1'">
+            <t t-set-slot="title">
+                Colors
+            </t>
+            <WeColorPicker selectStyle="true"
+                           cssProperty="'background-color'"
+                           colorPrefix="'bg-'"
+                           applyTo="'.o_scroll_button'"
+                           dependencies="['scroll_button_opt']"/>
+            <WeColorPicker  selectStyle="true"
+                            cssProperty="'color'"
+                            colorPrefix="'text-'"
+                            applyTo="'.o_scroll_button'"
+                            dependencies="['scroll_button_opt']"/>
+        </WeRow>
+        <WeSelect class="'o_we_sublevel_1'"
+                  applyTo="'.o_scroll_button'"
+                  dependencies="['scroll_button_opt']">
+            <t t-set-slot="title">Spacing</t>
+            <WeButton selectClass="''">None</WeButton>
+            <WeButton selectClass="'mb-1'">Extra-Small</WeButton>
+            <WeButton selectClass="'mb-2'">Small</WeButton>
+            <WeButton selectClass="'mb-3'">Medium</WeButton>
+            <WeButton selectClass="'mb-4'">Large</WeButton>
+            <WeButton selectClass="'mb-5'">Extra-Large</WeButton>
+        </WeSelect>
+    </t>
+</templates>

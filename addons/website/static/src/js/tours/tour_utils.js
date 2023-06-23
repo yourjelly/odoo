@@ -238,7 +238,7 @@ function dragNDrop(snippet, position = "bottom") {
         position: position,
         // Normally no main snippet can be dropped in the default footer but
         // targeting it allows to force "dropping at the end of the page".
-        run: "drag_and_drop iframe #wrapwrap > footer",
+        run: "drag_and_drop_native iframe #wrapwrap > footer",
     };
 }
 

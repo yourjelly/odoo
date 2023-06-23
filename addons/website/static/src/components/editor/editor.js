@@ -55,6 +55,10 @@ export class WebsiteEditorComponent extends Component {
 
         useActiveElement('wysiwyg-adapter');
     }
+
+    get editable() {
+        return this.websiteService.pageDocument.getElementById("wrapwrap");
+    }
     /**
      * Starts the wysiwyg or disable edition if currently
      * on a translated page.

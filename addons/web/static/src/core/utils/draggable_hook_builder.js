@@ -2,6 +2,7 @@
 
 import { onWillUnmount, reactive, useEffect, useExternalListener } from "@odoo/owl";
 import { clamp } from "@web/core/utils/numbers";
+import { camelToKebab } from "@web/core/utils/strings";
 import { setRecurringAnimationFrame, useThrottleForAnimation } from "@web/core/utils/timing";
 import { browser } from "../browser/browser";
 import { hasTouch, isBrowserFirefox, isIOS } from "../browser/feature_detection";
@@ -107,17 +108,6 @@ const WHITE_LISTED_KEYS = ["Alt", "Control", "Meta", "Shift"];
  * @type {Record<string, Set<HTMLElement>>}
  */
 const elCache = {};
-
-/**
- * Transforms a camelCased string to return its kebab-cased version.
- * Typically used to generate CSS properties from JS objects.
- *
- * @param {string} str
- * @returns {string}
- */
-function camelToKebab(str) {
-    return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-}
 
 /**
  * @template T

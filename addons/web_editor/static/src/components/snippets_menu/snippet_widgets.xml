@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="web_editor.WeRow">
+        <we-row t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+            <div>
+                <t t-slot="default"/>
+            </div>
+        </we-row>
+    </t>
+    <t t-name="web_editor.WeButton">
+        <we-button
+                class="o_we_user_value_widget"
+                t-att-class="this.cssClasses"
+                t-on-mouseenter="onMouseEnter"
+                t-on-mouseleave="onMouseLeave"
+                t-on-click="onUserValueChange">
+            <div t-ref="value-ref">
+                <t t-if="this.svg">
+                    <t t-out="this.svg"/>
+                </t>
+                <t t-if="this.img">
+                    <img t-att-src="this.img"/>
+                </t>
+                <t t-if="this.props.faIcon">
+                    <i t-att-class="this.props.faIcon"/>
+                </t>
+                <!-- For now, hide the title if there's an image
+                    Note that this can be worked around by adding the img html
+                    inside the default slot
+                -->
+                <t t-if="!showTooltip" t-slot="default"/>
+            </div>
+        </we-button>
+    </t>
+    <t t-name="web_editor.WeCheckbox">
+        <we-button class="o_we_user_value_widget o_we_checkbox_wrapper"
+                   t-att-class="this.cssClasses"
+                   t-on-mouseenter="onMouseEnter"
+                   t-on-mouseleave="onMouseLeave"
+                   t-on-click="onUserValueChange">
+            <we-title>
+                <t t-slot="default"/>
+            </we-title>
+            <div>
+                <we-checkbox/>
+            </div>
+        </we-button>
+    </t>
+    <t t-name="web_editor.WeSelect">
+        <we-select class="o_we_user_value_widget" t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+            <div>
+                <we-toggler t-on-click="this.onTogglerClick" t-att-class="{'active': state.isTogglerActive}">
+                    <t t-out="this.togglerValue"/>
+                </we-toggler>
+                <we-selection-items>
+                    <t t-slot="default"/>
+                </we-selection-items>
+                <span class="o_we_dropdown_caret"/>
+            </div>
+        </we-select>
+    </t>
+    <t t-name="web_editor.WeButtonGroup">
+        <we-button-group class="o_we_user_value_widget" t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+            <div>
+                <we-selection-items>
+                    <t t-slot="default"/>
+                </we-selection-items>
+            </div>
+        </we-button-group>
+    </t>
+    <t t-name="web_editor.WeInput">
+        <we-input class="o_we_user_value_widget" t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+            <div>
+                <input type="text" class="text-end"
+                       t-att-value="this.state.inputValue"
+                       t-on-input="onInput"
+                       t-on-blur="onBlur"
+                       t-on-keydown="onKeydown"
+                       t-att-placeholder="this.props.placeholder"
+                />
+                <span t-out="this.props.unit"/>
+            </div>
+        </we-input>
+    </t>
+    <t t-name="web_editor.WeColorPicker">
+        <we-select class="o_we_user_value_widget o_we_so_color_palette" t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.default">
+                <t t-slot="default"/>
+            </we-title>
+            <div>
+                <span class="o_we_color_preview"
+                      t-on-click="() => this.state.isTogglerActive = !this.state.isTogglerActive"
+                      t-att-style="this.state.isTogglerActive"/>
+                <we-toggler t-att-class="{'active': this.state.isTogglerActive}"/>
+                <we-selection-items>
+                    <t t-if="this.state.isTogglerActive">
+                        <div style="display: contents;">
+                            <ColorPalette withCombinations="!!this.props.withCombinations"
+                                          selectedCC="this.ccValue"
+                                          selectedColor="this.colorValue"
+                                          onColorHover.bind="this.onColorHover"
+                                          onColorLeave.bind="this.onColorLeave"
+                                          onColorPicked.bind="this.onColorPicked"
+                                          onCustomColorPicked.bind="this.onCustomColorPicked"
+                                          onSetColorNames.bind="onSetColorNames"
+                                          withGradients="this.props.withGradients"
+                                          opacity="this.props.opacity"
+                                          noTransparency="this.props.noTransparency"
+                                          excluded="this.excluded"
+                                          selectedTab="this.props.selectedTab"
+                                          getTemplate="this.env.getColorpickerTemplate"
+                            />
+                        </div>
+                    </t>
+                </we-selection-items>
+            </div>
+        </we-select>
+    </t>
+    <t t-name="web_editor.WeMulti">
+        <we-multi class="o_we_user_value_widget" t-att-class="this.cssClasses">
+            <div>
+                <t t-slot="default"/>
+            </div>
+        </we-multi>
+    </t>
+    <t t-name="web_editor.WeSelectPager">
+        <we-select class="o_we_user_value_widget o_we_select_pager" t-att-class="this.cssClasses">
+            <div>
+                <we-toggler class="o_we_toggler_pager" t-on-click="this.onTogglerClick" t-att-class="{'active': state.isTogglerActive}">
+                    <t t-out="this.togglerValue"/>
+                </we-toggler>
+                <we-selection-items class="o_we_has_pager position-fixed top-0 end-0 z-index-1 rounded-0">
+                    <t t-slot="default"/>
+                </we-selection-items>
+            </div>
+        </we-select>
+    </t>
+    <t t-name="web_editor.WeMediaPicker">
+        <WeButton t-on-click.capture.stop="this.onEditMedia" class="this.buttonClass" faIcon="this.faIcon">
+            <t t-slot="default"/>
+        </WeButton>
+    </t>
+    <t t-name="web_editor.WeDatetimePicker">
+        <we-input class="o_we_user_value_widget o_we_large" t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+            <div>
+                <DateTimeInput value="this.dateTimePickerValue"
+                               format="this.defaultFormat"
+                               onChange.bind="this.onDateTimePickerChange"
+                               onApply.bind="this.onDateTimePickerApply"
+                               rounding="1"
+                               type="this.type"
+                />
+            </div>
+        </we-input>
+    </t>
+    <t t-name="web_editor.WeRange">
+        <we-range class="o_we_user_value_widget">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+                <div>
+                <input type="range"
+                       t-att-min="this.min"
+                       t-att-value="this.state.inputValue"
+                       t-att-max="this.max"
+                       t-att-step="this.props.step"
+                       t-on-input="this.onRangeInput"
+                       t-on-change="this.onRangeChange"/>
+           </div>
+        </we-range>
+    </t>
+    <t t-name="web_editor.WeList">
+        <we-list t-att-class="this.cssClasses" class="o_we_user_value_widget">
+            <div>
+                <div class="o_we_table_wrapper">
+                    <table t-ref="table">
+                        <t t-foreach="this.state.list" t-as="listItem" t-key="listItem.id">
+                            <tr t-att-data-index="listItem_index">
+                                <td t-if="!listItem.undraggable">
+                                    <we-button class="o_we_drag_handle o_we_link fa fa-fw fa-arrows"/>
+                                </td>
+                                <td class="o_we_list_record_name">
+                                    <t t-foreach="this.props.inputs" t-as="input" t-key="input_index">
+                                        <input type="text"
+                                               t-att="this.getInputAttributes(input, listItem)"
+                                               t-att-placeholder="listItem.placeholder"
+                                               t-att-value="listItem[input.display]"
+                                               t-on-focus="this.onInputFocus"
+                                               t-on-blur="this.onInputBlur"
+                                               t-on-input="this.onInputInput"
+                                               t-on-keydown="this.onInputKeydown"
+                                               t-att-data-input-index="input_index"
+                                               t-att-data-item-index="listItem_index"
+                                               t-att-disabled="!props.editable"
+                                        />
+                                    </t>
+                                </td>
+                                <td>
+                                    <t t-if="!listItem.notToggleable">
+                                        <we-button class="o_we_user_value_widget o_we_checkbox_wrapper"
+                                                   t-att-class="{'active': listItem.selected}"
+                                                   t-on-click.synthetic="() => this.toggleItem(listItem)">
+                                                <we-checkbox/>
+                                        </we-button>
+                                    </t>
+                                </td>
+                                <td>
+                                    <t t-if="!listItem.undeletable">
+                                        <we-button class="o_we_select_remove_option o_we_link o_we_text_danger fa fa-fw fa-minus"
+                                                   t-on-click.synthetic="() => this.deleteItem(listItem)"/>
+                                    </t>
+                                </td>
+                            </tr>
+                        </t>
+                    </table>
+                </div>
+                <we-button t-if="props.editable"
+                           t-on-click="() => this.addItem()"
+                           class="o_we_list_add_optional">
+                    <t t-slot="add-button">Add entry</t>
+                </we-button>
+                <t t-if="this.props.records.length">
+                    <WeSelect placeholder="this.props.selectValue">
+                        <t t-foreach="this.props.records" t-as="record" t-key="record.id">
+                            <we-button t-if="!this.state.list.find(item => item.id === record.id)" t-on-click.synthetic.stop="() => this.addExisting(record_index)">
+                                <div t-out="record.display_name"/>
+                            </we-button>
+                        </t>
+                     </WeSelect>
+                </t>
+                <t t-slot="createWidget"/>
+            </div>
+        </we-list>
+    </t>
+    <t t-name="web_editor.WeMany2one">
+        <WeSelect placeholder="this.state.selectPlaceholder">
+            <t t-set-slot="title"><t t-if="props.slots?.default" t-slot="default"/></t>
+            <div class="o_we_m2o_search">
+                <input t-model="this.state.searchValue" placeholder="Search for records..."/>
+            </div>
+            <t t-foreach="this.state.recordsList" t-as="record" t-key="record.id">
+                <we-button t-att-class="{'active': this.state.activeId === record.id}" 
+                           t-on-click.synthetic="() => this.selectRecord(record)">
+                           <div t-out="record.display_name"/>
+                </we-button>
+            </t>
+            <t t-if="this.props.createMethod">
+                <we-row>
+                    <we-input class="o_we_user_value_widget o_we_large">
+                        <div>
+                            <input placeholder="Name of the new record" t-model="this.state.createInputValue"/>
+                        </div>
+                    </we-input>
+                    <we-button class="o_we_user_value_widget flex-grow-0 active" t-on-click.stop="this.createRecord">
+                        <div>Create</div>
+                    </we-button>
+                </we-row>
+            </t>
+        </WeSelect>
+    </t>
+    <t t-name="web_editor.WeMany2Many">
+        <div class="o_we_user_value_widget o_we_m2m">
+            <WeList name="this.listWidgetName" renderListItems="true" noPreview="true" editable="false">
+                <t t-slot="listTitle"/>
+                <t t-set-slot="createWidget">
+                    <WeMany2one model="props.m2oModel"
+                                fields="props.m2oFields"
+                                domain="props.m2oDomain"
+                                callWith="props.callWith"
+                                placeholder="props.m2oPlaceholder"
+                                limit="props.m2oLimit"
+                                addRecord="true">
+                        <t t-slot="m2oTitle"/>
+                    </WeMany2one>
+                </t>
+            </WeList>
+        </div>
+    </t>
+</templates>

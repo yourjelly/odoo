@@ -6,13 +6,11 @@ import { patch } from "@web/core/utils/patch";
 const patchWysiwygAdapter = () => {
     const { WysiwygAdapterComponent } = odoo.loader.modules.get("@website/components/wysiwyg_adapter/wysiwyg_adapter");
     return patch(WysiwygAdapterComponent.prototype, {
-        _trigger_up(ev) {
-            super._trigger_up(...arguments);
-            if (ev.name === 'snippet_removed') {
-                $('body').attr('test-dd-snippet-removed', true);
-            }
-        }
-    });
+        snippetRemoved() {
+            super.snippetRemoved(...arguments);
+        $('body').attr('test-dd-snippet-removed', true);
+    }
+});
 };
 
 let unpatchWysiwygAdapter = null;
@@ -35,7 +33,7 @@ for (const snippet of snippetsNames) {
     const snippetSteps = [{
         content: `Drop ${snippet} snippet [${n}/${snippetsNames.length}]`,
         trigger: `#oe_snippets .oe_snippet:has( > [data-snippet='${snippet}']) .oe_snippet_thumbnail`,
-        run: "drag_and_drop iframe #wrap",
+        run: "drag_and_drop_native iframe #wrap",
     }, {
         content: `Edit ${snippet} snippet`,
         trigger: `iframe #wrap.o_editable [data-snippet='${snippet}']${isModal ? ' .modal.show' : ''}`,
@@ -45,7 +43,8 @@ for (const snippet of snippetsNames) {
         run: function () {}, // it's a check
     }, {
         content: `Remove the ${snippet} snippet`, // Avoid bad perf if many snippets
-        trigger: "we-button.oe_snippet_remove:last"
+        buggyStep: true,
+        trigger: "we-customizeblock-options:not(.d-none) we-button.oe_snippet_remove:last"
     }, {
         content: `click on 'BLOCKS' tab (${snippet})`,
         extra_trigger: 'body[test-dd-snippet-removed]',

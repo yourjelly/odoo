@@ -1,9 +1,12 @@
 /** @odoo-module **/
 
+import { useService } from "@web/core/utils/hooks";
 import fonts from '@web_editor/js/wysiwyg/fonts';
 import weUtils from '@web_editor/js/common/utils';
 import options from '@web_editor/js/editor/snippets.options';
 import { _t } from "@web/core/l10n/translation";
+import { SnippetOption } from "@web_editor/components/snippets_menu/snippets_options";
+import { registry } from "@web/core/registry";
 
 let dbSocialValues;
 let dbSocialValuesProm;
@@ -12,23 +15,29 @@ const clearDbSocialValuesCache = () => {
     dbSocialValues = undefined;
 };
 
-options.registry.SocialMedia = options.Class.extend({
+export class SocialMedia extends SnippetOption {
+    setup() {
+        super.setup();
+        this.entriesNotInDom = [];
+        this.orm = useService("orm");
+        this.website = useService("website");
+        this.env.validMethodNames.push("renderListItems");
+    }
     /**
      * @override
      */
     start() {
         // When the alert is clicked, focus the first media input in the editor.
         this.__onSetupBannerClick = this._onSetupBannerClick.bind(this);
-        this.$target[0].addEventListener('click', this.__onSetupBannerClick);
-        this.entriesNotInDom = [];
-        return this._super(...arguments);
-    },
+        this.target.addEventListener('click', this.__onSetupBannerClick);
+        return super.start(...arguments);
+    }
     /**
      * @override
      */
     async onBuilt() {
         await this._fetchSocialMedia();
-        for (const anchorEl of this.$target[0].querySelectorAll(':scope > a')) {
+        for (const anchorEl of this.target.querySelectorAll(':scope > a')) {
             const mediaName = anchorEl.href.split('/website/social/').pop();
             if (mediaName && !dbSocialValues[`social_${mediaName}`]) {
                 // Delete social media without value in DB.
@@ -37,7 +46,7 @@ options.registry.SocialMedia = options.Class.extend({
         }
         // Ensure we do not drop a blank block.
         this._handleNoMediaAlert();
-    },
+    }
     /**
      * @override
      */
@@ -49,25 +58,19 @@ options.registry.SocialMedia = options.Class.extend({
             return;
         }
         // Update the DB links.
-        let websiteId;
-        this.trigger_up('context_get', {
-            callback: function (ctx) {
-                websiteId = ctx['website_id'];
-            },
-        });
-        await this._rpc({
-            model: 'website',
-            method: 'write',
-            args: [[websiteId], dbSocialValues],
-        });
-    },
+        await this.orm.write(
+            'website',
+            [this.website.currentWebsite.id],
+            dbSocialValues
+        );
+    }
     /**
      * @override
      */
     destroy() {
         this._super(...arguments);
         this.$target[0].removeEventListener('click', this.__onSetupBannerClick);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Options
@@ -79,6 +82,7 @@ options.registry.SocialMedia = options.Class.extend({
      * @see this.selectClass for parameters
      */
     async renderListItems(previewMode, widgetValue, params) {
+        console.log("rendering list items");
         const anchorEls = this.$target[0].querySelectorAll(':scope > a');
         let entries = JSON.parse(widgetValue);
         const anchorsToRemoveEls = [];
@@ -173,7 +177,7 @@ options.registry.SocialMedia = options.Class.extend({
         }
 
         this._handleNoMediaAlert();
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -182,21 +186,27 @@ options.registry.SocialMedia = options.Class.extend({
     /**
      * @override
      */
-    async _computeWidgetState(methodName, params) {
+    async computeWidgetState(methodName, params) {
+        console.log("computing widget state");
         if (methodName !== 'renderListItems') {
-            return this._super(methodName, params);
+            return super.computeWidgetState(methodName, params);
         }
         await this._fetchSocialMedia();
         let listPosition = 0;
         let domPosition = 0;
         // Check the DOM to compute the state of the ListUserValueWidget.
-        let entries = [...this.$target[0].querySelectorAll(':scope > a')].map(el => {
+        let entries = [...this.target.querySelectorAll(':scope > a')].map(el => {
             const media = el.href.split('/website/social/')[1];
             // Avoid a DOM entry and a non-dom entry having the same position.
             while (this.entriesNotInDom.find(entry => entry.listPosition === listPosition)) {
                 listPosition++;
             }
             return {
+                // TODO: Generate an ID that does not change at every
+                //  computeWidgetState. OWL needs a static id in order to retrieve
+                // the item in its tree. Here since it changes every
+                // computeWidgetState, the inputs get fully re-rendered.
+                // So focus is lost.
                 id: weUtils.generateHTMLId(),
                 display_name: media ? dbSocialValues[`social_${media}`] : el.getAttribute('href'),
                 placeholder: `https://${encodeURIComponent(media) || 'example'}.com/yourPage`,
@@ -211,7 +221,7 @@ options.registry.SocialMedia = options.Class.extend({
         // Adds the DB social media links that are not in the DOM.
         for (let [media, link] of Object.entries(dbSocialValues)) {
             media = media.split('social_').pop();
-            if (!this.$target[0].querySelector(`:scope > a[href="/website/social/${encodeURIComponent(media)}"]`)) {
+            if (!this.target.querySelector(`:scope > a[href="/website/social/${encodeURIComponent(media)}"]`)) {
                 const entryNotInDom = this.entriesNotInDom.find(entry => entry.media === media);
                 if (!entryNotInDom) {
                     this.entriesNotInDom.push({
@@ -238,31 +248,26 @@ options.registry.SocialMedia = options.Class.extend({
             return a.listPosition - b.listPosition;
         });
         return JSON.stringify(entries);
-    },
+    }
     /**
      * Fetches the urls of the social networks that are in the database.
      */
     async _fetchSocialMedia() {
         if (!dbSocialValuesProm) {
-            let websiteId;
-            this.trigger_up('context_get', {
-                callback: function (ctx) {
-                    websiteId = ctx['website_id'];
-                },
-            });
+            let websiteId = this.website.currentWebsite.id;
             // Fetch URLs for db links.
-            dbSocialValuesProm = this._rpc({
-                model: 'website',
-                method: 'read',
-                args: [websiteId, ['social_facebook', 'social_twitter', 'social_linkedin',
-                    'social_youtube', 'social_instagram', 'social_github', 'social_tiktok']],
-            }).then(function (values) {
+            dbSocialValuesProm = this.orm.read(
+                'website',
+                [websiteId],
+                ['social_facebook', 'social_twitter', 'social_linkedin',
+                    'social_youtube', 'social_instagram', 'social_github', 'social_tiktok'],
+            ).then(function (values) {
                 [dbSocialValues] = values;
                 delete dbSocialValues.id;
             });
         }
         await dbSocialValuesProm;
-    },
+    }
     /**
      * Finds the social network for the given url.
      *
@@ -292,13 +297,13 @@ options.registry.SocialMedia = options.Class.extend({
         } catch {
             return false;
         }
-    },
+    }
     /**
      * Adds a warning banner to alert that there are no social networks.
      */
     _handleNoMediaAlert() {
-        const alertEl = this.$target[0].querySelector('div.css_non_editable_mode_hidden');
-        if (this.$target[0].querySelector(':scope > a:not(.d-none)')) {
+        const alertEl = this.target.querySelector('div.css_non_editable_mode_hidden');
+        if (this.target.querySelector(':scope > a:not(.d-none)')) {
             if (alertEl) {
                 alertEl.remove();
             }
@@ -310,10 +315,10 @@ options.registry.SocialMedia = options.Class.extend({
                 divEl.classList.add(...classes);
                 const spanEl = document.createElement('span');
                 spanEl.textContent = _t("Click here to setup your social networks");
-                this.$target[0].appendChild(divEl).append(spanEl);
+                this.target.appendChild(divEl).append(spanEl);
             }
         }
-    },
+    }
     /**
      * @param  {String} str
      * @returns {boolean} is the string a valid URL.
@@ -326,7 +331,7 @@ options.registry.SocialMedia = options.Class.extend({
             return false;
         }
         return url.protocol.startsWith('http');
-    },
+    }
     /**
      * Removes social media classes from the given element.
      *
@@ -339,7 +344,7 @@ options.registry.SocialMedia = options.Class.extend({
         regx = new RegExp('\\b' + 'fa-' + '[^1-9][^ ]*[ ]?\\b');
         // Remove every fa classes except fa-x sizes.
         iEl.className = iEl.className.replace(regx, '');
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -355,7 +360,13 @@ options.registry.SocialMedia = options.Class.extend({
             // work of course
             this._requestUserValueWidgets('social_media_list')[0].focus();
         }
-    },
+    }
+}
+
+registry.category("snippets_options").add("SnippetSocialMedia", {
+    component: SocialMedia,
+    template: "website.SocialMediaOptions",
+    selector: ".s_social_media",
 });
 
 export default {
