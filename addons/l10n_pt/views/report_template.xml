@@ -27,11 +27,17 @@
         <xpath expr="//div[contains(@t-attf-class, 'article')]/t" position="after">
             <t t-call="l10n_pt.l10n_pt_report_template_note_certified_program"/>
         </xpath>
+        <xpath expr="//span[@id='document_name']" position="inside">
+            <t t-out="o.name"/> -
+        </xpath>
     </template>
 
     <template id="l10n_pt_external_layout_bold" inherit_id="web.external_layout_bold">
         <xpath expr="//div[contains(@t-attf-class, 'article')]/t" position="after">
             <t t-call="l10n_pt.l10n_pt_report_template_note_certified_program"/>
+        </xpath>
+        <xpath expr="//span[@id='document_name']" position="inside">
+            <t t-out="o.name"/> -
         </xpath>
     </template>
 
@@ -39,11 +45,17 @@
         <xpath expr="//div[contains(@t-attf-class, 'article')]/t" position="after">
             <t t-call="l10n_pt.l10n_pt_report_template_note_certified_program"/>
         </xpath>
+        <xpath expr="//span[@id='document_name']" position="inside">
+            <t t-out="o.name"/> -
+        </xpath>
     </template>
 
     <template id="l10n_pt_external_layout_striped" inherit_id="web.external_layout_striped">
         <xpath expr="//div[contains(@t-attf-class, 'article')]/t" position="after">
             <t t-call="l10n_pt.l10n_pt_report_template_note_certified_program"/>
+        </xpath>
+        <xpath expr="//span[@id='document_name']" position="inside">
+            <t t-out="o.name"/> -
         </xpath>
     </template>
 </odoo>
