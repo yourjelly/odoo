@@ -1,7 +1,7 @@
-/** @odoo-module alias=wysiwyg.widgets.AltDialog **/
+/** @odoo-module **/
 
-import core from "web.core";
-import Dialog from "wysiwyg.widgets.Dialog";
+import core from "@web/legacy/js/services/core";
+import Dialog from "@web_editor/js/wysiwyg/dialog";
 
 var _t = core._t;
 

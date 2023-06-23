@@ -1,5 +1,5 @@
-/** @odoo-module alias=web.ActionMixin **/
-    
+/** @odoo-module **/
+
     /**
      * We define here the ActionMixin, the generic notion of action (from the point
      * of view of the web client).  In short, an action is a widget which controls
@@ -20,8 +20,8 @@
      * @extends WidgetAdapterMixin
      */
 
-    import core from "web.core";
-    import { WidgetAdapterMixin } from "web.OwlCompatibility";
+    import core from "@web/legacy/js/services/core";
+    import { WidgetAdapterMixin } from "@web/legacy/js/owl_compatibility";
 
     const ActionMixin = Object.assign({}, WidgetAdapterMixin, {
         template: 'Action',

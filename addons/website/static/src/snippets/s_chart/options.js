@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import core from "web.core";
-import {ColorpickerWidget} from "web.Colorpicker";
-import options from "web_editor.snippets.options";
-import weUtils from "web_editor.utils";
+import core from "@web/legacy/js/services/core";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
+import options from "@web_editor/js/editor/snippets.options";
+import weUtils from "@web_editor/js/common/utils";
 
 var _t = core._t;
 

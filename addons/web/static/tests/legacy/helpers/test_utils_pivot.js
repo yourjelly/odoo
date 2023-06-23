@@ -1,6 +1,6 @@
-/** @odoo-module alias=web.test_utils_pivot **/
+/** @odoo-module **/
 
-import testUtilsDom from "web.test_utils_dom";
+import testUtilsDom from "@web/../tests/legacy/helpers/test_utils_dom";
 
 /**
  * Pivot Test Utils

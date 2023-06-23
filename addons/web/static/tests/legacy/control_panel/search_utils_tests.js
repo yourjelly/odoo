@@ -1,13 +1,13 @@
 /** @odoo-module **/
-    
-    import { constructDateDomain } from "web.searchUtils";
-    import testUtils from "web.test_utils";
+
+    import { constructDateDomain } from "@web/legacy/js/control_panel/search_utils";
+    import testUtils from "@web/../tests/legacy/helpers/test_utils";
     import { registry } from "@web/core/registry";
     import { translatedTerms } from "@web/core/l10n/translation";
     import { patchWithCleanup } from "@web/../tests/helpers/utils";
     import { makeTestEnv } from "@web/../tests/helpers/mock_env";
     import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
-    import { _t } from "web.core";
+    import { _t } from "@web/legacy/js/services/core";
 
     const patchDate = testUtils.mock.patchDate;
 

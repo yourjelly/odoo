@@ -1,8 +1,8 @@
 /** @odoo-module **/
-    
-    import DropdownMenu from "web.DropdownMenu";
-    import testUtils from "web.test_utils";
-    import makeTestEnvironment  from "web.test_env";
+
+    import DropdownMenu from "@web/legacy/js/components/dropdown_menu";
+    import testUtils from "@web/../tests/legacy/helpers/test_utils";
+    import makeTestEnvironment  from "@web/../tests/legacy/helpers/test_env";
     import { mount } from "@web/../tests/helpers/utils";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
@@ -74,7 +74,7 @@
 
             const bsDropdown = document.createElement('div');
             bsDropdown.innerHTML = `<div class="dropdown">
-                <button class="btn dropdown-toggle" type="button" 
+                <button class="btn dropdown-toggle" type="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
                     BS Dropdown button
                 </button>

@@ -1,16 +1,16 @@
-/** @odoo-module alias=web.AbstractAction **/
+/** @odoo-module **/
 
 /**
  * We define here the AbstractAction widget, which implements the ActionMixin.
  * All client actions must extend this widget.
  *
- * @module @web/chrome/abstract_action
+ * @module web.AbstractAction
  */
 
-import ActionMixin from "web.ActionMixin";
-import ControlPanel from "web.ControlPanel";
-import Widget from "web.Widget";
-import { ComponentWrapper } from "web.OwlCompatibility";
+import ActionMixin from "@web/legacy/js/chrome/action_mixin";
+import ControlPanel from "@web/legacy/js/control_panel/control_panel";
+import Widget from "@web/legacy/js/core/widget";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 
 const AbstractAction = Widget.extend(ActionMixin, {
     config: {

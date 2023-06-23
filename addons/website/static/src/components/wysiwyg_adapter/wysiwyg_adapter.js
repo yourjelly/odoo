@@ -1,10 +1,10 @@
 /** @odoo-module */
 
-import { ComponentAdapter } from 'web.OwlCompatibility';
+import { ComponentAdapter } from '@web/legacy/js/owl_compatibility';
 
 import { useWowlService } from '@web/legacy/utils';
 import { useHotkey } from '@web/core/hotkeys/hotkey_hook';
-import { setEditableWindow } from 'web_editor.utils';
+import weUtils from '@web_editor/js/common/utils';
 import { useBus } from "@web/core/utils/hooks";
 
 import { EditMenuDialog, MenuDialog } from "../dialog/edit_menu";
@@ -62,7 +62,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             // Set utils functions' editable window to the current iframe's window.
             // This allows those function to access the correct styles definitions,
             // document element, etc.
-            setEditableWindow(this.websiteService.contentWindow);
+            weUtils.setEditableWindow(this.websiteService.contentWindow);
             this.switchableRelatedViews = Promise.resolve(switchableRelatedViews);
         });
 
@@ -128,7 +128,7 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             if (this.dummyWidgetEl) {
                 this.dummyWidgetEl.remove();
                 document.body.classList.remove('editor_has_dummy_snippets');
-                setEditableWindow(window);
+                weUtils.setEditableWindow(window);
             }
         });
     }

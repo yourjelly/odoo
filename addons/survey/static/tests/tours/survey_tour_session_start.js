@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import surveySessionTools from "survey.session_tour_tools";
+import surveySessionTools from "@survey/../tests/tours/survey_tour_session_tools";
 
 /**
  * Small tour that will open the session manager and check

@@ -19,12 +19,16 @@ import { effectService } from "@web/core/effects/effect_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { menuService } from "@web/webclient/menus/menu_service";
 import { WebClient } from "@web/webclient/webclient";
-import AbstractService from "web.AbstractService";
-import ActionMenus from "web.ActionMenus";
-import basicFields from "web.basic_fields";
-import Registry from "web.Registry";
-import core from "web.core";
-import makeTestEnvironment from "web.test_env";
+// This import is needed because of it's sideeffects, for exemple :
+// @web/../tests/legacy/helpers/test_utils easyload xml templates at line : 124:130.
+// Also it set the autocomplete delay time for the field Many2One at 0 for the tests at line : 132:137
+import "web.test_legacy";
+import AbstractService from "@web/legacy/js/core/abstract_service";
+import ActionMenus from "@web/legacy/js/components/action_menus";
+import basicFields from "@web/legacy/js/fields/basic_fields";
+import Registry from "@web/legacy/js/core/registry";
+import core from "@web/legacy/js/services/core";
+import makeTestEnvironment from "@web/../tests/legacy/helpers/test_env";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import {
@@ -43,14 +47,14 @@ import {
     patchWithCleanup,
 } from "../helpers/utils";
 import session from "web.session";
-import LegacyMockServer from "web.MockServer";
-import Widget from "web.Widget";
+import LegacyMockServer from "@web/../tests/legacy/helpers/mock_server";
+import Widget from "@web/legacy/js/core/widget";
 import { uiService } from "@web/core/ui/ui_service";
 import { ClientActionAdapter } from "@web/legacy/action_adapters";
 import { commandService } from "@web/core/commands/command_service";
 import { ConnectionAbortedError } from "@web/core/network/rpc_service";
 import { CustomFavoriteItem } from "@web/search/custom_favorite_item/custom_favorite_item";
-import { standaloneAdapter } from "web.OwlCompatibility";
+import { standaloneAdapter } from "@web/legacy/js/owl_compatibility";
 import { overlayService } from "@web/core/overlay/overlay_service";
 
 import { Component, onMounted, xml } from "@odoo/owl";

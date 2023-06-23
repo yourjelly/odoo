@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import testUtils from "web.test_utils";
+import testUtils from "@web/../tests/legacy/helpers/test_utils";
 import { mount } from "@web/../tests/helpers/utils";
 import { useService } from "@web/core/utils/hooks";
 import { numberBufferService } from "@point_of_sale/app/utils/number_buffer_service";

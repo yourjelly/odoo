@@ -1,15 +1,9 @@
-/** @odoo-module alias=wysiwyg.widgets.LinkTools **/
+/** @odoo-module **/
 
-import Link from "wysiwyg.widgets.Link";
-import {ColorPaletteWidget} from "web_editor.ColorPalette";
-import {ColorpickerWidget} from "web.Colorpicker";
-import {
-    computeColorClasses,
-    getCSSVariableValue,
-    getColorClass,
-    getNumericAndUnit,
-    isColorGradient,
-} from "web_editor.utils";
+import Link from "@web_editor/js/wysiwyg/widgets/link";
+import {ColorPaletteWidget} from "@web_editor/js/wysiwyg/widgets/color_palette";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
+import weUtils from "@web_editor/js/common/utils";
 
 /**
  * Allows to customize link content and style.
@@ -211,7 +205,7 @@ const LinkTools = Link.extend({
         if (
             !textClass ||
             !colorPickerFg ||
-            !computeColorClasses(colorPickerFg.getColorNames(), 'text-').includes(textClass)
+            !weUtils.computeColorClasses(colorPickerFg.getColorNames(), 'text-').includes(textClass)
         ) {
             textClass = '';
         }
@@ -220,7 +214,7 @@ const LinkTools = Link.extend({
         if (
             !fillClass ||
             !colorPickerBg ||
-            !computeColorClasses(colorPickerBg.getColorNames(), 'bg-').includes(fillClass)
+            !weUtils.computeColorClasses(colorPickerBg.getColorNames(), 'bg-').includes(fillClass)
         ) {
             fillClass = '';
         }
@@ -267,7 +261,7 @@ const LinkTools = Link.extend({
             this._updateColorpicker('border-color');
 
             const borderWidth = this.linkEl.style['border-width'];
-            const numberAndUnit = getNumericAndUnit(borderWidth);
+            const numberAndUnit = weUtils.getNumericAndUnit(borderWidth);
             this.$('.link-custom-color-border input').val(numberAndUnit ? numberAndUnit[0] : "1");
             let borderStyle = this.linkEl.style['border-style'];
             if (!borderStyle || borderStyle === 'none') {
@@ -294,14 +288,14 @@ const LinkTools = Link.extend({
         // Update selected color.
         const colorNames = colorpicker.getColorNames();
         let color = this.linkEl.style[cssProperty];
-        const colorClasses = prefix ? computeColorClasses(colorNames, prefix) : [];
-        const colorClass = prefix && getColorClass(this.linkEl, colorNames, prefix);
+        const colorClasses = prefix ? weUtils.computeColorClasses(colorNames, prefix) : [];
+        const colorClass = prefix && weUtils.getColorClass(this.linkEl, colorNames, prefix);
         const isColorClass = colorClasses.includes(colorClass);
         if (isColorClass) {
             color = colorClass;
         } else if (cssProperty === 'background-color') {
             const gradientColor = this.linkEl.style['background-image'];
-            if (isColorGradient(gradientColor)) {
+            if (weUtils.isColorGradient(gradientColor)) {
                 color = gradientColor;
             }
         }
@@ -316,14 +310,14 @@ const LinkTools = Link.extend({
 
         // Update preview.
         const $colorPreview = this.$('.link-custom-color-' + (cssProperty === 'border-color' ? 'border' : cssProperty === 'color' ? 'text' : 'fill') + ' .o_we_color_preview');
-        const previewClasses = computeColorClasses(colorNames, 'bg-');
+        const previewClasses = weUtils.computeColorClasses(colorNames, 'bg-');
         $colorPreview[0].classList.remove(...previewClasses);
         if (isColorClass) {
             $colorPreview.css('background-color', `var(--we-cp-${color.replace(prefix, '')}`);
             $colorPreview.css('background-image', '');
         } else {
-            $colorPreview.css('background-color', isColorGradient(color) ? 'rgba(0, 0, 0, 0)' : color);
-            $colorPreview.css('background-image', isColorGradient(color) ? color : '');
+            $colorPreview.css('background-color', weUtils.isColorGradient(color) ? 'rgba(0, 0, 0, 0)' : color);
+            $colorPreview.css('background-image', weUtils.isColorGradient(color) ? color : '');
         }
     },
     /**
@@ -354,13 +348,13 @@ const LinkTools = Link.extend({
 
             let color = ev.data.color;
             const colorNames = colorpicker.getColorNames();
-            const colorClasses = prefix ? computeColorClasses(colorNames, prefix) : [];
+            const colorClasses = prefix ? weUtils.computeColorClasses(colorNames, prefix) : [];
             const colorClass = `${prefix}${color}`;
             if (colorClasses.includes(colorClass)) {
                 color = colorClass;
             } else if (colorNames.includes(color)) {
                 // Store as color value.
-                color = getCSSVariableValue(color);
+                color = weUtils.getCSSVariableValue(color);
             }
             this.customColors[cssProperty] = color;
             this.applyLinkToDom(this._getData());

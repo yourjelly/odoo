@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.mvc **/
+/** @odoo-module **/
 
 /**
  * This file contains a 'formalization' of a MVC pattern, applied to Odoo
@@ -28,10 +28,10 @@
  *     simple as possible.
  */
 
-import Class from "web.Class";
-import mixins from "web.mixins";
-import ServicesMixin from "web.ServicesMixin";
-import Widget from "web.Widget";
+import Class from "@web/legacy/js/core/class";
+import mixins from "@web/legacy/js/core/mixins";
+import ServicesMixin from "@web/legacy/js/core/service_mixins";
+import Widget from "@web/legacy/js/core/widget";
 import { loadBundle } from "@web/core/assets";
 
 

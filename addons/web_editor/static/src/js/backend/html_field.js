@@ -1,16 +1,16 @@
 /** @odoo-module **/
 
-import legacyEnv from 'web.commonEnv';
-import { ComponentAdapter } from 'web.OwlCompatibility';
+import legacyEnv from '@web/legacy/js/common_env';
+import { ComponentAdapter } from '@web/legacy/js/owl_compatibility';
 import { registry } from "@web/core/registry";
 import { _lt } from "@web/core/l10n/translation";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { getWysiwygClass } from 'web_editor.loader';
+import { getWysiwygClass } from '@web_editor/js/frontend/loader';
 import { QWebPlugin } from '@web_editor/js/backend/QWebPlugin';
 import { TranslationButton } from "@web/views/fields/translation_button";
 import { useDynamicPlaceholder } from "@web/views/fields/dynamic_placeholder_hook";
-import { QWeb } from 'web.core';
-import ajax from 'web.ajax';
+import { qweb as QWeb } from "@web/legacy/js/services/core";
+import ajax from '@web/legacy/js/core/ajax';
 import {
     useBus,
     useService,
@@ -21,7 +21,7 @@ import {
     getAdjacentNextSiblings,
     getRangePosition
 } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
-import { toInline } from 'web_editor.convertInline';
+import { toInline } from '@web_editor/js/backend/convert_inline';
 import { loadJS } from '@web/core/assets';
 import {
     Component,

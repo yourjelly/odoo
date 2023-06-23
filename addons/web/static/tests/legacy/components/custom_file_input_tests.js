@@ -1,7 +1,7 @@
 /** @odoo-module **/
-    
-    import CustomFileInput from "web.CustomFileInput";
-    import testUtils from "web.test_utils";
+
+    import CustomFileInput from "@web/legacy/js/components/custom_file_input";
+    import testUtils from "@web/../tests/legacy/helpers/test_utils";
 
     const { createComponent } = testUtils;
 

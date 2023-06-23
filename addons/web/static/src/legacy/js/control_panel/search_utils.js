@@ -1,8 +1,8 @@
-/** @odoo-module alias=web.searchUtils **/
-    
-    import { _lt, _t } from "web.core";
-    import Domain from "web.Domain";
-    import pyUtils from "web.py_utils";
+/** @odoo-module **/
+
+    import { _lt, _t } from "@web/legacy/js/services/core";
+    import Domain from "@web/legacy/js/core/domain";
+    import pyUtils from "@web/legacy/js/core/py_utils";
 
     //-------------------------------------------------------------------------
     // Constants
@@ -204,7 +204,7 @@
      * @param {string} [comparisonOptionId]
      * @returns {{ domain: string, description: string }}
      */
-    function constructDateDomain(
+    export function constructDateDomain(
         referenceMoment,
         fieldName,
         fieldType,

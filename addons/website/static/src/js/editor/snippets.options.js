@@ -1,16 +1,16 @@
-/** @odoo-module alias=website.editor.snippets.options **/
+/** @odoo-module **/
 
-import {ColorpickerWidget} from "web.Colorpicker";
-import core from "web.core";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
+import core from "@web/legacy/js/services/core";
 import { loadBundle, loadCSS } from "@web/core/assets";
-import Dialog from "web.Dialog";
-import {Markup, sprintf} from "web.utils";
-import weUtils from "web_editor.utils";
-import options from "web_editor.snippets.options";
+import Dialog from "@web/legacy/js/core/dialog";
+import { Markup, sprintf } from "@web/legacy/js/core/utils";
+import weUtils from "@web_editor/js/common/utils";
+import options from "@web_editor/js/editor/snippets.options";
 import wLinkPopoverWidget from "@website/js/widgets/link_popover_widget";
-import wUtils from "website.utils";
-import {isImageSupportedForStyle} from "web_editor.image_processing";
-import "website.s_popup_options";
+import wUtils from "@website/js/utils";
+import {isImageSupportedForStyle} from "@web_editor/js/editor/image_processing";
+import "@website/snippets/s_popup/options";
 import { range } from "@web/core/utils/numbers";
 import {Domain} from "@web/core/domain";
 
@@ -2884,8 +2884,8 @@ options.registry.CookiesBar = options.registry.SnippetPopup.extend({
         }));
 
         const $content = this.$target.find('.modal-content');
-        
-        // The order of selectors is significant since certain selectors may be 
+
+        // The order of selectors is significant since certain selectors may be
         // nested within others, and we want to preserve the nested ones.
         // For instance, in the case of '.o_cookies_bar_text_policy' nested
         // inside '.o_cookies_bar_text_secondary', the parent selector should be

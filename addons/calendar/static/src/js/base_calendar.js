@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import BasicModel from 'web.BasicModel';
+import BasicModel from '@web/legacy/js/views/basic/basic_model';
 
 BasicModel.include({
     /**

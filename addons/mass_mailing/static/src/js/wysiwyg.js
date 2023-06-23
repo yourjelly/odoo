@@ -1,9 +1,9 @@
-/** @odoo-module alias=mass_mailing.wysiwyg **/
+/** @odoo-module **/
 
-import Wysiwyg from "web_editor.wysiwyg";
-import MassMailingSnippetsMenu from "mass_mailing.snippets.editor";
+import Wysiwyg from "@web_editor/js/wysiwyg/wysiwyg";
+import MassMailingSnippetsMenu from "@mass_mailing/js/snippets.editor";
 import {closestElement} from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
-import Toolbar from "web_editor.toolbar";
+import Toolbar from "@web_editor/js/editor/toolbar";
 
 const MassMailingWysiwyg = Wysiwyg.extend({
     //--------------------------------------------------------------------------

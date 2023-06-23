@@ -1,17 +1,17 @@
-/** @odoo-module alias=web.viewUtils **/
+/** @odoo-module **/
 
 
 import { unique } from '@web/core/utils/arrays';
 import { omit } from '@web/core/utils/objects';
-import * as dom from 'web.dom';
-import * as utils from 'web.utils';
+import dom from '@web/legacy/js/core/dom';
+import utils from '@web/legacy/js/core/utils';
 
 var viewUtils = {
     /**
      * Since a date field can have a granularity in a groupby (date_field:granularity),
      * when we require only the field name, we have to split out the
      * eventual granularity
-     * 
+     *
      * @param {string} groupedBy the groupby with the eventual granularity
      * @returns {string}
      */

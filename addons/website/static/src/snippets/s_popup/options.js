@@ -1,6 +1,6 @@
-/** @odoo-module alias=website.s_popup_options **/
+/** @odoo-module **/
 
-import options from "web_editor.snippets.options";
+import options from "@web_editor/js/editor/snippets.options";
 
 options.registry.SnippetPopup = options.Class.extend({
     /**

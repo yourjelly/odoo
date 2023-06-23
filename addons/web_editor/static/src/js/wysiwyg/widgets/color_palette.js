@@ -1,14 +1,14 @@
-/** @odoo-module alias=web_editor.ColorPalette **/
+/** @odoo-module **/
 
 import session from "web.session";
-import {ColorpickerWidget} from "web.Colorpicker";
-import Widget from "web.Widget";
-import customColors from "web_editor.custom_colors";
-import weUtils from "web_editor.utils";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
+import Widget from "@web/legacy/js/core/widget";
+import customColors from "@web_editor/js/editor/custom_colors";
+import weUtils from "@web_editor/js/common/utils";
 
 let colorpickerArch;
 
-const ColorPaletteWidget = Widget.extend({
+export const ColorPaletteWidget = Widget.extend({
     template: 'web_editor.snippet.option.colorpicker',
     events: {
         'click .o_we_color_btn': '_onColorButtonClick',

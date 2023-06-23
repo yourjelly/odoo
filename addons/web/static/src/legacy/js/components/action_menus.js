@@ -1,8 +1,8 @@
-/** @odoo-module alias=web.ActionMenus **/
-    
-    import Context from "web.Context";
-    import DropdownMenu from "web.DropdownMenu";
-    import Registry from "web.Registry";
+/** @odoo-module **/
+
+    import Context from "@web/legacy/js/core/context";
+    import DropdownMenu from "@web/legacy/js/components/dropdown_menu";
+    import Registry from "@web/legacy/js/core/registry";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
     const {

@@ -7,7 +7,7 @@ import {
     dragAndDrop,
     getFixture,
 } from '@web/../tests/helpers/utils';
-import testUtils from 'web.test_utils';
+import testUtils from '@web/../tests/legacy/helpers/test_utils';
 import { serializeDateTime } from "@web/core/l10n/dates";
 const find = testUtils.dom.find;
 

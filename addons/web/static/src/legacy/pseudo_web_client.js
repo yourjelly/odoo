@@ -1,5 +1,5 @@
-/** @odoo-module alias=web.pseudo_web_client **/
-import FakeWebClient from "web.web_client";
+/** @odoo-module **/
+import FakeWebClient from "@web/legacy/web_client";
 
 function makeLegacyWebClientService(legacyEnv) {
     const legacyPseudoWebClient = {

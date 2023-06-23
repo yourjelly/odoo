@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_utils_graph **/
+/** @odoo-module **/
 
 /**
  * Graph Test Utils

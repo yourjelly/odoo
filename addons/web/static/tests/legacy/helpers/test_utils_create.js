@@ -1,5 +1,5 @@
-/** @odoo-module alias=web.test_utils_create **/
-    
+/** @odoo-module **/
+
     /**
      * Create Test Utils
      *
@@ -9,13 +9,13 @@
      * testUtils file.
      */
 
-    import ActionMenus from "web.ActionMenus";
-    import concurrency from "web.concurrency";
+    import ActionMenus from "@web/legacy/js/components/action_menus";
+    import concurrency from "@web/legacy/js/core/concurrency";
     import { useListener } from "@web/core/utils/hooks";
-    import dom from "web.dom";
-    import Registry from "web.Registry";
-    import testUtilsMock from "web.test_utils_mock";
-    import Widget from "web.Widget";
+    import dom from "@web/legacy/js/core/dom";
+    import Registry from "@web/legacy/js/core/registry";
+    import testUtilsMock from "@web/../tests/legacy/helpers/test_utils_mock";
+    import Widget from "@web/legacy/js/core/widget";
     import { destroy, getFixture, mount, useChild } from "@web/../tests/helpers/utils";
     import { registerCleanup } from "@web/../tests/helpers/cleanup";
     import { LegacyComponent } from "@web/legacy/legacy_component";

@@ -1,7 +1,7 @@
 /** @odoo-module **/
-    
-    import Pager from "web.Pager";
-    import testUtils from "web.test_utils";
+
+    import Pager from "@web/legacy/js/components/pager";
+    import testUtils from "@web/../tests/legacy/helpers/test_utils";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 
     const { createComponent } = testUtils;

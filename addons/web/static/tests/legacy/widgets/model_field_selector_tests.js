@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import ModelFieldSelector from "web.ModelFieldSelector";
-import testUtils from "web.test_utils";
+import ModelFieldSelector from "@web/legacy/js/widgets/model_field_selector";
+import testUtils from "@web/../tests/legacy/helpers/test_utils";
 
 QUnit.module('widgets', {}, function () {
 

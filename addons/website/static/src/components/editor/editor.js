@@ -1,6 +1,6 @@
 /** @odoo-module */
 // Legacy services
-import legacyEnv from 'web.commonEnv';
+import legacyEnv from '@web/legacy/js/common_env';
 import { useService } from '@web/core/utils/hooks';
 import { WysiwygAdapterComponent } from '../wysiwyg_adapter/wysiwyg_adapter';
 import { useActiveElement } from '@web/core/ui/ui_service';

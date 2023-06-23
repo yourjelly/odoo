@@ -1,8 +1,8 @@
-/** @odoo-module alias=web.ModelFieldSelector **/
+/** @odoo-module **/
 
-import core from "web.core";
-import Widget from "web.Widget";
-import ModelFieldSelectorPopover from "web.ModelFieldSelectorPopover";
+import core from "@web/legacy/js/services/core";
+import Widget from "@web/legacy/js/core/widget";
+import ModelFieldSelectorPopover from "@web/legacy/js/widgets/model_field_selector_popover";
 
  /**
  * The ModelFieldSelector widget can be used to display/select a particular

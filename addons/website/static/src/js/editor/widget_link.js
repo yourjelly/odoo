@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import weWidgets from "wysiwyg.widgets";
-import wUtils from "website.utils";
+import weWidgets from "@web_editor/js/wysiwyg/widgets/widgets";
+import wUtils from "@website/js/utils";
 import { debounce } from "@web/core/utils/timing";
 
 weWidgets.LinkTools.include({

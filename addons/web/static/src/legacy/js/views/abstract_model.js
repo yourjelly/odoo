@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.AbstractModel **/
+/** @odoo-module **/
 
 /**
  * An AbstractModel is the M in MVC.  We tend to think of MVC more on the server
@@ -28,8 +28,8 @@
  * sample model.
  */
 
-import fieldUtils from 'web.field_utils';
-import mvc from 'web.mvc';
+import fieldUtils from '@web/legacy/js/fields/field_utils';
+import mvc from '@web/legacy/js/core/mvc';
 
 
 var AbstractModel = mvc.Model.extend({

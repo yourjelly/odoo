@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.FieldManagerMixin **/
+/** @odoo-module **/
 
 /**
  * The FieldManagerMixin is a mixin, designed to do the plumbing between field
@@ -8,8 +8,8 @@
  */
 
 import { pick } from '@web/core/utils/objects';
-import BasicModel from 'web.BasicModel';
-import concurrency from 'web.concurrency';
+import BasicModel from '@web/legacy/js/views/basic/basic_model';
+import concurrency from '@web/legacy/js/core/concurrency';
 
 var FieldManagerMixin = {
     custom_events: {

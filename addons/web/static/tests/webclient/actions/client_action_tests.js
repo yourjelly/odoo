@@ -2,9 +2,9 @@
 
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
-import core from "web.core";
-import AbstractAction from "web.AbstractAction";
-import testUtils from "web.test_utils";
+import core from "@web/legacy/js/services/core";
+import AbstractAction from "@web/legacy/js/chrome/abstract_action";
+import testUtils from "@web/../tests/legacy/helpers/test_utils";
 import { registerCleanup } from "../../helpers/cleanup";
 import {
     click,

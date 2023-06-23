@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_utils **/
+/** @odoo-module **/
 
     /**
      * Test Utils
@@ -9,18 +9,18 @@
      * instance of a view, appended in the dom, ready to be tested.
      */
 
-    import testUtilsCreate from "web.test_utils_create";
-    import testUtilsControlPanel from "web.test_utils_control_panel";
-    import testUtilsDom from "web.test_utils_dom";
-    import testUtilsFields from "web.test_utils_fields";
-    import testUtilsFile from "web.test_utils_file";
-    import testUtilsForm from "web.test_utils_form";
-    import testUtilsGraph from "web.test_utils_graph";
-    import testUtilsKanban from "web.test_utils_kanban";
-    import testUtilsMock from "web.test_utils_mock";
-    import testUtilsModal from "web.test_utils_modal";
-    import testUtilsPivot from "web.test_utils_pivot";
-    import tools from "web.tools";
+    import testUtilsCreate from "@web/../tests/legacy/helpers/test_utils_create";
+    import testUtilsControlPanel from "@web/../tests/legacy/helpers/test_utils_control_panel";
+    import testUtilsDom from "@web/../tests/legacy/helpers/test_utils_dom";
+    import testUtilsFields from "@web/../tests/legacy/helpers/test_utils_fields";
+    import testUtilsFile from "@web/../tests/legacy/helpers/test_utils_file";
+    import testUtilsForm from "@web/../tests/legacy/helpers/test_utils_form";
+    import testUtilsGraph from "@web/../tests/legacy/helpers/test_utils_graph";
+    import testUtilsKanban from "@web/../tests/legacy/helpers/test_utils_kanban";
+    import testUtilsMock from "@web/../tests/legacy/helpers/test_utils_mock";
+    import testUtilsModal from "@web/../tests/legacy/helpers/test_utils_modal";
+    import testUtilsPivot from "@web/../tests/legacy/helpers/test_utils_pivot";
+    import tools from "@web/legacy/js/tools/tools";
 
 
     function deprecated(fn, type) {
@@ -88,7 +88,7 @@
      *
      * @returns {Promise}
      */
-    async function nextTick() {
+    export async function nextTick() {
         return testUtilsDom.returnAfterNextAnimationFrame();
     }
 
@@ -111,83 +111,115 @@
         return testUtilsDom.returnAfterNextAnimationFrame();
     }
 
+    export const dom = {
+        triggerKeypressEvent: testUtilsDom.triggerKeypressEvent,
+        triggerMouseEvent: testUtilsDom.triggerMouseEvent,
+        triggerPositionalMouseEvent: testUtilsDom.triggerPositionalMouseEvent,
+        triggerPositionalTapEvents: testUtilsDom.triggerPositionalTapEvents,
+        dragAndDrop: testUtilsDom.dragAndDrop,
+        find: testUtilsDom.findItem,
+        getNode: testUtilsDom.getNode,
+        openDatepicker: testUtilsDom.openDatepicker,
+        click: testUtilsDom.click,
+        clickFirst: testUtilsDom.clickFirst,
+        clickLast: testUtilsDom.clickLast,
+        triggerEvents: testUtilsDom.triggerEvents,
+        triggerEvent: testUtilsDom.triggerEvent,
+    };
+
+    export const form = {
+        clickEdit: testUtilsForm.clickEdit,
+        clickSave: testUtilsForm.clickSave,
+        clickCreate: testUtilsForm.clickCreate,
+        clickDiscard: testUtilsForm.clickDiscard,
+        reload: testUtilsForm.reload,
+    };
+
+    export const fields = {
+        many2one: {
+            createAndEdit: testUtilsFields.clickM2OCreateAndEdit,
+            clickOpenDropdown: testUtilsFields.clickOpenM2ODropdown,
+            clickHighlightedItem: testUtilsFields.clickM2OHighlightedItem,
+            clickItem: testUtilsFields.clickM2OItem,
+            searchAndClickItem: testUtilsFields.searchAndClickM2OItem,
+        },
+        editInput: testUtilsFields.editInput,
+        editSelect: testUtilsFields.editSelect,
+        editAndTrigger: testUtilsFields.editAndTrigger,
+        triggerKey: testUtilsFields.triggerKey,
+        triggerKeydown: testUtilsFields.triggerKeydown,
+        triggerKeyup: testUtilsFields.triggerKeyup,
+    };
+
+    export const mock = {
+        addMockEnvironment: testUtilsMock.addMockEnvironment,
+        addMockEnvironmentOwl: testUtilsMock.addMockEnvironmentOwl,
+        intercept: testUtilsMock.intercept,
+        patch: testUtilsMock.patch,
+        patchDate: testUtilsMock.patchDate,
+        unpatch: testUtilsMock.unpatch,
+        getView: testUtilsMock.getView,
+        patchSetTimeout: testUtilsMock.patchSetTimeout,
+    };
+
+    export const controlPanel = {
+        // Generic interactions
+        toggleMenu: testUtilsControlPanel.toggleMenu,
+        toggleMenuItem: testUtilsControlPanel.toggleMenuItem,
+        toggleMenuItemOption: testUtilsControlPanel.toggleMenuItemOption,
+        isItemSelected: testUtilsControlPanel.isItemSelected,
+        isOptionSelected: testUtilsControlPanel.isOptionSelected,
+        getMenuItemTexts: testUtilsControlPanel.getMenuItemTexts,
+        // Button interactions
+        getButtons: testUtilsControlPanel.getButtons,
+        // FilterMenu interactions
+        toggleFilterMenu: testUtilsControlPanel.toggleFilterMenu,
+        toggleAddCustomFilter: testUtilsControlPanel.toggleAddCustomFilter,
+        applyFilter: testUtilsControlPanel.applyFilter,
+        addCondition: testUtilsControlPanel.addCondition,
+        // GroupByMenu interactions
+        toggleGroupByMenu: testUtilsControlPanel.toggleGroupByMenu,
+        toggleAddCustomGroup: testUtilsControlPanel.toggleAddCustomGroup,
+        selectGroup: testUtilsControlPanel.selectGroup,
+        applyGroup: testUtilsControlPanel.applyGroup,
+        // FavoriteMenu interactions
+        toggleFavoriteMenu: testUtilsControlPanel.toggleFavoriteMenu,
+        toggleSaveFavorite: testUtilsControlPanel.toggleSaveFavorite,
+        editFavoriteName: testUtilsControlPanel.editFavoriteName,
+        saveFavorite: testUtilsControlPanel.saveFavorite,
+        deleteFavorite: testUtilsControlPanel.deleteFavorite,
+        // ComparisonMenu interactions
+        toggleComparisonMenu: testUtilsControlPanel.toggleComparisonMenu,
+        // SearchBar interactions
+        getFacetTexts: testUtilsControlPanel.getFacetTexts,
+        removeFacet: testUtilsControlPanel.removeFacet,
+        editSearch: testUtilsControlPanel.editSearch,
+        validateSearch: testUtilsControlPanel.validateSearch,
+        // Action menus interactions
+        toggleActionMenu: testUtilsControlPanel.toggleActionMenu,
+        // Pager interactions
+        pagerPrevious: testUtilsControlPanel.pagerPrevious,
+        pagerNext: testUtilsControlPanel.pagerNext,
+        getPagerValue: testUtilsControlPanel.getPagerValue,
+        getPagerSize: testUtilsControlPanel.getPagerSize,
+        setPagerValue: testUtilsControlPanel.setPagerValue,
+        // View switcher
+        switchView: testUtilsControlPanel.switchView,
+    };
+
+    export const file = {
+        createFile: testUtilsFile.createFile,
+        dragoverFile: testUtilsFile.dragoverFile,
+        dropFile: testUtilsFile.dropFile,
+        dropFiles: testUtilsFile.dropFiles,
+        inputFiles: testUtilsFile.inputFiles,
+    };
+
     export default {
-        mock: {
-            addMockEnvironment: testUtilsMock.addMockEnvironment,
-            addMockEnvironmentOwl: testUtilsMock.addMockEnvironmentOwl,
-            intercept: testUtilsMock.intercept,
-            patch: testUtilsMock.patch,
-            patchDate: testUtilsMock.patchDate,
-            unpatch: testUtilsMock.unpatch,
-            getView: testUtilsMock.getView,
-            patchSetTimeout: testUtilsMock.patchSetTimeout,
-        },
-        controlPanel: {
-            // Generic interactions
-            toggleMenu: testUtilsControlPanel.toggleMenu,
-            toggleMenuItem: testUtilsControlPanel.toggleMenuItem,
-            toggleMenuItemOption: testUtilsControlPanel.toggleMenuItemOption,
-            isItemSelected: testUtilsControlPanel.isItemSelected,
-            isOptionSelected: testUtilsControlPanel.isOptionSelected,
-            getMenuItemTexts: testUtilsControlPanel.getMenuItemTexts,
-            // Button interactions
-            getButtons: testUtilsControlPanel.getButtons,
-            // FilterMenu interactions
-            toggleFilterMenu: testUtilsControlPanel.toggleFilterMenu,
-            toggleAddCustomFilter: testUtilsControlPanel.toggleAddCustomFilter,
-            applyFilter: testUtilsControlPanel.applyFilter,
-            addCondition: testUtilsControlPanel.addCondition,
-            // GroupByMenu interactions
-            toggleGroupByMenu: testUtilsControlPanel.toggleGroupByMenu,
-            toggleAddCustomGroup: testUtilsControlPanel.toggleAddCustomGroup,
-            selectGroup: testUtilsControlPanel.selectGroup,
-            applyGroup: testUtilsControlPanel.applyGroup,
-            // FavoriteMenu interactions
-            toggleFavoriteMenu: testUtilsControlPanel.toggleFavoriteMenu,
-            toggleSaveFavorite: testUtilsControlPanel.toggleSaveFavorite,
-            editFavoriteName: testUtilsControlPanel.editFavoriteName,
-            saveFavorite: testUtilsControlPanel.saveFavorite,
-            deleteFavorite: testUtilsControlPanel.deleteFavorite,
-            // ComparisonMenu interactions
-            toggleComparisonMenu: testUtilsControlPanel.toggleComparisonMenu,
-            // SearchBar interactions
-            getFacetTexts: testUtilsControlPanel.getFacetTexts,
-            removeFacet: testUtilsControlPanel.removeFacet,
-            editSearch: testUtilsControlPanel.editSearch,
-            validateSearch: testUtilsControlPanel.validateSearch,
-            // Action menus interactions
-            toggleActionMenu: testUtilsControlPanel.toggleActionMenu,
-            // Pager interactions
-            pagerPrevious: testUtilsControlPanel.pagerPrevious,
-            pagerNext: testUtilsControlPanel.pagerNext,
-            getPagerValue: testUtilsControlPanel.getPagerValue,
-            getPagerSize: testUtilsControlPanel.getPagerSize,
-            setPagerValue: testUtilsControlPanel.setPagerValue,
-            // View switcher
-            switchView: testUtilsControlPanel.switchView,
-        },
-        dom: {
-            triggerKeypressEvent: testUtilsDom.triggerKeypressEvent,
-            triggerMouseEvent: testUtilsDom.triggerMouseEvent,
-            triggerPositionalMouseEvent: testUtilsDom.triggerPositionalMouseEvent,
-            triggerPositionalTapEvents: testUtilsDom.triggerPositionalTapEvents,
-            dragAndDrop: testUtilsDom.dragAndDrop,
-            find: testUtilsDom.findItem,
-            getNode: testUtilsDom.getNode,
-            openDatepicker: testUtilsDom.openDatepicker,
-            click: testUtilsDom.click,
-            clickFirst: testUtilsDom.clickFirst,
-            clickLast: testUtilsDom.clickLast,
-            triggerEvents: testUtilsDom.triggerEvents,
-            triggerEvent: testUtilsDom.triggerEvent,
-        },
-        form: {
-            clickEdit: testUtilsForm.clickEdit,
-            clickSave: testUtilsForm.clickSave,
-            clickCreate: testUtilsForm.clickCreate,
-            clickDiscard: testUtilsForm.clickDiscard,
-            reload: testUtilsForm.reload,
-        },
+        mock: mock,
+        controlPanel: controlPanel,
+        dom: dom,
+        form: form,
         graph: {
             reload: testUtilsGraph.reload,
         },
@@ -206,28 +238,8 @@
             toggleMeasuresDropdown: testUtilsPivot.toggleMeasuresDropdown,
             reload: testUtilsPivot.reload,
         },
-        fields: {
-            many2one: {
-                createAndEdit: testUtilsFields.clickM2OCreateAndEdit,
-                clickOpenDropdown: testUtilsFields.clickOpenM2ODropdown,
-                clickHighlightedItem: testUtilsFields.clickM2OHighlightedItem,
-                clickItem: testUtilsFields.clickM2OItem,
-                searchAndClickItem: testUtilsFields.searchAndClickM2OItem,
-            },
-            editInput: testUtilsFields.editInput,
-            editSelect: testUtilsFields.editSelect,
-            editAndTrigger: testUtilsFields.editAndTrigger,
-            triggerKey: testUtilsFields.triggerKey,
-            triggerKeydown: testUtilsFields.triggerKeydown,
-            triggerKeyup: testUtilsFields.triggerKeyup,
-        },
-        file: {
-            createFile: testUtilsFile.createFile,
-            dragoverFile: testUtilsFile.dragoverFile,
-            dropFile: testUtilsFile.dropFile,
-            dropFiles: testUtilsFile.dropFiles,
-            inputFiles: testUtilsFile.inputFiles,
-        },
+        fields: fields,
+        file: file,
 
         createComponent: testUtilsCreate.createComponent,
         createAsyncView: testUtilsCreate.createView,

@@ -7,7 +7,7 @@ import { registry } from "@web/core/registry";
 import { tooltipService } from "@web/core/tooltip/tooltip_service";
 import { session } from "@web/session";
 import { click, patchWithCleanup, triggerHotkey } from "@web/../tests/helpers/utils";
-import { nextTick } from "web.test_utils";
+import { nextTick } from "@web/../tests/legacy/helpers/test_utils";
 
 QUnit.module("M2XAvatarUser");
 

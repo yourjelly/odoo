@@ -1,11 +1,11 @@
-/** @odoo-module alias=web_editor.image_processing **/
+/** @odoo-module **/
 
 import { pick } from "@web/core/utils/objects";
 import {getAffineApproximation, getProjective} from "@web_editor/js/editor/perspective_utils";
 
 // Fields returned by cropperjs 'getData' method, also need to be passed when
 // initializing the cropper to reuse the previous crop.
-const cropperDataFields = ['x', 'y', 'width', 'height', 'rotate', 'scaleX', 'scaleY'];
+export const cropperDataFields = ['x', 'y', 'width', 'height', 'rotate', 'scaleX', 'scaleY'];
 const modifierFields = [
     'filter',
     'quality',
@@ -16,7 +16,7 @@ const modifierFields = [
     'resizeWidth',
     'aspectRatio',
 ];
-const isGif = (mimetype) => mimetype === 'image/gif';
+export const isGif = (mimetype) => mimetype === 'image/gif';
 
 // webgl color filters
 const _applyAll = (result, filter, filters) => {
@@ -200,7 +200,7 @@ const glFilters = {
  * @param {HTMLImageElement} img the image to which modifications are applied
  * @returns {string} dataURL of the image with the applied modifications
  */
-async function applyModifications(img, dataOptions = {}) {
+export async function applyModifications(img, dataOptions = {}) {
     const data = Object.assign({
         glFilter: '',
         filter: '#0000',
@@ -344,7 +344,7 @@ async function applyModifications(img, dataOptions = {}) {
  * @param {HTMLImageElement} [img] img element in which to load the image
  * @returns {Promise<HTMLImageElement>} Promise that resolves to the loaded img
  */
-function loadImage(src, img = new Image()) {
+export function loadImage(src, img = new Image()) {
     return new Promise((resolve, reject) => {
         img.addEventListener('load', () => resolve(img), {once: true});
         img.addEventListener('error', reject, {once: true});
@@ -401,7 +401,7 @@ async function _updateImageData(src, key = 'objectURL') {
  * @param {Number} aspectRatio the aspectRatio of the crop box
  * @param {DOMStringMap} dataset dataset containing the cropperDataFields
  */
-async function activateCropper(image, aspectRatio, dataset) {
+export async function activateCropper(image, aspectRatio, dataset) {
     image.src = await _loadImageObjectURL(image.getAttribute('src'));
     $(image).cropper({
         viewMode: 2,
@@ -425,7 +425,7 @@ async function activateCropper(image, aspectRatio, dataset) {
  * @param {string} [attachmentSrc=''] specifies the URL of the corresponding
  * attachment if it can't be found in the 'src' attribute.
  */
-async function loadImageInfo(img, rpc, attachmentSrc = '') {
+export async function loadImageInfo(img, rpc, attachmentSrc = '') {
     const src = attachmentSrc || img.getAttribute('src');
     // If there is a marked originalSrc, the data is already loaded.
     if (img.dataset.originalSrc || !src) {
@@ -452,7 +452,7 @@ async function loadImageInfo(img, rpc, attachmentSrc = '') {
  *     won't be accepted.
  * @returns {Boolean}
  */
-function isImageSupportedForProcessing(mimetype, strict = false) {
+export function isImageSupportedForProcessing(mimetype, strict = false) {
     if (isGif(mimetype)) {
         return !strict;
     }
@@ -462,7 +462,7 @@ function isImageSupportedForProcessing(mimetype, strict = false) {
  * @param {HTMLImageElement} img
  * @returns {Boolean}
  */
-function isImageSupportedForStyle(img) {
+export function isImageSupportedForStyle(img) {
     if (!img.parentElement) {
         return false;
     }
@@ -486,7 +486,7 @@ function isImageSupportedForStyle(img) {
  * @param {Blob} blob
  * @returns {Promise}
  */
-function createDataURL(blob) {
+export function createDataURL(blob) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.addEventListener('load', () => resolve(reader.result));
@@ -496,13 +496,15 @@ function createDataURL(blob) {
     });
 }
 
+export const removeOnImageChangeAttrs = [...cropperDataFields, ...modifierFields, 'aspectRatio']
+
 export default {
     applyModifications,
     cropperDataFields,
     activateCropper,
     loadImageInfo,
     loadImage,
-    removeOnImageChangeAttrs: [...cropperDataFields, ...modifierFields, 'aspectRatio'],
+    removeOnImageChangeAttrs,
     isImageSupportedForProcessing,
     isImageSupportedForStyle,
     createDataURL,

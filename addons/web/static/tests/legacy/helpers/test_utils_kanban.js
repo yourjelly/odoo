@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.test_utils_kanban **/
+/** @odoo-module **/
 
 /**
  * Kanban Test Utils
@@ -9,8 +9,8 @@
  * testUtils file.
  */
 
-import testUtilsDom from "web.test_utils_dom";
-import testUtilsFields from "web.test_utils_fields";
+import testUtilsDom from "@web/../tests/legacy/helpers/test_utils_dom";
+import testUtilsFields from "@web/../tests/legacy/helpers/test_utils_fields";
 
 /**
  * Clicks on the Create button in a kanban view. Note that this method checks that

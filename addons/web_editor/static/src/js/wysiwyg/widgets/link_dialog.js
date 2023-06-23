@@ -1,7 +1,7 @@
-/** @odoo-module alias=wysiwyg.widgets.LinkDialog **/
+/** @odoo-module **/
 
-import Dialog from "wysiwyg.widgets.Dialog";
-import Link from "wysiwyg.widgets.Link";
+import Dialog from "@web_editor/js/wysiwyg/dialog";
+import Link from "@web_editor/js/wysiwyg/widgets/link";
 
 
 // This widget is there only to extend Link and be instantiated by LinkDialog.

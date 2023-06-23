@@ -1,4 +1,4 @@
-/** @odoo-module alias=web.tools **/
+/** @odoo-module **/
 
 /**
  * Wrapper for deprecated functions that display a warning message.

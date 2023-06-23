@@ -2,7 +2,7 @@
 
 import { createPublicRoot } from "@web/legacy/js/public/public_root";
 import { WebsiteRoot } from "./website_root";
-import { loadWysiwyg } from "web_editor.loader";
+import { loadWysiwyg } from "@web_editor/js/frontend/loader";
 
 export default createPublicRoot(WebsiteRoot).then(rootInstance => {
     // This data attribute is set by the WebsitePreview client action for a

@@ -1,8 +1,8 @@
-/** @odoo-module alias=web.data_manager **/
+/** @odoo-module **/
 
-import config from "web.config";
-import core from "web.core";
-import rpc from "web.rpc";
+import config from "@web/legacy/js/services/config";
+import core from "@web/legacy/js/services/core";
+import rpc from "@web/legacy/js/core/rpc";
 import session from "web.session";
 import { generateLegacyLoadViewsResult } from "@web/legacy/legacy_load_views";
 

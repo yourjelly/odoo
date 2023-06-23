@@ -2,8 +2,8 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { action_registry as legacyActionRegistry } from "web.core";
-import Widget from "web.Widget";
+import { action_registry as legacyActionRegistry } from "@web/legacy/js/services/core";
+import Widget from "@web/legacy/js/core/widget";
 import { useSetupAction } from "../webclient/actions/action_hook";
 import { ClientActionAdapter } from "./action_adapters";
 import { breadcrumbsToLegacy } from "./backend_utils";

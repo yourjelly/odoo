@@ -1,7 +1,7 @@
 /** @odoo-module **/
-    
-    import BasicModel from "web.BasicModel";
-    import testUtils from "web.test_utils";
+
+    import BasicModel from "@web/legacy/js/views/basic/basic_model";
+    import testUtils from "@web/../tests/legacy/helpers/test_utils";
     import session from "web.session";
 
     var createModel = testUtils.createModel;

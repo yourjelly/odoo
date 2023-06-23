@@ -1,7 +1,7 @@
-/** @odoo-module alias=website_profile.website_profile **/
+/** @odoo-module **/
 
-import publicWidget from "web.public.widget";
-import wysiwygLoader from "web_editor.loader";
+import publicWidget from "@web/legacy/js/public/public_widget";
+import wysiwygLoader from "@web_editor/js/frontend/loader";
 
 publicWidget.registry.websiteProfile = publicWidget.Widget.extend({
     selector: '.o_wprofile_email_validation_container',

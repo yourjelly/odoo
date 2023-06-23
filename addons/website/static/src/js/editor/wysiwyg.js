@@ -1,7 +1,7 @@
-/** @odoo-module alias=website.wysiwyg **/
+/** @odoo-module **/
 
-import Wysiwyg from "web_editor.wysiwyg";
-import snippetsEditor from "website.snippet.editor";
+import Wysiwyg from "@web_editor/js/wysiwyg/wysiwyg";
+import snippetsEditor from "@website/js/editor/snippets.editor";
 import socialMediaOptions from "@website/snippets/s_social_media/options";
 import formOptions from "@website/snippets/s_website_form/options";
 

@@ -1,18 +1,18 @@
-/** @odoo-module alias=web_editor.snippets.options **/
+/** @odoo-module **/
 
-import { ComponentWrapper } from "web.OwlCompatibility";
+import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog";
-import core from "web.core";
-import {ColorpickerWidget} from "web.Colorpicker";
-import Dialog from "web.Dialog";
-import {scrollTo} from "web.dom";
-import rpc from "web.rpc";
-import time from "web.time";
+import core from "@web/legacy/js/services/core";
+import {ColorpickerWidget} from "@web/legacy/js/widgets/colorpicker";
+import Dialog from "@web/legacy/js/core/dialog";
+import dom from "@web/legacy/js/core/dom";
+import rpc from "@web/legacy/js/core/rpc";
+import time from "@web/legacy/js/core/time";
 import { throttleForAnimation, debounce } from "@web/core/utils/timing";
-import utils from "web.utils";
-import Widget from "web.Widget";
-import { ColorPaletteWidget } from "web_editor.ColorPalette";
-import weUtils from "web_editor.utils";
+import utils from "@web/legacy/js/core/utils";
+import Widget from "@web/legacy/js/core/widget";
+import { ColorPaletteWidget } from "@web_editor/js/wysiwyg/widgets/color_palette";
+import weUtils from "@web_editor/js/common/utils";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
 const {
     normalizeColor,
@@ -22,7 +22,7 @@ const {
     DEFAULT_PALETTE,
     isBackgroundImageAttribute,
 } = weUtils;
-import weWidgets from "wysiwyg.widgets";
+import weWidgets from "@web_editor/js/wysiwyg/widgets/widgets";
 import {
     loadImage,
     loadImageInfo,
@@ -32,7 +32,7 @@ import {
     isImageSupportedForStyle,
     createDataURL,
     isGif,
-} from "web_editor.image_processing";
+} from "@web_editor/js/editor/image_processing";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
 import {SIZES, MEDIAS_BREAKPOINTS} from "@web/core/ui/ui_service";
 import { sprintf } from "@web/core/utils/strings";
@@ -5436,7 +5436,7 @@ registry.SnippetMove = SnippetOptionWidget.extend({
             const bottomHidden = heightDiff < elTop;
             const hidden = elTop < 0 || bottomHidden;
             if (hidden) {
-                scrollTo(this.$target[0], {
+                dom.scrollTo(this.$target[0], {
                     extraOffset: 50,
                     forcedOffset: bottomHidden ? heightDiff - 50 : undefined,
                     easing: 'linear',
@@ -7465,7 +7465,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
                 ? Math.min(viewportBottom, rect.bottom) - rect.top // Starts inside
                 : 0; // Starts after
         if (visibleHeight < 200) {
-            await scrollTo(this.$target[0], {extraOffset: 50});
+            await dom.scrollTo(this.$target[0], {extraOffset: 50});
         }
         this._toggleBgOverlay(true);
     },

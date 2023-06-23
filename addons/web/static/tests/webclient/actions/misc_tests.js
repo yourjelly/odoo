@@ -3,10 +3,10 @@
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
-import AbstractAction from "web.AbstractAction";
-import core from "web.core";
+import AbstractAction from "@web/legacy/js/chrome/abstract_action";
+import core from "@web/legacy/js/services/core";
 import { makeTestEnv } from "../../helpers/mock_env";
-import testUtils from "web.test_utils";
+import testUtils from "@web/../tests/legacy/helpers/test_utils";
 import {
     click,
     getFixture,

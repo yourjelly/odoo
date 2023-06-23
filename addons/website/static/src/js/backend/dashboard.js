@@ -1,13 +1,13 @@
-/** @odoo-module alias=website.backend.dashboard **/
+/** @odoo-module **/
 
-import AbstractAction from "web.AbstractAction";
+import AbstractAction from "@web/legacy/js/chrome/abstract_action";
 import { loadBundle } from "@web/core/assets";
-import core from "web.core";
-import field_utils from "web.field_utils";
-import pyUtils from "web.py_utils";
+import core from "@web/legacy/js/services/core";
+import field_utils from "@web/legacy/js/fields/field_utils";
+import pyUtils from "@web/legacy/js/core/py_utils";
 import session from "web.session";
-import time from "web.time";
-import web_client from "web.web_client";
+import time from "@web/legacy/js/core/time";
+import web_client from "@web/legacy/web_client";
 import { uniqueId } from "@web/core/utils/functions";
 
 var QWeb = core.qweb;
