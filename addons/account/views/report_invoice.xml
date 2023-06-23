@@ -136,7 +136,7 @@
                                             <td name="td_subtotal" class="text-end o_price_total">
                                                 <span class="text-nowrap" t-field="line.price_subtotal"/>
                                             </td>
-                                            <td t-if="o.tax_calculation_rounding_method == 'round_per_line'" class="text-end o_price_total">
+                                            <td name="td_total" t-if="o.tax_calculation_rounding_method == 'round_per_line'" class="text-end o_price_total">
                                                 <span class="text-nowrap" t-field="line.price_total"/>
                                             </td>
                                         </t>

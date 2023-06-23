@@ -26,14 +26,14 @@
         </xpath>
 
 <!--    Add accumulated amount column-->
-        <xpath expr="//th[@name='th_subtotal']" position="after">
+        <xpath expr="//th[@name='th_total']" position="after">
             <t t-if="report_type == 'pdf' and len(o.invoice_line_ids) > 5">  <!-- TODO: change ? -->
-                <th>Acc. amount</th>
+                <th class="text-end">Acc. amount</th>
             </t>
         </xpath>
-        <xpath expr="//td[@name='td_subtotal']" position="after">
+        <xpath expr="//td[@name='td_total']" position="after">
             <t t-if="report_type == 'pdf' and len(o.invoice_line_ids) > 5">  <!-- TODO: change ? -->
-                <td>
+                <td class="text-end o_price_total">
                     <t t-out="current_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                 </td>
             </t>

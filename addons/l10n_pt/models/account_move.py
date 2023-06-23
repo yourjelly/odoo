@@ -9,7 +9,7 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     l10n_pt_qr_code_str = fields.Char(string='Portuguese QR Code', compute='_compute_l10n_pt_qr_code_str', store=True)
-    l10n_pt_inalterable_hash_short = fields.Char(string='Short verison of the Portuguese hash', compute='_compute_l10n_pt_inalterable_hash_short')
+    l10n_pt_inalterable_hash_short = fields.Char(string='Short version of the Portuguese hash', compute='_compute_l10n_pt_inalterable_hash_short')
     l10n_pt_show_future_date_warning = fields.Boolean(compute='_compute_l10n_pt_show_future_date_warning')
 
     @api.depends('inalterable_hash')
@@ -113,7 +113,7 @@ class AccountMove(models.Model):
             qr_code_str += f"N:{format_amount(move, move.tax_totals['amount_total'] - move.tax_totals['amount_untaxed'])}*"
             qr_code_str += f"O:{format_amount(move, move.tax_totals['amount_total'])}*"
             qr_code_str += "Q:TODO*"  # TODO: l10n_pt_inalterable_hash_short
-            qr_code_str += "R:0000"  # TODO: Fill with Certifiate number provided by the Tax Authority
+            qr_code_str += "R:0000"  # TODO: Fill with Certificate number provided by the Tax Authority
             move.l10n_pt_qr_code_str = qr_code_str
 
     def _l10n_pt_get_vat_exemptions_reasons(self):
