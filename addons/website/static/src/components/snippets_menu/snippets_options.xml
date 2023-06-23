@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="website.ContainerWidth">
+        <WeButtonGroup>
+            <t t-set-slot="title">Content Width</t>
+            <WeButton selectClass="'o_container_small'"
+                      name="'container_small'"
+                      img="'/website/static/src/img/snippets_options/content_width_small.svg'">
+                Small
+            </WeButton>
+            <WeButton selectClass="'container'"
+                      img="'/website/static/src/img/snippets_options/content_width_normal.svg'">
+                Regular
+            </WeButton>
+            <WeButton selectClass="'container-fluid'"
+                      img="'/website/static/src/img/snippets_options/content_width_full.svg'">
+                Full
+            </WeButton>
+        </WeButtonGroup>
+    </t>
+    <t t-name="website.Carousel">
+        <WeRow>
+            <t t-set-slot="title">Slide</t>
+            <WeButton addSlide="true" noPreview="true" class="o_we_bg_brand_primary">Add Slide</WeButton>
+        </WeRow>
+        <WeSelect>
+            <t t-set-slot="title">Style</t>
+            <WeButton selectClass="'s_carousel_default'">Default</WeButton>
+            <WeButton selectClass="'s_carousel_bordered'">Bordered</WeButton>
+            <WeButton selectClass="'s_carousel_boxed'">Boxed</WeButton>
+            <WeButton selectClass="'s_carousel_rounded'">Rounded</WeButton>
+        </WeSelect>
+        <WeSelect>
+            <t t-set-slot="title">Transition</t>
+            <WeButton selectClass="'slide'">Slide</WeButton>
+            <WeButton selectClass="'carousel-fade slide'">Fade</WeButton>
+            <we-divider/>
+            <WeButton selectClass="">None</WeButton>
+        </WeSelect>
+        <WeInput selectDataAttribute="'0s'" attributeName="'bsInterval'"
+                 unit="'s'" saveUnit="'ms'" step="0.1">
+            <t t-set-slot="title">Speed</t>
+        </WeInput>
+    </t>
+    <t t-name="website.snippet_options_shadow_widgets">
+        <WeButtonGroup shadowClass="'shadow'" variable="shadow_variable">
+            <t t-set-slot="title">Shadow</t>
+            <WeButton setShadow="''">None</WeButton>
+            <WeButton setShadow="'outset'"
+                       img="'/website/static/src/img/snippets_options/shadow_out.svg'"
+                       name="'shadow_active_opt'">
+                Outset
+            </WeButton>
+            <WeButton setShadow="'inset'"
+                       img="'/website/static/src/img/snippets_options/shadow_in.svg'"
+                       name="'shadow_inset_opt'">
+                Inset
+            </WeButton>
+        </WeButtonGroup>
+        <WeMulti name="'test_multi'" cssProperty="'box-shadow'" dependencies="['shadow_active_opt', 'shadow_inset_opt']">
+            <WeColorPicker class="'o_we_sublevel_1'" selectStyle="true" cssCompatible="true" sequence="1">Color</WeColorPicker>
+            <WeRow class="'o_we_sublevel_1'">
+                <t t-set-slot="title">Offset (X, Y)</t>
+                <WeInput selectStyle="true" unit="'px'" sequence="2"/>
+                <WeInput selectStyle="true" unit="'px'" sequence="3"/>
+            </WeRow>
+            <WeInput class="'o_we_sublevel_1'" selectStyle="true" unit="'px'" sequence="4">
+                    <t t-set-slot="title">Blur</t>
+            </WeInput>
+            <WeInput class="'o_we_sublevel_1'" selectStyle="true" unit="'px'" sequence="5">
+                <t t-set-slot="title">Spread</t>
+            </WeInput>
+        </WeMulti>
+    </t>
+
+    <t t-name="website.Box">
+<!--        <t t-call="website.snippet_options_border_widgets"/>-->
+        <t t-call="website.snippet_options_shadow_widgets"/>
+    </t>
+    <t t-name="website.LayoutColumn">
+        <WeRow>
+            <WeButtonGroup noPreview="true">
+                <t t-set-slot="title">Layout</t>
+                <WeButton selectLayout="'grid'" name="'grid_mode'">Grid</WeButton>
+                <WeButton selectLayout="'normal'" name="'normal_mode'">Cols</WeButton>
+            </WeButtonGroup>
+            <WeSelect class="'o_grid'" noPreview="true" name="'column_count_opt'" dependencies="['normal_mode']">
+                <WeButton selectCount="0" name="'zero_cols_opt'">None</WeButton>
+                <WeButton selectCount="1">1</WeButton>
+                <WeButton selectCount="2">2</WeButton>
+                <WeButton selectCount="3">3</WeButton>
+                <WeButton selectCount="4">4</WeButton>
+                <WeButton selectCount="5">5</WeButton>
+                <WeButton selectCount="6">6</WeButton>
+            </WeSelect>
+        </WeRow>
+        <WeButtonGroup class="'o_we_sublevel_1'" dependencies="['grid_mode']">
+            <t t-set-slot="title">Add elements</t>
+            <WeButton class="'o_we_bg_brand_primary o_grid'" addElement="'image'" noPreview="true">Image</WeButton>
+            <WeButton class="'o_we_bg_brand_primary o_grid'" addElement="'text'" noPreview="true">Text</WeButton>
+            <WeButton class="'o_we_bg_brand_primary o_grid'" addElement="'button'" noPreview="true">Button</WeButton>
+        </WeButtonGroup>
+        <WeRow class="'o_we_sublevel_1'">
+            <t t-set-slot="title">Padding (Y, X)</t>
+            <WeInput selectStyle="true" cssProperty="'--grid-item-padding-y'" unit="'px'" applyTo="'.row'" dependencies="['grid_mode']"/>
+            <WeInput selectStyle="true" cssProperty="'--grid-item-padding-x'" unit="'px'" applyTo="'.row'" dependencies="['grid_mode']"/>
+        </WeRow>
+    </t>
+    <t t-name="website.move_horizontally_opt">
+        <WeButton class="'fa fa-fw fa-angle-left'" moveSnippet="'prev'" noPreview="true" name="'move_left_opt'"/>
+        <WeButton class="'fa fa-fw fa-angle-right'" moveSnippet="'next'" noPreview="true" name="'move_right_opt'"/>
+    </t>
+</templates>

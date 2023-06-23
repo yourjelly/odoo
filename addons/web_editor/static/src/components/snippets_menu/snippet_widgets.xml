@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="web_editor.WeRow">
+        <we-row t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+            <div>
+                <t t-slot="default"/>
+            </div>
+        </we-row>
+    </t>
+    <t t-name="web_editor.WeButton">
+        <we-button
+                class="o_we_user_value_widget"
+                t-att-class="this.cssClasses"
+                t-on-mouseenter="onMouseEnter"
+                t-on-mouseleave="onMouseLeave"
+                t-on-click="onUserValueChange">
+            <div t-ref="value-ref">
+                <t t-if="this.svg">
+                    <t t-out="this.svg"/>
+                </t>
+                <t t-if="this.img">
+                    <img t-att-src="this.img"/>
+                </t>
+                <!-- For now, hide the title if there's an image
+                    Note that this can be worked around by adding the img html
+                    inside the default slot
+                -->
+                <t t-if="!(this.img || this.svg)" t-slot="default"/>
+            </div>
+        </we-button>
+    </t>
+    <t t-name="web_editor.WeSelect">
+        <we-select class="o_we_user_value_widget" t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+            <div>
+                <we-toggler t-on-click="this.onTogglerClick" t-att-class="{'active': togglerState.open}">
+                    <t t-out="this.togglerValue"/>
+                </we-toggler>
+                <we-selection-items>
+                    <t t-slot="default"/>
+                </we-selection-items>
+                <span class="o_we_dropdown_caret"/>
+            </div>
+        </we-select>
+    </t>
+    <t t-name="web_editor.WeButtonGroup">
+        <we-button-group class="o_we_user_value_widget" t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+            <div>
+                <we-selection-items>
+                    <t t-slot="default"/>
+                </we-selection-items>
+            </div>
+        </we-button-group>
+    </t>
+    <t t-name="web_editor.WeInput">
+        <we-input class="o_we_user_value_widget" t-att-class="this.cssClasses">
+            <we-title t-if="props.slots?.title">
+                <t t-slot="title"/>
+            </we-title>
+            <div>
+                <input type="text" class="text-end"
+                       t-att-value="this.state.inputValue"
+                       t-on-input="onInput"
+                       t-on-blur="onBlur"
+                       t-on-keydown="onKeydown"
+                />
+                <span t-out="this.props.unit"/>
+            </div>
+        </we-input>
+    </t>
+    <t t-name="web_editor.WeColorPicker">
+        <we-select class="o_we_user_value_widget o_we_so_color_palette" t-att-class="this.props.class">
+            <we-title t-if="props.slots?.default">
+                <t t-slot="default"/>
+            </we-title>
+            <div>
+                <span class="o_we_color_preview"
+                      t-on-click="() => this.togglerState.open = !this.togglerState.open"
+                      t-att-style="this.togglerState.style"/>
+                <we-toggler t-att-class="{'active': this.togglerState.open}"/>
+                <we-selection-items>
+                    <t t-if="this.togglerState.open">
+                        <div style="display: contents;">
+                            <ColorPalette withCombinations="!!this.props.withCombinations"
+                                          selectedCC="this.ccValue"
+                                          selectedColor="this.colorValue"
+                                          onColorHover.bind="this.onColorHover"
+                                          onColorLeave.bind="this.onColorLeave"
+                                          onColorPicked.bind="this.onColorPicked"
+                                          onCustomColorPicked.bind="this.onCustomColorPicked"
+                                          onSetColorNames.bind="onSetColorNames"
+                                          withGradients="this.props.withGradients"
+                                          opacity="this.props.opacity"
+                                          noTransparency="this.props.noTransparency"
+                                          excluded="this.excluded"
+                                          selectedTab="this.props.selectedTab"
+                                          getTemplate="this.env.getColorpickerTemplate"
+                            />
+                        </div>
+                    </t>
+                </we-selection-items>
+            </div>
+        </we-select>
+    </t>
+    <t t-name="web_editor.WeMulti">
+        <we-multi class="o_we_user_value_widget" t-att-class="this.cssClasses">
+            <div>
+                <t t-slot="default"/>
+            </div>
+        </we-multi>
+    </t>
+</templates>

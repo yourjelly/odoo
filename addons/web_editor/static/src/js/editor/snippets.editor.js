@@ -365,12 +365,6 @@ var SnippetEditor = Widget.extend({
         return this.$el && this.$el.hasClass('o_we_overlay_sticky');
     },
     /**
-     * @returns {boolean}
-     */
-    isTargetVisible: function () {
-        return (this.$target[0].dataset.invisible !== '1');
-    },
-    /**
      * Removes the associated snippet from the DOM and destroys the associated
      * editor (itself).
      *
@@ -431,12 +425,6 @@ var SnippetEditor = Widget.extend({
 
         // Actually remove the snippet and its option UI.
         var $parent = this.$target.parent();
-        this.$target.find('*').addBack().each((index, el) => {
-            const tooltip = Tooltip.getInstance(el);
-            if (tooltip) {
-                tooltip.dispose();
-            }
-        });
         this.$target.remove();
         this.$el.remove();
 
@@ -452,38 +440,6 @@ var SnippetEditor = Widget.extend({
         if (node && node.firstChild) {
             if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
                 node.removeChild(node.firstChild);
-            }
-        }
-
-        // Potentially remove ancestors (like when removing the last column of a
-        // snippet).
-        if ($parent.closest(':data("snippet-editor")').length) {
-            const isEmptyAndRemovable = ($el, editor) => {
-                editor = editor || $el.data('snippet-editor');
-                const isEmpty = $el.text().trim() === ''
-                    && $el.children().toArray().every(el => {
-                        // Consider layout-only elements (like bg-shapes) as empty
-                        return el.matches(this.layoutElementsSelector);
-                    });
-                return isEmpty && !$el.hasClass('oe_structure')
-                    && !$el.parent().hasClass('carousel-item')
-                    && (!editor || editor.isTargetParentEditable)
-                    && !isUnremovable($el[0]);
-            };
-
-            var editor = $parent.data('snippet-editor');
-            while (!editor) {
-                var $nextParent = $parent.parent();
-                if (isEmptyAndRemovable($parent)) {
-                    $parent.remove();
-                }
-                $parent = $nextParent;
-                editor = $parent.data('snippet-editor');
-            }
-            if (isEmptyAndRemovable($parent, editor)) {
-                // TODO maybe this should be part of the actual Promise being
-                // returned by the function ?
-                setTimeout(() => editor.removeSnippet());
             }
         }
 
@@ -811,21 +767,6 @@ var SnippetEditor = Widget.extend({
             });
             $optionsSection.toggleClass('d-none', options.length === 0);
         });
-    },
-    /**
-     * @private
-     * @param {boolean} [show]
-     */
-    _toggleVisibilityStatus: function (show) {
-        if (show === undefined) {
-            show = !this.isTargetVisible();
-        }
-        if (show) {
-            delete this.$target[0].dataset.invisible;
-        } else {
-            this.$target[0].dataset.invisible = '1';
-        }
-        return show;
     },
     /**
      * Returns false if the element matches a snippet block that cannot be
@@ -1589,72 +1530,6 @@ var SnippetEditor = Widget.extend({
      * @param {Event} ev
      */
     _onDragMove(ev) {
-        const columnEl = this.$target[0];
-        const rowEl = columnEl.parentNode;
-
-        // Computing the rowEl position.
-        const rowElTop = rowEl.getBoundingClientRect().top;
-        const rowElLeft = rowEl.getBoundingClientRect().left;
-
-        // Getting the column dimensions.
-        const borderWidth = parseFloat(window.getComputedStyle(columnEl).borderWidth);
-        const columnHeight = columnEl.clientHeight + 2 * borderWidth;
-        const columnWidth = columnEl.clientWidth + 2 * borderWidth;
-        const columnMiddle = columnWidth / 2;
-
-        // Placing the column where the mouse is.
-        const top = ev.pageY - rowElTop;
-        const bottom = top + columnHeight;
-        let left = ev.pageX - rowElLeft - columnMiddle;
-
-        // Horizontal overflow.
-        left = confine(left, 0, rowEl.clientWidth - columnWidth);
-
-        columnEl.style.top = top + 'px';
-        columnEl.style.left = left + 'px';
-
-        // Computing the drag helper corresponding grid area.
-        const gridProp = gridUtils._getGridProperties(rowEl);
-
-        const rowStart = Math.round(top / (gridProp.rowSize + gridProp.rowGap)) + 1;
-        const columnStart = Math.round(left / (gridProp.columnSize + gridProp.columnGap)) + 1;
-        const rowEnd = rowStart + this.dragState.columnRowCount;
-        const columnEnd = columnStart + this.dragState.columnColCount;
-
-        const dragHelperEl = this.dragState.dragHelperEl;
-        if (parseInt(dragHelperEl.style.gridRowStart) !== rowStart) {
-            dragHelperEl.style.gridRowStart = rowStart;
-            dragHelperEl.style.gridRowEnd = rowEnd;
-        }
-
-        if (parseInt(dragHelperEl.style.gridColumnStart) !== columnStart) {
-            dragHelperEl.style.gridColumnStart = columnStart;
-            dragHelperEl.style.gridColumnEnd = columnEnd;
-        }
-
-        // Vertical overflow/underflow.
-        // Updating the reference heights, the dropzone and the background grid.
-        const startingHeight = this.dragState.startingHeight;
-        const currentHeight = this.dragState.currentHeight;
-        const backgroundGridEl = this.dragState.backgroundGridEl;
-        const dropzoneEl = this.dragState.currentDropzoneEl;
-        const rowOverflow = Math.round((bottom - currentHeight) / (gridProp.rowSize + gridProp.rowGap));
-        const updateRows = bottom > currentHeight || bottom <= currentHeight && bottom > startingHeight;
-        const rowCount = Math.max(rowEl.dataset.rowCount, this.dragState.columnRowCount);
-        const maxRowEnd = rowCount + gridUtils.additionalRowLimit + 1;
-        if (Math.abs(rowOverflow) >= 1 && updateRows) {
-            if (rowEnd <= maxRowEnd) {
-                const dropzoneEnd = parseInt(dropzoneEl.style.gridRowEnd);
-                dropzoneEl.style.gridRowEnd = dropzoneEnd + rowOverflow;
-                backgroundGridEl.style.gridRowEnd = dropzoneEnd + rowOverflow;
-                this.dragState.currentHeight += rowOverflow * (gridProp.rowSize + gridProp.rowGap);
-            } else {
-                // Don't add new rows if we have reached the limit.
-                dropzoneEl.style.gridRowEnd = maxRowEnd;
-                backgroundGridEl.style.gridRowEnd = maxRowEnd;
-                this.dragState.currentHeight = (maxRowEnd - 1) * (gridProp.rowSize + gridProp.rowGap) - gridProp.rowGap;
-            }
-        }
     }
 });
 
@@ -2529,18 +2404,6 @@ var SnippetsMenu = Widget.extend({
         }
         if ($snippet && !$snippet.is(':visible')) {
             return;
-        }
-        // Take the first parent of the provided DOM (or itself) which
-        // should have an associated snippet editor.
-        // It is important to do that before the mutex exec call to compute it
-        // before potential ancestor removal.
-        if ($snippet && $snippet.length) {
-            const $globalSnippet = globalSelector.closest($snippet);
-            if (!$globalSnippet.length) {
-                $snippet = $snippet.closest('[data-oe-model="ir.ui.view"]:not([data-oe-type]):not(.oe_structure), [data-oe-type="html"]:not(.oe_structure)');
-            } else {
-                $snippet = $globalSnippet;
-            }
         }
         const exec = previewMode
             ? action => this._mutex.exec(action)

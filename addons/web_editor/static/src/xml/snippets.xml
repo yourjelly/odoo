@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
-    <t t-name="web_editor.snippet_overlay">
+    <t t-name="web_editor.snippet_overlay_legacy">
         <div class="oe_overlay">
             <div class="o_handles">
                 <!-- Visible overlay borders + allow to resize when not readonly -->
@@ -34,7 +34,7 @@
             </div>
         </div>
     </t>
-    <t t-name="web_editor.customize_block_options_section">
+    <t t-name="web_editor.customize_block_options_section_legacy">
         <we-customizeblock-options>
             <we-title>
                 <span t-esc="name"/>

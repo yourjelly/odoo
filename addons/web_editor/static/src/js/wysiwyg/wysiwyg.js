@@ -12,6 +12,7 @@ import { Toolbar } from "@web_editor/js/editor/toolbar";
 import { LinkPopoverWidget } from '@web_editor/js/wysiwyg/widgets/link_popover_widget';
 import { AltDialog } from '@web_editor/js/wysiwyg/widgets/alt_dialog';
 import { ImageCrop } from '@web_editor/js/wysiwyg/widgets/image_crop';
+import { SnippetsMenu } from "@web_editor/components/snippets_menu/snippets_menu";
 
 import * as wysiwygUtils from "@web_editor/js/common/wysiwyg_utils";
 import weUtils from "@web_editor/js/common/utils";
@@ -23,7 +24,7 @@ import { debounce } from "@web/core/utils/timing";
 import { registry } from "@web/core/registry";
 import { FileViewer } from "@web/core/file_viewer/file_viewer";
 import { isMobileOS } from "@web/core/browser/feature_detection";
-import { Mutex } from "@web/core/utils/concurrency";
+import { Deferred, Mutex } from "@web/core/utils/concurrency";
 import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { ConflictDialog } from "./conflict_dialog";
@@ -34,11 +35,13 @@ import {
     Component,
     useRef,
     useState,
+    useSubEnv,
     onWillStart,
     onMounted,
     onWillDestroy,
     onWillUpdateProps,
     markup,
+    EventBus,
 } from "@odoo/owl";
 import { requireWysiwygLegacyModule } from "@web_editor/js/frontend/loader";
 import { isCSSColor } from '@web/core/utils/colors';
@@ -104,9 +107,10 @@ let fileViewerId = 0;
 
 export class Wysiwyg extends Component {
     static template = 'web_editor.Wysiwyg';
-    static components = { MediaDialog, VideoSelector, Toolbar, ImageCrop };
+    static components = { MediaDialog, VideoSelector, Toolbar, ImageCrop, SnippetsMenu };
     static props = {
         options: Object,
+        snippets: { type: Boolean, optional: true },
         startWysiwyg: { type: Function, optional: true },
         editingValue: { type: String, optional: true },
     };
@@ -131,6 +135,7 @@ export class Wysiwyg extends Component {
         linkToolProps: false,
         showToolbar: true,
         toolbarProps: {},
+        showSnippetsMenu: false,
     });
 
     setup() {
@@ -139,6 +144,11 @@ export class Wysiwyg extends Component {
         this.notification = this._useService("notification");
         this.popover = this._useService("popover");
         this.busService = this.env.services.bus_service;
+        this.eventBus = new EventBus();
+        useSubEnv({
+            cleanForSaveCallbacks: new Map(),
+            getColorpickerTemplate: this.getColorpickerTemplate.bind(this),
+        });
 
         const getColorPickedHandler = (colorType) => {
             return (params) => {
@@ -264,6 +274,25 @@ export class Wysiwyg extends Component {
         onHistoryResetFromSteps: () => {},
         autostart: true,
         dropImageAsAttachment: true,
+    };
+    get snippetsMenuComponent() {
+        return SnippetsMenu;
+    }
+    get snippetsMenuProps() {
+        return {
+            selectorEditableArea: '.o_editable',
+            discard: this.cancel.bind(this),
+            save: this.save.bind(this),
+            context: this.options.context,
+            editable: this.options.editable,
+            odooEditor: this.odooEditor,
+            isSaving: this.isSaving.bind(this),
+            snippets: this.options.snippets,
+            undo: this.undo.bind(this),
+            redo: this.redo.bind(this),
+            setCSSVariables: this.setCSSVariables,
+            document: this.options.editable.ownerDocument,
+        };
     }
     init() {
         this.id = ++id;
@@ -515,18 +544,18 @@ export class Wysiwyg extends Component {
             }
         });
 
-        if (options.snippets) {
-            $(this.odooEditor.document.body).addClass('editor_enable');
-            this.snippetsMenu = await this._createSnippetsMenuInstance(options);
-            await this._insertSnippetMenu();
-
-            this._onBeforeUnload = (event) => {
-                if (this.isDirty()) {
-                    event.returnValue = _t('This document is not saved!');
-                }
-            };
-            window.addEventListener('beforeunload', this._onBeforeUnload);
-        }
+        // if (options.snippets) {
+        //     $(this.odooEditor.document.body).addClass('editor_enable');
+        //     this.snippetsMenu = await this._createSnippetsMenuInstance(options);
+        //     await this._insertSnippetMenu();
+        //
+        //     this._onBeforeUnload = (event) => {
+        //         if (this.isDirty()) {
+        //             event.returnValue = _t('This document is not saved!');
+        //         }
+        //     };
+        //     window.addEventListener('beforeunload', this._onBeforeUnload);
+        // }
         if (this.options.getContentEditableAreas) {
             $(this.options.getContentEditableAreas(this.odooEditor)).find('*').off('mousedown mouseup click');
         }
@@ -615,6 +644,9 @@ export class Wysiwyg extends Component {
             } else {
                 document.body.append(this.toolbarEl);
             }
+        }
+        if (this.options.snippets) {
+            this.state.showSnippetsMenu = true;
         }
     }
     setupCollaboration(collaborationChannel) {
@@ -1212,6 +1244,15 @@ export class Wysiwyg extends Component {
         return closestElement(...args);
     }
     async cleanForSave() {
+        if (this.env.cleanForSaveCallbacks.size > 0) {
+            const proms = [];
+            const values = this.env.cleanForSaveeCallbacks.values();
+            for (const callback of values) {
+                proms.push(callback.exec());
+            }
+            await Promise.all(proms);
+        }
+
         if (this.odooEditor) {
             this.odooEditor.cleanForSave();
             this._attachHistoryIds();
