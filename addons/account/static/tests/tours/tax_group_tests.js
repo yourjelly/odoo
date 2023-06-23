@@ -112,6 +112,11 @@ registry.category("web_tour.tours").add('account_tax_group', {
         content: "Check new value of tax group",
         trigger: '.o_tax_group_amount_value:contains("389.70")',
     },
+    // Edit tax group amount
+    {
+        content: "Edit tax group amount",
+        trigger: '.o_tax_group_edit',
+    },
     {
         content: "Edit tax value",
         trigger: '.o_tax_group_edit_input input',
