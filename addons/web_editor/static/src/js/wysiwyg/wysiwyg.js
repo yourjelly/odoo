@@ -206,7 +206,7 @@ export class Wysiwyg extends Component {
             this.destroy();
         });
         onWillUpdateProps((newProps) => {
-            this.options = this._getEditorOptions(newProps);
+            this.options = this._getEditorOptions(newProps.options);
             this._setToolbarProps();
 
             const lastValue = String(this.props.options.value || '');
