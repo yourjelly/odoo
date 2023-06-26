@@ -19,6 +19,13 @@ import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { uniqueId } from "@web/core/utils/functions";
 import { sortBy, unique } from "@web/core/utils/arrays";
 import { browser } from "@web/core/browser/browser";
+import { ComponentWrapper } from "web.OwlCompatibility";
+import { Toolbar } from "@web_editor/js/editor/toolbar";
+import {
+    Component,
+    xml,
+} from "@odoo/owl";
+import { LinkTools } from '@web_editor/js/wysiwyg/widgets/link_tools';
 
 var _t = core._t;
 
@@ -4226,7 +4233,7 @@ var SnippetsMenu = Widget.extend({
     async _onUpdateInvisibleDom() {
         await this._updateInvisibleDOM();
     },
-    _addToolbar(toolbarMode = "text") {
+    async _addToolbar(toolbarMode = "text") {
         if (this.folded) {
             return;
         }
@@ -4243,21 +4250,45 @@ var SnippetsMenu = Widget.extend({
                 break;
         }
 
-        this.options.wysiwyg.toolbarEl.classList.remove('oe-floating');
+        if (!this._toolbarWrapperEl) {
+            this._toolbarWrapperEl = document.createElement('div');
+            this._toolbarWrapperEl.classList.add('o_we_toolbar_wrapper');
+            class WebsiteToolbar extends Component {
+                static components = { Toolbar, LinkTools };
+                static template = xml`
+                    <Toolbar t-props="props.wysiwygState.toolbarProps">
+                        <t t-if="props.wysiwygState.linkToolProps">
+                            <LinkTools t-props="props.wysiwygState.linkToolProps" />
+                        </t>
+                    </Toolbar>
+                `;
+                static props = {
+                    wysiwygState: Object,
+                };
+            }
+            const toolbarWrapper = new ComponentWrapper(this, WebsiteToolbar, {
+                wysiwygState: this.options.wysiwyg.state,
+            });
+            // Add the toolbarWrapperEl to the dom for owl to properly mount the
+            // Toolbar.
+            document.body.append(this._toolbarWrapperEl);
+            this._toolbarWrapperEl.style.display = 'none';
+            await toolbarWrapper.mount(this._toolbarWrapperEl);
+            this._toolbarWrapperEl.style.display = 'contents';
+
+            const toolbarEl = this._toolbarWrapperEl.firstChild;
+            toolbarEl.classList.remove('oe-floating');
+            this.options.wysiwyg.toolbarEl.style.display = 'none';
+            this.options.wysiwyg.setupToolbar(toolbarEl);
+        }
 
         // Create toolbar custom container.
         this._$toolbarContainer = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_editor_toolbar_container"/>');
         const $title = $("<we-title><span>" + titleText + "</span></we-title>");
         this._$toolbarContainer.append($title);
-        // In case, the snippetEditor is inside an iframe, change the prototype
-        // of the element. This is required as the toolbar element is used as a
-        // reference to position the dropdown. The library popper.js check if
-        // the element is an HTMLElement. If that check returns false, the
-        // calculation err.
-        this.options.wysiwyg.toolbarEl.__proto__ = this.options.wysiwyg.toolbarEl.ownerDocument.defaultView.HTMLDivElement.prototype;
         // In case, the snippetEditor is inside an iframe, rebind the dropdown
         // from the iframe.
-        for (const dropdown of this.options.wysiwyg.toolbarEl.querySelectorAll('.colorpicker-group')) {
+        for (const dropdown of this._toolbarWrapperEl.querySelectorAll('.colorpicker-group')) {
             const $ = dropdown.ownerDocument.defaultView.$;
             const $dropdown = $(dropdown);
             $dropdown.off('show.bs.dropdown');
@@ -4267,15 +4298,15 @@ var SnippetsMenu = Widget.extend({
             $dropdown.off('hide.bs.dropdown');
             $dropdown.on('hide.bs.dropdown', (ev) => this.options.wysiwyg.onColorpaletteDropdownHide(ev));
         }
-        this._$toolbarContainer.append(this.options.wysiwyg.toolbarEl);
+        this._$toolbarContainer.append(this._toolbarWrapperEl);
         $(this.customizePanel).append(this._$toolbarContainer);
 
         // Create table-options custom container.
         const $customizeTableBlock = $(QWeb.render('web_editor.toolbar.table-options'));
         this.options.wysiwyg.odooEditor.bindExecCommand($customizeTableBlock[0]);
         $(this.customizePanel).append($customizeTableBlock);
-        $title.append(this.options.wysiwyg.toolbarEl.querySelector('#removeFormat'));
-        this._$toolbarContainer.append(this.options.wysiwyg.toolbarEl);
+        $title.append(this._toolbarWrapperEl.querySelector('#removeFormat'));
+        this._$toolbarContainer.append(this._toolbarWrapperEl);
 
         this._checkEditorToolbarVisibility();
     },
