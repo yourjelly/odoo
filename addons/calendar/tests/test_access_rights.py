@@ -4,7 +4,7 @@
 from datetime import datetime
 
 from odoo.tests.common import TransactionCase, new_test_user
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, AccessDenied
 from odoo.tools import mute_logger
 
 
@@ -49,29 +49,29 @@ class TestAccessRights(TransactionCase):
             (self.john, 'privacy', 'private', None),
             (self.george, 'privacy', 'private', None),
             (self.raoul, 'privacy', 'private', None),
-            (self.portal, 'privacy', None, AccessError),
+            (self.portal, 'privacy', None, AccessDenied),
             # substituted private field, only owner and invitees can read, other
             # employees get substitution
             (self.john, 'name', 'my private event', None),
             (self.george, 'name', 'my private event', None),
             (self.raoul, 'name', 'Busy', None),
-            (self.portal, 'name', None, AccessError),
+            (self.portal, 'name', None, AccessDenied),
             # computed from private field
             (self.john, 'display_name', 'my private event', None),
             (self.george, 'display_name', 'my private event', None),
             (self.raoul, 'display_name', 'Busy', None),
-            (self.portal, 'display_name', None, AccessError),
+            (self.portal, 'display_name', None, AccessDenied),
             # non-substituted private field, only owner and invitees can read,
             # other employees get an empty field
             (self.john, 'location', 'in the Sky', None),
             (self.george, 'location', 'in the Sky', None),
             (self.raoul, 'location', False, None),
-            (self.portal, 'location', None, AccessError),
+            (self.portal, 'location', None, AccessDenied),
             # non-substituted sequence field
             (self.john, 'partner_ids', self.george.partner_id, None),
             (self.george, 'partner_ids', self.george.partner_id, None),
             (self.raoul, 'partner_ids', self.env['res.partner'], None),
-            (self.portal, 'partner_ids', None, AccessError),
+            (self.portal, 'partner_ids', None, AccessDenied),
         ]:
             self.env.invalidate_all()
             with self.subTest("private read", user=user.display_name, field=field, error=error):
@@ -133,5 +133,5 @@ class TestAccessRights(TransactionCase):
         event.write({'partner_ids': [(6, 0, partners.ids)]})
         self.assertEqual(self.read_event(self.raoul, event, 'location'), 'in the Sky',
                          "Owner should be able to read the event")
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.read_event(self.portal, event, 'location')

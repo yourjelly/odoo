@@ -13,7 +13,7 @@ import psycopg2
 
 from odoo import models, fields, Command
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
-from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
+from odoo.exceptions import AccessError, AccessDenied, MissingError, UserError, ValidationError
 from odoo.tests import common
 from odoo.tools import mute_logger, float_repr
 from odoo.tools.date_utils import add, subtract, start_of, end_of
@@ -412,7 +412,7 @@ class TestFields(TransactionCaseWithUserDemo):
         user1, user2, user3 = users
         # regression test: a bug invalidated the field's value from cache
         user1.company_type
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             user2.company_type
         user3.company_type
 
@@ -1500,7 +1500,7 @@ class TestFields(TransactionCaseWithUserDemo):
         # add group on company-dependent field
         self.assertFalse(user0.has_group('base.group_system'))
         self.patch(type(record).foo, 'groups', 'base.group_system')
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             record.with_user(user0).foo = 'forbidden'
 
         user0.write({'groups_id': [Command.link(self.env.ref('base.group_system').id)]})
@@ -1513,7 +1513,7 @@ class TestFields(TransactionCaseWithUserDemo):
             'groups': [self.env.ref('base.group_user').id],
             'domain_force': str([('id', '!=', record.id)]),
         })
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             record.with_user(user0).foo = 'forbidden'
 
         # create company record and attribute
@@ -2762,7 +2762,7 @@ class TestFields(TransactionCaseWithUserDemo):
         })
 
         # ensure ir.rule is applied even when reading m2m
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             record_user.read(['tags'])
 
     def test_98_prefetch_translate(self):

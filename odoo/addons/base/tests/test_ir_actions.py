@@ -5,7 +5,7 @@ from datetime import date
 from psycopg2 import IntegrityError, ProgrammingError
 
 import odoo
-from odoo.exceptions import UserError, ValidationError, AccessError
+from odoo.exceptions import UserError, ValidationError, AccessError, AccessDenied
 from odoo.tools import mute_logger
 from odoo.tests import common
 from odoo import Command
@@ -341,10 +341,10 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
 
         # but can not write on private address
         self.test_partner.type = "private"
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.test_partner.with_user(user_demo.id).check_access_rule("write")
         # nor execute a server action on it
-        with self.assertRaises(AccessError), mute_logger('odoo.addons.base.models.ir_actions'):
+        with self.assertRaises(AccessDenied), mute_logger('odoo.addons.base.models.ir_actions'):
             self_demo.with_context(self.context).run()
 
 

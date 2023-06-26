@@ -9,7 +9,7 @@ from odoo import Command, fields
 from odoo.addons.mail.models.discuss.discuss_channel import channel_avatar, group_avatar
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.mail.tests.common import MailCommon
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, AccessDenied, UserError
 from odoo.tests import tagged, Form
 from odoo.tests.common import users
 from odoo.tools import html_escape, mute_logger
@@ -154,9 +154,9 @@ class TestChannelAccessRights(MailCommon):
         # Read public channel -> ok
         self.env['discuss.channel'].browse(self.public_channel.id).read()
         # Read group restricted channel/group -> ko, no access rights
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['discuss.channel'].browse(self.group_restricted_channel.id).read()
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['discuss.channel'].browse(self.private_group.id).read()
 
         # Being a group member: -> ok
@@ -167,21 +167,21 @@ class TestChannelAccessRights(MailCommon):
         self.env['discuss.channel'].browse(self.chat_user_portal.id).read()
 
         # Update group/chat when being a member: ko, no access rights
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['discuss.channel'].browse(self.private_group.id).write({'name': 'modified'})
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['discuss.channel'].browse(self.chat_user_portal.id).write({'name': 'modified'})
 
         # Create group/chat: ko, no access rights
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['discuss.channel'].create({'name': 'Test', 'channel_type': 'group'})
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['discuss.channel'].create({'name': 'Test', 'channel_type': 'chat'})
 
         # Unlink group/chat: ko, no access rights
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['discuss.channel'].browse(self.private_group.id).unlink()
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['discuss.channel'].browse(self.chat_user_portal.id).unlink()
 
         # Read message from group/chat: ok

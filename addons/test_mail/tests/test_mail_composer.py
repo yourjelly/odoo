@@ -15,7 +15,7 @@ from odoo.addons.mail.wizard.mail_compose_message import MailComposer
 from odoo.addons.test_mail.models.test_mail_models import MailTestTicket
 from odoo.addons.test_mail.tests.common import TestRecipients
 from odoo.fields import Datetime as FieldDatetime
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessDenied
 from odoo.tests import tagged
 from odoo.tests.common import users, Form
 from odoo.tools import mute_logger, formataddr
@@ -1107,7 +1107,7 @@ class TestComposerInternals(TestMailComposer):
         template_1.write({
             'attachment_ids': [(0, 0, dict(a, res_model="mail.template", res_id=template_1.id)) for a in attachment_data]
         })
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             # ensure user_rendering_restricted has no write access
             template_1.with_user(self.env.user).write({'name': 'New Name'})
 

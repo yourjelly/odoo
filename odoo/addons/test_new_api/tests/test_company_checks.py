@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo.exceptions import UserError, AccessError
+from odoo.exceptions import UserError, AccessError, AccessDenied
 from odoo.tests import common
 from odoo.tools import frozendict
 from odoo import Command
@@ -191,7 +191,7 @@ class TestCompanyCheck(common.TransactionCase):
         with common.Form(self.env['test_new_api.model_private_address_onchange'].with_user(user)) as form:
             form.name = 'My Classic Name'
             form.company_id = self.env.user.company_id
-            with self.assertRaises(AccessError):
+            with self.assertRaises(AccessDenied):
                 form.address_id.name
             form.save()
 

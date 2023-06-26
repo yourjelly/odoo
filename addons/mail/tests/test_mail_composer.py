@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.mail.tests.common import MailCommon
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessDenied
 from odoo.tests import Form, tagged, users
 from odoo.tools import mute_logger
 
@@ -146,13 +146,13 @@ class TestMailComposerForm(TestMailComposer):
         self.user_employee.write({'groups_id': [
             (3, self.env.ref('base.group_private_addresses').id),
         ]})
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             _name = self.partner_private.with_env(self.env).name
 
         partner_classic = self.partner_classic.with_env(self.env)
         test_record = self.test_record.with_env(self.env)
 
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             _form = Form(self.env['mail.compose.message'].with_context({
                 'default_partner_ids': (self.partner_private + partner_classic).ids,
                 'default_model': test_record._name,

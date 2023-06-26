@@ -385,7 +385,7 @@ But don't lose heart! There are plenty of other captivating records within your 
         self.env.flush_all()
         self.env.invalidate_all()
         with self.assertRaisesRegex(
-            AccessError,
+            AccessDenied,
             r"Implicitly accessed through 'Object for testing related access rights' \(test_access_right.parent\)\.",
         ):
             p.with_user(self.user).val

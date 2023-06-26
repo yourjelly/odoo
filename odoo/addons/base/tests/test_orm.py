@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import psycopg2
 
-from odoo.exceptions import AccessError, MissingError
+from odoo.exceptions import AccessDenied, MissingError
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
 from odoo import Command
@@ -80,22 +80,22 @@ class TestORM(TransactionCase):
         self.assertIn(p2, partners, "... but Y should be visible")
 
         # read as unprivileged user
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             p1.with_user(user).read(['name'])
         # write as unprivileged user
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             p1.with_user(user).write({'name': 'foo'})
         # unlink as unprivileged user
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             p1.with_user(user).unlink()
 
         # Prepare mixed case 
         p2.unlink()
         # read mixed records: some deleted and some filtered
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             (p1 + p2).with_user(user).read(['name'])
         # delete mixed records: some deleted and some filtered
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             (p1 + p2).with_user(user).unlink()
 
     def test_read(self):

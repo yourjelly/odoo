@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, AccessDenied
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
 from odoo import Command
@@ -45,7 +45,7 @@ class TestRules(TransactionCase):
 
         # but this should
         browse1.invalidate_model(['val'])
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.assertEqual(browse2.val, -1)
 
     @mute_logger('odoo.addons.base.models.ir_rule')
@@ -65,9 +65,9 @@ class TestRules(TransactionCase):
 
         # everything should blow up
         (browse1 + browse2).invalidate_model(['val'])
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.assertEqual(browse2.val, -1)
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.assertEqual(browse1.val, 1)
 
     def test_many2many(self):

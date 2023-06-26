@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from odoo.addons.mail.tests.common import mail_new_test_user, MailCommon
 from odoo.addons.test_mail.models.test_mail_models import MailTestSimple
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, AccessDenied, UserError
 from odoo.tools import is_html_empty, mute_logger, formataddr
 from odoo.tests import tagged, users
 
@@ -452,7 +452,7 @@ class TestMessageAccess(MailCommon):
     @mute_logger('odoo.models')
     def test_mail_message_access_create_crash(self):
         # Do: Employee create a private message -> ko, no creation rights
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['mail.message'].with_user(self.user_employee).create({'model': 'discuss.channel', 'res_id': self.private_group.id, 'body': 'Test'})
 
     @mute_logger('odoo.models')

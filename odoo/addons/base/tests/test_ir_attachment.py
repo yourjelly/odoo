@@ -8,7 +8,7 @@ import os
 from PIL import Image
 
 import odoo
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, AccessDenied
 from odoo.tests.common import TransactionCase
 from odoo.tools import image_to_base64
 
@@ -294,7 +294,7 @@ class TestPermissions(TransactionCase):
         # prevent read access on record
         self.rule.perm_read = True
         self.attachment.invalidate_recordset()
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.attachment.datas
 
         # Make the attachment public
@@ -304,7 +304,7 @@ class TestPermissions(TransactionCase):
         # Remove the public access
         self.attachment.sudo().public = False
         # Check the record can no longer be accessed
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.attachment.datas
 
         # Create an attachment as user without res_model/res_id
@@ -314,7 +314,7 @@ class TestPermissions(TransactionCase):
         # Create an attachment as superuser without res_model/res_id
         attachment_admin = self.Attachments.with_user(odoo.SUPERUSER_ID).create({'name': 'foo'})
         # Check the record cannot be accessed by a regular user
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             attachment_admin.with_user(self.env.user).datas
         # Check the record can be accessed by an admin (other than superuser)
         admin_user = self.env.ref('base.user_admin')

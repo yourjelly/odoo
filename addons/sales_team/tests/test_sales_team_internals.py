@@ -91,5 +91,5 @@ class TestSecurity(TestSalesMC):
     @users('user_sales_leads')
     def test_team_multi_company(self):
         self.sales_team_1.with_user(self.env.user).read(['name'])
-        with self.assertRaises(exceptions.AccessError):
+        with self.assertRaises(exceptions.AccessDenied):
             self.team_c2.with_user(self.env.user).read(['name'])

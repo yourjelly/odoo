@@ -5,7 +5,7 @@ from functools import partial
 
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.mail.tests.common import MailCommon
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, AccessDenied, UserError
 
 discuss_channel_new_test_user = partial(mail_new_test_user, context={'discuss_channel_nosubscribe': False})
 
@@ -113,7 +113,7 @@ class TestDiscussChannelMembers(MailCommon):
         self.assertEqual(len(channel_members), 1)
 
         # User 2 is not in the group, they can not invite user 3
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             self.env['discuss.channel.member'].with_user(self.user_2).create({
                 'partner_id': self.user_portal.partner_id.id,
                 'channel_id': self.group.id,
@@ -131,7 +131,7 @@ class TestDiscussChannelMembers(MailCommon):
         channel_member_1 = self.env['discuss.channel.member'].search([('channel_id', '=', self.group.id), ('partner_id', '=', self.user_1.partner_id.id)])
         channel_member_3 = self.env['discuss.channel.member'].search([('channel_id', '=', self.group.id), ('partner_id', '=', self.user_portal.partner_id.id)])
         channel_member_3.with_user(self.user_portal).custom_channel_name = 'Test'
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             channel_member_1.with_user(self.user_2).custom_channel_name = 'Blabla'
         self.assertNotEqual(channel_member_1.custom_channel_name, 'Blabla')
 
@@ -160,7 +160,7 @@ class TestDiscussChannelMembers(MailCommon):
         self.assertEqual(len(channel_members), 2)
 
         # User 2 is not in the group, they can not kick user 1
-        with self.assertRaises(AccessError):
+        with self.assertRaises(AccessDenied):
             channel_members.with_user(self.user_2).unlink()
 
         # User 3 is in the group, they can kick user 1
