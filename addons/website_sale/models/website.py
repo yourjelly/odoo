@@ -112,6 +112,7 @@ class Website(models.Model):
                                                default="Not Available For Sale")
     contact_us_button_url = fields.Char(string="Contact Us Button URL", translate=True, default="/contactus")
     enabled_portal_reorder_button = fields.Boolean(string="Re-order From Portal")
+    allow_cancellation = fields.Boolean("Allow Cancellation")
     enabled_delivery = fields.Boolean(string="Enable Shipping", compute='_compute_enabled_delivery')
 
     @api.depends('all_pricelist_ids')

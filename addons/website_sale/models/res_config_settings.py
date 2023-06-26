@@ -55,6 +55,11 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         related='website_id.show_line_subtotals_tax_selection',
     )
+    allow_cancellation = fields.Boolean(
+        string="Allow Cancellation",
+        related='website_id.allow_cancellation',
+        readonly=False
+    )
 
     @api.depends('website_id')
     def _compute_terms_url(self):

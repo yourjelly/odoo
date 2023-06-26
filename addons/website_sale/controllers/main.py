@@ -19,6 +19,7 @@ from odoo.addons.payment.controllers.post_processing import PaymentPostProcessin
 from odoo.addons.website.controllers.main import QueryURL
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.exceptions import AccessError, MissingError, ValidationError
+from odoo.addons.portal.controllers.mail import _message_post_helper
 from odoo.addons.portal.controllers.portal import _build_url_w_params
 from odoo.addons.website.controllers import main
 from odoo.addons.website.controllers.form import WebsiteForm
@@ -1828,6 +1829,28 @@ class CustomerPortal(sale_portal.CustomerPortal):
 
     def _sale_reorder_get_line_context(self):
         return {}
+
+    @http.route(['/my/orders/<int:order_id>/cancel_order_request'], type='http', auth="public", methods=['POST'], website=True)
+    def portal_sale_order_cancel_order_request(self, order_id, access_token=None, so_cancel_reason=None, **kwargs):
+        try:
+            order_sudo = self._document_check_access('sale.order', order_id, access_token=access_token)
+        except (AccessError, MissingError):
+            return request.redirect('/my')
+
+        _message_post_helper(
+            'sale.order',
+            order_sudo.id,
+            so_cancel_reason,
+            token=access_token,
+        )
+        order_sudo.cancellation_request = 'request'
+        order_sudo.activity_schedule(
+            'note.mail_activity_data_reminder',
+            user_id=order_sudo.user_id.id,
+            note=_("The sale order cancellation requested by %s.", order_sudo.partner_id.name),
+        )
+        redirect_url = order_sudo.get_portal_url(query_string="&message=can_so_cancel_request")
+        return request.redirect(redirect_url)
 
     @http.route('/my/orders/reorder_modal_content', type='json', auth='public', website=True)
     def _get_saleorder_reorder_content_modal(self, order_id, access_token):

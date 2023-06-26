@@ -15,6 +15,8 @@
                 <separator/>
                 <filter string="From Website" name="from_website" domain="[('website_id', '!=', False)]"/>
                 <separator/>
+                <filter string="Cancellation Request" name="cancellation_request" domain="[('cancellation_request', '=', 'request')]"/>
+                <separator/>
                 <!-- Dashboard filter - used by context -->
                 <filter string="Last Week" invisible="1" name="week" domain="[('date_order','&gt;', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
                 <filter string="Last Month" invisible="1" name="month" domain="[('date_order','&gt;', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
@@ -48,6 +50,7 @@
             <field name="team_id" position="after">
                 <field name="is_abandoned_cart" invisible="1"/>
                 <field name="cart_recovery_email_sent" invisible="1"/>
+                <field name="cancellation_request" invisible="1"/>
             </field>
             <xpath expr="//button[@name='action_quotation_send' and @states='draft']" position="attributes">
                 <!-- The '| and the '&amp' opertors are necessary because draft state of the parent concatenate the domain -->
@@ -63,6 +66,13 @@
             <xpath expr="//button[@name='action_quotation_send' and @states='sent,sale']" position="after">
                 <button name="action_quotation_send" string="Send by Email" type="object"
                     attrs="{'invisible': ['|', '|', ('is_abandoned_cart', '=', False), ('cart_recovery_email_sent', '=', True), ('state', '!=', 'draft')]}"/>
+            </xpath>
+            <xpath expr="//button[@name='action_cancel']" position="after">
+                <button name="action_autorized_cancel" data-hotkey="a" string="Autorized Cancel" type="object"
+                    class="btn-secondary"
+                    attrs="{'invisible': ['|', ('cancellation_request', '!=', 'request'), ('state', '=', 'cancel')]}"/>
+                <button name="action_void_cancel" data-hotkey="v" string="Void Cancel" type="object" class="btn-secondary"
+                    attrs="{'invisible': ['|', ('cancellation_request', '!=', 'request'), ('state', '=', 'cancel')]}"/>
             </xpath>
         </field>
     </record>

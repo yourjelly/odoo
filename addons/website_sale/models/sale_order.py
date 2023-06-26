@@ -33,6 +33,15 @@ class SaleOrder(models.Model):
         help="Tax included or excluded depending on the website configuration.",
     )
     access_point_address = fields.Json("Delivery Point Address")
+    cancellation_request = fields.Selection(
+        selection=[
+            ('no', 'No'),
+            ('request', 'Cancellation request'),
+            ('reject', 'Reject Cancellation request'),
+            ('done', 'Cancellation request done'),
+        ],
+        string='Sale order cancellation request', default='no', copy=False
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -599,3 +608,11 @@ class SaleOrder(models.Model):
         address = self.partner_shipping_id
         # searching on website_published will also search for available website (_search method on computed field)
         return self.env['delivery.carrier'].sudo().search([('website_published', '=', True)]).available_carriers(address)
+
+    def action_autorized_cancel(self):
+        res = self.action_cancel()
+        self.cancellation_request = 'done'
+        return res
+
+    def action_void_cancel(self):
+        self.cancellation_request = 'reject'

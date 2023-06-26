@@ -70,6 +70,9 @@
                     <setting help="Allow your customer to add products from previous order in their cart.">
                         <field name="website_sale_enabled_portal_reorder_button"/>
                     </setting>
+                    <setting string="Allow Cancellation from Portal" help="This will allow customers to cancel their orders from the portal">
+                        <field name="allow_cancellation"/>
+                    </setting>
                 </block>
 
                 <block title="Shop - Products" id="sale_product_catalog_settings">

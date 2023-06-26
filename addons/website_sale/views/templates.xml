@@ -2477,6 +2477,57 @@
                     Order Again
                 </button>
             </li>
+            <li t-if="request.website.allow_cancellation and sale_order.cancellation_request == 'no' and sale_order.state == 'sale'"
+                class="list-group-item flex-grow-1">
+                <a role="button" class="btn btn-primary mb8 w-100" data-bs-toggle="modal" data-bs-target="#modalsocellationrequest" href="#">
+                    <i class="fa fa-times"/> Cancel Order
+                </a>
+            </li>
+        </xpath>
+        <!-- cancellation dialog-->
+        <xpath expr="//div[@id='quote_content']" position="inside">
+            <div role="dialog" class="modal fade" id="modalsocellationrequest">
+                <div class="modal-dialog">
+                    <form id="sale_cancel_request" method="POST" t-att-data-order-id="sale_order.id" class="modal-content"
+                        t-att-data-token="sale_order.access_token"
+                        t-attf-action="/my/orders/#{sale_order.id}/cancel_order_request?access_token=#{sale_order.access_token}">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <header class="modal-header">
+                            <h4 class="modal-title">
+                            Cancel Order</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </header>
+                        <main class="modal-body" id="sign-dialog">
+                            <textarea class="form-control rounded bg-white" id="note" type="textarea" rows="4"
+                                placeholder="Cancellation Reason" required="1" name="so_cancel_reason"/>
+                        </main>
+                        <footer class="modal-footer justify-content-start">
+                            <button type="submit" t-att-id="sale_order.id" class="btn btn-primary">
+                                <i class="fa fa-times"></i> Cancel My Order
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                        </footer>
+                    </form>
+                </div>
+            </div>
+        </xpath>
+        <!-- warnning -->
+        <xpath expr="//div[@id='modaldecline']" position="after">
+            <div t-if="sale_order.cancellation_request == 'request' and sale_order.state != 'cancel'" class="alert alert-success alert-dismissible d-print-none" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <strong>Thank You!</strong><br/>
+                Your cancellation request has has been received and will be processed as soon as possible.
+            </div>
+            <div t-if="sale_order.cancellation_request == 'reject' and sale_order.state != 'cancel'" class="alert alert-danger alert-dismissible d-print-none" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                <strong>Your cancellation request has been rejected.</strong> <a role="button" href="#discussion"><i class="fa fa-comment"/> Contact us</a>
+            </div>
+        </xpath>
+        <!-- check cancellation request in cancel warning -->
+        <xpath expr="//div[hasclass('o_quotation_cancel_alert')]" position="attributes">
+            <attribute name="t-if" add="and sale_order.cancellation_request == 'no'" separator=" "/>
         </xpath>
     </template>
 </odoo>
