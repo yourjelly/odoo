@@ -78,6 +78,7 @@ import {
     leftPos,
     isNotAllowedContent,
     isEditorTab,
+    isVisibleEmpty,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -1959,7 +1960,7 @@ export class OdooEditor extends EventTarget {
                     next = firstLeaf(next);
                 }
             }, this._currentStep.mutations.length);
-            if ([UNBREAKABLE_ROLLBACK_CODE, UNREMOVABLE_ROLLBACK_CODE].includes(res)) {
+            if ([UNBREAKABLE_ROLLBACK_CODE, UNREMOVABLE_ROLLBACK_CODE].includes(res) || isVisibleEmpty(next)) {
                 restore();
                 break;
             }
