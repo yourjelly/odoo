@@ -1,7 +1,6 @@
 /** @odoo-module alias=web_editor.snippet.editor **/
 
 import concurrency from "web.concurrency";
-import snippetsOptions from "web_editor.snippets.options";
 import core from "web.core";
 import Dialog from "web.Dialog";
 import dom from "web.dom";
@@ -2019,7 +2018,7 @@ var SnippetsMenu = Widget.extend({
         this.el.ownerDocument.body.classList.remove('editor_has_snippets');
         // Dispose BS tooltips.
         this.tooltips.dispose();
-        snippetsOptions.clearM2oRpcCache();
+        options.clearM2oRpcCache();
     },
 
     //--------------------------------------------------------------------------
