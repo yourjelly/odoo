@@ -2615,14 +2615,21 @@ var SnippetsMenu = Widget.extend({
                 // TODO: this should be reviewed to be done another way: we
                 // should avoid focusing something here while it is being
                 // rendered elsewhere.
-                const linkTools = this.options.wysiwyg.linkTools;
-                if (linkTools && this._currentTab === this.tabs.OPTIONS
-                        && !linkTools.noFocusUrl) {
+                if (this.options.wysiwyg.state.linkToolProps) {
                     // Wait for `linkTools` potential in-progress rendering
                     // before focusing the URL input on `snippetsMenu` (this
                     // prevents race condition for automated testing).
-                    await linkTools.renderingPromise;
-                    linkTools.focusUrl();
+                    const inputElement = await new Promise((resolve) => {
+                        const observer = new MutationObserver(() => {
+                            const inputElement = document.querySelector('#o_link_dialog_url_input');
+                            if (inputElement) {
+                                observer.disconnect();
+                                resolve(inputElement);
+                            }
+                        });
+                        observer.observe(document.body, { childList: true, subtree: true });
+                    });
+                    inputElement.focus();
                 }
                 return editor;
             });
