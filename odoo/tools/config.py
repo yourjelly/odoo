@@ -35,6 +35,7 @@ class MyOption (optparse.Option, object):
     """
     def __init__(self, *opts, **attrs):
         self.my_default = attrs.pop('my_default', None)
+        self.cli_loadable = attrs.pop('cli_loadable', True)
         super(MyOption, self).__init__(*opts, **attrs)
         if self.dest and self.dest not in config.options_index:
             config.options_index[self.dest] = self
@@ -67,17 +68,7 @@ def _deduplicate_loggers(loggers):
 
 class configmanager:
     def __init__(self):
-        # Options not exposed on the command line. Command line options will be added
-        # from optparse's parser.
-        self.options = {
-            'admin_passwd': 'admin',
-            'csv_internal_sep': ',',
-            'publisher_warranty_url': 'http://services.openerp.com/publisher-warranty/',
-            'reportgz': False,
-            'websocket_keep_alive_timeout': 3600,
-            'websocket_rate_limit_burst': 10,
-            'websocket_rate_limit_delay': 0.2,
-        }
+        self.options = {}
 
         # Not exposed in the configuration file.
         self.blacklist_for_save = set([
@@ -349,6 +340,21 @@ class configmanager:
                              type="int")
             parser.add_option_group(group)
 
+        # Config file only options
+        def add_file_only_option(**kwargs):
+            # they are discarded at runtime
+            # limitation of optparse: there must be at least one short/long opt.
+            opt = '--' + kwargs['dest'].replace('_', '-')
+            return parser.add_option(opt, **kwargs, cli_loadable=False, help=hidden)
+        add_file_only_option(dest='admin_passwd', my_default='admin')
+        add_file_only_option(dest='csv_internal_sep', my_default=',')
+        add_file_only_option(dest='publisher_warranty_url', my_default='http://services.openerp.com/publisher-warranty/')
+        add_file_only_option(dest='reportgz', action='store_true', my_default=False)
+        add_file_only_option(dest='websocket_keep_alive_timeout', type='int', my_default=3600)
+        add_file_only_option(dest='websocket_rate_limit_burst', type='int', my_default=10)
+        add_file_only_option(dest='websocket_rate_limit_delay', type='float', my_default=0.2)
+        del add_file_only_option
+
     def _load_default_options(self):
         self.options.update({
             option_name: option.my_default
@@ -412,6 +418,10 @@ class configmanager:
 
         # Ensures no illegitimate argument is silently discarded (avoids insidious "hyphen to dash" problem)
         die(args, "unrecognized parameters: '%s'" % " ".join(args))
+        for option_name, option_value in list(vars(opt).items()):
+            if not self.options_index[option_name].cli_loadable:
+                die(option_value is not None, f"invalid parameter: {option_name}")
+                delattr(opt, option_name)  # hence list(...)
 
         die(bool(opt.syslog) and bool(opt.logfile),
             "the syslog and logfile options are exclusive")
