@@ -39,7 +39,7 @@ export class NavbarLinkPopoverWidget extends LinkPopoverWidget {
      */
     async start() {
         this.isWebsiteDesigner = await this.checkIsWebsiteDesigner();
-        const $removeLink = this.$('.o_we_remove_link');
+        const $removeLink = this.$el.find('.o_we_remove_link');
         // remove link has no sense on navbar menu links, instead show edit menu
         if (this.isWebsiteDesigner) {
             const $anchor = $('<a/>', {
@@ -49,7 +49,7 @@ export class NavbarLinkPopoverWidget extends LinkPopoverWidget {
             $removeLink.replaceWith($anchor);
             $anchor.on('click', () => this.onEditMenuClick(this));
         } else {
-            this.$('.o_we_edit_link').remove();
+            this.$el.find('.o_we_edit_link').remove();
             $removeLink.remove();
         }
 
