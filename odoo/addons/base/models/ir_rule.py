@@ -4,7 +4,7 @@ import logging
 import warnings
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
-from odoo.exceptions import AccessError, ValidationError
+from odoo.exceptions import AccessDenied, ValidationError
 from odoo.osv import expression
 from odoo.tools import config
 from odoo.tools.safe_eval import safe_eval, time
@@ -202,7 +202,7 @@ class IrRule(models.Model):
         resolution_info = resolution_info_per_operation[operation]
         if not self.env.user.has_group('base.group_no_one') or not self.env.user.has_group('base.group_user'):
             records.invalidate_recordset()
-            return AccessError(f"{operation_error}\n\n{resolution_info}")
+            return AccessDenied(f"{operation_error}\n\n{resolution_info}")
 
         user_description = f'{self.env.user.name} (id={self.env.user.id})'
         user_msg_per_operation = {
@@ -213,7 +213,7 @@ class IrRule(models.Model):
             'unlink': _("\n\nSorry my friend, %s is missing the secret sauce to perform the mystical art of %s deletion.", user_description, description),
         }
 
-        # This extended AccessError is only displayed in debug mode.
+        # This extended AccessDenied is only displayed in debug mode.
         # Note that by default, public and portal users do not have
         # the group "base.group_no_one", even if debug mode is enabled,
         # so it is relatively safe here to include the list of rules and record names.
@@ -263,7 +263,7 @@ class IrRule(models.Model):
         records_sudo.invalidate_recordset()
 
         msg = f"{operation_error}\n{failing_records}{user_message}\n\n{failing_rules}\n\n{resolution_info}"
-        return AccessError(msg)
+        return AccessDenied(msg)
 
 
 #

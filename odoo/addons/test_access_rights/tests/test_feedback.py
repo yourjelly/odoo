@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import SUPERUSER_ID, Command
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, AccessDenied
 from odoo.tests import common, TransactionCase
 
 
@@ -179,7 +179,7 @@ class TestIRRuleFeedback(Feedback):
 
     def test_local(self):
         self._make_rule('rule 0', '[("val", "=", 42)]')
-        with self.assertRaises(AccessError) as ctx:
+        with self.assertRaises(AccessDenied) as ctx:
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
@@ -189,7 +189,7 @@ But don’t worry, a little birdie told me that if you try to charm the administ
         # debug mode
         self.env.ref('base.group_no_one').write({'users': [Command.link(self.user.id)]})
         self.env.ref('base.group_user').write({'users': [Command.link(self.user.id)]})
-        with self.assertRaises(AccessError) as ctx:
+        with self.assertRaises(AccessDenied) as ctx:
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
@@ -216,7 +216,7 @@ But don’t worry, a little birdie told me that if you try to charm the administ
         self.env.ref('base.group_user').write({'users': [Command.link(self.user.id)]})
         self._make_rule('rule 0', '[("val", "=", 42)]')
         self._make_rule('rule 1', '[("val", "=", 78)]')
-        with self.assertRaises(AccessError) as ctx:
+        with self.assertRaises(AccessDenied) as ctx:
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
@@ -237,7 +237,7 @@ But don’t worry, a little birdie told me that if you try to charm the administ
         self.env.ref('base.group_user').write({'users': [Command.link(self.user.id)]})
         self._make_rule('rule 0', '[("val", "=", 42)]', global_=True)
         self._make_rule('rule 1', '[("val", "=", 78)]', global_=True)
-        with self.assertRaises(AccessError) as ctx:
+        with self.assertRaises(AccessDenied) as ctx:
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
@@ -261,7 +261,7 @@ But don’t worry, a little birdie told me that if you try to charm the administ
         self.env.ref('base.group_user').write({'users': [Command.link(self.user.id)]})
         self._make_rule('rule 0', '[("val", "=", 42)]', global_=True)
         self._make_rule('rule 1', '[(1, "=", 1)]', global_=True)
-        with self.assertRaises(AccessError) as ctx:
+        with self.assertRaises(AccessDenied) as ctx:
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
@@ -283,7 +283,7 @@ But don’t worry, a little birdie told me that if you try to charm the administ
         self._make_rule('rule 1', '[(1, "=", 1)]', global_=True)
         self._make_rule('rule 2', '[(0, "=", 1)]')
         self._make_rule('rule 3', '[("val", "=", 55)]')
-        with self.assertRaises(AccessError) as ctx:
+        with self.assertRaises(AccessDenied) as ctx:
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
@@ -309,7 +309,7 @@ But don’t worry, a little birdie told me that if you try to charm the administ
         self.env.ref('base.group_user').write({'users': [Command.link(self.user.id)]})
         self._make_rule('rule 0', "[('company_id', '=', user.company_id.id)]")
         self._make_rule('rule 1', '[("val", "=", 0)]', global_=True)
-        with self.assertRaises(AccessError) as ctx:
+        with self.assertRaises(AccessDenied) as ctx:
             self.record.write({'val': 1})
         self.assertEqual(
             ctx.exception.args[0],
@@ -342,7 +342,7 @@ But don't lose heart! There are plenty of other captivating records within your 
         self.record.sudo().company_id = self.env['res.company'].create({'name': 'Brosse Inc.'})
         self.user.sudo().company_ids = [Command.link(self.record.company_id.id)]
         child_record = ChildModel.create({'parent_id': self.record.id}).with_user(self.user)
-        with self.assertRaises(AccessError) as ctx:
+        with self.assertRaises(AccessDenied) as ctx:
             _ = child_record.parent_id
         self.assertEqual(
             ctx.exception.args[0],
@@ -366,7 +366,7 @@ But don't lose heart! There are plenty of other captivating records within your 
         self.record.sudo().company_id = self.env['res.company'].create({'name': 'Brosse Inc.'})
         self.user.sudo().company_ids = [Command.link(self.record.company_id.id)]
         self._make_rule('rule 0', "[('company_id', '=', user.company_id.id)]", attr='read')
-        with self.assertRaises(AccessError) as ctx:
+        with self.assertRaises(AccessDenied) as ctx:
             _ = self.record.val
         self.assertEqual(
             ctx.exception.args[0],
