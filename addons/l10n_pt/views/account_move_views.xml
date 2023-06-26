@@ -17,12 +17,12 @@
                 <xpath expr="//button[@name='preview_invoice']" position="before">
                     <field name="l10n_pt_qr_code_str" invisible="1"/>
                 </xpath>
-<!--                <xpath expr="//button[@name='preview_invoice']" position="attributes">-->
-<!--                    <attribute name="attrs">{'invisible': [-->
-<!--                        '|', ('move_type', 'not in', ('out_invoice', 'out_refund')),-->
-<!--                        ('country_code', '=', 'PT'), ('l10n_pt_qr_code_str', '=', False)-->
-<!--                    ]}</attribute>-->
-<!--                </xpath>-->
+                <xpath expr="//button[@name='preview_invoice']" position="attributes">
+                    <attribute name="attrs">{'invisible': [
+                        '|', ('move_type', 'not in', ('out_invoice', 'out_refund')),
+                        ('country_code', '=', 'PT'), ('l10n_pt_qr_code_str', '=', False)
+                    ]}</attribute>
+                </xpath>
             </field>
         </record>
     </data>
