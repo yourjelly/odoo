@@ -24,11 +24,11 @@ wTourUtils.registerWebsitePreviewTour('link_tools', {
     },
     {
         content: "Open link tools",
-        trigger: "#toolbar #create-link",
+        trigger: "#toolbar:not(.oe-floating) #create-link",
     },
     {
         content: "Type the link URL odoo.com",
-        trigger: '#o_link_dialog_url_input',
+        trigger: '#toolbar:not(.oe-floating) #o_link_dialog_url_input',
         run: 'text odoo.com'
     },
     clickOnImgStep,
@@ -90,7 +90,7 @@ wTourUtils.registerWebsitePreviewTour('link_tools', {
     },
     {
         content: "The new link content should be odoo website and url odoo.be",
-        trigger: '#toolbar .dropdown:has([name="link_style_color"]) > button',
+        trigger: '#toolbar:not(.oe-floating) .dropdown:has([name="link_style_color"]) > button',
     },
     {
         // When doing automated testing, the link popover takes time to
@@ -104,7 +104,7 @@ wTourUtils.registerWebsitePreviewTour('link_tools', {
     },
     {
         content: "Click on the secondary style button.",
-        trigger: '#toolbar we-button[data-value="secondary"]',
+        trigger: '#toolbar:not(.oe-floating) we-button[data-value="secondary"]',
     },
     ...wTourUtils.clickOnSave(),
     {
