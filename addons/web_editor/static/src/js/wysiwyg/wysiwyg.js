@@ -28,7 +28,7 @@ import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/c
 import { _t } from "@web/core/l10n/translation";
 import { ConflictDialog } from "./conflict_dialog";
 import { getOrCreateLink } from "./widgets/link";
-import { LinkTools, shouldUnlink } from '@web_editor/js/wysiwyg/widgets/link_tools';
+import { shouldUnlink } from '@web_editor/js/wysiwyg/widgets/link_tools';
 import { LinkDialog } from "./widgets/link_dialog";
 import {
     Component,
@@ -88,7 +88,7 @@ let fileViewerId = 0;
 
 export class Wysiwyg extends Component {
     static template = 'web_editor.Wysiwyg';
-    static components = { MediaDialog, VideoSelector, Toolbar, LinkTools, ImageCrop };
+    static components = { MediaDialog, VideoSelector, Toolbar, ImageCrop };
     static props = {
         options: Object,
         startWysiwyg: { type: Function, optional: true },
@@ -853,6 +853,11 @@ export class Wysiwyg extends Component {
             editorCollaborationOptions.postProcessExternalSteps = this.options.postProcessExternalSteps;
         }
         return editorCollaborationOptions;
+    }
+    setupToolbar(toolbarEl) {
+        this.toolbarEl = toolbarEl;
+        this.odooEditor.setupToolbar(toolbarEl);
+        this._updateEditorUI();
     }
     /**
      * @override

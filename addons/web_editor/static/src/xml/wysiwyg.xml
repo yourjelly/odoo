@@ -3,11 +3,7 @@
 
     <t t-name="web_editor.Wysiwyg" owl="1">
         <div style="display: contents;" t-ref="toolbar">
-            <Toolbar t-props="this.state.toolbarProps" t-if="this.state.showToolbar">
-                <t t-if="state.linkToolProps">
-                    <LinkTools t-props="state.linkToolProps" />
-                </t>
-            </Toolbar>
+            <Toolbar t-props="this.state.toolbarProps" t-if="this.state.showToolbar"/>
         </div>
         <div style="display: contents;" t-ref="imageCrop">
             <ImageCrop t-props="this.imageCropProps"/>
