@@ -2616,19 +2616,22 @@ var SnippetsMenu = Widget.extend({
                 // should avoid focusing something here while it is being
                 // rendered elsewhere.
                 if (this.options.wysiwyg.state.linkToolProps) {
-                    // Wait for `linkTools` potential in-progress rendering
-                    // before focusing the URL input on `snippetsMenu` (this
-                    // prevents race condition for automated testing).
-                    const inputElement = await new Promise((resolve) => {
-                        const observer = new MutationObserver(() => {
-                            const inputElement = document.querySelector('#o_link_dialog_url_input');
-                            if (inputElement) {
-                                observer.disconnect();
-                                resolve(inputElement);
-                            }
+                    let inputElement = document.querySelector('#o_link_dialog_url_input');
+                    if (!inputElement) {
+                        // Wait for `linkTools` potential in-progress rendering
+                        // before focusing the URL input on `snippetsMenu` (this
+                        // prevents race condition for automated testing).
+                        inputElement = await new Promise((resolve) => {
+                            const observer = new MutationObserver(() => {
+                                const inputElement = document.querySelector('#o_link_dialog_url_input');
+                                if (inputElement) {
+                                    observer.disconnect();
+                                    resolve(inputElement);
+                                }
+                            });
+                            observer.observe(document.body, { childList: true, subtree: true });
                         });
-                        observer.observe(document.body, { childList: true, subtree: true });
-                    });
+                    }
                     inputElement.focus();
                 }
                 return editor;
