@@ -192,7 +192,7 @@ const Wysiwyg = Widget.extend({
             getPowerboxElement: () => {
                 const selection = (this.options.document || document).getSelection();
                 if (selection.isCollapsed && selection.rangeCount) {
-                    const baseNode = closestElement(selection.anchorNode, 'P, DIV');
+                    const baseNode = closestElement(selection.anchorNode, 'P:not([t-field]), DIV:not([t-field])');
                     const fieldContainer = closestElement(selection.anchorNode, '[data-oe-field]');
                     if (!baseNode ||
                         (
