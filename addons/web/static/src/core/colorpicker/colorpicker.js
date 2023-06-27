@@ -62,7 +62,25 @@ export class Colorpicker extends Component {
         onWillStart(() => {
             this.init();
         });
-        onMounted(() => {
+        onMounted(async () => {
+            if (!this.elRef.el) {
+                // There is legacy code that can trigger the instantiation of the
+                // link tool when one of it's parent component is not in the dom. If
+                // that parent element is not in the dom, owl will not return
+                // `this.linkComponentWrapperRef.el` because of a check (see
+                // `inOwnerDocument`).
+                // Todo: this workaround should be removed when the snippet menu is
+                // converted to owl.
+                await new Promise(resolve => {
+                    const observer = new MutationObserver(() => {
+                        if (this.elRef.el) {
+                            observer.disconnect();
+                            resolve();
+                        }
+                    });
+                    observer.observe(document.body, { childList: true, subtree: true });
+                });
+            }
             this.el = this.elRef.el;
             const $el = $(this.el);
             this.$ = $el.find.bind($el);
