@@ -15,6 +15,11 @@ import dom from "@web/legacy/js/core/dom";
 import mixins from "@web/legacy/js/core/mixins";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import wUtils from "@website/js/utils";
+import {
+    setTextHighlight,
+    removeTextHighlight,
+    getCurrentTextHighlight,
+} from "@website/js/text_processing";
 
 var qweb = core.qweb;
 
@@ -1669,6 +1674,46 @@ registry.ZoomedBackgroundShape = publicWidget.Widget.extend({
             // only appears if the overflow to the right exceeds 0.333px.
             this._updateShapePosition(offset + 'px');
         }
+    },
+});
+
+registry.TextHighlight = publicWidget.Widget.extend({
+    selector: '#wrapwrap',
+
+    /**
+     * @override
+     */
+    async start() {
+        this._adaptTextHighlights();
+        this._adaptOnResize = debounce(() => this._adaptTextHighlights(), 100);
+        window.addEventListener("resize", this._adaptOnResize);
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    destroy() {
+        this._super(...arguments);
+        window.removeEventListener("resize", this.throttledResize);
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * We need to adapt the text highlights on resize, mainly to take in
+     * consideration the rendered line breaks in text nodes...
+     *
+     * @private
+     */
+    _adaptTextHighlights() {
+        [...this.el.querySelectorAll(".o_text_highlight")].forEach(textEl => {
+            const highlightID = getCurrentTextHighlight(textEl);
+            // Adapt the text highlights.
+            removeTextHighlight(textEl);
+            setTextHighlight(textEl, highlightID);
+        });
     },
 });
 

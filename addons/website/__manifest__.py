@@ -135,6 +135,7 @@
             'website/static/src/xml/website.xml',
             'website/static/src/xml/website.background.video.xml',
             'website/static/src/xml/website.share.xml',
+            'website/static/src/js/text_processing.js',
         ],
         'web.assets_frontend_minimal': [
             'website/static/src/js/content/inject_dom.js',
@@ -195,6 +196,7 @@
         ],
         'web.assets_common': [
             'website/static/src/js/tours/tour_utils.js',
+            'website/static/src/js/text_processing.js',
         ],
         'web.qunit_suite_tests': [
             'website/static/tests/redirect_field_tests.js',

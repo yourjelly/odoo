@@ -17,8 +17,27 @@ import {
     isVisibleTextNode,
 } from '../utils/utils.js';
 
+/**
+ * Special use case: applying the split on a node with text highlights should
+ * take into consideration duplicating the effect SVG on the first part too.
+ * This function should handle the split of both `Text` and `HTMLElement`.
+ */
+const textHighlightAdapter = (node, offset) => {
+    const parentElement = node.parentElement;
+    if (parentElement && parentElement.classList.contains("o_text_highlight_item")) {
+        const svg = parentElement.querySelector("svg");
+        const previous = node.previousSibling;
+        if (svg && previous) {
+            previous.replaceWith(previous, svg.cloneNode(true));
+            return offset + 1;
+        }
+    }
+    return offset;
+};
+
 Text.prototype.oEnter = function (offset) {
-    this.parentElement.oEnter(splitTextNode(this, offset), true);
+    const splitOffset = splitTextNode(this, offset);
+    this.parentElement.oEnter(textHighlightAdapter(this, splitOffset), true);
 };
 /**
  * The whole logic can pretty much be described by this example:
@@ -60,7 +79,8 @@ HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
     // closest list item element if there is one).
     if (!isBlock(this) || (this.nodeName !== 'LI' && this.closest('LI'))) {
         if (this.parentElement) {
-            this.parentElement.oEnter(childNodeIndex(this) + 1, !didSplit);
+            const splitOffset = childNodeIndex(this) + 1;
+            this.parentElement.oEnter(textHighlightAdapter(splitEl, splitOffset), !didSplit);
         } else {
             // There was no block parent element in the original chain, consider
             // this unsplittable, like an unbreakable.
