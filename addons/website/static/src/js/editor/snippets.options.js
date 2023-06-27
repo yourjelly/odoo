@@ -3652,6 +3652,228 @@ options.registry.WebsiteAnimate = options.Class.extend({
     },
 });
 
+options.registry.TextHighlight = options.Class.extend({
+    /**
+     * @constructor
+     */
+    init() {
+        this.textHighlightCache = {};
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+        this.leftPanelEl = this.$overlay.data('$optionsSection')[0];
+        // The overlay opacity is reduced for more highlight visibility on
+        // small text.
+        this.$overlay[0].style.opacity = "0.25";
+    },
+    /**
+     * Move "Text Effect" options to the editor's toolbar.
+     *
+     * @override
+     */
+    onFocus() {
+        const $toolbar = this.options.wysiwyg.toolbar.$el;
+        $toolbar.append(this.$el);
+    },
+    /**
+     * @override
+     */
+    onBlur() {
+        this.leftPanelEl.appendChild(this.el);
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Activates & deactivates the text highlight effect.
+     *
+     * @see this.selectClass for parameters
+     */
+    async setTextHighlight(previewMode, widgetValue, params) {
+        if (widgetValue) {
+            await this._addTextHighlight(widgetValue);
+        } else {
+            this._removeTextHighlight();
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async _renderCustomXML(uiFragment) {
+        await this._super(...arguments);
+        const weBtnEls = [...uiFragment.querySelectorAll("we-button[data-set-text-highlight]")];
+        const proms = weBtnEls.map(async weBtnEl => {
+            // Get the text highlight linked to each `<we-button/>` and apply it
+            // to its text content.
+            const svg = await this._loadTextHighlight(weBtnEl.dataset.setTextHighlight);
+            svg.className.baseVal = "";
+            weBtnEl.textContent = "Text";
+            weBtnEl.appendChild(svg);
+        });
+        await Promise.all(proms);
+    },
+    /**
+     * Loads the highlight SVG element and returns a copy of it.
+     *
+     * @param {String} highlightID The requested highlight effect.
+     * @private
+     */
+    async _loadTextHighlight(highlightID) {
+        let textHighlightSVG = this.textHighlightCache[highlightID];
+        if (!textHighlightSVG) {
+            const url = `/website/static/text_highlight/${encodeURIComponent(highlightID)}.svg`;
+            const svgText = await (await fetch(url)).text();
+            textHighlightSVG = new DOMParser().parseFromString(svgText, "image/svg+xml").documentElement;
+            this.textHighlightCache[highlightID] = textHighlightSVG;
+        }
+        return textHighlightSVG.cloneNode(true);
+    },
+    /**
+     * Used to add a highlight SVG element to the targeted text node(s).
+     * This should take in consideration a situation where many text nodes
+     * are separate e.g. `<p>first text content<br/>second text content...</p>`.
+     * To correctly handle those situations, every text node will be wrapped in
+     * a `.o_text_highlight_item` that contains its highlight SVG.
+     *
+     * @param {String} highlightID
+     * @private
+     */
+    async _addTextHighlight(highlightID) {
+        const textHighlightEl = await this._loadTextHighlight(highlightID);
+        if (textHighlightEl) {
+            const highlightEls = [...this.$target[0].querySelectorAll(".o_text_highlight_item svg")];
+            if (highlightEls.length) {
+                // If the text element has a highlight effect, we only need to
+                // change the SVG.
+                highlightEls.forEach(svg => svg.replaceWith(textHighlightEl.cloneNode(true)));
+            } else {
+                const lines = [];
+                let lineIndex = 0;
+                const nodeIsBR = node => node.nodeName === "BR";
+                [...this.$target[0].childNodes].forEach(child => {
+                    // We consider `<br/>` tags as full text lines to ease
+                    // excluding them when the highlight is applied on the DOM.
+                    if (nodeIsBR(child)) {
+                        lines[++lineIndex] = [child];
+                        return lineIndex++;
+                    }
+                    const textLines = this._splitNodeLines(child);
+                    // for each text line detected, we add the content as new
+                    // line and adjust the line index accordingly.
+                    textLines.map((node, i, {length}) => {
+                        if (!lines[lineIndex]) {
+                            lines[lineIndex] = [];
+                        }
+                        lines[lineIndex].push(node);
+                        if (i !== length - 1) {
+                            lineIndex++;
+                        }
+                    });
+                });
+                this.$target[0].replaceChildren(...lines.map(textLine => {
+                    // Add the highlight effects to text content only
+                    // (exclude `<br/>`).
+                    return nodeIsBR(textLine[0]) ? textLine[0] :
+                        this._createHighlight(textLine, textHighlightEl);
+                }));
+            }
+        }
+    },
+    /**
+     * Used to rollback the @see this._addTextHighlight behaviour.
+     *
+     * @private
+     */
+    _removeTextHighlight() {
+        // Simply replace every `<span class="o_text_highlight_item">
+        // textNode1 [textNode2,...]<svg .../></span>` by `textNode1
+        // [textNode2,...]`.
+        [...this.$target[0].querySelectorAll(".o_text_highlight_item")].forEach(item => {
+            item.replaceWith(...[...item.childNodes].filter((node) => node.tagName !== "svg"));
+        });
+    },
+    /**
+     * Returns a list of detected lines in the content of a text node.
+     *
+     * @param {Node} node
+     * @private
+     */
+    _splitNodeLines(node) {
+        const text = node.textContent;
+        if (node.nodeType !== Node.TEXT_NODE || !text) {
+            return [node];
+        }
+        const lines = [];
+        const range = document.createRange();
+        let i = -1;
+        while (++i < text.length) {
+            range.setStart(node, 0);
+            range.setEnd(node, i + 1);
+            const lineIndex = range.getClientRects().length - 1;
+            const currentText = lines[lineIndex];
+            lines[lineIndex] = (currentText || "") + text.charAt(i);
+        }
+        return lines.map(line => document.createTextNode(line));
+    },
+    /**
+     * @private
+     */
+    _createHighlight(nodes, highlightEl) {
+        const highlightContainer = document.createElement("span");
+        highlightContainer.className = "o_text_highlight_item position-relative d-inline-block z-index-1 text-decoration-none";
+        highlightContainer.append(...nodes, highlightEl.cloneNode(true));
+        return highlightContainer;
+    },
+    /**
+     * @override
+     */
+    async _computeWidgetState(methodName, params) {
+        const value = await this._super(...arguments);
+        switch (methodName) {
+            case "selectStyle": {
+                const style = window.getComputedStyle(this.$target[0]);
+                if (value === "currentColor") {
+                    // The text highlight default color is the text's
+                    // "currentColor". This value should be handled correctly
+                    // by the option.
+                    return style.color;
+                } else if (params.cssProperty.startsWith("--text-highlight-width") && !value) {
+                    // The default value for `--text-highlight-width` is 0.1em.
+                    const widthPXValue = `${Math.round(parseFloat(style.fontSize) * 0.1)}px`;
+                    this.$target[0].style.setProperty(params.cssProperty, widthPXValue);
+                    return widthPXValue;
+                }
+                break;
+            }
+            case "setTextHighlight": {
+                const match = this.$target[0].className.match(/o_text_(?<value>highlight_[\w]+)/);
+                if (match) {
+                    const highlightID = match.groups.value;
+                    // Automatically apply the highlight effect after setting
+                    // the option class.
+                    if (!this.$target[0].querySelector(".o_text_highlight_item")) {
+                        await this._addTextHighlight(highlightID);
+                        this.options.wysiwyg.odooEditor.historyStep();
+                    }
+                    return highlightID;
+                }
+            }
+        }
+        return value;
+    },
+});
+
 /**
  * Replaces current target with the specified template layout
  */

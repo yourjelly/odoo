@@ -2383,3 +2383,27 @@ input[value*="data-oe-translation-initial-sha"] {
 .o_dropdown_menu {
     @extend .dropdown-menu;
 }
+
+//------------------------------------------------------------------------------
+// Website Text Highlight Effects
+//------------------------------------------------------------------------------
+
+.o_text_highlight {
+    // Text highlight global CSS
+    --text-highlight-color: currentColor;
+
+    svg {
+        pointer-events: none;
+        z-index: -1;
+
+        .preview-effect{
+            display: none;
+        }
+    }
+
+    &.o_text_highlight_8, &.o_text_highlight_9, &.o_text_highlight_10 {
+        svg {
+            z-index: 1;
+        }
+    }
+}

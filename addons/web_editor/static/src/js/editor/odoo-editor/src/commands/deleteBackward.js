@@ -51,6 +51,10 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
     let moveDest;
     if (offset) {
         const leftNode = this.childNodes[offset - 1];
+        // Some elements like text highlights SVGs should be ignored.
+        if (leftNode.classList && leftNode.classList.contains('o_ignore_content')) {
+            return;
+        }
         if (isUnremovable(leftNode)) {
             throw UNREMOVABLE_ROLLBACK_CODE;
         }

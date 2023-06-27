@@ -95,7 +95,12 @@ function sanitizeNode(node, root) {
         !(
             node.attributes?.length === 1 &&
             node.hasAttribute('data-oe-zws-empty-inline') &&
-            (node.textContent === '\u200B' || node.previousSibling.textContent === '\u200B'))
+            (node.textContent === '\u200B' || node.previousSibling.textContent === '\u200B')) &&
+        // In some cases, as for text highlights, we want to prevent merging
+        // identical highlight containers (`.o_text_highlight_item`) added
+        // for each text line.
+        ![...node.childNodes].filter(node => node.classList
+            && node.classList.contains('o_ignore_content')).length
     ) {
         // Merge identical elements together.
         getDeepRange(root, { select: true });

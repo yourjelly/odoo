@@ -397,7 +397,19 @@ export const editorCommands = {
         }
     },
     removeFormat: editor => {
+        const highlightEls = editor.editable.querySelectorAll(".o_text_highlight");
+        // Hack: The `execCommand("removeFormat")` has unpredictable behaviour
+        // on text highlights content: it wraps the effect's SVG in a `<font/>`
+        // container on Chrome, while on Firefox it completely removes the SVG
+        // parent... The idea is to force the "removeFormat" command to ignore
+        // the text highlight by setting it temporarily as "not editable".
+        highlightEls.forEach(highlightEl => {
+            highlightEl.setAttribute("contenteditable", false);
+        });
         editor.document.execCommand('removeFormat');
+        highlightEls.forEach(highlightEl => {
+            highlightEl.removeAttribute("contenteditable");
+        });
         for (const node of getTraversedNodes(editor.editable)) {
             // The only possible background image on text is the gradient.
             closestElement(node).style.backgroundImage = '';
