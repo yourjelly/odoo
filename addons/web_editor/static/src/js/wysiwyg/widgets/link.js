@@ -56,6 +56,24 @@ export class Link extends Component {
                 return;
             }
             started = true;
+            if (!this.linkComponentWrapperRef.el) {
+                // There is legacy code that can trigger the instantiation of the
+                // link tool when it's parent component (the toolbar) is not in the
+                // dom. If the parent element is not in the dom, owl will not return
+                // `this.linkComponentWrapperRef.el` because of a check (see
+                // `inOwnerDocument`).
+                // Todo: this workaround should be removed when the snippet menu is
+                // converted to owl.
+                await new Promise(resolve => {
+                    const observer = new MutationObserver(() => {
+                        if (this.linkComponentWrapperRef.el) {
+                            observer.disconnect();
+                            resolve();
+                        }
+                    });
+                    observer.observe(document.body, { childList: true, subtree: true });
+                });
+            }
             this.$el = $(this.linkComponentWrapperRef.el);
 
             this.$el.find('input, select').on('input', this._onAnyChange.bind(this));
