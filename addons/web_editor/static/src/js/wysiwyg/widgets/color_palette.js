@@ -44,7 +44,7 @@ export class ColorPalette extends Component {
             return colorpickerTemplateProm;
         }
     }
-    static template = 'web_editor.snippet.option.colorpicker';
+    static template = 'web_editor.ColorPalette';
     static props = {
         document: { type: true, optional: true },
         resetTabCount: { type: Number, optional: true },
