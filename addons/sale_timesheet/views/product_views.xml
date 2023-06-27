@@ -5,6 +5,24 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="sale.product_template_form_view"/>
         <field name="arch" type="xml">
+<<<<<<< HEAD
+||||||| parent of a6e1412bac85 (temp)
+            <xpath expr="//field[@name='invoice_policy']" position="attributes">
+                <attribute name="invisible">False</attribute>
+                <attribute name="attrs">{'invisible': [('type', '=', 'service')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_policy']" position="after">
+                <field name="service_policy" string="Invoicing Policy" attrs="{'invisible': [('type', '!=', 'service')], 'required': [('type', '=', 'service')]}"/>
+            </xpath>
+=======
+            <xpath expr="//field[@name='invoice_policy']" position="attributes">
+                <attribute name="invisible">False</attribute>
+                <attribute name="attrs">{'invisible': [('type', '=', 'service'), ('sale_ok', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_policy']" position="after">
+                <field name="service_policy" string="Invoicing Policy" attrs="{'invisible': ['|', ('type', '!=', 'service'), ('sale_ok', '=', False)], 'required': [('type', '=', 'service'), ('sale_ok', '=', True)]}"/>
+            </xpath>
+>>>>>>> a6e1412bac85 (temp)
             <field name="product_tooltip" position="after">
                 <label for="product_tooltip" string="" attrs="{'invisible': ['|', ('type', '!=', 'service'), ('service_policy', '!=', 'ordered_prepaid')]}"/>
                 <div attrs="{'invisible': ['|', ('type', '!=', 'service'), ('service_policy', '!=', 'ordered_prepaid')]}" class="fst-italic text-muted">
