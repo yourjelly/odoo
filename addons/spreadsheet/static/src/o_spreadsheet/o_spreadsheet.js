@@ -3036,9 +3036,13 @@
      * Spread multiple colrows zone to one row/col zone and add a many new input range as needed.
      * For example, A1:B4 will become [A1:A4, B1:B4]
      */
-    function spreadRange(ranges) {
+    function spreadRange(getters, ranges) {
         const postProcessedRanges = [];
         for (const range of ranges) {
+            if (!getters.isRangeValid(range)) {
+                postProcessedRanges.push(range); // ignore invalid range
+                continue;
+            }
             const { sheetName } = splitReference(range);
             const sheetPrefix = sheetName ? `${sheetName}!` : "";
             const zone = toUnboundedZone(range);
@@ -18963,7 +18967,7 @@
             });
         }
         onDataSeriesConfirmed() {
-            this.dataSeriesRanges = spreadRange(this.dataSeriesRanges);
+            this.dataSeriesRanges = spreadRange(this.env.model.getters, this.dataSeriesRanges);
             this.state.datasetDispatchResult = this.props.updateChart(this.props.figureId, {
                 dataSets: this.dataSeriesRanges,
             });
@@ -22075,10 +22079,6 @@
       padding-left: 3px;
       padding-right: 3px;
       outline: none;
-
-      &.unfocusable {
-        pointer-events: none;
-      }
 
       p {
         margin-bottom: 0px;
@@ -45209,6 +45209,10 @@
       top: 20%;
     }
   }
+
+  .user-select-text {
+    user-select: text;
+  }
 `;
     class TopBarComposer extends owl.Component {
         static template = "o-spreadsheet-TopBarComposer";
@@ -45464,6 +45468,12 @@
                 return;
             }
             this.closeMenus();
+        }
+        onTopbarClick() {
+            if (this.env.model.getters.isReadonly()) {
+                return;
+            }
+            this.props.onClick();
         }
         onClick() {
             this.props.onClick();
@@ -49559,8 +49569,8 @@
 
 
     __info__.version = '16.4.0-alpha.5';
-    __info__.date = '2023-06-26T14:47:32.747Z';
-    __info__.hash = '3b0b6f1';
+    __info__.date = '2023-06-27T07:18:36.548Z';
+    __info__.hash = 'a27fd72';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
