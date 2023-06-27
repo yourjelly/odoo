@@ -2495,68 +2495,18 @@ input[value*="data-oe-translation-initial-sha"] {
     // Text highlight global CSS
     --text-highlight-color: currentColor;
 
-    // Text highlight positions.
-    &.o_highlight_center .o_text_highlight_item > svg {
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-    &.o_highlight_bottom .o_text_highlight_item > svg {
-        top: 50%;
-        left: 0;
-    }
-    // Text highlight SVG container.
-    > .o_text_highlight_item {
-        position: relative;
-        text-decoration: none;
-        display: inline-block;
-        z-index: 1;
+    svg {
+        pointer-events: none;
+        z-index: -1;
 
-        svg {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            overflow: visible;
-            pointer-events: none;
-            z-index: -1;
+        .preview-effect{
+            display: none;
         }
     }
 
-    // DESIGN NOTE: Optional modifiers: can be used for specific highlight style.
-    // &.o_text_highlight_0 {
-    //     //
-    // }
-    // &.o_text_highlight_1 {
-    //     //
-    // }
-    // &.o_text_highlight_3 {
-    //     //
-    // }
-    // &.o_text_highlight_2 {
-    //     //
-    // }
-    // &.o_text_highlight_3 {
-    //     //
-    // }
-    // &.o_text_highlight_4 {
-    //     //
-    // }
-    // &.o_text_highlight_5 {
-    //     //
-    // }
-    // &.o_text_highlight_6 {
-    //    //
-    // }
-    // &.o_text_highlight_7 {
-    //     //
-    // }
-    // &.o_text_highlight_8 {
-    //     //
-    // }
-    // &.o_text_highlight_9 {
-    //     //
-    // }
-    // &.o_text_highlight_10 {
-    //     //
-    // }
+    &.o_text_highlight_8, &.o_text_highlight_9, &.o_text_highlight_10 {
+        svg {
+            z-index: 1;
+        }
+    }
 }

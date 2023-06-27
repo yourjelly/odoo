@@ -1499,18 +1499,18 @@
         data-exclude="[data-oe-xpath], .o_no_text_highlight">
         <!-- Text highlight style -->
         <we-select string="Highlight" data-name="text_highlight_opt" class="o_we_select_grid">
-            <div class="o_we_select_content">
-                <we-button data-select-class="o_text_highlight_0 o_highlight_bottom" data-set-text-highlight="highlight_0" data-select-label="Highlight 0"/>
-                <we-button data-select-class="o_text_highlight_1 o_highlight_center" data-set-text-highlight="highlight_1" data-select-label="Highlight 1"/>
-                <we-button data-select-class="o_text_highlight_2 o_highlight_center" data-set-text-highlight="highlight_2" data-select-label="Highlight 2"/>
-                <we-button data-select-class="o_text_highlight_3 o_highlight_center" data-set-text-highlight="highlight_3" data-select-label="Highlight 3"/>
-                <we-button data-select-class="o_text_highlight_4 o_highlight_center" data-set-text-highlight="highlight_4" data-select-label="Highlight 4"/>
-                <we-button data-select-class="o_text_highlight_5 o_highlight_center" data-set-text-highlight="highlight_5" data-select-label="Highlight 5"/>
-                <we-button data-select-class="o_text_highlight_6 o_highlight_center" data-set-text-highlight="highlight_6" data-select-label="Highlight 6"/>
-                <we-button data-select-class="o_text_highlight_7 o_highlight_center" data-set-text-highlight="highlight_7" data-select-label="Highlight 7"/>
-                <we-button data-select-class="o_text_highlight_8 o_highlight_center" data-set-text-highlight="highlight_8" data-select-label="Highlight 8"/>
-                <we-button data-select-class="o_text_highlight_9 o_highlight_center" data-set-text-highlight="highlight_9" data-select-label="Highlight 9"/>
-                <we-button data-select-class="o_text_highlight_10 o_highlight_center" data-set-text-highlight="highlight_10" data-select-label="Highlight 10"/>
+            <div class="o_we_select_content d-flex flew-row flex-wrap">
+                <we-button data-select-class="o_text_highlight_0 o_highlight_bottom" data-set-text-highlight="highlight_0" data-select-label="Underline" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_1 o_highlight_bottom" data-set-text-highlight="highlight_1" data-select-label="Freehand" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_2 o_highlight_bottom" data-set-text-highlight="highlight_2" data-select-label="Double" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_3 o_highlight_bottom" data-set-text-highlight="highlight_3" data-select-label="Wavy" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_4 o_highlight_center" data-set-text-highlight="highlight_4" data-select-label="Circle" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_5 o_highlight_center" data-set-text-highlight="highlight_5" data-select-label="Over and underline" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_6 o_highlight_bottom" data-set-text-highlight="highlight_6" data-select-label="Scribble" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_7 o_highlight_bottom" data-set-text-highlight="highlight_7" data-select-label="Jagged" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_8 o_highlight_center" data-set-text-highlight="highlight_8" data-select-label="Cross" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_9 o_highlight_center" data-set-text-highlight="highlight_9" data-select-label="Diagonal" class="flex-grow-0 rounded-1"/>
+                <we-button data-select-class="o_text_highlight_10 o_highlight_center" data-set-text-highlight="highlight_10" data-select-label="Strikethrough" class="flex-grow-0 rounded-1"/>
             </div>
         </we-select>
         <!-- Text highlight color -->

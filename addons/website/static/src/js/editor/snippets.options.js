@@ -3868,7 +3868,7 @@ options.registry.TextHighlight = options.Class.extend({
      */
     _createHighlight(nodes, highlightEl) {
         const highlightContainer = document.createElement("span");
-        highlightContainer.className = "o_text_highlight_item";
+        highlightContainer.className = "o_text_highlight_item position-relative d-inline-block z-index-1 text-decoration-none";
         highlightContainer.append(...nodes, highlightEl.cloneNode(true));
         return highlightContainer;
     },
