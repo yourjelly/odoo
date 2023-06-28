@@ -887,7 +887,6 @@ export class Wysiwyg extends Component {
         }
         if (this.snippetsMenu) {
             this.snippetsMenu.destroy();
-            // setTimeout(()=>this.snippetsMenu.destroy());
         }
         // If peer to peer is initializing, wait for properly closing it.
         if (this._peerToPeerLoading) {
