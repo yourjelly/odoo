@@ -3036,9 +3036,13 @@
      * Spread multiple colrows zone to one row/col zone and add a many new input range as needed.
      * For example, A1:B4 will become [A1:A4, B1:B4]
      */
-    function spreadRange(ranges) {
+    function spreadRange(getters, ranges) {
         const postProcessedRanges = [];
         for (const range of ranges) {
+            if (!getters.isRangeValid(range)) {
+                postProcessedRanges.push(range); // ignore invalid range
+                continue;
+            }
             const { sheetName } = splitReference(range);
             const sheetPrefix = sheetName ? `${sheetName}!` : "";
             const zone = toUnboundedZone(range);
@@ -3978,6 +3982,11 @@
         CommandResult[CommandResult["SplitWillOverwriteContent"] = 91] = "SplitWillOverwriteContent";
         CommandResult[CommandResult["NoSplitSeparatorInSelection"] = 92] = "NoSplitSeparatorInSelection";
         CommandResult[CommandResult["NoActiveSheet"] = 93] = "NoActiveSheet";
+        CommandResult[CommandResult["MoreThanOneRangeSelected"] = 94] = "MoreThanOneRangeSelected";
+        CommandResult[CommandResult["NoValueSelected"] = 95] = "NoValueSelected";
+        CommandResult[CommandResult["NoColumnsSelected"] = 96] = "NoColumnsSelected";
+        CommandResult[CommandResult["ColumnsNotIncludedInZone"] = 97] = "ColumnsNotIncludedInZone";
+        CommandResult[CommandResult["DuplicatesColumnsSelected"] = 98] = "DuplicatesColumnsSelected";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
     const borderStyles = ["thin", "medium", "thick", "dashed", "dotted"];
@@ -6751,6 +6760,37 @@
         return position;
     }
 
+    const PasteInteractiveContent = {
+        wrongPasteSelection: _lt("This operation is not allowed with multiple selections."),
+        willRemoveExistingMerge: _lt("This operation is not possible due to a merge. Please remove the merges first than try again."),
+        wrongFigurePasteOption: _lt("Cannot do a special paste of a figure."),
+        frozenPaneOverlap: _lt("Cannot paste merged cells over a frozen pane."),
+    };
+    function handlePasteResult(env, result) {
+        if (!result.isSuccessful) {
+            if (result.reasons.includes(21 /* CommandResult.WrongPasteSelection */)) {
+                env.raiseError(PasteInteractiveContent.wrongPasteSelection);
+            }
+            else if (result.reasons.includes(2 /* CommandResult.WillRemoveExistingMerge */)) {
+                env.raiseError(PasteInteractiveContent.willRemoveExistingMerge);
+            }
+            else if (result.reasons.includes(23 /* CommandResult.WrongFigurePasteOption */)) {
+                env.raiseError(PasteInteractiveContent.wrongFigurePasteOption);
+            }
+            else if (result.reasons.includes(76 /* CommandResult.FrozenPaneOverlap */)) {
+                env.raiseError(PasteInteractiveContent.frozenPaneOverlap);
+            }
+        }
+    }
+    function interactivePaste(env, target, pasteOption) {
+        const result = env.model.dispatch("PASTE", { target, pasteOption });
+        handlePasteResult(env, result);
+    }
+    function interactivePasteFromOS(env, target, text, pasteOption) {
+        const result = env.model.dispatch("PASTE_FROM_OS_CLIPBOARD", { target, text, pasteOption });
+        handlePasteResult(env, result);
+    }
+
     const CfTerms = {
         Errors: {
             [26 /* CommandResult.InvalidRange */]: _lt("The range is invalid"),
@@ -6823,6 +6863,16 @@
             [92 /* CommandResult.NoSplitSeparatorInSelection */]: _lt("There is no match for the selected separator in the selection"),
             [89 /* CommandResult.MoreThanOneColumnSelected */]: _lt("Only a selection from a single column can be split"),
             [91 /* CommandResult.SplitWillOverwriteContent */]: _lt("Splitting will overwrite existing content"),
+        },
+    };
+    const RemoveDuplicateTerms = {
+        Errors: {
+            Unexpected: _lt("Cannot remove duplicates for an unknown reason"),
+            [94 /* CommandResult.MoreThanOneRangeSelected */]: _lt("Please select only one range of cells"),
+            [95 /* CommandResult.NoValueSelected */]: _lt("Please select a range of cells containing values."),
+            [96 /* CommandResult.NoColumnsSelected */]: _lt("Please select at latest one column to analyze."),
+            //TODO: Remove it when accept to copy and paste merge cells
+            [2 /* CommandResult.WillRemoveExistingMerge */]: PasteInteractiveContent.willRemoveExistingMerge,
         },
     };
 
@@ -8588,37 +8638,6 @@
                 env.model.dispatch("ADD_MERGE", { sheetId, target, force: true });
             });
         }
-    }
-
-    const PasteInteractiveContent = {
-        wrongPasteSelection: _lt("This operation is not allowed with multiple selections."),
-        willRemoveExistingMerge: _lt("This operation is not possible due to a merge. Please remove the merges first than try again."),
-        wrongFigurePasteOption: _lt("Cannot do a special paste of a figure."),
-        frozenPaneOverlap: _lt("Cannot paste merged cells over a frozen pane."),
-    };
-    function handlePasteResult(env, result) {
-        if (!result.isSuccessful) {
-            if (result.reasons.includes(21 /* CommandResult.WrongPasteSelection */)) {
-                env.raiseError(PasteInteractiveContent.wrongPasteSelection);
-            }
-            else if (result.reasons.includes(2 /* CommandResult.WillRemoveExistingMerge */)) {
-                env.raiseError(PasteInteractiveContent.willRemoveExistingMerge);
-            }
-            else if (result.reasons.includes(23 /* CommandResult.WrongFigurePasteOption */)) {
-                env.raiseError(PasteInteractiveContent.wrongFigurePasteOption);
-            }
-            else if (result.reasons.includes(76 /* CommandResult.FrozenPaneOverlap */)) {
-                env.raiseError(PasteInteractiveContent.frozenPaneOverlap);
-            }
-        }
-    }
-    function interactivePaste(env, target, pasteOption) {
-        const result = env.model.dispatch("PASTE", { target, pasteOption });
-        handlePasteResult(env, result);
-    }
-    function interactivePasteFromOS(env, target, text, pasteOption) {
-        const result = env.model.dispatch("PASTE_FROM_OS_CLIPBOARD", { target, text, pasteOption });
-        handlePasteResult(env, result);
     }
 
     /**
@@ -17470,6 +17489,19 @@
         },
         icon: "o-spreadsheet-Icon.SORT_ASCENDING",
     };
+    const dataCleanup = {
+        name: _lt("Data cleanup"),
+        icon: "o-spreadsheet-Icon.DATA_CLEANUP",
+    };
+    const removeDuplicates = {
+        name: _lt("Remove duplicates"),
+        execute: (env) => {
+            if (getZoneArea(env.model.getters.getSelectedZone()) === 1) {
+                env.model.selection.selectTableAroundSelection();
+            }
+            env.openSidePanel("RemoveDuplicates", {});
+        },
+    };
     const sortDescending = {
         name: _lt("Descending (Z ⟶ A)"),
         execute: (env) => {
@@ -18600,18 +18632,26 @@
         ...sortDescending,
         sequence: 20,
     })
+        .addChild("data_cleanup", ["data"], {
+        ...dataCleanup,
+        sequence: 20,
+    })
+        .addChild("remove_duplicates", ["data", "data_cleanup"], {
+        ...removeDuplicates,
+        sequence: 10,
+    })
         .addChild("split_to_columns", ["data"], {
         ...splitToColumns,
-        sequence: 20,
+        sequence: 30,
         separator: true,
     })
         .addChild("add_data_filter", ["data"], {
         ...addDataFilter,
-        sequence: 30,
+        sequence: 40,
     })
         .addChild("remove_data_filter", ["data"], {
         ...removeDataFilter,
-        sequence: 30,
+        sequence: 40,
     });
 
     class OTRegistry extends Registry {
@@ -18963,7 +19003,7 @@
             });
         }
         onDataSeriesConfirmed() {
-            this.dataSeriesRanges = spreadRange(this.dataSeriesRanges);
+            this.dataSeriesRanges = spreadRange(this.env.model.getters, this.dataSeriesRanges);
             this.state.datasetDispatchResult = this.props.updateChart(this.props.figureId, {
                 dataSets: this.dataSeriesRanges,
             });
@@ -21095,6 +21135,97 @@
         onCloseSidePanel: Function,
     };
 
+    css /* scss */ `
+  .o-checkbox-selection {
+    height: 150px;
+  }
+`;
+    class RemoveDuplicatesPanel extends owl.Component {
+        static template = "o-spreadsheet-RemoveDuplicatesPanel";
+        static components = { SidePanelErrors };
+        state = owl.useState({
+            hasHeader: false,
+            columns: {},
+        });
+        setup() {
+            owl.onWillUpdateProps(() => this.updateColumns());
+        }
+        toggleHasHeader() {
+            this.state.hasHeader = !this.state.hasHeader;
+            for (const colIndex in this.state.columns) {
+                this.state.columns[colIndex].label = this.createColLabel(parseInt(colIndex));
+            }
+        }
+        toggleAllColumns() {
+            const newState = !this.selectAllState;
+            for (const col of Object.values(this.state.columns)) {
+                col.isSelected = newState;
+            }
+        }
+        toggleColumn(colIndex) {
+            this.state.columns[colIndex].isSelected = !this.state.columns[colIndex].isSelected;
+        }
+        onRemoveDuplicates() {
+            this.env.model.dispatch("REMOVE_DUPLICATES", {
+                hasHeader: this.state.hasHeader,
+                columns: this.getColToAnalyze(),
+            });
+        }
+        get selectAllState() {
+            return Object.values(this.state.columns).every((col) => col.isSelected);
+        }
+        get errorMessages() {
+            const cancelledReasons = this.env.model.canDispatch("REMOVE_DUPLICATES", {
+                hasHeader: this.state.hasHeader,
+                columns: this.getColToAnalyze(),
+            }).reasons;
+            const errors = new Set();
+            for (const reason of cancelledReasons) {
+                errors.add(RemoveDuplicateTerms.Errors[reason] || RemoveDuplicateTerms.Errors.Unexpected);
+            }
+            return Array.from(errors);
+        }
+        get selectionStatisticalInformation() {
+            const dimension = zoneToDimension(this.env.model.getters.getSelectedZone());
+            return _lt("%s rows and %s columns selected", dimension.numberOfRows.toString(), dimension.numberOfCols.toString());
+        }
+        get canConfirm() {
+            return this.errorMessages.length === 0;
+        }
+        // ---------------------------------------------------------------------------
+        // Private
+        // ---------------------------------------------------------------------------
+        updateColumns() {
+            const zone = this.env.model.getters.getSelectedZone();
+            const oldColumns = this.state.columns;
+            const newColumns = {};
+            for (let i = zone.left; i <= zone.right; i++) {
+                newColumns[i] = {
+                    isSelected: oldColumns[i] ? oldColumns[i].isSelected : true,
+                    label: this.createColLabel(i),
+                };
+            }
+            this.state.columns = newColumns;
+        }
+        createColLabel(col) {
+            let colLabel = _lt("Column %s", numberToLetters(col));
+            if (this.state.hasHeader) {
+                const sheetId = this.env.model.getters.getActiveSheetId();
+                const row = this.env.model.getters.getSelectedZone().top;
+                const colHeader = this.env.model.getters.getEvaluatedCell({ sheetId, col, row });
+                if (colHeader.type !== "empty") {
+                    colLabel += ` - ${colHeader.value}`;
+                }
+            }
+            return colLabel;
+        }
+        getColToAnalyze() {
+            return Object.keys(this.state.columns)
+                .filter((colIndex) => this.state.columns[colIndex].isSelected)
+                .map((colIndex) => parseInt(colIndex));
+        }
+    }
+
     const SplitToColumnsInteractiveContent = {
         SplitIsDestructive: _lt("This will overwrite data in the subsequent columns. Split anyway?"),
     };
@@ -21225,6 +21356,10 @@
     sidePanelRegistry.add("SplitToColumns", {
         title: _lt("Split text into columns"),
         Body: SplitIntoColumnsPanel,
+    });
+    sidePanelRegistry.add("RemoveDuplicates", {
+        title: _lt("Remove duplicates"),
+        Body: RemoveDuplicatesPanel,
     });
 
     class TopBarComponentRegistry extends Registry {
@@ -38034,6 +38169,689 @@
         }
     }
 
+    /** Abstract state of the clipboard when copying/cutting content that is pasted in cells of the sheet */
+    class ClipboardCellsAbstractState {
+        getters;
+        dispatch;
+        selection;
+        operation;
+        sheetId;
+        constructor(operation, getters, dispatch, selection) {
+            this.getters = getters;
+            this.dispatch = dispatch;
+            this.selection = selection;
+            this.operation = operation;
+            this.sheetId = getters.getActiveSheetId();
+        }
+        isCutAllowed(target) {
+            return 0 /* CommandResult.Success */;
+        }
+        isPasteAllowed(target, clipboardOption) {
+            return 0 /* CommandResult.Success */;
+        }
+        /**
+         * Add columns and/or rows to ensure that col + width and row + height are still
+         * in the sheet
+         */
+        addMissingDimensions(width, height, col, row) {
+            const sheetId = this.getters.getActiveSheetId();
+            const missingRows = height + row - this.getters.getNumberRows(sheetId);
+            if (missingRows > 0) {
+                this.dispatch("ADD_COLUMNS_ROWS", {
+                    dimension: "ROW",
+                    base: this.getters.getNumberRows(sheetId) - 1,
+                    sheetId,
+                    quantity: missingRows,
+                    position: "after",
+                });
+            }
+            const missingCols = width + col - this.getters.getNumberCols(sheetId);
+            if (missingCols > 0) {
+                this.dispatch("ADD_COLUMNS_ROWS", {
+                    dimension: "COL",
+                    base: this.getters.getNumberCols(sheetId) - 1,
+                    sheetId,
+                    quantity: missingCols,
+                    position: "after",
+                });
+            }
+        }
+        isColRowDirtyingClipboard(position, dimension) {
+            return false;
+        }
+        drawClipboard(renderingContext) { }
+    }
+
+    /** State of the clipboard when copying/cutting cells */
+    class ClipboardCellsState extends ClipboardCellsAbstractState {
+        cells;
+        copiedTables;
+        zones;
+        constructor(zones, operation, getters, dispatch, selection) {
+            super(operation, getters, dispatch, selection);
+            if (!zones.length) {
+                this.cells = [[]];
+                this.zones = [];
+                this.copiedTables = [];
+                return;
+            }
+            const lefts = new Set(zones.map((z) => z.left));
+            const rights = new Set(zones.map((z) => z.right));
+            const tops = new Set(zones.map((z) => z.top));
+            const bottoms = new Set(zones.map((z) => z.bottom));
+            const areZonesCompatible = (tops.size === 1 && bottoms.size === 1) || (lefts.size === 1 && rights.size === 1);
+            // In order to don't paste several times the same cells in intersected zones
+            // --> we merge zones that have common cells
+            const clippedZones = areZonesCompatible
+                ? mergeOverlappingZones(zones)
+                : [zones[zones.length - 1]];
+            const cellsPosition = clippedZones.map((zone) => positions(zone)).flat();
+            const columnsIndex = [...new Set(cellsPosition.map((p) => p.col))].sort((a, b) => a - b);
+            const rowsIndex = [...new Set(cellsPosition.map((p) => p.row))].sort((a, b) => a - b);
+            const cellsInClipboard = [];
+            const sheetId = getters.getActiveSheetId();
+            for (let row of rowsIndex) {
+                let cellsInRow = [];
+                for (let col of columnsIndex) {
+                    const position = { col, row, sheetId };
+                    cellsInRow.push({
+                        cell: getters.getCell(position),
+                        style: getters.getCellComputedStyle(position),
+                        evaluatedCell: getters.getEvaluatedCell(position),
+                        border: getters.getCellBorder(position) || undefined,
+                        position,
+                    });
+                }
+                cellsInClipboard.push(cellsInRow);
+            }
+            const tables = [];
+            for (const zone of zones) {
+                for (const table of this.getters.getFilterTablesInZone(sheetId, zone)) {
+                    const values = [];
+                    for (const col of range(table.zone.left, table.zone.right + 1)) {
+                        values.push(this.getters.getFilterValues({ sheetId, col, row: table.zone.top }));
+                    }
+                    tables.push({ filtersValues: values, zone: table.zone });
+                }
+            }
+            this.cells = cellsInClipboard;
+            this.zones = clippedZones;
+            this.copiedTables = tables;
+        }
+        isCutAllowed(target) {
+            if (target.length !== 1) {
+                return 20 /* CommandResult.WrongCutSelection */;
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        isPasteAllowed(target, clipboardOption) {
+            const sheetId = this.getters.getActiveSheetId();
+            if (this.operation === "CUT" && clipboardOption?.pasteOption !== undefined) {
+                // cannot paste only format or only value if the previous operation is a CUT
+                return 22 /* CommandResult.WrongPasteOption */;
+            }
+            if (target.length > 1) {
+                // cannot paste if we have a clipped zone larger than a cell and multiple
+                // zones selected
+                if (this.cells.length > 1 || this.cells[0].length > 1) {
+                    return 21 /* CommandResult.WrongPasteSelection */;
+                }
+            }
+            const clipboardHeight = this.cells.length;
+            const clipboardWidth = this.cells[0].length;
+            for (let zone of this.getPasteZones(target)) {
+                if (this.getters.doesIntersectMerge(sheetId, zone)) {
+                    if (target.length > 1 ||
+                        !this.getters.isSingleCellOrMerge(sheetId, target[0]) ||
+                        clipboardHeight * clipboardWidth !== 1) {
+                        return 2 /* CommandResult.WillRemoveExistingMerge */;
+                    }
+                }
+            }
+            const { xSplit, ySplit } = this.getters.getPaneDivisions(sheetId);
+            for (const zone of this.getPasteZones(target)) {
+                if ((zone.left < xSplit && zone.right >= xSplit) ||
+                    (zone.top < ySplit && zone.bottom >= ySplit)) {
+                    return 76 /* CommandResult.FrozenPaneOverlap */;
+                }
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        /**
+         * Paste the clipboard content in the given target
+         */
+        paste(target, options) {
+            if (this.operation === "COPY") {
+                this.pasteFromCopy(target, options);
+            }
+            else {
+                this.pasteFromCut(target, options);
+            }
+            const height = this.cells.length;
+            const width = this.cells[0].length;
+            const isCutOperation = this.operation === "CUT";
+            if (options?.selectTarget) {
+                this.selectPastedZone(width, height, isCutOperation, target);
+            }
+        }
+        pasteFromCopy(target, options) {
+            if (target.length === 1) {
+                // in this specific case, due to the isPasteAllowed function:
+                // state.cells can contains several cells.
+                // So if the target zone is larger than the copied zone,
+                // we duplicate each cells as many times as possible to fill the zone.
+                const height = this.cells.length;
+                const width = this.cells[0].length;
+                const pasteZones = this.pastedZones(target, width, height);
+                for (const zone of pasteZones) {
+                    this.pasteZone(zone.left, zone.top, options);
+                }
+            }
+            else {
+                // in this case, due to the isPasteAllowed function: state.cells contains
+                // only one cell
+                for (const zone of target) {
+                    for (let col = zone.left; col <= zone.right; col++) {
+                        for (let row = zone.top; row <= zone.bottom; row++) {
+                            this.pasteZone(col, row, options);
+                        }
+                    }
+                }
+            }
+            if (options?.pasteOption === undefined) {
+                this.pasteCopiedTables(target);
+            }
+        }
+        pasteFromCut(target, options) {
+            this.clearClippedZones();
+            const selection = target[0];
+            this.pasteZone(selection.left, selection.top, options);
+            this.dispatch("MOVE_RANGES", {
+                target: this.zones,
+                sheetId: this.sheetId,
+                targetSheetId: this.getters.getActiveSheetId(),
+                col: selection.left,
+                row: selection.top,
+            });
+            for (const filterTable of this.copiedTables) {
+                this.dispatch("REMOVE_FILTER_TABLE", {
+                    sheetId: this.getters.getActiveSheetId(),
+                    target: [filterTable.zone],
+                });
+            }
+            this.pasteCopiedTables(target);
+            this.cells.forEach((row) => {
+                row.forEach((c) => {
+                    if (c.cell) {
+                        c.cell = undefined;
+                    }
+                });
+            });
+        }
+        /**
+         * The clipped zone is copied as many times as it fits in the target.
+         * This returns the list of zones where the clipped zone is copy-pasted.
+         */
+        pastedZones(target, originWidth, originHeight) {
+            const selection = target[0];
+            const repeatHorizontally = Math.max(1, Math.floor((selection.right + 1 - selection.left) / originWidth));
+            const repeatVertically = Math.max(1, Math.floor((selection.bottom + 1 - selection.top) / originHeight));
+            const zones = [];
+            for (let x = 0; x < repeatHorizontally; x++) {
+                for (let y = 0; y < repeatVertically; y++) {
+                    const top = selection.top + y * originHeight;
+                    const left = selection.left + x * originWidth;
+                    zones.push({
+                        left,
+                        top,
+                        bottom: top + originHeight - 1,
+                        right: left + originWidth - 1,
+                    });
+                }
+            }
+            return zones;
+        }
+        /**
+         * Compute the complete zones where to paste the current clipboard
+         */
+        getPasteZones(target) {
+            const cells = this.cells;
+            if (!cells.length || !cells[0].length) {
+                return target;
+            }
+            const pasteZones = [];
+            const height = cells.length;
+            const width = cells[0].length;
+            const selection = target[target.length - 1];
+            const col = selection.left;
+            const row = selection.top;
+            const repetitionCol = Math.max(1, Math.floor((selection.right + 1 - col) / width));
+            const repetitionRow = Math.max(1, Math.floor((selection.bottom + 1 - row) / height));
+            for (let x = 1; x <= repetitionCol; x++) {
+                for (let y = 1; y <= repetitionRow; y++) {
+                    pasteZones.push({
+                        left: col,
+                        top: row,
+                        right: col - 1 + x * width,
+                        bottom: row - 1 + y * height,
+                    });
+                }
+            }
+            return pasteZones;
+        }
+        /**
+         * Update the selection with the newly pasted zone
+         */
+        selectPastedZone(width, height, isCutOperation, target) {
+            const selection = target[0];
+            const col = selection.left;
+            const row = selection.top;
+            if (height > 1 || width > 1 || isCutOperation) {
+                const zones = this.pastedZones(target, width, height);
+                const newZone = isCutOperation ? zones[0] : union(...zones);
+                this.selection.selectZone({ cell: { col, row }, zone: newZone }, { scrollIntoView: false });
+            }
+        }
+        /**
+         * Clear the clipped zones: remove the cells and clear the formatting
+         */
+        clearClippedZones() {
+            for (const row of this.cells) {
+                for (const cell of row) {
+                    if (cell.cell) {
+                        this.dispatch("CLEAR_CELL", cell.position);
+                    }
+                }
+            }
+            this.dispatch("CLEAR_FORMATTING", {
+                sheetId: this.sheetId,
+                target: this.zones,
+            });
+        }
+        pasteZone(col, row, clipboardOptions) {
+            const height = this.cells.length;
+            const width = this.cells[0].length;
+            // This condition is used to determine if we have to paste the CF or not.
+            // We have to do it when the command handled is "PASTE", not "INSERT_CELL"
+            // or "DELETE_CELL". So, the state should be the local state
+            const shouldPasteCF = clipboardOptions?.pasteOption !== "onlyValue" && clipboardOptions?.shouldPasteCF;
+            const sheetId = this.getters.getActiveSheetId();
+            // first, add missing cols/rows if needed
+            this.addMissingDimensions(width, height, col, row);
+            // then, perform the actual paste operation
+            for (let r = 0; r < height; r++) {
+                const rowCells = this.cells[r];
+                for (let c = 0; c < width; c++) {
+                    const origin = rowCells[c];
+                    const position = { col: col + c, row: row + r, sheetId: sheetId };
+                    // TODO: refactor this part. the "Paste merge" action is also executed with
+                    // MOVE_RANGES in pasteFromCut. Adding a condition on the operation type here
+                    // is not appropriate
+                    if (this.operation !== "CUT") {
+                        this.pasteMergeIfExist(origin.position, position);
+                    }
+                    this.pasteCell(origin, position, this.operation, clipboardOptions);
+                    if (shouldPasteCF) {
+                        this.pasteCf(origin.position, position);
+                    }
+                }
+            }
+        }
+        /**
+         * Paste the cell at the given position to the target position
+         */
+        pasteCell(origin, target, operation, clipboardOption) {
+            const { sheetId, col, row } = target;
+            const targetCell = this.getters.getEvaluatedCell(target);
+            if (clipboardOption?.pasteOption !== "onlyValue") {
+                const targetBorders = this.getters.getCellBorder(target);
+                const originBorders = origin.border;
+                const border = {
+                    top: targetBorders?.top || originBorders?.top,
+                    bottom: targetBorders?.bottom || originBorders?.bottom,
+                    left: targetBorders?.left || originBorders?.left,
+                    right: targetBorders?.right || originBorders?.right,
+                };
+                this.dispatch("SET_BORDER", { sheetId, col, row, border });
+            }
+            if (origin.cell) {
+                if (clipboardOption?.pasteOption === "onlyFormat") {
+                    this.dispatch("UPDATE_CELL", {
+                        ...target,
+                        style: origin.cell.style,
+                        format: origin.evaluatedCell.format,
+                    });
+                    return;
+                }
+                if (clipboardOption?.pasteOption === "onlyValue") {
+                    const content = formatValue(origin.evaluatedCell.value);
+                    this.dispatch("UPDATE_CELL", { ...target, content });
+                    return;
+                }
+                let content = origin.cell.content;
+                if (origin.cell.isFormula && operation === "COPY") {
+                    const offsetX = col - origin.position.col;
+                    const offsetY = row - origin.position.row;
+                    content = this.getUpdatedContent(sheetId, origin.cell, offsetX, offsetY, operation);
+                }
+                this.dispatch("UPDATE_CELL", {
+                    ...target,
+                    content,
+                    style: origin.cell.style || null,
+                    format: origin.cell.format,
+                });
+            }
+            else if (targetCell) {
+                if (clipboardOption?.pasteOption === "onlyValue") {
+                    this.dispatch("UPDATE_CELL", { ...target, content: "" });
+                }
+                else if (clipboardOption?.pasteOption === "onlyFormat") {
+                    this.dispatch("UPDATE_CELL", { ...target, style: null, format: "" });
+                }
+                else {
+                    this.dispatch("CLEAR_CELL", target);
+                }
+            }
+        }
+        /**
+         * Get the newly updated formula, after applying offsets
+         */
+        getUpdatedContent(sheetId, cell, offsetX, offsetY, operation) {
+            const ranges = this.getters.createAdaptedRanges(cell.dependencies, offsetX, offsetY, sheetId);
+            return this.getters.buildFormulaContent(sheetId, cell, ranges);
+        }
+        /**
+         * If the origin position given is the top left of a merge, merge the target
+         * position.
+         */
+        pasteMergeIfExist(origin, target) {
+            let { sheetId, col, row } = origin;
+            const { col: mainCellColOrigin, row: mainCellRowOrigin } = this.getters.getMainCellPosition(origin);
+            if (mainCellColOrigin === col && mainCellRowOrigin === row) {
+                const merge = this.getters.getMerge(origin);
+                if (!merge) {
+                    return;
+                }
+                ({ sheetId, col, row } = target);
+                this.dispatch("ADD_MERGE", {
+                    sheetId,
+                    force: true,
+                    target: [
+                        {
+                            left: col,
+                            top: row,
+                            right: col + merge.right - merge.left,
+                            bottom: row + merge.bottom - merge.top,
+                        },
+                    ],
+                });
+            }
+        }
+        /** Paste the filter tables that are in the state */
+        pasteCopiedTables(target) {
+            const sheetId = this.getters.getActiveSheetId();
+            const selection = target[0];
+            const cutZone = this.zones[0];
+            const cutOffset = [
+                selection.left - cutZone.left,
+                selection.top - cutZone.top,
+            ];
+            for (const table of this.copiedTables) {
+                const newTableZone = createAdaptedZone(table.zone, "both", "MOVE", cutOffset);
+                this.dispatch("CREATE_FILTER_TABLE", { sheetId, target: [newTableZone] });
+                for (const i of range(0, table.filtersValues.length)) {
+                    this.dispatch("UPDATE_FILTER", {
+                        sheetId,
+                        col: newTableZone.left + i,
+                        row: newTableZone.top,
+                        values: table.filtersValues[i],
+                    });
+                }
+            }
+        }
+        getClipboardContent() {
+            return {
+                [ClipboardMIMEType.PlainText]: this.getPlainTextContent(),
+                [ClipboardMIMEType.Html]: this.getHTMLContent(),
+            };
+        }
+        getPlainTextContent() {
+            return (this.cells
+                .map((cells) => {
+                return cells
+                    .map((c) => this.getters.shouldShowFormulas() && c.cell?.isFormula
+                    ? c.cell?.content || ""
+                    : c.evaluatedCell?.formattedValue || "")
+                    .join("\t");
+            })
+                .join("\n") || "\t");
+        }
+        getHTMLContent() {
+            if (this.cells.length == 1 && this.cells[0].length == 1) {
+                return this.getters.getCellText(this.cells[0][0].position);
+            }
+            let htmlTable = '<table border="1" style="border-collapse:collapse">';
+            for (const row of this.cells) {
+                htmlTable += "<tr>";
+                for (const cell of row) {
+                    const cssStyle = cssPropertiesToCss(cellStyleToCss(cell.style));
+                    const cellText = this.getters.getCellText(cell.position);
+                    htmlTable += `<td style="${cssStyle}">` + xmlEscape(cellText) + "</td>";
+                }
+                htmlTable += "</tr>";
+            }
+            htmlTable += "</table>";
+            return htmlTable;
+        }
+        isColRowDirtyingClipboard(position, dimension) {
+            if (!this.zones) {
+                return false;
+            }
+            for (let zone of this.zones) {
+                if (dimension === "COL" && position <= zone.right) {
+                    return true;
+                }
+                if (dimension === "ROW" && position <= zone.bottom) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        drawClipboard(renderingContext) {
+            const { ctx, thinLineWidth } = renderingContext;
+            if (this.sheetId !== this.getters.getActiveSheetId() || !this.zones || !this.zones.length) {
+                return;
+            }
+            ctx.setLineDash([8, 5]);
+            ctx.strokeStyle = SELECTION_BORDER_COLOR;
+            ctx.lineWidth = 3.3 * thinLineWidth;
+            for (const zone of this.zones) {
+                const { x, y, width, height } = this.getters.getVisibleRect(zone);
+                if (width > 0 && height > 0) {
+                    ctx.strokeRect(x, y, width, height);
+                }
+            }
+        }
+        pasteCf(origin, target) {
+            const xc = toXC(target.col, target.row);
+            for (let rule of this.getters.getConditionalFormats(origin.sheetId)) {
+                for (let range of rule.ranges) {
+                    if (isInside(origin.col, origin.row, this.getters.getRangeFromSheetXC(origin.sheetId, range).zone)) {
+                        const cf = rule;
+                        const toRemoveRange = [];
+                        if (this.operation === "CUT") {
+                            //remove from current rule
+                            toRemoveRange.push(toXC(origin.col, origin.row));
+                        }
+                        if (origin.sheetId === target.sheetId) {
+                            this.adaptCFRules(origin.sheetId, cf, [xc], toRemoveRange);
+                        }
+                        else {
+                            this.adaptCFRules(target.sheetId, cf, [xc], []);
+                            this.adaptCFRules(origin.sheetId, cf, [], toRemoveRange);
+                        }
+                    }
+                }
+            }
+        }
+        /**
+         * Add or remove cells to a given conditional formatting rule.
+         */
+        adaptCFRules(sheetId, cf, toAdd, toRemove) {
+            const newRangesXC = this.getters.getAdaptedCfRanges(sheetId, cf, toAdd, toRemove);
+            if (!newRangesXC) {
+                return;
+            }
+            this.dispatch("ADD_CONDITIONAL_FORMAT", {
+                cf: {
+                    id: cf.id,
+                    rule: cf.rule,
+                    stopIfTrue: cf.stopIfTrue,
+                },
+                ranges: newRangesXC.map((xc) => this.getters.getRangeDataFromXc(sheetId, xc)),
+                sheetId,
+            });
+        }
+    }
+
+    class RemoveDuplicatesPlugin extends UIPlugin {
+        // ---------------------------------------------------------------------------
+        // Command Handling
+        // ---------------------------------------------------------------------------
+        allowDispatch(cmd) {
+            switch (cmd.type) {
+                case "REMOVE_DUPLICATES":
+                    return this.checkValidations(cmd, this.chainValidations(this.checkSingleRangeSelected, this.checkNoMergingZone, this.checkRangeContainsValues, this.checkColumnsIncludedInZone), this.chainValidations(this.checkColumnsSelected, this.checkColumnsAreUnique));
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        handle(cmd) {
+            switch (cmd.type) {
+                case "REMOVE_DUPLICATES":
+                    this.removeDuplicates(cmd.columns, cmd.hasHeader);
+                    break;
+            }
+        }
+        // ---------------------------------------------------------------------------
+        // Private
+        // ---------------------------------------------------------------------------
+        removeDuplicates(columnsToAnalyze, hasHeader) {
+            const sheetId = this.getters.getActiveSheetId();
+            const zone = this.getters.getSelectedZone();
+            if (hasHeader) {
+                zone.top += 1;
+            }
+            const uniqueRowsIndexes = this.getUniqueRowsIndexes(sheetId, zone.top, zone.bottom, columnsToAnalyze);
+            const numberOfUniqueRows = uniqueRowsIndexes.length;
+            if (numberOfUniqueRows === zoneToDimension(zone).numberOfRows) {
+                this.notifyRowsRemovedAndRemaining(0, numberOfUniqueRows);
+                return;
+            }
+            const rowsToKeep = uniqueRowsIndexes.map((rowIndex) => ({
+                sheetId,
+                left: zone.left,
+                top: rowIndex,
+                right: zone.right,
+                bottom: rowIndex,
+            }));
+            const state = new ClipboardCellsState(rowsToKeep, "COPY", this.getters, this.dispatch, this.selection);
+            for (const { col, row } of positions(zone)) {
+                this.dispatch("CLEAR_CELL", { col, row, sheetId });
+            }
+            const zonePasted = {
+                left: zone.left,
+                top: zone.top,
+                right: zone.left,
+                bottom: zone.top,
+            };
+            state.paste([zonePasted]);
+            const remainingZone = {
+                left: zone.left,
+                top: zone.top - (hasHeader ? 1 : 0),
+                right: zone.right,
+                bottom: zone.top + numberOfUniqueRows - 1,
+            };
+            this.selection.selectZone({
+                cell: { col: remainingZone.left, row: remainingZone.top },
+                zone: remainingZone,
+            });
+            const removedRows = zone.bottom - zone.top + 1 - numberOfUniqueRows;
+            this.notifyRowsRemovedAndRemaining(removedRows, numberOfUniqueRows);
+        }
+        getUniqueRowsIndexes(sheetId, top, bottom, columnsHeader) {
+            const uniqueRows = {};
+            for (let rowIndex = top; rowIndex <= bottom; rowIndex++) {
+                const cellsValueToAnalyze = columnsHeader.map((colIndex) => {
+                    return this.getters.getEvaluatedCell({
+                        sheetId,
+                        col: colIndex,
+                        row: rowIndex,
+                    }).value;
+                });
+                const isRowUnique = !Object.values(uniqueRows).some((uniqueRow) => deepEquals(uniqueRow, cellsValueToAnalyze));
+                if (isRowUnique) {
+                    uniqueRows[rowIndex] = cellsValueToAnalyze;
+                }
+            }
+            // transform key object in number
+            return Object.keys(uniqueRows).map((key) => parseInt(key));
+        }
+        notifyRowsRemovedAndRemaining(removedRows, remainingRows) {
+            this.ui.notifyUI({
+                type: "INFO",
+                text: _lt("%s duplicate rows found and removed.\n%s unique rows remain.", removedRows.toString(), remainingRows.toString()),
+            });
+        }
+        checkSingleRangeSelected() {
+            const zones = this.getters.getSelectedZones();
+            if (zones.length !== 1) {
+                return 94 /* CommandResult.MoreThanOneRangeSelected */;
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        checkNoMergingZone() {
+            const sheetId = this.getters.getActiveSheetId();
+            const zone = this.getters.getSelectedZone();
+            const mergesInZone = this.getters.getMergesInZone(sheetId, zone);
+            if (mergesInZone.length > 0) {
+                return 2 /* CommandResult.WillRemoveExistingMerge */;
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        checkRangeContainsValues(cmd) {
+            const sheetId = this.getters.getActiveSheetId();
+            const zone = this.getters.getSelectedZone();
+            if (cmd.hasHeader) {
+                zone.top += 1;
+            }
+            const evaluatedCells = this.getters.getEvaluatedCellsInZone(sheetId, zone);
+            if (evaluatedCells.every((evaluatedCel) => evaluatedCel.type === "empty")) {
+                return 95 /* CommandResult.NoValueSelected */;
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        checkColumnsSelected(cmd) {
+            if (cmd.columns.length === 0) {
+                return 96 /* CommandResult.NoColumnsSelected */;
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        checkColumnsIncludedInZone(cmd) {
+            const zone = this.getters.getSelectedZone();
+            const columnsToAnalyze = cmd.columns;
+            if (columnsToAnalyze.some((colIndex) => colIndex < zone.left || colIndex > zone.right)) {
+                return 97 /* CommandResult.ColumnsNotIncludedInZone */;
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        checkColumnsAreUnique(cmd) {
+            if (cmd.columns.length !== new Set(cmd.columns).size) {
+                return 98 /* CommandResult.DuplicatesColumnsSelected */;
+            }
+            return 0 /* CommandResult.Success */;
+        }
+    }
+
     class RendererPlugin extends UIPlugin {
         static layers = [0 /* LAYERS.Background */, 7 /* LAYERS.Headers */];
         static getters = ["getColDimensionsInViewport", "getRowDimensionsInViewport"];
@@ -40146,551 +40964,6 @@
                 }
             }
             return 92 /* CommandResult.NoSplitSeparatorInSelection */;
-        }
-    }
-
-    /** Abstract state of the clipboard when copying/cutting content that is pasted in cells of the sheet */
-    class ClipboardCellsAbstractState {
-        getters;
-        dispatch;
-        selection;
-        operation;
-        sheetId;
-        constructor(operation, getters, dispatch, selection) {
-            this.getters = getters;
-            this.dispatch = dispatch;
-            this.selection = selection;
-            this.operation = operation;
-            this.sheetId = getters.getActiveSheetId();
-        }
-        isCutAllowed(target) {
-            return 0 /* CommandResult.Success */;
-        }
-        isPasteAllowed(target, clipboardOption) {
-            return 0 /* CommandResult.Success */;
-        }
-        /**
-         * Add columns and/or rows to ensure that col + width and row + height are still
-         * in the sheet
-         */
-        addMissingDimensions(width, height, col, row) {
-            const sheetId = this.getters.getActiveSheetId();
-            const missingRows = height + row - this.getters.getNumberRows(sheetId);
-            if (missingRows > 0) {
-                this.dispatch("ADD_COLUMNS_ROWS", {
-                    dimension: "ROW",
-                    base: this.getters.getNumberRows(sheetId) - 1,
-                    sheetId,
-                    quantity: missingRows,
-                    position: "after",
-                });
-            }
-            const missingCols = width + col - this.getters.getNumberCols(sheetId);
-            if (missingCols > 0) {
-                this.dispatch("ADD_COLUMNS_ROWS", {
-                    dimension: "COL",
-                    base: this.getters.getNumberCols(sheetId) - 1,
-                    sheetId,
-                    quantity: missingCols,
-                    position: "after",
-                });
-            }
-        }
-        isColRowDirtyingClipboard(position, dimension) {
-            return false;
-        }
-        drawClipboard(renderingContext) { }
-    }
-
-    /** State of the clipboard when copying/cutting cells */
-    class ClipboardCellsState extends ClipboardCellsAbstractState {
-        cells;
-        copiedTables;
-        zones;
-        constructor(zones, operation, getters, dispatch, selection) {
-            super(operation, getters, dispatch, selection);
-            if (!zones.length) {
-                this.cells = [[]];
-                this.zones = [];
-                this.copiedTables = [];
-                return;
-            }
-            const lefts = new Set(zones.map((z) => z.left));
-            const rights = new Set(zones.map((z) => z.right));
-            const tops = new Set(zones.map((z) => z.top));
-            const bottoms = new Set(zones.map((z) => z.bottom));
-            const areZonesCompatible = (tops.size === 1 && bottoms.size === 1) || (lefts.size === 1 && rights.size === 1);
-            // In order to don't paste several times the same cells in intersected zones
-            // --> we merge zones that have common cells
-            const clippedZones = areZonesCompatible
-                ? mergeOverlappingZones(zones)
-                : [zones[zones.length - 1]];
-            const cellsPosition = clippedZones.map((zone) => positions(zone)).flat();
-            const columnsIndex = [...new Set(cellsPosition.map((p) => p.col))].sort((a, b) => a - b);
-            const rowsIndex = [...new Set(cellsPosition.map((p) => p.row))].sort((a, b) => a - b);
-            const cellsInClipboard = [];
-            const sheetId = getters.getActiveSheetId();
-            for (let row of rowsIndex) {
-                let cellsInRow = [];
-                for (let col of columnsIndex) {
-                    const position = { col, row, sheetId };
-                    cellsInRow.push({
-                        cell: getters.getCell(position),
-                        style: getters.getCellComputedStyle(position),
-                        evaluatedCell: getters.getEvaluatedCell(position),
-                        border: getters.getCellBorder(position) || undefined,
-                        position,
-                    });
-                }
-                cellsInClipboard.push(cellsInRow);
-            }
-            const tables = [];
-            for (const zone of zones) {
-                for (const table of this.getters.getFilterTablesInZone(sheetId, zone)) {
-                    const values = [];
-                    for (const col of range(table.zone.left, table.zone.right + 1)) {
-                        values.push(this.getters.getFilterValues({ sheetId, col, row: table.zone.top }));
-                    }
-                    tables.push({ filtersValues: values, zone: table.zone });
-                }
-            }
-            this.cells = cellsInClipboard;
-            this.zones = clippedZones;
-            this.copiedTables = tables;
-        }
-        isCutAllowed(target) {
-            if (target.length !== 1) {
-                return 20 /* CommandResult.WrongCutSelection */;
-            }
-            return 0 /* CommandResult.Success */;
-        }
-        isPasteAllowed(target, clipboardOption) {
-            const sheetId = this.getters.getActiveSheetId();
-            if (this.operation === "CUT" && clipboardOption?.pasteOption !== undefined) {
-                // cannot paste only format or only value if the previous operation is a CUT
-                return 22 /* CommandResult.WrongPasteOption */;
-            }
-            if (target.length > 1) {
-                // cannot paste if we have a clipped zone larger than a cell and multiple
-                // zones selected
-                if (this.cells.length > 1 || this.cells[0].length > 1) {
-                    return 21 /* CommandResult.WrongPasteSelection */;
-                }
-            }
-            const clipboardHeight = this.cells.length;
-            const clipboardWidth = this.cells[0].length;
-            for (let zone of this.getPasteZones(target)) {
-                if (this.getters.doesIntersectMerge(sheetId, zone)) {
-                    if (target.length > 1 ||
-                        !this.getters.isSingleCellOrMerge(sheetId, target[0]) ||
-                        clipboardHeight * clipboardWidth !== 1) {
-                        return 2 /* CommandResult.WillRemoveExistingMerge */;
-                    }
-                }
-            }
-            const { xSplit, ySplit } = this.getters.getPaneDivisions(sheetId);
-            for (const zone of this.getPasteZones(target)) {
-                if ((zone.left < xSplit && zone.right >= xSplit) ||
-                    (zone.top < ySplit && zone.bottom >= ySplit)) {
-                    return 76 /* CommandResult.FrozenPaneOverlap */;
-                }
-            }
-            return 0 /* CommandResult.Success */;
-        }
-        /**
-         * Paste the clipboard content in the given target
-         */
-        paste(target, options) {
-            if (this.operation === "COPY") {
-                this.pasteFromCopy(target, options);
-            }
-            else {
-                this.pasteFromCut(target, options);
-            }
-            const height = this.cells.length;
-            const width = this.cells[0].length;
-            const isCutOperation = this.operation === "CUT";
-            if (options?.selectTarget) {
-                this.selectPastedZone(width, height, isCutOperation, target);
-            }
-        }
-        pasteFromCopy(target, options) {
-            if (target.length === 1) {
-                // in this specific case, due to the isPasteAllowed function:
-                // state.cells can contains several cells.
-                // So if the target zone is larger than the copied zone,
-                // we duplicate each cells as many times as possible to fill the zone.
-                const height = this.cells.length;
-                const width = this.cells[0].length;
-                const pasteZones = this.pastedZones(target, width, height);
-                for (const zone of pasteZones) {
-                    this.pasteZone(zone.left, zone.top, options);
-                }
-            }
-            else {
-                // in this case, due to the isPasteAllowed function: state.cells contains
-                // only one cell
-                for (const zone of target) {
-                    for (let col = zone.left; col <= zone.right; col++) {
-                        for (let row = zone.top; row <= zone.bottom; row++) {
-                            this.pasteZone(col, row, options);
-                        }
-                    }
-                }
-            }
-            if (options?.pasteOption === undefined) {
-                this.pasteCopiedTables(target);
-            }
-        }
-        pasteFromCut(target, options) {
-            this.clearClippedZones();
-            const selection = target[0];
-            this.pasteZone(selection.left, selection.top, options);
-            this.dispatch("MOVE_RANGES", {
-                target: this.zones,
-                sheetId: this.sheetId,
-                targetSheetId: this.getters.getActiveSheetId(),
-                col: selection.left,
-                row: selection.top,
-            });
-            for (const filterTable of this.copiedTables) {
-                this.dispatch("REMOVE_FILTER_TABLE", {
-                    sheetId: this.getters.getActiveSheetId(),
-                    target: [filterTable.zone],
-                });
-            }
-            this.pasteCopiedTables(target);
-            this.cells.forEach((row) => {
-                row.forEach((c) => {
-                    if (c.cell) {
-                        c.cell = undefined;
-                    }
-                });
-            });
-        }
-        /**
-         * The clipped zone is copied as many times as it fits in the target.
-         * This returns the list of zones where the clipped zone is copy-pasted.
-         */
-        pastedZones(target, originWidth, originHeight) {
-            const selection = target[0];
-            const repeatHorizontally = Math.max(1, Math.floor((selection.right + 1 - selection.left) / originWidth));
-            const repeatVertically = Math.max(1, Math.floor((selection.bottom + 1 - selection.top) / originHeight));
-            const zones = [];
-            for (let x = 0; x < repeatHorizontally; x++) {
-                for (let y = 0; y < repeatVertically; y++) {
-                    const top = selection.top + y * originHeight;
-                    const left = selection.left + x * originWidth;
-                    zones.push({
-                        left,
-                        top,
-                        bottom: top + originHeight - 1,
-                        right: left + originWidth - 1,
-                    });
-                }
-            }
-            return zones;
-        }
-        /**
-         * Compute the complete zones where to paste the current clipboard
-         */
-        getPasteZones(target) {
-            const cells = this.cells;
-            if (!cells.length || !cells[0].length) {
-                return target;
-            }
-            const pasteZones = [];
-            const height = cells.length;
-            const width = cells[0].length;
-            const selection = target[target.length - 1];
-            const col = selection.left;
-            const row = selection.top;
-            const repetitionCol = Math.max(1, Math.floor((selection.right + 1 - col) / width));
-            const repetitionRow = Math.max(1, Math.floor((selection.bottom + 1 - row) / height));
-            for (let x = 1; x <= repetitionCol; x++) {
-                for (let y = 1; y <= repetitionRow; y++) {
-                    pasteZones.push({
-                        left: col,
-                        top: row,
-                        right: col - 1 + x * width,
-                        bottom: row - 1 + y * height,
-                    });
-                }
-            }
-            return pasteZones;
-        }
-        /**
-         * Update the selection with the newly pasted zone
-         */
-        selectPastedZone(width, height, isCutOperation, target) {
-            const selection = target[0];
-            const col = selection.left;
-            const row = selection.top;
-            if (height > 1 || width > 1 || isCutOperation) {
-                const zones = this.pastedZones(target, width, height);
-                const newZone = isCutOperation ? zones[0] : union(...zones);
-                this.selection.selectZone({ cell: { col, row }, zone: newZone }, { scrollIntoView: false });
-            }
-        }
-        /**
-         * Clear the clipped zones: remove the cells and clear the formatting
-         */
-        clearClippedZones() {
-            for (const row of this.cells) {
-                for (const cell of row) {
-                    if (cell.cell) {
-                        this.dispatch("CLEAR_CELL", cell.position);
-                    }
-                }
-            }
-            this.dispatch("CLEAR_FORMATTING", {
-                sheetId: this.sheetId,
-                target: this.zones,
-            });
-        }
-        pasteZone(col, row, clipboardOptions) {
-            const height = this.cells.length;
-            const width = this.cells[0].length;
-            // This condition is used to determine if we have to paste the CF or not.
-            // We have to do it when the command handled is "PASTE", not "INSERT_CELL"
-            // or "DELETE_CELL". So, the state should be the local state
-            const shouldPasteCF = clipboardOptions?.pasteOption !== "onlyValue" && clipboardOptions?.shouldPasteCF;
-            const sheetId = this.getters.getActiveSheetId();
-            // first, add missing cols/rows if needed
-            this.addMissingDimensions(width, height, col, row);
-            // then, perform the actual paste operation
-            for (let r = 0; r < height; r++) {
-                const rowCells = this.cells[r];
-                for (let c = 0; c < width; c++) {
-                    const origin = rowCells[c];
-                    const position = { col: col + c, row: row + r, sheetId: sheetId };
-                    // TODO: refactor this part. the "Paste merge" action is also executed with
-                    // MOVE_RANGES in pasteFromCut. Adding a condition on the operation type here
-                    // is not appropriate
-                    if (this.operation !== "CUT") {
-                        this.pasteMergeIfExist(origin.position, position);
-                    }
-                    this.pasteCell(origin, position, this.operation, clipboardOptions);
-                    if (shouldPasteCF) {
-                        this.pasteCf(origin.position, position);
-                    }
-                }
-            }
-        }
-        /**
-         * Paste the cell at the given position to the target position
-         */
-        pasteCell(origin, target, operation, clipboardOption) {
-            const { sheetId, col, row } = target;
-            const targetCell = this.getters.getEvaluatedCell(target);
-            if (clipboardOption?.pasteOption !== "onlyValue") {
-                const targetBorders = this.getters.getCellBorder(target);
-                const originBorders = origin.border;
-                const border = {
-                    top: targetBorders?.top || originBorders?.top,
-                    bottom: targetBorders?.bottom || originBorders?.bottom,
-                    left: targetBorders?.left || originBorders?.left,
-                    right: targetBorders?.right || originBorders?.right,
-                };
-                this.dispatch("SET_BORDER", { sheetId, col, row, border });
-            }
-            if (origin.cell) {
-                if (clipboardOption?.pasteOption === "onlyFormat") {
-                    this.dispatch("UPDATE_CELL", {
-                        ...target,
-                        style: origin.cell.style,
-                        format: origin.evaluatedCell.format,
-                    });
-                    return;
-                }
-                if (clipboardOption?.pasteOption === "onlyValue") {
-                    const content = formatValue(origin.evaluatedCell.value);
-                    this.dispatch("UPDATE_CELL", { ...target, content });
-                    return;
-                }
-                let content = origin.cell.content;
-                if (origin.cell.isFormula && operation === "COPY") {
-                    const offsetX = col - origin.position.col;
-                    const offsetY = row - origin.position.row;
-                    content = this.getUpdatedContent(sheetId, origin.cell, offsetX, offsetY, operation);
-                }
-                this.dispatch("UPDATE_CELL", {
-                    ...target,
-                    content,
-                    style: origin.cell.style || null,
-                    format: origin.cell.format,
-                });
-            }
-            else if (targetCell) {
-                if (clipboardOption?.pasteOption === "onlyValue") {
-                    this.dispatch("UPDATE_CELL", { ...target, content: "" });
-                }
-                else if (clipboardOption?.pasteOption === "onlyFormat") {
-                    this.dispatch("UPDATE_CELL", { ...target, style: null, format: "" });
-                }
-                else {
-                    this.dispatch("CLEAR_CELL", target);
-                }
-            }
-        }
-        /**
-         * Get the newly updated formula, after applying offsets
-         */
-        getUpdatedContent(sheetId, cell, offsetX, offsetY, operation) {
-            const ranges = this.getters.createAdaptedRanges(cell.dependencies, offsetX, offsetY, sheetId);
-            return this.getters.buildFormulaContent(sheetId, cell, ranges);
-        }
-        /**
-         * If the origin position given is the top left of a merge, merge the target
-         * position.
-         */
-        pasteMergeIfExist(origin, target) {
-            let { sheetId, col, row } = origin;
-            const { col: mainCellColOrigin, row: mainCellRowOrigin } = this.getters.getMainCellPosition(origin);
-            if (mainCellColOrigin === col && mainCellRowOrigin === row) {
-                const merge = this.getters.getMerge(origin);
-                if (!merge) {
-                    return;
-                }
-                ({ sheetId, col, row } = target);
-                this.dispatch("ADD_MERGE", {
-                    sheetId,
-                    force: true,
-                    target: [
-                        {
-                            left: col,
-                            top: row,
-                            right: col + merge.right - merge.left,
-                            bottom: row + merge.bottom - merge.top,
-                        },
-                    ],
-                });
-            }
-        }
-        /** Paste the filter tables that are in the state */
-        pasteCopiedTables(target) {
-            const sheetId = this.getters.getActiveSheetId();
-            const selection = target[0];
-            const cutZone = this.zones[0];
-            const cutOffset = [
-                selection.left - cutZone.left,
-                selection.top - cutZone.top,
-            ];
-            for (const table of this.copiedTables) {
-                const newTableZone = createAdaptedZone(table.zone, "both", "MOVE", cutOffset);
-                this.dispatch("CREATE_FILTER_TABLE", { sheetId, target: [newTableZone] });
-                for (const i of range(0, table.filtersValues.length)) {
-                    this.dispatch("UPDATE_FILTER", {
-                        sheetId,
-                        col: newTableZone.left + i,
-                        row: newTableZone.top,
-                        values: table.filtersValues[i],
-                    });
-                }
-            }
-        }
-        getClipboardContent() {
-            return {
-                [ClipboardMIMEType.PlainText]: this.getPlainTextContent(),
-                [ClipboardMIMEType.Html]: this.getHTMLContent(),
-            };
-        }
-        getPlainTextContent() {
-            return (this.cells
-                .map((cells) => {
-                return cells
-                    .map((c) => this.getters.shouldShowFormulas() && c.cell?.isFormula
-                    ? c.cell?.content || ""
-                    : c.evaluatedCell?.formattedValue || "")
-                    .join("\t");
-            })
-                .join("\n") || "\t");
-        }
-        getHTMLContent() {
-            if (this.cells.length == 1 && this.cells[0].length == 1) {
-                return this.getters.getCellText(this.cells[0][0].position);
-            }
-            let htmlTable = '<table border="1" style="border-collapse:collapse">';
-            for (const row of this.cells) {
-                htmlTable += "<tr>";
-                for (const cell of row) {
-                    const cssStyle = cssPropertiesToCss(cellStyleToCss(cell.style));
-                    const cellText = this.getters.getCellText(cell.position);
-                    htmlTable += `<td style="${cssStyle}">` + xmlEscape(cellText) + "</td>";
-                }
-                htmlTable += "</tr>";
-            }
-            htmlTable += "</table>";
-            return htmlTable;
-        }
-        isColRowDirtyingClipboard(position, dimension) {
-            if (!this.zones) {
-                return false;
-            }
-            for (let zone of this.zones) {
-                if (dimension === "COL" && position <= zone.right) {
-                    return true;
-                }
-                if (dimension === "ROW" && position <= zone.bottom) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        drawClipboard(renderingContext) {
-            const { ctx, thinLineWidth } = renderingContext;
-            if (this.sheetId !== this.getters.getActiveSheetId() || !this.zones || !this.zones.length) {
-                return;
-            }
-            ctx.setLineDash([8, 5]);
-            ctx.strokeStyle = SELECTION_BORDER_COLOR;
-            ctx.lineWidth = 3.3 * thinLineWidth;
-            for (const zone of this.zones) {
-                const { x, y, width, height } = this.getters.getVisibleRect(zone);
-                if (width > 0 && height > 0) {
-                    ctx.strokeRect(x, y, width, height);
-                }
-            }
-        }
-        pasteCf(origin, target) {
-            const xc = toXC(target.col, target.row);
-            for (let rule of this.getters.getConditionalFormats(origin.sheetId)) {
-                for (let range of rule.ranges) {
-                    if (isInside(origin.col, origin.row, this.getters.getRangeFromSheetXC(origin.sheetId, range).zone)) {
-                        const cf = rule;
-                        const toRemoveRange = [];
-                        if (this.operation === "CUT") {
-                            //remove from current rule
-                            toRemoveRange.push(toXC(origin.col, origin.row));
-                        }
-                        if (origin.sheetId === target.sheetId) {
-                            this.adaptCFRules(origin.sheetId, cf, [xc], toRemoveRange);
-                        }
-                        else {
-                            this.adaptCFRules(target.sheetId, cf, [xc], []);
-                            this.adaptCFRules(origin.sheetId, cf, [], toRemoveRange);
-                        }
-                    }
-                }
-            }
-        }
-        /**
-         * Add or remove cells to a given conditional formatting rule.
-         */
-        adaptCFRules(sheetId, cf, toAdd, toRemove) {
-            const newRangesXC = this.getters.getAdaptedCfRanges(sheetId, cf, toAdd, toRemove);
-            if (!newRangesXC) {
-                return;
-            }
-            this.dispatch("ADD_CONDITIONAL_FORMAT", {
-                cf: {
-                    id: cf.id,
-                    rule: cf.rule,
-                    stopIfTrue: cf.stopIfTrue,
-                },
-                ranges: newRangesXC.map((xc) => this.getters.getRangeDataFromXc(sheetId, xc)),
-                sheetId,
-            });
         }
     }
 
@@ -43676,7 +43949,8 @@
         .add("split_to_columns", SplitToColumnsPlugin)
         .add("cell_popovers", CellPopoverPlugin)
         .add("collaborative", CollaborativePlugin)
-        .add("history", HistoryPlugin);
+        .add("history", HistoryPlugin)
+        .add("remove_duplicates", RemoveDuplicatesPlugin);
     // Plugins which have a state, but which should not be shared in collaborative
     const statefulUIPluginRegistry = new Registry()
         .add("selection", GridSelectionPlugin)
@@ -45800,6 +46074,8 @@
                 case "ERROR":
                     this.env.raiseError(payload.text);
                     break;
+                case "INFO":
+                    this.env.notifyUser({ text: payload.text, tag: "info" });
             }
         }
         openSidePanel(panel, panelProps) {
@@ -49559,8 +49835,8 @@
 
 
     __info__.version = '16.4.0-alpha.5';
-    __info__.date = '2023-06-26T14:47:32.747Z';
-    __info__.hash = '3b0b6f1';
+    __info__.date = '2023-06-28T07:57:48.253Z';
+    __info__.hash = '9d19460';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
