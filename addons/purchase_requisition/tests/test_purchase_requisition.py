@@ -164,11 +164,13 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
             line.product_qty = 5.0
             line.price_unit = unit_price
             line.product_uom = self.env.ref('uom.product_uom_dozen')
+        po_form.save()
+        po_form = Form(orig_po.with_context(default_display_type="line_section"))
         with po_form.order_line.new() as line:
-            line.display_type = "line_section"
             line.name = "Products"
+        po_form.save()
+        po_form = Form(orig_po.with_context(default_display_type="line_note"))
         with po_form.order_line.new() as line:
-            line.display_type = 'line_note'
             line.name = 'note1'
         po_form.save()
 

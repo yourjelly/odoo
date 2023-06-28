@@ -2527,7 +2527,7 @@ class TestStockFlow(TestStockCommon):
         receipt = receipt_form.save()
         receipt.action_confirm()
 
-        with Form(receipt.move_ids.with_context(show_lots_text=True), view='stock.view_stock_move_nosuggest_operations') as move_form:
+        with Form(receipt.move_ids.with_context(show_lots_text=True, show_destination_location=True), view='stock.view_stock_move_nosuggest_operations') as move_form:
             with move_form.move_line_nosuggest_ids.new() as sml:
                 sml.location_dest_id = sub_loc
                 sml.lot_name = '123'
