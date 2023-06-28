@@ -44,9 +44,7 @@ class _Record extends Component {
                 return [servName, useService(servName)];
             })
         );
-        if (resModel) {
-            modelServices.orm = useService("orm");
-        }
+        modelServices.orm = useService("orm");
         this.model = useState(new StandaloneRelationalModel(this.env, modelParams, modelServices));
 
         const loadWithValues = (values) => {
