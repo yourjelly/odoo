@@ -37,16 +37,20 @@ patch(Thread.prototype, "im_livechat", {
             return `${this.getMemberName(this.correspondent)} (${this.correspondent.country.name})`;
         }
         if (this.channel?.anonymous_country) {
-            return `${this.getMemberName(this.correspondent)} (${this.channel.anonymous_country.name})`;
+            return `${this.getMemberName(this.correspondent)} (${
+                this.channel.anonymous_country.name
+            })`;
         }
         return this.getMemberName(this.correspondent);
     },
 
     get imgUrl() {
-        if (this.type === "livechat" && this.correspondent && !this.correspondent.is_public) {
-            return `/web/image/res.partner/${this.correspondent.id}/avatar_128`;
+        if (this.type !== "livechat") {
+            return this._super();
         }
-        return this._super();
+        return this.correspondent && !this.correspondent.is_public
+            ? `/web/image/res.partner/${this.correspondent.id}/avatar_128`
+            : "/mail/static/src/img/smiley/avatar.jpg";
     },
 
     /**
