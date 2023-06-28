@@ -2,4 +2,81 @@
     label {
         font-weight: $font-weight-bold;
     }
+    .o_notebook.vertical {
+        .o_notebook_headers {
+            overflow-x: unset;
+        }
+        .o_notebook_content .o_page_template {
+            position: relative;
+            border: 2px solid gray;
+
+            &.o_loading {
+                cursor: wait;
+                opacity: 5%;
+                filter: brightness(70%);
+            }
+            &:not(.o_loading):hover {
+                border: 2px solid black;
+                .o_page_template_preview {
+                    filter: brightness(70%) contrast(60%);
+                }
+                .o_button_area {
+                    display: flex;
+                }
+            }
+            &:empty {
+                opacity: 0; // Hide empty column filler
+            }
+
+            $-iframe-width: 1024;
+            $-preview-width: 275; // Empirically obtained
+            $-preview-width-xl: 220; // Empirically obtained
+            $-preview-width-lg: 408; // Empirically obtained
+            width: #{$-preview-width}px;
+            @include media-breakpoint-down(xl) {
+                width: #{$-preview-width-xl}px;
+            }
+            @include media-breakpoint-down(lg) {
+                width: #{$-preview-width-lg}px;
+            }
+
+            .o_page_template_preview {
+                // Resize iframe:
+                height: 300px;
+                padding: 0;
+                overflow: hidden;
+    
+                iframe {
+                    pointer-events: none;
+                    width: #{$-iframe-width}px;
+                    border: 0;
+                    transform: scale($-preview-width / $-iframe-width);
+                    @include media-breakpoint-down(xl) {
+                        transform: scale($-preview-width-xl / $-iframe-width);
+                    }
+                    @include media-breakpoint-down(lg) {
+                        transform: scale($-preview-width-lg / $-iframe-width);
+                    }
+                    transform-origin: 0 0;
+                }
+            }
+            .o_button_area {
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                display: none;
+                flex-flow: column nowrap;
+                padding: 10% 20%;
+    
+                button {
+                    align-self: center;
+                }
+            }
+        }
+    }
+    .row.o_loading {
+        min-height: 100vh;
+        cursor: wait;
+    }
 }

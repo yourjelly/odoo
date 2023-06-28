@@ -1,6 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+<!-- This template is used to obtain the order and the translations of all
+group names.
+It is not done in python (eg: a method returning a list of translated terms,
+overridden by modules), because:
+- it needs to be simple for designers and community: only write XML in themes
+- python is ignored when importing modules in Odoo, which is a common flow for
+  themes
+-->
+<template id="new_page_template_groups">
+    <div id="about">About</div>
+    <div id="landing">Landing Pages</div>
+    <div id="gallery">Gallery</div>
+    <div id="services">Services</div>
+    <div id="pricing">Pricing Plans</div>
+    <div id="team">Team</div>
+</template>
+
+<!-- Specific templates are generated from the manifest files:
+    If the manifest defines:
+    'new_page_template': {
+        'somekind': {
+            'somespecific': ['s_cover'... list of snippets],
+        },
+    }
+    A template named: new_page_template_sections_somekind_somespecific is generated.
+    Its arch contains t-snippet-calls to each listed snippet, all nested in a div#wrap.
+-->
+
+<!-- Previews for blocks -->
+<!-- Defined in website so that every theme can benefit from it -->
+<!-- Table of content -->
+<template id="new_page_template_s_table_of_content" inherit_id="s_table_of_content" primary="True">
+    <xpath expr="//div[hasclass('s_table_of_content_navbar')]" position="attributes">
+        <attribute name="style">top: 76px; max-height: calc(100vh - 96px);</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('s_table_of_content_navbar')]" position="inside">
+        <a href="#table_of_content_heading_1_1" class="table_of_content_link list-group-item list-group-item-action py-2 border-0 rounded-0 active">Intuitive system</a>
+        <a href="#table_of_content_heading_1_2" class="table_of_content_link list-group-item list-group-item-action py-2 border-0 rounded-0">Design features</a>
+    </xpath>
+    <xpath expr="//section//section[1]//h1" position="attributes">
+        <attribute name="id">table_of_content_heading_1_1</attribute>
+    </xpath>
+    <xpath expr="//section//section[2]//h1" position="attributes">
+        <attribute name="id">table_of_content_heading_1_2</attribute>
+    </xpath>
+</template>
+
+<!-- Countdown -->
+<!-- TODO Produce an SVG that looks like countdown -->
+<!-- The content of the .o_new_page_snippet_preview is removed upon page creation -->
+<template id="new_page_template_s_countdown" inherit_id="s_countdown" primary="True">
+    <xpath expr="//div[hasclass('s_countdown_canvas_wrapper')]" position="inside">
+        <div class="o_new_page_snippet_preview d-flex justify-content-center" style="font-size: 100px;">O O O O</div>
+    </xpath>
+</template>
+
 <!-- Generate primary snippet templates that are not predefined -->
 <function model="website" name="_generate_primary_snippet_templates">
     <value>website</value>

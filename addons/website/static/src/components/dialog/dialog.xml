@@ -8,7 +8,7 @@
             <t t-if="props.slots and props.slots.default" t-slot="default"/>
             <t t-else="" t-esc="props.body"/>
         </t>
-        <t t-set-slot="footer">
+        <t t-if="props.showFooter" t-set-slot="footer">
             <t t-if="props.slots and props.slots.footer" t-slot="footer"/>
             <t t-else="">
                 <button class="btn btn-primary" t-on-click="protectedClick(props.primaryClick)" t-att-disabled="state.disabled">
@@ -21,4 +21,95 @@
         </t>
     </Dialog>
 </t>
+
+<t t-name="website.AddPageTemplatePreview" owl="1">
+    <div t-ref="holder" class="gx-4 o_page_template" t-att-class="{ 'mb-4': props.firstRow }">
+        <div t-ref="preview" class="o_page_template_preview">
+            <iframe t-ref="iframe" src="about:blank"/>
+        </div>
+        <div class="o_button_area">
+            <button class="btn btn-primary" t-on-click="select">Use this template</button>
+        </div>
+    </div>
+</t>
+
+<t t-name="website.AddPageTemplatePreviews" owl="1">
+    <div class="container">
+        <div class="row gy-4">
+            <t t-foreach="[...this.columns.entries()]" t-as="column" t-key="column[0]">
+                <div class="col-lg-4 col-12">
+                    <t t-foreach="[...column[1].entries()]" t-as="template" t-key="template[0]">
+                        <AddPageTemplatePreview template="template[1]" firstRow="template_first"
+                            addPage="props.addPage" getCssLinkEls="props.getCssLinkEls" 
+                        />
+                    </t>
+                    <t t-if="column[1].length === 0">
+                        <div class="gx-4 o_page_template"/>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </div>
+</t>
+
+<t t-name="website.AddPageTemplates" owl="1">
+    <div class="row py-4" t-att-class="{o_loading: state.loading}">
+        <div t-if="state.loading" class="col-12 mt-5">
+            <p class="text-center h2">Loading page templates...</p>
+        </div>
+        <!-- Do not rely on Notebook to avoid pages from needing reload -->
+        <div t-else="" class="o_notebook d-flex w-100 vertical flex-row">
+            <div class="o_notebook_headers m-0">
+                <ul t-ref="tabs" class="nav nav-tabs flex-column p-0">
+                    <t t-foreach="state.pages" t-as="page" t-key="page.id">
+                        <li t-att-data-id="page.id" class="nav-item flex-nowrap cursor-pointer" t-on-click="() => this.onTabClick(page.id)">
+                            <a class="nav-link p-3 rounded-0" t-att-class="{active: page_first}" href="#" role="tab" tabindex="0"><t t-out="page.title"/></a>
+                        </li>
+                    </t>
+                </ul>
+            </div>
+            <div t-ref="panes" class="o_notebook_content tab-content">
+                <t t-foreach="state.pages" t-as="page" t-key="page.id">
+                    <div t-att-data-id="page.id" class="tab-pane" t-att-class="{active: page_first}">
+                        <AddPageTemplatePreviews
+                            name="page.props.name"
+                            addPage="page.props.addPage"
+                            getCssLinkEls="page.props.getCssLinkEls"
+                            templates="page.props.templates"
+                        />
+                    </div>
+                </t>
+            </div>
+        </div>
+    </div>
+</t>
+
+<t t-name="website.AddPageDialog" owl="1">
+    <WebsiteDialog
+        title="title"
+        showFooter="false"
+        size="'xl'"
+        close="props.close">
+        <div class="row gy-4">
+            <div class="col-md-2">
+                <button class="btn btn-primary" t-on-click="() => this.addPage()">+ Blank Page</button>
+            </div>
+            <label class="col-form-label col-md-2">
+                Page Title
+            </label>
+            <div class="col-md-5">
+                <input type="text" t-model="state.name" class="form-control" required="required" t-ref="autofocus"/>
+            </div>
+            <div class="col-md-3 pt-1">
+                <Switch label="switchLabel" value="state.addMenu" onChange="(value) => this.onChangeAddMenu(value)"/>
+            </div>
+        </div>
+        <AddPageTemplates
+            addPage="sectionsArch => this.addPage(sectionsArch)"
+            getCssLinkEls="() => this.getCssLinkEls()"
+            onTemplatePageChanged="name => this.onTemplatePageChanged(name)"
+        />
+    </WebsiteDialog>
+</t>
+
 </templates>

@@ -171,8 +171,14 @@ export class NewContentModal extends Component {
     }
 
     createNewPage() {
+        if (this.isCreatingNewPage) {
+            return;
+        }
+        this.isCreatingNewPage = true;
         this.dialogs.add(AddPageDialog, {
             onAddPage: () => this.websiteContext.showNewContentModal = false,
+            websiteId: this.website.currentWebsite.id,
+            ready: () => this.isCreatingNewPage = false,
         });
     }
 
