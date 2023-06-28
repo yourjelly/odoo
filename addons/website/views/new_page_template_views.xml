@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- This template is used to obtain the order and the translations of all
+group names -->
+<record id="new_page_template_groups" model="ir.ui.view">
+    <field name="name">New page template groups</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_groups</field>
+    <field name="arch" type="xml">
+        <div id="about">About</div>
+        <div id="landing">Landing Pages</div>
+        <div id="gallery">Gallery</div>
+        <div id="services">Services</div>
+        <div id="pricing">Pricing Plans</div>
+        <div id="team">Team</div>
+    </field>
+</record>
+
+<record id="new_page_template_about_0" model="ir.ui.view">
+    <field name="name">New page template: About #0</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_about_0</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_text_block"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_about_1" model="ir.ui.view">
+    <field name="name">New page template: About #1</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_about_1</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_picture"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_about_2" model="ir.ui.view">
+    <field name="name">New page template: About #2</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_about_2</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_about_3" model="ir.ui.view">
+    <field name="name">New page template: About #3</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_about_3</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_picture"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_showcase"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_about_4" model="ir.ui.view">
+    <field name="name">New page template: About #4</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_about_4</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_text_block"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_showcase"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_about_5" model="ir.ui.view">
+    <field name="name">New page template: About #5</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_about_5</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_picture"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_company_team"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_landing_0" model="ir.ui.view">
+    <field name="name">New page template: Landing Pages #0</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_landing_0</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_cover"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_call_to_action"/>
+            <t t-snippet-call="website.s_media_list"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_landing_1" model="ir.ui.view">
+    <field name="name">New page template: Landing Pages #1</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_landing_1</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_parallax"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_call_to_action"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_landing_2" model="ir.ui.view">
+    <field name="name">New page template: Landing Pages #2</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_landing_2</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_cover"/>
+            <t t-snippet-call="website.s_parallax"/>
+            <t t-snippet-call="website.s_media_list"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_landing_3" model="ir.ui.view">
+    <field name="name">New page template: Landing Pages #3</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_landing_3</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_cover"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_media_list"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_showcase"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_landing_4" model="ir.ui.view">
+    <field name="name">New page template: Landing Pages #4</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_landing_4</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_carousel"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_call_to_action"/>
+            <t t-snippet-call="website.s_media_list"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_landing_5" model="ir.ui.view">
+    <field name="name">New page template: Landing Pages #5</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_landing_5</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_cover"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_media_list"/>
+            <t t-snippet-call="website.s_parallax"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_gallery_0" model="ir.ui.view">
+    <field name="name">New page template: Gallery #0</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_gallery_0</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_image_gallery"/>
+            <t t-snippet-call="website.s_carousel"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_images_wall"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_gallery_1" model="ir.ui.view">
+    <field name="name">New page template: Gallery #1</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_gallery_1</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_masonry_block"/>
+            <t t-snippet-call="website.s_carousel"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_images_wall"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_gallery_2" model="ir.ui.view">
+    <field name="name">New page template: Gallery #2</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_gallery_2</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_image_gallery"/>
+            <t t-snippet-call="website.s_masonry_block"/>
+            <t t-snippet-call="website.s_carousel"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_gallery_3" model="ir.ui.view">
+    <field name="name">New page template: Gallery #3</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_gallery_3</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_carousel"/>
+            <t t-snippet-call="website.s_images_wall"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_masonry_block"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_gallery_4" model="ir.ui.view">
+    <field name="name">New page template: Gallery #4</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_gallery_4</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_images_wall"/>
+            <t t-snippet-call="website.s_image_text"/>
+            <t t-snippet-call="website.s_text_image"/>
+            <t t-snippet-call="website.s_image_gallery"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_gallery_5" model="ir.ui.view">
+    <field name="name">New page template: Gallery #5</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_gallery_5</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_image_gallery"/>
+            <t t-snippet-call="website.s_masonry_block"/>
+            <t t-snippet-call="website.s_images_wall"/>
+            <t t-snippet-call="website.s_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_services_0" model="ir.ui.view">
+    <field name="name">New page template: Services #0</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_services_0</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_text_image"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_three_columns"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_services_1" model="ir.ui.view">
+    <field name="name">New page template: Services #1</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_services_1</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_text_image"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_media_list"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_services_2" model="ir.ui.view">
+    <field name="name">New page template: Services #2</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_services_2</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_text_image"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_services_3" model="ir.ui.view">
+    <field name="name">New page template: Services #3</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_services_3</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_product_catalog"/>
+            <t t-snippet-call="website.s_showcase"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_services_4" model="ir.ui.view">
+    <field name="name">New page template: Services #4</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_services_4</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_text_image"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_tabs"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_three_columns"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_services_5" model="ir.ui.view">
+    <field name="name">New page template: Services #5</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_services_5</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_product_catalog"/>
+            <t t-snippet-call="website.s_features"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_pricing_0" model="ir.ui.view">
+    <field name="name">New page template: Pricing Plans #0</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_pricing_0</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_title"/>
+            <t t-snippet-call="website.s_numbers"/>
+            <t t-snippet-call="website.s_color_blocks_2"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_comparisons"/>
+            <t t-snippet-call="website.s_showcase"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_pricing_1" model="ir.ui.view">
+    <field name="name">New page template: Pricing Plans #1</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_pricing_1</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_title"/>
+            <t t-snippet-call="website.s_numbers"/>
+            <t t-snippet-call="website.s_color_blocks_2"/>
+            <t t-snippet-call="website.s_product_catalog"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_showcase"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_pricing_2" model="ir.ui.view">
+    <field name="name">New page template: Pricing Plans #2</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_pricing_2</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_title"/>
+            <t t-snippet-call="website.s_numbers"/>
+            <t t-snippet-call="website.s_color_blocks_2"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_comparisons"/>
+            <t t-snippet-call="website.s_media_list"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_pricing_3" model="ir.ui.view">
+    <field name="name">New page template: Pricing Plans #3</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_pricing_3</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_title"/>
+            <t t-snippet-call="website.s_numbers"/>
+            <t t-snippet-call="website.s_comparisons"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_product_catalog"/>
+            <t t-snippet-call="website.s_showcase"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_pricing_4" model="ir.ui.view">
+    <field name="name">New page template: Pricing Plans #4</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_pricing_4</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_title"/>
+            <t t-snippet-call="website.s_numbers"/>
+            <t t-snippet-call="website.s_product_catalog"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_media_list"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_pricing_5" model="ir.ui.view">
+    <field name="name">New page template: Pricing Plans #5</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_pricing_5</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_title"/>
+            <t t-snippet-call="website.s_numbers"/>
+            <t t-snippet-call="website.s_comparisons"/>
+            <t t-snippet-call="website.s_product_catalog"/>
+            <t t-snippet-call="website.s_features"/>
+            <t t-snippet-call="website.s_showcase"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_team_0" model="ir.ui.view">
+    <field name="name">New page template: Team #0</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_team_0</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_media_list"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_team_1" model="ir.ui.view">
+    <field name="name">New page template: Team #1</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_team_1</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_carousel"/>
+            <t t-snippet-call="website.s_media_list"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_team_2" model="ir.ui.view">
+    <field name="name">New page template: Team #2</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_team_2</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_carousel"/>
+            <t t-snippet-call="website.s_media_list"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_team_3" model="ir.ui.view">
+    <field name="name">New page template: Team #3</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_team_3</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_carousel"/>
+            <t t-snippet-call="website.s_media_list"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_team_4" model="ir.ui.view">
+    <field name="name">New page template: Team #4</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_team_4</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_banner"/>
+            <t t-snippet-call="website.s_text_block"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_media_list"/>
+            <t t-snippet-call="website.s_showcase"/>
+        </div>
+    </field>
+</record>
+
+<record id="new_page_template_team_5" model="ir.ui.view">
+    <field name="name">New page template: Team #5</field>
+    <field name="type">qweb</field>
+    <field name="key">website.new_page_template_team_5</field>
+    <field name="arch" type="xml">
+        <div id="wrap">
+            <t t-snippet-call="website.s_picture"/>
+            <t t-snippet-call="website.s_three_columns"/>
+            <t t-snippet-call="website.s_company_team"/>
+            <t t-snippet-call="website.s_quotes_carousel"/>
+            <t t-snippet-call="website.s_showcase"/>
+            <t t-snippet-call="website.s_media_list"/>
+        </div>
+    </field>
+</record>
+
+</odoo>

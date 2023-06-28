@@ -8,7 +8,7 @@
             <t t-if="props.slots and props.slots.default" t-slot="default"/>
             <t t-else="" t-esc="props.body"/>
         </t>
-        <t t-set-slot="footer">
+        <t t-if="props.showFooter" t-set-slot="footer">
             <t t-if="props.slots and props.slots.footer" t-slot="footer"/>
             <t t-else="">
                 <button class="btn btn-primary" t-on-click="protectedClick(props.primaryClick)" t-att-disabled="state.disabled">
@@ -21,4 +21,80 @@
         </t>
     </Dialog>
 </t>
+
+<t t-name="website.AddPageTemplatePreview" owl="1">
+    <div t-ref="holder" class="gx-4 o_page_template" t-att-class="{ 'mb-4': props.firstRow }">
+        <div t-ref="preview" class="o_page_template_preview">
+            <iframe t-ref="iframe" src="about:blank"/>
+        </div>
+        <div class="o_button_area">
+            <button class="btn btn-primary" t-on-click="select">Use this template</button>
+        </div>
+    </div>
+</t>
+
+<t t-name="website.AddPageTemplatePreviews" owl="1">
+    <div class="container">
+        <div class="row gy-4">
+            <t t-foreach="[...this.columns.entries()]" t-as="column" t-key="column[0]">
+                <div class="col-lg-4 col-12">
+                    <t t-foreach="[...column[1].entries()]" t-as="template" t-key="template[0]">
+                        <AddPageTemplatePreview template="template[1]" firstRow="template_first"
+                            addPage="props.addPage" getCssLinkEls="props.getCssLinkEls" 
+                        />
+                    </t>
+                    <t t-if="column[1].length === 0">
+                        <div class="gx-4 o_page_template"/>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </div>
+</t>
+
+<t t-name="website.AddPageTemplates" owl="1">
+    <div class="row py-4" t-att-class="{o_loading: state.loading}">
+        <Notebook orientation="'vertical'" pages="state.pages" onPageUpdate="(value) => this.onTemplatePageChanged(value)"/>
+    </div>
+</t>
+
+<t t-name="website.AddPageDialog" owl="1">
+    <WebsiteDialog
+        title="title"
+        showFooter="false"
+        size="'xl'"
+        close="props.close">
+        <div class="row gy-4">
+            <div class="col-md-2">
+                <button class="btn btn-primary" t-on-click="() => this.addPage()">+ Blank Page</button>
+            </div>
+            <label class="col-form-label col-md-2">
+                Page Title
+            </label>
+            <div class="col-md-8">
+                <input type="text" t-model="state.name" class="form-control" required="required" t-ref="autofocus"/>
+            </div>
+            <t t-if="props.selectWebsite">
+                <label class="col-form-label offset-md-2 col-md-2">Website</label>
+                <div class="col-md-8">
+                    <select class="form-select" t-model="state.websiteId">
+                        <option t-foreach="website.websites"
+                            t-as="option"
+                            t-key="option.id"
+                            t-att-value="option.id"
+                            t-esc="option.name"
+                        />
+                    </select>
+                </div>
+            </t>
+            <Switch extraClasses="'offset-md-4 col-md-8 text-start'" label="switchLabel" value="state.addMenu" onChange="(value) => this.onChangeAddMenu(value)"/>
+        </div>
+        <AddPageTemplates websiteId="state.websiteId"
+            addPage="sectionsArch => this.addPage(sectionsArch)"
+            getCssLinkEls="() => this.getCssLinkEls()"
+            onTemplatePageChanged="name => this.onTemplatePageChanged(name)"
+        />
+    </WebsiteDialog>
+</t>
+
 </templates>

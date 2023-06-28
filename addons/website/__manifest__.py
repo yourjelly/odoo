@@ -94,6 +94,7 @@
         'views/snippets/s_embed_code.xml',
         'views/snippets/s_website_form.xml',
         'views/snippets/s_searchbar.xml',
+        'views/new_page_template_views.xml',
         'views/website_views.xml',
         'views/website_pages_views.xml',
         'views/website_visitor_views.xml',

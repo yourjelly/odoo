@@ -117,6 +117,8 @@ class TestUiHtmlEditor(odoo.tests.HttpCase):
 @odoo.tests.tagged('-at_install', 'post_install')
 class TestUiTranslate(odoo.tests.HttpCase):
     def test_admin_tour_rte_translator(self):
+        # Avoid fetching page templates during this test
+        self.env['ir.ui.view'].search([('key', 'like', 'website.new_page_template_about_%')]).active = False
         self.env['res.lang'].create({
             'name': 'Parseltongue',
             'code': 'pa_GB',
