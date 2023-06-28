@@ -49,6 +49,12 @@ class Task(models.Model):
     def SELF_READABLE_FIELDS(self):
         return super().SELF_READABLE_FIELDS | PROJECT_TASK_READABLE_FIELDS
 
+    @api.constrains('project_root_id')
+    def _check_timesheetable_project(self):
+        orphan_tasks = self.filtered(lambda t: not t.project_root_id)
+        if orphan_tasks and self.env['account.analytic.line'].search_count([('task_id', 'in', orphan_tasks.ids)], limit=1):
+            raise UserError(_("This task cannot be private because there are some timesheets linked to it."))
+
     def _uom_in_days(self):
         return self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day')
 
@@ -162,15 +168,6 @@ class Task(models.Model):
         return self.timesheet_ids
 
     def write(self, values):
-        # a timesheet must have an analytic account (and a project)
-        is_removed_project = 'project_id' in values and not values['project_id']
-        is_removed_parent = 'parent_id' in values and not values['parent_id']
-        if (
-            ((is_removed_project and (not self.parent_id or is_removed_parent))
-            or (is_removed_parent and not (self.project_id or is_removed_project)))
-            and self._get_timesheet()
-        ):
-            raise UserError(_('This task must be part of a project because there are some timesheets linked to it.'))
         res = super(Task, self).write(values)
 
         if 'project_id' in values:

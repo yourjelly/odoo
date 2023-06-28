@@ -652,8 +652,10 @@ class TestTimesheet(TestCommonTimesheet):
             'task_id': self.task1.id,
             'employee_id': self.empl_employee.id,
         })
+        self.assertEqual(self.task1.project_id, self.project_customer)
         with self.assertRaises(UserError):
             self.task1.project_id = False
+        self.assertEqual(self.task1.project_id, self.project_customer, "The task should keep its project after the error is raised.")
 
         self.task1.parent_id = self.task2
         self.task1.project_id = False

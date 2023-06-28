@@ -150,7 +150,7 @@ class Task(models.Model):
 
     project_id = fields.Many2one('project.project', string='Project',
         index=True, tracking=True, check_company=True, change_default=True)
-    project_root_id = fields.Many2one('project.project', compute='_compute_project_root_id', search='_search_project_root_id', recursive=True)
+    project_root_id = fields.Many2one('project.project', compute='_compute_project_root_id', store=True, recursive=True)
     task_properties = fields.Properties('Properties', definition='project_id.task_properties_definition', copy=True)
     planned_hours = fields.Float("Allocated Time", tracking=True)
     subtask_planned_hours = fields.Float("Sub-tasks Planned Hours", compute='_compute_subtask_planned_hours',
