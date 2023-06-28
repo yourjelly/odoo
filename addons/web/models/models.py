@@ -881,7 +881,7 @@ class Base(models.AbstractModel):
 
             return { 'values': field_range, }
 
-    def onchange2(self, values: Dict, field_names: List[str], fields_spec: Dict):
+    def onchange(self, values: Dict, field_names: List[str], fields_spec: Dict):
         """
         Perform an onchange on the given fields, and return the result.
 

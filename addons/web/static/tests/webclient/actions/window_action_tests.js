@@ -190,7 +190,7 @@ QUnit.module("ActionManager", (hooks) => {
             "web_read_group",
             "unity_web_search_read",
             "unity_web_search_read",
-            "onchange2",
+            "onchange",
             "name_create",
             "web_read",
             "web_read",
@@ -733,7 +733,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/action/load",
             "get_views",
             "unity_web_search_read",
-            "onchange2",
+            "onchange",
             "unity_web_search_read",
         ]);
     });
@@ -816,7 +816,7 @@ QUnit.module("ActionManager", (hooks) => {
             };
             const def = testUtils.makeTestPromise();
             const mockRPC = async (route, args) => {
-                if (args.method === "onchange2") {
+                if (args.method === "onchange") {
                     // delay the opening of the dialog
                     await def;
                 }
@@ -1707,7 +1707,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/action/load",
             "get_views",
             "unity_web_search_read",
-            "onchange2",
+            "onchange",
             "get_formview_action",
             "create", // FIXME: to check with mcm
             "get_views",
@@ -1992,7 +1992,7 @@ QUnit.module("ActionManager", (hooks) => {
         async function (assert) {
             serverData.views["partner,false,form"] = `<form><field name="foo"/></form>`;
             const mockRPC = (route, args) => {
-                if (args.method === "onchange2") {
+                if (args.method === "onchange") {
                     return Promise.resolve({
                         value: {},
                         warning: {
@@ -2210,7 +2210,7 @@ QUnit.module("ActionManager", (hooks) => {
             .add("odoo.exceptions.ValidationError", WarningDialogWait);
 
         const mockRPC = (route, args) => {
-            if (args.method === "onchange2" && args.model === "partner") {
+            if (args.method === "onchange" && args.model === "partner") {
                 throw makeServerError({ type: "ValidationError" });
             }
         };

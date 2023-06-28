@@ -1391,7 +1391,7 @@ QUnit.module("Views", (hooks) => {
         await click(target, ".o_list_view");
         assert.containsN(target, ".o_data_row", 5);
         assert.strictEqual(target.querySelector(".o_data_row [name='int_field']").textContent, "1");
-        assert.verifySteps(["onchange2", "create", "web_read"]);
+        assert.verifySteps(["onchange", "create", "web_read"]);
     });
 
     QUnit.test("multi_edit: edit a required field with an invalid value", async function (assert) {
@@ -1598,7 +1598,7 @@ QUnit.module("Views", (hooks) => {
 
             await click($(".o_list_button_add:visible").get(0));
             assert.verifySteps(
-                ["get_views", "unity_web_search_read", "onchange2"],
+                ["get_views", "unity_web_search_read", "onchange"],
                 "no nameget should be done"
             );
         }
@@ -7915,7 +7915,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             groupBy: ["currency_id"],
             mockRPC(route, args) {
-                if (args.method === "onchange2") {
+                if (args.method === "onchange") {
                     assert.deepEqual(
                         args.args[3],
                         {
@@ -9034,7 +9034,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tr.o_data_row", 5);
         assert.hasClass(target.querySelector("tr.o_data_row:nth-child(5)"), "o_selected_row");
 
-        assert.verifySteps(["onchange2"]);
+        assert.verifySteps(["onchange"]);
     });
 
     QUnit.test("pressing tab on last cell of editable list view", async function (assert) {
@@ -9083,7 +9083,7 @@ QUnit.module("Views", (hooks) => {
             "/web/dataset/call_kw/foo/unity_web_search_read",
             "/web/dataset/call_kw/foo/write",
             "/web/dataset/call_kw/foo/web_read",
-            "/web/dataset/call_kw/foo/onchange2",
+            "/web/dataset/call_kw/foo/onchange",
         ]);
     });
 
@@ -9104,7 +9104,7 @@ QUnit.module("Views", (hooks) => {
                         return result;
                     });
                 }
-                if (args.method === "onchange2") {
+                if (args.method === "onchange") {
                     return onchangeGetPromise.then(function () {
                         return result;
                     });
@@ -9148,7 +9148,7 @@ QUnit.module("Views", (hooks) => {
             "unity_web_search_read",
             "write",
             "web_read",
-            "onchange2",
+            "onchange",
         ]);
     });
 
@@ -9800,7 +9800,7 @@ QUnit.module("Views", (hooks) => {
                         </group>
                     </form>`,
                 mockRPC(route, args) {
-                    if (args.method === "onchange2") {
+                    if (args.method === "onchange") {
                         assert.step(`onchange:${args.model}`);
                     }
                 },
@@ -10744,7 +10744,7 @@ QUnit.module("Views", (hooks) => {
             arch: '<tree editable="top"><field name="m2o" required="1"/></tree>',
             mockRPC: async function (route, args, performRPC) {
                 const result = await performRPC(route, args);
-                if (args.method === "onchange2") {
+                if (args.method === "onchange") {
                     await prom;
                 }
                 return result;
@@ -11233,7 +11233,7 @@ QUnit.module("Views", (hooks) => {
 
         // create a record and edit its value
         await click($(".o_list_button_add:visible").get(0));
-        assert.verifySteps(["onchange2"]);
+        assert.verifySteps(["onchange"]);
 
         await editInput(target, ".o_selected_row [name=int_field] input", 123);
         assert.containsNone(document.body, ".modal");
@@ -13901,10 +13901,10 @@ QUnit.module("Views", (hooks) => {
             "unity_web_search_read",
             "write",
             "web_read",
-            "onchange2",
+            "onchange",
             "create",
             "web_read",
-            "onchange2",
+            "onchange",
         ]);
     });
 
@@ -13995,7 +13995,7 @@ QUnit.module("Views", (hooks) => {
             "web_read_group",
             "unity_web_search_read",
             "unity_web_search_read",
-            "onchange2",
+            "onchange",
         ]);
     });
 
@@ -15351,7 +15351,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             groupBy: ["priority"],
             mockRPC(route, args) {
-                if (args.method === "onchange2") {
+                if (args.method === "onchange") {
                     assert.step(args.kwargs.context.default_priority.toString());
                 }
             },
@@ -15391,7 +15391,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             groupBy: ["m2o"],
             mockRPC(route, args) {
-                if (args.method === "onchange2") {
+                if (args.method === "onchange") {
                     assert.step(args.kwargs.context.default_m2o.toString());
                 }
             },
@@ -16778,7 +16778,7 @@ QUnit.module("Views", (hooks) => {
                         <field name="int_field"/>
                     </tree>`,
                 mockRPC(route, { args, method, model }) {
-                    if (model === "foo" && method === "onchange2") {
+                    if (model === "foo" && method === "onchange") {
                         return def;
                     }
                     if (model === "foo" && method === "write") {
@@ -16814,7 +16814,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="int_field"/>
                 </tree>`,
             mockRPC(route, { args, method, model }) {
-                if (model === "foo" && method === "onchange2") {
+                if (model === "foo" && method === "onchange") {
                     return def;
                 }
                 if (model === "foo" && method === "write") {
@@ -16869,7 +16869,7 @@ QUnit.module("Views", (hooks) => {
                         </group>
                     </form>`,
                 mockRPC(route, args) {
-                    if (args.method === "onchange2") {
+                    if (args.method === "onchange") {
                         assert.step(`onchange:${args.model}`);
                     }
                 },
@@ -17289,7 +17289,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             async mockRPC(route, args) {
                 assert.step(args.method);
-                if (args.method === "onchange2") {
+                if (args.method === "onchange") {
                     await Promise.resolve(def);
                 }
             },
@@ -17301,7 +17301,7 @@ QUnit.module("Views", (hooks) => {
         // add a new line
         await click($(".o_list_button_add:visible").get(0));
 
-        assert.verifySteps(["onchange2"]);
+        assert.verifySteps(["onchange"]);
 
         // we want to add a delay to simulate an onchange
         def = makeDeferred();
@@ -17314,7 +17314,7 @@ QUnit.module("Views", (hooks) => {
 
         // check that nothing changed before the onchange finished
         assert.strictEqual(target.querySelector("[name=int_field] input").value, value);
-        assert.verifySteps(["onchange2"]);
+        assert.verifySteps(["onchange"]);
 
         // unlock onchange
         def.resolve();
@@ -18872,7 +18872,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="m2o"/>
                 </tree>`,
             async mockRPC(route, args) {
-                if (args.method === "onchange2") {
+                if (args.method === "onchange") {
                     assert.step("onchange");
                     await def;
                     return { value: { m2o: [3, "Value 3"] } };

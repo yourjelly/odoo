@@ -1355,7 +1355,7 @@ QUnit.module("Fields", (hooks) => {
                     if (args.method === "name_search") {
                         nameSearchProm.resolve();
                     }
-                    if (args.method === "onchange2") {
+                    if (args.method === "onchange") {
                         if (onchangeCalls === 0) {
                             assert.deepEqual(
                                 args.kwargs.context,
