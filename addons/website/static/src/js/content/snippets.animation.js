@@ -1272,6 +1272,7 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
      * @override
      */
     start() {
+        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive('animation replay');
         this.lastScroll = 0;
         this.$scrollingElement = $().getScrollingElement(this.ownerDocument);
         this.$animatedElements = this.$('.o_animate');
@@ -1315,7 +1316,7 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
             this.windowsHeight = $(window).height();
             this._scrollWebsiteAnimate(this.$scrollingElement[0]);
         }).trigger("resize");
-
+        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive('animation replay');
         return this._super(...arguments);
     },
     /**
