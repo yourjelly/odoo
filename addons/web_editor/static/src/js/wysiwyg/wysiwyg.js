@@ -177,19 +177,22 @@ export class Wysiwyg extends Component {
                 }).flat();
             },
         };
-        Object.assign(this.colorPalettesProps.text, colorPaletteCommonOptions, {
-            onColorPicked: getOnColorPicked('text'),
-            onCustomColorPicked: getOnColorPicked('text'),
-            onColorHover: getOnColorHover('text'),
-        });
-        Object.assign(this.colorPalettesProps.background, colorPaletteCommonOptions, {
-            onColorPicked: getOnColorPicked('background'),
-            onCustomColorPicked: getOnColorPicked('background'),
-            onColorHover: getOnColorHover('background'),
-        });
-
         onWillStart(() => {
             this.init();
+
+            Object.assign(this.colorPalettesProps.text, colorPaletteCommonOptions, {
+                document: this.options.document,
+                onColorPicked: getOnColorPicked('text'),
+                onCustomColorPicked: getOnColorPicked('text'),
+                onColorHover: getOnColorHover('text'),
+            });
+            Object.assign(this.colorPalettesProps.background, colorPaletteCommonOptions, {
+                document: this.options.document,
+                onColorPicked: getOnColorPicked('background'),
+                onCustomColorPicked: getOnColorPicked('background'),
+                onColorHover: getOnColorHover('background'),
+            });
+
             this._setToolbarProps();
         });
         onMounted(async () => {
