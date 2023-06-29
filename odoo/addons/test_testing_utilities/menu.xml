@@ -275,7 +275,7 @@
             <tree editable="bottom">
                 <field name="a"/>
                 <field name="b" readonly="parent.value == 42"/>
-                <field name="c" column_invisible="context.get('hide_c')"/> <!-- TODO: use and test column_invisible instead of invisible -->
+                <field name="c" invisible="context.get('hide_c')"/> <!-- TODO: use and test column_invisible instead of invisible -->
             </tree>
         </field>
     </record>
