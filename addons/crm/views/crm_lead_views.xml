@@ -6,6 +6,11 @@
             <field name="arch" type="xml">
                 <form class="o_lead_opportunity_form" js_class="crm_form">
                     <header>
+                        <!-- TESTING PURPOSE, TODO-NAN remove both buttons below -->
+                        <button name="action_process_pls_pending_updates" string="Process Probabilities"
+                            type="object" class="oe_highlight" title="Process Probabilities"/>
+                        <button name="action_update_lead_probabilities" string="Update Lead Probabilities"
+                            type="object" class="oe_highlight" title="Update Lead Probabilities"/>
                         <button name="action_set_won_rainbowman" string="Won"
                             type="object" class="oe_highlight" data-hotkey="w" title="Mark as won"
                             invisible="is_won or type == 'lead' or not active"/>
@@ -323,6 +328,8 @@
                                         <field name="company_id"
                                             groups="base.group_multi_company"
                                             options="{'no_create': True}"/>
+                                        <!-- It looks like we can save a team B on a lead being in a stage specific to team A... TODO-NAN? domain?-->
+                                        <!-- Grbge in out rule? Task-NAN-->
                                         <field name="team_id" options="{'no_open': True, 'no_create': True}" context="{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"/>
                                         <field name="day_open" />
                                         <field name="day_close"/>

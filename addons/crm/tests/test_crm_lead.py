@@ -903,6 +903,7 @@ class TestCRMLead(TestCrmCommon):
 
         # Test won validity
         lead.action_set_won()
+        self.env['crm.lead']._process_pls_pending_updates()
         self.assertEqual(lead.probability, 100)
         self.assertFalse(lead.is_lost)
         self.assertTrue(lead.is_won)
@@ -917,6 +918,7 @@ class TestCRMLead(TestCrmCommon):
 
         # Restore the lead in a non won stage. won_count = lost_count = 0.1 in frequency table. P = 50%
         lead.write({'stage_id': stage_in_progress.id, 'active': True})
+        self.env['crm.lead']._process_pls_pending_updates()
         self.assertFalse(lead.probability == 100)
         self.assertFalse(lead.is_won)
 

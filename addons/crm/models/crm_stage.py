@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
+
 from odoo import api, fields, models
 
 AVAILABLE_PRIORITIES = [
@@ -35,7 +37,9 @@ class Stage(models.Model):
         return super(Stage, self).default_get(fields)
 
     name = fields.Char('Stage Name', required=True, translate=True)
-    sequence = fields.Integer('Sequence', default=1, help="Used to order stages. Lower is better.")
+    # Default needs to be high in order to have them set as end stage before computing frequencies when setting actual sequence.
+    # Otherwise it starts low, frequencies are updated accordingly (almost max lost_count), then updated to max sequence -> all below stage
+    sequence = fields.Integer('Sequence', default=1000, help="Used to order stages. Lower is better.")
     is_won = fields.Boolean('Is Won Stage?')
     requirements = fields.Text('Requirements', help="Enter here the internal requirements for this stage (ex: Offer sent to customer). It will appear as a tooltip over the stage's name.")
     team_id = fields.Many2one('crm.team', string='Sales Team', ondelete="set null",
@@ -64,5 +68,12 @@ class Stage(models.Model):
                 won_leads.write({'probability': 100, 'automated_probability': 100})
             elif won_leads and not vals.get('is_won'):
                 won_leads._compute_probabilities()
+        return res
 
+    def unlink(self):
+        res = super().unlink()
+        self.env['crm.lead.scoring.frequency'].sudo().search([
+            ('variable', '=', 'stage_id'),
+            ('value', 'in', [str(id_value) for id_value in self.ids])
+        ]).unlink()
         return res

@@ -342,6 +342,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             'priority': '%s' % (x % 3),
         } for x in range(count)]
 
+        print(leads_data)
         # generate customer information
         partners = []
         if partner_count:
