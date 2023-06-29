@@ -142,6 +142,7 @@ export class ColorPalette extends Component {
             await this.start();
         });
         onWillUpdateProps((newProps) => {
+            this._updateColorToColornames();
             if (this.props.resetTabCount !== newProps.resetTabCount) {
                 this._selectDefaultTab();
             }
@@ -328,27 +329,7 @@ export class ColorPalette extends Component {
         // Compute class colors
 
         this.colorNames = [...weUtils.COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES];
-        this.colorToColorNames = {};
-        this.el.querySelectorAll('button[data-color]:not(.o_custom_gradient_btn)').forEach(elem => {
-            const colorName = elem.dataset.color;
-            if (weUtils.isColorGradient(colorName)) {
-                return;
-            }
-            const $color = $(elem);
-            const isCCName = weUtils.isColorCombinationName(colorName);
-            if (isCCName) {
-                $color.find('.o_we_cc_preview_wrapper').addClass(`o_cc o_cc${colorName}`);
-            } else if (weUtils.EDITOR_COLOR_CSS_VARIABLES.includes(colorName)) {
-                elem.style.backgroundColor = `var(--we-cp-${colorName})`;
-            } else {
-                elem.classList.add(`bg-${colorName}`);
-            }
-            this.colorNames.push(colorName);
-            if (!isCCName && !elem.classList.contains('d-none')) {
-                const color = weUtils.getCSSVariableValue(colorName, this.style);
-                this.colorToColorNames[color] = colorName;
-            }
-        });
+        this._updateColorToColornames();
         this.props.onSetColorNames([...this.colorNames]);
 
         // Select selected Color and build customColors.
@@ -836,6 +817,32 @@ export class ColorPalette extends Component {
                 $slider.data('color', previousColor);
             }
         }
+    }
+    _getColorFromColorName(colorName) {
+        return weUtils.getCSSVariableValue(colorName, this.style);
+    }
+    _updateColorToColornames() {
+        this.colorToColorNames = {};
+        this.el.querySelectorAll('button[data-color]:not(.o_custom_gradient_btn)').forEach(elem => {
+            const colorName = elem.dataset.color;
+            if (weUtils.isColorGradient(colorName)) {
+                return;
+            }
+            const $color = $(elem);
+            const isCCName = weUtils.isColorCombinationName(colorName);
+            if (isCCName) {
+                $color.find('.o_we_cc_preview_wrapper').addClass(`o_cc o_cc${colorName}`);
+            } else if (weUtils.EDITOR_COLOR_CSS_VARIABLES.includes(colorName)) {
+                elem.style.backgroundColor = `var(--we-cp-${colorName})`;
+            } else {
+                elem.classList.add(`bg-${colorName}`);
+            }
+            this.colorNames.push(colorName);
+            if (!isCCName && !elem.classList.contains('d-none')) {
+                const color = weUtils.getCSSVariableValue(colorName, this.style);
+                this.colorToColorNames[color] = colorName;
+            }
+        });
     }
 
     //--------------------------------------------------------------------------
