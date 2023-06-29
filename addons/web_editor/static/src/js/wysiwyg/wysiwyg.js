@@ -1078,9 +1078,13 @@ const Wysiwyg = Widget.extend({
             $odooFields.each((i, field) => {
                 const observer = new MutationObserver((mutations) => {
                     mutations = this.odooEditor.filterMutationRecords(mutations);
+                    mutations = mutations.filter(rec => 
+                        !(rec.type === "attributes" && (rec.attributeName.startsWith("data-oe-t") || rec.attributeName === "contenteditable"))
+                    );
                     if (!mutations.length) {
                         return;
                     }
+
                     let $node = $(field);
                     // Do not forward "unstyled" copies to other nodes.
                     if ($node.hasClass('o_translation_without_style')) {
