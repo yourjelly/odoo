@@ -56,6 +56,14 @@ class TagsSelector(object):
         test_tags = test.test_tags | {test_module}  # module as test_tags deprecated, keep for retrocompatibility,
         test_method = test._testMethodName
 
+        from odoo.tests import HttpCase
+        if isinstance(test, HttpCase):  # TODO REMOVE ME
+            test_method = getattr(test, test._testMethodName)
+            import inspect
+            lines = inspect.getsource(test_method)
+            if 'start_tour' in lines or 'web_tour.tour' in lines:
+                test_tags.add('tour_tttt')
+
         def _is_matching(test_filter):
             (tag, module, klass, method, module_path) = test_filter
             if tag and tag not in test_tags:
