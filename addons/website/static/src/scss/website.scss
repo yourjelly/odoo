@@ -2394,6 +2394,7 @@ input[value*="data-oe-translation-initial-sha"] {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        z-index: -1;
     }
     &.o_highlight_bottom .o_text_highlight_item > svg {
         top: 50%;
@@ -2411,6 +2412,8 @@ input[value*="data-oe-translation-initial-sha"] {
             width: 100%;
             overflow: visible;
             pointer-events: none;
+
+            display: block;
         }
     }
 
@@ -2418,30 +2421,30 @@ input[value*="data-oe-translation-initial-sha"] {
     // &.o_text_highlight_0 {
     //     //
     // }
-    // &.o_text_highlight_1 {
-    //     //
-    // }
+    &.o_text_highlight_1 svg{
+        top: 100% !important;
+    }
     // &.o_text_highlight_3 {
     //     //
     // }
-    // &.o_text_highlight_2 {
-    //     //
-    // }
+    &.o_text_highlight_2 svg{
+        top: 100% !important;
+    }
     // &.o_text_highlight_3 {
     //     //
     // }
-    // &.o_text_highlight_4 {
-    //     //
-    // }
+    &.o_text_highlight_4 svg{
+        top: 100% !important;
+    }
     // &.o_text_highlight_5 {
     //     //
     // }
     // &.o_text_highlight_6 {
     //    //
     // }
-    // &.o_text_highlight_7 {
-    //     //
-    // }
+    &.o_text_highlight_7 svg{
+        top: 100% !important;
+    }
     // &.o_text_highlight_8 {
     //     //
     // }

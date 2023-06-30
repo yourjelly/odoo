@@ -1,6 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" class="o_ignore_content" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 800 100" preserveAspectRatio="none"
+<svg xmlns="http://www.w3.org/2000/svg" class="o_ignore_content" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 562.41 204.75" preserveAspectRatio="none"
     stroke-width="var(--text-highlight-width)"
     stroke="var(--text-highlight-color)"
     fill="none">
-    <path d="M0 49L800 49" stroke-linecap="round" stroke-linejoin="miter"/>
+    <g>
+      <path class="uuid-b54ff5aa-3770-4292-8e69-a2a040674bea" d="m0,.5l524.04,6.91"/>
+      <path class="uuid-b54ff5aa-3770-4292-8e69-a2a040674bea" d="m40.65,191.43c-7.38.55-14.75,1.09-22.13,1.64,181.31,2.59,362.61,6.32,543.88,11.18"/>
+    </g>
 </svg>

@@ -1,6 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" class="o_ignore_content" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 800 100" preserveAspectRatio="none"
+<!-- DESIGN NOTE: This is a default SVG added for testing purposes only.
+    In general, the SVG element class should contain "o_ignore_content"
+    to prevent issues during the editor's split process. -->
+<svg class="o_ignore_content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 616.62 31.57"
     stroke-width="var(--text-highlight-width)"
     stroke="var(--text-highlight-color)"
     fill="none">
-    <path d="M0 49L800 49" stroke-linecap="round" stroke-linejoin="miter"/>
+    <path class="uuid-c7d519e3-4f73-41d9-be52-ede288a03eb8" d="m616.12,31.07c-25.64,0-25.64-30.57-51.29-30.57-25.65,0-25.65,30.57-51.29,30.57-25.65,0-25.65-30.57-51.3-30.57-25.63,0-25.63,30.57-51.27,30.57-25.64,0-25.64-30.57-51.29-30.57-25.64,0-25.64,30.57-51.29,30.57-25.64,0-25.64-30.57-51.29-30.57-25.65,0-25.65,30.57-51.3,30.57-25.66,0-25.66-30.57-51.32-30.57-25.65,0-25.65,30.57-51.3,30.57-25.67,0-25.67-30.57-51.34-30.57S26.17,31.07.5,31.07"/>
+
 </svg>
