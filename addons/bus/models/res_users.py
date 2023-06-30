@@ -23,6 +23,7 @@ class ResUsers(models.Model):
             FROM bus_presence
             WHERE user_id IN %s
         """, ("%s seconds" % DISCONNECTION_TIMER, "%s seconds" % AWAY_TIMER, tuple(self.ids)))
+        # breakpoint()
         res = dict(((status['id'], status['status']) for status in self.env.cr.dictfetchall()))
         for user in self:
             user.im_status = res.get(user.id, 'offline')

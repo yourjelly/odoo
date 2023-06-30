@@ -32,9 +32,11 @@ class User(models.Model):
         ]
 
     def _compute_im_status(self):
+        print("\n\n\nCompute Called------\n\n",self,"\n\n"  )
         super(User, self)._compute_im_status()
         on_leave_user_ids = self._get_on_leave_ids()
         for user in self:
+            breakpoint()
             if user.id in on_leave_user_ids:
                 if user.im_status == 'online':
                     user.im_status = 'leave_online'
@@ -49,6 +51,7 @@ class User(models.Model):
         field = 'partner_id' if partner else 'id'
         self.flush_model(['active'])
         self.env['hr.leave'].flush_model(['user_id', 'state', 'date_from', 'date_to'])
+        # breakpoint()
         self.env.cr.execute('''SELECT res_users.%s FROM res_users
                             JOIN hr_leave ON hr_leave.user_id = res_users.id
                             AND state = 'validate'

@@ -330,6 +330,7 @@ export class Thread {
     }
 
     get offlineMembers() {
+        debugger;
         const orderedOnlineMembers = [];
         for (const member of this.channelMembers) {
             if (member.persona.im_status !== "online") {

@@ -24,6 +24,7 @@ patch(PersonaService.prototype, "hr_holidays", {
         }
         const currentDate = new Date();
         const date = deserializeDateTime(persona.out_of_office_date_end);
+        console.log(date);
         // const options = { day: "numeric", month: "short" };
         if (currentDate.getFullYear() !== date.year) {
             // options.year = "numeric";

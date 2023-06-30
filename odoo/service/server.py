@@ -417,7 +417,7 @@ class ThreadedServer(CommonServer):
                 # websocket requests excluded.
                 if getattr(thread, 'start_time', None):
                     thread_execution_time = time.time() - thread.start_time
-                    thread_limit_time_real = config['limit_time_real']
+                    thread_limit_time_real = 0
                     if (getattr(thread, 'type', None) == 'cron' and
                             config['limit_time_real_cron'] and config['limit_time_real_cron'] > 0):
                         thread_limit_time_real = config['limit_time_real_cron']
