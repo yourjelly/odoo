@@ -60,8 +60,8 @@ class MailComposer(models.TransientModel):
                 )
             )
         # deprecated record context management
-        if 'default_res_id' in self.env.context:
-            raise ValueError(_("Deprecated usage of 'default_res_id', should use 'default_res_ids'."))
+        # if 'default_res_id' in self.env.context:
+        #     raise ValueError(_("Deprecated usage of 'default_res_id', should use 'default_res_ids'."))
 
         result = super().default_get(fields_list)
 
