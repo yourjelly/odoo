@@ -181,8 +181,9 @@ class AccountChartTemplate(models.AbstractModel):
         if reload_template:
             self._pre_reload_data(company, template_data, data)
             install_demo = False
-        data = self._pre_load_data(template_code, company, template_data, data)
-        self._load_data(data)
+        else:
+            data = self._pre_load_data(template_code, company, template_data, data)
+            self._load_data(data)
         self._load_translations(companies=company)
         self._post_load_data(template_code, company, template_data)
 
