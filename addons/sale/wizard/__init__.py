@@ -8,3 +8,4 @@ from . import res_config_settings
 from . import sale_make_invoice_advance
 from . import sale_order_cancel
 from . import mass_cancel_orders
+from . import sale_order_discount_wizard
