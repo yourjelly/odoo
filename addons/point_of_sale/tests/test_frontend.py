@@ -86,7 +86,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
 
         # Archive all existing product to avoid noise during the tours
         all_pos_product = env['product.product'].search([('available_in_pos', '=', True)])
-        discount = env.ref('point_of_sale.product_product_consumable')
+        discount = env.ref('product.product_product_consumable')
         cls.tip = env.ref('point_of_sale.product_product_tip')
         (all_pos_product - discount - cls.tip)._write({'active': False})
 
@@ -334,7 +334,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'fixed_price': 2,
                 'applied_on': '0_product_variant',
                 'min_quantity': 2,
-                'product_id': env.ref('point_of_sale.product_product_consumable').id,
+                'product_id': env.ref('product.product_product_consumable').id,
             })],
         })
 
