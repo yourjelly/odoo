@@ -190,10 +190,6 @@ $input-border-radius: o-website-value('input-border-radius') !default;
 $input-border-radius-lg: o-website-value('input-border-radius-lg') !default;
 $input-border-radius-sm: o-website-value('input-border-radius-sm') !default;
 
-// Badge
-$badge-padding-y: 0.25em !default;
-$badge-padding-x: 0.4em !default;
-
 // Breadcrumbs
 $breadcrumb-padding-y: .75rem !default;
 $breadcrumb-padding-x: 1rem !default;
@@ -252,6 +248,11 @@ $accordion-button-active-color: color-contrast($light) !default;
 $accordion-button-focus-box-shadow: none !default;
 $accordion-icon-color: $body-color !default;
 $accordion-icon-active-color: $accordion-button-active-color !default;
+
+// Badge
+$badge-padding-y: .3em !default; // Ensure circle(-ish) badges for 1 digit numbers
+$badge-padding-x: .6em !default; // " "
+$badge-border-radius: $border-radius-pill !default;
 
 //Popover
 $popover-bg: $body-bg !default;
