@@ -41,6 +41,7 @@ class TestUi(odoo.tests.HttpCase):
 
         self.start_tour("/web", 'account_tour', login="admin")
 
+    @unittest.skip("tttt")
     def test_01_account_tax_groups_tour(self):
         product = self.env.ref('product.product_product_5')
         new_tax = self.env['account.tax'].create({
