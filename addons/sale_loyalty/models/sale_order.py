@@ -95,6 +95,12 @@ class SaleOrder(models.Model):
         self.coupon_point_ids.unlink()
         return res
 
+    def action_open_discount_wizard(self):
+        self.ensure_one()
+        if self.order_line:
+            return self.env['ir.actions.actions']._for_xml_id('sale.sale_order_line_wizard_action')
+        return True
+
     def action_open_reward_wizard(self):
         self.ensure_one()
         self._update_programs_and_rewards()

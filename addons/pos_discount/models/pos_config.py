@@ -22,7 +22,7 @@ class PosConfig(models.Model):
             .mapped('config_id')
         )
         # Do not modify configs where an opened session exists.
-        product = self.env.ref("point_of_sale.product_product_consumable", raise_if_not_found=False)
+        product = self.env.ref("product.product_product_consumable", raise_if_not_found=False)
         for conf in (configs - open_configs):
             conf.discount_product_id = product if conf.module_pos_discount and product and (not product.company_id or product.company_id == conf.company_id) else False
 
