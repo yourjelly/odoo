@@ -455,6 +455,12 @@ actual arch.
                 err.context = getattr(e, 'context', None)
                 raise err from None
 
+            for bn in combined_arch.xpath('//button[@context]'):
+                if 'active_id' in bn.attrib.get("context") or "":
+                    _logger.warning("Deprecated use of 'active_id' in view button context: %s (%s)\n%s",
+                        view, view.xml_id, str(etree.tostring(bn), "utf-8"),
+                    )
+
             try:
                 # verify that all fields used are valid, etc.
                 view._validate_view(combined_arch, view.model)
