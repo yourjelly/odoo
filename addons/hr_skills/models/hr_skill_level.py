@@ -10,6 +10,7 @@ class SkillLevel(models.Model):
     _description = "Skill Level"
     _order = "level_progress desc"
 
+    active = fields.Boolean('Active', default=True)
     skill_type_id = fields.Many2one('hr.skill.type', ondelete='cascade')
     name = fields.Char(required=True)
     level_progress = fields.Integer(string="Progress", help="Progress from zero knowledge (0%) to fully mastered (100%).")
