@@ -2775,13 +2775,20 @@ class Model(models.AbstractModel):
         An optional access_uid holds the user that will access the document
         that could be different from the current user. """
         view_id = self.sudo().get_formview_id(access_uid=access_uid)
+        context = dict(self._context)
+
+        # ensure that active_{id,ids,model} are not reflected back, those should
+        # be evaluated on client-side only
+        for backlisted_field in ('active_id', 'active_ids', 'active_model'):
+            context.pop(backlisted_field, None)
+
         return {
             'type': 'ir.actions.act_window',
             'res_model': self._name,
             'views': [(view_id, 'form')],
             'target': 'current',
             'res_id': self.id,
-            'context': dict(self._context),
+            'context': context,
         }
 
     @api.model
