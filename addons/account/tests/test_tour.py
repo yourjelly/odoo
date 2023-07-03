@@ -37,6 +37,5 @@ class TestUi(odoo.tests.HttpCase):
 
         self.start_tour("/web", 'account_tour', login="admin")
 
-    @unittest.skip("tttt")
     def test_01_account_tax_groups_tour(self):
         self.start_tour("/web", 'account_tax_group', login="admin")
