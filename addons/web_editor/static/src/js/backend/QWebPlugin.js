@@ -2,6 +2,42 @@
 
 import { ancestors } from '@web_editor/js/common/wysiwyg_utils';
 
+const getBoundingClientRect = Element.prototype.getBoundingClientRect;
+
+function getFirstSizedElement(element) {
+    const rect = getBoundingClientRect.call(element);
+    if (!rect.height || ! rect.width) {
+        if (getComputedStyle(element).display === "contents") {
+            for (const child of element.children) {
+                const subElem = getFirstSizedElement(child);
+                if (subElem) {
+                    return subElem;
+                }
+            }
+        } else {
+            return getFirstSizedElement(element.parentElement);
+        }
+    }
+    return element;
+}
+
+// Provided in same document and an positioned element exists
+// and is relevant (actually has scroll) in the parents of refParent
+// TODO: support in Iframe
+// TODO (priority): this is a Popover case, hence it should use Popover
+function isElementTopVisible(element, refParent) {
+    const offsetParent = refParent.offsetParent;
+    const parRect = getBoundingClientRect.call(offsetParent);
+    let elRect = getBoundingClientRect.call(element);
+
+    if (elRect.height === 0 || elRect.width === 0) {
+        element = getFirstSizedElement(element)
+        elRect = getBoundingClientRect.call(element);
+    }
+    return elRect.top > parRect.top && elRect.top < parRect.bottom;
+}
+
+
 export class QWebPlugin {
     constructor(options = {}) {
         this._options = options;
@@ -141,7 +177,8 @@ export class QWebPlugin {
     _showBranchingSelection(target) {
         this._hideBranchingSelection();
 
-        const branchingHierarchyElements = [target, ...ancestors(target, this._editable)]
+        const editable = this._options.editor.editable;
+        const branchingHierarchyElements = [target, ...ancestors(target, editable)]
             .filter(element => element.getAttribute('data-oe-t-group-active') === 'true')
             .filter(element => {
                 const itemGroupId = element.getAttribute('data-oe-t-group');
@@ -150,7 +187,7 @@ export class QWebPlugin {
                     `[data-oe-t-group='${itemGroupId}']`,
                 );
                 return groupItemsNodes.length > 1;
-            });
+            }).filter(el => isElementTopVisible(el, editable));
 
         if (!branchingHierarchyElements.length) return;
 
@@ -183,8 +220,10 @@ export class QWebPlugin {
         const localWindow = doc.defaultView;
         localWindow.addEventListener('scroll', this._hideBranchingSelection);
 
-        const box = target.getBoundingClientRect();
-        const selBox = this._selectElWrapper.getBoundingClientRect();
+        target = getFirstSizedElement(target);
+
+        const box = getBoundingClientRect.call(target);
+        const selBox = getBoundingClientRect.call(this._selectElWrapper);
 
         this._selectElWrapper.style.left = `${localWindow.scrollX + box.left}px`;
 
