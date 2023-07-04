@@ -1141,6 +1141,8 @@ const Wysiwyg = Widget.extend({
                         $nodes.addClass('o_editable_date_field_format_changed');
                     }
                     const html = $node.html();
+                    const removed = document.createElement("t")
+                    removed.setAttribute("oe-wysiwyg-sync", "1")
                     for (const node of $nodes) {
                         if (node.classList.contains('o_translation_without_style')) {
                             // For generated elements such as the navigation
@@ -1153,6 +1155,8 @@ const Wysiwyg = Widget.extend({
                             continue;
                         }
                         if (node.innerHTML !== html) {
+                            removed.append(...node.childNodes)
+                            node.setAttribute("oe-wysiwyg-sync", "1")
                             node.innerHTML = html;
                         }
                     }

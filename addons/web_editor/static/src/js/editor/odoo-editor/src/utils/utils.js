@@ -1304,6 +1304,10 @@ export function isUnbreakable(node) {
 }
 
 export function isUnremovable(node) {
+    const closestEl = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+    if (closestEl && closestEl.closest("[oe-wysiwyg-sync]")) {
+        return false;
+    }
     return (
         (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) ||
         node.oid === 'root' ||
@@ -1383,6 +1387,11 @@ export function containsUnremovable(node) {
     if (!node) {
         return false;
     }
+    const closestEl = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+    if (closestEl && closestEl.closest("[oe-wysiwyg-sync]")) {
+        return false;
+    }
+
     return isUnremovable(node) || containsUnremovable(node.firstChild);
 }
 
