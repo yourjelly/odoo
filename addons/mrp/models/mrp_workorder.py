@@ -274,13 +274,7 @@ class MrpWorkorder(models.Model):
             raise ValidationError(_("You cannot create cyclic dependency."))
 
     def name_get(self):
-        res = []
-        for wo in self:
-            if len(wo.production_id.workorder_ids) == 1:
-                res.append((wo.id, "%s - %s - %s" % (wo.production_id.name, wo.product_id.name, wo.name)))
-            else:
-                res.append((wo.id, "%s - %s - %s - %s" % (wo.production_id.workorder_ids.ids.index(wo._origin.id) + 1, wo.production_id.name, wo.product_id.name, wo.name)))
-        return res
+        return [(wo.id, "%s - %s" % (wo.production_id.name, wo.name)) for wo in self]
 
     def unlink(self):
         # Removes references to workorder to avoid Validation Error
