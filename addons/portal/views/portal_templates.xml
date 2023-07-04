@@ -314,7 +314,7 @@
                         <span class="small me-1 navbar-text">Group By:</span>
                         <div class="btn-group">
                             <button id="portal_searchbar_groupby" data-bs-toggle="dropdown" class="btn btn-secondary btn-sm dropdown-toggle">
-                                <t t-esc="searchbar_groupby[groupby].get('label', 'None')"/>
+                                <t t-esc="searchbar_groupby.get(groupby, {}).get('label', 'None')"/>
                             </button>
                             <div class="dropdown-menu" aria-labelledby="portal_searchbar_groupby">
                                 <t t-foreach="searchbar_groupby" t-as="option">
