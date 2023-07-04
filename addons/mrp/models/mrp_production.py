@@ -1166,6 +1166,11 @@ class MrpProduction(models.Model):
         parent_moves = self.procurement_group_id.stock_move_ids.move_dest_ids
         return (dest_moves | parent_moves).group_id.mrp_production_ids.filtered(lambda p: p.origin != self.origin) - self
 
+    def set_qty_producing(self):
+        # This method is used to call `_set_lot_producing` when the onchange doesn't apply.
+        self.ensure_one()
+        self._set_qty_producing()
+
     def _set_lot_producing(self):
         self.ensure_one()
         if self.product_id.tracking == 'lot':
