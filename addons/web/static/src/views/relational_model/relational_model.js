@@ -363,7 +363,10 @@ export class RelationalModel extends Model {
         config.groups = config.groups || {};
         const firstGroupByName = config.groupBy[0].split(":")[0];
         const orderBy = config.orderBy.filter(
-            (o) => o.name === firstGroupByName || config.fields[o.name].group_operator !== undefined
+            (o) =>
+                o.name === firstGroupByName ||
+                (o.name in config.activeFields &&
+                    config.fields[o.name].group_operator !== undefined)
         );
         const response = await this._webReadGroup(config, firstGroupByName, orderBy);
         const { groups, length } = response;
