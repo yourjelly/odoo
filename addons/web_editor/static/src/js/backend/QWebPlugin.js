@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { ancestors } from '@web_editor/js/common/wysiwyg_utils';
+import { throttleForAnimation } from '@web/core/utils/timing';
 
 const getBoundingClientRect = Element.prototype.getBoundingClientRect;
 
@@ -218,7 +219,14 @@ export class QWebPlugin {
     _updateBranchingSelectionPosition(target) {
         const doc = this._document;
         const localWindow = doc.defaultView;
-        localWindow.addEventListener('scroll', this._hideBranchingSelection);
+        // provided  offsetParent is relevant
+        const editableOffsetParent = this._options.editor.editable.offsetParent;
+
+        const onScroll = throttleForAnimation(() => {
+            editableOffsetParent.removeEventListener("scroll", onScroll)
+            this._hideBranchingSelection()
+        })
+        editableOffsetParent.addEventListener('scroll', onScroll);
 
         target = getFirstSizedElement(target);
 
@@ -269,6 +277,5 @@ export class QWebPlugin {
     _hideBranchingSelection() {
         this._selectElWrapper.style.display = 'none';
         this._selectElWrapper.innerHTML = ``;
-        window.removeEventListener('mousewheel', this._hideBranchingSelection);
     }
 }
