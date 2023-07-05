@@ -51,6 +51,7 @@ class TestProjectPurchaseProfitability(TestProjectProfitabilityCommon, TestPurch
             'account_id': self.analytic_account.id,
             'amount': -100,
         }])
+        self.maxDiff = None
         # the bill_1 is in draft, therefore it should have the cost "to_bill" same as the -product_price (untaxed)
         self.assertDictEqual(
             self.project._get_profitability_items(False)['costs'],
@@ -212,7 +213,7 @@ class TestProjectPurchaseProfitability(TestProjectProfitabilityCommon, TestPurch
                 }, {
                     'id': 'purchase_order',
                     'sequence': self.project._get_profitability_sequence_per_invoice_type()['purchase_order'],
-                    'to_bill': 0.0,
+                    'to_bill': -98.7,
                     'billed': -self.product_order.standard_price * analytic_contribution,
                 }, {
                     'id': 'other_purchase_costs',
@@ -221,7 +222,7 @@ class TestProjectPurchaseProfitability(TestProjectProfitabilityCommon, TestPurch
                     'billed': -2 * (self.product_a.standard_price + self.product_b.standard_price) * analytic_contribution,
                 }],
                 'total': {
-                    'to_bill': 0.0,
+                    'to_bill': -98.7,
                     'billed': -(2 * self.product_a.standard_price +
                                 2 * self.product_b.standard_price +
                                 self.product_order.standard_price) * analytic_contribution - 150,
@@ -289,11 +290,11 @@ class TestProjectPurchaseProfitability(TestProjectProfitabilityCommon, TestPurch
                 'data': [{
                     'id': 'purchase_order',
                     'sequence': self.project._get_profitability_sequence_per_invoice_type()['purchase_order'],
-                    'to_bill': 0.0,
+                    'to_bill': -141.0,
                     'billed': -(self.product_order.standard_price * (analytic_ratios["project_ratio"] / 100)),
                 }],
                 'total': {
-                    'to_bill': 0.0,
+                    'to_bill': -141.0,
                     'billed': -(self.product_order.standard_price * (analytic_ratios["project_ratio"] / 100)),
                 },
             },

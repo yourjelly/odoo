@@ -121,6 +121,7 @@ class Project(models.Model):
         return sequence_per_invoice_type
 
     def _get_profitability_items(self, with_action=True):
+        # breakpoint()
         profitability_items = super()._get_profitability_items(with_action)
         if self.analytic_account_id:
             query = self.env['purchase.order.line'].sudo()._search([
@@ -155,7 +156,13 @@ class Project(models.Model):
                     if pol_read['qty_to_invoice'] > 0:
                         amount_to_invoice -= price_unit * pol_read['qty_to_invoice'] * analytic_contribution
                     else:
-                        amount_to_invoice -= price_unit * (pol_read['product_uom_qty'] - pol_read['qty_invoiced']) * analytic_contribution
+                        amount_invoiced = 0.0
+                        if pol_read['invoice_lines']:
+                            for invoice_line in pol_read['invoice_lines']:
+                                invoice_analytic_contribution = invoice_line['analytic_distribution'][str(self.analytic_account_id.id)] / 100.
+                                amount_invoiced -= invoice_line.price_total * invoice_analytic_contribution
+                        else:
+                            amount_to_invoice += price_unit * (pol_read['product_uom_qty'] - pol_read['qty_invoiced']) * analytic_contribution
                     purchase_order_line_ids.append(pol_read['id'])
                 costs = profitability_items['costs']
                 section_id = 'purchase_order'
