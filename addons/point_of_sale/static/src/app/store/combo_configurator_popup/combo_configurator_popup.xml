@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+
+    <t t-name="point_of_sale.ComboConfiguratorPopup" owl="1">
+        <div class="popup popup-text popup-med product-configurator-popup">
+            <header class="title">
+            Choose a Combo
+            </header>
+
+            <main class="body product_configurator_attributes col-lg-4 col-md-6 col-sm-12">
+                <t t-foreach="props.product.combo_ids" t-as="combo_id" t-key="combo_id">
+                    <t t-set="combo" t-value="pos.db.combo_by_id[combo_id]"/>
+                    <h3 t-esc="combo.name"/>
+                    <t t-foreach="combo.combo_product_ids" t-as="combo_product_id" t-key="combo_product_id">
+                        <t 
+                            t-set="combo_product" 
+                            t-value="pos.db.combo_product_by_id[combo_product_id]"
+                            />
+                        <t 
+                            t-set="product" 
+                            t-value="pos.db.product_by_id[combo_product.product_id[0]]"
+                            />
+                        <label 
+                            t-attf-for="combo-{{combo_id}}-combo_product-{{combo_product_id}}"
+                            t-esc="product.display_name"
+                            />
+                        <input 
+                            type="radio" 
+                            t-attf-name="combo-{{combo_id}}" 
+                            t-attf-id="combo-{{combo_id}}-combo_product-{{combo_product_id}}"
+                            t-attf-value="{{product.id}}" 
+                            t-model="state.combo[combo_id]"
+                            />
+                    </t>
+                </t>
+                <div >
+                </div>
+            </main>
+
+            <footer class="footer footer-flex">
+                <div class="button highlight confirm" t-on-click="confirm">
+                        Add
+                </div>
+                <div class="button cancel" t-on-click="cancel">
+                        Cancel
+                </div>
+            </footer>
+        </div>
+    </t>
+</templates>

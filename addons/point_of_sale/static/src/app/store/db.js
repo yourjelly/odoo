@@ -48,6 +48,9 @@ export class PosDB {
         this.category_childs = {};
         this.category_parent = {};
         this.category_search_string = {};
+
+        this.combo_by_id = {};
+        this.combo_product_by_id = {};
     }
 
     /**
@@ -173,6 +176,19 @@ export class PosDB {
             }
         }
     }
+
+    add_combos(combos) {
+        combos.forEach((combo) => {
+            this.combo_by_id[combo.id] = combo;
+        });
+    }
+
+    add_combo_products(combo_products) {
+        combo_products.forEach((combo_product) => {
+            this.combo_product_by_id[combo_product.id] = combo_product;
+        });
+    }
+
     /* loads a record store from the database. returns default if nothing is found */
     load(store, deft) {
         if (CACHE[store] !== undefined) {

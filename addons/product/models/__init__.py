@@ -13,6 +13,8 @@ from . import product_attribute
 from . import product_attribute_custom_value
 from . import product_attribute_value
 from . import product_category
+from . import product_combo
+from . import product_combo_item
 from . import product_packaging
 from . import product_pricelist
 from . import product_pricelist_item

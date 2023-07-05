@@ -148,6 +148,8 @@ class ProductTemplate(models.Model):
         comodel_name='product.tag',
         relation='product_tag_product_template_rel',
     )
+    
+    combo_ids = fields.Many2many('product.combo', string='Combinations')
 
     def _compute_item_count(self):
         for template in self:

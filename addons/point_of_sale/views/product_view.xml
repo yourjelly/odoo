@@ -85,9 +85,15 @@
     <menuitem id="pos_config_menu_action_product_product"
         name="Product Variants"
         parent="point_of_sale.pos_config_menu_catalog"
-        action="product_product_action"
+        action="product_product_action"                                                           
         groups="product.group_product_variant"
         sequence="10"/>
+    <menuitem 
+        id="menu_product_combo" 
+        name="Product Combos" 
+        parent="point_of_sale.pos_config_menu_catalog" 
+        sequence="15" 
+        action="product.action_product_combo" />
     <menuitem id="pos_config_menu_action_product_pricelist"
         parent="point_of_sale.pos_config_menu_catalog"
         action="product.product_pricelist_action2"

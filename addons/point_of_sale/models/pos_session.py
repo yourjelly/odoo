@@ -1662,6 +1662,10 @@ class PosSession(models.Model):
             'product.pricelist',
             'res.currency',
             'pos.category',
+
+            # 'pos.combo',
+            # 'pos.combo.product',
+
             'product.product',
             'product.packaging',
             'account.cash.rounding',
@@ -1922,6 +1926,18 @@ class PosSession(models.Model):
     def _get_pos_ui_pos_category(self, params):
         return self.env['pos.category'].search_read(**params['search_params'])
 
+    # def _loader_params_pos_combo(self):
+    #     return {'search_params': {'domain': [], 'fields': ['id', 'name', 'combo_product_ids']}}
+
+    # def _get_pos_ui_pos_combo(self, params):
+    #     return self.env['pos.combo'].search_read(**params['search_params'])
+
+    # def _loader_params_pos_combo_product(self):
+    #     return {'search_params': {'domain': [], 'fields': ['id', 'product_id', 'price']}}
+
+    # def _get_pos_ui_pos_combo_product(self, params):
+    #     return self.env['pos.combo.product'].search_read(**params['search_params'])
+
     def _loader_params_product_product(self):
         return {
             'search_params': {
@@ -1929,7 +1945,7 @@ class PosSession(models.Model):
                 'fields': [
                     'display_name', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'barcode',
                     'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'product_tmpl_id', 'tracking',
-                    'write_date', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128'
+                    'write_date', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids'
                 ],
                 'order': 'sequence,default_code,name',
             },

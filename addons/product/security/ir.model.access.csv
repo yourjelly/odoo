@@ -15,6 +15,14 @@ access_product_template_attribute_exclusion,product..template.attribute exclusio
 access_product_template_attribute_line,product.template.attribute line,model_product_template_attribute_line,base.group_user,1,0,0,0
 access_product_tag_user,product.tag.user,model_product_tag,base.group_user,1,0,0,0
 access_product_category_manager,product.category.manager,model_product_category,base.group_system,1,1,1,1
+
+
+
+access_product_combo_user,product.combo_user,model_product_combo,base.group_user,1,1,1,1
+
+access_product_combo_item_user,product.combo.item_user,model_product_combo_item,base.group_user,1,1,1,1
+
+
 access_product_template_manager,product.template.manager,model_product_template,base.group_system,1,1,1,1
 access_product_packaging_manager,product.packaging.manager,model_product_packaging,base.group_system,1,1,1,1
 access_product_supplierinfo_manager,product.supplierinfo.manager,model_product_supplierinfo,base.group_system,1,1,1,1

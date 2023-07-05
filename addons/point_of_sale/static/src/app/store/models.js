@@ -12,6 +12,7 @@ import {
 } from "@web/core/utils/numbers";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
 import { ProductConfiguratorPopup } from "@point_of_sale/app/store/product_configurator_popup/product_configurator_popup";
+import { ComboConfiguratorPopup } from "./combo_configurator_popup/combo_configurator_popup";
 import { EditListPopup } from "@point_of_sale/app/store/select_lot_popup/select_lot_popup";
 import { ConfirmPopup } from "@point_of_sale/app/utils/confirm_popup/confirm_popup";
 import { sprintf } from "@web/core/utils/strings";
@@ -116,6 +117,7 @@ export class Product extends PosModel {
         let price_extra = 0.0;
         let draftPackLotLines, weight, description, packLotLinesToEdit;
         let quantity = 1;
+        let combo_product_ids = [];
 
         if (this.attribute_line_ids.some((id) => id in this.pos.attributes_by_ptal_id)) {
             const attributes = this.attribute_line_ids
@@ -139,6 +141,20 @@ export class Product extends PosModel {
                 return;
             }
         }
+
+        if (this.combo_ids.length) {
+            const { confirmed, payload } = await this.env.services.popup.add(
+                ComboConfiguratorPopup,
+                {
+                    product: this,
+                }
+            );
+            if (!confirmed) {
+                return;
+            }
+            combo_product_ids = payload;
+        }
+
         // Gather lot information if required.
         if (
             ["serial", "lot"].includes(this.tracking) &&
@@ -221,7 +237,14 @@ export class Product extends PosModel {
             weight = this.pos.db.product_packaging_by_barcode[code.code].qty;
         }
 
-        return { draftPackLotLines, quantity, weight, description, price_extra };
+        return {
+            draftPackLotLines,
+            quantity,
+            weight,
+            description,
+            price_extra,
+            combo_product_ids,
+        };
     }
     isPricelistItemUsable(item, date) {
         const categories = this.parent_category_ids.concat(this.categ.id);

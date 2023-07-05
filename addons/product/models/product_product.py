@@ -60,6 +60,7 @@ class ProductProduct(models.Model):
 
     pricelist_item_count = fields.Integer("Number of price rules", compute="_compute_variant_item_count")
 
+
     packaging_ids = fields.One2many(
         'product.packaging', 'product_id', 'Product Packages',
         help="Gives the different ways to package the same product.")

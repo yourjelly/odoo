@@ -241,6 +241,11 @@ export class PosStore extends Reactive {
         this.default_pricelist = loadedData["default_pricelist"];
         this.currency = loadedData["res.currency"];
         this.db.add_categories(loadedData["pos.category"]);
+
+        // this.db.add_combos(loadedData["pos.combo"], loadedData["pos.combo.product"]);
+        this.db.add_combos(loadedData["pos.combo"]);
+        this.db.add_combo_products(loadedData["pos.combo.product"]);
+
         this._loadProductProduct(loadedData["product.product"]);
         this.db.add_packagings(loadedData["product.packaging"]);
         this.attributes_by_ptal_id = loadedData["attributes_by_ptal_id"];
@@ -1754,6 +1759,17 @@ export class PosStore extends Reactive {
         if (!options) {
             return;
         }
+        options.combo_product_ids.forEach((comboProductId) => {
+            // const product = this.db.get_product_by_id(product);
+            // const options = await product.getAddProductOptions();
+            // if (!options) {
+            //     return;
+            // }
+            // // Add the product after having the extra information.
+            // this.addProductFromUi(product, options);
+            this.addProductToCurrentOrder(comboProductId);
+        });
+
         // Add the product after having the extra information.
         this.addProductFromUi(product, options);
         this.numberBuffer.reset();
