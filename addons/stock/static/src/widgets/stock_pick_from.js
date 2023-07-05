@@ -27,11 +27,11 @@ export class StockPickFrom extends Many2OneField {
         });
     }
     get displayName() {
-        return super.displayName || this._quant_display_name();
+        return this._quant_display_name();
     }
 
     get value() {
-        return super.value || [0, this._quant_display_name()];
+        return [0, this._quant_display_name()];
     }
 
     _quant_display_name() {
@@ -55,7 +55,7 @@ export class StockPickFrom extends Many2OneField {
             if (result) return result;
             return "- no data -";
         }
-        return "";
+        return this.props.record.data.quant_id[1];
     }
 }
 
