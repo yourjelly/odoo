@@ -692,5 +692,31 @@ QUnit.module(
             await nextTick();
             assert.verifySteps(["message"]);
         });
+
+        QUnit.test("do not reconnect after kill switch", async (assert) => {
+            const worker = patchWebsocketWorkerWithCleanup();
+            const env = await makeTestEnv();
+            const disconnectedDeferred = makeDeferred();
+            const connectedDeferred = makeDeferred();
+            env.services.bus_service.addEventListener("connect", () => {
+                assert.step("connect");
+                connectedDeferred.resolve();
+            });
+            env.services.bus_service.addEventListener("disconnect", () => {
+                assert.step("disconnect");
+                disconnectedDeferred.resolve();
+            });
+            env.services.bus_service.addEventListener("reconnecting", () =>
+                assert.step("reconnecting")
+            );
+            env.services.bus_service.start();
+            await connectedDeferred;
+            assert.verifySteps(["connect"]);
+            worker.websocket.close(WEBSOCKET_CLOSE_CODES.KILL_SWITCH);
+            await disconnectedDeferred;
+            assert.verifySteps(["disconnect"]);
+            await nextTick();
+            assert.verifySteps([]);
+        });
     }
 );

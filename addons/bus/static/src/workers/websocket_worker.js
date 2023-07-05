@@ -30,7 +30,7 @@ export const WEBSOCKET_CLOSE_CODES = Object.freeze({
     BAD_GATEWAY: 1014,
     SESSION_EXPIRED: 4001,
     KEEP_ALIVE_TIMEOUT: 4002,
-    RECONNECTING: 4003,
+    KILL_SWITCH: 4003,
 });
 // Should be incremented on every worker update in order to force
 // update of the worker in browser cache.
@@ -309,7 +309,7 @@ export class WebsocketWorker {
             return;
         }
         this.broadcast("disconnect", { code, reason });
-        if (code === WEBSOCKET_CLOSE_CODES.CLEAN) {
+        if ([WEBSOCKET_CLOSE_CODES.CLEAN, WEBSOCKET_CLOSE_CODES.KILL_SWITCH].includes(code)) {
             // WebSocket was closed on purpose, do not try to reconnect.
             return;
         }

@@ -6,6 +6,7 @@ import logging
 import os
 import psycopg2
 import random
+import signal
 import socket
 import struct
 import selectors
@@ -159,6 +160,7 @@ class CloseCode(IntEnum):
     BAD_GATEWAY = 1014
     SESSION_EXPIRED = 4001
     KEEP_ALIVE_TIMEOUT = 4002
+    KILL_SWITCH = 4003
 
 
 class ConnectionState(IntEnum):
@@ -599,11 +601,28 @@ class Websocket:
         self._incoming_frame_timestamps.append(now)
 
     @classmethod
-    def _kick_all(cls):
+    def _kick_all(cls, close_code):
         """ Disconnect all the websocket instances. """
+        print(threading.current_thread())
+        _logger.info("Kicking all websockets with code '%s'", close_code.name)
         for websocket in cls._instances:
             if websocket.state is ConnectionState.OPEN:
-                websocket.disconnect(CloseCode.GOING_AWAY)
+                websocket.disconnect(close_code)
+
+    @classmethod
+    def _dump_stats(cls):
+        """ Print the number of connected websockets and their
+        respective state """
+        count_by_state = defaultdict(int)
+        for websocket in cls._instances:
+            count_by_state[websocket.state] += 1
+        _logger.info(
+            'Number of websockets: %d, Opened: %d, Closing: %d, Closed: %d',
+            len(cls._instances),
+            count_by_state[ConnectionState.OPEN],
+            count_by_state[ConnectionState.CLOSING],
+            count_by_state[ConnectionState.CLOSED]
+        )
 
     def _trigger_lifecycle_event(self, event_type):
         """
@@ -913,4 +932,20 @@ class WebsocketConnectionHandler:
                     _logger.exception("Exception occurred during websocket request handling")
 
 
-CommonServer.on_stop(Websocket._kick_all)
+original_sigquit_handler = signal.getsignal(signal.SIGQUIT)
+original_sigusr2_handler = signal.getsignal(signal.SIGUSR2)
+
+def handle_sigquit(sig, frame):
+    Websocket._dump_stats()
+    if callable(original_sigquit_handler):
+        original_sigquit_handler(sig, frame)
+
+def handle_sigusr2(sig, frame):
+    Websocket._kick_all(CloseCode.KILL_SWITCH)
+    Websocket._dump_stats()
+    if callable(original_sigusr2_handler):
+        original_sigusr2_handler(sig, frame)
+
+signal.signal(signal.SIGQUIT, handle_sigquit)
+signal.signal(signal.SIGUSR2, handle_sigusr2)
+CommonServer.on_stop(lambda: Websocket._kick_all(CloseCode.GOING_AWAY))
