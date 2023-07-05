@@ -9,7 +9,11 @@ class HrEmployeePublic(models.Model):
     # These are required for manual attendance
     attendance_state = fields.Selection(related='employee_id.attendance_state', readonly=True,
         groups="hr_attendance.group_hr_attendance_kiosk,hr_attendance.group_hr_attendance")
+    in_break = fields.Boolean(related='employee_id.in_break', readonly=True,
+                              groups="hr_attendance.group_hr_attendance_kiosk,hr_attendance.group_hr_attendance")
     hours_today = fields.Float(related='employee_id.hours_today', readonly=True,
+        groups="hr_attendance.group_hr_attendance_kiosk,hr_attendance.group_hr_attendance")
+    break_today = fields.Float(related='employee_id.break_today', readonly=True,
         groups="hr_attendance.group_hr_attendance_kiosk,hr_attendance.group_hr_attendance")
     last_attendance_id = fields.Many2one(related='employee_id.last_attendance_id', readonly=True,
         groups="hr_attendance.group_hr_attendance_kiosk,hr_attendance.group_hr_attendance")

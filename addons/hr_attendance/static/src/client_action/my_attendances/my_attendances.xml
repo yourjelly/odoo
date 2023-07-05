@@ -13,14 +13,15 @@
                 <h1 class="mt-5" t-esc="employee.name"/>
                 <h3><t t-if="!checkedIn">Welcome!</t><t t-else="">Want to check out?</t></h3>
                 <h4 class="mt0 mb0 text-muted" t-if="checkedIn">Today's work hours: <span t-esc="hoursToday"/></h4>
+                <h4 class="mt0 mb0 text-muted" t-if="checkedIn">Today's break time: <span t-esc="breakToday"/></h4>
             </div>
 
             <CheckInOut checkedIn="checkedIn" employeeId="employee.id" nextAction="nextAction"/>
+            <BreakInOut breakIn="breakIn" employeeId="employee.id" nextAction="nextAction" t-if="checkedIn"/>
         </t>
         <div t-else="" class="alert alert-warning">
             <b>Warning</b>: Your user should be linked to an employee to use attendance.<br/> Please contact your administrator.
         </div>
     </CardLayout>
 </t>
-
 </templates>

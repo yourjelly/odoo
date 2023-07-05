@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <t t-name="hr_attendance.AttendanceListRenderer" t-inherit="web.ListRenderer" t-inherit-mode="primary" owl="1">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <div style="margin:20px">
+                         <t t-foreach="categories" t-as="category" t-key="category_index">
+            <h2><t t-esc="category"/></h2>
+                <t t-set="line" t-value="data[category]"/>
+                <div class="py-1 px-0 border-top">
+                    <span class="col-md-2 col-form-label text-odoo"><t t-esc="line"/></span>
+                </div>
+        </t>
+            </div>
+        </xpath>
+    </t>
+</odoo>

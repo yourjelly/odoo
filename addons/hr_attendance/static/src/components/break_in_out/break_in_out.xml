@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="hr_attendance.BreakInOut" owl="1">
+    <div class="flex-grow-1">
+        <button t-on-click="() => this.onClickBreakInOut()" t-attf-class="o_hr_attendance_sign_in_out_icon btn btn-{{ props.checkedIn ? 'warning' : 'success' }} align-self-center px-5 py-3 mt-4 mb-2">
+            <t t-if="!props.breakIn">
+                <span class="align-middle fs-2 me-3 text-white">Take a Break</span>
+            </t>
+            <t t-else="">
+                <span class="align-middle fs-2 ms-3 text-white">Resume Work</span>
+            </t>
+        </button>
+    </div>
+</t>
+
+</templates>

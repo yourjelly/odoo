@@ -19,7 +19,7 @@ from odoo.exceptions import AccessError
 class HrAttendance(models.Model):
     _name = "hr.attendance"
     _description = "Attendance"
-    _order = "check_in desc"
+    _order = "check_in asc"
 
     def _default_employee(self):
         return self.env.user.employee_id
@@ -27,8 +27,15 @@ class HrAttendance(models.Model):
     employee_id = fields.Many2one('hr.employee', string="Employee", default=_default_employee, required=True, ondelete='cascade', index=True)
     department_id = fields.Many2one('hr.department', string="Department", related="employee_id.department_id",
         readonly=True)
+    attendance_day_id = fields.Many2one('hr.attendance.day')
     check_in = fields.Datetime(string="Check In", default=fields.Datetime.now, required=True)
     check_out = fields.Datetime(string="Check Out")
+    type = fields.Selection(
+        string="Attendance Type",
+        selection=[('work', "Work"), ('break', "Break"), ('out', 'Out')],
+        default='work',
+        groups="hr_attendance.group_hr_attendance_kiosk,hr_attendance.group_hr_attendance,hr.group_hr_user")
+    comment = fields.Html(string="Comment")
     worked_hours = fields.Float(string='Worked Hours', compute='_compute_worked_hours', store=True, readonly=True)
 
     @api.depends('employee_id', 'check_in', 'check_out')
