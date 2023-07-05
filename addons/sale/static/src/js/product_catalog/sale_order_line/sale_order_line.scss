@@ -10,8 +10,7 @@ div.o_sale_product_catalog_quantity {
     }
 }
 
-// Keeping this here until rd-design make a global class for this color.
-button.o_sale_product_catalog_add_to_cart {
-    background-color: #017e84;
-    color: RGBA(255, 255, 255, var(--text-opacity, 1));
+.o_sale_product_kanban_view .o_kanban_renderer .o_kanban_record .o_sale_product_added {
+    background-color: $o-component-active-bg;
+    border-color: $o-component-active-border;
 }
