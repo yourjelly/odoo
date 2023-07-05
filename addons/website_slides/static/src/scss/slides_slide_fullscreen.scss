@@ -50,6 +50,7 @@
         @include media-breakpoint-down (md) {
             @include o-position-absolute(0, auto, 0, 0);
             box-shadow: 5px 0 15px rgba(black, 0.2);
+            width: 100%;
 
             &.o_wslides_fs_sidebar_hidden {
                 display: none;
