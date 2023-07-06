@@ -14,7 +14,7 @@ import surveySessionTools from "@survey/../tests/tours/survey_tour_session_tools
  */
 const getChartData = () => {
     const chartData = [];
-    const rootWidget = odoo.__DEBUG__.services['root.widget'];
+    const rootWidget = odoo.loader.modules.get('root.widget');
     const surveyManagePublicWidget = rootWidget.publicWidgets.find((widget) => {
         return widget.$el.hasClass('o_survey_session_manage');
     });

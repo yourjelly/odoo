@@ -231,19 +231,10 @@
     const loader = new ModuleLoader();
     odoo.define = loader.define.bind(loader);
 
-    // debug
-    odoo.__DEBUG__ = {};
     odoo.loader = loader;
 
-    odoo.ready = async function (str) {
+    odoo.waitTick = async function () {
         return Promise.resolve();
-    };
-
-    odoo.runtimeImport = function (moduleName) {
-        if (!loader.modules.has(moduleName)) {
-            throw new Error(`Service "${moduleName} is not defined or isn't finished loading."`);
-        }
-        return loader.modules.get(moduleName);
     };
 
     // todo: move this in test assets somewhere

@@ -218,7 +218,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
         });
     },
     load_qweb: async function () {
-        await odoo.ready(/\.bundle\.xml$/);
+        await odoo.waitTick();
     },
     get_currency: function (currency_id) {
         return this.currencies[currency_id];

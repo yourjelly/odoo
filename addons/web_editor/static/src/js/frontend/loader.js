@@ -28,12 +28,8 @@ exports.createWysiwyg = async (parent, options = {}) => {
 };
 
 export async function getWysiwygClass({moduleName = '@web_editor/js/wysiwyg/wysiwyg', additionnalAssets = []} = {}) {
-    if (!(await odoo.ready(moduleName))) {
-        await loadWysiwyg(additionnalAssets);
-        await odoo.ready(moduleName);
-    }
-    const mod = odoo.__DEBUG__.services[moduleName]
-    return mod[Symbol.for('default')] || mod;
+    await loadWysiwyg(additionnalAssets);
+    return odoo.loader.modules.get(moduleName)[Symbol.for('default')] || odoo.loader.modules.get(moduleName);
 }
 exports.getWysiwygClass = getWysiwygClass;
 

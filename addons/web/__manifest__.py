@@ -402,6 +402,8 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/src/core/debug/debug_menu.js'),
             ('remove', 'web/static/src/core/file_viewer/file_viewer.dark.scss'),
             ('remove', 'web/static/src/core/emoji_picker/emoji_data.js'),
+            'web/static/src/core/commands/default_providers.js',
+            'web/static/src/core/commands/command_palette.js',
             'web/static/src/public/error_notifications.js',
 
             'web/static/src/legacy/utils.js',
