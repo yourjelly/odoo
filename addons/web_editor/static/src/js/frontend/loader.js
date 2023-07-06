@@ -32,8 +32,7 @@ export async function getWysiwygClass({moduleName = '@web_editor/js/wysiwyg/wysi
         await loadWysiwyg(additionnalAssets);
         await odoo.ready(moduleName);
     }
-    const mod = odoo.__DEBUG__.services[moduleName]
-    return mod[Symbol.for('default')] || mod;
+    return odoo.loader.modules.get(moduleName);
 }
 exports.getWysiwygClass = getWysiwygClass;
 

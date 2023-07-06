@@ -47,8 +47,8 @@
             actionCount++;
         });
 
-        const { patch } = odoo.__DEBUG__.services["@web/core/utils/patch"];
-        const { WithSearch } = odoo.__DEBUG__.services["@web/search/with_search/with_search"];
+        const { patch } = odoo.loader.modules.get("@web/core/utils/patch");
+        const { WithSearch } = odoo.loader.modules.get("@web/search/with_search/with_search");
 
         patch(WithSearch.prototype, "PatchedWithSearch", {
             setup() {
@@ -65,7 +65,7 @@
 
         // This test file is not respecting Odoo module dependencies.
         // The following module might not be loaded (eg. if mail is not installed).
-        const DiscussWidgetModule = odoo.__DEBUG__.services["@mail/widgets/discuss/discuss"];
+        const DiscussWidgetModule = odoo.loader.modules.get("@mail/widgets/discuss/discuss");
         const DiscussWidget = DiscussWidgetModule && DiscussWidgetModule[Symbol.for("default")];
         if (DiscussWidget) {
             DiscussWidget.include({
