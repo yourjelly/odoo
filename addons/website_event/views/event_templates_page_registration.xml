@@ -84,7 +84,7 @@
                             }'/>
                             <div class="mb-3" t-field="event.address_id" t-options='{
                                 "widget": "contact",
-                                "fields": ["phone", "mobile", "email"]
+                                "fields": ["phone", "email"]
                             }'/>
                             <i class="fa fa-map-marker fa-fw" role="img"/>
                             <a t-att-href="event._google_map_link()" target="_blank">Get the direction</a>
@@ -93,7 +93,7 @@
                         <div t-if="event.organizer_id" class="o_wevent_sidebar_block">
                             <h6 class="o_wevent_sidebar_title">Organizer</h6>
                             <h4 t-field="event.organizer_id"/>
-                            <div itemprop="location" t-field="event.organizer_id" t-options="{'widget': 'contact', 'fields': ['phone', 'mobile', 'email']}"/>
+                            <div itemprop="location" t-field="event.organizer_id" t-options="{'widget': 'contact', 'fields': ['phone', 'email']}"/>
                         </div>
                         <!-- Social -->
                         <div class="o_wevent_sidebar_block">
@@ -416,7 +416,7 @@
                             }'/>
                         <div itemprop="location" t-field="event.address_id" t-options='{
                             "widget": "contact",
-                            "fields": ["phone", "mobile", "email"]
+                            "fields": ["phone", "email"]
                             }'/>
                     </div>
                     <div id="add_to_calendar" class="mt-4 d-flex flex-column flex-md-row">

@@ -217,7 +217,7 @@ class EventRegistration(models.Model):
         contact_vals.update({
             'name': "%s - %s" % (self.event_id.name, valid_partner.name or self._find_first_notnull('name') or self._find_first_notnull('email')),
             'partner_id': valid_partner.id,
-            'mobile': valid_partner.mobile or self._find_first_notnull('mobile'),
+            'mobile': valid_partner.mobile,
         })
         return contact_vals
 
@@ -308,7 +308,7 @@ class EventRegistration(models.Model):
         """ Get registration fields linked to lead contact. Those are used notably
         to see if an update of lead is necessary or to fill contact values
         in ``_get_lead_contact_values())`` """
-        return ['name', 'email', 'phone', 'mobile', 'partner_id']
+        return ['name', 'email', 'phone', 'partner_id']
 
     @api.model
     def _get_lead_description_fields(self):
@@ -325,8 +325,8 @@ class EventRegistration(models.Model):
 
     def _convert_value(self, value, field_name):
         """ Small tool because convert_to_write is touchy """
-        if value and self._fields[field_name].type in ['many2many', 'one2many']:
+        if isinstance(value, models.BaseModel) and self._fields[field_name].type in ['many2many', 'one2many']:
             return value.ids
-        if value and self._fields[field_name].type == 'many2one':
+        if isinstance(value, models.BaseModel) and self._fields[field_name].type == 'many2one':
             return value.id
         return value

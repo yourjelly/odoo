@@ -101,7 +101,7 @@ class EventCrmCase(TestCrmCommon, EventCase):
         self.assertEqual(lead.partner_name, expected_partner_name)
         self.assertEqual(lead.email_from, partner.email if partner else registrations._find_first_notnull('email'))
         self.assertEqual(lead.phone, partner.phone if partner else registrations._find_first_notnull('phone'))
-        self.assertEqual(lead.mobile, partner.mobile if partner and partner.mobile else registrations._find_first_notnull('mobile'))
+        self.assertEqual(lead.mobile, partner.mobile)
 
         # description: to improve
         self.assertNotIn('False', lead.description)  # avoid a "Dear False" like construct ^^ (this assert is serious and intended)

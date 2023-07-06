@@ -253,7 +253,6 @@ class TestEventFullCommon(EventCrmCase, TestSalesCommon, MockVisitor):
         cls.customer_data = [
             {'email': 'customer.email.%02d@test.example.com' % x,
              'name': 'My Customer %02d' % x,
-             'mobile': '04569999%02d' % x,
              'partner_id': False,
              'phone': '04560000%02d' % x,
             } for x in range(0, 10)
@@ -261,7 +260,6 @@ class TestEventFullCommon(EventCrmCase, TestSalesCommon, MockVisitor):
         cls.website_customer_data = [
             {'email': 'website.email.%02d@test.example.com' % x,
              'name': 'My Customer %02d' % x,
-             'mobile': '04569999%02d' % x,
              'partner_id': cls.env.ref('base.public_partner').id,
              'phone': '04560000%02d' % x,
              'registration_answer_ids': [

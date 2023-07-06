@@ -33,7 +33,6 @@ class EventRegistration(models.Model):
         compute='_compute_name', readonly=False, store=True, tracking=10)
     email = fields.Char(string='Email', compute='_compute_email', readonly=False, store=True, tracking=11)
     phone = fields.Char(string='Phone', compute='_compute_phone', readonly=False, store=True, tracking=12)
-    mobile = fields.Char(string='Mobile', compute='_compute_mobile', readonly=False, store=True, tracking=13)
     company_name = fields.Char(
         string='Company Name', compute='_compute_company_name', readonly=False, store=True, tracking=14)
     # organization
@@ -74,19 +73,11 @@ class EventRegistration(models.Model):
     def _compute_phone(self):
         for registration in self:
             if not registration.phone and registration.partner_id:
-                registration.phone = registration._synchronize_partner_values(
+                partner_values = registration._synchronize_partner_values(
                     registration.partner_id,
-                    fnames=['phone']
-                ).get('phone') or False
-
-    @api.depends('partner_id')
-    def _compute_mobile(self):
-        for registration in self:
-            if not registration.mobile and registration.partner_id:
-                registration.mobile = registration._synchronize_partner_values(
-                    registration.partner_id,
-                    fnames=['mobile']
-                ).get('mobile') or False
+                    fnames=['mobile', 'phone']
+                )
+                registration.phone = partner_values.get('phone') or partner_values.get('mobile') or False
 
     @api.depends('partner_id')
     def _compute_company_name(self):

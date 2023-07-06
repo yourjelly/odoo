@@ -116,8 +116,7 @@ class TestEventCrmFlow(TestEventCrmCommon):
             'name': 'My Registration',
             'partner_id': False,
             'email': 'super.email@test.example.com',
-            'phone': False,
-            'mobile': '0456332211',
+            'phone': '0456332211',
             'event_id': self.event_0.id,
         })
         self.assertEqual(len(self.event_0.registration_ids), 2)
@@ -129,7 +128,6 @@ class TestEventCrmFlow(TestEventCrmCommon):
             'partner_id': False,
             'email': 'giga.email@test.example.com',
             'phone': False,
-            'mobile': False,
             'event_id': self.event_0.id,
         })
         self.assertEqual(len(self.event_0.registration_ids), 3)
@@ -139,8 +137,7 @@ class TestEventCrmFlow(TestEventCrmCommon):
         registration = self.env['event.registration'].create({
             'partner_id': self.event_customer.id,
             'email': 'other.email@test.example.com',
-            'phone': False,
-            'mobile': '0456112233',
+            'phone': '0456112233',
             'event_id': self.event_0.id,
         })
         self.assertEqual(len(self.event_0.registration_ids), 4)
@@ -153,8 +150,7 @@ class TestEventCrmFlow(TestEventCrmCommon):
         registration = self.env['event.registration'].create({
             'partner_id': self.event_customer.id,
             'email': 'trigger.test@not.test.example.com',
-            'phone': False,
-            'mobile': '0456112233',
+            'phone': '0456112233',
             'event_id': self.event_0.id,
         })
 
@@ -180,8 +176,7 @@ class TestEventCrmFlow(TestEventCrmCommon):
             'name': 'My Registration',
             'partner_id': False,
             'email': 'super.email@test.example.com',
-            'phone': False,
-            'mobile': '0456332211',
+            'phone': '0456332211',
             'event_id': self.event_0.id,
         })
         self.assertEqual(len(self.test_rule_order.lead_ids), 1)

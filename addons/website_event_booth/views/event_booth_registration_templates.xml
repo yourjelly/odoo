@@ -41,14 +41,7 @@
                         <label class="col-form-label col-sm-auto">Phone</label>
                         <div class="col-sm">
                             <input type="tel" class="form-control" name="contact_phone"
-                                   t-att-value="default_contact.get('phone', '')"/>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label class="col-form-label col-sm-auto">Mobile</label>
-                        <div class="col-sm">
-                            <input type="tel" class="form-control" name="contact_mobile"
-                                   t-att-value="default_contact.get('mobile', '')"/>
+                                   t-att-value="default_contact.get('phone', '') or default_contact.get('mobile', '')"/>
                         </div>
                     </div>
                 </div>
