@@ -112,6 +112,12 @@ class StockWarehouseOrderpoint(models.Model):
                 product_qty_sum, orderpoint.product_uom, round=False)
         return res
 
+    def _get_lead_days_values(self):
+        values = super()._get_lead_days_values()
+        if self.bom_id:
+            values['bom'] = self.bom_id
+        return values
+
     def _get_qty_multiple_to_order(self):
         """ Calculates the minimum quantity that can be ordered according to the qty and UoM of the BoM
         """
