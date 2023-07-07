@@ -224,7 +224,7 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
     def test_export_invoice_two_line_schematron_foreign_partner_fr(self):
         invoice = self.env["account.move"].create({
             'move_type': 'out_invoice',
-            'partner_id': self.partner_b.id,
+            'partner_id': self.partner_c.id,
             'partner_bank_id': self.env.company.partner_id.bank_ids[:1].id,
             'invoice_payment_term_id': self.pay_terms_b.id,
             'invoice_date': '2017-01-01',
@@ -322,6 +322,57 @@ class TestUBLDK(TestUBLCommon, TestAccountMoveSendCommon):
         invoice = self.env["account.move"].create({
             'move_type': 'out_refund',
             'partner_id': self.partner_a.id,
+            'partner_bank_id': self.env.company.partner_id.bank_ids[:1].id,
+            'invoice_payment_term_id': self.pay_terms_b.id,
+            'invoice_date': '2017-01-01',
+            'date': '2017-01-01',
+            'narration': 'test narration',
+            'ref': 'ref_move',
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'quantity': 1.0,
+                    'price_unit': 500.0,
+                    'tax_ids': [Command.set(self.env["account.chart.template"].ref('tax120').ids)],
+                }),
+                Command.create({
+                    'product_id': self.product_b.id,
+                    'quantity': 1.0,
+                    'price_unit': 1000.0,
+                    'tax_ids': [Command.set(self.env["account.chart.template"].ref('tax110').ids)],
+                }),
+            ],
+        })
+        invoice.action_post()
+        invoice._generate_pdf_and_send_invoice(self.move_template)
+        self.assertTrue(invoice.ubl_cii_xml_id)
+        xml_content = base64.b64decode(invoice.ubl_cii_xml_id.with_context(bin_size=False).datas)
+        xml_etree = self.get_xml_tree_from_string(xml_content)
+
+        with file_open("l10n_account_edi_ubl_cii_tests/tests/OIOUBL_CreditNote_Schematron.xsl", "rb") as schematron_file:
+            xsl = etree.parse(schematron_file)
+            transform = etree.XSLT(xsl)
+            result_tree = transform(xml_etree)
+
+            errors = result_tree.xpath("//Error")
+            err = False
+            for error in errors:
+                err = True
+                print("")
+                print("")
+                print(error.xpath("//Xpath")[0].text)
+                print(error.xpath("//Description")[0].text)
+                print("")
+                print(error.xpath("//Pattern")[0].text)
+        if err:
+            write_oioubl_xml(xml_content)
+        self.assertFalse(err, "There is some error detected by the schematron")
+
+    @freeze_time('2017-01-01')
+    def test_export_credit_note_two_line_schematron_partner_fr(self):
+        invoice = self.env["account.move"].create({
+            'move_type': 'out_refund',
+            'partner_id': self.partner_c.id,
             'partner_bank_id': self.env.company.partner_id.bank_ids[:1].id,
             'invoice_payment_term_id': self.pay_terms_b.id,
             'invoice_date': '2017-01-01',
