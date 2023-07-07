@@ -1984,6 +1984,7 @@ export class Wysiwyg extends Component {
         // snippet is a media.
         const isInMedia = $target.is(mediaSelector) && !$target.parent().hasClass('o_stars') && e.target &&
             (e.target.isContentEditable || (e.target.parentElement && e.target.parentElement.isContentEditable));
+        this.toolbarEl.classList.toggle('oe_media', isInMedia);
 
         for (const el of this.toolbarEl.querySelectorAll([
             '#image-preview',
@@ -2052,8 +2053,6 @@ export class Wysiwyg extends Component {
         // Toggle unlink button. Always hide it on media.
         const linkNode = getInSelection(this.odooEditor.document, 'a');
         this.toolbarEl.querySelector('#unlink')?.classList.toggle('d-none', !linkNode || isInMedia);
-        // Toggle the toolbar arrow.
-        this.toolbarEl.classList.toggle('noarrow', isInMedia);
         // Unselect all media.
         this.$editable.find('.o_we_selected_image').removeClass('o_we_selected_image');
         if (isInMedia) {
