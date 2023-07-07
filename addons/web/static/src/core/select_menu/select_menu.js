@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useState, useRef, onWillUpdateProps } from "@odoo/owl";
+import { Component, useState, useRef, onWillUpdateProps, useEffect } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _lt } from "@web/core/l10n/translation";
@@ -94,6 +94,10 @@ export class SelectMenu extends Component {
                 this.selectedChoice = this.getSelectedChoice(nextProps);
             }
         });
+        useEffect(() => {
+            const groups = [{ choices: this.props.choices }, ...this.props.groups];
+            this.filterOptions(this.state.searchValue, groups);
+        }, () => [this.props.choices, this.props.groups]);
     }
 
     get displayValue() {
