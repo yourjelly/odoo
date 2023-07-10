@@ -13,7 +13,7 @@ import { HtmlField, htmlField } from "@web_editor/js/backend/html_field";
 import { device } from 'web.config';
 import { MassMailingMobilePreviewDialog } from "./mass_mailing_mobile_preview";
 import { getRangePosition } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
-import { MassMailingWysiwyg } from '@mass_mailing/js/MassMailingWysiwyg';
+import { MassMailingWysiwyg } from '@mass_mailing/js/mass_mailing_wysiwyg';
 
 const {
     onWillStart,
