@@ -36,6 +36,9 @@ export class ImageCrop extends Component {
     });
     elRef = useRef('el');
     setup() {
+        // This promise is resolved when the component is mounted. It is
+        // required by a legacy mechanism to wait for the component to be
+        // mounted. See `ImageTools.resetCrop`.
         this.mountedPromise = new Promise((resolve) => {
             this.mountedResolve = resolve;
         });
