@@ -15,5 +15,12 @@
     ],
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
+    'assets': {
+        'web.assets_frontend': [
+            'payment_asiapay/static/src/js/checkout_form.js',
+            'payment_asiapay/static/src/js/manage_form.js',
+            'payment_asiapay/static/src/js/asiapay_mixin.js',
+        ],
+    },
     'license': 'LGPL-3',
 }

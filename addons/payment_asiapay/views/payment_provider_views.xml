@@ -9,19 +9,34 @@
             <group name="provider_credentials" position='inside'>
                 <group attrs="{'invisible': [('code', '!=', 'asiapay')]}">
                     <field name="asiapay_brand"
-                           string="Brand"
-                           attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled')]}"/>
+                        string="Brand"
+                        attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled')]}"/>
                     <field name="asiapay_merchant_id"
-                           string="Merchant ID"
-                           attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled')]}"/>
+                        string="Merchant ID"
+                        attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled')]}"/>
                     <field name="asiapay_secure_hash_secret"
-                           string="Secure Hash Secret"
-                           attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled')]}"
-                           password="True"/>
+                        string="Secure Hash Secret"
+                        attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled')]}"
+                        password="True"/>
                     <field name="asiapay_secure_hash_function"
-                           string="Secure Hash Function"
-                           attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled')]}"
-                           groups="base.group_no_one"/>
+                        string="Secure Hash Function"
+                        attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled')]}"
+                        groups="base.group_no_one"/>
+                    <field name="asiapay_api_login_id"
+                        string="API Login ID"
+                        attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled'), '|', ('allow_tokenization', '=', True), ('capture_manually', '=', True)]}"/>
+                    <field name="asiapay_api_password"
+                        string="API Password"
+                        attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled'), '|', ('allow_tokenization', '=', True), ('capture_manually', '=', True)]}"
+                        password="True"/>
+                    <field name="asiapay_tokenization_key"
+                        string="Tokenization Key"
+                        attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled'), ('allow_tokenization', '=', True)]}"
+                        password="True"/>
+                    <field name="asiapay_tokenization_salt"
+                        string="Tokenization Salt"
+                        attrs="{'required': [('code', '=', 'asiapay'), ('state', '!=', 'disabled'), ('allow_tokenization', '=', True)]}"
+                        password="True"/>
                 </group>
             </group>
         </field>

@@ -168,7 +168,6 @@ class PaymentTransaction(models.Model):
 
     def _stripe_create_customer(self):
         """ Create and return a Customer.
-
         :return: The Customer
         :rtype: dict
         """

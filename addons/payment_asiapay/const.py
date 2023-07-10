@@ -2,16 +2,24 @@
 
 API_URLS = {
     'production': {
-        'pesopay': 'https://www.pesopay.com/b2c2/eng/payment/payForm.jsp',
-        'siampay': 'https://www.siampay.com/b2c2/eng/payment/payForm.jsp',
-        'bimopay': 'https://www.bimopay.com/b2c2/eng/payment/payForm.jsp',
-        'paydollar': 'https://www.paydollar.com/b2c2/eng/payment/payForm.jsp',
+        'pesopay': 'https://www.pesopay.com/b2c2/eng/',
+        'siampay': 'https://www.siampay.com/b2c2/eng/',
+        'bimopay': 'https://www.bimopay.com/b2c2/eng/',
+        'paydollar': 'https://www.paydollar.com/b2c2/eng/',
     },
     'test': {
-        'pesopay': 'https://test.pesopay.com/b2cDemo/eng/payment/payForm.jsp',
-        'siampay': 'https://test.siampay.com/b2cDemo/eng/payment/payForm.jsp',
-        'paydollar': 'https://test.paydollar.com/b2cDemo/eng/payment/payForm.jsp',
+        'pesopay': 'https://test.pesopay.com/b2cDemo/eng/',
+        'siampay': 'https://test.siampay.com/b2cDemo/eng/',
+        'paydollar': 'https://test.paydollar.com/b2cDemo/eng/',
     }
+}
+
+STATUS_MAPPING = {
+    'pending': ('Pending',),
+    'authorized': ('Authorized',),
+    'done': ('Accepted', 'Captured',),
+    'cancel': ('Voided',),
+    'error': ('Rejected',),
 }
 
 # Mapping of currency ISO 4217 codes AsiaPay's currency codes.
@@ -81,5 +89,5 @@ LANGUAGE_CODES_MAPPING = {
 # Mapping of transaction states to AsiaPay success codes.
 SUCCESS_CODE_MAPPING = {
     'done': ('0',),
-    'error': ('1',),
+    'error': ('1', '-1'),
 }
