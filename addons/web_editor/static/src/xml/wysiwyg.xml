@@ -164,8 +164,8 @@
                                 onSetColorNames="(colorNames) => this._onColorpaletteSetColorNames('color', colorNames)"
                                 onColorHover="(params) => this._colorpaletteApply('color', params)"
                                 onColorLeave="(params) => this._colorpaletteApply('color', params)"
-                                onColorPicked="(params) => this._onColorpalettePicked('color', params)"
-                                onCustomColorPicked="(params) => this._onColorpalettePicked('color', params)"
+                                onColorPicked="(params) => this._onColorpaletteColorPicked('color', params)"
+                                onCustomColorPicked="(params) => this._onColorpaletteColorPicked('color', params)"
                                 />
                         </we-selection-items>
                     </div>
@@ -185,8 +185,8 @@
                                 onSetColorNames="(colorNames) => this._onColorpaletteSetColorNames('background-color', colorNames)"
                                 onColorHover="(params) => this._colorpaletteApply('background-color', params)"
                                 onColorLeave="(params) => this._colorpaletteApply('background-color', params)"
-                                onColorPicked="(params) => this._onColorpalettePicked('background-color', params)"
-                                onCustomColorPicked="(params) => this._onColorpalettePicked('background-color', params)"
+                                onColorPicked="(params) => this._onColorpaletteColorPicked('background-color', params)"
+                                onCustomColorPicked="(params) => this._onColorpaletteColorPicked('background-color', params)"
                                 />
                         </we-selection-items>
                     </div>
@@ -227,8 +227,8 @@
                                     onSetColorNames="(colorNames) => this._onColorpaletteSetColorNames('border-color', colorNames)"
                                     onColorHover="(params) => this._colorpaletteApply('border-color', params)"
                                     onColorLeave="(params) => this._colorpaletteApply('border-color', params)"
-                                    onColorPicked="(params) => this._onColorpalettePicked('border-color', params)"
-                                    onCustomColorPicked="(params) => this._onColorpalettePicked('border-color', params)"
+                                    onColorPicked="(params) => this._onColorpaletteColorPicked('border-color', params)"
+                                    onCustomColorPicked="(params) => this._onColorpaletteColorPicked('border-color', params)"
                                     />
                             </we-selection-items>
                         </div>
