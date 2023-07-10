@@ -990,6 +990,9 @@ export class Wysiwyg extends Component {
             }
         }
     }
+    /**
+     * @private
+     */
     _replaceElement($el) {
         this.el.replaceWith($el[0]);
         this.$el = $el;
