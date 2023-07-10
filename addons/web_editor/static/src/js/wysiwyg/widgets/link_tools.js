@@ -337,9 +337,16 @@ export class LinkTools extends Link {
             $colorPreview.css('background-image', isColorGradient(color) ? color : '');
         }
     }
+
+    /**
+     * @private
+     */
     _onColorpaletteSetColorNames(cssProperty, colorNames) {
         this.colorpickers[cssProperty].colorNames = colorNames;
     }
+    /**
+     * @private
+     */
     _onColorpaletteColorPicked(cssProperty, params) {
         // Reset color styles in link content to make sure new color is not hidden.
         // Only done when applied to avoid losing state during preview.
@@ -356,6 +363,9 @@ export class LinkTools extends Link {
         this.props.wysiwyg.odooEditor.historyStep();
         this._updateOptionsUI();
     }
+    /**
+     * @private
+     */
     _colorpaletteApply(cssProperty, params) {
         const prefix = this.PREFIXES[cssProperty];
         let color = params.color;
