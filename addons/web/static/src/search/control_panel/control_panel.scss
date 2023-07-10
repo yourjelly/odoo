@@ -4,6 +4,10 @@
 
     .o_control_panel_breadcrumbs {
         min-width: 200px;
+
+        .lht {
+            line-height: 1.1 !important;
+        }
     }
 
     @include media-breakpoint-down(md) {
