@@ -64,6 +64,36 @@ export class ImageCrop extends Component {
         });
     }
 
+    destroy() {
+        if (this.destroyed) return;
+        this.destroyed = true;
+        if (this.$cropperImage) {
+            this.$cropperImage.cropper('destroy');
+            this.document.removeEventListener('mousedown', this._onDocumentMousedown, {capture: true});
+        }
+        this.media.setAttribute('src', this.initialSrc);
+        this.$media.trigger('image_cropper_destroyed');
+        this.state.active = false;
+    }
+
+    /**
+     * Resets the crop
+     */
+    async reset() {
+        if (this.$cropperImage) {
+            this.$cropperImage.cropper('reset');
+            if (this.aspectRatio !== '0/0') {
+                this.aspectRatio = '0/0';
+                this.$cropperImage.cropper('setAspectRatio', this.aspectRatios[this.aspectRatio].value);
+            }
+            await this._save(false);
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
     /**
      * @override
      */
@@ -129,40 +159,6 @@ export class ImageCrop extends Component {
         // like save, such that we can restore the src before a save.
         this.document.addEventListener('mousedown', this._onDocumentMousedown, {capture: true});
     }
-    destroy() {
-        if (this.destroyed) return;
-        this.destroyed = true;
-        if (this.$cropperImage) {
-            this.$cropperImage.cropper('destroy');
-            this.document.removeEventListener('mousedown', this._onDocumentMousedown, {capture: true});
-        }
-        this.media.setAttribute('src', this.initialSrc);
-        this.$media.trigger('image_cropper_destroyed');
-        this.state.active = false;
-    }
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * Resets the crop
-     */
-    async reset() {
-        if (this.$cropperImage) {
-            this.$cropperImage.cropper('reset');
-            if (this.aspectRatio !== '0/0') {
-                this.aspectRatio = '0/0';
-                this.$cropperImage.cropper('setAspectRatio', this.aspectRatios[this.aspectRatio].value);
-            }
-            await this._save(false);
-        }
-    }
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
     /**
      * Updates the DOM image with cropped data and associates required
      * information for a potential future save (where required cropped data
