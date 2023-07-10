@@ -804,14 +804,14 @@ export class ColorPalette extends Component {
      *
      * @private
      * @param {Object} params
-     * @param {boolean} isPreview
+     * @param {String} params.cssColor
+     * @param {Boolean} params.isPreview
      */
-    _updateGradientColor(params, isPreview) {
+    _updateGradientColor({ cssColor, isPreview }) {
         const $slider = $(this.gradientEditorParts.sliders).find('input.active');
-        const color = params.cssColor;
-        if (!weUtils.areCssValuesEqual(color, $slider.data('color'))) {
+        if (!weUtils.areCssValuesEqual(cssColor, $slider.data('color'))) {
             const previousColor = $slider.data('color');
-            $slider.data('color', color);
+            $slider.data('color', cssColor);
             this._updateGradient(isPreview);
             if (isPreview) {
                 $slider.data('color', previousColor);
@@ -906,7 +906,7 @@ export class ColorPalette extends Component {
      * @param {Object} params
      */
     _onColorPickerPreviewGradient(params) {
-        this._updateGradientColor(params, true);
+        this._updateGradientColor({ ...params, isPreview: true});
     }
     /**
      * Called when a color is selected on the colorpicker (mouseup).
