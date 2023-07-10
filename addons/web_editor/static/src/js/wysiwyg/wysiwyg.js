@@ -21,7 +21,6 @@ import { groupBy } from "@web/core/utils/arrays";
 import { debounce } from "@web/core/utils/timing";
 import { registry } from "@web/core/registry";
 import { FileViewer } from "@web/core/file_viewer/file_viewer";
-import { EmojiPickerWrapper } from '@web_editor/components/emoji_popover/emoji_popover'
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { Mutex } from "@web/core/utils/concurrency";
 import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -42,6 +41,7 @@ import {
 } from "@odoo/owl";
 import { requireWysiwygLegacyModule } from "@web_editor/js/frontend/loader";
 import { isCSSColor } from '@web/core/utils/colors';
+import { EmojiPicker } from '@web/core/emoji_picker/emoji_picker';
 
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
@@ -120,6 +120,7 @@ export class Wysiwyg extends Component {
     setup() {
         this.orm = this._useService('orm');
         this.notification = this._useService("notification");
+        this.popover = this._useService("popover");
         this.busService = this.env.services.bus_service;
 
         const getOnColorPicked = (colorType) => {
@@ -1596,15 +1597,15 @@ export class Wysiwyg extends Component {
         } else if (cursorAt <= portionWidth * 3) {
             position = 'middle';
         }
-        const emojiPicker = new ComponentWrapper(this, EmojiPickerWrapper, {
-            targetEl: closest,
-            position,
-            onSelect: (str) => {
-                restoreSelection();
-                this.odooEditor.execCommand('insert', str);
-            }
-        });
-        emojiPicker.mount(closest);
+
+        this.popover.add(closest, EmojiPicker, {
+                onSelect: (str) => {
+                    restoreSelection();
+                    this.odooEditor.execCommand('insert', str);
+                },
+            },
+            { position: `bottom-${position}`}
+        );
     }
     /**
      * Sets custom CSS Variables on the snippet menu element.
