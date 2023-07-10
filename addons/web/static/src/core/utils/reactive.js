@@ -32,14 +32,19 @@ export class Reactive {
  * microtick will only call the original callback once.
  *
  * @param callback the callback to batch
+ * @param promise an optional promise that will be awaited before calling the
  * @returns a batched version of the original callback
  */
-export function batched(callback) {
+export function batched(callback, promise) {
     let called = false;
     return async (...args) => {
         // This await blocks all calls to the callback here, then releases them sequentially
         // in the next microtick. This line decides the granularity of the batch.
-        await Promise.resolve();
+        if (promise) {
+            await new Promise(promise);
+        } else {
+            await Promise.resolve();
+        }
         if (!called) {
             called = true;
             // so that only the first call to the batched function calls the original callback.

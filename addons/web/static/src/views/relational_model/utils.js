@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useComponent, markup, onWillStart, onWillDestroy } from "@odoo/owl";
+import { useComponent, markup, onWillStart, onWillDestroy, onWillUpdateProps } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { x2ManyCommands } from "@web/core/orm_service";
@@ -485,22 +485,35 @@ export function fromUnityToServerValues(values, fields, activeFields) {
  */
 export function onWillUpdateRecord(callback) {
     const component = useComponent();
-    const def = new Deferred();
+    let def;
     let alive = true;
-    effect(
-        batched(async (record) => {
-            if (!alive) {
-                // effect doesn't clean up when the component is unmounted.
-                // We must do it manually.
-                return;
-            }
-            await callback(record);
-            def.resolve();
-        }),
-        [component.props.record]
-    );
+    const fct = (props) => {
+        def = new Deferred();
+        effect(
+            batched(
+                async (record) => {
+                    if (!alive) {
+                        // effect doesn't clean up when the component is unmounted.
+                        // We must do it manually.
+                        return;
+                    }
+                    await callback(record);
+                    def.resolve();
+                },
+                (resolve) => window.requestAnimationFrame(resolve)
+            ),
+            [props.record]
+        );
+    };
+    fct(component.props);
     onWillDestroy(() => {
         alive = false;
     });
     onWillStart(() => def);
+    onWillUpdateProps((props) => {
+        if (props.record.id !== component.props.record.id) {
+            fct(props);
+            return def;
+        }
+    });
 }
