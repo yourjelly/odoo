@@ -353,23 +353,6 @@ export class ColorPalette extends Component {
             this.state.customDefaultColor = defaultColor;
         }
     }
-    /**
-     * Sets the currently selected colors.
-     *
-     * Note: the tab selection is done here because of an optimization to avoid creating the whole
-     * palette hundreds of times when opening the THEME tab.
-     *
-     * @param {string|number} ccValue
-     * @param {string} color rgb[a]
-     * @param {boolean} [selectTab=true]
-     */
-    setSelectedColor(ccValue, color, selectTab = true) {
-        this._selectColor({
-            ccValue: ccValue,
-            color: color,
-        });
-    }
-
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -818,9 +801,9 @@ export class ColorPalette extends Component {
             }
         }
     }
-    _getColorFromColorName(colorName) {
-        return weUtils.getCSSVariableValue(colorName, this.style);
-    }
+    /**
+     * @private
+     */
     _updateColorToColornames() {
         this.colorToColorNames = {};
         this.el.querySelectorAll('button[data-color]:not(.o_custom_gradient_btn)').forEach(elem => {
