@@ -340,7 +340,7 @@ export class LinkTools extends Link {
     _onColorpaletteSetColorNames(cssProperty, colorNames) {
         this.colorpickers[cssProperty].colorNames = colorNames;
     }
-    _onColorpalettePicked(cssProperty, params) {
+    _onColorpaletteColorPicked(cssProperty, params) {
         // Reset color styles in link content to make sure new color is not hidden.
         // Only done when applied to avoid losing state during preview.
         const selection = window.getSelection();
