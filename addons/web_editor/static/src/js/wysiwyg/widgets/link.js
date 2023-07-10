@@ -181,6 +181,9 @@ export class Link extends Component {
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     */
     _setUrl({ shouldFocus } = {}) {
         if (this.state.url) {
             var match = /mailto:(.+)/.exec(this.state.url);
@@ -192,6 +195,9 @@ export class Link extends Component {
             this.focusUrl();
         }
     }
+    /**
+     * @private
+     */
     _setSelectOptionFromLink() {
         for (const option of this._getLinkOptions()) {
             const $option = $(option);
