@@ -101,7 +101,7 @@
             'mass_mailing/static/src/js/mailing_portal.js',
         ],
         'web_editor.assets_wysiwyg': [
-            'mass_mailing/static/src/js/MassMailingWysiwyg.js',
+            'mass_mailing/static/src/js/mass_mailing_wysiwyg.js',
             'mass_mailing/static/src/scss/mass_mailing.wysiwyg.scss',
         ],
         'web.assets_backend': [
