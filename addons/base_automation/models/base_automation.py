@@ -83,7 +83,7 @@ class BaseAutomation(models.Model):
     )
     url = fields.Char(compute='_compute_url')
     webhook_uuid = fields.Char(string="Webhook UUID", readonly=True, copy=False, default=lambda self: str(uuid4()))
-    record_getter = fields.Char(help="This code will be run to find on which record the automation rule should be applied.")
+    record_getter = fields.Char(help="This code will be run to find on which record the automation rule should be run.\nExample: model.browse(payload.get('recordId')))")
     active = fields.Boolean(default=True, help="When unchecked, the rule is hidden and will not be executed.")
     trigger = fields.Selection(
         [
@@ -187,30 +187,36 @@ class BaseAutomation(models.Model):
         for automation in self:
             automation.url = "%s/web/hook/%s" % (automation.get_base_url(), automation.webhook_uuid)
 
+
+    def action_rotate_webhook_uuid(self):
+        for automation in self:
+            automation.webhook_uuid = str(uuid4())
+
     def _execute_webhook(self, payload):
         """ Execute the webhook for the given payload.
         
         The payload is a dictionnary that can be used by the `record_getter` to
-        idnetify the record on which the automation should be run.
+        identify the record on which the automation should be run.
         """
         self.ensure_one()
         self_sudo = self.with_user(SUPERUSER_ID)
+        _logger.info("Webhook #%s triggered with payload %s" % (self_sudo.id, payload))
         if self.record_getter:
             try:
                 record = safe_eval.safe_eval(self_sudo.record_getter, self._get_eval_context(payload=payload))
             except Exception as e:
-                _logger.warning(
-                    "Webhook #%s could not be triggered because the record_getter failed:\n%s",
-                    self_sudo.id, traceback.format_exc()
-                )
+                _logger.warning("Webhook #%s could not be triggered because the record_getter failed:\n%s" % (self_sudo.id, traceback.format_exc()))
                 raise e
         else:
             record = None
-        if not record:
-            _logger.warning("Webhook #%s could not be triggered because no record to run was found.", self_sudo.id)
+        if not record.exists():
+            _logger.warning("Webhook #%s could not be triggered because no record to run it on was found." % self_sudo.id)
             raise exceptions.ValidationError(_("No record to run the automation on was found."))
-        _logger.info("Webhook #%s triggered for %s(%s)", self_sudo.id, record._name, record.id)
-        return self_sudo._process(record)
+        try:
+            return self_sudo._process(record.with_user(SUPERUSER_ID))
+        except Exception as e:
+            _logger.warning("Webhook #%s failed with error:\n%s" % (self_sudo.id, traceback.format_exc()))
+            raise e
 
     @api.constrains('trigger', 'action_server_ids')
     def _check_trigger_state(self):
@@ -453,8 +459,6 @@ class BaseAutomation(models.Model):
             'datetime': safe_eval.datetime,
             'dateutil': safe_eval.dateutil,
             'time': safe_eval.time,
-            'uid': self.env.uid,
-            'user': self.env.user,
             'model': model,
         }
         if payload is not None:
