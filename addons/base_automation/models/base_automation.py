@@ -84,6 +84,7 @@ class BaseAutomation(models.Model):
     url = fields.Char(compute='_compute_url')
     webhook_uuid = fields.Char(string="Webhook UUID", readonly=True, copy=False, default=lambda self: str(uuid4()))
     record_getter = fields.Char(help="This code will be run to find on which record the automation rule should be run.\nExample: model.browse(payload.get('recordId')))")
+    log_webhook_calls = fields.Boolean(string="Log Calls", default=True)
     active = fields.Boolean(default=True, help="When unchecked, the rule is hidden and will not be executed.")
     trigger = fields.Selection(
         [
@@ -192,6 +193,16 @@ class BaseAutomation(models.Model):
         for automation in self:
             automation.webhook_uuid = str(uuid4())
 
+    def action_view_webhook_logs(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Webhook Logs'),
+            'res_model': 'ir.logging',
+            'view_mode': 'tree,form',
+            'domain': [('path', '=', "base_automation(%s)" % self.id)],
+        }
+
     def _execute_webhook(self, payload):
         """ Execute the webhook for the given payload.
         
@@ -200,22 +211,63 @@ class BaseAutomation(models.Model):
         """
         self.ensure_one()
         self_sudo = self.with_user(SUPERUSER_ID)
-        _logger.info("Webhook #%s triggered with payload %s" % (self_sudo.id, payload))
+        ir_logging_sudo = self.env['ir.logging'].sudo()
+        msg = "Webhook #%s triggered with payload %s" % (self_sudo.id, payload)
+        _logger.info(msg)
+        if self_sudo.log_webhook_calls:
+            ir_logging_sudo.create({'name': _("Webhook Log"),
+                        'type': 'server',
+                        'dbname': self._cr.dbname,
+                        'level': 'INFO',
+                        'message': msg,
+                        'path': "base_automation(%s)" % self_sudo.id,
+                        'func': '',
+                        'line': ''})
         if self.record_getter:
             try:
                 record = safe_eval.safe_eval(self_sudo.record_getter, self._get_eval_context(payload=payload))
             except Exception as e:
-                _logger.warning("Webhook #%s could not be triggered because the record_getter failed:\n%s" % (self_sudo.id, traceback.format_exc()))
+                msg = "Webhook #%s could not be triggered because the record_getter failed:\n%s" % (self_sudo.id, traceback.format_exc())
+                _logger.warning(msg)
+                if self_sudo.log_webhook_calls:
+                    ir_logging_sudo.create({'name': _("Webhook Log"),
+                                'type': 'server',
+                                'dbname': self._cr.dbname,
+                                'level': 'ERROR',
+                                'message': msg,
+                                'path': "base_automation(%s)" % self_sudo.id,
+                                'func': '',
+                                'line': ''})
                 raise e
         else:
             record = None
         if not record.exists():
-            _logger.warning("Webhook #%s could not be triggered because no record to run it on was found." % self_sudo.id)
+            msg = "Webhook #%s could not be triggered because no record to run it on was found." % self_sudo.id
+            _logger.warning(msg)
+            if self_sudo.log_webhook_calls:
+                ir_logging_sudo.create({'name': _("Webhook Log"),
+                            'type': 'server',
+                            'dbname': self._cr.dbname,
+                            'level': 'ERROR',
+                            'message': msg,
+                            'path': "base_automation(%s)" % self_sudo.id,
+                            'func': '',
+                            'line': ''})
             raise exceptions.ValidationError(_("No record to run the automation on was found."))
         try:
             return self_sudo._process(record.with_user(SUPERUSER_ID))
         except Exception as e:
-            _logger.warning("Webhook #%s failed with error:\n%s" % (self_sudo.id, traceback.format_exc()))
+            msg = "Webhook #%s failed with error:\n%s" % (self_sudo.id, traceback.format_exc())
+            _logger.warning(msg)
+            if self_sudo.log_webhook_calls:
+                ir_logging_sudo.create({'name': _("Webhook Log"),
+                            'type': 'server',
+                            'dbname': self._cr.dbname,
+                            'level': 'ERROR',
+                            'message': msg,
+                            'path': "base_automation(%s)" % self_sudo.id,
+                            'func': '',
+                            'line': ''})
             raise e
 
     @api.constrains('trigger', 'action_server_ids')
