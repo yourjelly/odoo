@@ -49,7 +49,7 @@ export function isAndroidApp() {
 }
 
 export function hasTouch() {
-    return browser.ontouchstart !== undefined;
+    return !window.matchMedia("(pointer:fine)").matches;
 }
 
 export function maxTouchPoints() {
