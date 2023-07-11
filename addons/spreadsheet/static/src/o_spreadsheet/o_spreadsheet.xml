@@ -1007,7 +1007,8 @@
     <div
       t-ref="gridOverlay"
       class="o-grid-overlay overflow-hidden"
-      t-att-style="props.gridOverlayDimensions"
+      t-att-class="{'o-paint-format-cursor': isPaintingFormat}"
+      t-att-style="style"
       t-on-mousedown="onMouseDown"
       t-on-dblclick.self="onDoubleClick"
       t-on-contextmenu="onContextMenu">
@@ -2239,6 +2240,20 @@
         menuId="props.menuId"
       />
     </Popover>
+  </t>
+
+  <t t-name="o-spreadsheet-PaintFormatButton" owl="1">
+    <span
+      class="o-menu-item-button"
+      title="Paint Format"
+      t-att-class="{active: isActive}"
+      t-attf-class="{{props.class}}"
+      t-on-click="togglePaintFormat"
+      t-on-dblclick="onDblClick">
+      <span>
+        <t t-call="o-spreadsheet-Icon.PAINT_FORMAT"/>
+      </span>
+    </span>
   </t>
 
   <t t-name="o-spreadsheet-Popover" owl="1">
@@ -3796,7 +3811,7 @@
           <div t-else="" class="o-toolbar-tools d-flex flex-shrink-0 ms-4">
             <ActionButton action="EDIT.undo" class="'o-hoverable-button'"/>
             <ActionButton action="EDIT.redo" class="'o-hoverable-button'"/>
-            <ActionButton action="FORMAT.paintFormat" class="'o-hoverable-button'"/>
+            <PaintFormatButton class="'o-hoverable-button o-menu-item-button'"/>
             <ActionButton action="FORMAT.clearFormat" class="'o-hoverable-button'"/>
 
             <div class="o-divider"/>
@@ -3938,6 +3953,6 @@
 </odoo>
 <!--
   __info__.version = '16.4.0-alpha.7';
-  __info__.date = '2023-07-04T14:12:26.682Z';
-  __info__.hash = 'b04cf78';
+  __info__.date = '2023-07-11T13:24:16.329Z';
+  __info__.hash = '2dfa67f';
 -->

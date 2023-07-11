@@ -393,82 +393,6 @@
     function clip(val, min, max) {
         return val < min ? min : val > max ? max : val;
     }
-    function computeTextLinesHeight(textLineHeight, numberOfLines = 1) {
-        return numberOfLines * (textLineHeight + MIN_CELL_TEXT_MARGIN) - MIN_CELL_TEXT_MARGIN;
-    }
-    /**
-     * Get the default height of the cell given its style.
-     */
-    function getDefaultCellHeight(cell) {
-        if (!cell || !cell.content) {
-            return DEFAULT_CELL_HEIGHT;
-        }
-        const fontSize = computeTextFontSizeInPixels(cell.style);
-        // the number of lines should be computed from the formula result, but it's not evaluated at this point
-        const numberOfLines = cell.isFormula ? 1 : cell.content.split(NEWLINE).length;
-        return computeTextLinesHeight(fontSize, numberOfLines) + 2 * PADDING_AUTORESIZE_VERTICAL;
-    }
-    function computeTextWidth(context, text, style) {
-        const font = computeTextFont(style);
-        if (!textWidthCache[font]) {
-            textWidthCache[font] = {};
-        }
-        if (textWidthCache[font][text] === undefined) {
-            context.save();
-            context.font = font;
-            const textWidth = context.measureText(text).width;
-            context.restore();
-            textWidthCache[font][text] = textWidth;
-        }
-        return textWidthCache[font][text];
-    }
-    const textWidthCache = {};
-    function fontSizeInPixels(fontSize) {
-        return Math.round((fontSize * 96) / 72);
-    }
-    function computeTextFont(style) {
-        const italic = style.italic ? "italic " : "";
-        const weight = style.bold ? "bold" : DEFAULT_FONT_WEIGHT;
-        const size = computeTextFontSizeInPixels(style);
-        return `${italic}${weight} ${size}px ${DEFAULT_FONT}`;
-    }
-    function computeTextFontSizeInPixels(style) {
-        const sizeInPt = style?.fontSize || DEFAULT_FONT_SIZE;
-        return fontSizeInPixels(sizeInPt);
-    }
-    /**
-     * Return the font size that makes the width of a text match the given line width.
-     * Minimum font size is 1.
-     *
-     * @param getTextWidth function that takes a fontSize as argument, and return the width of the text with this font size.
-     */
-    function getFontSizeMatchingWidth(lineWidth, maxFontSize, getTextWidth, precision = 0.25) {
-        let minFontSize = 1;
-        if (getTextWidth(minFontSize) > lineWidth)
-            return minFontSize;
-        if (getTextWidth(maxFontSize) < lineWidth)
-            return maxFontSize;
-        // Dichotomic search
-        let fontSize = (minFontSize + maxFontSize) / 2;
-        let currentTextWidth = getTextWidth(fontSize);
-        // Use a maximum number of iterations to be safe, because measuring text isn't 100% precise
-        let iterations = 0;
-        while (Math.abs(currentTextWidth - lineWidth) > precision && iterations < 20) {
-            if (currentTextWidth >= lineWidth) {
-                maxFontSize = (minFontSize + maxFontSize) / 2;
-            }
-            else {
-                minFontSize = (minFontSize + maxFontSize) / 2;
-            }
-            fontSize = (minFontSize + maxFontSize) / 2;
-            currentTextWidth = getTextWidth(fontSize);
-            iterations++;
-        }
-        return fontSize;
-    }
-    function computeIconWidth(style) {
-        return computeTextFontSizeInPixels(style) + 2 * MIN_CF_ICON_MARGIN;
-    }
     /**
      * Create a range from start (included) to end (excluded).
      * range(10, 13) => [10, 11, 12]
@@ -723,10 +647,6 @@
         Object.keys(cleanObject).forEach((key) => !cleanObject[key] && delete cleanObject[key]);
         return cleanObject;
     }
-    /** Transform a string to lower case. If the string is undefined, return an empty string */
-    function toLowerCase(str) {
-        return str ? str.toLowerCase() : "";
-    }
     function transpose2dArray(matrix, callback = (val) => val) {
         if (!matrix.length)
             return [];
@@ -815,6 +735,14 @@
                 return cache.get(args[0]);
             },
         }[funcName];
+    }
+    function removeIndexesFromArray(array, indexes) {
+        return array.filter((_, index) => !indexes.includes(index));
+    }
+    function insertItemsAtIndex(array, items, index) {
+        const newArray = [...array];
+        newArray.splice(index, 0, ...items);
+        return newArray;
     }
 
     const RBA_REGEX = /rgba?\(|\s+|\)/gi;
@@ -3275,6 +3203,169 @@
         return rows;
     }
 
+    function computeTextLinesHeight(textLineHeight, numberOfLines = 1) {
+        return numberOfLines * (textLineHeight + MIN_CELL_TEXT_MARGIN) - MIN_CELL_TEXT_MARGIN;
+    }
+    /**
+     * Get the default height of the cell given its style.
+     */
+    function getDefaultCellHeight(ctx, cell, colSize) {
+        if (!cell || !cell.content)
+            return DEFAULT_CELL_HEIGHT;
+        const maxWidth = cell.style?.wrapping ? colSize - 2 * MIN_CELL_TEXT_MARGIN : undefined;
+        const numberOfLines = cell.isFormula
+            ? 1
+            : splitTextToWidth(ctx, cell.content, cell.style, maxWidth).length;
+        const fontSize = computeTextFontSizeInPixels(cell.style);
+        return computeTextLinesHeight(fontSize, numberOfLines) + 2 * PADDING_AUTORESIZE_VERTICAL;
+    }
+    const textWidthCache = {};
+    function computeTextWidth(context, text, style) {
+        const font = computeTextFont(style);
+        if (!textWidthCache[font]) {
+            textWidthCache[font] = {};
+        }
+        if (textWidthCache[font][text] === undefined) {
+            context.save();
+            context.font = font;
+            const textWidth = context.measureText(text).width;
+            context.restore();
+            textWidthCache[font][text] = textWidth;
+        }
+        return textWidthCache[font][text];
+    }
+    function fontSizeInPixels(fontSize) {
+        return Math.round((fontSize * 96) / 72);
+    }
+    function computeTextFont(style) {
+        const italic = style.italic ? "italic " : "";
+        const weight = style.bold ? "bold" : DEFAULT_FONT_WEIGHT;
+        const size = computeTextFontSizeInPixels(style);
+        return `${italic}${weight} ${size}px ${DEFAULT_FONT}`;
+    }
+    function computeTextFontSizeInPixels(style) {
+        const sizeInPt = style?.fontSize || DEFAULT_FONT_SIZE;
+        return fontSizeInPixels(sizeInPt);
+    }
+    function splitWordToSpecificWidth(ctx, word, width, style) {
+        const wordWidth = computeTextWidth(ctx, word, style);
+        if (wordWidth <= width) {
+            return [word];
+        }
+        const splitWord = [];
+        let wordPart = "";
+        for (let l of word) {
+            const wordPartWidth = computeTextWidth(ctx, wordPart + l, style);
+            if (wordPartWidth > width) {
+                splitWord.push(wordPart);
+                wordPart = l;
+            }
+            else {
+                wordPart += l;
+            }
+        }
+        splitWord.push(wordPart);
+        return splitWord;
+    }
+    /**
+     * Return the given text, split in multiple lines if needed. The text will be split in multiple
+     * line if it contains NEWLINE characters, or if it's longer than the given width.
+     */
+    function splitTextToWidth(ctx, text, style, width) {
+        if (!style)
+            style = {};
+        const brokenText = [];
+        // Checking if text contains NEWLINE before split makes it very slightly slower if text contains it,
+        // but 5-10x faster if it doesn't
+        const lines = text.includes(NEWLINE) ? text.split(NEWLINE) : [text];
+        for (const line of lines) {
+            const words = line.includes(" ") ? line.split(" ") : [line];
+            if (!width) {
+                brokenText.push(line);
+                continue;
+            }
+            let textLine = "";
+            let availableWidth = width;
+            for (let word of words) {
+                const splitWord = splitWordToSpecificWidth(ctx, word, width, style);
+                const lastPart = splitWord.pop();
+                const lastPartWidth = computeTextWidth(ctx, lastPart, style);
+                // At this step: "splitWord" is an array composed of parts of word whose
+                // length is at most equal to "width".
+                // Last part contains the end of the word.
+                // Note that: When word length is less than width, then lastPart is equal
+                // to word and splitWord is empty
+                if (splitWord.length) {
+                    if (textLine !== "") {
+                        brokenText.push(textLine);
+                        textLine = "";
+                        availableWidth = width;
+                    }
+                    splitWord.forEach((wordPart) => {
+                        brokenText.push(wordPart);
+                    });
+                    textLine = lastPart;
+                    availableWidth = width - lastPartWidth;
+                }
+                else {
+                    // here "lastPart" is equal to "word" and the "word" size is smaller than "width"
+                    const _word = textLine === "" ? lastPart : " " + lastPart;
+                    const wordWidth = computeTextWidth(ctx, _word, style);
+                    if (wordWidth <= availableWidth) {
+                        textLine += _word;
+                        availableWidth -= wordWidth;
+                    }
+                    else {
+                        brokenText.push(textLine);
+                        textLine = lastPart;
+                        availableWidth = width - lastPartWidth;
+                    }
+                }
+            }
+            if (textLine !== "") {
+                brokenText.push(textLine);
+            }
+        }
+        return brokenText;
+    }
+    /**
+     * Return the font size that makes the width of a text match the given line width.
+     * Minimum font size is 1.
+     *
+     * @param getTextWidth function that takes a fontSize as argument, and return the width of the text with this font size.
+     */
+    function getFontSizeMatchingWidth(lineWidth, maxFontSize, getTextWidth, precision = 0.25) {
+        let minFontSize = 1;
+        if (getTextWidth(minFontSize) > lineWidth)
+            return minFontSize;
+        if (getTextWidth(maxFontSize) < lineWidth)
+            return maxFontSize;
+        // Dichotomic search
+        let fontSize = (minFontSize + maxFontSize) / 2;
+        let currentTextWidth = getTextWidth(fontSize);
+        // Use a maximum number of iterations to be safe, because measuring text isn't 100% precise
+        let iterations = 0;
+        while (Math.abs(currentTextWidth - lineWidth) > precision && iterations < 20) {
+            if (currentTextWidth >= lineWidth) {
+                maxFontSize = (minFontSize + maxFontSize) / 2;
+            }
+            else {
+                minFontSize = (minFontSize + maxFontSize) / 2;
+            }
+            fontSize = (minFontSize + maxFontSize) / 2;
+            currentTextWidth = getTextWidth(fontSize);
+            iterations++;
+        }
+        return fontSize;
+    }
+    function computeIconWidth(style) {
+        return computeTextFontSizeInPixels(style) + 2 * MIN_CF_ICON_MARGIN;
+    }
+    /** Transform a string to lower case. If the string is undefined, return an empty string */
+    function toLowerCase(str) {
+        return str ? str.toLowerCase() : "";
+    }
+
     /*
      * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
      * */
@@ -4125,6 +4216,7 @@
         CommandResult[CommandResult["NoSplitSeparatorInSelection"] = 92] = "NoSplitSeparatorInSelection";
         CommandResult[CommandResult["NoActiveSheet"] = 93] = "NoActiveSheet";
         CommandResult[CommandResult["InvalidLocale"] = 94] = "InvalidLocale";
+        CommandResult[CommandResult["AlreadyInPaintingFormatMode"] = 95] = "AlreadyInPaintingFormatMode";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
     const borderStyles = ["thin", "medium", "thick", "dashed", "dotted"];
@@ -17521,6 +17613,7 @@
                     env.model.dispatch("SELECT_FIGURE", { id: figureId });
                     env.openSidePanel("ChartPanel");
                 },
+                icon: "o-spreadsheet-Icon.EDIT",
             },
             getCopyMenuItem(figureId, env),
             getCutMenuItem(figureId, env),
@@ -17552,6 +17645,7 @@
                         width,
                     });
                 },
+                icon: "o-spreadsheet-Icon.REFRESH",
             },
             getDeleteMenuItem(figureId, onFigureDeleted, env),
         ];
@@ -17568,6 +17662,7 @@
                 env.model.dispatch("COPY");
                 await env.clipboard.write(env.model.getters.getClipboardContent());
             },
+            icon: "o-spreadsheet-Icon.COPY",
         };
     }
     function getCutMenuItem(figureId, env) {
@@ -17581,6 +17676,7 @@
                 env.model.dispatch("CUT");
                 await env.clipboard.write(env.model.getters.getClipboardContent());
             },
+            icon: "o-spreadsheet-Icon.CUT",
         };
     }
     function getDeleteMenuItem(figureId, onFigureDeleted, env) {
@@ -17595,6 +17691,7 @@
                 });
                 onFigureDeleted();
             },
+            icon: "o-spreadsheet-Icon.DELETE",
         };
     }
 
@@ -18662,7 +18759,7 @@
     };
     const categorieFunctionAll = {
         name: _lt("All"),
-        children: allFunctionListMenuBuilder(),
+        children: [allFunctionListMenuBuilder],
     };
     function allFunctionListMenuBuilder() {
         const fnNames = functionRegistry.getKeys();
@@ -19192,14 +19289,6 @@
         execute: OPEN_CF_SIDEPANEL_ACTION,
         icon: "o-spreadsheet-Icon.CONDITIONAL_FORMAT",
     };
-    const paintFormat = {
-        name: _lt("Paint Format"),
-        execute: (env) => env.model.dispatch("ACTIVATE_PAINT_FORMAT", {
-            target: env.model.getters.getSelectedZones(),
-        }),
-        icon: "o-spreadsheet-Icon.PAINT_FORMAT",
-        isActive: (env) => env.model.getters.isPaintingFormat(),
-    };
     const clearFormat = {
         name: _lt("Clear formatting"),
         description: "Ctrl+<",
@@ -19277,7 +19366,6 @@
         textColor: textColor,
         fillColor: fillColor,
         formatCF: formatCF,
-        paintFormat: paintFormat,
         clearFormat: clearFormat
     });
 
@@ -25034,6 +25122,14 @@
         };
     }
 
+    const CURSOR_SVG = /*xml*/ `
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="14" height="16"><path d="M6.5.4c1.3-.8 2.9-.1 3.8 1.4l2.9 5.1c.2.4.9 1.6-.4 2.3l-1.6.9 1.8 3.1c.2.4.1 1-.2 1.2l-1.6 1c-.3.1-.9 0-1.1-.4l-1.8-3.1-1.6 1c-.6.4-1.7 0-2.2-.8L0 4.3"/><path fill="#fff" d="M9.1 2a1.4 1.1 60 0 0-1.7-.6L5.5 2.5l.9 1.6-1 .6-.9-1.6-.6.4 1.8 3.1-1.3.7-1.8-3.1-1 .6 3.8 6.6 6.8-3.98M3.9 8.8 10.82 5l.795 1.4-6.81 3.96"/></svg>
+`;
+    css /* scss */ `
+  .o-paint-format-cursor {
+    cursor: url("data:image/svg+xml,${encodeURIComponent(CURSOR_SVG)}"), auto;
+  }
+`;
     function useCellHovered(env, gridRef, callback) {
         let hoveredPosition = {
             col: undefined,
@@ -25156,6 +25252,12 @@
                 throw new Error("GridOverlay el is not defined.");
             }
             return this.gridOverlay.el;
+        }
+        get style() {
+            return this.props.gridOverlayDimensions;
+        }
+        get isPaintingFormat() {
+            return this.env.model.getters.isPaintingFormat();
         }
         onMouseDown(ev) {
             if (ev.button > 0) {
@@ -26333,6 +26435,9 @@
                 }
                 else if (this.menuState.isOpen) {
                     this.closeMenu();
+                }
+                else if (this.env.model.getters.isPaintingFormat()) {
+                    this.env.model.dispatch("CANCEL_PAINT_FORMAT");
                 }
                 else {
                     this.env.model.dispatch("CLEAN_CLIPBOARD_HIGHLIGHT");
@@ -32359,7 +32464,9 @@
             const numHeader = this.getters.getNumberRows(sheetId);
             let gridHeight = 0;
             for (let i = 0; i < numHeader; i++) {
-                gridHeight += this.getters.getRowSize(sheetId, i);
+                // TODO : since the row size is an UI value now, this doesn't work anymore. Using the default cell height is
+                // a temporary solution at best, but is broken.
+                gridHeight += this.getters.getUserRowSize(sheetId, i) || DEFAULT_CELL_HEIGHT;
             }
             const figures = this.getters.getFigures(sheetId);
             for (const figure of figures) {
@@ -32785,33 +32892,15 @@
     }
 
     class HeaderSizePlugin extends CorePlugin {
-        static getters = ["getRowSize", "getColSize"];
+        static getters = ["getUserRowSize", "getColSize"];
         sizes = {};
         handle(cmd) {
             switch (cmd.type) {
                 case "CREATE_SHEET": {
-                    const computedSizes = this.computeSheetSizes(cmd.sheetId);
-                    const sizes = {
-                        COL: computedSizes.COL.map((size) => ({
-                            manualSize: undefined,
-                            computedSize: lazy(size),
-                        })),
-                        ROW: computedSizes.ROW.map((size) => ({
-                            manualSize: undefined,
-                            computedSize: lazy(size),
-                        })),
-                    };
-                    this.history.update("sizes", cmd.sheetId, sizes);
+                    this.history.update("sizes", cmd.sheetId, { COL: [], ROW: [] });
                     break;
                 }
                 case "DUPLICATE_SHEET":
-                    // make sure the values are computed in case the original sheet is deleted
-                    for (const row of this.sizes[cmd.sheetId].ROW) {
-                        row.computedSize();
-                    }
-                    for (const col of this.sizes[cmd.sheetId].COL) {
-                        col.computedSize();
-                    }
                     this.history.update("sizes", cmd.sheetIdTo, deepCopy(this.sizes[cmd.sheetId]));
                     break;
                 case "DELETE_SHEET":
@@ -32820,21 +32909,8 @@
                     this.history.update("sizes", sizes);
                     break;
                 case "REMOVE_COLUMNS_ROWS": {
-                    let sizes = [...this.sizes[cmd.sheetId][cmd.dimension]];
-                    for (let headerIndex of [...cmd.elements].sort((a, b) => b - a)) {
-                        sizes.splice(headerIndex, 1);
-                    }
-                    const min = Math.min(...cmd.elements);
-                    sizes = sizes.map((size, row) => {
-                        if (cmd.dimension === "ROW" && row >= min) {
-                            // invalidate sizes
-                            return {
-                                manualSize: size.manualSize,
-                                computedSize: lazy(() => this.getRowTallestCellSize(cmd.sheetId, row)),
-                            };
-                        }
-                        return size;
-                    });
+                    const arr = this.sizes[cmd.sheetId][cmd.dimension];
+                    const sizes = removeIndexesFromArray(arr, cmd.elements);
                     this.history.update("sizes", cmd.sheetId, cmd.dimension, sizes);
                     break;
                 }
@@ -32843,51 +32919,18 @@
                     const addIndex = getAddHeaderStartIndex(cmd.position, cmd.base);
                     const baseSize = sizes[cmd.base];
                     sizes.splice(addIndex, 0, ...Array(cmd.quantity).fill(baseSize));
-                    sizes = sizes.map((size, row) => {
-                        if (cmd.dimension === "ROW" && row > cmd.base + cmd.quantity) {
-                            // invalidate sizes
-                            return {
-                                manualSize: size.manualSize,
-                                computedSize: lazy(() => this.getRowTallestCellSize(cmd.sheetId, row)),
-                            };
-                        }
-                        return size;
-                    });
                     this.history.update("sizes", cmd.sheetId, cmd.dimension, sizes);
                     break;
                 }
                 case "RESIZE_COLUMNS_ROWS":
-                    for (let el of cmd.elements) {
-                        if (cmd.dimension === "ROW") {
-                            const height = this.getRowTallestCellSize(cmd.sheetId, el);
-                            const size = height;
-                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, {
-                                manualSize: cmd.size || undefined,
-                                computedSize: lazy(size),
-                            });
-                        }
-                        else {
-                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, {
-                                manualSize: cmd.size || undefined,
-                                computedSize: lazy(cmd.size || DEFAULT_CELL_WIDTH),
-                            });
+                    if (cmd.dimension === "ROW") {
+                        for (const el of cmd.elements) {
+                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, cmd.size || undefined);
                         }
                     }
-                    break;
-                case "UPDATE_CELL":
-                    if (!this.sizes[cmd.sheetId]?.["ROW"]?.[cmd.row]?.manualSize) {
-                        const { sheetId, row } = cmd;
-                        this.history.update("sizes", sheetId, "ROW", row, "computedSize", lazy(() => this.getRowTallestCellSize(sheetId, row)));
-                    }
-                    break;
-                case "ADD_MERGE":
-                case "REMOVE_MERGE":
-                    for (let target of cmd.target) {
-                        for (let row of range(target.top, target.bottom + 1)) {
-                            const rowHeight = this.getRowTallestCellSize(cmd.sheetId, row);
-                            if (rowHeight !== this.getRowSize(cmd.sheetId, row)) {
-                                this.history.update("sizes", cmd.sheetId, "ROW", row, "computedSize", lazy(rowHeight));
-                            }
+                    else {
+                        for (const el of cmd.elements) {
+                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, cmd.size || undefined);
                         }
                     }
                     break;
@@ -32895,94 +32938,29 @@
             return;
         }
         getColSize(sheetId, index) {
-            return this.getHeaderSize(sheetId, "COL", index);
+            return Math.round(this.sizes[sheetId]?.["COL"][index] || DEFAULT_CELL_WIDTH);
         }
-        getRowSize(sheetId, index) {
-            return this.getHeaderSize(sheetId, "ROW", index);
-        }
-        getHeaderSize(sheetId, dimension, index) {
-            return Math.round(this.sizes[sheetId]?.[dimension][index]?.manualSize ||
-                this.sizes[sheetId]?.[dimension][index]?.computedSize() ||
-                this.getDefaultHeaderSize(dimension));
-        }
-        computeSheetSizes(sheetId) {
-            const sizes = { COL: [], ROW: [] };
-            for (let col of range(0, this.getters.getNumberCols(sheetId))) {
-                sizes.COL.push(this.getHeaderSize(sheetId, "COL", col));
-            }
-            for (let row of range(0, this.getters.getNumberRows(sheetId))) {
-                let rowSize = this.sizes[sheetId]?.["ROW"]?.[row].manualSize;
-                if (!rowSize) {
-                    const height = this.getRowTallestCellSize(sheetId, row);
-                    rowSize = height;
-                }
-                sizes.ROW.push(rowSize);
-            }
-            return sizes;
-        }
-        getDefaultHeaderSize(dimension) {
-            return dimension === "COL" ? DEFAULT_CELL_WIDTH : DEFAULT_CELL_HEIGHT;
-        }
-        /**
-         * Return the height the cell should have in the sheet, which is either DEFAULT_CELL_HEIGHT if the cell is in a multi-row
-         * merge, or the height of the cell computed based on its font size.
-         */
-        getCellHeight(position) {
-            const merge = this.getters.getMerge(position);
-            if (merge && merge.bottom !== merge.top) {
-                return DEFAULT_CELL_HEIGHT;
-            }
-            const cell = this.getters.getCell(position);
-            return getDefaultCellHeight(cell);
-        }
-        /**
-         * Get the tallest cell of a row and its size.
-         *
-         * The tallest cell of the row correspond to the cell with the biggest font size,
-         * and that is not part of a multi-line merge.
-         */
-        getRowTallestCellSize(sheetId, row) {
-            const cellIds = this.getters.getRowCells(sheetId, row);
-            let maxHeight = 0;
-            for (let i = 0; i < cellIds.length; i++) {
-                const cell = this.getters.getCellById(cellIds[i]);
-                if (!cell)
-                    continue;
-                const position = this.getters.getCellPosition(cell.id);
-                const cellHeight = this.getCellHeight(position);
-                if (cellHeight > maxHeight && cellHeight > DEFAULT_CELL_HEIGHT) {
-                    maxHeight = cellHeight;
-                }
-            }
-            if (maxHeight <= DEFAULT_CELL_HEIGHT) {
-                return DEFAULT_CELL_HEIGHT;
-            }
-            return maxHeight;
+        getUserRowSize(sheetId, index) {
+            const rowSize = this.sizes[sheetId]?.["ROW"][index];
+            return rowSize ? Math.round(rowSize) : undefined;
         }
         import(data) {
             for (let sheet of data.sheets) {
-                const manualSizes = { COL: [], ROW: [] };
+                const sizes = {
+                    COL: Array(sheet.colNumber).fill(undefined),
+                    ROW: Array(sheet.rowNumber).fill(undefined),
+                };
                 for (let [rowIndex, row] of Object.entries(sheet.rows)) {
                     if (row.size) {
-                        manualSizes["ROW"][rowIndex] = row.size;
+                        sizes["ROW"][rowIndex] = row.size;
                     }
                 }
                 for (let [colIndex, col] of Object.entries(sheet.cols)) {
                     if (col.size) {
-                        manualSizes["COL"][colIndex] = col.size;
+                        sizes["COL"][colIndex] = col.size;
                     }
                 }
-                const computedSizes = this.computeSheetSizes(sheet.id);
-                this.sizes[sheet.id] = {
-                    COL: computedSizes.COL.map((size, i) => ({
-                        manualSize: manualSizes.COL[i],
-                        computedSize: lazy(size),
-                    })),
-                    ROW: computedSizes.ROW.map((size, i) => ({
-                        manualSize: manualSizes.ROW[i],
-                        computedSize: lazy(size),
-                    })),
-                };
+                this.sizes[sheet.id] = sizes;
             }
             return;
         }
@@ -33003,9 +32981,12 @@
                 if (sheet.rows === undefined) {
                     sheet.rows = {};
                 }
-                for (let row of range(0, this.getters.getNumberRows(sheet.id))) {
-                    if (exportDefaults || this.sizes[sheet.id]["ROW"][row]?.manualSize) {
-                        sheet.rows[row] = { ...sheet.rows[row], size: this.getRowSize(sheet.id, row) };
+                for (const row of range(0, this.getters.getNumberRows(sheet.id))) {
+                    if (exportDefaults || this.sizes[sheet.id]["ROW"][row]) {
+                        sheet.rows[row] = {
+                            ...sheet.rows[row],
+                            size: this.getUserRowSize(sheet.id, row) ?? DEFAULT_CELL_HEIGHT,
+                        };
                     }
                 }
                 // Export col sizes
@@ -33013,7 +32994,7 @@
                     sheet.cols = {};
                 }
                 for (let col of range(0, this.getters.getNumberCols(sheet.id))) {
-                    if (exportDefaults || this.sizes[sheet.id]["COL"][col]?.manualSize) {
+                    if (exportDefaults || this.sizes[sheet.id]["COL"][col]) {
                         sheet.cols[col] = { ...sheet.cols[col], size: this.getColSize(sheet.id, col) };
                     }
                 }
@@ -36596,6 +36577,156 @@
         };
     }
 
+    class UIRowSizePlugin extends UIPlugin {
+        static getters = ["getRowSize"];
+        tallestCellInRow = {};
+        ctx = document.createElement("canvas").getContext("2d");
+        handle(cmd) {
+            switch (cmd.type) {
+                case "START":
+                    for (const sheetId of this.getters.getSheetIds()) {
+                        this.initializeSheet(sheetId);
+                    }
+                    break;
+                case "CREATE_SHEET": {
+                    this.initializeSheet(cmd.sheetId);
+                    break;
+                }
+                case "DUPLICATE_SHEET": {
+                    const tallestCells = deepCopy(this.tallestCellInRow[cmd.sheetId]);
+                    this.history.update("tallestCellInRow", cmd.sheetIdTo, tallestCells);
+                    break;
+                }
+                case "DELETE_SHEET":
+                    const tallestCells = { ...this.tallestCellInRow };
+                    delete tallestCells[cmd.sheetId];
+                    this.history.update("tallestCellInRow", tallestCells);
+                    break;
+                case "REMOVE_COLUMNS_ROWS": {
+                    if (cmd.dimension === "COL") {
+                        return;
+                    }
+                    const tallestCells = removeIndexesFromArray(this.tallestCellInRow[cmd.sheetId], cmd.elements);
+                    this.history.update("tallestCellInRow", cmd.sheetId, tallestCells);
+                    break;
+                }
+                case "ADD_COLUMNS_ROWS": {
+                    if (cmd.dimension === "COL") {
+                        return;
+                    }
+                    const addIndex = getAddHeaderStartIndex(cmd.position, cmd.base);
+                    const newCells = Array(cmd.quantity).fill(undefined);
+                    const newTallestCells = insertItemsAtIndex(this.tallestCellInRow[cmd.sheetId], newCells, addIndex);
+                    this.history.update("tallestCellInRow", cmd.sheetId, newTallestCells);
+                    break;
+                }
+                case "RESIZE_COLUMNS_ROWS":
+                    {
+                        const sheetId = cmd.sheetId;
+                        if (cmd.dimension === "ROW") {
+                            for (const row of cmd.elements) {
+                                const tallestCell = this.getRowTallestCell(sheetId, row);
+                                this.history.update("tallestCellInRow", sheetId, row, tallestCell);
+                            }
+                        }
+                        else {
+                            // Recompute row heights on col size change, they might have changed because of wrapped text
+                            for (const row of range(0, this.getters.getNumberRows(sheetId))) {
+                                for (const col of cmd.elements) {
+                                    this.updateRowSizeForCellChange(sheetId, row, col);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case "UPDATE_CELL":
+                    this.updateRowSizeForCellChange(cmd.sheetId, cmd.row, cmd.col);
+                    break;
+                case "ADD_MERGE":
+                case "REMOVE_MERGE":
+                    for (const target of cmd.target) {
+                        for (const position of positions(target)) {
+                            this.updateRowSizeForCellChange(cmd.sheetId, position.row, position.col);
+                        }
+                    }
+            }
+            return;
+        }
+        getRowSize(sheetId, row) {
+            return Math.round(this.getters.getUserRowSize(sheetId, row) ??
+                this.tallestCellInRow[sheetId][row]?.size ??
+                DEFAULT_CELL_HEIGHT);
+        }
+        updateRowSizeForCellChange(sheetId, row, col) {
+            const tallestCellInRow = this.tallestCellInRow[sheetId]?.[row];
+            if (tallestCellInRow?.cell.col === col) {
+                const newTallestCell = this.getRowTallestCell(sheetId, row);
+                this.history.update("tallestCellInRow", sheetId, row, newTallestCell);
+            }
+            const updatedCellHeight = this.getCellHeight({ sheetId, col, row });
+            if (updatedCellHeight <= DEFAULT_CELL_HEIGHT) {
+                return;
+            }
+            if ((!tallestCellInRow && updatedCellHeight > DEFAULT_CELL_HEIGHT) ||
+                (tallestCellInRow && updatedCellHeight > tallestCellInRow.size)) {
+                const newTallestCell = { cell: { sheetId, col, row }, size: updatedCellHeight };
+                this.history.update("tallestCellInRow", sheetId, row, newTallestCell);
+            }
+        }
+        initializeSheet(sheetId) {
+            const tallestCells = [];
+            for (let row = 0; row < this.getters.getNumberRows(sheetId); row++) {
+                const tallestCell = this.getRowTallestCell(sheetId, row);
+                tallestCells.push(tallestCell);
+            }
+            this.history.update("tallestCellInRow", sheetId, tallestCells);
+        }
+        /**
+         * Return the height the cell should have in the sheet, which is either DEFAULT_CELL_HEIGHT if the cell is in a multi-row
+         * merge, or the height of the cell computed based on its style/content.
+         */
+        getCellHeight(position) {
+            if (this.isInMultiRowMerge(position)) {
+                return DEFAULT_CELL_HEIGHT;
+            }
+            const cell = this.getters.getCell(position);
+            const colSize = this.getters.getColSize(position.sheetId, position.col);
+            return getDefaultCellHeight(this.ctx, cell, colSize);
+        }
+        isInMultiRowMerge(position) {
+            const merge = this.getters.getMerge(position);
+            return !!merge && merge.bottom !== merge.top;
+        }
+        /**
+         * Get the tallest cell of a row and its size.
+         */
+        getRowTallestCell(sheetId, row) {
+            const userRowSize = this.getters.getUserRowSize(sheetId, row);
+            if (userRowSize !== undefined) {
+                return undefined;
+            }
+            const cellIds = this.getters.getRowCells(sheetId, row);
+            let maxHeight = 0;
+            let tallestCell = undefined;
+            for (let i = 0; i < cellIds.length; i++) {
+                const cell = this.getters.getCellById(cellIds[i]);
+                if (!cell) {
+                    continue;
+                }
+                const position = this.getters.getCellPosition(cell.id);
+                const cellHeight = this.getCellHeight(position);
+                if (cellHeight > maxHeight && cellHeight > DEFAULT_CELL_HEIGHT) {
+                    maxHeight = cellHeight;
+                    tallestCell = { cell: position, size: cellHeight };
+                }
+            }
+            if (tallestCell && tallestCell.size > DEFAULT_CELL_HEIGHT) {
+                return tallestCell;
+            }
+            return undefined;
+        }
+    }
+
     /**
      * This plugin manage the autofill.
      *
@@ -40133,24 +40264,28 @@
         // Getters
         // ---------------------------------------------------------------------------
         getCellWidth(position) {
-            const text = this.getCellText(position);
             const style = this.getters.getCellComputedStyle(position);
-            const multiLineText = text.split(NEWLINE);
-            let contentWidth = Math.max(...multiLineText.map((line) => this.getTextWidth(line, style)));
+            let contentWidth = 0;
+            const content = this.getters.getEvaluatedCell(position).formattedValue;
+            if (content) {
+                const multiLineText = splitTextToWidth(this.ctx, content, style, undefined);
+                contentWidth += Math.max(...multiLineText.map((line) => computeTextWidth(this.ctx, line, style)));
+            }
             const icon = this.getters.getConditionalIcon(position);
             if (icon) {
-                contentWidth += computeIconWidth(this.getters.getCellStyle(position));
+                contentWidth += computeIconWidth(style);
             }
             const isFilterHeader = this.getters.isFilterHeader(position);
             if (isFilterHeader) {
                 contentWidth += ICON_EDGE_LENGTH + FILTER_ICON_MARGIN;
             }
-            if (contentWidth > 0) {
-                contentWidth += 2 * PADDING_AUTORESIZE_HORIZONTAL;
-                if (this.getters.getCellStyle(position).wrapping === "wrap") {
-                    const colWidth = this.getters.getColSize(this.getters.getActiveSheetId(), position.col);
-                    return Math.min(colWidth, contentWidth);
-                }
+            if (contentWidth === 0) {
+                return 0;
+            }
+            contentWidth += 2 * PADDING_AUTORESIZE_HORIZONTAL;
+            if (style.wrapping === "wrap") {
+                const colWidth = this.getters.getColSize(this.getters.getActiveSheetId(), position.col);
+                return Math.min(colWidth, contentWidth);
             }
             return contentWidth;
         }
@@ -40173,56 +40308,7 @@
         getCellMultiLineText(position, width) {
             const style = this.getters.getCellStyle(position);
             const text = this.getters.getCellText(position, this.getters.shouldShowFormulas());
-            const brokenText = [];
-            for (const line of text.split("\n")) {
-                const words = line.split(" ");
-                if (!width) {
-                    brokenText.push(line);
-                    continue;
-                }
-                let textLine = "";
-                let availableWidth = width;
-                for (let word of words) {
-                    const splitWord = this.splitWordToSpecificWidth(this.ctx, word, width, style);
-                    const lastPart = splitWord.pop();
-                    const lastPartWidth = computeTextWidth(this.ctx, lastPart, style);
-                    // At this step: "splitWord" is an array composed of parts of word whose
-                    // length is at most equal to "width".
-                    // Last part contains the end of the word.
-                    // Note that: When word length is less than width, then lastPart is equal
-                    // to word and splitWord is empty
-                    if (splitWord.length) {
-                        if (textLine !== "") {
-                            brokenText.push(textLine);
-                            textLine = "";
-                            availableWidth = width;
-                        }
-                        splitWord.forEach((wordPart) => {
-                            brokenText.push(wordPart);
-                        });
-                        textLine = lastPart;
-                        availableWidth = width - lastPartWidth;
-                    }
-                    else {
-                        // here "lastPart" is equal to "word" and the "word" size is smaller than "width"
-                        const _word = textLine === "" ? lastPart : " " + lastPart;
-                        const wordWidth = computeTextWidth(this.ctx, _word, style);
-                        if (wordWidth <= availableWidth) {
-                            textLine += _word;
-                            availableWidth -= wordWidth;
-                        }
-                        else {
-                            brokenText.push(textLine);
-                            textLine = lastPart;
-                            availableWidth = width - lastPartWidth;
-                        }
-                    }
-                }
-                if (textLine !== "") {
-                    brokenText.push(textLine);
-                }
-            }
-            return brokenText;
+            return splitTextToWidth(this.ctx, text, style, width);
         }
         /**
          * Returns the size, start and end coordinates of a column on an unfolded sheet
@@ -40280,26 +40366,6 @@
             const cellsPositions = positions(this.getters.getColsZone(sheetId, index, index));
             const sizes = cellsPositions.map((position) => this.getCellWidth({ sheetId, ...position }));
             return Math.max(0, ...sizes);
-        }
-        splitWordToSpecificWidth(ctx, word, width, style) {
-            const wordWidth = computeTextWidth(ctx, word, style);
-            if (wordWidth <= width) {
-                return [word];
-            }
-            const splitWord = [];
-            let wordPart = "";
-            for (let l of word) {
-                const wordPartWidth = computeTextWidth(ctx, wordPart + l, style);
-                if (wordPartWidth > width) {
-                    splitWord.push(wordPart);
-                    wordPart = l;
-                }
-                else {
-                    wordPart += l;
-                }
-            }
-            splitWord.push(wordPart);
-            return splitWord;
         }
         /**
          * Check that any "sheetId" in the command matches an existing
@@ -41617,7 +41683,7 @@
         status = "invisible";
         state;
         lastPasteState;
-        _isPaintingFormat = false;
+        paintFormatStatus = "inactive";
         originSheetId;
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -41632,7 +41698,7 @@
                     if (!this.state) {
                         return 24 /* CommandResult.EmptyClipboard */;
                     }
-                    const pasteOption = cmd.pasteOption || (this._isPaintingFormat ? "onlyFormat" : undefined);
+                    const pasteOption = cmd.pasteOption || (this.paintFormatStatus !== "inactive" ? "onlyFormat" : undefined);
                     return this.state.isPasteAllowed(cmd.target, { pasteOption });
                 case "PASTE_FROM_OS_CLIPBOARD": {
                     const state = new ClipboardOsState(cmd.text, this.getters, this.dispatch, this.selection);
@@ -41647,6 +41713,11 @@
                     const { cut, paste } = this.getDeleteCellsTargets(cmd.zone, cmd.shiftDimension);
                     const state = this.getClipboardStateForCopyCells(cut, "CUT");
                     return state.isPasteAllowed(paste);
+                }
+                case "ACTIVATE_PAINT_FORMAT": {
+                    if (this.paintFormatStatus !== "inactive") {
+                        return 95 /* CommandResult.AlreadyInPaintingFormatMode */;
+                    }
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -41664,11 +41735,13 @@
                     if (!this.state) {
                         break;
                     }
-                    const pasteOption = cmd.pasteOption || (this._isPaintingFormat ? "onlyFormat" : undefined);
-                    this._isPaintingFormat = false;
+                    const pasteOption = cmd.pasteOption || (this.paintFormatStatus !== "inactive" ? "onlyFormat" : undefined);
                     this.state.paste(cmd.target, { pasteOption, shouldPasteCF: true, selectTarget: true });
                     this.lastPasteState = this.state;
-                    this.status = "invisible";
+                    if (this.paintFormatStatus === "oneOff") {
+                        this.paintFormatStatus = "inactive";
+                        this.status = "invisible";
+                    }
                     break;
                 case "CLEAN_CLIPBOARD_HIGHLIGHT":
                     this.status = "invisible";
@@ -41736,8 +41809,13 @@
                 case "ACTIVATE_PAINT_FORMAT": {
                     const zones = this.getters.getSelectedZones();
                     this.state = this.getClipboardStateForCopyCells(zones, "COPY");
-                    this._isPaintingFormat = true;
                     this.status = "visible";
+                    if (cmd.persistent) {
+                        this.paintFormatStatus = "persistent";
+                    }
+                    else {
+                        this.paintFormatStatus = "oneOff";
+                    }
                     break;
                 }
                 case "DELETE_SHEET":
@@ -41749,6 +41827,11 @@
                         this.status = "invisible";
                     }
                     break;
+                case "CANCEL_PAINT_FORMAT": {
+                    this.paintFormatStatus = "inactive";
+                    this.status = "invisible";
+                    break;
+                }
                 default:
                     if (isCoreCommand(cmd)) {
                         this.status = "invisible";
@@ -41779,7 +41862,7 @@
             return this.state ? this.state.operation === "CUT" : false;
         }
         isPaintingFormat() {
-            return this._isPaintingFormat;
+            return this.paintFormatStatus !== "inactive";
         }
         // ---------------------------------------------------------------------------
         // Private methods
@@ -44414,6 +44497,7 @@
         .add("evaluation", EvaluationPlugin)
         .add("evaluation_chart", EvaluationChartPlugin)
         .add("evaluation_cf", EvaluationConditionalFormatPlugin)
+        .add("row_size", UIRowSizePlugin)
         .add("custom_colors", CustomColorsPlugin);
 
     const clickableCellRegistry = new Registry();
@@ -46058,6 +46142,27 @@
         class: String,
     };
 
+    class PaintFormatButton extends owl.Component {
+        static template = "o-spreadsheet-PaintFormatButton";
+        get isActive() {
+            return this.env.model.getters.isPaintingFormat();
+        }
+        onDblClick() {
+            this.env.model.dispatch("ACTIVATE_PAINT_FORMAT", { persistent: true });
+        }
+        togglePaintFormat() {
+            if (this.isActive) {
+                this.env.model.dispatch("CANCEL_PAINT_FORMAT");
+            }
+            else {
+                this.env.model.dispatch("ACTIVATE_PAINT_FORMAT", { persistent: false });
+            }
+        }
+    }
+    PaintFormatButton.props = {
+        class: { type: String, optional: true },
+    };
+
     // -----------------------------------------------------------------------------
     // TopBar
     // -----------------------------------------------------------------------------
@@ -46158,6 +46263,7 @@
             TopBarComposer,
             FontSizeEditor,
             ActionButton,
+            PaintFormatButton,
             BorderEditorWidget,
         };
         state = owl.useState({
@@ -50307,8 +50413,8 @@
 
 
     __info__.version = '16.4.0-alpha.7';
-    __info__.date = '2023-07-04T14:12:23.240Z';
-    __info__.hash = 'b04cf78';
+    __info__.date = '2023-07-11T13:24:13.075Z';
+    __info__.hash = '2dfa67f';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
