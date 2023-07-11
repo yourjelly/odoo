@@ -1,8 +1,9 @@
 /** @odoo-module alias=web_editor.test_utils **/
 
 import ajax from "web.ajax";
-import MockServer from "web.MockServer";
+import { MockServer } from "@web/../tests/helpers/mock_server";
 import testUtils from "web.test_utils";
+import * as coreUtils from "@web/core/utils/patch";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
 import { Wysiwyg } from '@web_editor/js/wysiwyg/wysiwyg';
 import options from "web_editor.snippets.options";
@@ -93,7 +94,7 @@ const SNIPPETS_TEMPLATE = `
         </div>
     </div>`;
 
-MockServer.include({
+coreUtils.patch(MockServer.prototype, 'web_editor', {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -103,7 +104,7 @@ MockServer.include({
      * @private
      * @returns {Promise}
      */
-    async _performRpc(route, args) {
+    async _performRPC(route, args) {
         if (args.model === "ir.ui.view" && args.method === 'render_public_asset') {
             if (args.args[0] === "web_editor.colorpicker") {
                 return COLOR_PICKER_TEMPLATE;
