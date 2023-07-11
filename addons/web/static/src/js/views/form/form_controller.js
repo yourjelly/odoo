@@ -487,7 +487,7 @@ var FormController = BasicController.extend({
         // if the `close` attribute is set
         def.then(function () {
             self._enableButtons();
-            if (attrs.close) {
+            if (attrs.close || attrs.special) {
                 self.trigger_up('close_dialog');
             }
         }).guardedCatch(this._enableButtons.bind(this));
