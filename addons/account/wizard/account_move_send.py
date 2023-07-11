@@ -532,7 +532,7 @@ class AccountMoveSend(models.Model):
         }
         for invoice, invoice_data in invoices_data_pdf.items():
             form = invoice_data['_form']
-            if form._need_invoice_document(invoice):
+            if form._need_invoice_document(invoice) and self.env['ir.actions.report'].search([('report_name', '=', 'account.report_invoice_with_payments')]):
                 form._prepare_invoice_pdf_report(invoice, invoice_data)
                 form._hook_invoice_document_after_pdf_report_render(invoice, invoice_data)
                 form._link_invoice_documents(invoice, invoice_data)
