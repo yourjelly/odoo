@@ -60,6 +60,8 @@
                                     </div>
                                     <div class="text-muted" invisible="trigger != 'on_change'"><i class="fa fa-lightbulb-o"/> Automation rules that run on live updates will be executed every time the trigger fields change, <em>whether you save or not</em>.</div>
                                 </div>
+                                <field name="url" widget="CopyClipboardURL"  attrs="{'invisible': [('trigger', '!=', 'on_webhook')]}" placeholder="URL will be created once the rule is saved."/>
+                                <field name="record_getter" />
                                 <label for="trg_date_range" class="oe_inline" string="Delay"
                                     invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']"/>
                                 <div class="o_row oe_inline" invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']" >

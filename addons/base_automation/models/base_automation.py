@@ -5,10 +5,12 @@ import datetime
 import logging
 import traceback
 from collections import defaultdict
+from uuid import uuid4
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import _, api, Command, exceptions, fields, models
+from odoo import _, api, Command, exceptions, fields, models, SUPERUSER_ID
+from odoo.addons.http_routing.models.ir_http import slugify
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools import safe_eval
 
@@ -79,6 +81,9 @@ class BaseAutomation(models.Model):
         store=True,
         readonly=False,
     )
+    url = fields.Char(compute='_compute_url')
+    webhook_uuid = fields.Char(string="Webhook UUID", readonly=True, copy=False, default=lambda self: str(uuid4()))
+    record_getter = fields.Char(help="This code will be run to find on which record the automation rule should be applied.")
     active = fields.Boolean(default=True, help="When unchecked, the rule is hidden and will not be executed.")
     trigger = fields.Selection(
         [
@@ -99,6 +104,7 @@ class BaseAutomation(models.Model):
             ('on_time', "Based on date field"),
             ('on_time_created', "After creation"),
             ('on_time_updated', "After last update"),
+            ('on_webhook', "On webhook"),
         ], string='Trigger',
         compute='_compute_trigger_and_trigger_field_ids', readonly=False, store=True, required=True)
     trg_selection_field_id = fields.Many2one(
@@ -176,6 +182,35 @@ class BaseAutomation(models.Model):
     # which fields have an impact on the registry and the cron
     CRITICAL_FIELDS = ['model_id', 'active', 'trigger', 'on_change_field_ids']
     RANGE_FIELDS = ['trg_date_range', 'trg_date_range_type']
+
+    def _compute_url(self):
+        for automation in self:
+            automation.url = "%s/web/hook/%s" % (automation.get_base_url(), automation.webhook_uuid)
+
+    def _execute_webhook(self, payload):
+        """ Execute the webhook for the given payload.
+        
+        The payload is a dictionnary that can be used by the `record_getter` to
+        idnetify the record on which the automation should be run.
+        """
+        self.ensure_one()
+        self_sudo = self.with_user(SUPERUSER_ID)
+        if self.record_getter:
+            try:
+                record = safe_eval.safe_eval(self_sudo.record_getter, self._get_eval_context(payload=payload))
+            except Exception as e:
+                _logger.warning(
+                    "Webhook #%s could not be triggered because the record_getter failed:\n%s",
+                    self_sudo.id, traceback.format_exc()
+                )
+                raise e
+        else:
+            record = None
+        if not record:
+            _logger.warning("Webhook #%s could not be triggered because no record to run was found.", self_sudo.id)
+            raise exceptions.ValidationError(_("No record to run the automation on was found."))
+        _logger.info("Webhook #%s triggered for %s(%s)", self_sudo.id, record._name, record.id)
+        return self_sudo._process(record)
 
     @api.constrains('trigger', 'action_server_ids')
     def _check_trigger_state(self):
@@ -408,17 +443,23 @@ class BaseAutomation(models.Model):
         automations = self.with_context(active_test=True).sudo().search(domain)
         return automations.with_env(self.env)
 
-    def _get_eval_context(self):
+    def _get_eval_context(self, payload=None):
         """ Prepare the context used when evaluating python code
             :returns: dict -- evaluation context given to safe_eval
         """
-        return {
+        self.ensure_one()
+        model = self.env[self.model_name]
+        eval_context = {
             'datetime': safe_eval.datetime,
             'dateutil': safe_eval.dateutil,
             'time': safe_eval.time,
             'uid': self.env.uid,
             'user': self.env.user,
+            'model': model,
         }
+        if payload is not None:
+            eval_context['payload'] = payload
+        return eval_context
 
     def _get_cron_interval(self, automations=None):
         """ Return the expected time interval used by the cron, in minutes. """
@@ -470,7 +511,7 @@ class BaseAutomation(models.Model):
     def _process(self, records, domain_post=None):
         """ Process automation ``self`` on the ``records`` that have not been done yet. """
         # filter out the records on which self has already been done
-        automation_done = self._context['__action_done']
+        automation_done = self._context.get('__action_done', {})
         records_done = automation_done.get(self, records.browse())
         records -= records_done
         if not records:

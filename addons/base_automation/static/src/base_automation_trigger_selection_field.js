@@ -31,9 +31,13 @@ const OPT_GROUPS = [
         triggers: ["on_unlink", "on_change"],
     },
     {
-        group: { sequence: 50, key: "deprecated", name: _lt("Deprecated (do not use)") },
-        triggers: ["on_create", "on_write"],
+        group: { sequence: 50, key: "external", name: _lt("External") },
+        triggers: ["on_webhook"],
     },
+    {
+        group: { sequence: 60, key: "deprecated", name: _lt("Deprecated (do not use)") },
+        triggers: ["on_create", "on_write"],
+    }
 ];
 
 function computeDerivedOptions(options, fields, recordValue) {
