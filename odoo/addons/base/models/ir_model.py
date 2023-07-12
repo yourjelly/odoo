@@ -1689,7 +1689,7 @@ class IrModelConstraint(models.Model):
                             write_uid=%s, type=%s, definition=%s, message=%s
                         WHERE id=%s"""
             cr.execute(query, (self.env.uid, type, definition, Json({'en_US': message}), cons_id))
-        return self.browse(cons_id)
+            return self.browse(cons_id)
 
     def _reflect_constraints(self, model_names):
         """ Reflect the SQL constraints of the given models. """
@@ -1717,8 +1717,8 @@ class IrModelConstraint(models.Model):
             if record:
                 xml_id = '%s.constraint_%s' % (module, conname)
                 data_list.append(dict(xml_id=xml_id, record=record))
-
-        self.env['ir.model.data']._update_xmlids(data_list)
+        if data_list:
+            self.env['ir.model.data']._update_xmlids(data_list)
 
 
 class IrModelRelation(models.Model):
@@ -2103,6 +2103,8 @@ class IrModelData(models.Model):
             try:
                 self.env.cr.execute(query, [arg for row in sub_rows for arg in row])
                 self.env.registry.clear_cache()
+                import traceback
+                traceback.print_stack()
             except Exception:
                 _logger.error("Failed to insert ir_model_data\n%s", "\n".join(str(row) for row in sub_rows))
                 raise

@@ -706,7 +706,7 @@ class Registry(Mapping):
 
         # log information about invalidation_cause
         caller_info = format_frame(inspect.currentframe().f_back)
-        log = _logger.info if self.loaded else _logger.debug
+        log = _logger.info if self.loaded else _logger.info
         log('Invalidating %s model caches from %s', ','.join(cache_names), caller_info)
 
     def clear_all_caches(self):
@@ -719,7 +719,8 @@ class Registry(Mapping):
             self.cache_invalidated.add(cache_name)
 
         caller_info = format_frame(inspect.currentframe().f_back)
-        _logger.info('Invalidating all model caches from %s', caller_info)
+        log = _logger.info if self.loaded else _logger.info
+        log('Invalidating all model caches from %s', caller_info)
 
     def is_an_ordinary_table(self, model):
         """ Return whether the given model has an ordinary table. """
