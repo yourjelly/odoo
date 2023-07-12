@@ -6096,6 +6096,9 @@ registry.ImageTools = ImageHandlerOption.extend({
     async resetCrop() {
         const img = this._getImg();
 
+        // Mount the ImageCrop to call the reset method. As we need the state of
+        // the component to be mounted before calling reset, mount it
+        // temporarily into the body.
         const imageCropWrapper = new ComponentWrapper(this, ImageCrop, {
             rpc: this._rpc.bind(this),
             activeOnStart: true,
