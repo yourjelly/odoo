@@ -42,7 +42,7 @@
                 </div>
             </main>
             <footer class="footer cash-move modal-footer">
-                <div class="button confirm disable highlight dynamic-size btn-btn-lg btn-primary" t-on-click="confirm">
+                <div class="button confirm disable highlight dynamic-size btn btn-lg btn-primary" t-on-click="confirm">
                     Confirm <span t-esc="env.utils.formatCurrency(state.parsedAmount)"/>
                 </div>
                 <div class="button cancel btn btn-lg btn-secondary" t-on-click="cancel">

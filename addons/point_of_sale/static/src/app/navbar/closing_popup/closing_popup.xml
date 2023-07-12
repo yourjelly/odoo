@@ -26,7 +26,7 @@
                                 <tr>
                                     <td t-esc="defaultCashDetails.name"/>
                                     <td t-esc="env.utils.formatCurrency(defaultCashDetails.amount)"/>
-                                    <td class="d-flex" t-on-input="(event) => this.handleInputChange(defaultCashDetails.id, event)">
+                                    <td class="input-group" t-on-input="(event) => this.handleInputChange(defaultCashDetails.id, event)">
                                         <input class="pos-input form-control" t-ref="closingCashInput" t-on-focus="ev=>ev.target.select()"/>
                                         <div class="button icon ClosePosPopup btn btn-secondary" t-on-click="openDetailsPopup">
                                             <i class="fa fa-money fa-2x" role="img" title="Open the money details popup"/>
