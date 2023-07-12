@@ -2871,6 +2871,18 @@ export class Wysiwyg extends Component {
     _bindOnBlur() {
         this.$editable.on('blur', this._onBlur);
     }
+    _getColorpickerTemplate() {
+        return this.orm.call(
+            'ir.ui.view',
+            'render_public_asset',
+            ['web_editor.colorpicker', {}]
+        )
+    }
+
+    // -----------------------------------------------------------------------------
+    // Legacy compatibility layer
+    // Remove me when all legacy widgets using wysiwyg are converted to OWL.
+    // -----------------------------------------------------------------------------
     _trigger_up(ev) {
         const evType = ev.name;
         const payload = ev.data;
@@ -2939,13 +2951,6 @@ export class Wysiwyg extends Component {
     }
     _useService(serviceName) {
         return useService(serviceName);
-    }
-    _getColorpickerTemplate() {
-        return this.orm.call(
-            'ir.ui.view',
-            'render_public_asset',
-            ['web_editor.colorpicker', {}]
-        )
     }
 }
 Wysiwyg.activeCollaborationChannelNames = new Set();
