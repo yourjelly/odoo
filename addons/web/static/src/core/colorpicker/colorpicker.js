@@ -82,15 +82,14 @@ export class Colorpicker extends Component {
                 });
             }
             this.el = this.elRef.el;
-            const $el = $(this.el);
-            this.$ = $el.find.bind($el);
+            this.$el = $(this.el);
 
-            $el.on('click', this._onClick.bind(this));
-            $el.on('keypress', this._onKeypress.bind(this));
-            $el.on('mousedown', '.o_color_pick_area', this._onMouseDownPicker.bind(this));
-            $el.on('mousedown', '.o_color_slider', this._onMouseDownSlider.bind(this));
-            $el.on('mousedown', '.o_opacity_slider', this._onMouseDownOpacitySlider.bind(this));
-            $el.on('change', '.o_color_picker_inputs', this._onChangeInputs.bind(this));
+            this.$el.on('click', this._onClick.bind(this));
+            this.$el.on('keypress', this._onKeypress.bind(this));
+            this.$el.on('mousedown', '.o_color_pick_area', this._onMouseDownPicker.bind(this));
+            this.$el.on('mousedown', '.o_color_slider', this._onMouseDownSlider.bind(this));
+            this.$el.on('mousedown', '.o_opacity_slider', this._onMouseDownOpacitySlider.bind(this));
+            this.$el.on('change', '.o_color_picker_inputs', this._onChangeInputs.bind(this));
 
             this.start();
         });
@@ -116,12 +115,12 @@ export class Colorpicker extends Component {
      * @override
      */
     start() {
-        this.$colorpickerArea = this.$('.o_color_pick_area');
-        this.$colorpickerPointer = this.$('.o_picker_pointer');
-        this.$colorSlider = this.$('.o_color_slider');
-        this.$colorSliderPointer = this.$('.o_slider_pointer');
-        this.$opacitySlider = this.$('.o_opacity_slider');
-        this.$opacitySliderPointer = this.$('.o_opacity_pointer');
+        this.$colorpickerArea = this.$el.find('.o_color_pick_area');
+        this.$colorpickerPointer = this.$el.find('.o_picker_pointer');
+        this.$colorSlider = this.$el.find('.o_color_slider');
+        this.$colorSliderPointer = this.$el.find('.o_slider_pointer');
+        this.$opacitySlider = this.$el.find('.o_opacity_slider');
+        this.$opacitySliderPointer = this.$el.find('.o_opacity_pointer');
 
         const rgba = convertCSSColorToRgba(this.props.defaultColor);
         if (rgba) {
@@ -214,11 +213,11 @@ export class Colorpicker extends Component {
     _updateUI() {
         // Update inputs
         for (const [color, value] of Object.entries(this.colorComponents)) {
-            this.$(`.o_${color}_input`).val(value);
+            this.$el.find(`.o_${color}_input`).val(value);
         }
 
         // Update preview
-        this.$('.o_color_preview').css('background-color', this.colorComponents.cssColor);
+        this.$el.find('.o_color_preview').css('background-color', this.colorComponents.cssColor);
 
         // Update picker area and picker pointer position
         this.$colorpickerArea.css(
@@ -500,24 +499,24 @@ export class Colorpicker extends Component {
     _onChangeInputs(ev) {
         switch ($(ev.target).data('colorMethod')) {
             case 'hex':
-                this._updateHex(this.$('.o_hex_input').val());
+                this._updateHex(this.$el.find('.o_hex_input').val());
                 break;
             case 'rgb':
                 this._updateRgba(
-                    parseInt(this.$('.o_red_input').val()),
-                    parseInt(this.$('.o_green_input').val()),
-                    parseInt(this.$('.o_blue_input').val())
+                    parseInt(this.$el.find('.o_red_input').val()),
+                    parseInt(this.$el.find('.o_green_input').val()),
+                    parseInt(this.$el.find('.o_blue_input').val())
                 );
                 break;
             case 'hsl':
                 this._updateHsl(
-                    parseInt(this.$('.o_hue_input').val()),
-                    parseInt(this.$('.o_saturation_input').val()),
-                    parseInt(this.$('.o_lightness_input').val())
+                    parseInt(this.$el.find('.o_hue_input').val()),
+                    parseInt(this.$el.find('.o_saturation_input').val()),
+                    parseInt(this.$el.find('.o_lightness_input').val())
                 );
                 break;
             case 'opacity':
-                this._updateOpacity(parseInt(this.$('.o_opacity_input').val()));
+                this._updateOpacity(parseInt(this.$el.find('.o_opacity_input').val()));
                 break;
         }
         this._updateUI();
