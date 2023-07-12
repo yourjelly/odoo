@@ -2,31 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { ancestors } from '@web_editor/js/common/wysiwyg_utils';
-
-class DropPrevious {
-    /**
-     * Registers a new promise and rejects the previous one
-     *
-     * @param {Promise} promise the new promise
-     * @returns {Promise}
-     */
-    add(promise) {
-        if (this.currentDef) {
-            this.currentDef.reject();
-        }
-        let rejection;
-        let res = new Promise((resolve, reject) => {
-            rejection = reject;
-            promise.then(resolve).catch((reason) => {
-                reject(reason);
-            });
-        });
-
-        this.currentDef = res;
-        this.currentDef.reject = rejection;
-        return res;
-    }
-}
+import { KeepLast } from '@web/core/utils/concurrency';
 
 export class LinkPopoverWidget {
     static createFor(params) {
@@ -76,7 +52,7 @@ export class LinkPopoverWidget {
         this.$target = $(params.target);
         this.container = params.container || this.target.ownerDocument.body;
         this.href = this.$target.attr('href'); // for template
-        this._dp = new DropPrevious();
+        this._keepLastPromise = new KeepLast();
     }
 
     /**
@@ -276,7 +252,7 @@ export class LinkPopoverWidget {
             }).removeClass('d-none');
             this.$previewFaviconFa.addClass('d-none');
         } else {
-            await this._dp.add($.get(this.target.href)).then(content => {
+            await this._keepLastPromise.add($.get(this.target.href)).then(content => {
                 const parser = new window.DOMParser();
                 const doc = parser.parseFromString(content, "text/html");
 
