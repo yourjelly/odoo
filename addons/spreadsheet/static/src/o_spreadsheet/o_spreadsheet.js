@@ -33291,6 +33291,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 searchFormulas: false,
             };
             this.toSearch = "";
+            this.isEvaluationDirty = false;
         }
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -33321,10 +33322,19 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "ADD_COLUMNS_ROWS":
                     this.clearSearch();
                     break;
+                case "UPDATE_CELL":
+                    this.isEvaluationDirty = true;
+                    break;
                 case "ACTIVATE_SHEET":
                 case "REFRESH_SEARCH":
                     this.refreshSearch();
                     break;
+            }
+        }
+        finalize() {
+            if (this.isEvaluationDirty) {
+                this.refreshSearch();
+                this.isEvaluationDirty = false;
             }
         }
         // ---------------------------------------------------------------------------
@@ -35163,15 +35173,15 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
      * This plugin handles this internal state.
      */
     class SelectionInputsManagerPlugin extends UIPlugin {
-        get currentInput() {
-            return this.focusedInputId ? this.inputs[this.focusedInputId] : null;
-        }
         constructor(getters, state, dispatch, config, selection) {
             super(getters, state, dispatch, config, selection);
             this.state = state;
             this.config = config;
             this.inputs = {};
             this.focusedInputId = null;
+        }
+        get currentInput() {
+            return this.focusedInputId ? this.inputs[this.focusedInputId] : null;
         }
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -42832,8 +42842,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.14';
-    __info__.date = '2023-06-26T14:45:27.638Z';
-    __info__.hash = '1e37a94';
+    __info__.date = '2023-07-12T12:39:58.613Z';
+    __info__.hash = 'bc10ec2';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
