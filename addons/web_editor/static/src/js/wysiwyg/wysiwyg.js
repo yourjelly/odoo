@@ -123,7 +123,7 @@ export class Wysiwyg extends Component {
         this.popover = this._useService("popover");
         this.busService = this.env.services.bus_service;
 
-        const getOnColorPicked = (colorType) => {
+        const getColorPickedHandler = (colorType) => {
             return (params) => {
                 if (this.hadNonCollapsedSelectionBeforeColorpicker) {
                     this.odooEditor.historyResetLatestComputedSelection(true);
@@ -141,7 +141,7 @@ export class Wysiwyg extends Component {
             };
         }
 
-        const getOnColorHover = (colorType) => {
+        const getColorHoverHandler = (colorType) => {
             return (props) => {
                 if (this.hadNonCollapsedSelectionBeforeColorpicker) {
                     this.odooEditor.historyResetLatestComputedSelection(true);
@@ -183,15 +183,15 @@ export class Wysiwyg extends Component {
 
             Object.assign(this.colorPalettesProps.text, colorPaletteCommonOptions, {
                 document: this.options.document,
-                onColorPicked: getOnColorPicked('text'),
-                onCustomColorPicked: getOnColorPicked('text'),
-                onColorHover: getOnColorHover('text'),
+                onColorPicked: getColorPickedHandler('text'),
+                onCustomColorPicked: getColorPickedHandler('text'),
+                onColorHover: getColorHoverHandler('text'),
             });
             Object.assign(this.colorPalettesProps.background, colorPaletteCommonOptions, {
                 document: this.options.document,
-                onColorPicked: getOnColorPicked('background'),
-                onCustomColorPicked: getOnColorPicked('background'),
-                onColorHover: getOnColorHover('background'),
+                onColorPicked: getColorPickedHandler('background'),
+                onCustomColorPicked: getColorPickedHandler('background'),
+                onColorHover: getColorHoverHandler('background'),
             });
 
             this._setToolbarProps();
