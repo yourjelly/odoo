@@ -60,13 +60,13 @@ export class ImageCrop extends Component {
             return this._show(newProps);
         });
         onWillDestroy(() => {
-            this.destroyed = true;
+            this._closeCropper();
         });
     }
 
-    destroy() {
-        if (this.destroyed) return;
-        this.destroyed = true;
+    _closeCropper() {
+        if (this._cropperClosed) return;
+        this._cropperClosed = true;
         if (this.$cropperImage) {
             this.$cropperImage.cropper('destroy');
             this.document.removeEventListener('mousedown', this._onDocumentMousedown, {capture: true});
@@ -101,7 +101,7 @@ export class ImageCrop extends Component {
         if (!props.media || !this.state.active) {
             return;
         }
-        this.destroyed = false;
+        this._cropperClosed = false;
         this.media = props.media;
         this.$media = $(this.media);
         // Needed for editors in iframes.
@@ -134,7 +134,7 @@ export class ImageCrop extends Component {
               title: _t("This image is an external image"),
               message: _t("This type of image is not supported for cropping.<br/>If you want to crop it, please first download it from the original source and upload it in Odoo."),
             });
-            return this.destroy();
+            return this._closeCropper();
         }
         const $cropperWrapper = this.$('.o_we_cropper_wrapper');
 
@@ -185,7 +185,7 @@ export class ImageCrop extends Component {
         this.initialSrc = await applyModifications(this.media, {forceModification: true, mimetype: this.mimetype});
         this.media.classList.toggle('o_we_image_cropped', cropped);
         this.$media.trigger('image_cropped');
-        this.destroy();
+        this._closeCropper();
     }
     /**
      * Returns an attribute's value for saving.
@@ -241,7 +241,7 @@ export class ImageCrop extends Component {
             case 'apply':
                 return this._save();
             case 'discard':
-                return this.destroy();
+                return this._closeCropper();
         }
     }
     /**
@@ -252,7 +252,7 @@ export class ImageCrop extends Component {
      */
     _onDocumentMousedown(ev) {
         if (document.body.contains(ev.target) && this.$(ev.target).length === 0) {
-            return this.destroy();
+            return this._closeCropper();
         }
     }
     /**
