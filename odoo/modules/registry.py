@@ -42,7 +42,6 @@ _registry_caches = {
     'templates.cached_values': 2048, # arbitrary
     'routing': 1024,  # 2 entries per website
     'routing.rewrites': 8192,  # url_rewrite entries
-    'xmlid': 1024,
 }
 class Registry(Mapping):
     """ Model registry for a particular database.

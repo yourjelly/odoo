@@ -1997,7 +1997,7 @@ class IrModelData(models.Model):
 
     # NEW V8 API
     @api.model
-    @tools.ormcache('xmlid', cache='xmlid')
+    @tools.ormcache('xmlid')
     def _xmlid_lookup(self, xmlid: str) -> tuple:
         """Low level xmlid lookup
         Return (id, res_model, res_id) or raise ValueError if not found
@@ -2045,12 +2045,12 @@ class IrModelData(models.Model):
         return super().copy(default)
 
     def write(self, values):
-        self.env.registry.clear_cache('xmlid')  # _xmlid_lookup
+        self.env.registry.clear_cache()  # _xmlid_lookup
         return super().write(values)
 
     def unlink(self):
         """ Regular unlink method, but make sure to clear the caches. """
-        self.env.registry.clear_cache('xmlid')  # _xmlid_lookup
+        self.env.registry.clear_cache()  # _xmlid_lookup
         return super(IrModelData, self).unlink()
 
     def _lookup_xmlids(self, xml_ids, model):
@@ -2102,7 +2102,7 @@ class IrModelData(models.Model):
             query = self._build_update_xmlids_query(sub_rows, update)
             try:
                 self.env.cr.execute(query, [arg for row in sub_rows for arg in row])
-                self.env.registry.clear_cache('xmlid')
+                self.env.registry.clear_cache()
             except Exception:
                 _logger.error("Failed to insert ir_model_data\n%s", "\n".join(str(row) for row in sub_rows))
                 raise
