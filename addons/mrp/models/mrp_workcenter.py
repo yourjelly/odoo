@@ -368,6 +368,7 @@ class MrpWorkcenterProductivityLoss(models.Model):
                 duration = max(duration, (date_stop - date_start).total_seconds() / 60.0)
         return round(duration, 2)
 
+
 class MrpWorkcenterProductivity(models.Model):
     _name = "mrp.workcenter.productivity"
     _description = "Workcenter Productivity Log"

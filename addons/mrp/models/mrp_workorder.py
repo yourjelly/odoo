@@ -599,10 +599,9 @@ class MrpWorkorder(models.Model):
         elif self.qty_producing == 0:
             self.qty_producing = self.qty_remaining
 
-        if self._should_start_timer():
-            self.env['mrp.workcenter.productivity'].create(
-                self._prepare_timeline_vals(self.duration, datetime.now())
-            )
+        self.env['mrp.workcenter.productivity'].create(
+            self._prepare_timeline_vals(self.duration, datetime.now())
+        )
 
         if self.production_id.state != 'progress':
             self.production_id.write({
@@ -858,9 +857,6 @@ class MrpWorkorder(models.Model):
             production_move._set_quantity_done(
                 float_round(self.qty_producing, precision_rounding=rounding)
             )
-
-    def _should_start_timer(self):
-        return True
 
     def _update_qty_producing(self, quantity):
         self.ensure_one()
