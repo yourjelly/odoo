@@ -1702,7 +1702,6 @@ export class Wysiwyg extends Component {
     _setToolbarProps() {
         this.state.toolbarProps = {
             ...this.options.toolbarOptions,
-
             onColorpaletteDropdownShow: this.onColorpaletteDropdownShow.bind(this),
             onColorpaletteDropdownHide: this.onColorpaletteDropdownHide.bind(this),
             textColorPaletteProps: this.colorPalettesProps.text,
