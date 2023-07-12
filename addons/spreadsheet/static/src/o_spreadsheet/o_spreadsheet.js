@@ -33319,8 +33319,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "REDO":
                 case "REMOVE_COLUMNS_ROWS":
                 case "ADD_COLUMNS_ROWS":
-                    this.clearSearch();
-                    break;
                 case "ACTIVATE_SHEET":
                 case "REFRESH_SEARCH":
                     this.refreshSearch();
@@ -42832,8 +42830,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.14';
-    __info__.date = '2023-06-26T14:45:27.638Z';
-    __info__.hash = '1e37a94';
+    __info__.date = '2023-07-12T12:57:10.290Z';
+    __info__.hash = '506a710';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

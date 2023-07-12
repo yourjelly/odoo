@@ -319,8 +319,8 @@
           t-on-contextmenu.prevent=""
           t-att-style="getCellClickableStyle(clickableCell.coordinates)"
         />
+        <FilterIconsOverlay/>
       </div>
-      <FilterIconsOverlay/>
       <VerticalScrollBar/>
       <HorizontalScrollBar/>
       <div class="o-scrollbar corner"/>
@@ -3249,6 +3249,6 @@
 </odoo>
 <!--
   __info__.version = '16.0.14';
-  __info__.date = '2023-06-26T14:45:30.322Z';
-  __info__.hash = '1e37a94';
+  __info__.date = '2023-07-12T12:57:13.067Z';
+  __info__.hash = '506a710';
 -->
