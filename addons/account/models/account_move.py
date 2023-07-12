@@ -3045,6 +3045,8 @@ class AccountMove(models.Model):
 
     def preview_invoice(self):
         self.ensure_one()
+        if not self.env.ref('account.account_invoices', False):
+            raise UserError(_("Invocie report is not available"))
         return {
             'type': 'ir.actions.act_url',
             'target': 'self',
@@ -3054,7 +3056,8 @@ class AccountMove(models.Model):
     def _compute_access_url(self):
         super(AccountMove, self)._compute_access_url()
         for move in self.filtered(lambda move: move.is_invoice()):
-            move.access_url = '/my/invoices/%s' % (move.id)
+            if self.env.ref('account.account_invoices', False):
+                move.access_url = '/my/invoices/%s' % (move.id)
 
     @api.depends('line_ids')
     def _compute_has_reconciled_entries(self):

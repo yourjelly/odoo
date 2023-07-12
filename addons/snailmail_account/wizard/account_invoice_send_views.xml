@@ -9,7 +9,7 @@
                 <xpath expr="//div[@name='option_email']" position='before'>
                     <div name="option_letter">
                         <field name="invalid_addresses" invisible="1"/>
-                        <div name="option" class="text-left d-inline-block">
+                        <div name="option" class="text-left d-inline-block"  attrs="{'invisible': [('snailmail_is_letter', '=', False)]}">
                             <field name="snailmail_is_letter" />
                             <b><label for="snailmail_is_letter"/></b>
                         </div>
