@@ -35031,45 +35031,60 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         // ---------------------------------------------------------------------------
         // Replace
         // ---------------------------------------------------------------------------
+        replaceMatch(replaceWith, selectedMatch) {
+            if (!this.currentSearchRegex) {
+                return false;
+            }
+            const sheetId = this.getters.getActiveSheetId();
+            const cell = this.getters.getCell({ sheetId, ...selectedMatch });
+            if ((cell === null || cell === void 0 ? void 0 : cell.isFormula) && !this.searchOptions.searchFormulas) {
+                return false;
+            }
+            const replaceRegex = new RegExp(this.currentSearchRegex.source, this.currentSearchRegex.flags + "g");
+            const toReplace = this.getSearchableString({
+                sheetId,
+                col: selectedMatch.col,
+                row: selectedMatch.row,
+            });
+            const newContent = toReplace.replace(replaceRegex, replaceWith);
+            this.dispatch("UPDATE_CELL", {
+                sheetId: this.getters.getActiveSheetId(),
+                col: selectedMatch.col,
+                row: selectedMatch.row,
+                content: newContent,
+            });
+            return true;
+        }
         /**
          * Replace the value of the currently selected match
          */
         replace(replaceWith) {
-            if (this.selectedMatchIndex === null || !this.currentSearchRegex) {
+            if (this.selectedMatchIndex === null) {
                 return;
             }
-            const matches = this.searchMatches;
-            const selectedMatch = matches[this.selectedMatchIndex];
-            const sheetId = this.getters.getActiveSheetId();
-            const cell = this.getters.getCell({ sheetId, ...selectedMatch });
-            if ((cell === null || cell === void 0 ? void 0 : cell.isFormula) && !this.searchOptions.searchFormulas) {
-                this.selectNextCell(Direction.next);
-            }
-            else {
-                const replaceRegex = new RegExp(this.currentSearchRegex.source, this.currentSearchRegex.flags + "g");
-                const toReplace = this.getSearchableString({
-                    sheetId,
-                    col: selectedMatch.col,
-                    row: selectedMatch.row,
-                });
-                const newContent = toReplace.replace(replaceRegex, replaceWith);
-                this.dispatch("UPDATE_CELL", {
-                    sheetId: this.getters.getActiveSheetId(),
-                    col: selectedMatch.col,
-                    row: selectedMatch.row,
-                    content: newContent,
-                });
+            const selectedMatch = this.searchMatches[this.selectedMatchIndex];
+            const replaced = this.replaceMatch(replaceWith, selectedMatch);
+            if (replaced) {
                 this.searchMatches.splice(this.selectedMatchIndex, 1);
                 this.selectNextCell(Direction.current);
+            }
+            else {
+                this.selectNextCell(Direction.next);
             }
         }
         /**
          * Apply the replace function to all the matches one time.
          */
         replaceAll(replaceWith) {
-            const matchCount = this.searchMatches.length;
-            for (let i = 0; i < matchCount; i++) {
-                this.replace(replaceWith);
+            for (let i = 0; i < this.searchMatches.length; i++) {
+                const replaced = this.replaceMatch(replaceWith, this.searchMatches[i]);
+                if (replaced) {
+                    this.searchMatches.splice(i, 1);
+                    i--; // Adjust the index due to splice operation
+                }
+            }
+            if (this.searchMatches.length === 0) {
+                this.selectedMatchIndex = null;
             }
         }
         getSearchableString(position) {
@@ -36174,14 +36189,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
      * This plugin handles this internal state.
      */
     class SelectionInputsManagerPlugin extends UIPlugin {
+        get currentInput() {
+            return this.focusedInputId ? this.inputs[this.focusedInputId] : null;
+        }
         constructor(config) {
             super(config);
             this.config = config;
             this.inputs = {};
             this.focusedInputId = null;
-        }
-        get currentInput() {
-            return this.focusedInputId ? this.inputs[this.focusedInputId] : null;
         }
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -44284,8 +44299,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.1.15';
-    __info__.date = '2023-06-26T21:56:50.699Z';
-    __info__.hash = '2b264ad';
+    __info__.date = '2023-07-13T09:24:05.125Z';
+    __info__.hash = '4edd8bf';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
