@@ -26,29 +26,29 @@ msgstr ""
 msgid ""
 "<i>Your order has been saved.</i> Please come to the store to pay for your "
 "products"
-msgstr ""
+msgstr "/"
 "<i>Votre commande a été enregistrée.</i> Veuillez venir au magasin pour "
 "payer vos produits"
 
 #. module: website_sale_picking
 #: model_terms:ir.ui.view,arch_db:website_sale_picking.payment_confirmation_status
 msgid "<span class=\"text-muted\"> (On site picking)</span>"
-msgstr "<span class=\"text-muted\"> (Retrait sur site)</span>"
+msgstr "/<span class=\"text-muted\"> (Retrait sur site)</span>"
 
 #. module: website_sale_picking
 #: model:ir.model,name:website_sale_picking.model_res_config_settings
 msgid "Config Settings"
-msgstr "Paramètres de configuration"
+msgstr "/Paramètres de configuration"
 
 #. module: website_sale_picking
 #: model:ir.model.fields,field_description:website_sale_picking.field_payment_provider__custom_mode
 msgid "Custom Mode"
-msgstr "Mode personnalisé"
+msgstr "/Mode personnalisé"
 
 #. module: website_sale_picking
 #: model_terms:ir.ui.view,arch_db:website_sale_picking.res_config_settings_view_form
 msgid "Customize Pickup Sites"
-msgstr "Personnaliser les sites d'enlèvement"
+msgstr "/Personnaliser les sites d'enlèvement"
 
 #. module: website_sale_picking
 #. openerp-web
@@ -57,7 +57,7 @@ msgstr "Personnaliser les sites d'enlèvement"
 msgid ""
 "If you believe that it is an error, please contact the website "
 "administrator."
-msgstr ""
+msgstr "/"
 "Si vous pensez qu'il s'agit d'une erreur, veuillez contacter "
 "l'administrateur du site web."
 
@@ -66,98 +66,98 @@ msgstr ""
 #: code:addons/website_sale_picking/static/src/js/checkout_form.js:0
 #, python-format
 msgid "No suitable payment option could be found."
-msgstr "Aucune option de paiement appropriée n'a pu être trouvée."
+msgstr "/Aucune option de paiement appropriée n'a pu être trouvée."
 
 #. module: website_sale_picking
 #: model:ir.model.fields.selection,name:website_sale_picking.selection__payment_provider__custom_mode__onsite
 msgid "On Site"
-msgstr "Sur site"
+msgstr "/Sur site"
 
 #. module: website_sale_picking
 #: model:product.product,name:website_sale_picking.onsite_delivery_product
 #: model:product.template,name:website_sale_picking.onsite_delivery_product_product_template
 msgid "On site picking"
-msgstr "Retrait sur site"
+msgstr "/Retrait sur site"
 
 #. module: website_sale_picking
 #: model:payment.provider,name:website_sale_picking.payment_provider_onsite
 #: model_terms:product.product,description:website_sale_picking.onsite_delivery_product
 #: model_terms:product.template,description:website_sale_picking.onsite_delivery_product_product_template
 msgid "Pay in store when picking the product"
-msgstr "Paiement en magasin lors du retrait du produit"
+msgstr "/Paiement en magasin lors du retrait du produit"
 
 #. module: website_sale_picking
 #: model:ir.model,name:website_sale_picking.model_payment_provider
 msgid "Payment Provider"
-msgstr "Fournisseur de paiement"
+msgstr "/Fournisseur de paiement"
 
 #. module: website_sale_picking
 #: model:ir.model.fields,field_description:website_sale_picking.field_res_config_settings__picking_site_ids
 #: model:ir.model.fields,field_description:website_sale_picking.field_website__picking_site_ids
 #: model_terms:ir.ui.view,arch_db:website_sale_picking.res_config_settings_view_form
 msgid "Picking sites"
-msgstr "Sites de retrait"
+msgstr "/Sites de retrait"
 
 #. module: website_sale_picking
 #: model:ir.model.fields.selection,name:website_sale_picking.selection__delivery_carrier__delivery_type__onsite
 msgid "Pickup in store"
-msgstr "Enlèvement en magasin"
+msgstr "/Enlèvement en magasin"
 
 #. module: website_sale_picking
 #: model:ir.model.fields,field_description:website_sale_picking.field_delivery_carrier__delivery_type
 msgid "Provider"
-msgstr "Fournisseur"
+msgstr "/Fournisseur"
 
 #. module: website_sale_picking
 #: model:ir.model,name:website_sale_picking.model_delivery_carrier
 msgid "Shipping Methods"
-msgstr "Modes d'expédition"
+msgstr "/Modes d'expédition"
 
 #. module: website_sale_picking
 #: code:addons/website_sale_picking/models/delivery_carrier.py:0
 #, python-format
 msgid "The picking site and warehouse must share the same company"
-msgstr "Le site de retrait et l'entrepôt doivent partager la même société"
+msgstr "/Le site de retrait et l'entrepôt doivent partager la même société"
 
 #. module: website_sale_picking
 #: model:product.product,uom_name:website_sale_picking.onsite_delivery_product
 #: model:product.template,uom_name:website_sale_picking.onsite_delivery_product_product_template
 msgid "Units"
-msgstr "Unité(s)"
+msgstr "/Unité(s)"
 
 #. module: website_sale_picking
 #: model:ir.model.fields,field_description:website_sale_picking.field_delivery_carrier__warehouse_id
 msgid "Warehouse"
-msgstr "Entrepôt"
+msgstr "/Entrepôt"
 
 #. module: website_sale_picking
 #: model:ir.model,name:website_sale_picking.model_website
 msgid "Website"
-msgstr "Site web"
+msgstr "/Site web"
 
 #. module: website_sale_picking
 #: code:addons/website_sale_picking/controllers/main.py:0
 #, python-format
 msgid "You cannot pay onsite if the delivery is not onsite"
-msgstr ""
+msgstr "/"
 "Vous ne pouvez pas payer sur place si la livraison n'est pas sur place"
 
 #. module: website_sale_picking
 #: model_terms:payment.provider,auth_msg:website_sale_picking.payment_provider_onsite
 msgid "Your payment has been authorized."
-msgstr "Votre paiement a été autorisé."
+msgstr "/Votre paiement a été autorisé."
 
 #. module: website_sale_picking
 #: model_terms:payment.provider,cancel_msg:website_sale_picking.payment_provider_onsite
 msgid "Your payment has been cancelled."
-msgstr "Votre paiement a été annulé."
+msgstr "/Votre paiement a été annulé."
 
 #. module: website_sale_picking
 #: model_terms:payment.provider,done_msg:website_sale_picking.payment_provider_onsite
 msgid "Your payment has been successfully processed. Thank you!"
-msgstr "Votre paiement a été traité avec succès. Merci !"
+msgstr "/Votre paiement a été traité avec succès. Merci !"
 
 #. module: website_sale_picking
 #: model:delivery.carrier,name:website_sale_picking.default_onsite_carrier
 msgid "[On Site Pick] My Shop 1"
-msgstr "[Retrait sur site] My Shop 1"
+msgstr "/[Retrait sur site] My Shop 1"

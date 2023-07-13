@@ -24,11 +24,11 @@ msgstr ""
 #: code:addons/web_kanban_gauge/static/src/js/kanban_gauge.js:99
 #, python-format
 msgid "Max: "
-msgstr "Max: "
+msgstr "/Max: "
 
 #. module: web_kanban_gauge
 #. openerp-web
 #: code:addons/web_kanban_gauge/static/src/js/kanban_gauge.js:97
 #, python-format
 msgid "Value: "
-msgstr "Valeur: "
+msgstr "/Valeur: "

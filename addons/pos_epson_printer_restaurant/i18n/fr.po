@@ -23,29 +23,29 @@ msgstr ""
 #. module: pos_epson_printer_restaurant
 #: model:ir.model.fields,field_description:pos_epson_printer_restaurant.field_restaurant_printer__epson_printer_ip
 msgid "Epson Printer IP Address"
-msgstr "Adresse IP de l'imprimante Epson"
+msgstr "/Adresse IP de l'imprimante Epson"
 
 #. module: pos_epson_printer_restaurant
 #: model:ir.model.fields,help:pos_epson_printer_restaurant.field_restaurant_printer__epson_printer_ip
 msgid "Local IP address of an Epson receipt printer."
-msgstr "Adresse IP locale d'une imprimante de reçus Epson."
+msgstr "/Adresse IP locale d'une imprimante de reçus Epson."
 
 #. module: pos_epson_printer_restaurant
 #: model:ir.model,name:pos_epson_printer_restaurant.model_pos_session
 msgid "Point of Sale Session"
-msgstr "Session du point de vente"
+msgstr "/Session du point de vente"
 
 #. module: pos_epson_printer_restaurant
 #: model:ir.model.fields,field_description:pos_epson_printer_restaurant.field_restaurant_printer__printer_type
 msgid "Printer Type"
-msgstr "Type d'imprimante"
+msgstr "/Type d'imprimante"
 
 #. module: pos_epson_printer_restaurant
 #: model:ir.model,name:pos_epson_printer_restaurant.model_restaurant_printer
 msgid "Restaurant Printer"
-msgstr "Imprimante du restaurant"
+msgstr "/Imprimante du restaurant"
 
 #. module: pos_epson_printer_restaurant
 #: model:ir.model.fields.selection,name:pos_epson_printer_restaurant.selection__restaurant_printer__printer_type__epson_epos
 msgid "Use an Epson printer"
-msgstr "Utiliser une imprimante Epson"
+msgstr "/Utiliser une imprimante Epson"

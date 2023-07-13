@@ -25,38 +25,38 @@ msgstr ""
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "%(reminder_type)s - %(duration)s Days"
-msgstr "%(reminder_type)s - %(duration)s Jours"
+msgstr "/%(reminder_type)s - %(duration)s Jours"
 
 #. module: microsoft_calendar
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "%(reminder_type)s - %(duration)s Hours"
-msgstr "%(reminder_type)s - %(duration)s Heures"
+msgstr "/%(reminder_type)s - %(duration)s Heures"
 
 #. module: microsoft_calendar
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "%(reminder_type)s - %(duration)s Minutes"
-msgstr "%(reminder_type)s - %(duration)s Minutes"
+msgstr "/%(reminder_type)s - %(duration)s Minutes"
 
 #. module: microsoft_calendar
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "%s - At time of event"
-msgstr "%s - Au moment de l'événément"
+msgstr "/%s - Au moment de l'événément"
 
 #. module: microsoft_calendar
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "(No title)"
-msgstr "(Pas de titre)"
+msgstr "/(Pas de titre)"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__active
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__active
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__active
 msgid "Active"
-msgstr "Actif"
+msgstr "/Actif"
 
 #. module: microsoft_calendar
 #. openerp-web
@@ -65,7 +65,7 @@ msgstr "Actif"
 msgid ""
 "An administrator needs to configure Outlook Synchronization before you can "
 "use it!"
-msgstr ""
+msgstr "/"
 "Un administrateur doit configurer la synchronisation d'Outlook avant que "
 "vous puissiez l'utiliser !"
 
@@ -77,7 +77,7 @@ msgid ""
 " invalid or has already expired [%s]. You should check your Client ID and "
 "secret on the Microsoft Azure portal or try to stop and restart your "
 "calendar synchronisation."
-msgstr ""
+msgstr "/"
 "Une erreur s'est produite lors de la génération du jeton. Votre code "
 "d'autorisation est peut-être invalide ou a déjà expiré [%s]. Vous devez "
 "vérifier votre ID client et votre secret sur le portail Microsoft Azure ou "
@@ -86,32 +86,32 @@ msgstr ""
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_calendar_attendee
 msgid "Calendar Attendee Information"
-msgstr "Informations des participants au calendrier"
+msgstr "/Informations des participants au calendrier"
 
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_calendar_event
 msgid "Calendar Event"
-msgstr "Événement calendrier"
+msgstr "/Événement calendrier"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.microsoft_calendar_reset_account_view_form
 msgid "Cancel"
-msgstr "Annuler"
+msgstr "/Annuler"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.res_config_settings_view_form
 msgid "Client ID"
-msgstr "ID client"
+msgstr "/ID client"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.res_config_settings_view_form
 msgid "Client Secret"
-msgstr "Secret client"
+msgstr "/Secret client"
 
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_res_config_settings
 msgid "Config Settings"
-msgstr "Paramètres de configuration"
+msgstr "/Paramètres de configuration"
 
 #. module: microsoft_calendar
 #. openerp-web
@@ -119,47 +119,47 @@ msgstr "Paramètres de configuration"
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #, python-format
 msgid "Configuration"
-msgstr "Configuration"
+msgstr "/Configuration"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.microsoft_calendar_reset_account_view_form
 msgid "Confirm"
-msgstr "Confirmer"
+msgstr "/Confirmer"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__create_uid
 msgid "Created by"
-msgstr "Créé par"
+msgstr "/Créé par"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__create_date
 msgid "Created on"
-msgstr "Créé le"
+msgstr "/Créé le"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__delete_odoo
 msgid "Delete from Odoo"
-msgstr "Supprimer dans Odoo"
+msgstr "/Supprimer dans Odoo"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__delete_both
 msgid "Delete from both"
-msgstr "Supprimer des deux"
+msgstr "/Supprimer des deux"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__delete_microsoft
 msgid "Delete from the current Microsoft Calendar account"
-msgstr "Supprimer du compte Microsoft Calendar actuel"
+msgstr "/Supprimer du compte Microsoft Calendar actuel"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__display_name
 msgid "Display Name"
-msgstr "Nom d'affichage"
+msgstr "/Nom d'affichage"
 
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_calendar_recurrence
 msgid "Event Recurrence Rule"
-msgstr "Règle de récurrence de l'événement"
+msgstr "/Règle de récurrence de l'événement"
 
 #. module: microsoft_calendar
 #: code:addons/microsoft_calendar/models/calendar.py:0
@@ -168,7 +168,7 @@ msgid ""
 "For a correct synchronization between Odoo and Outlook Calendar, all attendees must have an email address. However, some events do not respect this condition. As long as the events are incorrect, the calendars will not be synchronized.\n"
 "Either update the events/attendees or archive these events %s:\n"
 "%s"
-msgstr ""
+msgstr "/"
 "Pour une synchronisation correcte entre Odoo et le calendrier Outlook, tous les participants doivent avoir une adresse email. Cependant, certains événements ne respectent pas cette condition. Tant que les événements sont incorrects, les calendriers ne seront pas synchronisés.\n"
 "Mettez à jour les événements et les participants ou archivez ces événements %s:\n"
 "%s"
@@ -176,107 +176,107 @@ msgstr ""
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__id
 msgid "ID"
-msgstr "ID"
+msgstr "/ID"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,help:microsoft_calendar.field_calendar_event__active
 msgid ""
 "If the active field is set to false, it will allow you to hide the event "
 "alarm information without removing it."
-msgstr ""
+msgstr "/"
 "Si le champ actif n'est pas coché, il vous permet de masquer l'alarme de cet"
 " événement sans la supprimer."
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset____last_update
 msgid "Last Modified on"
-msgstr "Dernière modification le"
+msgstr "/Dernière modification le"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__write_uid
 msgid "Last Updated by"
-msgstr "Dernière mise à jour par"
+msgstr "/Dernière mise à jour par"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__write_date
 msgid "Last Updated on"
-msgstr "Dernière mise à jour le"
+msgstr "/Dernière mise à jour le"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__dont_delete
 msgid "Leave them untouched"
-msgstr "Ne les modifiez pas"
+msgstr "/Ne les modifiez pas"
 
 #. module: microsoft_calendar
 #: model:ir.actions.act_window,name:microsoft_calendar.microsoft_calendar_reset_account_action
 #: model:ir.model,name:microsoft_calendar.model_microsoft_calendar_account_reset
 msgid "Microsoft Calendar Account Reset"
-msgstr "Réinitialisation du compte Microsoft Calendar"
+msgstr "/Réinitialisation du compte Microsoft Calendar"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__microsoft_id
 msgid "Microsoft Calendar Event Id"
-msgstr "Id de l'événement Microsoft Calendar"
+msgstr "/Id de l'événement Microsoft Calendar"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__microsoft_id
 msgid "Microsoft Calendar Id"
-msgstr "Id Microsoft Calendar"
+msgstr "/Id Microsoft Calendar"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__microsoft_id
 msgid "Microsoft Calendar Recurrence Id"
-msgstr "Id récurrence Microsoft Calendar"
+msgstr "/Id récurrence Microsoft Calendar"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_config_settings__cal_microsoft_client_id
 msgid "Microsoft Client_id"
-msgstr "Client_id Microsoft"
+msgstr "/Client_id Microsoft"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_config_settings__cal_microsoft_client_secret
 msgid "Microsoft Client_key"
-msgstr "Client_key Microsoft"
+msgstr "/Client_key Microsoft"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__microsoft_calendar_sync_token
 msgid "Microsoft Next Sync Token"
-msgstr "Jeton de la prochaine sync Microsoft"
+msgstr "/Jeton de la prochaine sync Microsoft"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__microsoft_recurrence_master_id
 msgid "Microsoft Recurrence Master Id"
-msgstr "Master Id récurrence Microsoft"
+msgstr "/Master Id récurrence Microsoft"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__need_sync_m
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__need_sync_m
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__need_sync_m
 msgid "Need Sync M"
-msgstr "Sync M nécessaire"
+msgstr "/Sync M nécessaire"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
 msgid "Next Sync Token"
-msgstr "Jeton de la prochaine sync"
+msgstr "/Jeton de la prochaine sync"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__sync_policy
 msgid "Next Synchronization"
-msgstr "Prochaine synchronisation"
+msgstr "/Prochaine synchronisation"
 
 #. module: microsoft_calendar
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "Notification"
-msgstr "Notification"
+msgstr "/Notification"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__ms_organizer_event_id
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__ms_organizer_event_id
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__ms_organizer_event_id
 msgid "Organizer event Id"
-msgstr "Id organisateur de l'événement"
+msgstr "/Id organisateur de l'événement"
 
 #. module: microsoft_calendar
 #. openerp-web
@@ -284,17 +284,17 @@ msgstr "Id organisateur de l'événement"
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.xml:0
 #, python-format
 msgid "Outlook"
-msgstr "Outlook"
+msgstr "/Outlook"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
 msgid "Outlook Calendar"
-msgstr "Calendrier Outlook"
+msgstr "/Calendrier Outlook"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__microsoft_synchronization_stopped
 msgid "Outlook Synchronization stopped"
-msgstr "Synchronisation Outlook arrêtée"
+msgstr "/Synchronisation Outlook arrêtée"
 
 #. module: microsoft_calendar
 #: code:addons/microsoft_calendar/models/calendar.py:0
@@ -303,7 +303,7 @@ msgid ""
 "Outlook limitation: in a recurrence, an event cannot be moved to or before "
 "the day of the previous event, and cannot be moved to or after the day of "
 "the following event."
-msgstr ""
+msgstr "/"
 "Limite Outlook : pour un événement récurrent, un événement ne peut pas être "
 "déplacé au jour de l'événement précédent ou avant et ne peut pas être "
 "déplacé au jour de l'événement suivant ou après. "
@@ -313,44 +313,44 @@ msgstr ""
 #: model:ir.cron,cron_name:microsoft_calendar.ir_cron_sync_all_cals
 #: model:ir.cron,name:microsoft_calendar.ir_cron_sync_all_cals
 msgid "Outlook: synchronization"
-msgstr "Outlook : synchronisation"
+msgstr "/Outlook : synchronisation"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
 msgid "Refresh Token"
-msgstr "Actualiser le jeton"
+msgstr "/Actualiser le jeton"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
 msgid "Reset Account"
-msgstr "Réinitialiser le compte"
+msgstr "/Réinitialiser le compte"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.microsoft_calendar_reset_account_view_form
 msgid "Reset Outlook Calendar Account"
-msgstr "Réinitialiser le compte Outlook Calendar"
+msgstr "/Réinitialiser le compte Outlook Calendar"
 
 #. module: microsoft_calendar
 #. openerp-web
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #, python-format
 msgid "Success"
-msgstr "Succès"
+msgstr "/Succès"
 
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_microsoft_calendar_sync
 msgid "Synchronize a record with Microsoft Calendar"
-msgstr "Synchroniser un enregistrement avec Microsoft Calendar"
+msgstr "/Synchroniser un enregistrement avec Microsoft Calendar"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__sync_policy__all
 msgid "Synchronize all existing events"
-msgstr "Synchroniser tous les événements existants"
+msgstr "/Synchroniser tous les événements existants"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__sync_policy__new
 msgid "Synchronize only new events"
-msgstr "Synchroniser uniquement les nouveaux événements"
+msgstr "/Synchroniser uniquement les nouveaux événements"
 
 #. module: microsoft_calendar
 #. openerp-web
@@ -359,7 +359,7 @@ msgstr "Synchroniser uniquement les nouveaux événements"
 msgid ""
 "The Outlook Synchronization needs to be configured before you can use it, do"
 " you want to do it now?"
-msgstr ""
+msgstr "/"
 "La synchronisation d'Outlook doit être configurée avant que vous puissiez "
 "l'utiliser, voulez-vous le faire maintenant ?"
 
@@ -367,49 +367,49 @@ msgstr ""
 #: code:addons/microsoft_calendar/models/res_users.py:0
 #, python-format
 msgid "The account for the Outlook Calendar service is not configured."
-msgstr "Le compte pour le Calendrier Outlook n'est pas configuré."
+msgstr "/Le compte pour le Calendrier Outlook n'est pas configuré."
 
 #. module: microsoft_calendar
 #. openerp-web
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #, python-format
 msgid "The synchronization with Outlook calendar was successfully stopped."
-msgstr ""
+msgstr "/"
 "La synchronisation avec le calendrier Outlook a été arrêtée avec succès."
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,help:microsoft_calendar.field_microsoft_calendar_account_reset__delete_policy
 msgid "This will only affect events for which the user is the owner"
-msgstr ""
+msgstr "/"
 "Cela n'affectera que les événements dont l'utilisateur est le responsable"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
 msgid "Token Validity"
-msgstr "Validité du jeton d'accès"
+msgstr "/Validité du jeton d'accès"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__ms_universal_event_id
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__ms_universal_event_id
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__ms_universal_event_id
 msgid "Universal event Id"
-msgstr "Id événement universel"
+msgstr "/Id événement universel"
 
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_res_users
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__user_id
 msgid "User"
-msgstr "Utilisateur"
+msgstr "/Utilisateur"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
 msgid "User Token"
-msgstr "Jeton d'utilisateur"
+msgstr "/Jeton d'utilisateur"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__delete_policy
 msgid "User's Existing Events"
-msgstr "Événements existants de l'utilisateur"
+msgstr "/Événements existants de l'utilisateur"
 
 #. module: microsoft_calendar
 #. openerp-web
@@ -418,6 +418,6 @@ msgstr "Événements existants de l'utilisateur"
 msgid ""
 "You are about to stop the synchronization of your calendar with Outlook. Are"
 " you sure you want to continue?"
-msgstr ""
+msgstr "/"
 "Vous êtes sur le point d'arrêter la synchronisation de votre calendrier avec"
 " Outlook. Êtes-vous sûr de vouloir continuer ?"

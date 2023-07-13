@@ -24,18 +24,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sms.website_visitor_view_kanban
 #: model_terms:ir.ui.view,arch_db:website_sms.website_visitor_view_tree
 msgid "SMS"
-msgstr "SMS"
+msgstr "/SMS"
 
 #. module: website_sms
 #: model_terms:ir.ui.view,arch_db:website_sms.website_visitor_view_form
 msgid "Send SMS"
-msgstr "Envoyer le SMS"
+msgstr "/Envoyer le SMS"
 
 #. module: website_sms
 #: code:addons/website_sms/models/website_visitor.py:0
 #, python-format
 msgid "Send SMS Text Message"
-msgstr "Envoyer un SMS"
+msgstr "/Envoyer un SMS"
 
 #. module: website_sms
 #: code:addons/website_sms/models/website_visitor.py:0
@@ -43,11 +43,11 @@ msgstr "Envoyer un SMS"
 msgid ""
 "There are no contact and/or no phone or mobile numbers linked to this "
 "visitor."
-msgstr ""
+msgstr "/"
 "Il n'y a aucun contact et/ou numéro de téléphone ou de portable liés à ce "
 "visiteur."
 
 #. module: website_sms
 #: model:ir.model,name:website_sms.model_website_visitor
 msgid "Website Visitor"
-msgstr "Visiteur du site web"
+msgstr "/Visiteur du site web"

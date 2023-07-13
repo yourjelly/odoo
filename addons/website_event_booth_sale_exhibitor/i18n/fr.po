@@ -24,39 +24,39 @@ msgstr ""
 #. module: website_event_booth_sale_exhibitor
 #: model:ir.model,name:website_event_booth_sale_exhibitor.model_event_booth_registration
 msgid "Event Booth Registration"
-msgstr "Réservation d'un stand d'événement"
+msgstr "/Réservation d'un stand d'événement"
 
 #. module: website_event_booth_sale_exhibitor
 #: model:ir.model.fields,field_description:website_event_booth_sale_exhibitor.field_event_booth_registration__sponsor_website_description
 msgid "Sponsor Description"
-msgstr "Description du sponsor"
+msgstr "/Description du sponsor"
 
 #. module: website_event_booth_sale_exhibitor
 #: model:ir.model.fields,field_description:website_event_booth_sale_exhibitor.field_event_booth_registration__sponsor_email
 msgid "Sponsor Email"
-msgstr "Email du sponsor"
+msgstr "/Email du sponsor"
 
 #. module: website_event_booth_sale_exhibitor
 #: model:ir.model.fields,field_description:website_event_booth_sale_exhibitor.field_event_booth_registration__sponsor_image_512
 msgid "Sponsor Logo"
-msgstr "Logo du sponsor"
+msgstr "/Logo du sponsor"
 
 #. module: website_event_booth_sale_exhibitor
 #: model:ir.model.fields,field_description:website_event_booth_sale_exhibitor.field_event_booth_registration__sponsor_mobile
 msgid "Sponsor Mobile"
-msgstr "Portable du sponsor"
+msgstr "/Portable du sponsor"
 
 #. module: website_event_booth_sale_exhibitor
 #: model:ir.model.fields,field_description:website_event_booth_sale_exhibitor.field_event_booth_registration__sponsor_name
 msgid "Sponsor Name"
-msgstr "Nom du sponsor"
+msgstr "/Nom du sponsor"
 
 #. module: website_event_booth_sale_exhibitor
 #: model:ir.model.fields,field_description:website_event_booth_sale_exhibitor.field_event_booth_registration__sponsor_phone
 msgid "Sponsor Phone"
-msgstr "Numéro de téléphone du sponsor"
+msgstr "/Numéro de téléphone du sponsor"
 
 #. module: website_event_booth_sale_exhibitor
 #: model:ir.model.fields,field_description:website_event_booth_sale_exhibitor.field_event_booth_registration__sponsor_subtitle
 msgid "Sponsor Slogan"
-msgstr "Slogan du sponsor"
+msgstr "/Slogan du sponsor"

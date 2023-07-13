@@ -23,14 +23,14 @@ msgstr ""
 #. module: account_qr_code_sepa
 #: model:ir.model,name:account_qr_code_sepa.model_res_partner_bank
 msgid "Bank Accounts"
-msgstr "Comptes bancaires"
+msgstr "/Comptes bancaires"
 
 #. module: account_qr_code_sepa
 #. odoo-python
 #: code:addons/account_qr_code_sepa/models/res_bank.py:0
 #, python-format
 msgid "SEPA Credit Transfer QR"
-msgstr "Virement SEPA QR"
+msgstr "/Virement SEPA QR"
 
 #. module: account_qr_code_sepa
 #. odoo-python
@@ -39,6 +39,6 @@ msgstr "Virement SEPA QR"
 msgid ""
 "The account receiving the payment must have an account holder name or "
 "partner name set."
-msgstr ""
+msgstr "/"
 "Un nom de titulaire de compte ou un nom de partenaire doit être défini pour "
 "le compte recevant le paiement."

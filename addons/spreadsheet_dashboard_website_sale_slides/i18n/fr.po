@@ -27,14 +27,14 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Attendees"
-msgstr "Participants"
+msgstr "/Participants"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Attendees by Course"
-msgstr "Participants par cours"
+msgstr "/Participants par cours"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
@@ -42,7 +42,7 @@ msgstr "Participants par cours"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Content"
-msgstr "Contenu"
+msgstr "/Contenu"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
@@ -50,7 +50,7 @@ msgstr "Contenu"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Courses"
-msgstr "Cours"
+msgstr "/Cours"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
@@ -58,14 +58,14 @@ msgstr "Cours"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Actuel"
+msgstr "/Actuel"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Période"
+msgstr "/Période"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
@@ -73,7 +73,7 @@ msgstr "Période"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Précedent"
+msgstr "/Précedent"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
@@ -81,7 +81,7 @@ msgstr "Précedent"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Rating"
-msgstr "Évaluation"
+msgstr "/Évaluation"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
@@ -89,70 +89,70 @@ msgstr "Évaluation"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Revenue"
-msgstr "Revenu"
+msgstr "/Revenu"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Revenues"
-msgstr "Revenus"
+msgstr "/Revenus"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "Views by Course"
-msgstr "Vues par cours"
+msgstr "/Vues par cours"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "attendees - current"
-msgstr "participants - actuel"
+msgstr "/participants - actuel"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "attendees - previous"
-msgstr "participants - précédent"
+msgstr "/participants - précédent"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "content"
-msgstr "contenu"
+msgstr "/contenu"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "courses"
-msgstr "cours"
+msgstr "/cours"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "rating"
-msgstr "évaluation"
+msgstr "/évaluation"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "revenue - current"
-msgstr "revenus - actuel"
+msgstr "/revenus - actuel"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "revenue - previous"
-msgstr "revenus - précédent"
+msgstr "/revenus - précédent"
 
 #. module: spreadsheet_dashboard_website_sale_slides
 #. openerp-web
@@ -160,4 +160,4 @@ msgstr "revenus - précédent"
 #: code:addons/spreadsheet_dashboard_website_sale_slides/data/files/elearning_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr "depuis la période précédente"
+msgstr "/depuis la période précédente"

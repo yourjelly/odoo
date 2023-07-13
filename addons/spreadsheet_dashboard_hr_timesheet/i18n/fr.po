@@ -27,21 +27,21 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid " days"
-msgstr "jours"
+msgstr "/jours"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Assignee"
-msgstr "Assigné"
+msgstr "/Assigné"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Assignees"
-msgstr "Assignés"
+msgstr "/Assignés"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
@@ -49,7 +49,7 @@ msgstr "Assignés"
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Actuel"
+msgstr "/Actuel"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
@@ -57,21 +57,21 @@ msgstr "Actuel"
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Customer"
-msgstr "Client"
+msgstr "/Client"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Days to assign"
-msgstr "Jours pour assigner"
+msgstr "/Jours pour assigner"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Days to close"
-msgstr "Jours pour clôturer"
+msgstr "/Jours pour clôturer"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
@@ -82,28 +82,28 @@ msgstr "Jours pour clôturer"
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Hours Logged"
-msgstr "Heures enregistrées"
+msgstr "/Heures enregistrées"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Hours logged"
-msgstr "Heures enregistrées"
+msgstr "/Heures enregistrées"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr "KPI"
+msgstr "/KPI"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Période"
+msgstr "/Période"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
@@ -111,7 +111,7 @@ msgstr "Période"
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Précédent"
+msgstr "/Précédent"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
@@ -119,21 +119,21 @@ msgstr "Précédent"
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Project"
-msgstr "Projet"
+msgstr "/Projet"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Tag"
-msgstr "Étiquette"
+msgstr "/Étiquette"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Tags"
-msgstr "Étiquettes"
+msgstr "/Étiquettes"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
@@ -145,49 +145,49 @@ msgstr "Étiquettes"
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Tasks"
-msgstr "Tâches"
+msgstr "/Tâches"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Tasks Analysis by Assignees"
-msgstr "Analyse des tâches par assignés"
+msgstr "/Analyse des tâches par assignés"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Tasks Analysis by Customer"
-msgstr "Analyse des tâches par client"
+msgstr "/Analyse des tâches par client"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Tasks Analysis by Project"
-msgstr "Analyse des tâches par projet"
+msgstr "/Analyse des tâches par projet"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Tasks Analysis by Tags"
-msgstr "Analyse des tâches par étiquettes"
+msgstr "/Analyse des tâches par étiquettes"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Tasks by Stage"
-msgstr "Tâches par étape"
+msgstr "/Tâches par étape"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Tasks by State"
-msgstr "Tâches par statut"
+msgstr "/Tâches par statut"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
@@ -195,35 +195,35 @@ msgstr "Tâches par statut"
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Time to Assign"
-msgstr "Temps pour assigner"
+msgstr "/Temps pour assigner"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Top Assignees"
-msgstr "Meilleurs assignés"
+msgstr "/Meilleurs assignés"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Top Customers"
-msgstr "Meilleurs clients"
+msgstr "/Meilleurs clients"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Top Projects"
-msgstr "Meilleurs projets"
+msgstr "/Meilleurs projets"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "Top Tags"
-msgstr "Meilleures étiquettes"
+msgstr "/Meilleures étiquettes"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
@@ -231,25 +231,25 @@ msgstr "Meilleures étiquettes"
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "last period"
-msgstr "période précédente"
+msgstr "/période précédente"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr "depuis la période précédente"
+msgstr "/depuis la période précédente"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "stats - current"
-msgstr "stats - actuel"
+msgstr "/stats - actuel"
 
 #. module: spreadsheet_dashboard_hr_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_hr_timesheet/data/files/tasks_dashboard.json:0
 #, python-format
 msgid "stats - previous"
-msgstr "stats - précédent"
+msgstr "/stats - précédent"

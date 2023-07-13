@@ -22,19 +22,19 @@ msgstr ""
 #. module: website_event_meet_quiz
 #: model_terms:ir.ui.view,arch_db:website_event_meet_quiz.community_leaderboard_small
 msgid "Leaderboard"
-msgstr "Classement"
+msgstr "/Classement"
 
 #. module: website_event_meet_quiz
 #: model_terms:ir.ui.view,arch_db:website_event_meet_quiz.community_leaderboard_small
 msgid "View all"
-msgstr "Voir tout"
+msgstr "/Voir tout"
 
 #. module: website_event_meet_quiz
 #: model_terms:ir.ui.view,arch_db:website_event_meet_quiz.visitor_quiz_points_card
 msgid "You"
-msgstr "Vous "
+msgstr "/Vous "
 
 #. module: website_event_meet_quiz
 #: model_terms:ir.ui.view,arch_db:website_event_meet_quiz.visitor_quiz_points_card
 msgid "xp"
-msgstr "xp"
+msgstr "/xp"

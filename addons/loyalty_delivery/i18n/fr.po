@@ -26,26 +26,26 @@ msgstr ""
 #: code:addons/loyalty_delivery/models/loyalty_reward.py:0
 #, python-format
 msgid " (Max %s)"
-msgstr " (Max %s)"
+msgstr "/ (Max %s)"
 
 #. module: loyalty_delivery
 #: model_terms:ir.ui.view,arch_db:loyalty_delivery.loyalty_reward_view_kanban_inherit_loyalty_delivery
 msgid "( Max"
-msgstr "( Max"
+msgstr "/( Max"
 
 #. module: loyalty_delivery
 #. odoo-python
 #: code:addons/loyalty_delivery/models/loyalty_program.py:0
 #, python-format
 msgid "Automatic promotion: free shipping on orders higher than $50"
-msgstr ""
+msgstr "/"
 "Promotion automatique : expédition gratuite sur les commandes supérieures à "
 "50 $"
 
 #. module: loyalty_delivery
 #: model:ir.model.fields.selection,name:loyalty_delivery.selection__loyalty_reward__reward_type__shipping
 msgid "Free Shipping"
-msgstr "Expédition gratuite"
+msgstr "/Expédition gratuite"
 
 #. module: loyalty_delivery
 #. odoo-python
@@ -54,24 +54,24 @@ msgstr "Expédition gratuite"
 #: model_terms:ir.ui.view,arch_db:loyalty_delivery.loyalty_reward_view_kanban_inherit_loyalty_delivery
 #, python-format
 msgid "Free shipping"
-msgstr "Expédition gratuite"
+msgstr "/Expédition gratuite"
 
 #. module: loyalty_delivery
 #: model:ir.model,name:loyalty_delivery.model_loyalty_program
 msgid "Loyalty Program"
-msgstr "Programme de fidelité"
+msgstr "/Programme de fidelité"
 
 #. module: loyalty_delivery
 #: model:ir.model,name:loyalty_delivery.model_loyalty_reward
 msgid "Loyalty Reward"
-msgstr "Récompense de fidélité"
+msgstr "/Récompense de fidélité"
 
 #. module: loyalty_delivery
 #: model:ir.model.fields,field_description:loyalty_delivery.field_loyalty_reward__reward_type
 msgid "Reward Type"
-msgstr "Type de récompense"
+msgstr "/Type de récompense"
 
 #. module: loyalty_delivery
 #: model:ir.model,name:loyalty_delivery.model_sale_order
 msgid "Sales Order"
-msgstr "Bon de commande"
+msgstr "/Bon de commande"

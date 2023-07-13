@@ -23,24 +23,24 @@ msgstr ""
 #. module: purchase_price_diff
 #: model:ir.model,name:purchase_price_diff.model_account_move_line
 msgid "Journal Item"
-msgstr "Écriture comptable"
+msgstr "/Écriture comptable"
 
 #. module: purchase_price_diff
 #: model:ir.model.fields,field_description:purchase_price_diff.field_product_category__property_account_creditor_price_difference_categ
 #: model:ir.model.fields,field_description:purchase_price_diff.field_product_product__property_account_creditor_price_difference
 #: model:ir.model.fields,field_description:purchase_price_diff.field_product_template__property_account_creditor_price_difference
 msgid "Price Difference Account"
-msgstr "Compte d'écart de prix"
+msgstr "/Compte d'écart de prix"
 
 #. module: purchase_price_diff
 #: model:ir.model,name:purchase_price_diff.model_product_template
 msgid "Product"
-msgstr "Produit"
+msgstr "/Produit"
 
 #. module: purchase_price_diff
 #: model:ir.model,name:purchase_price_diff.model_product_category
 msgid "Product Category"
-msgstr "Catégorie de produit"
+msgstr "/Catégorie de produit"
 
 #. module: purchase_price_diff
 #: model:ir.model.fields,help:purchase_price_diff.field_product_product__property_account_creditor_price_difference
@@ -49,7 +49,7 @@ msgid ""
 "This account is used in automated inventory valuation to record the price "
 "difference between a purchase order and its related vendor bill when "
 "validating this vendor bill."
-msgstr ""
+msgstr "/"
 "Ce compte est utilisé dans la valorisation automatisée des stocks pour "
 "enregistrer la différence de prix entre un bon de commande et sa facture "
 "fournisseur quand celle-ci est validée."
@@ -59,6 +59,6 @@ msgstr ""
 msgid ""
 "This account will be used to value price difference between purchase price "
 "and accounting cost."
-msgstr ""
+msgstr "/"
 "Ce compte sera utilisé pour évaluer les différences de prix entre les prix "
 "d'achat et les coûts comptables."

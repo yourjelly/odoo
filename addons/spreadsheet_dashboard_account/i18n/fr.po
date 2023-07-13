@@ -26,14 +26,14 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid " days"
-msgstr "jours"
+msgstr "/jours"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "# days"
-msgstr "# jours"
+msgstr "/# jours"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -44,21 +44,21 @@ msgstr "# jours"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Amount"
-msgstr "Montant"
+msgstr "/Montant"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Average Invoice"
-msgstr "Facture moyenne"
+msgstr "/Facture moyenne"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "COGS"
-msgstr "Coût des marchandises vendues"
+msgstr "/Coût des marchandises vendues"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -66,70 +66,70 @@ msgstr "Coût des marchandises vendues"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Country"
-msgstr "Pays"
+msgstr "/Pays"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Current year"
-msgstr "Année actuelle"
+msgstr "/Année actuelle"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Customer"
-msgstr "Client"
+msgstr "/Client"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "DSO"
-msgstr "DMP"
+msgstr "/DMP"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Date"
-msgstr "Date"
+msgstr "/Date"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Income"
-msgstr "Revenus"
+msgstr "/Revenus"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Invoiced"
-msgstr "Facturé"
+msgstr "/Facturé"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Invoiced by Month"
-msgstr "Facturé par mois"
+msgstr "/Facturé par mois"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Invoices"
-msgstr "Factures"
+msgstr "/Factures"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Invoices by Total Signed"
-msgstr "Factures par total signé"
+msgstr "/Factures par total signé"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -137,14 +137,14 @@ msgstr "Factures par total signé"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - Average Invoice"
-msgstr "KPI - Facture moyenne"
+msgstr "/KPI - Facture moyenne"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - DSO"
-msgstr "KPI - DMP"
+msgstr "/KPI - DMP"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -152,14 +152,14 @@ msgstr "KPI - DMP"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - Income"
-msgstr "KPI - Revenus"
+msgstr "/KPI - Revenus"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - Invoice Count"
-msgstr "KPI - Nombre de factures"
+msgstr "/KPI - Nombre de factures"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -167,14 +167,14 @@ msgstr "KPI - Nombre de factures"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "KPI - Unpaid Invoices"
-msgstr "KPI - Factures impayées"
+msgstr "/KPI - Factures impayées"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Période"
+msgstr "/Période"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -182,14 +182,14 @@ msgstr "Période"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Product"
-msgstr "Produit"
+msgstr "/Produit"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Product Category"
-msgstr "Catégorie de produit"
+msgstr "/Catégorie de produit"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -199,28 +199,28 @@ msgstr "Catégorie de produit"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Ratio"
-msgstr "Ratio"
+msgstr "/Ratio"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Receivable"
-msgstr "Créance"
+msgstr "/Créance"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Reference"
-msgstr "Référence"
+msgstr "/Référence"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Revenue"
-msgstr "Revenus"
+msgstr "/Revenus"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -229,14 +229,14 @@ msgstr "Revenus"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Salesperson"
-msgstr "Vendeur"
+msgstr "/Vendeur"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Status"
-msgstr "Statut"
+msgstr "/Statut"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -245,7 +245,7 @@ msgstr "Statut"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Categories"
-msgstr "Meilleures catégories"
+msgstr "/Meilleures catégories"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -253,14 +253,14 @@ msgstr "Meilleures catégories"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Countries"
-msgstr "Meilleurs pays"
+msgstr "/Meilleurs pays"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Invoices"
-msgstr "Meilleures factures"
+msgstr "/Meilleures factures"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -268,7 +268,7 @@ msgstr "Meilleures factures"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Products"
-msgstr "Meilleurs produits"
+msgstr "/Meilleurs produits"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
@@ -276,18 +276,18 @@ msgstr "Meilleurs produits"
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "Top Salespeople"
-msgstr "Meilleur vendeur"
+msgstr "/Meilleur vendeur"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "in current year"
-msgstr "dans l'année actuelle"
+msgstr "/dans l'année actuelle"
 
 #. module: spreadsheet_dashboard_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_account/data/files/invoicing_dashboard.json:0
 #, python-format
 msgid "unpaid"
-msgstr "non payé"
+msgstr "/non payé"

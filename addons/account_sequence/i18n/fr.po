@@ -23,14 +23,14 @@ msgstr ""
 #. module: account_sequence
 #: model:ir.model.constraint,message:account_sequence.constraint_account_move_unique_name
 msgid "Another entry with the same name already exists."
-msgstr "Une autre écriture avec le même nom existe déjà."
+msgstr "/Une autre écriture avec le même nom existe déjà."
 
 #. module: account_sequence
 #: model:ir.model,name:account_sequence.model_sequence_mixin
 msgid "Automatic sequence"
-msgstr "Séquence automatique"
+msgstr "/Séquence automatique"
 
 #. module: account_sequence
 #: model:ir.model,name:account_sequence.model_account_move
 msgid "Journal Entry"
-msgstr "Pièce comptable"
+msgstr "/Pièce comptable"

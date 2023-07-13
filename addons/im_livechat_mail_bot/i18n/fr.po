@@ -27,7 +27,7 @@ msgid ""
 "Good, you can customize canned responses in the live chat "
 "application.<br/><br/><b>It's the end of this overview</b>, enjoy "
 "discovering Odoo!"
-msgstr ""
+msgstr "/"
 "Bien, vous pouvez modifier les réponses automatiques dans l'application Live"
 " chat.<br/><br/><b>C'est la fin de cette visite</b>, bonne découverte d'Odoo"
 " ! "
@@ -35,7 +35,7 @@ msgstr ""
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_mail_bot
 msgid "Mail Bot"
-msgstr "Mail Bot"
+msgstr "/Mail Bot"
 
 #. module: im_livechat_mail_bot
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
@@ -44,7 +44,7 @@ msgid ""
 "Not sure what you are doing. Please, type <span "
 "class=\"o_odoobot_command\">:</span> and wait for the propositions. Select "
 "one of them and press enter."
-msgstr ""
+msgstr "/"
 "Pas sûr de ce que vous faites. S'il vous plaît, tapez <span "
 "class=\"o_odoobot_command\">:</span> et attendez les propositions. "
 "Sélectionnez l'une d'elles et appuyez sur Enter."
@@ -52,12 +52,12 @@ msgstr ""
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields,field_description:im_livechat_mail_bot.field_res_users__odoobot_state
 msgid "OdooBot Status"
-msgstr "Statut OdooBot"
+msgstr "/Statut OdooBot"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields.selection,name:im_livechat_mail_bot.selection__res_users__odoobot_state__onboarding_canned
 msgid "Onboarding canned"
-msgstr "Parcours d'intégration enregistré"
+msgstr "/Parcours d'intégration enregistré"
 
 #. module: im_livechat_mail_bot
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
@@ -65,7 +65,7 @@ msgstr "Parcours d'intégration enregistré"
 msgid ""
 "That's me! 🎉<br/>Try typing <span class=\"o_odoobot_command\">:</span> to "
 "use canned responses."
-msgstr ""
+msgstr "/"
 "C'est moi ! 🎉<br/>Essayez de taper <span "
 "class=\"o_odoobot_command\">:</span> pour utiliser des réponses "
 "enregistrées."
@@ -73,4 +73,4 @@ msgstr ""
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_res_users
 msgid "User"
-msgstr "Utilisateur"
+msgstr "/Utilisateur"

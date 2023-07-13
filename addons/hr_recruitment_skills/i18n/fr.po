@@ -25,79 +25,79 @@ msgstr ""
 #: model:ir.model,name:hr_recruitment_skills.model_hr_applicant
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__applicant_id
 msgid "Applicant"
-msgstr "Candidat"
+msgstr "/Candidat"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__create_uid
 msgid "Created by"
-msgstr "Créé par"
+msgstr "/Créé par"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__create_date
 msgid "Created on"
-msgstr "Créé le"
+msgstr "/Créé le"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__display_name
 msgid "Display Name"
-msgstr "Nom d'affichage"
+msgstr "/Nom d'affichage"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__id
 msgid "ID"
-msgstr "ID"
+msgstr "/ID"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant__is_interviewer
 msgid "Is Interviewer"
-msgstr "Est un interviewer"
+msgstr "/Est un interviewer"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill____last_update
 msgid "Last Modified on"
-msgstr "Dernière modification le"
+msgstr "/Dernière modification le"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__write_uid
 msgid "Last Updated by"
-msgstr "Dernière mise à jour par"
+msgstr "/Dernière mise à jour par"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__write_date
 msgid "Last Updated on"
-msgstr "Dernière mise à jour le"
+msgstr "/Dernière mise à jour le"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__level_progress
 msgid "Progress"
-msgstr "En cours"
+msgstr "/En cours"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,help:hr_recruitment_skills.field_hr_applicant_skill__level_progress
 msgid "Progress from zero knowledge (0%) to fully mastered (100%)."
-msgstr ""
+msgstr "/"
 "Progression d'une connaissance nulle (0%) à complètement maitrisée (100%)."
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant__skill_ids
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__skill_id
 msgid "Skill"
-msgstr "Compétence"
+msgstr "/Compétence"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__skill_level_id
 msgid "Skill Level"
-msgstr "Niveau de compétence"
+msgstr "/Niveau de compétence"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant_skill__skill_type_id
 msgid "Skill Type"
-msgstr "Type de compétence"
+msgstr "/Type de compétence"
 
 #. module: hr_recruitment_skills
 #: model:ir.model,name:hr_recruitment_skills.model_hr_applicant_skill
 msgid "Skill level for an applicant"
-msgstr "Niveau de compétence pour un candidat"
+msgstr "/Niveau de compétence pour un candidat"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.fields,field_description:hr_recruitment_skills.field_hr_applicant__applicant_skill_ids
@@ -106,13 +106,13 @@ msgstr "Niveau de compétence pour un candidat"
 #: model_terms:ir.ui.view,arch_db:hr_recruitment_skills.hr_applicant_view_search
 #: model_terms:ir.ui.view,arch_db:hr_recruitment_skills.hr_applicant_view_search_bis
 msgid "Skills"
-msgstr "Compétences"
+msgstr "/Compétences"
 
 #. module: hr_recruitment_skills
 #: code:addons/hr_recruitment_skills/models/hr_applicant_skill.py:0
 #, python-format
 msgid "The skill %(name)s and skill type %(type)s doesn't match"
-msgstr ""
+msgstr "/"
 "La compétence %(name)s et le type de compétence %(type)s ne correspondent "
 "pas"
 
@@ -120,11 +120,11 @@ msgstr ""
 #: code:addons/hr_recruitment_skills/models/hr_applicant_skill.py:0
 #, python-format
 msgid "The skill level %(level)s is not valid for skill type: %(type)s"
-msgstr ""
+msgstr "/"
 "Le niveau de compétence %(level)s n'est pas valide pour le type de "
 "compétence : %(type)s"
 
 #. module: hr_recruitment_skills
 #: model:ir.model.constraint,message:hr_recruitment_skills.constraint_hr_applicant_skill__unique_skill
 msgid "Two levels for the same skill is not allowed"
-msgstr "Deux niveaux pour la même compétence ne sont pas autorisés"
+msgstr "/Deux niveaux pour la même compétence ne sont pas autorisés"

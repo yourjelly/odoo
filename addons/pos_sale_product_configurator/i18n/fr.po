@@ -25,7 +25,7 @@ msgstr ""
 #: code:addons/pos_sale_product_configurator/static/src/js/models.js:0
 #, python-format
 msgid "An unknown error prevents us from loading product information."
-msgstr ""
+msgstr "/"
 "Une erreur inconnue nous empêche de charger les informations du produit."
 
 #. module: pos_sale_product_configurator
@@ -33,7 +33,7 @@ msgstr ""
 #: code:addons/pos_sale_product_configurator/static/src/js/models.js:0
 #, python-format
 msgid "Cannot access product information screen if offline."
-msgstr ""
+msgstr "/"
 "Impossible d'accéder à l'écran d'information du produit si hors ligne."
 
 #. module: pos_sale_product_configurator
@@ -41,35 +41,35 @@ msgstr ""
 #: code:addons/pos_sale_product_configurator/static/src/js/models.js:0
 #, python-format
 msgid "Network Error"
-msgstr "Erreur réseau"
+msgstr "/Erreur réseau"
 
 #. module: pos_sale_product_configurator
 #. odoo-javascript
 #: code:addons/pos_sale_product_configurator/static/src/xml/Popups/ProductInfoPopup.xml:0
 #, python-format
 msgid "Optional Products"
-msgstr "Produits optionnels"
+msgstr "/Produits optionnels"
 
 #. module: pos_sale_product_configurator
 #: model:ir.model,name:pos_sale_product_configurator.model_pos_session
 msgid "Point of Sale Session"
-msgstr "Session du point de vente"
+msgstr "/Session du point de vente"
 
 #. module: pos_sale_product_configurator
 #: model:ir.model,name:pos_sale_product_configurator.model_product_product
 msgid "Product Variant"
-msgstr "Variante de produit"
+msgstr "/Variante de produit"
 
 #. module: pos_sale_product_configurator
 #. odoo-javascript
 #: code:addons/pos_sale_product_configurator/static/src/js/models.js:0
 #, python-format
 msgid "Unknown error"
-msgstr "Erreur inconnue"
+msgstr "/Erreur inconnue"
 
 #. module: pos_sale_product_configurator
 #. odoo-javascript
 #: code:addons/pos_sale_product_configurator/static/src/xml/Popups/ProductInfoPopup.xml:0
 #, python-format
 msgid "from"
-msgstr "de"
+msgstr "/de"

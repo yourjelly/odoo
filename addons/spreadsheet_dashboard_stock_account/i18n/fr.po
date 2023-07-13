@@ -26,42 +26,42 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Actuel"
+msgstr "/Actuel"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Inventory Value"
-msgstr "Valeur d'inventaire"
+msgstr "/Valeur d'inventaire"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Inventory by Location"
-msgstr "Inventaire par emplacement"
+msgstr "/Inventaire par emplacement"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Inventory by Lot/Serial Number"
-msgstr "Inventaire par lot/numéro de série"
+msgstr "/Inventaire par lot/numéro de série"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Inventory by Product"
-msgstr "Inventaire par produit"
+msgstr "/Inventaire par produit"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr "KPI"
+msgstr "/KPI"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
@@ -69,14 +69,14 @@ msgstr "KPI"
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Location"
-msgstr "Emplacement"
+msgstr "/Emplacement"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Lot/Serial"
-msgstr "Lot/Série"
+msgstr "/Lot/Série"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
@@ -85,7 +85,7 @@ msgstr "Lot/Série"
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "On Hand"
-msgstr "En stock"
+msgstr "/En stock"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
@@ -93,7 +93,7 @@ msgstr "En stock"
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Product"
-msgstr "Produit"
+msgstr "/Produit"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
@@ -102,46 +102,46 @@ msgstr "Produit"
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Reserved"
-msgstr "Réservé"
+msgstr "/Réservé"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Stock Quantity by Location"
-msgstr "Quantité de stock par emplacement"
+msgstr "/Quantité de stock par emplacement"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Top Locations"
-msgstr "Meilleurs emplacements"
+msgstr "/Meilleurs emplacements"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Top Lots / Serial Numbers"
-msgstr "Meilleurs numéros de lot / série"
+msgstr "/Meilleurs numéros de lot / série"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Top Products"
-msgstr "Meilleurs produits"
+msgstr "/Meilleurs produits"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "Total inventory value"
-msgstr "Valeur d'inventaire totale"
+msgstr "/Valeur d'inventaire totale"
 
 #. module: spreadsheet_dashboard_stock_account
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/inventory_on_hand_dashboard.json:0
 #, python-format
 msgid "total inventory value"
-msgstr "valeur d'inventaire totale"
+msgstr "/valeur d'inventaire totale"

@@ -24,30 +24,30 @@ msgstr ""
 #. module: website_crm_livechat
 #: model:ir.model.fields,field_description:website_crm_livechat.field_crm_lead__visitor_sessions_count
 msgid "# Sessions"
-msgstr "# Sessions"
+msgstr "/# Sessions"
 
 #. module: website_crm_livechat
 #: code:addons/website_crm_livechat/models/chatbot_script_step.py:0
 #, python-format
 msgid "%s's New Lead"
-msgstr "Nouvelle piste de %s"
+msgstr "/Nouvelle piste de %s"
 
 #. module: website_crm_livechat
 #: model:ir.model,name:website_crm_livechat.model_chatbot_script_step
 msgid "Chatbot Script Step"
-msgstr "Étape de script du chatbot"
+msgstr "/Étape de script du chatbot"
 
 #. module: website_crm_livechat
 #: model:ir.model,name:website_crm_livechat.model_mail_channel
 msgid "Discussion Channel"
-msgstr "Canal de discussion"
+msgstr "/Canal de discussion"
 
 #. module: website_crm_livechat
 #: model:ir.model,name:website_crm_livechat.model_crm_lead
 msgid "Lead/Opportunity"
-msgstr "Piste/opportunité"
+msgstr "/Piste/opportunité"
 
 #. module: website_crm_livechat
 #: model_terms:ir.ui.view,arch_db:website_crm_livechat.crm_lead_view_form
 msgid "Sessions"
-msgstr "Sessions"
+msgstr "/Sessions"

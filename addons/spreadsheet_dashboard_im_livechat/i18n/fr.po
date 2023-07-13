@@ -27,35 +27,35 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Average Rating"
-msgstr "Évaluation moyenne"
+msgstr "/Évaluation moyenne"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Avg. Session Duration"
-msgstr "Durée moy. de la session"
+msgstr "/Durée moy. de la session"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Avg. Time to Answer"
-msgstr "Temps moy. pour répondre"
+msgstr "/Temps moy. pour répondre"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Avg. session duration"
-msgstr "Durée moy. de la session"
+msgstr "/Durée moy. de la session"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Avg. time to answer"
-msgstr "Temps moy. de réponse"
+msgstr "/Temps moy. de réponse"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
@@ -63,28 +63,28 @@ msgstr "Temps moy. de réponse"
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Actuel"
+msgstr "/Actuel"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Daily Sessions"
-msgstr "Sessions quotidiennes"
+msgstr "/Sessions quotidiennes"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr "KPI"
+msgstr "/KPI"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Livechat Support Statistics by Operator"
-msgstr "Statistiques du support du Live Chat par opérateur"
+msgstr "/Statistiques du support du Live Chat par opérateur"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
@@ -92,14 +92,14 @@ msgstr "Statistiques du support du Live Chat par opérateur"
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Operator"
-msgstr "Opérateur"
+msgstr "/Opérateur"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Période"
+msgstr "/Période"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
@@ -107,14 +107,14 @@ msgstr "Période"
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Précedent"
+msgstr "/Précedent"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Rating"
-msgstr "Évaluation"
+msgstr "/Évaluation"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
@@ -123,21 +123,21 @@ msgstr "Évaluation"
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Sessions"
-msgstr "Sessions"
+msgstr "/Sessions"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Sessions by Operator"
-msgstr "Sessions par opérateur"
+msgstr "/Sessions par opérateur"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "Top Operators"
-msgstr "Meilleurs opérateurs"
+msgstr "/Meilleurs opérateurs"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
@@ -145,39 +145,39 @@ msgstr "Meilleurs opérateurs"
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "last period"
-msgstr "période précédente"
+msgstr "/période précédente"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "sessions count - current"
-msgstr "nombre de sessions - actuel"
+msgstr "/nombre de sessions - actuel"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "sessions count - previous"
-msgstr "nombre de sessions - précédent"
+msgstr "/nombre de sessions - précédent"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr "depuis la période précédente"
+msgstr "/depuis la période précédente"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "stats 2 - current"
-msgstr "stats 2 - actuel"
+msgstr "/stats 2 - actuel"
 
 #. module: spreadsheet_dashboard_im_livechat
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_im_livechat/data/files/livechat_dashboard.json:0
 #, python-format
 msgid "stats 2 - previous"
-msgstr "stats 2 - précédent"
+msgstr "/stats 2 - précédent"

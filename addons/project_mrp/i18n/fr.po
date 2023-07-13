@@ -24,30 +24,30 @@ msgstr ""
 #: code:addons/project_mrp/models/project.py:0
 #, python-format
 msgid "Bills of Materials"
-msgstr "Nomenclatures"
+msgstr "/Nomenclatures"
 
 #. module: project_mrp
 #: model:ir.model.fields,field_description:project_mrp.field_project_project__bom_count
 msgid "BoM Count"
-msgstr "Nombre de nomenclatures"
+msgstr "/Nombre de nomenclatures"
 
 #. module: project_mrp
 #: code:addons/project_mrp/models/project.py:0
 #, python-format
 msgid "Manufacturing Orders"
-msgstr "Ordres de fabrication"
+msgstr "/Ordres de fabrication"
 
 #. module: project_mrp
 #: model:ir.model.fields,field_description:project_mrp.field_project_project__production_count
 msgid "Manufacturing Orders Count"
-msgstr "Nombre d'ordres de fabrication"
+msgstr "/Nombre d'ordres de fabrication"
 
 #. module: project_mrp
 #: model:ir.model,name:project_mrp.model_project_project
 msgid "Project"
-msgstr "Projet"
+msgstr "/Projet"
 
 #. module: project_mrp
 #: model:ir.model.fields,field_description:project_mrp.field_project_project__workorder_count
 msgid "Work Order Count"
-msgstr "Nombre d'ordres de travail"
+msgstr "/Nombre d'ordres de travail"

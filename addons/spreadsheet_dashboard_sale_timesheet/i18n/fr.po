@@ -28,21 +28,21 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billable Hours"
-msgstr "Heures facturables"
+msgstr "/Heures facturables"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billable Rate"
-msgstr "Taux facturable"
+msgstr "/Taux facturable"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billable hours"
-msgstr "Heures facturables"
+msgstr "/Heures facturables"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -53,28 +53,28 @@ msgstr "Heures facturables"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billable rate"
-msgstr "Taux facturable"
+msgstr "/Taux facturable"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billed fixed price"
-msgstr "Prix forfaitaire facturé"
+msgstr "/Prix forfaitaire facturé"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billed manually"
-msgstr "Facturé manuellement"
+msgstr "/Facturé manuellement"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Billed timesheets"
-msgstr "Feuilles de temps facturées"
+msgstr "/Feuilles de temps facturées"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -82,7 +82,7 @@ msgstr "Feuilles de temps facturées"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Actuel"
+msgstr "/Actuel"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -90,7 +90,7 @@ msgstr "Actuel"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Department"
-msgstr "Département"
+msgstr "/Département"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -98,14 +98,14 @@ msgstr "Département"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Employee"
-msgstr "Employé"
+msgstr "/Employé"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Grand total"
-msgstr "Total global"
+msgstr "/Total global"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -115,7 +115,7 @@ msgstr "Total global"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Hours billed"
-msgstr "Heures facturées"
+msgstr "/Heures facturées"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -125,35 +125,35 @@ msgstr "Heures facturées"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Hours spent"
-msgstr "Heures passées"
+msgstr "/Heures passées"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr "KPI"
+msgstr "/KPI"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Non-billable Hours"
-msgstr "Heures non facturables"
+msgstr "/Heures non facturables"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Non-billable hours"
-msgstr "Heures non facturables"
+msgstr "/Heures non facturables"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Période"
+msgstr "/Période"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -161,7 +161,7 @@ msgstr "Période"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Précédent"
+msgstr "/Précédent"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -169,7 +169,7 @@ msgstr "Précédent"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Project"
-msgstr "Projet"
+msgstr "/Projet"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -177,77 +177,77 @@ msgstr "Projet"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Task"
-msgstr "Tâche"
+msgstr "/Tâche"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Time Billed by Week"
-msgstr "Temps facturé par semaine"
+msgstr "/Temps facturé par semaine"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Timesheets Analysis by Department"
-msgstr "Analyse des feuilles de temps par département"
+msgstr "/Analyse des feuilles de temps par département"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Timesheets Analysis by Employee"
-msgstr "Analyse des feuilles de temps par employé"
+msgstr "/Analyse des feuilles de temps par employé"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Timesheets Analysis by Project"
-msgstr "Analyse des feuilles de temps par projet"
+msgstr "/Analyse des feuilles de temps par projet"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Timesheets Analysis by Task"
-msgstr "Analyse des feuilles de temps par tâche"
+msgstr "/Analyse des feuilles de temps par tâche"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Top Departments"
-msgstr "Meilleurs départements"
+msgstr "/Meilleurs départements"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Top Employees"
-msgstr "Meilleurs employés"
+msgstr "/Meilleurs employés"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Top Projects"
-msgstr "Meilleurs projets"
+msgstr "/Meilleurs projets"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "Top Tasks"
-msgstr "Meilleures tâches"
+msgstr "/Meilleures tâches"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "last period"
-msgstr "période précédente"
+msgstr "/période précédente"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
@@ -255,18 +255,18 @@ msgstr "période précédente"
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr "depuis la période précédente"
+msgstr "/depuis la période précédente"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "stats - current"
-msgstr "stats - actuel"
+msgstr "/stats - actuel"
 
 #. module: spreadsheet_dashboard_sale_timesheet
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_sale_timesheet/data/files/timesheet_dashboard.json:0
 #, python-format
 msgid "stats - previous"
-msgstr "stats - précédent"
+msgstr "/stats - précédent"

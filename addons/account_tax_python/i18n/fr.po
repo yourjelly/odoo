@@ -33,7 +33,7 @@ msgid ""
 "        e.g 180 / (1 - 10%) = 200 (not price included)\n"
 "        e.g 200 * (1 - 10%) = 180 (price included)\n"
 "        "
-msgstr ""
+msgstr "/"
 "\n"
 "- Groupe de taxes : la taxe est un ensemble de sous-taxes.\n"
 "- Fixe : le montant de la taxe est fixe quel que soit le prix.\n"
@@ -49,7 +49,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_tax_python.field_account_tax__python_applicable
 #: model:ir.model.fields,field_description:account_tax_python.field_account_tax_template__python_applicable
 msgid "Applicable Code"
-msgstr "Code applicable"
+msgstr "/Code applicable"
 
 #. module: account_tax_python
 #: model:ir.model.fields,help:account_tax_python.field_account_tax__python_compute
@@ -62,7 +62,7 @@ msgid ""
 ":param company: res.company recordset singleton\n"
 ":param product: product.product recordset singleton or None\n"
 ":param partner: res.partner recordset singleton or None"
-msgstr ""
+msgstr "/"
 "Calculer le montant de la taxe en retournant la variable 'result'.\n"
 "\n"
 ":param base_amount: nombre flottant, montant réel sur lequel la taxe est appliquée\n"
@@ -82,7 +82,7 @@ msgid ""
 ":param quantity: float\n"
 ":param product: product.product recordset singleton or None\n"
 ":param partner: res.partner recordset singleton or None"
-msgstr ""
+msgstr "/"
 "Calculer le montant de la taxe en retournant la variable 'result'.\n"
 "\n"
 ":param base_amount: nombre flottant, montant réel sur lequel la taxe est appliquée\n"
@@ -101,7 +101,7 @@ msgid ""
 ":param company: res.company recordset singleton\n"
 ":param product: product.product recordset singleton or None\n"
 ":param partner: res.partner recordset singleton or None"
-msgstr ""
+msgstr "/"
 "Déterminer si la taxe sera appliquée en retournant la variable 'result' à Vrai ou Faux.\n"
 "\n"
 ":param price_unit: nombre flottant\n"
@@ -119,7 +119,7 @@ msgid ""
 ":param quantity: float\n"
 ":param product: product.product recordset singleton or None\n"
 ":param partner: res.partner recordset singleton or None"
-msgstr ""
+msgstr "/"
 "Déterminer si la taxe sera appliquée en retournant la variable \"result\" à Vrai ou Faux.\n"
 "\n"
 ":param price_unit: nombre flottant\n"
@@ -133,23 +133,23 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_tax_python.selection__account_tax__amount_type__code
 #: model:ir.model.fields.selection,name:account_tax_python.selection__account_tax_template__amount_type__code
 msgid "Python Code"
-msgstr "Code Python"
+msgstr "/Code Python"
 
 #. module: account_tax_python
 #: model:ir.model,name:account_tax_python.model_account_tax
 msgid "Tax"
-msgstr "Taxe"
+msgstr "/Taxe"
 
 #. module: account_tax_python
 #: model:ir.model.fields,field_description:account_tax_python.field_account_tax__amount_type
 #: model:ir.model.fields,field_description:account_tax_python.field_account_tax_template__amount_type
 msgid "Tax Computation"
-msgstr "Calcul de la taxe"
+msgstr "/Calcul de la taxe"
 
 #. module: account_tax_python
 #: model:ir.model,name:account_tax_python.model_account_tax_template
 msgid "Templates for Taxes"
-msgstr "Modèles pour les taxes"
+msgstr "/Modèles pour les taxes"
 
 #. module: account_tax_python
 #: code:addons/account_tax_python/models/account_tax.py:0
@@ -159,7 +159,7 @@ msgid ""
 "You entered invalid code %r in %r taxes\n"
 "\n"
 "Error : %s"
-msgstr ""
+msgstr "/"
 "Vous avez saisi un code invalide %r dans %r taxes\n"
 "\n"
 "Erreur : %s"

@@ -24,7 +24,7 @@ msgid ""
 "                            .company_header {\n"
 "                                .name_container {\n"
 "                                    color:"
-msgstr ""
+msgstr "/"
 
 #. module: l10n_din5008
 #: model_terms:ir.ui.view,arch_db:l10n_din5008.din5008_css
@@ -35,7 +35,7 @@ msgid ""
 "                            }\n"
 "                            h2 {\n"
 "                                color:"
-msgstr ""
+msgstr "/"
 
 #. module: l10n_din5008
 #: model_terms:ir.ui.view,arch_db:l10n_din5008.din5008_css
@@ -49,7 +49,7 @@ msgid ""
 "                                .address {\n"
 "                                    &gt; span {\n"
 "                                        color:"
-msgstr ""
+msgstr "/"
 
 #. module: l10n_din5008
 #: model_terms:ir.ui.view,arch_db:l10n_din5008.din5008_css
@@ -61,120 +61,120 @@ msgid ""
 "[name=stock_move_table], .o_main_table {\n"
 "                                    th {\n"
 "                                        color:"
-msgstr ""
+msgstr "/"
 
 #. module: l10n_din5008
 #: model_terms:ir.ui.view,arch_db:l10n_din5008.external_layout_din5008
 msgid "<span>|</span>"
-msgstr ""
+msgstr "/"
 
 #. module: l10n_din5008
 #: model:ir.model,name:l10n_din5008.model_account_analytic_line
 msgid "Analytic Line"
-msgstr "Ligne analytique"
+msgstr "/Ligne analytique"
 
 #. module: l10n_din5008
 #: model_terms:ir.ui.view,arch_db:l10n_din5008.external_layout_din5008
 msgid "BIC:"
-msgstr ""
+msgstr "/"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,field_description:l10n_din5008.field_base_document_layout__bank_ids
 msgid "Banks"
-msgstr "Banques"
+msgstr "/Banques"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #, python-format
 msgid "Cancelled Invoice"
-msgstr "Facture annulée"
+msgstr "/Facture annulée"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,field_description:l10n_din5008.field_base_document_layout__city
 msgid "City"
-msgstr "Ville"
+msgstr "/Ville"
 
 #. module: l10n_din5008
 #: model:ir.model,name:l10n_din5008.model_base_document_layout
 msgid "Company Document Layout"
-msgstr "Mise en page des documents de votre société"
+msgstr "/Mise en page des documents de votre société"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,field_description:l10n_din5008.field_base_document_layout__company_registry
 msgid "Company Registry"
-msgstr "Registre des entreprises"
+msgstr "/Registre des entreprises"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #, python-format
 msgid "Credit Note"
-msgstr "Note de crédit"
+msgstr "/Note de crédit"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #, python-format
 msgid "Draft Invoice"
-msgstr "Facture en brouillon"
+msgstr "/Facture en brouillon"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #: code:addons/l10n_din5008/models/base_document_layout.py:0
 #, python-format
 msgid "Due Date"
-msgstr "Date d'échéance"
+msgstr "/Date d'échéance"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,field_description:l10n_din5008.field_base_document_layout__account_fiscal_country_id
 msgid "Fiscal Country"
-msgstr "Pays d'imposition"
+msgstr "/Pays d'imposition"
 
 #. module: l10n_din5008
 #: model_terms:ir.ui.view,arch_db:l10n_din5008.external_layout_din5008
 msgid "HRB Nr:"
-msgstr ""
+msgstr "/"
 
 #. module: l10n_din5008
 #: model_terms:ir.ui.view,arch_db:l10n_din5008.external_layout_din5008
 msgid "IBAN:"
-msgstr ""
+msgstr "/"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #: code:addons/l10n_din5008/models/base_document_layout.py:0
 #, python-format
 msgid "Invoice"
-msgstr "Facture client"
+msgstr "/Facture client"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #, python-format
 msgid "Invoicing Address:"
-msgstr "Adresse de facturation:"
+msgstr "/Adresse de facturation:"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #, python-format
 msgid "Invoicing and Shipping Address:"
-msgstr "Adresse de facturation et d'expédition:"
+msgstr "/Adresse de facturation et d'expédition:"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #: code:addons/l10n_din5008/models/base_document_layout.py:0
 #, python-format
 msgid "Invoice Date"
-msgstr "Date de facturation"
+msgstr "/Date de facturation"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #: code:addons/l10n_din5008/models/base_document_layout.py:0
 #, python-format
 msgid "Invoice No."
-msgstr "N° de facture"
+msgstr "/N° de facture"
 
 #. module: l10n_din5008
 #: model:ir.model,name:l10n_din5008.model_account_move
 msgid "Journal Entry"
-msgstr "Pièce comptable"
+msgstr "/Pièce comptable"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,field_description:l10n_din5008.field_account_analytic_line__l10n_din5008_document_title
@@ -183,7 +183,7 @@ msgstr "Pièce comptable"
 #: model:ir.model.fields,field_description:l10n_din5008.field_account_payment__l10n_din5008_document_title
 #: model:ir.model.fields,field_description:l10n_din5008.field_base_document_layout__l10n_din5008_document_title
 msgid "L10N Din5008 Document Title"
-msgstr "Titre du document L10N Din5008"
+msgstr "/Titre du document L10N Din5008"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,field_description:l10n_din5008.field_account_analytic_line__l10n_din5008_template_data
@@ -192,61 +192,61 @@ msgstr "Titre du document L10N Din5008"
 #: model:ir.model.fields,field_description:l10n_din5008.field_account_payment__l10n_din5008_template_data
 #: model:ir.model.fields,field_description:l10n_din5008.field_base_document_layout__l10n_din5008_template_data
 msgid "L10N Din5008 Template Data"
-msgstr "Données de modèle L10N Din5008"
+msgstr "/Données de modèle L10N Din5008"
 
 #. module: l10n_din5008
 #: model_terms:ir.ui.view,arch_db:l10n_din5008.external_layout_din5008
 msgid "Page: <span class=\"page\"/> of <span class=\"topage\"/>"
-msgstr "Page: <span class=\"page\"/> sur <span class=\"topage\"/>"
+msgstr "/Page: <span class=\"page\"/> sur <span class=\"topage\"/>"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #: code:addons/l10n_din5008/models/base_document_layout.py:0
 #, python-format
 msgid "Reference"
-msgstr "Référence"
+msgstr "/Référence"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #, python-format
 msgid "Shipping Address:"
-msgstr "Adresse de livraison:"
+msgstr "/Adresse de livraison:"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #, python-format
 msgid "Source"
-msgstr "Origine"
+msgstr "/Origine"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,field_description:l10n_din5008.field_base_document_layout__street
 msgid "Street"
-msgstr "Rue"
+msgstr "/Rue"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,field_description:l10n_din5008.field_base_document_layout__street2
 msgid "Street2"
-msgstr "Rue 2"
+msgstr "/Rue 2"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,help:l10n_din5008.field_base_document_layout__account_fiscal_country_id
 msgid "The country to use the tax reports from for this company"
-msgstr ""
+msgstr "/"
 "Le pays à partir duquel utiliser les déclarations fiscales pour cette société"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #, python-format
 msgid "Vendor Bill"
-msgstr "Facture fournisseur"
+msgstr "/Facture fournisseur"
 
 #. module: l10n_din5008
 #: code:addons/l10n_din5008/models/account_move.py:0
 #, python-format
 msgid "Vendor Credit Note"
-msgstr "Avoir de fournisseur"
+msgstr "/Avoir de fournisseur"
 
 #. module: l10n_din5008
 #: model:ir.model.fields,field_description:l10n_din5008.field_base_document_layout__zip
 msgid "Zip"
-msgstr "Code postal"
+msgstr "/Code postal"

@@ -27,7 +27,7 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Attendees"
-msgstr "Participants"
+msgstr "/Participants"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
@@ -35,42 +35,42 @@ msgstr "Participants"
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Actuel"
+msgstr "/Actuel"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Date"
-msgstr "Date"
+msgstr "/Date"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Event by Organizer"
-msgstr "Événement par organisateur"
+msgstr "/Événement par organisateur"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Event by Tags"
-msgstr "Événement par étiquettes"
+msgstr "/Événement par étiquettes"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Event by Template"
-msgstr "Événement par modèle"
+msgstr "/Événement par modèle"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Event by Venue"
-msgstr "Événement par lieu"
+msgstr "/Événement par lieu"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
@@ -82,21 +82,21 @@ msgstr "Événement par lieu"
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Events"
-msgstr "Événements"
+msgstr "/Événements"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Events Status"
-msgstr "Statut des événements"
+msgstr "/Statut des événements"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr "KPI"
+msgstr "/KPI"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
@@ -104,7 +104,7 @@ msgstr "KPI"
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Organizer"
-msgstr "Organisateur"
+msgstr "/Organisateur"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
@@ -112,14 +112,14 @@ msgstr "Organisateur"
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Précedent"
+msgstr "/Précedent"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Registration Status"
-msgstr "Statut de l'inscription"
+msgstr "/Statut de l'inscription"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
@@ -127,21 +127,21 @@ msgstr "Statut de l'inscription"
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Revenue"
-msgstr "Revenu"
+msgstr "/Revenu"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Tag"
-msgstr "Étiquette"
+msgstr "/Étiquette"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Tags"
-msgstr "Étiquettes"
+msgstr "/Étiquettes"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
@@ -149,35 +149,35 @@ msgstr "Étiquettes"
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Template"
-msgstr "Modèle"
+msgstr "/Modèle"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Top Organizers"
-msgstr "Meilleurs organisateurs"
+msgstr "/Meilleurs organisateurs"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Top Tags"
-msgstr "Meilleures étiquettes"
+msgstr "/Meilleures étiquettes"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Top Templates"
-msgstr "Meilleurs modèles"
+msgstr "/Meilleurs modèles"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Top Venues"
-msgstr "Meilleurs lieux"
+msgstr "/Meilleurs lieux"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
@@ -185,35 +185,35 @@ msgstr "Meilleurs lieux"
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "Venue"
-msgstr "Lieu"
+msgstr "/Lieu"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "attendees - current"
-msgstr "participants - actuel"
+msgstr "/participants - actuel"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "attendees - previous"
-msgstr "participants - précédent"
+msgstr "/participants - précédent"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "events - current"
-msgstr "événements - actuels"
+msgstr "/événements - actuels"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "events - previous"
-msgstr "événements - précédents"
+msgstr "/événements - précédents"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
@@ -222,18 +222,18 @@ msgstr "événements - précédents"
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr "depuis la période précédente"
+msgstr "/depuis la période précédente"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "untaxed revenue - current"
-msgstr "revenus hors taxes - actuels"
+msgstr "/revenus hors taxes - actuels"
 
 #. module: spreadsheet_dashboard_event_sale
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_event_sale/data/files/events_dashboard.json:0
 #, python-format
 msgid "untaxed revenue - previous"
-msgstr "revenus hors taxes - précédents"
+msgstr "/revenus hors taxes - précédents"

@@ -25,92 +25,92 @@ msgstr ""
 msgid ""
 "1 credit is consumed per visitor matching the website traffic conditions and"
 " whose company can be identified.<br/>"
-msgstr ""
+msgstr "/"
 "1 crédit est consommé par visiteur correspondant aux conditions de trafic du"
 " site web et dont l'entreprise peut être identifiée."
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "<span class=\"o_stat_text\"> Leads </span>"
-msgstr "<span class=\"o_stat_text\"> Pistes </span>"
+msgstr "/<span class=\"o_stat_text\"> Pistes </span>"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "<span class=\"o_stat_text\"> Opportunities </span>"
-msgstr "<span class=\"o_stat_text\"> Opportunités </span>"
+msgstr "/<span class=\"o_stat_text\"> Opportunités </span>"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__active
 msgid "Active"
-msgstr "Active"
+msgstr "/Active"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_view_search
 msgid "Archived"
-msgstr "Archivé"
+msgstr "/Archivé"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model,name:website_crm_iap_reveal.model_crm_reveal_rule
 msgid "CRM Lead Generation Rules"
-msgstr "Règles de génération de pistes commerciales du CRM"
+msgstr "/Règles de génération de pistes commerciales du CRM"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model,name:website_crm_iap_reveal.model_crm_reveal_view
 msgid "CRM Reveal View"
-msgstr "Vue de CRM Révélation"
+msgstr "/Vue de CRM Révélation"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__lead_for
 msgid "Choose whether to track companies only or companies and their contacts"
-msgstr ""
+msgstr "/"
 "Choisissez de suivre uniquement les sociétés ou les sociétés et leurs "
 "contacts"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__lead_for__companies
 msgid "Companies"
-msgstr "Sociétés"
+msgstr "/Sociétés"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__lead_for__people
 msgid "Companies and their Contacts"
-msgstr "Sociétés et leurs contacts"
+msgstr "/Sociétés et leurs contacts"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__company_size_min
 msgid "Company Size"
-msgstr "Taille de la société"
+msgstr "/Taille de la société"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__company_size_max
 msgid "Company Size Max"
-msgstr "Taille maximale de la société"
+msgstr "/Taille maximale de la société"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "Contact Filter"
-msgstr "Filtre des contacts"
+msgstr "/Filtre des contacts"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__country_ids
 msgid "Countries"
-msgstr "Pays"
+msgstr "/Pays"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__create_date
 msgid "Create Date"
-msgstr "Date de création"
+msgstr "/Date de création"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.actions.act_window,help:website_crm_iap_reveal.crm_reveal_rule_action
 msgid "Create a conversion rule"
-msgstr "Créer une règle de conversion"
+msgstr "/Créer une règle de conversion"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.actions.act_window,help:website_crm_iap_reveal.crm_reveal_rule_action
 msgid ""
 "Create rules to generate B2B leads/opportunities from your website visitors."
-msgstr ""
+msgstr "/"
 "Créer des règles pour générer des pistes/opportunités B2B à partir des "
 "visiteurs de votre site web"
 
@@ -118,131 +118,131 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__create_uid
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__create_uid
 msgid "Created by"
-msgstr "Créé par"
+msgstr "/Créé par"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__create_date
 msgid "Created on"
-msgstr "Créé le"
+msgstr "/Créé le"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__lead_for
 msgid "Data Tracking"
-msgstr "Suivi des données"
+msgstr "/Suivi des données"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__display_name
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__display_name
 msgid "Display Name"
-msgstr "Nom d'affichage"
+msgstr "/Nom d'affichage"
 
 #. module: website_crm_iap_reveal
 #: code:addons/website_crm_iap_reveal/models/crm_reveal_rule.py:0
 #, python-format
 msgid "Enter Valid Regex."
-msgstr "Saisir une regex valide."
+msgstr "/Saisir une regex valide."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__contact_filter_type
 msgid "Filter On"
-msgstr "Filtrer sur"
+msgstr "/Filtrer sur"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__filter_on_size
 msgid "Filter companies based on their size."
-msgstr "Filtrer les sociétés en fonction de leur taille"
+msgstr "/Filtrer les sociétés en fonction de leur taille"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__filter_on_size
 msgid "Filter on Size"
-msgstr "Filtrer en fonction de la taille"
+msgstr "/Filtrer en fonction de la taille"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "From"
-msgstr "De"
+msgstr "/De"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__lead_ids
 msgid "Generated Lead / Opportunity"
-msgstr "Piste / opportunité générée"
+msgstr "/Piste / opportunité générée"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model,name:website_crm_iap_reveal.model_ir_http
 msgid "HTTP Routing"
-msgstr "Routage HTTP"
+msgstr "/Routage HTTP"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__priority__2
 msgid "High"
-msgstr "Élevé"
+msgstr "/Élevé"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_lead__reveal_iap_credits
 msgid "IAP Credits"
-msgstr "Crédits IAP"
+msgstr "/Crédits IAP"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__id
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__id
 msgid "ID"
-msgstr "ID"
+msgstr "/ID"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_lead__reveal_ip
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__reveal_ip
 msgid "IP Address"
-msgstr "Adresse IP"
+msgstr "/Adresse IP"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__industry_tag_ids
 msgid "Industries"
-msgstr "Secteurs d'activité"
+msgstr "/Secteurs d'activité"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule____last_update
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view____last_update
 msgid "Last Modified on"
-msgstr "Dernière modification le"
+msgstr "/Dernière modification le"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__write_uid
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__write_uid
 msgid "Last Updated by"
-msgstr "Dernière mise à jour par"
+msgstr "/Dernière mise à jour par"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__write_date
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__write_date
 msgid "Last Updated on"
-msgstr "Dernière mise à jour le"
+msgstr "/Dernière mise à jour le"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__lead_type__lead
 msgid "Lead"
-msgstr "Piste"
+msgstr "/Piste"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "Lead Data"
-msgstr "Données sur la piste"
+msgstr "/Données sur la piste"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_lead_opportunity_form
 msgid "Lead Generation Information"
-msgstr "Information concernant la génération de pistes"
+msgstr "/Information concernant la génération de pistes"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_lead__reveal_rule_id
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__reveal_rule_id
 msgid "Lead Generation Rule"
-msgstr "Règle de génération de pistes"
+msgstr "/Règle de génération de pistes"
 
 #. module: website_crm_iap_reveal
 #: model:ir.actions.act_window,name:website_crm_iap_reveal.crm_reveal_view_action
 #: model:ir.ui.menu,name:website_crm_iap_reveal.crm_reveal_view_menu_action
 msgid "Lead Generation Views"
-msgstr "Vues de génération de pistes"
+msgstr "/Vues de génération de pistes"
 
 #. module: website_crm_iap_reveal
 #: code:addons/website_crm_iap_reveal/models/crm_reveal_rule.py:0
@@ -250,7 +250,7 @@ msgstr "Vues de génération de pistes"
 msgid ""
 "Lead Generation requires a GeoIP resolver which could not be found on your "
 "system. Please consult https://pypi.org/project/GeoIP/."
-msgstr ""
+msgstr "/"
 "La génération de pistes nécessite un GeoIP resolveur introuvable sur votre "
 "système. Veuillez consulter https://pypi.org/project/GeoIP/."
 
@@ -259,76 +259,76 @@ msgstr ""
 #: model:ir.cron,cron_name:website_crm_iap_reveal.ir_cron_crm_reveal_lead
 #: model:ir.cron,name:website_crm_iap_reveal.ir_cron_crm_reveal_lead
 msgid "Lead Generation: Leads/Opportunities Generation"
-msgstr "Génération de pistes: Génération de pistes/opportunités"
+msgstr "/Génération de pistes: Génération de pistes/opportunités"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model,name:website_crm_iap_reveal.model_crm_lead
 msgid "Lead/Opportunity"
-msgstr "Piste/opportunité"
+msgstr "/Piste/opportunité"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__industry_tag_ids
 msgid "Leave empty to always match. Odoo will not create lead if no match"
-msgstr ""
+msgstr "/"
 "Laissez vide pour toujours correspondre. Odoo ne créera pas de piste s'il "
 "n'y a pas de correspondance"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__priority__0
 msgid "Low"
-msgstr "Faible"
+msgstr "/Faible"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid ""
 "Make sure you know if you have to be GDPR compliant for storing personal "
 "data."
-msgstr ""
+msgstr "/"
 "Assurez-vous de savoir si vous devez être conforme au RGPD pour stocker des "
 "données personnelles."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.constraint,message:website_crm_iap_reveal.constraint_crm_reveal_rule_limit_extra_contacts
 msgid "Maximum 5 contacts are allowed!"
-msgstr "Maximum 5 contacts sont autorisés !"
+msgstr "/Maximum 5 contacts sont autorisés !"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__priority__1
 msgid "Medium"
-msgstr "Moyen"
+msgstr "/Moyen"
 
 #. module: website_crm_iap_reveal
 #: code:addons/website_crm_iap_reveal/models/crm_reveal_rule.py:0
 #, python-format
 msgid "Missing Library"
-msgstr "Librairie manquante"
+msgstr "/Librairie manquante"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_view__reveal_state__not_found
 msgid "Not Found"
-msgstr "Introuvable"
+msgstr "/Introuvable"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__extra_contacts
 msgid "Number of Contacts"
-msgstr "Nombre de contacts"
+msgstr "/Nombre de contacts"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__lead_count
 msgid "Number of Generated Leads"
-msgstr "Nombre de pistes générées"
+msgstr "/Nombre de pistes générées"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__opportunity_count
 msgid "Number of Generated Opportunity"
-msgstr "Nombre d'opportunités générées"
+msgstr "/Nombre d'opportunités générées"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__country_ids
 msgid ""
 "Only visitors of following countries will be converted into "
 "leads/opportunities (using GeoIP)."
-msgstr ""
+msgstr "/"
 "Seuls les visiteurs des pays suivants seront convertis en pistes / "
 "opportunités (en utilisant GeoIP)."
 
@@ -337,45 +337,45 @@ msgstr ""
 msgid ""
 "Only visitors of following states will be converted into "
 "leads/opportunities."
-msgstr ""
+msgstr "/"
 "Seuls les visiteurs des États suivants seront convertis en pistes / "
 "opportunités"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__lead_type__opportunity
 msgid "Opportunity"
-msgstr "Opportunité"
+msgstr "/Opportunité"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "Opportunity Data"
-msgstr "Données sur l'opportunité"
+msgstr "/Données sur l'opportunité"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "Opportunity Generation Conditions"
-msgstr "Conditions de génération d'opportunités"
+msgstr "/Conditions de génération d'opportunités"
 
 #. module: website_crm_iap_reveal
 #: code:addons/website_crm_iap_reveal/models/crm_reveal_rule.py:0
 #, python-format
 msgid "Opportunity created by Odoo Lead Generation"
-msgstr "Opportunité créée par le générateur de pistes d'Odoo"
+msgstr "/Opportunité créée par le générateur de pistes d'Odoo"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__other_role_ids
 msgid "Other Roles"
-msgstr "Autres rôles"
+msgstr "/Autres rôles"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__preferred_role_id
 msgid "Preferred Role"
-msgstr "Rôle préféré"
+msgstr "/Rôle préféré"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__priority
 msgid "Priority"
-msgstr "Priorité"
+msgstr "/Priorité"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__regex_url
@@ -383,7 +383,7 @@ msgid ""
 "Regex to track website pages. Leave empty to track the entire website, or / "
 "to target the homepage. Example: /page* to track all the pages which begin "
 "with /page"
-msgstr ""
+msgstr "/"
 "Regex pour tracker des pages du site web. Laissez vide pour tracker "
 "l'entiereté du site web, ou / pour cibler la page d'accueil. Exemple: /page*"
 " pour tracker toutes les pages qui commencent par /page."
@@ -391,68 +391,68 @@ msgstr ""
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__website_id
 msgid "Restrict Lead generation to this website."
-msgstr "Restreindre la génération de pistes à ce site web."
+msgstr "/Restreindre la génération de pistes à ce site web."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__contact_filter_type__role
 msgid "Role"
-msgstr "Rôle"
+msgstr "/Rôle"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_view_search
 msgid "Rule"
-msgstr "Règle"
+msgstr "/Règle"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__name
 msgid "Rule Name"
-msgstr "Nom de la règle"
+msgstr "/Nom de la règle"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__team_id
 msgid "Sales Team"
-msgstr "Équipe commerciale"
+msgstr "/Équipe commerciale"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__user_id
 msgid "Salesperson"
-msgstr "Vendeur"
+msgstr "/Vendeur"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_view_search
 msgid "Search CRM Reveal Rule"
-msgstr "Chercher une règle de CRM Révélation"
+msgstr "/Chercher une règle de CRM Révélation"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__seniority_id
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__contact_filter_type__seniority
 msgid "Seniority"
-msgstr "Ancienneté"
+msgstr "/Ancienneté"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__sequence
 msgid "Sequence"
-msgstr "Séquence"
+msgstr "/Séquence"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__reveal_state
 msgid "State"
-msgstr "État"
+msgstr "/État"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__state_ids
 msgid "States"
-msgstr "États"
+msgstr "/États"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__suffix
 msgid "Suffix"
-msgstr "Suffixe"
+msgstr "/Suffixe"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__tag_ids
 msgid "Tags"
-msgstr "Étiquettes"
+msgstr "/Étiquettes"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__extra_contacts
@@ -460,7 +460,7 @@ msgid ""
 "This is the number of contacts to track if their role/seniority match your "
 "criteria. Their details will show up in the history thread of generated "
 "leads/opportunities. One credit is consumed per tracked contact."
-msgstr ""
+msgstr "/"
 "C'est le nombre de contacts à tracker si leur rôle / ancienneté correspond à"
 " vos critères. Leurs détails apparaîtront dans l'historique des "
 "pistes/opportunités générés. Un crédit est consommé par contact tracké."
@@ -470,83 +470,83 @@ msgstr ""
 msgid ""
 "This will be appended in name of generated lead so you can identify "
 "lead/opportunity is generated with this rule"
-msgstr ""
+msgstr "/"
 "Ceci sera ajouté au nom de la piste générée afin que vous puissiez "
 "identifier la piste/opportunité générée avec cette règle"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_view__reveal_state__to_process
 msgid "To Process"
-msgstr "À traiter"
+msgstr "/À traiter"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__lead_type
 msgid "Type"
-msgstr "Type"
+msgstr "/Type"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__regex_url
 msgid "URL Expression"
-msgstr "Expression URL"
+msgstr "/Expression URL"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "Up to"
-msgstr "Jusqu'à"
+msgstr "/Jusqu'à"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__sequence
 msgid ""
 "Used to order the rules with same URL and countries. Rules with a lower "
 "sequence number will be processed first."
-msgstr ""
+msgstr "/"
 "Utilisé pour ordonner les règles avec les mêmes URL et pays. Les règles avec"
 " un numéro de séquence inférieur seront traitées en premier."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__priority__3
 msgid "Very High"
-msgstr "Très élevé"
+msgstr "/Très élevé"
 
 #. module: website_crm_iap_reveal
 #: model:ir.actions.act_window,name:website_crm_iap_reveal.crm_reveal_rule_action
 #: model:ir.ui.menu,name:website_crm_iap_reveal.crm_reveal_rule_menu_action
 msgid "Visits to Leads Rules"
-msgstr "Règles pour convertir des visites en pistes"
+msgstr "/Règles pour convertir des visites en pistes"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__website_id
 msgid "Website"
-msgstr "Site web"
+msgstr "/Site web"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "Website Traffic Conditions"
-msgstr "Conditions du trafic du site web"
+msgstr "/Conditions du trafic du site web"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "additional credit(s) are consumed if the company matches this rule."
-msgstr ""
+msgstr "/"
 "les crédits additionnels sont consommés si la société est conforme à cette "
 "règle."
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "e.g. /page"
-msgstr "par ex. /page"
+msgstr "/par ex. /page"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "e.g. US Visitors"
-msgstr "par ex. visiteurs américains"
+msgstr "/par ex. visiteurs américains"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "employees"
-msgstr "employés"
+msgstr "/employés"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "to"
-msgstr "au"
+msgstr "/au"

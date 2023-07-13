@@ -23,32 +23,32 @@ msgstr ""
 #. module: website_event_booth_sale
 #: model_terms:ir.ui.view,arch_db:website_event_booth_sale.event_booth_registration
 msgid "<span class=\"fw-bold\">Total</span>"
-msgstr "<span class=\"fw-bold\">Total</span>"
+msgstr "/<span class=\"fw-bold\">Total</span>"
 
 #. module: website_event_booth_sale
 #: model_terms:ir.ui.view,arch_db:website_event_booth_sale.event_booth_registration
 msgid "Free"
-msgstr "Gratuit"
+msgstr "/Gratuit"
 
 #. module: website_event_booth_sale
 #: model:ir.model,name:website_event_booth_sale.model_product_product
 msgid "Product Variant"
-msgstr "Variante de produit"
+msgstr "/Variante de produit"
 
 #. module: website_event_booth_sale
 #: model:ir.model,name:website_event_booth_sale.model_sale_order
 msgid "Sales Order"
-msgstr "Bon de commande"
+msgstr "/Bon de commande"
 
 #. module: website_event_booth_sale
 #: model:ir.model,name:website_event_booth_sale.model_website
 msgid "Website"
-msgstr "Site web"
+msgstr "/Site web"
 
 #. module: website_event_booth_sale
 #: code:addons/website_event_booth_sale/models/sale_order.py:0
 #, python-format
 msgid "You cannot manually change the quantity of an Event Booth product."
-msgstr ""
+msgstr "/"
 "Vous ne pouvez pas modifier manuellement la quantité d'un produit Stand "
 "d'événement."

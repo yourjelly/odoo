@@ -23,19 +23,19 @@ msgstr ""
 #. module: mass_mailing_event
 #: model_terms:ir.ui.view,arch_db:mass_mailing_event.event_event_view_form_inherit_mass_mailing
 msgid "Contact Attendees"
-msgstr "Contacter les participants"
+msgstr "/Contacter les participants"
 
 #. module: mass_mailing_event
 #: model:ir.model,name:mass_mailing_event.model_event_event
 msgid "Event"
-msgstr "Événement"
+msgstr "/Événement"
 
 #. module: mass_mailing_event
 #: model:ir.model,name:mass_mailing_event.model_event_registration
 msgid "Event Registration"
-msgstr "Inscription à l'événement"
+msgstr "/Inscription à l'événement"
 
 #. module: mass_mailing_event
 #: model_terms:ir.ui.view,arch_db:mass_mailing_event.event_event_view_form_inherit_mass_mailing
 msgid "Invite"
-msgstr "Inviter"
+msgstr "/Inviter"

@@ -20,92 +20,92 @@ msgstr ""
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Customer Reference"
-msgstr "Référence client"
+msgstr "/Référence client"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Expiration"
-msgstr "Expiration"
+msgstr "/Expiration"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Incoterm"
-msgstr "Incoterms"
+msgstr "/Incoterms"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Invoicing Address:"
-msgstr "Adresse de facturation:"
+msgstr "/Adresse de facturation:"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Invoicing and Shipping Address:"
-msgstr "Adresse de facturation et d'expédition:"
+msgstr "/Adresse de facturation et d'expédition:"
 
 #. module: l10n_din5008_sale
 #: model:ir.model.fields,field_description:l10n_din5008_sale.field_sale_order__l10n_din5008_addresses
 msgid "L10N Din5008 Addresses"
-msgstr "Adresses L10N Din5008"
+msgstr "/Adresses L10N Din5008"
 
 #. module: l10n_din5008_sale
 #: model:ir.model.fields,field_description:l10n_din5008_sale.field_sale_order__l10n_din5008_document_title
 msgid "L10N Din5008 Document Title"
-msgstr "Titre du document L10N Din5008"
+msgstr "/Titre du document L10N Din5008"
 
 #. module: l10n_din5008_sale
 #: model:ir.model.fields,field_description:l10n_din5008_sale.field_sale_order__l10n_din5008_template_data
 msgid "L10N Din5008 Template Data"
-msgstr "Données de modèle L10N Din5008"
+msgstr "/Données de modèle L10N Din5008"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Order Date"
-msgstr "Date de commande"
+msgstr "/Date de commande"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Order No."
-msgstr "N ° de commande."
+msgstr "/N ° de commande."
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Pro Forma Invoice"
-msgstr "Facture pro forma"
+msgstr "/Facture pro forma"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Quotation"
-msgstr "Devis"
+msgstr "/Devis"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Quotation Date"
-msgstr "Date du devis"
+msgstr "/Date du devis"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Quotation No."
-msgstr "Devis N."
+msgstr "/Devis N."
 
 #. module: l10n_din5008_sale
 #. odoo-python
@@ -113,18 +113,18 @@ msgstr "Devis N."
 #: model:ir.model,name:l10n_din5008_sale.model_sale_order
 #, python-format
 msgid "Sales Order"
-msgstr "Bon de commande"
+msgstr "/Bon de commande"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Salesperson"
-msgstr "Vendeur"
+msgstr "/Vendeur"
 
 #. module: l10n_din5008_sale
 #. odoo-python
 #: code:addons/l10n_din5008_sale/models/sale.py:0
 #, python-format
 msgid "Shipping Address:"
-msgstr "Adresse de livraison:"
+msgstr "/Adresse de livraison:"

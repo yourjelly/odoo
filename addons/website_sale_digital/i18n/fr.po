@@ -27,57 +27,57 @@ msgstr ""
 #: code:addons/website_sale_digital/models/product.py:0
 #, python-format
 msgid "Add attachments for this digital product"
-msgstr "Ajoutez des pièces jointes pour ce produit numérique"
+msgstr "/Ajoutez des pièces jointes pour ce produit numérique"
 
 #. module: website_sale_digital
 #: model:ir.model,name:website_sale_digital.model_ir_attachment
 msgid "Attachment"
-msgstr "Pièce jointe"
+msgstr "/Pièce jointe"
 
 #. module: website_sale_digital
 #: code:addons/website_sale_digital/models/product.py:0
 #: code:addons/website_sale_digital/models/product.py:0
 #, python-format
 msgid "Digital Attachments"
-msgstr "Pièces jointes numériques"
+msgstr "/Pièces jointes numériques"
 
 #. module: website_sale_digital
 #: model_terms:ir.ui.view,arch_db:website_sale_digital.product_product_view_form_inherit_digital
 #: model_terms:ir.ui.view,arch_db:website_sale_digital.product_template_view_form_inherit_digital
 msgid "Digital Files"
-msgstr "Fichiers numériques"
+msgstr "/Fichiers numériques"
 
 #. module: website_sale_digital
 #: model:ir.model.fields,field_description:website_sale_digital.field_ir_attachment__product_downloadable
 #: model:ir.model.fields,field_description:website_sale_digital.field_mrp_document__product_downloadable
 msgid "Downloadable from product portal"
-msgstr "Téléchargeable depuis le portail produit"
+msgstr "/Téléchargeable depuis le portail produit"
 
 #. module: website_sale_digital
 #: model_terms:ir.ui.view,arch_db:website_sale_digital.sale_order_portal_content_inherit_website_sale_digital
 msgid "Downloads"
-msgstr "Téléchargements"
+msgstr "/Téléchargements"
 
 #. module: website_sale_digital
 #: model:ir.model.fields,field_description:website_sale_digital.field_product_product__attachment_count
 #: model:ir.model.fields,field_description:website_sale_digital.field_product_template__attachment_count
 msgid "File"
-msgstr "Fichier"
+msgstr "/Fichier"
 
 #. module: website_sale_digital
 #: model:ir.model,name:website_sale_digital.model_account_move_line
 msgid "Journal Item"
-msgstr "Écriture comptable"
+msgstr "/Écriture comptable"
 
 #. module: website_sale_digital
 #: model:ir.model,name:website_sale_digital.model_product_template
 msgid "Product"
-msgstr "Produit"
+msgstr "/Produit"
 
 #. module: website_sale_digital
 #: model:ir.model,name:website_sale_digital.model_product_product
 msgid "Product Variant"
-msgstr "Variante de produit"
+msgstr "/Variante de produit"
 
 #. module: website_sale_digital
 #: code:addons/website_sale_digital/models/product.py:0
@@ -86,15 +86,15 @@ msgstr "Variante de produit"
 msgid ""
 "The attached files are the ones that will be purchased and sent to the "
 "customer."
-msgstr ""
+msgstr "/"
 "Les fichiers joints sont ceux qui seront achetés et envoyés au client."
 
 #. module: website_sale_digital
 #: model:product.template,uom_name:website_sale_digital.product_1
 msgid "Units"
-msgstr "Unité(s)"
+msgstr "/Unité(s)"
 
 #. module: website_sale_digital
 #: model:product.template,name:website_sale_digital.product_1
 msgid "eBook: Office Renovation for Dummies"
-msgstr "eBook : Rénovation de bureau pour les nuls"
+msgstr "/eBook : Rénovation de bureau pour les nuls"

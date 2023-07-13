@@ -27,14 +27,14 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "# Expenses"
-msgstr "# Notes de frais"
+msgstr "/# Notes de frais"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Category"
-msgstr "Catégorie"
+msgstr "/Catégorie"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
@@ -43,91 +43,91 @@ msgstr "Catégorie"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Employee"
-msgstr "Employé"
+msgstr "/Employé"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Expense"
-msgstr "Note de frais"
+msgstr "/Note de frais"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Expenses"
-msgstr "Notes de frais"
+msgstr "/Notes de frais"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Expenses Analysis"
-msgstr "Analyse des notes de frais"
+msgstr "/Analyse des notes de frais"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "KPI - Expenses"
-msgstr "KPI - Notes de frais"
+msgstr "/KPI - Notes de frais"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "KPI - To reimburse"
-msgstr "KPI - À rembourser"
+msgstr "/KPI - À rembourser"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "KPI - To report"
-msgstr "KPI - À signaler"
+msgstr "/KPI - À signaler"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "KPI - To validate"
-msgstr "KPI - À valider"
+msgstr "/KPI - À valider"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Période"
+msgstr "/Période"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Product"
-msgstr "Produit"
+msgstr "/Produit"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "To reimburse"
-msgstr "À rembourser"
+msgstr "/À rembourser"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "To report"
-msgstr "À signaler"
+msgstr "/À signaler"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "To validate"
-msgstr "À valider"
+msgstr "/À valider"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
@@ -135,7 +135,7 @@ msgstr "À valider"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Top Categories"
-msgstr "Meilleures catégories"
+msgstr "/Meilleures catégories"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
@@ -143,7 +143,7 @@ msgstr "Meilleures catégories"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Top Employees"
-msgstr "Meilleurs employés"
+msgstr "/Meilleurs employés"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
@@ -151,7 +151,7 @@ msgstr "Meilleurs employés"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Top Expenses"
-msgstr "Meilleures notes de frais"
+msgstr "/Meilleures notes de frais"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
@@ -160,4 +160,4 @@ msgstr "Meilleures notes de frais"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Total"
-msgstr "Total"
+msgstr "/Total"

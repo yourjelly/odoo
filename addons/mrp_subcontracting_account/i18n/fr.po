@@ -23,19 +23,19 @@ msgstr ""
 #. module: mrp_subcontracting_account
 #: model:ir.model,name:mrp_subcontracting_account.model_product_product
 msgid "Product Variant"
-msgstr "Variante de produit"
+msgstr "/Variante de produit"
 
 #. module: mrp_subcontracting_account
 #: model:ir.model,name:mrp_subcontracting_account.model_mrp_production
 msgid "Production Order"
-msgstr "Ordre de production"
+msgstr "/Ordre de production"
 
 #. module: mrp_subcontracting_account
 #: model:ir.model,name:mrp_subcontracting_account.model_stock_move
 msgid "Stock Move"
-msgstr "Mouvement de stock"
+msgstr "/Mouvement de stock"
 
 #. module: mrp_subcontracting_account
 #: model:ir.model,name:mrp_subcontracting_account.model_stock_picking
 msgid "Transfer"
-msgstr "Transfert"
+msgstr "/Transfert"

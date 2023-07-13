@@ -20,136 +20,136 @@ msgstr ""
 #: code:addons/test_translation_import/models/models.py:0
 #, python-format
 msgid "Code Lazy, English"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #. odoo-python
 #: code:addons/test_translation_import/models/models.py:0
 #, python-format
 msgid "Code, %(num)s, %(symbol)s, English"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #. odoo-python
 #: code:addons/test_translation_import/models/models.py:0
 #, python-format
 msgid "Code, %s, English"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #. odoo-python
 #: code:addons/test_translation_import/models/models.py:0
 #, python-format
 msgid "Code, English"
-msgstr "Code, Français"
+msgstr "/Code, Français"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1__create_date
 msgid "Created on"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model_terms:test.translation.import.model1,xml:test_translation_import.test_translation_import_model1_record1
 msgid "Fork"
-msgstr "Fourchette"
+msgstr "/Fourchette"
 
 #. module: test_translation_import
 #: model:ir.model.fields,help:test_translation_import.field_test_translation_import_model1__name
 msgid "Help, English"
-msgstr "Aider, Français"
+msgstr "/Aider, Français"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1__id
 msgid "ID"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model_terms:test.translation.import.model1,xml:test_translation_import.test_translation_import_model1_record1
 msgid "Knife"
-msgstr "Couteau"
+msgstr "/Couteau"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1____last_update
 msgid "Last Modified on"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1__name
 msgid "Name"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1__selection
 msgid "Selection"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.model.fields.selection,name:test_translation_import.selection__test_translation_import_model1__selection__bar
 msgid "Selection Bar"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.model.fields.selection,name:test_translation_import.selection__test_translation_import_model1__selection__foo
 msgid "Selection Foo"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model_terms:test.translation.import.model1,xml:test_translation_import.test_translation_import_model1_record1
 msgid "Spoon"
-msgstr "Cuillère"
+msgstr "/Cuillère"
 
 #. module: test_translation_import
 #: model:test.translation.import.model1,name:test_translation_import.test_translation_import_model1_record1
 msgid "Tableware"
-msgstr "Vaisselle"
+msgstr "/Vaisselle"
 
 #. module: test_translation_import
 #: model:ir.actions.act_window,name:test_translation_import.action_test_translation_import_model1
 #: model:ir.ui.menu,name:test_translation_import.menu_test_translation_import_model1
 msgid "Test translation import model1"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.ui.menu,name:test_translation_import.menu_test_translation_import
 msgid "Test translation model1"
-msgstr "Test translation import in french"
+msgstr "/Test translation import in french"
 
 #. module: test_translation_import
 #: model:ir.model,name:test_translation_import.model_test_translation_import_model1
 msgid "Translation Test 1"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #: model:ir.model.fields,field_description:test_translation_import.field_test_translation_import_model1__xml
 msgid "XML"
-msgstr ""
+msgstr "/"
 
 #. module: test_translation_import
 #. odoo-javascript
 #: code:addons/test_translation_import/static/src/xml/js_templates.xml:0
 #, python-format
 msgid "do export"
-msgstr "exporter"
+msgstr "/exporter"
 
 #. module: test_translation_import
 #. odoo-javascript
@@ -158,18 +158,18 @@ msgstr "exporter"
 #: code:addons/test_translation_import/static/src/xml/js_templates.xml:0
 #, python-format
 msgid "slot"
-msgstr "emplacement"
+msgstr "/emplacement"
 
 #. module: test_translation_import
 #. odoo-javascript
 #: code:addons/test_translation_import/static/src/xml/js_templates.xml:0
 #, python-format
 msgid "slot 2"
-msgstr "emplacement 2"
+msgstr "/emplacement 2"
 
 #. module: test_translation_import
 #. odoo-javascript
 #: code:addons/test_translation_import/static/src/xml/js_templates.xml:0
 #, python-format
 msgid "text node"
-msgstr "nœud de texte"
+msgstr "/nœud de texte"

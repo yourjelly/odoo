@@ -23,13 +23,13 @@ msgstr ""
 #. module: google_account
 #: model:ir.model,name:google_account.model_google_service
 msgid "Google Service"
-msgstr "Services Google"
+msgstr "/Services Google"
 
 #. module: google_account
 #: code:addons/google_account/models/google_service.py:0
 #, python-format
 msgid "Method not supported [%s] not in [GET, POST, PUT, PATCH or DELETE]!"
-msgstr ""
+msgstr "/"
 "Méthode non prise en charge [%s] pas dans [GET, POST, PUT, PATCH or DELETE] "
 "!"
 
@@ -39,6 +39,6 @@ msgstr ""
 msgid ""
 "Something went wrong during your token generation. Maybe your Authorization "
 "Code is invalid or already expired"
-msgstr ""
+msgstr "/"
 "Une erreur est survenue durant la génération du jeton. Votre code "
 "d'autorisation est peut être invalide ou expiré."

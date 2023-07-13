@@ -23,29 +23,29 @@ msgstr ""
 #. module: pos_restaurant_adyen
 #: model:ir.model.fields,field_description:pos_restaurant_adyen.field_pos_payment_method__adyen_merchant_account
 msgid "Adyen Merchant Account"
-msgstr "Compte marchand Ayden"
+msgstr "/Compte marchand Ayden"
 
 #. module: pos_restaurant_adyen
 #: model:ir.model,name:pos_restaurant_adyen.model_pos_order
 msgid "Point of Sale Orders"
-msgstr "Commandes du point de vente"
+msgstr "/Commandes du point de vente"
 
 #. module: pos_restaurant_adyen
 #: model:ir.model,name:pos_restaurant_adyen.model_pos_payment_method
 msgid "Point of Sale Payment Methods"
-msgstr "Modes de paiement du point de vente"
+msgstr "/Modes de paiement du point de vente"
 
 #. module: pos_restaurant_adyen
 #: model:ir.model,name:pos_restaurant_adyen.model_pos_payment
 msgid "Point of Sale Payments"
-msgstr "Paiements du point de vente"
+msgstr "/Paiements du point de vente"
 
 #. module: pos_restaurant_adyen
 #: model:ir.model,name:pos_restaurant_adyen.model_pos_session
 msgid "Point of Sale Session"
-msgstr "Session du point de vente"
+msgstr "/Session du point de vente"
 
 #. module: pos_restaurant_adyen
 #: model:ir.model.fields,help:pos_restaurant_adyen.field_pos_payment_method__adyen_merchant_account
 msgid "The POS merchant account code used in Adyen"
-msgstr "Le code PdV du compte marchand utilisé sur Ayden"
+msgstr "/Le code PdV du compte marchand utilisé sur Ayden"

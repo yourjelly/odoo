@@ -26,21 +26,21 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-spin fa-circle-o-notch position-relative\"/>\n"
 "                <span class=\"ps-2\">Loading Video...</span>"
-msgstr ""
+msgstr "/"
 "<i class=\"fa fa-spin fa-circle-o-notch position-relative\"/>\n"
 "                <span class=\"ps-2\">En cours de chargement de la vidéo...</span>"
 
 #. module: website_event_track_live
 #: model_terms:ir.ui.view,arch_db:website_event_track_live.event_track_aside
 msgid "Chat"
-msgstr "Chat"
+msgstr "/Chat"
 
 #. module: website_event_track_live
 #: model:ir.model.fields,help:website_event_track_live.field_event_track__is_youtube_replay
 msgid ""
 "Check this option if the video is already available on YouTube to avoid "
 "showing 'Direct' options (Chat, ...)"
-msgstr ""
+msgstr "/"
 "Cochez cette option si la vidéo est déjà disponible sur YouTube pour éviter "
 "d'afficher les options 'Direct' (Chat, ...)"
 
@@ -48,38 +48,38 @@ msgstr ""
 #: model:ir.model.fields,help:website_event_track_live.field_event_track__youtube_video_url
 msgid ""
 "Configure this URL so that event attendees can see your Track in video!"
-msgstr ""
+msgstr "/"
 "Configurez cette URL pour que les participants à cet événement puissent voir"
 " votre session en vidéo !"
 
 #. module: website_event_track_live
 #: model:ir.model,name:website_event_track_live.model_event_track
 msgid "Event Track"
-msgstr "Session d'événement"
+msgstr "/Session d'événement"
 
 #. module: website_event_track_live
 #: model:ir.model.fields,help:website_event_track_live.field_event_track__youtube_video_id
 msgid ""
 "Extracted from the video URL and used to infer various links "
 "(embed/thumbnail/...)"
-msgstr ""
+msgstr "/"
 "Extrait de l'URL de la vidéo et utilisé pour déduire divers liens "
 "(embed/thumbnail/...)"
 
 #. module: website_event_track_live
 #: model:ir.model.fields,field_description:website_event_track_live.field_event_track__is_youtube_chat_available
 msgid "Is Chat Available"
-msgstr "Est un chat disponible"
+msgstr "/Est un chat disponible"
 
 #. module: website_event_track_live
 #: model:ir.model.fields,field_description:website_event_track_live.field_event_track__is_youtube_replay
 msgid "Is YouTube Replay"
-msgstr "Est un replay YouTube"
+msgstr "/Est un replay YouTube"
 
 #. module: website_event_track_live
 #: model_terms:ir.ui.view,arch_db:website_event_track_live.tracks_display_list
 msgid "Replay"
-msgstr "Rejouer"
+msgstr "/Rejouer"
 
 #. module: website_event_track_live
 #. openerp-web
@@ -87,21 +87,21 @@ msgstr "Rejouer"
 #: code:addons/website_event_track_live/static/src/xml/website_event_track_live_templates.xml:0
 #, python-format
 msgid "Replay Video"
-msgstr "Rejouer la vidéo"
+msgstr "/Rejouer la vidéo"
 
 #. module: website_event_track_live
 #. openerp-web
 #: code:addons/website_event_track_live/static/src/xml/website_event_track_live_templates.xml:0
 #, python-format
 msgid "Starts in"
-msgstr "Commence dans "
+msgstr "/Commence dans "
 
 #. module: website_event_track_live
 #. openerp-web
 #: code:addons/website_event_track_live/static/src/xml/website_event_track_live_templates.xml:0
 #, python-format
 msgid "Up Next:"
-msgstr "Suivante :"
+msgstr "/Suivante :"
 
 #. module: website_event_track_live
 #. openerp-web
@@ -109,14 +109,14 @@ msgstr "Suivante :"
 #: code:addons/website_event_track_live/static/src/xml/website_event_track_live_templates.xml:0
 #, python-format
 msgid "You just watched:"
-msgstr "Vous venez de regarder :"
+msgstr "/Vous venez de regarder :"
 
 #. module: website_event_track_live
 #: model:ir.model.fields,field_description:website_event_track_live.field_event_track__youtube_video_url
 msgid "YouTube Video Link"
-msgstr "Lien vidéo YouTube"
+msgstr "/Lien vidéo YouTube"
 
 #. module: website_event_track_live
 #: model:ir.model.fields,field_description:website_event_track_live.field_event_track__youtube_video_id
 msgid "YouTube video ID"
-msgstr "ID vidéo YouTube"
+msgstr "/ID vidéo YouTube"

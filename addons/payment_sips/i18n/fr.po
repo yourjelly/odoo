@@ -24,78 +24,78 @@ msgstr ""
 #: code:addons/payment_sips/models/payment.py:0
 #, python-format
 msgid "; multiple order found"
-msgstr "; plusieurs commandes trouvées"
+msgstr "/; plusieurs commandes trouvées"
 
 #. module: payment_sips
 #: code:addons/payment_sips/models/payment.py:0
 #, python-format
 msgid "; no order found"
-msgstr "; aucune commande trouvée"
+msgstr "/; aucune commande trouvée"
 
 #. module: payment_sips
 #: code:addons/payment_sips/models/payment.py:0
 #, python-format
 msgid "Currency not supported by Wordline"
-msgstr "Actuellement non supportée par Wordline"
+msgstr "/Actuellement non supportée par Wordline"
 
 #. module: payment_sips
 #: code:addons/payment_sips/models/payment.py:0
 #, python-format
 msgid "Incorrect payment acquirer provider"
-msgstr "Paiement incorrect vendeur fournisseur"
+msgstr "/Paiement incorrect vendeur fournisseur"
 
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__sips_version
 msgid "Interface Version"
-msgstr "Version de l'interface"
+msgstr "/Version de l'interface"
 
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__sips_merchant_id
 msgid "Merchant ID"
-msgstr "Identifiant du marchand"
+msgstr "/Identifiant du marchand"
 
 #. module: payment_sips
 #: model:ir.model,name:payment_sips.model_payment_acquirer
 msgid "Payment Acquirer"
-msgstr "Intermédiaire de Paiement"
+msgstr "/Intermédiaire de Paiement"
 
 #. module: payment_sips
 #: model:ir.model,name:payment_sips.model_payment_transaction
 msgid "Payment Transaction"
-msgstr "Transaction"
+msgstr "/Transaction"
 
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__sips_prod_url
 msgid "Production url"
-msgstr "URL de Production"
+msgstr "/URL de Production"
 
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__provider
 msgid "Provider"
-msgstr "Fournisseur"
+msgstr "/Fournisseur"
 
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__sips_secret
 msgid "Secret Key"
-msgstr "Clé secrète"
+msgstr "/Clé secrète"
 
 #. module: payment_sips
 #: model:ir.model.fields.selection,name:payment_sips.selection__payment_acquirer__provider__sips
 msgid "Sips"
-msgstr "Sips"
+msgstr "/Sips"
 
 #. module: payment_sips
 #: code:addons/payment_sips/models/payment.py:0
 #, python-format
 msgid "Sips: received data for reference %s"
-msgstr "Sips: a reçu les données avec pour référence %s"
+msgstr "/Sips: a reçu les données avec pour référence %s"
 
 #. module: payment_sips
 #: model:ir.model.fields,field_description:payment_sips.field_payment_acquirer__sips_test_url
 msgid "Test url"
-msgstr "URL de test"
+msgstr "/URL de test"
 
 #. module: payment_sips
 #: model:ir.model.fields,help:payment_sips.field_payment_acquirer__sips_merchant_id
 msgid "Used for production only"
-msgstr "Utilisée pour la production uniquement"
+msgstr "/Utilisée pour la production uniquement"

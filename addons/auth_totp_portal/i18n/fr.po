@@ -25,26 +25,26 @@ msgstr ""
 #: code:addons/auth_totp_portal/static/src/js/totp_frontend.js:0
 #, python-format
 msgid " Copy"
-msgstr "Copier"
+msgstr "/Copier"
 
 #. module: auth_totp_portal
 #: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
 msgid "(Disable two-factor authentication)"
-msgstr "(Désactiver l'authentification à deux facteurs)"
+msgstr "/(Désactiver l'authentification à deux facteurs)"
 
 #. module: auth_totp_portal
 #: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
 msgid ""
 "<i class=\"fa fa-warning\"/>\n"
 "                        Two-factor authentication not enabled"
-msgstr ""
+msgstr "/"
 "<i class=\"fa fa-warning\"/>\n"
 "                        Authentification à deux facteurs non activée"
 
 #. module: auth_totp_portal
 #: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
 msgid "<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
-msgstr "<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+msgstr "/<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
 
 #. module: auth_totp_portal
 #: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
@@ -53,7 +53,7 @@ msgid ""
 "                        <i class=\"fa fa-check-circle\"/>\n"
 "                        Two-factor authentication enabled\n"
 "                    </span>"
-msgstr ""
+msgstr "/"
 "<span class=\"text-success\">\n"
 "                        <i class=\"fa fa-check-circle\"/>\n"
 "                        Authentification à deux facteurs activée\n"
@@ -62,43 +62,43 @@ msgstr ""
 #. module: auth_totp_portal
 #: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
 msgid "<strong>Added On</strong>"
-msgstr "<strong>Ajouté le</strong>"
+msgstr "/<strong>Ajouté le</strong>"
 
 #. module: auth_totp_portal
 #: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
 msgid "<strong>Trusted Device</strong>"
-msgstr "<strong>Appareil de confiance</strong>"
+msgstr "/<strong>Appareil de confiance</strong>"
 
 #. module: auth_totp_portal
 #. openerp-web
 #: code:addons/auth_totp_portal/static/src/js/totp_frontend.js:0
 #, python-format
 msgid "Copied !"
-msgstr "Copié !"
+msgstr "/Copié !"
 
 #. module: auth_totp_portal
 #: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
 msgid "Enable two-factor authentication"
-msgstr "Activer l'authentification à deux facteurs"
+msgstr "/Activer l'authentification à deux facteurs"
 
 #. module: auth_totp_portal
 #. openerp-web
 #: code:addons/auth_totp_portal/static/src/js/totp_frontend.js:0
 #, python-format
 msgid "Operation failed for unknown reason."
-msgstr "L'opération a échoué pour une raison inconnue."
+msgstr "/L'opération a échoué pour une raison inconnue."
 
 #. module: auth_totp_portal
 #: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
 msgid "Revoke All"
-msgstr "Révoquer tout"
+msgstr "/Révoquer tout"
 
 #. module: auth_totp_portal
 #: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
 msgid "Two-factor authentication"
-msgstr "Authentification à deux facteurs"
+msgstr "/Authentification à deux facteurs"
 
 #. module: auth_totp_portal
 #: model:ir.model,name:auth_totp_portal.model_res_users
 msgid "User"
-msgstr "Utilisateur"
+msgstr "/Utilisateur"

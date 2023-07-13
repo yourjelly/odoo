@@ -23,82 +23,82 @@ msgstr ""
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "<strong>Amount of discounts</strong>:"
-msgstr "<strong>Montant des remises</strong> :"
+msgstr "/<strong>Montant des remises</strong> :"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "<strong>Config names</strong>"
-msgstr "<strong>Noms de configuration</strong>"
+msgstr "/<strong>Noms de configuration</strong>"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "<strong>End of session note:</strong>"
-msgstr "<strong>Note de fin de session :</strong>"
+msgstr "/<strong>Note de fin de session :</strong>"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "<strong>Number of discounts</strong>:"
-msgstr "<strong>Nombre de remises</strong> :"
+msgstr "/<strong>Nombre de remises</strong> :"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "<strong>Opening of session note:</strong>"
-msgstr "<strong>Note d'ouverture de session :</strong>"
+msgstr "/<strong>Note d'ouverture de session :</strong>"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "<strong>Total</strong>"
-msgstr "<strong>Total</strong>"
+msgstr "/<strong>Total</strong>"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Base Amount"
-msgstr "Montant de base"
+msgstr "/Montant de base"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.view_pos_daily_sales_reports_wizard
 msgid "Cancel"
-msgstr "Annuler"
+msgstr "/Annuler"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model.fields,field_description:pos_daily_sales_reports.field_pos_session__closing_notes
 msgid "Closing Notes"
-msgstr "Notes à la clôture"
+msgstr "/Notes à la clôture"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Counted"
-msgstr "Compté"
+msgstr "/Compté"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model.fields,field_description:pos_daily_sales_reports.field_pos_daily_sales_reports_wizard__create_uid
 msgid "Created by"
-msgstr "Créé par"
+msgstr "/Créé par"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model.fields,field_description:pos_daily_sales_reports.field_pos_daily_sales_reports_wizard__create_date
 msgid "Created on"
-msgstr "Créé le"
+msgstr "/Créé le"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Daily Report"
-msgstr "Rapport quotidien"
+msgstr "/Rapport quotidien"
 
 #. module: pos_daily_sales_reports
 #: model:ir.actions.act_window,name:pos_daily_sales_reports.action_report_pos_daily_sales_reports
 msgid "Daily Reports"
-msgstr "Rapports quotidiens"
+msgstr "/Rapports quotidiens"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Difference"
-msgstr "Différence"
+msgstr "/Différence"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Disc:"
-msgstr "Rem. :"
+msgstr "/Rem. :"
 
 #. module: pos_daily_sales_reports
 #. odoo-javascript
@@ -106,193 +106,193 @@ msgstr "Rem. :"
 #: code:addons/pos_daily_sales_reports/static/src/xml/SaleDetailsReport.xml:0
 #, python-format
 msgid "Discount:"
-msgstr "Remise :"
+msgstr "/Remise :"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Discounts:"
-msgstr "Remises :"
+msgstr "/Remises :"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model.fields,field_description:pos_daily_sales_reports.field_pos_daily_sales_reports_wizard__display_name
 msgid "Display Name"
-msgstr "Nom d'affichage"
+msgstr "/Nom d'affichage"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Expected"
-msgstr "Prévu"
+msgstr "/Prévu"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model.fields,field_description:pos_daily_sales_reports.field_pos_daily_sales_reports_wizard__id
 msgid "ID"
-msgstr "ID"
+msgstr "/ID"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Invoices"
-msgstr "Factures clients"
+msgstr "/Factures clients"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model.fields,field_description:pos_daily_sales_reports.field_pos_daily_sales_reports_wizard____last_update
 msgid "Last Modified on"
-msgstr "Dernière modification le"
+msgstr "/Dernière modification le"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model.fields,field_description:pos_daily_sales_reports.field_pos_daily_sales_reports_wizard__write_uid
 msgid "Last Updated by"
-msgstr "Mis à jour par"
+msgstr "/Mis à jour par"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model.fields,field_description:pos_daily_sales_reports.field_pos_daily_sales_reports_wizard__write_date
 msgid "Last Updated on"
-msgstr "Mis à jour le"
+msgstr "/Mis à jour le"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Name"
-msgstr "Nom"
+msgstr "/Nom"
 
 #. module: pos_daily_sales_reports
 #. odoo-python
 #: code:addons/pos_daily_sales_reports/models/pos_daily_sales_reports.py:0
 #, python-format
 msgid "No Taxes"
-msgstr "Pas de taxe"
+msgstr "/Pas de taxe"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Number of transactions:"
-msgstr "Nombre de transactions :"
+msgstr "/Nombre de transactions :"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Order reference"
-msgstr "Référence de commande"
+msgstr "/Référence de commande"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Payments"
-msgstr "Paiements"
+msgstr "/Paiements"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model,name:pos_daily_sales_reports.model_pos_daily_sales_reports_wizard
 msgid "Point of Sale Daily Report"
-msgstr "Rapport quotidien du Point de Vente"
+msgstr "/Rapport quotidien du Point de Vente"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model,name:pos_daily_sales_reports.model_report_point_of_sale_report_saledetails
 msgid "Point of Sale Details"
-msgstr "Détails du point de vente"
+msgstr "/Détails du point de vente"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model,name:pos_daily_sales_reports.model_pos_session
 msgid "Point of Sale Session"
-msgstr "Session du point de vente"
+msgstr "/Session du point de vente"
 
 #. module: pos_daily_sales_reports
 #: model:ir.model.fields,field_description:pos_daily_sales_reports.field_pos_daily_sales_reports_wizard__pos_session_id
 msgid "Pos Session"
-msgstr "Session du PdV"
+msgstr "/Session du PdV"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.view_pos_daily_sales_reports_wizard
 msgid "Pos session"
-msgstr "Session PdV"
+msgstr "/Session PdV"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.view_pos_daily_sales_reports_wizard
 msgid "Print"
-msgstr "Imprimer"
+msgstr "/Imprimer"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Product"
-msgstr "Produit"
+msgstr "/Produit"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Product Category"
-msgstr "Catégorie de produits"
+msgstr "/Catégorie de produits"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Quantity"
-msgstr "Quantité"
+msgstr "/Quantité"
 
 #. module: pos_daily_sales_reports
 #. odoo-javascript
 #: code:addons/pos_daily_sales_reports/static/src/xml/SaleDetailsReport.xml:0
 #, python-format
 msgid "REFUNDED:"
-msgstr "REMBOURSÉ :"
+msgstr "/REMBOURSÉ :"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Refunds"
-msgstr "Remboursements"
+msgstr "/Remboursements"
 
 #. module: pos_daily_sales_reports
 #. odoo-javascript
 #: code:addons/pos_daily_sales_reports/static/src/xml/SaleDetailsReport.xml:0
 #, python-format
 msgid "SOLD:"
-msgstr "VENDU :"
+msgstr "/VENDU :"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Sales"
-msgstr "Ventes"
+msgstr "/Ventes"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.view_pos_daily_sales_reports_wizard
 msgid "Sales Details"
-msgstr "Détails des ventes"
+msgstr "/Détails des ventes"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Session Control"
-msgstr "Contrôle de session"
+msgstr "/Contrôle de session"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Session ID:"
-msgstr "ID de session :"
+msgstr "/ID de session :"
 
 #. module: pos_daily_sales_reports
 #: model:ir.ui.menu,name:pos_daily_sales_reports.menu_report_daily_details
 msgid "Session Report"
-msgstr "Rapport de session"
+msgstr "/Rapport de session"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Tax Amount"
-msgstr "Montant de la taxe"
+msgstr "/Montant de la taxe"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Taxes on refunds"
-msgstr "Taxes sur les remboursements"
+msgstr "/Taxes sur les remboursements"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Taxes on sales"
-msgstr "Taxes sur les ventes"
+msgstr "/Taxes sur les ventes"
 
 #. module: pos_daily_sales_reports
 #. odoo-python
 #: code:addons/pos_daily_sales_reports/models/pos_daily_sales_reports.py:0
 #, python-format
 msgid "This session is already closed."
-msgstr "Cette session est déjà fermée."
+msgstr "/Cette session est déjà fermée."
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Total"
-msgstr "Total"
+msgstr "/Total"
 
 #. module: pos_daily_sales_reports
 #: model_terms:ir.ui.view,arch_db:pos_daily_sales_reports.pos_daily_report
 msgid "Total:"
-msgstr "Total :"
+msgstr "/Total :"

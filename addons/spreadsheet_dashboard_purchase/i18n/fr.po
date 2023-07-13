@@ -26,7 +26,7 @@ msgstr ""
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid " days"
-msgstr "jours"
+msgstr "/jours"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -36,7 +36,7 @@ msgstr "jours"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Amount"
-msgstr "Montant"
+msgstr "/Montant"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -45,7 +45,7 @@ msgstr "Montant"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Buyer"
-msgstr "Acheteur"
+msgstr "/Acheteur"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -53,7 +53,7 @@ msgstr "Acheteur"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Country"
-msgstr "Pays"
+msgstr "/Pays"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -61,7 +61,7 @@ msgstr "Pays"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Current"
-msgstr "Actuel"
+msgstr "/Actuel"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -69,14 +69,14 @@ msgstr "Actuel"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Days to receive"
-msgstr "Jours pour recevoir"
+msgstr "/Jours pour recevoir"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "KPI"
-msgstr "KPI"
+msgstr "/KPI"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -84,21 +84,21 @@ msgstr "KPI"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Lines"
-msgstr "Lignes"
+msgstr "/Lignes"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Order"
-msgstr "Commande"
+msgstr "/Commande"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Ordered"
-msgstr "Commandée"
+msgstr "/Commandée"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -109,14 +109,14 @@ msgstr "Commandée"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Orders"
-msgstr "Commandes"
+msgstr "/Commandes"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Période"
+msgstr "/Période"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -124,105 +124,105 @@ msgstr "Période"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Previous"
-msgstr "Précédent"
+msgstr "/Précédent"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchase Analysis by Partner Country"
-msgstr "Analyse des achats par pays partenaire"
+msgstr "/Analyse des achats par pays partenaire"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchase Analysis by Purchase Representative"
-msgstr "Analyse des achats par le représentant des achats"
+msgstr "/Analyse des achats par le représentant des achats"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchase Analysis by Vendor"
-msgstr "Analyse des achats par fournisseur"
+msgstr "/Analyse des achats par fournisseur"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchase Orders by Untaxed Amount"
-msgstr "Bons de commande par montant hors taxes"
+msgstr "/Bons de commande par montant hors taxes"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Purchased"
-msgstr "Acheté"
+msgstr "/Acheté"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Qty ordered"
-msgstr "Qté commandée"
+msgstr "/Qté commandée"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Quantity ordered"
-msgstr "Quantité commandée"
+msgstr "/Quantité commandée"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Source"
-msgstr "Origine"
+msgstr "/Origine"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Sourcing by Country"
-msgstr "Approvisionnement par pays"
+msgstr "/Approvisionnement par pays"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Top Buyers"
-msgstr "Meilleurs acheteurs"
+msgstr "/Meilleurs acheteurs"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Top Orders"
-msgstr "Meilleures commandes"
+msgstr "/Meilleures commandes"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Top Vendors"
-msgstr "Meilleurs vendeurs"
+msgstr "/Meilleurs vendeurs"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Top Vendors by Amount"
-msgstr "Meilleurs vendeurs par montant"
+msgstr "/Meilleurs vendeurs par montant"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Untaxed total"
-msgstr "Total hors taxes"
+msgstr "/Total hors taxes"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -231,14 +231,14 @@ msgstr "Total hors taxes"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "Vendor"
-msgstr "Fournisseur"
+msgstr "/Fournisseur"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "last period"
-msgstr "période précédente"
+msgstr "/période précédente"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
@@ -248,18 +248,18 @@ msgstr "période précédente"
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "since last period"
-msgstr "depuis la période précédente"
+msgstr "/depuis la période précédente"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "stats - current"
-msgstr "stats - actuel"
+msgstr "/stats - actuel"
 
 #. module: spreadsheet_dashboard_purchase
 #. openerp-web
 #: code:addons/spreadsheet_dashboard_purchase/data/files/vendors_dashboard.json:0
 #, python-format
 msgid "stats - previous"
-msgstr "stats - précédent"
+msgstr "/stats - précédent"

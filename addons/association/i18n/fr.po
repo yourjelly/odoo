@@ -22,4 +22,4 @@ msgstr ""
 #. module: association
 #: model:ir.ui.menu,name:association.menu_event_config
 msgid "Configuration"
-msgstr "Configuration"
+msgstr "/Configuration"

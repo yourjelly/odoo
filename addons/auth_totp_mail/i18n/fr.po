@@ -40,7 +40,7 @@ msgid ""
 "    </p>\n"
 "</div>\n"
 "        "
-msgstr ""
+msgstr "/"
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Bonjour <t t-out=\"object.partner_id.name or ''\"></t><br><br>\n"
@@ -63,12 +63,12 @@ msgstr ""
 #: code:addons/auth_totp_mail/models/res_users.py:0
 #, python-format
 msgid "Account Security"
-msgstr "Sécurité du compte"
+msgstr "/Sécurité du compte"
 
 #. module: auth_totp_mail
 #: model:mail.template,subject:auth_totp_mail.mail_template_totp_invite
 msgid "Invitation to activate two-factor authentication on your Odoo account"
-msgstr ""
+msgstr "/"
 "Invitation à activer l'authentification à deux facteurs sur votre compte "
 "Odoo"
 
@@ -79,36 +79,36 @@ msgstr ""
 msgid ""
 "Invitation to use two-factor authentication sent for the following user(s): "
 "%s"
-msgstr ""
+msgstr "/"
 "Invitation à utiliser l'authentification à deux facteurs envoyée pour le(s) "
 "utilisateur(s) suivant(s) : %s"
 
 #. module: auth_totp_mail
 #: model_terms:ir.ui.view,arch_db:auth_totp_mail.view_users_form
 msgid "Invite to use 2FA"
-msgstr "Inviter à l'utiliser la 2FA"
+msgstr "/Inviter à l'utiliser la 2FA"
 
 #. module: auth_totp_mail
 #: model:ir.actions.server,name:auth_totp_mail.action_invite_totp
 msgid "Invite to use two-factor authentication"
-msgstr "Inviter à utiliser l'authentification à deux facteurs"
+msgstr "/Inviter à utiliser l'authentification à deux facteurs"
 
 #. module: auth_totp_mail
 #: model_terms:ir.ui.view,arch_db:auth_totp_mail.res_users_view_form
 msgid "Name"
-msgstr "Nom"
+msgstr "/Nom"
 
 #. module: auth_totp_mail
 #: model:ir.actions.server,name:auth_totp_mail.action_activate_two_factor_authentication
 msgid "Open two-factor authentication configuration"
-msgstr "Ouvrir la configuration de l'authentification à deux facteurs"
+msgstr "/Ouvrir la configuration de l'authentification à deux facteurs"
 
 #. module: auth_totp_mail
 #: model:mail.template,name:auth_totp_mail.mail_template_totp_invite
 msgid "Settings: 2Fa Invitation"
-msgstr "Paramètres : Invitation 2Fa"
+msgstr "/Paramètres : Invitation 2Fa"
 
 #. module: auth_totp_mail
 #: model:ir.model,name:auth_totp_mail.model_res_users
 msgid "User"
-msgstr "Utilisateur"
+msgstr "/Utilisateur"

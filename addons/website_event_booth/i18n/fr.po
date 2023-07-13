@@ -26,7 +26,7 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-exclamation-triangle me-2\" role=\"img\" aria-label=\"Error\" title=\"Error\"/>\n"
 "                    <span class=\"o_wbooth_registration_error_message\"/>"
-msgstr ""
+msgstr "/"
 "<i class=\"fa fa-exclamation-triangle me-2\" role=\"img\" aria-label=\"Erreur\" title=\"Erreur\"/>\n"
 "                    <span class=\"o_wbooth_registration_error_message\"/>"
 
@@ -35,7 +35,7 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-exclamation-triangle\"/>\n"
 "                                    <span>Sorry, several booths are now sold out. Please change your choices before validating again.</span>"
-msgstr ""
+msgstr "/"
 "<i class=\"fa fa-exclamation-triangle\"/>\n"
 "                                    <span>Désolé, plusieurs stands sont maintenant épuisés. Veuillez modifier vos choix avant de valider à nouveau.</span>"
 
@@ -44,7 +44,7 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-gear me-1\" role=\"img\" aria-label=\"Configure\" "
 "title=\"Configure event booths\"/><em>Configure Booths</em>"
-msgstr ""
+msgstr "/"
 "<i class=\"fa fa-gear me-1\" role=\"img\" aria-label=\"Configurez\" "
 "title=\"Configurez des stands d'événement\"/><em>Configurer des stands</em>"
 
@@ -53,26 +53,26 @@ msgstr ""
 msgid ""
 "<span class=\"alert alert-info\">This event is finished. It's no longer "
 "possible to book a booth.</span>"
-msgstr ""
+msgstr "/"
 "<span class=\"alert alert-info\">Cet événement est terminé. Il n'est plus "
 "possible de réserver un stand.</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "<span class=\"text-nowrap\">Sold Out</span>"
-msgstr "<span class=\"text-nowrap\">Épuisé</span>"
+msgstr "/<span class=\"text-nowrap\">Épuisé</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "<span>Book my Booths</span>"
-msgstr "<span>Réservez mes stands</span>"
+msgstr "/<span>Réservez mes stands</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid ""
 "<span>Email</span>\n"
 "                            <span> *</span>"
-msgstr ""
+msgstr "/"
 "<span>Email</span>\n"
 "                            <span> *</span>"
 
@@ -81,161 +81,161 @@ msgstr ""
 msgid ""
 "<span>Name</span>\n"
 "                            <span> *</span>"
-msgstr ""
+msgstr "/"
 "<span>Nom</span>\n"
 "                            <span> *</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "<strong>Contact Details</strong>"
-msgstr "<strong>Coordonnées</strong>"
+msgstr "/<strong>Coordonnées</strong>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "Book my Booths"
-msgstr "Réserver mes stands"
+msgstr "/Réserver mes stands"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_type_view_form
 msgid "Booth Menu Item"
-msgstr "Rubrique sur les stands"
+msgstr "/Rubrique sur les stands"
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_event_event__booth_menu
 msgid "Booth Register"
-msgstr "Réservation de stand"
+msgstr "/Réservation de stand"
 
 #. module: website_event_booth
 #. openerp-web
 #: code:addons/website_event_booth/static/src/xml/event_booth_registration_templates.xml:0
 #, python-format
 msgid "Booth Registration completed!"
-msgstr "Réservation du stand réussie !"
+msgstr "/Réservation du stand réussie !"
 
 #. module: website_event_booth
 #. openerp-web
 #: code:addons/website_event_booth/static/src/js/booth_register.js:0
 #, python-format
 msgid "Booth registration failed."
-msgstr "Échec de la réservation du stand."
+msgstr "/Échec de la réservation du stand."
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "Booths"
-msgstr "Stands"
+msgstr "/Stands"
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_event_type__booth_menu
 msgid "Booths on Website"
-msgstr "Stands sur Site web"
+msgstr "/Stands sur Site web"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "Contact Us"
-msgstr "Contactez-nous"
+msgstr "/Contactez-nous"
 
 #. module: website_event_booth
 #: model:ir.model,name:website_event_booth.model_event_event
 msgid "Event"
-msgstr "Événement"
+msgstr "/Événement"
 
 #. module: website_event_booth
 #: model:ir.model.fields.selection,name:website_event_booth.selection__website_event_menu__menu_type__booth
 msgid "Event Booth Menus"
-msgstr "Menus des stands de l'événement"
+msgstr "/Menus des stands de l'événement"
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_event_event__booth_menu_ids
 msgid "Event Booths Menus"
-msgstr "Menus des stands de l'événement"
+msgstr "/Menus des stands de l'événement"
 
 #. module: website_event_booth
 #: model:ir.model,name:website_event_booth.model_event_type
 msgid "Event Template"
-msgstr "Modèle d'événement"
+msgstr "/Modèle d'événement"
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_event_event__exhibition_map
 msgid "Exhibition Map"
-msgstr "Plan du salon"
+msgstr "/Plan du salon"
 
 #. module: website_event_booth
 #: code:addons/website_event_booth/models/event_event.py:0
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
 #, python-format
 msgid "Get A Booth"
-msgstr "Réservez un stand"
+msgstr "/Réservez un stand"
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_website_event_menu__menu_type
 msgid "Menu Type"
-msgstr "Type de menu"
+msgstr "/Type de menu"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "Mobile"
-msgstr "Téléphone portable"
+msgstr "/Téléphone portable"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "Phone"
-msgstr "Téléphone"
+msgstr "/Téléphone"
 
 #. module: website_event_booth
 #. openerp-web
 #: code:addons/website_event_booth/static/src/js/booth_register.js:0
 #, python-format
 msgid "Please fill out the form correctly."
-msgstr "Merci de remplir correctement le formulaire."
+msgstr "/Merci de remplir correctement le formulaire."
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "Sorry, all the booths are sold out."
-msgstr "Désolé, tous les stands sont épuisés."
+msgstr "/Désolé, tous les stands sont épuisés."
 
 #. module: website_event_booth
 #. openerp-web
 #: code:addons/website_event_booth/static/src/js/booth_register.js:0
 #, python-format
 msgid "The booth category doesn't exist."
-msgstr "La catégorie de stands n'existe pas."
+msgstr "/La catégorie de stands n'existe pas."
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
 msgid "This event is not open to exhibitors registration,"
-msgstr "Cet événement n'est pas ouvert à l'inscription des exposants,"
+msgstr "/Cet événement n'est pas ouvert à l'inscription des exposants,"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "View Floor Plan"
-msgstr "Visualiser le plan"
+msgstr "/Visualiser le plan"
 
 #. module: website_event_booth
 #: model:ir.model,name:website_event_booth.model_website_event_menu
 msgid "Website Event Menu"
-msgstr "Menu des événements du site web"
+msgstr "/Menu des événements du site web"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
 msgid "check our"
-msgstr "aller voir notre"
+msgstr "/aller voir notre"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
 msgid "for this event."
-msgstr "pour cet événement."
+msgstr "/pour cet événement."
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "if you have any question."
-msgstr "si vous avez des questions."
+msgstr "/si vous avez des questions."
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
 msgid "list of future events"
-msgstr "liste des événements futurs"
+msgstr "/liste des événements futurs"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
 msgid "you can"
-msgstr "vous pouvez"
+msgstr "/vous pouvez"

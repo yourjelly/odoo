@@ -23,30 +23,30 @@ msgstr ""
 #. module: project_purchase
 #: model:ir.model.fields,field_description:project_purchase.field_project_project__purchase_orders_count
 msgid "# Purchase Orders"
-msgstr "# Bons de commande"
+msgstr "/# Bons de commande"
 
 #. module: project_purchase
 #: code:addons/project_purchase/models/project.py:0
 #: code:addons/project_purchase/models/project.py:0
 #, python-format
 msgid "Other Costs"
-msgstr "Autres coûts"
+msgstr "/Autres coûts"
 
 #. module: project_purchase
 #: model:ir.model,name:project_purchase.model_project_project
 msgid "Project"
-msgstr "Projet"
+msgstr "/Projet"
 
 #. module: project_purchase
 #: code:addons/project_purchase/models/project.py:0
 #, python-format
 msgid "Purchase Order Items"
-msgstr "Lignes de commande d'achat"
+msgstr "/Lignes de commande d'achat"
 
 #. module: project_purchase
 #: model:ir.model,name:project_purchase.model_purchase_order_line
 msgid "Purchase Order Line"
-msgstr "Ligne de commande d'achat"
+msgstr "/Ligne de commande d'achat"
 
 #. module: project_purchase
 #: code:addons/project_purchase/models/project.py:0
@@ -54,4 +54,4 @@ msgstr "Ligne de commande d'achat"
 #: code:addons/project_purchase/models/project.py:0
 #, python-format
 msgid "Purchase Orders"
-msgstr "Bons de commande"
+msgstr "/Bons de commande"

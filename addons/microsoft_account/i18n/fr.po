@@ -24,29 +24,29 @@ msgstr ""
 #: code:addons/microsoft_account/models/microsoft_service.py:0
 #, python-format
 msgid "Method not supported [%s] not in [GET, POST, PUT, PATCH or DELETE]!"
-msgstr ""
+msgstr "/"
 "Méthode non prise en charge [%s] pas dans [GET, POST, PUT, PATCH or DELETE] "
 "!"
 
 #. module: microsoft_account
 #: model:ir.model.fields,field_description:microsoft_account.field_res_users__microsoft_calendar_rtoken
 msgid "Microsoft Refresh Token"
-msgstr "Actualiser le jeton Microsoft"
+msgstr "/Actualiser le jeton Microsoft"
 
 #. module: microsoft_account
 #: model:ir.model,name:microsoft_account.model_microsoft_service
 msgid "Microsoft Service"
-msgstr "Microsoft Service"
+msgstr "/Microsoft Service"
 
 #. module: microsoft_account
 #: model:ir.model.fields,field_description:microsoft_account.field_res_users__microsoft_calendar_token_validity
 msgid "Microsoft Token Validity"
-msgstr "Validité du jeton Microsoft"
+msgstr "/Validité du jeton Microsoft"
 
 #. module: microsoft_account
 #: model:ir.model.fields,field_description:microsoft_account.field_res_users__microsoft_calendar_token
 msgid "Microsoft User token"
-msgstr "Jeton d'utilisateur Microsoft"
+msgstr "/Jeton d'utilisateur Microsoft"
 
 #. module: microsoft_account
 #: code:addons/microsoft_account/models/microsoft_service.py:0
@@ -54,7 +54,7 @@ msgstr "Jeton d'utilisateur Microsoft"
 msgid ""
 "Something went wrong during your token generation. Maybe your Authorization "
 "Code is invalid"
-msgstr ""
+msgstr "/"
 "Une erreur est survenue durant la génération du jeton. Votre code "
 "d'autorisation est peut-être invalide."
 
@@ -64,11 +64,11 @@ msgstr ""
 msgid ""
 "Something went wrong during your token generation. Maybe your Authorization "
 "Code is invalid or already expired"
-msgstr ""
+msgstr "/"
 "Une erreur est survenue durant la génération du jeton. Votre code "
 "d'autorisation est peut-être invalide ou expiré."
 
 #. module: microsoft_account
 #: model:ir.model,name:microsoft_account.model_res_users
 msgid "User"
-msgstr "Utilisateur"
+msgstr "/Utilisateur"

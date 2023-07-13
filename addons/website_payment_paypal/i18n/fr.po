@@ -26,7 +26,7 @@ msgid ""
 "After your first sale, Paypal will email you to link your Paypal account, or"
 " setup a new business account, to claim your funds, and setup payment "
 "methods."
-msgstr ""
+msgstr "/"
 "Après votre première vente, Paypal vous enverra un email pour lier votre "
 "compte Paypal ou configurer un nouveau compte professionnel, réclamer vos "
 "fonds et configurer les modes de paiement."
@@ -34,14 +34,14 @@ msgstr ""
 #. module: website_payment_paypal
 #: model:ir.model,name:website_payment_paypal.model_res_config_settings
 msgid "Config Settings"
-msgstr "Paramètres de configuration"
+msgstr "/Paramètres de configuration"
 
 #. module: website_payment_paypal
 #: model_terms:ir.ui.view,arch_db:website_payment_paypal.res_config_settings_view_form
 msgid "Email"
-msgstr "Email"
+msgstr "/Email"
 
 #. module: website_payment_paypal
 #: model:ir.model.fields,field_description:website_payment_paypal.field_res_config_settings__paypal_email_account
 msgid "Paypal Email Account"
-msgstr "Compte email Paypal"
+msgstr "/Compte email Paypal"

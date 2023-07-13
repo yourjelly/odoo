@@ -24,29 +24,29 @@ msgstr ""
 #. module: website_mail
 #: model_terms:ir.ui.view,arch_db:website_mail.follow
 msgid "<small>Follow</small><i class=\"fa fa-fw ms-1\"/>"
-msgstr "<small>Suivre</small><i class=\"fa fa-fw ms-1\"/>"
+msgstr "/<small>Suivre</small><i class=\"fa fa-fw ms-1\"/>"
 
 #. module: website_mail
 #: model_terms:ir.ui.view,arch_db:website_mail.follow
 msgid "<small>Unfollow</small><i class=\"fa fa-fw ms-1\"/>"
-msgstr "<small>Ne plus suivre</small><i class=\"fa fa-fw ms-1\"/>"
+msgstr "/<small>Ne plus suivre</small><i class=\"fa fa-fw ms-1\"/>"
 
 #. module: website_mail
 #: model:ir.model,name:website_mail.model_publisher_warranty_contract
 msgid "Publisher Warranty Contract"
-msgstr "Publisher Warranty Contract"
+msgstr "/Publisher Warranty Contract"
 
 #. module: website_mail
 #: model_terms:ir.ui.view,arch_db:website_mail.follow
 msgid "Subscribe"
-msgstr "S'abonner"
+msgstr "/S'abonner"
 
 #. module: website_mail
 #: model_terms:ir.ui.view,arch_db:website_mail.follow
 msgid "Unsubscribe"
-msgstr "Se désabonner"
+msgstr "/Se désabonner"
 
 #. module: website_mail
 #: model_terms:ir.ui.view,arch_db:website_mail.follow
 msgid "your email..."
-msgstr "votre adresse email..."
+msgstr "/votre adresse email..."

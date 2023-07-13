@@ -26,7 +26,7 @@ msgstr ""
 msgid ""
 "If set, an SMS Text Message will be automatically sent to the customer when "
 "the project reaches this stage."
-msgstr ""
+msgstr "/"
 "Si défini, un SMS sera automatiquement envoyé au client lorsque le projet "
 "atteindra cette étape."
 
@@ -35,38 +35,38 @@ msgstr ""
 msgid ""
 "If set, an SMS Text Message will be automatically sent to the customer when "
 "the task reaches this stage."
-msgstr ""
+msgstr "/"
 "Si défini, un SMS sera automatiquement envoyé au client lorsque la tâche "
 "atteindra cette étape."
 
 #. module: project_sms
 #: model:ir.model,name:project_sms.model_project_project
 msgid "Project"
-msgstr "Projet"
+msgstr "/Projet"
 
 #. module: project_sms
 #: model:ir.model,name:project_sms.model_project_project_stage
 msgid "Project Stage"
-msgstr "Étape du projet"
+msgstr "/Étape du projet"
 
 #. module: project_sms
 #: model:ir.model.fields,field_description:project_sms.field_project_project_stage__sms_template_id
 #: model:ir.model.fields,field_description:project_sms.field_project_task_type__sms_template_id
 msgid "SMS Template"
-msgstr "Modèle de SMS"
+msgstr "/Modèle de SMS"
 
 #. module: project_sms
 #: model:ir.actions.act_window,name:project_sms.project_project_act_window_sms_composer
 #: model:ir.actions.act_window,name:project_sms.project_task_act_window_sms_composer
 msgid "Send SMS Text Message"
-msgstr "Envoyer un SMS"
+msgstr "/Envoyer un SMS"
 
 #. module: project_sms
 #: model:ir.model,name:project_sms.model_project_task
 msgid "Task"
-msgstr "Tâche"
+msgstr "/Tâche"
 
 #. module: project_sms
 #: model:ir.model,name:project_sms.model_project_task_type
 msgid "Task Stage"
-msgstr "Étape de tâche"
+msgstr "/Étape de tâche"

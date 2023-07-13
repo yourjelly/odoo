@@ -23,33 +23,33 @@ msgstr ""
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_equipment__assign_date
 msgid "Assigned Date"
-msgstr "Date d'attribution"
+msgstr "/Date d'attribution"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_equipment__department_id
 msgid "Assigned Department"
-msgstr "Département attribué"
+msgstr "/Département attribué"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_equipment__employee_id
 msgid "Assigned Employee"
-msgstr "Employé attribué"
+msgstr "/Employé attribué"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_res_users__equipment_count
 msgid "Assigned Equipments"
-msgstr "Équipements attribués"
+msgstr "/Équipements attribués"
 
 #. module: hr_maintenance
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_request_view_form_inherit_hr
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_request_view_search_inherit_hr
 msgid "Created By"
-msgstr "Créé par"
+msgstr "/Créé par"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_request__owner_user_id
 msgid "Created by User"
-msgstr "Crée par l'utilisateur"
+msgstr "/Crée par l'utilisateur"
 
 #. module: hr_maintenance
 #: model:ir.model.fields.selection,name:hr_maintenance.selection__maintenance_equipment__equipment_assign_to__department
@@ -57,7 +57,7 @@ msgstr "Crée par l'utilisateur"
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_equipment_view_search_inherit_hr
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_equipment_view_tree_inherit_hr
 msgid "Department"
-msgstr "Département"
+msgstr "/Département"
 
 #. module: hr_maintenance
 #: model:ir.model,name:hr_maintenance.model_hr_employee
@@ -67,60 +67,60 @@ msgstr "Département"
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_equipment_view_search_inherit_hr
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_equipment_view_tree_inherit_hr
 msgid "Employee"
-msgstr "Employé"
+msgstr "/Employé"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_hr_employee__equipment_ids
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_request__equipment_id
 msgid "Equipment"
-msgstr "Équipement"
+msgstr "/Équipement"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_hr_employee__equipment_count
 msgid "Equipments"
-msgstr "Équipements"
+msgstr "/Équipements"
 
 #. module: hr_maintenance
 #: model:ir.model,name:hr_maintenance.model_maintenance_equipment
 msgid "Maintenance Equipment"
-msgstr "Équipement de maintenance"
+msgstr "/Équipement de maintenance"
 
 #. module: hr_maintenance
 #: model:ir.model,name:hr_maintenance.model_maintenance_request
 msgid "Maintenance Request"
-msgstr "Demande de maintenance"
+msgstr "/Demande de maintenance"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_res_users__equipment_ids
 msgid "Managed Equipments"
-msgstr "Équipements gérés"
+msgstr "/Équipements gérés"
 
 #. module: hr_maintenance
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_request_view_search_inherit_hr
 msgid "My Maintenances"
-msgstr "Mes maintenances"
+msgstr "/Mes maintenances"
 
 #. module: hr_maintenance
 #: model:ir.model.fields.selection,name:hr_maintenance.selection__maintenance_equipment__equipment_assign_to__other
 msgid "Other"
-msgstr "Autre"
+msgstr "/Autre"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_equipment__owner_user_id
 msgid "Owner"
-msgstr "Propriétaire"
+msgstr "/Propriétaire"
 
 #. module: hr_maintenance
 #: model_terms:ir.ui.view,arch_db:hr_maintenance.maintenance_equipment_view_kanban_inherit_hr
 msgid "Unassigned"
-msgstr "Non attribué"
+msgstr "/Non attribué"
 
 #. module: hr_maintenance
 #: model:ir.model.fields,field_description:hr_maintenance.field_maintenance_equipment__equipment_assign_to
 msgid "Used By"
-msgstr "Utilisé par"
+msgstr "/Utilisé par"
 
 #. module: hr_maintenance
 #: model:ir.model,name:hr_maintenance.model_res_users
 msgid "User"
-msgstr "Utilisateur"
+msgstr "/Utilisateur"

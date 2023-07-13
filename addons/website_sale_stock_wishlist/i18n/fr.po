@@ -26,7 +26,7 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-bell\"/>\n"
 "                        We'll notify you once the product is back in stock."
-msgstr ""
+msgstr "/"
 "<i class=\"fa fa-bell\"/>\n"
 "                        Nous vous informerons dès que le produit sera de nouveau en stock."
 
@@ -35,7 +35,7 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-times text-danger\"/>\n"
 "                                Invalid email"
-msgstr ""
+msgstr "/"
 "<i class=\"fa fa-times text-danger\"/>\n"
 "                                Email non valide"
 
@@ -46,7 +46,7 @@ msgid ""
 "                            <i class=\"fa fa-envelope-o\"/>\n"
 "                            Get notified when back in stock\n"
 "                        </small>"
-msgstr ""
+msgstr "/"
 "<small>\n"
 "                            <i class=\"fa fa-envelope-o\"/>\n"
 "                            Recevez une notification lorsque le stock est de nouveau disponible\n"
@@ -57,7 +57,7 @@ msgstr ""
 msgid ""
 "Add\n"
 "                <span class=\"d-none d-md-inline\">to Cart</span>"
-msgstr ""
+msgstr "/"
 "Ajouter\n"
 "                <span class=\"d-none d-md-inline\">au panier</span>"
 
@@ -66,43 +66,43 @@ msgstr ""
 #: code:addons/website_sale_stock_wishlist/static/src/xml/product_availability.xml:0
 #, python-format
 msgid "Add to wishlist"
-msgstr "Ajouter à la liste de souhaits"
+msgstr "/Ajouter à la liste de souhaits"
 
 #. module: website_sale_stock_wishlist
 #. openerp-web
 #: code:addons/website_sale_stock_wishlist/static/src/xml/product_availability.xml:0
 #, python-format
 msgid "Added to your wishlist"
-msgstr "Ajouté à votre liste de souhaits"
+msgstr "/Ajouté à votre liste de souhaits"
 
 #. module: website_sale_stock_wishlist
 #: model:ir.model,name:website_sale_stock_wishlist.model_product_template
 msgid "Product"
-msgstr "Produit"
+msgstr "/Produit"
 
 #. module: website_sale_stock_wishlist
 #: model:ir.model,name:website_sale_stock_wishlist.model_product_wishlist
 msgid "Product Wishlist"
-msgstr "Liste de souhaits de produits"
+msgstr "/Liste de souhaits de produits"
 
 #. module: website_sale_stock_wishlist
 #. openerp-web
 #: code:addons/website_sale_stock_wishlist/static/src/xml/product_availability.xml:0
 #, python-format
 msgid "Save for later"
-msgstr "Enregistrer pour plus tard"
+msgstr "/Enregistrer pour plus tard"
 
 #. module: website_sale_stock_wishlist
 #: model:ir.model.fields,field_description:website_sale_stock_wishlist.field_product_wishlist__stock_notification
 msgid "Stock Notification"
-msgstr "Avis de stock"
+msgstr "/Avis de stock"
 
 #. module: website_sale_stock_wishlist
 #: model_terms:ir.ui.view,arch_db:website_sale_stock_wishlist.product_wishlist
 msgid "Temporarily out of stock"
-msgstr "Temporairement en rupture de stock"
+msgstr "/Temporairement en rupture de stock"
 
 #. module: website_sale_stock_wishlist
 #: model_terms:ir.ui.view,arch_db:website_sale_stock_wishlist.product_wishlist
 msgid "youremail@gmail.com"
-msgstr "votreemail@gmail.com"
+msgstr "/votreemail@gmail.com"

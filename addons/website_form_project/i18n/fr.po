@@ -24,25 +24,25 @@ msgstr ""
 #: code:addons/website_form_project/static/src/xml/website_form_project.xml:23
 #, python-format
 msgid "Description"
-msgstr "Description"
+msgstr "/Description"
 
 #. module: website_form_project
 #. openerp-web
 #: code:addons/website_form_project/static/src/xml/website_form_project.xml:15
 #, python-format
 msgid "Email"
-msgstr "Courriel"
+msgstr "/Courriel"
 
 #. module: website_form_project
 #. openerp-web
 #: code:addons/website_form_project/static/src/js/website_form_project_editor.js:17
 #, python-format
 msgid "Project"
-msgstr "Projet"
+msgstr "/Projet"
 
 #. module: website_form_project
 #. openerp-web
 #: code:addons/website_form_project/static/src/xml/website_form_project.xml:7
 #, python-format
 msgid "Task Title"
-msgstr "Titre de la tâche"
+msgstr "/Titre de la tâche"

@@ -23,23 +23,23 @@ msgstr ""
 #. module: website_event_jitsi
 #: model:ir.model,name:website_event_jitsi.model_res_config_settings
 msgid "Config Settings"
-msgstr "Paramètres de configuration"
+msgstr "/Paramètres de configuration"
 
 #. module: website_event_jitsi
 #: model:ir.model.fields,field_description:website_event_jitsi.field_res_config_settings__jitsi_server_domain
 msgid "Jitsi Server Domain"
-msgstr "Domaine du serveur Jitsi"
+msgstr "/Domaine du serveur Jitsi"
 
 #. module: website_event_jitsi
 #: model:ir.model.fields,help:website_event_jitsi.field_res_config_settings__jitsi_server_domain
 msgid ""
 "The Jitsi server domain can be customized through the settings to use a "
 "different server than the default \"meet.jit.si\""
-msgstr ""
+msgstr "/"
 "Le domaine du serveur Jitsi peut être personnalisé via les paramètres pour "
 "utiliser un serveur différent de celui par défaut \"meet.jit.si\""
 
 #. module: website_event_jitsi
 #: model_terms:ir.ui.view,arch_db:website_event_jitsi.res_config_settings_view_form
 msgid "meet.jit.si"
-msgstr "meet.jit.si"
+msgstr "/meet.jit.si"

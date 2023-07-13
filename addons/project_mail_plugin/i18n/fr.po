@@ -27,77 +27,77 @@ msgstr ""
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Could not create the project"
-msgstr "Impossible de créer le projet"
+msgstr "/Impossible de créer le projet"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Could not create the task"
-msgstr "Impossible de créer la tâche"
+msgstr "/Impossible de créer la tâche"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Create"
-msgstr "Créer"
+msgstr "/Créer"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "Create %(name)s"
-msgstr "Créer %(name)s"
+msgstr "/Créer %(name)s"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Create Project & Task"
-msgstr "Créer projet & tâche"
+msgstr "/Créer projet & tâche"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Create a Task in a new Project"
-msgstr "Créer une tâche dans un nouveau projet"
+msgstr "/Créer une tâche dans un nouveau projet"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Create a Task in an existing Project"
-msgstr "Créer une tâche dans un projet existant"
+msgstr "/Créer une tâche dans un projet existant"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Email already logged on the task"
-msgstr "Email déjà enregistré sur la tâche"
+msgstr "/Email déjà enregistré sur la tâche"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "Log Email Into Task"
-msgstr "Enregistrer l'email sur la tâche"
+msgstr "/Enregistrer l'email sur la tâche"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Log the email on the task"
-msgstr "Enregistrer l'email sur la tâche"
+msgstr "/Enregistrer l'email sur la tâche"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "No Project Found"
-msgstr "Aucun projet trouvé"
+msgstr "/Aucun projet trouvé"
 
 #. module: project_mail_plugin
 #. openerp-web
@@ -105,77 +105,77 @@ msgstr "Aucun projet trouvé"
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "No project"
-msgstr "Pas de projet"
+msgstr "/Pas de projet"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "No project found."
-msgstr "Aucun projet trouvé."
+msgstr "/Aucun projet trouvé."
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "No tasks found for this contact."
-msgstr "Aucune tâche trouvée pour ce contact."
+msgstr "/Aucune tâche trouvée pour ce contact."
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "OR"
-msgstr "OU"
+msgstr "/OU"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "Pick a Project to create a Task"
-msgstr "Choisir un projet pour créer une tâche"
+msgstr "/Choisir un projet pour créer une tâche"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Project Name"
-msgstr "Nom du projet"
+msgstr "/Nom du projet"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "Save Contact to create new Tasks."
-msgstr "Enregistrez le contact pour créer de nouvelles tâches."
+msgstr "/Enregistrez le contact pour créer de nouvelles tâches."
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Save the contact to create new tasks."
-msgstr "Enregistrez le contact pour créer de nouvelles tâches."
+msgstr "/Enregistrez le contact pour créer de nouvelles tâches."
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Search"
-msgstr "Rechercher"
+msgstr "/Rechercher"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "Search Projects..."
-msgstr "Rechercher des projets..."
+msgstr "/Rechercher des projets..."
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Search a Project"
-msgstr "Rechercher un projet"
+msgstr "/Rechercher un projet"
 
 #. module: project_mail_plugin
 #. openerp-web
@@ -183,32 +183,32 @@ msgstr "Rechercher un projet"
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "Task"
-msgstr "Tâche"
+msgstr "/Tâche"
 
 #. module: project_mail_plugin
 #: code:addons/project_mail_plugin/controllers/project_client.py:0
 #, python-format
 msgid "Task for %s"
-msgstr "Tâche pour %s"
+msgstr "/Tâche pour %s"
 
 #. module: project_mail_plugin
 #: model:ir.actions.act_window,name:project_mail_plugin.project_task_action_form_edit
 msgid "Task: redirect to form in edit mode"
-msgstr "Tâche: rediriger vers le formulaire en mode édition"
+msgstr "/Tâche: rediriger vers le formulaire en mode édition"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "Tasks (%(count)s)"
-msgstr "Tâches (%(count)s)"
+msgstr "/Tâches (%(count)s)"
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "Tasks (%s)"
-msgstr "Tâches (%s)"
+msgstr "/Tâches (%s)"
 
 #. module: project_mail_plugin
 #. openerp-web
@@ -216,14 +216,14 @@ msgstr "Tâches (%s)"
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_outlook.xml:0
 #, python-format
 msgid "The Contact needs to exist to create Task."
-msgstr "Le contact doit exister pour créer la tâche."
+msgstr "/Le contact doit exister pour créer la tâche."
 
 #. module: project_mail_plugin
 #. openerp-web
 #: code:addons/project_mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #, python-format
 msgid "The project name is required"
-msgstr "Le nom du projet est requis"
+msgstr "/Le nom du projet est requis"
 
 #. module: project_mail_plugin
 #. openerp-web
@@ -232,6 +232,6 @@ msgstr "Le nom du projet est requis"
 msgid ""
 "There are no project in your database. Please ask your project manager to "
 "create one."
-msgstr ""
+msgstr "/"
 "Il n'y a aucun projet dans votre base de données. Veuillez demander à votre "
 "chef de projet d'en créer un. "

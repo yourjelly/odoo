@@ -30,7 +30,7 @@ msgid ""
 "                        If you wish to use another currency than CNY for your transactions, switch your\n"
 "                        configuration to a Cross-border account on the Alipay payment acquirer in Odoo.\n"
 "                    "
-msgstr ""
+msgstr "/"
 "\n"
 "Seules les transactions en yuan chinois (CNY) sont autorisées pour Alipay Express Checkout.\n"
 "Si vous souhaitez utiliser une devise autre que le CNY pour vos transactions, \n"
@@ -41,98 +41,98 @@ msgstr ""
 msgid ""
 "  * Cross-border: For the Overseas seller \n"
 "  * Express Checkout: For the Chinese Seller"
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: code:addons/payment_alipay/models/payment.py:0
 #, python-format
 msgid "; multiple order found"
-msgstr "; plusieurs commandes trouvées"
+msgstr "/; plusieurs commandes trouvées"
 
 #. module: payment_alipay
 #: code:addons/payment_alipay/models/payment.py:0
 #, python-format
 msgid "; no order found"
-msgstr "; aucune commande trouvée"
+msgstr "/; aucune commande trouvée"
 
 #. module: payment_alipay
 #: model:ir.model.fields,field_description:payment_alipay.field_payment_acquirer__alipay_payment_method
 msgid "Account"
-msgstr "Compte"
+msgstr "/Compte"
 
 #. module: payment_alipay
 #: model:ir.model.fields.selection,name:payment_alipay.selection__payment_acquirer__provider__alipay
 msgid "Alipay"
-msgstr "Alipay"
+msgstr "/Alipay"
 
 #. module: payment_alipay
 #: model:ir.model.fields,field_description:payment_alipay.field_payment_acquirer__alipay_seller_email
 msgid "Alipay Seller Email"
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: code:addons/payment_alipay/models/payment.py:0
 #, python-format
 msgid "Alipay: invalid sign, received %s, computed %s, for data %s"
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: code:addons/payment_alipay/models/payment.py:0
 #, python-format
 msgid "Alipay: received data for reference %s"
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: code:addons/payment_alipay/models/payment.py:0
 #, python-format
 msgid "Alipay: received data with missing reference (%s) or txn_id (%s)"
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: model:ir.model.fields.selection,name:payment_alipay.selection__payment_acquirer__alipay_payment_method__standard_checkout
 msgid "Cross-border"
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: model:ir.model.fields.selection,name:payment_alipay.selection__payment_acquirer__alipay_payment_method__express_checkout
 msgid "Express Checkout (only for Chinese Merchant)"
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: model:ir.model.fields,field_description:payment_alipay.field_payment_acquirer__alipay_md5_signature_key
 msgid "MD5 Signature Key"
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: model:ir.model.fields,field_description:payment_alipay.field_payment_acquirer__alipay_merchant_partner_id
 msgid "Merchant Partner ID"
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: model:ir.model,name:payment_alipay.model_payment_acquirer
 msgid "Payment Acquirer"
-msgstr "Intermédiaire de Paiement"
+msgstr "/Intermédiaire de Paiement"
 
 #. module: payment_alipay
 #: model:ir.model,name:payment_alipay.model_payment_transaction
 msgid "Payment Transaction"
-msgstr "Transaction"
+msgstr "/Transaction"
 
 #. module: payment_alipay
 #: model:ir.model.fields,field_description:payment_alipay.field_payment_acquirer__provider
 msgid "Provider"
-msgstr "Fournisseur"
+msgstr "/Fournisseur"
 
 #. module: payment_alipay
 #: model:ir.model.fields,help:payment_alipay.field_payment_acquirer__alipay_md5_signature_key
 msgid ""
 "The MD5 private key is the 32-byte string which is composed of English "
 "letters and numbers."
-msgstr ""
+msgstr "/"
 
 #. module: payment_alipay
 #: model:ir.model.fields,help:payment_alipay.field_payment_acquirer__alipay_merchant_partner_id
 msgid ""
 "The Merchant Partner ID is used to ensure communications coming from Alipay "
 "are valid and secured."
-msgstr ""
+msgstr "/"

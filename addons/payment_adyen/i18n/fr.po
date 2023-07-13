@@ -23,36 +23,36 @@ msgstr ""
 #: code:addons/payment_adyen/models/payment.py:0
 #, python-format
 msgid "; multiple order found"
-msgstr "; plusieurs commandes trouvées"
+msgstr "/; plusieurs commandes trouvées"
 
 #. module: payment_adyen
 #: code:addons/payment_adyen/models/payment.py:0
 #, python-format
 msgid "; no order found"
-msgstr "; aucune commande trouvée"
+msgstr "/; aucune commande trouvée"
 
 #. module: payment_adyen
 #: model:ir.model.fields.selection,name:payment_adyen.selection__payment_acquirer__provider__adyen
 msgid "Adyen"
-msgstr "Adyen"
+msgstr "/Adyen"
 
 #. module: payment_adyen
 #: code:addons/payment_adyen/models/payment.py:0
 #, python-format
 msgid "Adyen: feedback error"
-msgstr "Adyen : Erreur de rétroaction"
+msgstr "/Adyen : Erreur de rétroaction"
 
 #. module: payment_adyen
 #: code:addons/payment_adyen/models/payment.py:0
 #, python-format
 msgid "Adyen: invalid merchantSig, received %s, computed %s"
-msgstr "Adyen : merchantSig incorrect, %s reçu, %s calculé"
+msgstr "/Adyen : merchantSig incorrect, %s reçu, %s calculé"
 
 #. module: payment_adyen
 #: code:addons/payment_adyen/models/payment.py:0
 #, python-format
 msgid "Adyen: received data for reference %s"
-msgstr "Adyen : données reçues pour la référence %s"
+msgstr "/Adyen : données reçues pour la référence %s"
 
 #. module: payment_adyen
 #: code:addons/payment_adyen/models/payment.py:0
@@ -60,41 +60,41 @@ msgstr "Adyen : données reçues pour la référence %s"
 msgid ""
 "Adyen: received data with missing reference (%s) or missing pspReference "
 "(%s)"
-msgstr ""
+msgstr "/"
 "Adyen : données reçues avec des références manquantes (%s) ou pspReference "
 "(%s) manquante"
 
 #. module: payment_adyen
 #: model_terms:ir.ui.view,arch_db:payment_adyen.acquirer_form_adyen
 msgid "How to configure your Adyen account?"
-msgstr "Comment configurer votre compte Adyen?"
+msgstr "/Comment configurer votre compte Adyen?"
 
 #. module: payment_adyen
 #: model:ir.model.fields,field_description:payment_adyen.field_payment_acquirer__adyen_merchant_account
 msgid "Merchant Account"
-msgstr "Compte marchand"
+msgstr "/Compte marchand"
 
 #. module: payment_adyen
 #: model:ir.model,name:payment_adyen.model_payment_acquirer
 msgid "Payment Acquirer"
-msgstr "Intermédiaire de Paiement"
+msgstr "/Intermédiaire de Paiement"
 
 #. module: payment_adyen
 #: model:ir.model,name:payment_adyen.model_payment_transaction
 msgid "Payment Transaction"
-msgstr "Transaction"
+msgstr "/Transaction"
 
 #. module: payment_adyen
 #: model:ir.model.fields,field_description:payment_adyen.field_payment_acquirer__provider
 msgid "Provider"
-msgstr "Fournisseur"
+msgstr "/Fournisseur"
 
 #. module: payment_adyen
 #: model:ir.model.fields,field_description:payment_adyen.field_payment_acquirer__adyen_skin_code
 msgid "Skin Code"
-msgstr "Skin Code"
+msgstr "/Skin Code"
 
 #. module: payment_adyen
 #: model:ir.model.fields,field_description:payment_adyen.field_payment_acquirer__adyen_skin_hmac_key
 msgid "Skin HMAC Key"
-msgstr "Skin HMAC Key"
+msgstr "/Skin HMAC Key"

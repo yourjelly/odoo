@@ -24,59 +24,59 @@ msgstr ""
 #. module: purchase_mrp
 #: model_terms:ir.ui.view,arch_db:purchase_mrp.purchase_order_form_mrp
 msgid "<span class=\"o_stat_text\">Manufacturing</span>"
-msgstr "<span class=\"o_stat_text\">Fabrication</span>"
+msgstr "/<span class=\"o_stat_text\">Fabrication</span>"
 
 #. module: purchase_mrp
 #: model_terms:ir.ui.view,arch_db:purchase_mrp.mrp_production_form_view_purchase
 msgid "<span class=\"o_stat_text\">Purchases</span>"
-msgstr "<span class=\"o_stat_text\">Achats</span>"
+msgstr "/<span class=\"o_stat_text\">Achats</span>"
 
 #. module: purchase_mrp
 #: model:ir.model,name:purchase_mrp.model_report_mrp_report_bom_structure
 msgid "BOM Overview Report"
-msgstr "Rapport de vue d'ensemble de la nomenclature"
+msgstr "/Rapport de vue d'ensemble de la nomenclature"
 
 #. module: purchase_mrp
 #: model:ir.model,name:purchase_mrp.model_mrp_bom
 msgid "Bill of Material"
-msgstr "Nomenclature"
+msgstr "/Nomenclature"
 
 #. module: purchase_mrp
 #: model:ir.model,name:purchase_mrp.model_mrp_bom_line
 msgid "Bill of Material Line"
-msgstr "Ligne de nomenclature"
+msgstr "/Ligne de nomenclature"
 
 #. module: purchase_mrp
 #: code:addons/purchase_mrp/models/mrp_bom.py:0
 #, python-format
 msgid "Components cost share have to be positive or equals to zero."
-msgstr "Le partage des coûts des composants doit être positif ou égal à zéro."
+msgstr "/Le partage des coûts des composants doit être positif ou égal à zéro."
 
 #. module: purchase_mrp
 #: model:ir.model.fields,field_description:purchase_mrp.field_mrp_bom_line__cost_share
 msgid "Cost Share (%)"
-msgstr "Partage des couts (%)"
+msgstr "/Partage des couts (%)"
 
 #. module: purchase_mrp
 #: model:ir.model.fields,field_description:purchase_mrp.field_purchase_order__mrp_production_count
 msgid "Count of MO Source"
-msgstr "Nombre d'OF d'origine"
+msgstr "/Nombre d'OF d'origine"
 
 #. module: purchase_mrp
 #: model:ir.model.fields,field_description:purchase_mrp.field_mrp_production__purchase_order_count
 msgid "Count of generated PO"
-msgstr "Nombre de bons de commande générés"
+msgstr "/Nombre de bons de commande générés"
 
 #. module: purchase_mrp
 #: model:ir.model,name:purchase_mrp.model_account_move_line
 msgid "Journal Item"
-msgstr "Écriture comptable"
+msgstr "/Écriture comptable"
 
 #. module: purchase_mrp
 #: code:addons/purchase_mrp/models/purchase.py:0
 #, python-format
 msgid "Manufacturing Source of %s"
-msgstr "Source de fabrication de %s"
+msgstr "/Source de fabrication de %s"
 
 #. module: purchase_mrp
 #: code:addons/purchase_mrp/models/stock_move.py:0
@@ -84,42 +84,42 @@ msgstr "Source de fabrication de %s"
 msgid ""
 "Odoo is not able to generate the anglo saxon entries. The total valuation of"
 " %s is zero."
-msgstr ""
+msgstr "/"
 "Odoo n'est pas capable de générer les écritures anglo-saxonnes. La "
 "valorisation totale de %s est zéro"
 
 #. module: purchase_mrp
 #: model:ir.model,name:purchase_mrp.model_mrp_production
 msgid "Production Order"
-msgstr "Ordre de fabrication"
+msgstr "/Ordre de fabrication"
 
 #. module: purchase_mrp
 #: model:ir.model,name:purchase_mrp.model_purchase_order
 msgid "Purchase Order"
-msgstr "Bon de commande"
+msgstr "/Bon de commande"
 
 #. module: purchase_mrp
 #: model:ir.model,name:purchase_mrp.model_purchase_order_line
 msgid "Purchase Order Line"
-msgstr "Ligne de bon de commande"
+msgstr "/Ligne de bon de commande"
 
 #. module: purchase_mrp
 #: code:addons/purchase_mrp/models/mrp_production.py:0
 #, python-format
 msgid "Purchase Order generated from %s"
-msgstr "Bons de commande générés de %s"
+msgstr "/Bons de commande générés de %s"
 
 #. module: purchase_mrp
 #: model:ir.model,name:purchase_mrp.model_stock_move
 msgid "Stock Move"
-msgstr "Mouvements de stock"
+msgstr "/Mouvements de stock"
 
 #. module: purchase_mrp
 #: model:ir.model.fields,help:purchase_mrp.field_mrp_bom_line__cost_share
 msgid ""
 "The percentage of the component repartition cost when purchasing a kit.The "
 "total of all components' cost have to be equal to 100."
-msgstr ""
+msgstr "/"
 "Le pourcentage du coût de répartition du composant en achetant un kit. Le "
 "total de tous les coûts des composants doit être égal à 100."
 
@@ -127,6 +127,6 @@ msgstr ""
 #: code:addons/purchase_mrp/models/mrp_bom.py:0
 #, python-format
 msgid "The total cost share for a BoM's component have to be 100"
-msgstr ""
+msgstr "/"
 "Le coût de partage total pour les composants d'une nomenclature doit être "
 "100."

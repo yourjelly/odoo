@@ -23,24 +23,24 @@ msgstr ""
 #. module: hr_hourly_cost
 #: model_terms:ir.ui.view,arch_db:hr_hourly_cost.view_employee_form
 msgid "Application Settings"
-msgstr "Paramètres de l'application"
+msgstr "/Paramètres de l'application"
 
 #. module: hr_hourly_cost
 #: model:ir.model.fields,field_description:hr_hourly_cost.field_hr_employee__currency_id
 msgid "Currency"
-msgstr "Devise"
+msgstr "/Devise"
 
 #. module: hr_hourly_cost
 #: model:ir.model,name:hr_hourly_cost.model_hr_employee
 msgid "Employee"
-msgstr "Employé"
+msgstr "/Employé"
 
 #. module: hr_hourly_cost
 #: model:ir.model.fields,field_description:hr_hourly_cost.field_hr_employee__hourly_cost
 msgid "Hourly Cost"
-msgstr "Coût horaire"
+msgstr "/Coût horaire"
 
 #. module: hr_hourly_cost
 #: model_terms:ir.ui.view,arch_db:hr_hourly_cost.view_employee_form
 msgid "per hour"
-msgstr "par heure"
+msgstr "/par heure"

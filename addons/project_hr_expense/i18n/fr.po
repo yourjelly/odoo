@@ -22,16 +22,16 @@ msgstr ""
 #. module: project_hr_expense
 #: model:ir.model.fields,field_description:project_hr_expense.field_project_project__expenses_count
 msgid "# Expenses"
-msgstr "# Notes de frais"
+msgstr "/# Notes de frais"
 
 #. module: project_hr_expense
 #: code:addons/project_hr_expense/models/project.py:0
 #: code:addons/project_hr_expense/models/project.py:0
 #, python-format
 msgid "Expenses"
-msgstr "Notes de frais"
+msgstr "/Notes de frais"
 
 #. module: project_hr_expense
 #: model:ir.model,name:project_hr_expense.model_project_project
 msgid "Project"
-msgstr "Projet"
+msgstr "/Projet"

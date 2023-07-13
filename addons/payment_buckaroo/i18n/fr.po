@@ -23,30 +23,30 @@ msgstr ""
 #: code:addons/payment_buckaroo/models/payment.py:0
 #, python-format
 msgid "; multiple order found"
-msgstr "; plusieurs commandes trouvées"
+msgstr "/; plusieurs commandes trouvées"
 
 #. module: payment_buckaroo
 #: code:addons/payment_buckaroo/models/payment.py:0
 #, python-format
 msgid "; no order found"
-msgstr "; aucune commande trouvée"
+msgstr "/; aucune commande trouvée"
 
 #. module: payment_buckaroo
 #: model:ir.model.fields.selection,name:payment_buckaroo.selection__payment_acquirer__provider__buckaroo
 msgid "Buckaroo"
-msgstr "Buckaroo"
+msgstr "/Buckaroo"
 
 #. module: payment_buckaroo
 #: code:addons/payment_buckaroo/models/payment.py:0
 #, python-format
 msgid "Buckaroo: invalid shasign, received %s, computed %s, for data %s"
-msgstr "Buckaroo : shasign incorrect, %s reçu, %s calculé, pour donnée %s"
+msgstr "/Buckaroo : shasign incorrect, %s reçu, %s calculé, pour donnée %s"
 
 #. module: payment_buckaroo
 #: code:addons/payment_buckaroo/models/payment.py:0
 #, python-format
 msgid "Buckaroo: received data for reference %s"
-msgstr "Buckaroo : données reçues pour la référence %s"
+msgstr "/Buckaroo : données reçues pour la référence %s"
 
 #. module: payment_buckaroo
 #: code:addons/payment_buckaroo/models/payment.py:0
@@ -54,31 +54,31 @@ msgstr "Buckaroo : données reçues pour la référence %s"
 msgid ""
 "Buckaroo: received data with missing reference (%s) or pay_id (%s) or "
 "shasign (%s)"
-msgstr ""
+msgstr "/"
 "Buckaroo : données reçues avec des références manquantes (%s) ou pay_id (%s)"
 " ou shasign (%s)"
 
 #. module: payment_buckaroo
 #: model:ir.model,name:payment_buckaroo.model_payment_acquirer
 msgid "Payment Acquirer"
-msgstr "Intermédiaire de Paiement"
+msgstr "/Intermédiaire de Paiement"
 
 #. module: payment_buckaroo
 #: model:ir.model,name:payment_buckaroo.model_payment_transaction
 msgid "Payment Transaction"
-msgstr "Transaction"
+msgstr "/Transaction"
 
 #. module: payment_buckaroo
 #: model:ir.model.fields,field_description:payment_buckaroo.field_payment_acquirer__provider
 msgid "Provider"
-msgstr "Fournisseur"
+msgstr "/Fournisseur"
 
 #. module: payment_buckaroo
 #: model:ir.model.fields,field_description:payment_buckaroo.field_payment_acquirer__brq_secretkey
 msgid "SecretKey"
-msgstr "SecretKey"
+msgstr "/SecretKey"
 
 #. module: payment_buckaroo
 #: model:ir.model.fields,field_description:payment_buckaroo.field_payment_acquirer__brq_websitekey
 msgid "WebsiteKey"
-msgstr "WebsiteKey"
+msgstr "/WebsiteKey"
