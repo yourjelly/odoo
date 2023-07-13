@@ -756,6 +756,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         const payload = ev.data;
         if (evType in triggers) {
             triggers[evType](ev);
+            // move in _callService
         } else if (evType === 'call_service') {
             let args = payload.args || [];
             if (payload.service === 'ajax' && payload.method === 'rpc') {

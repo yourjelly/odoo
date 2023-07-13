@@ -907,10 +907,10 @@ export class ColorPalette extends Component {
      * Called when a color is selected on the gradient colorpicker (mouseup).
      *
      * @private
-     * @param {Object} params
+     * @param {Object} colorInfo
      */
-    _onColorPickerSelectGradient(params) {
-        this._updateGradientColor(params);
+    _onColorPickerSelectGradient(colorInfo) {
+        this._updateGradientColor(colorInfo);
     }
     /**
      * @private
