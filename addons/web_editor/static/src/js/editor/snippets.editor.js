@@ -275,8 +275,8 @@ var SnippetEditor = Widget.extend({
         // Todo: In runbot, there a test that fails (test_17_website_edit_menus)
         // because targetEl.ownerDocument.defaultView is undefined. It does not
         // fail locally. To be investigated.
-        const vpWidth = targetEl.ownerDocument.defaultView?.innerWidth || document.documentElement.clientWidth;
-        const vpHeight = targetEl.ownerDocument.defaultView?.innerHeight || document.documentElement.clientHeight;
+        const vpWidth = targetEl.ownerDocument.defaultView.innerWidth || document.documentElement.clientWidth;
+        const vpHeight = targetEl.ownerDocument.defaultView.innerHeight || document.documentElement.clientHeight;
         const isInViewport = (
             rect.bottom > -0.1 &&
             rect.right > -0.1 &&
