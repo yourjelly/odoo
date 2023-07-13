@@ -3834,7 +3834,18 @@ class AccountMove(models.Model):
             ('date', '<=', fields.Date.context_today(self)),
             ('auto_post', '!=', 'no'),
         ], limit=100)
-        records._post()
+
+        odoobot = self.env.ref('base.partner_root')
+        for move in records:
+            try:
+                move._post()
+            except UserError as e:
+                move.to_check = True
+                msg = _('The move could not be posted: %(error_message)s', error_message=e)
+                move.message_post(body=msg,
+                                  message_type='comment',
+                                  subtype_xmlid='mail.mt_note',
+                                  author_id=odoobot.id)
 
         if len(records) == 100:  # assumes there are more whenever search hits limit
             self.env.ref('account.ir_cron_auto_post_draft_entry')._trigger()
