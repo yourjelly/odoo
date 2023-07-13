@@ -34,7 +34,10 @@ export class ImageCrop extends Component {
     state = useState({
         active: false,
     });
+
     elRef = useRef('el');
+    _cropperClosed = true;
+
     setup() {
         // This promise is resolved when the component is mounted. It is
         // required by a legacy mechanism to wait for the component to be
