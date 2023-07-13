@@ -786,15 +786,14 @@ export class ColorPalette extends Component {
      * Updates a gradient color from a selection in the color picker.
      *
      * @private
-     * @param {Object} params
-     * @param {boolean} isPreview
+     * @param {String} colorInfo.cssColor
+     * @param {Boolean} isPreview
      */
-    _updateGradientColor(params, isPreview) {
+    _updateGradientColor(colorInfo, isPreview) {
         const $slider = $(this.gradientEditorParts.sliders).find('input.active');
-        const color = params.cssColor;
-        if (!weUtils.areCssValuesEqual(color, $slider.data('color'))) {
+        if (!weUtils.areCssValuesEqual(cssColor, $slider.data('color'))) {
             const previousColor = $slider.data('color');
-            $slider.data('color', color);
+            $slider.data('color', colorInfo.cssColor);
             this._updateGradient(isPreview);
             if (isPreview) {
                 $slider.data('color', previousColor);
@@ -874,43 +873,43 @@ export class ColorPalette extends Component {
      * Called when an update is made on the colorpicker.
      *
      * @private
-     * @param {Object} params
+     * @param {Object} colorInfo
      */
-    _onColorPickerPreview(params) {
+    _onColorPickerPreview(colorInfo) {
         this.props.onColorHover({
             ...this._getSelectedColors(),
-            color: params.cssColor,
+            color: colorInfo.cssColor,
         });
     }
     /**
      * Called when an update is made on the gradient colorpicker.
      *
      * @private
-     * @param {Object} params
+     * @param {Object} colorInfo
      */
-    _onColorPickerPreviewGradient(params) {
-        this._updateGradientColor(params, true);
+    _onColorPickerPreviewGradient(colorInfo) {
+        this._updateGradientColor(colorInfo, true);
     }
     /**
      * Called when a color is selected on the colorpicker (mouseup).
      *
      * @private
-     * @param {Object} params
+     * @param {Object} colorInfo
      */
-    _onColorPickerSelect(params) {
+    _onColorPickerSelect(colorInfo) {
         this._selectColor({
             ...this._getSelectedColors(),
-            color: params.cssColor,
+            color: colorInfo.cssColor,
         }, this.props.onCustomColorPicked);
     }
     /**
      * Called when a color is selected on the gradient colorpicker (mouseup).
      *
      * @private
-     * @param {Object} params
+     * @param {Object} colorInfo
      */
-    _onColorPickerSelectGradient(params) {
-        this._updateGradientColor(params);
+    _onColorPickerSelectGradient(colorInfo) {
+        this._updateGradientColor(colorInfo);
     }
     /**
      * @private
