@@ -139,7 +139,8 @@ export class AceEditorAdapterComponent extends ComponentAdapter {
                 reload: () => {
                     this.website.contentWindow.location.reload();
                 },
-            }
+                context: {...this.user.context, website_id: this.website.currentWebsite.id},
+            },
         ];
     }
 }

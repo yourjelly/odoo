@@ -515,6 +515,7 @@ var ViewEditor = Widget.extend({
                 bundles: this.options.includeBundles,
                 bundles_restriction: this.options.filesFilter === 'all' ? [] : this.options.defaultBundlesRestriction,
                 only_user_custom_files: this.options.filesFilter === 'custom',
+                context: {...this.options.context},
             },
         }).then((function (resources) {
             _processViews.call(this, resources.views || []);

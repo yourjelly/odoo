@@ -948,6 +948,9 @@ class Website(models.Model):
         """
         is_frontend_request = request and getattr(request, 'is_frontend', False)
         if request and request.session.get('force_website_id'):
+            context_website_id = self.env.context.get('website_id', False)
+            if context_website_id and context_website_id != request.session['force_website_id']:
+                raise Exception("Missmatch between the context website_id and session website_id")
             website_id = self.browse(request.session['force_website_id']).exists()
             if not website_id:
                 # Don't crash is session website got deleted
