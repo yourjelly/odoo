@@ -23,14 +23,14 @@ msgstr ""
 #. module: mass_mailing_event_track
 #: model_terms:ir.ui.view,arch_db:mass_mailing_event_track.event_event_view_form_inherit_mass_mailing_track
 msgid "Contact Track Speakers"
-msgstr "Contacter les intervenants"
+msgstr "/Contacter les intervenants"
 
 #. module: mass_mailing_event_track
 #: model:ir.model,name:mass_mailing_event_track.model_event_event
 msgid "Event"
-msgstr "Événement"
+msgstr "/Événement"
 
 #. module: mass_mailing_event_track
 #: model:ir.model,name:mass_mailing_event_track.model_event_track
 msgid "Event Track"
-msgstr "Session d'événement"
+msgstr "/Session d'événement"

@@ -21,57 +21,57 @@ msgstr ""
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Cancelled Purchase Order"
-msgstr "Bon d'achat annulé"
+msgstr "/Bon d'achat annulé"
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Cancelled Purchase Order No."
-msgstr "Bon d'achat annulé n."
+msgstr "/Bon d'achat annulé n."
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Incoterm"
-msgstr "Incoterms"
+msgstr "/Incoterms"
 
 #. module: l10n_din5008_purchase
 #: model:ir.model.fields,field_description:l10n_din5008_purchase.field_purchase_order__l10n_din5008_addresses
 msgid "L10N Din5008 Addresses"
-msgstr "Adresses L10N Din5008"
+msgstr "/Adresses L10N Din5008"
 
 #. module: l10n_din5008_purchase
 #: model:ir.model.fields,field_description:l10n_din5008_purchase.field_purchase_order__l10n_din5008_document_title
 msgid "L10N Din5008 Document Title"
-msgstr "Titre du document L10N Din5008"
+msgstr "/Titre du document L10N Din5008"
 
 #. module: l10n_din5008_purchase
 #: model:ir.model.fields,field_description:l10n_din5008_purchase.field_purchase_order__l10n_din5008_template_data
 msgid "L10N Din5008 Template Data"
-msgstr "Données de modèle L10N Din5008"
+msgstr "/Données de modèle L10N Din5008"
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Order Date"
-msgstr "Date de commande"
+msgstr "/Date de commande"
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Order Deadline"
-msgstr "Date d'échéance"
+msgstr "/Date d'échéance"
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Order Reference"
-msgstr "Référence commande"
+msgstr "/Référence commande"
 
 #. module: l10n_din5008_purchase
 #. odoo-python
@@ -79,39 +79,39 @@ msgstr "Référence commande"
 #: model:ir.model,name:l10n_din5008_purchase.model_purchase_order
 #, python-format
 msgid "Purchase Order"
-msgstr "Commande fournisseur"
+msgstr "/Commande fournisseur"
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Purchase Order No."
-msgstr "N° de Bon de Commande"
+msgstr "/N° de Bon de Commande"
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Purchase Representative"
-msgstr "Responsable achats"
+msgstr "/Responsable achats"
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Request for Quotation"
-msgstr "Demande de devis"
+msgstr "/Demande de devis"
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Request for Quotation No."
-msgstr "Demande de devis N."
+msgstr "/Demande de devis N."
 
 #. module: l10n_din5008_purchase
 #. odoo-python
 #: code:addons/l10n_din5008_purchase/models/purchase.py:0
 #, python-format
 msgid "Shipping Address:"
-msgstr "Adresse de livraison:"
+msgstr "/Adresse de livraison:"

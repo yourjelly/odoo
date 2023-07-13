@@ -24,80 +24,80 @@ msgstr ""
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.opt_index_google_map
 msgid "<span class=\"fa fa-external-link\" role=\"img\" aria-label=\"External link\" title=\"External link\"/>"
-msgstr "<span class=\"fa fa-external-link\" role=\"img\" aria-label=\"Lien externe\" title=\"Lien externe\"/>"
+msgstr "/<span class=\"fa fa-external-link\" role=\"img\" aria-label=\"Lien externe\" title=\"Lien externe\"/>"
 
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.index
 msgid "All"
-msgstr "Tous"
+msgstr "/Tous"
 
 #. module: website_membership
 #: code:addons/website_membership/controllers/main.py:0
 #, python-format
 msgid "All Countries"
-msgstr "Tous les pays"
+msgstr "/Tous les pays"
 
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.index
 msgid "Associations"
-msgstr "Associations"
+msgstr "/Associations"
 
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.opt_index_google_map
 msgid "Close"
-msgstr "Fermer"
+msgstr "/Fermer"
 
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.index
 msgid "Find a business partner"
-msgstr "Trouvez un partenaire d'affaire"
+msgstr "/Trouvez un partenaire d'affaire"
 
 #. module: website_membership
 #: code:addons/website_membership/controllers/main.py:0
 #, python-format
 msgid "Free Members"
-msgstr "Membres gratuits"
+msgstr "/Membres gratuits"
 
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.opt_index_country
 #: model_terms:ir.ui.view,arch_db:website_membership.snippet_options
 msgid "Location"
-msgstr "Lieu"
+msgstr "/Lieu"
 
 #. module: website_membership
 #: code:addons/website_membership/models/website.py:0
 #: model_terms:ir.ui.view,arch_db:website_membership.index
 #, python-format
 msgid "Members"
-msgstr "Membres"
+msgstr "/Membres"
 
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.snippet_options
 msgid "Members Page"
-msgstr "Page Membres"
+msgstr "/Page Membres"
 
 #. module: website_membership
 #: model:ir.model,name:website_membership.model_membership_membership_line
 msgid "Membership Line"
-msgstr "Ligne d'adhésion"
+msgstr "/Ligne d'adhésion"
 
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.index
 msgid "No result found."
-msgstr "Aucun résultat."
+msgstr "/Aucun résultat."
 
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.index
 msgid "Our Members Directory"
-msgstr "Le répertoire de nos membres"
+msgstr "/Le répertoire de nos membres"
 
 #. module: website_membership
 #: model:ir.model,name:website_membership.model_website
 msgid "Website"
-msgstr "Site web"
+msgstr "/Site web"
 
 #. module: website_membership
 #: model_terms:ir.ui.view,arch_db:website_membership.opt_index_google_map
 #: model_terms:ir.ui.view,arch_db:website_membership.snippet_options
 msgid "World Map"
-msgstr "Carte du monde"
+msgstr "/Carte du monde"

@@ -25,38 +25,38 @@ msgstr ""
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "Good, you can customize canned responses in the live chat application.<br/><br/><b>It's the end of this overview</b>, enjoy discovering Odoo!"
-msgstr "Bien, vous pouvez modifier les réponses automatiques dans l'application Live chat.<br/><br/><b>C'est la fin de cette visite</b>, bonne découverte d'Odoo ! "
+msgstr "/Bien, vous pouvez modifier les réponses automatiques dans l'application Live chat.<br/><br/><b>C'est la fin de cette visite</b>, bonne découverte d'Odoo ! "
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_mail_bot
 msgid "Mail Bot"
-msgstr "Mail Bot"
+msgstr "/Mail Bot"
 
 #. module: im_livechat_mail_bot
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "Not sure what you are doing. Please, type %s and wait for the propositions. Select one of them and press enter."
-msgstr ""
+msgstr "/"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields,field_description:im_livechat_mail_bot.field_res_users__odoobot_state
 msgid "OdooBot Status"
-msgstr "Statut OdooBot"
+msgstr "/Statut OdooBot"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields.selection,name:im_livechat_mail_bot.selection__res_users__odoobot_state__onboarding_canned
 msgid "Onboarding canned"
-msgstr "Parcours d'intégration enregistré"
+msgstr "/Parcours d'intégration enregistré"
 
 #. module: im_livechat_mail_bot
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "That's me! 🎉<br/>Try typing %s to use canned responses."
-msgstr ""
+msgstr "/"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_res_users
 msgid "User"
-msgstr "Utilisateur"
+msgstr "/Utilisateur"

@@ -26,7 +26,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_stat_value\">1</span>\n"
 "                        <span class=\"o_stat_text\">Employee</span>"
-msgstr ""
+msgstr "/"
 "<span class=\"o_stat_value\">1</span>\n"
 "                        <span class=\"o_stat_text\">Employé</span>"
 
@@ -34,45 +34,45 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_assignation_log_employee_view_list
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_assignation_log_view_list
 msgid "Attachments"
-msgstr "Pièces jointes"
+msgstr "/Pièces jointes"
 
 #. module: hr_fleet
 #. odoo-python
 #: code:addons/hr_fleet/models/employee.py:0
 #, python-format
 msgid "Cannot remove address from employees with linked cars."
-msgstr "Impossible de supprimer l'adresse des employés auxquels des voitures sont liées."
+msgstr "/Impossible de supprimer l'adresse des employés auxquels des voitures sont liées."
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_hr_employee__employee_cars_count
 #: model:ir.model.fields,field_description:hr_fleet.field_res_users__employee_cars_count
 msgid "Cars"
-msgstr "Véhicules"
+msgstr "/Véhicules"
 
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.hr_departure_wizard_view_form
 msgid "Company Car"
-msgstr "Véhicule de société"
+msgstr "/Véhicule de société"
 
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_assignation_log_employee_view_list
 msgid "Current Driver"
-msgstr "Conducteur actuel"
+msgstr "/Conducteur actuel"
 
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_view_search_inherit_hr
 msgid "Current Driver (Employee)"
-msgstr "Conducteur actuel (employé)"
+msgstr "/Conducteur actuel (employé)"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_hr_departure_wizard
 msgid "Departure Wizard"
-msgstr "Assistant de départ"
+msgstr "/Assistant de départ"
 
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_log_contract_view_form_inherit_hr
 msgid "Driver"
-msgstr "Conducteur"
+msgstr "/Conducteur"
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_fleet_vehicle__driver_employee_id
@@ -82,130 +82,130 @@ msgstr "Conducteur"
 #: model:ir.model.fields,field_description:hr_fleet.field_fleet_vehicle_odometer__driver_employee_id
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_log_services_view_form_inherit_hr
 msgid "Driver (Employee)"
-msgstr "Conducteur (Employé)"
+msgstr "/Conducteur (Employé)"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_fleet_vehicle_assignation_log
 msgid "Drivers history on a vehicle"
-msgstr "Historique de conducteurs sur un véhicule"
+msgstr "/Historique de conducteurs sur un véhicule"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_hr_employee
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_log_contract_view_search_inherit_hr
 msgid "Employee"
-msgstr "Employé"
+msgstr "/Employé"
 
 #. module: hr_fleet
 #. odoo-python
 #: code:addons/hr_fleet/models/hr_plan_activity_type.py:0
 #, python-format
 msgid "Employee %s is not linked to a vehicle."
-msgstr ""
+msgstr "/"
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_fleet_vehicle__driver_employee_name
 msgid "Employee Name"
-msgstr "Nom de l'employé"
+msgstr "/Nom de l'employé"
 
 #. module: hr_fleet
 #. odoo-python
 #: code:addons/hr_fleet/models/hr_plan_activity_type.py:0
 #, python-format
 msgid "Employee's vehicle %s is not linked to a fleet manager."
-msgstr ""
+msgstr "/"
 
 #. module: hr_fleet
 #: model:ir.model.fields.selection,name:hr_fleet.selection__hr_plan_activity_type__responsible__fleet_manager
 msgid "Fleet Manager"
-msgstr ""
+msgstr "/"
 
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.view_employee_form
 msgid "Fleet Mobility Card"
-msgstr "Carte mobilité"
+msgstr "/Carte mobilité"
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_fleet_vehicle__future_driver_employee_id
 msgid "Future Driver (Employee)"
-msgstr "Futur conducteur (Employé)"
+msgstr "/Futur conducteur (Employé)"
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_hr_employee__license_plate
 msgid "License Plate"
-msgstr "Plaque d'immatriculation"
+msgstr "/Plaque d'immatriculation"
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_fleet_vehicle__mobility_card
 #: model:ir.model.fields,field_description:hr_fleet.field_hr_employee__mobility_card
 #: model:ir.model.fields,field_description:hr_fleet.field_hr_employee_public__mobility_card
 msgid "Mobility Card"
-msgstr "Carte mobilité"
+msgstr "/Carte mobilité"
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_fleet_vehicle_assignation_log__attachment_number
 msgid "Number of Attachments"
-msgstr "Nombre de pièces jointes"
+msgstr "/Nombre de pièces jointes"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_fleet_vehicle_odometer
 msgid "Odometer log for a vehicle"
-msgstr "Suivi du kilomètrage pour le véhicule"
+msgstr "/Suivi du kilomètrage pour le véhicule"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_hr_plan_activity_type
 msgid "Plan activity type"
-msgstr ""
+msgstr "/"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_hr_employee_public
 msgid "Public Employee"
-msgstr "Employé public"
+msgstr "/Employé public"
 
 #. module: hr_fleet
 #. odoo-python
 #: code:addons/hr_fleet/models/fleet_vehicle.py:0
 #, python-format
 msgid "Related Employee"
-msgstr "Employé associé"
+msgstr "/Employé associé"
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_hr_departure_wizard__release_campany_car
 msgid "Release Company Car"
-msgstr "Libérer le véhicule de société"
+msgstr "/Libérer le véhicule de société"
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_hr_plan_activity_type__responsible
 msgid "Responsible"
-msgstr ""
+msgstr "/"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_fleet_vehicle_log_services
 msgid "Services for vehicles"
-msgstr "Services associés aux véhicules"
+msgstr "/Services associés aux véhicules"
 
 #. module: hr_fleet
 #. odoo-javascript
 #: code:addons/hr_fleet/static/src/views/hr_fleet_kanban/hr_fleet_kanban_controller.xml:0
 #, python-format
 msgid "Upload"
-msgstr "Charger"
+msgstr "/Charger"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_res_users
 msgid "User"
-msgstr "Utilisateur"
+msgstr "/Utilisateur"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_fleet_vehicle
 msgid "Vehicle"
-msgstr "Véhicule"
+msgstr "/Véhicule"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_fleet_vehicle_log_contract
 msgid "Vehicle Contract"
-msgstr "Contrat du véhicule"
+msgstr "/Contrat du véhicule"
 
 #. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_hr_employee__car_ids
 msgid "Vehicles (private)"
-msgstr "Véhicules (privés)"
+msgstr "/Véhicules (privés)"

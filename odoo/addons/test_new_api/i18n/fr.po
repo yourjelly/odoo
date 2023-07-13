@@ -19,4 +19,4 @@ msgstr ""
 #. module: test_new_api
 #: model:ir.model.constraint,message:test_new_api.constraint_test_new_api_category_positive_color
 msgid "The color code must be positive !"
-msgstr "La couleur doit être une valeur positive !"
+msgstr "/La couleur doit être une valeur positive !"

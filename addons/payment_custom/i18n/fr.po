@@ -24,13 +24,13 @@ msgstr ""
 #: code:addons/payment_transfer/models/payment.py:0
 #, python-format
 msgid "; multiple order found"
-msgstr "; plusieurs commandes trouvées"
+msgstr "/; plusieurs commandes trouvées"
 
 #. module: payment_transfer
 #: code:addons/payment_transfer/models/payment.py:0
 #, python-format
 msgid "; no order found"
-msgstr "; aucune commande trouvée"
+msgstr "/; aucune commande trouvée"
 
 #. module: payment_transfer
 #: code:addons/payment_transfer/models/payment.py:0
@@ -43,7 +43,7 @@ msgid ""
 "<h4>Communication</h4>\n"
 "<p>Please use the order name as communication reference.</p>\n"
 "</div>"
-msgstr ""
+msgstr "/"
 "<div>\n"
 "<h3>Veuillez mentionner les détails suivants pour le transfert bancaire</h3>\n"
 "<h4>%(bank_title)s</h4>\n"
@@ -56,36 +56,36 @@ msgstr ""
 #: code:addons/payment_transfer/models/payment.py:0
 #, python-format
 msgid "Bank Account"
-msgstr "Compte bancaire"
+msgstr "/Compte bancaire"
 
 #. module: payment_transfer
 #: code:addons/payment_transfer/models/payment.py:0
 #, python-format
 msgid "Bank Accounts"
-msgstr "Comptes bancaires"
+msgstr "/Comptes bancaires"
 
 #. module: payment_transfer
 #: model:ir.model.fields.selection,name:payment_transfer.selection__payment_acquirer__provider__transfer
 msgid "Manual Payment"
-msgstr "Paiement manuel"
+msgstr "/Paiement manuel"
 
 #. module: payment_transfer
 #: model:ir.model,name:payment_transfer.model_payment_acquirer
 msgid "Payment Acquirer"
-msgstr "Intermédiaire de Paiement"
+msgstr "/Intermédiaire de Paiement"
 
 #. module: payment_transfer
 #: model:ir.model,name:payment_transfer.model_payment_transaction
 msgid "Payment Transaction"
-msgstr "Transaction"
+msgstr "/Transaction"
 
 #. module: payment_transfer
 #: model:ir.model.fields,field_description:payment_transfer.field_payment_acquirer__provider
 msgid "Provider"
-msgstr "Fournisseur"
+msgstr "/Fournisseur"
 
 #. module: payment_transfer
 #: code:addons/payment_transfer/models/payment.py:0
 #, python-format
 msgid "received data for reference %s"
-msgstr "a reçu les données avec pour référence %s"
+msgstr "/a reçu les données avec pour référence %s"

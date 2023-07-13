@@ -24,15 +24,15 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing_slides.slide_channel_view_form
 #: model_terms:ir.ui.view,arch_db:mass_mailing_slides.slide_channel_view_kanban
 msgid "Contact Attendees"
-msgstr "Contacter les participants"
+msgstr "/Contacter les participants"
 
 #. module: mass_mailing_slides
 #: model:ir.model,name:mass_mailing_slides.model_slide_channel
 msgid "Course"
-msgstr "Cours"
+msgstr "/Cours"
 
 #. module: mass_mailing_slides
 #: code:addons/mass_mailing_slides/models/slide_channel.py:0
 #, python-format
 msgid "Mass Mail Course Members"
-msgstr "Email marketing membres du cours"
+msgstr "/Email marketing membres du cours"

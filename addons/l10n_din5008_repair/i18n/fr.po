@@ -19,33 +19,33 @@ msgstr ""
 #. module: l10n_din5008_repair
 #: model:ir.model.fields,field_description:l10n_din5008_repair.field_repair_order__l10n_din5008_document_title
 msgid "L10N Din5008 Document Title"
-msgstr "Titre du document L10N Din5008"
+msgstr "/Titre du document L10N Din5008"
 
 #. module: l10n_din5008_repair
 #: model:ir.model.fields,field_description:l10n_din5008_repair.field_repair_order__l10n_din5008_template_data
 msgid "L10N Din5008 Template Data"
-msgstr "Données de modèle L10N Din5008"
+msgstr "/Données de modèle L10N Din5008"
 
 #. module: l10n_din5008_repair
 #. odoo-python
 #: code:addons/l10n_din5008_repair/models/repair.py:0
 #, python-format
 msgid "Lot/Serial Number"
-msgstr "Numéro de lot/série"
+msgstr "/Numéro de lot/série"
 
 #. module: l10n_din5008_repair
 #. odoo-python
 #: code:addons/l10n_din5008_repair/models/repair.py:0
 #, python-format
 msgid "Printing Date"
-msgstr "Date d'impression"
+msgstr "/Date d'impression"
 
 #. module: l10n_din5008_repair
 #. odoo-python
 #: code:addons/l10n_din5008_repair/models/repair.py:0
 #, python-format
 msgid "Product to Repair"
-msgstr "Article à réparer"
+msgstr "/Article à réparer"
 
 #. module: l10n_din5008_repair
 #. odoo-python
@@ -53,18 +53,18 @@ msgstr "Article à réparer"
 #: model:ir.model,name:l10n_din5008_repair.model_repair_order
 #, python-format
 msgid "Repair Order"
-msgstr "Ordre de réparation"
+msgstr "/Ordre de réparation"
 
 #. module: l10n_din5008_repair
 #. odoo-python
 #: code:addons/l10n_din5008_repair/models/repair.py:0
 #, python-format
 msgid "Repair Quotation"
-msgstr "Devis de réparation"
+msgstr "/Devis de réparation"
 
 #. module: l10n_din5008_repair
 #. odoo-python
 #: code:addons/l10n_din5008_repair/models/repair.py:0
 #, python-format
 msgid "Warranty"
-msgstr "Garantie"
+msgstr "/Garantie"

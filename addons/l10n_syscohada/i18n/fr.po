@@ -19,4 +19,4 @@ msgstr ""
 #. module: l10n_syscohada
 #: model:ir.ui.menu,name:l10n_syscohada.account_reports_syscohada_statements_menu
 msgid "Syscohada"
-msgstr "Syscohada"
+msgstr "/Syscohada"

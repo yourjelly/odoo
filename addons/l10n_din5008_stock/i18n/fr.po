@@ -21,28 +21,28 @@ msgstr ""
 #: code:addons/l10n_din5008_stock/models/stock.py:0
 #, python-format
 msgid "Customer Address:"
-msgstr "Adresse du client:"
+msgstr "/Adresse du client:"
 
 #. module: l10n_din5008_stock
 #: model:ir.model.fields,field_description:l10n_din5008_stock.field_stock_picking__l10n_din5008_addresses
 msgid "L10N Din5008 Addresses"
-msgstr "Adresses L10N Din5008"
+msgstr "/Adresses L10N Din5008"
 
 #. module: l10n_din5008_stock
 #: model:ir.model,name:l10n_din5008_stock.model_stock_picking
 msgid "Transfer"
-msgstr "Transfert"
+msgstr "/Transfert"
 
 #. module: l10n_din5008_stock
 #. odoo-python
 #: code:addons/l10n_din5008_stock/models/stock.py:0
 #, python-format
 msgid "Vendor Address:"
-msgstr "Adresse du fournisseur:"
+msgstr "/Adresse du fournisseur:"
 
 #. module: l10n_din5008_stock
 #. odoo-python
 #: code:addons/l10n_din5008_stock/models/stock.py:0
 #, python-format
 msgid "Warehouse Address:"
-msgstr "Adresse de l'entrepôt:"
+msgstr "/Adresse de l'entrepôt:"
