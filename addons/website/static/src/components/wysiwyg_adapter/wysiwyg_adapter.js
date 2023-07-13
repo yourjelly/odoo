@@ -766,28 +766,28 @@ export class WysiwygAdapterComponent extends Wysiwyg {
 
 
         const evType = ev.name;
+        const payload = ev.data;
         if (evType in triggers) {
             triggers[evType](ev);
+        } else if (evType === 'call_service') {
+            let args = payload.args || [];
+            if (payload.service === 'ajax' && payload.method === 'rpc') {
+                // ajax service uses an extra 'target' argument for rpc
+                args = args.concat(ev.target);
+            }
+            const service = legacyEnv.services[payload.service];
+            //If the service doesn't exist it means that it was translated to Owl
+            if (service) {
+                const result = service[payload.method].apply(service, args);
+                payload.callback(result);
+            } else {
+                throw new Error(
+                    `The service "${payload.service}" is not present in the legacy owl environment.
+                        You should probably create a mapper in @web/legacy/utils`
+                );
+            }
         } else {
             super._trigger_up(...arguments);
-        }
-    }
-    _callService(payload) {
-        let args = payload.args || [];
-        if (payload.service === 'ajax' && payload.method === 'rpc') {
-            // ajax service uses an extra 'target' argument for rpc
-            args = args.concat(ev.target);
-        }
-        const service = legacyEnv.services[payload.service];
-        //If the service doesn't exist it means that it was translated to Owl
-        if (service) {
-            const result = service[payload.method].apply(service, args);
-            payload.callback(result);
-        } else {
-            throw new Error(
-                `The service "${payload.service}" is not present in the legacy owl environment.
-                    You should probably create a mapper in @web/legacy/utils`
-            );
         }
     }
     /**
