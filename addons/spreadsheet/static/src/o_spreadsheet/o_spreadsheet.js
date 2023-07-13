@@ -9990,6 +9990,10 @@
                 this.env.model.dispatch("CLEAR_SEARCH");
                 this.env.model.dispatch("SET_FORMULA_VISIBILITY", { show: this.showFormulaState });
             });
+            owl.useEffect(() => {
+                this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
+                this.searchFormulas();
+            }, () => [this.env.model.getters.shouldShowFormulas()]);
         }
         onInput(ev) {
             this.state.toSearch = ev.target.value;
@@ -10008,7 +10012,6 @@
             }
         }
         onFocusSidePanel() {
-            this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
             this.env.model.dispatch("REFRESH_SEARCH");
         }
         searchFormulas() {
@@ -42832,8 +42835,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.14';
-    __info__.date = '2023-06-26T14:45:27.638Z';
-    __info__.hash = '1e37a94';
+    __info__.date = '2023-07-13T06:28:45.779Z';
+    __info__.hash = '0792dfa';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
