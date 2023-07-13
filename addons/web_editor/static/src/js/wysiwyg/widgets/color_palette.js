@@ -791,7 +791,7 @@ export class ColorPalette extends Component {
      */
     _updateGradientColor(colorInfo, isPreview) {
         const $slider = $(this.gradientEditorParts.sliders).find('input.active');
-        if (!weUtils.areCssValuesEqual(cssColor, $slider.data('color'))) {
+        if (!weUtils.areCssValuesEqual(colorInfo.cssColor, $slider.data('color'))) {
             const previousColor = $slider.data('color');
             $slider.data('color', colorInfo.cssColor);
             this._updateGradient(isPreview);
