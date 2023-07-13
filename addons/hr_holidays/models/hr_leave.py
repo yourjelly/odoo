@@ -952,7 +952,7 @@ class HolidaysRequest(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_if_correct_states(self):
-        error_message = _('You cannot delete a time off which is in %s state')
+        error_message = _("You can't delete an %s time off")
         state_description_values = {elem[0]: elem[1] for elem in self._fields['state']._description_selection(self.env)}
         now = fields.Datetime.now()
 
@@ -965,7 +965,7 @@ class HolidaysRequest(models.Model):
                 if hol.sudo().employee_ids and not hol.employee_id:
                     raise UserError(_('You cannot delete a time off assigned to several employees'))
         else:
-            for holiday in self.filtered(lambda holiday: holiday.state not in ['draft', 'cancel', 'confirm']):
+            for holiday in self.filtered(lambda holiday: holiday.state not in ['draft', 'cancel', 'confirm', 'refuse']):
                 raise UserError(error_message % (state_description_values.get(holiday.state),))
 
     def unlink(self):
@@ -1130,7 +1130,7 @@ class HolidaysRequest(models.Model):
 
         # Do not check the state in case we are redirected from the dashboard
         if check_state and any(holiday.state != 'confirm' for holiday in self):
-            raise UserError(_('Time off request must be confirmed ("To Approve") in order to approve it.'))
+            raise UserError(_('You can only manage time off requests that are in state “To approve”'))
 
         current_employee = self.env.user.employee_id
         self.filtered(lambda hol: hol.validation_type == 'both').write({'state': 'validate1', 'first_approver_id': current_employee.id})
