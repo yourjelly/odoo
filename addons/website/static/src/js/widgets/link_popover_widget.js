@@ -8,7 +8,7 @@ import { LinkPopoverWidget } from '@web_editor/js/wysiwyg/widgets/link_popover_w
 
 
 
-patch(LinkPopoverWidget, 'website_link_popower_widget', {
+patch(LinkPopoverWidget.prototype, 'website_link_popower_widget', {
     /**
      * @override
      */
