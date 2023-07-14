@@ -86,8 +86,22 @@
             'web/static/src/libs/fontawesome/css/font-awesome.css',
             'web/static/lib/odoo_ui_icons/*',
             'web/static/src/legacy/scss/fontawesome_overridden.scss',
-            # JS framework
+            # JS boot
             'web/static/src/boot.js',
+            # libs (should be loaded before framework)
+            'point_of_sale/static/lib/**/*',
+            'web/static/lib/luxon/luxon.js',
+            'web/static/lib/owl/owl.js',
+            'web/static/lib/owl/odoo_module.js',
+            'web_editor/static/lib/html2canvas.js',
+            'web/static/lib/zxing-library/zxing-library.js',
+            # FIXME POSREF legacy dependencies to remove
+            'web/static/lib/moment/moment.js',
+            'web/static/src/legacy/js/promise_extension.js',
+            'web/static/src/legacy/js/core/concurrency.js',
+            'web/static/src/legacy/js/core/owl_dialog.js', # needed by barcode_scanner
+            'web/static/src/legacy/legacy_component.js', # needed by owl_dialog
+            # JS framework
             'web/static/src/session.js',
             'web/static/src/env.js',
             'web/static/src/core/utils/transitions.scss', # needs to be loaded before other scss files
@@ -113,13 +127,6 @@
             'bus/static/src/workers/*',
             # report download utils
             'web/static/src/webclient/actions/reports/utils.js',
-            # libs
-            'point_of_sale/static/lib/**/*',
-            'web/static/lib/luxon/luxon.js',
-            'web/static/lib/owl/owl.js',
-            'web/static/lib/owl/odoo_module.js',
-            'web_editor/static/lib/html2canvas.js',
-            'web/static/lib/zxing-library/zxing-library.js',
             # PoS files
             'point_of_sale/static/src/**/*',
             ('remove', 'point_of_sale/static/src/backend/**/*'),
@@ -129,13 +136,6 @@
             'web/static/lib/jquery/jquery.js',
             'web_tour/static/src/tour_pointer/**/*',
             'web_tour/static/src/tour_service/**/*',
-
-            # FIXME POSREF legacy dependencies to remove
-            'web/static/lib/moment/moment.js',
-            'web/static/src/legacy/js/promise_extension.js',
-            'web/static/src/legacy/js/core/concurrency.js',
-            'web/static/src/legacy/js/core/owl_dialog.js', # needed by barcode_scanner
-            'web/static/src/legacy/legacy_component.js', # needed by owl_dialog
         ],
         # Bundle that starts the pos, loaded on /pos/ui
         'point_of_sale.assets_prod': [
