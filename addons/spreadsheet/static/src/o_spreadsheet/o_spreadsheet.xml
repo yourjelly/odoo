@@ -319,8 +319,8 @@
           t-on-contextmenu.prevent=""
           t-att-style="getCellClickableStyle(clickableCell.coordinates)"
         />
+        <FilterIconsOverlay/>
       </div>
-      <FilterIconsOverlay/>
       <VerticalScrollBar/>
       <HorizontalScrollBar/>
       <div class="o-scrollbar corner"/>
@@ -2973,7 +2973,7 @@
             t-if="state.menuState.isOpen"
             position="state.menuState.position"
             menuItems="state.menuState.menuItems"
-            onClose="() => this.closeMenus()"
+            onClose="() => this.onMenuClick()"
           />
         </div>
         <div class="o-topbar-topright">
@@ -3249,6 +3249,6 @@
 </odoo>
 <!--
   __info__.version = '16.0.14';
-  __info__.date = '2023-06-26T14:45:30.322Z';
-  __info__.hash = '1e37a94';
+  __info__.date = '2023-07-14T05:53:01.801Z';
+  __info__.hash = '6ea7325';
 -->

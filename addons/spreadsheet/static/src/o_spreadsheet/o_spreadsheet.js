@@ -38515,6 +38515,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
             this.closeMenus();
         }
+        onMenuClick() {
+            this.props.onClick();
+            this.closeMenus();
+        }
         toogleStyle(style) {
             setStyle(this.env, { [style]: !this.style[style] });
         }
@@ -42832,8 +42836,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.14';
-    __info__.date = '2023-06-26T14:45:27.638Z';
-    __info__.hash = '1e37a94';
+    __info__.date = '2023-07-14T05:52:59.358Z';
+    __info__.hash = '6ea7325';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
