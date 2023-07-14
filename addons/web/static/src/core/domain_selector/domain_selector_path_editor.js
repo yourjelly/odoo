@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { formatValue } from "@web/core/domain_tree";
+import { formatValue } from "@web/core/tree_editor/tree";
 import { _t } from "@web/core/l10n/translation";
 import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
 

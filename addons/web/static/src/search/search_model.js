@@ -18,7 +18,7 @@ import {
 import { FACET_ICONS, FACET_COLORS } from "./utils/misc";
 
 import { EventBus, toRaw } from "@odoo/owl";
-import { toDomain, toTree } from "@web/core/domain_tree";
+import { domainFromTree, treeFromDomain } from "@web/core/tree_editor/tree";
 import { _t } from "@web/core/l10n/translation";
 import { useGetDomainTreeDescription } from "@web/core/domain_selector/utils";
 
@@ -817,13 +817,13 @@ export class SearchModel extends EventBus {
             context = makeContext(contexts);
         }
 
-        const tree = toTree(domain, { distributeNot: !this.isDebugMode });
+        const tree = treeFromDomain(domain, { distributeNot: !this.isDebugMode });
         const trees = !tree.negate && tree.value === "&" ? tree.children : [tree];
         const promises = trees.map(async (tree) => {
             const description = await this.getDomainTreeDescription(this.resModel, tree);
             const preFilter = {
                 description,
-                domain: toDomain(tree),
+                domain: domainFromTree(tree),
                 invisible: true,
                 type: "filter",
             };

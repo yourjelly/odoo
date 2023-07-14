@@ -43,7 +43,6 @@ export class DomainSelectorDialog extends Component {
             readonly: this.props.readonly,
             isDebugMode: this.props.isDebugMode,
             defaultConnector: this.props.defaultConnector,
-            defaultLeafValue: this.props.defaultLeafValue,
             domain: this.state.domain,
             update: (domain) => {
                 this.state.domain = domain;
@@ -95,7 +94,6 @@ DomainSelectorDialog.props = {
     resModel: String,
     className: { type: String, optional: true },
     defaultConnector: { type: [{ value: "&" }, { value: "|" }], optional: true },
-    defaultLeafValue: { type: Array, optional: true },
     domain: String,
     isDebugMode: { type: Boolean, optional: true },
     readonly: { type: Boolean, optional: true },

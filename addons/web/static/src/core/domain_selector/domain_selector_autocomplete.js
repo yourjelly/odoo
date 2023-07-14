@@ -7,7 +7,7 @@ import { formatAST, toPyValue } from "@web/core/py_js/py_utils";
 import { registry } from "@web/core/registry";
 import { TagsList } from "@web/core/tags_list/tags_list";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
-import { Expression } from "@web/core/domain_tree";
+import { Expression } from "@web/core/tree_editor/tree";
 
 const SEARCH_LIMIT = 7;
 const SEARCH_MORE_LIMIT = 320;

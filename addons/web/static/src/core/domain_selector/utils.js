@@ -9,94 +9,52 @@ import { unique, zip } from "@web/core/utils/arrays";
 import {
     Expression,
     toValue,
-    toDomain,
-    toTree,
+    domainFromTree,
+    treeFromDomain,
     normalizeValue,
-    formatValue as toSring,
-} from "@web/core/domain_tree";
+    formatValue as toString,
+    createVirtualOperators,
+    removeVirtualOperators,
+} from "@web/core/tree_editor/tree";
 import { useLoadFieldInfo, useLoadPathDescription } from "@web/core/model_field_selector/utils";
 
 /**
- * @param {import("@web/core/domain_tree").Tree} tree
- * @param {Function} getFieldDef
- * @returns {import("@web/core/domain_tree").Tree}
- */
-export function createVirtualOperators(tree, getFieldDef) {
-    if (tree.type === "condition") {
-        const { path, operator, value } = tree;
-        if (["=", "!="].includes(operator)) {
-            const fieldDef = getFieldDef(path);
-            if (fieldDef?.type === "boolean") {
-                return { ...tree, operator: operator === "=" ? "is" : "is_not" };
-            } else if (
-                !["many2one", "date", "datetime"].includes(fieldDef?.type) &&
-                value === false
-            ) {
-                return { ...tree, operator: operator === "=" ? "not_set" : "set" };
-            }
-        }
-        return tree;
-    }
-    const processedChildren = tree.children.map((c) => createVirtualOperators(c, getFieldDef));
-    return { ...tree, children: processedChildren };
-}
-
-/**
- * @param {import("@web/core/domain_tree").Tree} tree
- * @returns {import("@web/core/domain_tree").Tree}
- */
-function removeVirtualOperators(tree) {
-    if (tree.type === "condition") {
-        const { operator } = tree;
-        if (["is", "is_not"].includes(operator)) {
-            return { ...tree, operator: operator === "is" ? "=" : "!=" };
-        }
-        if (["set", "not_set"].includes(operator)) {
-            return { ...tree, operator: operator === "set" ? "!=" : "=" };
-        }
-        return tree;
-    }
-    const processedChildren = tree.children.map((c) => removeVirtualOperators(c));
-    return { ...tree, children: processedChildren };
-}
-
-/**
- * @param {import("@web/core/domain_tree").Tree} domainSelectorTree
+ * @param {import("@web/core/tree_editor/domain_tree").Tree} domainSelectorTree
  * @returns {string}
  */
 export function buildDomain(domainSelectorTree) {
     const tree = removeVirtualOperators(domainSelectorTree);
-    return toDomain(tree);
+    return domainFromTree(tree);
 }
 
 /**
  * @param {import("@web/core/domain").DomainRepr} domain
  * @param {Function} getFieldDef
  * @param {Object} [options={}]
- * @returns {import("@web/core/domain_tree").Tree}
+ * @returns {import("@web/core/tree_editor/domain_tree").Tree}
  */
 export function buildDomainSelectorTree(domain, getFieldDef, options = {}) {
-    const tree = toTree(domain, options);
+    const tree = treeFromDomain(domain, options);
     return createVirtualOperators(tree, getFieldDef);
 }
 
 /**
- * @param {import("@web/core/domain_tree").Value} value
- * @returns {import("@web/core/domain_tree").Value}
+ * @param {import("@web/core/tree_editor/domain_tree").Value} value
+ * @returns {import("@web/core/tree_editor/domain_tree").Value}
  */
 function cloneValue(value) {
     if (value instanceof Expression) {
         return new Expression(value.toAST());
     }
     if (Array.isArray(value)) {
-        return value.map((val) => cloneValue(val));
+        return value.map(cloneValue);
     }
     return value;
 }
 
 /**
- * @param {import("@web/core/domain_tree").Tree} tree
- * @returns {import("@web/core/domain_tree").Tree}
+ * @param {import("@web/core/tree_editor/domain_tree").Tree} tree
+ * @returns {import("@web/core/tree_editor/domain_tree").Tree}
  */
 export function cloneTree(tree) {
     const clone = {};
@@ -108,7 +66,7 @@ export function cloneTree(tree) {
 
 /**
  * @param {import("@web/core/domain").DomainRepr} domain
- * @returns {import("@web/core/domain_tree").Value[]}
+ * @returns {import("@web/core/tree_editor/domain_tree").Value[]}
  */
 export function extractPathsFromDomain(domain) {
     domain = new Domain(domain);
@@ -171,7 +129,7 @@ export function useLoadDisplayNames(nameService) {
 }
 
 /**
- * @param {import("@web/core/domain_tree").Value} val
+ * @param {import("@web/core/tree_editor/domain_tree").Value} val
  * @param {boolean} disambiguate
  * @param {Object|null} fieldDef
  * @param {Object} displayNames
@@ -276,11 +234,11 @@ export function useGetDefaultLeafDomain() {
  * @param {Tree} tree
  * @returns {tree}
  */
-export function simplifyTree(tree, isRoot = true) {
+export function simplifyTree(tree) {
     if (tree.type === "condition") {
         return tree;
     }
-    const processedChildren = tree.children.map((c) => simplifyTree(c, false));
+    const processedChildren = tree.children.map(simplifyTree);
     if (tree.value === "&") {
         return { ...tree, children: processedChildren };
     }
@@ -321,7 +279,7 @@ export function simplifyTree(tree, isRoot = true) {
             value: normalizeValue(value),
         });
     }
-    if (children.length === 1 && !isRoot) {
+    if (children.length === 1) {
         return { ...children[0] };
     }
     return { ...tree, children };
@@ -379,7 +337,7 @@ export function useGetDomainTreeDescription(fieldService, nameService) {
     const loadDisplayNames = useLoadDisplayNames(nameService);
     return async (resModel, tree) => {
         tree = simplifyTree(tree);
-        const domain = toDomain(tree);
+        const domain = domainFromTree(tree);
         const paths = extractPathsFromDomain(domain);
         const promises = [];
         const pathFieldDefs = {};
@@ -387,16 +345,16 @@ export function useGetDomainTreeDescription(fieldService, nameService) {
         for (const path of paths) {
             promises.push(
                 loadPathDescription(resModel, path).then(({ displayNames }) => {
-                    pathDescriptions[toSring(path)] = displayNames.join(" 🠒 ");
+                    pathDescriptions[toString(path)] = displayNames.join(" 🠒 ");
                 }),
                 loadFieldInfo(resModel, path).then(({ fieldDef }) => {
-                    pathFieldDefs[toSring(path)] = fieldDef;
+                    pathFieldDefs[toString(path)] = fieldDef;
                 })
             );
         }
         await Promise.all(promises);
-        const getFieldDef = (path) => pathFieldDefs[toSring(path)];
-        const getDescription = (path) => pathDescriptions[toSring(path)];
+        const getFieldDef = (path) => pathFieldDefs[toString(path)];
+        const getDescription = (path) => pathDescriptions[toString(path)];
         const idsByModel = extractIdsFromDomain(domain, getFieldDef);
         const treeWithVirtualOperators = createVirtualOperators(tree, getFieldDef);
         const displayNames = await loadDisplayNames(idsByModel);

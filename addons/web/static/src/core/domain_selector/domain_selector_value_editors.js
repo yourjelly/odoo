@@ -15,7 +15,7 @@ import {
 } from "./domain_selector_autocomplete";
 import { unique } from "@web/core/utils/arrays";
 import { Input, Select, List, Range } from "./domain_selector_components";
-import { formatValue } from "@web/core/domain_tree";
+import { formatValue } from "@web/core/tree_editor/tree";
 import { sprintf } from "@web/core/utils/strings";
 
 const { DateTime } = luxon;

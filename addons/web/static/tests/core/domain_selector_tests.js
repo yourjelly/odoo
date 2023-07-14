@@ -47,16 +47,16 @@ function addProductIds() {
 
 export const SELECTORS = {
     debugArea: ".o_domain_selector_debug_container textarea",
-    condition: ".o_domain_selector_condition",
-    addNewRule: ".o_domain_selector_row > a",
+    condition: ".o_tree_editor_condition",
+    addNewRule: ".o_tree_editor_row > a",
     resetButton: ".o_domain_selector_row > button",
-    buttonAddNewRule: ".o_domain_selector_node_control_panel > button:nth-child(1)",
-    buttonAddBranch: ".o_domain_selector_node_control_panel > button:nth-child(2)",
-    buttonDeleteNode: ".o_domain_selector_node_control_panel > button:nth-child(3)",
-    pathEditor: ".o_domain_selector_condition > .o_domain_selector_editor:nth-child(1)",
-    operatorEditor: ".o_domain_selector_condition > .o_domain_selector_editor:nth-child(2)",
-    valueEditor: ".o_domain_selector_condition > .o_domain_selector_editor:nth-child(3)",
-    editor: ".o_domain_selector_editor",
+    buttonAddNewRule: ".o_tree_editor_node_control_panel > button:nth-child(1)",
+    buttonAddBranch: ".o_tree_editor_node_control_panel > button:nth-child(2)",
+    buttonDeleteNode: ".o_tree_editor_node_control_panel > button:nth-child(3)",
+    pathEditor: ".o_tree_editor_condition > .o_tree_editor_editor:nth-child(1)",
+    operatorEditor: ".o_tree_editor_condition > .o_tree_editor_editor:nth-child(2)",
+    valueEditor: ".o_tree_editor_condition > .o_tree_editor_editor:nth-child(3)",
+    editor: ".o_tree_editor_editor",
     clearNotSupported: ".o_input .fa-times",
     tag: ".o_input .o_tag",
     toggleArchive: ".form-switch",
@@ -500,26 +500,6 @@ QUnit.module("Components", (hooks) => {
         });
         assert.strictEqual(getCurrentValue(target), "parent.foo");
         assert.ok(isNotSupportedValue(target));
-    });
-
-    QUnit.test("creating a domain with a default option", async (assert) => {
-        assert.expect(1);
-        // Create the domain selector and its mock environment
-        await makeDomainSelector({
-            isDebugMode: true,
-            defaultLeafValue: ["foo", "=", "kikou"],
-            update: (domain) => {
-                assert.strictEqual(
-                    domain,
-                    `[("foo", "=", "kikou")]`,
-                    "the domain input should contain the default domain"
-                );
-            },
-        });
-
-        // Clicking on the button should add a visible field selector in the
-        // widget so that the user can change the field chain
-        await addNewRule(target);
     });
 
     QUnit.test("edit a domain with the debug textarea", async (assert) => {

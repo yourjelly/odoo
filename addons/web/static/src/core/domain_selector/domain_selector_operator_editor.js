@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { formatValue, TERM_OPERATORS_NEGATION, toValue } from "@web/core/domain_tree";
+import { formatValue, TERM_OPERATORS_NEGATION, toValue } from "@web/core/tree_editor/tree";
 import { sprintf } from "@web/core/utils/strings";
 import { parseExpr } from "@web/core/py_js/py";
 import { Select } from "./domain_selector_components";
