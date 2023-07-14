@@ -1,7 +1,11 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+
 from odoo import _, fields, models
+from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountEdiProxyClientUser(models.Model):
@@ -29,5 +33,5 @@ class AccountEdiProxyClientUser(models.Model):
         if proxy_type == 'l10n_it_edi':
             if not company.l10n_it_codice_fiscale:
                 raise UserError(_('Please fill your codice fiscale to be able to receive invoices from FatturaPA'))
-            return self.env['res.partner']._l10n_it_edi_normalized_codice_fiscale(company.l10n_it_codice_fiscale)
+            return company.partner_id._l10n_it_edi_normalized_codice_fiscale()
         return super()._get_proxy_identification(company, proxy_type)
