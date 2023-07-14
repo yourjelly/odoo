@@ -657,7 +657,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
-"                                       Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
+"                                                   Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 msgstr ""
 
 #. module: web
@@ -1022,7 +1022,7 @@ msgstr ""
 #: code:addons/web/static/src/core/domain_selector/domain_selector.xml:0
 #: code:addons/web/static/src/core/domain_selector/domain_selector.xml:0
 #, python-format
-msgid "Add New Rule"
+msgid "Add Custom Group"
 msgstr ""
 
 #. module: web
@@ -1259,9 +1259,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+#: code:addons/web/static/src/search/custom_group_by_item/custom_group_by_item.xml:0
 #, python-format
 msgid "Aquarius"
 msgstr ""
@@ -3556,15 +3554,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
-msgid "In %s days"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/domain_selector/domain_selector_autocomplete.js:0
-#: code:addons/web/static/src/core/domain_selector/utils.js:0
-#, python-format
-msgid "Inaccessible/missing record ID: %s"
+msgid "In"
 msgstr ""
 
 #. module: web
@@ -3679,20 +3669,6 @@ msgid "Invalid fields: "
 msgstr ""
 
 #. module: web
-#. odoo-python
-#: code:addons/web/controllers/domain.py:0
-#, python-format
-msgid "Invalid model: %s"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/domain_selector/domain_selector_autocomplete.js:0
-#, python-format
-msgid "Invalid record ID: %s"
-msgstr ""
-
-#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
 #, python-format
@@ -3711,20 +3687,6 @@ msgstr ""
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
 #, python-format
 msgid "Inviting..."
-msgstr ""
-
-#. module: web
-#: model:ir.model.fields,field_description:web.field_base_document_layout__is_company_details_empty
-msgid "Is Company Details Empty"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "Islam"
 msgstr ""
 
 #. module: web
@@ -4859,13 +4821,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/list/list_renderer.js:0
-#, python-format
-msgid "No currency provided"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_renderer.js:0
 #, python-format
 msgid "No data"
@@ -5531,6 +5486,13 @@ msgstr ""
 #, python-format
 msgid ""
 "Please use the copy button to report the error to your support service."
+msgstr ""
+
+#. module: web
+#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
+msgid ""
+"Please use the following communication for your payment: <b><span>\n"
+"                           INV/2020/07/0003</span></b>"
 msgstr ""
 
 #. module: web
@@ -6834,41 +6796,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "TM"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "TOP"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "TOP arrow"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "TV"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
-#, python-format
-msgid "Tag"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/relational_fields.js:0
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
@@ -7221,21 +7148,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "Tokyo"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "Tokyo tower"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
 #, python-format
 msgid "Tomorrow"
 msgstr ""
@@ -13366,579 +13279,16 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
 #, python-format
-msgid "dazed"
+msgid "days"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
 #, python-format
-msgid "dead"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "deadpan"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "deaf"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "deaf man"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "deaf person"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "deaf woman"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "death"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "decapod"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "deciduous"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "deciduous tree"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "decorated"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "decoration"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "deer"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dejected"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "delicious"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "delivery"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "delivery truck"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "demon"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dengue"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "denied"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dentist"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "department"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "department store"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "departure"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "departures"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "derelict"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "derelict house"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "desert"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "desert island"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "desktop"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "desktop computer"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dessert"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "detective"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "developer"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "devil"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dharma"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dialog"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dialogue"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diamond"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diamond suit"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diamond with a dot"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diamonds"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diaper"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dice"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "die"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diesel"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dim"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dim button"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diplodocus"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "direct hit"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "direction"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "disabled access"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "disappointed"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "disappointed face"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "disbelief"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "disease"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dish"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "disk"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diskette"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "distrust"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "divide"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dividers"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diving"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diving mask"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "division"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diya"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "diya lamp"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dizzy"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "djinn"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "dna"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "doctor"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#, python-format
-msgid "document"
+msgid "days ago"
 msgstr ""
 
 #. module: web
@@ -23158,7 +22508,6 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector/domain_selector_fields.js:0
-#: code:addons/web/static/src/core/domain_selector/utils.js:0
 #, python-format
 msgid "not set"
 msgstr ""
@@ -27586,6 +26935,7 @@ msgstr ""
 #: code:addons/web/static/src/core/domain_selector/utils.js:0
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #: code:addons/web/static/src/legacy/xml/base.xml:0
+#: code:addons/web/static/src/search/search_model.js:0
 #, python-format
 msgid "set"
 msgstr ""
