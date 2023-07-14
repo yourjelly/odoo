@@ -51,12 +51,14 @@
                 throw new Error("Factory should be defined by a function", factory);
             }
             if (this.factories.has(name)) {
-                throw new Error("Module " + name + " already defined");
+                console.warn("Module " + name + " already defined");
             }
-            this.factories.set(name, { deps, fn: factory });
+            else {
+                this.factories.set(name, { deps, fn: factory });
 
-            if (this.autoStart) {
-                this.addJob(name);
+                if (this.autoStart) {
+                    this.addJob(name);
+                }
             }
         }
 

@@ -90,7 +90,6 @@
         ],
         'web.assets_tests': [
             'project/static/tests/tours/**/*',
-            'project/static/tests/views/**/*',
         ],
         'project.webclient': [
             ('include', 'web._assets_helpers'),

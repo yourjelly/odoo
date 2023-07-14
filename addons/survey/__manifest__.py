@@ -102,6 +102,8 @@ sent mails with personal token for the invitation of the survey.
             'survey/static/src/scss/*.dark.scss',
         ],
         'web.assets_tests': [
+            ('include', 'survey.survey_assets'),
+            ('include', 'survey.survey_user_input_session_assets'),
             'survey/static/tests/tours/*.js',
         ],
         'web.qunit_suite_tests': [
