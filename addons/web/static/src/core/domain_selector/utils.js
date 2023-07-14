@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
 import { Domain } from "@web/core/domain";
-import { getDefaultValue, getDefaultOperator } from "./domain_selector_fields";
+import { disambiguate, getDefaultValue } from "./domain_selector_value_editors";
+import { getDefaultOperator, getOperatorLabel } from "./domain_selector_operator_editor";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { unique, zip } from "@web/core/utils/arrays";
@@ -14,7 +15,6 @@ import {
     formatValue as toSring,
 } from "@web/core/domain_tree";
 import { useLoadFieldInfo, useLoadPathDescription } from "@web/core/model_field_selector/utils";
-import { getOperatorInfo } from "@web/core/domain_selector/domain_selector_operators";
 
 /**
  * @param {import("@web/core/domain_tree").Tree} tree
@@ -138,7 +138,7 @@ export function extractIdsFromDomain(domain, getFieldDef) {
                 const value = toValue(node.value[2]);
                 const values = Array.isArray(value) ? value : [value];
                 const ids = values.filter((val) => isId(val));
-                const resModel = fieldDef.relation;
+                const resModel = fieldDef.is_property ? fieldDef.comodel : fieldDef.relation;
                 if (ids.length) {
                     if (!idsByModel[resModel]) {
                         idsByModel[resModel] = [];
@@ -186,7 +186,7 @@ function formatValue(val, disambiguate, fieldDef, displayNames) {
         }
     }
     if (fieldDef?.type === "selection") {
-        const [, label] = (fieldDef.selection || []).find(([v]) => v === val);
+        const [, label] = (fieldDef.selection || []).find(([v]) => v === val) || [];
         if (label !== undefined) {
             val = label;
         }
@@ -197,35 +197,19 @@ function formatValue(val, disambiguate, fieldDef, displayNames) {
     return val;
 }
 
-function disambiguate(value, displayNames) {
-    if (!Array.isArray(value)) {
-        return value === "";
-    }
-    let hasSomeString = false;
-    let hasSomethingElse = false;
-    for (const val of value) {
-        if (val === "") {
-            return true;
-        }
-        if (typeof val === "string" || (displayNames && isId(val))) {
-            hasSomeString = true;
-        } else {
-            hasSomethingElse = true;
-        }
-    }
-    return hasSomeString && hasSomethingElse;
-}
+export function leafToString(tree, fieldDef, displayNames) {
+    const { operator, negate, value } = tree;
+    const operatorLabel = getOperatorLabel(operator, negate);
 
-export function leafToString(fieldDef, operatorInfo, value, displayNames) {
     const description = {
-        operatorDescription: `${operatorInfo.label}`,
+        operatorDescription: `${operatorLabel}`,
         valueDescription: null,
     };
 
-    if (["set", "not_set"].includes(operatorInfo.operator)) {
+    if (["set", "not_set"].includes(operator)) {
         return description;
     }
-    if (["is", "is_not"].includes(operatorInfo.operator)) {
+    if (["is", "is_not"].includes(operator)) {
         description.valueDescription = {
             values: [value ? _t("set") : _t("not set")],
             join: "",
@@ -240,7 +224,7 @@ export function leafToString(fieldDef, operatorInfo, value, displayNames) {
     );
     let join;
     let addParenthesis = Array.isArray(value);
-    switch (operatorInfo.operator) {
+    switch (operator) {
         case "between":
             join = _t("and");
             addParenthesis = false;
@@ -368,13 +352,11 @@ export function getDomainTreeDescription(
         }
         return description;
     }
-    const { negate, operator, path, value } = tree;
+    const { path } = tree;
     const fieldDef = getFieldDef(path);
-    const operatorInfo = getOperatorInfo(operator, negate);
     const { operatorDescription, valueDescription } = leafToString(
+        tree,
         fieldDef,
-        operatorInfo,
-        value,
         displayNames[fieldDef?.relation]
     );
     let description = `${getDescription(path)} ${operatorDescription} `;
