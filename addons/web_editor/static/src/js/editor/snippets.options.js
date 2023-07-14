@@ -5513,6 +5513,7 @@ registry.ImageTools = ImageHandlerOption.extend({
      * @see this.selectClass for parameters
      */
     async setImgShapeColor(previewMode, widgetValue, params) {
+        // changes to done...
         const img = this._getImg();
         const newColorId = parseInt(params.colorId);
         const oldColors = img.dataset.shapeColors.split(';');
@@ -5764,6 +5765,7 @@ registry.ImageTools = ImageHandlerOption.extend({
         uiFragment.querySelectorAll('we-select-page we-button[data-set-img-shape]').forEach(btn => {
             const image = document.createElement('img');
             const [moduleName, directory, shapeName] = btn.dataset.setImgShape.split('/');
+            // changes to be done...
             image.src = `/${encodeURIComponent(moduleName)}/static/image_shapes/${encodeURIComponent(directory)}/${encodeURIComponent(shapeName)}.svg`;
             $(btn).prepend(image);
 
