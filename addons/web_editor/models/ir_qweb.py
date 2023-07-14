@@ -190,6 +190,19 @@ class Float(models.AbstractModel):
                           .replace(lang.decimal_point, '.'))
 
 
+class FloatTimeConverter(models.AbstractModel):
+    _name = 'ir.qweb.field.float_time'
+    _description = 'Qweb Field Float Time'
+    _inherit = 'ir.qweb.field.float_time'
+
+    @api.model
+    def from_html(self, model, field, element):
+        if ':' in element.text_content():
+            hours, minutes = map(int, element.text_content().split(':'))
+            return round((hours + (minutes / 60)), 2)
+        return float(element.text_content())
+
+
 class ManyToOne(models.AbstractModel):
     _name = 'ir.qweb.field.many2one'
     _description = 'Qweb Field Many to One'
