@@ -2,6 +2,7 @@
 
 import ajax from "web.ajax";
 import { MockServer } from "@web/../tests/helpers/mock_server";
+import MockServerLegacy from "web.MockServer";
 import testUtils from "web.test_utils";
 import * as coreUtils from "@web/core/utils/patch";
 import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
@@ -105,6 +106,28 @@ coreUtils.patch(MockServer.prototype, 'web_editor', {
      * @returns {Promise}
      */
     async _performRPC(route, args) {
+        if (args.model === "ir.ui.view" && args.method === 'render_public_asset') {
+            if (args.args[0] === "web_editor.colorpicker") {
+                return COLOR_PICKER_TEMPLATE;
+            }
+            if (args.args[0] === "web_editor.snippets") {
+                return SNIPPETS_TEMPLATE;
+            }
+        }
+        return this._super(...arguments);
+    },
+});
+MockServerLegacy.include({
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     * @private
+     * @returns {Promise}
+     */
+    async _performRpc(route, args) {
         if (args.model === "ir.ui.view" && args.method === 'render_public_asset') {
             if (args.args[0] === "web_editor.colorpicker") {
                 return COLOR_PICKER_TEMPLATE;
