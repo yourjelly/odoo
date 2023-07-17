@@ -118,7 +118,7 @@ export class ImageCrop extends Component {
                 src.endsWith('.png') ? 'image/png' :
                 src.endsWith('.webp') ? 'image/webp' :
                 'image/jpeg';
-        this.mimetype = options.mimetype || mimetype;
+        this.mimetype = this.props.mimetype || mimetype;
 
         await loadImageInfo(this.media, this.props.rpc);
         const isIllustration = /^\/web_editor\/shape\/illustration\//.test(this.media.dataset.originalSrc);
