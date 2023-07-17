@@ -4,7 +4,7 @@
     <t t-name="discuss.ChannelInvitation" owl="1">
         <div class="o-discuss-ChannelInvitation bg-view d-flex flex-column" t-att-class="{ 'o-discuss-ChannelInvitation-has-size-constraints': props.hasSizeConstraints }" t-attf-class="{{ props.className }}">
             <t t-if="store.user">
-                <h3 class="mx-3 mt-3 mb-2">Invite people</h3>
+                <h3 t-ref="invitePeopleTitle" class="mx-3 mt-3 mb-2">Invite people</h3>
                 <div class="mx-3 my-2">
                     <input class="o-discuss-ChannelInvitation-search border form-control" t-ref="input" placeholder="Type the name of a person" t-on-input="onInput"/>
                 </div>
@@ -18,7 +18,9 @@
                                     <ImStatus persona="selectablePartner" className="'position-absolute top-100 start-100 translate-middle bg-view mt-n1 ms-n1'"/>
                                 </div>
                             </div>
-                            <span class="flex-grow-1 mx-2 text-truncate text-start fs-6" t-esc="selectablePartner.name"/>
+                            <t name="partnerDetail">
+                                <span class="flex-grow-1 mx-2 text-truncate text-start fs-6" t-esc="selectablePartner.name"/>
+                            </t>
                             <input class="form-check-input flex-shrink-0" type="checkbox" t-att-checked="state.selectedPartners.includes(selectablePartner) ? 'checked' : undefined"/>
                         </div>
                     </t>
@@ -47,7 +49,7 @@
                     </button>
                 </div>
             </t>
-            <t t-if="props.thread.invitationLink">
+            <t name="invitationLinkContainer" t-if="props.thread.invitationLink">
                 <h4 class="mx-3 mt-3 mb-2">Invitation Link</h4>
                 <div class="mx-3 mt-2 mb-3">
                     <div class="input-group">

@@ -47,8 +47,7 @@ class ResPartner(models.Model):
         )
         return channels
 
-    @api.model
-    def search_for_channel_invite(self, search_term, channel_id=None, limit=30):
+    def _get_invitable_partners(self, search_term, channel_id, limit):
         """Returns partners matching search_term that can be invited to a channel.
         If the channel_id is specified, only partners that can actually be invited to the channel
         are returned (not already members, and in accordance to the channel configuration).
@@ -75,9 +74,19 @@ class ResPartner(models.Model):
         query = self.env["res.partner"]._search(domain, order="name, id")
         query.order = 'LOWER("res_partner"."name"), "res_partner"."id"'  # bypass lack of support for case insensitive order in search()
         query.limit = int(limit)
+        return self.env["res.partner"].browse(query)
+
+
+    @api.model
+    def search_for_channel_invite(self, search_term, channel_id=None, limit=30):
+        """Returns partners matching search_term that can be invited to a channel.
+        If the channel_id is specified, only partners that can actually be invited to the channel
+        are returned (not already members, and in accordance to the channel configuration).
+        """
+        partners = self._get_invitable_partners(search_term, channel_id, limit)
         return {
-            "count": self.env["res.partner"].search_count(domain),
-            "partners": list(self.env["res.partner"].browse(query).mail_partner_format().values()),
+            "count": len(partners),
+            "partners": list(partners.mail_partner_format().values()),
         }
 
     @api.model

@@ -56,7 +56,8 @@ function transformAction(component, id, action) {
         /** Closes this action. */
         close() {
             if (this.toggle) {
-                component.threadActions.activeAction = null;
+                component.threadActions.activeAction =
+                    component.threadActions.actionStack.pop() ?? null;
             }
             action.close?.(component, this);
         },
@@ -68,7 +69,7 @@ function transformAction(component, id, action) {
         },
         /** Props to pass to the component of this action. */
         get componentProps() {
-            return action.componentProps?.(this);
+            return action.componentProps?.(this, component);
         },
         /** Condition to display this action. */
         get condition() {
@@ -93,17 +94,26 @@ function transformAction(component, id, action) {
             const res = this.isActive && action.nameActive ? action.nameActive : action.name;
             return typeof res === "function" ? res(component) : res;
         },
-        /** Action to execute when this action is selected (on or off). */
-        onSelect() {
+        /**
+         * Action to execute when this action is selected (on or off).
+         *
+         * @param {boolean} keepPrevious Whether the previous action
+         * should be kept so that closing the current action goes back
+         * to the previous one.
+         * */
+        onSelect(keepPrevious = false) {
             if (this.toggle && this.isActive) {
                 this.close();
             } else {
-                this.open();
+                this.open(keepPrevious);
             }
         },
         /** Opens this action. */
-        open() {
+        open(keepPrevious = false) {
             if (this.toggle) {
+                if (component.threadActions.activeAction && keepPrevious) {
+                    component.threadActions.actionStack.push(component.threadActions.activeAction);
+                }
                 component.threadActions.activeAction = this;
             }
             action.open?.(component, this);
@@ -141,6 +151,7 @@ export function useThreadActions() {
                 .filter((action) => action.condition)
                 .sort((a1, a2) => a1.sequence - a2.sequence);
         },
+        actionStack: [],
         activeAction: null,
     });
     return state;

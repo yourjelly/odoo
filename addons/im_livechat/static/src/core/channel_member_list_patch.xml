@@ -17,4 +17,10 @@
             </div>
         </xpath>
     </t>
+
+    <t t-inherit="mail.discuss.ChannelMemberList" t-inherit-mode="extension">
+        <xpath expr="//*[hasclass('o-discuss-ChannelMemberList')]//*" position="before">
+            <button t-on-click="onClickAddUser" t-if="props.thread.type === 'livechat'" class="btn btn-secondary m-3 mt-4">Invite a User</button>
+        </xpath>
+    </t>
 </templates>
