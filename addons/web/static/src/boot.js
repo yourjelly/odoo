@@ -6,103 +6,81 @@
 (function () {
     "use strict";
 
-    const commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/gm;
-    const cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
-
     class ModuleLoader {
-        autoStart = true;
-
-        /** @type {Map<string,{fn: Function, deps: string[]}} mapping name => deps/fn */
-        factories = new Map();
-
+        /** @type {Map<string, { factory: Function; dependencies: string[]; }>} descriptions of modules */
+        descriptors = new Map();
+        /** @type {Map<string, any>} exported values of modules */
+        modules = new Map();
+        /** @type {Set<string>} names of failed modules */
+        failedModules = new Set();
         /** @type {Set<string>} names of modules waiting to be started */
         jobs = new Set();
-        /** @type {Set<string>} names of failed modules */
-        failed = new Set();
 
-        /** @type {Map<string,any} mapping name => value */
-        modules = new Map();
+        constructor(descriptors = null) {
+            this.descriptors = new Map(descriptors);
+            this.checkDescriptor = descriptors === null;
+        }
 
         /**
          * @param {string} name
-         * @param {string[]|Function} arg1
-         * @param {Function|undefined} arg2
+         * @param {string[]} dependencies
+         * @param {Function} factory
          */
-        define(name, arg1, arg2) {
-            let deps = arg1;
-            let factory = arg2;
-            if (!Array.isArray(arg1)) {
-                // odoo.define is called without explicit dependencies. this is
-                // deprecated and support for this should be removed in the future
-                factory = arg1;
-                deps = [];
-                factory
-                    .toString()
-                    .replace(commentRegExp, "")
-                    .replace(cjsRequireRegExp, (match, dep) => deps.push(dep));
-            }
+        addModule(name, dependencies, factory) {
             if (typeof name !== "string") {
-                throw new Error(`Invalid name definition: ${name} (should be a string)"`);
+                throw new Error(`Module: name should be defined by a string: ${name}`);
             }
-            if (!(deps instanceof Array)) {
-                throw new Error(`Dependencies should be defined by an array: ${deps}`);
+            if (!Array.isArray(dependencies)) {
+                throw new Error(`Module: dependencies of "${name}" should be defined by an array: ${dependencies}`);
             }
             if (typeof factory !== "function") {
-                throw new Error("Factory should be defined by a function", factory);
+                throw new Error(`Module: factory of "${name}" should be defined by a function`);
             }
-            if (this.factories.has(name)) {
-                console.warn("Module " + name + " already defined");
+            if (this.checkDescriptor && this.descriptors.has(name)) {
+                return console.warn(`Module "${name}" is already defined`);
             }
-            else {
-                this.factories.set(name, { deps, fn: factory });
-
-                if (this.autoStart) {
-                    this.addJob(name);
-                }
-            }
-        }
-
-        addJob(name) {
+            this.descriptors.set(name, { dependencies, factory });
             this.jobs.add(name);
             this.startModules();
         }
 
-        findJob() {
+        nextAvailableJob() {
             for (const job of this.jobs) {
-                if (this.factories.get(job).deps.every((dep) => this.modules.has(dep))) {
+                if (this.descriptors.get(job).dependencies.every((dep) => this.modules.has(dep))) {
                     return job;
                 }
             }
             return null;
         }
 
+        startModule(name) {
+            try {
+                const { factory } = this.descriptors.get(name);
+                const module = factory((dep) => this.modules.get(dep));
+                this.modules.set(name, module);
+            } catch (error) {
+                this.failedModules.add(name);
+                console.error(`Error while loading module "${name}":\n`, error);
+            }
+        }
+
         startModules() {
-            let job;
-            while ((job = this.findJob())) {
+            let job = null;
+            while ((job = this.nextAvailableJob())) {
+                this.jobs.delete(job);
                 this.startModule(job);
             }
         }
 
-        startModule(name) {
-            const require = (name) => this.modules.get(name);
-            this.jobs.delete(name);
-            try {
-                const value = this.factories.get(name).fn(require);
-                if (value instanceof Promise) {
-                    console.log(name);
-                }
-                this.modules.set(name, value);
-            } catch (error) {
-                this.failed.add(name);
-                console.error(`Error while loading "${name}":\n`, error);
-            }
-        }
-
         findErrors() {
+            if (!this.failedModules.size && !this.jobs.size) {
+                return null;
+            }
+
             // cycle
             const dependencyGraph = new Map();
             for (const job of this.jobs) {
-                dependencyGraph.set(job, this.factories.get(job).deps);
+                dependencyGraph.set(job, this.descriptors.get(job).dependencies);
             }
             // cycle detection
             function visitJobs(jobs, visited = new Set()) {
@@ -117,7 +95,7 @@
 
             function visitJob(job, visited) {
                 if (visited.has(job)) {
-                    const jobs = Array.from(visited).concat([job]);
+                    const jobs = [...visited, job];
                     const index = jobs.indexOf(job);
                     return jobs
                         .slice(index)
@@ -131,97 +109,26 @@
             // missing dependencies
             const missing = new Set();
             for (const job of this.jobs) {
-                for (const dep of this.factories.get(job).deps) {
-                    if (!this.factories.has(dep)) {
+                for (const dep of this.descriptors.get(job).dependencies) {
+                    if (!this.descriptors.has(dep)) {
                         missing.add(dep);
                     }
                 }
             }
 
             return {
-                failed: [...this.failed],
+                failed: [...this.failedModules],
                 cycle: visitJobs(this.jobs),
                 missing: [...missing],
                 unloaded: [...this.jobs],
             };
         }
 
-        validate() {
-            if (!this.failed.size && !this.jobs.size) {
-                return;
-            }
+        validateModules() {
             const errors = this.findErrors();
-            throw new Error("boom" + errors);
-        }
-
-        async checkAndReportErrors() {
-            if (!this.failed.size && !this.jobs.size) {
-                return;
+            if (errors) {
+                throw new Error(`Couldn't load all JS modules: ${JSON.stringify(errors)}`);
             }
-            const { failed, cycle, missing, unloaded } = this.findErrors();
-
-            function domReady(cb) {
-                if (document.readyState === "complete") {
-                    cb();
-                } else {
-                    document.addEventListener("DOMContentLoaded", cb);
-                }
-            }
-
-            function list(heading, names) {
-                const frag = document.createDocumentFragment();
-                if (!names || !names.length) {
-                    return frag;
-                }
-                frag.textContent = heading;
-                const ul = document.createElement("ul");
-                for (const el of names) {
-                    const li = document.createElement("li");
-                    li.textContent = el;
-                    ul.append(li);
-                }
-                frag.appendChild(ul);
-                return frag;
-            }
-
-            domReady(() => {
-                // Empty body
-                while (document.body.childNodes.length) {
-                    document.body.childNodes[0].remove();
-                }
-                const container = document.createElement("div");
-                container.className =
-                    "position-fixed w-100 h-100 d-flex align-items-center flex-column bg-white overflow-auto modal";
-                container.style.zIndex = "10000";
-                const alert = document.createElement("div");
-                alert.className = "alert alert-danger o_error_detail fw-bold m-auto";
-                container.appendChild(alert);
-                alert.appendChild(
-                    list(
-                        "The following modules failed to load because of an error, you may find more information in the devtools console:",
-                        failed
-                    )
-                );
-                alert.appendChild(
-                    list(
-                        "The following modules could not be loaded because they form a dependency cycle:",
-                        cycle && [cycle]
-                    )
-                );
-                alert.appendChild(
-                    list(
-                        "The following modules are needed by other modules but have not been defined, they may not be present in the correct asset bundle:",
-                        missing
-                    )
-                );
-                alert.appendChild(
-                    list(
-                        "The following modules could not be loaded because they have unmet dependencies, this is a secondary error which is likely caused by one of the above problems:",
-                        unloaded
-                    )
-                );
-                document.body.appendChild(container);
-            });
         }
     }
 
@@ -231,47 +138,111 @@
     const odoo = globalThis.odoo;
 
     const loader = new ModuleLoader();
-    odoo.define = loader.define.bind(loader);
+    odoo.loader = loader; // debug
 
-    odoo.loader = loader;
+    odoo.define = loader.addModule.bind(loader);
 
-    odoo.waitTick = async function () {
+    odoo.waitTick = function () {
         return Promise.resolve();
     };
 
-    // todo: move this in test assets somewhere
-    function inject({ targets, mocks }) {
+    odoo.checkAndReportErrors = function () {
+        const errors = loader.findErrors();
+        if (!errors) {
+            return;
+        }
+
+        function domReady(cb) {
+            if (document.readyState === "complete") {
+                cb();
+            } else {
+                document.addEventListener("DOMContentLoaded", cb);
+            }
+        }
+
+        function list(heading, names) {
+            const frag = document.createDocumentFragment();
+            if (!names || !names.length) {
+                return frag;
+            }
+            frag.textContent = heading;
+            const ul = document.createElement("ul");
+            for (const el of names) {
+                const li = document.createElement("li");
+                li.textContent = el;
+                ul.append(li);
+            }
+            frag.appendChild(ul);
+            return frag;
+        }
+
+        domReady(() => {
+            // Empty body
+            while (document.body.childNodes.length) {
+                document.body.childNodes[0].remove();
+            }
+            const container = document.createElement("div");
+            container.className =
+                "position-fixed w-100 h-100 d-flex align-items-center flex-column bg-white overflow-auto modal";
+            container.style.zIndex = "10000";
+            const alert = document.createElement("div");
+            alert.className = "alert alert-danger o_error_detail fw-bold m-auto";
+            container.appendChild(alert);
+            alert.appendChild(
+                list(
+                    "The following modules failed to load because of an error, you may find more information in the devtools console:",
+                    errors.failed
+                )
+            );
+            alert.appendChild(
+                list(
+                    "The following modules could not be loaded because they form a dependency cycle:",
+                    errors.cycle && [errors.cycle]
+                )
+            );
+            alert.appendChild(
+                list(
+                    "The following modules are needed by other modules but have not been defined, they may not be present in the correct asset bundle:",
+                    errors.missing
+                )
+            );
+            alert.appendChild(
+                list(
+                    "The following modules could not be loaded because they have unmet dependencies, this is a secondary error which is likely caused by one of the above problems:",
+                    errors.unloaded
+                )
+            );
+            document.body.appendChild(container);
+        });
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+    // TODO: move this in tests
+    /**
+     * @param {string[]} moduleNames
+     * @param {object} mocks
+     * @returns {Map<string, any>}
+     */
+    function loadModules(moduleNames, mocks = {}) {
         const ModuleLoader = odoo.loader.constructor;
-        const factories = new Map(odoo.loader.factories);
-        const loader = new ModuleLoader();
-        loader.factories = factories;
-
-        // replace some factories by mocks
-        if (mocks) {
-            for (const name in mocks) {
-                const deps = factories.get(name).deps;
-                factories.set(name, { fn: mocks[name], deps });
-            }
+        const loader = new ModuleLoader(odoo.loader.descriptors);
+        for (const [name, factory] of Object.entries(mocks)) {
+            loader.addModule(name, [], factory);
         }
-
-        // add recursively all required dependencies
-        const addJob = (target) => {
-            if (!factories.has(target)) {
-                throw new Error(`unknown dependency: ${target}`);
+        const addJobs = (names) => {
+            for (const name of names) {
+                if (!this.descriptors.has(name)) {
+                    throw new Error(`Module "${name}" is unknown`);
+                }
+                // add recursively all required dependencies
+                addJobs(this.descriptors.get(name).dependencies);
+                this.jobs.add(name);
             }
-            for (const dep of factories.get(target).deps) {
-                addJob(dep);
-            }
-            loader.addJob(target);
         };
-        for (const target of targets) {
-            if (!loader.jobs.has(target)) {
-                addJob(target);
-            }
-        }
-        loader.validate();
+        addJobs(moduleNames);
+        loader.startModules();
+        loader.validateModules();
         return loader.modules;
     }
-
-    odoo.inject = inject;
+    ///////////////////////////////////////////////////////////////////////////
 })();

@@ -247,7 +247,7 @@ export const _loadBundle = (assets.loadBundle = async function loadBundle(desc) 
             );
         }
     }
-    odoo.loader.checkAndReportErrors();
+    odoo.checkAndReportErrors();
 });
 
 export const loadJS = function (url) {
