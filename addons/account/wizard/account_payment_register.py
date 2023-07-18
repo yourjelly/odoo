@@ -735,7 +735,7 @@ class AccountPaymentRegister(models.TransientModel):
 
         total_amount, mode = self._get_total_amount_using_same_currency(batch_result)
         currency = self.env['res.currency'].browse(batch_values['source_currency_id'])
-        if mode == 'early_payment':
+        if mode == 'early_payment' and batch_result['lines'].move_id.invoice_payment_term_id.early_discount :
             payment_vals['amount'] = total_amount
 
             conversion_rate = self.env['res.currency']._get_conversion_rate(
