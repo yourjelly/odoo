@@ -1,24 +1,33 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import websiteSaleTracking from "@website_sale/js/website_sale_tracking";
+
+function patchWebsiteSaleTracking() {
+    const websiteSaleTracking = odoo.loader.modules.get("@website_sale/js/website_sale_tracking");
+    websiteSaleTracking.include({
+        // Purposely don't call super to avoid call to third party (GA) during tests
+        _onViewItem(event, data) {
+            $('body').attr('view-event-id', data.item_id);
+        },
+        _onAddToCart(event, data) {
+            $('body').attr('cart-event-id', data.item_id);
+        },
+    });
+}
 
 let itemId;
 
-websiteSaleTracking.include({
-    // Purposely don't call super to avoid call to third party (GA) during tests
-    _onViewItem(event, data) {
-        $('body').attr('view-event-id', data.item_id);
-    },
-    _onAddToCart(event, data) {
-        $('body').attr('cart-event-id', data.item_id);
-    },
-});
 
 registry.category("web_tour.tours").add('google_analytics_view_item', {
     test: true,
     url: '/shop?search=Customizable Desk',
     steps: [
+    {
+        content: "Patching websiteSaleTracking",
+        run: () => {
+            patchWebsiteSaleTracking();
+        }
+    },
     {
         content: "select customizable desk",
         trigger: '.oe_product_cart a:contains("Customizable Desk")',

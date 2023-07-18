@@ -2,7 +2,7 @@
 
 import {_t} from "@web/legacy/js/services/core";
 import "@web/legacy/translations_loaded";
-import { Markup } from "@web/legacy/js/core/utils";
+import { Markup, patch } from "@web/legacy/js/core/utils";
 import { registry } from "@web/core/registry";
 import { sprintf } from "@web/core/utils/strings";
 
@@ -337,7 +337,17 @@ function registerWebsitePreviewTour(name, options, steps) {
             trigger: '.o_website_preview.editor_enable.editor_has_snippets',
             timeout: 30000,
             auto: true,
-            run: () => {}, // It's a check
+            run: () => {
+                const { WebsitePreview } = "@website/client_actions/website_preview/website_preview";
+                patch(WebsitePreview.prototype, 'website_preview_test_mode', {
+                    /**
+                     * @override
+                     */
+                    get testMode() {
+                        return true;
+                    }
+                });
+            }, // It's a check
         });
     } else {
         tourSteps[0].timeout = 20000;

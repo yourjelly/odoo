@@ -162,7 +162,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/widgets/colorpicker.js',
             'web/static/src/legacy/xml/colorpicker.xml',
             'web/static/src/legacy/translations_loaded.js',
-            'web/static/src/legacy/js/public/public_widget.js',
         ],
         'web.assets_emoji': [
             'web/static/src/core/emoji_picker/emoji_data.js'

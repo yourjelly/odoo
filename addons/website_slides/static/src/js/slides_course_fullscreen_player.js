@@ -492,7 +492,7 @@
      *
      * This widget is rendered sever side, and attached to the existing DOM.
      */
-    var Fullscreen = SlideCoursePage.extend({
+    export var Fullscreen = SlideCoursePage.extend({
         events: Object.assign({}, SlideCoursePage.prototype.events, {
             'click .o_wslides_fs_toggle_sidebar': '_onClickToggleSidebar',
         }),

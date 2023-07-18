@@ -1,19 +1,25 @@
 /** @odoo-module **/
 
-import { WysiwygAdapterComponent } from "@website/components/wysiwyg_adapter/wysiwyg_adapter";
 import websiteTourUtils from "@website/js/tours/tour_utils";
 import { patch, unpatch } from '@web/legacy/js/core/utils';
 
-const patchWysiwygAdapter = () => patch(WysiwygAdapterComponent.prototype, 'snippets_all_drag_and_drop.wysiwyg_adapter', {
-    _trigger_up(ev) {
-        this._super(...arguments);
-        if (ev.name === 'snippet_removed') {
-            $('body').attr('test-dd-snippet-removed', true);
-        }
-    }
-});
 
-const unpatchWysiwygAdapter = () => unpatch(WysiwygAdapterComponent.prototype, 'snippets_all_drag_and_drop.wysiwyg_adapter');
+const patchWysiwygAdapter = () => {
+    const { WysiwygAdapterComponent } = odoo.loader.modules.get("@website/components/wysiwyg_adapter/wysiwyg_adapter");
+    return patch(WysiwygAdapterComponent.prototype, 'snippets_all_drag_and_drop.wysiwyg_adapter', {
+        _trigger_up(ev) {
+            this._super(...arguments);
+            if (ev.name === 'snippet_removed') {
+                $('body').attr('test-dd-snippet-removed', true);
+            }
+        }
+    });
+}
+
+const unpatchWysiwygAdapter = () => {
+    const { WysiwygAdapterComponent } = odoo.loader.modules.get("@website/components/wysiwyg_adapter/wysiwyg_adapter");
+    return unpatch(WysiwygAdapterComponent.prototype, 'snippets_all_drag_and_drop.wysiwyg_adapter');
+}
 
 import { registry } from "@web/core/registry";
 

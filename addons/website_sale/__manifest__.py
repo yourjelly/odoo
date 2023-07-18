@@ -110,7 +110,6 @@
             'website_sale/static/src/js/tours/tour_utils.js',
         ],
         'web.assets_tests': [
-            'website_sale/static/src/js/website_sale_tracking.js',
             'website_sale/static/tests/**/*',
         ],
     },

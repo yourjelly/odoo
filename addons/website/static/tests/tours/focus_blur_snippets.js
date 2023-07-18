@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import wTourUtils from '@website/js/tours/tour_utils';
+import { registryFocusBlueSnippets } from "../tour_utils/focus_blur_snippets_options"
 
 const blockIDToData = {
     parent: {
@@ -54,6 +55,12 @@ wTourUtils.registerWebsitePreviewTour("focus_blur_snippets", {
     url: "/",
     edition: true,
 }, [
+    {
+        content: "Registry Focus Blur Snippets",
+        run: function(){
+            registryFocusBlueSnippets()
+        }
+    },
     {
         content: 'Drag the custom block into the page',
         trigger: '#snippet_structure .oe_snippet:has(.oe_snippet_body.s_focusblur) .oe_snippet_thumbnail',

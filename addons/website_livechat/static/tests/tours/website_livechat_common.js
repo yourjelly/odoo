@@ -1,14 +1,17 @@
 /** @odoo-module **/
 
 import { patch } from "@web/core/utils/patch";
-import { RATING, LivechatService } from "@im_livechat/embed/core/livechat_service";
 
-patch(LivechatService.prototype, "website_livechat", {
-    sendFeedback() {
-        document.body.classList.add("feedback_sent");
-        return this._super(...arguments);
-    },
-});
+function patchLivechatService() {
+    const { LivechatService } = odoo.loader.modules.get("@im_livechat/embed/core/livechat_service");
+    return patch(LivechatService.prototype, "website_livechat", {
+        sendFeedback() {
+            document.body.classList.add("feedback_sent");
+            return this._super(...arguments);
+        },
+    });
+}
+
 
 /*******************************
  *         Common Steps
@@ -124,20 +127,20 @@ export const close = [
 export const goodRating = [
     {
         content: "Choose Good Rating",
-        trigger: `img[src*=rating][alt=${RATING.GOOD}]`,
+        trigger: `img[src*=rating][alt=5]`,
     },
 ];
 
 export const okRating = [
     {
         content: "Choose ok Rating",
-        trigger: `img[src*=rating][alt=${RATING.OK}]`,
+        trigger: `img[src*=rating][alt=3]`,
     },
 ];
 
 export const sadRating = [
     {
         content: "Choose bad Rating",
-        trigger: `img[src*=rating][alt=${RATING.BAD}]`,
+        trigger: `img[src*=rating][alt=1]`,
     },
 ];

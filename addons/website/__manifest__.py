@@ -160,10 +160,8 @@
             ('prepend', 'website/static/src/scss/secondary_variables.scss'),
         ],
         'web.assets_tests': [
-            ('include', 'web_editor.assets_wysiwyg'),
             'website/static/tests/tour_utils/**/*',
             'website/static/tests/tours/**/*',
-            'website/static/src/client_actions/website_preview/website_preview_test_mode.js',
         ],
         'web.assets_backend': [
             ('include', 'website.assets_editor'),
@@ -174,7 +172,6 @@
             'website/static/src/scss/website_visitor_views.scss',
             'website/static/src/js/backend/**/*',
             'website/static/src/client_actions/*/*',
-            ('remove', 'website/static/src/client_actions/website_preview/website_preview_test_mode.js'),
             'website/static/src/components/fields/*',
             'website/static/src/components/fullscreen_indication/fullscreen_indication.js',
             'website/static/src/components/fullscreen_indication/fullscreen_indication.scss',
