@@ -21160,6 +21160,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 if (dirY < 0) {
                     this.dnd.y = dndInitialY - deltaY;
                 }
+                if (this.dnd.x < 0) {
+                    this.dnd.width += this.dnd.x;
+                    this.dnd.x = 0;
+                }
+                if (this.dnd.y < 0) {
+                    this.dnd.height += this.dnd.y;
+                    this.dnd.y = 0;
+                }
             };
             const onMouseUp = (ev) => {
                 if (!this.dnd.figId) {
@@ -42832,8 +42840,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.14';
-    __info__.date = '2023-06-26T14:45:27.638Z';
-    __info__.hash = '1e37a94';
+    __info__.date = '2023-07-18T11:28:26.848Z';
+    __info__.hash = 'c63367f';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
