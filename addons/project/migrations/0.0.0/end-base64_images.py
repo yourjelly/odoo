@@ -38,24 +38,38 @@ def migrate(cr, installed_version):
             continue
         # description = pattern.sub(replace_src, task.description)
         # print(description)
-        adjust_index = 0
-        description = task.description
+        # Stores (index span old src, new src)
+        replacements = []
         for match in re.finditer(pattern, task.description):
-            src, b64_encoded_image = match.group(1), match.group(2)
-            print("src:", short(src))
-            print("base64-encoded image:", short(b64_encoded_image))
-            src_span = match.span(1)
+            b64_encoded_image = match.group(2)
             attachment = add_attachment(env, b64_encoded_image)
             # TODO: handle error
             new_src = attachment['image_src']
-            description = replace_at_index(description, src_span, adjust_index, new_src)
-            adjust_index += len(new_src) - len(src)
-        print("new task description:")
-        print(description)
-        # Commit change
-        task.description = description
+            replacements.append((match.span(1), new_src))
 
+            # debug info
+            print("src:", short(match.group(1)))
+            print("base64-encoded image:", short(b64_encoded_image))
+        
+        if (len(replacements)):
+            new_description = make_replacements(task.description, replacements)
+            print("new description:", new_description)
+            # Commit change
+            task.description = new_description
 
+def make_replacements(text, replacements):
+    shift_index = 0
+    for span, new_src in replacements:
+        start, end = map(lambda i: i + shift_index, span)
+        text = text[:start] + new_src + text[end:]
+        shift_index += len(new_src) - (end - start)
+
+    # debug
+    print(str(len(replacements)), "replacements made.")
+
+    return text
+
+# for debug only
 def short(text):
     if (len(text) <= 80):
         return text
@@ -77,16 +91,3 @@ def add_attachment(env, b64_encoded_data):
     }
     attachment = env['ir.attachment'].create(attachment_data)
     return attachment._get_media_info()
-
-def replace_at_index(text, span, adjust, replacement):
-    start, end = span
-    start += adjust
-    end += adjust
-    return text[:start] + replacement + text[end:]
-
-# not is use
-def replace_src(match):
-    src, b64_encoded_image = match.group(1), match.group(2)
-    print("src:", short(src))
-    print("base64-encoded image:", short(b64_encoded_image))
-    return "YOOO"
