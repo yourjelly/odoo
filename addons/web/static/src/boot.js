@@ -244,5 +244,6 @@
         loader.validateModules();
         return loader.modules;
     }
+    odoo.inject = loadModules;
     ///////////////////////////////////////////////////////////////////////////
 })();
