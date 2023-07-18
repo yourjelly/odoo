@@ -13,7 +13,6 @@ import { Layout } from "@web/search/layout";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-import { useModel } from "@web/views/model";
 
 export class ActivityController extends Component {
     static components = { Layout, SearchBar, CogMenu };
