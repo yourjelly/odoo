@@ -202,9 +202,9 @@ export class QWebPlugin {
         for (const element of groupElements) {
             const optionElement = document.createElement('option');
             if (element.hasAttribute('t-if')) {
-                optionElement.innerText = 'if';
+                optionElement.innerText = `if: "${element.getAttribute("t-if")}"`;
             } else if (element.hasAttribute('t-elif')) {
-                optionElement.innerText = 'elif';
+                optionElement.innerText = `elif: "${element.getAttribute("t-elif")}"`;
             } else if (element.hasAttribute('t-else')) {
                 optionElement.innerText = 'else';
             }
