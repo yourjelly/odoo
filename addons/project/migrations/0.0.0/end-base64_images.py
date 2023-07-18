@@ -5,7 +5,6 @@ from base64 import b64decode
 from odoo.upgrade import util
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.addons.web_editor.models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES
-from odoo.tools import image_process
 
 print ("=======================")
 print ("migration script start")
@@ -16,17 +15,17 @@ def migrate(cr, installed_version):
     env = util.env(cr)
 
     tasks = env['project.task'].search([])
-    # TODO: white-list mime types? white-list base64 characters?
-    # pattern = r'<img [^>]*?src="(data:image/[^;>]+;base64,([^">]+))"[^<]*?>'
+    # TODO: handle single quotes?
     pattern = re.compile(r"""
-        <img                # img element opening tag
-        \s                  # Whitespace   (use word boundary instead?)
-        [^>]*?              # Anything except the closing tag
-        src="(               # src attribute (1st capturing group)
-            data:image/[^;>]+; # white list mime types?
-            base64,([^">]+)    # base64-encoded image (2nd capturing group)
+        <img                        # img element opening tag
+        \s                          # Whitespace
+        [^>]*?                      # Anything except the closing tag, lazy
+        src="(                      # src attribute (1st capturing group)
+            data:image/
+            (?:gif|jpe|jpe?g|png|svg\+xml)  # allowed MIME types
+            ;base64,([A-Za-z0-9+/=]+)       # base64-encoded image (2nd capturing group)
         )"
-        [^<]*?              # Anything except a new opening tag
+        [^<]*?              # Anything except a new opening tag, lazy
         >                   # closing tag
     """, re.VERBOSE)
 
@@ -42,14 +41,18 @@ def migrate(cr, installed_version):
         replacements = []
         for match in re.finditer(pattern, task.description):
             b64_encoded_image = match.group(2)
-            attachment = add_attachment(env, b64_encoded_image)
-            # TODO: handle error
-            new_src = attachment['image_src']
-            replacements.append((match.span(1), new_src))
+            try:
+                attachment = add_attachment(env, b64_encoded_image)
+                new_src = attachment['image_src']
+                replacements.append((match.span(1), new_src))
 
-            # debug info
-            print("src:", short(match.group(1)))
-            print("base64-encoded image:", short(b64_encoded_image))
+                # debug info
+                print("src:", short(match.group(1)))
+                print("base64-encoded image:", short(b64_encoded_image))
+            # TODO: catch suitable exceptions here
+            except Exception:
+                # TODO: log error
+                pass
         
         if (len(replacements)):
             new_description = make_replacements(task.description, replacements)
@@ -77,10 +80,11 @@ def short(text):
 
 def add_attachment(env, b64_encoded_data):
     data = b64decode(b64_encoded_data)
-    # data = image_process(data)
     mimetype = guess_mimetype(data)
     if mimetype not in SUPPORTED_IMAGE_MIMETYPES:
+        # TODO: raise exception instead
         return {'error': "mimetype not supported"}
+    # TODO: better naming...
     name = 'test-' + str(uuid.uuid4()) + SUPPORTED_IMAGE_MIMETYPES[mimetype]
     attachment_data = {
         'name': name,
