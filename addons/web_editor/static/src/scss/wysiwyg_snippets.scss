@@ -1241,6 +1241,21 @@
                             top: 20%;
                             left: 0;
                         }
+
+                        &[data-select-class*="o_text_highlight_2"] .secondpath{
+                            transform: translateY(-20px);
+                        }
+
+                        &[data-select-class*="o_text_highlight_3"], &[data-select-class*="o_text_highlight_7"] {
+
+                            .applied-effect{
+                                display: none;
+                            }
+   
+                            .preview-effect{
+                                display: block;
+                            }
+                        }
                     }
                 }
             }

@@ -173,7 +173,7 @@
             This can be replaced with another FA or an SVG background. -->
         <t t-jquery="#underline" t-operation="replace">
             <div title="Add Text Highlight Effects"
-                class="btn fa fa-underline fa-fw o_we_text_highlight"
+                class="btn oi oi-text-effect oi-fw o_we_text_highlight"
                 data-text-selector=".o_text_highlight"/>
         </t>
     </t>

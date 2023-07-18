@@ -2498,6 +2498,8 @@ input[value*="data-oe-translation-initial-sha"] {
     svg {
         pointer-events: none;
         z-index: -1;
+        width: 100%;
+        height: 24px;
 
         .preview-effect{
             display: none;
