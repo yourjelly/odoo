@@ -14,21 +14,24 @@ def migrate(cr, installed_version):
     # import ipdb; ipdb.set_trace()
     env = util.env(cr)
 
-    tasks = env['project.task'].search([])
-    # TODO: handle single quotes?
     pattern = re.compile(r"""
         <img                        # img element opening tag
         \s                          # Whitespace
-        [^>]*?                      # Anything except the closing tag, lazy
-        src="(                      # src attribute (1st capturing group)
+        [^>]*?                      # Anything except closing tag, lazy
+        src=                        # src attribute
+        (?P<quote>['"])             # single or double quote
+        (?P<src>                    # src value  
             data:image/
-            (?:gif|jpe|jpe?g|png|svg\+xml)  # allowed MIME types
-            ;base64,([A-Za-z0-9+/=]+)       # base64-encoded image (2nd capturing group)
-        )"
-        [^<]*?              # Anything except a new opening tag, lazy
-        >                   # closing tag
+            (?:gif|jpe|jpe?g|png|svg(?:\+xml)?)  # allowed MIME types
+            ;base64,
+            (?P<b64data>[A-Za-z0-9+/=]+)    # base64-encoded image
+        )
+        (?P=quote)
+        [^<]*?                      # Anything except opening tag, lazy
+        >                           # closing tag
     """, re.VERBOSE)
 
+    tasks = env['project.task'].search([])
     for task in tasks:
         print("-----------------------------")
         print("Task name:", task.name)
@@ -38,27 +41,35 @@ def migrate(cr, installed_version):
         # description = pattern.sub(replace_src, task.description)
         # print(description)
         # Stores (index span old src, new src)
+        content = task.description
         replacements = []
-        for match in re.finditer(pattern, task.description):
-            b64_encoded_image = match.group(2)
+        for match in re.finditer(pattern, content):
+            b64_encoded_image = match.group('b64data')
             try:
                 attachment = add_attachment(env, b64_encoded_image)
                 new_src = attachment['image_src']
-                replacements.append((match.span(1), new_src))
+                replacements.append((match.span('src'), new_src))
 
                 # debug info
-                print("src:", short(match.group(1)))
+                print("src:", short(match.group('src')))
                 print("base64-encoded image:", short(b64_encoded_image))
-            # TODO: catch suitable exceptions here
-            except Exception:
-                # TODO: log error
-                pass
+
+            except Exception as e:
+                print("Conversion of base64-encoded image to attachemnt failed:", e)
         
-        if (len(replacements)):
-            new_description = make_replacements(task.description, replacements)
-            print("new description:", new_description)
+        if (replacements):
+            modified_content = make_replacements(task.description, replacements)
+            # debug log
+            print("new description:", modified_content)
             # Commit change
-            task.description = new_description
+            task.description = modified_content
+
+def clean_html_fields(env):
+    fields = [
+        ('project.task', 'description'),
+    ]
+
+
 
 def make_replacements(text, replacements):
     shift_index = 0
@@ -82,8 +93,7 @@ def add_attachment(env, b64_encoded_data):
     data = b64decode(b64_encoded_data)
     mimetype = guess_mimetype(data)
     if mimetype not in SUPPORTED_IMAGE_MIMETYPES:
-        # TODO: raise exception instead
-        return {'error': "mimetype not supported"}
+        raise ValueError("MIME type not supported")
     # TODO: better naming...
     name = 'test-' + str(uuid.uuid4()) + SUPPORTED_IMAGE_MIMETYPES[mimetype]
     attachment_data = {
