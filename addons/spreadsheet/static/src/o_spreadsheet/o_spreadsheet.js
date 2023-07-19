@@ -236,6 +236,7 @@
     const HEADER_FONT_SIZE = 11;
     const DEFAULT_FONT = "'Roboto', arial";
     const DEFAULT_VERTICAL_ALIGN = "bottom";
+    const DEFAULT_WRAPPING_MODE = "overflow";
     // Borders
     const DEFAULT_BORDER_DESC = { style: "thin", color: "#000000" };
     const DEFAULT_FILTER_BORDER_DESC = { style: "thin", color: FILTERS_COLOR };
@@ -392,82 +393,6 @@
     }
     function clip(val, min, max) {
         return val < min ? min : val > max ? max : val;
-    }
-    function computeTextLinesHeight(textLineHeight, numberOfLines = 1) {
-        return numberOfLines * (textLineHeight + MIN_CELL_TEXT_MARGIN) - MIN_CELL_TEXT_MARGIN;
-    }
-    /**
-     * Get the default height of the cell given its style.
-     */
-    function getDefaultCellHeight(cell) {
-        if (!cell || !cell.content) {
-            return DEFAULT_CELL_HEIGHT;
-        }
-        const fontSize = computeTextFontSizeInPixels(cell.style);
-        // the number of lines should be computed from the formula result, but it's not evaluated at this point
-        const numberOfLines = cell.isFormula ? 1 : cell.content.split(NEWLINE).length;
-        return computeTextLinesHeight(fontSize, numberOfLines) + 2 * PADDING_AUTORESIZE_VERTICAL;
-    }
-    function computeTextWidth(context, text, style) {
-        const font = computeTextFont(style);
-        if (!textWidthCache[font]) {
-            textWidthCache[font] = {};
-        }
-        if (textWidthCache[font][text] === undefined) {
-            context.save();
-            context.font = font;
-            const textWidth = context.measureText(text).width;
-            context.restore();
-            textWidthCache[font][text] = textWidth;
-        }
-        return textWidthCache[font][text];
-    }
-    const textWidthCache = {};
-    function fontSizeInPixels(fontSize) {
-        return Math.round((fontSize * 96) / 72);
-    }
-    function computeTextFont(style) {
-        const italic = style.italic ? "italic " : "";
-        const weight = style.bold ? "bold" : DEFAULT_FONT_WEIGHT;
-        const size = computeTextFontSizeInPixels(style);
-        return `${italic}${weight} ${size}px ${DEFAULT_FONT}`;
-    }
-    function computeTextFontSizeInPixels(style) {
-        const sizeInPt = style?.fontSize || DEFAULT_FONT_SIZE;
-        return fontSizeInPixels(sizeInPt);
-    }
-    /**
-     * Return the font size that makes the width of a text match the given line width.
-     * Minimum font size is 1.
-     *
-     * @param getTextWidth function that takes a fontSize as argument, and return the width of the text with this font size.
-     */
-    function getFontSizeMatchingWidth(lineWidth, maxFontSize, getTextWidth, precision = 0.25) {
-        let minFontSize = 1;
-        if (getTextWidth(minFontSize) > lineWidth)
-            return minFontSize;
-        if (getTextWidth(maxFontSize) < lineWidth)
-            return maxFontSize;
-        // Dichotomic search
-        let fontSize = (minFontSize + maxFontSize) / 2;
-        let currentTextWidth = getTextWidth(fontSize);
-        // Use a maximum number of iterations to be safe, because measuring text isn't 100% precise
-        let iterations = 0;
-        while (Math.abs(currentTextWidth - lineWidth) > precision && iterations < 20) {
-            if (currentTextWidth >= lineWidth) {
-                maxFontSize = (minFontSize + maxFontSize) / 2;
-            }
-            else {
-                minFontSize = (minFontSize + maxFontSize) / 2;
-            }
-            fontSize = (minFontSize + maxFontSize) / 2;
-            currentTextWidth = getTextWidth(fontSize);
-            iterations++;
-        }
-        return fontSize;
-    }
-    function computeIconWidth(style) {
-        return computeTextFontSizeInPixels(style) + 2 * MIN_CF_ICON_MARGIN;
     }
     /**
      * Create a range from start (included) to end (excluded).
@@ -723,10 +648,6 @@
         Object.keys(cleanObject).forEach((key) => !cleanObject[key] && delete cleanObject[key]);
         return cleanObject;
     }
-    /** Transform a string to lower case. If the string is undefined, return an empty string */
-    function toLowerCase(str) {
-        return str ? str.toLowerCase() : "";
-    }
     function transpose2dArray(matrix, callback = (val) => val) {
         if (!matrix.length)
             return [];
@@ -815,6 +736,14 @@
                 return cache.get(args[0]);
             },
         }[funcName];
+    }
+    function removeIndexesFromArray(array, indexes) {
+        return array.filter((_, index) => !indexes.includes(index));
+    }
+    function insertItemsAtIndex(array, items, index) {
+        const newArray = [...array];
+        newArray.splice(index, 0, ...items);
+        return newArray;
     }
 
     const RBA_REGEX = /rgba?\(|\s+|\)/gi;
@@ -958,13 +887,13 @@
         let g = rgba.g.toString(16);
         let b = rgba.b.toString(16);
         let a = Math.round(rgba.a * 255).toString(16);
-        if (r.length == 1)
+        if (r.length === 1)
             r = "0" + r;
-        if (g.length == 1)
+        if (g.length === 1)
             g = "0" + g;
-        if (b.length == 1)
+        if (b.length === 1)
             b = "0" + b;
-        if (a.length == 1)
+        if (a.length === 1)
             a = "0" + a;
         if (a === "ff")
             a = "";
@@ -1067,13 +996,13 @@
         let l = 0;
         // Calculate hue
         // No difference
-        if (delta == 0)
+        if (delta === 0)
             h = 0;
         // Red is max
-        else if (cMax == r)
+        else if (cMax === r)
             h = ((g - b) / delta) % 6;
         // Green is max
-        else if (cMax == g)
+        else if (cMax === g)
             h = (b - r) / delta + 2;
         // Blue is max
         else
@@ -1084,7 +1013,7 @@
             h += 360;
         l = (cMax + cMin) / 2;
         // Calculate saturation
-        s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+        s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
         // Multiply l and s by 100
         s = +(s * 100).toFixed(1);
         l = +(l * 100).toFixed(1);
@@ -1521,7 +1450,7 @@
     }
     function isLeapYear(year) {
         const _year = Math.trunc(year);
-        return (_year % 4 === 0 && _year % 100 != 0) || _year % 400 == 0;
+        return (_year % 4 === 0 && _year % 100 != 0) || _year % 400 === 0;
     }
     function getYearFrac(startDate, endDate, _dayCountConvention) {
         if (startDate === endDate) {
@@ -2181,6 +2110,39 @@
             return digitBase + "%";
         }
         return undefined;
+    }
+    function createCurrencyFormat(currency) {
+        const decimalPlaces = currency.decimalPlaces ?? 2;
+        const position = currency.position ?? "before";
+        const code = currency.code ?? "";
+        const symbol = currency.symbol ?? "";
+        const decimalRepresentation = decimalPlaces ? "." + "0".repeat(decimalPlaces) : "";
+        const numberFormat = "#,##0" + decimalRepresentation;
+        let textExpression = `${code} ${symbol}`.trim();
+        if (position === "after" && code) {
+            textExpression = " " + textExpression;
+        }
+        return insertTextInFormat(textExpression, position, numberFormat);
+    }
+    function insertTextInFormat(text, position, format) {
+        const textExpression = `[$${text}]`;
+        return position === "before" ? textExpression + format : format + textExpression;
+    }
+    function roundFormat(format) {
+        const internalFormat = parseFormat(format);
+        const roundedFormat = internalFormat.map((formatPart) => {
+            if (formatPart.type === "NUMBER") {
+                return {
+                    type: formatPart.type,
+                    format: {
+                        ...formatPart.format,
+                        decimalPart: undefined,
+                    },
+                };
+            }
+            return formatPart;
+        });
+        return convertInternalFormatToFormat(roundedFormat);
     }
     function createLargeNumberFormat(format, magnitude, postFix, locale) {
         const internalFormat = parseFormat(format || "#,##0");
@@ -3275,6 +3237,169 @@
         return rows;
     }
 
+    function computeTextLinesHeight(textLineHeight, numberOfLines = 1) {
+        return numberOfLines * (textLineHeight + MIN_CELL_TEXT_MARGIN) - MIN_CELL_TEXT_MARGIN;
+    }
+    /**
+     * Get the default height of the cell given its style.
+     */
+    function getDefaultCellHeight(ctx, cell, colSize) {
+        if (!cell || !cell.content)
+            return DEFAULT_CELL_HEIGHT;
+        const maxWidth = cell.style?.wrapping ? colSize - 2 * MIN_CELL_TEXT_MARGIN : undefined;
+        const numberOfLines = cell.isFormula
+            ? 1
+            : splitTextToWidth(ctx, cell.content, cell.style, maxWidth).length;
+        const fontSize = computeTextFontSizeInPixels(cell.style);
+        return computeTextLinesHeight(fontSize, numberOfLines) + 2 * PADDING_AUTORESIZE_VERTICAL;
+    }
+    const textWidthCache = {};
+    function computeTextWidth(context, text, style) {
+        const font = computeTextFont(style);
+        if (!textWidthCache[font]) {
+            textWidthCache[font] = {};
+        }
+        if (textWidthCache[font][text] === undefined) {
+            context.save();
+            context.font = font;
+            const textWidth = context.measureText(text).width;
+            context.restore();
+            textWidthCache[font][text] = textWidth;
+        }
+        return textWidthCache[font][text];
+    }
+    function fontSizeInPixels(fontSize) {
+        return Math.round((fontSize * 96) / 72);
+    }
+    function computeTextFont(style) {
+        const italic = style.italic ? "italic " : "";
+        const weight = style.bold ? "bold" : DEFAULT_FONT_WEIGHT;
+        const size = computeTextFontSizeInPixels(style);
+        return `${italic}${weight} ${size}px ${DEFAULT_FONT}`;
+    }
+    function computeTextFontSizeInPixels(style) {
+        const sizeInPt = style?.fontSize || DEFAULT_FONT_SIZE;
+        return fontSizeInPixels(sizeInPt);
+    }
+    function splitWordToSpecificWidth(ctx, word, width, style) {
+        const wordWidth = computeTextWidth(ctx, word, style);
+        if (wordWidth <= width) {
+            return [word];
+        }
+        const splitWord = [];
+        let wordPart = "";
+        for (let l of word) {
+            const wordPartWidth = computeTextWidth(ctx, wordPart + l, style);
+            if (wordPartWidth > width) {
+                splitWord.push(wordPart);
+                wordPart = l;
+            }
+            else {
+                wordPart += l;
+            }
+        }
+        splitWord.push(wordPart);
+        return splitWord;
+    }
+    /**
+     * Return the given text, split in multiple lines if needed. The text will be split in multiple
+     * line if it contains NEWLINE characters, or if it's longer than the given width.
+     */
+    function splitTextToWidth(ctx, text, style, width) {
+        if (!style)
+            style = {};
+        const brokenText = [];
+        // Checking if text contains NEWLINE before split makes it very slightly slower if text contains it,
+        // but 5-10x faster if it doesn't
+        const lines = text.includes(NEWLINE) ? text.split(NEWLINE) : [text];
+        for (const line of lines) {
+            const words = line.includes(" ") ? line.split(" ") : [line];
+            if (!width) {
+                brokenText.push(line);
+                continue;
+            }
+            let textLine = "";
+            let availableWidth = width;
+            for (let word of words) {
+                const splitWord = splitWordToSpecificWidth(ctx, word, width, style);
+                const lastPart = splitWord.pop();
+                const lastPartWidth = computeTextWidth(ctx, lastPart, style);
+                // At this step: "splitWord" is an array composed of parts of word whose
+                // length is at most equal to "width".
+                // Last part contains the end of the word.
+                // Note that: When word length is less than width, then lastPart is equal
+                // to word and splitWord is empty
+                if (splitWord.length) {
+                    if (textLine !== "") {
+                        brokenText.push(textLine);
+                        textLine = "";
+                        availableWidth = width;
+                    }
+                    splitWord.forEach((wordPart) => {
+                        brokenText.push(wordPart);
+                    });
+                    textLine = lastPart;
+                    availableWidth = width - lastPartWidth;
+                }
+                else {
+                    // here "lastPart" is equal to "word" and the "word" size is smaller than "width"
+                    const _word = textLine === "" ? lastPart : " " + lastPart;
+                    const wordWidth = computeTextWidth(ctx, _word, style);
+                    if (wordWidth <= availableWidth) {
+                        textLine += _word;
+                        availableWidth -= wordWidth;
+                    }
+                    else {
+                        brokenText.push(textLine);
+                        textLine = lastPart;
+                        availableWidth = width - lastPartWidth;
+                    }
+                }
+            }
+            if (textLine !== "") {
+                brokenText.push(textLine);
+            }
+        }
+        return brokenText;
+    }
+    /**
+     * Return the font size that makes the width of a text match the given line width.
+     * Minimum font size is 1.
+     *
+     * @param getTextWidth function that takes a fontSize as argument, and return the width of the text with this font size.
+     */
+    function getFontSizeMatchingWidth(lineWidth, maxFontSize, getTextWidth, precision = 0.25) {
+        let minFontSize = 1;
+        if (getTextWidth(minFontSize) > lineWidth)
+            return minFontSize;
+        if (getTextWidth(maxFontSize) < lineWidth)
+            return maxFontSize;
+        // Dichotomic search
+        let fontSize = (minFontSize + maxFontSize) / 2;
+        let currentTextWidth = getTextWidth(fontSize);
+        // Use a maximum number of iterations to be safe, because measuring text isn't 100% precise
+        let iterations = 0;
+        while (Math.abs(currentTextWidth - lineWidth) > precision && iterations < 20) {
+            if (currentTextWidth >= lineWidth) {
+                maxFontSize = (minFontSize + maxFontSize) / 2;
+            }
+            else {
+                minFontSize = (minFontSize + maxFontSize) / 2;
+            }
+            fontSize = (minFontSize + maxFontSize) / 2;
+            currentTextWidth = getTextWidth(fontSize);
+            iterations++;
+        }
+        return fontSize;
+    }
+    function computeIconWidth(style) {
+        return computeTextFontSizeInPixels(style) + 2 * MIN_CF_ICON_MARGIN;
+    }
+    /** Transform a string to lower case. If the string is undefined, return an empty string */
+    function toLowerCase(str) {
+        return str ? str.toLowerCase() : "";
+    }
+
     /*
      * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
      * */
@@ -3297,7 +3422,7 @@
             else {
                 // mainly for jest and other browsers that do not have the crypto functionality
                 return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-                    var r = (Math.random() * 16) | 0, v = c == "x" ? r : (r & 0x3) | 0x8;
+                    var r = (Math.random() * 16) | 0, v = c === "x" ? r : (r & 0x3) | 0x8;
                     return v.toString(16);
                 });
             }
@@ -4125,6 +4250,7 @@
         CommandResult[CommandResult["NoSplitSeparatorInSelection"] = 92] = "NoSplitSeparatorInSelection";
         CommandResult[CommandResult["NoActiveSheet"] = 93] = "NoActiveSheet";
         CommandResult[CommandResult["InvalidLocale"] = 94] = "InvalidLocale";
+        CommandResult[CommandResult["AlreadyInPaintingFormatMode"] = 95] = "AlreadyInPaintingFormatMode";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
     const borderStyles = ["thin", "medium", "thick", "dashed", "dotted"];
@@ -5825,6 +5951,10 @@
     width: ${MENU_WIDTH}px;
     box-sizing: border-box !important;
 
+    &:focus {
+      outline: none;
+    }
+
     .o-menu-item {
       display: flex;
       justify-content: space-between;
@@ -5851,7 +5981,6 @@
       }
 
       &:not(.disabled) {
-        &:hover,
         &.o-menu-item-active {
           background-color: ${BG_HOVER_COLOR};
         }
@@ -5877,22 +6006,57 @@
         static defaultProps = {
             depth: 1,
         };
+        clickableMenuItems = [];
         subMenu = owl.useState({
             isOpen: false,
             position: null,
             scrollOffset: 0,
             menuItems: [],
+            shouldSelectFirstItemWhenFirstOpened: false,
+        });
+        menuItemSelection = owl.useState({
+            selectedIndex: this.props.shouldSelectFirstItemWhenFirstOpened ? 0 : undefined,
         });
         menuRef = owl.useRef("menu");
         position = useAbsoluteBoundingRect(this.menuRef);
+        menuItemRefs = {};
+        childrenHaveIcon = false;
         setup() {
+            for (const menuItem of this.props.menuItems) {
+                this.menuItemRefs[menuItem.id] = {
+                    action: menuItem,
+                    ref: owl.useRef(menuItem.id),
+                };
+            }
+            this.childrenHaveIcon = this.props.menuItems.some((menuItem) => !!menuItem.icon || !!menuItem.isActive);
+            if (this.menuItemSelection.selectedIndex === undefined &&
+                this.props.shouldSelectFirstItemWhenFirstOpened) {
+                this.menuItemSelection.selectedIndex = 0;
+            }
             owl.useExternalListener(window, "click", this.onExternalClick, { capture: true });
             owl.useExternalListener(window, "contextmenu", this.onExternalClick, { capture: true });
+            owl.onMounted(() => this.focus());
             owl.onWillUpdateProps((nextProps) => {
                 if (nextProps.menuItems !== this.props.menuItems) {
                     this.closeSubMenu();
                 }
             });
+            owl.onPatched(() => this.focus());
+            owl.useEffect(() => {
+                this.clickableMenuItems = this.props.menuItems.filter((menuItem) => menuItem.isEnabled(this.env) && menuItem.isVisible(this.env));
+                this.closeSubMenu();
+                this.menuItemSelection.selectedIndex = undefined;
+                if (this.menuItemSelection.selectedIndex === undefined &&
+                    this.clickableMenuItems.length > 0 &&
+                    this.props.shouldSelectFirstItemWhenFirstOpened) {
+                    this.menuItemSelection.selectedIndex = 0;
+                }
+            }, () => [this.menuItemsAndSeparators.length]);
+        }
+        focus() {
+            if (this.subMenu.isOpen)
+                return;
+            this.menuRef.el?.focus();
         }
         get menuItemsAndSeparators() {
             const menuItemsAndSeparators = [];
@@ -5936,12 +6100,15 @@
                 onPopoverMoved: () => this.closeSubMenu(),
             };
         }
-        get childrenHaveIcon() {
-            return this.props.menuItems.some((menuItem) => !!menuItem.icon || !!menuItem.isActive);
+        isMenuItemActive(menuItem) {
+            if (this.menuItemSelection.selectedIndex === undefined) {
+                return this.isParentMenu(this.subMenu, menuItem);
+            }
+            return menuItem.id === this.clickableMenuItems[this.menuItemSelection.selectedIndex]?.id;
         }
         getIconName(menu) {
-            if (menu.icon) {
-                return menu.icon;
+            if (menu.icon(this.env)) {
+                return menu.icon(this.env);
             }
             if (menu.isActive?.(this.env)) {
                 return "o-spreadsheet-Icon.CHECK";
@@ -5988,18 +6155,28 @@
          * If the given menu is not disabled, open it's submenu at the
          * correct position according to available surrounding space.
          */
-        openSubMenu(menu, menuIndex, ev) {
-            const parentMenuEl = ev.currentTarget;
-            if (!parentMenuEl)
-                return;
+        openSubMenu(parentMenuEl, parentMenu) {
             const y = parentMenuEl.getBoundingClientRect().top;
             this.subMenu.position = {
                 x: this.position.x + this.props.depth * MENU_WIDTH,
                 y: y - (this.subMenu.scrollOffset || 0),
             };
-            this.subMenu.menuItems = menu.children(this.env);
+            this.menuItemSelection.selectedIndex = this.clickableMenuItems.findIndex((menuItem) => menuItem.id === parentMenu.id);
+            this.subMenu.menuItems = parentMenu.children(this.env);
             this.subMenu.isOpen = true;
-            this.subMenu.parentMenu = menu;
+            this.subMenu.parentMenu = parentMenu;
+        }
+        openSubMenuViaMouse(parentMenu, ev) {
+            const parentMenuEl = ev.currentTarget;
+            this.openSubMenu(parentMenuEl, parentMenu);
+        }
+        openSubMenuViaKeyboard(parentMenu) {
+            const { ref } = this.menuItemRefs[parentMenu.id];
+            const parentMenuEl = ref.el;
+            if (!parentMenuEl)
+                return;
+            this.subMenu.shouldSelectFirstItemWhenFirstOpened = true;
+            this.openSubMenu(parentMenuEl, parentMenu);
         }
         isParentMenu(subMenu, menuItem) {
             return subMenu.parentMenu?.id === menuItem.id;
@@ -6008,25 +6185,117 @@
             this.subMenu.isOpen = false;
             this.subMenu.parentMenu = undefined;
         }
-        onClickMenu(menu, menuIndex, ev) {
+        onClickMenu(menu, ev) {
             if (this.isEnabled(menu)) {
                 if (this.isRoot(menu)) {
-                    this.openSubMenu(menu, menuIndex, ev);
+                    this.openSubMenuViaMouse(menu, ev);
                 }
                 else {
                     this.activateMenu(menu);
                 }
             }
         }
-        onMouseOver(menu, position, ev) {
+        onMouseMove(menu, ev) {
+            this.subMenu.shouldSelectFirstItemWhenFirstOpened = false;
+            this.menuItemSelection.selectedIndex = this.clickableMenuItems.findIndex((menuItem) => menuItem.id === menu.id);
             if (this.isEnabled(menu)) {
                 if (this.isRoot(menu)) {
-                    this.openSubMenu(menu, position, ev);
+                    this.openSubMenuViaMouse(menu, ev);
                 }
                 else {
                     this.closeSubMenu();
                 }
             }
+        }
+        onKeydown(ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if (ev.key.startsWith("Arrow")) {
+                this.processArrows(ev);
+            }
+            else if (ev.key === "Enter") {
+                if (this.menuItemSelection.selectedIndex === undefined)
+                    return;
+                const menu = this.clickableMenuItems[this.menuItemSelection.selectedIndex];
+                if (this.isEnabled(menu)) {
+                    if (this.isRoot(menu)) {
+                        this.openSubMenuViaKeyboard(menu);
+                    }
+                    else {
+                        this.activateMenu(menu);
+                    }
+                }
+            }
+            else if (ev.key === "Escape") {
+                this.close();
+            }
+        }
+        processArrows(ev) {
+            switch (ev.key) {
+                case "ArrowDown": {
+                    this.selectNextMenuItem();
+                    break;
+                }
+                case "ArrowUp": {
+                    this.selectPreviousMenuItem();
+                    break;
+                }
+                case "ArrowRight": {
+                    if (this.menuItemSelection.selectedIndex === undefined) {
+                        this.props.navigateBackToParent?.("right");
+                        return;
+                    }
+                    const menu = this.clickableMenuItems[this.menuItemSelection.selectedIndex];
+                    if (!this.isRoot(menu)) {
+                        this.props.navigateBackToParent?.("right");
+                        return;
+                    }
+                    this.openSubMenuViaKeyboard(menu);
+                    break;
+                }
+                case "ArrowLeft": {
+                    this.props.navigateBackToParent?.("left");
+                    break;
+                }
+            }
+        }
+        onSubmenuBackNavigation(direction) {
+            this.closeSubMenu();
+            if (direction === "right") {
+                this.props.navigateBackToParent?.(direction);
+            }
+        }
+        selectNextMenuItem() {
+            if (this.clickableMenuItems.length === 0)
+                return;
+            if (this.menuItemSelection.selectedIndex === undefined) {
+                this.menuItemSelection.selectedIndex = 0;
+            }
+            else if (this.menuItemSelection.selectedIndex === this.clickableMenuItems.length - 1) {
+                this.menuItemSelection.selectedIndex = 0;
+            }
+            else {
+                this.menuItemSelection.selectedIndex++;
+            }
+            const nextMenuItem = this.clickableMenuItems[this.menuItemSelection.selectedIndex];
+            const el = this.menuItemRefs[nextMenuItem.id]?.ref.el;
+            el?.scrollIntoView(false);
+        }
+        selectPreviousMenuItem() {
+            if (this.clickableMenuItems.length === 0)
+                return;
+            if (this.menuItemSelection.selectedIndex === undefined) {
+                this.menuItemSelection.selectedIndex = this.clickableMenuItems.length - 1;
+            }
+            else if (this.menuItemSelection.selectedIndex === 0) {
+                this.menuItemSelection.selectedIndex = this.clickableMenuItems.length - 1;
+            }
+            else {
+                this.menuItemSelection.selectedIndex--;
+            }
+            const previousMenuItem = this.clickableMenuItems[this.menuItemSelection.selectedIndex];
+            const el = this.menuItemRefs[previousMenuItem.id]?.ref.el;
+            el?.scrollIntoView(false);
         }
     }
     Menu.props = {
@@ -6037,6 +6306,8 @@
         onClose: Function,
         onMenuClicked: { type: Function, optional: true },
         menuId: { type: String, optional: true },
+        navigateBackToParent: { type: Function, optional: true },
+        shouldSelectFirstItemWhenFirstOpened: { type: Boolean, optional: true },
     };
 
     const LINK_TOOLTIP_HEIGHT = 32;
@@ -6375,7 +6646,7 @@
         for (let pivot = 0; pivot < dim; pivot++) {
             let diagonalElement = C[pivot][pivot];
             // if we have a 0 on the diagonal we'll need to swap with a lower row
-            if (diagonalElement == 0) {
+            if (diagonalElement === 0) {
                 //look through every row below the i'th row
                 for (let row = pivot + 1; row < dim; row++) {
                     //if the ii'th row has a non-0 in the i'th col, swap it with that row
@@ -6402,7 +6673,7 @@
             // the other rows so that there will be 0's in this column in the
             // rows above and below this one
             for (let row = 0; row < dim; row++) {
-                if (row == pivot) {
+                if (row === pivot) {
                     continue;
                 }
                 // We want to change this element to 0
@@ -12467,7 +12738,7 @@
                 return false;
             }
             catch (e) {
-                return e?.errorType == CellErrorType.NotAvailable;
+                return e?.errorType === CellErrorType.NotAvailable;
             }
         },
         isExported: true,
@@ -15183,6 +15454,8 @@
     function createAction(item) {
         const name = item.name;
         const children = item.children;
+        const description = item.description;
+        const icon = item.icon;
         return {
             id: item.id || uuidGenerator$2.uuidv4(),
             name: typeof name === "function" ? name : () => name,
@@ -15200,8 +15473,8 @@
                 : () => [],
             isReadonlyAllowed: item.isReadonlyAllowed || false,
             separator: item.separator || false,
-            icon: item.icon || "",
-            description: item.description || "",
+            icon: typeof icon === "function" ? icon : () => icon || "",
+            description: typeof description === "function" ? description : () => description || "",
             textColor: item.textColor,
             sequence: item.sequence || 0,
         };
@@ -16667,7 +16940,7 @@
     function convertDateFormatForMoment(format) {
         format = format.replace(/y/g, "Y");
         format = format.replace(/d/g, "D");
-        // "m" before "h" == month, "m" after "h" == minute
+        // "m" before "h" === month, "m" after "h" === minute
         const indexH = format.indexOf("h");
         if (indexH >= 0) {
             format = format.slice(0, indexH).replace(/m/g, "M") + format.slice(indexH);
@@ -17521,6 +17794,7 @@
                     env.model.dispatch("SELECT_FIGURE", { id: figureId });
                     env.openSidePanel("ChartPanel");
                 },
+                icon: "o-spreadsheet-Icon.EDIT",
             },
             getCopyMenuItem(figureId, env),
             getCutMenuItem(figureId, env),
@@ -17552,6 +17826,7 @@
                         width,
                     });
                 },
+                icon: "o-spreadsheet-Icon.REFRESH",
             },
             getDeleteMenuItem(figureId, onFigureDeleted, env),
         ];
@@ -17568,6 +17843,7 @@
                 env.model.dispatch("COPY");
                 await env.clipboard.write(env.model.getters.getClipboardContent());
             },
+            icon: "o-spreadsheet-Icon.COPY",
         };
     }
     function getCutMenuItem(figureId, env) {
@@ -17581,6 +17857,7 @@
                 env.model.dispatch("CUT");
                 await env.clipboard.write(env.model.getters.getClipboardContent());
             },
+            icon: "o-spreadsheet-Icon.CUT",
         };
     }
     function getDeleteMenuItem(figureId, onFigureDeleted, env) {
@@ -17595,6 +17872,7 @@
                 });
                 onFigureDeleted();
             },
+            icon: "o-spreadsheet-Icon.DELETE",
         };
     }
 
@@ -18662,7 +18940,7 @@
     };
     const categorieFunctionAll = {
         name: _lt("All"),
-        children: allFunctionListMenuBuilder(),
+        children: [allFunctionListMenuBuilder],
     };
     function allFunctionListMenuBuilder() {
         const fnNames = functionRegistry.getKeys();
@@ -18674,6 +18952,7 @@
         return categories.sort().map((category, i) => {
             const functionsInCategory = Object.keys(functions).filter((key) => functions[key].category === category);
             return {
+                id: `insert_function_category_${category}`,
                 name: category,
                 children: createFormulaFunctions(functionsInCategory),
             };
@@ -18698,6 +18977,7 @@
     function createFormulaFunctions(fnNames) {
         return fnNames.sort().map((fnName, i) => {
             return {
+                id: `function_${fnName}`,
                 name: fnName,
                 sequence: i * 10,
                 execute: (env) => env.startCellEdition(`=${fnName}(`),
@@ -18994,7 +19274,10 @@
     };
     const formatNumberNumber = {
         name: _lt("Number"),
-        description: "1,000.12",
+        description: (env) => formatValue(1000.12, {
+            format: "#,##0.00",
+            locale: env.model.getters.getLocale(),
+        }),
         execute: (env) => setFormatter(env, "#,##0.00"),
         isActive: (env) => isFormatSelected(env, "#,##0.00"),
     };
@@ -19005,21 +19288,34 @@
     };
     const formatNumberPercent = {
         name: _lt("Percent"),
-        description: "10.12%",
+        description: (env) => formatValue(0.1012, {
+            format: "0.00%",
+            locale: env.model.getters.getLocale(),
+        }),
         execute: FORMAT_PERCENT_ACTION,
         isActive: (env) => isFormatSelected(env, "0.00%"),
     };
     const formatNumberCurrency = {
         name: _lt("Currency"),
-        description: "$1,000.12",
-        execute: (env) => setFormatter(env, "[$$]#,##0.00"),
-        isActive: (env) => isFormatSelected(env, "[$$]#,##0.00"),
+        description: (env) => formatValue(1000.12, {
+            format: env.model.config.defaultCurrencyFormat,
+            locale: env.model.getters.getLocale(),
+        }),
+        execute: (env) => setFormatter(env, env.model.config.defaultCurrencyFormat),
+        isActive: (env) => isFormatSelected(env, env.model.config.defaultCurrencyFormat),
     };
     const formatNumberCurrencyRounded = {
         name: _lt("Currency rounded"),
-        description: "$1,000",
-        execute: (env) => setFormatter(env, "[$$]#,##0"),
-        isActive: (env) => isFormatSelected(env, "[$$]#,##0"),
+        description: (env) => formatValue(1000, {
+            format: roundFormat(env.model.config.defaultCurrencyFormat),
+            locale: env.model.getters.getLocale(),
+        }),
+        execute: (env) => setFormatter(env, roundFormat(env.model.config.defaultCurrencyFormat)),
+        isActive: (env) => isFormatSelected(env, roundFormat(env.model.config.defaultCurrencyFormat)),
+        isVisible: (env) => {
+            const currencyFormat = env.model.config.defaultCurrencyFormat;
+            return currencyFormat !== roundFormat(currencyFormat);
+        },
     };
     const formatCustomCurrency = {
         name: _lt("Custom currency"),
@@ -19028,19 +19324,37 @@
     };
     const formatNumberDate = {
         name: _lt("Date"),
-        description: "9/26/2008",
+        description: (env) => {
+            const locale = env.model.getters.getLocale();
+            return formatValue(parseLiteral("9/26/2023", DEFAULT_LOCALE), {
+                format: locale.dateFormat,
+                locale,
+            });
+        },
         execute: (env) => setFormatter(env, env.model.getters.getLocale().dateFormat),
         isActive: (env) => isFormatSelected(env, env.model.getters.getLocale().dateFormat),
     };
     const formatNumberTime = {
         name: _lt("Time"),
-        description: "10:43:00 PM",
+        description: (env) => {
+            const locale = env.model.getters.getLocale();
+            return formatValue(parseLiteral("9/26/2023 10:43:00 PM", DEFAULT_LOCALE), {
+                format: locale.timeFormat,
+                locale,
+            });
+        },
         execute: (env) => setFormatter(env, env.model.getters.getLocale().timeFormat),
         isActive: (env) => isFormatSelected(env, env.model.getters.getLocale().timeFormat),
     };
     const formatNumberDateTime = {
         name: _lt("Date time"),
-        description: "9/26/2008 22:43:00",
+        description: (env) => {
+            const locale = env.model.getters.getLocale();
+            return formatValue(parseLiteral("9/26/2023 22:43:00", DEFAULT_LOCALE), {
+                format: locale.dateFormat + " " + locale.timeFormat,
+                locale,
+            });
+        },
         execute: (env) => {
             const locale = env.model.getters.getLocale();
             setFormatter(env, locale.dateFormat + " " + locale.timeFormat);
@@ -19112,7 +19426,7 @@
     };
     const formatAlignmentHorizontal = {
         name: _lt("Horizontal align"),
-        icon: "o-spreadsheet-Icon.ALIGN_LEFT",
+        icon: (env) => getHorizontalAlignmentIcon(env),
     };
     const formatAlignmentLeft = {
         name: _lt("Left"),
@@ -19137,46 +19451,50 @@
     };
     const formatAlignmentVertical = {
         name: _lt("Vertical align"),
-        icon: "o-spreadsheet-Icon.ALIGN_MIDDLE",
+        icon: (env) => getVerticalAlignmentIcon(env),
     };
     const formatAlignmentTop = {
         name: _lt("Top"),
         execute: (env) => setStyle(env, { verticalAlign: "top" }),
-        isActive: (env) => (env.model.getters.getCurrentStyle().verticalAlign || DEFAULT_VERTICAL_ALIGN) === "top",
+        isActive: (env) => getVerticalAlign(env) === "top",
         icon: "o-spreadsheet-Icon.ALIGN_TOP",
     };
     const formatAlignmentMiddle = {
         name: _lt("Middle"),
         execute: (env) => setStyle(env, { verticalAlign: "middle" }),
-        isActive: (env) => (env.model.getters.getCurrentStyle().verticalAlign || DEFAULT_VERTICAL_ALIGN) === "middle",
+        isActive: (env) => getVerticalAlign(env) === "middle",
         icon: "o-spreadsheet-Icon.ALIGN_MIDDLE",
     };
     const formatAlignmentBottom = {
         name: _lt("Bottom"),
         execute: (env) => setStyle(env, { verticalAlign: "bottom" }),
-        isActive: (env) => (env.model.getters.getCurrentStyle().verticalAlign || DEFAULT_VERTICAL_ALIGN) === "bottom",
+        isActive: (env) => getVerticalAlign(env) === "bottom",
         icon: "o-spreadsheet-Icon.ALIGN_BOTTOM",
+    };
+    const formatWrappingIcon = {
+        name: _lt("Wrapping"),
+        icon: "o-spreadsheet-Icon.WRAPPING_OVERFLOW",
     };
     const formatWrapping = {
         name: _lt("Wrapping"),
-        icon: "o-spreadsheet-Icon.WRAPPING_OVERFLOW",
+        icon: (env) => getWrapModeIcon(env),
     };
     const formatWrappingOverflow = {
         name: _lt("Overflow"),
         execute: (env) => setStyle(env, { wrapping: "overflow" }),
-        isActive: (env) => (env.model.getters.getCurrentStyle().wrapping || "overflow") === "overflow",
+        isActive: (env) => getWrappingMode(env) === "overflow",
         icon: "o-spreadsheet-Icon.WRAPPING_OVERFLOW",
     };
     const formatWrappingWrap = {
         name: _lt("Wrap"),
         execute: (env) => setStyle(env, { wrapping: "wrap" }),
-        isActive: (env) => env.model.getters.getCurrentStyle().wrapping === "wrap",
+        isActive: (env) => getWrappingMode(env) === "wrap",
         icon: "o-spreadsheet-Icon.WRAPPING_WRAP",
     };
     const formatWrappingClip = {
         name: _lt("Clip"),
         execute: (env) => setStyle(env, { wrapping: "clip" }),
-        isActive: (env) => env.model.getters.getCurrentStyle().wrapping === "clip",
+        isActive: (env) => getWrappingMode(env) === "clip",
         icon: "o-spreadsheet-Icon.WRAPPING_CLIP",
     };
     const textColor = {
@@ -19191,14 +19509,6 @@
         name: _lt("Conditional formatting"),
         execute: OPEN_CF_SIDEPANEL_ACTION,
         icon: "o-spreadsheet-Icon.CONDITIONAL_FORMAT",
-    };
-    const paintFormat = {
-        name: _lt("Paint Format"),
-        execute: (env) => env.model.dispatch("ACTIVATE_PAINT_FORMAT", {
-            target: env.model.getters.getSelectedZones(),
-        }),
-        icon: "o-spreadsheet-Icon.PAINT_FORMAT",
-        isActive: (env) => env.model.getters.isPaintingFormat(),
     };
     const clearFormat = {
         name: _lt("Clear formatting"),
@@ -19240,6 +19550,53 @@
         const cell = env.model.getters.getActiveCell();
         return cell.defaultAlign;
     }
+    function getVerticalAlign(env) {
+        const style = env.model.getters.getCurrentStyle();
+        if (style.verticalAlign) {
+            return style.verticalAlign;
+        }
+        return DEFAULT_VERTICAL_ALIGN;
+    }
+    function getWrappingMode(env) {
+        const style = env.model.getters.getCurrentStyle();
+        if (style.wrapping) {
+            return style.wrapping;
+        }
+        return DEFAULT_WRAPPING_MODE;
+    }
+    function getHorizontalAlignmentIcon(env) {
+        const horizontalAlign = getHorizontalAlign(env);
+        switch (horizontalAlign) {
+            case "right":
+                return "o-spreadsheet-Icon.ALIGN_RIGHT";
+            case "center":
+                return "o-spreadsheet-Icon.ALIGN_CENTER";
+            default:
+                return "o-spreadsheet-Icon.ALIGN_LEFT";
+        }
+    }
+    function getVerticalAlignmentIcon(env) {
+        const verticalAlign = getVerticalAlign(env);
+        switch (verticalAlign) {
+            case "top":
+                return "o-spreadsheet-Icon.ALIGN_TOP";
+            case "middle":
+                return "o-spreadsheet-Icon.ALIGN_MIDDLE";
+            default:
+                return "o-spreadsheet-Icon.ALIGN_BOTTOM";
+        }
+    }
+    function getWrapModeIcon(env) {
+        const wrapMode = getWrappingMode(env);
+        switch (wrapMode) {
+            case "wrap":
+                return "o-spreadsheet-Icon.WRAPPING_WRAP";
+            case "clip":
+                return "o-spreadsheet-Icon.WRAPPING_CLIP";
+            default:
+                return "o-spreadsheet-Icon.WRAPPING_OVERFLOW";
+        }
+    }
 
     var ACTION_FORMAT = /*#__PURE__*/Object.freeze({
         __proto__: null,
@@ -19270,6 +19627,7 @@
         formatAlignmentTop: formatAlignmentTop,
         formatAlignmentMiddle: formatAlignmentMiddle,
         formatAlignmentBottom: formatAlignmentBottom,
+        formatWrappingIcon: formatWrappingIcon,
         formatWrapping: formatWrapping,
         formatWrappingOverflow: formatWrappingOverflow,
         formatWrappingWrap: formatWrappingWrap,
@@ -19277,7 +19635,6 @@
         textColor: textColor,
         fillColor: fillColor,
         formatCF: formatCF,
-        paintFormat: paintFormat,
         clearFormat: clearFormat
     });
 
@@ -20040,7 +20397,7 @@
         separator: true,
     })
         .addChild("format_wrapping", ["format"], {
-        ...formatWrapping,
+        ...formatWrappingIcon,
         sequence: 80,
         separator: true,
     })
@@ -22330,17 +22687,45 @@
         }
         get formatProposals() {
             const currency = this.availableCurrencies[this.state.selectedCurrencyIndex];
-            const proposalBases = this.initProposalBases(currency.decimalPlaces);
-            const firstPosition = currency.position;
-            const secondPosition = currency.position === "before" ? "after" : "before";
+            const position = currency.position;
+            const opposite = currency.position === "before" ? "after" : "before";
             const symbol = this.state.currencySymbol.trim() ? this.state.currencySymbol : "";
             const code = this.state.currencyCode.trim() ? this.state.currencyCode : "";
-            return code || symbol
-                ? [
-                    ...this.createFormatProposals(proposalBases, symbol, code, firstPosition),
-                    ...this.createFormatProposals(proposalBases, symbol, code, secondPosition),
-                ]
-                : [];
+            const decimalPlaces = currency.decimalPlaces;
+            if (!symbol && !code) {
+                return [];
+            }
+            const simple = symbol ? createCurrencyFormat({ symbol, position, decimalPlaces }) : "";
+            const rounded = simple ? roundFormat(simple) : "";
+            const simpleWithCode = createCurrencyFormat({ symbol, position, decimalPlaces, code });
+            const roundedWithCode = roundFormat(simpleWithCode);
+            const simpleOpposite = symbol
+                ? createCurrencyFormat({ symbol, position: opposite, decimalPlaces })
+                : "";
+            const roundedOpposite = simpleOpposite ? roundFormat(simpleOpposite) : "";
+            const simpleOppositeWithCode = createCurrencyFormat({
+                symbol,
+                position: opposite,
+                decimalPlaces,
+                code,
+            });
+            const roundedOppositeWithCode = roundFormat(simpleOppositeWithCode);
+            const formats = new Set([
+                rounded,
+                simple,
+                roundedWithCode,
+                simpleWithCode,
+                roundedOpposite,
+                simpleOpposite,
+                roundedOppositeWithCode,
+                simpleOppositeWithCode,
+            ]);
+            return [...formats]
+                .filter((format) => format !== "")
+                .map((format) => ({
+                format,
+                example: formatValue(1000.0, { format, locale: this.env.model.getters.getLocale() }),
+            }));
         }
         get isSameFormat() {
             const selectedFormat = this.formatProposals[this.state.selectedFormatIndex];
@@ -22396,41 +22781,6 @@
         // ---------------------------------------------------------------------------
         initAvailableCurrencies() {
             this.state.selectedCurrencyIndex = 0;
-        }
-        initProposalBases(decimalPlaces) {
-            const result = [{ format: "#,##0", example: "1,000" }];
-            const decimalRepresentation = decimalPlaces ? "." + "0".repeat(decimalPlaces) : "";
-            if (decimalRepresentation) {
-                result.push({
-                    format: "#,##0" + decimalRepresentation,
-                    example: "1,000" + decimalRepresentation,
-                });
-            }
-            return result;
-        }
-        createFormatProposals(proposalBases, symbol, code, position) {
-            let formatProposals = [];
-            // 1 - add proposal with symbol and without code
-            if (symbol) {
-                for (let base of proposalBases) {
-                    formatProposals.push(this.createFormatProposal(position, base.example, base.format, symbol));
-                }
-            }
-            // 2 - if code exist --> add more proposal with symbol and with code
-            if (code) {
-                for (let base of proposalBases) {
-                    const expression = (position === "after" ? " " : "") + code + " " + symbol;
-                    formatProposals.push(this.createFormatProposal(position, base.example, base.format, expression));
-                }
-            }
-            return formatProposals;
-        }
-        createFormatProposal(position, baseExample, formatBase, expression) {
-            const formatExpression = "[$" + expression + "]";
-            return {
-                example: position === "before" ? expression + baseExample : baseExample + expression,
-                format: position === "before" ? formatExpression + formatBase : formatBase + formatExpression,
-            };
         }
         getCommonFormat() {
             const selectedZones = this.env.model.getters.getSelectedZones();
@@ -23234,7 +23584,7 @@
                 selection.removeAllRanges();
                 selection.addRange(range);
             }
-            if (start == end && start === 0) {
+            if (start === end && start === 0) {
                 range.setStart(this.el, 0);
                 range.setEnd(this.el, 0);
             }
@@ -23487,7 +23837,7 @@
                     }, 0);
                 }
             }
-            if (nodeToFind.nodeName === "P" && !isFirstParagraph && nodeToFind.textContent == "") {
+            if (nodeToFind.nodeName === "P" && !isFirstParagraph && nodeToFind.textContent === "") {
                 usedCharacters++;
             }
             return usedCharacters;
@@ -25034,6 +25384,14 @@
         };
     }
 
+    const CURSOR_SVG = /*xml*/ `
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="14" height="16"><path d="M6.5.4c1.3-.8 2.9-.1 3.8 1.4l2.9 5.1c.2.4.9 1.6-.4 2.3l-1.6.9 1.8 3.1c.2.4.1 1-.2 1.2l-1.6 1c-.3.1-.9 0-1.1-.4l-1.8-3.1-1.6 1c-.6.4-1.7 0-2.2-.8L0 4.3"/><path fill="#fff" d="M9.1 2a1.4 1.1 60 0 0-1.7-.6L5.5 2.5l.9 1.6-1 .6-.9-1.6-.6.4 1.8 3.1-1.3.7-1.8-3.1-1 .6 3.8 6.6 6.8-3.98M3.9 8.8 10.82 5l.795 1.4-6.81 3.96"/></svg>
+`;
+    css /* scss */ `
+  .o-paint-format-cursor {
+    cursor: url("data:image/svg+xml,${encodeURIComponent(CURSOR_SVG)}"), auto;
+  }
+`;
     function useCellHovered(env, gridRef, callback) {
         let hoveredPosition = {
             col: undefined,
@@ -25156,6 +25514,12 @@
                 throw new Error("GridOverlay el is not defined.");
             }
             return this.gridOverlay.el;
+        }
+        get style() {
+            return this.props.gridOverlayDimensions;
+        }
+        get isPaintingFormat() {
+            return this.env.model.getters.isPaintingFormat();
         }
         onMouseDown(ev) {
             if (ev.button > 0) {
@@ -26331,8 +26695,8 @@
                 if (this.env.model.getters.hasOpenedPopover()) {
                     this.closeOpenedPopover();
                 }
-                else if (this.menuState.isOpen) {
-                    this.closeMenu();
+                else if (this.env.model.getters.isPaintingFormat()) {
+                    this.env.model.dispatch("CANCEL_PAINT_FORMAT");
                 }
                 else {
                     this.env.model.dispatch("CLEAN_CLIPBOARD_HIGHLIGHT");
@@ -27536,8 +27900,8 @@
                     throw new Error("Multiple escaped blocks in format");
                 }
                 convertedFormat = convertedFormat.replace(/"(.*)"/g, "[$$$1]"); // replace '"..."' by '[$...]'
-                convertedFormat = convertedFormat.replace(/_.{1}/g, ""); // _ == ignore width of next char for align purposes. Not supported ATM
-                convertedFormat = convertedFormat.replace(/\*.{1}/g, ""); // * == repeat next character enough to fill the line. Not supported ATM
+                convertedFormat = convertedFormat.replace(/_.{1}/g, ""); // _ === ignore width of next char for align purposes. Not supported ATM
+                convertedFormat = convertedFormat.replace(/\*.{1}/g, ""); // * === repeat next character enough to fill the line. Not supported ATM
                 convertedFormat = convertedFormat.replace(/\\ /g, " "); // unescape spaces
                 convertedFormat = convertedFormat.replace(/\\./g, (match) => match[1]); // unescape other characters
                 if (isXlsxDateFormat(convertedFormat)) {
@@ -29119,8 +29483,8 @@
          *
          * Why we need to do this :
          *  - For an XML "<t:test />"
-         *  - on Jest(jsdom) : xml.querySelector("test") == null, xml.querySelector("t\\:test") == <t:test />
-         *  - on Browser : xml.querySelector("test") == <t:test />, xml.querySelector("t\\:test") == null
+         *  - on Jest(jsdom) : xml.querySelector("test") === null, xml.querySelector("t\\:test") === <t:test />
+         *  - on Browser : xml.querySelector("test") === <t:test />, xml.querySelector("t\\:test") === null
          */
         querySelector(element, query) {
             query = this.areNamespaceIgnored ? removeNamespaces(query) : escapeNamespaces(query);
@@ -29131,8 +29495,8 @@
          *
          * Why we need to do this :
          *  - For an XML "<t:test />"
-         *  - on Jest(jsdom) : xml.querySelectorAll("test") == [], xml.querySelectorAll("t\\:test") == [<t:test />]
-         *  - on Browser : xml.querySelectorAll("test") == [<t:test />], xml.querySelectorAll("t\\:test") == []
+         *  - on Jest(jsdom) : xml.querySelectorAll("test") === [], xml.querySelectorAll("t\\:test") === [<t:test />]
+         *  - on Browser : xml.querySelectorAll("test") === [<t:test />], xml.querySelectorAll("t\\:test") === []
          */
         querySelectorAll(element, query) {
             query = this.areNamespaceIgnored ? removeNamespaces(query) : escapeNamespaces(query);
@@ -31089,7 +31453,7 @@
         }
         /**
          * Set the borders of a cell.
-         * It overrides the current border if override == true.
+         * It overrides the current border if override === true.
          */
         setBorder(sheetId, col, row, border, override = true) {
             if (override || !this.borders?.[sheetId]?.[col]?.[row]?.vertical) {
@@ -32359,7 +32723,9 @@
             const numHeader = this.getters.getNumberRows(sheetId);
             let gridHeight = 0;
             for (let i = 0; i < numHeader; i++) {
-                gridHeight += this.getters.getRowSize(sheetId, i);
+                // TODO : since the row size is an UI value now, this doesn't work anymore. Using the default cell height is
+                // a temporary solution at best, but is broken.
+                gridHeight += this.getters.getUserRowSize(sheetId, i) || DEFAULT_CELL_HEIGHT;
             }
             const figures = this.getters.getFigures(sheetId);
             for (const figure of figures) {
@@ -32785,33 +33151,15 @@
     }
 
     class HeaderSizePlugin extends CorePlugin {
-        static getters = ["getRowSize", "getColSize"];
+        static getters = ["getUserRowSize", "getColSize"];
         sizes = {};
         handle(cmd) {
             switch (cmd.type) {
                 case "CREATE_SHEET": {
-                    const computedSizes = this.computeSheetSizes(cmd.sheetId);
-                    const sizes = {
-                        COL: computedSizes.COL.map((size) => ({
-                            manualSize: undefined,
-                            computedSize: lazy(size),
-                        })),
-                        ROW: computedSizes.ROW.map((size) => ({
-                            manualSize: undefined,
-                            computedSize: lazy(size),
-                        })),
-                    };
-                    this.history.update("sizes", cmd.sheetId, sizes);
+                    this.history.update("sizes", cmd.sheetId, { COL: [], ROW: [] });
                     break;
                 }
                 case "DUPLICATE_SHEET":
-                    // make sure the values are computed in case the original sheet is deleted
-                    for (const row of this.sizes[cmd.sheetId].ROW) {
-                        row.computedSize();
-                    }
-                    for (const col of this.sizes[cmd.sheetId].COL) {
-                        col.computedSize();
-                    }
                     this.history.update("sizes", cmd.sheetIdTo, deepCopy(this.sizes[cmd.sheetId]));
                     break;
                 case "DELETE_SHEET":
@@ -32820,21 +33168,8 @@
                     this.history.update("sizes", sizes);
                     break;
                 case "REMOVE_COLUMNS_ROWS": {
-                    let sizes = [...this.sizes[cmd.sheetId][cmd.dimension]];
-                    for (let headerIndex of [...cmd.elements].sort((a, b) => b - a)) {
-                        sizes.splice(headerIndex, 1);
-                    }
-                    const min = Math.min(...cmd.elements);
-                    sizes = sizes.map((size, row) => {
-                        if (cmd.dimension === "ROW" && row >= min) {
-                            // invalidate sizes
-                            return {
-                                manualSize: size.manualSize,
-                                computedSize: lazy(() => this.getRowTallestCellSize(cmd.sheetId, row)),
-                            };
-                        }
-                        return size;
-                    });
+                    const arr = this.sizes[cmd.sheetId][cmd.dimension];
+                    const sizes = removeIndexesFromArray(arr, cmd.elements);
                     this.history.update("sizes", cmd.sheetId, cmd.dimension, sizes);
                     break;
                 }
@@ -32843,51 +33178,18 @@
                     const addIndex = getAddHeaderStartIndex(cmd.position, cmd.base);
                     const baseSize = sizes[cmd.base];
                     sizes.splice(addIndex, 0, ...Array(cmd.quantity).fill(baseSize));
-                    sizes = sizes.map((size, row) => {
-                        if (cmd.dimension === "ROW" && row > cmd.base + cmd.quantity) {
-                            // invalidate sizes
-                            return {
-                                manualSize: size.manualSize,
-                                computedSize: lazy(() => this.getRowTallestCellSize(cmd.sheetId, row)),
-                            };
-                        }
-                        return size;
-                    });
                     this.history.update("sizes", cmd.sheetId, cmd.dimension, sizes);
                     break;
                 }
                 case "RESIZE_COLUMNS_ROWS":
-                    for (let el of cmd.elements) {
-                        if (cmd.dimension === "ROW") {
-                            const height = this.getRowTallestCellSize(cmd.sheetId, el);
-                            const size = height;
-                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, {
-                                manualSize: cmd.size || undefined,
-                                computedSize: lazy(size),
-                            });
-                        }
-                        else {
-                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, {
-                                manualSize: cmd.size || undefined,
-                                computedSize: lazy(cmd.size || DEFAULT_CELL_WIDTH),
-                            });
+                    if (cmd.dimension === "ROW") {
+                        for (const el of cmd.elements) {
+                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, cmd.size || undefined);
                         }
                     }
-                    break;
-                case "UPDATE_CELL":
-                    if (!this.sizes[cmd.sheetId]?.["ROW"]?.[cmd.row]?.manualSize) {
-                        const { sheetId, row } = cmd;
-                        this.history.update("sizes", sheetId, "ROW", row, "computedSize", lazy(() => this.getRowTallestCellSize(sheetId, row)));
-                    }
-                    break;
-                case "ADD_MERGE":
-                case "REMOVE_MERGE":
-                    for (let target of cmd.target) {
-                        for (let row of range(target.top, target.bottom + 1)) {
-                            const rowHeight = this.getRowTallestCellSize(cmd.sheetId, row);
-                            if (rowHeight !== this.getRowSize(cmd.sheetId, row)) {
-                                this.history.update("sizes", cmd.sheetId, "ROW", row, "computedSize", lazy(rowHeight));
-                            }
+                    else {
+                        for (const el of cmd.elements) {
+                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, cmd.size || undefined);
                         }
                     }
                     break;
@@ -32895,94 +33197,29 @@
             return;
         }
         getColSize(sheetId, index) {
-            return this.getHeaderSize(sheetId, "COL", index);
+            return Math.round(this.sizes[sheetId]?.["COL"][index] || DEFAULT_CELL_WIDTH);
         }
-        getRowSize(sheetId, index) {
-            return this.getHeaderSize(sheetId, "ROW", index);
-        }
-        getHeaderSize(sheetId, dimension, index) {
-            return Math.round(this.sizes[sheetId]?.[dimension][index]?.manualSize ||
-                this.sizes[sheetId]?.[dimension][index]?.computedSize() ||
-                this.getDefaultHeaderSize(dimension));
-        }
-        computeSheetSizes(sheetId) {
-            const sizes = { COL: [], ROW: [] };
-            for (let col of range(0, this.getters.getNumberCols(sheetId))) {
-                sizes.COL.push(this.getHeaderSize(sheetId, "COL", col));
-            }
-            for (let row of range(0, this.getters.getNumberRows(sheetId))) {
-                let rowSize = this.sizes[sheetId]?.["ROW"]?.[row].manualSize;
-                if (!rowSize) {
-                    const height = this.getRowTallestCellSize(sheetId, row);
-                    rowSize = height;
-                }
-                sizes.ROW.push(rowSize);
-            }
-            return sizes;
-        }
-        getDefaultHeaderSize(dimension) {
-            return dimension === "COL" ? DEFAULT_CELL_WIDTH : DEFAULT_CELL_HEIGHT;
-        }
-        /**
-         * Return the height the cell should have in the sheet, which is either DEFAULT_CELL_HEIGHT if the cell is in a multi-row
-         * merge, or the height of the cell computed based on its font size.
-         */
-        getCellHeight(position) {
-            const merge = this.getters.getMerge(position);
-            if (merge && merge.bottom !== merge.top) {
-                return DEFAULT_CELL_HEIGHT;
-            }
-            const cell = this.getters.getCell(position);
-            return getDefaultCellHeight(cell);
-        }
-        /**
-         * Get the tallest cell of a row and its size.
-         *
-         * The tallest cell of the row correspond to the cell with the biggest font size,
-         * and that is not part of a multi-line merge.
-         */
-        getRowTallestCellSize(sheetId, row) {
-            const cellIds = this.getters.getRowCells(sheetId, row);
-            let maxHeight = 0;
-            for (let i = 0; i < cellIds.length; i++) {
-                const cell = this.getters.getCellById(cellIds[i]);
-                if (!cell)
-                    continue;
-                const position = this.getters.getCellPosition(cell.id);
-                const cellHeight = this.getCellHeight(position);
-                if (cellHeight > maxHeight && cellHeight > DEFAULT_CELL_HEIGHT) {
-                    maxHeight = cellHeight;
-                }
-            }
-            if (maxHeight <= DEFAULT_CELL_HEIGHT) {
-                return DEFAULT_CELL_HEIGHT;
-            }
-            return maxHeight;
+        getUserRowSize(sheetId, index) {
+            const rowSize = this.sizes[sheetId]?.["ROW"][index];
+            return rowSize ? Math.round(rowSize) : undefined;
         }
         import(data) {
             for (let sheet of data.sheets) {
-                const manualSizes = { COL: [], ROW: [] };
+                const sizes = {
+                    COL: Array(sheet.colNumber).fill(undefined),
+                    ROW: Array(sheet.rowNumber).fill(undefined),
+                };
                 for (let [rowIndex, row] of Object.entries(sheet.rows)) {
                     if (row.size) {
-                        manualSizes["ROW"][rowIndex] = row.size;
+                        sizes["ROW"][rowIndex] = row.size;
                     }
                 }
                 for (let [colIndex, col] of Object.entries(sheet.cols)) {
                     if (col.size) {
-                        manualSizes["COL"][colIndex] = col.size;
+                        sizes["COL"][colIndex] = col.size;
                     }
                 }
-                const computedSizes = this.computeSheetSizes(sheet.id);
-                this.sizes[sheet.id] = {
-                    COL: computedSizes.COL.map((size, i) => ({
-                        manualSize: manualSizes.COL[i],
-                        computedSize: lazy(size),
-                    })),
-                    ROW: computedSizes.ROW.map((size, i) => ({
-                        manualSize: manualSizes.ROW[i],
-                        computedSize: lazy(size),
-                    })),
-                };
+                this.sizes[sheet.id] = sizes;
             }
             return;
         }
@@ -33003,9 +33240,12 @@
                 if (sheet.rows === undefined) {
                     sheet.rows = {};
                 }
-                for (let row of range(0, this.getters.getNumberRows(sheet.id))) {
-                    if (exportDefaults || this.sizes[sheet.id]["ROW"][row]?.manualSize) {
-                        sheet.rows[row] = { ...sheet.rows[row], size: this.getRowSize(sheet.id, row) };
+                for (const row of range(0, this.getters.getNumberRows(sheet.id))) {
+                    if (exportDefaults || this.sizes[sheet.id]["ROW"][row]) {
+                        sheet.rows[row] = {
+                            ...sheet.rows[row],
+                            size: this.getUserRowSize(sheet.id, row) ?? DEFAULT_CELL_HEIGHT,
+                        };
                     }
                 }
                 // Export col sizes
@@ -33013,7 +33253,7 @@
                     sheet.cols = {};
                 }
                 for (let col of range(0, this.getters.getNumberCols(sheet.id))) {
-                    if (exportDefaults || this.sizes[sheet.id]["COL"][col]?.manualSize) {
+                    if (exportDefaults || this.sizes[sheet.id]["COL"][col]) {
                         sheet.cols[col] = { ...sheet.cols[col], size: this.getColSize(sheet.id, col) };
                     }
                 }
@@ -36569,7 +36809,7 @@
                     case "ContainsText":
                         return cell.value.toString().indexOf(values[0].toString()) > -1;
                     case "NotContains":
-                        return !cell.value || cell.value.toString().indexOf(values[0].toString()) == -1;
+                        return !cell.value || cell.value.toString().indexOf(values[0].toString()) === -1;
                     case "GreaterThan":
                         return cell.value > values[0];
                     case "GreaterThanOrEqual":
@@ -36594,6 +36834,156 @@
                 return false;
             },
         };
+    }
+
+    class UIRowSizePlugin extends UIPlugin {
+        static getters = ["getRowSize"];
+        tallestCellInRow = {};
+        ctx = document.createElement("canvas").getContext("2d");
+        handle(cmd) {
+            switch (cmd.type) {
+                case "START":
+                    for (const sheetId of this.getters.getSheetIds()) {
+                        this.initializeSheet(sheetId);
+                    }
+                    break;
+                case "CREATE_SHEET": {
+                    this.initializeSheet(cmd.sheetId);
+                    break;
+                }
+                case "DUPLICATE_SHEET": {
+                    const tallestCells = deepCopy(this.tallestCellInRow[cmd.sheetId]);
+                    this.history.update("tallestCellInRow", cmd.sheetIdTo, tallestCells);
+                    break;
+                }
+                case "DELETE_SHEET":
+                    const tallestCells = { ...this.tallestCellInRow };
+                    delete tallestCells[cmd.sheetId];
+                    this.history.update("tallestCellInRow", tallestCells);
+                    break;
+                case "REMOVE_COLUMNS_ROWS": {
+                    if (cmd.dimension === "COL") {
+                        return;
+                    }
+                    const tallestCells = removeIndexesFromArray(this.tallestCellInRow[cmd.sheetId], cmd.elements);
+                    this.history.update("tallestCellInRow", cmd.sheetId, tallestCells);
+                    break;
+                }
+                case "ADD_COLUMNS_ROWS": {
+                    if (cmd.dimension === "COL") {
+                        return;
+                    }
+                    const addIndex = getAddHeaderStartIndex(cmd.position, cmd.base);
+                    const newCells = Array(cmd.quantity).fill(undefined);
+                    const newTallestCells = insertItemsAtIndex(this.tallestCellInRow[cmd.sheetId], newCells, addIndex);
+                    this.history.update("tallestCellInRow", cmd.sheetId, newTallestCells);
+                    break;
+                }
+                case "RESIZE_COLUMNS_ROWS":
+                    {
+                        const sheetId = cmd.sheetId;
+                        if (cmd.dimension === "ROW") {
+                            for (const row of cmd.elements) {
+                                const tallestCell = this.getRowTallestCell(sheetId, row);
+                                this.history.update("tallestCellInRow", sheetId, row, tallestCell);
+                            }
+                        }
+                        else {
+                            // Recompute row heights on col size change, they might have changed because of wrapped text
+                            for (const row of range(0, this.getters.getNumberRows(sheetId))) {
+                                for (const col of cmd.elements) {
+                                    this.updateRowSizeForCellChange(sheetId, row, col);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case "UPDATE_CELL":
+                    this.updateRowSizeForCellChange(cmd.sheetId, cmd.row, cmd.col);
+                    break;
+                case "ADD_MERGE":
+                case "REMOVE_MERGE":
+                    for (const target of cmd.target) {
+                        for (const position of positions(target)) {
+                            this.updateRowSizeForCellChange(cmd.sheetId, position.row, position.col);
+                        }
+                    }
+            }
+            return;
+        }
+        getRowSize(sheetId, row) {
+            return Math.round(this.getters.getUserRowSize(sheetId, row) ??
+                this.tallestCellInRow[sheetId][row]?.size ??
+                DEFAULT_CELL_HEIGHT);
+        }
+        updateRowSizeForCellChange(sheetId, row, col) {
+            const tallestCellInRow = this.tallestCellInRow[sheetId]?.[row];
+            if (tallestCellInRow?.cell.col === col) {
+                const newTallestCell = this.getRowTallestCell(sheetId, row);
+                this.history.update("tallestCellInRow", sheetId, row, newTallestCell);
+            }
+            const updatedCellHeight = this.getCellHeight({ sheetId, col, row });
+            if (updatedCellHeight <= DEFAULT_CELL_HEIGHT) {
+                return;
+            }
+            if ((!tallestCellInRow && updatedCellHeight > DEFAULT_CELL_HEIGHT) ||
+                (tallestCellInRow && updatedCellHeight > tallestCellInRow.size)) {
+                const newTallestCell = { cell: { sheetId, col, row }, size: updatedCellHeight };
+                this.history.update("tallestCellInRow", sheetId, row, newTallestCell);
+            }
+        }
+        initializeSheet(sheetId) {
+            const tallestCells = [];
+            for (let row = 0; row < this.getters.getNumberRows(sheetId); row++) {
+                const tallestCell = this.getRowTallestCell(sheetId, row);
+                tallestCells.push(tallestCell);
+            }
+            this.history.update("tallestCellInRow", sheetId, tallestCells);
+        }
+        /**
+         * Return the height the cell should have in the sheet, which is either DEFAULT_CELL_HEIGHT if the cell is in a multi-row
+         * merge, or the height of the cell computed based on its style/content.
+         */
+        getCellHeight(position) {
+            if (this.isInMultiRowMerge(position)) {
+                return DEFAULT_CELL_HEIGHT;
+            }
+            const cell = this.getters.getCell(position);
+            const colSize = this.getters.getColSize(position.sheetId, position.col);
+            return getDefaultCellHeight(this.ctx, cell, colSize);
+        }
+        isInMultiRowMerge(position) {
+            const merge = this.getters.getMerge(position);
+            return !!merge && merge.bottom !== merge.top;
+        }
+        /**
+         * Get the tallest cell of a row and its size.
+         */
+        getRowTallestCell(sheetId, row) {
+            const userRowSize = this.getters.getUserRowSize(sheetId, row);
+            if (userRowSize !== undefined) {
+                return undefined;
+            }
+            const cellIds = this.getters.getRowCells(sheetId, row);
+            let maxHeight = 0;
+            let tallestCell = undefined;
+            for (let i = 0; i < cellIds.length; i++) {
+                const cell = this.getters.getCellById(cellIds[i]);
+                if (!cell) {
+                    continue;
+                }
+                const position = this.getters.getCellPosition(cell.id);
+                const cellHeight = this.getCellHeight(position);
+                if (cellHeight > maxHeight && cellHeight > DEFAULT_CELL_HEIGHT) {
+                    maxHeight = cellHeight;
+                    tallestCell = { cell: position, size: cellHeight };
+                }
+            }
+            if (tallestCell && tallestCell.size > DEFAULT_CELL_HEIGHT) {
+                return tallestCell;
+            }
+            return undefined;
+        }
     }
 
     /**
@@ -40133,24 +40523,28 @@
         // Getters
         // ---------------------------------------------------------------------------
         getCellWidth(position) {
-            const text = this.getCellText(position);
             const style = this.getters.getCellComputedStyle(position);
-            const multiLineText = text.split(NEWLINE);
-            let contentWidth = Math.max(...multiLineText.map((line) => this.getTextWidth(line, style)));
+            let contentWidth = 0;
+            const content = this.getters.getEvaluatedCell(position).formattedValue;
+            if (content) {
+                const multiLineText = splitTextToWidth(this.ctx, content, style, undefined);
+                contentWidth += Math.max(...multiLineText.map((line) => computeTextWidth(this.ctx, line, style)));
+            }
             const icon = this.getters.getConditionalIcon(position);
             if (icon) {
-                contentWidth += computeIconWidth(this.getters.getCellStyle(position));
+                contentWidth += computeIconWidth(style);
             }
             const isFilterHeader = this.getters.isFilterHeader(position);
             if (isFilterHeader) {
                 contentWidth += ICON_EDGE_LENGTH + FILTER_ICON_MARGIN;
             }
-            if (contentWidth > 0) {
-                contentWidth += 2 * PADDING_AUTORESIZE_HORIZONTAL;
-                if (this.getters.getCellStyle(position).wrapping === "wrap") {
-                    const colWidth = this.getters.getColSize(this.getters.getActiveSheetId(), position.col);
-                    return Math.min(colWidth, contentWidth);
-                }
+            if (contentWidth === 0) {
+                return 0;
+            }
+            contentWidth += 2 * PADDING_AUTORESIZE_HORIZONTAL;
+            if (style.wrapping === "wrap") {
+                const colWidth = this.getters.getColSize(this.getters.getActiveSheetId(), position.col);
+                return Math.min(colWidth, contentWidth);
             }
             return contentWidth;
         }
@@ -40173,56 +40567,7 @@
         getCellMultiLineText(position, width) {
             const style = this.getters.getCellStyle(position);
             const text = this.getters.getCellText(position, this.getters.shouldShowFormulas());
-            const brokenText = [];
-            for (const line of text.split("\n")) {
-                const words = line.split(" ");
-                if (!width) {
-                    brokenText.push(line);
-                    continue;
-                }
-                let textLine = "";
-                let availableWidth = width;
-                for (let word of words) {
-                    const splitWord = this.splitWordToSpecificWidth(this.ctx, word, width, style);
-                    const lastPart = splitWord.pop();
-                    const lastPartWidth = computeTextWidth(this.ctx, lastPart, style);
-                    // At this step: "splitWord" is an array composed of parts of word whose
-                    // length is at most equal to "width".
-                    // Last part contains the end of the word.
-                    // Note that: When word length is less than width, then lastPart is equal
-                    // to word and splitWord is empty
-                    if (splitWord.length) {
-                        if (textLine !== "") {
-                            brokenText.push(textLine);
-                            textLine = "";
-                            availableWidth = width;
-                        }
-                        splitWord.forEach((wordPart) => {
-                            brokenText.push(wordPart);
-                        });
-                        textLine = lastPart;
-                        availableWidth = width - lastPartWidth;
-                    }
-                    else {
-                        // here "lastPart" is equal to "word" and the "word" size is smaller than "width"
-                        const _word = textLine === "" ? lastPart : " " + lastPart;
-                        const wordWidth = computeTextWidth(this.ctx, _word, style);
-                        if (wordWidth <= availableWidth) {
-                            textLine += _word;
-                            availableWidth -= wordWidth;
-                        }
-                        else {
-                            brokenText.push(textLine);
-                            textLine = lastPart;
-                            availableWidth = width - lastPartWidth;
-                        }
-                    }
-                }
-                if (textLine !== "") {
-                    brokenText.push(textLine);
-                }
-            }
-            return brokenText;
+            return splitTextToWidth(this.ctx, text, style, width);
         }
         /**
          * Returns the size, start and end coordinates of a column on an unfolded sheet
@@ -40280,26 +40625,6 @@
             const cellsPositions = positions(this.getters.getColsZone(sheetId, index, index));
             const sizes = cellsPositions.map((position) => this.getCellWidth({ sheetId, ...position }));
             return Math.max(0, ...sizes);
-        }
-        splitWordToSpecificWidth(ctx, word, width, style) {
-            const wordWidth = computeTextWidth(ctx, word, style);
-            if (wordWidth <= width) {
-                return [word];
-            }
-            const splitWord = [];
-            let wordPart = "";
-            for (let l of word) {
-                const wordPartWidth = computeTextWidth(ctx, wordPart + l, style);
-                if (wordPartWidth > width) {
-                    splitWord.push(wordPart);
-                    wordPart = l;
-                }
-                else {
-                    wordPart += l;
-                }
-            }
-            splitWord.push(wordPart);
-            return splitWord;
         }
         /**
          * Check that any "sheetId" in the command matches an existing
@@ -41292,7 +41617,7 @@
                 .join("\n") || "\t");
         }
         getHTMLContent() {
-            if (this.cells.length == 1 && this.cells[0].length == 1) {
+            if (this.cells.length === 1 && this.cells[0].length === 1) {
                 return this.getters.getCellText(this.cells[0][0].position);
             }
             let htmlTable = '<table border="1" style="border-collapse:collapse">';
@@ -41617,7 +41942,7 @@
         status = "invisible";
         state;
         lastPasteState;
-        _isPaintingFormat = false;
+        paintFormatStatus = "inactive";
         originSheetId;
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -41632,7 +41957,7 @@
                     if (!this.state) {
                         return 24 /* CommandResult.EmptyClipboard */;
                     }
-                    const pasteOption = cmd.pasteOption || (this._isPaintingFormat ? "onlyFormat" : undefined);
+                    const pasteOption = cmd.pasteOption || (this.paintFormatStatus !== "inactive" ? "onlyFormat" : undefined);
                     return this.state.isPasteAllowed(cmd.target, { pasteOption });
                 case "PASTE_FROM_OS_CLIPBOARD": {
                     const state = new ClipboardOsState(cmd.text, this.getters, this.dispatch, this.selection);
@@ -41647,6 +41972,11 @@
                     const { cut, paste } = this.getDeleteCellsTargets(cmd.zone, cmd.shiftDimension);
                     const state = this.getClipboardStateForCopyCells(cut, "CUT");
                     return state.isPasteAllowed(paste);
+                }
+                case "ACTIVATE_PAINT_FORMAT": {
+                    if (this.paintFormatStatus !== "inactive") {
+                        return 95 /* CommandResult.AlreadyInPaintingFormatMode */;
+                    }
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -41664,11 +41994,13 @@
                     if (!this.state) {
                         break;
                     }
-                    const pasteOption = cmd.pasteOption || (this._isPaintingFormat ? "onlyFormat" : undefined);
-                    this._isPaintingFormat = false;
+                    const pasteOption = cmd.pasteOption || (this.paintFormatStatus !== "inactive" ? "onlyFormat" : undefined);
                     this.state.paste(cmd.target, { pasteOption, shouldPasteCF: true, selectTarget: true });
                     this.lastPasteState = this.state;
-                    this.status = "invisible";
+                    if (this.paintFormatStatus === "oneOff") {
+                        this.paintFormatStatus = "inactive";
+                        this.status = "invisible";
+                    }
                     break;
                 case "CLEAN_CLIPBOARD_HIGHLIGHT":
                     this.status = "invisible";
@@ -41736,8 +42068,13 @@
                 case "ACTIVATE_PAINT_FORMAT": {
                     const zones = this.getters.getSelectedZones();
                     this.state = this.getClipboardStateForCopyCells(zones, "COPY");
-                    this._isPaintingFormat = true;
                     this.status = "visible";
+                    if (cmd.persistent) {
+                        this.paintFormatStatus = "persistent";
+                    }
+                    else {
+                        this.paintFormatStatus = "oneOff";
+                    }
                     break;
                 }
                 case "DELETE_SHEET":
@@ -41749,6 +42086,11 @@
                         this.status = "invisible";
                     }
                     break;
+                case "CANCEL_PAINT_FORMAT": {
+                    this.paintFormatStatus = "inactive";
+                    this.status = "invisible";
+                    break;
+                }
                 default:
                     if (isCoreCommand(cmd)) {
                         this.status = "invisible";
@@ -41779,7 +42121,7 @@
             return this.state ? this.state.operation === "CUT" : false;
         }
         isPaintingFormat() {
-            return this._isPaintingFormat;
+            return this.paintFormatStatus !== "inactive";
         }
         // ---------------------------------------------------------------------------
         // Private methods
@@ -44414,6 +44756,7 @@
         .add("evaluation", EvaluationPlugin)
         .add("evaluation_chart", EvaluationChartPlugin)
         .add("evaluation_cf", EvaluationConditionalFormatPlugin)
+        .add("row_size", UIRowSizePlugin)
         .add("custom_colors", CustomColorsPlugin);
 
     const clickableCellRegistry = new Registry();
@@ -45669,11 +46012,11 @@
         }
         get title() {
             const name = this.actionButton.name(this.env);
-            const description = this.actionButton.description;
+            const description = this.actionButton.description(this.env);
             return name + (description ? ` (${description})` : "");
         }
         get iconTitle() {
-            return this.actionButton.icon;
+            return this.actionButton.icon(this.env);
         }
         onClick(ev) {
             if (this.isEnabled) {
@@ -46058,6 +46401,27 @@
         class: String,
     };
 
+    class PaintFormatButton extends owl.Component {
+        static template = "o-spreadsheet-PaintFormatButton";
+        get isActive() {
+            return this.env.model.getters.isPaintingFormat();
+        }
+        onDblClick() {
+            this.env.model.dispatch("ACTIVATE_PAINT_FORMAT", { persistent: true });
+        }
+        togglePaintFormat() {
+            if (this.isActive) {
+                this.env.model.dispatch("CANCEL_PAINT_FORMAT");
+            }
+            else {
+                this.env.model.dispatch("ACTIVATE_PAINT_FORMAT", { persistent: false });
+            }
+        }
+    }
+    PaintFormatButton.props = {
+        class: { type: String, optional: true },
+    };
+
     // -----------------------------------------------------------------------------
     // TopBar
     // -----------------------------------------------------------------------------
@@ -46158,6 +46522,7 @@
             TopBarComposer,
             FontSizeEditor,
             ActionButton,
+            PaintFormatButton,
             BorderEditorWidget,
         };
         state = owl.useState({
@@ -46165,6 +46530,7 @@
             activeTool: "",
             fillColor: "#ffffff",
             textColor: "#000000",
+            openedMenuId: undefined,
         });
         isSelectingMenu = false;
         openedEl = null;
@@ -46174,8 +46540,53 @@
         VIEW = ACTION_VIEW;
         formatNumberMenuItemSpec = formatNumberMenuItemSpec;
         isntToolbarMenu = false;
+        keyDownMapping;
+        menuRefs = {};
         setup() {
+            this.menus = topbarMenuRegistry.getMenuItems().filter((menu) => menu.children.length !== 0);
+            this.menus.forEach((menu) => {
+                this.menuRefs[menu.id] = { ref: owl.useRef(menu.id), action: menu };
+            });
+            this.keyDownMapping = {
+                "ALT+F": () => {
+                    if (!this.menuRefs["file"])
+                        return;
+                    this.openMenu(this.menuRefs["file"].action, this.menuRefs["file"].ref.el);
+                },
+                "ALT+E": () => {
+                    if (!this.menuRefs["edit"])
+                        return;
+                    this.openMenu(this.menuRefs["edit"].action, this.menuRefs["edit"].ref.el);
+                },
+                "ALT+V": () => {
+                    if (!this.menuRefs["view"])
+                        return;
+                    this.openMenu(this.menuRefs["view"].action, this.menuRefs["view"].ref.el);
+                },
+                "ALT+I": () => {
+                    if (!this.menuRefs["insert"])
+                        return;
+                    this.openMenu(this.menuRefs["insert"].action, this.menuRefs["insert"].ref.el);
+                },
+                "ALT+O": () => {
+                    if (!this.menuRefs["format"])
+                        return;
+                    this.openMenu(this.menuRefs["format"].action, this.menuRefs["format"].ref.el);
+                },
+                "ALT+D": () => {
+                    if (!this.menuRefs["data"])
+                        return;
+                    this.openMenu(this.menuRefs["data"].action, this.menuRefs["data"].ref.el);
+                },
+                ARROWRIGHT: () => {
+                    this.changeActiveMenu("right");
+                },
+                ARROWLEFT: () => {
+                    this.changeActiveMenu("left");
+                },
+            };
             owl.useExternalListener(window, "click", this.onExternalClick);
+            owl.useExternalListener(window, "keydown", this.onKeydown);
             owl.onWillStart(() => this.updateCellState());
             owl.onWillUpdateProps(() => this.updateCellState());
         }
@@ -46190,10 +46601,23 @@
             // And we cannot stop the event propagation because it's used in an
             // external listener of the Menu component to close the context menu when
             // clicking on the top bar
-            if (this.openedEl === ev.target) {
+            if (this.openedEl === ev.target || this.openedEl === null) {
                 return;
             }
             this.closeMenus();
+        }
+        onKeydown(ev) {
+            let keyDownString = "";
+            if (ev.altKey)
+                keyDownString += "ALT+";
+            keyDownString += ev.key.toUpperCase();
+            let handler = this.keyDownMapping[keyDownString];
+            if (handler) {
+                // ev.preventDefault();
+                ev.stopPropagation();
+                handler();
+                return;
+            }
         }
         onClick() {
             this.props.onClick();
@@ -46201,7 +46625,7 @@
         }
         onMenuMouseOver(menu, ev) {
             if (this.isSelectingMenu && this.isntToolbarMenu) {
-                this.openMenu(menu, ev);
+                this.openMenu(menu, ev.target);
             }
         }
         toggleDropdownTool(tool, ev) {
@@ -46215,7 +46639,7 @@
                 this.closeMenus();
             }
             else {
-                this.openMenu(menu, ev);
+                this.openMenu(menu, ev.target);
                 this.isntToolbarMenu = true;
             }
         }
@@ -46225,12 +46649,40 @@
             }
             else {
                 const menu = createAction(menuSpec);
-                this.openMenu(menu, ev);
+                this.openMenu(menu, ev.target);
                 this.isntToolbarMenu = false;
             }
         }
-        openMenu(menu, ev) {
-            const { left, top, height } = ev.currentTarget.getBoundingClientRect();
+        changeActiveMenu(direction) {
+            if (!this.state.openedMenuId) {
+                /**
+                 * This is to prevent unexpected menu opening when using arrow keys
+                 * e.g. when inputting something in sidebar input
+                 */
+                return;
+            }
+            switch (direction) {
+                case "left": {
+                    let currentMenuIndex = this.menus.findIndex((menu) => menu.id === this.state.openedMenuId);
+                    if (currentMenuIndex === 0)
+                        currentMenuIndex = this.menus.length;
+                    const nextMenuId = this.menus[currentMenuIndex - 1].id;
+                    this.openMenu(this.menuRefs[nextMenuId].action, this.menuRefs[nextMenuId].ref.el);
+                    break;
+                }
+                case "right": {
+                    let currentMenuIndex = this.menus.findIndex((menu) => menu.id === this.state.openedMenuId);
+                    if (currentMenuIndex === this.menus.length - 1)
+                        currentMenuIndex = -1;
+                    const nextMenuId = this.menus[currentMenuIndex + 1].id;
+                    this.openMenu(this.menuRefs[nextMenuId].action, this.menuRefs[nextMenuId].ref.el);
+                    break;
+                }
+            }
+        }
+        openMenu(menu, el) {
+            const { left, top, height } = el.getBoundingClientRect();
+            this.state.openedMenuId = menu.id;
             this.state.activeTool = "";
             this.state.menuState.isOpen = true;
             this.state.menuState.position = { x: left, y: top + height };
@@ -46239,21 +46691,22 @@
                 .sort((a, b) => a.sequence - b.sequence);
             this.state.menuState.parentMenu = menu;
             this.isSelectingMenu = true;
-            this.openedEl = ev.target;
+            this.openedEl = el;
             this.env.model.dispatch("STOP_EDITION");
         }
         closeMenus() {
             this.state.activeTool = "";
             this.state.menuState.isOpen = false;
             this.state.menuState.parentMenu = undefined;
+            this.state.openedMenuId = undefined;
             this.isSelectingMenu = false;
             this.openedEl = null;
+            this.props.onClick();
         }
         updateCellState() {
             const style = this.env.model.getters.getCurrentStyle();
             this.state.fillColor = style.fillColor || "#ffffff";
             this.state.textColor = style.textColor || "#000000";
-            this.menus = topbarMenuRegistry.getMenuItems();
         }
         getMenuName(menu) {
             return menu.name(this.env);
@@ -48010,7 +48463,7 @@
                 : "nextCluster";
             while (true) {
                 const nextCellPosition = this.getNextCellPosition(currentPosition, dim, dir);
-                // Break if nextPosition == currentPosition, which happens if there's no next valid position
+                // Break if nextPosition === currentPosition, which happens if there's no next valid position
                 if (currentPosition.col === nextCellPosition.col &&
                     currentPosition.row === nextCellPosition.row) {
                     break;
@@ -49924,6 +50377,7 @@
                 ...config,
                 mode: config.mode || "normal",
                 custom: config.custom || {},
+                defaultCurrencyFormat: config.defaultCurrencyFormat || "[$$]#,##0.00",
                 external: this.setupExternalConfig(config.external || {}),
                 transportService,
                 client,
@@ -50221,6 +50675,7 @@
         numberToLetters,
         UuidGenerator,
         formatValue,
+        createCurrencyFormat,
         computeTextWidth,
         createEmptyWorkbookData,
         createEmptySheet,
@@ -50307,8 +50762,8 @@
 
 
     __info__.version = '16.4.0-alpha.7';
-    __info__.date = '2023-07-04T14:12:23.240Z';
-    __info__.hash = 'b04cf78';
+    __info__.date = '2023-07-19T14:04:23.565Z';
+    __info__.hash = 'b48c762';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
