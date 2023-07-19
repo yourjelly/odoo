@@ -106,7 +106,7 @@
     const HEADER_BORDER_COLOR = "#C0C0C0";
     const CELL_BORDER_COLOR = "#E2E3E3";
     const BACKGROUND_CHART_COLOR = "#FFFFFF";
-    const MENU_ITEM_DISABLED_COLOR = "#CACACA";
+    const DISABLED_TEXT_COLOR = "#CACACA";
     const DEFAULT_COLOR_SCALE_MIDPOINT_COLOR = 0xb6d7a8;
     const LINK_COLOR = "#01666b";
     const FILTERS_COLOR = "#188038";
@@ -3104,7 +3104,6 @@
         "SET_VIEWPORT_OFFSET",
         "SELECT_SEARCH_NEXT_MATCH",
         "SELECT_SEARCH_PREVIOUS_MATCH",
-        "REFRESH_SEARCH",
         "UPDATE_SEARCH",
         "CLEAR_SEARCH",
         "EVALUATE_CELLS",
@@ -4031,7 +4030,7 @@
         }
       }
       &.disabled {
-        color: ${MENU_ITEM_DISABLED_COLOR};
+        color: ${DISABLED_TEXT_COLOR};
         cursor: not-allowed;
       }
     }
@@ -9990,6 +9989,10 @@
                 this.env.model.dispatch("CLEAR_SEARCH");
                 this.env.model.dispatch("SET_FORMULA_VISIBILITY", { show: this.showFormulaState });
             });
+            owl.useEffect(() => {
+                this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
+                this.searchFormulas();
+            }, () => [this.env.model.getters.shouldShowFormulas()]);
         }
         onInput(ev) {
             this.state.toSearch = ev.target.value;
@@ -10006,10 +10009,6 @@
                 ev.preventDefault();
                 this.replace();
             }
-        }
-        onFocusSidePanel() {
-            this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
-            this.env.model.dispatch("REFRESH_SEARCH");
         }
         searchFormulas() {
             this.env.model.dispatch("SET_FORMULA_VISIBILITY", {
@@ -33291,6 +33290,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 searchFormulas: false,
             };
             this.toSearch = "";
+            this.isSearchDirty = false;
         }
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -33315,16 +33315,23 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "REPLACE_ALL_SEARCH":
                     this.replaceAll(cmd.replaceWith);
                     break;
+                case "EVALUATE_CELLS":
+                case "UPDATE_CELL":
+                    this.isSearchDirty = true;
+                    break;
                 case "UNDO":
                 case "REDO":
                 case "REMOVE_COLUMNS_ROWS":
                 case "ADD_COLUMNS_ROWS":
-                    this.clearSearch();
-                    break;
                 case "ACTIVATE_SHEET":
-                case "REFRESH_SEARCH":
                     this.refreshSearch();
                     break;
+            }
+        }
+        finalize() {
+            if (this.isSearchDirty) {
+                this.refreshSearch();
+                this.isSearchDirty = false;
             }
         }
         // ---------------------------------------------------------------------------
@@ -33376,11 +33383,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * Find matches using the current regex
          */
         findMatches() {
-            const activeSheetId = this.getters.getActiveSheetId();
-            const cells = this.getters.getCells(activeSheetId);
+            const sheetId = this.getters.getActiveSheetId();
+            const cells = this.getters.getCells(sheetId);
             const matches = [];
             if (this.toSearch) {
                 for (const cell of Object.values(cells)) {
+                    const { col, row } = this.getters.getCellPosition(cell.id);
+                    const isColHidden = this.getters.isColHidden(sheetId, col);
+                    const isRowHidden = this.getters.isRowHidden(sheetId, row);
+                    if (isColHidden || isRowHidden) {
+                        continue;
+                    }
                     if (cell &&
                         this.currentSearchRegex &&
                         this.currentSearchRegex.test(this.searchOptions.searchFormulas
@@ -38058,6 +38071,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     .o-sidePanelButton:enabled {
       cursor: pointer;
     }
+
+    .o-sidePanelButton:disabled {
+      color: ${DISABLED_TEXT_COLOR};
+    }
+
     .o-sidePanelButton:last-child {
       margin-right: 0px;
     }
@@ -42832,8 +42850,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.14';
-    __info__.date = '2023-06-26T14:45:27.638Z';
-    __info__.hash = '1e37a94';
+    __info__.date = '2023-07-19T11:16:11.175Z';
+    __info__.hash = '4834464';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
