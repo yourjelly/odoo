@@ -56,6 +56,8 @@
                     <field string="User" name="user_id"/>
                     <field name="partner_id" context="{'res_partner_search_mode': 'customer'}" attrs="{'readonly': [('state','=','invoiced')]}"/>
                     <field name="fiscal_position_id" options="{'no_create': True}"/>
+                    <field name="table_id"/>
+                    <field name="customer_count"/>
                 </group>
                 <notebook colspan="4">
                     <page string="Products" name="products">

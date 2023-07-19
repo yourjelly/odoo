@@ -1,8 +1,6 @@
 <odoo>
-
         <!-- ******  Basic Restaurant Setup ***** -->
-
-        <record id="drinks" model="pos.category">
+        <record id="drinks" model="point_of_sale.category">
               <field name="name">Drinks</field>
         </record>
 
@@ -11,7 +9,7 @@
             <field name="name">Food</field>
         </record>
 
-        <record id="food" model="pos.category">
+        <record id="food" model="point_of_sale.category">
               <field name="name">Food</field>
         </record>
 
@@ -22,8 +20,8 @@
             <field name="name">Margherita</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/th-pizza.png"/>
         </record>
         <record id="pos_food_funghi" model="product.product">
             <field name="available_in_pos">True</field>
@@ -31,8 +29,8 @@
             <field name="name">Funghi</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/th-pizza.png"/>
         </record>
         <record id="pos_food_vege" model="product.product">
             <field name="available_in_pos">True</field>
@@ -40,8 +38,8 @@
             <field name="name">Vegetarian</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pizza.png"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/th-pizza.png"/>
         </record>
         <record id="pos_food_bolo" model="product.product">
             <field name="available_in_pos">True</field>
@@ -49,8 +47,8 @@
             <field name="name">Pasta Bolognese</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pasta.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" file="point_of_sale/static/img/th-pasta.jpg"/>
         </record>
         <record id="pos_food_4formaggi" model="product.product">
             <field name="available_in_pos">True</field>
@@ -58,8 +56,8 @@
             <field name="name">Pasta 4 formaggi </field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-pasta-4f.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-pasta-4f.jpg"/>
         </record>
         <record id="pos_food_bacon" model="product.product">
             <field name="available_in_pos">True</field>
@@ -67,8 +65,8 @@
             <field name="name">Bacon Burger</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-burger.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-burger.jpg"/>
         </record>
         <record id="pos_food_cheeseburger" model="product.product">
             <field name="available_in_pos">True</field>
@@ -76,8 +74,8 @@
             <field name="name">Cheese Burger</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-cheeseburger.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-cheeseburger.jpg"/>
         </record>
         <record id="pos_food_chicken" model="product.product">
             <field name="available_in_pos">True</field>
@@ -85,8 +83,8 @@
             <field name="name">Chicken Curry Sandwich</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-sandwich.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-sandwich.jpg"/>
         </record>
         <record id="pos_food_tuna" model="product.product">
             <field name="available_in_pos">True</field>
@@ -94,8 +92,8 @@
             <field name="name">Spicy Tuna Sandwich</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-tuna.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-tuna.jpg"/>
         </record>
         <record id="pos_food_mozza" model="product.product">
             <field name="available_in_pos">True</field>
@@ -103,8 +101,8 @@
             <field name="name">Mozzarella Sandwich</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-mozza.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-mozza.jpg"/>
         </record>
         <record id="pos_food_club" model="product.product">
             <field name="available_in_pos">True</field>
@@ -112,8 +110,8 @@
             <field name="name">Club Sandwich</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-club.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-club.jpg"/>
         </record>
         <record id="pos_food_maki" model="product.product">
             <field name="available_in_pos">True</field>
@@ -121,8 +119,8 @@
             <field name="name">Lunch Maki 18pc</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-maki.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-maki.jpg"/>
         </record>
         <record id="pos_food_salmon" model="product.product">
             <field name="available_in_pos">True</field>
@@ -130,8 +128,8 @@
             <field name="name">Lunch Salmon 20pc</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-salmon.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-salmon.jpg"/>
         </record>
         <record id="pos_food_temaki" model="product.product">
             <field name="available_in_pos">True</field>
@@ -139,8 +137,8 @@
             <field name="name">Lunch Temaki mix 3pc</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-temaki.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-temaki.jpg"/>
         </record>
         <record id="pos_food_chirashi" model="product.product">
             <field name="available_in_pos">True</field>
@@ -148,8 +146,8 @@
             <field name="name">Salmon and Avocado</field>
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('food')])]"/>
-            <field name="categ_id" ref="pos_restaurant.product_category_pos_food"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-salmon-avocado.jpg"/>
+            <field name="categ_id" ref="point_of_sale.product_category_pos_food"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-salmon-avocado.jpg"/>
         </record>
 
         <!-- Drinks -->
@@ -160,7 +158,7 @@
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('drinks')])]"/>
             <field name="categ_id" ref="point_of_sale.product_category_pos"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-coke.jpg"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-coke.jpg"/>
         </record>
 
         <record id="water" model="product.product">
@@ -170,7 +168,7 @@
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('drinks')])]"/>
             <field name="categ_id" ref="point_of_sale.product_category_pos"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-water.jpg"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-water.jpg"/>
         </record>
 
         <record id="minute_maid" model="product.product">
@@ -180,13 +178,13 @@
             <field name="weight">0.01</field>
             <field name="pos_categ_ids" eval="[(6, 0, [ref('drinks')])]"/>
             <field name="categ_id" ref="point_of_sale.product_category_pos"/>
-            <field name="image_1920" type="base64" file="pos_restaurant/static/img/th-minute_maid.jpg"/>
+            <field name="image_1920" type="base64" ref="point_of_sale/static/img/th-minute_maid.jpg"/>
         </record>
 
         <!-- Pos Config -->
         <record model="pos.config" id="pos_config_restaurant">
             <field name="name">Bar</field>
-            <field name="module_pos_restaurant">True</field>
+            <field name="module_pos">True</field>
             <field name="iface_splitbill">True</field>
             <field name="iface_printbill">True</field>
             <field name="iface_orderline_notes">True</field>
@@ -195,15 +193,15 @@
         </record>
 
         <!-- Floors: Main Floor -->
-        <record id="floor_main" model="restaurant.floor">
+        <record id="floor_main" model="pos.floor">
             <field name="name">Main Floor</field>
             <field name="background_color">rgb(136,137,242)</field>
-            <field name="pos_config_ids" eval="[(6, 0, [ref('pos_restaurant.pos_config_restaurant')])]"/>
+            <field name="pos_config_ids" eval="[(6, 0, [ref('pos.pos_config_restaurant')])]"/>
         </record>
 
-        <record id="table_01" model="restaurant.table">
+        <record id="table_01" model="pos.table">
             <field name="name">1</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -213,9 +211,9 @@
             <field name="position_v">50</field>
         </record>
 
-        <record id="table_02" model="restaurant.table">
+        <record id="table_02" model="pos.table">
             <field name="name">2</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -225,9 +223,9 @@
             <field name="position_v">50</field>
         </record>
 
-        <record id="table_03" model="restaurant.table">
+        <record id="table_03" model="pos.table">
             <field name="name">3</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -237,9 +235,9 @@
             <field name="position_v">50</field>
         </record>
 
-        <record id="table_04" model="restaurant.table">
+        <record id="table_04" model="pos.table">
             <field name="name">4</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -249,9 +247,9 @@
             <field name="position_v">50</field>
         </record>
 
-        <record id="table_05" model="restaurant.table">
+        <record id="table_05" model="pos.table">
             <field name="name">5</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -261,9 +259,9 @@
             <field name="position_v">50</field>
         </record>
 
-        <record id="table_06" model="restaurant.table">
+        <record id="table_06" model="pos.table">
             <field name="name">6</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -273,9 +271,9 @@
             <field name="position_v">50</field>
         </record>
 
-        <record id="table_07" model="restaurant.table">
+        <record id="table_07" model="pos.table">
             <field name="name">7</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,109,109)</field>
             <field name="shape">square</field>
@@ -285,9 +283,9 @@
             <field name="position_v">280</field>
         </record>
 
-        <record id="table_08" model="restaurant.table">
+        <record id="table_08" model="pos.table">
             <field name="name">8</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,109,109)</field>
             <field name="shape">square</field>
@@ -297,9 +295,9 @@
             <field name="position_v">280</field>
         </record>
 
-        <record id="table_09" model="restaurant.table">
+        <record id="table_09" model="pos.table">
             <field name="name">9</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,109,109)</field>
             <field name="shape">square</field>
@@ -309,9 +307,9 @@
             <field name="position_v">280</field>
         </record>
 
-        <record id="table_10" model="restaurant.table">
+        <record id="table_10" model="pos.table">
             <field name="name">10</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,109,109)</field>
             <field name="shape">square</field>
@@ -321,9 +319,9 @@
             <field name="position_v">280</field>
         </record>
 
-        <record id="table_11" model="restaurant.table">
+        <record id="table_11" model="pos.table">
             <field name="name">11</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="floor_id" ref="point_of_sale.floor_main"/>
             <field name="seats">4</field>
             <field name="color">rgb(78,210,190)</field>
             <field name="shape">round</field>
@@ -335,17 +333,17 @@
 
         <!-- Restaurant Floor: Patio -->
 
-        <record id="floor_patio" model="restaurant.floor">
+        <record id="floor_patio" model="pos.floor">
             <field name="name">Patio</field>
             <field name="background_color">rgb(130, 233, 171)</field>
-            <field name="pos_config_ids" eval="[(6, 0, [ref('pos_restaurant.pos_config_restaurant')])]"/>
+            <field name="pos_config_ids" eval="[(6, 0, [ref('pos.pos_config_restaurant')])]"/>
         </record>
 
         <!-- Patio: Left table row -->
 
-        <record id="table_21" model="restaurant.table">
+        <record id="table_21" model="pos.table">
             <field name="name">1</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -355,9 +353,9 @@
             <field name="position_v">50</field>
         </record>
 
-        <record id="table_22" model="restaurant.table">
+        <record id="table_22" model="pos.table">
             <field name="name">2</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -367,9 +365,9 @@
             <field name="position_v">166</field>
         </record>
 
-        <record id="table_23" model="restaurant.table">
+        <record id="table_23" model="pos.table">
             <field name="name">3</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -379,9 +377,9 @@
             <field name="position_v">283</field>
         </record>
 
-        <record id="table_24" model="restaurant.table">
+        <record id="table_24" model="pos.table">
             <field name="name">4</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -393,9 +391,9 @@
 
         <!-- Patio: Right table row -->
 
-        <record id="table_25" model="restaurant.table">
+        <record id="table_25" model="pos.table">
             <field name="name">5</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -405,9 +403,9 @@
             <field name="position_v">50</field>
         </record>
 
-        <record id="table_26" model="restaurant.table">
+        <record id="table_26" model="pos.table">
             <field name="name">6</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -417,9 +415,9 @@
             <field name="position_v">166</field>
         </record>
 
-        <record id="table_27" model="restaurant.table">
+        <record id="table_27" model="pos.table">
             <field name="name">7</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -429,9 +427,9 @@
             <field name="position_v">283</field>
         </record>
 
-        <record id="table_28" model="restaurant.table">
+        <record id="table_28" model="pos.table">
             <field name="name">8</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">2</field>
             <field name="color">rgb(53,211,116)</field>
             <field name="shape">square</field>
@@ -443,9 +441,9 @@
 
         <!-- Patio: Center table block -->
 
-        <record id="table_29" model="restaurant.table">
+        <record id="table_29" model="pos.table">
             <field name="name">9</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,191,109)</field>
             <field name="shape">square</field>
@@ -455,9 +453,9 @@
             <field name="position_v">100</field>
         </record>
 
-        <record id="table_29" model="restaurant.table">
+        <record id="table_29" model="pos.table">
             <field name="name">9</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,191,109)</field>
             <field name="shape">square</field>
@@ -467,9 +465,9 @@
             <field name="position_v">100</field>
         </record>
 
-        <record id="table_30" model="restaurant.table">
+        <record id="table_30" model="pos.table">
             <field name="name">10</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,191,109)</field>
             <field name="shape">square</field>
@@ -479,9 +477,9 @@
             <field name="position_v">100</field>
         </record>
 
-        <record id="table_31" model="restaurant.table">
+        <record id="table_31" model="pos.table">
             <field name="name">11</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,191,109)</field>
             <field name="shape">square</field>
@@ -491,9 +489,9 @@
             <field name="position_v">315</field>
         </record>
 
-        <record id="table_32" model="restaurant.table">
+        <record id="table_32" model="pos.table">
             <field name="name">12</field>
-            <field name="floor_id" ref="pos_restaurant.floor_patio"/>
+            <field name="floor_id" ref="point_of_sale.floor_patio"/>
             <field name="seats">4</field>
             <field name="color">rgb(235,191,109)</field>
             <field name="shape">square</field>

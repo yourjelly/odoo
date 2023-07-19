@@ -8,6 +8,7 @@ import pytz
 from odoo import api, fields, models, _
 from odoo.osv.expression import OR
 from odoo.exceptions import ValidationError, UserError
+from collections import defaultdict
 
 
 class PosConfig(models.Model):
@@ -178,6 +179,14 @@ class PosConfig(models.Model):
     trusted_config_ids = fields.Many2many("pos.config", relation="pos_config_trust_relation", column1="is_trusting",
                                           column2="is_trusted", string="Trusted Point of Sale Configurations",
                                           domain="[('id', '!=', pos_config_id), ('module_pos_restaurant', '=', False)]")
+    iface_splitbill = fields.Boolean(string='Bill Splitting', help='Enables Bill Splitting in the Point of Sale.')
+    iface_printbill = fields.Boolean(string='Bill Printing', help='Allows to print the Bill before payment.')
+    iface_orderline_notes = fields.Boolean(string='Internal Notes', help='Allow custom Internal notes on Orderlines.', default=True)
+    floor_ids = fields.Many2many('pos.floor', string='Restaurant Floors', help='The restaurant floors served by this point of sale.')
+    set_tip_after_payment = fields.Boolean('Set Tip After Payment', help="Adjust the amount authorized by payment terminals to add a tip after the customers left or at the end of the day.")
+    is_restaurant = fields.Boolean(default=True)
+    module_pos_restaurant_appointment = fields.Boolean("Table Booking")
+
 
     @api.depends('payment_method_ids')
     def _compute_cash_control(self):
@@ -386,6 +395,11 @@ class PosConfig(models.Model):
 
             val.update(name=_('POS order line %s', vals['name']), code='pos.order.line')
             vals['sequence_line_id'] = IrSequence.create(val).id
+            is_restaurant = 'module_pos_restaurant' not in vals or vals['module_pos_restaurant']
+            if is_restaurant and 'iface_splitbill' not in vals:
+                vals['iface_splitbill'] = True
+            if not is_restaurant or not vals.get('iface_tipproduct', False):
+                vals['set_tip_after_payment'] = False
         pos_configs = super().create(vals_list)
         pos_configs.sudo()._check_modules_to_install()
         pos_configs.sudo()._check_groups_implied()
@@ -410,6 +424,11 @@ class PosConfig(models.Model):
         self._reset_default_on_vals(vals)
         if ('is_order_printer' in vals and not vals['is_order_printer']):
             vals['printer_ids'] = [fields.Command.clear()]
+        if ('is_restaurant' in vals and vals['is_restaurant'] is False):
+            vals['floor_ids'] = [(5, 0, 0)]
+
+        if ('is_restaurant' in vals and not vals['is_restaurant']) or ('iface_tipproduct' in vals and not vals['iface_tipproduct']):
+            vals['set_tip_after_payment'] = False
 
         bypass_categories_forbidden_change = self.env.context.get('bypass_categories_forbidden_change', False)
 
@@ -445,7 +464,7 @@ class PosConfig(models.Model):
     def _get_forbidden_change_fields(self):
         forbidden_keys = ['module_pos_hr', 'module_pos_restaurant', 'available_pricelist_ids',
                           'limit_categories', 'iface_available_categ_ids', 'use_pricelist', 'module_pos_discount',
-                          'payment_method_ids', 'iface_tipproduc']
+                          'payment_method_ids', 'iface_tipproduc', 'floor_ids']
         return forbidden_keys
 
     def unlink(self):
@@ -581,6 +600,12 @@ class PosConfig(models.Model):
                 'name': 'Shop',
                 'company_id': company.id,
                 'module_pos_restaurant': False,
+                'name': 'Bar',
+                'company_id': company.id,
+                'module_pos_restaurant': True,
+                'iface_splitbill': True,
+                'iface_printbill': True,
+                'iface_orderline_notes': True,
             })
             pos_configs.setup_defaults(company)
 
@@ -728,3 +753,76 @@ class PosConfig(models.Model):
 
     def _remove_trusted_config_id(self, config_id):
         self.trusted_config_ids -= config_id
+
+    def get_tables_order_count_and_printing_changes(self):
+        self.ensure_one()
+        tables = self.env['pos.table'].search([('floor_id.pos_config_ids', '=', self.id)])
+        domain = [('state', '=', 'draft'), ('table_id', 'in', tables.ids)]
+
+        order_stats = self.env['pos.order']._read_group(domain, ['table_id'], ['__count'])
+        linked_orderlines = self.env['pos.order.line'].search([('order_id.state', '=', 'draft'), ('order_id.table_id', 'in', tables.ids)])
+        orders_map = {table.id: count for table, count in order_stats}
+        changes_map = defaultdict(lambda: 0)
+        skip_changes_map = defaultdict(lambda: 0)
+
+        for line in linked_orderlines:
+            # For the moment, as this feature is not compatible with pos_self_order,
+            # we ignore last_order_preparation_change when it is set to false.
+            # In future, pos_self_order will send the various changes to the order.
+            if not line.order_id.last_order_preparation_change:
+                continue
+
+            last_order_preparation_change = json.loads(line.order_id.last_order_preparation_change)
+            prep_change = {}
+            for line_uuid in last_order_preparation_change:
+                prep_change[last_order_preparation_change[line_uuid]['line_uuid']] = last_order_preparation_change[line_uuid]
+            quantity_changed = 0
+            if line.uuid in prep_change:
+                quantity_changed = line.qty - prep_change[line.uuid]['quantity']
+            else:
+                quantity_changed = line.qty
+
+            if line.skip_change:
+                skip_changes_map[line.order_id.table_id.id] += quantity_changed
+            else:
+                changes_map[line.order_id.table_id.id] += quantity_changed
+
+        result = []
+        for table in tables:
+            result.append({'id': table.id, 'orders': orders_map.get(table.id, 0), 'changes': changes_map.get(table.id, 0), 'skip_changes': skip_changes_map.get(table.id, 0)})
+        return result
+
+    def _set_tips_after_payment_if_country_custom(self):
+        self.ensure_one()
+        company = self.company_id or self.env.company or self.env['res.company']._get_main_company()
+        if company and company.country_id and company.country_id.code == 'US':
+            self.update({
+                'iface_tipproduct': True,
+                'set_tip_after_payment': True,
+            })
+
+    @api.model
+    def add_cash_payment_method(self):
+        companies = self.env['res.company'].search([])
+        for company in companies.filtered('chart_template'):
+            pos_configs = self.search([('company_id', '=', company.id), ('module_pos_restaurant', '=', True)])
+            journal_counter = 2
+            for pos_config in pos_configs:
+                if pos_config.payment_method_ids.filtered('is_cash_count'):
+                    continue
+                cash_journal = self.env['account.journal'].search([('company_id', '=', company.id), ('type', '=', 'cash'), ('pos_payment_method_ids', '=', False)], limit=1)
+                if not cash_journal:
+                    cash_journal = self.env['account.journal'].create({
+                        'name': 'Cash %s' % journal_counter,
+                        'code': 'RCSH%s' % journal_counter,
+                        'type': 'cash',
+                        'company_id': company.id
+                    })
+                    journal_counter += 1
+                payment_methods = pos_config.payment_method_ids
+                payment_methods |= self.env['pos.payment.method'].create({
+                    'name': _('Cash Bar'),
+                    'journal_id': cash_journal.id,
+                    'company_id': company.id,
+                })
+                pos_config.write({'payment_method_ids': [(6, 0, payment_methods.ids)]})

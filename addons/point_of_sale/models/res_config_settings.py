@@ -44,7 +44,7 @@ class ResConfigSettings(models.TransientModel):
     # pos.config fields
     pos_module_pos_discount = fields.Boolean(related='pos_config_id.module_pos_discount', readonly=False)
     pos_module_pos_hr = fields.Boolean(related='pos_config_id.module_pos_hr', readonly=False)
-    pos_module_pos_restaurant = fields.Boolean(related='pos_config_id.module_pos_restaurant', readonly=False)
+    is_restaurant = fields.Boolean(related='pos_config_id.is_restaurant', readonly=False)
     pos_is_order_printer = fields.Boolean(compute='_compute_pos_printer', store=True, readonly=False)
     pos_printer_ids = fields.Many2many(related='pos_config_id.printer_ids', readonly=False)
 
@@ -104,6 +104,12 @@ class ResConfigSettings(models.TransientModel):
     pos_auto_validate_terminal_payment = fields.Boolean(related='pos_config_id.auto_validate_terminal_payment', readonly=False, string="Automatically validates orders paid with a payment terminal.")
     pos_trusted_config_ids = fields.Many2many(related='pos_config_id.trusted_config_ids', readonly=False)
     point_of_sale_ticket_unique_code = fields.Boolean(related='company_id.point_of_sale_ticket_unique_code', readonly=False)
+    pos_floor_ids = fields.Many2many(related='pos_config_id.floor_ids', readonly=False)
+    pos_iface_orderline_notes = fields.Boolean(compute='_compute_is_restaurant', store=True, readonly=False)
+    pos_iface_printbill = fields.Boolean(compute='_compute_is_restaurant', store=True, readonly=False)
+    pos_iface_splitbill = fields.Boolean(compute='_compute_is_restaurant', store=True, readonly=False)
+    pos_set_tip_after_payment = fields.Boolean(compute='_compute_pos_set_tip_after_payment', store=True, readonly=False)
+    pos_module_pos_restaurant_appointment = fields.Boolean(related="pos_config_id.module_pos_restaurant_appointment", readonly=False)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -185,7 +191,7 @@ class ResConfigSettings(models.TransientModel):
     def _is_cashdrawer_displayed(self, res_config):
         return res_config.pos_iface_print_via_proxy
 
-    @api.depends('pos_module_pos_restaurant', 'pos_config_id')
+    @api.depends('is_restaurant', 'pos_config_id')
     def _compute_pos_printer(self):
         for res_config in self:
             res_config.update({
@@ -331,3 +337,28 @@ class ResConfigSettings(models.TransientModel):
                     old._add_trusted_config_id(config.pos_config_id)
                 if old.id in removed_trusted_configs:
                     old._remove_trusted_config_id(config.pos_config_id)
+
+    @api.depends('is_restaurant', 'pos_config_id')
+    def _compute_pos_is_restaurant(self):
+        for res_config in self:
+            if not res_config.pos_is_restaurant:
+                res_config.update({
+                    'pos_iface_orderline_notes': False,
+                    'pos_iface_printbill': False,
+                    'pos_iface_splitbill': False,
+                })
+            else:
+                res_config.update({
+                    'pos_iface_orderline_notes': res_config.pos_config_id.iface_orderline_notes,
+                    'pos_iface_printbill': res_config.pos_config_id.iface_printbill,
+                    'pos_iface_splitbill': res_config.pos_config_id.iface_splitbill,
+                })
+
+    @api.depends('pos_iface_tipproduct', 'pos_config_id')
+    def _compute_pos_set_tip_after_payment(self):
+        for res_config in self:
+            if res_config.pos_iface_tipproduct:
+                res_config.pos_set_tip_after_payment = res_config.pos_config_id.set_tip_after_payment
+            else:
+                res_config.pos_set_tip_after_payment = False
+

@@ -1667,6 +1667,7 @@ class PosSession(models.Model):
             'account.cash.rounding',
             'pos.payment.method',
             'account.fiscal.position',
+            'pos.floor'
         ]
 
         return models_to_load
@@ -1681,6 +1682,24 @@ class PosSession(models.Model):
                     'point_of_sale_ticket_unique_code',
                 ],
             }
+        }
+    def _loader_params_pos_floor(self):
+        return {
+            'search_params': {
+                'domain': [('pos_config_ids', '=', self.config_id.id)],
+                'fields': ['name', 'background_color', 'table_ids', 'sequence'],
+            },
+        }
+
+    def _loader_params_pos_table(self):
+        return {
+            'search_params': {
+                'domain': [('active', '=', True)],
+                'fields': [
+                    'name', 'width', 'height', 'position_h', 'position_v',
+                    'shape', 'floor_id', 'color', 'seats', 'active'
+                ],
+            },
         }
 
     def _get_pos_ui_res_company(self, params):
@@ -2104,7 +2123,17 @@ class PosSession(models.Model):
         return self.env['product.product'].sudo().search_count(['&', ('available_in_pos', '=', True), ('list_price', '>', 0)], limit=1) > 0
 
     def _load_onboarding_data(self):
-        convert.convert_file(self.env, 'point_of_sale', 'data/point_of_sale_onboarding.xml', None, mode='init', kind='data')
+        convert.convert_file(self.env, 'point_of_sale', 'data/point_of_sale_onboarding.xml', None, mode='init',
+                             kind='data')
+        convert.convert_file(self.env, 'point_of_sale', 'data/pos_restaurant_onboarding.xml', None, mode='init',
+                             kind='data')
+        configs = self.config_id.filtered('is_restaurant').union(
+            self.env.ref('point_of_sale.pos_config_main_restaurant', raise_if_not_found=False))
+        configs.with_context(bypass_categories_forbidden_change=True).write({
+            'limit_categories': True,
+            'iface_available_categ_ids': [Command.link(self.env.ref('point_of_sale.onboarding_drinks_category').id),
+                                          Command.link(self.env.ref('point_of_sale.onboarding_food_category').id)]
+        })
 
     def load_product_frontend(self):
         allowed = not self._pos_has_valid_product()
@@ -2115,6 +2144,26 @@ class PosSession(models.Model):
             'models_data': self.get_onboarding_data(),
             'successful': allowed,
         }
+
+    def _get_pos_ui_restaurant_floor(self, params):
+        floors = self.env['pos.floor'].search_read(**params['search_params'])
+        floor_ids = [floor['id'] for floor in floors]
+
+        table_params = self._loader_params_restaurant_table()
+        table_params['search_params']['domain'] = AND([table_params['search_params']['domain'], [('floor_id', 'in', floor_ids)]])
+        tables = self.env['pos.table'].search(table_params['search_params']['domain'], order='floor_id')
+        tables_by_floor_id = {}
+        for floor_id, table_group in groupby(tables, key=lambda table: table.floor_id):
+            floor_tables = self.env['pos.table'].concat(*table_group)
+            tables_by_floor_id[floor_id.id] = floor_tables.read(table_params['search_params']['fields'])
+
+        for floor in floors:
+            floor['tables'] = tables_by_floor_id.get(floor['id'], [])
+
+        return floors
+
+    def get_pos_ui_pos_floor(self):
+        return self._get_pos_ui_pos_floor(self._loader_params_restaurant_floor())
 
 
 class ProcurementGroup(models.Model):

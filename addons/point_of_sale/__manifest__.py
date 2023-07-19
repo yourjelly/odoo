@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+
+
+
+
+
+
+
 {
     'name': 'Point of Sale',
     'version': '1.0.1',
@@ -31,6 +38,7 @@
         'views/pos_bill_view.xml',
         'views/pos_session_view.xml',
         'views/point_of_sale_sequence.xml',
+        'views/pos_restaurant_views.xml',
         'data/point_of_sale_data.xml',
         'views/pos_order_report_view.xml',
         'views/account_statement_view.xml',

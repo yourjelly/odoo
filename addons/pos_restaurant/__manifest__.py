@@ -29,7 +29,7 @@ This module adds several features to the Point of Sale that are specific to rest
     'demo': [
         'data/pos_restaurant_demo.xml',
     ],
-    'installable': True,
+    'installable': False,
     'assets': {
         'point_of_sale._assets_pos': [
             'pos_restaurant/static/src/**/*',

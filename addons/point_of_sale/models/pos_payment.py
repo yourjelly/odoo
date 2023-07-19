@@ -93,3 +93,10 @@ class PosPayment(models.Model):
             self.env['account.move.line'].with_context(check_move_validity=False).create([credit_line_vals, debit_line_vals])
             payment_move._post()
         return result
+
+    def _update_payment_line_for_tip(self, tip_amount):
+        """Inherit this method to perform reauthorization or capture on electronic payment."""
+        self.ensure_one()
+        self.write({
+            "amount": self.amount + tip_amount,
+        })

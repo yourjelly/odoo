@@ -11,8 +11,12 @@ from . import chart_template
 from . import digest
 from . import pos_category
 from . import pos_config
+from . import pos_floor
 from . import pos_order
+from . import pos_order_line
+from . import pos_order_line_lot
 from . import pos_session
+from . import pos_table
 from . import product
 from . import res_partner
 from . import res_company
