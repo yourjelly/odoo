@@ -56,7 +56,7 @@
         </div>
         <div t-if="!props.chatWindow.folded or ui.isSmall" class="o-mail-ChatWindow-content bg-view d-flex flex-column h-100 overflow-auto position-relative" t-ref="content">
             <t t-if="thread" name="thread content">
-                <div t-if="threadActions.activeAction?.componentCondition" class="h-100" t-attf-class="{{ threadActions.activeAction.panelOuterClass }}">
+                <div t-if="threadActions.activeAction?.componentCondition" class="bg-view h-100" t-attf-class="{{ threadActions.activeAction.panelOuterClass }}">
                     <t t-component="threadActions.activeAction.component" t-props="{ ...threadActions.activeAction.componentProps, thread }"/>
                 </div>
                 <t t-else="">
