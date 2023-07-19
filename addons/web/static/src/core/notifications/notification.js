@@ -27,6 +27,7 @@ Notification.props = {
             shape: {
                 name: { type: String },
                 icon: { type: String, optional: true },
+                class: { type: String, optional: true },
                 primary: { type: Boolean, optional: true },
                 onClick: Function,
             },
