@@ -19,6 +19,13 @@ function patchLivechatService() {
 
 export const start = [
     {
+        content: "Patching Livechat",
+        trigger: ".o-livechat-LivechatButton",
+        run: function() {
+            patchLivechatService()
+        }
+    },
+    {
         content: "click on livechat widget",
         trigger: ".o-livechat-LivechatButton",
     },

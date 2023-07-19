@@ -22,6 +22,7 @@ import { registry } from "@web/core/registry";
 
 var patch = [{
     content: "Patching Survey Widget",
+    trigger: 'body',
     run: function(){
         patchSurveyWidget();
     }

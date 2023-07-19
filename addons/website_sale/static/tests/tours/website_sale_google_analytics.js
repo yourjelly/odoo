@@ -24,6 +24,7 @@ registry.category("web_tour.tours").add('google_analytics_view_item', {
     steps: [
     {
         content: "Patching websiteSaleTracking",
+        trigger: 'body',
         run: () => {
             patchWebsiteSaleTracking();
         }

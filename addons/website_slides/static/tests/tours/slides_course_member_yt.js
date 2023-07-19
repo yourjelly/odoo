@@ -37,6 +37,7 @@ registry.category("web_tour.tours").add('course_member_youtube', {
     steps: [
 {
     content: "Patching FullScreen",
+    trigger: 'body',
     run: function() {
         patchFullScreen()
     }

@@ -20,6 +20,7 @@ registry.category("web_tour.tours").add('test_certification_success', {
     url: '/survey/start/4ead4bc8-b8f2-4760-a682-1fde8daaaaac',
     steps: [{
         content: "Patching Survey Widget",
+        trigger: 'body',
         run: function(){
             patchSurveyWidget();
         }
