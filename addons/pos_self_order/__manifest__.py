@@ -23,6 +23,7 @@
     "assets": {
         "pos_self_order.assets_self_order": [
             "web/static/lib/jquery/jquery.js",
+            "web/static/lib/luxon/luxon.js",
             ("include", "web._assets_helpers"),
             ("include", "web._assets_backend_helpers"),
             ("include", "web._assets_primary_variables"),
@@ -41,7 +42,6 @@
             ("remove", "web/static/src/core/debug/**/*"),
             "web/static/lib/owl/owl.js",
             "web/static/lib/owl/odoo_module.js",
-            "web/static/lib/luxon/luxon.js",
             "web/static/src/views/fields/formatters.js",
             "web/static/src/libs/fontawesome/css/font-awesome.css",
             "web/static/lib/odoo_ui_icons/*",
