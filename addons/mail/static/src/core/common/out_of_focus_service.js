@@ -57,10 +57,19 @@ export class OutOfFocusService {
             type: "info",
         });
         this.counter++;
-        const titlePattern = this.counter === 1 ? _t("%s Message") : _t("%s Messages");
+        const title = (() => {
+            switch (this.counter) {
+                case 1:
+                    return _t("1 Message");
+                case 2:
+                    return _t("2 Messages");
+                default:
+                    return sprintf(_t("%(count)s Messages"), { count: this.counter });
+            }
+        })();
         this.busService.trigger("set_title_part", {
             part: "_chat",
-            title: sprintf(titlePattern, this.counter),
+            title,
         });
     }
 

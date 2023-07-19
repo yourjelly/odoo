@@ -21,43 +21,39 @@ export class MessageReactions extends Component {
     }
 
     getReactionSummary(reaction) {
-        const [firstUserName, secondUserName, thirdUserName] = reaction.personas.map(
+        const [user1, user2, user3] = reaction.personas.map(
             ({ name, displayName }) => name || displayName
         );
         switch (reaction.count) {
             case 1:
-                return sprintf(_t("%s has reacted with %s"), firstUserName, reaction.content);
+                return sprintf(_t("%(user)s has reacted with %(reaction)s"), {
+                    user: user1,
+                    reaction: reaction.content,
+                });
             case 2:
-                return sprintf(
-                    _t("%s and %s have reacted with %s"),
-                    firstUserName,
-                    secondUserName,
-                    reaction.content
-                );
+                return sprintf(_t("%(user1)s and %(user2)s have reacted with %(reaction)s"), {
+                    user1,
+                    user2,
+                    reaction: reaction.content,
+                });
             case 3:
                 return sprintf(
-                    _t("%s, %s, %s have reacted with %s"),
-                    firstUserName,
-                    secondUserName,
-                    thirdUserName,
-                    reaction.content
+                    _t("%(user1)s, %(user2)s and %(user3)s have reacted with %(reaction)s"),
+                    { user1, user2, user3, reaction: reaction.content }
                 );
             case 4:
                 return sprintf(
-                    _t("%s, %s, %s and 1 other person have reacted with %s"),
-                    firstUserName,
-                    secondUserName,
-                    thirdUserName,
-                    reaction.content
+                    _t(
+                        "%(user1)s, %(user2)s, %(user3)s and 1 other person have reacted with %(reaction)s"
+                    ),
+                    { user1, user2, user3, reaction: reaction.content }
                 );
             default:
                 return sprintf(
-                    _t("%s, %s, %s and %s other persons have reacted with %s"),
-                    firstUserName,
-                    secondUserName,
-                    thirdUserName,
-                    reaction.personas.length - 3,
-                    reaction.content
+                    _t(
+                        "%(user1)s, %(user2)s, %(user3)s and %(count)s other persons have reacted with %(reaction)s"
+                    ),
+                    { user1, user2, user3, count: reaction.count - 3, reaction: reaction.content }
                 );
         }
     }
