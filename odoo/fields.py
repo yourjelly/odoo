@@ -3037,8 +3037,6 @@ class Many2one(_Relational):
             except MissingError:
                 # Should not happen, unless the foreign key is missing.
                 return False
-        elif self.delegate:
-            return value.id
         else:
             return value._origin.id
 
