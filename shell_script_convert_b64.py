@@ -13,9 +13,15 @@ def run(env):
 def get_models(env):
     html_fields = env['ir.model.fields'].search([
         ('ttype', '=', 'html'),
-        ('store', '=', True)
+        ('store', '=', True),
     ])
-    return [(field.model_id.model, field.name) for field in html_fields]
+    models_and_fields = []
+    for field in html_fields:
+        model_name = field.model_id.model
+        model = env[model_name]
+        if not model._abstract and not model._transient:
+            models_and_fields.append((model_name, field.name))
+    return models_and_fields
 
 def clean_html_fields(env, models_and_fields):
 
@@ -37,31 +43,37 @@ def clean_html_fields(env, models_and_fields):
     """, re.VERBOSE) 
 
     def convert_b64images_to_attachments(record, field):
+        """
+            Returns (number of converted images, char count delta)
+        """
         content = record[field]
         if not content:
-            return 0
+            return (0, 0)
         replacements = []
+        attachments = []
         for match in re.finditer(pattern, content):
             b64_encoded_image = match.group('b64data')
             try:
                 attachment = add_attachment(b64_encoded_image)
-                new_src = attachment['image_src']
+            except Exception as e:
+                log_conversion_error(record, field, match.group('src'), e)
+            else:
+                attachments.append(attachment)
+                new_src = attachment._get_media_info()['image_src']
                 replacements.append((match.span('src'), new_src))
 
-                if DEBUG:
-                    log_image_info(match)
-
-
-            except Exception as e:
-                print(f"ERROR: {record._name} id {record.id} {field}: "
-                      f"Conversion of base64-encoded image to attachment failed.")
-                print(f"src={short(match.group('src'))}")
-                print("Error message:", e)
-        
         if (replacements):
-            # Database write
-            record[field] = make_replacements(content, replacements)
-        return (len(replacements))
+            new_content, delta_size = make_replacements(content, replacements)
+            try:
+                record[field] = new_content
+            except Exception as e:
+                log_write_error(record, field, e)
+                # TODO: test this
+                for attachment in attachments:
+                    attachment.unlink()
+            else:
+                return (len(replacements), delta_size)
+        return (0, 0)
 
     def make_replacements(text, replacements):
         shift_index = 0
@@ -69,7 +81,7 @@ def clean_html_fields(env, models_and_fields):
             start, end = map(lambda i: i + shift_index, span)
             text = text[:start] + new_src + text[end:]
             shift_index += len(new_src) - (end - start)
-        return text
+        return text, shift_index
 
     def add_attachment(b64_encoded_data):
         data = b64decode(b64_encoded_data)
@@ -85,36 +97,48 @@ def clean_html_fields(env, models_and_fields):
             'res_model': 'ir.ui.view',
             'raw': data
         }
-        attachment = env['ir.attachment'].create(attachment_data)
-        return attachment._get_media_info()
+        return env['ir.attachment'].create(attachment_data)
 
+    total_record_update_count = 0
+    total_size_saved_MB = 0
     for model, field in models_and_fields:
-        count_updated_records = 0
-        # recordset = env[model].search([(field, 'like', "src=_data:image")]) 
-        recordset = env[model].search([]) 
+        model_record_count = 0
+        model_size_reduction_MB = 0
+        recordset = env[model].search([(field, 'like', "src=_data:image")]) 
         for record in recordset:
-            num_replacements = convert_b64images_to_attachments(record, field)
-            if (num_replacements):
-                log_replacements(record, field, num_replacements)
-                count_updated_records += 1
+            num_replacements, size_delta = convert_b64images_to_attachments(record, field)
+            if num_replacements:
+                model_record_count += 1
+                size_reduction_MB = -size_delta / (1024 * 1024)
+                model_size_reduction_MB += size_reduction_MB
+                log_record_update(record, field, num_replacements, size_reduction_MB)
 
-        log_count(model, field, count_updated_records)
+        if model_record_count:
+            log_model_report(model, model_record_count, model_size_reduction_MB)
+            total_record_update_count += model_record_count
+            total_size_saved_MB += model_size_reduction_MB
+    log_totals(total_record_update_count, total_size_saved_MB)
 
 
 # Logging utils
 def short(text):
-    if (len(text) <= 80):
+    if len(text) <= 80:
         return text
     return text[:38] + '....' + text[-38:]
 
-def log_replacements(record, field, num_replacements):
-    print(  f"{record._name} {field} record id {record.id} "
-            f"({getattr(record, 'name', '')}) updated, "
-            f"{num_replacements} image(s) converted to attachment")
+def log_record_update(record, field, num_replacements, size_MB):
+    print(  f"{record._name} (html field: {field}) record id {record.id} "
+            f"({getattr(record, 'name', '')}) updated: "
+            f"{num_replacements} image(s) converted to attachment, "
+            f"{size_MB:.1f}MB reduction in field content size."
+    )
 
-def log_count(model, field, count):
-    print(f"{model} {field}: {count} record(s) updated")
+def log_model_report(model, count, size_MB):
+    print(f"{model}: {count} record(s) updated, delta: {size_MB:.1f}MB.")
     print("-----------------------------------")
+
+def log_totals(record_count, size_MB):
+    print(f"TOTAL: {record_count} record(s) updated, delta: {size_MB:.1f}MB.")
 
 def log_image_info(match):
     print("------------------")
@@ -124,3 +148,14 @@ def log_image_info(match):
     size_MB = len(b64data) / (1024 * 1024)
     print(f"Estimated size in DB: {size_MB:.1f}MB")
     print("------------------")
+
+def log_conversion_error(record, field, src, exception):
+    print(f"ERROR: {record._name} id {record.id} {field}: "
+        f"Conversion of base64-encoded image to attachment failed.")
+    print(f"src={short(src)}")
+    print("Exception message:", exception)
+
+def log_write_error(record, field, exception):
+    print(  f"ERROR: {record._name} id {record.id} {field}: "
+            f"Write operation failed.")
+    print("Exception message:", exception)
