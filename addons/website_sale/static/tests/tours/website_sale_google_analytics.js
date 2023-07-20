@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 
 function patchWebsiteSaleTracking() {
-    const websiteSaleTracking = odoo.loader.modules.get("@website_sale/js/website_sale_tracking");
+    const websiteSaleTracking = odoo.loader.modules.get("@website_sale/js/website_sale_tracking")[Symbol.for('default')];
     websiteSaleTracking.include({
         // Purposely don't call super to avoid call to third party (GA) during tests
         _onViewItem(event, data) {
