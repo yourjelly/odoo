@@ -254,8 +254,8 @@ registry.category("web_tour.tours").add('test_survey_session_manage_tour', {
     }
 }, {
     trigger: 'h1:contains("Scored Simple Choice")',
-    // Wait for Button to be updated ("late" enough DOM change after onNext() is triggered).
-    extra_trigger: '.o_survey_session_navigation_next_label:contains("Show Correct Answer(s)")',
+    // Wait for progressbar to be updated ("late" enough DOM change after onNext() is triggered).
+    extra_trigger: '.o_survey_session_progress_small[style*="width: 100%"]',
     run: () => {
         checkAnswers(getChartData(), [
             {value: 1, type: "regular"},
@@ -267,7 +267,7 @@ registry.category("web_tour.tours").add('test_survey_session_manage_tour', {
     }
 }, {
     trigger: 'h1:contains("Scored Simple Choice")',
-    // Same as above
+    // Wait for Button to be updated ("late" enough DOM change after onNext() is triggered).
     extra_trigger: '.o_survey_session_navigation_next_label:contains("Show Leaderboard")',
     run: () => {
         checkAnswers(getChartData(), [
