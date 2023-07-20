@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="discuss.CallParticipantVideo" owl="1">
-        <video class="w-100 h-100 rounded-1 cursor-pointer camera"
+    <t t-name="discuss.CallScreenShareVideo" owl="1">
+        <video class="w-100 h-100 rounded-1 cursor-pointer screen"
             t-attf-class="{{ className }}"
             playsinline="true"
             autoplay="true"
             muted="true"
-            t-ref="camera"
+            t-ref="screen"
             t-on-loadedmetadata="onVideoLoadedMetaData"
         />
     </t>

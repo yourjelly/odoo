@@ -120,6 +120,7 @@ export class Rtc {
             notificationsToSend: new Map(),
             audioTrack: undefined,
             videoTrack: undefined,
+            type: undefined,
             /**
              * callback to properly end the audio monitoring.
              * If set it indicates that we are currently monitoring the local
@@ -139,6 +140,7 @@ export class Rtc {
             outgoingSessions: new Set(),
             pttReleaseTimeout: undefined,
             sourceCameraStream: null,
+            sourceScreenStream: null,
         });
         this.blurManager = undefined;
         this.ringingThreads = reactive([], () => this.onRingingThreadsChange());
@@ -512,7 +514,9 @@ export class Rtc {
                      * but only 'muted'. This is why we do not stop the local track
                      * until the peer is completely removed.
                      */
-                    session.videoStream = undefined;
+                    session.videoStream = undefined
+                    session.camereStream = undefined
+                    session.screenStream = undefined
                 }
                 break;
             }
@@ -1012,7 +1016,9 @@ export class Rtc {
         this.state.videoTrack?.stop();
         this.state.notificationsToSend.clear();
         closeStream(this.state.sourceCameraStream);
+        closeStream(this.state.sourceScreenStream);
         this.state.sourceCameraStream = null;
+        this.state.sourceScreenStream = null;
         if (this.blurManager) {
             this.blurManager.close();
             this.blurManager = undefined;
@@ -1027,6 +1033,7 @@ export class Rtc {
             sendCamera: false,
             sendScreen: false,
             channel: undefined,
+            type: undefined,
         });
     }
 
@@ -1138,17 +1145,30 @@ export class Rtc {
             }
         }
         if (this.state.selfSession) {
-            if (!this.state.videoTrack) {
-                this.removeVideoFromSession(this.state.selfSession);
-            } else {
+            if(!this.state.videoTrack){
+                this.removeVideoFromSession(this.state.selfSession)
+            }
+            else if (type === "camera"){
+                !this.state.videoTrack ?
+                this.removeVideoFromSession(this.state.selfSession):
                 this.updateStream(this.state.selfSession, this.state.videoTrack);
+            }
+            else if (type === "screen"){
+                !this.state.screenTrack ?
+                this.removeVideoFromSession(this.state.selfSession):
+                this.updateStream(this.state.selfSession, this.state.screenTrack);
             }
         }
         for (const session of Object.values(this.state.channel.rtcSessions)) {
             if (session.id === this.state.selfSession.id) {
                 continue;
             }
-            await this.updateRemote(session, "video");
+            if (type === "camera") {
+                await this.updateRemote(session, "video");
+            }
+            if (type === "screen") {
+                await this.updateRemote(session,"video");
+            }
         }
         if (!this.state.selfSession) {
             return;
@@ -1201,7 +1221,9 @@ export class Rtc {
             }
             this.state.videoTrack = undefined;
             closeStream(this.state.sourceCameraStream);
+            closeStream(this.state.sourceScreenStream);
             this.state.sourceCameraStream = null;
+            this.state.sourceScreenStream = null;
         };
         if (!activateVideo) {
             if (type === "screen") {
@@ -1210,21 +1232,28 @@ export class Rtc {
             stopVideo();
             return;
         }
-        let sourceStream;
+        let sourceCameraStream = this.state.sourceCameraStream;
+        let sourceScreenStream = this.state.sourceScreenStream;
         try {
             if (type === "camera") {
+                this.state.type="camera";
                 if (this.state.sourceCameraStream && this.state.sendCamera) {
-                    sourceStream = this.state.sourceCameraStream;
+                    sourceCameraStream = this.state.sourceCameraStream;
                 } else {
-                    sourceStream = await browser.navigator.mediaDevices.getUserMedia({
+                    sourceCameraStream = await browser.navigator.mediaDevices.getUserMedia({
                         video: VIDEO_CONFIG,
                     });
                 }
             }
             if (type === "screen") {
-                sourceStream = await browser.navigator.mediaDevices.getDisplayMedia({
-                    video: VIDEO_CONFIG,
-                });
+                this.state.type="screen";
+                if (this.state.sourceScreenStream && this.state.sendScreen) {
+                    sourceScreenStream = this.state.sourceScreenStream;
+                } else {
+                    sourceScreenStream = await browser.navigator.mediaDevices.getDisplayMedia({
+                        video: VIDEO_CONFIG,
+                    });
+                }
                 this.soundEffectsService.play("screen-sharing");
             }
         } catch {
@@ -1236,14 +1265,15 @@ export class Rtc {
             stopVideo();
             return;
         }
-        let videoStream = sourceStream;
+        let videoCameraStream = sourceCameraStream;
+        let videoScreenStream = sourceScreenStream;
         if (this.userSettingsService.useBlur && type === "camera") {
             try {
-                this.blurManager = new BlurManager(sourceStream, {
+                this.blurManager = new BlurManager(sourceCameraStream, {
                     backgroundBlur: this.userSettingsService.backgroundBlurAmount,
                     edgeBlur: this.userSettingsService.edgeBlurAmount,
                 });
-                videoStream = await this.blurManager.stream;
+                videoCameraStream = await this.blurManager.stream;
             } catch (_e) {
                 this.notification.add(
                     sprintf(_t("%(name)s: %(message)s)"), {
@@ -1255,34 +1285,53 @@ export class Rtc {
                 this.userSettingsService.useBlur = false;
             }
         }
-        const track = videoStream ? videoStream.getVideoTracks()[0] : undefined;
-        if (track) {
-            track.addEventListener("ended", async () => {
+        const cameratrack = videoCameraStream ? videoCameraStream.getVideoTracks()[0] : undefined;
+        const screentrack = videoScreenStream ? videoScreenStream.getVideoTracks()[0] : undefined;
+        if (cameratrack) {
+            cameratrack.addEventListener("ended", async () => {
+                await this.toggleVideo(type, false);
+            });
+        }
+        if (screentrack) {
+            screentrack.addEventListener("ended", async () => {
                 await this.toggleVideo(type, false);
             });
         }
         // ensures that the previous stream is stopped before overwriting it
-        if (this.state.sourceCameraStream && sourceStream.id !== this.state.sourceCameraStream.id) {
+        if (type === "camera" && this.state.sourceCameraStream && sourceCameraStream.id !== this.state.sourceCameraStream.id ) {
             closeStream(this.state.sourceCameraStream);
+        }if (type === "screen" && this.state.sourceScreenStream && sourceScreenStream.id !== this.state.sourceScreenStream.id ) {
+            closeStream(this.state.sourceScreenStream);
         }
         Object.assign(this.state, {
-            sourceCameraStream: sourceStream,
-            videoTrack: track,
-            sendCamera: Boolean(type === "camera" && track),
-            sendScreen: Boolean(type === "screen" && track),
+            sourceCameraStream: sourceCameraStream,
+            sourceScreenStream: sourceScreenStream,
+            videoTrack: cameratrack,
+            screenTrack: screentrack,
+            sendCamera: Boolean(type === "camera" && cameratrack),
+            sendScreen: Boolean(type === "screen" && screentrack),
         });
     }
 
     /**
      * Updates the track that is broadcasted to the RTCPeerConnection.
-     * This will start new transaction by triggering a negotiationneeded event
+     *      * This will start new transaction by triggering a negotiationneeded event
      * on the peerConnection given as parameter.
      *
      * negotiationneeded -> offer -> answer -> ...
      */
     async updateRemote(session, trackKind, initTransceiver = false) {
         this.log(session, `updating ${trackKind} transceiver`);
-        const track = trackKind === "audio" ? this.state.audioTrack : this.state.videoTrack;
+        let track ;
+        if (trackKind === "audio") {
+            track = this.state.audioTrack;
+        }
+        if (this.state.type === "camera") {
+            track = this.state.videoTrack;
+        }
+        if (this.state.type === "video") {
+            track = this.state.screenTrack;
+        }
         let transceiverDirection = track ? "sendrecv" : "recvonly";
         if (trackKind === "video") {
             transceiverDirection = this.getTransceiverDirection(session, Boolean(track));
@@ -1472,12 +1521,22 @@ export class Rtc {
         }
         if (track.kind === "video") {
             session.videoStream = stream;
+            if (this.state.type == "camera") {
+                session.cameraStream = this.state.sourceCameraStream;
+            }
+            if (this.state.type == "screen") {
+                session.screenStream = this.state.sourceScreenStream ;
+            }
         }
     }
 
     removeVideoFromSession(session) {
         closeStream(session.videoStream);
+        closeStream(session.cameraStream);
+        closeStream(session.screenStream);
         session.videoStream = undefined;
+        session.cameraStream = undefined;
+        session.screenStream = undefined;
     }
 
     updateVideoDownload(rtcSession, { viewCountIncrement }) {

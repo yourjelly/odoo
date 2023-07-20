@@ -3,6 +3,7 @@
 import { useStore } from "@mail/core/common/messaging_hook";
 import { CallContextMenu } from "@mail/discuss/call/common/call_context_menu";
 import { CallParticipantVideo } from "@mail/discuss/call/common/call_participant_video";
+import { CallScreenShareVideo } from "@mail/discuss/call/common/call_screenShare_video";
 import { useRtc } from "@mail/discuss/call/common/rtc_hook";
 import { useHover } from "@mail/utils/common/hooks";
 import { isEventHandled, markEventHandled } from "@mail/utils/common/misc";
@@ -16,7 +17,7 @@ const HIDDEN_CONNECTION_STATES = new Set(["connected", "completed"]);
 
 export class CallParticipantCard extends Component {
     static props = ["className", "cardData", "thread", "minimized?"];
-    static components = { CallParticipantVideo };
+    static components = { CallParticipantVideo, CallScreenShareVideo };
     static template = "discuss.CallParticipantCard";
 
     setup() {
