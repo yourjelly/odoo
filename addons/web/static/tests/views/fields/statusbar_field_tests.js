@@ -434,7 +434,7 @@ QUnit.module("Fields", (hooks) => {
             await click(target, ".o_statusbar_status .dropdown-toggle:not(.d-none)");
 
             const status = target.querySelectorAll(".o_statusbar_status");
-            assert.containsOnce(status[0], ".dropdown-item.disabled");
+            assert.containsOnce(getDropdownMenu(target, status[0]), ".dropdown-item.disabled");
             assert.containsOnce(status[status.length - 1], "button:disabled");
         }
     );

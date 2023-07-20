@@ -1623,7 +1623,7 @@ QUnit.test("Can edit a message only containing an attachment", async () => {
     const { openDiscuss } = await start();
     openDiscuss(channelId);
     await click(".o-mail-Message [title='Expand']");
-    await click(".o-mail-Message [title='Edit']");
+    await click(".o-mail-Message-moreMenu [title='Edit']");
     await contains(".o-mail-Message-editable .o-mail-Composer-input");
 });
 

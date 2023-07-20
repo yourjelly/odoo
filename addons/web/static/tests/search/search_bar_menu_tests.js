@@ -1693,8 +1693,9 @@ QUnit.module("Search", (hooks) => {
             await openAddCustomFilterDialog(target);
             await dsHelpers.clickOnButtonAddNewRule(target);
 
-            await click(target.querySelector(".o_domain_selector .dropdown .dropdown-toggle"));
-            await click(target.querySelector(".o_domain_selector .dropdown .dropdown-item"));
+            await click(target.querySelector(".o_domain_selector .dropdown-toggle"));
+            const domainSelector = getDropdownMenu(target, ".o_domain_selector");
+            await click(domainSelector.querySelector(".dropdown-item"));
 
             await dsHelpers.clickOnButtonAddBranch(target, -1);
             await dsHelpers.clickOnButtonAddBranch(target, -1);

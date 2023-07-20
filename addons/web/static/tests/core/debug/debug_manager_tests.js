@@ -369,7 +369,7 @@ QUnit.module("DebugMenu", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1234);
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".o-dropdown--menu .dropdown-item"));
         assert.containsOnce(target, ".modal");
         assert.strictEqual(
             target.querySelector(".modal-body").innerText,
@@ -722,7 +722,7 @@ QUnit.module("DebugMenu", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1234);
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".o-dropdown--menu .dropdown-item"));
         assert.containsOnce(target, ".modal");
         assert.strictEqual(
             target.querySelector(".modal-title").textContent,
