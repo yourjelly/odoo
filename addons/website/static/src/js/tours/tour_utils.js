@@ -2,7 +2,7 @@
 
 import {_t} from "@web/legacy/js/services/core";
 import "@web/legacy/translations_loaded";
-import { Markup, patch } from "@web/legacy/js/core/utils";
+import { Markup } from "@web/legacy/js/core/utils";
 import { registry } from "@web/core/registry";
 import { sprintf } from "@web/core/utils/strings";
 
