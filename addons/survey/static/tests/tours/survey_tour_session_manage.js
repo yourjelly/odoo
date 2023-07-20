@@ -6,6 +6,8 @@ import { TourError } from "@web_tour/tour_service/tour_utils";
 
 import surveySessionTools from "@survey/../tests/tours/survey_tour_session_tools";
 
+let rootWidget = null;
+
 /**
  * Since the chart is rendered using SVG, we can't use jQuery triggers to check if everything
  * is correctly rendered.
@@ -14,7 +16,6 @@ import surveySessionTools from "@survey/../tests/tours/survey_tour_session_tools
  */
 const getChartData = () => {
     const chartData = [];
-    const rootWidget = odoo.loader.modules.get('root.widget');
     const surveyManagePublicWidget = rootWidget.publicWidgets.find((widget) => {
         return widget.$el.hasClass('o_survey_session_manage');
     });
@@ -142,11 +143,21 @@ registry.category("web_tour.tours").add('test_survey_session_manage_tour', {
     test: true,
     steps: [].concat(surveySessionTools.accessSurveySteps, [{
     trigger: 'button[name="action_open_session_manager"]',
-}, {
+},{
     trigger: 'h1:contains("Nickname")',
     isCheck: true // check nickname question is displayed
 }, {
+    trigger: 'body',
+    run: () => {
+        const rootWidgetModule = odoo.loader.modules.get('root.widget');
+        Promise.resolve(rootWidgetModule).then((instance) => {
+            rootWidget = instance;
+            document.body.classList.add('root_widget_loaded');
+        });
+    },
+}, {
     trigger: 'h1',
+    extra_trigger: "body.root_widget_loaded",
     run: nextScreen
 }, {
     trigger: 'h1:contains("Text Question")',
