@@ -338,7 +338,7 @@ function registerWebsitePreviewTour(name, options, steps) {
             timeout: 30000,
             auto: true,
             run: () => {
-                const { WebsitePreview } = "@website/client_actions/website_preview/website_preview";
+                const { WebsitePreview } = odoo.loader.modules.get("@website/client_actions/website_preview/website_preview");
                 patch(WebsitePreview.prototype, 'website_preview_test_mode', {
                     /**
                      * @override
