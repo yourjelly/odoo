@@ -337,17 +337,7 @@ function registerWebsitePreviewTour(name, options, steps) {
             trigger: '.o_website_preview.editor_enable.editor_has_snippets',
             timeout: 30000,
             auto: true,
-            run: () => {
-                const { WebsitePreview } = odoo.loader.modules.get("@website/client_actions/website_preview/website_preview");
-                patch(WebsitePreview.prototype, 'website_preview_test_mode', {
-                    /**
-                     * @override
-                     */
-                    get testMode() {
-                        return true;
-                    }
-                });
-            }, // It's a check
+            run: () => {}, // It's a check
         });
     } else {
         tourSteps[0].timeout = 20000;
