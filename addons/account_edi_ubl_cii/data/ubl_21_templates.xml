@@ -68,10 +68,9 @@
                 </t>
                 <t t-foreach="vals.get('payment_terms_vals', [])" t-as="foreach_vals">
                     <cac:PaymentTerms
-                        xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-                        xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-                        <t t-foreach="foreach_vals.get('note_vals', [])" t-as="note">
-                            <cbc:Note t-out="note"/>
+                        xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+                        <t t-call="{{PaymentTermsType_template}}">
+                            <t t-set="vals" t-value="foreach_vals"/>
                         </t>
                     </cac:PaymentTerms>
                 </t>
