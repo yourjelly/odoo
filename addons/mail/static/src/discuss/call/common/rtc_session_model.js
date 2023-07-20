@@ -29,6 +29,8 @@ export class RtcSession {
     videoComponentCount = 0;
     /** @type {MediaStream} */
     videoStream;
+    cameraStream;
+    screenStream;
     /** @type {import("@mail/core/common/store_service").Store} */
     _store;
     // RTC stats

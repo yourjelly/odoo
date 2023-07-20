@@ -4,13 +4,13 @@ import { useRtc } from "@mail/discuss/call/common/rtc_hook";
 
 import { Component, onMounted, onPatched, useExternalListener, useRef } from "@odoo/owl";
 
-export class CallParticipantVideo extends Component {
+export class CallScreenShareVideo extends Component {
     static props = ["session"];
-    static template = "discuss.CallParticipantVideo";
+    static template = "discuss.CallScreenShareVideo";
 
     setup() {
         this.rtc = useRtc();
-        this.root = useRef("camera");
+        this.root = useRef("screen");
         onMounted(() => this._update());
         onPatched(() => this._update());
         useExternalListener(this.env.bus, "RTC-SERVICE:PLAY_MEDIA", async () => {
@@ -22,10 +22,10 @@ export class CallParticipantVideo extends Component {
         if (!this.root.el) {
             return;
         }
-        if (!this.props.session || !this.props.session.cameraStream) {
+        if (!this.props.session || !this.props.session.screenStream) {
             this.root.el.srcObject = undefined;
         } else {
-            this.root.el.srcObject = this.props.session.cameraStream;
+            this.root.el.srcObject = this.props.session.screenStream;
         }
         this.root.el.load();
     }

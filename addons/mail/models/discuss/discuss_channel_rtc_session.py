@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from dateutil.relativedelta import relativedelta
-
+import json
 from odoo import api, fields, models
 
 
@@ -85,11 +85,15 @@ class MailRtcSession(models.Model):
 
             :param notifications: list of tuple with the following elements:
                 - target_session_ids: a list of discuss.channel.rtc.session ids
-                - content: a string with the content to be sent to the targets
+                - content: a string with the  content to be sent to the targets
         """
         self.ensure_one()
         payload_by_target = defaultdict(lambda: {'sender': self.id, 'notifications': []})
         for target_session_ids, content in notifications:
+            data = json.loads(content)
+            stream_type = data['payload']['stream_type']
+            event = data['event']
+            print(event,stream_type,"================================================NOTIFY_PEERS=======================")
             for target_session in self.env['discuss.channel.rtc.session'].browse(target_session_ids).exists():
                 target = target_session.guest_id or target_session.partner_id
                 payload_by_target[target]['notifications'].append(content)

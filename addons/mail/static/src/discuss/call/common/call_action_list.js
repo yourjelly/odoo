@@ -33,9 +33,11 @@ export class CallActionList extends Component {
         if (isMobileOS) {
             acts.push({
                 id: "shareScreen",
-                name: !this.rtc.state.sendScreen ? _t("Share Screen") : _t("Stop Sharing Screen"),
+                name: !this.rtc.state?.selfSession.sendScreen ? _t("Share Screen") : _t("Stop Sharing Screen"),
                 icon: "fa fa-fw fa-desktop",
-                onSelect: () => this.rtc.toggleVideo("screen"),
+                onSelect: (ev) => {
+                    this.sendScreen(ev)
+                },
             });
         }
         if (!this.props.fullscreen.isActive) {
@@ -81,6 +83,10 @@ export class CallActionList extends Component {
 
     async onClickRaiseHand(ev) {
         this.rtc.raiseHand(!this.rtc.state.selfSession.raisingHand);
+    }
+
+    async sendScreen(ev){
+        await this.rtc.connectScreen(this.rtc.state.selfSession)
     }
 
     /**

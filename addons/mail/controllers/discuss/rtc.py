@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-
+import json
 from odoo import http
 from odoo.http import request
 from odoo.tools import file_open
@@ -21,6 +21,10 @@ class RtcController(http.Controller):
         guest = request.env["mail.guest"]._get_guest_from_context()
         notifications_by_session = defaultdict(list)
         for sender_session_id, target_session_ids, content in peer_notifications:
+            # data = json.loads(content)
+            # stream_type = data['payload']['stream_type']
+            # event = data['event']
+            # print(event,stream_type,"===============================CALL_NOTIFY=================================")
             session_sudo = guest.env["discuss.channel.rtc.session"].sudo().browse(int(sender_session_id)).exists()
             if (
                 not session_sudo

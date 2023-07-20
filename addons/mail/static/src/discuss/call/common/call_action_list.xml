@@ -46,7 +46,7 @@
                         }"
                         t-att-aria-label="cameraText"
                         t-att-title="cameraText"
-                        t-on-click="() => this.rtc.toggleVideo('camera')">
+                        t-on-click="() => this.rtc.shareCamera('camera')">
                         <div class="fa-stack">
                             <i class="fa fa-video-camera fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall, 'text-success': rtc.state.sendCamera }"/>
                         </div>
