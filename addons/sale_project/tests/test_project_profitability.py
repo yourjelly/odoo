@@ -1157,3 +1157,63 @@ class TestSaleProjectProfitability(TestProjectProfitabilityCommon, TestSaleCommo
                 },
             },
         )
+
+    def test_profitability_revenue(self):
+        product_profitability_items = self.env['product.product'].create({
+            'name': "Service Ordered, create task in new project",
+            'standard_price': 10,
+            'list_price': 20,
+            'type': 'service',
+            'invoice_policy': 'order',
+            'uom_id': self.uom_hour.id,
+            'uom_po_id': self.uom_hour.id,
+            'default_code': 'SERV-ORDERED3',
+            'service_tracking': 'task_in_project',
+            'project_id': False,
+            'service_type': 'manual',
+        })
+        saleorder_revenue = self.env['sale.order'].with_context(tracking_disable=True)
+        saleOrderLine_revenue = self.env['sale.order.line'].with_context(tracking_disable=True)
+        sale_order_revenue = saleorder_revenue.create({
+            'partner_id': self.partner.id,
+            'partner_invoice_id': self.partner.id,
+            'partner_shipping_id': self.partner.id,
+        })
+
+        sale_order_line_revenue = saleOrderLine_revenue.create({
+            'product_id':product_profitability_items.id,
+            'product_uom_qty':10,
+            'order_id':sale_order_revenue.id,
+        })
+
+        sequence_per_invoice_type = self.project._get_profitability_sequence_per_invoice_type()
+        profitability_item_data = {
+            'revenues': {
+                'data': [{
+                    'id': 'billable_fixed',
+                    'sequence': sequence_per_invoice_type['billable_fixed'],
+                    'invoiced': 0.0,
+                    'to_invoice': 200.0
+                }],
+                'total': {
+                    'invoiced': 0.0,
+                    'to_invoice': 200.0
+                }
+            },
+            'costs': {
+                'data': [],
+                'total': {'billed': 0.0, 'to_bill': 0.0}
+            }
+        }
+
+        sale_order_revenue.action_confirm()
+        project_profitability_items = sale_order_line_revenue.project_id
+        self.assertDictEqual(
+            project_profitability_items._get_profitability_items(False),
+            profitability_item_data
+        )
+        project_profitability_items.active = False
+        self.assertDictEqual(
+            project_profitability_items._get_profitability_items(False),
+            profitability_item_data
+        )
