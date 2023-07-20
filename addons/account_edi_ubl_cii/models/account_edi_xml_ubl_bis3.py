@@ -248,12 +248,8 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
     def _get_invoice_line_vals(self, line, taxes_vals):
         # EXTENDS account.edi.xml.ubl_21
         vals = super()._get_invoice_line_vals(line, taxes_vals)
-
         vals.pop('tax_total_vals', None)
-
-        vals['currency_dp'] = 2
-        vals['price_vals']['currency_dp'] = 2
-
+        vals['currency_dp'] = 2  # "Invoice line net amount shall be rounded to two decimals"
         return vals
 
     def _export_invoice_vals(self, invoice):

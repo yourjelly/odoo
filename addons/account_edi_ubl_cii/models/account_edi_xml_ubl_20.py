@@ -297,12 +297,9 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
         return {
             'currency': line.currency_id,
-            'currency_dp': line.currency_id.decimal_places,
-
             # The price of an item, exclusive of VAT, after subtracting item price discount.
             'price_amount': gross_price_unit,
             'product_price_dp': self.env['decimal.precision'].precision_get('Product Price'),
-
             # The number of item units to which the price applies.
             # setting to None -> the xml will not comprise the BaseQuantity (it's not mandatory)
             'base_quantity': None,
