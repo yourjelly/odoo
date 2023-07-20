@@ -7,7 +7,7 @@
                 <span>More...</span>
             </button>
             <button class="button set-partner" t-att-class="{'decentered': isLongName}"
-                    t-on-click="() => this.pos.selectPartner()">
+                    t-on-click="() => this.pos.selectPartner()" t-if="!this.swapButton">
                 <t t-if="!ui.isSmall"><i class="fa fa-user" role="img" aria-label="Customer" title="Customer" /></t>
                 <t t-if="props.partner">
                     <t t-esc="props.partner.name" />
@@ -16,11 +16,32 @@
                     Customer
                 </t>
             </button>
-            <button class="button pay validation pay-order-button" t-att-class="{ 'with-more-button': props.onClickMore and ui.isSmall }" t-on-click="props.actionToTrigger ? this.props.actionToTrigger : () => pos.get_order().pay()">
+            <button t-on-click="() => pos.get_order().pay()" class="button pay-order-button" t-att-class="{ 'highlight': this.highlightPay }" t-if="!this.swapButton">
+                <i class="oi oi-chevron-right" role="img" aria-label="Pay" title="Pay" />
+                Payment
+            </button>
+            <button class="button pay validation pay-order-button"
+                    t-if="!this.swapButton" t-att-class="{ 'with-more-button': props.onClickMore and ui.isSmall }"
+                    t-on-click="props.actionToTrigger ? this.props.actionToTrigger : () => pos.get_order().pay()">
                 <div class="pay-circle" t-att-class="{ 'highlight': this.highlightPay }">
                     <i class="oi oi-chevron-right" role="img" aria-label="Pay" title="Pay" />
                 </div>
                 <t t-esc="props.actionName" />
+            </button>
+            <button
+                t-if="this.swapButton"
+                class="button submit-order"
+                t-att-class="addedClasses"
+                t-on-click="submitOrder">
+                <div t-att-class ="categoryCount ? 'smaller-display' : 'none'">
+                    <div  t-att-class = "categoryCount ? 'submit-circle-smaller' : 'submit-circle'">
+                            <i class="fa fa-cutlery"></i>
+                    </div>
+                    Order
+                </div>
+                <div class = "break-line">
+                    <span t-esc="categoryCount"/>
+                </div>
             </button>
         </div>
     </t>

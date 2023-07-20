@@ -228,6 +228,10 @@ export class TicketScreen extends Component {
     async onDoRefund() {
         const order = this.getSelectedSyncedOrder();
 
+        if (this.pos.config.is_restaurant && order && !this.pos.table) {
+            this.pos.setTable(order.table ? order.table : Object.values(this.pos.tables_by_id)[0]);
+        }
+
         if (order && this._doesOrderHaveSoleItem(order)) {
             if (!this._prepareAutoRefundOnOrder(order)) {
                 // Don't proceed on refund if preparation returned false.
@@ -241,7 +245,6 @@ export class TicketScreen extends Component {
         }
 
         const partner = order.get_partner();
-
         const allToRefundDetails = this._getRefundableDetails(partner);
         if (allToRefundDetails.length == 0) {
             this._state.ui.highlightHeaderNote = !this._state.ui.highlightHeaderNote;
@@ -299,7 +302,7 @@ export class TicketScreen extends Component {
      * @returns {boolean}
      */
     get allowNewOrders() {
-        return true;
+        return this.pos.config.is_restaurant ? Boolean(this.pos.table) : true;
     }
     getFilteredOrderList() {
         if (this._state.ui.filter == "SYNCED") {
@@ -359,6 +362,9 @@ export class TicketScreen extends Component {
      * If the order is the only order and is empty
      */
     isDefaultOrderEmpty(order) {
+        if (this.pos.config.is_restaurant) {
+            return false;
+        }
         const status = this._getScreenToStatusMap()[order.get_screen_data().name];
         const productScreenStatus = this._getScreenToStatusMap().ProductScreen;
         return (
@@ -435,6 +441,72 @@ export class TicketScreen extends Component {
             .map((toRefundDetail) => toRefundDetail.qty)
             .reduce((acc, val) => acc + val, 0);
         return !this.pos.isProductQtyZero(total);
+    }
+    getTable(order) {
+        const table = order.getTable();
+        if (table) {
+            let floorAndTable = "";
+
+            if (this.pos.floors && this.pos.floors.length > 1) {
+                floorAndTable = `${table.floor.name}/`;
+            }
+
+            floorAndTable += table.name;
+            return floorAndTable;
+        }
+    }
+    async settleTips() {
+        // set tip in each order
+        for (const order of this.getFilteredOrderList()) {
+            const tipAmount = parseFloat(order.uiState.TipScreen.inputTipAmount || "0");
+            const serverId = this.pos.validated_orders_name_server_id_map[order.name];
+            if (!serverId) {
+                console.warn(
+                    `${order.name} is not yet sync. Sync it to server before setting a tip.`
+                );
+            } else {
+                const result = await this.setTip(order, serverId, tipAmount);
+                if (!result) {
+                    break;
+                }
+            }
+        }
+    }
+    async setTip(order, serverId, amount) {
+        try {
+            const paymentline = order.get_paymentlines()[0];
+            if (paymentline.payment_method.payment_terminal) {
+                paymentline.amount += amount;
+                this.pos.set_order(order, { silent: true });
+                await paymentline.payment_method.payment_terminal.send_payment_adjust(
+                    paymentline.cid
+                );
+            }
+
+            if (!amount) {
+                await this.setNoTip(serverId);
+            } else {
+                order.finalized = false;
+                order.set_tip(amount);
+                order.finalized = true;
+                const tip_line = order.selected_orderline;
+                await this.orm.call("pos.order", "set_tip", [serverId, tip_line.export_as_JSON()]);
+            }
+            if (order === this.pos.get_order()) {
+                this._selectNextOrder(order);
+            }
+            this.pos.removeOrder(order);
+            return true;
+        } catch {
+            const { confirmed } = await this.popup.add(ConfirmPopup, {
+                title: "Failed to set tip",
+                body: `Failed to set tip to ${order.name}. Do you want to proceed on setting the tips of the remaining?`,
+            });
+            return confirmed;
+        }
+    }
+    async setNoTip(serverId) {
+        await this.orm.call("pos.order", "set_no_tip", [serverId]);
     }
     //#endregion
     //#region PRIVATE METHODS
@@ -554,14 +626,22 @@ export class TicketScreen extends Component {
             discount: orderline.discount,
         };
     }
-    _setOrder(order) {
-        if (this.pos.isOpenOrderShareable()) {
-            this.pos.sendDraftToServer();
+    async _setOrder(order) {
+        if (!this.pos.config.is_restaurant || this.pos.table) {
+            if (this.pos.isOpenOrderShareable()) {
+                this.pos.sendDraftToServer();
+            }
+            this.pos.set_order(order);
+            this.pos.closeScreen();
         }
-        this.pos.set_order(order);
+        const orderTable = order.getTable();
+        await this.pos.setTable(orderTable, order.uid);
         this.pos.closeScreen();
     }
     _getOrderList() {
+        if (this.pos.table) {
+            return this.pos.getTableOrders(this.pos.table.id);
+        }
         return this.pos.get_order_list();
     }
     _getFilterOptions() {
@@ -589,6 +669,11 @@ export class TicketScreen extends Component {
                 displayName: this.env._t("Customer"),
                 modelField: "partner_id.complete_name",
             },
+            TABLE: {
+                repr: this.getTable.bind(this),
+                displayName: this.env._t("Table"),
+                modelField: "table_id.name",
+            },
         };
 
         if (this.showCardholderName()) {
@@ -607,8 +692,9 @@ export class TicketScreen extends Component {
     _getScreenToStatusMap() {
         return {
             ProductScreen: "ONGOING",
-            PaymentScreen: "PAYMENT",
+            PaymentScreen: this.pos.config.set_tip_after_payment ? "OPEN" : "PAYMENT",
             ReceiptScreen: "RECEIPT",
+            TipScreen: "TIPPING",
         };
     }
     /**
@@ -640,6 +726,11 @@ export class TicketScreen extends Component {
             text: this.env._t("Receipt"),
             indented: true,
         });
+        if (this.pos.config.set_tip_after_payment) {
+            result.delete("PAYMENT");
+            result.set("OPEN", { text: this.env._t("Open"), indented: true });
+            result.set("TIPPING", { text: this.env._t("Tipping"), indented: true });
+        }
         return states;
     }
     //#region SEARCH SYNCED ORDERS
@@ -717,3 +808,31 @@ export class TicketScreen extends Component {
 }
 
 registry.category("pos_screens").add("TicketScreen", TicketScreen);
+
+export class TipCell extends Component {
+    static template = "point_of_sale.TipCell";
+
+    setup() {
+        this.state = useState({ isEditing: false });
+        this.orderUiState = this.props.order.uiState.TipScreen;
+        useAutofocus();
+    }
+    get tipAmountStr() {
+        return this.env.utils.formatCurrency(parseFloat(this.orderUiState.inputTipAmount || "0"));
+    }
+    onBlur() {
+        this.state.isEditing = false;
+    }
+    onKeydown(event) {
+        if (event.key === "Enter") {
+            this.state.isEditing = false;
+        }
+    }
+    editTip() {
+        this.state.isEditing = true;
+    }
+}
+
+//patch(TicketScreen, "point_of_sale.TicketScreen.components", {
+//    components: { ...TicketScreen.components, TipCell },
+//});

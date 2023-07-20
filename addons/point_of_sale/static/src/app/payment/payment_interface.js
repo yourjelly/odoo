@@ -89,4 +89,27 @@ export class PaymentInterface {
      * progress payments.
      */
     close() {}
+
+    /**
+     * Override this method to be able to show the 'Adjust Authorisation' button
+     * on a validated payment_line and to show the tip screen which allow
+     * tipping even after payment. By default, this returns true for all
+     * non-cash payment.
+     */
+    canBeAdjusted() {
+        return false;
+        //todo: TO FIX
+//        if (this.payment_method.payment_terminal) {
+//            return this.payment_method.payment_terminal.canBeAdjusted(this.cid);
+//        }
+//        return !this.payment_method.is_cash_count;
+    }
+
+    /**
+     * Called when the amount authorized by a payment request should
+     * be adjusted to account for a new order line, it can only be called if
+     * canBeAdjusted returns True
+     * @param {string} cid - The id of the paymentline
+     */
+    send_payment_adjust(cid) {}
 }

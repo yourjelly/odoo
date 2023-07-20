@@ -48,6 +48,19 @@ export const popupService = {
                     };
                 });
             },
+            closePopupsButError() {
+                const popups = Object.values(this.popups);
+                const isErrorPopupOpen = popups.some((popup) =>
+                    // FIXME POSREF: this seems very brittle.
+                    popup.component.name.toLowerCase().includes("error")
+                );
+                if (!isErrorPopupOpen) {
+                    for (const popup of popups) {
+                        popup.props.close(false);
+                    }
+                }
+                return !isErrorPopupOpen;
+            },
             // exposed so that overrides can use it, should not be read from outside. Maybe we should just implement closePopupsButError directly in pos instead of pos_restaurant
             popups,
         };

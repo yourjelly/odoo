@@ -312,6 +312,15 @@ export class PaymentScreen extends Component {
         this.pos.showScreen(this.nextScreen);
     }
     get nextScreen() {
+        const order = this.currentOrder;
+        if (!this.pos.config.set_tip_after_payment || order.is_tipped) {
+            return !this.error ? "ReceiptScreen" : "ProductScreen";
+        }
+        // Take the first payment method as the main payment.
+        const mainPayment = order.get_paymentlines()[0];
+        if (mainPayment.canBeAdjusted()) {
+            return "TipScreen";
+        }
         return !this.error ? "ReceiptScreen" : "ProductScreen";
     }
     paymentMethodImage(id) {

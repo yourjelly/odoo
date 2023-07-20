@@ -38,6 +38,12 @@
                                         Backend
                                     </span>
                                 </li>
+                                <li t-if="pos.mainScreen.component.name == 'FloorScreen'" class="menu-item navbar-button edit-button" t-on-click="toggleEditMode">
+                                    <span>Edit Plan</span>
+                                </li>
+                                <li t-if="pos.mainScreen.component.name == 'FloorScreen'" class="menu-item navbar-button" t-on-click="onSwitchButtonClick">
+                                    <span>Switch Floor View</span>
+                                </li>
                                 <li class="menu-item navbar-button close-button" t-on-click="closeSession">
                                     <span>
                                         Close Session

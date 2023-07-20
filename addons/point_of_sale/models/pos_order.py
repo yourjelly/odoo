@@ -1341,27 +1341,27 @@ class PosOrder(models.Model):
                 messages.append((config_cur_session._get_bus_channel_name(), 'TABLE_ORDER_COUNT', order_count))
         self.env['bus.bus']._sendmany(messages)
 
-        @api.model
-        def get_table_draft_orders(self, table_ids):
-            """Generate an object of all draft orders for the given table.
+    @api.model
+    def get_table_draft_orders(self, table_ids):
+        """Generate an object of all draft orders for the given table.
 
-            Generate and return an JSON object with all draft orders for the given table, to send to the
-            front end application.
+        Generate and return an JSON object with all draft orders for the given table, to send to the
+        front end application.
 
-            :param table_ids: Ids of the selected tables.
-            :type table_ids: list of int.
-            :returns: list -- list of dict representing the table orders
-            """
-            table_orders = self.search_read(
-                domain=self._get_domain_for_draft_orders(table_ids),
-                fields=self._get_fields_for_draft_order())
+        :param table_ids: Ids of the selected tables.
+        :type table_ids: list of int.
+        :returns: list -- list of dict representing the table orders
+        """
+        table_orders = self.search_read(
+            domain=self._get_domain_for_draft_orders(table_ids),
+            fields=self._get_fields_for_draft_order())
 
-            self._get_order_lines(table_orders)
-            self._get_payment_lines(table_orders)
+        self._get_order_lines(table_orders)
+        self._get_payment_lines(table_orders)
 
-            self._prepare_order(table_orders)
+        self._prepare_order(table_orders)
 
-            return table_orders
+        return table_orders
 
     def set_tip(self, tip_line_vals):
         """Set tip to `self` based on values in `tip_line_vals`."""

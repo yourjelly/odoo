@@ -10,6 +10,7 @@
                            title="Shopping cart"/>
                         <h1>This order is empty</h1>
                     </div>
+                    <button t-if="showReleaseBtn" class="btn btn-primary" style="border:none; font-size: 20px;" t-on-click="releaseTable">Release table</button>
                 </t>
                 <t t-else="">
                     <ul class="orderlines">

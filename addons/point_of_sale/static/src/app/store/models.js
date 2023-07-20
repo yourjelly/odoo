@@ -370,6 +370,7 @@ export class Orderline extends PosModel {
         this.id = orderline_id++;
         this.customerNote = this.customerNote || "";
         this.saved_quantity = 0;
+        this.note = this.note || "";
 
         if (options.price) {
             this.set_unit_price(options.price);
@@ -405,6 +406,10 @@ export class Orderline extends PosModel {
         this.saved_quantity = json.qty;
         this.uuid = json.uuid;
         this.skipChange = json.skip_change;
+        this.note = json.note;
+        if (this.pos.config.iface_printers) {
+            this.uuid = json.uuid;
+        }
     }
     clone() {
         var orderline = new Orderline(
@@ -424,6 +429,7 @@ export class Orderline extends PosModel {
         orderline.selected = false;
         orderline.price_type = this.price_type;
         orderline.customerNote = this.customerNote;
+        orderline.note = this.note;
         return orderline;
     }
     getPackLotLinesToEdit(isAllowOnlyOneLot) {
@@ -755,6 +761,8 @@ export class Orderline extends PosModel {
             customer_note: this.get_customer_note(),
             refunded_orderline_id: this.refunded_orderline_id,
             price_type: this.price_type,
+            note: this.note,
+            uuid: this.pos.config.iface_printers ? this.uuid : false
         };
     }
     //used to create a json of the ticket, to be sent to the printer
@@ -1082,6 +1090,13 @@ export class Orderline extends PosModel {
     get_total_cost() {
         return this.product.standard_price * this.quantity;
     }
+    get_line_diff_hash() {
+        if (this.getNote()) {
+            return this.id + "|" + this.getNote();
+        } else {
+            return "" + this.id;
+        }
+    }
 }
 
 export class Packlotline extends PosModel {
@@ -1274,8 +1289,13 @@ export class Order extends PosModel {
         this.finalized = false; // if true, cannot be modified.
         this.shippingDate = null;
         this.firstDraft = true;
+        this.customerCount = this.customerCount || 1;
 
         this.partner = null;
+
+        if (!this.tableId && !options.json && this.pos.table) {
+            this.tableId = this.pos.table.id;
+        }
 
         this.uiState = {
             ReceiptScreen: {
@@ -1422,6 +1442,9 @@ export class Order extends PosModel {
         this.ticketCode = json.ticket_code || "";
         this.lastOrderPrepaChange =
             json.last_order_preparation_change && JSON.parse(json.last_order_preparation_change);
+        this.tableId = json.table_id;
+        this.validation_date = moment.utc(json.creation_date).local().toDate();
+        this.customerCount = json.customer_count;
     }
     export_as_JSON() {
         var orderLines, paymentLines;
@@ -1460,6 +1483,8 @@ export class Order extends PosModel {
             access_token: this.access_token || "",
             last_order_preparation_change: JSON.stringify(this.lastOrderPrepaChange),
             ticket_code: this.ticketCode || "",
+            table_id: this.tableId,
+            customer_count: this.customerCount
         };
         if (!this.is_paid && this.user_id) {
             json.user_id = this.user_id;
@@ -1509,6 +1534,8 @@ export class Order extends PosModel {
             partner: partner ? partner : null,
             invoice_id: null, //TODO
             cashier: cashier ? cashier.name : null,
+            table: this.getTable()?.name,
+            customer_count: this.getCustomerCount(),
             precision: {
                 price: 2,
                 money: 2,
@@ -2633,5 +2660,17 @@ export class Order extends PosModel {
             code = Math.random().toString(36).slice(2, 7);
         }
         return code;
+    }
+    getCustomerCount() {
+        return this.customerCount;
+    }
+    setCustomerCount(count) {
+        this.customerCount = Math.max(count, 0);
+    }
+    getTable() {
+        if (this.pos.config.module_pos_restaurant) {
+            return this.pos.tables_by_id[this.tableId];
+        }
+        return null;
     }
 }

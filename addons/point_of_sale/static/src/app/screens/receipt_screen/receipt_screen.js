@@ -5,7 +5,7 @@ import { AbstractReceiptScreen } from "@point_of_sale/app/screens/receipt_screen
 import { OfflineErrorPopup } from "@point_of_sale/app/errors/popups/offline_error_popup";
 import { registry } from "@web/core/registry";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/receipt";
-import { onMounted, useRef, status, useState, onWillStart } from "@odoo/owl";
+import { onMounted, useRef, status, useState, onWillStart, onWillUnmount } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { useService } from "@web/core/utils/hooks";
 import { BasePrinter } from "@point_of_sale/app/printer/base_printer";
@@ -53,10 +53,19 @@ export class ReceiptScreen extends AbstractReceiptScreen {
                 await this.pos.sendOrderInPreparation(this.currentOrder);
             }
         });
+
+        onWillUnmount(() => {
+            // When leaving the receipt screen to the floor screen the order is paid and can be removed
+            if (this.pos.mainScreen.component === FloorScreen && this.currentOrder.finalized) {
+                this.pos.removeOrder(this.currentOrder);
+            }
+        });
     }
 
     _addNewOrder() {
-        this.pos.add_new_order();
+        if (!this.pos.config.is_restaurant) {
+            this.pos.add_new_order();
+        }
     }
     onSendEmail() {
         if (this.buttonMailReceipt.el.classList.contains("fa-spin")) {
@@ -109,6 +118,10 @@ export class ReceiptScreen extends AbstractReceiptScreen {
         return `${orderAmountStr} + ${tipAmountStr} tip`;
     }
     get nextScreen() {
+        if (this.pos.config.is_restaurant) {
+            const table = this.pos.table;
+            return { name: "FloorScreen", props: { floor: table ? table.floor : null } };
+        }
         return { name: "ProductScreen" };
     }
     get ticketScreen() {
@@ -154,6 +167,9 @@ export class ReceiptScreen extends AbstractReceiptScreen {
         this.pos.showScreen("ProductScreen");
     }
     isResumeVisible() {
+        if (this.pos.config.is_restaurant && this.pos.table) {
+            return this.pos.getTableOrders(this.pos.table.id).length > 1;
+        }
         return this.pos.get_order_list().length > 1;
     }
     async printReceipt() {

@@ -9,7 +9,10 @@
                         <div class="button back"
                               t-on-click="() => pos.showScreen('ProductScreen')">
                             <i class="fa fa-angle-double-left fa-fw"></i>
-                            <span class="back_text">Back</span>
+                            <t t-if="pos.config.set_tip_after_payment and currentOrder.is_paid()">
+                                <span class="back_text">Keep Open</span>
+                            </t>
+                            <t t-else="">$0</t>
                         </div>
                         <div class="top-content-center"><h1>Payment</h1></div>
                     </div>
@@ -45,12 +48,15 @@
                                 selectLine.bind="selectPaymentLine"
                                 updateSelectedPaymentline.bind="updateSelectedPaymentline"/>
                         </div>
-                        <div t-if="!ui.isSmall" class="button next validation" t-att-class="{ highlight: currentOrder.is_paid() and currentOrder._isValidEmptyOrder() }"
+                        <div t-if="!ui.isSmall" class="button next validation" t-att-hidden="pos.config.set_tip_after_payment and !currentOrder.is_paid()" t-att-class="{ highlight: currentOrder.is_paid() and currentOrder._isValidEmptyOrder() }"
                             t-on-click="() => this.validateOrder()">
                             <div class="pay-circle">
                                 <i class="oi oi-chevron-right" role="img" aria-label="Pay" title="Pay" />
                             </div>
-                            <span class="next_text">Validate</span>
+                            <t t-if="pos.config.set_tip_after_payment and currentOrder.is_paid()">
+                                <span class="back_text">Close Tab</span>
+                            </t>
+                            <t t-else="">$0</t>
                         </div>
                     </div>
                     <div class="center-content" t-if="!ui.isSmall">

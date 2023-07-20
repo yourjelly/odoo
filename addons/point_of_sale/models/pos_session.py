@@ -10,6 +10,7 @@ from odoo import api, fields, models, _, Command
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import float_is_zero, float_compare, convert
 from odoo.service.common import exp_version
+from odoo.osv.expression import AND
 
 
 class PosSession(models.Model):
@@ -1667,7 +1668,7 @@ class PosSession(models.Model):
             'account.cash.rounding',
             'pos.payment.method',
             'account.fiscal.position',
-            'pos.floor'
+            'pos.floor',
         ]
 
         return models_to_load
@@ -2145,11 +2146,11 @@ class PosSession(models.Model):
             'successful': allowed,
         }
 
-    def _get_pos_ui_restaurant_floor(self, params):
+    def _get_pos_ui_pos_floor(self, params):
         floors = self.env['pos.floor'].search_read(**params['search_params'])
         floor_ids = [floor['id'] for floor in floors]
 
-        table_params = self._loader_params_restaurant_table()
+        table_params = self._loader_params_pos_table()
         table_params['search_params']['domain'] = AND([table_params['search_params']['domain'], [('floor_id', 'in', floor_ids)]])
         tables = self.env['pos.table'].search(table_params['search_params']['domain'], order='floor_id')
         tables_by_floor_id = {}
@@ -2163,7 +2164,7 @@ class PosSession(models.Model):
         return floors
 
     def get_pos_ui_pos_floor(self):
-        return self._get_pos_ui_pos_floor(self._loader_params_restaurant_floor())
+        return self._get_pos_ui_pos_floor(self._loader_params_pos_floor())
 
 
 class ProcurementGroup(models.Model):

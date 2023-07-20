@@ -44,7 +44,6 @@ export class Navbar extends Component {
             this.state.isMenuOpened = false;
         }
     }
-
     get customerFacingDisplayButtonIsShown() {
         return this.pos.config.iface_customer_facing_display;
     }
@@ -77,7 +76,7 @@ export class Navbar extends Component {
     }
 
     _shouldLoadOrders() {
-        return this.pos.config.trusted_config_ids.length > 0;
+        return this.pos.config.trusted_config_ids.length > 0 || (this.pos.config.is_restaurant && !this.pos.table);;
     }
 
     get isTicketScreenShown() {
@@ -85,6 +84,9 @@ export class Navbar extends Component {
     }
 
     get orderCount() {
+        if (this.pos.config.is_restaurant && this.pos.table) {
+            return this.pos.getTableOrders(this.pos.table.id).length;
+        }
         return this.pos.get_order_list().length;
     }
 
@@ -106,7 +108,7 @@ export class Navbar extends Component {
     }
 
     showBackButton() {
-        return this.pos.showBackButton() && this.ui.isSmall;
+        return (this.pos.showBackButton() && this.ui.isSmall) || (this.pos.showBackButton() && this.pos.config.is_restaurant)
     }
 
     toggleProductView() {
@@ -117,5 +119,13 @@ export class Navbar extends Component {
 
     get showToggleProductView() {
         return this.pos.mainScreen.component === ProductScreen && this.ui.isSmall;
+    }
+    onSwitchButtonClick() {
+        const mode = this.pos.floorPlanStyle == "kanban" ? "default" : "kanban";
+        localStorage.setItem("floorPlanStyle", mode);
+        this.pos.floorPlanStyle = mode;
+    }
+    toggleEditMode() {
+        this.pos.toggleEditMode();
     }
 }

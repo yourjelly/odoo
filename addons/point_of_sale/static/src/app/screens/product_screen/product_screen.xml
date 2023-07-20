@@ -34,10 +34,21 @@
                             <span><t t-esc="selectedOrderlineTotal"/></span>
                         </div>
                         <div class="switchpane">
-                            <button class="btn-switchpane pay-button" t-att-class="{'primary': primaryPayButton(), 'secondary': !primaryPayButton()}" t-on-click="() => currentOrder.pay()">
-                                <h1>Pay</h1>
-                                <span><t t-esc="total" /></span>
+                             <button
+                                t-if="this.swapButton"
+                                class="btn-switchpane"
+                                t-on-click="submitOrder"
+                                t-att-class="{'primary': primaryPayButton(), 'secondary': !primaryPayButton()}">
+                                <!-- add a showOrderButton here (using the computeOrderChange method) -->
+                                <h1>Order</h1>
+                                <span><t t-esc="total"/></span>
                             </button>
+                            <t t-else="">
+                                <button class="btn-switchpane" t-att-class="{'primary': primaryPayButton(), 'secondary': !primaryPayButton()}" t-on-click="() => currentOrder.pay()">
+                                    <h1>Pay</h1>
+                                    <span><t t-esc="total" /></span>
+                                </button>
+                            </t>
                             <button class="btn-switchpane" t-att-class="{'primary': primaryReviewButton(), 'secondary': !primaryReviewButton()}" t-on-click="switchPane">
                                 <h1>Review</h1>
                                 <span><t t-esc="items_number"/> items</span>

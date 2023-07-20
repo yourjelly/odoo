@@ -37,6 +37,12 @@
                         <div>--------------------------------</div>
                         <div>Served by <t t-esc="receipt.cashier" /></div>
                     </div>
+                    <t t-if="receipt.table">
+                        at table <t t-esc="receipt.table" />
+                    </t>
+                    <t t-if="receipt.table and receipt.customer_count">
+                        <div>Guests: <t t-esc="receipt.customer_count" /></div>
+                    </t>
                 </t>
             </div>
             <br /><br />
@@ -90,7 +96,7 @@
             </t>
             <br/>
 
-            <div class="pos-receipt-amount receipt-change">
+            <div class="pos-receipt-amount receipt-change" t-if="!props.isBill">
                 CHANGE
                 <span t-esc="env.utils.formatCurrency(receipt.change)" class="pos-receipt-right-align"/>
             </div>
@@ -118,6 +124,32 @@
             </t>
 
             <div class="before-footer" />
+
+            <t t-if="props.isBill and pos.config.set_tip_after_payment">
+                <div class="tip-form">
+                    <div class="title">For convenience, we are providing the following gratuity calculations:</div>
+                    <div class="percentage-options">
+                        <div class="option">
+                            <div>15%</div>
+                            <div class="amount">
+                                <t t-esc="env.utils.formatCurrency(receipt.total_with_tax * 0.15)"></t>
+                            </div>
+                        </div>
+                        <div class="option">
+                            <div>20%</div>
+                            <div class="amount">
+                                <t t-esc="env.utils.formatCurrency(receipt.total_with_tax * 0.20)"></t>
+                            </div>
+                        </div>
+                        <div class="option">
+                            <div>25%</div>
+                            <div class="amount">
+                                <t t-esc="env.utils.formatCurrency(receipt.total_with_tax * 0.25)"></t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
 
             <div t-if="receipt.pos_qr_code">
                 <br /><br />
@@ -167,6 +199,9 @@
             <br/>
             <div class="pos-receipt-order-data">
                 <div><t t-esc="receipt.name" /></div>
+                <t t-if="props.isBill">
+                    <div>PRO FORMA</div>
+                </t>
                 <t t-if="receipt.date.localestring">
                     <div><t t-esc="receipt.date.localestring" /></div>
                 </t>
