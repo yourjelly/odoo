@@ -20,7 +20,6 @@ import { toInline } from 'web_editor.convertInline';
 import { loadJS, getBundle } from '@web/core/assets';
 import {
     Component,
-    markup,
     useRef,
     useState,
     onWillStart,
@@ -290,7 +289,7 @@ export class HtmlField extends Component {
         ) {
             this.props.record.model.bus.trigger("FIELD_IS_DIRTY", false);
             this.currentEditingValue = value;
-            await this.props.record.update({ [this.props.name]: markup(value) });
+            await this.props.record.update({ [this.props.name]: value });
         }
     }
     async startWysiwyg(wysiwyg) {
@@ -327,7 +326,7 @@ export class HtmlField extends Component {
                 this.wysiwyg.$editable.remove();
                 this.wysiwyg.odooEditor.toolbarHide();
                 const value = this.wysiwyg.getValue();
-                this.props.record.update({ [this.props.name]: markup(value) });
+                this.props.record.update({ [this.props.name]: value });
             } else {
                 this.wysiwyg.odooEditor.observerActive('toggleCodeView');
             }
@@ -335,7 +334,7 @@ export class HtmlField extends Component {
         if (!this.state.showCodeView) {
             const $codeview = $(this.codeViewRef.el);
             const value = $codeview.val();
-            this.props.record.update({ [this.props.name]: markup(value) });
+            this.props.record.update({ [this.props.name]: value });
 
         }
     }
@@ -575,7 +574,7 @@ export class HtmlField extends Component {
             checked: !checked,
         });
         if (value) {
-            this.props.record.update({ [this.props.name]: markup(value) });
+            this.props.record.update({ [this.props.name]: value });
         }
     }
     async _onReadonlyClickStar(ev) {
@@ -603,7 +602,7 @@ export class HtmlField extends Component {
             rating,
         });
         if (value) {
-            this.props.record.update({ [this.props.name]: markup(value) });
+            this.props.record.update({ [this.props.name]: value });
         }
     }
 }
