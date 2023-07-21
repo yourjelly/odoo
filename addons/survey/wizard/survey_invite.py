@@ -218,13 +218,15 @@ class SurveyInvite(models.TransientModel):
     def _send_mail(self, answer):
         """ Create mail specific for recipient containing notably its access token """
         subject = self._render_field('subject', answer.ids)[answer.id]
-        body = self._render_field('body', answer.ids)[answer.id]
+        main_body = self._render_field('body', answer.ids)[answer.id]
+        print("subject-->",subject,'\n')
         # post the message
+        breakpoint()
         mail_values = {
             'attachment_ids': [(4, att.id) for att in self.attachment_ids],
             'auto_delete': True,
             'author_id': self.author_id.id,
-            'body_html': body,
+            'body_html': main_body,
             'email_from': self.author_id.email_formatted,
             'model': None,
             'res_id': None,
@@ -236,24 +238,46 @@ class SurveyInvite(models.TransientModel):
             mail_values['email_to'] = answer.email
 
         # optional support of default_email_layout_xmlid in context
-        email_layout_xmlid = self.env.context.get('default_email_layout_xmlid')
+        email_layout_xmlid = self.env.context.get('default_email_layout_xmlid', self.env.context.get('notif_layout'))
         if email_layout_xmlid:
-            body = self.env.context.get('default_template_id')
+            template_ctx = {
+                'message': self.env['mail.message'].sudo().new(dict(body=mail_values['body_html'], record_name=self.survey_id.title)),
+                'model_description': self.env['ir.model']._get('survey.survey').display_name,
+                'company': self.env.company,
+            }
+            print("mail_values['subject']---->",mail_values['subject'],'\n')
+
+            body = self.env['ir.qweb']._render(email_layout_xmlid, template_ctx, minimal_qcontext=True, raise_if_not_found=False)
             if body:
                 mail_values['body_html'] = self.env['mail.render.mixin']._replace_local_links(body)
                 self.survey_id.message_notify(
-                    body=self.env.ref('survey.mail_template_user_input_invite').body_html,
+                    body=main_body,
                     partner_ids=self.partner_ids.ids,
+                    subject=subject,
                 )
             else:
                 _logger.warning('QWeb template %s not found or is empty when sending survey mails. Sending without layout', email_layout_xmlid)
+        return self.env['mail.mail'].search([], order='id DESC', limit=1)
+        # breakpoint();
+        # email_layout_xmlid = self.env.context.get('default_email_layout_xmlid')
+        # if email_layout_xmlid:
+        #     template_id = self.env.context.get('default_template_id')
+        #     if template_id:
+        #         default_template = self.env['mail.template'].browse(template_id)
+        #         mail_values['body_html'] = self.env['mail.render.mixin']._replace_local_links(body)
+                # self.survey_id.message_notify(
+                #     body=default_template.body_html,
+                #     partner_ids=self.partner_ids.ids,
+                # )
+        #     else:
+        #         _logger.warning('QWeb template %s not found or is empty when sending survey mails. Sending without layout', email_layout_xmlid)
 
     def action_invite(self):
         """ Process the wizard content and proceed with sending the related
             email(s), rendering any template patterns on the fly if needed """
         self.ensure_one()
         Partner = self.env['res.partner']
-
+        
         # compute partners and emails, try to find partners for given emails
         valid_partners = self.partner_ids
         langs = set(valid_partners.mapped('lang')) - {False}
