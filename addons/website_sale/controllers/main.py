@@ -519,7 +519,6 @@ class WebsiteSale(http.Controller):
         links all of them to product.
         :raises NotFound : If the user is not allowed to access Attachment model
         """
-
         if not request.env.user.has_group('website.group_website_restricted_editor'):
             raise NotFound()
 

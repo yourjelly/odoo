@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="web.ExternalImage" owl="1">
+        <t t-if="['all', 'database'].includes(state.searchService)">
+            <t t-foreach="state.attachments" t-as="attachment" t-key="attachment.id">
+                <!-- <t t-out="attachment.id" /> -->
+                <img class="img img-fluid h-25 w-25"
+                   t-att-src="attachment.image_src"
+                   t-att-title="attachment.name"/>
+            </t>
+        </t>
+    </t>
+
+    <t t-name="web.AddMediaImageVideo" owl="1">
+        <Dialog size="'lg'" title="props.title" modalRef="modalRef">
+            <div class="border-bottom" >
+                <h3>Images</h3>
+            </div>
+            <div class="o_we_existing_attachments o_we_images d-flex flex-wrap my-0">
+                <t t-call="web.ExternalImage"/>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-4 mb-2 align-items-end">
+                <div class="col justify-content-end flex-nowrap input-group has-validation">
+                        <button type="button" class="btn o_upload_media_url_button text-nowrap btn-secondary">Add URL</button>
+                        <div class="d-flex align-items-center"/>
+                </div>
+                <div class="col-auto btn-group">
+                    <input type="file" class="d-none o_file_input" t-on-change="onChangeFileInput" t-ref="file-input" multiple="multiple" />
+                    <div class="col-auto btn-group">
+                        <button type="button" class="btn btn-primary o_upload_media_button" t-on-click="onClickUpload">
+                            <!-- <t t-esc="props.uploadText"/> -->
+                            Upload An Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Dialog Footer button -->
+            <t t-set-slot="footer" owl="1">
+                <button class="btn btn-primary" t-on-click="_add" t-esc="props.addLabel"/>
+                <button class="btn btn-primary" t-on-click="_discard" t-esc="props.discardLabel"/>
+                <button t-if="props.cancel" class="btn btn-secondary" t-on-click="_discard" t-esc="props.discardLabel"/>
+            </t> 
+
+        </Dialog>
+    </t>
+</templates>

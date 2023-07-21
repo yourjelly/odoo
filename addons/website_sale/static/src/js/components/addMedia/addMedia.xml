@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<template xml:space="preserve">
+    <t t-name="website_sale.addMediaField" owl="1">
+        <button t-on-click="addImages" t-attf-class="btn btn-primary p-2 text-nowrap">Upload Media</button>
+    </t>
+</template>
