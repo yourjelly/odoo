@@ -28,6 +28,21 @@
                                 <field name="module_hr_recruitment_extract" widget="upgrade_boolean"/>
                             </setting>
                         </block>
+                        <block title="Developer Accounts" name="indeed_account">
+                            <setting id="recruitment_extract_settings_indeed" string="Indeed Account" company_dependent="1" help="Configure your Indeed account" title="Use this to link your Indeed Account">
+                                <field name="link_indeed_account"/>
+                                <div class="content-group" attrs="{'invisible': [('link_indeed_account', '=', False)]}">
+                                    <div class="mt16">
+                                        <label for="indeed_api_token" string="API Token" class="col-3 col-lg-3 o_form_label"/>
+                                        <field name="indeed_api_token" password="True" class="oe_inline"/>
+                                    </div>
+                                    <div class="mt16">
+                                        <label for="indeed_post_url" string="Post URL" class="col-3 col-lg-3 o_form_label"/>
+                                        <field name="indeed_post_url" class="oe_inline"/>
+                                    </div>
+                                </div>
+                            </setting>
+                        </block>
                     </app>
                 </xpath>
             </field>

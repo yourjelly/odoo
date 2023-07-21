@@ -159,6 +159,30 @@
     </t>
 </template>
 
+<!-- Indeed Job feed template -->
+<template id="job_feed" name="Job Feed">
+    <source>
+        <t t-foreach="job_data" t-as="job">
+            <job>
+                <t t-out="job.get('title')" /><br/>
+                <t t-out="job.get('date')" /><br/>
+                <t t-out="job.get('referencenumber')" /><br/>
+                <t t-out="job.get('requisitionid')" /><br/>
+                <t t-out="job.get('url')" /><br/>
+                <t t-out="job.get('company')" /><br/>
+                <t t-out="job.get('city')" /><br/>
+                <t t-out="job.get('state')" /><br/>
+                <t t-out="job.get('country')" /><br/>
+                <t t-out="job.get('postalcode')" /><br/>
+                <t t-out="job.get('streetaddress')" /><br/>
+                <t t-out="job.get('email')" /><br/>
+                <t t-out="job.get('description')" /><br/>
+                <t t-out="job.get('indeed-apply-data')" /><br/>
+            </job>
+        </t>
+    </source>
+</template>
+
 <!-- Apply -->
 <template id="apply">
     <t t-call="website.layout">

@@ -8,8 +8,6 @@ from odoo.addons.http_routing.models.ir_http import slug
 from odoo.osv.expression import AND
 from odoo.http import request
 from odoo.tools.misc import groupby
-
-
 class WebsiteHrRecruitment(http.Controller):
     _jobs_per_page = 12
 
@@ -217,6 +215,42 @@ class WebsiteHrRecruitment(http.Controller):
         })
         return f"/jobs/{slug(job)}"
 
+    @http.route('/jobs/feed.xml', type='http', auth='public', website=True)
+    def jobs_xml_feed(self, **kwargs):
+        jobs = request.env['hr.job'].sudo().search([], limit=1)
+        job_feed_data = []
+        indeed_api_token = request.env['ir.config_parameter'].sudo().get_param('hr_recruitment.indeed_api_token')
+        indeed_post_url = request.env['ir.config_parameter'].sudo().get_param('hr_recruitment.indeed_post_url')
+
+        for job in jobs:
+            create_date_gmt = job.create_date.strftime('%a, %d %b %Y %H:%M:%S GMT')
+            data = 'indeed-apply-apiToken=%s;indeed-apply-jobTitle=%s;indeed-apply-jobCompanyName=%s;indeed-apply-jobLocation=%s;indeed-apply-postUrl=%s' % (
+                indeed_api_token,
+                job.name,
+                job.company_id.name,
+                job.address_id.street,
+                indeed_post_url,
+            )
+            job_data = {
+                'title': job.name,
+                'date': create_date_gmt,
+                'referencenumber': str(job.id),
+                'requisitionid': str(job.id),
+                'url': job.website_url,
+                'company': job.company_id.name,
+                'city': job.company_id.city,
+                'state': job.company_id.state_id.name,
+                'country': job.company_id.country_id.name,
+                'postalcode': job.company_id.zip,
+                'streetaddress': job.company_id.street,
+                'email': job.company_id.email,
+                'description': job.description,
+                'indeed-apply-data': data,
+            }
+
+            job_feed_data.append(job_data)
+
+        return request.render("website_hr_recruitment.job_feed", {'job_data': job_feed_data})
     @http.route('''/jobs/detail/<model("hr.job"):job>''', type='http', auth="public", website=True, sitemap=True)
     def jobs_detail(self, job, **kwargs):
         redirect_url = f"/jobs/{slug(job)}"
