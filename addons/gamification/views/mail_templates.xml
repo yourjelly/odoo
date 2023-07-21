@@ -18,7 +18,7 @@
                     <span>${object.name or ''}</span>!
                 </p>
                 <p>
-                    You just reached a new: <strong>${object.rank_id.name}</strong>
+                    You just reached a new rank: <strong>${object.rank_id.name}</strong>
                 </p>
                 % if object.next_rank_id.name
                     <p>Continue your work to become a <strong>${object.next_rank_id.name}</strong> !</p>
@@ -34,11 +34,11 @@
             </td>
             <td style="padding:15px 20px 10px 20px;">
                 <p style="text-align: center;">
-                    <img src="/web/image/gamification.karma.rank/${object.rank_id.id}/image_medium"/>
+                    <img src="/web/image/gamification.karma.rank/${object.rank_id.id}/image_128"/>
                 </p>
             </td>
         </tr>
-        % if user.signature
+        % if user.signature and not user.has_group('base.group_portal'):
         <tr>
             <td style="padding:15px 20px 10px 20px;">
                 ${user.signature | safe}

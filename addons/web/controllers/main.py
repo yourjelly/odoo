@@ -1475,7 +1475,7 @@ class Binary(http.Controller):
         '/web/image/<int:id>-<string:unique>',
         '/web/image/<int:id>-<string:unique>/<string:filename>',
         '/web/image/<int:id>-<string:unique>/<int:width>x<int:height>',
-        '/web/image/<int:id>-<string:unique>/<int:width>x<int:height>/<string:filename>'], type='http', auth="public")
+        '/web/image/<int:id>-<string:unique>/<int:width>x<int:height>/<string:filename>'], type='http', auth="none")
     def content_image(self, xmlid=None, model='ir.attachment', id=None, field='datas',
                       filename_field='name', unique=None, filename=None, mimetype=None,
                       download=None, width=0, height=0, crop=False, access_token=None,
@@ -1606,7 +1606,7 @@ class Binary(http.Controller):
         '/web/binary/company_logo',
         '/logo',
         '/logo.png',
-    ], type='http', auth="none", cors="*")
+    ], type='http', auth="public", cors="*")
     def company_logo(self, dbname=None, **kw):
         imgname = 'logo'
         imgext = '.png'
