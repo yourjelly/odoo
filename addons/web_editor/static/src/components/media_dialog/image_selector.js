@@ -25,6 +25,7 @@ export class AutoResizeImage extends Attachment {
     }
 
     async onImageLoaded() {
+        debugger;
         if (!this.image.el) {
             // Do not fail if already removed.
             return;
@@ -134,6 +135,7 @@ export class ImageSelector extends FileSelector {
     }
 
     async uploadFiles(files) {
+        debugger;
         await this.uploadService.uploadFiles(files, { resModel: this.props.resModel, resId: this.props.resId, isImage: true }, (attachment) => this.onUploaded(attachment));
     }
 
@@ -182,6 +184,7 @@ export class ImageSelector extends FileSelector {
     }
 
     async fetchLibraryMedia(offset) {
+        debugger;
         if (!this.state.needle) {
             return { media: [], results: null };
         }
@@ -306,6 +309,7 @@ export class ImageSelector extends FileSelector {
     }
 
     async onImageLoaded(imgEl, attachment) {
+        debugger;
         this.debouncedScroll();
         if (attachment.mediaType === 'libraryMedia' && !imgEl.src.startsWith('blob')) {
             // This call applies the theme's color palette to the

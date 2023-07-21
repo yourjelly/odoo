@@ -106,6 +106,8 @@
         ],
         'web.assets_common': [
             'website_sale/static/src/js/tours/tour_utils.js',
+            'website_sale/static/src/js/components/addMedia/addMedia.js',
+            'website_sale/static/src/js/components/addMedia/addMedia.xml',
         ],
         'web.assets_tests': [
             'website_sale/static/tests/**/*',

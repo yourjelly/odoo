@@ -117,10 +117,12 @@ export class FileSelectorControlPanel extends Component {
     }
 
     onClickUpload() {
+        debugger;
         this.fileInput.el.click();
     }
 
     async onChangeFileInput() {
+        debugger;
         const inputFiles = this.fileInput.el.files;
         if (!inputFiles.length) {
             return;

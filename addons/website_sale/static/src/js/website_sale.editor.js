@@ -783,6 +783,7 @@ options.registry.WebsiteSaleProductPage = options.Class.extend({
      * Prompts the user for images, then saves the new images.
      */
     addImages: function () {
+        debugger;
         if(this.mode === 'product.template'){
             this.displayNotification({
                 type: 'info',
