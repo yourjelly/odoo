@@ -477,6 +477,75 @@ Dialog.confirm = function (owner, message, options) {
     }, options)).open({shouldFocusButtons:true});
 };
 
+
+Dialog.addMediaImage = function (owner, message, options) {
+    /**
+     * Creates an improved callback from the given callback value at the given
+     * key from the parent function's options parameter. This is improved to:
+     *
+     * - Prevent calling given callbacks once one has been called.
+     *
+     * - Re-allow calling callbacks once a previous callback call's returned
+     *   Promise is rejected.
+     */
+    let isBlocked = false;
+    function makeCallback(key) {
+        const callback = options && options[key];
+        return function () {
+            if (isBlocked) {
+                // Do not (re)call any callback and return a rejected Promise
+                // to prevent closing the Dialog.
+                return Promise.reject();
+            }
+            isBlocked = true;
+            const callbackRes = callback && callback.apply(this, arguments);
+            Promise.resolve(callbackRes).guardedCatch(() => {
+                isBlocked = false;
+            });
+            return callbackRes;
+        };
+    }
+
+    function UploadAnImage(){
+        console.log("Uploading an Image");
+    }
+
+    var buttons = [
+        {
+            text: _t("Add"),
+            classes: 'btn-primary',
+            close: true,
+            click: makeCallback('confirm_callback'),
+        },
+        {
+            text: _t("Discard"),
+            close: true,
+            click: makeCallback('cancel_callback'),
+        },
+        {
+            text: _t("UPLOAD AN IMAGE"),
+            classes: 'btn-primary',
+            // close: true,
+            click: UploadAnImage(),
+        },
+    ];
+    return new Dialog(owner, _.extend({
+        size: 'large',
+        buttons: buttons,
+        $content: $('<main/>', {
+            // role: 'alert',
+            html: message,
+        }),
+        title: _t("Select a media"),
+        onForceClose: options && (options.onForceClose || options.cancel_callback),
+    }, options)).open({shouldFocusButtons:true});
+};
+
+
+
+
+
+
 /**
  * Static method to open double confirmation dialog.
  *

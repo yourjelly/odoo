@@ -36,6 +36,7 @@ export const TABS = {
 
 export class MediaDialog extends Component {
     setup() {
+        debugger;
         this.size = 'xl';
         this.contentClass = 'o_select_media_dialog';
         this.title = this.env._t("Select a media");
