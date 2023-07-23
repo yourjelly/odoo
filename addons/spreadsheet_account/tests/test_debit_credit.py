@@ -3,6 +3,7 @@
 from datetime import date
 
 from odoo import Command
+from odoo.osv import expression
 from odoo.tests import tagged
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
@@ -956,7 +957,7 @@ class SpreadsheetAccountingFunctionsTest(AccountTestInvoicingCommon):
                 "view_mode": "list",
                 "views": [[False, "list"]],
                 "target": "current",
-                "domain": [(0, "=", 1)],
+                "domain": expression.FALSE_DOMAIN,
                 "name": "Journal items for account prefix ",
             },
         )

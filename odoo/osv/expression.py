@@ -178,8 +178,8 @@ ANY_IN = {'any': 'in', 'not any': 'not in'}
 TRUE_LEAF = (1, '=', 1)
 FALSE_LEAF = (0, '=', 1)
 
-TRUE_DOMAIN = [TRUE_LEAF]
-FALSE_DOMAIN = [FALSE_LEAF]
+TRUE_DOMAIN = (TRUE_LEAF,)
+FALSE_DOMAIN = (FALSE_LEAF,)
 
 _logger = logging.getLogger(__name__)
 

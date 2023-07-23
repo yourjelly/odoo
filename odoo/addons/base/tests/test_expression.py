@@ -705,10 +705,23 @@ class TestExpression(SavepointCaseWithUserDemo):
             # what should not be called
             w().assert_not_called()
 
+    def test_base_domain_immutable(self):
+        # pylint: disable=unsupported-assignment-operation
+        with self.assertRaises(TypeError):
+            expression.FALSE_DOMAIN += [('field_name', '=', 1)]
+
+        with self.assertRaises(TypeError):
+            expression.TRUE_DOMAIN += [('field_name', '=', 1)]
+
+        with self.assertRaises(TypeError):
+            expression.TRUE_LEAF[2] = 0
+
+        with self.assertRaises(TypeError):
+            expression.FALSE_LEAF[2] = 1
 
     def test_pure_function(self):
-        orig_false = expression.FALSE_DOMAIN.copy()
-        orig_true = expression.TRUE_DOMAIN.copy()
+        orig_false = list(expression.FALSE_DOMAIN)
+        orig_true = list(expression.TRUE_DOMAIN)
         false = orig_false.copy()
         true = orig_true.copy()
 
@@ -849,8 +862,8 @@ class TestExpression(SavepointCaseWithUserDemo):
 
     def test_proper_combine_unit_leaves(self):
         # test that unit leaves (TRUE_LEAF, FALSE_LEAF) are properly handled in specific cases
-        false = expression.FALSE_DOMAIN
-        true = expression.TRUE_DOMAIN
+        false = list(expression.FALSE_DOMAIN)
+        true = list(expression.TRUE_DOMAIN)
         normal = [('foo', '=', 'bar')]
         # OR with single FALSE_LEAF
         expr = expression.OR([false])
