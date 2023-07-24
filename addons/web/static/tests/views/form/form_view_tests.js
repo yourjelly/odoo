@@ -306,6 +306,73 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, "label.o_form_label_empty:contains(timmy)");
     });
 
+    QUnit.test("simple form rendering", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <div class="test" style="opacity: 0.5;">some html<span>aa</span></div>
+                    <sheet>
+                        <group>
+                            <group style="background-color: red">
+                                <field name="foo" style="color: blue;"/>
+                                <field name="bar"/>
+                                <field name="int_field" string="f3_description"/>
+                                <field name="qux"/>
+                            </group>
+                            <group>
+                                <div class="hello"></div>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Partner Yo">
+                                <field name="p">
+                                    <tree>
+                                        <field name="foo"/>
+                                        <field name="bar"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>`,
+            resId: 2,
+        });
+
+        assert.containsOnce(target, "div.test");
+        assert.hasAttrValue(
+            target.querySelector("div.test"),
+            "style",
+            "opacity: 0.5;",
+            "should keep the inline style on html elements"
+        );
+        assert.containsOnce(target, "label:contains(Foo)");
+        assert.containsOnce(target, ".o_field_char input");
+        assert.strictEqual(target.querySelector(".o_field_char input").value, "blip");
+        assert.hasAttrValue(
+            target.querySelector(".o_group .o_inner_group"),
+            "style",
+            "background-color: red",
+            "should apply style attribute on groups"
+        );
+        assert.hasAttrValue(
+            target.querySelector(".o_field_widget[name=foo]"),
+            "style",
+            "color: blue;",
+            "should apply style attribute on fields"
+        );
+        assert.containsNone(target, "label:contains(something_id)");
+        assert.containsOnce(target, "label:contains(f3_description)");
+        assert.containsOnce(target, "div.o_field_one2many table");
+        assert.containsOnce(
+            target,
+            "div.o_cell:not(.o_list_record_selector) .o-checkbox input:checked"
+        );
+        assert.containsNone(target, "label.o_form_label_empty:contains(timmy)");
+    });
+
     QUnit.test("form rendering with class and style attributes", async (assert) => {
         await makeView({
             type: "form",

@@ -1050,4 +1050,45 @@ QUnit.module("Fields", (hooks) => {
             "Placeholder"
         );
     });
+
+    QUnit.debug("char field with placeholder", async function (assert) {
+        const def = makeDeferred();
+        serverData.models.partner.onchanges = {
+            int_field(obj) {
+                obj.int_field = 9;
+            },
+        };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            resId: 1,
+            arch: `
+                <form>
+                    <sheet>
+                        <field name="foo" attrs="{'invisible': [('int_field', '==', 9)]}"/>
+                        <field name="int_field" />
+                    </sheet>
+                </form>`,
+            async mockRPC(route, args) {
+                if (args.method === "onchange2") {
+                    await def;
+                }
+                if (args.method === "write") {
+                    assert.step("write");
+                    // debugger
+                }
+            },
+        });
+        // debugger
+        await editInput(target, ".o_field_widget[name='int_field'] input", 25);
+        // debugger
+        // set foo before onchange
+        target.querySelector(".o_field_widget[name='foo'] input").value = "tralala";
+        triggerEvent(target, ".o_field_widget[name='foo'] input", "blop");
+        def.resolve();
+        await nextTick();
+
+        await clickSave(target);
+    });
 });
