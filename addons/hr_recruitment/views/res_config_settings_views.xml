@@ -28,6 +28,11 @@
                                 <field name="module_hr_recruitment_extract" widget="upgrade_boolean"/>
                             </setting>
                         </block>
+                        <block title="Developer Accounts" name="indeed_account">
+                            <setting id="recruitment_extract_settings_indeed" string="Indeed Account" help="Configure your Indeed account" title="Use this to link your Indeed Account">
+                                <field name="module_hr_recruitment_indeed"/>
+                            </setting>
+                        </block>
                     </app>
                 </xpath>
             </field>

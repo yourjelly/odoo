@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="job_feed">
+    <job t-foreach="data" t-as="job">
+        <title><t t-out="job['title']"/></title>
+        <date><t t-out="job['date']"/></date>
+        <referencenumber><t t-out="job['referencenumber']"/></referencenumber>
+        <requisitionid><t t-out="job['requisitionid']"/></requisitionid>
+        <url><t t-out="job['url']"/></url>
+        <company><t t-out="job['company']"/></company>
+        <sourcename><t t-out="job['company']"/></sourcename>
+        <salary><t t-out="job['salary']"/></salary>
+        <jobtype><t t-out="job['jobtype']"/></jobtype>
+        <city><t t-out="job['city']"/></city>
+        <state><t t-out="job['state']"/></state>
+        <country><t t-out="job['country']"/></country>
+        <postalcode><t t-out="job['postalcode']"/></postalcode>
+        <streetaddress><t t-out="job['streetaddress']"/></streetaddress>
+        <email><t t-out="job['email']"/></email>
+        <description><t t-out="job['description']"/></description>
+        <indeed-apply-data><t t-out="job['indeed-apply-data']"/></indeed-apply-data>
+    </job>
+</template>
+</odoo>
