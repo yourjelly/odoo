@@ -11,3 +11,4 @@ class ResConfigSettings(models.TransientModel):
     module_hr_recruitment_survey = fields.Boolean(string='Interview Forms')
     group_applicant_cv_display = fields.Boolean(implied_group="hr_recruitment.group_applicant_cv_display")
     module_hr_recruitment_extract = fields.Boolean(string='Send CV to OCR to fill applications')
+    module_hr_recruitment_indeed = fields.Boolean(string="Indeed HR Recruitment")
