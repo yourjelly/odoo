@@ -708,6 +708,7 @@ class AccountTax(models.Model):
                     'group': groups_map.get(tax),
                     'tag_ids': (repartition_line_tags + subsequent_tags).ids + product_tag_ids,
                     'tax_ids': subsequent_taxes.ids,
+                    'tax_amount': tax.amount_type == 'percent' and tax.amount or False,
                 })
 
                 if not repartition_line.account_id:
@@ -721,6 +722,27 @@ class AccountTax(models.Model):
 
             total_included += factorized_tax_amount
             i += 1
+
+        tax_dict_vals = {}
+        for tax in taxes_vals:
+            group = tax.get('group')
+            if group is not None:
+                group_id = str(group.id)
+                tax_amount = str(tax['tax_amount'])
+                tax_dict_vals.setdefault(group_id, {}).setdefault(tax_amount, []).append(tax)
+        tax_dict_vals = {key: value for key, value in tax_dict_vals.items() if len(value) == 1}
+        for tax in taxes_vals:
+            group = tax.get('group')
+            if group is not None:
+                for value_by_rate in tax_dict_vals.values():
+                    for value_of_taxes in value_by_rate.values():
+                        first_value = value_of_taxes[0]['amount']
+                        for value_of_tax in value_of_taxes:
+                            if value_of_tax['amount'] != first_value:
+                                diff = first_value - value_of_tax['amount']
+                                total_excluded -= diff
+                                total_void -= diff
+                                value_of_tax['amount'] += diff
 
         base_taxes_for_tags = taxes
         if not include_caba_tags:
