@@ -14,6 +14,7 @@
     ],
     'data': [
         'data/pe_ubl_templates.xml',
+        'views/product_views.xml',
     ],
     'auto_install': True,
 }
