@@ -51,8 +51,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'registration_name': partner.name,
             'company_id': partner.vat,
             'registration_address_vals': self._get_partner_address_vals(partner),
-            'TaxScheme_vals': {},
-            'tax_scheme_id': 'VAT',
+            'tax_scheme_vals': { 'id': 'VAT' },
         }]
 
     def _get_partner_party_legal_entity_vals_list(self, partner):

@@ -70,7 +70,7 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         if partner.country_id.code == "NO" and role == 'supplier':
             vals_list.append({
                 'company_id': "Foretaksregisteret",
-                'tax_scheme_id': "TAX",
+                'tax_scheme_vals': { 'id': 'TAX' },
             })
 
         return vals_list
