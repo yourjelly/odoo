@@ -20,7 +20,7 @@ class KarmaRank(models.Model):
         help='Minimum karma needed to reach this rank')
     user_ids = fields.One2many('res.users', 'rank_id', string='Users', help="Users having this rank")
     rank_users_count = fields.Integer("# Users", compute="_compute_rank_users_count")
-
+    breakpoint()
     _sql_constraints = [
         ('karma_min_check', "CHECK( karma_min > 0 )", 'The required karma has to be above 0.')
     ]

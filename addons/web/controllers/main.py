@@ -1475,7 +1475,7 @@ class Binary(http.Controller):
         '/web/image/<int:id>-<string:unique>',
         '/web/image/<int:id>-<string:unique>/<string:filename>',
         '/web/image/<int:id>-<string:unique>/<int:width>x<int:height>',
-        '/web/image/<int:id>-<string:unique>/<int:width>x<int:height>/<string:filename>'], type='http', auth="none")
+        '/web/image/<int:id>-<string:unique>/<int:width>x<int:height>/<string:filename>'], type='http', auth="public")
     def content_image(self, xmlid=None, model='ir.attachment', id=None, field='datas',
                       filename_field='name', unique=None, filename=None, mimetype=None,
                       download=None, width=0, height=0, crop=False, access_token=None,
@@ -1485,7 +1485,7 @@ class Binary(http.Controller):
             filename_field=filename_field, unique=unique, filename=filename, mimetype=mimetype,
             download=download, width=width, height=height, crop=crop,
             quality=int(kwargs.get('quality', 0)), access_token=access_token)
-
+    breakpoint()
     def _content_image(self, xmlid=None, model='ir.attachment', id=None, field='datas',
                        filename_field='name', unique=None, filename=None, mimetype=None,
                        download=None, width=0, height=0, crop=False, quality=0, access_token=None,
@@ -1606,7 +1606,7 @@ class Binary(http.Controller):
         '/web/binary/company_logo',
         '/logo',
         '/logo.png',
-    ], type='http', auth="public", cors="*")
+    ], type='http', auth="none", cors="*")
     def company_logo(self, dbname=None, **kw):
         imgname = 'logo'
         imgext = '.png'
