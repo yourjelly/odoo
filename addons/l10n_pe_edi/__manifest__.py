@@ -26,6 +26,7 @@ We support sending and cancelling of customer invoices.
         'l10n_pe',
         'product_unspsc',
         'account_edi',
+        'account_edi_ubl_cii',
     ],
     'auto_install': ['l10n_pe', 'account_edi'],
     "data": [

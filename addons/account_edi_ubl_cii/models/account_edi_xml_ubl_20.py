@@ -51,8 +51,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'registration_name': partner.name,
             'company_id': partner.vat,
             'registration_address_vals': self._get_partner_address_vals(partner),
-            'TaxScheme_vals': {},
-            'tax_scheme_id': 'VAT',
+            'tax_scheme_vals': {'id': 'VAT'},
         }]
 
     def _get_partner_party_legal_entity_vals_list(self, partner):
@@ -162,7 +161,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     def _get_invoice_payment_terms_vals_list(self, invoice):
         payment_term = invoice.invoice_payment_term_id
         if payment_term:
-            return [{'note_vals': [payment_term.name]}]
+            return [{'note_vals': [{'note': payment_term.name}]}]
         else:
             return []
 
@@ -436,9 +435,11 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'ContactType_template': 'account_edi_ubl_cii.ubl_20_ContactType',
             'PartyType_template': 'account_edi_ubl_cii.ubl_20_PartyType',
             'PaymentMeansType_template': 'account_edi_ubl_cii.ubl_20_PaymentMeansType',
+            'PaymentTermsType_template': 'account_edi_ubl_cii.ubl_20_PaymentTermsType',
             'TaxCategoryType_template': 'account_edi_ubl_cii.ubl_20_TaxCategoryType',
             'TaxTotalType_template': 'account_edi_ubl_cii.ubl_20_TaxTotalType',
             'AllowanceChargeType_template': 'account_edi_ubl_cii.ubl_20_AllowanceChargeType',
+            'SignatureType_template': 'account_edi_ubl_cii.ubl_20_SignatureType',
             'InvoiceLineType_template': 'account_edi_ubl_cii.ubl_20_InvoiceLineType',
             'InvoiceType_template': 'account_edi_ubl_cii.ubl_20_InvoiceType',
 

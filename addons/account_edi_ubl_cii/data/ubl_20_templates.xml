@@ -5,6 +5,8 @@
         <t xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
            xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
            xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+            <cbc:ID t-out="vals.get('id')"/>
+            <cbc:AddressTypeCode t-out="vals.get('address_type_code')"/>
             <cbc:StreetName t-out="vals.get('street_name')"/>
             <cbc:AdditionalStreetName t-out="vals.get('additional_street_name')"/>
             <cbc:CityName t-out="vals.get('city_name')"/>
@@ -58,7 +60,8 @@
                         </t>
                     </cac:RegistrationAddress>
                     <cac:TaxScheme>
-                        <cbc:ID t-out="foreach_vals.get('tax_scheme_id')"/>
+                        <t t-set="tax_scheme_vals" t-value="foreach_vals.get('tax_scheme_vals', {})"/>
+                        <cbc:ID t-out="tax_scheme_vals.get('id')"/>
                     </cac:TaxScheme>
                 </cac:PartyTaxScheme>
             </t>
@@ -90,6 +93,7 @@
         <t xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
            xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
            xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+            <cbc:ID t-out="vals.get('id')"/>
             <cbc:PaymentMeansCode
                     t-att="vals.get('payment_means_code_attrs', {})"
                     t-out="vals.get('payment_means_code')"/>
@@ -125,6 +129,22 @@
         </t>
     </template>
 
+    <template id="ubl_20_PaymentTermsType">
+        <t xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+           xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+            <cbc:ID t-out="vals.get('id')"/>
+            <cbc:PaymentMeansID t-out="vals.get('payment_means_id')"/>
+            <t t-foreach="vals.get('note_vals', [])" t-as="note">
+                <cbc:Note t-out="note"/>
+            </t>
+            <cbc:PaymentPercent t-out="vals.get('payment_percent')"/>
+            <cbc:Amount
+                t-att="vals.get('amount_attrs', {})"
+                t-out="vals.get('amount')"/>
+            <cbc:PaymentDueDate t-out="vals.get('payment_due_date')"/>
+        </t>
+    </template>
+
     <template id="ubl_20_TaxCategoryType">
         <t xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
            xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
@@ -139,7 +159,10 @@
             <cbc:TaxExemptionReason
                     t-out="vals.get('tax_exemption_reason')"/>
             <cac:TaxScheme>
-                <cbc:ID t-translation="off" t-out="vals.get('tax_scheme_id')"/>
+                <t t-set="tax_scheme_vals" t-value="vals.get('tax_scheme_vals', {})"/>
+                <cbc:ID t-translation="off" t-out="tax_scheme_vals.get('id')"/>
+                <cbc:Name t-out="tax_scheme_vals.get('name')"/>
+                <cbc:TaxTypeCode t-out="tax_scheme_vals.get('tax_type_code')"/>
             </cac:TaxScheme>
         </t>
     </template>
@@ -160,6 +183,9 @@
                         t-att-currencyID="foreach_vals['currency'].name"
                         t-out="format_float(foreach_vals.get('tax_amount'), foreach_vals.get('currency_dp'))"/>
                     <cbc:Percent t-out="foreach_vals.get('percent')"/>
+                    <cbc:BaseUnitMeasure
+                        t-att="foreach_vals.get('base_unit_measure_attrs', {})"
+                        t-out="foreach_vals.get('base_unit_measure')"/>
                     <cac:TaxCategory>
                         <t t-call="{{TaxCategoryType_template}}">
                             <t t-set="vals" t-value="foreach_vals.get('tax_category_vals', {})"/>
@@ -191,6 +217,28 @@
         </t>
     </template>
 
+    <template id="ubl_20_SignatureType">
+        <t xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+           xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+            <cbc:ID t-out="vals.get('id')"/>
+            <cac:SignatoryParty>
+                <t t-set="vals" t-value="vals.get('signatory_party_vals', {})"/>
+                <cac:PartyIdentification>
+                    <cbc:ID t-out="vals.get('party_id')"/>
+                </cac:PartyIdentification>
+                <cac:PartyName>
+                    <cbc:Name t-out="vals.get('party_name')"/>
+                </cac:PartyName>
+            </cac:SignatoryParty>
+            <cac:DigitalSignatureAttachment>
+                <t t-set="vals" t-value="vals.get('digital_signature_attachment_vals', {})"/>
+                <cac:ExternalReference>
+                    <cbc:URI t-out="vals.get('external_reference_uri')"/>
+                </cac:ExternalReference>
+            </cac:DigitalSignatureAttachment>
+        </t>
+    </template>
+
     <template id="ubl_20_InvoiceLineType">
         <t xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
            xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
@@ -212,6 +260,18 @@
             <cbc:LineExtensionAmount
                     t-att-currencyID="vals['currency'].name"
                     t-out="format_float(vals.get('line_extension_amount'), vals.get('currency_dp'))"/>
+            <cac:PricingReference>
+                <t t-set="vals" t-value="vals.get('pricing_reference_vals', {})"/>
+                <t t-foreach="vals.get('alternative_condition_price_vals', [])" t-as="foreach_vals">
+                    <cac:AlternativeConditionPrice>
+                        <cbc:PriceAmount
+                            t-att="foreach_vals.get('price_amount_attrs', {})"
+                            t-out="format_float(foreach_vals.get('price_amount'), foreach_vals.get('price_amount_dp'))"/>
+                        <cbc:PriceTypeCode
+                            t-out="foreach_vals.get('price_type_code')"/>
+                    </cac:AlternativeConditionPrice>
+                </t>
+            </cac:PricingReference>
             <!-- AllowanceCharge is only present for InvoiceLine, not for CreditNoteLine or DebitNoteLine in UBL 2.0
             (they are both present in UBL 2.1 and next)
              http://www.datypic.com/sc/ubl20/e-cac_CreditNoteLine.html
@@ -241,6 +301,11 @@
                 <cac:SellersItemIdentification>
                     <cbc:ID t-out="item_vals.get('sellers_item_identification_vals', {}).get('id')"/>
                 </cac:SellersItemIdentification>
+                <t t-foreach="item_vals.get('commodity_classification_vals', [])" t-as="foreach_vals">
+                    <cac:CommodityClassification>
+                        <cbc:ItemClassificationCode t-out="foreach_vals.get('item_classification_code')"/>
+                    </cac:CommodityClassification>
+                </t>
                 <t t-foreach="item_vals.get('classified_tax_category_vals', [])" t-as="foreach_vals">
                     <cac:ClassifiedTaxCategory>
                         <t t-call="{{TaxCategoryType_template}}">
@@ -276,8 +341,10 @@
                     t-att="vals.get('invoice_type_code_attrs', {})"
                     t-out="vals.get('invoice_type_code')"
             />
-            <t t-foreach="vals.get('note_vals', [])" t-as="note">
-                <cbc:Note t-out="note"/>
+            <t t-foreach="vals.get('note_vals', [])" t-as="note_vals">
+                <cbc:Note
+                    t-att="note_vals.get('note_attrs', {})"
+                    t-out="note_vals.get('note')"/>
             </t>
             <cbc:DocumentCurrencyCode
                     t-att="vals.get('document_currency_code_attrs', {})"
@@ -288,6 +355,14 @@
                     <cbc:EndDate t-out="foreach_vals.get('end_date')"/>
                 </cac:InvoicePeriod>
             </t>
+            <t t-if="document_type in ('credit_note', 'debit_note')">
+                <t t-foreach="vals.get('discrepancy_response_vals', [])" t-as="dr_vals">
+                    <cac:DiscrepancyResponse>
+                        <cbc:ResponseCode t-out="dr_vals.get('response_code')"/>
+                        <cbc:Description t-out="dr_vals.get('description')"/>
+                    </cac:DiscrepancyResponse>
+                </t>
+            </t>
             <cac:OrderReference>
                 <cbc:ID t-esc="vals.get('order_reference')"/>
                 <cbc:SalesOrderID t-esc="vals.get('sales_order_id')"/>
@@ -296,10 +371,19 @@
                 <cac:InvoiceDocumentReference>
                     <cbc:ID t-out="vals['billing_reference_vals'].get('id')"/>
                     <cbc:IssueDate t-out="vals['billing_reference_vals'].get('issue_date')"/>
+                    <cbc:DocumentTypeCode t-out="vals['billing_reference_vals'].get('document_type_code')"/>
                 </cac:InvoiceDocumentReference>
             </cac:BillingReference>
+            <t t-foreach="vals.get('signature_vals', [])" t-as="signature_vals">
+                <cac:Signature>
+                    <t t-call="{{SignatureType_template}}">
+                        <t t-set="vals" t-value="signature_vals"/>
+                    </t>
+                </cac:Signature>
+            </t>
             <cac:AccountingSupplierParty>
                 <t t-set="accounting_supplier_vals" t-value="vals.get('accounting_supplier_party_vals', {})"/>
+                <cbc:CustomerAssignedAccountID t-out="accounting_supplier_vals.get('customer_assigned_account_id')"/>
                 <cac:Party>
                     <t t-call="{{PartyType_template}}">
                         <t t-set="vals" t-value="accounting_supplier_vals.get('party_vals', {})"/>
@@ -308,6 +392,7 @@
             </cac:AccountingSupplierParty>
             <cac:AccountingCustomerParty>
                 <t t-set="accounting_customer_vals" t-value="vals.get('accounting_customer_party_vals', {})"/>
+                <cbc:AdditionalAccountID t-out="accounting_customer_vals.get('additional_account_id')"/>
                 <cac:Party>
                     <t t-call="{{PartyType_template}}">
                         <t t-set="vals" t-value="accounting_customer_vals.get('party_vals', {})"/>
@@ -342,8 +427,8 @@
                 </t>
                 <t t-foreach="vals.get('payment_terms_vals', [])" t-as="foreach_vals">
                     <cac:PaymentTerms>
-                        <t t-foreach="foreach_vals.get('note_vals', [])" t-as="note">
-                            <cbc:Note t-out="note"/>
+                        <t t-call="{{PaymentTermsType_template}}">
+                            <t t-set="vals" t-value="foreach_vals"/>
                         </t>
                     </cac:PaymentTerms>
                 </t>
@@ -392,6 +477,20 @@
                         t-att-currencyID="monetary_tot_vals['currency'].name"
                         t-out="format_float(monetary_tot_vals.get('payable_amount'), monetary_tot_vals.get('currency_dp'))"/>
                 </cac:LegalMonetaryTotal>
+            </t>
+            <t t-if="document_type == 'debit_note'">
+                <cac:RequestedMonetaryTotal>
+                    <t t-set="monetary_tot_vals" t-value="vals.get('legal_monetary_total_vals', {})"/>
+                    <cbc:LineExtensionAmount
+                        t-att-currencyID="monetary_tot_vals['currency'].name"
+                        t-out="format_float(monetary_tot_vals.get('line_extension_amount'), monetary_tot_vals.get('currency_dp'))"/>
+                    <cbc:TaxInclusiveAmount
+                        t-att-currencyID="monetary_tot_vals['currency'].name"
+                        t-out="format_float(monetary_tot_vals.get('tax_inclusive_amount'), monetary_tot_vals.get('currency_dp'))"/>
+                    <cbc:PayableAmount
+                        t-att-currencyID="monetary_tot_vals['currency'].name"
+                        t-out="format_float(monetary_tot_vals.get('payable_amount'), monetary_tot_vals.get('currency_dp'))"/>
+                </cac:RequestedMonetaryTotal>
             </t>
             <t t-foreach="vals.get('invoice_line_vals', [])" t-as="foreach_vals">
                 <cac:InvoiceLine t-if="document_type == 'invoice'">

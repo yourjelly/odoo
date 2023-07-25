@@ -75,8 +75,8 @@
                         xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-                        <t t-foreach="foreach_vals.get('note_vals', [])" t-as="note">
-                            <cbc:Note t-out="note"/>
+                        <t t-call="{{PaymentTermsType_template}}">
+                            <t t-set="vals" t-value="foreach_vals"/>
                         </t>
                     </cac:PaymentTerms>
                 </t>
