@@ -2,6 +2,7 @@
 
 import dom from "web.dom";
 import core from "web.core";
+import { _t } from "@web/core/l10n/translation";
 import {setCookie} from "web.utils.cookies";
 import Dialog from "web.Dialog";
 import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFromTextarea";
@@ -11,7 +12,6 @@ import session from "web.session";
 import { escape, sprintf } from "@web/core/utils/strings";
 var qweb = core.qweb;
 
-var _t = core._t;
 
 publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     selector: '.website_forum',

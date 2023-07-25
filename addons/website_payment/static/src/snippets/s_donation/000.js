@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { sprintf } from '@web/core/utils/strings';
-import {_t} from 'web.core';
+import { _t } from "@web/core/l10n/translation";
 import publicWidget from 'web.public.widget';
 
 const CUSTOM_BUTTON_EXTRA_WIDTH = 10;

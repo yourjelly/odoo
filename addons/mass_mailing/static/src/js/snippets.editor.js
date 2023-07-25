@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import {_lt} from "web.core";
+import { _lt } from "@web/core/l10n/translation";
 import snippetsEditor from "web_editor.snippet.editor";
 
 export const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({

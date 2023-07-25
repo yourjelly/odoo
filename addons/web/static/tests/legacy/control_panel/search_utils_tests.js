@@ -3,11 +3,10 @@
     import { constructDateDomain } from "web.searchUtils";
     import testUtils from "web.test_utils";
     import { registry } from "@web/core/registry";
-    import { translatedTerms } from "@web/core/l10n/translation";
+    import { translatedTerms, _t } from "@web/core/l10n/translation";
     import { patchWithCleanup } from "@web/../tests/helpers/utils";
     import { makeTestEnv } from "@web/../tests/helpers/mock_env";
     import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
-    import { _t } from "web.core";
 
     const patchDate = testUtils.mock.patchDate;
 

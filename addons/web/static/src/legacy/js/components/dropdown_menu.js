@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.DropdownMenu **/
     
-    import { _t } from "web.core";
+    import { _t } from "@web/core/l10n/translation";
     import DropdownMenuItem from "web.DropdownMenuItem";
     import { LegacyComponent } from "@web/legacy/legacy_component";
 

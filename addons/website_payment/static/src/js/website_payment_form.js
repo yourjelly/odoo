@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import core, { _t } from 'web.core';
+import core from 'web.core';
 import checkoutForm from 'payment.checkout_form';
 import { sprintf } from '@web/core/utils/strings';
+import { _t } from "@web/core/l10n/translation";
 
 checkoutForm.include({
     events: Object.assign({}, checkoutForm.prototype.events || {}, {

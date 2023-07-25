@@ -1,8 +1,7 @@
 /** @odoo-module alias=mail_group.mail_group **/
 
 import publicWidget from "web.public.widget";
-import core from "web.core";
-const _t = core._t;
+import { _t } from "@web/core/l10n/translation";
 
 publicWidget.registry.MailGroup = publicWidget.Widget.extend({
     selector: '.o_mail_group',

@@ -2,7 +2,8 @@
 
 import { uniqueId } from '@web/core/utils/functions';
 import { sprintf } from '@web/core/utils/strings';
-import {_t, qweb as QWeb} from 'web.core';
+import {qweb as QWeb} from 'web.core';
+import { _t } from "@web/core/l10n/translation";
 import Dialog from 'web.Dialog';
 import publicWidget from 'web.public.widget';
 import utils from 'web.utils';

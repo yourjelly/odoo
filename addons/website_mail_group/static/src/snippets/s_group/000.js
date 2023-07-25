@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-import core from "web.core";
-const _t = core._t;
+import { _t } from "@web/core/l10n/translation";
 import MailGroup from "mail_group.mail_group";
 
 MailGroup.include({

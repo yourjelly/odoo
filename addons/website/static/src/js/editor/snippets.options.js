@@ -1,5 +1,6 @@
 /** @odoo-module alias=website.editor.snippets.options **/
 
+import { _t } from "@web/core/l10n/translation";
 import core from "web.core";
 import { loadBundle, loadCSS } from "@web/core/assets";
 import Dialog from "web.Dialog";
@@ -20,7 +21,6 @@ import {
     convertHslToRgb,
  } from '@web/core/utils/colors';
 
-var _t = core._t;
 var qweb = core.qweb;
 
 const InputUserValueWidget = options.userValueWidgetsRegistry['we-input'];

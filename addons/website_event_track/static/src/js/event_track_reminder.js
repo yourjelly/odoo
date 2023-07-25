@@ -2,8 +2,8 @@
 
 import { sprintf } from "@web/core/utils/strings";
 import { debounce } from "@web/core/utils/timing";
+import { _t } from "@web/core/l10n/translation";
 import core from "web.core";
-var _t = core._t;
 import publicWidget from "web.public.widget";
 
 publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({

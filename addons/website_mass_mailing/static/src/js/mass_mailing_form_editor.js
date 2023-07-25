@@ -1,9 +1,7 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import { _t } from "@web/core/l10n/translation";
 import FormEditorRegistry from "website.form_editor_registry";
-
-const _t = core._t;
 
 FormEditorRegistry.add('create_mailing_contact', {
     formFields: [{

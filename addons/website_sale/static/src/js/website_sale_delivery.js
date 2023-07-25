@@ -2,8 +2,8 @@
 
 import core from "web.core";
 import publicWidget from "web.public.widget";
+import { _t } from "@web/core/l10n/translation";
 
-const _t = core._t;
 const qweb = core.qweb;
 import concurrency from "web.concurrency";
 

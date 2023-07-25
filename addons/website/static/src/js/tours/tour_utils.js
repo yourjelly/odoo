@@ -1,6 +1,6 @@
 /** @odoo-module alias=website.tour_utils **/
 
-import {_t} from "web.core";
+ import { _t } from "@web/core/l10n/translation";
 import "web.legacy_tranlations_loaded";
 import {Markup} from "web.utils";
 import { registry } from "@web/core/registry";

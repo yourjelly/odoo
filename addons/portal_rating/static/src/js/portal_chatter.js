@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
 import core from "web.core";
+import { _t } from "@web/core/l10n/translation";
 import portalChatter from "portal.chatter";
 import { roundPrecision } from "@web/core/utils/numbers";
 
-var _t = core._t;
 var PortalChatter = portalChatter.PortalChatter;
 var qweb = core.qweb;
 

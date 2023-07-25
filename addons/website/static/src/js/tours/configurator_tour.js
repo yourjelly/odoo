@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
 import wTourUtils from "website.tour_utils";
-import core from "web.core";
+import { _t } from "@web/core/l10n/translation";
 import "web.legacy_tranlations_loaded";
-const _t = core._t;
 
 let titleSelector = '#wrap > section:first-child';
 let title = $(titleSelector).find('h1, h2').first();

@@ -3,10 +3,10 @@
 import { escape, sprintf } from "@web/core/utils/strings";
 import ajax from "web.ajax";
 import core from "web.core";
+import { _t } from "@web/core/l10n/translation";
 import publicWidget from "web.public.widget";
 
 var qweb = core.qweb;
-var _t = core._t;
 
 /**
  * Widget PortalComposer

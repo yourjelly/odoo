@@ -1,14 +1,12 @@
 /** @odoo-module alias=website_sale.SaleVariantMixin **/
 
 import concurrency from "web.concurrency";
-import core from "web.core";
+import { _t } from "@web/core/l10n/translation";
 import utils from "web.utils";
 import ajax from "web.ajax";
 import { sprintf } from "@web/core/utils/strings";
 import { memoize, uniqueId } from "@web/core/utils/functions";
 import { throttleForAnimation } from "@web/core/utils/timing";
-
-var _t = core._t;
 
 var VariantMixin = {
     events: {

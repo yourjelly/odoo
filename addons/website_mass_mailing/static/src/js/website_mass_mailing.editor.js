@@ -3,9 +3,9 @@
 import core from "web.core";
 import Dialog from "web.Dialog";
 import options from "web_editor.snippets.options";
+import { _t } from "@web/core/l10n/translation";
 
 const qweb = core.qweb;
-var _t = core._t;
 
 
 options.registry.mailing_list_subscribe = options.Class.extend({

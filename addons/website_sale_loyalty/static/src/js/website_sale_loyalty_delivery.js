@@ -2,9 +2,7 @@
 
 import PublicWidget from 'web.public.widget';
 import { patch } from 'web.utils';
-import core from 'web.core';
-
-const _t = core._t;
+import { _t } from "@web/core/l10n/translation";
 
 patch(PublicWidget.registry.websiteSaleDelivery, 'addons/website_sale_loyalty_delivery/statis/src/js/website_sale_loyalty_delivery.js', {
     //--------------------------------------------------------------------------

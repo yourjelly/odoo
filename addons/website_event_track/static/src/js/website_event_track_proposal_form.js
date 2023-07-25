@@ -2,9 +2,9 @@
 
 import core from "web.core";
 import publicWidget from "web.public.widget";
+import { _t } from "@web/core/l10n/translation";
 
 var QWeb = core.qweb;
-var _t = core._t;
 
 publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend({
     selector: '.o_website_event_track_proposal_form',

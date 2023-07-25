@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog_wrapper";
+import { _t } from "@web/core/l10n/translation";
 import { ComponentWrapper } from "web.OwlCompatibility";
 import core from "web.core";
 import options from "web_editor.snippets.options";
 import wUtils from "website.utils";
 
-var _t = core._t;
 var qweb = core.qweb;
 
 /**

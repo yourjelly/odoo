@@ -1,9 +1,8 @@
 /** @odoo-module alias=website_event_meet.website_event_meet_meeting_room **/
 
 import publicWidget from "web.public.widget";
-import core from "web.core";
+import { _t } from "@web/core/l10n/translation";
 import Dialog from "web.Dialog";
-const _t = core._t;
 
 publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
     selector: '.o_wevent_meeting_room_card',

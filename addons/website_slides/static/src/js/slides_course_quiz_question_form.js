@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import publicWidget from 'web.public.widget';
 import core from 'web.core';
 
 var QWeb = core.qweb;
-var _t = core._t;
 
 /**
  * This Widget is responsible of displaying the question inputs when adding a new question or when updating an

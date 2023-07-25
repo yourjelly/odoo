@@ -11,6 +11,7 @@ import { ColorPalette } from '@web_editor/js/wysiwyg/widgets/color_palette';
 import SmoothScrollOnDrag from "web.smooth_scroll_on_drag";
 import {getCSSVariableValue} from "web_editor.utils";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
+import { _t } from "@web/core/l10n/translation";
 import { sprintf, escape } from "@web/core/utils/strings";
 const QWeb = core.qweb;
 import { closestElement, isUnremovable } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
@@ -25,8 +26,6 @@ import {
     xml,
 } from "@odoo/owl";
 import { LinkTools } from '@web_editor/js/wysiwyg/widgets/link_tools';
-
-var _t = core._t;
 
 let cacheSnippetTemplate = {};
 

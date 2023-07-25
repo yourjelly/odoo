@@ -3,10 +3,10 @@
 import core from "web.core";
 import publicWidget from "web.public.widget";
 import weUtils from "web_editor.utils";
+import { _t } from "@web/core/l10n/translation";
 import { isCSSColor } from '@web/core/utils/colors';
 
 const qweb = core.qweb;
-const _t = core._t;
 
 const CountdownWidget = publicWidget.Widget.extend({
     selector: '.s_countdown',

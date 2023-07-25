@@ -10,9 +10,9 @@
  */
 
 import { uniqueId } from "@web/core/utils/functions";
+import { _t } from "@web/core/l10n/translation";
 import concurrency from "web.concurrency";
 import core from "web.core";
-var _t = core._t;
 
 /**
  * Private function to notify that something has been attached in the DOM

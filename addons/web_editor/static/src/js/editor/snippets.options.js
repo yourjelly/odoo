@@ -7,6 +7,7 @@ import Dialog from "web.Dialog";
 import {scrollTo} from "web.dom";
 import rpc from "web.rpc";
 import time from "web.time";
+import { _t, _lt } from "@web/core/l10n/translation";
 import { throttleForAnimation, debounce } from "@web/core/utils/timing";
 import utils from "web.utils";
 import Widget from "web.Widget";
@@ -45,8 +46,6 @@ import {
  } from '@web/core/utils/colors';
 
 var qweb = core.qweb;
-var _t = core._t;
-const _lt = core._lt;
 const preserveCursor = OdooEditorLib.preserveCursor;
 const descendants = OdooEditorLib.descendants;
 
