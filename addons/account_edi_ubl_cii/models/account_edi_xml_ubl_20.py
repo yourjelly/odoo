@@ -414,8 +414,17 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         # OrderReference/ID (order_reference) is mandatory inside the OrderReference node !
         order_reference = invoice.ref or invoice.name if sales_order_id else invoice.ref
 
+        # Check the type of the document
+        if 'debit_origin_id' in self.env['account.move']._fields and invoice.debit_origin_id:
+            document_type = 'debit_note'
+        elif invoice.move_type == 'out_refund':
+            document_type = 'credit_note'
+        else: # invoice.move_type == 'out_invoice'
+            document_type = 'invoice'
+
         vals = {
             'builder': self,
+            'document_type': document_type,
             'invoice': invoice,
             'supplier': supplier,
             'customer': customer,
