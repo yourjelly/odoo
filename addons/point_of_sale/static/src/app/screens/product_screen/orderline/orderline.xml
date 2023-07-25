@@ -27,7 +27,7 @@
             <span class="price fw-bolder float-end">
                 <t t-esc="env.utils.formatCurrency(props.line.get_display_price())"/>
             </span>
-            <ul class="info-list">
+            <ul class="info-list text-dark">
                 <t t-if="props.line.get_quantity_str() !== '1' || props.line.selected ">
                     <li class="info ms-2">
                         <em class="fst-normal fw-bolder">
