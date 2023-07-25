@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import SmoothScrollOnDrag from 'web/static/src/js/core/smooth_scroll_on_drag.js';
+import { SmoothScrollOnDrag } from '@web/core/smooth_scroll_on_drag';
 import {
     ancestors,
     setSelection,
@@ -73,6 +73,7 @@ export class MoveNodePlugin {
     }
     destroy() {
         this.observer.disconnect();
+        this.smoothScrollOnDrag && this.smoothScrollOnDrag.destroy();
     }
     _updateHooks() {
         const editableStyles = getComputedStyle(this._editable);
@@ -193,7 +194,8 @@ export class MoveNodePlugin {
         }
 
         if (this._scrollableElement) {
-            new SmoothScrollOnDrag(undefined, $(this._moveWidget), $(this._scrollableElement), {
+            this.smoothScrollOnDrag && this.smoothScrollOnDrag.destroy();
+            this.smoothScrollOnDrag = new SmoothScrollOnDrag($(this._moveWidget), $(this._scrollableElement), {
                 scrollBoundaries: {
                     right: false,
                 },
