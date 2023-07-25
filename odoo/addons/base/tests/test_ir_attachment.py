@@ -244,8 +244,6 @@ class TestIrAttachment(TransactionCase):
         self.assertFalse(os.path.isfile(store_path), 'file removed')
 
     def test_13_rollback(self):
-        self.registry.enter_test_mode(self.cr)
-        self.addCleanup(self.registry.leave_test_mode)
         self.cr = self.registry.cursor()
         self.addCleanup(self.cr.close)
         self.env = odoo.api.Environment(self.cr, odoo.SUPERUSER_ID, {})

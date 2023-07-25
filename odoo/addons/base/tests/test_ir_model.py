@@ -179,15 +179,6 @@ class TestIrModel(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        # The test mode is necessary in this case.  After each test, we call
-        # registry.reset_changes(), which opens a new cursor to retrieve custom
-        # models and fields.  A regular cursor would correspond to the state of
-        # the database before setUpClass(), which is not correct.  Instead, a
-        # test cursor will correspond to the state of the database of cls.cr at
-        # that point, i.e., before the call to setUp().
-        cls.registry.enter_test_mode(cls.cr)
-        cls.addClassCleanup(cls.registry.leave_test_mode)
-
         # model and records for banana stages
         cls.env['ir.model'].create({
             'name': 'Banana Ripeness',

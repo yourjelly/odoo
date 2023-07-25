@@ -698,6 +698,7 @@ class TransactionCase(BaseCase):
     fields. If a test modifies the registry (custom models and/or fields), it
     should prepare the necessary cleanup (`self.registry.reset_changes()`).
     """
+    registry_test_mode = True
     registry: Registry = None
     env: api.Environment = None
     cr: Cursor = None
@@ -731,6 +732,10 @@ class TransactionCase(BaseCase):
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(cls.cr.close)
+
+        if cls.registry_test_mode:
+            cls.registry.enter_test_mode(cls.cr)
+            cls.addClassCleanup(cls.registry.leave_test_mode)
 
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
 
@@ -1579,7 +1584,6 @@ class Transport(xmlrpclib.Transport):
 
 class HttpCase(TransactionCase):
     """ Transactional HTTP TestCase with url_open and Chrome headless helpers. """
-    registry_test_mode = True
     browser = None
     browser_size = '1366x768'
     touch_enabled = False
@@ -1590,9 +1594,6 @@ class HttpCase(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        if cls.registry_test_mode:
-            cls.registry.enter_test_mode(cls.cr)
-            cls.addClassCleanup(cls.registry.leave_test_mode)
 
         ICP = cls.env['ir.config_parameter']
         ICP.set_param('web.base.url', cls.base_url())

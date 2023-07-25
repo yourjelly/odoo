@@ -546,7 +546,7 @@ class TestEmailMessage(TransactionCase):
         return self.env['ir.mail_server'].build_email(**kwargs)
 
     def send_email(self, msg):
-        with patch.object(threading.current_thread(), 'testing', False):
+        with patch.object(self.env.registry['ir.mail_server'], '_is_test_mode', lambda self: False):
             self.env['ir.mail_server'].send_email(msg, smtp_session=self._fake_smtp)
         return self._fake_smtp.messages.pop()
 

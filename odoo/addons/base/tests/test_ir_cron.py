@@ -238,16 +238,12 @@ class TestIrCron(TransactionCase, CronMixinCase):
 
                 self.cron.flush_recordset()
                 capture.records.flush_recordset()
-                self.registry.enter_test_mode(self.cr)
-                try:
-                    with patch.object(self.registry['ir.cron'], '_callback') as callback:
-                        self.registry['ir.cron']._process_job(
-                            self.registry.db_name,
-                            self.registry.cursor(),
-                            self.cron.read(load=None)[0]
-                        )
-                finally:
-                    self.registry.leave_test_mode()
+                with patch.object(self.registry['ir.cron'], '_callback') as callback:
+                    self.registry['ir.cron']._process_job(
+                        self.registry.db_name,
+                        self.registry.cursor(),
+                        self.cron.read(load=None)[0]
+                    )
                 self.cron.invalidate_recordset()
                 capture.records.invalidate_recordset()
 

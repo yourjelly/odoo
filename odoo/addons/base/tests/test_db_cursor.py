@@ -50,9 +50,6 @@ class TestRealCursor(BaseCase):
 class TestTestCursor(common.TransactionCase):
     def setUp(self):
         super().setUp()
-        # make the registry in test mode
-        self.registry.enter_test_mode(self.cr)
-        self.addCleanup(self.registry.leave_test_mode)
         # now we make a test cursor for self.cr
         self.cr = self.registry.cursor()
         self.addCleanup(self.cr.close)
@@ -201,6 +198,8 @@ class TestTestCursor(common.TransactionCase):
 
 
 class TestCursorHooks(common.TransactionCase):
+    registry_test_mode = False
+
     def setUp(self):
         super().setUp()
         self.log = []
