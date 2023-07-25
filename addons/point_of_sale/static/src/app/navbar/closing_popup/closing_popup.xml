@@ -32,7 +32,8 @@
                                             <i class="fa fa-money fa-2x" role="img" title="Open the money details popup"/>
                                         </div>
                                     </td>
-                                    <td t-esc="env.utils.formatCurrency(state.payments[defaultCashDetails.id].difference)" t-att-class="{'warning text-danger fw-bolder': state.payments[defaultCashDetails.id].difference}"/>
+                                    <td t-esc="env.utils.formatCurrency(state.payments[defaultCashDetails.id].difference)" 
+                                        t-att-class="{'warning text-danger fw-bolder': state.payments[defaultCashDetails.id].difference}"/>
                                 </tr>
                             </tbody>
                             <tbody class="cash-overview d-flex flex-column mb-2 border-start small text-muted">
