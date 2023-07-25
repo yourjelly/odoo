@@ -59,6 +59,7 @@
         span:not(.fa) {
             display: inline-block;
             padding: 5px;
+            background: $body-bg;
         }
         .fa {
             margin: 0 $grid-gutter-width/2;
