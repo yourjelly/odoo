@@ -1,5 +1,11 @@
 (function (exports) {
     'use strict';
+    const weakMaps = {};
+    window.clearWeakMaps = () => {
+        for (const key in weakMaps) {
+            weakMaps[key] = new WeakMap();
+        }
+    };
 
     function filterOutModifiersFromData(dataList) {
         dataList = dataList.slice();
@@ -87,17 +93,17 @@
     class OwlError extends Error {
     }
     // Maps fibers to thrown errors
-    const fibersInError = new WeakMap();
-    const nodeErrorHandlers = new WeakMap();
+    weakMaps.fibersInError = new WeakMap();
+    weakMaps.nodeErrorHandlers = new WeakMap();
     function _handleError(node, error) {
         if (!node) {
             return false;
         }
         const fiber = node.fiber;
         if (fiber) {
-            fibersInError.set(fiber, error);
+            weakMaps.fibersInError.set(fiber, error);
         }
-        const errorHandlers = nodeErrorHandlers.get(node);
+        const errorHandlers = weakMaps.nodeErrorHandlers.get(node);
         if (errorHandlers) {
             let handled = false;
             // execute in the opposite order
@@ -132,7 +138,7 @@
             current.node.fiber = current;
             current = current.parent;
         } while (current);
-        fibersInError.set(fiber.root, error);
+        weakMaps.fibersInError.set(fiber.root, error);
         const handled = _handleError(node, error);
         if (!handled) {
             console.warn(`[Owl] Unhandled error. Destroying the root component`);
@@ -1632,9 +1638,9 @@
             current.children = [];
             current.childrenMap = {};
             current.bdom = null;
-            if (fibersInError.has(current)) {
-                fibersInError.delete(current);
-                fibersInError.delete(root);
+            if (weakMaps.fibersInError.has(current)) {
+                weakMaps.fibersInError.delete(current);
+                weakMaps.fibersInError.delete(root);
                 current.appliedToDom = false;
             }
             return current;
@@ -1916,9 +1922,9 @@
      * @returns the underlying value
      */
     function toRaw(value) {
-        return targets.has(value) ? targets.get(value) : value;
+        return weakMaps.targets.has(value) ? weakMaps.targets.get(value) : value;
     }
-    const targetToKeysToCallbacks = new WeakMap();
+    weakMaps.targetToKeysToCallbacks = new WeakMap();
     /**
      * Observes a given key on a target with an callback. The callback will be
      * called when the given key changes on the target.
@@ -1932,18 +1938,18 @@
         if (callback === NO_CALLBACK) {
             return;
         }
-        if (!targetToKeysToCallbacks.get(target)) {
-            targetToKeysToCallbacks.set(target, new Map());
+        if (!weakMaps.targetToKeysToCallbacks.get(target)) {
+            weakMaps.targetToKeysToCallbacks.set(target, new Map());
         }
-        const keyToCallbacks = targetToKeysToCallbacks.get(target);
+        const keyToCallbacks = weakMaps.targetToKeysToCallbacks.get(target);
         if (!keyToCallbacks.get(key)) {
             keyToCallbacks.set(key, new Set());
         }
         keyToCallbacks.get(key).add(callback);
-        if (!callbacksToTargets.has(callback)) {
-            callbacksToTargets.set(callback, new Set());
+        if (!weakMaps.callbacksToTargets.has(callback)) {
+            weakMaps.callbacksToTargets.set(callback, new Set());
         }
-        callbacksToTargets.get(callback).add(target);
+        weakMaps.callbacksToTargets.get(callback).add(target);
     }
     /**
      * Notify Reactives that are observing a given target that a key has changed on
@@ -1955,7 +1961,7 @@
      *   or deleted)
      */
     function notifyReactives(target, key) {
-        const keyToCallbacks = targetToKeysToCallbacks.get(target);
+        const keyToCallbacks = weakMaps.targetToKeysToCallbacks.get(target);
         if (!keyToCallbacks) {
             return;
         }
@@ -1969,19 +1975,19 @@
             callback();
         }
     }
-    const callbacksToTargets = new WeakMap();
+    weakMaps.callbacksToTargets = new WeakMap();
     /**
      * Clears all subscriptions of the Reactives associated with a given callback.
      *
      * @param callback the callback for which the reactives need to be cleared
      */
     function clearReactivesForCallback(callback) {
-        const targetsToClear = callbacksToTargets.get(callback);
-        if (!targetsToClear) {
+        const targettsToClear = weakMaps.callbacksToTargets.get(callback);
+        if (!targettsToClear) {
             return;
         }
-        for (const target of targetsToClear) {
-            const observedKeys = targetToKeysToCallbacks.get(target);
+        for (const target of targettsToClear) {
+            const observedKeys = weakMaps.targetToKeysToCallbacks.get(target);
             if (!observedKeys) {
                 continue;
             }
@@ -1992,12 +1998,12 @@
                 }
             }
         }
-        targetsToClear.clear();
+        targettsToClear.clear();
     }
     function getSubscriptions(callback) {
-        const targets = callbacksToTargets.get(callback) || [];
-        return [...targets].map((target) => {
-            const keysToCallbacks = targetToKeysToCallbacks.get(target);
+        const targetts = weakMaps.callbacksToTargets.get(callback) || [];
+        return [...targetts].map((target) => {
+            const keysToCallbacks = weakMaps.targetToKeysToCallbacks.get(target);
             let keys = [];
             if (keysToCallbacks) {
                 for (const [key, cbs] of keysToCallbacks) {
@@ -2010,8 +2016,8 @@
         });
     }
     // Maps reactive objects to the underlying target
-    const targets = new WeakMap();
-    const reactiveCache = new WeakMap();
+    weakMaps.targets = new WeakMap();
+    weakMaps.reactiveCache = new WeakMap();
     /**
      * Creates a reactive proxy for an object. Reading data on the reactive object
      * subscribes to changes to the data. Writing data on the object will cause the
@@ -2046,14 +2052,14 @@
         if (skipped.has(target)) {
             return target;
         }
-        if (targets.has(target)) {
+        if (weakMaps.targets.has(target)) {
             // target is reactive, create a reactive on the underlying object instead
-            return reactive(targets.get(target), callback);
+            return reactive(weakMaps.targets.get(target), callback);
         }
-        if (!reactiveCache.has(target)) {
-            reactiveCache.set(target, new WeakMap());
+        if (!weakMaps.reactiveCache.has(target)) {
+            weakMaps.reactiveCache.set(target, new WeakMap());
         }
-        const reactivesForTarget = reactiveCache.get(target);
+        const reactivesForTarget = weakMaps.reactiveCache.get(target);
         if (!reactivesForTarget.has(callback)) {
             const targetRawType = rawType(target);
             const handler = COLLECTION_RAWTYPES.has(targetRawType)
@@ -2061,7 +2067,7 @@
                 : basicProxyHandler(callback);
             const proxy = new Proxy(target, handler);
             reactivesForTarget.set(callback, proxy);
-            targets.set(proxy, target);
+            weakMaps.targets.set(proxy, target);
         }
         return reactivesForTarget.get(callback);
     }
@@ -2303,7 +2309,7 @@
     // -----------------------------------------------------------------------------
     // Integration with reactivity system (useState)
     // -----------------------------------------------------------------------------
-    const batchedRenderFunctions = new WeakMap();
+    weakMaps.batchedRenderFunctions = new WeakMap();
     /**
      * Creates a reactive object that will be observed by the current component.
      * Reading data from the returned object (eg during rendering) will cause the
@@ -2316,10 +2322,10 @@
      */
     function useState(state) {
         const node = getCurrent();
-        let render = batchedRenderFunctions.get(node);
+        let render = weakMaps.batchedRenderFunctions.get(node);
         if (!render) {
             render = batched(node.render.bind(node, false));
-            batchedRenderFunctions.set(node, render);
+            weakMaps.batchedRenderFunctions.set(node, render);
             // manual implementation of onWillDestroy to break cyclic dependency
             node.willDestroy.push(clearReactivesForCallback.bind(null, render));
         }
@@ -2355,7 +2361,7 @@
             this.childEnv = env;
             for (const key in props) {
                 const prop = props[key];
-                if (prop && typeof prop === "object" && targets.has(prop)) {
+                if (prop && typeof prop === "object" && weakMaps.targets.has(prop)) {
                     props[key] = useState(prop);
                 }
             }
@@ -2395,7 +2401,7 @@
                 current = this.fiber;
             }
             if (current) {
-                if (!current.bdom && !fibersInError.has(current)) {
+                if (!current.bdom && !weakMaps.fibersInError.has(current)) {
                     if (deep) {
                         // we want the render from this point on to be with deep=true
                         current.deep = deep;
@@ -2474,7 +2480,7 @@
             currentNode = this;
             for (const key in props) {
                 const prop = props[key];
-                if (prop && typeof prop === "object" && targets.has(prop)) {
+                if (prop && typeof prop === "object" && weakMaps.targets.has(prop)) {
                     props[key] = useState(prop);
                 }
             }
@@ -2588,7 +2594,7 @@
             return this.component.constructor.name;
         }
         get subscriptions() {
-            const render = batchedRenderFunctions.get(this);
+            const render = weakMaps.batchedRenderFunctions.get(this);
             return render ? getSubscriptions(render) : [];
         }
     }
@@ -2693,10 +2699,10 @@
     }
     function onError(callback) {
         const node = getCurrent();
-        let handlers = nodeErrorHandlers.get(node);
+        let handlers = weakMaps.nodeErrorHandlers.get(node);
         if (!handlers) {
             handlers = [];
-            nodeErrorHandlers.set(node, handlers);
+            weakMaps.nodeErrorHandlers.set(node, handlers);
         }
         handlers.push(callback.bind(node.component));
     }
@@ -3730,7 +3736,7 @@
             this.blocks = [];
             this.nextBlockId = 1;
             this.isDebug = false;
-            this.targets = [];
+            this.targetts = [];
             this.target = new CodeTarget("template");
             this.translatableAttributes = TRANSLATABLE_ATTRS;
             this.staticDefs = [];
@@ -3797,8 +3803,8 @@
                 }
             }
             // define all slots/defaultcontent function
-            if (this.targets.length) {
-                for (let fn of this.targets) {
+            if (this.targetts.length) {
+                for (let fn of this.targetts) {
                     mainCode.push("");
                     mainCode = mainCode.concat(fn.generateCode());
                 }
@@ -3817,7 +3823,7 @@
             const name = generateId(prefix);
             const initialTarget = this.target;
             const target = new CodeTarget(name, on);
-            this.targets.push(target);
+            this.targetts.push(target);
             this.target = target;
             this.compileAST(ast, createContext(ctx));
             this.target = initialTarget;
@@ -4793,17 +4799,17 @@
     // -----------------------------------------------------------------------------
     // Parser
     // -----------------------------------------------------------------------------
-    const cache = new WeakMap();
+    weakMaps.cache = new WeakMap();
     function parse(xml) {
         if (typeof xml === "string") {
             const elem = parseXML(`<t>${xml}</t>`).firstChild;
             return _parse(elem);
         }
-        let ast = cache.get(xml);
+        let ast = weakMaps.cache.get(xml);
         if (!ast) {
             // we clone here the xml to prevent modifying it in place
             ast = _parse(xml.cloneNode(true));
-            cache.set(xml, ast);
+            weakMaps.cache.set(xml, ast);
         }
         return ast;
     }
@@ -5584,7 +5590,7 @@
                 this.tasks.delete(fiber);
                 return;
             }
-            const hasError = fibersInError.has(fiber);
+            const hasError = weakMaps.fibersInError.has(fiber);
             if (hasError && fiber.counter !== 0) {
                 this.tasks.delete(fiber);
                 return;
@@ -5664,10 +5670,10 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
                     isResolved = true;
                 });
                 // Manually add the last resort error handler on the node
-                let handlers = nodeErrorHandlers.get(node);
+                let handlers = weakMaps.nodeErrorHandlers.get(node);
                 if (!handlers) {
                     handlers = [];
-                    nodeErrorHandlers.set(node, handlers);
+                    weakMaps.nodeErrorHandlers.set(node, handlers);
                 }
                 handlers.unshift((e) => {
                     if (!isResolved) {
