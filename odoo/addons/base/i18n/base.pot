@@ -14940,6 +14940,12 @@ msgid "Invalid field %s.%s"
 msgstr ""
 
 #. module: base
+#: code:addons/base/models/ir_rule.py:0
+#, python-format
+msgid "Invalid field in domain of the rule: %s"
+msgstr ""
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid "Invalid field specification %r."

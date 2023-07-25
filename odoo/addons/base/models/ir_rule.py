@@ -2,6 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 import warnings
+import ast
+
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, ValidationError
@@ -213,6 +215,16 @@ class IrRule(models.Model):
         self.flush()
         self.clear_caches()
         return res
+
+    @api.constrains('domain_force')
+    def _check_domain_formula(self):
+        for record in self:
+            try:
+                domain = safe_eval(record.domain_force)
+                model = record.model_id.model
+                self.env[model].sudo()._search(expression.normalize_domain(domain))
+            except (ValueError, SyntaxError, IndexError):
+                raise ValidationError(_("Invalid domain field in DOMIAN: %s") % (record.domain_force))
 
     def _make_access_error(self, operation, records):
         _logger.info('Access Denied by record rules for operation: %s on record ids: %r, uid: %s, model: %s', operation, records.ids[:6], self._uid, records._name)
