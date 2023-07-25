@@ -174,11 +174,12 @@ class MailTemplate(models.Model):
                     partner = Partner.find_or_create(mail)
                     partner_ids.append(partner.id)
             partner_to = values.pop('partner_to', '')
-            if partner_to:
-                # placeholders could generate '', 3, 2 due to some empty field values
-                tpl_partner_ids = [int(pid) for pid in partner_to.split(',') if pid]
-                partner_ids += self.env['res.partner'].sudo().browse(tpl_partner_ids).exists().ids
-            results[res_id]['partner_ids'] = partner_ids
+            if partner_to.isnumeric():
+                if partner_to:
+                    # placeholders could generate '', 3, 2 due to some empty field values
+                    tpl_partner_ids = [int(pid) for pid in partner_to.split(',') if pid]
+                    partner_ids += self.env['res.partner'].sudo().browse(tpl_partner_ids).exists().ids
+                results[res_id]['partner_ids'] = partner_ids
         return results
 
     def generate_email(self, res_ids, fields):
