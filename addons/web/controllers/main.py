@@ -1485,7 +1485,7 @@ class Binary(http.Controller):
             filename_field=filename_field, unique=unique, filename=filename, mimetype=mimetype,
             download=download, width=width, height=height, crop=crop,
             quality=int(kwargs.get('quality', 0)), access_token=access_token)
-    breakpoint()
+
     def _content_image(self, xmlid=None, model='ir.attachment', id=None, field='datas',
                        filename_field='name', unique=None, filename=None, mimetype=None,
                        download=None, width=0, height=0, crop=False, quality=0, access_token=None,
@@ -1494,7 +1494,7 @@ class Binary(http.Controller):
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
             filename_field=filename_field, download=download, mimetype=mimetype,
             default_mimetype='image/png', access_token=access_token)
-
+        breakpoint()
         return Binary._content_image_get_response(
             status, headers, image_base64, model=model, id=id, field=field, download=download,
             width=width, height=height, crop=crop, quality=quality,
@@ -1607,6 +1607,7 @@ class Binary(http.Controller):
         '/logo',
         '/logo.png',
     ], type='http', auth="none", cors="*")
+
     def company_logo(self, dbname=None, **kw):
         imgname = 'logo'
         imgext = '.png'
