@@ -8,7 +8,7 @@
                 <span class="label fw-bolder fs-4 z-index-1">
                     <t t-esc="props.table.name" />
                 </span>
-                <span t-att-class="orderCountClass" t-attf-class="{{ orderCount === 0 ? 'd-none' : ''}}" t-att-style="badgeStyle">
+                <span t-att-class="orderCountClass" class="badge d-flex align-items-center justify-content-center position-absolute top-0 start-100 translate-middle rounded-pill" t-attf-class="{{ orderCount === 0 ? 'd-none' : ''}}" t-att-style="badgeStyle">
                     <t t-esc="orderCount" />
                 </span>
             </div>

@@ -149,8 +149,9 @@ export class Table extends Component {
         const notifications = this._getNotifications();
         const countClass = {
             "order-count": true,
-            "notify-printing badge d-flex align-items-center justify-content-center position-absolute top-0 start-100 translate-middle rounded-pill text-bg-danger": notifications.printing,
-            "notify-skipped badge d-flex align-items-center justify-content-center position-absolute top-0 start-100 translate-middle rounded-pill text-bg-info": notifications.skipped,
+            "notify-printing text-bg-danger": notifications.printing,
+            "notify-skipped text-bg-info": notifications.skipped,
+            "text-bg-dark": !notifications.printing && !notifications.skipped,
         };
         return countClass;
     }

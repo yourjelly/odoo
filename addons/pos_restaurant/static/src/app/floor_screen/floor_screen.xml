@@ -16,7 +16,7 @@
                         <t t-esc="floor.name" />
                     </button>
                 </t>
-                <button class="button button-add btn btn-secondary p-3 rounded-0" t-ref="add-floor-ref" t-on-click="addFloor">
+                <button class="button button-add btn btn-secondary p-3 ms-auto rounded-0" t-ref="add-floor-ref" t-on-click="addFloor">
                     <i class="fa fa-plus icon-button me-2" role="img" aria-label="Add" title="Add"></i>
                     Add Floor
                 </button>
