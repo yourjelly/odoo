@@ -1,0 +1,26 @@
+.o_install_prompt {
+    border-radius: 1em;
+    height: fit-content !important;
+	-webkit-backdrop-filter: blur(5px);
+	backdrop-filter: blur(5px);
+	background: rgba(#FFF, .7);
+
+    &.mobile {
+        width: 90% !important;
+        inset: auto auto 5px 50% !important;
+        transform: translateX(-50%);
+
+        .modal-header {
+            background: none !important;
+
+            button {
+                color: black !important;
+            }
+        }
+    }
+
+    &.desktop {
+        width: fit-content !important;
+        inset: 5px auto auto 5px !important;
+    }
+}
