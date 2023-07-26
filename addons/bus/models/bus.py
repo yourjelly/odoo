@@ -41,7 +41,13 @@ class ImBus(models.Model):
     def _gc_messages(self):
         timeout_ago = datetime.datetime.utcnow()-datetime.timedelta(seconds=TIMEOUT*2)
         domain = [('create_date', '<', timeout_ago.strftime(DEFAULT_SERVER_DATETIME_FORMAT))]
-        return self.sudo().search(domain).unlink()
+        limit = 1e6
+        total_count = self.sudo().search_count(domain)
+        i = 0
+        while i*limit < total_count:
+            self.sudo().search(domain, limit=limit).unlink()
+            i += 1
+
 
     @api.model
     def sendmany(self, notifications):
