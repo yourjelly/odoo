@@ -437,6 +437,24 @@ This module provides the core of the Odoo Web Client.
             ('include', 'web.assets_tests'),
             'web/static/tests/ignore_missing_deps_stop.js',
         ],
+        # Assets for test framework and setup
+        'web.assets_unit_tests_setup': [
+            'web/static/src/module_loader.js',
+
+            'web/static/lib/owl/owl.js',
+            'web/static/lib/owl/odoo_module.js',
+
+            'web/static/lib/hoot/**/*',
+            ('remove', 'web/static/lib/hoot/tests/**/*'),
+
+            # Odoo mocks
+            'web/static/tests/hoot/mocks/**/*',
+        ],
+        # Unit test files
+        'web.assets_unit_tests': [
+            'web/static/tests/hoot/**/*',
+            ('remove', 'web/static/tests/hoot/mocks/**/*'),
+        ],
         'web.tests_assets': [
             ('include', 'web.assets_backend'),
 

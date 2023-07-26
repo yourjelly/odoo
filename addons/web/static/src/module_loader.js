@@ -212,6 +212,10 @@
 
     if (!globalThis.odoo) {
         globalThis.odoo = {};
+    } else if (globalThis.odoo.loader) {
+        // Allows for duplicate calls to `module_loader`: only the first one is
+        // executed.
+        return;
     }
     const odoo = globalThis.odoo;
     if (odoo.debug && !new URLSearchParams(location.search).has("debug")) {

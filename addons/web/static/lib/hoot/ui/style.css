@@ -1,0 +1,593 @@
+@keyframes hoot-sick-traverse {
+    10% {
+        transform: scaleX(90%) skew(5deg);
+    }
+
+    25% {
+        opacity: 1;
+        transform: scaleX(110%) skew(-10deg);
+    }
+
+    74% {
+        opacity: 0;
+        transform: scaleX(90%) skew(-10deg) translateX(30vw);
+    }
+
+    75% {
+        transform: scaleX(90%) skew(-10deg) translateX(-20vw);
+    }
+
+    90% {
+        transform: scaleX(90%) skew(5deg);
+    }
+}
+
+.hoot {
+    /* Generic colors */
+    --hoot-primary: #714b67;
+    --hoot-secondary: #74b4b9;
+    --hoot-abort: #f59e0b;
+    --hoot-abort-bg: #fef3c7;
+    --hoot-fail: #9f1239;
+    --hoot-fail-bg: #fecdd3;
+    --hoot-pass: #047857;
+    --hoot-pass-bg: #ecfdf5;
+    --hoot-skip: #0891b2;
+    --hoot-skip-bg: #e0f2fe;
+    --hoot-todo: #581c87;
+    --hoot-todo-bg: #f3e8ff;
+
+    /* Grays */
+    --hoot-gray-100: #f1f5f9;
+    --hoot-gray-200: #e2e8f0;
+    --hoot-gray-300: #cbd5e1;
+    --hoot-gray-400: #94a3b8;
+    --hoot-gray-500: #64748b;
+    --hoot-gray-600: #475569;
+    --hoot-gray-700: #334155;
+    --hoot-gray-800: #1e293b;
+    --hoot-gray-900: #0f172a;
+
+    /* App colors */
+    --hoot-bg: var(--hoot-gray-100);
+    --hoot-text: var(--hoot-gray-900);
+    --hoot-panel-bg: var(--hoot-gray-200);
+    --hoot-status-bg: var(--hoot-gray-300);
+    --hoot-btn-bg: #714b67;
+    --hoot-btn-bg-hover: #624159;
+    --hoot-btn-text: #ffffff;
+    --hoot-bg-result: rgba(255, 255, 255, 0.6);
+    --hoot-border-result: var(--hoot-gray-300);
+    --hoot-border-search: #d8dadd;
+
+    /* HootReporting colors */
+    --hoot-bg-report: #ffffff;
+    --hoot-text-report: #202124;
+    --hoot-border-report: #f0f0f0;
+    --hoot-bg-report-error: #fff0f0;
+    --hoot-text-report-error: #ff0000;
+    --hoot-border-report-error: #ffd6d6;
+    --hoot-text-report-number: #1a1aa6;
+    --hoot-text-report-string: #c80000;
+    --hoot-text-report-key: #881280;
+    --hoot-text-report-html-tag: #881280;
+    --hoot-text-report-html-id: #1a1aa8;
+    --hoot-text-report-html-class: #994500;
+
+    /* Bootstrap overrides */
+    --bs-primary: var(--hoot-primary);
+
+    display: flex;
+    flex-direction: column;
+    font-size: 0.875rem;
+    height: 100%;
+    background: var(--hoot-bg);
+    color: var(--hoot-text);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+/*---------------------------------------------------------------------------*/
+/* Dark mode                                                                 */
+/*---------------------------------------------------------------------------*/
+
+.hoot.hoot-dark {
+    /* Generic colors */
+    --hoot-primary: #14b8a6;
+    --hoot-abort: #fbbf24;
+    --hoot-abort-bg: #422006;
+    --hoot-fail: #fb7185;
+    --hoot-fail-bg: #4c0519;
+    --hoot-pass: #34d399;
+    --hoot-pass-bg: #064e3b;
+    --hoot-skip: #22d3ee;
+    --hoot-skip-bg: #083344;
+    --hoot-todo: #a855f7;
+    --hoot-todo-bg: #3b0764;
+
+    /* App colors */
+    --hoot-bg: var(--hoot-gray-900);
+    --hoot-text: var(--hoot-gray-100);
+    --hoot-panel-bg: var(--hoot-gray-800);
+    --hoot-status-bg: var(--hoot-gray-700);
+    --hoot-btn-bg: #00dac5;
+    --hoot-btn-bg-hover: #00c1ae;
+    --hoot-btn-text: #000000;
+    --hoot-bg-result: rgba(0, 0, 0, 0.5);
+    --hoot-border-result: var(--hoot-gray-600);
+    --hoot-border-search: #3c3f4c;
+
+    /* HootReporting colors */
+    --hoot-bg-report: #202124;
+    --hoot-text-report: #e8eaed;
+    --hoot-border-report: #3a3a3a;
+    --hoot-bg-report-error: #290000;
+    --hoot-text-report-error: #ff8080;
+    --hoot-border-report-error: #5c0000;
+    --hoot-text-report-number: #9980ff;
+    --hoot-text-report-string: #f28b54;
+    --hoot-text-report-key: #5db0d7;
+    --hoot-text-report-html-tag: #5db0d7;
+    --hoot-text-report-html-id: #f29364;
+    --hoot-text-report-html-class: #9bbbdc;
+}
+
+/*---------------------------------------------------------------------------*/
+/* CSS reset                                                                 */
+/*---------------------------------------------------------------------------*/
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+    color: inherit;
+    background-color: inherit;
+    border: none;
+    padding: 0;
+    margin: 0;
+    text-align: start;
+}
+
+/*---------------------------------------------------------------------------*/
+/* Panel                                                                     */
+/*---------------------------------------------------------------------------*/
+
+.hoot .hoot-transition-colors {
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.hoot .hoot-panel {
+    background: var(--hoot-panel-bg);
+}
+
+.hoot .hoot-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.hoot .hoot-buttons {
+    border-radius: 0.25rem;
+    gap: 1px;
+}
+.hoot .hoot-buttons .hoot-btn {
+    border-radius: 0;
+}
+
+.hoot .hoot-config .hoot-dropdown {
+    width: clamp(200px, 256px, 100vw);
+}
+
+.hoot .hoot-search {
+    flex: 1;
+}
+.hoot .hoot-search .hoot-dropdown {
+    width: clamp(300px, 460px, 100vw);
+}
+
+.hoot .hoot-search-group {
+    border: 1px solid var(--hoot-border-search);
+    border-radius: 0.25rem;
+    transition: border-color 0.15s;
+}
+.hoot .hoot-search-group:focus-within {
+    border-color: var(--hoot-secondary);
+}
+.hoot .hoot-search-group .hoot-btn-go {
+    border-radius: 0;
+}
+
+.hoot .hoot-search-bar {
+    width: 100%;
+    outline: none;
+    color: inherit;
+    background-color: var(--hoot-bg);
+}
+.hoot .hoot-search-bar input[type="text"] {
+    outline: none;
+}
+
+.hoot .hoot-logo:hover {
+    animation: hoot-sick-traverse 1.2s ease-in-out;
+}
+
+.hoot .hoot-status {
+    justify-content: space-between;
+    background-color: var(--hoot-status-bg);
+    padding: 0.5rem 0.75rem;
+}
+
+/*---------------------------------------------------------------------------*/
+/* Components                                                                */
+/*---------------------------------------------------------------------------*/
+
+.hoot .hoot-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--hoot-btn-bg);
+    color: var(--hoot-btn-text);
+    transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+
+    border-radius: 0.25rem;
+    text-decoration: none;
+    user-select: none;
+}
+.hoot .hoot-btn:active,
+.hoot .hoot-btn:focus-within,
+.hoot .hoot-btn:hover {
+    background: var(--hoot-btn-bg-hover);
+}
+.hoot .hoot-btn:active {
+    transform: translateY(1px);
+}
+.hoot .hoot-btn[disabled] {
+    opacity: 0.4;
+}
+
+.hoot .hoot-circle {
+    display: inline-flex;
+    min-height: 12px;
+    min-width: 12px;
+    border-radius: 999rem;
+}
+
+.hoot .hoot-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+}
+
+.hoot .hoot-checkbox input[type="checkbox"] {
+    cursor: inherit;
+    appearance: none;
+    width: 1em;
+    height: 1em;
+    border: 1px solid var(--hoot-primary);
+    border-radius: 2px;
+}
+.hoot .hoot-checkbox input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23FFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+    background-color: var(--hoot-primary);
+}
+
+.hoot .hoot-tag {
+    background: var(--hoot-tag-bg);
+    color: var(--hoot-tag-text);
+}
+
+/*---------------------------------------------------------------------------*/
+/* Dropdown                                                                  */
+/*---------------------------------------------------------------------------*/
+
+.hoot .hoot-dropdown {
+    --bs-dropdown-link-active-bg: var(--hoot-primary);
+    --bs-dropdown-link-color: var(--hoot-text);
+
+    color: var(--hoot-text);
+    background-color: var(--hoot-bg);
+}
+
+.hoot .hoot-dropdown-category:hover .hoot-remove-category {
+    visibility: visible;
+}
+
+.hoot .hoot-dropdown-header {
+    font-weight: bold;
+    color: var(--hoot-primary);
+    padding: 0.1rem 0.5rem;
+}
+
+.hoot .hoot-dropdown-title {
+    flex: 1;
+}
+
+.hoot .hoot-remove-category {
+    float: right;
+    color: gray;
+    padding: 0.3rem 0.5rem;
+    visibility: hidden;
+    cursor: pointer;
+}
+.hoot .hoot-remove-category:hover {
+    background-color: #eeeeee;
+}
+
+.hoot .hoot-dropdown-lines {
+    margin: 0 0.5rem;
+    max-height: 12rem;
+    overflow-y: auto;
+}
+
+.hoot .hoot-dropdown-line {
+    width: 100%;
+    padding: 0.25rem 0 0.25rem 0.5rem;
+}
+.hoot .hoot-dropdown-line:hover {
+    background-color: var(--hoot-status-bg);
+}
+
+/* Bootstrap SM breakpoint */
+@media (max-width: 576px) {
+    .hoot .hoot-controls {
+        display: grid;
+        grid-template: 1fr auto auto / 1fr auto auto;
+        gap: 0.25rem;
+    }
+
+    .hoot .hoot-controls .hoot-search {
+        order: 99;
+        grid-column: span 3;
+    }
+}
+
+/*---------------------------------------------------------------------------*/
+/* Reporting                                                                 */
+/*---------------------------------------------------------------------------*/
+
+.hoot .hoot-reporting,
+.hoot .hoot-results {
+    overflow-y: auto;
+}
+
+.hoot .hoot-result {
+    border-bottom: 1px solid var(--hoot-border-result);
+}
+.hoot .hoot-result.hoot-abort {
+    background: var(--hoot-abort-bg);
+}
+.hoot .hoot-result.hoot-fail {
+    background: var(--hoot-fail-bg);
+}
+.hoot .hoot-result.hoot-skip {
+    background: var(--hoot-skip-bg);
+}
+
+.hoot .hoot-result-header {
+    cursor: pointer;
+    padding: 0.1rem 1rem;
+    justify-content: space-between;
+}
+
+.hoot .hoot-result-detail {
+    background: var(--hoot-bg-result);
+    grid-template-columns: 1fr auto;
+}
+
+.hoot .hoot-info {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
+.hoot .hoot-info-line {
+    display: grid;
+    grid-template-columns: 80px auto;
+    column-gap: 0.5rem;
+}
+
+.hoot .hoot-technical ins {
+    color: var(--hoot-pass);
+    background: var(--hoot-pass-bg);
+    text-decoration: none;
+}
+
+.hoot .hoot-technical del {
+    color: var(--hoot-fail);
+    background: var(--hoot-fail-bg);
+    text-decoration: none;
+}
+
+.hoot .hoot-object-type {
+    color: var(--hoot-text-report);
+    display: inline-flex;
+}
+
+.hoot .hoot-log {
+    color: #909090;
+}
+.hoot .hoot-log:hover {
+    color: #606060;
+}
+
+.hoot .hoot-test {
+    color: var(--hoot-primary);
+    width: clamp(100px, 100%, 50vw);
+}
+
+.hoot .hoot-path:hover .hoot-copy {
+    opacity: 1;
+    width: 16px;
+}
+
+.hoot .hoot-copy {
+    opacity: 0;
+    width: 0;
+    transition: 0.15s;
+    color: var(--hoot-gray-400);
+}
+
+.hoot .hoot-copy:hover {
+    color: var(--hoot-gray-500);
+}
+
+.hoot .hoot-copy.hoot-copied {
+    color: var(--hoot-pass);
+}
+
+.hoot .hoot-result-button-text i {
+    opacity: 0;
+    width: 0;
+    transition: 0.15s;
+}
+
+.hoot .hoot-result-button-text:active,
+.hoot .hoot-result-button-text:focus-within,
+.hoot .hoot-result-button-text:hover {
+    color: white;
+    margin: 0 0.25rem;
+    background-color: var(--hoot-primary);
+}
+
+.hoot .hoot-result-button-text:active i,
+.hoot .hoot-result-button-text:focus-within i,
+.hoot .hoot-result-button-text:hover i {
+    opacity: 1;
+    width: 16px;
+}
+
+.hoot .hoot-result-btn {
+    color: var(--hoot-primary);
+    border-radius: 0.25rem;
+    border: 1px solid var(--hoot-primary);
+    transition: color 0.15s, background-color 0.15s;
+}
+.hoot .hoot-result-btn:active,
+.hoot .hoot-result-btn:focus-within,
+.hoot .hoot-result-btn:hover {
+    color: white;
+    background: var(--hoot-primary);
+}
+
+.hoot .hoot-path a,
+.hoot .hoot-name {
+    user-select: text;
+}
+
+.hoot .hoot-html {
+    background: transparent;
+    color: var(--hoot-text-report-html-tag);
+    font-weight: 700;
+}
+.hoot .hoot-html:hover {
+    font-weight: 800;
+}
+
+.hoot .hoot-html-id {
+    color: var(--hoot-text-report-html-id);
+}
+
+.hoot .hoot-html-class {
+    color: var(--hoot-text-report-html-class);
+}
+
+.hoot .hoot-boolean,
+.hoot .hoot-number {
+    color: var(--hoot-text-report-number);
+}
+
+.hoot-string {
+    color: var(--hoot-text-report-string);
+}
+
+.hoot .hoot-key {
+    color: var(--hoot-text-report-key);
+}
+
+/*---------------------------------------------------------------------------*/
+/* Colors                                                                    */
+/*---------------------------------------------------------------------------*/
+
+.hoot .hoot-bg-primary {
+    background: var(--hoot-primary);
+}
+
+.hoot .hoot-text-primary {
+    color: var(--hoot-primary);
+}
+
+.hoot .hoot-bg-abort {
+    background: var(--hoot-abort);
+}
+
+.hoot .hoot-text-abort {
+    color: var(--hoot-abort);
+}
+
+.hoot .hoot-bg-fail {
+    background: var(--hoot-fail);
+}
+
+.hoot .hoot-text-fail {
+    color: var(--hoot-fail);
+}
+
+.hoot .hoot-bg-muted {
+    background: var(--hoot-gray-500);
+}
+
+.hoot .hoot-text-muted {
+    color: var(--hoot-gray-500);
+}
+
+.hoot .hoot-bg-pass {
+    background: var(--hoot-pass);
+}
+
+.hoot .hoot-text-pass {
+    color: var(--hoot-pass);
+}
+
+.hoot .hoot-bg-skip {
+    background: var(--hoot-skip);
+}
+
+.hoot .hoot-text-skip {
+    color: var(--hoot-skip);
+}
+
+.hoot .hoot-bg-todo {
+    background: var(--hoot-todo);
+}
+
+.hoot .hoot-text-todo {
+    color: var(--hoot-todo);
+}
+
+/*---------------------------------------------------------------------------*/
+/* Fixture                                                                   */
+/*---------------------------------------------------------------------------*/
+
+.hoot-fixture {
+    position: fixed;
+    left: 9999px;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+.hoot-fixture.hoot-debug {
+    top: 92px;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
