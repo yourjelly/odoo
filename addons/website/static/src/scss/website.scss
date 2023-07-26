@@ -505,6 +505,12 @@ font[class*='bg-'] {
     }
 }
 
+.btn-group .btn-light.active {
+    box-shadow: inset 0 0 0 $border-width o-color('primary');
+    border-color: transparent;
+    background-color: mix(o-color('primary'), $light, 10%);
+}
+
 // Badges
 .badge {
     // Similarly to list-group-item-x and alert-* classes, override text-bg-*
