@@ -106,7 +106,7 @@
     const HEADER_BORDER_COLOR = "#C0C0C0";
     const CELL_BORDER_COLOR = "#E2E3E3";
     const BACKGROUND_CHART_COLOR = "#FFFFFF";
-    const MENU_ITEM_DISABLED_COLOR = "#CACACA";
+    const DISABLED_TEXT_COLOR = "#CACACA";
     const DEFAULT_COLOR_SCALE_MIDPOINT_COLOR = 0xb6d7a8;
     const LINK_COLOR = "#01666b";
     const FILTERS_COLOR = "#188038";
@@ -3104,7 +3104,6 @@
         "SET_VIEWPORT_OFFSET",
         "SELECT_SEARCH_NEXT_MATCH",
         "SELECT_SEARCH_PREVIOUS_MATCH",
-        "REFRESH_SEARCH",
         "UPDATE_SEARCH",
         "CLEAR_SEARCH",
         "EVALUATE_CELLS",
@@ -4031,7 +4030,7 @@
         }
       }
       &.disabled {
-        color: ${MENU_ITEM_DISABLED_COLOR};
+        color: ${DISABLED_TEXT_COLOR};
         cursor: not-allowed;
       }
     }
@@ -9985,11 +9984,16 @@
         }
         setup() {
             this.showFormulaState = this.env.model.getters.shouldShowFormulas();
+            this.debouncedUpdateSearch = debounce(this.updateSearch.bind(this), 200);
             owl.onMounted(() => this.focusInput());
             owl.onWillUnmount(() => {
                 this.env.model.dispatch("CLEAR_SEARCH");
                 this.env.model.dispatch("SET_FORMULA_VISIBILITY", { show: this.showFormulaState });
             });
+            owl.useEffect(() => {
+                this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
+                this.searchFormulas();
+            }, () => [this.env.model.getters.shouldShowFormulas()]);
         }
         onInput(ev) {
             this.state.toSearch = ev.target.value;
@@ -10006,10 +10010,6 @@
                 ev.preventDefault();
                 this.replace();
             }
-        }
-        onFocusSidePanel() {
-            this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
-            this.env.model.dispatch("REFRESH_SEARCH");
         }
         searchFormulas() {
             this.env.model.dispatch("SET_FORMULA_VISIBILITY", {
@@ -10028,10 +10028,6 @@
                 toSearch: this.state.toSearch,
                 searchOptions: this.state.searchOptions,
             });
-        }
-        debouncedUpdateSearch() {
-            clearTimeout(this.inDebounce);
-            this.inDebounce = setTimeout(() => this.updateSearch.call(this), 400);
         }
         replace() {
             this.env.model.dispatch("REPLACE_SEARCH", {
@@ -33140,6 +33136,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 return [];
             return this.filterValues[sheetId][id] || [];
         }
+        getHiddenRowsByDataFilter() {
+            return this.hiddenRows;
+        }
         isFilterHeader(sheetId, col, row) {
             const headers = this.getFilterHeaders(sheetId);
             return headers.some((header) => header.col === col && header.row === row);
@@ -33257,6 +33256,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         "getCellBorderWithFilterBorder",
         "getFilterHeaders",
         "getFilterValues",
+        "getHiddenRowsByDataFilter",
         "isFilterHeader",
         "isRowFiltered",
         "isFilterActive",
@@ -33291,6 +33291,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 searchFormulas: false,
             };
             this.toSearch = "";
+            this.isSearchDirty = false;
         }
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -33315,16 +33316,23 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 case "REPLACE_ALL_SEARCH":
                     this.replaceAll(cmd.replaceWith);
                     break;
+                case "EVALUATE_CELLS":
+                case "UPDATE_CELL":
+                    this.isSearchDirty = true;
+                    break;
                 case "UNDO":
                 case "REDO":
                 case "REMOVE_COLUMNS_ROWS":
                 case "ADD_COLUMNS_ROWS":
-                    this.clearSearch();
-                    break;
                 case "ACTIVATE_SHEET":
-                case "REFRESH_SEARCH":
                     this.refreshSearch();
                     break;
+            }
+        }
+        finalize() {
+            if (this.isSearchDirty) {
+                this.refreshSearch();
+                this.isSearchDirty = false;
             }
         }
         // ---------------------------------------------------------------------------
@@ -33376,11 +33384,17 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * Find matches using the current regex
          */
         findMatches() {
-            const activeSheetId = this.getters.getActiveSheetId();
-            const cells = this.getters.getCells(activeSheetId);
+            const sheetId = this.getters.getActiveSheetId();
+            const cells = this.getters.getCells(sheetId);
             const matches = [];
             if (this.toSearch) {
                 for (const cell of Object.values(cells)) {
+                    const { col, row } = this.getters.getCellPosition(cell.id);
+                    const isColHidden = this.getters.isColHidden(sheetId, col);
+                    const isRowHidden = this.getters.isRowHidden(sheetId, row);
+                    if (isColHidden || isRowHidden) {
+                        continue;
+                    }
                     if (cell &&
                         this.currentSearchRegex &&
                         this.currentSearchRegex.test(this.searchOptions.searchFormulas
@@ -33588,6 +33602,49 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     FormatPlugin.modes = ["normal"];
 
     class HeaderVisibilityUIPlugin extends UIPlugin {
+        allowDispatch(cmd) {
+            switch (cmd.type) {
+                case "REMOVE_COLUMNS_ROWS":
+                    if (!this.getters.tryGetSheet(cmd.sheetId)) {
+                        return 27 /* CommandResult.InvalidSheetId */;
+                    }
+                    if (this.isAllHeaderIndices(cmd.sheetId, cmd.dimension, cmd.elements)) {
+                        this.ui.notifyUI({
+                            type: "ERROR",
+                            text: _lt(`Sorry, it is not possible to delete all non-frozen ${cmd.dimension === "ROW" ? "rows" : "columns"}.`),
+                        });
+                        return 85 /* CommandResult.InvalidHeaderIndex */;
+                    }
+                    return 0 /* CommandResult.Success */;
+                default:
+                    return 0 /* CommandResult.Success */;
+            }
+        }
+        /**
+         * Checks if all non-frozen header indices are present in the provided elements of selected rows/columns.
+         * This validation ensures that all rows or columns cannot be deleted when frozen panes exist.
+         */
+        isAllHeaderIndices(sheetId, dimension, elements) {
+            const paneDivisions = this.getters.getPaneDivisions(sheetId);
+            const startIndex = dimension === "ROW" ? paneDivisions.ySplit : paneDivisions.xSplit;
+            const endIndex = dimension === "ROW"
+                ? this.getters.getNumberRows(sheetId) - 1
+                : this.getters.getNumberCols(sheetId) - 1;
+            const hiddenColsRowsGroups = new Set(dimension === "ROW"
+                ? this.getters.getHiddenRowsGroups(sheetId).flat()
+                : this.getters.getHiddenColsGroups(sheetId).flat());
+            const hiddenRowsByDataFilter = this.getters.getHiddenRowsByDataFilter();
+            if (!startIndex) {
+                return false;
+            }
+            for (let i = startIndex; i <= endIndex; i++) {
+                if (!elements.includes(i) && !hiddenColsRowsGroups.has(i) && !hiddenRowsByDataFilter.has(i)) {
+                    // If the index is not present in the elements of selected rows/columns, and is not hidden by user or data filter, then return false.
+                    return false;
+                }
+            }
+            return true;
+        }
         isRowHidden(sheetId, index) {
             return (this.getters.isRowHiddenByUser(sheetId, index) || this.getters.isRowFiltered(sheetId, index));
         }
@@ -36408,6 +36465,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const sheetId = this.sheetId;
             this.left = this.searchHeaderIndex("COL", this.offsetScrollbarX, this.boundaries.left);
             this.right = Math.min(this.boundaries.right, this.searchHeaderIndex("COL", this.viewportWidth, this.left));
+            if (this.left === -1) {
+                this.left = this.getters.getPaneDivisions(sheetId).xSplit;
+            }
             if (this.right === -1) {
                 this.right = this.getters.getNumberCols(sheetId) - 1;
             }
@@ -36421,6 +36481,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const sheetId = this.sheetId;
             this.top = this.searchHeaderIndex("ROW", this.offsetScrollbarY, this.boundaries.top);
             this.bottom = Math.min(this.boundaries.bottom, this.searchHeaderIndex("ROW", this.viewportHeight, this.top));
+            if (this.top === -1) {
+                this.top = this.getters.getPaneDivisions(sheetId).ySplit;
+            }
             if (this.bottom === -1) {
                 this.bottom = this.getters.getNumberRows(sheetId) - 1;
             }
@@ -37268,6 +37331,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             const sortedIndexOfSortTypeCells = sortCells(sortingCells, sortDirection, Boolean(options.emptyCellAsZero));
             const sortedIndex = sortedIndexOfSortTypeCells.map((x) => x.index);
             const [width, height] = [cells.length, cells[0].length];
+            const cellUpdates = [];
             for (let c = 0; c < width; c++) {
                 for (let r = 0; r < height; r++) {
                     let cell = cells[c][sortedIndex[r]];
@@ -37278,7 +37342,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         col: newCol,
                         row: newRow,
                         content: "",
-                        value: "",
                     };
                     if (cell) {
                         let content = cell.content;
@@ -37292,11 +37355,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         newCellValues.style = cell.style;
                         newCellValues.content = content;
                         newCellValues.format = cell.format;
-                        newCellValues.value = cell.evaluated.value;
                     }
-                    this.dispatch("UPDATE_CELL", newCellValues);
+                    cellUpdates.push(newCellValues);
                 }
             }
+            cellUpdates.forEach((cmdPayload) => this.dispatch("UPDATE_CELL", cmdPayload));
         }
         /**
          * Return the distances between main merge cells in the zone.
@@ -38058,6 +38121,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     .o-sidePanelButton:enabled {
       cursor: pointer;
     }
+
+    .o-sidePanelButton:disabled {
+      color: ${DISABLED_TEXT_COLOR};
+    }
+
     .o-sidePanelButton:last-child {
       margin-right: 0px;
     }
@@ -42832,8 +42900,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.14';
-    __info__.date = '2023-06-26T14:45:27.638Z';
-    __info__.hash = '1e37a94';
+    __info__.date = '2023-07-26T06:34:42.262Z';
+    __info__.hash = '113bd6b';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
