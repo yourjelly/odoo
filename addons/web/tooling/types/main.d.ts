@@ -4,7 +4,10 @@
 declare const luxon: typeof import("luxon");
 
 declare module "@odoo/owl" {
-    export * from "@odoo/owl/dist/types/owl"
+    export * from "@odoo/owl/dist/types/owl";
+}
+declare module "@odoo/hoot" {
+    export * from "@web/../lib/hoot/setup";
 }
 
 // declare const Qunit: typeof import("qunit"); => Because we add methods to QUnit, we define our own..
@@ -12,4 +15,4 @@ declare module "@odoo/owl" {
 declare const QUnit: QUnit;
 
 // @ts-ignore
-declare const $: typeof import("jquery"); 
+declare const $: typeof import("jquery");
