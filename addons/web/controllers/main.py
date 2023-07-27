@@ -1494,7 +1494,6 @@ class Binary(http.Controller):
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
             filename_field=filename_field, download=download, mimetype=mimetype,
             default_mimetype='image/png', access_token=access_token)
-        breakpoint()
         return Binary._content_image_get_response(
             status, headers, image_base64, model=model, id=id, field=field, download=download,
             width=width, height=height, crop=crop, quality=quality,
