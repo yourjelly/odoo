@@ -153,21 +153,29 @@ def load_module_graph(env, graph, status=None, perform_checks=True,
     models_updated = set()
 
     for index, package in enumerate(graph, 1):
+      from contextlib import nullcontext
+      from odoo.tools.profiler import PeriodicCollector, Profiler
+      if package.state == "to install":
+        context_manager = Profiler(collectors = ['sql', PeriodicCollector(interval=0.1)], description=package.name, db=env.cr.dbname)
+      else:
+        context_manager = nullcontext()
+      with context_manager:
         module_name = package.name
         module_id = package.id
-
+    
         if skip_modules and module_name in skip_modules:
             continue
-
+    
         module_t0 = time.time()
         module_cursor_query_count = env.cr.sql_log_count
         module_extra_query_count = odoo.sql_db.sql_counter
-
+    
         needs_update = (
             hasattr(package, "init")
             or hasattr(package, "update")
             or package.state in ("to install", "to upgrade")
         )
+
         module_log_level = logging.DEBUG
         if needs_update:
             module_log_level = logging.INFO
