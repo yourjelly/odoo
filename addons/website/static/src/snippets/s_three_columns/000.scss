@@ -3,3 +3,9 @@
         height: 100%;
     }
 }
+
+.s_three_columns {
+    .round-corner-base {
+        border-radius: $round-corner-base;
+    }
+}

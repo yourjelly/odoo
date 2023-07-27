@@ -1552,6 +1552,13 @@
                   data-variable="font-size-base"
                   data-unit="px"
                   data-save-unit="rem"/>
+        <!-- round corner  round-corner-base-->
+        <we-input string="Round Corners"
+                  data-customize-website-variable="null"
+                  data-variable="round-corner-base"
+                  data-unit="px"
+                  data-save-unit="rem"/>
+
         <we-fontfamilypicker string="Font family" data-variable="font"/>
         <!-- "× ": \u00D7\u2000 -->
         <we-input string="Line height"
@@ -1711,6 +1718,14 @@
         <we-checkbox string="Show Header"
                      data-customize-website-views="website.option_layout_hide_header|"
                      data-reload="/"/>
+
+        <!-- <we-input string="Col Round Corner"
+                  data-customize-website-variable="null"
+                  data-variable="header-font-size"
+                  data-unit="px"
+                  data-save-unit="rem"/> -->
+
+
         <we-row string="Code Injection" title="Enter code that will be added into every page of your site">
             <we-button data-no-preview="true" data-open-custom-code-dialog="head">&amp;lt;head&amp;gt;</we-button>
             <we-button data-no-preview="true" data-open-custom-code-dialog="footer">&amp;lt;/body&amp;gt;</we-button>
