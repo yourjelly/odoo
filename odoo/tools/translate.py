@@ -1570,7 +1570,7 @@ def _get_translation_upgrade_queries(cr, field):
               GROUP BY it.res_id
             )
             UPDATE {Model._table} m
-               SET "{field.name}" = CASE WHEN t.noupdate THEN m."{field.name}" || t.value ELSE t.value || m."{field.name}" END
+               SET "{field.name}" = CASE WHEN (t.noupdate = 't' OR t.noupdate IS NULL) THEN m."{field.name}" || t.value ELSE t.value || m."{field.name}" END
               FROM t
              WHERE t.res_id = m.id
         """
