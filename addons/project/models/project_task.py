@@ -18,8 +18,6 @@ PROJECT_TASK_READABLE_FIELDS = {
     'id',
     'active',
     'priority',
-    'project_id',
-    'display_in_project',
     'color',
     'subtask_count',
     'email_from',
@@ -54,6 +52,8 @@ PROJECT_TASK_WRITABLE_FIELDS = {
     'parent_id',
     'priority',
     'state',
+    'project_id',
+    'display_in_project',
 }
 
 CLOSED_STATES = {
