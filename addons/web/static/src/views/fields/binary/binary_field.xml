@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.BinaryField" owl="1">
+        <t t-if="!props.readonly">
+            <t t-if="props.record.data[props.name]">
+                <div class="w-100 d-inline-flex gap-1">
+                    <FileUploader
+                        acceptedFileExtensions="props.acceptedFileExtensions"
+                        onUploaded.bind="update"
+                    >
+                        <t t-if="props.record.resId">
+                            <button
+                                class="btn btn-secondary btn-sm lh-1 o_download_file_button"
+                                data-tooltip="Download"
+                                aria-label="Download"
+                                t-on-click="onFileDownload"
+                            >
+                                <i class="fa fa-fw fa-download"/>
+                            </button>
+                        </t>
+                        <t t-set-slot="toggler">
+                            <input type="text" class="o_input" t-att-value="fileName" readonly="readonly" />
+                            <button
+                                class="btn btn-secondary btn-sm lh-1 o_select_file_button"
+                                data-tooltip="Edit"
+                                aria-label="Edit"
+                            >
+                                <i class="fa fa-fw fa-pencil"/>
+                            </button>
+                        </t>
+                        <button
+                            class="btn btn-secondary btn-sm lh-1 o_clear_file_button"
+                            data-tooltip="Clear"
+                            aria-label="Clear"
+                            t-on-click="() => this.update({})"
+                        >
+                            <i class="fa fa-fw fa-trash"/>
+                        </button>
+                    </FileUploader>
+                </div>
+            </t>
+            <t t-else="">
+                <label class="o_select_file_button btn btn-primary">
+                    <FileUploader
+                        acceptedFileExtensions="props.acceptedFileExtensions"
+                        onUploaded.bind="update"
+                    >
+                        <t t-set-slot="toggler">
+                            Upload your file
+                        </t>
+                    </FileUploader>
+                </label>
+            </t>
+        </t>
+        <t t-elif="props.record.resId and props.record.data[props.name]">
+            <a class="o_form_uri" href="#" t-on-click.prevent="onFileDownload">
+                <span class="fa fa-download me-2" />
+                <t t-if="state.fileName" t-esc="state.fileName" />
+            </a>
+        </t>
+    </t>
+
+    <t t-name="web.ListBinaryField" t-inherit="web.BinaryField" owl="1">
+        <xpath expr="//label[hasclass('o_select_file_button')]" position="replace">
+            <label class="o_select_file_button btn btn-sm btn-link p-0">
+                <FileUploader
+                    acceptedFileExtensions="props.acceptedFileExtensions"
+                    onUploaded.bind="update"
+                >
+                    <t t-set-slot="toggler">
+                        <i class="fa fa-upload fa-fw"/> Upload your file
+                    </t>
+                </FileUploader>
+            </label>
+        </xpath>
+        <xpath expr="//button[hasclass('o_download_file_button')]" position="attributes">
+            <attribute name="class">btn btn-sm btn-link fa fa-download o_download_file_button</attribute>
+        </xpath>
+        <xpath expr="//button[hasclass('o_select_file_button')]" position="attributes">
+            <attribute name="class">btn btn-sm btn-link fa fa-pencil o_select_file_button</attribute>
+        </xpath>
+        <xpath expr="//button[hasclass('o_clear_file_button')]" position="attributes">
+            <attribute name="class">btn btn-sm btn-link fa fa-trash o_clear_file_button</attribute>
+        </xpath>
+
+    </t>
+
+</templates>

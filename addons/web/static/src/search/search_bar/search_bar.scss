@@ -1,0 +1,18 @@
+// = Search Bar
+// ============================================================================
+
+.o_searchview_facet {
+    @keyframes animate {
+        from {
+            opacity: .5;
+            transform: translateY(20%);
+        }
+    }
+
+    animation: animate .25s ease-out;
+    &.o_facet_with_domain:hover .o_searchview_facet_label {
+        cursor: pointer;
+        background: var(--SearchBar-facet-background, $o-enterprise-action-color);
+        border-color: var(--SearchBar-facet-background, $o-enterprise-action-color);
+    }
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="mail.ChatWindow" t-inherit-mode="extension">
+        <xpath expr="//PinnedMessagesPanel" position="after">
+            <CallSettings t-elif="state.activeMode === 'in-settings'" thread="thread" className="'flex-grow-1'"/>
+            <ChannelMemberList t-elif="state.activeMode === 'member-list'" thread="thread" className="'flex-shrink-0 w-100 h-100'"/>
+            <ChannelInvitation t-elif="state.activeMode === 'add-users'" thread="thread" close="() => state.activeMode = ''"/>
+        </xpath>
+    </t>
+</templates>

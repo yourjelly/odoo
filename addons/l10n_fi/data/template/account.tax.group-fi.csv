@@ -1,0 +1,5 @@
+"id","name","country_id","tax_receivable_account_id","tax_payable_account_id"
+"tax_group_24","ALV 24%","base.fi","account_1765","account_2930"
+"tax_group_14","ALV 14 %","base.fi","account_1765","account_2930"
+"tax_group_10","ALV 10 %","base.fi","account_1765","account_2930"
+"tax_group_0","ALV 0 %","base.fi","account_1765","account_2930"

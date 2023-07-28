@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="point_of_sale.Navbar" owl="1">
+        <div class="pos-topheader">
+            <div t-if="pos.tempScreen" class="block-top-header" />
+            <div class="pos-branding">
+                <img t-if="!ui.isSmall" class="pos-logo" t-on-click="() => debug.toggleWidget()" src="/point_of_sale/static/src/img/logo.png" alt="Logo" />
+            </div>
+            <div class="pos-rightheader">
+                <div class="status-buttons">
+                    <CashierName />
+                    <SaleDetailsButton t-if="hardwareProxy.printer" isHeaderButton="true"/>
+                    <ProxyStatus t-if="pos.globalState.config.use_proxy" />
+                    <CustomerFacingDisplayButton t-if="customerFacingDisplayButtonIsShown" />
+                    <SyncNotification />
+                </div>
+                <div t-if="isBurgerMenuClosed()" class="navbar-button menu-button" t-on-click="openMenu">
+                    <i class="fa fa-bars" aria-hidden="true"></i>
+                </div>
+                <div t-else="" class="navbar-button menu menu-button" t-on-click="closeMenu">
+                    <ul>
+                        <li class="menu-item">
+                            <i class="fa fa-bars" aria-hidden="true"></i>
+                            <ul class="sub-menu">
+                                <li class="menu-item navbar-button ticket-button" t-on-click="onTicketButtonClick">
+                                    <div class="with-badge" t-att-badge="orderCount">
+                                        <span>Orders</span>
+                                    </div>
+                                </li>
+                                <li t-if="props.showCashMoveButton" class="menu-item navbar-button" t-on-click="onCashMoveButtonClick">
+                                    <span>Cash In/Out</span>
+                                </li>
+                                <CustomerFacingDisplayButton t-if="CustomerFacingDisplayButtonIsShown"/>
+                                <div class="end-nav-button">
+                                    <BackendButton/>
+                                    <div class="close-button">
+                                        <HeaderButton/>
+                                    </div>
+                                </div>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

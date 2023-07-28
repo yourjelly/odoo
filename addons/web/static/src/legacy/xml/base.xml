@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<!-- Owl Templates -->
+
+<t t-name="web.Legacy.ControlPanel" owl="1">
+    <div class="o_control_panel px-3" data-command-category="actions">
+        <div class="o_cp_top mb-1">
+            <div class="o_cp_top_left">
+                <ol t-if="props.withBreadcrumbs" class="breadcrumb" role="navigation">
+                    <li t-foreach="props.breadcrumbs" t-as="bc" t-key="bc.controllerID"
+                        class="breadcrumb-item"
+                        t-att-class="{ o_back_button: bc_index === props.breadcrumbs.length - 1 }"
+                        t-att-accesskey="bc_last and 'b'"
+                        t-on-click.prevent="()=>this.trigger('breadcrumb-clicked', { controllerID: bc.controllerID })"
+                        title="Previous menu"
+                        >
+                        <a href="#">
+                            <t t-if="bc.title" t-esc="bc.title"/>
+                            <em t-else="" class="text-warning">Unnamed</em>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        <span t-attf-class="{{props.breadcrumbs.length ? 'text-muted' : 'text-900' }}" t-if="props.title" t-esc="props.title"/>
+                        <em t-else="" class="text-warning">Unnamed</em>
+                    </li>
+                </ol>
+            </div>
+            <div class="o_cp_top_right">
+                <div class="o_cp_searchview"
+                    role="search"
+                    t-ref="searchView"
+                    >
+                </div>
+            </div>
+        </div>
+        <div class="o_cp_bottom">
+            <div class="o_cp_bottom_left">
+                <div class="o_cp_buttons" role="toolbar" aria-label="Control panel buttons" t-ref="buttons">
+                    <t t-slot="buttons"/>
+                </div>
+                <ActionMenus t-if="props.actionMenus and props.actionMenus.items"
+                    t-props="props.actionMenus"
+                />
+            </div>
+            <div class="o_cp_bottom_right">
+                <div class="btn-group o_search_options position-static"
+                    role="search"
+                    t-ref="searchViewButtons"
+                    >
+                </div>
+                <div class="o_cp_pager" role="search" t-ref="pager">
+                    <Pager t-if="props.pager and props.pager.limit" t-props="props.pager"/>
+                </div>
+                <nav t-if="props.views.length gt 1" class="btn-group o_cp_switch_buttons" role="toolbar" aria-label="View switcher">
+                    <t t-foreach="props.views" t-as="view" t-key="view.type">
+                        <t t-call="web.ViewSwitcherButton"/>
+                    </t>
+                </nav>
+            </div>
+        </div>
+    </div>
+</t>
+
+<t t-name="web.CustomFileInput" owl="1">
+    <span class="o_file_input" aria-atomic="true" t-on-uploaded="(ev) => props.onUpload(ev.detail.files)">
+        <span class="o_file_input_trigger" t-on-click.prevent="() => this._onTriggerClicked()">
+            <t t-slot="default">
+                <button class="btn btn-primary">Choose File</button>
+            </t>
+        </span>
+        <input type="file" name="ufile" class="o_input_file d-none"
+            t-att="{multiple: props.multi_upload, accept: props.accepted_file_extensions}"
+            t-ref="file-input"
+            t-on-change="() => this._onFileInputChange()"
+        />
+    </span>
+</t>
+
+<t t-name="web.DialogButton.tooltip" owl="1">
+    <div class="oe_tooltip_string" role="tooltip">
+        <div class="tooltip-inner">
+            <t>Hit ENTER to <t t-esc="title"/></t>
+        </div>
+    </div>
+</t>
+
+<t t-name="web.DropdownMenu" owl="1">
+    <div class="btn-group dropdown" t-att-class="{ show: state.open }">
+        <button type="button"
+            class="dropdown-toggle btn btn-secondary o-no-caret"
+            t-attf-class="{{ icon || displayCaret || displayChevron ? 'd-flex align-items-center ' : ''}} {{ displayCaret || displayChevron ? 'pe-1 ' : ''}}"
+            t-att-aria-expanded="state.open ? 'true' : 'false'"
+            tabindex="-1"
+            t-on-click="() => { state.open = !state.open }"
+            t-on-keydown="_onButtonKeydown"
+            t-att-title="props.hotkeyTitle"
+            t-att-data-hotkey="props.hotkey"
+            >
+            <i t-if="icon" t-att-class="icon + ' small me-1'"/>
+            <span class="o_dropdown_title" t-esc="title"/>
+            <i t-if="displayCaret" t-attf-class="o_dropdown_caret fa fa-fw fa-caret-{{ state.open ? 'down' : 'right' }}"/>
+            <i t-elif="displayChevron" t-attf-class="o_dropdown_chevron fa fa-fw ms-auto fa-chevron-{{ state.open ? 'down' : 'right' }}"/>
+        </button>
+        <ul t-if="state.open" t-attf-class="o-dropdown-menu {{ dropdownMenuAlignClass }} show" role="menu"
+            t-on-item-selected="_onItemSelected"
+            >
+            <t t-set="currentGroup" t-value="null"/>
+            <t t-foreach="items" t-as="item" t-key="item.key || item.id || ('item-' + item_index)">
+                <li t-if="currentGroup !== null and currentGroup !== item.groupNumber" class="dropdown-divider" role="separator"/>
+                <t t-if="item.Component" t-component="item.Component" t-props="item.props"/>
+                <DropdownMenuItem t-else="" t-props="item"/>
+                <t t-set="currentGroup" t-value="item.groupNumber"/>
+            </t>
+        </ul>
+    </div>
+</t>
+
+<t t-name="web.DropdownMenuItem" owl="1">
+    <li class="o_menu_item" role="menuitem" t-on-keydown="_onKeydown">
+        <t t-if="canBeOpened">
+            <a class="o_menu_item_parent dropdown-item d-flex align-items-center justify-content-between"
+                t-att-class="{ selected: props.isActive }"
+                t-att-aria-checked="props.isActive ? 'true' : 'false'"
+                role="menuitemcheckbox"
+                href="#"
+                t-ref="fallback-focus"
+                t-on-click.prevent="() => { state.open = !state.open }"
+                >
+                <t t-esc="props.description"/>
+                <i t-attf-class="o_icon_right fa fa-fw mr-n4 fa-caret-{{ state.open ? 'down' : 'right' }}"/>
+            </a>
+            <ul t-if="state.open" class="o_menu_item_options pb-2 list-unstyled">
+                <t t-set="currentGroup" t-value="null"/>
+                <t t-foreach="props.options" t-as="option" t-key="option_index">
+                    <li t-if="currentGroup !== null and currentGroup !== option.groupNumber"
+                        class="dropdown-divider"
+                        role="separator"
+                    />
+                    <li class="o_item_option" role="menuitem">
+                        <a class="dropdown-item ps-5"
+                            t-att-class="{ selected: option.isActive }"
+                            t-att-aria-checked="option.isActive ? 'true' : 'false'"
+                            role="menuitemcheckbox"
+                            t-att-href="option.url or '#'"
+                            t-esc="option.description"
+                            t-on-click.prevent="() => this.trigger('item-selected', { item: props, option: option })"
+                        />
+                    </li>
+                    <t t-set="currentGroup" t-value="option.groupNumber"/>
+                </t>
+            </ul>
+        </t>
+        <a t-else="" class="dropdown-item"
+            t-att-class="{
+                selected: props.isActive,
+                [props.className]: props.className,
+                'd-flex': props.removable,
+                'align-items-center': props.removable,
+                'justify-content-between': props.removable
+            }"
+            t-att-aria-checked="props.isActive ? 'true' : 'false'"
+            role="menuitemcheckbox"
+            t-att-href="props.url or '#'"
+            t-on-click.prevent="() => this.trigger('item-selected', { item: props })"
+            >
+            <t t-esc="props.description"/>
+            <i t-if="props.removable"
+                class="o_icon_right fa fa-trash btn btn-link text-danger p-0 mr-n3"
+                title="Delete item"
+                t-on-click.stop.prevent="() => this.trigger('remove-item', { item: props })"
+            />
+        </a>
+    </li>
+</t>
+
+<t t-name="web.OwlDialog" owl="1">
+    <t t-portal="'body'">
+        <div class="o_dialog" t-on-focus="_onFocus" t-on-click="_onClick" t-on-dialog-closed="_onDialogClosed" t-ref="dialog">
+            <div role="dialog" class="modal"
+                tabindex="-1"
+                t-att-class="{ o_technical_modal: props.technical, o_modal_full: props.fullscreen }"
+                t-att-data-bs-backdrop="'' + props.backdrop"
+                t-ref="modal"
+                t-on-close_dialog.stop="_close"
+                t-on-click="_onBackdropClick"
+                >
+                <div class="modal-dialog" t-att-class="size">
+                    <div class="modal-content" t-att-class="props.contentClass">
+                        <header t-if="props.renderHeader" class="modal-header">
+                            <h4 class="modal-title">
+                                <t t-esc="props.title"/>
+                                <span t-if="props.subtitle" class="o_subtitle text-muted small" t-esc="props.subtitle"/>
+                            </h4>
+                            <button type="button" class="btn-close" aria-label="Close" tabindex="-1" t-on-click="_close"></button>
+                        </header>
+                        <main class="modal-body">
+                            <t t-slot="default"/>
+                        </main>
+                        <footer t-if="props.renderFooter" class="modal-footer justify-content-around justify-content-sm-start flex-wrap gap-1" t-ref="modal-footer">
+                            <t t-slot="buttons" close="_close" >
+                                <button class="btn btn-primary" t-on-click.prevent="_close">
+                                    <t>Ok</t>
+                                </button>
+                            </t>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</t>
+
+<t t-name="Popover" owl="1">
+    <div t-att-class="{ 'o_is_open': state.displayed }" t-attf-class="{{ props.class }}" t-att-title="props.titleAttribute" t-on-click="_onClick" t-on-o-popover-compute="_onPopoverCompute" t-on-o-popover-close="_onPopoverClose">
+        <t t-slot="default"/>
+        <t t-portal="'body'" t-if="state.displayed">
+            <div role="tooltip" class="o_popover" t-att-class="props.popoverClass" t-ref="popover">
+                <div class="arrow"/>
+                <h3 t-if="props.title" class="o_popover_header"><t t-esc="props.title"/></h3>
+                <div class="popover-body" t-on-o-popover-close="_onPopoverClose">
+                    <t t-slot="opened"/>
+                </div>
+            </div>
+        </t>
+    </div>
+</t>
+
+<t t-name="web.legacy.Pager" owl="1">
+    <nav class="o_pager align-items-center d-flex gap-2" aria-label="Pager">
+        <span class="o_pager_counter" t-on-click.stop="">
+            <input t-if="state.editing" type="text"
+                class="o_pager_value o_input d-inline-block w-auto text-end"
+                size="7"
+                t-ref="autofocus"
+                t-att-value="value"
+                t-on-blur="() => { this.state.editing = false }"
+                t-on-change="_onValueChange"
+                t-on-keydown.stop="_onValueKeydown"
+            />
+            <span t-else=""
+                class="o_pager_value d-inline-block border-bottom border-white"
+                t-esc="value"
+                t-on-click="_onEdit"
+            />
+            <span> / </span>
+            <span class="o_pager_limit" t-esc="props.size"/>
+        </span>
+        <span class="btn-group" aria-atomic="true">
+            <!-- accesskeys not wanted in X2Many widgets -->
+            <button type="button"
+                class="oi oi-chevron-left px-2 btn btn-secondary o_pager_previous rounded-start"
+                t-att-disabled="state.disabled || singlePage"
+                t-att-accesskey="props.withAccessKey ? 'p' : false"
+                aria-label="Previous page"
+                title="Previous page"
+                tabindex="-1"
+                t-on-click="ev => this._changeSelection(-1, ev)"
+            />
+            <button type="button"
+                class="oi oi-chevron-right px-2 btn btn-secondary o_pager_next rounded-end"
+                t-att-disabled="state.disabled || singlePage"
+                t-att-accesskey="props.withAccessKey ? 'n' : false"
+                aria-label="Next page"
+                title="Next page"
+                tabindex="-1"
+                t-on-click="ev => this._changeSelection(1, ev)"
+            />
+        </span>
+    </nav>
+</t>
+
+<t t-name="web.Legacy.ActionMenus" owl="1">
+    <div class="o_cp_action_menus" t-on-item-selected.stop="_onItemSelected">
+        <DropdownMenu t-if="printItems.length"
+            title="printButtonStrings.title"
+            items="printItems"
+            icon="'fa fa-print'"
+            hotkey="'shift+u'"
+            hotkeyTitle="printButtonStrings.hotkey"
+        />
+        <DropdownMenu t-if="actionItems.length"
+            title="actionButtonStrings.title"
+            items="actionItems"
+            icon="'fa fa-cog'"
+            closeOnSelected="true"
+            hotkey="'u'"
+            hotkeyTitle="actionButtonStrings.hotkey"
+        />
+    </div>
+</t>
+
+<t t-name="web.ViewSwitcherButton" owl="1">
+    <t t-set="buttonLabel">View %s</t>
+    <button type="button"
+        t-att-accesskey="view.accessKey"
+        t-attf-class="btn btn-light o_switch_view o_{{ view.type }} {{ view.icon }}"
+        t-att-class="{ active: env.view.type === view.type }"
+        t-att-aria-label="sprintf(buttonLabel.toString(), view.type)"
+        t-att-data-tooltip="view.name"
+        tabindex="-1"
+        t-on-click="() => this.trigger('switch-view', { view_type: view.type })"
+    />
+</t>
+
+<!-- Legacy Templates -->
+
+<div t-name="Action" class="o_action">
+    <div class="o_content"/>
+</div>
+
+<t t-name="FormButton.tooltip">
+    <div class="oe_tooltip_string" role="tooltip">
+        <div class="tooltip-inner">
+            Hit ENTER to
+            <t t-esc="title"></t>
+        </div>
+    </div>
+</t>
+
+<t t-name="DomainNode.ControlPanel">
+    <div t-if="!widget.readonly &amp;&amp; !widget.noControlPanel" class="o_domain_node_control_panel" role="toolbar" aria-label="Domain node">
+        <button class="btn btn-link text-danger o_domain_delete_node_button" title="Delete node" aria-label="Delete node"><i class="fa fa-times"/></button>
+        <button class="btn o_domain_add_node_button" title="Add node" aria-label="Add node"><i class="fa fa-plus-circle"/></button>
+        <button class="btn o_domain_add_node_button" title="Add branch" aria-label="Add branch" data-branch="1"><i class="fa fa-ellipsis-h"/></button>
+    </div>
+</t>
+<t t-name="DomainTree.OperatorSelector">
+    <div t-if="!widget.readonly" class="btn-group o_domain_tree_operator_selector" aria-atomic="true">
+        <button class="btn btn-sm btn-primary o_domain_tree_operator_caret" data-bs-toggle="dropdown">
+            <t t-if="widget.operator === '&amp;'">All</t>
+            <t t-if="widget.operator === '|'">Any</t>
+            <t t-if="widget.operator === '!'">None</t>
+        </button>
+        <div class="dropdown-menu" role="menu">
+            <a role="menuitem" href="#" class="dropdown-item" data-operator="&amp;">All</a>
+            <a role="menuitem" href="#" class="dropdown-item" data-operator="|">Any</a>
+        </div>
+    </div>
+    <strong t-else="">
+        <t t-if="widget.operator === '&amp;'">ALL</t>
+        <t t-if="widget.operator === '|'">ANY</t>
+        <t t-if="widget.operator === '!'">NONE</t>
+    </strong>
+</t>
+<div aria-atomic="true" t-name="DomainSelector" t-attf-class="o_domain_node o_domain_tree o_domain_selector o_domain_selector_legacy #{widget.readonly ? 'o_read_mode' : 'o_edit_mode'}">
+    <t t-if="widget.children.length === 0">
+        <span>Match <strong>all records</strong></span>
+        <button t-if="!widget.readonly" class="btn btn-sm btn-primary o_domain_add_first_node_button"><i class="fa fa-plus"/> Add filter</button>
+    </t>
+    <t t-else="">
+        <div class="o_domain_tree_header">
+            <t t-if="widget.children.length === 1">Match records with the following rule:</t>
+            <t t-else="">
+                <span>Match records with</span>
+                <t t-call="DomainTree.OperatorSelector"/>
+                <span>of the following rules:</span>
+            </t>
+        </div>
+
+        <div class="o_domain_node_children_container"/>
+    </t>
+    <label t-if="widget.debug &amp;&amp; !widget.readonly" class="o_domain_debug_container">
+        <span class="small"># Code editor</span>
+        <textarea type="text" class="o_domain_debug_input"/>
+    </label>
+</div>
+<div t-name="DomainTree" class="o_domain_node o_domain_tree">
+    <div class="o_domain_tree_header o_domain_selector_row">
+        <t t-call="DomainNode.ControlPanel"/>
+        <t t-call="DomainTree.OperatorSelector"/>
+        <span class="ml4">of:</span>
+    </div>
+
+    <div class="o_domain_node_children_container"/>
+</div>
+<div t-name="DomainLeaf" t-attf-class="o_domain_node o_domain_leaf o_domain_selector_row #{widget.readonly ? 'o_read_mode' : 'o_edit_mode'}">
+    <t t-call="DomainNode.ControlPanel"/>
+
+    <div t-if="!widget.readonly" class="o_domain_leaf_edition">
+        <!-- field selector will be instantiated here -->
+        <div> <!-- used for flex stretching -->
+            <select class="o_domain_leaf_operator_select o_input">
+                <option t-foreach="widget.operators" t-as="key" t-key="key_index"
+                        t-att-value="key"
+                        t-att-selected="widget.displayOperator === key ? 'selected' : None">
+                    <t t-esc="key_value"/>
+                </option>
+            </select>
+        </div>
+        <div t-attf-class="o_ds_value_cell#{['set', 'not set'].includes(widget.displayOperator) ? ' d-none' : ''}">
+            <t t-if="widget.selectionChoices !== null">
+                <select class="o_domain_leaf_value_input o_input">
+                    <option t-foreach="widget.selectionChoices" t-as="val" t-key="val_index"
+                            t-att-value="val[0]"
+                            t-att-selected="val.includes(widget.displayValue) ? 'selected' : None">
+                        <t t-esc="val[1]"/>
+                    </option>
+                </select>
+            </t>
+            <t t-else="">
+                <t t-if="['in', 'not in'].includes(widget.operator)">
+                    <div class="o_domain_leaf_value_input">
+                        <span class="badge rounded-pill" t-foreach="widget.displayValue" t-as="val" t-key="val_index">
+                            <t t-esc="val"/> <i class="o_domain_leaf_value_remove_tag_button fa fa-times" t-att-data-value="val" role="img" aria-label="Remove tag" title="Remove tag"/>
+                        </span>
+                    </div>
+                    <div class="o_domain_leaf_value_tags">
+                        <input placeholder="Add new value" type="text" class="o_input"/>
+                        <button class="btn btn-sm btn-primary fa fa-plus o_domain_leaf_value_add_tag_button" aria-label="Add tag" title="Add tag"/>
+                    </div>
+                </t>
+                <t t-else="">
+                    <input class="o_domain_leaf_value_input o_input" type="text" t-att-value="widget.displayValue"/>
+                </t>
+            </t>
+        </div>
+    </div>
+    <div t-else="" class="o_domain_leaf_info">
+        <!-- field selector will be instantiated here -->
+        <t t-if="typeof(widget.value) === 'string'">
+            <span class="o_domain_leaf_operator"><t t-esc="widget.operator_mapping[widget.operator]"/></span>
+            <span class="o_domain_leaf_value text-primary">"<t t-esc="widget.value"/>"</span>
+        </t>
+        <t t-if="Array.isArray(widget.value)">
+            <span class="o_domain_leaf_operator"><t t-esc="widget.operator_mapping[widget.operator]"/></span>
+            <t t-foreach="widget.value" t-as="v" t-key="v_index">
+                <span class="o_domain_leaf_value text-primary">"<t t-esc="v"/>"</span>
+                <t t-if="!v_last"> or </t>
+            </t>
+        </t>
+        <t t-if="typeof(widget.value) === 'number'">
+            <span class="o_domain_leaf_operator"><t t-esc="widget.operator_mapping[widget.operator]"/></span>
+            <span class="o_domain_leaf_value text-primary"><t t-esc="widget.value"></t></span>
+        </t>
+        <t t-if="typeof(widget.value) === 'boolean'">
+            is
+            <t t-if="widget.operator === '=' &amp;&amp; widget.value === false || widget.operator === '!=' &amp;&amp; widget.value === true">not</t>
+            set
+        </t>
+    </div>
+</div>
+<div aria-atomic="true" t-name="ModelFieldSelector" t-attf-class="o_field_selector o_legacy_field_selector#{!widget.options.readonly ? ' o_edit_mode o_input' : ''}">
+    <div class="o_field_selector_value" tabindex="0"/>
+    <div class="o_field_selector_controls" tabindex="0">
+        <i role="alert" class="fa fa-exclamation-triangle o_field_selector_warning d-none" title="Invalid field chain" aria-label="Invalid field chain"/>
+    </div>
+</div>
+<div  t-name="ModelFieldSelector.popover" class="o_field_selector_popover o_legacy_field_selector_popover d-none" tabindex="0">
+    <div class="o_field_selector_popover_header text-center">
+        <i class="oi oi-arrow-left o_field_selector_popover_option o_field_selector_prev_page" title="Previous" role="img" aria-label="Previous"/>
+        <div class="o_field_selector_title"/>
+        <i class="fa fa-times o_field_selector_popover_option o_field_selector_close" title="Close" role="img" aria-label="Close"/>
+        <div t-if="widget.options.showSearchInput" class="o_field_selector_search mt-2">
+            <input type="text" placeholder='Search a field...' class="o_input"/>
+        </div>
+        <div t-if="widget.options.needDefaultValue" class="o_field_selector_default_value_input mt-2 d-none">
+            <input type="text" placeholder='type a default text or press ENTER' class="o_input"/>
+        </div>
+    </div>
+    <div class="o_field_selector_popover_body">
+        <ul class="o_field_selector_page"/>
+    </div>
+    <div t-if="widget.options.debugMode" class="o_field_selector_popover_footer">
+        <input type="text" class="o_input o_field_selector_debug"/>
+    </div>
+</div>
+<t t-name="ModelFieldSelector.value">
+    <t t-foreach="chain" t-as="fieldName" t-key="fieldName_index">
+        <t t-if="fieldName_index > 0">
+            <i class="oi oi-chevron-right" role="img" aria-label="Followed by" title="Followed by"/>
+        </t>
+        <span class="o_field_selector_chain_part">
+            <t t-if="fieldName === '1'">
+                <t t-esc="fieldName"/>
+            </t>
+            <t t-elif="fieldName === '0'">
+                <t t-esc="fieldName"/>
+            </t>
+            <t t-else="">
+                <t t-set="fieldInfo" t-value="_.findWhere(pages[fieldName_index], {'name': fieldName})"/>
+                <t t-esc="fieldInfo &amp;&amp; fieldInfo.string || '?'"/>
+            </t>
+        </span>
+    </t>
+</t>
+<ul t-name="ModelFieldSelector.defaultValue" class="o_field_selector_page o_field_selector_default_value">
+    <li t-attf-class="o_field_selector_item active o_field_selector_select_button">
+        <t t-esc="line.string"/>
+        <div class="text-muted o_field_selector_item_title"><t t-esc="line.description"/></div>
+    </li>
+</ul>
+<ul t-name="ModelFieldSelector.page" class="o_field_selector_page">
+    <t t-foreach="lines" t-as="line" t-key="line_index">
+        <t t-set="relationToFollow" t-value="followRelations(line) &amp;&amp; line.relation"/>
+        <li t-attf-class="o_field_selector_item #{relationToFollow and 'o_field_selector_next_page' or 'o_field_selector_select_button'}#{line_index == 0 and ' active' or ''}"
+            t-att-data-name="line.name">
+            <t t-esc="line.string"/>
+            <div t-if="debug" class="text-muted o_field_selector_item_title"><t t-esc="line.name"/> (<t t-esc="line.type"/>)</div>
+            <i t-if="relationToFollow" class="oi oi-chevron-right o_field_selector_relation_icon" role="img" aria-label="Relation to follow" title="Relation to follow"/>
+        </li>
+    </t>
+</ul>
+
+<t t-name="web.datepicker">
+    <t t-set="placeholder" t-value="widget.getParent().node and widget.getParent().node.attrs.placeholder"/>
+    <t t-set="datepickerID" t-value="_.uniqueId('datepicker')"/>
+    <div class="o_datepicker" aria-atomic="true" t-att-id="datepickerID" data-target-input="nearest">
+        <input type="text"
+            class="o_datepicker_input o_input datetimepicker-input"
+            t-att-name="widget.name"
+            t-att-placeholder="placeholder"
+            t-attf-data-target="##{datepickerID}"
+            autocomplete="off"/>
+        <span class="o_datepicker_button"/>
+    </div>
+</t>
+<t t-name="web.Legacy.FieldSelection">
+    <span t-if="widget.mode === 'readonly'"/>
+
+    <select t-if="widget.mode !== 'readonly'"
+        class="o_input"
+        t-att-name="widget.name"
+        t-att-tabindex="widget.attrs.tabindex"
+        t-att-autofocus="widget.attrs.autofocus"
+        t-att-id="widget.idForLabel"/>
+</t>
+<t t-name="FieldRadio.button">
+    <div class="form-check o_radio_item" aria-atomic="true">
+        <input type="radio" class="form-check-input o_radio_input" t-att-checked="checked ? true : undefined" t-att-disabled="disabled ? true : undefined"
+            t-att-name="name" t-att-data-value="value[0]" t-att-data-index="index" t-att-id="id"/>
+        <label class="form-check-label o_form_label" t-att-for="id"><t t-esc="value[1]"/></label>
+    </div>
+</t>
+
+<t t-name="FieldMany2One">
+    <t t-if="widget.mode === 'readonly'">
+        <a t-if="!widget.noOpen" t-att-tabindex="widget.attrs.tabindex" class="o_form_uri" href="#"/>
+        <span t-if="widget.noOpen"/>
+    </t>
+    <div t-if="widget.mode === 'edit'" class="o_field_widget o_field_many2one" aria-atomic="true">
+        <div class="o_field_many2one_selection">
+            <div class="o_input_dropdown">
+                <input type="text" class="o_input form-control"
+                    t-att-barcode_events="widget.nodeOptions.barcode_events"
+                    t-att-tabindex="widget.attrs.tabindex"
+                    t-att-autofocus="widget.attrs.autofocus"
+                    t-att-placeholder="widget.attrs.placeholder"
+                    t-att-id="widget.idForLabel"/>
+                <a role="button" class="o_dropdown_button" draggable="false"/>
+            </div>
+            <button type="button" t-if="!widget.noOpen" class="fa fa-external-link btn btn-secondary o_external_button" tabindex="-1" draggable="false" aria-label="External link" title="External link"/>
+        </div>
+        <div class="o_field_many2one_extra"/>
+    </div>
+</t>
+
+<t t-name="web.Many2OneAvatar">
+    <div class="o_m2o_avatar">
+        <img t-if="widget.value" t-att-src="url" t-att-alt="value"/>
+        <span t-elif="widget.mode === 'edit'" class="o_m2o_avatar_empty"></span>
+        <span t-if="widget.mode === 'readonly'" t-esc="value"/>
+    </div>
+</t>
+
+<t t-name="FieldMany2ManyTag">
+    <t t-foreach="elements" t-as="el" t-key="el_index">
+        <t t-set="color" t-value="el[colorField] || 0"/>
+        <t t-set="colornames" t-value="['No color', 'Red', 'Orange', 'Yellow', 'Light blue', 'Dark purple', 'Salmon pink', 'Medium blue', 'Dark blue', 'Fushia', 'Green', 'Purple']"/>
+        <div t-attf-class="badge rounded-pill #{hasDropdown ? 'dropdown' : ''} o_tag_color_#{color}" t-att-data-color="color" t-att-data-index="el_index" t-att-data-id="el.id" t-attf-title="Tag color: #{colornames[color]}">
+            <t t-set="_badge_text">
+                <span class="o_badge_text" t-att-title="el.display_name"><span role="img" t-attf-aria-label="Tag color: #{colornames[color]}"/><span class="o_tag_badge_text" t-esc="el.display_name"/></span>
+            </t>
+            <t t-if="hasDropdown">
+                <a role="button" href="#" class="dropdown-toggle o-no-caret" aria-expanded="false">
+                    <t t-out="_badge_text"/>
+                </a>
+            </t>
+            <t t-else="">
+                <t t-out="_badge_text"/>
+            </t>
+            <a t-if="!readonly" href="#" class="fa fa-times o_delete" title="Delete" aria-label="Delete"/>
+        </div>
+    </t>
+</t>
+<t t-name="FieldMany2ManyTagAvatar" t-extend="FieldMany2ManyTag">
+    <t t-jquery="t[t-set='_badge_text']" t-operation="before">
+        <span><img t-attf-src="/web/image/#{avatarModel}/#{el.id}/#{avatarField}" t-att-data-id="el.id" class="rounded-circle o_m2m_avatar"/></span>
+    </t>
+</t>
+<t t-name="KanbanMany2ManyTagAvatar">
+    <t t-set="visibleElements" t-value="elements.length === widget.visibleAvatarCount ? elements : elements.slice(0, widget.visibleAvatarCount - 1)"/>
+    <t t-foreach="visibleElements" t-as="el" t-key="el_index">
+        <span><img t-attf-src="/web/image/#{avatarModel}/#{el.id}/#{avatarField}" t-att-title="el.display_name" t-att-data-id="el.id" class="rounded-circle o_m2m_avatar"/></span>
+    </t>
+    <t t-if="elements.length > widget.visibleAvatarCount">
+        <span class="o_m2m_avatar_empty rounded-circle text-center fw-bold">
+            <span t-if="elements.length - widget.visibleAvatarCount + 1 > 9">9+</span>
+            <span t-else="">+<t t-esc="elements.length - widget.visibleAvatarCount + 1"/></span>
+        </span>
+    </t>
+</t>
+<t t-name="ListMany2ManyTagAvatar">
+    <t t-if="widget.mode !== 'readonly'">
+        <t t-call="FieldMany2ManyTagAvatar"/>
+    </t>
+    <t t-else="">
+        <t t-if="elements.length === 1">
+            <div>
+                <img t-attf-src="/web/image/#{avatarModel}/#{elements[0].id}/#{avatarField}" t-att-data-id="elements[0].id" class="rounded-circle o_m2m_avatar"/>
+                <span t-esc="elements[0].display_name"/>
+            </div>
+        </t>
+        <t t-else="">
+            <t t-set="visibleElements" t-value="elements.length === widget.visibleAvatarCount ? elements : elements.slice(0, widget.visibleAvatarCount - 1)"/>
+            <t t-foreach="visibleElements" t-as="el" t-key="el_index">
+                <span><img t-attf-src="/web/image/#{avatarModel}/#{el.id}/#{avatarField}" t-att-title="el.display_name" t-att-data-id="el.id" class="rounded-circle o_m2m_avatar"/></span>
+            </t>
+            <t t-if="elements.length > widget.visibleAvatarCount">
+                <span class="o_m2m_avatar_empty rounded-circle text-center fw-bold">
+                    <span t-if="elements.length - widget.visibleAvatarCount + 1 > 9">9+</span>
+                    <span t-else="">+<t t-esc="elements.length - widget.visibleAvatarCount + 1"/></span>
+                </span>
+            </t>
+        </t>
+    </t>
+</t>
+<t t-name="Many2ManyTagAvatarPopover">
+    <t t-foreach="elements" t-as="el" t-key="el_index">
+        <div><t t-esc="el.display_name"/></div>
+    </t>
+</t>
+<t t-name="FieldMany2ManyTag.colorpicker">
+    <div class="o_colorpicker dropdown-menu tagcolor_dropdown_menu" role="menu">
+        <ul>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_1" data-color="1" title="Red" aria-label="Red"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_2" data-color="2" title="Orange" aria-label="Orange"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_3" data-color="3" title="Yellow" aria-label="Yellow"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_4" data-color="4" title="Light blue" aria-label="Light blue"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_5" data-color="5" title="Dark purple" aria-label="Dark purple"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_6" data-color="6" title="Salmon pink" aria-label="Salmon pink"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_7" data-color="7" title="Medium blue" aria-label="Medium blue"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_8" data-color="8" title="Dark blue" aria-label="Dark blue"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_9" data-color="9" title="Fushia" aria-label="Fushia"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_10" data-color="10" title="Green" aria-label="Green"/></li>
+            <li><a role="menuitem" href="#" t-att-data-id="tag_id" class="o_tag_color_11" data-color="11" title="Purple" aria-label="Purple"/></li>
+            <li> <!-- checkbox for tag color 0 -->
+                <div role="menuitem" class="o_hide_in_kanban"
+                     t-att-data-id="tag_id"
+                     t-att-data-color="0">
+                    <div class="form-check">
+                        <input type="checkbox" id="o_hide_in_kanban_checkbox" class="form-check-input"/>
+                        <label for="o_hide_in_kanban_checkbox" class="form-check-label">Hide in Kanban</label>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</t>
+<t t-name="FieldBinaryFile">
+    <a t-if="widget.mode === 'readonly'" href="javascript:void(0)" class="o_form_uri"/>
+
+    <div t-if="widget.mode !== 'readonly'" class="o_field_binary_file" aria-atomic="true">
+        <input type="text" class="o_input"
+            readonly="readonly"
+            t-att-name="widget.name"
+            t-att-tabindex="widget.attrs.tabindex"
+            t-att-autofocus="widget.attrs.autofocus"/>
+
+        <button type="button" class="btn btn-primary o_select_file_button" title="Select">Upload your file</button>
+        <button type="button" class="btn btn-secondary fa fa-pencil o_select_file_button" title="Select" aria-label="Select"/>
+        <button type="button" class="btn btn-secondary fa fa-trash-o o_clear_file_button" title="Clear" aria-label="Clear"/>
+
+        <span class="o_form_binary_progress">Uploading...</span>
+        <t t-call="HiddenInputFile">
+            <t t-set="fileupload_id" t-value="widget.fileupload_id"/>
+            <t t-set="fileupload_style" t-translation="off">overflow-x: hidden</t>
+        </t>
+    </div>
+</t>
+
+<t t-name="HiddenInputFile">
+    <div t-attf-class="o_hidden_input_file #{fileupload_class or ''}" t-att-style="fileupload_style" aria-atomic="true">
+        <form class="o_form_binary_form" t-att-target="fileupload_id"
+              method="post" enctype="multipart/form-data" t-att-action="fileupload_action || '/web/binary/upload'">
+            <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+            <input type="hidden" name="callback" t-att-value="fileupload_id"/>
+            <input type="file" class="o_input_file" name="ufile"
+                t-att="{'multiple': multi_upload ? 'multiple' : null, 'accept': widget.accepted_file_extensions || '*'}"/>
+            <t t-out="0"/>
+        </form>
+        <iframe t-att-id="fileupload_id" t-att-name="fileupload_id" style="display: none"/>
+    </div>
+</t>
+
+<t t-name="Throbber">
+    <div>
+        <div class="oe_blockui_spin" style="height: 50px">
+            <img src="/web/static/img/spin.png" style="animation: fa-spin 1s infinite steps(12);" alt="Loading..."/>
+        </div>
+        <br />
+        <div class="oe_throbber_message" style="color:white"></div>
+    </div>
+</t>
+<t t-name="Spinner">
+    <div class="o_spinner"><i class="fa fa-circle-o-notch fa-spin" role="img" aria-label="Loading, please wait..." title="Loading, please wait..."/></div>
+</t>
+<t t-name="M2ODialog">
+    <div>
+        Create <strong t-esc="widget.value"/> as a new <t t-esc="widget.name"/>?
+    </div>
+</t>
+<t t-name="toggle_button">
+    <button type="button" class="o_icon_button" t-att-title="widget.string" t-att-aria-label="widget.string" aria-pressed="false">
+        <i class="fa fa-circle" t-att-title="widget.string"/>
+    </button>
+</t>
+
+</templates>

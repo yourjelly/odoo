@@ -1,0 +1,212 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_mx
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.1alpha1+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-12-27 08:05+0000\n"
+"PO-Revision-Date: 2022-12-27 08:05+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_mx
+#: model:ir.model.fields,field_description:l10n_mx.field_res_bank__l10n_mx_edi_code
+msgid "ABM Code"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model,name:l10n_mx.model_account_chart_template
+msgid "Account Chart Template"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model,name:l10n_mx.model_res_bank
+msgid "Bank"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model,name:l10n_mx.model_res_partner_bank
+msgid "Bank Accounts"
+msgstr ""
+
+#. module: l10n_mx
+#. odoo-python
+#: code:addons/l10n_mx/models/chart_template.py:0
+#, python-format
+msgid "Bank Suspense Account"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model.fields,field_description:l10n_mx.field_account_setup_bank_manual_config__l10n_mx_edi_clabe
+#: model:ir.model.fields,field_description:l10n_mx.field_res_partner_bank__l10n_mx_edi_clabe
+msgid "CLABE"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model,name:l10n_mx.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: l10n_mx
+#: model_terms:ir.ui.view,arch_db:l10n_mx.res_config_settings_view_form
+msgid "Create your electronic invoices automatically (CFDI format)"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_credit_balance_account
+msgid "Credit Balance Account"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model.fields.selection,name:l10n_mx.selection__account_tax__l10n_mx_tax_type__cuota
+#: model:ir.model.fields.selection,name:l10n_mx.selection__account_tax_template__l10n_mx_tax_type__cuota
+msgid "Cuota"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_debit_balance_account
+msgid "Debit Balance Account"
+msgstr ""
+
+#. module: l10n_mx
+#. odoo-python
+#: code:addons/l10n_mx/models/chart_template.py:0
+#, python-format
+msgid "Effectively Paid"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model.fields.selection,name:l10n_mx.selection__account_tax__l10n_mx_tax_type__exento
+#: model:ir.model.fields.selection,name:l10n_mx.selection__account_tax_template__l10n_mx_tax_type__exento
+msgid "Exento"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model.fields,field_description:l10n_mx.field_account_tax__l10n_mx_tax_type
+#: model:ir.model.fields,field_description:l10n_mx.field_account_tax_template__l10n_mx_tax_type
+msgid "Factor Type"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_diot_0
+msgid "IDTTP: 0%"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_diot_16
+msgid "IDTTP: 16%"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_diot_16_imp
+msgid "IDTTP: 16% IMPORT"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_diot_16_non_cre
+msgid "IDTTP: 16% NON-CREDITABLE"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_diot_8
+msgid "IDTTP: 8%"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_diot_8_non_cre
+msgid "IDTTP: 8% NON-CREDITABLE"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_diot_exento
+msgid "IDTTP: Exempt"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_diot_ret
+msgid "IDTTP: Withholding"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_isr
+msgid "Income tax"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model.fields,field_description:l10n_mx.field_res_config_settings__module_l10n_mx_edi
+msgid "Mexican Electronic Invoicing"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_ieps
+msgid "Output tax"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model.fields,help:l10n_mx.field_account_setup_bank_manual_config__l10n_mx_edi_clabe
+#: model:ir.model.fields,help:l10n_mx.field_res_partner_bank__l10n_mx_edi_clabe
+msgid ""
+"Standardized banking cipher for Mexico. More info wikipedia.org/wiki/CLABE"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model.fields.selection,name:l10n_mx.selection__account_tax__l10n_mx_tax_type__tasa
+#: model:ir.model.fields.selection,name:l10n_mx.selection__account_tax_template__l10n_mx_tax_type__tasa
+msgid "Tasa"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model,name:l10n_mx.model_account_tax
+msgid "Tax"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model,name:l10n_mx.model_account_tax_template
+msgid "Templates for Taxes"
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model.fields,help:l10n_mx.field_account_tax__l10n_mx_tax_type
+#: model:ir.model.fields,help:l10n_mx.field_account_tax_template__l10n_mx_tax_type
+msgid ""
+"The CFDI version 3.3 have the attribute 'TipoFactor' in the tax lines. In it"
+" is indicated the factor type that is applied to the base of the tax."
+msgstr ""
+
+#. module: l10n_mx
+#: model:ir.model.fields,help:l10n_mx.field_res_bank__l10n_mx_edi_code
+msgid ""
+"Three-digit number assigned by the ABM to identify banking institutions (ABM"
+" is an acronym for Asociación de Bancos de México)"
+msgstr ""
+
+#. module: l10n_mx
+#: model:account.account.tag,name:l10n_mx.tag_iva
+msgid "VAT"
+msgstr ""
+
+#. module: uom
+#: model:uom.category,name:uom.product_uom_categ_service
+msgid "Service"
+msgstr ""
+
+#. module: uom
+#: model:uom.uom,name:uom.product_uom_service_unit
+msgid "Service Unit"
+msgstr ""
+
+#. module: uom
+#: model:uom.uom,name:uom.product_uom_activity
+msgid "Activity"
+msgstr ""
+
+#. module: uom
+#: model:uom.uom,name:uom.product_uom_job
+msgid "Job"
+msgstr ""

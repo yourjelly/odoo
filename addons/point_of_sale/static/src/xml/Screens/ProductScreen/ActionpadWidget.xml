@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="ActionpadWidget" owl="1">
+        <div class="actionpad">
+            <button class="button set-partner" t-att-class="{'decentered': isLongName}"
+                    t-on-click="() => this.pos.selectPartner()">
+                <t t-if="!ui.isSmall"><i class="fa fa-user" role="img" aria-label="Customer" title="Customer" /></t>
+                <t t-if="props.partner">
+                    <t t-esc="props.partner.name" />
+                </t>
+                <t t-else="">
+                    Customer
+                </t>
+            </button>
+            <button class="button pay validation pay-order-button" t-on-click="props.actionToTrigger ? this.props.actionToTrigger : () => this.clickPay()">
+                <div class="pay-circle" t-att-class="{ 'highlight': this.highlightPay }">
+                    <i class="oi oi-chevron-right" role="img" aria-label="Pay" title="Pay" />
+                </div>
+                <t t-esc="props.actionName" />
+            </button>
+            <button t-if="ui.isSmall" class="button back-button" t-on-click="props.onSwitchPane">
+                <i class="fa fa-angle-double-left"/>
+                Back
+            </button>
+        </div>
+    </t>
+
+</templates>
