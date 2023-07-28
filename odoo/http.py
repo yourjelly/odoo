@@ -1659,7 +1659,7 @@ def set_safe_image_headers(headers, content):
     `Content-type` header was already set to a different mimetype
     """
     headers = werkzeug.datastructures.Headers(headers)
-    safe_types = {'image/jpeg', 'image/png', 'image/gif', 'image/x-icon'}
+    safe_types = {'image/jpeg', 'image/png', 'image/gif', 'image/x-icon', 'image/svg'}
     content_type = guess_mimetype(content)
     if content_type in safe_types:
         headers['Content-Type'] = content_type
