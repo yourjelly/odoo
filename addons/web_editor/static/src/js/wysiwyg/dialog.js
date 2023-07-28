@@ -24,10 +24,12 @@ var WysiwygDialog = Dialog.extend({
                     text: this.options.save_text || _t("Save"),
                     classes: 'btn-primary',
                     click: this.save,
+                    hotkey: 'c',
                 },
                 {
                     text: _t("Discard"),
                     close: true,
+                    hotkey: 'j',
                 }
             ]
         }, this.options));

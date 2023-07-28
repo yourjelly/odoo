@@ -323,7 +323,7 @@ var Dialog = Widget.extend({
                 icon: buttonData.icon,
                 text: buttonData.text,
             });
-            $button.on('click', function (e) {
+            const buttonCall = (buttonData, e) => {
                 var def;
                 if (buttonData.click) {
                     def = buttonData.click.call(self, e);
@@ -332,7 +332,17 @@ var Dialog = Widget.extend({
                     self.onForceClose = false;
                     Promise.resolve(def).then(self.close.bind(self));
                 }
+            }
+            $button.on('click', function (e) {
+                buttonCall(buttonData, e)
             });
+            if (buttonData.hotkey) {
+                self.$modal.on('keydown', function (e) {
+                    if (e.key === buttonData.hotkey && (e.ctrlKey || e.metaKey)) {
+                        buttonCall(buttonData, e)
+                    }
+                });
+            }
             if (self.technical) {
                 $target.append($button);
             } else {
