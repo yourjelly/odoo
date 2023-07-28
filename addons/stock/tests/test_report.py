@@ -649,11 +649,11 @@ class TestReports(TestReportsCommon):
         reordering_rule.action_replenish()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
         pickings = self.env['stock.picking'].search([('product_id', '=', self.product.id)])
-        receipt = pickings.filtered(lambda p: p.picking_type_id.id == self.picking_type_in.id)
+        picking_id = pickings.filtered(lambda p: p.picking_type_id.id == warehouse.int_type_id.id)[0]
 
         # The Forecasted Report don't show intermediate moves, it must display only ingoing/outgoing documents.
         self.assertEqual(len(lines), 1, "The report must have only 1 line.")
-        self.assertEqual(lines[0]['document_in']['id'], receipt.id, "The report must only show the receipt.")
+        self.assertEqual(lines[0]['document_in']['id'], picking_id.id, "The report must only show the receipt.")
         self.assertEqual(lines[0]['document_out'], False)
         self.assertEqual(lines[0]['quantity'], reordering_rule.product_max_qty)
 

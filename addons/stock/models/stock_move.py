@@ -2206,6 +2206,18 @@ Please change the quantity done or the rounding precision of your unit of measur
             out_domain + [('state', 'in', ('partially_available', 'assigned'))],
             ['product_id', 'product_uom'],
             order='priority desc, date, id')
+        move_domain = self.env['stock.forecasted_product_product']._product_domain(self.product_id.product_tmpl_id.ids, product_ids)
+        move_domain += [('product_uom_qty', '!=', 0)]
+        if self.env.context.get('warehouse'):
+            warehouse = self.env['stock.warehouse'].browse(self.env.context.get('warehouse'))
+        else:
+            warehouse = self.env['stock.warehouse'].search([['active', '=', True]])[0]
+        in_domain = move_domain + [
+            ('state', 'not in', ['draft', 'cancel', 'done']),
+            '&',
+            ('location_id.parent_path', 'not like', warehouse.lot_stock_id.parent_path),
+            ('location_dest_id.parent_path', '=like', warehouse.lot_stock_id.parent_path),
+        ]
         ins = self.env['stock.move'].search_fetch(
             in_domain,
             ['product_id', 'product_qty', 'date', 'move_dest_ids'],
@@ -2220,7 +2232,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         for in_ in ins:
             ins_per_product[in_.product_id.id].append({
                 'qty': in_.product_qty,
-                'move_date': in_.date,
+                'move_date': max(self.browse(in_._rollup_move_dests()).mapped('date')),
                 'move_dests': in_._rollup_move_dests()
             })
 
