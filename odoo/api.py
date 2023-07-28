@@ -829,6 +829,7 @@ class Transaction:
         self.envs.data = OrderedSet()  # make the weakset OrderedWeakSet
         # cache for all records
         self.cache = Cache()
+        self.transaction_cache = {} # dirty, just for the pock
         # fields to protect {field: ids}
         self.protected = StackMap()
         # pending computations {field: ids}
@@ -848,6 +849,7 @@ class Transaction:
     def clear(self):
         """ Clear the caches and pending computations and updates in the translations. """
         self.cache.clear()
+        self.transaction_cache.clear()
         self.tocompute.clear()
 
     def reset(self):
@@ -967,7 +969,7 @@ class Cache(object):
                 raise CacheMiss(record, field)
             return default
 
-    def set(self, record, field, value, dirty=False, check_dirty=True):
+    def set(self, record, field, value, dirty=False, check_dirty=True):  # noqa: A003
         """ Set the value of ``field`` for ``record``.
         One can normally make a clean field dirty but not the other way around.
         Updating a dirty field without ``dirty=True`` is a programming error and

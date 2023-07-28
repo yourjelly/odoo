@@ -155,7 +155,7 @@ def load_module_graph(env, graph, status=None, perform_checks=True,
     for index, package in enumerate(graph, 1):
       from contextlib import nullcontext
       from odoo.tools.profiler import PeriodicCollector, Profiler
-      if package.state == "to install":
+      if package.state == "to install" and False:
         context_manager = Profiler(collectors = ['sql', PeriodicCollector(interval=0.1)], description=package.name, db=env.cr.dbname)
       else:
         context_manager = nullcontext()
@@ -427,6 +427,7 @@ def load_modules(registry, force_demo=False, status=None, update_module=False):
         # loaded_modules: to avoid double loading
         report = registry._assertion_report
         env = api.Environment(cr, SUPERUSER_ID, {})
+        assert cr.transaction
         loaded_modules, processed_modules = load_module_graph(
             env, graph, status, perform_checks=update_module,
             report=report, models_to_check=models_to_check)
@@ -629,7 +630,7 @@ def reset_modules_state(db_name):
     with db.cursor() as cr:
         cr.execute("SELECT 1 FROM information_schema.tables WHERE table_name='ir_module_module'")
         if not cr.fetchall():
-            _logger.info('skipping reset_modules_state, ir_module_module table does not exists')
+            _logger.error('skipping reset_modules_state, ir_module_module table does not exists')
             return
         cr.execute(
             "UPDATE ir_module_module SET state='installed' WHERE state IN ('to remove', 'to upgrade')"

@@ -33,7 +33,7 @@ class ResPartner(models.Model):
     def init(self):
         super().init()
         if not sql.column_exists(self.env.cr, self._table, "signup_token"):
-            self.env.cr.execute("ALTER TABLE res_partner ADD COLUMN signup_token varchar")
+            sql.create_column(self.env.cr, 'res_partner', 'signup_token', 'varchar')
 
     @api.depends('signup_token', 'signup_expiration')
     def _compute_signup_valid(self):

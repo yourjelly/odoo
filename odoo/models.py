@@ -2679,6 +2679,7 @@ class BaseModel(metaclass=MetaModel):
         # Note: the final '/' is necessary to match subtrees correctly: '42/63'
         # is a prefix of '42/630', but '42/63/' is not a prefix of '42/630/'.
         _logger.info('Computing parent_path for table %s...', self._table)
+
         query = """
             WITH RECURSIVE __parent_store_compute(id, parent_path) AS (
                 SELECT row.id, concat(row.id, '/')
@@ -2693,6 +2694,7 @@ class BaseModel(metaclass=MetaModel):
             FROM __parent_store_compute comp
             WHERE row.id = comp.id
         """.format(table=self._table, parent=self._parent_name)
+
         self.env.cr.execute(query)
         self.invalidate_model(['parent_path'])
         return True
@@ -2775,7 +2777,14 @@ class BaseModel(metaclass=MetaModel):
 
         cr = self._cr
         update_custom_fields = self._context.get('update_custom_fields', False)
-        must_create_table = not tools.table_exists(cr, self._table)
+
+        transaction_cache = self.env.transaction.transaction_cache
+        if 'db_columns' not in transaction_cache:
+            transaction_cache['db_columns'] = tools.db_columns(cr)
+
+        db_columns = transaction_cache['db_columns']
+
+        must_create_table = (self._table, 'id') not in db_columns
         parent_path_compute = False
 
         if self._auto:
@@ -2788,10 +2797,19 @@ class BaseModel(metaclass=MetaModel):
                     for field in sorted(self._fields.values(), key=lambda f: f.column_order)
                     if field.name != 'id' and field.store and field.column_type
                 ])
+                for field in self._fields.values():
+                    column = field.get_column()
+                    db_columns[(self._table, field.name)] = column
+                    column['is_nullable'] = 'NO' if field.required else 'YES' # cleanup this
 
             if self._parent_store:
-                if not tools.column_exists(cr, self._table, 'parent_path'):
+                if (self._table, 'parent_path') not in db_columns:
                     tools.create_column(self._cr, self._table, 'parent_path', 'VARCHAR')
+                    db_columns[(self._table, 'parent_path')] = {
+                        'udt_name': 'varchar',
+                        'character_maximum_length': None,
+                        'is_nullable': 'YES',
+                    }
                     parent_path_compute = True
                 self._check_parent_path()
 
@@ -2799,7 +2817,6 @@ class BaseModel(metaclass=MetaModel):
                 self._check_removed_columns(log=False)
 
             # update the database schema for fields
-            columns = tools.table_columns(cr, self._table)
             fields_to_compute = []
 
             for field in sorted(self._fields.values(), key=lambda f: f.column_order):
@@ -2807,7 +2824,7 @@ class BaseModel(metaclass=MetaModel):
                     continue
                 if field.manual and not update_custom_fields:
                     continue            # don't update custom fields
-                new = field.update_db(self, columns)
+                new = field.update_db(self)
                 if new and field.compute:
                     fields_to_compute.append(field)
 
@@ -4045,7 +4062,6 @@ class BaseModel(metaclass=MetaModel):
             # they flush other fields when deleting lines.
             for field, value in sorted(field_values, key=lambda item: item[0].write_sequence):
                 field.write(self, value)
-
             # determine records depending on new values
             #
             # Call modified after write, because the modified can trigger a

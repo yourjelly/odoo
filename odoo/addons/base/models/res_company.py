@@ -229,7 +229,6 @@ class Company(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-
         # create missing partners
         no_partner_vals_list = [
             vals
@@ -263,7 +262,6 @@ class Company(models.Model):
 
         self.env.registry.clear_cache()
         companies = super().create(vals_list)
-
         # The write is made on the user to set it automatically in the multi company group.
         if companies:
             self.env.user.write({

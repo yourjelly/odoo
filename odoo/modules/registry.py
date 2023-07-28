@@ -541,7 +541,6 @@ class Registry(Mapping):
             self._post_init_queue = deque()
             self._foreign_keys = {}
             self._is_install = install
-
             for model in models:
                 model._auto_init()
                 model.init()

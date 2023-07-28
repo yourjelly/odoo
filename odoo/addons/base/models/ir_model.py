@@ -17,7 +17,7 @@ from psycopg2.sql import Identifier, SQL, Placeholder
 from odoo import api, fields, models, tools, _, _lt, Command
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import pycompat, unique, OrderedSet
+from odoo.tools import pycompat, unique, OrderedSet, sql
 from odoo.tools.safe_eval import safe_eval, datetime, dateutil, time
 
 _logger = logging.getLogger(__name__)
@@ -1024,12 +1024,7 @@ class IrModelFields(models.Model):
             # rename column in database, and its corresponding index if present
             table, oldname, newname, index, stored = column_rename
             if stored:
-                self._cr.execute(
-                    sql.SQL('ALTER TABLE {} RENAME COLUMN {} TO {}').format(
-                        sql.Identifier(table),
-                        sql.Identifier(oldname),
-                        sql.Identifier(newname)
-                    ))
+                sql.rename_column(self._cr, table, oldname, newname)
                 if index:
                     self._cr.execute(
                         sql.SQL('ALTER INDEX {} RENAME TO {}').format(

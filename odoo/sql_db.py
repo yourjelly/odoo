@@ -318,7 +318,9 @@ class Cursor(BaseCursor):
         try:
             params = params or None
             res = self._obj.execute(query, params)
+
         except Exception as e:
+
             if log_exceptions:
                 _logger.error("bad query: %s\nERROR: %s", tools.ustr(self._obj.query or query), e)
             raise

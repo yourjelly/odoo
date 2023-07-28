@@ -112,37 +112,110 @@ def create_model_table(cr, tablename, comment=None, columns=()):
 
     _schema.debug("Table %r: created", tablename)
 
-def table_columns(cr, tablename):
-    """ Return a dict mapping column names to their configuration. The latter is
+
+def db_columns(cr):
+    """ Return a dict mapping (table_name, column_name) to their configuration. The latter is
         a dict with the data from the table ``information_schema.columns``.
     """
     # Do not select the field `character_octet_length` from `information_schema.columns`
     # because specific access right restriction in the context of shared hosting (Heroku, OVH, ...)
     # might prevent a postgres user to read this field.
-    query = '''SELECT column_name, udt_name, character_maximum_length, is_nullable
-               FROM information_schema.columns WHERE table_name=%s'''
-    cr.execute(query, (tablename,))
-    return {row['column_name']: row for row in cr.dictfetchall()}
+    cr.execute('''SELECT table_name, column_name, udt_name, character_maximum_length, is_nullable
+               FROM information_schema.columns''')
+    return {
+        (row[0], row[1]): {
+            'udt_name': row[2],
+            'character_maximum_length': row[3],
+            'is_nullable': row[4],
+        } for row in cr.fetchall()}
 
 def column_exists(cr, tablename, columnname):
+    if cr.transaction:
+        transaction_cache = cr.transaction.transaction_cache
+        if 'db_columns' not in transaction_cache:
+            transaction_cache['db_columns'] = db_columns(cr)
+
+        _db_columns = transaction_cache['db_columns']
+
+        return (tablename, columnname) in _db_columns
+    _schema.warning('no transaction found on cursor')
     """ Return whether the given column exists. """
     query = """ SELECT 1 FROM information_schema.columns
                 WHERE table_name=%s AND column_name=%s """
     cr.execute(query, (tablename, columnname))
     return cr.rowcount
 
-def create_column(cr, tablename, columnname, columntype, comment=None):
+# data_type to udt_name mapping, mainly to match existing column udt_name
+columntype_mapping = {
+    'double precision': 'float8',
+    'integer': 'int4',
+    'boolean': 'bool',
+    'bigint': 'int8',
+    'character varying': 'varchar',
+    'decimal': 'numeric',
+}
+
+def create_column(cr, tablename, columnname, columntype, comment=None, default='', references=None, size=None):
     """ Create a column with the given type. """
-    coldefault = (columntype.upper()=='BOOLEAN') and 'DEFAULT false' or ''
-    cr.execute('ALTER TABLE "{}" ADD COLUMN "{}" {} {}'.format(tablename, columnname, columntype, coldefault))
+    assert columntype.lower() != 'boolean'
+
+    # idea for retrocompatibility
+    if columntype.endswith(')'):
+        try:
+            columntype, size = columntype.strip(')').split('(')
+            size = int(size)
+        except ValueError:
+            pass
+
+    # determine the column_type corresponding to the udt_name
+    init_columntype = columntype
+    udt_name = columntype.lower()
+    udt_name = columntype_mapping.get(udt_name, udt_name)
+    if udt_name not in SQL_ORDER_BY_TYPE:
+        raise Exception('Invalid udt_name "%s"', udt_name)
+#
+    columntype = udt_name
+#
+    if size is not None:
+        if udt_name != 'varchar':
+            raise Exception('Size is only supported for varchar for field "%s"', udt_name)
+        columntype = f'{columntype}({size})'
+#
+    transaction_cache = cr.transaction.transaction_cache
+    if 'db_columns' not in transaction_cache:
+        transaction_cache['db_columns'] = db_columns(cr)
+    _db_columns = transaction_cache['db_columns']
+    key = (tablename, columnname)
+#
+    column_data = {
+        'udt_name': udt_name,
+        'character_maximum_length': size,
+        'is_nullable': 'YES',
+    }
+    _db_columns[key] = column_data
+    #coldefault = coldefault or (columntype=='boolean') and 'false'
+    coldefault = f" DEFAULT '{default}'" if default else ''
+    colreferences = f' REFERENCES {references}' if references else ''
+    cr.execute(f'ALTER TABLE "{tablename}" ADD COLUMN "{columnname}" {columntype}{coldefault}{colreferences}')
     if comment:
         cr.execute('COMMENT ON COLUMN "{}"."{}" IS %s'.format(tablename, columnname), (comment,))
     _schema.debug("Table %r: added column %r of type %s", tablename, columnname, columntype)
+    return column_data
 
-def rename_column(cr, tablename, columnname1, columnname2):
+def rename_column(cr, tablename, old_name, new_name):
     """ Rename the given column. """
-    cr.execute('ALTER TABLE "{}" RENAME COLUMN "{}" TO "{}"'.format(tablename, columnname1, columnname2))
-    _schema.debug("Table %r: renamed column %r to %r", tablename, columnname1, columnname2)
+
+    if cr.transaction:
+        transaction_cache = cr.transaction.transaction_cache
+        if 'db_columns' not in transaction_cache:
+            transaction_cache['db_columns'] = db_columns(cr)
+
+        _db_columns = transaction_cache['db_columns']
+
+    cr.execute(SQL('ALTER TABLE {} RENAME COLUMN {} TO {}').format(Identifier(tablename), Identifier(old_name), Identifier(new_name)))
+    _db_columns[(tablename, new_name)] = _db_columns.pop((tablename, old_name))
+
+    _schema.debug("Table %r: renamed column %r to %r", tablename, old_name, new_name)
 
 def convert_column(cr, tablename, columnname, columntype):
     """ Convert the column to the given type. """

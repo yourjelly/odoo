@@ -350,6 +350,13 @@ class Field(MetaField('DummyField', (object,), {})):
             return "<%s.%s>" % (__name__, type(self).__name__)
         return "%s.%s" % (self.model_name, self.name)
 
+    def get_column(self):
+        return {
+            'udt_name': self.column_type and self.column_type[0],
+            'character_maximum_length': None,
+            'is_nullable': 'YES',
+        }
+
     ############################################################################
     #
     # Base field setup: things that do not depend on other models/fields
@@ -991,7 +998,7 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Prescribed column order in table. """
         return 0 if self.column_type is None else SQL_ORDER_BY_TYPE[self.column_type[0]]
 
-    def update_db(self, model, columns):
+    def update_db(self, model):
         """ Update the database schema to implement this field.
 
             :param model: an instance of the field's model
@@ -1000,17 +1007,25 @@ class Field(MetaField('DummyField', (object,), {})):
         """
         if not self.column_type:
             return
-
-        column = columns.get(self.name)
-
+        db_columns = model.env.transaction.transaction_cache['db_columns']
+        column = db_columns.setdefault((model._table, self.name), {})
+        new = not column
         # create/update the column, not null constraint; the index will be
         # managed by registry.check_indexes()
         self.update_db_column(model, column)
-        self.update_db_notnull(model, column)
+        self.update_db_notnull(model, new, column)
+
+        # hack to make inherits work. Could be done more cleanly or simplified
+        inherits = {
+            'ir_actions': ['ir_act_report_xml', 'ir_act_client', 'ir_act_url', 'ir_act_server', 'ir_act_window'],
+        }
+
+        for table in inherits.get(model._table, []):
+            db_columns[(table, self.name)] = column.copy()
 
         # optimization for computing simple related fields like 'foo_id.bar'
         if (
-            not column
+            new
             and self.related and self.related.count('.') == 1
             and self.related_field.store and not self.related_field.compute
             and not (self.related_field.type == 'binary' and self.related_field.attachment)
@@ -1025,7 +1040,7 @@ class Field(MetaField('DummyField', (object,), {})):
                 # discard the "classical" computation
                 return False
 
-        return not column
+        return new
 
     def update_db_column(self, model, column):
         """ Create/update the column corresponding to ``self``.
@@ -1035,27 +1050,29 @@ class Field(MetaField('DummyField', (object,), {})):
         """
         if not column:
             # the column does not exist, create it
-            sql.create_column(model._cr, model._table, self.name, self.column_type[1], self.string)
+            column.update(sql.create_column(model._cr, model._table, self.name, self.column_type[1], self.string))
             return
         if column['udt_name'] == self.column_type[0]:
             return
         if column['is_nullable'] == 'NO':
             sql.drop_not_null(model._cr, model._table, self.name)
+            column['is_nullable'] = 'YES'
         self._convert_db_column(model, column)
+        column['udt_name'] = self.column_type[0]
 
     def _convert_db_column(self, model, column):
         """ Convert the given database column to the type of the field. """
         sql.convert_column(model._cr, model._table, self.name, self.column_type[1])
 
-    def update_db_notnull(self, model, column):
+    def update_db_notnull(self, model, new, column):
         """ Add or remove the NOT NULL constraint on ``self``.
 
             :param model: an instance of the field's model
             :param column: the column's configuration (dict) if it exists, or ``None``
         """
-        has_notnull = column and column['is_nullable'] == 'NO'
+        has_notnull = not new and column['is_nullable'] == 'NO'
 
-        if not column or (self.required and not has_notnull):
+        if new or (self.required and not has_notnull):
             # the column is new or it becomes required; initialize its values
             if model._table_has_rows():
                 model._init_column(self.name)
@@ -1873,6 +1890,11 @@ class Char(_String):
     def column_type(self):
         return ('jsonb', 'jsonb') if self.translate else ('varchar', pg_varchar(self.size))
 
+    def get_column(self):
+        column = super().get_column()
+        column['character_maximum_length'] = self.size
+        return column
+
     def update_db_column(self, model, column):
         if (
             column and self.column_type[0] == 'varchar' and
@@ -1881,6 +1903,7 @@ class Char(_String):
         ):
             # the column's varchar size does not match self.size; convert it
             sql.convert_column(model._cr, model._table, self.name, self.column_type[1])
+            column['character_maximum_length'] = self.size
         super().update_db_column(model, column)
 
     _related_size = property(attrgetter('size'))
@@ -2951,17 +2974,17 @@ class Many2one(_Relational):
                 f"supported for this type of field as comodel."
             )
 
-    def update_db(self, model, columns):
+    def update_db(self, model):
         comodel = model.env[self.comodel_name]
         if not model.is_transient() and comodel.is_transient():
             raise ValueError('Many2one %s from Model to TransientModel is forbidden' % self)
-        return super(Many2one, self).update_db(model, columns)
+        return super(Many2one, self).update_db(model)
 
     def update_db_column(self, model, column):
         super(Many2one, self).update_db_column(model, column)
-        model.pool.post_init(self.update_db_foreign_key, model, column)
+        model.pool.post_init(self.update_db_foreign_key, model)
 
-    def update_db_foreign_key(self, model, column):
+    def update_db_foreign_key(self, model):
         comodel = model.env[self.comodel_name]
         # foreign keys do not work on views, and users can define custom models on sql views.
         if not model._is_an_ordinary_table() or not comodel._is_an_ordinary_table():
@@ -4323,7 +4346,7 @@ class One2many(_RelationalMulti):
 
     _description_relation_field = property(attrgetter('inverse_name'))
 
-    def update_db(self, model, columns):
+    def update_db(self, model):
         if self.comodel_name in model.env:
             comodel = model.env[self.comodel_name]
             if self.inverse_name not in comodel._fields:
@@ -4676,7 +4699,7 @@ class Many2many(_RelationalMulti):
                 model.pool.field_inverses.add(self, field)
                 model.pool.field_inverses.add(field, self)
 
-    def update_db(self, model, columns):
+    def update_db(self, model):
         cr = model._cr
         # Do not reflect relations for custom fields, as they do not belong to a
         # module. They are automatically removed when dropping the corresponding
@@ -4754,7 +4777,6 @@ class Many2many(_RelationalMulti):
         model = records_commands_list[0][0].browse()
         comodel = model.env[self.comodel_name].with_context(**self.context)
         cr = model.env.cr
-
         # determine old and new relation {x: ys}
         set = OrderedSet
         ids = set(rid for recs, cs in records_commands_list for rid in recs.ids)
@@ -4829,7 +4851,6 @@ class Many2many(_RelationalMulti):
         cache = records.env.cache
         for record in records:
             cache.set(record, self, tuple(new_relation[record.id]))
-
         # determine the corecords for which the relation has changed
         modified_corecord_ids = set()
 
@@ -4843,7 +4864,6 @@ class Many2many(_RelationalMulti):
                     Identifier(self.column2),
                 )
                 execute_values(cr._obj, query, pairs)
-
             # update the cache of inverse fields
             y_to_xs = defaultdict(set)
             for x, y in pairs:
@@ -5030,7 +5050,7 @@ class Id(Field):
     readonly = True
     prefetch = False
 
-    def update_db(self, model, columns):
+    def update_db(self, model):
         pass                            # this column is created with the table
 
     def __get__(self, record, owner):

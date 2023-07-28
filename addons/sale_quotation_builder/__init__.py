@@ -3,6 +3,7 @@
 
 from . import controllers
 from . import models
+from odoo.tools import sql
 
 def _pre_init_sale_quotation_builder(env):
     """ Allow installing sale_quotation_builder in databases
@@ -14,19 +15,7 @@ def _pre_init_sale_quotation_builder(env):
     By avoiding the computation of those fields,
     we reduce the installation time noticeably
     """
-    env.cr.execute("""
-        ALTER TABLE "sale_order"
-        ADD COLUMN "website_description" text
-    """)
-    env.cr.execute("""
-        ALTER TABLE "sale_order_line"
-        ADD COLUMN "website_description" text
-    """)
-    env.cr.execute("""
-        ALTER TABLE "sale_order_template_line"
-        ADD COLUMN "website_description" text
-    """)
-    env.cr.execute("""
-        ALTER TABLE "sale_order_template_option"
-        ADD COLUMN "website_description" text
-    """)
+    sql.create_column(env.cr, "sale_order", "website_description", 'text')
+    sql.create_column(env.cr, "sale_order_line", "website_description", 'text')
+    sql.create_column(env.cr, "sale_order_template_line", "website_description", 'text')
+    sql.create_column(env.cr, "sale_order_template_option", "website_description", 'text')

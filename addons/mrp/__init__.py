@@ -6,6 +6,7 @@ from . import wizard
 from . import report
 from . import controller
 from . import populate
+from odoo.tools import sql
 
 
 def _pre_init_mrp(env):
@@ -14,10 +15,10 @@ def _pre_init_mrp(env):
           stock_move.unit_factor is terribly slow with the ORM and leads to "Out of
           Memory" crashes
     """
-    env.cr.execute("""ALTER TABLE "stock_move" ADD COLUMN "is_done" bool;""")
+    sql.create_column(env.cr, "stock_move", "is_done", "bool")
     env.cr.execute("""UPDATE stock_move
                      SET is_done=COALESCE(state in ('done', 'cancel'), FALSE);""")
-    env.cr.execute("""ALTER TABLE "stock_move" ADD COLUMN "unit_factor" double precision;""")
+    sql.create_column(env.cr, "stock_move", "unit_factor", "float8") # double precision
     env.cr.execute("""UPDATE stock_move
                      SET unit_factor=1;""")
 

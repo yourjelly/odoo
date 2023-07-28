@@ -28,7 +28,7 @@ class Users(models.Model):
     def init(self):
         super().init()
         if not sql.column_exists(self.env.cr, self._table, "totp_secret"):
-            self.env.cr.execute("ALTER TABLE res_users ADD COLUMN totp_secret varchar")
+            sql.create_column(self.env.cr, 'res_users', 'totp_secret', 'varchar')
 
     @property
     def SELF_READABLE_FIELDS(self):
