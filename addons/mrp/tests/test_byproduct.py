@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import Command
 from odoo.tests import Form
 from odoo.tests import common
 from odoo.exceptions import ValidationError
@@ -407,3 +408,36 @@ class TestMrpByProduct(common.TransactionCase):
         mo.move_byproduct_ids[0].quantity_done = 1
         mo.button_mark_done()
         self.assertEqual(mo.state, 'done')
+
+    def test_same_products(self):
+        # Required to display "By-products" in the Form view
+        self.env.user.groups_id += self.env.ref("mrp.group_mrp_byproducts")
+        prod_A = self.env['product.product'].create({
+            'name': 'Product_A',
+            'type': 'product',
+        })
+
+        # Create a MO that has his final product also a byproduct through form
+        with Form(self.env['mrp.production']) as mo_form:
+            mo_form.product_id = prod_A
+            mo_form.product_qty = 5
+            with mo_form.move_byproduct_ids.new() as move:
+                move.product_id = prod_A
+                move.product_uom_qty = 4
+            production = mo_form.save()
+
+        self.assertEqual(len(production.move_finished_ids.filtered(lambda m: m.product_id.id == prod_A.id)), 2)
+
+        # Create a MO that has his final product also a byproduct through create
+        production_2 = self.env['mrp.production'].create({
+            'product_id': prod_A.id,
+            'product_qty': 5,
+            'move_byproduct_ids': [
+                Command.create({
+                    'product_id': prod_A.id,
+                    'product_uom_qty': 4,
+                }),
+            ],
+        })
+
+        self.assertEqual(len(production_2.move_finished_ids.filtered(lambda m: m.product_id.id == prod_A.id)), 2)

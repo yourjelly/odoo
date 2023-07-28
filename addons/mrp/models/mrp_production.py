@@ -164,10 +164,15 @@ class MrpProduction(models.Model):
         copy=False,
         domain=[('scrapped', '=', False)])
     move_finished_ids = fields.One2many(
-        'stock.move', 'production_id', 'Finished Products', readonly=False,
-        compute='_compute_move_finished_ids', store=True, copy=False,
+        'stock.move', compute='_compute_move_finished_ids', inverse='_set_move_finished_ids', search="_search_move_finished_ids", string="Ref Finished Products")
+    move_finished_id = fields.One2many(
+        'stock.move', 'production_id', 'Ref Finished Product', readonly=False,
+        compute='_compute_outgoing_moves', store=True, copy=False,
         domain=[('scrapped', '=', False)])
-    move_byproduct_ids = fields.One2many('stock.move', compute='_compute_move_byproduct_ids', inverse='_set_move_byproduct_ids')
+    move_byproduct_ids = fields.One2many(
+        'stock.move', 'byproduct_production_id', 'Ref By-products', readonly=False,
+        compute='_compute_outgoing_moves', store=True,
+        domain=[('scrapped', '=', False)])
     finished_move_line_ids = fields.One2many(
         'stock.move.line', compute='_compute_lines', inverse='_inverse_lines', string="Finished Product"
         )
@@ -640,9 +645,8 @@ class MrpProduction(models.Model):
     @api.depends('workorder_ids.state', 'move_finished_ids', 'move_finished_ids.quantity_done')
     def _get_produced_qty(self):
         for production in self:
-            done_moves = production.move_finished_ids.filtered(lambda x: x.state != 'cancel' and x.product_id.id == production.product_id.id)
-            qty_produced = sum(done_moves.mapped('quantity_done'))
-            production.qty_produced = qty_produced
+            done_move = production.move_finished_id.filtered(lambda x: x.state != 'cancel')
+            production.qty_produced = done_move.quantity_done
         return True
 
     def _compute_scrap_move_count(self):
@@ -656,15 +660,10 @@ class MrpProduction(models.Model):
         for production in self:
             production.unbuild_count = len(production.unbuild_ids)
 
-    @api.depends('move_finished_ids')
-    def _compute_move_byproduct_ids(self):
-        for order in self:
-            order.move_byproduct_ids = order.move_finished_ids.filtered(lambda m: m.product_id != order.product_id)
-
-    def _set_move_byproduct_ids(self):
-        move_finished_ids = self.move_finished_ids.filtered(lambda m: m.product_id == self.product_id)
-        # TODO: Try to create by-product moves here instead of moving them in the `create`.
-        self.move_finished_ids = move_finished_ids | self.move_byproduct_ids
+    def _set_move_finished_ids(self):
+        # Try to split them here to record them
+        self.move_finished_id = self.move_finished_ids.filtered(lambda m: m.production_id.id == self.id)
+        self.move_byproduct_ids = self.move_finished_ids.filtered(lambda m: m.byproduct_production_id.id == self.id)
 
     @api.depends('state')
     def _compute_show_lock(self):
@@ -733,6 +732,10 @@ class MrpProduction(models.Model):
         late_stock_moves = self.env['stock.move'].search([('delay_alert_date', operator, value)])
         return ['|', ('move_raw_ids', 'in', late_stock_moves.ids), ('move_finished_ids', 'in', late_stock_moves.ids)]
 
+    @api.model
+    def _search_move_finished_ids(self, operator, value):
+        return ['|', ('move_finished_id', operator, value), ('move_byproduct_ids', operator, value)]
+
     @api.depends('company_id', 'date_start', 'is_planned', 'product_id', 'workorder_ids.duration_expected')
     def _compute_date_finished(self):
         for production in self:
@@ -770,8 +773,13 @@ class MrpProduction(models.Model):
             else:
                 production.move_raw_ids = [Command.delete(move.id) for move in production.move_raw_ids.filtered(lambda m: m.bom_line_id)]
 
-    @api.depends('product_id', 'bom_id', 'product_qty', 'product_uom_id', 'location_dest_id', 'date_finished')
+    @api.depends('move_finished_id', 'move_byproduct_ids')
     def _compute_move_finished_ids(self):
+        for production in self:
+            production.move_finished_ids = production.move_finished_id | production.move_byproduct_ids
+
+    @api.depends('product_id', 'bom_id', 'product_qty', 'product_uom_id', 'location_dest_id', 'date_finished')
+    def _compute_outgoing_moves(self):
         for production in self:
             if production.state != 'draft':
                 updated_values = {}
@@ -780,19 +788,42 @@ class MrpProduction(models.Model):
                 if production.date_deadline:
                     updated_values['date_deadline'] = production.date_deadline
                 if 'date' in updated_values or 'date_deadline' in updated_values:
-                    production.move_finished_ids = [
-                        Command.update(m.id, updated_values) for m in production.move_finished_ids
-                    ]
+                    # TODO QUWO: Need to check if writable through move_finished_ids instead (have a single write, since it's on moves after all)
+                    production.move_finished_id.write(updated_values)
+                    # production.move_byproduct_ids.write(updated_values)
                 continue
             # delete to remove existing moves from database and clear to remove new records
-            production.move_finished_ids = [Command.delete(m) for m in production.move_finished_ids.ids]
-            production.move_finished_ids = [Command.clear()]
+            # TODO QUWO: Need to check if doable through move_finished_ids instead
+            production.move_finished_id = False
+            # production.move_byproduct_ids = [Command.delete(move_id) for move_id in production.move_byproduct_ids.ids]
+            # production.move_byproduct_ids = [Command.clear()]
+
             if production.product_id:
                 production._create_update_move_finished()
-            else:
-                production.move_finished_ids = [
-                    Command.delete(move.id) for move in production.move_finished_ids if move.bom_line_id
-                ]
+
+    # @api.depends('product_id', 'bom_id', 'product_qty', 'product_uom_id', 'location_dest_id', 'date_finished')
+    # def _compute_move_finished_ids(self):
+    #     for production in self:
+    #         if production.state != 'draft':
+    #             updated_values = {}
+    #             if production.date_finished:
+    #                 updated_values['date'] = production.date_finished
+    #             if production.date_deadline:
+    #                 updated_values['date_deadline'] = production.date_deadline
+    #             if 'date' in updated_values or 'date_deadline' in updated_values:
+    #                 production.move_finished_ids = [
+    #                     Command.update(m.id, updated_values) for m in production.move_finished_ids
+    #                 ]
+    #             continue
+    #         # delete to remove existing moves from database and clear to remove new records
+    #         production.move_finished_ids = [Command.delete(m) for m in production.move_finished_ids.ids]
+    #         production.move_finished_ids = [Command.clear()]
+    #         if production.product_id:
+    #             production._create_update_move_finished()
+    #         else:
+    #             production.move_finished_ids = [
+    #                 Command.delete(move.id) for move in production.move_finished_ids if move.bom_line_id
+    #             ]
 
     @api.depends('state', 'product_qty', 'qty_producing')
     def _compute_show_produce(self):
@@ -829,7 +860,7 @@ class MrpProduction(models.Model):
                 self.move_raw_ids = self.move_raw_ids - move
                 return {'warning': {'title': _('Warning'), 'message': message}}
 
-    @api.constrains('move_finished_ids')
+    @api.constrains('move_byproduct_ids')
     def _check_byproducts(self):
         for order in self:
             if any(move.cost_share < 0 for move in order.move_byproduct_ids):
@@ -838,21 +869,6 @@ class MrpProduction(models.Model):
                 raise ValidationError(_("The total cost share for a manufacturing order's by-products cannot exceed 100."))
 
     def write(self, vals):
-        if 'move_byproduct_ids' in vals and 'move_finished_ids' not in vals:
-            vals['move_finished_ids'] = vals.get('move_finished_ids', []) + vals['move_byproduct_ids']
-            del vals['move_byproduct_ids']
-        if 'bom_id' in vals and 'move_byproduct_ids' in vals and 'move_finished_ids' in vals:
-            # If byproducts are given, they take precedence over move_finished for byproduts definition
-            bom = self.env['mrp.bom'].browse(vals.get('bom_id'))
-            bom_product = bom.product_id or bom.product_tmpl_id.product_variant_id
-            joined_move_ids = vals.get('move_byproduct_ids', [])
-            for move_finished in vals.get('move_finished_ids', []):
-                # Remove CREATE lines from finished_ids as they do not reflect the form current state (nor the byproduct vals)
-                if move_finished[0] == Command.CREATE and move_finished[2].get('product_id') != bom_product.id:
-                    continue
-                joined_move_ids.append(move_finished)
-            vals['move_finished_ids'] = joined_move_ids
-            del vals['move_byproduct_ids']
         if 'workorder_ids' in self:
             production_to_replan = self.filtered(lambda p: p.is_planned)
         if 'move_raw_ids' in vals and self.state not in ['draft', 'cancel', 'done']:
@@ -879,13 +895,12 @@ class MrpProduction(models.Model):
                 production.move_raw_ids.write({'date': production.date_start, 'date_deadline': production.date_start})
             if vals.get('date_finished'):
                 production.move_finished_ids.write({'date': production.date_finished})
-            if any(field in ['move_raw_ids', 'move_finished_ids', 'workorder_ids'] for field in vals) and production.state != 'draft':
+            if any(field in ['move_raw_ids', 'move_finished_id', 'move_byproduct_ids', 'workorder_ids'] for field in vals) and production.state != 'draft':
                 production._autoconfirm_production()
                 if production in production_to_replan:
                     production._plan_workorders()
             if production.state == 'done' and ('lot_producing_id' in vals or 'qty_producing' in vals):
-                finished_move_lines = production.move_finished_ids.filtered(
-                    lambda move: move.product_id == production.product_id and move.state == 'done').mapped('move_line_ids')
+                finished_move_lines = production.move_finished_id.filtered(lambda move: move.state == 'done').mapped('move_line_ids')
                 if 'lot_producing_id' in vals:
                     finished_move_lines.write({'lot_id': vals.get('lot_producing_id')})
                 if 'qty_producing' in vals:
@@ -899,12 +914,6 @@ class MrpProduction(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            # Remove from `move_finished_ids` the by-product moves and then move `move_byproduct_ids`
-            # into `move_finished_ids` to avoid duplicate and inconsistency.
-            if vals.get('move_finished_ids', False) and vals.get('move_byproduct_ids', False):
-                vals['move_finished_ids'] = list(filter(lambda move: move[2]['product_id'] == vals['product_id'], vals['move_finished_ids']))
-                vals['move_finished_ids'] = vals.get('move_finished_ids', []) + vals['move_byproduct_ids']
-                del vals['move_byproduct_ids']
             if not vals.get('name', False) or vals['name'] == _('New'):
                 picking_type_id = vals.get('picking_type_id')
                 if not picking_type_id:
@@ -927,11 +936,16 @@ class MrpProduction(models.Model):
         default = dict(default or {})
         # covers at least 2 cases: backorders generation (follow default logic for moves copying)
         # and copying a done MO via the form (i.e. copy only the non-cancelled moves since no backorder = cancelled finished moves)
-        if not default or 'move_finished_ids' not in default:
-            move_finished_ids = self.move_finished_ids
+        if not default or 'move_finished_id' not in default:
+            move_finished_id = self.move_finished_id
             if self.state != 'cancel':
-                move_finished_ids = self.move_finished_ids.filtered(lambda m: m.state != 'cancel' and m.product_qty != 0.0)
-            default['move_finished_ids'] = [(0, 0, move.copy_data()[0]) for move in move_finished_ids]
+                move_finished_id = self.move_finished_id.filtered(lambda m: m.state != 'cancel' and not float_is_zero(m.product_qty, precision_rounding=m.product_uom.rounding))
+            default['move_finished_id'] = [Command.create(move.copy_data()[0]) for move in move_finished_id]
+        if not default or 'move_byproduct_ids' not in default:
+            move_byproduct_ids = self.move_byproduct_ids
+            if self.state != 'cancel':
+                move_byproduct_ids = self.move_byproduct_ids.filtered(lambda m: m.state != 'cancel' and not float_is_zero(m.product_qty, precision_rounding=m.product_uom.rounding))
+            default['move_byproduct_ids'] = [Command.create(move.copy_data()[0]) for move in move_byproduct_ids]
         if not default or 'move_raw_ids' not in default:
             default['move_raw_ids'] = [(0, 0, move.copy_data()[0]) for move in self.move_raw_ids.filtered(lambda m: m.product_qty != 0.0)]
         return super(MrpProduction, self).copy_data(default=default)
@@ -1003,7 +1017,7 @@ class MrpProduction(models.Model):
         action['context'] = {
             'active_id': self.product_id.id,
             'active_model': 'product.product',
-            'move_to_match_ids': self.move_finished_ids.filtered(lambda m: m.product_id == self.product_id).ids
+            'move_to_match_ids': self.move_finished_id.ids
         }
         warehouse = self.picking_type_id.warehouse_id
         if warehouse:
@@ -1065,11 +1079,38 @@ class MrpProduction(models.Model):
             ('warehouse_id.company_id', '=', company_id),
         ], limit=1).id
 
+    # def _get_move_finished_values(self, product_id, product_uom_qty, product_uom, operation_id=False, byproduct_id=False, cost_share=0):
+    #     group_orders = self.procurement_group_id.mrp_production_ids
+    #     move_dest_ids = self.move_dest_ids
+    #     if len(group_orders) > 1:
+    #         move_dest_ids |= group_orders[0].move_finished_ids.filtered(lambda m: m.product_id == self.product_id).move_dest_ids
+    #     return {
+    #         'product_id': product_id,
+    #         'product_uom_qty': product_uom_qty,
+    #         'product_uom': product_uom,
+    #         'operation_id': operation_id,
+    #         'byproduct_id': byproduct_id,
+    #         'name': _('New'),
+    #         'date': self.date_finished,
+    #         'date_deadline': self.date_deadline,
+    #         'picking_type_id': self.picking_type_id.id,
+    #         'location_id': self.product_id.with_company(self.company_id).property_stock_production.id,
+    #         'location_dest_id': self.location_dest_id.id,
+    #         'company_id': self.company_id.id,
+    #         'production_id': self.id,
+    #         'warehouse_id': self.location_dest_id.warehouse_id.id,
+    #         'origin': self.product_id.partner_ref,
+    #         'group_id': self.procurement_group_id.id,
+    #         'propagate_cancel': self.propagate_cancel,
+    #         'move_dest_ids': [(4, x.id) for x in self.move_dest_ids if not byproduct_id],
+    #         'cost_share': cost_share,
+    #     }
+
     def _get_move_finished_values(self, product_id, product_uom_qty, product_uom, operation_id=False, byproduct_id=False, cost_share=0):
         group_orders = self.procurement_group_id.mrp_production_ids
         move_dest_ids = self.move_dest_ids
         if len(group_orders) > 1:
-            move_dest_ids |= group_orders[0].move_finished_ids.filtered(lambda m: m.product_id == self.product_id).move_dest_ids
+            move_dest_ids |= group_orders[0].move_finished_id.move_dest_ids
         return {
             'product_id': product_id,
             'product_uom_qty': product_uom_qty,
@@ -1092,9 +1133,27 @@ class MrpProduction(models.Model):
             'cost_share': cost_share,
         }
 
+    # def _get_moves_finished_values(self):
+    #     moves = []
+    #     for production in self:
+    #         # NOTE QUWO: If the byproduct was set from outside a bom, this UserError doesn't trigger :/
+    #         if production.product_id in production.bom_id.byproduct_ids.mapped('product_id'):
+    #             raise UserError(_("You cannot have %s  as the finished product and in the Byproducts", self.product_id.name))
+    #         moves.append(production._get_move_finished_values(production.product_id.id, production.product_qty, production.product_uom_id.id))
+    #         for byproduct in production.bom_id.byproduct_ids:
+    #             if byproduct._skip_byproduct_line(production.product_id):
+    #                 continue
+    #             product_uom_factor = production.product_uom_id._compute_quantity(production.product_qty, production.bom_id.product_uom_id)
+    #             qty = byproduct.product_qty * (product_uom_factor / production.bom_id.product_qty)
+    #             moves.append(production._get_move_finished_values(
+    #                 byproduct.product_id.id, qty, byproduct.product_uom_id.id,
+    #                 byproduct.operation_id.id, byproduct.id, byproduct.cost_share))
+    #     return moves
+
     def _get_moves_finished_values(self):
         moves = []
         for production in self:
+            # NOTE QUWO: If the byproduct was set from outside a bom, this UserError doesn't trigger :/
             if production.product_id in production.bom_id.byproduct_ids.mapped('product_id'):
                 raise UserError(_("You cannot have %s  as the finished product and in the Byproducts", self.product_id.name))
             moves.append(production._get_move_finished_values(production.product_id.id, production.product_qty, production.product_uom_id.id))
@@ -1102,31 +1161,31 @@ class MrpProduction(models.Model):
                 if byproduct._skip_byproduct_line(production.product_id):
                     continue
                 product_uom_factor = production.product_uom_id._compute_quantity(production.product_qty, production.bom_id.product_uom_id)
-                qty = byproduct.product_qty * (product_uom_factor / production.bom_id.product_qty)
+                qty = byproduct.product_qty * (product_uom_factor / production.bom_Id.product_qty)
                 moves.append(production._get_move_finished_values(
                     byproduct.product_id.id, qty, byproduct.product_uom_id.id,
                     byproduct.operation_id.id, byproduct.id, byproduct.cost_share))
         return moves
 
     def _create_update_move_finished(self):
-        """ This is a helper function to support complexity of onchange logic for MOs.
-        It is important that the special *2Many commands used here remain as long as function
-        is used within onchanges.
-        """
-        list_move_finished = []
-        moves_finished_values = self._get_moves_finished_values()
-        moves_byproduct_dict = {move.byproduct_id.id: move for move in self.move_finished_ids.filtered(lambda m: m.byproduct_id)}
-        move_finished = self.move_finished_ids.filtered(lambda m: m.product_id == self.product_id)
-        for move_finished_values in moves_finished_values:
-            if move_finished_values.get('byproduct_id') in moves_byproduct_dict:
-                # update existing entries
-                list_move_finished += [Command.update(moves_byproduct_dict[move_finished_values['byproduct_id']].id, move_finished_values)]
-            elif move_finished_values.get('product_id') == self.product_id.id and move_finished:
-                list_move_finished += [Command.update(move_finished.id, move_finished_values)]
+        list_byproduct_finished = []
+        move_finished_values = self._get_moves_finished_values()
+        moves_byproduct_dict = {move.byproduct_id.id: move for move in self.move_byproduct_ids}
+        for finished_values in move_finished_values:
+            if finished_values.get('product_id') == self.product_id.id:
+                if self.move_finished_id:
+                    self.move_finished_id = [Command.update(finished_values)]
+                else:
+                    self.move_finished_id = [Command.create(finished_values)]
             else:
-                # add new entries
-                list_move_finished += [Command.create(move_finished_values)]
-        self.move_finished_ids = list_move_finished
+                finished_values['byproduct_production_id'] = finished_values['production_id']
+                del finished_values['production_id']
+                if finished_values.get('byproduct_id') in moves_byproduct_dict:
+                    list_byproduct_finished += [Command.update(moves_byproduct_dict[move_finished_values['byproduct_id']].id, finished_values)]
+                else:
+                    list_byproduct_finished += [Command.create(finished_values)]
+        if list_byproduct_finished:
+            self.move_byproduct_ids = list_byproduct_finished
 
     def _get_moves_raw_values(self):
         moves = []
@@ -1195,7 +1254,7 @@ class MrpProduction(models.Model):
             if qty_producing_uom != 1:
                 self.qty_producing = self.product_id.uom_id._compute_quantity(1, self.product_uom_id, rounding_method='HALF-UP')
 
-        for move in (self.move_raw_ids | self.move_finished_ids.filtered(lambda m: m.product_id != self.product_id)):
+        for move in (self.move_raw_ids | self.move_byproduct_ids):
             if move._should_bypass_set_qty_producing() or not move.product_uom:
                 continue
 
@@ -1265,7 +1324,7 @@ class MrpProduction(models.Model):
             )
             additional_moves._adjust_procure_method()
             moves_to_confirm |= additional_moves
-            additional_byproducts = production.move_finished_ids.filtered(
+            additional_byproducts = production.move_byproduct_ids.filtered(
                 lambda move: move.state == 'draft'
             )
             moves_to_confirm |= additional_byproducts
@@ -1381,11 +1440,11 @@ class MrpProduction(models.Model):
                     'product_qty': production.product_uom_id._compute_quantity(production.product_qty, production.product_id.uom_id),
                     'product_uom_id': production.product_id.uom_id
                 })
-                for move_finish in production.move_finished_ids.filtered(lambda m: m.product_id == production.product_id):
-                    move_finish.write({
-                        'product_uom_qty': move_finish.product_uom._compute_quantity(move_finish.product_uom_qty, move_finish.product_id.uom_id),
-                        'product_uom': move_finish.product_id.uom_id
-                    })
+                move_finish = production.move_finished_id
+                move_finish.write({
+                    'product_uom_qty': move_finish.product_uom._compute_quantity(move_finish.product_uom_qty, move_finish.product_id.uom_id),
+                    'product_uom': move_finish.product_id.uom_id
+                })
             production.move_raw_ids._adjust_procure_method()
             (production.move_raw_ids | production.move_finished_ids)._action_confirm(merge=False)
             production.workorder_ids._action_confirm()
@@ -1641,9 +1700,9 @@ class MrpProduction(models.Model):
             for key, values in tools_groupby(moves_to_do, key=lambda m: m.raw_material_production_id.id)
         ])
         for order in self:
-            finish_moves = order.move_finished_ids.filtered(lambda m: m.product_id == order.product_id and m.state not in ('done', 'cancel'))
+            finish_move = order.move_finish_id.filtered(lambda m: m.state not in ('done', 'cancel'))
             # the finish move can already be completed by the workorder.
-            for move in finish_moves:
+            if finish_move:
                 if not move.quantity_done:
                     move._set_quantity_done(float_round(order.qty_producing - order.qty_produced, precision_rounding=order.product_uom_id.rounding, rounding_method='HALF-UP'))
                 if move.has_tracking != 'none' and order.lot_producing_id:
@@ -1682,7 +1741,8 @@ class MrpProduction(models.Model):
         return {
             'procurement_group_id': self.procurement_group_id.id,
             'move_raw_ids': None,
-            'move_finished_ids': None,
+            'move_finished_id': None,
+            'move_byproduct_ids': None,
             'lot_producing_id': False,
             'origin': self.origin,
             'state': 'draft' if self.state == 'draft' else 'confirmed',
@@ -2395,7 +2455,7 @@ class MrpProduction(models.Model):
                 bom_byproduct.operation_id.id, bom_byproduct.id, bom_byproduct.cost_share
             )
             byproduct_values.append(move_byproduct_vals)
-        self.move_finished_ids += self.env['stock.move'].create(byproduct_values)
+        self.move_byproduct_ids += self.env['stock.move'].create(byproduct_values)
 
         moves_to_unlink._action_cancel()
         moves_to_unlink.unlink()
@@ -2422,8 +2482,8 @@ class MrpProduction(models.Model):
             if self._is_finished_sn_already_produced(self.lot_producing_id):
                 raise UserError(_('This serial number for product %s has already been produced', self.product_id.name))
 
-        for move in self.move_finished_ids:
-            if move.has_tracking != 'serial' or move.product_id == self.product_id:
+        for move in self.move_byproduct_ids:
+            if move.has_tracking != 'serial':
                 continue
             for move_line in move.move_line_ids:
                 if float_is_zero(move_line.qty_done, precision_rounding=move_line.product_uom_id.rounding):

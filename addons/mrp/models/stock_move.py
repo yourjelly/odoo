@@ -13,14 +13,17 @@ class StockMoveLine(models.Model):
 
     workorder_id = fields.Many2one('mrp.workorder', 'Work Order', check_company=True)
     production_id = fields.Many2one('mrp.production', 'Production Order', check_company=True)
+    # byproduct_production_id = fields.Many2one('mrp.production', 'Byproduct Production Order', check_company=True)
     description_bom_line = fields.Char(related='move_id.description_bom_line')
 
     @api.depends('production_id')
     def _compute_picking_type_id(self):
         line_to_remove = self.env['stock.move.line']
         for line in self:
+            # if not line.production_id and not line.byproduct_production_id:
             if not line.production_id:
                 continue
+            # line.picking_type_id = (line.production_id | line.byproduct_production_id).picking_type_id
             line.picking_type_id = line.production_id.picking_type_id
             line_to_remove |= line
         return super(StockMoveLine, self - line_to_remove)._compute_picking_type_id()
@@ -48,7 +51,7 @@ class StockMoveLine(models.Model):
             if line.move_id.raw_material_production_id and line.state == 'done':
                 mo = line.move_id.raw_material_production_id
                 finished_lots = mo.lot_producing_id
-                finished_lots |= mo.move_finished_ids.filtered(lambda m: m.product_id != mo.product_id).move_line_ids.lot_id
+                finished_lots |= mo.move_byproduct_ids.move_line_ids.lot_id
                 if finished_lots:
                     produced_move_lines = mo.move_finished_ids.move_line_ids.filtered(lambda sml: sml.lot_id in finished_lots)
                     line.produce_line_ids = [(6, 0, produced_move_lines.ids)]
@@ -80,7 +83,7 @@ class StockMoveLine(models.Model):
 
     def write(self, vals):
         for move_line in self:
-            production = move_line.move_id.production_id or move_line.move_id.raw_material_production_id
+            production = move_line.move_id.production_id or move_line.move_id.byproduct_production_id or move_line.move_id.raw_material_production_id
             if production and move_line.state == 'done' and any(field in vals for field in ('lot_id', 'location_id', 'qty_done')):
                 move_line._log_message(production, move_line, 'mrp.track_production_move_template', vals)
         return super(StockMoveLine, self).write(vals)
@@ -110,6 +113,8 @@ class StockMove(models.Model):
     created_production_id = fields.Many2one('mrp.production', 'Created Production Order', check_company=True, index=True)
     production_id = fields.Many2one(
         'mrp.production', 'Production Order for finished products', check_company=True, index='btree_not_null')
+    byproduct_production_id = fields.Many2one(
+        'mrp.production', 'Production Order for byproducts', check_company=True, index='btree_not_null')
     raw_material_production_id = fields.Many2one(
         'mrp.production', 'Production Order for components', check_company=True, index='btree_not_null')
     unbuild_id = fields.Many2one(
@@ -261,7 +266,7 @@ class StockMove(models.Model):
         mo_id_to_mo = defaultdict(lambda: self.env['mrp.production'])
         product_id_to_product = defaultdict(lambda: self.env['product.product'])
         for values in vals_list:
-            mo_id = values.get('raw_material_production_id', False) or values.get('production_id', False)
+            mo_id = values.get('raw_material_production_id', False) or values.get('production_id', False) or values.get('byproduct_production_id', False)
             location_dest = self.env['stock.location'].browse(values.get('location_dest_id'))
             if mo_id and not values.get('scrapped') and not location_dest.scrap_location:
                 mo = mo_id_to_mo[mo_id]
@@ -556,7 +561,9 @@ class StockMove(models.Model):
         for production in self.mapped('raw_material_production_id'):
             candidate_moves_set.add(production.move_raw_ids.filtered(lambda m: m.product_id in self.product_id))
         for production in self.mapped('production_id'):
-            candidate_moves_set.add(production.move_finished_ids.filtered(lambda m: m.product_id in self.product_id))
+            candidate_moves_set.add(production.move_finished_id.filtered(lambda m: m.product_id in self.product_id))
+        for production in self.mapped('byproduct_production_id'):
+            candidate_moves_set.add(production.move_byproduct_ids.filtered(lambda m: m.product_id in self.product_id))
         # this will include sibling pickings as a result of merging MOs
         for picking in self.move_dest_ids.raw_material_production_id.picking_ids:
             candidate_moves_set.add(picking.move_ids)
