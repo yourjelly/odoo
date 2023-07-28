@@ -84,6 +84,43 @@ class StockForecasted(models.AbstractModel):
         res['incoming_qty'] = sum(products.mapped('incoming_qty'))
         res['outgoing_qty'] = sum(products.mapped('outgoing_qty'))
 
+        if self.env.context.get('warehouse'):
+            warehouse = self.env['stock.warehouse'].browse(self.env.context.get('warehouse'))
+        else:
+            warehouse = self.env['stock.warehouse'].search([['active', '=', True]])[0]
+
+        lot_stock_child_ids = [loc['id'] for loc in self.env['stock.location'].search_read(
+            [('id', 'child_of', warehouse.lot_stock_id.id)],
+            ['id'],
+        )]
+        wh_internal_location = list(set(wh_location_ids) - set(lot_stock_child_ids))
+
+        inventory_link_move_domain = [
+            ('state', 'in', ('assigned', 'partially_available')),
+            ('location_id.usage', '=', 'internal'),
+            ('location_id', 'in', wh_internal_location),
+            '|',
+                ('move_orig_ids', '!=', False),
+                ('move_dest_ids', '!=', False),
+            ('picking_id.group_id.stock_move_ids', '!=', False),
+        ]
+        quant_qty_domain = [
+            ('location_id', 'in', wh_internal_location)
+        ]
+        if product_template_ids:
+            inventory_link_move_domain.append(('product_id.product_tmpl_id', 'in', product_template_ids))
+            quant_qty_domain.append(('product_tmpl_id', 'in', product_template_ids))
+        else:
+            inventory_link_move_domain.append(('product_id', 'in', product_ids))
+            quant_qty_domain.append(('product_id', 'in', product_ids))
+
+        non_available = 0
+        move_qty_by_location = dict(self.env['stock.move']._read_group(inventory_link_move_domain, groupby=['location_id'], aggregates=['quantity:sum']))
+        quant_qty_by_location = self.env['stock.quant']._read_group(quant_qty_domain, groupby=['location_id'], aggregates=['inventory_quantity_auto_apply:sum'])
+        for location, qty in quant_qty_by_location:
+            non_available += qty - move_qty_by_location.get(location, 0)
+
+        res['non_available'] = non_available
         in_domain, out_domain = self._move_draft_domain(product_template_ids, product_ids, wh_location_ids)
         [in_sum] = self.env['stock.move']._read_group(in_domain, aggregates=['product_qty:sum'])[0]
         [out_sum] = self.env['stock.move']._read_group(out_domain, aggregates=['product_qty:sum'])[0]
@@ -248,6 +285,10 @@ class StockForecasted(models.AbstractModel):
         def _reconcile_out_with_ins(lines, out, ins, demand, product_rounding, only_matching_move_dest=True, read=True):
             index_to_remove = []
             for index, in_ in enumerate(ins):
+                if in_['move'].picking_id:
+                    move = self.env['stock.move'].search([('id', 'in', list(in_['move_dests'])), ('location_dest_id', 'in', wh_stock_sub_location_ids)], limit=1)
+                    if move:
+                        in_.update({'move': move})
                 if float_is_zero(in_['qty'], precision_rounding=product_rounding):
                     index_to_remove.append(index)
                     continue
@@ -255,7 +296,8 @@ class StockForecasted(models.AbstractModel):
                     continue
                 taken_from_in = min(demand, in_['qty'])
                 demand -= taken_from_in
-                lines.append(self._prepare_report_line(taken_from_in, move_in=in_['move'], move_out=out, read=read))
+                move = self.env['stock.move'].search([('id', 'in', list(in_['move_dests'])), ('location_dest_id', 'in', wh_stock_sub_location_ids)], limit=1)
+                lines.append(self._prepare_report_line(taken_from_in, move_in=move, move_out=out, read=read))
                 in_['qty'] -= taken_from_in
                 if in_['qty'] <= 0:
                     index_to_remove.append(index)
@@ -280,6 +322,22 @@ class StockForecasted(models.AbstractModel):
         for out in outs:
             outs_per_product[out.product_id.id].append(out)
 
+        wh_stock_sub_location_ids = wh_stock_location.search([('id', 'child_of', wh_stock_location.id)]).ids
+        move_domain = self._product_domain(product_template_ids, product_ids)
+        move_domain += [('product_uom_qty', '!=', 0)]
+
+        if self.env.context.get('warehouse'):
+            warehouse = self.env['stock.warehouse'].browse(self.env.context.get('warehouse'))
+        else:
+            warehouse = self.env['stock.warehouse'].search([['active', '=', True]])[0]
+
+        in_domain = move_domain + [
+            ('state', 'not in', ['draft', 'cancel', 'done']),
+            '&',
+            ('location_id.parent_path', 'not like', warehouse.lot_stock_id.parent_path),
+            ('location_dest_id.parent_path', '=like', warehouse.lot_stock_id.parent_path),
+        ]
+
         ins = self.env['stock.move'].search(in_domain, order='priority desc, date, id')
         ins_per_product = defaultdict(list)
         for in_ in ins:
@@ -291,13 +349,15 @@ class StockForecasted(models.AbstractModel):
 
         qties = self.env['stock.quant']._read_group([('location_id', 'in', wh_location_ids), ('quantity', '>', 0), ('product_id', 'in', outs.product_id.ids)],
                                                     ['product_id', 'location_id'], ['quantity:sum'])
-        wh_stock_sub_location_ids = wh_stock_location.search([('id', 'child_of', wh_stock_location.id)]).ids
         currents = defaultdict(float)
+        non_available_stock = 0
         for product, location, quantity in qties:
             location_id = location.id
             # any sublocation qties will be added to the main stock location qty
             if location_id in wh_stock_sub_location_ids:
                 location_id = wh_stock_location.id
+            else:
+                non_available_stock += quantity
             currents[(product.id, location_id)] += quantity
         moves_data = {}
         for _, out_moves in outs_per_product.items():
@@ -316,7 +376,7 @@ class StockForecasted(models.AbstractModel):
             unreconciled_outs = []
             # remaining stock
             free_stock = currents[product.id, wh_stock_location.id]
-            transit_stock = sum([v if k[0] == product.id else 0 for k, v in currents.items()]) - free_stock
+            transit_stock = sum([v if k[0] == product.id else 0 for k, v in currents.items()]) - free_stock - non_available_stock
             # add report lines and see if remaining demand can be reconciled by unreservable stock or ins
             for out in outs_per_product[product.id]:
                 reserved_out = moves_data[out].get('reserved')
@@ -371,9 +431,15 @@ class StockForecasted(models.AbstractModel):
                 lines.append(self._prepare_report_line(free_stock, product=product, read=read))
             # In moves not used.
             for in_ in ins_per_product[product.id]:
+                move = self.env['stock.move']
+                if in_['move'].picking_id:
+                    if move.browse(in_['move']._rollup_move_origs()).filtered(lambda m: m.state == 'done'):
+                        move = max(move.browse(in_['move']._rollup_move_origs()))
+                    else:
+                        move = self.env['stock.move'].search([('id', 'in', list(in_['move_dests'])), ('location_dest_id', 'in', wh_stock_sub_location_ids)], limit=1)
                 if float_is_zero(in_['qty'], precision_rounding=product_rounding):
                     continue
-                lines.append(self._prepare_report_line(in_['qty'], move_in=in_['move'], read=read))
+                lines.append(self._prepare_report_line(move.product_qty or in_['qty'], move_in=move or in_['move'], read=read))
         return lines
 
     @api.model
