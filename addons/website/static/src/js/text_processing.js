@@ -23,7 +23,7 @@ const _textHighlightFactory = {
     },
     circle: targetEl => {
         const template = (w, h) => [
-            `M ${w / 2.3},${h} C ${w / 1.4},${h} ${w},${h} ${w},${h / 2} C ${w},0 ${w / 1.5},0 ${w / 2.3},0 S 0,0 0,${h / 2} S ${w / 2.3},${h} ${w / 1.4},${h}`];
+            `M ${w / 2.88},${h / 1.1} C ${w / 1.1},${h / 1.05} ${w * 1.1},${h * 1.023} ${w * 1.023},${h / 2.32} C ${w}, ${h / 14.6} ${w / 1.411},0 ${w / 2},0 S -2,${h / 14.6} -2,${h / 2.2} S ${w / 4.24},${h} ${w / 1.36},${h * 1.04}`];
         return drawPath(targetEl, {mode: "free", template});
     },
     over_underline: targetEl => {
@@ -35,7 +35,7 @@ const _textHighlightFactory = {
     },
     scribble: targetEl => {
         const template = (w, h) => [
-            `M ${w / 2},${h} c ${w / 16},0 ${w},1 ${w / 4},1 c 2,0 -${w / 10},-2 -${w / 2},-1 c -${w / 20},0 -${w / 5},2 -${w / 5},4 c -2,0 ${w / 10},-1 ${w / 2},0 c ${w / 25},0 ${w / 10},0 ${w / 5},1 c 0,0 -${w / 10},1 -${w / 8},1 c -${w / 40},0 -${w / 16},0 -${w / 4},0`];
+            `M ${w / 2},${h} c ${w / 16},0 ${w},1 ${w / 4},1 c 2,0 -${w / 10},-2 -${w / 2},-1 c -${w / 20},0 -${w / 5},2 -${w / 5},4 c -2,0 ${w / 10},-1 ${w / 2},${h / 16} c ${w / 25},0 ${w / 10},0 ${w / 5},1 c 0,0 -${w / 10},1 -${w / 8},1 c -${w / 40},0 -${w / 16},0 -${w / 4},${h / 22}`];
         return drawPath(targetEl, {mode: "free", template});
     },
     jagged: targetEl => {
