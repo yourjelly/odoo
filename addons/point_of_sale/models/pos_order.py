@@ -692,7 +692,7 @@ class PosOrder(models.Model):
                 is_refund=is_refund,
             ))
 
-        tax_results = self.env['account.tax']._compute_taxes(base_line_vals_list)
+        tax_results = self.env['account.tax']._compute_taxes(base_line_vals_list, self.company_id)
 
         total_balance = 0.0
         total_amount_currency = 0.0
