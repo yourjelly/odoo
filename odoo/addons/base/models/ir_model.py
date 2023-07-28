@@ -279,6 +279,16 @@ class IrModel(models.Model):
 
     @tools.ormcache('name')
     def _get_id(self, name):
+        self.flush_model(['name'])
+        if self.env.context.get('batch_get_id'):
+            self.env.cr.execute("SELECT id, model FROM ir_model", (name,))
+            found_module_id = None
+            for module_id, module_name in self.env.cr.fetchall():
+                if name == module_name:
+                    found_module_id = module_id
+                self._get_id.cache.add_value(self, module_name, cache_value=module_id)
+            if found_module_id:
+                return found_module_id
         self.env.cr.execute("SELECT id FROM ir_model WHERE model=%s", (name,))
         result = self.env.cr.fetchone()
         return result and result[0]
@@ -1096,7 +1106,7 @@ class IrModelFields(models.Model):
         # determine expected and existing rows
         rows = []
         for model_name in model_names:
-            model_id = self.env['ir.model']._get_id(model_name)
+            model_id = self.env['ir.model'].with_context(batch_get_id=True)._get_id(model_name)
             for field in self.env[model_name]._fields.values():
                 rows.append(self._reflect_field_params(field, model_id))
         if not rows:
