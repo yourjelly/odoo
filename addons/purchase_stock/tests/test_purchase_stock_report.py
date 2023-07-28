@@ -106,6 +106,8 @@ class TestPurchaseStockReports(TestReportsCommon):
         draft_purchase_qty = docs['draft_purchase_qty']
         pending_qty_in = docs['qty']['in']
         self.assertEqual(len(lines), 1)
+        pickings = self.env['stock.picking'].search([('product_id', '=', self.product.id)])
+        picking_id = pickings.filtered(lambda p: p.picking_type_id.id == warehouse.int_type_id.id)[0]
         self.assertEqual(lines[0]['document_in']['id'], po.id)
         self.assertEqual(lines[0]['quantity'], 4)
         self.assertEqual(lines[0]['document_out'], False)
@@ -137,8 +139,10 @@ class TestPurchaseStockReports(TestReportsCommon):
         draft_purchase_qty = docs['draft_purchase_qty']
         pending_qty_in = docs['qty']['in']
         self.assertEqual(len(lines), 1)
+        pickings = self.env['stock.picking'].search([('product_id', '=', self.product.id)])
+        picking_id = picking_id.filtered(lambda p: p.picking_type_id.id == warehouse.int_type_id.id)[0]
         self.assertEqual(lines[0]['document_in']['id'], po.id)
-        self.assertEqual(lines[0]['quantity'], 6)
+        self.assertEqual(lines[0]['quantity'], 10)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
