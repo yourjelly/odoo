@@ -2808,7 +2808,7 @@ class BaseModel(metaclass=MetaModel):
                 if field.manual and not update_custom_fields:
                     continue            # don't update custom fields
                 new = field.update_db(self, columns)
-                if new and field.compute:
+                if new and field.compute and not field.default:
                     fields_to_compute.append(field)
 
             if fields_to_compute:
