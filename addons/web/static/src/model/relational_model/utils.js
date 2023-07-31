@@ -347,9 +347,6 @@ export function parseServerValue(field, value) {
             };
         }
         case "many2one": {
-            if (Array.isArray(value)) {
-                return value;
-            }
             if (Number.isInteger(value)) {
                 // for always invisible many2ones, unity directly returns the id, not a pair
                 return [value, ""];
