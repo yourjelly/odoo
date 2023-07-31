@@ -628,7 +628,26 @@ export function getSelectedNodes(editable) {
         node => range.isPointInRange(node, 0) && range.isPointInRange(node, nodeSize(node)),
     );
 }
-
+/**
+ * Returns an array containing the nodes which are inline to a given node.
+ *
+ * @param {Node} node
+ * @returns {Node[]}
+ */
+export function getConsecutiveInlineNodes(node) {
+    const res = [node];
+    let prev = node.previousSibling;
+    while (prev && !isBlock(prev)) {
+        res.unshift(prev);
+        prev = prev.previousSibling;
+    }
+    let next = node.nextSibling;
+    while (next && !isBlock(next)) {
+        res.push(next);
+        next = next.nextSibling;
+    }
+    return res;
+}
 /**
  * Returns the current range (if any), adapted to target the deepest
  * descendants.
