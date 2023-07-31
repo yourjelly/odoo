@@ -393,3 +393,30 @@ export function useMessageToReplyTo() {
         },
     });
 }
+
+export function useAsyncFunctionOnInput() {
+    const state = {
+        inProgress: false,
+        /** @type {Function|undefined} */
+        nextFunction: undefined,
+        results: undefined,
+        /**
+         * @param {Function} func
+         */
+        process: async (func) => {
+            if (state.inProgress) {
+                state.nextFunction = func;
+                return;
+            }
+            state.inProgress = true;
+            state.nextFunction = undefined;
+            state.results = await func();
+            state.inProgress = false;
+            if (state.nextFunction) {
+                state.rpcFunction = state.nextFunction;
+                await state.process(state.nextFunction);
+            }
+        },
+    };
+    return state;
+}

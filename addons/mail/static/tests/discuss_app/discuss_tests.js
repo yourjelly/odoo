@@ -14,7 +14,13 @@ import {
     startServer,
     waitUntil,
 } from "@mail/../tests/helpers/test_utils";
-import { editInput, nextTick, triggerEvent, triggerHotkey } from "@web/../tests/helpers/utils";
+import {
+    editInput,
+    makeDeferred,
+    nextTick,
+    triggerEvent,
+    triggerHotkey,
+} from "@web/../tests/helpers/utils";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 
@@ -2074,5 +2080,68 @@ QUnit.test(
             $,
             ".o-mail-Chatter .o-mail-Message:contains(A needaction message to have it in messaging menu)"
         );
+    }
+);
+
+QUnit.test(
+    "Chats input should wait until the previous RPC is done before starting a new one",
+    async (assert) => {
+        const pyEnv = await startServer();
+        const partnerId = pyEnv["res.partner"].create({ name: "Mario" });
+        pyEnv["res.users"].create({ partner_id: partnerId });
+        const deferred = makeDeferred();
+        let counter = 0;
+        const { openDiscuss } = await start({
+            async mockRPC(route, params) {
+                if (route === "/web/dataset/call_kw/res.partner/im_search") {
+                    if (counter === 0) {
+                        await deferred;
+                    }
+                    counter++;
+                }
+            },
+        });
+        await openDiscuss();
+
+        await click(".o-mail-DiscussSidebar i[title='Start a conversation']");
+        await afterNextRender(async () => await insertText(".o-mail-ChannelSelector input", "m"));
+        await afterNextRender(async () => {
+            await insertText(".o-mail-ChannelSelector input", "a");
+        });
+        await afterNextRender(async () => {
+            await insertText(".o-mail-ChannelSelector input", "r");
+            deferred.resolve();
+        });
+        assert.strictEqual(counter, 2);
+    }
+);
+
+QUnit.test(
+    "Channel input should wait until the previous RPC is done before starting a new one",
+    async (assert) => {
+        const pyEnv = await startServer();
+        pyEnv["discuss.channel"].create({ name: "Mario" });
+        const deferred = makeDeferred();
+        let counter = 0;
+        const { openDiscuss } = await start({
+            async mockRPC(route, params) {
+                if (route === "/web/dataset/call_kw/discuss.channel/search_read") {
+                    if (counter === 0) {
+                        await deferred;
+                    }
+                    counter++;
+                }
+            },
+        });
+        await openDiscuss();
+
+        await click(".o-mail-DiscussSidebar i[title='Add or join a channel']");
+        await afterNextRender(async () => await insertText(".o-mail-ChannelSelector input", "m"));
+        await afterNextRender(async () => await insertText(".o-mail-ChannelSelector input", "a"));
+        await afterNextRender(async () => {
+            await insertText(".o-mail-ChannelSelector input", "r");
+            deferred.resolve();
+        });
+        assert.strictEqual(counter, 2);
     }
 );
