@@ -1,0 +1,9 @@
+.o_add_custom_group_menu.o-dropdown {
+    button {
+        border: 0;
+    }
+    > .o-dropdown--menu {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}

@@ -2112,7 +2112,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             actionMenus: {},
         });
-        await groupByMenu(target, "m2m");
+        await groupByMenu(target, "M2M field");
 
         await click(target.querySelector(".o_group_header:first-child")); // open first group
         await click(target.querySelector(".o_data_row .o_list_record_selector input"));
@@ -2388,7 +2388,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target.querySelector("tr:nth-child(2) td:not(.o_list_record_selector)"));
-        await groupByMenu(target, "foo");
+        await groupByMenu(target, "Foo");
 
         assert.containsN(target, "tr.o_group_header", 3, "list should be grouped");
         await click(target.querySelector("th.o_group_name"));
@@ -7790,7 +7790,7 @@ QUnit.module("Views", (hooks) => {
             "there should be only one column"
         );
 
-        await groupByMenu(target, "currency_id");
+        await groupByMenu(target, "Currency");
 
         assert.verifySteps(["web_read_group"]);
         assert.containsN(target, ".o_group_header", 2, "there should be 2 group headers");
@@ -18175,7 +18175,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_list_renderer table"), "o_list_table_grouped");
         assert.containsN(target, ".o_group_header", 2);
 
-        await groupByMenu(target, "m2m");
+        await groupByMenu(target, "M2M field");
         assert.containsN(target, ".o_group_header", 4);
 
         await toggleMenuItem(target, "M2M field");

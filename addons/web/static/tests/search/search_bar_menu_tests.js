@@ -498,7 +498,7 @@ QUnit.module("Search", (hooks) => {
 
             await toggleSearchBarMenu(target);
 
-            assert.containsOnce(target, ".o_menu_item");
+            assert.containsNone(target, ".o_menu_item");
             assert.containsNone(target, ".dropdown-divider");
             assert.containsOnce(target, ".o_add_custom_group_menu");
         });
@@ -519,7 +519,7 @@ QUnit.module("Search", (hooks) => {
 
             await toggleSearchBarMenu(target);
 
-            assert.containsN(target, ".o_menu_item", 2);
+            assert.containsN(target, ".o_menu_item", 1);
             const menuItem = target.querySelector(".o_menu_item");
             assert.strictEqual(menuItem.innerText.trim(), "Foo");
             assert.strictEqual(menuItem.getAttribute("role"), "menuitemcheckbox");

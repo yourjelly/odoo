@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-import { AccordionItem } from "@web/core/dropdown/accordion_item";
-
+import { SelectMenu } from "@web/core/select_menu/select_menu";
 import { Component, useState } from "@odoo/owl";
 
 export class CustomGroupByItem extends Component {
@@ -11,10 +10,18 @@ export class CustomGroupByItem extends Component {
             this.state.fieldName = this.props.fields[0].name;
         }
     }
+
+    get choices() {
+        return this.props.fields.map((f) => ({ label: f.string, value: f.name }));
+    }
+
+    onSelected(value) {
+        this.props.onAddCustomGroup(value);
+    }
 }
 
 CustomGroupByItem.template = "web.CustomGroupByItem";
-CustomGroupByItem.components = { AccordionItem };
+CustomGroupByItem.components = { SelectMenu };
 CustomGroupByItem.props = {
     fields: Array,
     onAddCustomGroup: Function,

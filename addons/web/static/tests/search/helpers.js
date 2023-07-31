@@ -5,6 +5,7 @@ import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import {
     click,
     editInput,
+    editSelectMenu,
     getFixture,
     mount,
     mouseEnter,
@@ -279,24 +280,17 @@ export async function toggleGroupByMenu(el) {
 }
 
 export async function toggleAddCustomGroup(el) {
-    await click(findItem(el, `.o_add_custom_group_menu`));
+    await triggerEvent(el, ".o_add_custom_group_menu button", "click");
 }
 
-export async function selectGroup(el, fieldName) {
-    const select = findItem(el, `.o_add_custom_group_menu + .o_accordion_values select`);
-    select.value = fieldName;
-    await triggerEvent(select, null, "change");
+export async function selectGroup(el, value) {
+    await editSelectMenu(el, ".o_add_custom_group_menu", value);
 }
 
-export async function applyGroup(el) {
-    await click(findItem(el, `.o_add_custom_group_menu + .o_accordion_values .btn`));
-}
-
-export async function groupByMenu(el, fieldName) {
+export async function groupByMenu(el, value) {
     await toggleSearchBarMenu(el);
     await toggleAddCustomGroup(el);
-    await selectGroup(el, fieldName);
-    await applyGroup(el);
+    await selectGroup(el, value);
 }
 
 /** Favorite menu */

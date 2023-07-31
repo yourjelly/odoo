@@ -12,10 +12,10 @@ const checkKanbanGroupBy = [{
     trigger: '.o_control_panel .o_searchview_dropdown_toggler',
 }, {
     content: "Click on Add Custom Group",
-    trigger: '.o_add_custom_group_menu',
+    trigger: '.o_add_custom_group_menu button',
 }, {
-    content: "Click on Apply", // Active is selected by default
-    trigger: '.o_add_custom_group_menu + .o_accordion_values .btn-primary',
+    content: "Select 'Active' in the SelectMenu",
+    trigger: ".o_select_menu_item:contains('Active')",
 }, {
     content: "Click on List View",
     extra_trigger: '.o_kanban_renderer .o_kanban_header',

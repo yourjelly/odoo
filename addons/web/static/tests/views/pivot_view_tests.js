@@ -11,12 +11,10 @@ import {
     nextTick,
     patchDate,
     patchWithCleanup,
-    triggerEvent,
     triggerEvents,
     mouseEnter,
 } from "../helpers/utils";
 import {
-    applyGroup,
     editFavoriteName,
     getFacetTexts,
     removeFacet,
@@ -1103,8 +1101,8 @@ QUnit.module("Views", (hooks) => {
             assert.containsN(
                 target,
                 ".o_control_panel .o_cp_searchview .dropdown-menu .o_menu_item",
-                6,
-                "should have 6 menu items in searchview"
+                5,
+                "should have 5 menu items in searchview"
             );
             assert.containsOnce(
                 target,
@@ -1126,15 +1124,15 @@ QUnit.module("Views", (hooks) => {
                 "should have custom group generator same as searchview groupby"
             );
             // check custom groupby selection has groupable fields only
-            await click(target, ".o_add_custom_group_menu");
+            await toggleAddCustomGroup(target);
             assert.containsN(
                 target,
-                ".o_add_custom_group_menu + .o_accordion_values option",
+                ".o_add_custom_group_menu .o_select_menu_item",
                 6,
                 "should have 6 fields in custom groupby"
             );
             const optionDescriptions = [
-                ...target.querySelectorAll(".o_add_custom_group_menu + .o_accordion_values option"),
+                ...target.querySelectorAll(".o_add_custom_group_menu .o_select_menu_item"),
             ].map((option) => option.innerText.trim());
             assert.deepEqual(
                 optionDescriptions,
@@ -1166,8 +1164,8 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(
             target,
             ".o_control_panel .o_cp_searchview .dropdown-menu .o_menu_item",
-            5,
-            "should have 5 menu items in searchview"
+            4,
+            "should have 4 menu items in searchview"
         );
 
         // click on closed header to open dropdown
@@ -1175,45 +1173,38 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(
             target,
             ".dropdown-menu .o_menu_item",
-            3,
+            2,
             "should have 2 menu items in pivot groupby"
         );
 
         // add a custom group in searchview groupby
         await toggleSearchBarMenu(target);
         await toggleAddCustomGroup(target);
-        await applyGroup(target);
+        await selectGroup(target, "Company Type");
         assert.containsN(
             target,
             ".o_control_panel .o_cp_searchview .dropdown-menu .o_menu_item",
-            6,
-            "should have 6 menu items in searchview"
+            5,
+            "should have 5 menu items in searchview"
         );
         await click(target, "tbody tr:last-child .o_pivot_header_cell_closed");
         assert.containsN(
             target,
             ".dropdown-menu .o_menu_item",
-            3,
+            2,
             "should still have 2 menu items in pivot groupby"
         );
 
         // add a custom group in pivot groupby
-        await click(target, ".o_add_custom_group_menu");
-        target.querySelector(".o_add_custom_group_menu + .o_accordion_values select").value =
-            "date";
-        await triggerEvent(
-            target,
-            ".o_add_custom_group_menu + .o_accordion_values select",
-            "change"
-        );
-        await click(target, ".o_add_custom_group_menu  + .o_accordion_values .btn");
+        await toggleAddCustomGroup(target);
+        await selectGroup(target, "Date");
         // click on closed header to open groupby selection dropdown
         await click(target, "tbody tr:last-child .o_pivot_header_cell_closed");
         assert.containsN(
             target,
             ".dropdown-menu .o_menu_item",
-            4,
-            "should have 4 menu items in pivot groupby dropdown"
+            3,
+            "should have 3 menu items in pivot groupby dropdown"
         );
 
         // applying custom groupby in pivot groupby dropdown will not update search dropdown
@@ -1221,8 +1212,8 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(
             target,
             ".o_control_panel .o_cp_searchview .dropdown-menu .o_menu_item",
-            6,
-            "should still have 6 menu items in searchview"
+            5,
+            "should still have 5 menu items in searchview"
         );
     });
 
@@ -1250,16 +1241,15 @@ QUnit.module("Views", (hooks) => {
             assert.containsN(
                 target,
                 ".o_control_panel .o_cp_searchview .dropdown-menu .o_menu_item",
-                5,
-                "should have 5 menu items in searchview"
+                4,
+                "should have 4 menu items in searchview"
             );
-            await toggleAddCustomGroup(target);
-            await applyGroup(target);
+            await selectGroup(target, "Company Type");
             assert.containsN(
                 target,
                 ".o_control_panel .o_cp_searchview .dropdown-menu .o_menu_item",
-                6,
-                "should have 6 menu items in searchview"
+                5,
+                "should have 5 menu items in searchview"
             );
 
             // click on closed header to open dropdown
@@ -1281,16 +1271,7 @@ QUnit.module("Views", (hooks) => {
             );
 
             // add a custom group in pivot groupby
-            await click(target, ".o_add_custom_group_menu");
-            target.querySelector(".o_add_custom_group_menu + .o_accordion_values select").value =
-                "customer";
-            await triggerEvent(
-                target,
-                ".o_add_custom_group_menu + .o_accordion_values select",
-                "change"
-            );
-            await click(target, ".o_add_custom_group_menu + .o_accordion_values .btn");
-
+            await selectGroup(target, "Customer");
             await click(target.querySelectorAll("tbody .o_pivot_header_cell_closed")[1]);
             items = target.querySelectorAll(".o_menu_item:not(.o_accordion_toggle)");
             assert.deepEqual(
@@ -1349,17 +1330,10 @@ QUnit.module("Views", (hooks) => {
 
             // click on closed header to open dropdown and apply groupby on date field
             await click(target.querySelector("thead .o_pivot_header_cell_closed"));
-            await click(target.querySelector("thead .dropdown-menu .o_add_custom_group_menu "));
+            await toggleAddCustomGroup(target);
 
             checkReadGroup = true;
-            const select = target.querySelector(
-                ".o_add_custom_group_menu + .o_accordion_values select"
-            );
-            select.value = "date";
-            select.dispatchEvent(new Event("change"));
-            await click(
-                target.querySelector(".o_add_custom_group_menu + .o_accordion_values .btn-primary")
-            );
+            await selectGroup(target, "Date");
         }
     );
 
@@ -1380,7 +1354,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(
             target,
             ".o_control_panel .o_cp_searchview .dropdown-menu .o_menu_item",
-            3,
+            2,
             "should not have more menu items than default in searchview"
         );
         assert.containsOnce(
@@ -1393,7 +1367,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(
             target,
             "tbody .dropdown-menu .o_menu_item",
-            7,
+            6,
             "should have 7 menu items i.e. all groupable fields available"
         );
         assert.containsOnce(
@@ -1498,16 +1472,12 @@ QUnit.module("Views", (hooks) => {
             // click on closed header to open dropdown
             await click(target.querySelector("thead .o_pivot_header_cell_closed"));
             assert.containsOnce(target, "thead .dropdown-menu .o_add_custom_group_menu");
-            await click(target.querySelector("thead .dropdown-menu .o_add_custom_group_menu"));
-            assert.containsOnce(target, "thead .dropdown-menu .o_add_custom_group_menu");
+            await toggleAddCustomGroup(target);
+            assert.containsOnce(target, ".o_add_custom_group_menu .dropdown-menu");
 
-            // click on apply button should close dropdown
-            await click(
-                target.querySelector(
-                    "thead .dropdown-menu .o_add_custom_group_menu + .o_accordion_values .btn-primary"
-                )
-            );
-            assert.containsNone(target, "thead .dropdown-menu");
+            // selecting a value should close dropdown
+            await selectGroup(target, "Customer");
+            assert.containsNone(target, ".o_add_custom_group_menu .dropdown-menu");
         }
     );
 
@@ -2343,6 +2313,7 @@ QUnit.module("Views", (hooks) => {
                 type: "ir.actions.act_window",
                 views: [[false, "pivot"]],
             });
+            await nextTick();
 
             assert.strictEqual(
                 target.querySelector("tbody .o_pivot_header_cell_closed").textContent,
@@ -2356,7 +2327,7 @@ QUnit.module("Views", (hooks) => {
 
             // activate the unique existing favorite
             await toggleSearchBarMenu(target);
-            await toggleMenuItem(target, 2);
+            await toggleMenuItem(target, 1);
             assert.strictEqual(
                 target.querySelector("tbody .o_pivot_header_cell_closed").textContent,
                 "xphone"
@@ -2368,7 +2339,7 @@ QUnit.module("Views", (hooks) => {
             );
 
             // desactivate the unique existing favorite
-            await toggleMenuItem(target, 2);
+            await toggleMenuItem(target, 1);
 
             assert.strictEqual(
                 target.querySelector("tbody .o_pivot_header_cell_closed").textContent,
@@ -2396,7 +2367,7 @@ QUnit.module("Views", (hooks) => {
 
             // activate AGAIN the unique existing favorite
             await toggleSearchBarMenu(target);
-            await toggleMenuItem(target, 2);
+            await toggleMenuItem(target, 1);
 
             assert.strictEqual(
                 target.querySelector("tbody .o_pivot_header_cell_closed").textContent,
@@ -4434,8 +4405,7 @@ QUnit.module("Views", (hooks) => {
 
             // open group by menu and add new groupby
             await toggleSearchBarMenu(target);
-            await toggleAddCustomGroup(target);
-            await applyGroup(target);
+            await selectGroup(target, "Company Type");
 
             assert.deepEqual(
                 [...target.querySelectorAll("thead th")].map((th) => th.innerText),
@@ -4465,9 +4435,7 @@ QUnit.module("Views", (hooks) => {
 
             // open groupby menu generator and add a new groupby
             await toggleSearchBarMenu(target);
-            await toggleAddCustomGroup(target);
             await selectGroup(target, "bar");
-            await applyGroup(target);
 
             assert.deepEqual(
                 [...target.querySelectorAll("thead th")].map((th) => th.innerText),

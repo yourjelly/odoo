@@ -1,23 +1,9 @@
 <templates xml:space="preserve">
 
     <t t-name="web.CustomGroupByItem">
-        <AccordionItem class="'o_add_custom_group_menu text-truncate'" description="'Add Custom Group'">
-            <div class="px-3 py-2">
-                <select class="pe-3 text-truncate o_input" t-model="state.fieldName">
-                    <option t-foreach="props.fields" t-as="field" t-key="field.name"
-                    t-att-value="field.name"
-                    t-esc="field.string"
-                    />
-                </select>
-            </div>
-            <div class="px-3 py-2">
-                <button class="btn btn-primary w-100"
-                    t-on-click="() => props.onAddCustomGroup(state.fieldName)"
-                    >
-                    Apply
-                </button>
-            </div>
-        </AccordionItem>
+        <SelectMenu class="'o_add_custom_group_menu border-0'" choices="choices" onSelect.bind="onSelected" isSorted="false">
+            <b>Add Custom Group</b>
+        </SelectMenu>
     </t>
 
 </templates>

@@ -3,11 +3,11 @@
 import { browser } from "@web/core/browser/browser";
 import { getFixture, patchWithCleanup } from "../helpers/utils";
 import {
-    applyGroup,
     getFacetTexts,
     isItemSelected,
     isOptionSelected,
     makeWithSearch,
+    selectGroup,
     setupControlPanelServiceRegistry,
     toggleAddCustomGroup,
     toggleMenuItem,
@@ -61,24 +61,20 @@ QUnit.module("Search", (hooks) => {
 
         const groupByMenu = target.querySelector(".o_group_by_menu");
         assert.strictEqual(
-            groupByMenu.querySelector(".o_accordion").innerText.trim(),
+            groupByMenu.querySelector(".o_group_by_menu .o_select_menu").innerText.trim(),
             "Add Custom Group"
         );
 
         assert.containsOnce(groupByMenu, "button");
-        assert.containsNone(groupByMenu, ".o_accordion_values");
+        assert.containsNone(groupByMenu, ".o_select_menu .dropdown-menu");
 
         await toggleAddCustomGroup(target);
 
-        assert.containsOnce(groupByMenu, ".o_accordion_values");
+        assert.containsOnce(groupByMenu, ".o_select_menu .dropdown-menu");
 
-        assert.deepEqual(
-            [
-                ...target.querySelectorAll(
-                    ".o_add_custom_group_menu + .o_accordion_values select option"
-                ),
-            ].map((el) => el.innerText),
-            ["Birthday", "Date", "Foo"]
+        assert.strictEqual(
+            target.querySelector(".o_add_custom_group_menu .dropdown-menu").textContent,
+            "BirthdayDateFoo"
         );
     });
 
@@ -102,13 +98,9 @@ QUnit.module("Search", (hooks) => {
             await toggleSearchBarMenu(target);
             await toggleAddCustomGroup(target);
 
-            assert.deepEqual(
-                [
-                    ...target.querySelectorAll(
-                        ".o_add_custom_group_menu + .o_accordion_values select option"
-                    ),
-                ].map((el) => el.innerText),
-                ["Foo"]
+            assert.strictEqual(
+                target.querySelector(".o_add_custom_group_menu .dropdown-menu").textContent,
+                "Foo"
             );
         }
     );
@@ -138,13 +130,9 @@ QUnit.module("Search", (hooks) => {
             await toggleSearchBarMenu(target);
             await toggleAddCustomGroup(target);
 
-            assert.deepEqual(
-                [
-                    ...target.querySelectorAll(
-                        ".o_add_custom_group_menu + .o_accordion_values select option"
-                    ),
-                ].map((el) => el.innerText),
-                ["Char A", "M2M Stored"]
+            assert.strictEqual(
+                target.querySelector(".o_add_custom_group_menu .dropdown-menu").textContent,
+                "Char AM2M Stored"
             );
         }
     );
@@ -168,10 +156,9 @@ QUnit.module("Search", (hooks) => {
             await toggleSearchBarMenu(target);
 
             assert.deepEqual(controlPanel.env.searchModel.groupBy, []);
-            assert.containsOnce(target, ".o_menu_item"); //Add Custom Group
+            assert.containsOnce(target, ".o_add_custom_group_menu.o_select_menu"); //Add Custom Group
 
-            await toggleAddCustomGroup(target);
-            await applyGroup(target);
+            await selectGroup(target, "Date");
 
             assert.deepEqual(controlPanel.env.searchModel.groupBy, ["date_field:month"]);
             assert.deepEqual(getFacetTexts(target), ["Date: Month"]);
@@ -184,7 +171,7 @@ QUnit.module("Search", (hooks) => {
     );
 
     QUnit.test("click on add custom group toggle group selector", async function (assert) {
-        assert.expect(4);
+        assert.expect(3);
 
         await makeWithSearch({
             serverData,
@@ -205,22 +192,17 @@ QUnit.module("Search", (hooks) => {
         await toggleAddCustomGroup(target);
 
         // Single select node with a single option
-        assert.containsOnce(target, ".o_add_custom_group_menu + .o_accordion_values select");
+        assert.containsOnce(target, ".o_add_custom_group_menu .o_select_menu_item");
         assert.strictEqual(
-            target
-                .querySelector(".o_add_custom_group_menu + .o_accordion_values select option")
-                .innerText.trim(),
+            target.querySelector(".o_add_custom_group_menu .dropdown-menu").textContent,
             "Super Date"
         );
-
-        // Button apply
-        assert.containsOnce(target, ".o_add_custom_group_menu + .o_accordion_values .btn");
     });
 
     QUnit.test(
         "select a field name in Add Custom Group menu properly trigger the corresponding field",
         async function (assert) {
-            assert.expect(4);
+            assert.expect(3);
 
             await makeWithSearch({
                 serverData,
@@ -237,12 +219,10 @@ QUnit.module("Search", (hooks) => {
             });
 
             await toggleSearchBarMenu(target);
-            await toggleAddCustomGroup(target);
-            await applyGroup(target);
+            await selectGroup(target, "Candlelight");
 
-            assert.containsN(target, ".o_group_by_menu .o_menu_item", 2);
-            assert.containsOnce(target, ".o_add_custom_group_menu.o_accordion_toggle");
-            assert.containsOnce(target, ".o_add_custom_group_menu + .o_accordion_values");
+            assert.containsN(target, ".o_group_by_menu .o_menu_item", 1);
+            assert.containsOnce(target, ".o_add_custom_group_menu.o_select_menu");
             assert.deepEqual(getFacetTexts(target), ["Candlelight"]);
         }
     );
