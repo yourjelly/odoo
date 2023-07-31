@@ -11,11 +11,12 @@ const checkKanbanGroupBy = [{
     extra_trigger: '.o_kanban_renderer',
     trigger: '.o_control_panel .o_searchview_dropdown_toggler',
 }, {
-    content: "Click on Add Custom Group",
-    trigger: '.o_add_custom_group_menu',
-}, {
-    content: "Click on Apply", // Active is selected by default
-    trigger: '.o_add_custom_group_menu + .o_accordion_values .btn-primary',
+    content: "Select 'Active' in the select of Add Custom Group",
+    trigger: ".o_select_menu_item",
+    run: function () {
+        $('.o_add_custom_group_menu option:contains(Active)').prop('selected', true);
+        $('.o_add_custom_group_menu').trigger('change');
+    },
 }, {
     content: "Click on List View",
     extra_trigger: '.o_kanban_renderer .o_kanban_header',

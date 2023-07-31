@@ -1,7 +1,14 @@
 /** @odoo-module **/
 
-import { Component, useState, useRef, onWillUpdateProps, useEffect } from "@odoo/owl";
-import { Dropdown } from "@web/core/dropdown/dropdown";
+import {
+    Component,
+    useState,
+    useRef,
+    onWillUpdateProps,
+    useChildSubEnv,
+    useEffect,
+} from "@odoo/owl";
+import { Dropdown, DROPDOWN } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { useDebounced } from "@web/core/utils/timing";
@@ -20,6 +27,7 @@ export class SelectMenu extends Component {
         value: undefined,
         class: "",
         togglerClass: "",
+        isSorted: true,
         multiSelect: false,
         onSelect: () => {},
         required: false,
@@ -67,6 +75,7 @@ export class SelectMenu extends Component {
         searchable: { type: Boolean, optional: true },
         searchPlaceholder: { type: String, optional: true },
         value: { optional: true },
+        isSorted: { type: Boolean, optional: true },
         multiSelect: { type: Boolean, optional: true },
         onInput: { type: Function, optional: true },
         onSelect: { type: Function, optional: true },
@@ -80,6 +89,11 @@ export class SelectMenu extends Component {
     };
 
     setup() {
+        // Prevent the SelectMenu to be considered as a subdropdown
+        useChildSubEnv({
+            [DROPDOWN]: undefined,
+        });
+
         this.state = useState({
             choices: [],
             displayedOptions: [],
@@ -246,9 +260,11 @@ export class SelectMenu extends Component {
                 );
             } else {
                 filteredOptions = group.choices;
-                filteredOptions.sort((optionA, optionB) =>
-                    optionA.label.localeCompare(optionB.label)
-                );
+                if (this.props.isSorted) {
+                    filteredOptions.sort((optionA, optionB) =>
+                        optionA.label.localeCompare(optionB.label)
+                    );
+                }
             }
 
             if (filteredOptions.length === 0) {

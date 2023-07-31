@@ -9,9 +9,7 @@ import {
     triggerEvent,
 } from "@web/../tests/helpers/utils";
 import {
-    applyGroup,
     removeFacet,
-    toggleAddCustomGroup,
     toggleSearchBarMenu,
     toggleMenuItem,
     toggleMenuItemOption,
@@ -21,6 +19,7 @@ import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import testUtils from "@web/../tests/legacy/helpers/test_utils";
 import { makeFakeUserService } from "@web/../tests/helpers/mock_services";
+import { selectGroup } from "../../../web/static/tests/search/helpers";
 
 const patchDate = testUtils.mock.patchDate;
 const favoriteMenuRegistry = registry.category("favoriteMenu");
@@ -137,8 +136,7 @@ QUnit.module("Board", (hooks) => {
 
         // Group It
         await toggleSearchBarMenu(target);
-        await toggleAddCustomGroup(target);
-        await applyGroup(target);
+        await selectGroup(target, "foo");
 
         // add this action to dashboard
         await testUtils.dom.triggerEvent($(".o_add_to_board button.dropdown-toggle"), "mouseenter");

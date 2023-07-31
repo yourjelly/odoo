@@ -86,7 +86,8 @@ export function useDropdownNavigation() {
         /** @type {NodeListOf<HTMLElement>} */
         const queryResult = menuRef.el.querySelectorAll(MENU_ELEMENTS_SELECTORS.join());
         for (const el of queryResult) {
-            const isSubDropdown = el.classList.contains("dropdown");
+            const isSubDropdown =
+                el.classList.contains("dropdown") && !el.classList.contains("o_select_menu");
             const isSubDropdownOpen = () => el.classList.contains("show");
             const navTarget = isSubDropdown ? el.querySelector(":scope > .dropdown-toggle") : el;
             let subDropdownTimeout;

@@ -1,4 +1,7 @@
 .o_select_menu {
+    .dropdown-toggle::after {
+        display: none;
+    }
     .o_select_menu_toggler {
         display: grid;
         grid-template-columns: auto 25px;
@@ -66,10 +69,8 @@
 
 .dropup .o_select_menu_menu {
     box-shadow: 0 -7px 10px rgba(8, 8, 8, 0.319);
-    border-bottom: none;
 }
 
 .dropdown .o_select_menu_menu {
     box-shadow: 0 7px 10px rgba(8, 8, 8, 0.319);
-    border-top: none;
 }
