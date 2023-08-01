@@ -1,29 +1,8 @@
 /** @odoo-module **/
 
 import AbstractField from "@web/legacy/js/fields/abstract_field";
-import basic_fields from "@web/legacy/js/fields/basic_fields";
 import relational_fields from "@web/legacy/js/fields/relational_fields";
 import registry from "@web/legacy/js/fields/field_registry";
-
-// Basic fields
-registry
-    .add('abstract', AbstractField)
-    .add('input', basic_fields.InputField)
-    .add('integer', basic_fields.FieldInteger)
-    .add('boolean', basic_fields.FieldBoolean)
-    .add('date', basic_fields.FieldDate)
-    .add('datetime', basic_fields.FieldDateTime)
-    .add('float', basic_fields.FieldFloat)
-    .add('char', basic_fields.FieldChar)
-    .add('text', basic_fields.FieldText)
-    .add('url', basic_fields.UrlWidget)
-    .add('binary', basic_fields.FieldBinaryFile)
-    .add('monetary', basic_fields.FieldMonetary)
-    .add('percentage', basic_fields.FieldPercentage)
-    .add('float_time', basic_fields.FieldFloatTime)
-    .add('float_factor', basic_fields.FieldFloatFactor)
-    .add('float_toggle', basic_fields.FieldFloatToggle)
-    .add('many2one_reference', basic_fields.FieldInteger)
 
 // Relational fields
 registry
