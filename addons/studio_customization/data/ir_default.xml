@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="studio_customization.analytic_plan_analyt_01f8d5eb-0b9a-47e2-bacb-4090374b12c1" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="analytic.field_account_analytic_applicability__analytic_plan_id"/>
+    <field name="condition" eval="False"/>
+    <field name="json_value">1</field>
+  </record>
+</odoo>

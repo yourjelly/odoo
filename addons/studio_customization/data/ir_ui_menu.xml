@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="studio_customization.properties_0794f117-267b-4273-941f-d6ad56e1b820" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="studio_customization.rental_contracts_0ba2fb96-aa58-447e-9e22-f3c63055ec01"/>
+    <field name="active" eval="True"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="name">Properties</field>
+    <field name="parent_id" eval="False"/>
+    <field name="sequence">10</field>
+    <field name="web_icon">fa fa-home,#f1c40f,#34495e</field>
+  </record>
+  <record id="studio_customization.properties_availabil_62797498-4601-40e8-87b1-80d846177c8a" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="studio_customization.availability_746b48e0-5f14-468b-8076-437c28839b4f"/>
+    <field name="active" eval="True"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="name">Availability</field>
+    <field name="parent_id" ref="studio_customization.properties_0794f117-267b-4273-941f-d6ad56e1b820"/>
+    <field name="sequence">1</field>
+    <field name="web_icon" eval="False"/>
+  </record>
+  <record id="studio_customization.properties_propertie_b9ac30e6-65ec-41cd-86f9-7b82f0d7826f" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="studio_customization.rental_contracts_0ba2fb96-aa58-447e-9e22-f3c63055ec01"/>
+    <field name="active" eval="True"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="name">Properties</field>
+    <field name="parent_id" ref="studio_customization.properties_0794f117-267b-4273-941f-d6ad56e1b820"/>
+    <field name="sequence">2</field>
+    <field name="web_icon" eval="False"/>
+  </record>
+  <record id="studio_customization.properties_products_8efec8fd-d7c4-494d-bbcd-035f8df8275d" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="studio_customization.products_7291dd7f-38c3-4df6-9f9f-aa0ef79fff56"/>
+    <field name="active" eval="True"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="name">Products</field>
+    <field name="parent_id" ref="studio_customization.properties_propertie_b9ac30e6-65ec-41cd-86f9-7b82f0d7826f"/>
+    <field name="sequence">1</field>
+    <field name="web_icon" eval="False"/>
+  </record>
+  <record id="studio_customization.properties_propertie_465ae57b-0348-45d9-85e9-7d5cde9c8825" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="studio_customization.properties_47252187-18f2-41f2-8023-fae82e0a1575"/>
+    <field name="active" eval="True"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="name">Properties</field>
+    <field name="parent_id" ref="studio_customization.properties_propertie_b9ac30e6-65ec-41cd-86f9-7b82f0d7826f"/>
+    <field name="sequence" eval="False"/>
+    <field name="web_icon" eval="False"/>
+  </record>
+  <record id="studio_customization.properties_rental_co_21c843bb-ebf1-4f6c-becb-8fdb67da1bf8" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="studio_customization.rental_contracts_0ba2fb96-aa58-447e-9e22-f3c63055ec01"/>
+    <field name="active" eval="True"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="name">Rental contracts</field>
+    <field name="parent_id" ref="studio_customization.properties_0794f117-267b-4273-941f-d6ad56e1b820"/>
+    <field name="sequence" eval="False"/>
+    <field name="web_icon" eval="False"/>
+  </record>
+</odoo>

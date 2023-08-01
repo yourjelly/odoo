@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="sale_subscription.sale_subscription_form" model="ir.actions.act_window.view" context="{'studio': True}">
+    <field name="act_window_id" ref="sale_subscription.sale_subscription_action"/>
+    <field name="multi" eval="False"/>
+    <field name="sequence">2</field>
+    <field name="view_id" ref="sale_subscription.sale_subscription_primary_form_view"/>
+    <field name="view_mode">form</field>
+  </record>
+  <record id="sale_subscription.sale_subscription_kanban" model="ir.actions.act_window.view" context="{'studio': True}">
+    <field name="act_window_id" ref="sale_subscription.sale_subscription_action"/>
+    <field name="multi" eval="False"/>
+    <field name="sequence" eval="False"/>
+    <field name="view_id" ref="sale_subscription.sale_subscription_view_kanban"/>
+    <field name="view_mode">kanban</field>
+  </record>
+  <record id="sale_subscription.sale_subscription_tree" model="ir.actions.act_window.view" context="{'studio': True}">
+    <field name="act_window_id" ref="sale_subscription.sale_subscription_action"/>
+    <field name="multi" eval="False"/>
+    <field name="sequence">1</field>
+    <field name="view_id" ref="sale_subscription.sale_subscription_view_tree"/>
+    <field name="view_mode">tree</field>
+  </record>
+  <record id="studio_customization._226345d0-5da5-4029-9442-d0d1be57bf56" model="ir.actions.act_window.view" context="{'studio': True}">
+    <field name="act_window_id" ref="sale_subscription.sale_subscription_action"/>
+    <field name="multi" eval="False"/>
+    <field name="sequence">3</field>
+    <field name="view_id" eval="False"/>
+    <field name="view_mode">pivot</field>
+  </record>
+  <record id="studio_customization._8cd822b0-38c5-4299-ae8d-1b0237d8fa23" model="ir.actions.act_window.view" context="{'studio': True}">
+    <field name="act_window_id" ref="sale_subscription.sale_subscription_action"/>
+    <field name="multi" eval="False"/>
+    <field name="sequence">4</field>
+    <field name="view_id" eval="False"/>
+    <field name="view_mode">graph</field>
+  </record>
+  <record id="studio_customization._a8782b82-f66b-48b2-8f53-ccc78455ac7f" model="ir.actions.act_window.view" context="{'studio': True}">
+    <field name="act_window_id" ref="sale_subscription.sale_subscription_action"/>
+    <field name="multi" eval="False"/>
+    <field name="sequence">6</field>
+    <field name="view_id" eval="False"/>
+    <field name="view_mode">activity</field>
+  </record>
+  <record id="studio_customization._cc37d51b-6096-419b-9f44-b8afdde28310" model="ir.actions.act_window.view" context="{'studio': True}">
+    <field name="act_window_id" ref="sale_subscription.sale_subscription_action"/>
+    <field name="multi" eval="False"/>
+    <field name="sequence">5</field>
+    <field name="view_id" eval="False"/>
+    <field name="view_mode">cohort</field>
+  </record>
+  <record id="studio_customization._f5265ec5-a276-4522-832c-20000014081b" model="ir.actions.act_window.view" context="{'studio': True}">
+    <field name="act_window_id" ref="sale_subscription.sale_subscription_action"/>
+    <field name="multi" eval="False"/>
+    <field name="sequence">7</field>
+    <field name="view_id" eval="False"/>
+    <field name="view_mode">gantt</field>
+  </record>
+</odoo>

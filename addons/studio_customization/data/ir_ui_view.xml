@@ -1,0 +1,706 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="analytic.account_analytic_plan_form_view" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <form string="Analytic Plans">
+        <field name="company_id" invisible="1"/>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_view_children_plans" type="object" class="oe_stat_button" icon="fa-bars">
+              <field string="Subplans" name="children_count" widget="statinfo"/>
+            </button>
+            <button name="action_view_analytical_accounts" type="object" class="oe_stat_button" icon="fa-bars">
+              <div class="o_field_widget o_stat_info">
+                <span class="o_stat_value">
+                  <field name="all_account_count"/>
+                </span>
+                <span class="o_stat_text">Analytic Accounts</span>
+              </div>
+            </button>
+          </div>
+          <div class="oe_title">
+            <h1>
+              <field name="name"/>
+            </h1>
+          </div>
+          <group>
+            <group>
+              <field name="id"/>
+              <field name="parent_id"/>
+              <field name="default_applicability" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+              <field name="color" widget="color_picker"/>
+            </group>
+            <group>
+              <field name="company_id" groups="base.group_multi_company"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Applicability" name="applicability" attrs="{'invisible': [('parent_id', '!=', False)]}">
+              <field name="applicability_ids">
+                <tree editable="bottom">
+                  <field name="business_domain"/>
+                  <field name="applicability"/>
+                </tree>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">account.analytic.plan</field>
+    <field name="name">account.analytic.plan.form</field>
+    <field name="priority">16</field>
+    <field name="type">form</field>
+  </record>
+  <record id="analytic.view_account_analytic_account_form" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <form string="Analytic Account">
+        <field name="company_id" invisible="1"/>
+        <sheet string="Analytic Account">
+          <div class="oe_button_box" name="button_box">
+            <button class="oe_stat_button" type="action" name="138" icon="fa-usd">
+              <div class="o_form_field o_stat_info">
+                <span class="o_stat_text">Gross Margin</span>
+                <span class="o_stat_value">
+                  <field name="balance" widget="monetary"/>
+                </span>
+              </div>
+            </button>
+          </div>
+          <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+          <div class="oe_title">
+            <label for="name"/>
+            <h1>
+              <field name="name" class="oe_inline" placeholder="e.g. Appartment Oxford Street"/>
+            </h1>
+          </div>
+          <div name="project"/>
+          <group name="main">
+            <group>
+              <field name="active" invisible="1"/>
+              <field name="partner_id"/>
+              <field name="code"/>
+            </group>
+            <group>
+              <field name="plan_id" options="{'no_quick_create': True}"/>
+              <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+              <field name="currency_id" options="{'no_create': True}" groups="base.group_multi_currency"/>
+            </group>
+          </group>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids"/>
+          <field name="message_ids"/>
+        </div>
+      </form>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">account.analytic.account</field>
+    <field name="name">analytic.analytic.account.form</field>
+    <field name="priority">16</field>
+    <field name="type">form</field>
+  </record>
+  <record id="analytic.view_account_analytic_account_kanban" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <kanban class="o_kanban_mobile">
+        <field name="display_name"/>
+        <field name="balance"/>
+        <field name="currency_id"/>
+        <field name="x_studio_add_pictures_of_the_property"/>
+        <templates>
+          <t t-name="kanban-box">
+            <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+              <div class="oe_kanban_details">
+                <div class="o_kanban_record_top mb-0">
+                  <field name="x_studio_add_pictures_of_the_property"/>
+                  <div class="o_kanban_record_headings">
+                    <strong class="o_kanban_record_title">
+                      <field name="display_name"/>
+                    </strong>
+                  </div>
+                </div>
+                <div class="o_kanban_record_body">
+                                      </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">account.analytic.account</field>
+    <field name="name">account.analytic.account.kanban</field>
+    <field name="priority">16</field>
+    <field name="type">kanban</field>
+  </record>
+  <record id="sale.view_sale_order_kanban" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <kanban class="o_kanban_mobile" sample="1">
+        <field name="name"/>
+        <field name="partner_id"/>
+        <field name="starred"/>
+        <field name="amount_total"/>
+        <field name="date_order"/>
+        <field name="state"/>
+        <field name="currency_id"/>
+        <field name="activity_state"/>
+        <progressbar field="activity_state" colors="{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}"/>
+        <templates>
+          <t t-name="kanban-box">
+            <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+              <div class="oe_kanban_content">
+                <strong class="float-end">
+                  <field name="amount_total" widget="monetary"/>
+                </strong>
+                <div class="o_kanban_record_title">
+                  <field name="partner_id"/>
+                </div>
+                <div class="o_kanban_record_body">
+                                </div>
+              </div>
+              <div class="o_kanban_record_bottom">
+                <div class="oe_kanban_bottom_left text-muted">
+                  <field name="starred" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                  <field name="activity_ids" widget="kanban_activity"/>
+                </div>
+                <div class="oe_kanban_bottom_right">
+                  <field name="state" widget="label_selection" options="{'classes': {'draft': 'default', 'cancel': 'default', 'done': 'success'}}"/>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">sale.order</field>
+    <field name="name">sale.order.kanban</field>
+    <field name="priority">16</field>
+    <field name="type">kanban</field>
+  </record>
+  <record id="sale.view_sales_order_filter" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <search string="Search Sales Order">
+        <field name="name" string="Order" filter_domain="['|', '|', ('name', 'ilike', self), ('client_order_ref', 'ilike', self), ('partner_id', 'child_of', self)]"/>
+        <field name="partner_id" operator="child_of"/>
+        <field name="user_id"/>
+        <field name="team_id" string="Sales Team"/>
+        <field name="order_line" string="Product" filter_domain="[('order_line.product_id', 'ilike', self)]"/>
+        <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+        <!-- We only allow to search on the following sale order line fields (product, name) because the other fields, such as price, quantity, ...
+                    will not be searched as often, and if they need to be searched it's usually in the context of products
+                    and then they can be searched from the page listing the sale order lines related to a product (from the product itself).
+                -->
+        <filter string="My Orders" domain="[('user_id', '=', uid)]" name="my_sale_orders_filter"/>
+        <filter invisible="1" string="Late Activities" name="activities_overdue" domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]" help="Show all records which has next action date is before today"/>
+        <filter invisible="1" string="Today Activities" name="activities_today" domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+        <filter invisible="1" string="Future Activities" name="activities_upcoming_all" domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
+        <group expand="0" string="Group By">
+          <filter string="Salesperson" name="salesperson" domain="[]" context="{'group_by': 'user_id'}"/>
+          <filter name="customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+          <filter string="Order Date" name="order_month" domain="[]" context="{'group_by': 'date_order'}"/>
+          <filter string="Building" name="building" domain="[]" context="{'group_by': 'x_studio_related_field_GDD8C'}"/>
+        </group>
+      </search>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">sale.order</field>
+    <field name="name">sale.order.list.select</field>
+    <field name="priority">15</field>
+    <field name="type">search</field>
+  </record>
+  <record id="studio_customization.default_form_view_fo_7416c5a1-50f5-4f92-a206-8f5df3be49d3" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="Analytic Account Tag">
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_75d8e4">
+            <group name="studio_group_75d8e4_left"/>
+            <group name="studio_group_75d8e4_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">x_analytic_account_tag</field>
+    <field name="name">Default form view for x_analytic_account_tag</field>
+    <field name="priority">16</field>
+    <field name="type">form</field>
+  </record>
+  <record id="studio_customization.default_form_view_fo_a18649a5-aaf8-46aa-bf9c-4643d1e2f772" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="sale_order_line">
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_379abe">
+            <group name="studio_group_379abe_left"/>
+            <group name="studio_group_379abe_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">x_sale_order_line_0f01a</field>
+    <field name="name">Default form view for x_sale_order_line_0f01a</field>
+    <field name="priority">16</field>
+    <field name="type">form</field>
+  </record>
+  <record id="studio_customization.default_form_view_fo_e11399eb-be1a-4494-85fe-15106abf97d5" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="sale_order_line">
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_89ecb8">
+            <group name="studio_group_89ecb8_left"/>
+            <group name="studio_group_89ecb8_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">x_sale_order_line_fd1be</field>
+    <field name="name">Default form view for x_sale_order_line_fd1be</field>
+    <field name="priority">16</field>
+    <field name="type">form</field>
+  </record>
+  <record id="studio_customization.default_gantt_view_f_849e6411-b5ae-4022-b68b-7c0f2420ad65" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <gantt date_start="x_studio_rental_start_date" date_stop="end_date" string="Default gantt view for sale.order"/>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">sale.order</field>
+    <field name="name">Default gantt view for sale.order</field>
+    <field name="priority">16</field>
+    <field name="type">gantt</field>
+  </record>
+  <record id="studio_customization.default_list_view_fo_0f85def1-8952-41f2-9fb0-86023a706288" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </tree>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">x_sale_order_line_0f01a</field>
+    <field name="name">Default list view for x_sale_order_line_0f01a</field>
+    <field name="priority">16</field>
+    <field name="type">tree</field>
+  </record>
+  <record id="studio_customization.default_list_view_fo_aadb4972-8f44-4593-a536-e691ec23e73c" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="x_name"/>
+      </tree>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">x_analytic_account_tag</field>
+    <field name="name">Default list view for x_analytic_account_tag</field>
+    <field name="priority">16</field>
+    <field name="type">tree</field>
+  </record>
+  <record id="studio_customization.default_list_view_fo_d80cabf6-cc58-47a2-9a7a-9c934a1ebc88" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </tree>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">x_sale_order_line_fd1be</field>
+    <field name="name">Default list view for x_sale_order_line_fd1be</field>
+    <field name="priority">16</field>
+    <field name="type">tree</field>
+  </record>
+  <record id="studio_customization.default_search_view__1c24d2e7-0698-4db9-a9bc-28837ddc1e45" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+      </search>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">x_analytic_account_tag</field>
+    <field name="name">Default search view for x_analytic_account_tag</field>
+    <field name="priority">16</field>
+    <field name="type">search</field>
+  </record>
+  <record id="studio_customization.default_search_view__2c8a3a07-8eae-4341-b953-0598ad0587a3" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+      </search>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">x_sale_order_line_0f01a</field>
+    <field name="name">Default search view for x_sale_order_line_0f01a</field>
+    <field name="priority">16</field>
+    <field name="type">search</field>
+  </record>
+  <record id="studio_customization.default_search_view__c367f265-2d4e-4625-ac1a-bff6405bbfdd" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+      </search>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" eval="False"/>
+    <field name="key" eval="False"/>
+    <field name="mode">primary</field>
+    <field name="model">x_sale_order_line_fd1be</field>
+    <field name="name">Default search view for x_sale_order_line_fd1be</field>
+    <field name="priority">16</field>
+    <field name="type">search</field>
+  </record>
+  <record id="studio_customization.odoo_studio_account__d029d489-35f4-4e9a-b29b-83ee3c9f158c" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[1]/div[1]/field[@name='x_studio_add_pictures_of_the_property']" position="attributes">
+          <attribute name="options">{"size":[0,90]}</attribute>
+          <attribute name="widget">image</attribute>
+        </xpath>
+        <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[1]/div[1]/div[1]/strong[1]/field[@name='display_name']" position="after">
+          <field name="x_studio_address" display="full"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" ref="analytic.view_account_analytic_account_kanban"/>
+    <field name="key" eval="False"/>
+    <field name="mode">extension</field>
+    <field name="model">account.analytic.account</field>
+    <field name="name">Odoo Studio: account.analytic.account.kanban customization</field>
+    <field name="priority">99</field>
+    <field name="type">kanban</field>
+  </record>
+  <record id="studio_customization.odoo_studio_account__d3af8998-3700-4a05-b8e4-53d1eb8ff578" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//field[@name='balance']" position="replace"/>
+        <xpath expr="//field[@name='credit']" position="replace"/>
+        <xpath expr="//field[@name='debit']" position="replace"/>
+        <xpath expr="//field[@name='plan_id']" position="replace"/>
+        <xpath expr="//field[@name='partner_id']" position="replace"/>
+        <xpath expr="//tree[1]/field[@name='name']" position="after">
+          <field name="x_studio_building_1" optional="show"/>
+          <field name="x_studio_property_type" optional="show"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" ref="analytic.view_account_analytic_account_list"/>
+    <field name="key" eval="False"/>
+    <field name="mode">extension</field>
+    <field name="model">account.analytic.account</field>
+    <field name="name">Odoo Studio: account.analytic.account.list customization</field>
+    <field name="priority">99</field>
+    <field name="type">tree</field>
+  </record>
+  <record id="studio_customization.odoo_studio_analytic_7b34f445-4598-4c2c-80e7-37ccf5bb28d3" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//field[@name='code']" position="replace">
+          <field widget="many2many_tags" name="x_studio_building_1" options="{&quot;color_field&quot;: &quot;x_color&quot;}" string="Building"/>
+          <field name="x_studio_address" string="Address"/>
+        </xpath>
+        <xpath expr="//button[@name='138']" position="replace"/>
+        <xpath expr="//field[@name='invoice_count']" position="attributes">
+          <attribute name="string">Invoices</attribute>
+        </xpath>
+        <xpath expr="//field[@name='subscription_count']" position="attributes">
+          <attribute name="string">Rental contracts</attribute>
+        </xpath>
+        <xpath expr="//widget[@name='web_ribbon']" position="after">
+          <field name="x_studio_add_pictures_of_the_property" widget="image" class="oe_avatar ml-3 mr-3" options="{&quot;size&quot;:[0,180]}"/>
+        </xpath>
+        <xpath expr="//form[1]/sheet[1]/div[not(@name)][1]/label[1]" position="attributes">
+          <attribute name="string">Property</attribute>
+        </xpath>
+        <xpath expr="//field[@name='partner_id']" position="attributes">
+          <attribute name="attrs">{}</attribute>
+          <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='plan_id']" position="attributes">
+          <attribute name="attrs">{}</attribute>
+          <attribute name="domain">[]</attribute>
+          <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='currency_id']" position="after">
+          <field name="x_studio_property_type" string="Property type"/>
+          <field name="x_studio_rent" string="Rent"/>
+        </xpath>
+        <xpath expr="//group[@name='main']" position="after">
+          <notebook name="studio_notebook_xPXWf">
+            <page string="Description" name="studio_page_xPXWf">
+              <field name="x_studio_property_description" placeholder="Describe your property here"/>
+            </page>
+            <page string="Gallery" name="studio_page_kFDCa">
+              <group name="studio_group_kFDCa">
+                <field widget="image" options="{&quot;size&quot;: [0, 90]}" name="x_studio_add_pictures_of_the_property" string="Add pictures of the property"/>
+              </group>
+            </page>
+            <page string="Documents" name="studio_page_u6TDm">
+              <field filename="x_studio_add_key_documents_here_filename" name="x_studio_add_key_documents_here" string="Add key documents here"/>
+              <field invisible="1" name="x_studio_add_key_documents_here_filename"/>
+            </page>
+          </notebook>
+        </xpath>
+      </data>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
+    <field name="key" eval="False"/>
+    <field name="mode">extension</field>
+    <field name="model">account.analytic.account</field>
+    <field name="name">Odoo Studio: analytic.analytic.account.form customization</field>
+    <field name="priority">400</field>
+    <field name="type">form</field>
+  </record>
+  <record id="studio_customization.odoo_studio_default__b9f82f39-df32-4167-8759-957c7008b7a8" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//gantt[1]" position="attributes">
+          <attribute name="color">partner_id</attribute>
+          <attribute name="date_start">x_studio_rental_start_date_1</attribute>
+          <attribute name="default_scale">year</attribute>
+          <attribute name="display_unavailability">true</attribute>
+          <attribute name="string">Availability</attribute>
+        </xpath>
+      </data>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" ref="studio_customization.default_gantt_view_f_849e6411-b5ae-4022-b68b-7c0f2420ad65"/>
+    <field name="key" eval="False"/>
+    <field name="mode">extension</field>
+    <field name="model">sale.order</field>
+    <field name="name">Odoo Studio: Default gantt view for sale.order customization</field>
+    <field name="priority">99</field>
+    <field name="type">gantt</field>
+  </record>
+  <record id="studio_customization.odoo_studio_sale_ord_284dc81b-6332-4830-acfc-f53dd047b3b3" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//field[@name='tag_ids']" position="replace"/>
+        <xpath expr="//field[@name='partner_id']" position="attributes">
+          <attribute name="string">Tenant</attribute>
+        </xpath>
+        <xpath expr="//field[@name='partner_id']" position="after">
+          <xpath expr="//field[@name='analytic_account_id']" position="move"/>
+          <field name="x_studio_last_rental_fee" string="Last rental fee"/>
+          <field name="x_studio_guarant" string="Guarant"/>
+          <field name="x_studio_related_field_GDD8C" widget="many2many_tags" options="{&quot;color_field&quot;: &quot;x_color&quot;}" string="Building" attrs="{}" invisible="1"/>
+        </xpath>
+        <xpath expr="//field[@name='validity_date']" position="after">
+          <field name="x_studio_rental_start_date_1" string="Rental start date"/>
+        </xpath>
+        <xpath expr="//field[@name='order_line']" position="attributes">
+          <attribute name="attrs">{}</attribute>
+        </xpath>
+        <xpath expr="//form[1]/sheet[1]/notebook[1]" position="inside">
+          <page string="Meter readings" name="studio_page_hAtu0">
+            <group name="studio_group_hAtu0">
+              <field name="x_studio_one2many_field_J4Zda" string="" attrs="{}" required="1">
+                <tree editable="button">
+                  <field optional="show" name="x_studio_date" string="Date"/>
+                  <field optional="show" name="x_studio_electricity" string="Electricity"/>
+                  <field optional="show" name="x_studio_gas" string="Gas"/>
+                  <field optional="show" name="x_studio_water" string="Water"/>
+                  <field name="x_studio_sequence" widget="handle"/>
+                </tree>
+              </field>
+            </group>
+          </page>
+        </xpath>
+        <xpath expr="//field[@name='analytic_account_id']" position="attributes">
+          <attribute name="string">Property</attribute>
+        </xpath>
+      </data>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="key" eval="False"/>
+    <field name="mode">extension</field>
+    <field name="model">sale.order</field>
+    <field name="name">Odoo Studio: sale.order.form customization</field>
+    <field name="priority">160</field>
+    <field name="type">form</field>
+  </record>
+  <record id="studio_customization.odoo_studio_sale_ord_7f5f6032-d78c-49dc-be4f-c2eec8a62e88" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[1]/div[2]/field[@name='name']" position="replace"/>
+        <xpath expr="//field[@name='partner_id']" position="after">
+          <field name="analytic_account_id" display="full"/>
+          <field name="end_date" display="full"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" ref="sale_subscription.sale_subscription_view_kanban"/>
+    <field name="key" eval="False"/>
+    <field name="mode">extension</field>
+    <field name="model">sale.order</field>
+    <field name="name">Odoo Studio: sale.order.kanban customization</field>
+    <field name="priority">99</field>
+    <field name="type">kanban</field>
+  </record>
+  <record id="studio_customization.odoo_studio_sale_ord_c7a1954e-7468-4a70-ba44-da131f77c3b4" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[2]/div[2]/field[@name='state']" position="replace"/>
+        <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[1]/strong[1]/field[@name='amount_total']" position="after">
+          <field name="end_date" display="full"/>
+        </xpath>
+        <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[1]/div[1]/field[@name='partner_id']" position="after">
+          <field name="analytic_account_id" display="full"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" ref="sale.view_sale_order_kanban"/>
+    <field name="key" eval="False"/>
+    <field name="mode">extension</field>
+    <field name="model">sale.order</field>
+    <field name="name">Odoo Studio: sale.order.kanban customization</field>
+    <field name="priority">99</field>
+    <field name="type">kanban</field>
+  </record>
+  <record id="studio_customization.odoo_studio_sale_sub_8667832b-56a0-4e74-815d-243c0cbad2ce" model="ir.ui.view" context="{'studio': True}">
+    <field name="active" eval="True"/>
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//field[@name='sale_order_template_id']" position="after">
+          <xpath expr="//field[@name='tag_ids']" position="move"/>
+        </xpath>
+        <xpath expr="//field[@name='validity_date']" position="after">
+          <field name="x_studio_rental_start_date" string="Rental start date"/>
+        </xpath>
+        <xpath expr="//form[1]/sheet[1]/notebook[1]" position="inside">
+          <page string="Meter readings" name="studio_page_Y0K7r">
+            <field name="x_studio_one2many_field_zgMSy">
+              <tree>
+                <field optional="show" name="x_studio_date" string="Date"/>
+                <field optional="show" name="x_studio_gaz" string="Gaz"/>
+                <field optional="show" name="x_studio_electricity" string="Electricity"/>
+                <field optional="show" name="x_studio_water" string="Water"/>
+                <field name="x_studio_sequence" widget="handle"/>
+              </tree>
+            </field>
+          </page>
+        </xpath>
+        <xpath expr="//field[@name='tag_ids']" position="attributes">
+          <attribute name="string">Building</attribute>
+        </xpath>
+      </data>
+    </field>
+    <field name="field_parent" eval="False"/>
+    <field name="groups_id" eval="[(6, 0, [])]"/>
+    <field name="inherit_id" ref="sale_subscription.sale_subscription_primary_form_view"/>
+    <field name="key" eval="False"/>
+    <field name="mode">extension</field>
+    <field name="model">sale.order</field>
+    <field name="name">Odoo Studio: sale.subscription.order.form customization</field>
+    <field name="priority">99</field>
+    <field name="type">form</field>
+  </record>
+</odoo>

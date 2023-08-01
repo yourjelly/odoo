@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="studio_customization.analytic_account_tag_fa16e7a5-18f6-4f10-bc9a-7a849781fbd2" model="ir.model" context="{'studio': True}">
+    <field name="info"> Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class user(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    </field>
+    <field name="is_mail_thread" eval="False"/>
+    <field name="is_mail_activity" eval="False"/>
+    <field name="model">x_analytic_account_tag</field>
+    <field name="name">Analytic Account Tag</field>
+    <field name="state">manual</field>
+    <field name="transient" eval="False"/>
+  </record>
+  <record id="studio_customization.sale_order_line_6f6cbddd-8998-4aaa-9256-b2e5464b7cab" model="ir.model" context="{'studio': True}">
+    <field name="info"> Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class user(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    </field>
+    <field name="is_mail_thread" eval="False"/>
+    <field name="is_mail_activity" eval="False"/>
+    <field name="model">x_sale_order_line_0f01a</field>
+    <field name="name">sale_order_line</field>
+    <field name="state">manual</field>
+    <field name="transient" eval="False"/>
+  </record>
+  <record id="studio_customization.sale_order_line_ecd5a13d-8e13-446c-bcf0-0c7319f64e8c" model="ir.model" context="{'studio': True}">
+    <field name="info"> Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class user(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    </field>
+    <field name="is_mail_thread" eval="False"/>
+    <field name="is_mail_activity" eval="False"/>
+    <field name="model">x_sale_order_line_fd1be</field>
+    <field name="name">sale_order_line</field>
+    <field name="state">manual</field>
+    <field name="transient" eval="False"/>
+  </record>
+</odoo>
