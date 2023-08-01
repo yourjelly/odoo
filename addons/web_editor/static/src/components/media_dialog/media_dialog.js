@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from '@web/core/utils/hooks';
+// 1st commit
 import { Dialog } from '@web/core/dialog/dialog';
 import { Notebook } from '@web/core/notebook/notebook';
 import { ImageSelector } from './image_selector';
