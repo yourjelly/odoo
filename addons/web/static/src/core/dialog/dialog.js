@@ -13,6 +13,9 @@ export class Dialog extends Component {
         useHotkey("escape", () => {
             this.data.close();
         });
+        // useHotkey("control+k",() => {
+        //     this.data.close();
+        // })
         this.id = `dialog_${this.data.id}`;
         useChildSubEnv({ inDialog: true, dialogId: this.id, closeDialog: this.data.close });
 

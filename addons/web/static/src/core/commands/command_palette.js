@@ -90,6 +90,7 @@ DefaultCommandItem.template = "web.DefaultCommandItem";
 
 export class CommandPalette extends Component {
     setup() {
+        debugger;
         if (this.props.bus) {
             const setConfig = ({ detail }) => this.setCommandPaletteConfig(detail);
             this.props.bus.addEventListener(`SET-CONFIG`, setConfig);
@@ -180,6 +181,7 @@ export class CommandPalette extends Component {
      * @param {object} options
      */
     async setCommands(namespace, options = {}) {
+        debugger;
         this.categoryKeys = ["default"];
         const proms = this.providersByNamespace[namespace].map((provider) => {
             const { provide } = provider;
@@ -263,6 +265,7 @@ export class CommandPalette extends Component {
      * @param {CommandItem} command
      */
     async executeCommand(command) {
+        debugger;
         const config = await command.action();
         if (config) {
             this.setCommandPaletteConfig(config);
