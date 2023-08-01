@@ -59,56 +59,20 @@ class QuestionPageOneToManyField extends X2ManyField {
         // enables checking validation parameters consistency and using questions as triggers
         // immediately during question creation.
         // Preparing everything in order to override `this._openRecord` below.
-        const { saveRecord: superSaveRecord, updateRecord: superUpdateRecord } = useX2ManyCrud(
+        const { saveRecord, updateRecord } = useX2ManyCrud(
             () => this.list,
-            this.isMany2Many
+            true,
         );
 
-        const self = this;
-        const saveRecord = async (record) => {
-            await superSaveRecord(record);
-            try {
-                await self.props.record.save();
-            } catch (error) {
-                // In case of error occurring when saving.
-                // Remove erroneous question row added to the embedded list
-                await this.list.delete(record);
-                throw new SurveySaveError(error.data.message);
-            }
-        };
-
-        const updateRecord = async (record) => {
-            await superUpdateRecord(record);
-            try {
-                await self.props.record.save();
-            } catch (error) {
-                throw new SurveySaveError(error.data.message);
-            }
-        };
-
-        const openRecord = useOpenX2ManyRecord({
+        this._openRecord = useOpenX2ManyRecord({
             resModel: this.list.resModel,
             activeField: this.activeField,
             activeActions: this.activeActions,
             getList: () => this.list,
             saveRecord,
             updateRecord,
+            isMany2Many: true,
         });
-        this._openRecord = async (params) => {
-            const { record, name } = this.props;
-            if (!await record.save()) {
-                // do not open question form as it won't be savable either.
-                return;
-            }
-            if (params.record) {
-                params.record = record.data[name].records.find(r => r.resId === params.record.resId);
-                // Force synchronization of fields that depend on sequence
-                // (allowed_triggering_question_ids, is_placed_before_trigger)
-                // as records may have been re-ordered before opening this one.
-                await params.record.load();
-            }
-            await openRecord(params);
-        };
         this.canOpenRecord = true;
     }
 }
