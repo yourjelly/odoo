@@ -24064,13 +24064,19 @@
             });
             this.processTokenAtCursor();
         }
-        onKeyup() {
+        onKeyup(ev) {
             if (this.contentHelper.el === document.activeElement) {
+                const isSelectingForComposer = this.env.model.getters.isSelectingForComposer();
+                const isArrowKey = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(ev.key);
+                if (isSelectingForComposer && isArrowKey) {
+                    return;
+                }
                 const { start: oldStart, end: oldEnd } = this.env.model.getters.getComposerSelection();
                 const { start, end } = this.contentHelper.getCurrentSelection();
                 if (start !== oldStart || end !== oldEnd) {
                     this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", { start, end });
                 }
+                this.processTokenAtCursor();
             }
         }
         showAutocomplete(searchTerm) {
@@ -24685,6 +24691,15 @@
             if (dirY < 0) {
                 y = initialFigure.y - deltaY;
             }
+        }
+        // Restrict resizing if x or y reaches header boundaries
+        if (x < 0) {
+            width += x;
+            x = 0;
+        }
+        if (y < 0) {
+            height += y;
+            y = 0;
         }
         return { ...initialFigure, x, y, width, height };
     }
@@ -50528,8 +50543,8 @@
 
 
     __info__.version = '16.4.1';
-    __info__.date = '2023-07-26T13:08:04.216Z';
-    __info__.hash = 'e687fa9';
+    __info__.date = '2023-08-01T05:09:36.679Z';
+    __info__.hash = '11e5b29';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
