@@ -7811,6 +7811,7 @@
             this.legendPosition = definition.legendPosition;
             this.labelsAsText = definition.labelsAsText;
             this.stacked = definition.stacked;
+            this.cumulated = definition.cumulated;
         }
         static validateChartDefinition(validator, definition) {
             return validator.checkValidations(definition, checkDataset, checkLabelRange);
@@ -7830,6 +7831,7 @@
                 verticalAxisPosition: "left",
                 labelRange: context.auxiliaryRange || undefined,
                 stacked: false,
+                cumulated: false,
             };
         }
         getDefinition() {
@@ -7849,6 +7851,7 @@
                 title: this.title,
                 labelsAsText: this.labelsAsText,
                 stacked: this.stacked,
+                cumulated: this.cumulated,
             };
         }
         getContextCreation() {
@@ -8032,6 +8035,15 @@
             let backgroundRGBA = colorToRGBA(color);
             if (chart.stacked) {
                 backgroundRGBA.a = LINE_FILL_TRANSPARENCY;
+            }
+            if (chart.cumulated) {
+                let accumulator = 0;
+                data = data.map((value) => {
+                    if (!isNaN(value)) {
+                        accumulator += Number(value);
+                    }
+                    return accumulator;
+                });
             }
             const backgroundColor = rgbaToHex(backgroundRGBA);
             const dataset = {
@@ -8816,6 +8828,11 @@
         onUpdateStacked(ev) {
             this.props.updateChart(this.props.figureId, {
                 stacked: ev.target.checked,
+            });
+        }
+        onUpdateCumulated(ev) {
+            this.props.updateChart(this.props.figureId, {
+                cumulated: ev.target.checked,
             });
         }
     }
@@ -24647,6 +24664,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             verticalAxisPosition: chartData.verticalAxisPosition,
             legendPosition: chartData.legendPosition,
             stacked: chartData.stacked || false,
+            cumulated: chartData.cumulated || false,
             labelsAsText: false,
         };
     }
@@ -42855,8 +42873,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
 
 
     __info__.version = '16.0.15';
-    __info__.date = '2023-07-26T13:03:40.443Z';
-    __info__.hash = '18da14b';
+    __info__.date = '2023-08-01T05:38:08.873Z';
+    __info__.hash = 'd27767a';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
