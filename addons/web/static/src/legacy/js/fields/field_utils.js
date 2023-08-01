@@ -20,8 +20,6 @@ import session from "web.session";
 import time from "@web/legacy/js/core/time";
 const { DateTime } = luxon;
 
-var _t = core._t;
-
 //------------------------------------------------------------------------------
 // Formatting
 //------------------------------------------------------------------------------
