@@ -1141,6 +1141,10 @@ class BaseModel(metaclass=MetaModel):
                     # Failed to write, log to messages, rollback savepoint (to
                     # avoid broken transaction) and keep going
                     errors += 1
+                except UserError as e:
+                    info = rec_data['info']
+                    messages.append(dict(info, type='error', message=str(e)))
+                    errors += 1
                 except Exception as e:
                     _logger.debug("Error while loading record", exc_info=True)
                     info = rec_data['info']
@@ -4370,6 +4374,15 @@ class BaseModel(metaclass=MetaModel):
             for data in to_create:
                 if data.get('xml_id') and not data['xml_id'].startswith(prefix):
                     _logger.warning("Creating record %s in module %s.", data['xml_id'], module)
+
+        if self.env.context.get('import_file'):
+            existing_modules = self.env['ir.module.module'].search([]).mapped('name')
+            for data in to_create:
+                xml_id = data.get('xml_id')
+                if xml_id:
+                    module_name = xml_id.split('.')[0]
+                    if module_name in existing_modules:
+                        raise UserError(f"The record {data['xml_id']} with module prefix {module_name} will be deleted when the module is upgraded. Use either no prefix or a prefix that isn't an existing module.")
 
         # create records
         if to_create:
