@@ -394,29 +394,30 @@ export function useMessageToReplyTo() {
     });
 }
 
-export function useAsyncFunctionOnInput() {
-    const state = {
-        inProgress: false,
-        /** @type {Function|undefined} */
-        nextFunction: undefined,
-        results: undefined,
-        /**
-         * @param {Function} func
-         */
-        process: async (func) => {
-            if (state.inProgress) {
-                state.nextFunction = func;
-                return;
-            }
-            state.inProgress = true;
-            state.nextFunction = undefined;
-            state.results = await func();
-            state.inProgress = false;
-            if (state.nextFunction) {
-                state.rpcFunction = state.nextFunction;
-                await state.process(state.nextFunction);
-            }
-        },
+export function useSequential() {
+    let inProgress = false;
+    let nextFunction;
+    let nextResolve;
+    async function call() {
+        const resolve = nextResolve;
+        const func = nextFunction;
+        nextResolve = undefined;
+        nextFunction = undefined;
+        inProgress = true;
+        const data = await func();
+        inProgress = false;
+        resolve(data);
+        if (nextFunction && nextResolve) {
+            call();
+        }
+    }
+    return (func) => {
+        nextResolve?.();
+        const prom = new Promise((resolve) => (nextResolve = resolve));
+        nextFunction = func;
+        if (!inProgress) {
+            call();
+        }
+        return prom;
     };
-    return state;
 }

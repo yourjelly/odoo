@@ -9,7 +9,7 @@ import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { cleanTerm } from "@mail/utils/format";
 import { createLocalId, isEventHandled, markEventHandled } from "@mail/utils/misc";
 import { _t } from "@web/core/l10n/translation";
-import { useAsyncFunctionOnInput } from "@mail/utils/hooks";
+import { useSequential } from "@mail/utils/hooks";
 
 export class ChannelSelector extends Component {
     static components = { TagsList, NavigableList };
@@ -21,7 +21,7 @@ export class ChannelSelector extends Component {
         this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
         this.personaService = useService("mail.persona");
-        this.asyncFunctionOnInput = useAsyncFunctionOnInput();
+        this.sequential = useSequential();
         this.orm = useService("orm");
         this.state = useState({
             value: "",
@@ -44,12 +44,14 @@ export class ChannelSelector extends Component {
                     ["name", "ilike", cleanedTerm],
                 ];
                 const fields = ["name"];
-                await this.asyncFunctionOnInput.process(() =>
+                const results = await this.sequential(() =>
                     this.orm.searchRead("discuss.channel", domain, fields, {
                         limit: 10,
                     })
                 );
-                const results = this.asyncFunctionOnInput.results || [];
+                if (!results) {
+                    return;
+                }
                 const choices = results.map((channel) => {
                     return {
                         channelId: channel.id,
@@ -65,14 +67,16 @@ export class ChannelSelector extends Component {
                 return choices;
             }
             if (this.props.category.id === "chats") {
-                await this.asyncFunctionOnInput.process(() =>
+                const results = await this.sequential(() =>
                     this.orm.call("res.partner", "im_search", [
                         cleanedTerm,
                         10,
                         this.state.selectedPartners,
                     ])
                 );
-                const results = this.asyncFunctionOnInput.results || [];
+                if (!results) {
+                    return;
+                }
                 const suggestions = results.map((data) => {
                     this.personaService.insert({ ...data, type: "partner" });
                     return {
