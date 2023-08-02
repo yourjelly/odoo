@@ -1,4 +1,4 @@
-body:not(.o_touch_device) .o_field_selection {
+body:not(.o_touch_device) .o_view_controller:not(.o-settings-form-view) .o_field_selection {
     &:not(:hover):not(:focus-within) {
         & select:not(:hover) {
             background: none !important;
