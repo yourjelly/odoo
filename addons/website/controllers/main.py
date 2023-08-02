@@ -380,6 +380,21 @@ class Website(Home):
             ]
         }
 
+    @http.route('/website/get_default_layout_mode', type='json', auth='public', website=True)
+    def get_default_layout_mode(self, view_id):
+        return request.env["website.controller.page"]._get_default_layout(int(view_id))
+
+    @http.route('/website/save_default_layout_mode', type='json', auth='public', website=True)
+    def save_default_layout_mode(self, layout_mode, view_id):
+        assert layout_mode in ('grid', 'list'), "Invalid layout mode"
+        page = request.env["website.controller.page"].sudo().search([("view_id", "=", int(view_id))])[0]
+        page.write({'default_layout': layout_mode})
+
+    @http.route('/website/save_session_layout_mode', type='json', auth='public', website=True)
+    def save_session_layout_mode(self, layout_mode, view_id):
+        assert layout_mode in ('grid', 'list'), "Invalid layout mode"
+        request.session[f'website_{view_id}_layout_mode'] = layout_mode
+
     @http.route('/website/snippet/filters', type='json', auth='public', website=True)
     def get_dynamic_filter(self, filter_id, template_key, limit=None, search_domain=None, with_sample=False):
         dynamic_filter = request.env['website.snippet.filter'].sudo().search(
