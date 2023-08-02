@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<odoo>
+
+<record id="website_controller_pages_form_view" model="ir.ui.view">
+    <field name="name">website.controller.page.form</field>
+    <field name="model">website.controller.page</field>
+    <field name="arch" type="xml">
+        <form string="Website Controller Page Settings">
+            <sheet>
+                <group>
+                    <group>
+                        <field name="name"/>
+                        <field name="view_id" context="{'display_website': True}"/>
+                        <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
+                    </group>
+                </group>
+                <label for="menu_ids" string="Related Menu Items"/>
+                <field name="menu_ids"/>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+<record id="website_controller_pages_tree_view" model="ir.ui.view">
+    <field name="name">website.controller.page.list</field>
+    <field name="model">website.controller.page</field>
+    <field name="priority">99</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="name" string="Page Title"/>
+            <field name="view_id" column_invisible="True"/>
+
+
+
+            <!-- website_id should be shown only in multi website environment
+            when the group is enabled, but we need the field to be there all the
+            time for `PageRendererMixin`'s `recordFilter' to be able to filter
+            correctly. -->
+            <field name="website_id" column_invisible="True"/>
+            <field name="website_id" groups="website.group_multi_website"/>
+        </tree>
+    </field>
+</record>
+
+<record id="action_website_controller_pages_list" model="ir.actions.act_window">
+    <field name="name">Website Controller Pages</field>
+    <field name="res_model">website.controller.page</field>
+    <field name="view_mode">form,tree,kanban</field>
+</record>
+
+<menuitem id="menu_website_controller_pages_list"
+    parent="menu_content"
+    sequence="10"
+    name="Controller Pages"
+    action="action_website_controller_pages_list"/>
+
+</odoo>
