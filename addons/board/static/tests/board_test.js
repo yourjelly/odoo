@@ -288,14 +288,14 @@ QUnit.module("Board", (hooks) => {
         });
 
         assert.strictEqual(
-            $("tr.o_data_row").text(),
+            document.querySelector("tr.o_data_row").textContent,
             "yoplalalaabc",
             "should have correct initial data"
         );
 
-        await click($(target).find("th.o_column_sortable:contains(Foo)")[0]);
+        await click(target.querySelector("th.o_column_sortable:contains(Foo)"));
         assert.strictEqual(
-            $("tr.o_data_row").text(),
+            document.querySelector("tr.o_data_row").textContent,
             "abclalalayop",
             "data should have been sorted"
         );
@@ -345,7 +345,7 @@ QUnit.module("Board", (hooks) => {
             },
         });
 
-        await click($(target).find("tr.o_data_row td:contains(yop)")[0]);
+        await click(target.querySelector("tr.o_data_row td:contains(yop)"));
     });
 
     QUnit.test("can open record using action form view", async function (assert) {
@@ -398,7 +398,7 @@ QUnit.module("Board", (hooks) => {
             },
         });
 
-        await click($(target).find("tr.o_data_row td:contains(yop)")[0]);
+        await click(target.querySelector("tr.o_data_row td:contains(yop)"));
     });
 
     QUnit.skip("can drag and drop a view", async function (assert) {
@@ -496,15 +496,15 @@ QUnit.module("Board", (hooks) => {
             },
         });
 
-        var $firstAction = $(".o-dashboard-action:eq(0)");
+        const firstAction = document.querySelector(".o-dashboard-action:eq(0)");
         assert.strictEqual(
-            $firstAction.find(".o_list_view").length,
+            firstAction.querySelectorAll(".o_list_view").length,
             1,
             "list view should be displayed in 'ABC' block"
         );
-        var $secondAction = $(".o-dashboard-action:eq(1)");
+        const secondAction = document.querySelector(".o-dashboard-action:eq(1)");
         assert.strictEqual(
-            $secondAction.find(".o_kanban_view").length,
+            secondAction.querySelectorAll(".o_kanban_view").length,
             1,
             "kanban view should be displayed in 'DEF' block"
         );
