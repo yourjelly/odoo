@@ -104,8 +104,8 @@ export class CommandPalette extends Component {
         this.activeElement = useService("ui").activeElement;
         this.inputRef = useAutofocus();
 
-        useHotkey("Enter", () => this.executeSelectedCommand(), { bypassEditableProtection: true });
-        useHotkey("Control+Enter", () => this.executeSelectedCommand(true), {
+        // useHotkey("Enter", () => this.executeSelectedCommand(), { bypassEditableProtection: true });
+        useHotkey("Control+Enter", () => {debugger;this.executeSelectedCommand(true)}, {
             bypassEditableProtection: true,
         });
         useHotkey("ArrowUp", () => this.selectCommandAndScrollTo("PREV"), {
@@ -136,6 +136,7 @@ export class CommandPalette extends Component {
     }
 
     get commandsByCategory() {
+        
         const categories = [];
         for (const category of this.categoryKeys) {
             const commands = this.state.commands.filter(
@@ -156,6 +157,7 @@ export class CommandPalette extends Component {
      * @param {CommandPaletteConfig} config
      */
     async setCommandPaletteConfig(config) {
+        debugger
         this.configByNamespace = config.configByNamespace || {};
         this.state.FooterComponent = config.FooterComponent;
 
