@@ -1,0 +1,20 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="web_tour.TourRecorderDialog" owl="1">
+        <div class="user-select-none o-tour-controller bg-black border border-2 text-white position-absolute p-3" t-att-style="contentStyle">
+            <div class="o-tour-controller--content d-flex flex-column">
+                <h2 class="text-white">Tour Recorder</h2>
+                <ol>
+                    <t t-foreach="this.steps" t-as="step" t-key="step_index">
+                        <li> <t t-esc="step"/> </li>
+                    </t>
+                </ol>
+                <button t-on-click="startRecording" t-if="!this.state.recording" class="btn btn-success border-0 text-white"> Start </button>
+                <button t-on-click="stopRecording" t-else="" class="btn btn-danger border-0 text-white"> Stop </button>
+                <button t-on-click="resetRecording" t-if="!this.state.recording and this.steps.length > 0" class="btn btn-warning border-0 text-white mt-1"> Reset </button>
+                <button t-on-click="copySteps" t-if="!this.state.recording and this.steps.length > 0" class="btn btn-info border-0 text-white mt-1"> Copy steps </button>
+            </div>
+        </div>
+    </t>
+</templates>

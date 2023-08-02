@@ -22,9 +22,14 @@ Odoo Web tours.
             'web_tour/static/src/tour_service/**/*',
         ],
         'web.assets_backend': [
+            'web_tour/static/src/debug/finder.js',
             'web_tour/static/src/debug/debug_manager.js',
             'web_tour/static/src/debug/tour_dialog_component.js',
             'web_tour/static/src/debug/tour_dialog_component.xml',
+            'web_tour/static/src/debug/tour_recorder_dialog.js',
+            'web_tour/static/src/debug/tour_recorder_dialog.xml',
+            'web_tour/static/src/debug/tour_dialog_component.xml',
+
         ],
         'web.assets_frontend': [
             'web_tour/static/src/tour_pointer/**/*',

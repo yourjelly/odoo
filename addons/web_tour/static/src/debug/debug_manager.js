@@ -3,6 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import ToursDialog from "@web_tour/debug/tour_dialog_component";
+import { TourRecorderOverlay } from "@web_tour/debug/tour_recorder_dialog";
 import { tourState } from "../tour_service/tour_state";
 
 export function disableTours({ env }) {
@@ -41,8 +42,24 @@ export function startTour({ env }) {
     };
 }
 
+export function recordTour({ env }) {
+    if (!env.services.user.isSystem) {
+        return null;
+    }
+    return {
+        type: "item",
+        description: env._t("Record Tour"),
+        callback: async () => {
+            debugger;
+            env.services.overlay.add(TourRecorderOverlay);
+        },
+        sequence: 60,
+    };
+}
+
 registry
     .category("debug")
     .category("default")
     .add("web_tour.startTour", startTour)
-    .add("web_tour.disableTours", disableTours);
+    .add("web_tour.disableTours", disableTours)
+    .add("web_tour.recordTour", recordTour);
