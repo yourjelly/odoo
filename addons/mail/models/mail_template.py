@@ -621,6 +621,8 @@ class MailTemplate(models.Model):
 
         mail = self.env['mail.mail'].sudo().create(values)
 
+        _logger.error('____SUBJECT____', mail.subject)
+
         # manage attachments
         for attachment in attachments:
             attachment_data = {
