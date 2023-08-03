@@ -526,8 +526,9 @@ export async function toggleBold() {
     return new Promise(resolve => setTimeout(() => resolve(), 200));
 }
 
-export async function createLink(editor, content) {
-    editor.execCommand('createLink', '#', content);
+export async function createLink(editor, label, url) {
+    const link = editor._createLink(label, url);
+    editor.execCommand('insert', link);
 }
 
 export async function insertText(editor, text) {
