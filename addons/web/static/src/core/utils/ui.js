@@ -206,3 +206,9 @@ export function getPreviousTabableElement(container = document.body) {
         ? tabableElements[tabableElements.length - 1]
         : tabableElements[index - 1] || null;
 }
+
+document.generateElement = (html) => {
+    const template = document.createElement('p');
+    template.innerHTML = html.trim();
+    return template.content.children[0];
+}
