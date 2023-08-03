@@ -93,6 +93,7 @@ For more specific needs, you may also assign custom-defined actions
         'data/mail_templates_mailgateway.xml',
         'data/discuss_channel_data.xml',
         'data/mail_activity_data.xml',
+        'data/mail_render_mixin_data.xml',
         'data/security_notifications_templates.xml',
         'data/ir_cron_data.xml',
         'security/mail_security.xml',

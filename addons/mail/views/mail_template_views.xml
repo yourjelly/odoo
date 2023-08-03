@@ -79,6 +79,16 @@
                                     <field name="scheduled_date" string="Scheduled Send Date"/>
                                 </group>
                             </page>
+                            <page string="Substitution Variables" name="substitution_variables">
+                                <group>
+                                    <field name="render_variable_ids" nolabel="1" colspan="2">
+                                        <tree editable="bottom">
+                                            <field name="name"/>
+                                            <field name="expression"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </page>
                             <page string="Settings" name="email_settings">
                                 <group>
                                     <field name="lang" placeholder="{{ object.partner_id.lang }}"/>

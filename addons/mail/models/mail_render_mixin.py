@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import ast
 import babel
 import copy
 import logging
@@ -14,8 +15,10 @@ from odoo import _, api, fields, models, tools
 from odoo.addons.base.models.ir_qweb import QWebException
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.exceptions import UserError, AccessError
+from odoo.osv import expression
 from odoo.tools import is_html_empty
-from odoo.tools.rendering_tools import convert_inline_template_to_qweb, parse_inline_template, render_inline_template, template_env_globals
+from odoo.tools.safe_eval import safe_eval
+from odoo.tools.rendering_tools import convert_inline_template_to_qweb, INLINE_TEMPLATE_REGEX, parse_inline_template, render_inline_template, template_env_globals
 
 _logger = logging.getLogger(__name__)
 
@@ -54,12 +57,30 @@ class MailRenderMixin(models.AbstractModel):
              "that provides the appropriate language, e.g. {{ object.partner_id.lang }}.")
     # rendering context
     render_model = fields.Char("Rendering Model", compute='_compute_render_model', store=False)
+    render_variable_ids = fields.One2many(
+        'mail.render.variable', string='Substitution Variables',
+        compute='_compute_render_variable_ids', inverse='_inverse_render_variable_ids',
+    )
 
     def _compute_render_model(self):
         """ Give the target model for rendering. Void by default as models
         inheriting from ``mail.render.mixin`` should define how to find this
         model. """
         self.render_model = False
+
+    def _compute_render_variable_ids(self):
+        base_domain = [('model_id', '=', False)]
+        for record in self:
+            if record.render_model:
+                model = self.env['ir.model']._get(record.render_model)
+                domain = expression.OR([base_domain, [('model_id', '=', model.id)]])
+            record.render_variable_ids = self.env['mail.render.variable'].search(domain)
+
+    def _inverse_render_variable_ids(self):
+        for record in self:
+            if record.render_model:
+                model = self.env['ir.model']._get(record.render_model)
+                model.render_variable_ids = record.render_variable_ids
 
     @api.model
     def _build_expression(self, field_name, sub_field_name, null_value):
@@ -95,6 +116,7 @@ class MailRenderMixin(models.AbstractModel):
             # If the rendering is unrestricted (e.g. mail.template),
             # check the user is part of the mail editor group to create a new template if the template is dynamic
             record._check_access_right_dynamic_template()
+        record._upgrade_variables()
         return record
 
     def write(self, vals):
@@ -307,10 +329,16 @@ class MailRenderMixin(models.AbstractModel):
 
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
+            substitution_variables = {
+                variable.name: safe_eval(variable.expression, variables)
+                for variable in self.env['mail.render.variable'].sudo().search([
+                    '|', ('model_id', '=', False), ('model_id.model', '=', model)
+                ])
+            }
             try:
-                render_result = self.env['ir.qweb']._render(
+                render_result = self.env['ir.qweb'].with_context(minimal_qcontext=True)._render(
                     html.fragment_fromstring(template_src, create_parent='div'),
-                    variables,
+                    substitution_variables,
                     raise_on_code=is_restricted,
                     **(options or {})
                 )
@@ -436,11 +464,17 @@ class MailRenderMixin(models.AbstractModel):
 
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
+            substitution_variables = {
+                variable.name: safe_eval(variable.expression, variables)
+                for variable in self.env['mail.render.variable'].sudo().search([
+                    '|', ('model_id', '=', False), ('model_id.model', '=', model)
+                ])
+            }
 
             try:
                 results[record.id] = render_inline_template(
                     template_instructions,
-                    variables
+                    substitution_variables
                 )
             except Exception as e:
                 _logger.info("Failed to render inline_template: \n%s", str(template_txt), exc_info=True)
@@ -651,3 +685,115 @@ class MailRenderMixin(models.AbstractModel):
                 options=field_options,
             ).items()
         )
+
+    def _upgrade_variables(self):
+        def _replace_inline_expression(record, expression):
+            repl = ''
+            for string, expression in parse_inline_template(expression):
+                repl += string
+                if expression:
+                    new_expression = record._replace_expression(expression)
+                    repl += ' {{ %s }}' % new_expression
+            return repl.strip()
+
+        for record in self:
+            render_inline_fields = {
+                'mail.template': [
+                    'email_cc', 'email_from', 'email_to', 'lang', 'partner_to', 'reply_to', 'scheduled_date', 'subject',
+                ],
+                'sms.template': [],
+                'mail.compose.message': [],
+            }
+            render_qweb_fields = {
+                'mail.template': ['body_html'],
+                'sms.template': ['body'],
+                'mail.compose.message': [],
+            }
+            # 1. Replace inline template rendered fields
+            for field in render_inline_fields.get(record._name, []):
+                if field in record._fields and record[field]:
+                    record[field] = _replace_inline_expression(record, record[field])
+
+            # 2. Replace qweb rendered fields
+            for field in render_qweb_fields[record._name]:
+                tree = html.fromstring(record[field])
+                for attr in [
+                    't-out',
+                    't-if',
+                    't-for',
+                    't-value',
+                    't-att-href',
+                ]:
+                    for node in tree.xpath(f'//*[@{attr}]'):
+                        node.set(attr, record._replace_expression(node.get(attr)))
+                for attr in [
+                    't-attf-href',
+                ]:
+                    for node in tree.xpath(f'//*[@{attr}]'):
+                        node.set(attr, _replace_inline_expression(record, node.get(attr)))
+
+                record[field] = html.tostring(tree).decode()
+
+    def _replace_expression(self, expression):
+        self.ensure_one()
+        t = SubstitutionVariableTransformer(self)
+        tree = ast.parse(expression.strip())
+        t.visit(tree)
+        return ast.unparse(tree)
+
+    def _find_or_create_variable(self, expression):
+        self.ensure_one()
+        model = self.env['ir.model']._get(self.render_model)
+        variable = self.env['mail.render.variable'].search([
+            ('model_id', '=', model.id),
+            ('expression', '=', expression),
+        ])
+        if not variable:
+            name = expression
+            if name.startswith('object.'):
+                name = name.split('object.', 1)[1]
+            name = re.sub(r'\W+', '_', name).strip('_')
+            i = 0
+            while self.env['mail.render.variable'].search_count([('model_id', '=', model.id), ('name', '=', name)]):
+                i += 1
+                name = name.rsplit('_', 1)[0] + '_' + str(i)
+            variable = self.env['mail.render.variable'].create({
+                'model_id': model.id,
+                'expression': expression,
+                'name': name,
+            })
+        return variable
+
+
+class MailRenderVariable(models.Model):
+    _name = 'mail.render.variable'
+    _description = 'Mail Render Variable'
+    _order = 'name'
+
+    model_id = fields.Many2one('ir.model', string='Model', ondelete='cascade')
+    name = fields.Char('Name', required=True)
+    expression = fields.Char('Expression', required=True)
+
+    _sql_constraints = [
+        ('uniq_model_id_name', 'unique (model_id, name)', "A variable with the same name and model already exists."),
+    ]
+
+
+class Model(models.Model):
+    _inherit = 'ir.model'
+
+    render_variable_ids = fields.One2many('mail.render.variable', 'model_id', string="Substitution variables for mail.render.mixin")
+
+
+class SubstitutionVariableTransformer(ast.NodeTransformer):
+    def __init__(self, record):
+        super().__init__()
+        self.record = record
+
+    def visit_Attribute(self, node):
+        variable = self.record._find_or_create_variable(ast.unparse(node))
+        return ast.Name(variable.name)
+
+    def visit_Call(self, node):
+        variable = self.record._find_or_create_variable(ast.unparse(node))
+        return ast.Name(variable.name)

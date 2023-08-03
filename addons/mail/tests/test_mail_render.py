@@ -31,9 +31,9 @@ class TestMailRenderCommon(common.MailCommon):
         # some jinja templates
         cls.base_inline_template_bits = [
             '<p>Hello</p>',
-            '<p>Hello {{ object.name }}</p>',
+            '<p>Hello {{ name }}</p>',
             """<p>
-    {{ '<span>English Speaker</span>' if object.lang == 'en_US' else '<span>Other Speaker</span>' }}
+    {{ '<span>English Speaker</span>' if lang == 'en_US' else '<span>Other Speaker</span>' }}
 </p>""",
             """
             <p>{{ 13 + 13 }}</p>
@@ -43,26 +43,30 @@ class TestMailRenderCommon(common.MailCommon):
         ]
         cls.base_inline_template_bits_fr = [
             '<p>Bonjour</p>',
-            '<p>Bonjour {{ object.name }}</p>',
+            '<p>Bonjour {{ name }}</p>',
             """<p>
-    {{ '<span>Narrateur Anglais</span>' if object.lang == 'en_US' else '<span>Autre Narrateur</span>' }}
+    {{ '<span>Narrateur Anglais</span>' if lang == 'en_US' else '<span>Autre Narrateur</span>' }}
 </p>"""
         ]
 
         # some qweb templates, their views and their xml ids
+        cls.env['mail.render.variable'].create([
+            {'name': 'name', 'expression': 'object.name'},
+            {'name': 'lang', 'expression': 'object.lang'},
+        ])
         cls.base_qweb_bits = [
             '<p>Hello</p>',
-            '<p>Hello <t t-esc="object.name"/></p>',
+            '<p>Hello <t t-esc="name"/></p>',
             """<p>
-    <span t-if="object.lang == 'en_US'">English Speaker</span>
+    <span t-if="lang == 'en_US'">English Speaker</span>
     <span t-else="">Other Speaker</span>
 </p>"""
         ]
         cls.base_qweb_bits_fr = [
             '<p>Bonjour</p>',
-            '<p>Bonjour <t t-esc="object.name"/></p>',
+            '<p>Bonjour <t t-esc="name"/></p>',
             """<p>
-    <span t-if="object.lang == 'en_US'">Narrateur Anglais</span>
+    <span t-if="lang == 'en_US'">Narrateur Anglais</span>
     <span t-else="">Autre Narrateur</span>
 </p>"""
         ]
@@ -150,14 +154,20 @@ class TestMailRender(TestMailRenderCommon):
         partner = self.env['res.partner'].browse(self.render_object.ids)
         MailRenderMixin = self.env['mail.render.mixin']
 
+        self.env['mail.render.variable'].sudo().create([
+            {'name': 'june_1_2021', 'expression': 'format_datetime(datetime.datetime(2021, 6, 1), dt_format="MM - d - YYY")'},
+            {'name': 'ctx_get_custom_ctx', 'expression': 'ctx.get("custom_ctx")'},
+            {'name': 'custom_value', 'expression': 'custom_value'},
+        ])
+
         custom_ctx = {'custom_ctx': 'Custom Context Value'}
         add_context = {
             'custom_value': 'Custom Render Value'
         }
         srces = [
-            '<b>I am {{ user.name }}</b>',
-            '<span>Datetime is {{ format_datetime(datetime.datetime(2021, 6, 1), dt_format="MM - d - YYY") }}</span>',
-            '<span>Context {{ ctx.get("custom_ctx") }}, value {{ custom_value }}</span>',
+            '<b>I am {{ user_name }}</b>',
+            '<span>Datetime is {{ june_1_2021 }}</span>',
+            '<span>Context {{ ctx_get_custom_ctx }}, value {{ custom_value }}</span>',
         ]
         results = [
             '<b>I am %s</b>' % self.env.user.name,
