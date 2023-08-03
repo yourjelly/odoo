@@ -25,13 +25,14 @@ export const dialogService = {
     start(env) {
         const dialogs = reactive({});
         let dialogId = 0;
-
         registry.category("main_components").add("DialogContainer", {
             Component: DialogContainer,
             props: { dialogs },
         });
 
+        
         function add(dialogClass, props, options = {}) {
+            debugger;
             for (const dialog of Object.values(dialogs)) {
                 dialog.dialogData.isActive = false;
             }

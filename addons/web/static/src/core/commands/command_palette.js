@@ -90,7 +90,6 @@ DefaultCommandItem.template = "web.DefaultCommandItem";
 
 export class CommandPalette extends Component {
     setup() {
-        debugger;
         if (this.props.bus) {
             const setConfig = ({ detail }) => this.setCommandPaletteConfig(detail);
             this.props.bus.addEventListener(`SET-CONFIG`, setConfig);
@@ -103,9 +102,9 @@ export class CommandPalette extends Component {
         this.DefaultCommandItem = DefaultCommandItem;
         this.activeElement = useService("ui").activeElement;
         this.inputRef = useAutofocus();
-
-        // useHotkey("Enter", () => this.executeSelectedCommand(), { bypassEditableProtection: true });
-        useHotkey("Control+Enter", () => {debugger;this.executeSelectedCommand(true)}, {
+        this.dialogservice = useService("dialog")
+        useHotkey("Enter", () => this.executeSelectedCommand(), { bypassEditableProtection: true });
+        useHotkey("Control+Enter", () => this.executeSelectedCommand(true), {
             bypassEditableProtection: true,
         });
         useHotkey("ArrowUp", () => this.selectCommandAndScrollTo("PREV"), {
@@ -136,7 +135,6 @@ export class CommandPalette extends Component {
     }
 
     get commandsByCategory() {
-        
         const categories = [];
         for (const category of this.categoryKeys) {
             const commands = this.state.commands.filter(
@@ -157,7 +155,6 @@ export class CommandPalette extends Component {
      * @param {CommandPaletteConfig} config
      */
     async setCommandPaletteConfig(config) {
-        debugger
         this.configByNamespace = config.configByNamespace || {};
         this.state.FooterComponent = config.FooterComponent;
 
@@ -183,7 +180,6 @@ export class CommandPalette extends Component {
      * @param {object} options
      */
     async setCommands(namespace, options = {}) {
-        debugger;
         this.categoryKeys = ["default"];
         const proms = this.providersByNamespace[namespace].map((provider) => {
             const { provide } = provider;

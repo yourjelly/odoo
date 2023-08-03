@@ -2,20 +2,31 @@
 
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useActiveElement } from "../ui/ui_service";
-import { useForwardRefToParent } from "@web/core/utils/hooks";
+import { useForwardRefToParent, useService } from "@web/core/utils/hooks";
 
-import { Component, useChildSubEnv, useState } from "@odoo/owl";
+import { Component, useChildSubEnv, useState, useExternalListener } from "@odoo/owl";
 export class Dialog extends Component {
     setup() {
+        debugger;
+        // this.state = useState({is_open:false})
         this.modalRef = useForwardRefToParent("modalRef");
         useActiveElement("modalRef");
         this.data = useState(this.env.dialogData);
+        this.command = useService("command")
         useHotkey("escape", () => {
             this.data.close();
         });
+        // useExternalListener(window, "mousedown", this.onWindowMouseDown);
+        
         // useHotkey("control+k",() => {
         //     this.data.close();
+        //     debugger
+        //     this.command.openMainPalette();
         // })
+        // if(this.data.isActive)
+        // {
+        //     this.data.close();
+        // }
         this.id = `dialog_${this.data.id}`;
         useChildSubEnv({ inDialog: true, dialogId: this.id, closeDialog: this.data.close });
 
@@ -29,6 +40,10 @@ export class Dialog extends Component {
     get isFullscreen() {
         return this.props.fullscreen || this.env.isSmall;
     }
+
+    // onWindowMouseDown(ev) {
+    //     this.data.close();
+    // }
 }
 Dialog.template = "web.Dialog";
 Dialog.props = {

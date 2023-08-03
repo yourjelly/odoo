@@ -41,6 +41,7 @@ class DefaultFooter extends Component {
             .getEntries()
             .map((el) => ({ namespace: el[0], name: el[1].name }))
             .filter((el) => el.name);
+
     }
 
     onClick(namespace) {
