@@ -3424,6 +3424,39 @@
         }
     }
 
+    function createActions(menuItems) {
+        return menuItems.map(createAction).sort((a, b) => a.sequence - b.sequence);
+    }
+    const uuidGenerator$2 = new UuidGenerator();
+    function createAction(item) {
+        const name = item.name;
+        const children = item.children;
+        const description = item.description;
+        const icon = item.icon;
+        return {
+            id: item.id || uuidGenerator$2.uuidv4(),
+            name: typeof name === "function" ? name : () => name,
+            isVisible: item.isVisible ? item.isVisible : () => true,
+            isEnabled: item.isEnabled ? item.isEnabled : () => true,
+            isActive: item.isActive,
+            execute: item.execute,
+            children: children
+                ? (env) => {
+                    return children
+                        .map((child) => (typeof child === "function" ? child(env) : child))
+                        .flat()
+                        .map(createAction);
+                }
+                : () => [],
+            isReadonlyAllowed: item.isReadonlyAllowed || false,
+            separator: item.separator || false,
+            icon: typeof icon === "function" ? icon : () => icon || "",
+            description: typeof description === "function" ? description : () => description || "",
+            textColor: item.textColor,
+            sequence: item.sequence || 0,
+        };
+    }
+
     class ChartJsComponent extends owl.Component {
         static template = "o-spreadsheet-ChartJsComponent";
         canvas = owl.useRef("graphContainer");
@@ -9256,7 +9289,7 @@
         }
         // Example continuation: matchingRows = {0, 2}
         // 4 - return for each database row corresponding, the cells corresponding to the field parameter
-        const fieldCol = database[index].map((col) => col);
+        const fieldCol = database[index];
         // Example continuation:: fieldCol = ["C", "j", "k", 7]
         const matchingCells = [...matchingRows].map((x) => fieldCol[x + 1]);
         // Example continuation:: matchingCells = ["j", 7]
@@ -15288,39 +15321,6 @@
         execute: (env) => env.model.dispatch("HIDE_SHEET", { sheetId: env.model.getters.getActiveSheetId() }),
     };
 
-    function createActions(menuItems) {
-        return menuItems.map(createAction).sort((a, b) => a.sequence - b.sequence);
-    }
-    const uuidGenerator$2 = new UuidGenerator();
-    function createAction(item) {
-        const name = item.name;
-        const children = item.children;
-        const description = item.description;
-        const icon = item.icon;
-        return {
-            id: item.id || uuidGenerator$2.uuidv4(),
-            name: typeof name === "function" ? name : () => name,
-            isVisible: item.isVisible ? item.isVisible : () => true,
-            isEnabled: item.isEnabled ? item.isEnabled : () => true,
-            isActive: item.isActive,
-            execute: item.execute,
-            children: children
-                ? (env) => {
-                    return children
-                        .map((child) => (typeof child === "function" ? child(env) : child))
-                        .flat()
-                        .map(createAction);
-                }
-                : () => [],
-            isReadonlyAllowed: item.isReadonlyAllowed || false,
-            separator: item.separator || false,
-            icon: typeof icon === "function" ? icon : () => icon || "",
-            description: typeof description === "function" ? description : () => description || "",
-            textColor: item.textColor,
-            sequence: item.sequence || 0,
-        };
-    }
-
     /**
      * The class Registry is extended in order to add the function addChild
      *
@@ -18321,8 +18321,8 @@
                 else {
                     interactivePaste(env, target, pasteOption);
                 }
-                if (env.model.getters.isCutOperation() && pasteOption !== "onlyValue") {
-                    await env.clipboard.write({ [ClipboardMIMEType.PlainText]: "" });
+                if (env.model.getters.isCutOperation()) {
+                    await clearOSClipboard(env);
                 }
                 break;
             case "notImplemented":
@@ -18332,6 +18332,9 @@
                 env.raiseError(_t("Access to the clipboard denied by the browser. Please enable clipboard permission for this page in your browser settings."));
                 break;
         }
+    }
+    async function clearOSClipboard(env) {
+        await env.clipboard.write({ [ClipboardMIMEType.PlainText]: "" });
     }
     const PASTE_FORMAT_ACTION = (env) => paste$1(env, "onlyFormat");
     //------------------------------------------------------------------------------
@@ -27206,7 +27209,7 @@
                     interactivePasteFromOS(this.env, target, content);
                 }
                 if (this.env.model.getters.isCutOperation()) {
-                    await this.env.clipboard.write({ [ClipboardMIMEType.PlainText]: "" });
+                    await clearOSClipboard(this.env);
                 }
             }
         }
@@ -41346,9 +41349,6 @@
                 });
             }
         }
-        isColRowDirtyingClipboard(position, dimension) {
-            return false;
-        }
         drawClipboard(renderingContext) { }
     }
 
@@ -41756,7 +41756,7 @@
             for (const row of this.cells) {
                 htmlTable += "<tr>";
                 for (const cell of row) {
-                    const cssStyle = cssPropertiesToCss(cellStyleToCss(cell.style));
+                    const cssStyle = cssPropertiesToCss(cellStyleToCss(this.getters.getCellComputedStyle(cell.position)));
                     const cellText = this.getters.getCellText(cell.position);
                     htmlTable += `<td style="${cssStyle}">` + xmlEscape(cellText) + "</td>";
                 }
@@ -41765,17 +41765,85 @@
             htmlTable += "</table>";
             return htmlTable;
         }
-        isColRowDirtyingClipboard(position, dimension) {
-            if (!this.zones) {
-                return false;
+        isInvalidatedBy(cmd) {
+            switch (cmd.type) {
+                case "SET_ZONE_BORDERS":
+                    for (const zone of cmd.target) {
+                        if (this.areZonesAdjacent(zone, this.zones[0])) {
+                            for (const originRow of this.cells) {
+                                for (const cell of originRow) {
+                                    const { col, row, sheetId } = cell.position;
+                                    const originBorder = cell.border;
+                                    const currentBorder = this.getters.getCellBorder({ col, row, sheetId }) || undefined;
+                                    if (JSON.stringify(originBorder) !== JSON.stringify(currentBorder)) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case "UPDATE_CELL":
+                    for (const originRow of this.cells) {
+                        for (const cell of originRow) {
+                            const { col, row, sheetId } = cell.position;
+                            if (col === cmd.col && row === cmd.row && sheetId === cmd.sheetId) {
+                                const originContent = this.getters.shouldShowFormulas() && cell.cell?.isFormula
+                                    ? cell.cell?.content || ""
+                                    : cell.evaluatedCell?.formattedValue || "";
+                                if (cmd.content && cmd.content !== originContent) {
+                                    return true;
+                                }
+                                if (cmd.style && JSON.stringify(cmd.style) !== JSON.stringify(cell.style)) {
+                                    return true;
+                                }
+                                if (cmd.format &&
+                                    JSON.stringify(cmd.format) !== JSON.stringify(cell.evaluatedCell.format)) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case "ADD_COLUMNS_ROWS":
+                    if (!this.zones) {
+                        return false;
+                    }
+                    const position = cmd.position === "before" ? cmd.base : cmd.base + 1;
+                    for (let zone of this.zones) {
+                        if (cmd.dimension === "COL" && position <= zone.right) {
+                            return true;
+                        }
+                        if (cmd.dimension === "ROW" && position <= zone.bottom) {
+                            return true;
+                        }
+                    }
+                    break;
+                case "REMOVE_COLUMNS_ROWS":
+                    if (!this.zones) {
+                        return false;
+                    }
+                    for (const zone of this.zones) {
+                        for (const position of cmd.elements) {
+                            if (cmd.dimension === "COL" && position <= zone.right) {
+                                return true;
+                            }
+                            if (cmd.dimension === "ROW" && position <= zone.bottom) {
+                                return true;
+                            }
+                        }
+                    }
+                    break;
             }
-            for (let zone of this.zones) {
-                if (dimension === "COL" && position <= zone.right) {
-                    return true;
-                }
-                if (dimension === "ROW" && position <= zone.bottom) {
-                    return true;
-                }
+            return false;
+        }
+        areZonesAdjacent(currentZone, clippedZone) {
+            if (currentZone.top === clippedZone.bottom + 1 ||
+                currentZone.right + 1 === clippedZone.left ||
+                currentZone.bottom === clippedZone.top - 1 ||
+                currentZone.left === clippedZone.right + 1 ||
+                deepEquals(currentZone, clippedZone)) {
+                return true;
             }
             return false;
         }
@@ -41910,7 +41978,7 @@
         getClipboardContent() {
             return { [ClipboardMIMEType.PlainText]: "\t" };
         }
-        isColRowDirtyingClipboard(position, dimension) {
+        isInvalidatedBy(cmd) {
             return false;
         }
         drawClipboard(renderingContext) { }
@@ -42044,6 +42112,9 @@
                 [ClipboardMIMEType.PlainText]: this.values.map((values) => values.join("\t")).join("\n"),
             };
         }
+        isInvalidatedBy(cmd) {
+            return false;
+        }
         getPasteZone(target) {
             const height = this.values.length;
             const width = Math.max(...this.values.map((a) => a.length));
@@ -42069,12 +42140,14 @@
             "getClipboardContent",
             "getClipboardTextContent",
             "isCutOperation",
+            "isCutZoneAltered",
             "isPaintingFormat",
         ];
         status = "invisible";
         state;
         lastPasteState;
         paintFormatStatus = "inactive";
+        _isCutZoneAltered = false;
         originSheetId;
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -42114,12 +42187,18 @@
             return 0 /* CommandResult.Success */;
         }
         handle(cmd) {
+            if (this.state?.operation === "CUT" && this.state?.isInvalidatedBy(cmd)) {
+                this._isCutZoneAltered = true;
+                this.state = undefined;
+                this.status = "invisible";
+            }
             switch (cmd.type) {
                 case "COPY":
                 case "CUT":
                     const zones = ("cutTarget" in cmd && cmd.cutTarget) || this.getters.getSelectedZones();
                     this.state = this.getClipboardState(zones, cmd.type);
                     this.status = "visible";
+                    this._isCutZoneAltered = false;
                     this.originSheetId = this.getters.getActiveSheetId();
                     break;
                 case "PASTE":
@@ -42153,34 +42232,6 @@
                     const { cut, paste } = this.getInsertCellsTargets(cmd.zone, cmd.shiftDimension);
                     const state = this.getClipboardStateForCopyCells(cut, "CUT");
                     state.paste(paste);
-                    break;
-                }
-                case "ADD_COLUMNS_ROWS": {
-                    this.status = "invisible";
-                    // If we add a col/row inside or before the cut area, we invalidate the clipboard
-                    if (this.state?.operation !== "CUT") {
-                        return;
-                    }
-                    const isClipboardDirty = this.state.isColRowDirtyingClipboard(cmd.position === "before" ? cmd.base : cmd.base + 1, cmd.dimension);
-                    if (isClipboardDirty) {
-                        this.state = undefined;
-                    }
-                    break;
-                }
-                case "REMOVE_COLUMNS_ROWS": {
-                    this.status = "invisible";
-                    // If we remove a col/row inside or before the cut area, we invalidate the clipboard
-                    if (this.state?.operation !== "CUT") {
-                        return;
-                    }
-                    for (let el of cmd.elements) {
-                        const isClipboardDirty = this.state.isColRowDirtyingClipboard(el, cmd.dimension);
-                        if (isClipboardDirty) {
-                            this.state = undefined;
-                            break;
-                        }
-                    }
-                    this.status = "invisible";
                     break;
                 }
                 case "PASTE_FROM_OS_CLIPBOARD":
@@ -42251,6 +42302,9 @@
         }
         isCutOperation() {
             return this.state ? this.state.operation === "CUT" : false;
+        }
+        isCutZoneAltered() {
+            return this._isCutZoneAltered;
         }
         isPaintingFormat() {
             return this.paintFormatStatus !== "inactive";
@@ -46971,6 +47025,11 @@
             owl.useExternalListener(window, "resize", () => this.render(true));
             owl.useExternalListener(window, "beforeunload", this.unbindModelEvents.bind(this));
             this.bindModelEvents();
+            owl.onWillUpdateProps((nextProps) => {
+                if (nextProps.model !== this.props.model) {
+                    throw new Error("Changing the props model is not supported at the moment.");
+                }
+            });
             owl.onMounted(() => {
                 this.checkViewportSize();
             });
@@ -50744,6 +50803,8 @@
         isDefined: isDefined$1,
         lazy,
         genericRepeat,
+        createAction,
+        createActions,
     };
     const links = {
         isMarkdownLink,
@@ -50768,6 +50829,7 @@
         ScorecardChartConfigPanel,
         ScorecardChartDesignPanel,
         FigureComponent,
+        Menu,
     };
     function addFunction(functionName, functionDescription) {
         functionRegistry.add(functionName, functionDescription);
@@ -50817,8 +50879,8 @@
 
 
     __info__.version = '16.5.0-alpha.5';
-    __info__.date = '2023-08-17T11:19:14.474Z';
-    __info__.hash = 'e0cb3aa';
+    __info__.date = '2023-08-23T06:07:39.745Z';
+    __info__.hash = '8b09fbf';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
