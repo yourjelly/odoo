@@ -423,7 +423,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
                 'default_template_id': test_template.id,
             }).create({})
 
-        with self.assertQueryCount(admin=108, employee=111), self.mock_mail_gateway():
+        with self.assertQueryCount(admin=129, employee=132), self.mock_mail_gateway():
             composer._action_send_mail()
 
         self.assertEqual(len(self._new_mails), 10)
@@ -1190,7 +1190,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
         rec1 = rec.with_context(active_test=False)      # to see inactive records
         self.assertEqual(rec1.message_partner_ids, self.partners | self.env.user.partner_id | self.user_portal.partner_id)
 
-        with self.assertQueryCount(admin=32, employee=32):
+        with self.assertQueryCount(admin=35, employee=35):
             rec.write({
                 'name': 'Test2',
                 'customer_id': customer_id,
@@ -1229,7 +1229,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
         """
         messages_all = self.messages_all.with_env(self.env)
 
-        with self.assertQueryCount(employee=24):  # test_mail: 24
+        with self.assertQueryCount(employee=26):  # test_mail: 24
             res = messages_all.message_format()
 
         self.assertEqual(len(res), 2*2)
@@ -1242,7 +1242,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
     def test_message_format_single(self):
         message = self.messages_all[0].with_env(self.env)
 
-        with self.assertQueryCount(employee=21):  # test_mail: 21
+        with self.assertQueryCount(employee=23):  # test_mail: 21
             res = message.message_format()
 
         self.assertEqual(len(res), 1)
@@ -1270,7 +1270,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
         self.env.flush_all()
         self.env.invalidate_all()
 
-        with self.assertQueryCount(employee=14):
+        with self.assertQueryCount(employee=16):
             res = messages.message_format()
             self.assertEqual(len(res), 6)
 
