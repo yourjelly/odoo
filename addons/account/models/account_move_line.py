@@ -283,6 +283,7 @@ class AccountMoveLine(models.Model):
             ('cogs', 'Cost of Goods Sold'),
             ('tax', 'Tax'),
             ('rounding', "Rounding"),
+            ('discount', 'Discount'),
             ('payment_term', 'Payment Term'),
             ('line_section', 'Section'),
             ('line_note', 'Note'),
@@ -802,6 +803,7 @@ class AccountMoveLine(models.Model):
             if line.display_type != 'product':
                 line.price_total = line.price_subtotal = False
             # Compute 'price_subtotal'.
+            #line_discount_price_unit = line.price_unit
             line_discount_price_unit = line.price_unit * (1 - (line.discount / 100.0))
             subtotal = line.quantity * line_discount_price_unit
 

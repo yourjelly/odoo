@@ -1070,6 +1070,7 @@ class AccountMove(models.Model):
 
     @api.depends('invoice_payment_term_id', 'invoice_date', 'currency_id', 'amount_total_in_currency_signed', 'invoice_date_due')
     def _compute_needed_terms(self):
+        "ICi que je peux trouver comment inclure le nouveau type de move line"
         for invoice in self:
             is_draft = invoice.id != invoice._origin.id
             invoice.needed_terms = {}
@@ -2002,6 +2003,37 @@ class AccountMove(models.Model):
     # DYNAMIC LINES
     # -------------------------------------------------------------------------
 
+    def _recompute_discount_allocation_lines(self):
+
+        self.ensure_one()
+
+        product_lines = self.line_ids.filtered(lambda line: line.display_type == 'product')
+        discount = 15
+        existing_discount_line = self.line_ids.filtered(lambda line: line.display_type == 'rounding')
+
+        product_line = product_lines[0]
+        product_line.balance = -300
+
+        discount_line_vals = {
+            'name': 'test',
+            'account_id': self.company_id.default_cash_difference_income_account_id.id,
+            'amount_currency': discount,
+            'balance': discount,
+            'partner_id': self.partner_id.id,
+            'move_id': self.id,
+            'currency_id': self.currency_id.id,
+            'company_id': self.company_id.id,
+            'company_currency_id': self.company_id.currency_id.id,
+            'display_type': 'rounding',
+        }
+
+        if existing_discount_line:
+            existing_discount_line.update({discount_line_vals})
+        else:
+            self.env['account.move.line'].create(discount_line_vals)
+        print('test')
+
+
     def _recompute_cash_rounding_lines(self):
         ''' Handle the cash rounding feature on invoices.
 
@@ -2168,6 +2200,12 @@ class AccountMove(models.Model):
             invoice._recompute_cash_rounding_lines()
 
     @contextmanager
+    def _sync_discount_allocation_lines(self, container):
+        yield
+        for invoice in container['records']:
+            invoice._recompute_discount_allocation_lines()
+
+    @contextmanager
     def _sync_dynamic_line(self, existing_key_fname, needed_vals_fname, needed_dirty_fname, line_type, container):
         def existing():
             return {
@@ -2332,6 +2370,7 @@ class AccountMove(models.Model):
                 ))
                 stack.enter_context(self._sync_unbalanced_lines(misc_container))
                 stack.enter_context(self._sync_rounding_lines(invoice_container))
+                stack.enter_context(self._sync_discount_allocation_lines(invoice_container))
                 stack.enter_context(self._sync_dynamic_line(
                     existing_key_fname='tax_key',
                     needed_vals_fname='line_ids.compute_all_tax',
