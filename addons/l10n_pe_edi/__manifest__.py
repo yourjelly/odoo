@@ -31,12 +31,8 @@ We support sending and cancelling of customer invoices.
     'auto_install': ['l10n_pe', 'account_edi'],
     "data": [
         'security/ir.model.access.csv',
-        'data/2.1/edi_common.xml',
-        'data/2.1/edi_signature.xml',
-        'data/2.1/edi_invoice.xml',
-        'data/2.1/edi_refund.xml',
-        'data/2.1/edi_debit_note.xml',
         'data/2.1/edi_void_documents.xml',
+        'data/ubl_pe_21_templates.xml',
         'data/uom_data.xml',
         'data/ir_sequence_data.xml',
         'wizards/account_invoice_refund_views.xml',

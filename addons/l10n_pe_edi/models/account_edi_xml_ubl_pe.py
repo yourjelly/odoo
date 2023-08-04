@@ -1,4 +1,5 @@
 from odoo import models
+import pudb
 
 
 class AccountEdiXmlUBLPE(models.AbstractModel):
@@ -19,8 +20,9 @@ class AccountEdiXmlUBLPE(models.AbstractModel):
         vals.append({
             'id_attrs': {
                 'schemeID': (
-                    partner.l10n_latam_identification_type_id
-                    and partner.l10n_latam_identification_type_id.l10n_pe_vat_code
+                    partner.l10n_latam_identification_type_id.l10n_pe_vat_code
+                    if partner.l10n_latam_identification_type_id
+                    else None
                 ),
             },
             'id': partner.vat,
@@ -31,8 +33,8 @@ class AccountEdiXmlUBLPE(models.AbstractModel):
         # EXTENDS account.edi.xml.ubl_21
         vals = super()._get_partner_address_vals(partner)
         vals.update({
-            'id': partner.l10n_pe_district and partner.l10n_pe_district.code,
-            'address_type_code': partner.company_id and partner.company_id.l10n_pe_edi_address_type_code,
+            'id': partner.l10n_pe_district.code if partner.l10n_pe_district else None,
+            'address_type_code': partner.company_id.l10n_pe_edi_address_type_code if partner.company_id else None,
         })
         return vals
 
@@ -125,31 +127,82 @@ class AccountEdiXmlUBLPE(models.AbstractModel):
             line.amount_currency
             for line in invoice.line_ids.filtered(lambda l: l.tax_line_id.tax_group_id.l10n_pe_edi_code == 'ISC')
         ]))
-        vals['tax_subtotal_vals'] = []
-        for vals in tax_details_grouped.items():
-            vals['tax_subtotal_vals'].append({
+        vals[0]['tax_subtotal_vals'] = []
+        for grouping_keys, grouping_vals in tax_details_grouped['tax_details'].items():
+            vals[0]['tax_subtotal_vals'].append({
                 'currency': invoice.currency_id,
                 'currency_dp': invoice.currency_id.decimal_places,
                 'taxable_amount': (
-                    vals['base_amount_currency']
-                    - (isc_tax_amount if vals['l10n_pe_edi_code'] != 'ISC' else 0)
+                    grouping_vals['base_amount_currency']
+                    - (isc_tax_amount if grouping_keys['l10n_pe_edi_code'] != 'ISC' else 0)
                 ),
-                'tax_amount': vals['tax_amount_currency'] or 0.0,
+                'tax_amount': grouping_vals['tax_amount_currency'] or 0.0,
                 'tax_category_vals': {
                     'tax_scheme_vals': {
-                        'id': vals['l10n_pe_edi_tax_code'],
-                        'name': vals['l10n_pe_edi_code'],
-                        'tax_type_code': vals['l10n_pe_edi_international_code'],
+                        'id': grouping_keys['l10n_pe_edi_tax_code'],
+                        'name': grouping_keys['l10n_pe_edi_code'],
+                        'tax_type_code': grouping_keys['l10n_pe_edi_international_code'],
                     },
                 },
             })
 
         return vals
 
+    def _get_invoice_line_tax_totals_vals_list(self, line, taxes_vals):
+        # OVERRIDES account.edi.xml.ubl_21
+        pass
+        vals = {
+            'currency': line.currency_id,
+            'currency_dp': line.currency_id.decimal_places,
+            'tax_amount': line.price_total - line.price_subtotal,
+            'tax_subtotal_vals': [{
+                'currency': line.currency_id,
+                'currency_dp': line.currency_id.decimal_places,
+                'taxable_amount': tax_detail_vals['base_amount_currency'] if tax_detail['tax'].tax_group_id.l10n_pe_edi_code != 'ICBPER' else None,
+                'tax_amount': tax_detail_vals['tax_amount_currency'] or 0.0,
+                'base_unit_measure_attrs': {
+                    'unitCode': line.product_uom_id.l10n_pe_edi_measure_unit_code,
+                },
+                'base_unit_measure': int(line.quantity) if tax_detail['tax'].tax_group_id.l10n_pe_edi_code == 'ICBPER' else None,
+                'tax_category_vals': {
+                    'percent': tax_detail['tax'].amount if tax_detail['tax'].amount_type == 'percent' else None,
+                    'tax_exemption_reason_code': line.l10n_pe_edi_affectation_reason if tax_detail['tax'].tax_group_id.l10n_pe_edi_code not in ('ISC', 'ICBPER') and line.l10n_pe_edi_affectation_reason else None,
+                    'tier_range': tax_detail['tax'].l10n_pe_edi_isc_type if tax_detail['tax'].tax_group_id.l10n_pe_edi_code == 'ISC' and tax_detail['tax'].l10n_pe_edi_isc_type else None,
+                    'tax_scheme_vals': {
+                        'id': tax_detail['tax'].l10n_pe_edi_tax_code,
+                        'name': tax_detail['tax'].tax_group_id.l10n_pe_edi_code,
+                        'tax_type_code': tax_detail['tax'].l10n_pe_edi_international_code,
+                    },
+                },
+            } for tax_detail, tax_detail_vals in taxes_vals['tax_details'].items()],
+        }
+        return vals
+
+    def _get_invoice_line_item_vals(self, line, taxes_vals):
+        # EXTENDS account.edi.xml.ubl_21
+        vals = super()._get_invoice_line_item_vals(line, taxes_vals)
+        if vals['description']:
+            vals['description'] = vals['description'][:250]
+        vals['commodity_classification_vals'] = [{
+            'item_classification_code': line.product_id.unspsc_code_id.code if line.product_id else None,
+        }]
+        return vals
+
     def _get_invoice_line_vals(self, line, taxes_vals):
         # EXTENDS account.edi.xml.ubl_21
         vals = super()._get_invoice_line_vals(line, taxes_vals)
+        line_vals = line._prepare_edi_vals_to_export()
         vals['invoiced_quantity_attrs']['unitCode'] = line.product_uom_id.l10n_pe_edi_measure_unit_code
+        vals['pricing_reference_vals'] = {
+            'alternative_condition_price_vals': [{
+                'price_amount_attrs': {
+                    'currencyID': line.currency_id.name,
+                },
+                'price_amount': line_vals['price_total_unit'],
+                'price_amount_dp': self.env['decimal.precision'].precision_get('Product Price'),
+                'price_type_code': '01' if not line.currency_id.is_zero(line_vals['price_unit_after_discount']) else '02',
+            }]
+        }
         return vals
 
     def _export_invoice_vals(self, invoice):
@@ -185,8 +238,11 @@ class AccountEdiXmlUBLPE(models.AbstractModel):
             ),
         })
 
+        if vals['order_reference']:
+            vals['order_reference'] = vals['order_reference'][:20]
+
         # Invoice specific changes
-        if (vals['document_type'] == 'invoice'):
+        if vals['document_type'] == 'invoice':
             vals['vals'].update({
                 'invoice_type_code': invoice.l10n_latam_document_type_id.code,
                 'invoice_type_code_attrs': {
@@ -212,7 +268,7 @@ class AccountEdiXmlUBLPE(models.AbstractModel):
                 })
 
         # Credit Note specific changes
-        if (vals['document_type'] == 'credit_note'):
+        if vals['document_type'] == 'credit_note':
             if invoice.l10n_latam_document_type_id.code == '07':
                 vals['vals'].update({
                     'discrepancy_response_vals': [{
@@ -229,7 +285,7 @@ class AccountEdiXmlUBLPE(models.AbstractModel):
                 })
 
         # Debit Note specific changes
-        if (vals['document_type'] == 'debit_note'):
+        if vals['document_type'] == 'debit_note':
             if invoice.l10n_latam_document_type_id.code == '08':
                 vals['vals'].update({
                     'discrepancy_response_vals': [{

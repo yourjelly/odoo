@@ -93,7 +93,14 @@ class Certificate(models.Model):
     def _sign(self, edi_tree):
         self.ensure_one()
         pem_certificate, pem_private_key, dummy = self._decode_certificate()
-        namespaces = {'ds': 'http://www.w3.org/2000/09/xmldsig#'}
+        namespaces = {
+            'cbc': 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2',
+            'ds': 'http://www.w3.org/2000/09/xmldsig#'
+        }
+
+        ubl_version_id_element = edi_tree.xpath('.//cbc:UBLVersionID', namespaces=namespaces)[0]
+        ubl_extensions_str = self.env['ir.qweb']._render('l10n_pe_edi.ubl_pe_21_ubl_extensions_empty_signature')
+        ubl_version_id_element.addprevious(etree.fromstring(ubl_extensions_str))
 
         edi_tree_copy = deepcopy(edi_tree)
         signature_element = edi_tree_copy.xpath('.//ds:Signature', namespaces=namespaces)[0]
@@ -101,12 +108,12 @@ class Certificate(models.Model):
 
         edi_tree_c14n_str = etree.tostring(edi_tree_copy, method='c14n', exclusive=True, with_comments=False)
         digest_b64 = b64encode(hashlib.new('sha1', edi_tree_c14n_str).digest())
-        signature_str = self.env['ir.qweb']._render('l10n_pe_edi.pe_ubl_2_1_signature', {'digest_value': digest_b64.decode()})
+        ubl_extensions_str = self.env['ir.qweb']._render('l10n_pe_edi.ubl_pe_21_ubl_extensions_signature_template', {'digest_value': digest_b64.decode()})
 
         # Eliminate all non useful spaces and new lines in the stream
-        signature_str = signature_str.replace('\n', '').replace('  ', '')
-
-        signature_tree = etree.fromstring(signature_str)
+        ubl_extensions_str = ubl_extensions_str.replace('\n', '').replace('  ', '')
+        ubl_extensions_tree = etree.fromstring(ubl_extensions_str)
+        signature_tree = ubl_extensions_tree.xpath('.//ds:Signature', namespaces=namespaces)[0]
         signed_info_element = signature_tree.xpath('.//ds:SignedInfo', namespaces=namespaces)[0]
         signature = etree.tostring(signed_info_element, method='c14n', exclusive=True, with_comments=False)
         private_pem_key = crypto.load_privatekey(crypto.FILETYPE_PEM, pem_private_key)
