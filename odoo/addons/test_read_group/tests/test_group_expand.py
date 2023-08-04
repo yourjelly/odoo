@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
-from odoo.tests import common
+from odoo.tests import common, tagged
 
+@tagged('post_install', '-at_install')
+class TestGroupOnSelectionName(common.TransactionCase):
+    def test_name(self):
+        for model in self.env.values():
+            fields = model._fields
+            for fname in fields.keys():
+                if fname + '_count' in fields:
+                    self._logger.runbot(f'field name {fname}_count is not good')
 
 class TestGroupOnSelection(common.TransactionCase):
     def setUp(self):
