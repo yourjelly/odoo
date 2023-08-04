@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from odoo.tests import common, tagged
+
+_logger = logging.getLogger(__name__)
 
 @tagged('post_install', '-at_install')
 class TestGroupOnSelectionName(common.TransactionCase):
@@ -8,7 +12,7 @@ class TestGroupOnSelectionName(common.TransactionCase):
             fields = model._fields
             for fname in fields.keys():
                 if fname + '_count' in fields:
-                    self._logger.runbot(f'field name {fname}_count is not good')
+                    _logger.runbot(f'field name {fname}_count is not good')
 
 class TestGroupOnSelection(common.TransactionCase):
     def setUp(self):
