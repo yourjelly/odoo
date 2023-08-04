@@ -751,6 +751,7 @@ export const htmlField = {
             maxHeight: options.maxHeight,
             resizable: 'resizable' in options ? options.resizable : false,
             editorPlugins: [QWebPlugin],
+            dropImageAsAttachment:'dropImageAsAttachment' in options ? options.dropImageAsAttachment : true
         };
         if ('collaborative' in options) {
             wysiwygOptions.collaborative = options.collaborative;
