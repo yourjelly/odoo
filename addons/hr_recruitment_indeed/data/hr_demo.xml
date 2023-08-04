@@ -1,0 +1,1168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- For testing purpose only -->
+        <record id="dep_serv" model="hr.department">
+            <field name="name">Services / Business Support</field>
+        </record>
+        <record id="dep_developer" model="hr.department">
+            <field name="name">Services / Business Services</field>
+        </record>
+        <record id="dep_rd" model="hr.department">
+            <field name="name">Research and Development</field>
+        </record>
+        <record id="dep_sales" model="hr.department">
+            <field name="name">Sales</field>
+        </record>
+        <record id="job_analyst" model="hr.job">
+            <field name="name">Customer Support Analyst</field>
+            <field name="department_id" ref="dep_serv"/>
+            <field name="no_of_recruitment">40</field>
+            <field name="description">As a Customer Support Analyst, with a positive attitude and dynamism, you will provide support and help to our existing and potential customers, and our colleagues as well. Our goal is to make our customers happy by solving their issues and giving them a good quality service.Your mission will consist of helping our software's users by investigating to provide them with the perfect answer to their questions. When a customer's request comes in, through ticketing, live chat, and phone calls, you will have to understand the functional issue and investigate. If needed, you will redirect customers to our Developers, depending on the types of requests.Indeed, you will closely collaborate with internal teams such as Consultants, Sales, or Developers. In a nutshell, you will be the key point between the end-users and Odoo.</field>
+            <field name="contract_type_id" ref="hr.contract_type_permanent"/>
+            <field name="is_published">True</field>
+            <field name="website_description" type="html">
+                <!-- Description text and ratings -->
+                <section class="pt0">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8 pb32" itemprop="description">
+                                <p class="lead">
+                                    As a Customer Support Analyst, with a positive attitude and dynamism, you will provide support and help to our existing and potential customers, and our colleagues as well. Our goal is to make our customers happy by solving their issues and giving them a good quality service.<br/><br/>
+                                    Your mission will consist of helping our software's users by investigating to provide them with the perfect answer to their questions. When a customer's request comes in, through ticketing, live chat, and phone calls, you will have to understand the functional issue and investigate. If needed, you will redirect customers to our Developers, depending on the types of requests.<br/><br/>
+                                    Indeed, you will closely collaborate with internal teams such as Consultants, Sales, or Developers. In a nutshell, you will be the key point between the end-users and Odoo.
+                                </p>
+                            </div>
+                            <div class="col-lg-3 offset-lg-1 pb32">
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Bussiness Knowledge</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Technical Skills</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                            <i class="fa fa-star-o"/>
+                                            <i class="fa fa-star-o"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Autonomy</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Variability of the Job</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Quality of Product / Tools</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Responsabilities, Must Have and Nice to have -->
+                <section class="s_comparisons pt24 pb24 bg-200" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Responsibilities</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Help customers with their use of Odoo Business Apps</li>
+                                        <li class="list-group-item">Solve functional problems by investigating</li>
+                                        <li class="list-group-item">Engage with our visitors and leads (Livechat)</li>
+                                        <li class="list-group-item">Ensure customers' satisfaction</li>
+                                        <li class="list-group-item">Improve customers's experience</li>
+                                        <li class="list-group-item">Contribute to the improvement of our product and all documentation</li>
+                                        <li class="list-group-item">Side projects (recruit and onboard new colleagues, give training, ...)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Must Have</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Bachelor Degree or Higher</li>
+                                        <li class="list-group-item">IT and Business Affinity</li>
+                                        <li class="list-group-item">Customer oriented</li>
+                                        <li class="list-group-item">Autonomous and fast learner</li>
+                                        <li class="list-group-item">Fluent in English</li>
+                                        <li class="list-group-item">Solution minded</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Nice to have</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Good knowledge of business processes</li>
+                                        <li class="list-group-item">Technical knowledge (XML, Python, JS)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What's great -->
+                <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-sm-7 pb40" itemprop="description">
+                                <h2>Why should you say 'YES' to this job?</h2>
+                                <br/>
+                                <ul class="lead">
+                                    <li>2 weeks of intensive functional training with final certification</li>
+                                    <li>You will contribute to the improvement of our software Odoo by escalating good feedback</li>
+                                    <li>You will be delivering the best support experience to clients they have never had before!</li>
+                                    <li>None of your work days will be the same, guarantee!</li>
+                                </ul>
+                            </div>
+                            <div data-name="Box" class="col-sm-4 offset-sm-1 pt16 pb16">
+                                <div class="card shadow text-center">
+                                    <h5 class="card-header o_colored_level text-bg-primary">Our Product</h5>
+                                    <div class="card-body p-0 pt-3">
+                                        <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 75% !important;" alt="Our Product"/>
+                                        <p>Discover our products.</p>
+                                        <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What we offer -->
+                <section class="s_features pt64 pb40 bg-200" data-name="Features" data-snippet="s_features">
+                    <div class="container">
+                        <h2>What do we offer</h2>
+                        <br/>
+                        <p class="lead">
+                            Each employee has a chance to see the impact of his work.
+                            You can make a real contribution to the success of the company.
+                            <br/>
+                            Several activities are often organized all over the year, such as weekly
+                            sports sessions, team building events, monthly drink, and much more
+                        </p>
+                        <div class="row pt16">
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-gift rounded-circle text-bg-primary m-3"></i>
+                                <h3>Compensation and Perks</h3>
+                                <p>A full-time position <br/>with an attractive salary package.</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-bar-chart rounded-circle text-bg-primary m-3"></i>
+                                <h3>Paid leaves</h3>
+                                <p>5 Days working week, 24 paid leaves and public <br/>holidays as per the IT Industry</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-futbol-o rounded-circle text-bg-primary m-3"></i>
+                                <h3>Prime location</h3>
+                                <p>Work at the best location with easy<br/>transportation connectivity</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-coffee rounded-circle text-bg-primary m-3"></i>
+                                <h3>Eat &amp; Drink</h3>
+                                <p>Tea, coffee and snacks<br/>provided all day.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Photos -->
+                <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+                    <div class="container">
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-8">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_9.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-4">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_10.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_11.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_12.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-6">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_13.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </field>
+        </record>
+        <record id="job_consultant" model="hr.job">
+            <field name="name">Implementation Consultant</field>
+            <field name="department_id" ref="dep_developer"/>
+            <field name="no_of_recruitment">20</field>
+            <field name="description">As an Implementation Consultant, you will implement Odoo. You'll be in direct contact with the clients to help them with the good use of Odoo Software. Therefore, you will analyse their needs and deliver personal training sessions and provide support. Basically, you'll be responsible to deliver the best management solution to your customers! </field>
+            <field name="contract_type_id" ref="hr.contract_type_permanent"/>
+            <field name="is_published">True</field>
+            <field name="website_description" type="html">
+                <!-- Description text and ratings -->
+                <section class="pt0">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8 pb32" itemprop="description">
+                                <p class="lead">
+                                    As an Implementation Consultant, you will implement Odoo. You'll be in direct contact with the clients to help them with the good use of Odoo Software. Therefore, you will analyse their needs and deliver personal training sessions and provide support. Basically, you'll be responsible to deliver the best management solution to your customers! <br/><br/>
+                                    As an Implementation Consultant, you will support the growth of our partner network. You will help and coach our partners, from all around the world, to implement their customers projects and to become Odoo Experts.<br/><br/>
+                                    We want our team to be able to implement Odoo to different sectors and business areas. To achieve it, bringing people having a few years of experience of implementation in domain like manufacturing, accounting and finance, supply chain management and E commerce is necessary as well as an important for your application.
+                                </p>
+                            </div>
+                            <div class="col-lg-3 offset-lg-1 pb32">
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Product Complexity</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Personal Evolution</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                            <i class="fa fa-star-o"/>
+                                            <i class="fa fa-star-o"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Autonomy</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Customer Relationship</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Communication Skills</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Responsabilities, Must Have and Nice to have -->
+                <section class="s_comparisons pt24 pb24 bg-200" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Responsibilities</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Analyse the customer needs and suggest solutions</li>
+                                        <li class="list-group-item">Accompany customers in the full delivery cycle from software configuration to go-live.</li>
+                                        <li class="list-group-item">Negotiate the required resources</li>
+                                        <li class="list-group-item">Make your customer/partner an Odoo Champion (training)</li>
+                                        <li class="list-group-item">Take part in the first line support.Support the sales team during pre-sale.</li>
+                                        <li class="list-group-item">Feedback to the Product Owners</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Must Have</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Bachelor Degree or Higher</li>
+                                        <li class="list-group-item">Minimum of 1 year of experience in Business/ ERP Application</li>
+                                        <li class="list-group-item">Ability to understand different business processes</li>
+                                        <li class="list-group-item">Good communication/negotiation skills</li>
+                                        <li class="list-group-item">Ability to learn fast and execute accordingly</li>
+                                        <li class="list-group-item">Affinity with the IT world</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Nice to have</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Experienced in management software implementation</li>
+                                        <li class="list-group-item">TMaster in the product demonstration</li>
+                                        <li class="list-group-item">TDeal with various Industry and Customers  segments</li>
+                                        <li class="list-group-item">Autonomous,Assertive, Proactive</li>
+                                        <li class="list-group-item">Multi Tasking</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What's great -->
+                <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-sm-7 pb40" itemprop="description">
+                                <h2>Why should you say 'YES' to this job?</h2>
+                                <br/>
+                                <ul class="lead">
+                                    <li>Great team of very smart people, in a friendly and open culture.</li>
+                                    <li>Two weeks of intensive functional training</li>
+                                    <li>Work with direct customers in the Indian market.</li>
+                                    <li>Chance to work on various business applications </li>
+                                </ul>
+                            </div>
+                            <div data-name="Box" class="col-sm-4 offset-sm-1 pt16 pb16">
+                                <div class="card shadow text-center">
+                                    <h5 class="card-header o_colored_level text-bg-primary">Our Product</h5>
+                                    <div class="card-body p-0 pt-3">
+                                        <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 75% !important;" alt="Our Product"/>
+                                        <p>Discover our products.</p>
+                                        <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What we offer -->
+                <section class="s_features pt64 pb40 bg-200" data-name="Features" data-snippet="s_features">
+                    <div class="container">
+                        <h2>What do we offer</h2>
+                        <br/>
+                        <p class="lead">
+                            Each employee has a chance to see the impact of his work.
+                            You can make a real contribution to the success of the company.
+                            <br/>
+                            Several activities are often organized all over the year, such as weekly
+                            sports sessions, team building events, monthly drink, and much more
+                        </p>
+                        <div class="row pt16">
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-gift rounded-circle text-bg-primary m-3"></i>
+                                <h3>Compensation and Perks</h3>
+                                <p>A full-time position <br/>with an attractive salary package.</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-bar-chart rounded-circle text-bg-primary m-3"></i>
+                                <h3>Paid leaves</h3>
+                                <p>5 Days working week, 24 paid leaves and public <br/>holidays as per the IT Industry</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-futbol-o rounded-circle text-bg-primary m-3"></i>
+                                <h3>Prime location</h3>
+                                <p>Work at the best location with easy<br/>transportation connectivity</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-coffee rounded-circle text-bg-primary m-3"></i>
+                                <h3>Eat &amp; Drink</h3>
+                                <p>Tea, coffee and snacks<br/>provided all day.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Photos -->
+                <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+                    <div class="container">
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-8">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_9.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-4">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_10.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_11.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_12.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-6">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_13.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </field>
+        </record>
+        <record id="job_support" model="hr.job">
+            <field name="name">Bussiness Support Analyst</field>
+            <field name="department_id" ref="dep_serv"/>
+            <field name="no_of_recruitment">40</field>
+            <field name="description">As a Customer Support Analyst, with a positive attitude and dynamism, you will provide support and help to our existing and potential customers, and our colleagues as well. Our goal is to make our customers happy by solving their issues and giving them a good quality service.</field>
+            <field name="contract_type_id" ref="hr.contract_type_permanent"/>
+            <field name="is_published">True</field>
+            <field name="website_description" type="html">
+                <!-- Description text and ratings -->
+                <section class="pt0">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8 pb32" itemprop="description">
+                                <p class="lead">
+                                    As a Customer Support Analyst, with a positive attitude and dynamism, you will provide support and help to our existing and potential customers, and our colleagues as well. Our goal is to make our customers happy by solving their issues and giving them a good quality service.<br/><br/>
+                                    Your mission will consist of helping our software's users by investigating to provide them with the perfect answer to their questions. When a customer's request comes in, through ticketing, live chat, and phone calls, you will have to understand the functional issue and investigate. If needed, you will redirect customers to our Developers, depending on the types of requests.<br/><br/>
+                                    Indeed, you will closely collaborate with internal teams such as Consultants, Sales, or Developers. In a nutshell, you will be the key point between the end-users and Odoo.
+                                </p>
+                            </div>
+                            <div class="col-lg-3 offset-lg-1 pb32">
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Bussiness Knowledge</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Technical Skills</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                            <i class="fa fa-star-o"/>
+                                            <i class="fa fa-star-o"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Autonomy</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Variability of the Job</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Quality of Product / Tools</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Responsabilities, Must Have and Nice to have -->
+                <section class="s_comparisons pt24 pb24 bg-200" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Responsibilities</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Help customers with their use of Odoo Business Apps</li>
+                                        <li class="list-group-item">Solve functional problems by investigating</li>
+                                        <li class="list-group-item">Engage with our visitors and leads (Livechat)</li>
+                                        <li class="list-group-item">Ensure customers' satisfaction</li>
+                                        <li class="list-group-item">Improve customers's experience</li>
+                                        <li class="list-group-item">Contribute to the improvement of our product and all documentation</li>
+                                        <li class="list-group-item">Side projects (recruit and onboard new colleagues, give training, ...)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Must Have</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Bachelor Degree or Higher</li>
+                                        <li class="list-group-item">IT and Business Affinity</li>
+                                        <li class="list-group-item">Customer oriented</li>
+                                        <li class="list-group-item">Autonomous and fast learner</li>
+                                        <li class="list-group-item">Fluent in English</li>
+                                        <li class="list-group-item">Solution minded</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Nice to have</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Good knowledge of business processes</li>
+                                        <li class="list-group-item">Technical knowledge (XML, Python, JS)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What's great -->
+                <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-sm-7 pb40" itemprop="description">
+                                <h2>Why should you say 'YES' to this job?</h2>
+                                <br/>
+                                <ul class="lead">
+                                    <li>2 weeks of intensive functional training with final certification</li>
+                                    <li>You will contribute to the improvement of our software Odoo by escalating good feedback</li>
+                                    <li>You will be delivering the best support experience to clients they have never had before!</li>
+                                    <li>None of your work days will be the same, guarantee!</li>
+                                </ul>
+                            </div>
+                            <div data-name="Box" class="col-sm-4 offset-sm-1 pt16 pb16">
+                                <div class="card shadow text-center">
+                                    <h5 class="card-header o_colored_level text-bg-primary">Our Product</h5>
+                                    <div class="card-body p-0 pt-3">
+                                        <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 75% !important;" alt="Our Product"/>
+                                        <p>Discover our products.</p>
+                                        <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What we offer -->
+                <section class="s_features pt64 pb40 bg-200" data-name="Features" data-snippet="s_features">
+                    <div class="container">
+                        <h2>What do we offer</h2>
+                        <br/>
+                        <p class="lead">
+                            Each employee has a chance to see the impact of his work.
+                            You can make a real contribution to the success of the company.
+                            <br/>
+                            Several activities are often organized all over the year, such as weekly
+                            sports sessions, team building events, monthly drink, and much more
+                        </p>
+                        <div class="row pt16">
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-gift rounded-circle text-bg-primary m-3"></i>
+                                <h3>Compensation and Perks</h3>
+                                <p>A full-time position <br/>with an attractive salary package.</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-bar-chart rounded-circle text-bg-primary m-3"></i>
+                                <h3>Paid leaves</h3>
+                                <p>5 Days working week, 24 paid leaves and public <br/>holidays as per the IT Industry</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-futbol-o rounded-circle text-bg-primary m-3"></i>
+                                <h3>Prime location</h3>
+                                <p>Work at the best location with easy<br/>transportation connectivity</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-coffee rounded-circle text-bg-primary m-3"></i>
+                                <h3>Eat &amp; Drink</h3>
+                                <p>Tea, coffee and snacks<br/>provided all day.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Photos -->
+                <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+                    <div class="container">
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-8">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_9.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-4">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_10.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_11.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_12.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-6">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_13.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </field>
+        </record>
+        <record id="job_rd_developer" model="hr.job">
+            <field name="name">Python and JavaScript Developer</field>
+            <field name="department_id" ref="dep_rd"/>
+            <field name="no_of_recruitment">30</field>
+            <field name="description">If you are passionate about development, then it is time to work on a great Open Source project where your work will count!With emerging technologies and trends, offshore development services are becoming more crucial as they can do a galaxy of work for various industries like SaaS, E-commerce, Internet and IT.</field>
+            <field name="contract_type_id" ref="hr.contract_type_permanent"/>
+            <field name="is_published">True</field>
+            <field name="website_description" type="html">
+                <!-- Description text and ratings -->
+                <section class="pt0">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8 pb32" itemprop="description">
+                                <p class="lead">
+                                    We develop open source apps to help millions of employees save time in their day-to-day job. 
+
+                                    Our projects include:
+
+                                    --> Business Apps: from point of Sales, to logistics and accounting, we have plenty of projects around business apps (improvement, creation of new features,...)
+
+                                    --> Frontend UI: Odoo Spreadsheet (an open source Google Spreadsheet alternative), a react/vue style JS framework (the fastest VDOM ever developed).
+
+                                    --> Python Framework: It's all about perf and optimizations. (ORM based on PostgreSQL)
+
+                                    -->  Mobile: All Odoo apps run on iOS and Android hybrid mobile apps.
+
+                                    --> Website / Builder: An open source website builder and eCommerce, to help entrepreneurs launch their website by themselves, without technical hassle.
+
+                                    --> API / Connectors: Integrate Odoo with payment processors, carriers, or other services.
+
+                                    --> Security: from product security (code reviews, security patches) to system administration issues (pentesting, best practices, etc.).
+
+                                    After 3 weeks of initial training (both functional and technical), we'll present you teams looking for new members and you'll choose the one you prefer.
+                                </p>
+                            </div>
+                            <div class="col-lg-3 offset-lg-1 pb32">
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Product Modernity</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Customer Relationship</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                            <i class="fa fa-star-o"/>
+                                            <i class="fa fa-star-o"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Personal Evolution</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Autonomy</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Code Quality</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Responsabilities, Must Have and Nice to have -->
+                <section class="s_comparisons pt24 pb24 bg-200" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Responsibilities</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Develop Quality Apps</li>
+                                        <li class="list-group-item">Coach small distributed dev teams</li>
+                                        <li class="list-group-item">Be responsible of what you develop</li>
+                                        <li class="list-group-item">Produce clean code</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Must Have</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Several programming languages</li>
+                                        <li class="list-group-item">Object-oriented programming language</li>
+                                        <li class="list-group-item">Passion for development</li>
+                                        <li class="list-group-item">Quick and Autonomous learner</li>
+                                        <li class="list-group-item">Read and Written English</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">Nice to have</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Contribution to Open Source Projects</li>
+                                        <li>Bachelors or Master Degree</li>
+                                        <li>Python, JavaScript</li>
+                                        <li class="list-group-item">Linux, GitHub</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What's great -->
+                <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-sm-7 pb40" itemprop="description">
+                                <h2>What's great in the job?</h2>
+                                <br/>
+                                <ul class="lead">
+                                    <li>Flexible working hours.</li>
+                                    <li>A full-time internship of 6 months or more for your last year of studies</li>
+                                    <li> complete technical and functional Odoo training</li>
+                                    <li> A pleasant and friendly working environment located in a Gandhinagar.</li>
+                                    <li> Great experience in state-of-the-art web technologies and agile development </li>
+                                    <li>Opportunity to join a popular open source project</li>
+                                    <li>Nice working atmosphere in a young and passionate team.</li>
+                                </ul>
+                            </div>
+                            <div data-name="Box" class="col-sm-4 offset-sm-1 pt16 pb16">
+                                <div class="card shadow text-center">
+                                    <h5 class="card-header o_colored_level text-bg-primary">Our Product</h5>
+                                    <div class="card-body p-0 pt-3">
+                                        <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 75% !important;" alt="Our Product"/>
+                                        <p>Discover our products.</p>
+                                        <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What we offer -->
+                <section class="s_features pt64 pb40 bg-200" data-name="Features" data-snippet="s_features">
+                    <div class="container">
+                        <h2>What do we offer</h2>
+                        <br/>
+                        <p class="lead">
+                            Each employee has a chance to see the impact of his work.
+                            You can make a real contribution to the success of the company.
+                            <br/>
+                            Several activities are often organized all over the year, such as weekly
+                            sports sessions, team building events, monthly drink, and much more
+                        </p>
+                        <div class="row pt16">
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-gift rounded-circle text-bg-primary m-3"></i>
+                                <h3>Compensation and Perks</h3>
+                                <p>A full-time position <br/>with an attractive salary package.</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-bar-chart rounded-circle text-bg-primary m-3"></i>
+                                <h3>Paid leaves</h3>
+                                <p>5 Days working week, 24 paid leaves and public <br/>holidays as per the IT Industry</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-futbol-o rounded-circle text-bg-primary m-3"></i>
+                                <h3>Prime location</h3>
+                                <p>Work at the best location with easy<br/>transportation connectivity</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-coffee rounded-circle text-bg-primary m-3"></i>
+                                <h3>Eat &amp; Drink</h3>
+                                <p>Tea, coffee and snacks<br/>provided all day.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Photos -->
+                <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+                    <div class="container">
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-8">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_9.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-4">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_10.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_11.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_12.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-6">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_13.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </field>
+        </record>
+        <record id="job_advisor" model="hr.job">
+            <field name="name">Sales: Bussiness Advisor</field>
+            <field name="department_id" ref="dep_sales"/>
+            <field name="no_of_recruitment">18</field>
+            <field name="description">Join our dynamic team of Direct Sales and make use of your hunting, analytical and negotiation skills to acquire new clients. As Business Advisor, you will engage with SMEs and advise them on the best solution to adopt for their business.Concretely, you will be in charge for the whole Sales cycle, from leads to closing, including customers on-boarding. </field>
+            <field name="contract_type_id" ref="hr.contract_type_permanent"/>
+            <field name="is_published">True</field>
+            <field name="website_description" type="html">
+                <!-- Description text and ratings -->
+                <section class="pt0">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8 pb32" itemprop="description">
+                                <p class="lead">
+                                    Join our dynamic team of Direct Sales and make use of your hunting, analytical and negotiation skills to acquire new clients. As Business Advisor, you will engage with SMEs and advise them on the best solution to adopt for their business. 
+                                </p>
+                            </div>
+                            <div class="col-lg-3 offset-lg-1 pb32">
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Sales Knowledge</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Technical Skills</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                            <i class="fa fa-star-o"/>
+                                            <i class="fa fa-star-o"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Autonomy</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Communication</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                                    <h6 class="s_rating_title">Proficiency</h6>
+                                    <div class="s_rating_icons o_not_editable">
+                                        <span class="s_rating_active_icons text-primary">
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                            <i class="fa fa-star"/>
+                                        </span>
+                                        <span class="s_rating_inactive_icons text-primary">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Responsabilities, Must Have and Nice to have -->
+                <section class="s_comparisons pt24 pb24 bg-200" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">PROFILE</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Strong Business knowledge and curiosity</li>
+                                        <li class="list-group-item">Genuine interest in IT and software</li>
+                                        <li class="list-group-item">Fluent in: English</li>
+                                        <li class="list-group-item">Analytic vision and fighting spirit</li>
+                                        <li class="list-group-item">Strong relational and negotiation skills</li>
+                                        <li class="list-group-item">Good organizational skills</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">NICE TO HAVE</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Business degree</li>
+                                        <li class="list-group-item">Previous experience in Sales or Consultancy</li>
+                                        <li class="list-group-item">Previous experience in IT sector</li>
+                                        <li class="list-group-item">Convincing communicator</li>
+                                        <li class="list-group-item">Overachiever spirit and pro activity </li>
+                                        <li class="list-group-item">Work hard/play hard attitude </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 s_col_no_bgcolor pt16 pb16" data-name="Box">
+                                <div class="card text-bg-primary">
+                                    <h4 class="card-header">WHAT MAKES THIS JOB ESSENTIAL?</h4>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">No cold calling - you receive leads coming from the different marketing channels</li>
+                                        <li class="list-group-item">Solution selling and consulting approach that allows you to use your analytical skills</li>
+                                        <li>Deal with interesting people : SME's CEO, CFO, CTO and your colleagues</li>
+                                        <li>Deal with companies of various industries, sizes, and from different countries</li>
+                                        <li>Large apps scope: CRM, accounting, Inventory, HR, Project Management,etc. </li>
+                                        <li>High commissions for best sellers, no ceiling </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What's great -->
+                <section class="s_comparisons pt24 pb24" data-snippet="s_comparisons">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-sm-7 pb40" itemprop="description">
+                                <h2>What will you do?</h2>
+                                <br/>
+                                <ul class="lead">
+                                    <li>Receive leads, initiate contact, and qualify the potential clients </li>
+                                    <li>Analyze and understand the customer needs, activities, challenges, and pain points</li>
+                                    <li>Present the CRM software by providing tailored demonstration according to the customers' needs</li>
+                                    <li>Provide customized quotes and negotiate conditions of the contract</li>
+                                </ul>
+                            </div>
+                            <div data-name="Box" class="col-sm-4 offset-sm-1 pt16 pb16">
+                                <div class="card shadow text-center">
+                                    <h5 class="card-header o_colored_level text-bg-primary">Our Product</h5>
+                                    <div class="card-body p-0 pt-3">
+                                        <img class="img-fluid o_we_custom_image pb24" src="/website_hr_recruitment/static/src/img/job_product.svg" style="width: 75% !important;" alt="Our Product"/>
+                                        <p>Discover our products.</p>
+                                        <p><a href="/" class="btn btn-primary" target="_blank"><small><b>READ</b></small></a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- What we offer -->
+                <section class="s_features pt64 pb40 bg-200" data-name="Features" data-snippet="s_features">
+                    <div class="container">
+                        <h2>What do we offer</h2>
+                        <br/>
+                        <p class="lead">
+                            Each employee has a chance to see the impact of his work.
+                            You can make a real contribution to the success of the company.
+                            <br/>
+                            Several activities are often organized all over the year, such as weekly
+                            sports sessions, team building events, monthly drink, and much more
+                        </p>
+                        <div class="row pt16">
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-gift rounded-circle text-bg-primary m-3"></i>
+                                <h3>Compensation and Perks</h3>
+                                <p>A full-time position <br/>with an attractive salary package.</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-bar-chart rounded-circle text-bg-primary m-3"></i>
+                                <h3>Paid leaves</h3>
+                                <p>5 Days working week, 24 paid leaves and public <br/>holidays as per the IT Industry</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-futbol-o rounded-circle text-bg-primary m-3"></i>
+                                <h3>Prime location</h3>
+                                <p>Work at the best location with easy<br/>transportation connectivity</p>
+                            </div>
+                            <div class="col-lg-3 text-center pt16 pb32">
+                                <i class="fa fa-2x fa-coffee rounded-circle text-bg-primary m-3"></i>
+                                <h3>Eat &amp; Drink</h3>
+                                <p>Tea, coffee and snacks<br/>provided all day.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Photos -->
+                <section class="o_jobs_image_gallery s_image_gallery pt24 pb24 o_grid o_spc-medium" data-vcss="001" data-columns="3" style="overflow: hidden;" data-snippet="s_images_wall" data-name="Images Wall">
+                    <div class="container">
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-8">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_9.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-4">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_10.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                        <div class="row s_nb_column_fixed">
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_11.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-3">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_12.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                            <div class="col-lg-6">
+                                <img src="/website_hr_recruitment/static/src/img/job_image_13.jpg" class="img img-fluid d-block h-100 w-100 shadow" style="object-fit: cover;"/>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </field>
+        </record>
+    </data>
+</odoo>

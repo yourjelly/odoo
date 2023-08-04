@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form_inherit" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="75"/>
+            <field name="inherit_id" ref="hr_recruitment.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='recruitment_process_div']" position="after">
+                <div class="row mt16 o_settings_container" name="recruitment_process_div">
+                    <h2>Developer Accounts</h2>
+                    <div class="col-12 col-lg-6 o_setting_box" id="developer_accounts">
+                        <div class="o_setting_left_pane">
+                            <field name="module_hr_recruitment_indeed"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="module_hr_recruitment_indeed" string="Indeed HR Recruitment"/>
+                            <div class="text-muted">
+                                Enable HR Recruitment integration with Indeed
+                            </div>
+                            <div class="content-group" attrs="{'invisible': [('module_hr_recruitment_indeed', '=', False)]}">
+                                <div class="mt16">
+                                    <label for="indeed_api_token" string="API Token" class="col-3 col-lg-3 o_form_label"/>
+                                    <field name="indeed_api_token" password="True" class="oe_inline"/>
+                                </div>
+                                <div class="mt16">
+                                    <label for="indeed_secret_key" string="Secret Key" class="col-3 col-lg-3 o_form_label"/>
+                                    <field name="indeed_secret_key" password="True" class="oe_inline"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
