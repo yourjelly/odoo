@@ -131,6 +131,7 @@ export const commandService = {
          * @param {Function} onClose called when the command palette is closed
          */
         function openPalette(config, onClose) {
+            debugger;
             if (isPaletteOpened) {
                 bus.trigger("SET-CONFIG", config);
                 return;

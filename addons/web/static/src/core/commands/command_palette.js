@@ -102,7 +102,7 @@ export class CommandPalette extends Component {
         this.DefaultCommandItem = DefaultCommandItem;
         this.activeElement = useService("ui").activeElement;
         this.inputRef = useAutofocus();
-        this.dialogservice = useService("dialog")
+        // this.dialogservice = useService("dialog")
         useHotkey("Enter", () => this.executeSelectedCommand(), { bypassEditableProtection: true });
         useHotkey("Control+Enter", () => this.executeSelectedCommand(true), {
             bypassEditableProtection: true,
@@ -263,7 +263,6 @@ export class CommandPalette extends Component {
      * @param {CommandItem} command
      */
     async executeCommand(command) {
-        debugger;
         const config = await command.action();
         if (config) {
             this.setCommandPaletteConfig(config);

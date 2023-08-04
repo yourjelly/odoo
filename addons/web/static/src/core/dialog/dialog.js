@@ -18,11 +18,11 @@ export class Dialog extends Component {
         });
         // useExternalListener(window, "mousedown", this.onWindowMouseDown);
         
-        // useHotkey("control+k",() => {
-        //     this.data.close();
-        //     debugger
-        //     this.command.openMainPalette();
-        // })
+        useHotkey("control+k",() => {
+            this.data.close();
+            debugger
+            this.command.openMainPalette();
+        })
         // if(this.data.isActive)
         // {
         //     this.data.close();
