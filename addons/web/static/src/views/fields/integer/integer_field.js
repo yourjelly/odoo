@@ -8,23 +8,38 @@ import { useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 import { useNumpadDecimal } from "../numpad_decimal_hook";
 
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 
 export class IntegerField extends Component {
     static template = "web.IntegerField";
     static props = {
         ...standardFieldProps,
         formatNumber: { type: Boolean, optional: true },
+        humanReadable: { type: Boolean, optional: true },
+        decimals: { type: Number, optional: true },
         inputType: { type: String, optional: true },
         step: { type: Number, optional: true },
         placeholder: { type: String, optional: true },
     };
     static defaultProps = {
         formatNumber: true,
+        humanReadable: false,
         inputType: "text",
+        decimals: 0, 
     };
 
+    onFocusIn() {
+        this.state.hasFocus = true
+    }
+
+    onFocusOut() {
+        this.state.hasFocus = false
+    }
+
     setup() {
+        this.state = useState({
+            hasFocus: false, 
+        })
         useInputField({
             getValue: () => this.formattedValue,
             refName: "numpadDecimal",
@@ -40,7 +55,11 @@ export class IntegerField extends Component {
         ) {
             return this.props.record.data[this.props.name];
         }
-        return formatInteger(this.props.record.data[this.props.name]);
+        if (this.props.humanReadable && !this.state.hasFocus) {
+            return formatInteger(this.props.record.data[this.props.name], {humanReadable: true, decimals: this.props.decimals });
+        } else {
+            return formatInteger(this.props.record.data[this.props.name], {humanReadable: false});
+        }
     }
 }
 
@@ -71,9 +90,11 @@ export const integerField = {
     extractProps: ({ attrs, options }) => ({
         formatNumber:
             options?.enable_formatting !== undefined ? Boolean(options.enable_formatting) : true,
+        humanReadable: options?.human_readable !== undefined ? Boolean(options.human_readable) : false,
         inputType: options.type,
         step: options.step,
         placeholder: attrs.placeholder,
+        decimals: options?.decimals > 0 ? +Math.ceil(options.decimals) : 0,
     }),
 };
 
