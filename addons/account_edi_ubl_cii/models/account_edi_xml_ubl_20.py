@@ -303,6 +303,12 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'base_quantity_attrs': {'unitCode': uom},
         }
 
+    def _get_invoice_line_tax_totals_vals_list(self, line, taxes_vals):
+        """ Method used to fill the cac:TaxTotal node on a line level.
+        Uses the same method as the invoice TaxTotal, but can be overridden in other formats.
+        """
+        return self._get_invoice_tax_totals_vals_list(line.move_id, taxes_vals)
+
     def _get_invoice_line_vals(self, line, taxes_vals):
         """ Method used to fill the cac:InvoiceLine node.
         It provides information about the invoice line.
@@ -331,7 +337,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'line_extension_amount': line.price_subtotal + total_fixed_tax_amount,
 
             'allowance_charge_vals': allowance_charge_vals_list,
-            'tax_total_vals': self._get_invoice_tax_totals_vals_list(line.move_id, taxes_vals),
+            'tax_total_vals': self._get_invoice_line_tax_totals_vals_list(line, taxes_vals),
             'item_vals': self._get_invoice_line_item_vals(line, taxes_vals),
             'price_vals': self._get_invoice_line_price_vals(line),
         }
