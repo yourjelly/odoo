@@ -235,7 +235,7 @@ Contracts:
             at the time of the leave.
         """
         days = super()._get_number_of_days(date_from, date_to, employee)
-        if employee:
+        if employee and employee.contract_id:
             # Use sudo otherwise base users can't compute number of days
             contracts = employee.sudo()._get_contracts(date_from, date_to, states=['open'])
             contracts |= employee.sudo()._get_incoming_contracts(date_from, date_to)
