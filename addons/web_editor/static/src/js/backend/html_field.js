@@ -712,6 +712,9 @@ HtmlField.extractProps = ({ attrs, field }) => {
         // can be set elsewhere otherwise.
         wysiwygOptions.allowCommandVideo = Boolean(attrs.options.allowCommandVideo);
     }
+    if ('imageAsAttachment' in attrs.options) {
+        wysiwygOptions.dropImageAsAttachment = Boolean(attrs.options.imageAsAttachment);
+    }
     return {
         isTranslatable: field.translate,
         fieldName: field.name,
