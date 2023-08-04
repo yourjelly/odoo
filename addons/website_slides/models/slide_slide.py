@@ -483,6 +483,11 @@ class Slide(models.Model):
         return slide
 
     def write(self, values):
+        if values.get('completion_time') and not isinstance(values.get('completion_time'), float):
+            try:
+                values['completion_time'] = float(values.get('completion_time'))
+            except ValueError:
+                raise UserError(_("Invalid format of course duration"))
         if values.get('url') and values['url'] != self.url:
             doc_data = self._parse_document_url(values['url']).get('values', dict())
             for key, value in doc_data.items():
