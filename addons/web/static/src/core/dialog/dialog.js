@@ -17,7 +17,7 @@ export class Dialog extends Component {
             this.data.close();
         });
         // useExternalListener(window, "mousedown", this.onWindowMouseDown);
-        
+        // useExternalListener(window, "keydown", this.onKeydown);
         useHotkey("control+k",() => {
             this.data.close();
             debugger
@@ -42,6 +42,9 @@ export class Dialog extends Component {
     }
 
     // onWindowMouseDown(ev) {
+    //     this.data.close();
+    // }
+    // onKeydown(ev){
     //     this.data.close();
     // }
 }

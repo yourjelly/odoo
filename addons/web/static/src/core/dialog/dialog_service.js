@@ -41,6 +41,8 @@ export const dialogService = {
                 if (dialogs[id]) {
                     delete dialogs[id];
                     Object.values(dialogs).forEach((dialog, i, dialogArr) => {
+                        debugger;
+                        dialog.dialogData.close();
                         dialog.dialogData.isActive = i === dialogArr.length - 1;
                     });
                     if (options.onClose) {
