@@ -3,6 +3,7 @@
 from unittest.mock import patch
 import logging
 import time
+import timeit
 
 from psycopg2 import IntegrityError
 from psycopg2.extras import Json
@@ -14,6 +15,7 @@ from odoo.tools.translate import quote, unquote, xml_translate, html_translate, 
 from odoo.tests.common import TransactionCase, BaseCase, new_test_user, tagged
 
 _stats_logger = logging.getLogger('odoo.tests.stats')
+_logger = logging.getLogger(__name__)
 
 # a string with various unicode characters
 SPECIAL_CHARACTERS = " ¥®°²Æçéðπ⁉€∇⓵▲☑♂♥✓➔『にㄅ㊀中한︸🌈🌍👌😀"
@@ -1203,3 +1205,95 @@ class TestTranslationTrigramIndexPatterns(BaseCase):
         ]
         for original_pattern, escaped_pattern, message in cases:
             self.assertEqual(sql.pattern_to_translated_trigram_pattern(original_pattern), escaped_pattern, message)
+
+class TestTranslatableCacheValuePerformance(TestXMLTranslation):
+    class TranslatableCacheValue(dict):
+        def __getitem__(self, key):
+            if (res := dict.get(self, key)) is not None:
+                return res
+            return dict.__getitem__(self, 'en_US')
+
+        def __contains__(self, item):
+            return True
+
+    def test_00_class(self):
+        archf = '<form string="%s"><div>%s</div><div>%s</div></form>'
+        terms_en = ('Knife', 'Fork', 'Spoon')
+        terms_fr = ('Couteau', 'Fourchette', 'Cuiller')
+        raw_cache_value = {
+            'en_US': archf % terms_en,
+            'fr_FR': archf % terms_fr,
+        }
+        translatable_cache_value = self.TranslatableCacheValue(raw_cache_value)
+        raw_cache_value['nl_NL'] = raw_cache_value['en_US']
+
+        t_dict_en = timeit.timeit('value["en_US"]', globals={'value': raw_cache_value}, number=10000)
+        t_dict_fr = timeit.timeit('value["fr_FR"]', globals={'value': raw_cache_value}, number=10000)
+        t_dict_nl = timeit.timeit('value["nl_NL"]', globals={'value': raw_cache_value}, number=10000)
+
+
+        t_tcv_en = timeit.timeit('value["en_US"]', globals={'value': translatable_cache_value}, number=10000)
+        t_tcv_fr = timeit.timeit('value["fr_FR"]', globals={'value': translatable_cache_value}, number=10000)
+        t_tcv_nl = timeit.timeit('value["nl_NL"]', globals={'value': translatable_cache_value}, number=10000)
+
+        _logger.info(
+            'TranslatableCacheValue["en_US"] (hit) is %s times slower than the dict',
+            (t_tcv_en / t_dict_en,)
+        )
+        _logger.info(
+            'TranslatableCacheValue["fr_FR"] (hit) is %s times slower than the dict',
+            (t_tcv_fr / t_dict_fr,)
+        )
+        _logger.info(
+            'TranslatableCacheValue["nl_NL"] (miss) is %s times slower than the dict',
+            (t_tcv_nl / t_dict_nl,)
+        )
+
+    def test_01_read(self):
+        archf = '<form string="%s"><div>%s</div><div>%s</div></form>'
+        terms_en = ('Knife', 'Fork', 'Spoon')
+        terms_fr = ('Couteau', 'Fourchette', 'Cuiller')
+        view0 = self.create_view(archf, terms_en, fr_FR=terms_fr)
+
+        env_en = self.env(context={'lang': 'en_US'})
+        env_fr = self.env(context={'lang': 'fr_FR'})
+        env_nl = self.env(context={'lang': 'nl_NL'})
+
+        view0.with_env(env_en).arch_db
+        view0.with_env(env_fr).arch_db
+        view0.with_env(env_nl).arch_db
+
+        t_dict_en = timeit.timeit('view.arch_db', globals={'view': view0.with_env(env_en)}, number=10000)
+        t_dict_fr = timeit.timeit('view.arch_db', globals={'view': view0.with_env(env_fr)}, number=10000)
+        t_dict_nl = timeit.timeit('view.arch_db', globals={'view': view0.with_env(env_nl)}, number=10000)
+
+        archf2 = '<form string="%s"><div>%s</div><div>%s</div>updated</form>'
+        self.env.cache.update_raw(view0, view0._fields['arch_db'], [
+            self.TranslatableCacheValue({
+                'en_US': archf2 % terms_en,
+                'fr_FR': archf2 % terms_fr,
+            })
+        ])
+        view0.flush_recordset()
+
+        with self.assertQueryCount(0):
+            self.assertEqual(view0.with_env(env_en).arch_db, archf2 % terms_en)
+            self.assertEqual(view0.with_env(env_fr).arch_db, archf2 % terms_fr)
+            self.assertEqual(view0.with_env(env_nl).arch_db, archf2 % terms_en)
+
+        t_tcv_en = timeit.timeit('view.arch_db', globals={'view': view0.with_env(env_en)}, number=10000)
+        t_tcv_fr = timeit.timeit('view.arch_db', globals={'view': view0.with_env(env_fr)}, number=10000)
+        t_tcv_nl = timeit.timeit('view.arch_db', globals={'view': view0.with_env(env_nl)}, number=10000)
+
+        _logger.info(
+            'TranslatableCacheValue record read with en_US (hit) is %s times slower than the dict',
+            (t_tcv_en / t_dict_en,)
+        )
+        _logger.info(
+            'TranslatableCacheValue record read with fr_FR (hit) is %s times slower than the dict',
+            (t_tcv_fr / t_dict_fr,)
+        )
+        _logger.info(
+            'TranslatableCacheValue record read with nl_NL (miss) is %s times slower than the dict',
+            (t_tcv_nl / t_dict_nl,)
+        )
