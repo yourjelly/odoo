@@ -109,8 +109,8 @@
     const HEADER_BORDER_COLOR = "#C0C0C0";
     const CELL_BORDER_COLOR = "#E2E3E3";
     const BACKGROUND_CHART_COLOR = "#FFFFFF";
-    const MENU_ITEM_DISABLED_COLOR = "#CACACA";
     const BG_HOVER_COLOR = "#EBEBEB";
+    const DISABLED_TEXT_COLOR = "#CACACA";
     const DEFAULT_COLOR_SCALE_MIDPOINT_COLOR = 0xb6d7a8;
     const LINK_COLOR = "#01666b";
     const FILTERS_COLOR = "#188038";
@@ -236,6 +236,7 @@
     const HEADER_FONT_SIZE = 11;
     const DEFAULT_FONT = "'Roboto', arial";
     const DEFAULT_VERTICAL_ALIGN = "bottom";
+    const DEFAULT_WRAPPING_MODE = "overflow";
     // Borders
     const DEFAULT_BORDER_DESC = { style: "thin", color: "#000000" };
     const DEFAULT_FILTER_BORDER_DESC = { style: "thin", color: FILTERS_COLOR };
@@ -392,82 +393,6 @@
     }
     function clip(val, min, max) {
         return val < min ? min : val > max ? max : val;
-    }
-    function computeTextLinesHeight(textLineHeight, numberOfLines = 1) {
-        return numberOfLines * (textLineHeight + MIN_CELL_TEXT_MARGIN) - MIN_CELL_TEXT_MARGIN;
-    }
-    /**
-     * Get the default height of the cell given its style.
-     */
-    function getDefaultCellHeight(cell) {
-        if (!cell || !cell.content) {
-            return DEFAULT_CELL_HEIGHT;
-        }
-        const fontSize = computeTextFontSizeInPixels(cell.style);
-        // the number of lines should be computed from the formula result, but it's not evaluated at this point
-        const numberOfLines = cell.isFormula ? 1 : cell.content.split(NEWLINE).length;
-        return computeTextLinesHeight(fontSize, numberOfLines) + 2 * PADDING_AUTORESIZE_VERTICAL;
-    }
-    function computeTextWidth(context, text, style) {
-        const font = computeTextFont(style);
-        if (!textWidthCache[font]) {
-            textWidthCache[font] = {};
-        }
-        if (textWidthCache[font][text] === undefined) {
-            context.save();
-            context.font = font;
-            const textWidth = context.measureText(text).width;
-            context.restore();
-            textWidthCache[font][text] = textWidth;
-        }
-        return textWidthCache[font][text];
-    }
-    const textWidthCache = {};
-    function fontSizeInPixels(fontSize) {
-        return Math.round((fontSize * 96) / 72);
-    }
-    function computeTextFont(style) {
-        const italic = style.italic ? "italic " : "";
-        const weight = style.bold ? "bold" : DEFAULT_FONT_WEIGHT;
-        const size = computeTextFontSizeInPixels(style);
-        return `${italic}${weight} ${size}px ${DEFAULT_FONT}`;
-    }
-    function computeTextFontSizeInPixels(style) {
-        const sizeInPt = style?.fontSize || DEFAULT_FONT_SIZE;
-        return fontSizeInPixels(sizeInPt);
-    }
-    /**
-     * Return the font size that makes the width of a text match the given line width.
-     * Minimum font size is 1.
-     *
-     * @param getTextWidth function that takes a fontSize as argument, and return the width of the text with this font size.
-     */
-    function getFontSizeMatchingWidth(lineWidth, maxFontSize, getTextWidth, precision = 0.25) {
-        let minFontSize = 1;
-        if (getTextWidth(minFontSize) > lineWidth)
-            return minFontSize;
-        if (getTextWidth(maxFontSize) < lineWidth)
-            return maxFontSize;
-        // Dichotomic search
-        let fontSize = (minFontSize + maxFontSize) / 2;
-        let currentTextWidth = getTextWidth(fontSize);
-        // Use a maximum number of iterations to be safe, because measuring text isn't 100% precise
-        let iterations = 0;
-        while (Math.abs(currentTextWidth - lineWidth) > precision && iterations < 20) {
-            if (currentTextWidth >= lineWidth) {
-                maxFontSize = (minFontSize + maxFontSize) / 2;
-            }
-            else {
-                minFontSize = (minFontSize + maxFontSize) / 2;
-            }
-            fontSize = (minFontSize + maxFontSize) / 2;
-            currentTextWidth = getTextWidth(fontSize);
-            iterations++;
-        }
-        return fontSize;
-    }
-    function computeIconWidth(style) {
-        return computeTextFontSizeInPixels(style) + 2 * MIN_CF_ICON_MARGIN;
     }
     /**
      * Create a range from start (included) to end (excluded).
@@ -723,10 +648,6 @@
         Object.keys(cleanObject).forEach((key) => !cleanObject[key] && delete cleanObject[key]);
         return cleanObject;
     }
-    /** Transform a string to lower case. If the string is undefined, return an empty string */
-    function toLowerCase(str) {
-        return str ? str.toLowerCase() : "";
-    }
     function transpose2dArray(matrix, callback = (val) => val) {
         if (!matrix.length)
             return [];
@@ -815,6 +736,14 @@
                 return cache.get(args[0]);
             },
         }[funcName];
+    }
+    function removeIndexesFromArray(array, indexes) {
+        return array.filter((_, index) => !indexes.includes(index));
+    }
+    function insertItemsAtIndex(array, items, index) {
+        const newArray = [...array];
+        newArray.splice(index, 0, ...items);
+        return newArray;
     }
 
     const RBA_REGEX = /rgba?\(|\s+|\)/gi;
@@ -958,13 +887,13 @@
         let g = rgba.g.toString(16);
         let b = rgba.b.toString(16);
         let a = Math.round(rgba.a * 255).toString(16);
-        if (r.length == 1)
+        if (r.length === 1)
             r = "0" + r;
-        if (g.length == 1)
+        if (g.length === 1)
             g = "0" + g;
-        if (b.length == 1)
+        if (b.length === 1)
             b = "0" + b;
-        if (a.length == 1)
+        if (a.length === 1)
             a = "0" + a;
         if (a === "ff")
             a = "";
@@ -1067,13 +996,13 @@
         let l = 0;
         // Calculate hue
         // No difference
-        if (delta == 0)
+        if (delta === 0)
             h = 0;
         // Red is max
-        else if (cMax == r)
+        else if (cMax === r)
             h = ((g - b) / delta) % 6;
         // Green is max
-        else if (cMax == g)
+        else if (cMax === g)
             h = (b - r) / delta + 2;
         // Blue is max
         else
@@ -1084,7 +1013,7 @@
             h += 360;
         l = (cMax + cMin) / 2;
         // Calculate saturation
-        s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+        s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
         // Multiply l and s by 100
         s = +(s * 100).toFixed(1);
         l = +(l * 100).toFixed(1);
@@ -1256,7 +1185,7 @@
     const mdyDateRegexp = /^\d{1,2}(\/|-|\s)\d{1,2}((\/|-|\s)\d{1,4})?$/;
     const ymdDateRegexp = /^\d{3,4}(\/|-|\s)\d{1,2}(\/|-|\s)\d{1,2}$/;
     const dateSeparatorsRegex = /\/|-|\s/;
-    const dateRegexp = /^(\d{1,4})[\/-\s](\d{1,2})([\/-\s](\d{1,4}))?$/;
+    const dateRegexp = /^(\d{1,4})[\/-\s](\d{1,4})([\/-\s](\d{1,4}))?$/;
     const timeRegexp = /((\d+(:\d+)?(:\d+)?\s*(AM|PM))|(\d+:\d+(:\d+)?))$/;
     function isDateTime(str, locale) {
         return parseDateTime(str, locale) !== null;
@@ -1317,6 +1246,10 @@
         }
         const localeDateType = getLocaleDateFormatType(locale);
         if (!part3) {
+            if (part2.length > 2) {
+                // e.g. 11/2023
+                return { month: part1, year: part2, day: undefined, dateString, type: localeDateType };
+            }
             if (localeDateType === "dmy") {
                 return { day: part1, month: part2, year: part3, dateString, type: "dmy" };
             }
@@ -1521,7 +1454,7 @@
     }
     function isLeapYear(year) {
         const _year = Math.trunc(year);
-        return (_year % 4 === 0 && _year % 100 != 0) || _year % 400 == 0;
+        return (_year % 4 === 0 && _year % 100 != 0) || _year % 400 === 0;
     }
     function getYearFrac(startDate, endDate, _dayCountConvention) {
         if (startDate === endDate) {
@@ -2181,6 +2114,39 @@
             return digitBase + "%";
         }
         return undefined;
+    }
+    function createCurrencyFormat(currency) {
+        const decimalPlaces = currency.decimalPlaces ?? 2;
+        const position = currency.position ?? "before";
+        const code = currency.code ?? "";
+        const symbol = currency.symbol ?? "";
+        const decimalRepresentation = decimalPlaces ? "." + "0".repeat(decimalPlaces) : "";
+        const numberFormat = "#,##0" + decimalRepresentation;
+        let textExpression = `${code} ${symbol}`.trim();
+        if (position === "after" && code) {
+            textExpression = " " + textExpression;
+        }
+        return insertTextInFormat(textExpression, position, numberFormat);
+    }
+    function insertTextInFormat(text, position, format) {
+        const textExpression = `[$${text}]`;
+        return position === "before" ? textExpression + format : format + textExpression;
+    }
+    function roundFormat(format) {
+        const internalFormat = parseFormat(format);
+        const roundedFormat = internalFormat.map((formatPart) => {
+            if (formatPart.type === "NUMBER") {
+                return {
+                    type: formatPart.type,
+                    format: {
+                        ...formatPart.format,
+                        decimalPart: undefined,
+                    },
+                };
+            }
+            return formatPart;
+        });
+        return convertInternalFormatToFormat(roundedFormat);
     }
     function createLargeNumberFormat(format, magnitude, postFix, locale) {
         const internalFormat = parseFormat(format || "#,##0");
@@ -3030,11 +2996,18 @@
         constructor(args, getSheetSize) {
             this.getSheetSize = getSheetSize;
             this._zone = args.zone;
-            this.parts = args.parts;
             this.prefixSheet = args.prefixSheet;
             this.invalidXc = args.invalidXc;
             this.sheetId = args.sheetId;
             this.invalidSheetName = args.invalidSheetName;
+            let _fixedParts = [...args.parts];
+            if (args.parts.length === 1 && getZoneArea(this.zone) > 1) {
+                _fixedParts.push({ ...args.parts[0] });
+            }
+            else if (args.parts.length === 2 && getZoneArea(this.zone) === 1) {
+                _fixedParts.pop();
+            }
+            this.parts = _fixedParts;
         }
         static fromRange(range, getters) {
             if (range instanceof RangeImpl) {
@@ -3275,6 +3248,169 @@
         return rows;
     }
 
+    function computeTextLinesHeight(textLineHeight, numberOfLines = 1) {
+        return numberOfLines * (textLineHeight + MIN_CELL_TEXT_MARGIN) - MIN_CELL_TEXT_MARGIN;
+    }
+    /**
+     * Get the default height of the cell given its style.
+     */
+    function getDefaultCellHeight(ctx, cell, colSize) {
+        if (!cell || !cell.content)
+            return DEFAULT_CELL_HEIGHT;
+        const maxWidth = cell.style?.wrapping ? colSize - 2 * MIN_CELL_TEXT_MARGIN : undefined;
+        const numberOfLines = cell.isFormula
+            ? 1
+            : splitTextToWidth(ctx, cell.content, cell.style, maxWidth).length;
+        const fontSize = computeTextFontSizeInPixels(cell.style);
+        return computeTextLinesHeight(fontSize, numberOfLines) + 2 * PADDING_AUTORESIZE_VERTICAL;
+    }
+    const textWidthCache = {};
+    function computeTextWidth(context, text, style) {
+        const font = computeTextFont(style);
+        if (!textWidthCache[font]) {
+            textWidthCache[font] = {};
+        }
+        if (textWidthCache[font][text] === undefined) {
+            context.save();
+            context.font = font;
+            const textWidth = context.measureText(text).width;
+            context.restore();
+            textWidthCache[font][text] = textWidth;
+        }
+        return textWidthCache[font][text];
+    }
+    function fontSizeInPixels(fontSize) {
+        return Math.round((fontSize * 96) / 72);
+    }
+    function computeTextFont(style) {
+        const italic = style.italic ? "italic " : "";
+        const weight = style.bold ? "bold" : DEFAULT_FONT_WEIGHT;
+        const size = computeTextFontSizeInPixels(style);
+        return `${italic}${weight} ${size}px ${DEFAULT_FONT}`;
+    }
+    function computeTextFontSizeInPixels(style) {
+        const sizeInPt = style?.fontSize || DEFAULT_FONT_SIZE;
+        return fontSizeInPixels(sizeInPt);
+    }
+    function splitWordToSpecificWidth(ctx, word, width, style) {
+        const wordWidth = computeTextWidth(ctx, word, style);
+        if (wordWidth <= width) {
+            return [word];
+        }
+        const splitWord = [];
+        let wordPart = "";
+        for (let l of word) {
+            const wordPartWidth = computeTextWidth(ctx, wordPart + l, style);
+            if (wordPartWidth > width) {
+                splitWord.push(wordPart);
+                wordPart = l;
+            }
+            else {
+                wordPart += l;
+            }
+        }
+        splitWord.push(wordPart);
+        return splitWord;
+    }
+    /**
+     * Return the given text, split in multiple lines if needed. The text will be split in multiple
+     * line if it contains NEWLINE characters, or if it's longer than the given width.
+     */
+    function splitTextToWidth(ctx, text, style, width) {
+        if (!style)
+            style = {};
+        const brokenText = [];
+        // Checking if text contains NEWLINE before split makes it very slightly slower if text contains it,
+        // but 5-10x faster if it doesn't
+        const lines = text.includes(NEWLINE) ? text.split(NEWLINE) : [text];
+        for (const line of lines) {
+            const words = line.includes(" ") ? line.split(" ") : [line];
+            if (!width) {
+                brokenText.push(line);
+                continue;
+            }
+            let textLine = "";
+            let availableWidth = width;
+            for (let word of words) {
+                const splitWord = splitWordToSpecificWidth(ctx, word, width, style);
+                const lastPart = splitWord.pop();
+                const lastPartWidth = computeTextWidth(ctx, lastPart, style);
+                // At this step: "splitWord" is an array composed of parts of word whose
+                // length is at most equal to "width".
+                // Last part contains the end of the word.
+                // Note that: When word length is less than width, then lastPart is equal
+                // to word and splitWord is empty
+                if (splitWord.length) {
+                    if (textLine !== "") {
+                        brokenText.push(textLine);
+                        textLine = "";
+                        availableWidth = width;
+                    }
+                    splitWord.forEach((wordPart) => {
+                        brokenText.push(wordPart);
+                    });
+                    textLine = lastPart;
+                    availableWidth = width - lastPartWidth;
+                }
+                else {
+                    // here "lastPart" is equal to "word" and the "word" size is smaller than "width"
+                    const _word = textLine === "" ? lastPart : " " + lastPart;
+                    const wordWidth = computeTextWidth(ctx, _word, style);
+                    if (wordWidth <= availableWidth) {
+                        textLine += _word;
+                        availableWidth -= wordWidth;
+                    }
+                    else {
+                        brokenText.push(textLine);
+                        textLine = lastPart;
+                        availableWidth = width - lastPartWidth;
+                    }
+                }
+            }
+            if (textLine !== "") {
+                brokenText.push(textLine);
+            }
+        }
+        return brokenText;
+    }
+    /**
+     * Return the font size that makes the width of a text match the given line width.
+     * Minimum font size is 1.
+     *
+     * @param getTextWidth function that takes a fontSize as argument, and return the width of the text with this font size.
+     */
+    function getFontSizeMatchingWidth(lineWidth, maxFontSize, getTextWidth, precision = 0.25) {
+        let minFontSize = 1;
+        if (getTextWidth(minFontSize) > lineWidth)
+            return minFontSize;
+        if (getTextWidth(maxFontSize) < lineWidth)
+            return maxFontSize;
+        // Dichotomic search
+        let fontSize = (minFontSize + maxFontSize) / 2;
+        let currentTextWidth = getTextWidth(fontSize);
+        // Use a maximum number of iterations to be safe, because measuring text isn't 100% precise
+        let iterations = 0;
+        while (Math.abs(currentTextWidth - lineWidth) > precision && iterations < 20) {
+            if (currentTextWidth >= lineWidth) {
+                maxFontSize = (minFontSize + maxFontSize) / 2;
+            }
+            else {
+                minFontSize = (minFontSize + maxFontSize) / 2;
+            }
+            fontSize = (minFontSize + maxFontSize) / 2;
+            currentTextWidth = getTextWidth(fontSize);
+            iterations++;
+        }
+        return fontSize;
+    }
+    function computeIconWidth(style) {
+        return computeTextFontSizeInPixels(style) + 2 * MIN_CF_ICON_MARGIN;
+    }
+    /** Transform a string to lower case. If the string is undefined, return an empty string */
+    function toLowerCase(str) {
+        return str ? str.toLowerCase() : "";
+    }
+
     /*
      * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
      * */
@@ -3297,7 +3433,7 @@
             else {
                 // mainly for jest and other browsers that do not have the crypto functionality
                 return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-                    var r = (Math.random() * 16) | 0, v = c == "x" ? r : (r & 0x3) | 0x8;
+                    var r = (Math.random() * 16) | 0, v = c === "x" ? r : (r & 0x3) | 0x8;
                     return v.toString(16);
                 });
             }
@@ -3921,13 +4057,10 @@
         "START",
         "ACTIVATE_SHEET",
         "COPY",
-        "PREPARE_SELECTION_INPUT_EXPANSION",
-        "STOP_SELECTION_INPUT",
         "RESIZE_SHEETVIEW",
         "SET_VIEWPORT_OFFSET",
         "SELECT_SEARCH_NEXT_MATCH",
         "SELECT_SEARCH_PREVIOUS_MATCH",
-        "REFRESH_SEARCH",
         "UPDATE_SEARCH",
         "CLEAR_SEARCH",
         "EVALUATE_CELLS",
@@ -4125,6 +4258,7 @@
         CommandResult[CommandResult["NoSplitSeparatorInSelection"] = 92] = "NoSplitSeparatorInSelection";
         CommandResult[CommandResult["NoActiveSheet"] = 93] = "NoActiveSheet";
         CommandResult[CommandResult["InvalidLocale"] = 94] = "InvalidLocale";
+        CommandResult[CommandResult["AlreadyInPaintingFormatMode"] = 95] = "AlreadyInPaintingFormatMode";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
     const borderStyles = ["thin", "medium", "thick", "dashed", "dotted"];
@@ -4998,8 +5132,7 @@
                 return { cellData: {} };
             }
             const sheetId = data.sheetId;
-            const ranges = getters.createAdaptedRanges(cell.dependencies, x, y, sheetId);
-            const content = getters.buildFormulaContent(sheetId, cell, ranges);
+            const content = getters.getTranslatedCellFormula(sheetId, x, y, cell.compiledFormula, cell.dependencies);
             return {
                 cellData: {
                     border: data.border,
@@ -5865,7 +5998,7 @@
         }
       }
       &.disabled {
-        color: ${MENU_ITEM_DISABLED_COLOR};
+        color: ${DISABLED_TEXT_COLOR};
         cursor: not-allowed;
       }
     }
@@ -5940,8 +6073,8 @@
             return this.props.menuItems.some((menuItem) => !!menuItem.icon || !!menuItem.isActive);
         }
         getIconName(menu) {
-            if (menu.icon) {
-                return menu.icon;
+            if (menu.icon(this.env)) {
+                return menu.icon(this.env);
             }
             if (menu.isActive?.(this.env)) {
                 return "o-spreadsheet-Icon.CHECK";
@@ -6375,7 +6508,7 @@
         for (let pivot = 0; pivot < dim; pivot++) {
             let diagonalElement = C[pivot][pivot];
             // if we have a 0 on the diagonal we'll need to swap with a lower row
-            if (diagonalElement == 0) {
+            if (diagonalElement === 0) {
                 //look through every row below the i'th row
                 for (let row = pivot + 1; row < dim; row++) {
                     //if the ii'th row has a non-0 in the i'th col, swap it with that row
@@ -6402,7 +6535,7 @@
             // the other rows so that there will be 0's in this column in the
             // rows above and below this one
             for (let row = 0; row < dim; row++) {
-                if (row == pivot) {
+                if (row === pivot) {
                     continue;
                 }
                 // We want to change this element to 0
@@ -12467,7 +12600,7 @@
                 return false;
             }
             catch (e) {
-                return e?.errorType == CellErrorType.NotAvailable;
+                return e?.errorType === CellErrorType.NotAvailable;
             }
         },
         isExported: true,
@@ -15183,6 +15316,8 @@
     function createAction(item) {
         const name = item.name;
         const children = item.children;
+        const description = item.description;
+        const icon = item.icon;
         return {
             id: item.id || uuidGenerator$2.uuidv4(),
             name: typeof name === "function" ? name : () => name,
@@ -15200,8 +15335,8 @@
                 : () => [],
             isReadonlyAllowed: item.isReadonlyAllowed || false,
             separator: item.separator || false,
-            icon: item.icon || "",
-            description: item.description || "",
+            icon: typeof icon === "function" ? icon : () => icon || "",
+            description: typeof description === "function" ? description : () => description || "",
             textColor: item.textColor,
             sequence: item.sequence || 0,
         };
@@ -16667,7 +16802,7 @@
     function convertDateFormatForMoment(format) {
         format = format.replace(/y/g, "Y");
         format = format.replace(/d/g, "D");
-        // "m" before "h" == month, "m" after "h" == minute
+        // "m" before "h" === month, "m" after "h" === minute
         const indexH = format.indexOf("h");
         if (indexH >= 0) {
             format = format.slice(0, indexH).replace(/m/g, "M") + format.slice(indexH);
@@ -17521,6 +17656,7 @@
                     env.model.dispatch("SELECT_FIGURE", { id: figureId });
                     env.openSidePanel("ChartPanel");
                 },
+                icon: "o-spreadsheet-Icon.EDIT",
             },
             getCopyMenuItem(figureId, env),
             getCutMenuItem(figureId, env),
@@ -17552,6 +17688,7 @@
                         width,
                     });
                 },
+                icon: "o-spreadsheet-Icon.REFRESH",
             },
             getDeleteMenuItem(figureId, onFigureDeleted, env),
         ];
@@ -17568,6 +17705,7 @@
                 env.model.dispatch("COPY");
                 await env.clipboard.write(env.model.getters.getClipboardContent());
             },
+            icon: "o-spreadsheet-Icon.COPY",
         };
     }
     function getCutMenuItem(figureId, env) {
@@ -17581,6 +17719,7 @@
                 env.model.dispatch("CUT");
                 await env.clipboard.write(env.model.getters.getClipboardContent());
             },
+            icon: "o-spreadsheet-Icon.CUT",
         };
     }
     function getDeleteMenuItem(figureId, onFigureDeleted, env) {
@@ -17595,6 +17734,7 @@
                 });
                 onFigureDeleted();
             },
+            icon: "o-spreadsheet-Icon.DELETE",
         };
     }
 
@@ -18662,7 +18802,7 @@
     };
     const categorieFunctionAll = {
         name: _lt("All"),
-        children: allFunctionListMenuBuilder(),
+        children: [allFunctionListMenuBuilder],
     };
     function allFunctionListMenuBuilder() {
         const fnNames = functionRegistry.getKeys();
@@ -18994,7 +19134,10 @@
     };
     const formatNumberNumber = {
         name: _lt("Number"),
-        description: "1,000.12",
+        description: (env) => formatValue(1000.12, {
+            format: "#,##0.00",
+            locale: env.model.getters.getLocale(),
+        }),
         execute: (env) => setFormatter(env, "#,##0.00"),
         isActive: (env) => isFormatSelected(env, "#,##0.00"),
     };
@@ -19005,21 +19148,34 @@
     };
     const formatNumberPercent = {
         name: _lt("Percent"),
-        description: "10.12%",
+        description: (env) => formatValue(0.1012, {
+            format: "0.00%",
+            locale: env.model.getters.getLocale(),
+        }),
         execute: FORMAT_PERCENT_ACTION,
         isActive: (env) => isFormatSelected(env, "0.00%"),
     };
     const formatNumberCurrency = {
         name: _lt("Currency"),
-        description: "$1,000.12",
-        execute: (env) => setFormatter(env, "[$$]#,##0.00"),
-        isActive: (env) => isFormatSelected(env, "[$$]#,##0.00"),
+        description: (env) => formatValue(1000.12, {
+            format: env.model.config.defaultCurrencyFormat,
+            locale: env.model.getters.getLocale(),
+        }),
+        execute: (env) => setFormatter(env, env.model.config.defaultCurrencyFormat),
+        isActive: (env) => isFormatSelected(env, env.model.config.defaultCurrencyFormat),
     };
     const formatNumberCurrencyRounded = {
         name: _lt("Currency rounded"),
-        description: "$1,000",
-        execute: (env) => setFormatter(env, "[$$]#,##0"),
-        isActive: (env) => isFormatSelected(env, "[$$]#,##0"),
+        description: (env) => formatValue(1000, {
+            format: roundFormat(env.model.config.defaultCurrencyFormat),
+            locale: env.model.getters.getLocale(),
+        }),
+        execute: (env) => setFormatter(env, roundFormat(env.model.config.defaultCurrencyFormat)),
+        isActive: (env) => isFormatSelected(env, roundFormat(env.model.config.defaultCurrencyFormat)),
+        isVisible: (env) => {
+            const currencyFormat = env.model.config.defaultCurrencyFormat;
+            return currencyFormat !== roundFormat(currencyFormat);
+        },
     };
     const formatCustomCurrency = {
         name: _lt("Custom currency"),
@@ -19028,19 +19184,37 @@
     };
     const formatNumberDate = {
         name: _lt("Date"),
-        description: "9/26/2008",
+        description: (env) => {
+            const locale = env.model.getters.getLocale();
+            return formatValue(parseLiteral("9/26/2023", DEFAULT_LOCALE), {
+                format: locale.dateFormat,
+                locale,
+            });
+        },
         execute: (env) => setFormatter(env, env.model.getters.getLocale().dateFormat),
         isActive: (env) => isFormatSelected(env, env.model.getters.getLocale().dateFormat),
     };
     const formatNumberTime = {
         name: _lt("Time"),
-        description: "10:43:00 PM",
+        description: (env) => {
+            const locale = env.model.getters.getLocale();
+            return formatValue(parseLiteral("9/26/2023 10:43:00 PM", DEFAULT_LOCALE), {
+                format: locale.timeFormat,
+                locale,
+            });
+        },
         execute: (env) => setFormatter(env, env.model.getters.getLocale().timeFormat),
         isActive: (env) => isFormatSelected(env, env.model.getters.getLocale().timeFormat),
     };
     const formatNumberDateTime = {
         name: _lt("Date time"),
-        description: "9/26/2008 22:43:00",
+        description: (env) => {
+            const locale = env.model.getters.getLocale();
+            return formatValue(parseLiteral("9/26/2023 22:43:00", DEFAULT_LOCALE), {
+                format: locale.dateFormat + " " + locale.timeFormat,
+                locale,
+            });
+        },
         execute: (env) => {
             const locale = env.model.getters.getLocale();
             setFormatter(env, locale.dateFormat + " " + locale.timeFormat);
@@ -19112,7 +19286,7 @@
     };
     const formatAlignmentHorizontal = {
         name: _lt("Horizontal align"),
-        icon: "o-spreadsheet-Icon.ALIGN_LEFT",
+        icon: (env) => getHorizontalAlignmentIcon(env),
     };
     const formatAlignmentLeft = {
         name: _lt("Left"),
@@ -19137,46 +19311,50 @@
     };
     const formatAlignmentVertical = {
         name: _lt("Vertical align"),
-        icon: "o-spreadsheet-Icon.ALIGN_MIDDLE",
+        icon: (env) => getVerticalAlignmentIcon(env),
     };
     const formatAlignmentTop = {
         name: _lt("Top"),
         execute: (env) => setStyle(env, { verticalAlign: "top" }),
-        isActive: (env) => (env.model.getters.getCurrentStyle().verticalAlign || DEFAULT_VERTICAL_ALIGN) === "top",
+        isActive: (env) => getVerticalAlign(env) === "top",
         icon: "o-spreadsheet-Icon.ALIGN_TOP",
     };
     const formatAlignmentMiddle = {
         name: _lt("Middle"),
         execute: (env) => setStyle(env, { verticalAlign: "middle" }),
-        isActive: (env) => (env.model.getters.getCurrentStyle().verticalAlign || DEFAULT_VERTICAL_ALIGN) === "middle",
+        isActive: (env) => getVerticalAlign(env) === "middle",
         icon: "o-spreadsheet-Icon.ALIGN_MIDDLE",
     };
     const formatAlignmentBottom = {
         name: _lt("Bottom"),
         execute: (env) => setStyle(env, { verticalAlign: "bottom" }),
-        isActive: (env) => (env.model.getters.getCurrentStyle().verticalAlign || DEFAULT_VERTICAL_ALIGN) === "bottom",
+        isActive: (env) => getVerticalAlign(env) === "bottom",
         icon: "o-spreadsheet-Icon.ALIGN_BOTTOM",
+    };
+    const formatWrappingIcon = {
+        name: _lt("Wrapping"),
+        icon: "o-spreadsheet-Icon.WRAPPING_OVERFLOW",
     };
     const formatWrapping = {
         name: _lt("Wrapping"),
-        icon: "o-spreadsheet-Icon.WRAPPING_OVERFLOW",
+        icon: (env) => getWrapModeIcon(env),
     };
     const formatWrappingOverflow = {
         name: _lt("Overflow"),
         execute: (env) => setStyle(env, { wrapping: "overflow" }),
-        isActive: (env) => (env.model.getters.getCurrentStyle().wrapping || "overflow") === "overflow",
+        isActive: (env) => getWrappingMode(env) === "overflow",
         icon: "o-spreadsheet-Icon.WRAPPING_OVERFLOW",
     };
     const formatWrappingWrap = {
         name: _lt("Wrap"),
         execute: (env) => setStyle(env, { wrapping: "wrap" }),
-        isActive: (env) => env.model.getters.getCurrentStyle().wrapping === "wrap",
+        isActive: (env) => getWrappingMode(env) === "wrap",
         icon: "o-spreadsheet-Icon.WRAPPING_WRAP",
     };
     const formatWrappingClip = {
         name: _lt("Clip"),
         execute: (env) => setStyle(env, { wrapping: "clip" }),
-        isActive: (env) => env.model.getters.getCurrentStyle().wrapping === "clip",
+        isActive: (env) => getWrappingMode(env) === "clip",
         icon: "o-spreadsheet-Icon.WRAPPING_CLIP",
     };
     const textColor = {
@@ -19191,14 +19369,6 @@
         name: _lt("Conditional formatting"),
         execute: OPEN_CF_SIDEPANEL_ACTION,
         icon: "o-spreadsheet-Icon.CONDITIONAL_FORMAT",
-    };
-    const paintFormat = {
-        name: _lt("Paint Format"),
-        execute: (env) => env.model.dispatch("ACTIVATE_PAINT_FORMAT", {
-            target: env.model.getters.getSelectedZones(),
-        }),
-        icon: "o-spreadsheet-Icon.PAINT_FORMAT",
-        isActive: (env) => env.model.getters.isPaintingFormat(),
     };
     const clearFormat = {
         name: _lt("Clear formatting"),
@@ -19240,6 +19410,53 @@
         const cell = env.model.getters.getActiveCell();
         return cell.defaultAlign;
     }
+    function getVerticalAlign(env) {
+        const style = env.model.getters.getCurrentStyle();
+        if (style.verticalAlign) {
+            return style.verticalAlign;
+        }
+        return DEFAULT_VERTICAL_ALIGN;
+    }
+    function getWrappingMode(env) {
+        const style = env.model.getters.getCurrentStyle();
+        if (style.wrapping) {
+            return style.wrapping;
+        }
+        return DEFAULT_WRAPPING_MODE;
+    }
+    function getHorizontalAlignmentIcon(env) {
+        const horizontalAlign = getHorizontalAlign(env);
+        switch (horizontalAlign) {
+            case "right":
+                return "o-spreadsheet-Icon.ALIGN_RIGHT";
+            case "center":
+                return "o-spreadsheet-Icon.ALIGN_CENTER";
+            default:
+                return "o-spreadsheet-Icon.ALIGN_LEFT";
+        }
+    }
+    function getVerticalAlignmentIcon(env) {
+        const verticalAlign = getVerticalAlign(env);
+        switch (verticalAlign) {
+            case "top":
+                return "o-spreadsheet-Icon.ALIGN_TOP";
+            case "middle":
+                return "o-spreadsheet-Icon.ALIGN_MIDDLE";
+            default:
+                return "o-spreadsheet-Icon.ALIGN_BOTTOM";
+        }
+    }
+    function getWrapModeIcon(env) {
+        const wrapMode = getWrappingMode(env);
+        switch (wrapMode) {
+            case "wrap":
+                return "o-spreadsheet-Icon.WRAPPING_WRAP";
+            case "clip":
+                return "o-spreadsheet-Icon.WRAPPING_CLIP";
+            default:
+                return "o-spreadsheet-Icon.WRAPPING_OVERFLOW";
+        }
+    }
 
     var ACTION_FORMAT = /*#__PURE__*/Object.freeze({
         __proto__: null,
@@ -19270,6 +19487,7 @@
         formatAlignmentTop: formatAlignmentTop,
         formatAlignmentMiddle: formatAlignmentMiddle,
         formatAlignmentBottom: formatAlignmentBottom,
+        formatWrappingIcon: formatWrappingIcon,
         formatWrapping: formatWrapping,
         formatWrappingOverflow: formatWrappingOverflow,
         formatWrappingWrap: formatWrappingWrap,
@@ -19277,7 +19495,6 @@
         textColor: textColor,
         fillColor: fillColor,
         formatCF: formatCF,
-        paintFormat: paintFormat,
         clearFormat: clearFormat
     });
 
@@ -20040,7 +20257,7 @@
         separator: true,
     })
         .addChild("format_wrapping", ["format"], {
-        ...formatWrapping,
+        ...formatWrappingIcon,
         sequence: 80,
         separator: true,
     })
@@ -22207,6 +22424,18 @@
             style[tool] = !style[tool];
             this.closeMenus();
         }
+        onKeydown(event) {
+            if (event.key === "F4") {
+                const target = event.target;
+                const update = this.env.model.getters.getCycledReference({ start: target.selectionStart ?? 0, end: target.selectionEnd ?? 0 }, target.value);
+                if (!update) {
+                    return;
+                }
+                target.value = update.content;
+                target.setSelectionRange(update.selection.start, update.selection.end);
+                target.dispatchEvent(new Event("input"));
+            }
+        }
         setColor(target, color) {
             this.state.rules.cellIs.style[target] = color;
             this.closeMenus();
@@ -22330,17 +22559,45 @@
         }
         get formatProposals() {
             const currency = this.availableCurrencies[this.state.selectedCurrencyIndex];
-            const proposalBases = this.initProposalBases(currency.decimalPlaces);
-            const firstPosition = currency.position;
-            const secondPosition = currency.position === "before" ? "after" : "before";
+            const position = currency.position;
+            const opposite = currency.position === "before" ? "after" : "before";
             const symbol = this.state.currencySymbol.trim() ? this.state.currencySymbol : "";
             const code = this.state.currencyCode.trim() ? this.state.currencyCode : "";
-            return code || symbol
-                ? [
-                    ...this.createFormatProposals(proposalBases, symbol, code, firstPosition),
-                    ...this.createFormatProposals(proposalBases, symbol, code, secondPosition),
-                ]
-                : [];
+            const decimalPlaces = currency.decimalPlaces;
+            if (!symbol && !code) {
+                return [];
+            }
+            const simple = symbol ? createCurrencyFormat({ symbol, position, decimalPlaces }) : "";
+            const rounded = simple ? roundFormat(simple) : "";
+            const simpleWithCode = createCurrencyFormat({ symbol, position, decimalPlaces, code });
+            const roundedWithCode = roundFormat(simpleWithCode);
+            const simpleOpposite = symbol
+                ? createCurrencyFormat({ symbol, position: opposite, decimalPlaces })
+                : "";
+            const roundedOpposite = simpleOpposite ? roundFormat(simpleOpposite) : "";
+            const simpleOppositeWithCode = createCurrencyFormat({
+                symbol,
+                position: opposite,
+                decimalPlaces,
+                code,
+            });
+            const roundedOppositeWithCode = roundFormat(simpleOppositeWithCode);
+            const formats = new Set([
+                rounded,
+                simple,
+                roundedWithCode,
+                simpleWithCode,
+                roundedOpposite,
+                simpleOpposite,
+                roundedOppositeWithCode,
+                simpleOppositeWithCode,
+            ]);
+            return [...formats]
+                .filter((format) => format !== "")
+                .map((format) => ({
+                format,
+                example: formatValue(1000.0, { format, locale: this.env.model.getters.getLocale() }),
+            }));
         }
         get isSameFormat() {
             const selectedFormat = this.formatProposals[this.state.selectedFormatIndex];
@@ -22396,41 +22653,6 @@
         // ---------------------------------------------------------------------------
         initAvailableCurrencies() {
             this.state.selectedCurrencyIndex = 0;
-        }
-        initProposalBases(decimalPlaces) {
-            const result = [{ format: "#,##0", example: "1,000" }];
-            const decimalRepresentation = decimalPlaces ? "." + "0".repeat(decimalPlaces) : "";
-            if (decimalRepresentation) {
-                result.push({
-                    format: "#,##0" + decimalRepresentation,
-                    example: "1,000" + decimalRepresentation,
-                });
-            }
-            return result;
-        }
-        createFormatProposals(proposalBases, symbol, code, position) {
-            let formatProposals = [];
-            // 1 - add proposal with symbol and without code
-            if (symbol) {
-                for (let base of proposalBases) {
-                    formatProposals.push(this.createFormatProposal(position, base.example, base.format, symbol));
-                }
-            }
-            // 2 - if code exist --> add more proposal with symbol and with code
-            if (code) {
-                for (let base of proposalBases) {
-                    const expression = (position === "after" ? " " : "") + code + " " + symbol;
-                    formatProposals.push(this.createFormatProposal(position, base.example, base.format, expression));
-                }
-            }
-            return formatProposals;
-        }
-        createFormatProposal(position, baseExample, formatBase, expression) {
-            const formatExpression = "[$" + expression + "]";
-            return {
-                example: position === "before" ? expression + baseExample : baseExample + expression,
-                format: position === "before" ? formatExpression + formatBase : formatBase + formatExpression,
-            };
         }
         getCommonFormat() {
             const selectedZones = this.env.model.getters.getSelectedZones();
@@ -22488,6 +22710,7 @@
         state = owl.useState(this.initialState());
         debounceTimeoutId;
         showFormulaState = false;
+        debouncedUpdateSearch;
         findAndReplaceRef = owl.useRef("findAndReplace");
         get hasSearchResult() {
             return this.env.model.getters.getCurrentSelectedMatchIndex() !== null;
@@ -22497,11 +22720,16 @@
         }
         setup() {
             this.showFormulaState = this.env.model.getters.shouldShowFormulas();
+            this.debouncedUpdateSearch = debounce(this.updateSearch.bind(this), 200);
             owl.onMounted(() => this.focusInput());
             owl.onWillUnmount(() => {
                 this.env.model.dispatch("CLEAR_SEARCH");
                 this.env.model.dispatch("SET_FORMULA_VISIBILITY", { show: this.showFormulaState });
             });
+            owl.useEffect(() => {
+                this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
+                this.searchFormulas();
+            }, () => [this.env.model.getters.shouldShowFormulas()]);
         }
         onInput(ev) {
             this.state.toSearch = ev.target.value;
@@ -22521,10 +22749,6 @@
                 this.replace();
             }
         }
-        onFocusSidePanel() {
-            this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
-            this.env.model.dispatch("REFRESH_SEARCH");
-        }
         searchFormulas() {
             this.env.model.dispatch("SET_FORMULA_VISIBILITY", {
                 show: this.state.searchOptions.searchFormulas,
@@ -22542,13 +22766,6 @@
                 toSearch: this.state.toSearch,
                 searchOptions: this.state.searchOptions,
             });
-        }
-        debouncedUpdateSearch() {
-            clearTimeout(this.debounceTimeoutId);
-            this.debounceTimeoutId = setTimeout(() => {
-                this.updateSearch();
-                this.debounceTimeoutId = undefined;
-            }, 400);
         }
         replace() {
             this.env.model.dispatch("REPLACE_SEARCH", {
@@ -23234,7 +23451,7 @@
                 selection.removeAllRanges();
                 selection.addRange(range);
             }
-            if (start == end && start === 0) {
+            if (start === end && start === 0) {
                 range.setStart(this.el, 0);
                 range.setEnd(this.el, 0);
             }
@@ -23487,7 +23704,7 @@
                     }, 0);
                 }
             }
-            if (nodeToFind.nodeName === "P" && !isFirstParagraph && nodeToFind.textContent == "") {
+            if (nodeToFind.nodeName === "P" && !isFirstParagraph && nodeToFind.textContent === "") {
                 usedCharacters++;
             }
             return usedCharacters;
@@ -24489,6 +24706,15 @@
                 y = initialFigure.y - deltaY;
             }
         }
+        // Restrict resizing if x or y reaches header boundaries
+        if (x < 0) {
+            width += x;
+            x = 0;
+        }
+        if (y < 0) {
+            height += y;
+            y = 0;
+        }
         return { ...initialFigure, x, y, width, height };
     }
 
@@ -25034,6 +25260,14 @@
         };
     }
 
+    const CURSOR_SVG = /*xml*/ `
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="14" height="16"><path d="M6.5.4c1.3-.8 2.9-.1 3.8 1.4l2.9 5.1c.2.4.9 1.6-.4 2.3l-1.6.9 1.8 3.1c.2.4.1 1-.2 1.2l-1.6 1c-.3.1-.9 0-1.1-.4l-1.8-3.1-1.6 1c-.6.4-1.7 0-2.2-.8L0 4.3"/><path fill="#fff" d="M9.1 2a1.4 1.1 60 0 0-1.7-.6L5.5 2.5l.9 1.6-1 .6-.9-1.6-.6.4 1.8 3.1-1.3.7-1.8-3.1-1 .6 3.8 6.6 6.8-3.98M3.9 8.8 10.82 5l.795 1.4-6.81 3.96"/></svg>
+`;
+    css /* scss */ `
+  .o-paint-format-cursor {
+    cursor: url("data:image/svg+xml,${encodeURIComponent(CURSOR_SVG)}"), auto;
+  }
+`;
     function useCellHovered(env, gridRef, callback) {
         let hoveredPosition = {
             col: undefined,
@@ -25073,10 +25307,29 @@
                 setPosition(undefined, undefined);
             }
         }
+        function onMouseLeave(e) {
+            const x = e.offsetX;
+            const y = e.offsetY;
+            const gridRect = getBoundingRectAsPOJO(gridRef.el);
+            if (y < 0 || y > gridRect.height || x < 0 || x > gridRect.width) {
+                return updateMousePosition(e);
+            }
+            else {
+                return pause();
+            }
+        }
         useRefListener(gridRef, "mousemove", updateMousePosition);
-        useRefListener(gridRef, "mouseleave", pause);
+        useRefListener(gridRef, "mouseleave", onMouseLeave);
         useRefListener(gridRef, "mouseenter", resume);
         useRefListener(gridRef, "mousedown", recompute);
+        owl.useExternalListener(window, "click", handleGlobalClick);
+        function handleGlobalClick(e) {
+            const target = e.target;
+            const grid = gridRef.el;
+            if (!grid.contains(target)) {
+                setPosition(undefined, undefined);
+            }
+        }
         function setPosition(col, row) {
             if (col !== hoveredPosition.col || row !== hoveredPosition.row) {
                 hoveredPosition.col = col;
@@ -25156,6 +25409,12 @@
                 throw new Error("GridOverlay el is not defined.");
             }
             return this.gridOverlay.el;
+        }
+        get style() {
+            return this.props.gridOverlayDimensions;
+        }
+        get isPaintingFormat() {
+            return this.env.model.getters.isPaintingFormat();
         }
         onMouseDown(ev) {
             if (ev.button > 0) {
@@ -25394,7 +25653,6 @@
             const mouseUpSelect = () => {
                 this.state.isSelecting = false;
                 this.lastSelectedElementIndex = null;
-                this.env.model.dispatch(ev.ctrlKey ? "PREPARE_SELECTION_INPUT_EXPANSION" : "STOP_SELECTION_INPUT");
                 this._computeGrabDisplay(ev);
             };
             dragAndDropBeyondTheViewport(this.env, mouseMoveSelect, mouseUpSelect);
@@ -25959,9 +26217,7 @@
             let lastCol = isLeft ? z.left : z.right;
             let lastRow = isTop ? z.top : z.bottom;
             let currentZone = z;
-            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", {
-                range: this.env.model.getters.getRangeDataFromZone(activeSheetId, currentZone),
-            });
+            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", { zone: currentZone });
             const mouseMove = (col, row) => {
                 if (lastCol !== col || lastRow !== row) {
                     lastCol = clip(col === -1 ? lastCol : col, 0, this.env.model.getters.getNumberCols(activeSheetId) - 1);
@@ -25972,21 +26228,17 @@
                         right: Math.max(pivotCol, lastCol),
                         bottom: Math.max(pivotRow, lastRow),
                     };
-                    newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
-                        this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeFromZone(activeSheetId, this.env.model.getters.getUnboundedZone(activeSheetId, newZone)).rangeData,
-                        });
+                        this.env.model.selection.selectZone({
+                            cell: { col: newZone.left, row: newZone.top },
+                            zone: newZone,
+                        }, { unbounded: true });
                         currentZone = newZone;
                     }
                 }
             };
             const mouseUp = () => {
                 this.highlightState.shiftingMode = "none";
-                // To do:
-                // Command used here to restore focus to the current composer,
-                // to be changed when refactoring the 'edition' plugin
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
             };
             dragAndDropBeyondTheViewport(this.env, mouseMove, mouseUp);
         }
@@ -26002,9 +26254,7 @@
             const deltaRowMin = -z.top;
             const deltaRowMax = this.env.model.getters.getNumberRows(activeSheetId) - z.bottom - 1;
             let currentZone = z;
-            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", {
-                range: this.env.model.getters.getRangeDataFromZone(activeSheetId, currentZone),
-            });
+            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", { zone: currentZone });
             let lastCol = initCol;
             let lastRow = initRow;
             const mouseMove = (col, row) => {
@@ -26019,21 +26269,17 @@
                         right: z.right + deltaCol,
                         bottom: z.bottom + deltaRow,
                     };
-                    newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
-                        this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeFromZone(activeSheetId, this.env.model.getters.getUnboundedZone(activeSheetId, newZone)).rangeData,
-                        });
+                        this.env.model.selection.selectZone({
+                            cell: { col: newZone.left, row: newZone.top },
+                            zone: newZone,
+                        }, { unbounded: true });
                         currentZone = newZone;
                     }
                 }
             };
             const mouseUp = () => {
                 this.highlightState.shiftingMode = "none";
-                // To do:
-                // Command used here to restore focus to the current composer,
-                // to be changed when refactoring the 'edition' plugin
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
             };
             dragAndDropBeyondTheViewport(this.env, mouseMove, mouseUp);
         }
@@ -26334,6 +26580,9 @@
                 else if (this.menuState.isOpen) {
                     this.closeMenu();
                 }
+                else if (this.env.model.getters.isPaintingFormat()) {
+                    this.env.model.dispatch("CANCEL_PAINT_FORMAT");
+                }
                 else {
                     this.env.model.dispatch("CLEAN_CLIPBOARD_HIGHLIGHT");
                 }
@@ -26523,9 +26772,6 @@
         // Zone selection with mouse
         // ---------------------------------------------------------------------------
         onCellClicked(col, row, { ctrlKey, shiftKey }) {
-            if (ctrlKey) {
-                this.env.model.dispatch("PREPARE_SELECTION_INPUT_EXPANSION");
-            }
             if (this.env.model.getters.hasOpenedPopover()) {
                 this.closeOpenedPopover();
             }
@@ -26551,7 +26797,6 @@
                 }
             };
             const onMouseUp = () => {
-                this.env.model.dispatch("STOP_SELECTION_INPUT");
                 if (this.env.model.getters.isPaintingFormat()) {
                     this.env.model.dispatch("PASTE", {
                         target: this.env.model.getters.getSelectedZones(),
@@ -27536,8 +27781,8 @@
                     throw new Error("Multiple escaped blocks in format");
                 }
                 convertedFormat = convertedFormat.replace(/"(.*)"/g, "[$$$1]"); // replace '"..."' by '[$...]'
-                convertedFormat = convertedFormat.replace(/_.{1}/g, ""); // _ == ignore width of next char for align purposes. Not supported ATM
-                convertedFormat = convertedFormat.replace(/\*.{1}/g, ""); // * == repeat next character enough to fill the line. Not supported ATM
+                convertedFormat = convertedFormat.replace(/_.{1}/g, ""); // _ === ignore width of next char for align purposes. Not supported ATM
+                convertedFormat = convertedFormat.replace(/\*.{1}/g, ""); // * === repeat next character enough to fill the line. Not supported ATM
                 convertedFormat = convertedFormat.replace(/\\ /g, " "); // unescape spaces
                 convertedFormat = convertedFormat.replace(/\\./g, (match) => match[1]); // unescape other characters
                 if (isXlsxDateFormat(convertedFormat)) {
@@ -28829,29 +29074,26 @@
         return new XMLString(concat(str));
     }
     /**
-     * Removes the namespace of all the xml tags in the string.
+     * Removes the escaped namespace of all the xml tags in the string.
      *
-     * Eg. : "ns:test a" => "test a"
+     * Eg. : "NAMESPACEnsNAMESPACEtest a" => "test a"
      */
-    function removeNamespaces(query) {
-        return query.replace(/[a-z0-9]+:(?=[a-z0-9]+)/gi, "");
+    function removeTagEscapedNamespaces(tag) {
+        return tag.replace(/NAMESPACE.*NAMESPACE(.*)/, "$1");
     }
     /**
-     * Escape the namespace's colons of all the xml tags in the string.
+     * Encase the namespaces in the element's tags with NAMESPACE string
      *
-     * Eg. : "ns:test a" => "ns\\:test a"
+     * e.g. <x:foo> becomes <NAMESPACExNAMESPACEFoo>
+     *
+     * That's useful because namespaces aren't supported by the HTML specification, so it's arbitrary whether a HTML parser/querySelector
+     * implementation will support namespaces in the tags or not.
      */
-    function escapeNamespaces(query) {
-        return query.replace(/([a-z0-9]+):(?=[a-z0-9]+)/gi, "$1\\:");
+    function escapeTagNamespaces(str) {
+        return str.replaceAll(/(<\/?)([a-zA-Z0-9]+):([a-zA-Z0-9]+)/g, "$1" + "NAMESPACE" + "$2" + "NAMESPACE" + "$3");
     }
-    /**
-     * Return true if the querySelector ignores the namespaces when searching for a tag in the DOM.
-     *
-     * Should return true if it's running on a browser, and false if it's running on jest (jsdom).
-     */
-    function areNamespaceIgnoredByQuerySelector() {
-        const doc = new DOMParser().parseFromString("<t:test xmlns:t='a'/>", "text/xml");
-        return doc.querySelector("test") !== null;
+    function escapeQueryNameSpaces(query) {
+        return query.replaceAll(/([a-zA-Z0-9]+):([a-zA-Z0-9]+)/g, "NAMESPACE" + "$1" + "NAMESPACE" + "$2");
     }
 
     class AttributeValue {
@@ -28881,14 +29123,20 @@
         // The xml file we are currently parsing. We should have one Extractor class by XLSXImportFile, but
         // the XLSXImportFile contains both the main .xml file, and the .rels file
         currentFile = undefined;
-        // If the parser querySelector() implementation ignores tag namespaces or not
-        areNamespaceIgnored;
+        /**
+         * /!\ Important : There should be no namespaces in the tags of the XML files.
+         *
+         * This class use native querySelector and querySelectorAll, that's used for HTML (not XML). These aren't supposed to
+         * handled namespaces, as they are not supported by the HTML specification. Some implementations (most browsers) do
+         * actually support namespaces, but some don't (e.g. jsdom).
+         *
+         * The namespace should be escaped as with NAMESPACE string (eg. <t:foo> => <NAMESPACEtNAMESPACEfoo>).
+         */
         constructor(rootFile, xlsxStructure, warningManager) {
             this.rootFile = rootFile;
             this.currentFile = rootFile.file.fileName;
             this.xlsxFileStructure = xlsxStructure;
             this.warningManager = warningManager;
-            this.areNamespaceIgnored = areNamespaceIgnoredByQuerySelector();
             this.relationships = {};
             if (rootFile.rels) {
                 this.extractRelationships(rootFile.rels).map((rel) => {
@@ -29114,29 +29362,13 @@
                 throw new Error("Cannot find target file");
             return f;
         }
-        /**
-         * Wrapper of querySelector, but we'll remove the namespaces from the query if areNamespacesIgnored is true.
-         *
-         * Why we need to do this :
-         *  - For an XML "<t:test />"
-         *  - on Jest(jsdom) : xml.querySelector("test") == null, xml.querySelector("t\\:test") == <t:test />
-         *  - on Browser : xml.querySelector("test") == <t:test />, xml.querySelector("t\\:test") == null
-         */
         querySelector(element, query) {
-            query = this.areNamespaceIgnored ? removeNamespaces(query) : escapeNamespaces(query);
-            return element.querySelector(query);
+            const escapedQuery = escapeQueryNameSpaces(query);
+            return element.querySelector(escapedQuery);
         }
-        /**
-         * Wrapper of querySelectorAll, but we'll remove the namespaces from the query if areNamespacesIgnored is true.
-         *
-         * Why we need to do this :
-         *  - For an XML "<t:test />"
-         *  - on Jest(jsdom) : xml.querySelectorAll("test") == [], xml.querySelectorAll("t\\:test") == [<t:test />]
-         *  - on Browser : xml.querySelectorAll("test") == [<t:test />], xml.querySelectorAll("t\\:test") == []
-         */
         querySelectorAll(element, query) {
-            query = this.areNamespaceIgnored ? removeNamespaces(query) : escapeNamespaces(query);
-            return element.querySelectorAll(query);
+            const escapedQuery = escapeQueryNameSpaces(query);
+            return element.querySelectorAll(escapedQuery);
         }
         /**
          * Get a color from its id in the Theme's colorScheme.
@@ -29376,7 +29608,7 @@
                 throw new Error("Missing plot area in the chart definition.");
             }
             for (let child of plotAreaElement.children) {
-                const tag = removeNamespaces(child.tagName);
+                const tag = removeTagEscapedNamespaces(child.tagName);
                 if (XLSX_CHART_TYPES.some((chartType) => chartType === tag)) {
                     return tag;
                 }
@@ -29388,7 +29620,7 @@
     class XlsxFigureExtractor extends XlsxBaseExtractor {
         extractFigures() {
             return this.mapOnElements({ parent: this.rootFile.file.xml, query: "xdr:wsDr", children: true }, (figureElement) => {
-                const anchorType = removeNamespaces(figureElement.tagName);
+                const anchorType = removeTagEscapedNamespaces(figureElement.tagName);
                 if (anchorType !== "twoCellAnchor") {
                     throw new Error("Only twoCellAnchor are supported for xlsx drawings.");
                 }
@@ -30022,7 +30254,8 @@
             for (let key of Object.keys(files)) {
                 // Random files can be in xlsx (like a bin file for printer settings)
                 if (key.endsWith(".xml") || key.endsWith(".rels")) {
-                    this.xmls[key] = parseXML(new XMLString(files[key]));
+                    const contentString = escapeTagNamespaces(files[key]);
+                    this.xmls[key] = parseXML(new XMLString(contentString));
                 }
                 else if (key.includes("media/image")) {
                     this.images.push({
@@ -31089,7 +31322,7 @@
         }
         /**
          * Set the borders of a cell.
-         * It overrides the current border if override == true.
+         * It overrides the current border if override === true.
          */
         setBorder(sheetId, col, row, border, override = true) {
             if (override || !this.borders?.[sheetId]?.[col]?.[row]?.vertical) {
@@ -31281,8 +31514,8 @@
             "zoneToXC",
             "getCells",
             "getFormulaCellContent",
+            "getTranslatedCellFormula",
             "getCellStyle",
-            "buildFormulaContent",
             "getCellById",
         ];
         nextId = 1;
@@ -31481,7 +31714,7 @@
         /*
          * Reconstructs the original formula string based on a normalized form and its dependencies
          */
-        buildFormulaContent(sheetId, cell, dependencies) {
+        getFormulaCellContent(sheetId, cell, dependencies) {
             const ranges = dependencies || [...cell.dependencies];
             return concat(cell.compiledFormula.tokens.map((token) => {
                 if (token.type === "REFERENCE") {
@@ -31491,8 +31724,15 @@
                 return token.value;
             }));
         }
-        getFormulaCellContent(sheetId, cell) {
-            return this.buildFormulaContent(sheetId, cell);
+        /*
+         * Constructs a formula string based on an initial formula and a translation vector
+         */
+        getTranslatedCellFormula(sheetId, offsetX, offsetY, compiledFormula, dependencies) {
+            const adaptedDependencies = this.getters.createAdaptedRanges(dependencies, offsetX, offsetY, sheetId);
+            return this.getFormulaCellContent(sheetId, {
+                compiledFormula,
+                dependencies: adaptedDependencies,
+            });
         }
         getCellStyle(position) {
             return this.getters.getCell(position)?.style || {};
@@ -31682,7 +31922,7 @@
          */
         createFormulaCellWithDependencies(id, compiledFormula, format, style, sheetId) {
             const dependencies = compiledFormula.dependencies.map((xc) => this.getters.getRangeFromSheetXC(sheetId, xc));
-            return new FormulaCellWithDependencies(id, compiledFormula, format, style, dependencies, sheetId, this.buildFormulaContent.bind(this));
+            return new FormulaCellWithDependencies(id, compiledFormula, format, style, dependencies, sheetId, this.getFormulaCellContent.bind(this));
         }
         createErrorFormula(id, content, format, style, error) {
             return {
@@ -31716,19 +31956,19 @@
         style;
         dependencies;
         sheetId;
-        buildFormulaContent;
+        getFormulaCellContent;
         isFormula = true;
-        constructor(id, compiledFormula, format, style, dependencies, sheetId, buildFormulaContent) {
+        constructor(id, compiledFormula, format, style, dependencies, sheetId, getFormulaCellContent) {
             this.id = id;
             this.compiledFormula = compiledFormula;
             this.format = format;
             this.style = style;
             this.dependencies = dependencies;
             this.sheetId = sheetId;
-            this.buildFormulaContent = buildFormulaContent;
+            this.getFormulaCellContent = getFormulaCellContent;
         }
         get content() {
-            return this.buildFormulaContent(this.sheetId, {
+            return this.getFormulaCellContent(this.sheetId, {
                 dependencies: this.dependencies,
                 compiledFormula: this.compiledFormula,
             });
@@ -32359,7 +32599,9 @@
             const numHeader = this.getters.getNumberRows(sheetId);
             let gridHeight = 0;
             for (let i = 0; i < numHeader; i++) {
-                gridHeight += this.getters.getRowSize(sheetId, i);
+                // TODO : since the row size is an UI value now, this doesn't work anymore. Using the default cell height is
+                // a temporary solution at best, but is broken.
+                gridHeight += this.getters.getUserRowSize(sheetId, i) || DEFAULT_CELL_HEIGHT;
             }
             const figures = this.getters.getFigures(sheetId);
             for (const figure of figures) {
@@ -32785,33 +33027,15 @@
     }
 
     class HeaderSizePlugin extends CorePlugin {
-        static getters = ["getRowSize", "getColSize"];
+        static getters = ["getUserRowSize", "getColSize"];
         sizes = {};
         handle(cmd) {
             switch (cmd.type) {
                 case "CREATE_SHEET": {
-                    const computedSizes = this.computeSheetSizes(cmd.sheetId);
-                    const sizes = {
-                        COL: computedSizes.COL.map((size) => ({
-                            manualSize: undefined,
-                            computedSize: lazy(size),
-                        })),
-                        ROW: computedSizes.ROW.map((size) => ({
-                            manualSize: undefined,
-                            computedSize: lazy(size),
-                        })),
-                    };
-                    this.history.update("sizes", cmd.sheetId, sizes);
+                    this.history.update("sizes", cmd.sheetId, { COL: [], ROW: [] });
                     break;
                 }
                 case "DUPLICATE_SHEET":
-                    // make sure the values are computed in case the original sheet is deleted
-                    for (const row of this.sizes[cmd.sheetId].ROW) {
-                        row.computedSize();
-                    }
-                    for (const col of this.sizes[cmd.sheetId].COL) {
-                        col.computedSize();
-                    }
                     this.history.update("sizes", cmd.sheetIdTo, deepCopy(this.sizes[cmd.sheetId]));
                     break;
                 case "DELETE_SHEET":
@@ -32820,21 +33044,8 @@
                     this.history.update("sizes", sizes);
                     break;
                 case "REMOVE_COLUMNS_ROWS": {
-                    let sizes = [...this.sizes[cmd.sheetId][cmd.dimension]];
-                    for (let headerIndex of [...cmd.elements].sort((a, b) => b - a)) {
-                        sizes.splice(headerIndex, 1);
-                    }
-                    const min = Math.min(...cmd.elements);
-                    sizes = sizes.map((size, row) => {
-                        if (cmd.dimension === "ROW" && row >= min) {
-                            // invalidate sizes
-                            return {
-                                manualSize: size.manualSize,
-                                computedSize: lazy(() => this.getRowTallestCellSize(cmd.sheetId, row)),
-                            };
-                        }
-                        return size;
-                    });
+                    const arr = this.sizes[cmd.sheetId][cmd.dimension];
+                    const sizes = removeIndexesFromArray(arr, cmd.elements);
                     this.history.update("sizes", cmd.sheetId, cmd.dimension, sizes);
                     break;
                 }
@@ -32843,51 +33054,18 @@
                     const addIndex = getAddHeaderStartIndex(cmd.position, cmd.base);
                     const baseSize = sizes[cmd.base];
                     sizes.splice(addIndex, 0, ...Array(cmd.quantity).fill(baseSize));
-                    sizes = sizes.map((size, row) => {
-                        if (cmd.dimension === "ROW" && row > cmd.base + cmd.quantity) {
-                            // invalidate sizes
-                            return {
-                                manualSize: size.manualSize,
-                                computedSize: lazy(() => this.getRowTallestCellSize(cmd.sheetId, row)),
-                            };
-                        }
-                        return size;
-                    });
                     this.history.update("sizes", cmd.sheetId, cmd.dimension, sizes);
                     break;
                 }
                 case "RESIZE_COLUMNS_ROWS":
-                    for (let el of cmd.elements) {
-                        if (cmd.dimension === "ROW") {
-                            const height = this.getRowTallestCellSize(cmd.sheetId, el);
-                            const size = height;
-                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, {
-                                manualSize: cmd.size || undefined,
-                                computedSize: lazy(size),
-                            });
-                        }
-                        else {
-                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, {
-                                manualSize: cmd.size || undefined,
-                                computedSize: lazy(cmd.size || DEFAULT_CELL_WIDTH),
-                            });
+                    if (cmd.dimension === "ROW") {
+                        for (const el of cmd.elements) {
+                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, cmd.size || undefined);
                         }
                     }
-                    break;
-                case "UPDATE_CELL":
-                    if (!this.sizes[cmd.sheetId]?.["ROW"]?.[cmd.row]?.manualSize) {
-                        const { sheetId, row } = cmd;
-                        this.history.update("sizes", sheetId, "ROW", row, "computedSize", lazy(() => this.getRowTallestCellSize(sheetId, row)));
-                    }
-                    break;
-                case "ADD_MERGE":
-                case "REMOVE_MERGE":
-                    for (let target of cmd.target) {
-                        for (let row of range(target.top, target.bottom + 1)) {
-                            const rowHeight = this.getRowTallestCellSize(cmd.sheetId, row);
-                            if (rowHeight !== this.getRowSize(cmd.sheetId, row)) {
-                                this.history.update("sizes", cmd.sheetId, "ROW", row, "computedSize", lazy(rowHeight));
-                            }
+                    else {
+                        for (const el of cmd.elements) {
+                            this.history.update("sizes", cmd.sheetId, cmd.dimension, el, cmd.size || undefined);
                         }
                     }
                     break;
@@ -32895,94 +33073,29 @@
             return;
         }
         getColSize(sheetId, index) {
-            return this.getHeaderSize(sheetId, "COL", index);
+            return Math.round(this.sizes[sheetId]?.["COL"][index] || DEFAULT_CELL_WIDTH);
         }
-        getRowSize(sheetId, index) {
-            return this.getHeaderSize(sheetId, "ROW", index);
-        }
-        getHeaderSize(sheetId, dimension, index) {
-            return Math.round(this.sizes[sheetId]?.[dimension][index]?.manualSize ||
-                this.sizes[sheetId]?.[dimension][index]?.computedSize() ||
-                this.getDefaultHeaderSize(dimension));
-        }
-        computeSheetSizes(sheetId) {
-            const sizes = { COL: [], ROW: [] };
-            for (let col of range(0, this.getters.getNumberCols(sheetId))) {
-                sizes.COL.push(this.getHeaderSize(sheetId, "COL", col));
-            }
-            for (let row of range(0, this.getters.getNumberRows(sheetId))) {
-                let rowSize = this.sizes[sheetId]?.["ROW"]?.[row].manualSize;
-                if (!rowSize) {
-                    const height = this.getRowTallestCellSize(sheetId, row);
-                    rowSize = height;
-                }
-                sizes.ROW.push(rowSize);
-            }
-            return sizes;
-        }
-        getDefaultHeaderSize(dimension) {
-            return dimension === "COL" ? DEFAULT_CELL_WIDTH : DEFAULT_CELL_HEIGHT;
-        }
-        /**
-         * Return the height the cell should have in the sheet, which is either DEFAULT_CELL_HEIGHT if the cell is in a multi-row
-         * merge, or the height of the cell computed based on its font size.
-         */
-        getCellHeight(position) {
-            const merge = this.getters.getMerge(position);
-            if (merge && merge.bottom !== merge.top) {
-                return DEFAULT_CELL_HEIGHT;
-            }
-            const cell = this.getters.getCell(position);
-            return getDefaultCellHeight(cell);
-        }
-        /**
-         * Get the tallest cell of a row and its size.
-         *
-         * The tallest cell of the row correspond to the cell with the biggest font size,
-         * and that is not part of a multi-line merge.
-         */
-        getRowTallestCellSize(sheetId, row) {
-            const cellIds = this.getters.getRowCells(sheetId, row);
-            let maxHeight = 0;
-            for (let i = 0; i < cellIds.length; i++) {
-                const cell = this.getters.getCellById(cellIds[i]);
-                if (!cell)
-                    continue;
-                const position = this.getters.getCellPosition(cell.id);
-                const cellHeight = this.getCellHeight(position);
-                if (cellHeight > maxHeight && cellHeight > DEFAULT_CELL_HEIGHT) {
-                    maxHeight = cellHeight;
-                }
-            }
-            if (maxHeight <= DEFAULT_CELL_HEIGHT) {
-                return DEFAULT_CELL_HEIGHT;
-            }
-            return maxHeight;
+        getUserRowSize(sheetId, index) {
+            const rowSize = this.sizes[sheetId]?.["ROW"][index];
+            return rowSize ? Math.round(rowSize) : undefined;
         }
         import(data) {
             for (let sheet of data.sheets) {
-                const manualSizes = { COL: [], ROW: [] };
+                const sizes = {
+                    COL: Array(sheet.colNumber).fill(undefined),
+                    ROW: Array(sheet.rowNumber).fill(undefined),
+                };
                 for (let [rowIndex, row] of Object.entries(sheet.rows)) {
                     if (row.size) {
-                        manualSizes["ROW"][rowIndex] = row.size;
+                        sizes["ROW"][rowIndex] = row.size;
                     }
                 }
                 for (let [colIndex, col] of Object.entries(sheet.cols)) {
                     if (col.size) {
-                        manualSizes["COL"][colIndex] = col.size;
+                        sizes["COL"][colIndex] = col.size;
                     }
                 }
-                const computedSizes = this.computeSheetSizes(sheet.id);
-                this.sizes[sheet.id] = {
-                    COL: computedSizes.COL.map((size, i) => ({
-                        manualSize: manualSizes.COL[i],
-                        computedSize: lazy(size),
-                    })),
-                    ROW: computedSizes.ROW.map((size, i) => ({
-                        manualSize: manualSizes.ROW[i],
-                        computedSize: lazy(size),
-                    })),
-                };
+                this.sizes[sheet.id] = sizes;
             }
             return;
         }
@@ -33003,9 +33116,12 @@
                 if (sheet.rows === undefined) {
                     sheet.rows = {};
                 }
-                for (let row of range(0, this.getters.getNumberRows(sheet.id))) {
-                    if (exportDefaults || this.sizes[sheet.id]["ROW"][row]?.manualSize) {
-                        sheet.rows[row] = { ...sheet.rows[row], size: this.getRowSize(sheet.id, row) };
+                for (const row of range(0, this.getters.getNumberRows(sheet.id))) {
+                    if (exportDefaults || this.sizes[sheet.id]["ROW"][row]) {
+                        sheet.rows[row] = {
+                            ...sheet.rows[row],
+                            size: this.getUserRowSize(sheet.id, row) ?? DEFAULT_CELL_HEIGHT,
+                        };
                     }
                 }
                 // Export col sizes
@@ -33013,7 +33129,7 @@
                     sheet.cols = {};
                 }
                 for (let col of range(0, this.getters.getNumberCols(sheet.id))) {
-                    if (exportDefaults || this.sizes[sheet.id]["COL"][col]?.manualSize) {
+                    if (exportDefaults || this.sizes[sheet.id]["COL"][col]) {
                         sheet.cols[col] = { ...sheet.cols[col], size: this.getColSize(sheet.id, col) };
                     }
                 }
@@ -36367,13 +36483,21 @@
                             }
                             break;
                         case "CellIsRule":
+                            const formulas = cf.rule.values.map((value) => value.startsWith("=") ? compile(value) : undefined);
                             for (let ref of cf.ranges) {
                                 const zone = this.getters.getRangeFromSheetXC(sheetId, ref).zone;
                                 for (let row = zone.top; row <= zone.bottom; row++) {
                                     for (let col = zone.left; col <= zone.right; col++) {
-                                        const pr = this.rulePredicate[cf.rule.type];
-                                        let cell = this.getters.getEvaluatedCell({ sheetId, col, row });
-                                        if (pr && pr(cell, cf.rule)) {
+                                        const predicate = this.rulePredicate[cf.rule.type];
+                                        const target = { sheetId, col, row };
+                                        const values = cf.rule.values.map((value, i) => {
+                                            const compiledFormula = formulas[i];
+                                            if (compiledFormula) {
+                                                return this.getters.getTranslatedCellFormula(sheetId, col - zone.left, row - zone.top, compiledFormula, compiledFormula.dependencies.map((d) => this.getters.getRangeFromSheetXC(sheetId, d)));
+                                            }
+                                            return value;
+                                        });
+                                        if (predicate && predicate(target, { ...cf.rule, values })) {
                                             if (!computedStyle[col])
                                                 computedStyle[col] = [];
                                             // we must combine all the properties of all the CF rules applied to the given cell
@@ -36541,12 +36665,18 @@
          * Execute the predicate to know if a conditional formatting rule should be applied to a cell
          */
         rulePredicate = {
-            CellIsRule: (cell, rule) => {
+            CellIsRule: (target, rule) => {
+                const cell = this.getters.getEvaluatedCell(target);
                 if (cell.type === CellValueType.error) {
                     return false;
                 }
                 const locale = this.getters.getLocale();
-                const values = rule.values.map((val) => parseLiteral(val, locale));
+                const values = rule.values.map((value) => {
+                    if (value.startsWith("=")) {
+                        return this.getters.evaluateFormula(target.sheetId, value);
+                    }
+                    return parseLiteral(value, locale);
+                });
                 switch (rule.operator) {
                     case "IsEmpty":
                         return cell.value.toString().trim() === "";
@@ -36569,7 +36699,7 @@
                     case "ContainsText":
                         return cell.value.toString().indexOf(values[0].toString()) > -1;
                     case "NotContains":
-                        return !cell.value || cell.value.toString().indexOf(values[0].toString()) == -1;
+                        return !cell.value || cell.value.toString().indexOf(values[0].toString()) === -1;
                     case "GreaterThan":
                         return cell.value > values[0];
                     case "GreaterThanOrEqual":
@@ -36594,6 +36724,156 @@
                 return false;
             },
         };
+    }
+
+    class UIRowSizePlugin extends UIPlugin {
+        static getters = ["getRowSize"];
+        tallestCellInRow = {};
+        ctx = document.createElement("canvas").getContext("2d");
+        handle(cmd) {
+            switch (cmd.type) {
+                case "START":
+                    for (const sheetId of this.getters.getSheetIds()) {
+                        this.initializeSheet(sheetId);
+                    }
+                    break;
+                case "CREATE_SHEET": {
+                    this.initializeSheet(cmd.sheetId);
+                    break;
+                }
+                case "DUPLICATE_SHEET": {
+                    const tallestCells = deepCopy(this.tallestCellInRow[cmd.sheetId]);
+                    this.history.update("tallestCellInRow", cmd.sheetIdTo, tallestCells);
+                    break;
+                }
+                case "DELETE_SHEET":
+                    const tallestCells = { ...this.tallestCellInRow };
+                    delete tallestCells[cmd.sheetId];
+                    this.history.update("tallestCellInRow", tallestCells);
+                    break;
+                case "REMOVE_COLUMNS_ROWS": {
+                    if (cmd.dimension === "COL") {
+                        return;
+                    }
+                    const tallestCells = removeIndexesFromArray(this.tallestCellInRow[cmd.sheetId], cmd.elements);
+                    this.history.update("tallestCellInRow", cmd.sheetId, tallestCells);
+                    break;
+                }
+                case "ADD_COLUMNS_ROWS": {
+                    if (cmd.dimension === "COL") {
+                        return;
+                    }
+                    const addIndex = getAddHeaderStartIndex(cmd.position, cmd.base);
+                    const newCells = Array(cmd.quantity).fill(undefined);
+                    const newTallestCells = insertItemsAtIndex(this.tallestCellInRow[cmd.sheetId], newCells, addIndex);
+                    this.history.update("tallestCellInRow", cmd.sheetId, newTallestCells);
+                    break;
+                }
+                case "RESIZE_COLUMNS_ROWS":
+                    {
+                        const sheetId = cmd.sheetId;
+                        if (cmd.dimension === "ROW") {
+                            for (const row of cmd.elements) {
+                                const tallestCell = this.getRowTallestCell(sheetId, row);
+                                this.history.update("tallestCellInRow", sheetId, row, tallestCell);
+                            }
+                        }
+                        else {
+                            // Recompute row heights on col size change, they might have changed because of wrapped text
+                            for (const row of range(0, this.getters.getNumberRows(sheetId))) {
+                                for (const col of cmd.elements) {
+                                    this.updateRowSizeForCellChange(sheetId, row, col);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case "UPDATE_CELL":
+                    this.updateRowSizeForCellChange(cmd.sheetId, cmd.row, cmd.col);
+                    break;
+                case "ADD_MERGE":
+                case "REMOVE_MERGE":
+                    for (const target of cmd.target) {
+                        for (const position of positions(target)) {
+                            this.updateRowSizeForCellChange(cmd.sheetId, position.row, position.col);
+                        }
+                    }
+            }
+            return;
+        }
+        getRowSize(sheetId, row) {
+            return Math.round(this.getters.getUserRowSize(sheetId, row) ??
+                this.tallestCellInRow[sheetId][row]?.size ??
+                DEFAULT_CELL_HEIGHT);
+        }
+        updateRowSizeForCellChange(sheetId, row, col) {
+            const tallestCellInRow = this.tallestCellInRow[sheetId]?.[row];
+            if (tallestCellInRow?.cell.col === col) {
+                const newTallestCell = this.getRowTallestCell(sheetId, row);
+                this.history.update("tallestCellInRow", sheetId, row, newTallestCell);
+            }
+            const updatedCellHeight = this.getCellHeight({ sheetId, col, row });
+            if (updatedCellHeight <= DEFAULT_CELL_HEIGHT) {
+                return;
+            }
+            if ((!tallestCellInRow && updatedCellHeight > DEFAULT_CELL_HEIGHT) ||
+                (tallestCellInRow && updatedCellHeight > tallestCellInRow.size)) {
+                const newTallestCell = { cell: { sheetId, col, row }, size: updatedCellHeight };
+                this.history.update("tallestCellInRow", sheetId, row, newTallestCell);
+            }
+        }
+        initializeSheet(sheetId) {
+            const tallestCells = [];
+            for (let row = 0; row < this.getters.getNumberRows(sheetId); row++) {
+                const tallestCell = this.getRowTallestCell(sheetId, row);
+                tallestCells.push(tallestCell);
+            }
+            this.history.update("tallestCellInRow", sheetId, tallestCells);
+        }
+        /**
+         * Return the height the cell should have in the sheet, which is either DEFAULT_CELL_HEIGHT if the cell is in a multi-row
+         * merge, or the height of the cell computed based on its style/content.
+         */
+        getCellHeight(position) {
+            if (this.isInMultiRowMerge(position)) {
+                return DEFAULT_CELL_HEIGHT;
+            }
+            const cell = this.getters.getCell(position);
+            const colSize = this.getters.getColSize(position.sheetId, position.col);
+            return getDefaultCellHeight(this.ctx, cell, colSize);
+        }
+        isInMultiRowMerge(position) {
+            const merge = this.getters.getMerge(position);
+            return !!merge && merge.bottom !== merge.top;
+        }
+        /**
+         * Get the tallest cell of a row and its size.
+         */
+        getRowTallestCell(sheetId, row) {
+            const userRowSize = this.getters.getUserRowSize(sheetId, row);
+            if (userRowSize !== undefined) {
+                return undefined;
+            }
+            const cellIds = this.getters.getRowCells(sheetId, row);
+            let maxHeight = 0;
+            let tallestCell = undefined;
+            for (let i = 0; i < cellIds.length; i++) {
+                const cell = this.getters.getCellById(cellIds[i]);
+                if (!cell) {
+                    continue;
+                }
+                const position = this.getters.getCellPosition(cell.id);
+                const cellHeight = this.getCellHeight(position);
+                if (cellHeight > maxHeight && cellHeight > DEFAULT_CELL_HEIGHT) {
+                    maxHeight = cellHeight;
+                    tallestCell = { cell: position, size: cellHeight };
+                }
+            }
+            if (tallestCell && tallestCell.size > DEFAULT_CELL_HEIGHT) {
+                return tallestCell;
+            }
+            return undefined;
+        }
     }
 
     /**
@@ -38297,6 +38577,7 @@
             searchFormulas: false,
         };
         toSearch = "";
+        isSearchDirty = false;
         // ---------------------------------------------------------------------------
         // Command Handling
         // ---------------------------------------------------------------------------
@@ -38320,16 +38601,31 @@
                 case "REPLACE_ALL_SEARCH":
                     this.replaceAll(cmd.replaceWith);
                     break;
+                case "EVALUATE_CELLS":
+                case "UPDATE_CELL":
+                case "REMOVE_FILTER_TABLE":
+                case "UPDATE_FILTER":
+                    this.isSearchDirty = true;
+                    break;
                 case "UNDO":
                 case "REDO":
                 case "REMOVE_COLUMNS_ROWS":
+                case "HIDE_COLUMNS_ROWS":
+                case "UNHIDE_COLUMNS_ROWS":
                 case "ADD_COLUMNS_ROWS":
-                    this.clearSearch();
+                case "EVALUATE_CELLS":
+                case "UPDATE_CELL":
+                    this.isSearchDirty = true;
                     break;
                 case "ACTIVATE_SHEET":
-                case "REFRESH_SEARCH":
                     this.refreshSearch();
                     break;
+            }
+        }
+        finalize() {
+            if (this.isSearchDirty) {
+                this.refreshSearch();
+                this.isSearchDirty = false;
             }
         }
         // ---------------------------------------------------------------------------
@@ -38387,6 +38683,11 @@
             if (this.toSearch) {
                 for (const cell of Object.values(cells)) {
                     const { col, row } = this.getters.getCellPosition(cell.id);
+                    const isColHidden = this.getters.isColHidden(sheetId, col);
+                    const isRowHidden = this.getters.isRowHidden(sheetId, row);
+                    if (isColHidden || isRowHidden) {
+                        continue;
+                    }
                     if (cell &&
                         this.currentSearchRegex &&
                         this.currentSearchRegex.test(this.getSearchableString({ sheetId, col, row }))) {
@@ -38446,37 +38747,32 @@
         // ---------------------------------------------------------------------------
         // Replace
         // ---------------------------------------------------------------------------
+        replaceMatch(selectedMatch, replaceWith) {
+            if (!this.currentSearchRegex) {
+                return;
+            }
+            const sheetId = this.getters.getActiveSheetId();
+            const cell = this.getters.getCell({ sheetId, ...selectedMatch });
+            const { col, row } = selectedMatch;
+            if (cell?.isFormula && !this.searchOptions.searchFormulas) {
+                return;
+            }
+            const replaceRegex = new RegExp(this.currentSearchRegex.source, this.currentSearchRegex.flags + "g");
+            const toReplace = this.getSearchableString({ sheetId, col, row });
+            const content = toReplace.replace(replaceRegex, replaceWith);
+            const canonicalContent = canonicalizeContent(content, this.getters.getLocale());
+            this.dispatch("UPDATE_CELL", { sheetId, col, row, content: canonicalContent });
+        }
         /**
          * Replace the value of the currently selected match
          */
         replace(replaceWith) {
-            if (this.selectedMatchIndex === null || !this.currentSearchRegex) {
+            if (this.selectedMatchIndex === null) {
                 return;
             }
-            const matches = this.searchMatches;
-            const selectedMatch = matches[this.selectedMatchIndex];
-            const sheetId = this.getters.getActiveSheetId();
-            const cell = this.getters.getCell({ sheetId, ...selectedMatch });
-            if (cell?.isFormula && !this.searchOptions.searchFormulas) {
-                this.selectNextCell(Direction.next);
-            }
-            else {
-                const replaceRegex = new RegExp(this.currentSearchRegex.source, this.currentSearchRegex.flags + "g");
-                const toReplace = this.getSearchableString({
-                    sheetId,
-                    col: selectedMatch.col,
-                    row: selectedMatch.row,
-                });
-                const newContent = toReplace.replace(replaceRegex, replaceWith);
-                this.dispatch("UPDATE_CELL", {
-                    sheetId: this.getters.getActiveSheetId(),
-                    col: selectedMatch.col,
-                    row: selectedMatch.row,
-                    content: canonicalizeContent(newContent, this.getters.getLocale()),
-                });
-                this.searchMatches.splice(this.selectedMatchIndex, 1);
-                this.selectNextCell(Direction.current);
-            }
+            const selectedMatch = this.searchMatches[this.selectedMatchIndex];
+            this.replaceMatch(selectedMatch, replaceWith);
+            this.selectNextCell(Direction.next);
         }
         /**
          * Apply the replace function to all the matches one time.
@@ -38484,7 +38780,7 @@
         replaceAll(replaceWith) {
             const matchCount = this.searchMatches.length;
             for (let i = 0; i < matchCount; i++) {
-                this.replace(replaceWith);
+                this.replaceMatch(this.searchMatches[i], replaceWith);
             }
         }
         getSearchableString(position) {
@@ -39406,8 +39702,7 @@
         static getters = [];
         ranges = [];
         focusedRangeIndex = null;
-        activeSheet;
-        willAddNewRange = false;
+        inputSheetId;
         constructor(config, initialRanges, inputHasSingleRange) {
             if (inputHasSingleRange && initialRanges.length > 1) {
                 throw new Error("Input with a single range cannot be instantiated with several range references.");
@@ -39415,7 +39710,7 @@
             super(config);
             this.inputHasSingleRange = inputHasSingleRange;
             this.insertNewRange(0, initialRanges);
-            this.activeSheet = this.getters.getActiveSheetId();
+            this.inputSheetId = this.getters.getActiveSheetId();
             if (this.ranges.length === 0) {
                 this.insertNewRange(this.ranges.length, [""]);
                 this.focusLast();
@@ -39441,11 +39736,33 @@
             return 0 /* CommandResult.Success */;
         }
         handleEvent(event) {
-            const inputSheetId = this.activeSheet;
-            const sheetId = this.getters.getActiveSheetId();
-            const zone = event.anchor.zone;
-            const range = this.getters.getRangeFromZone(sheetId, event.options.unbounded ? this.getters.getUnboundedZone(sheetId, zone) : zone);
-            this.add([this.getters.getSelectionRangeString(range, inputSheetId)]);
+            if (this.focusedRangeIndex === null) {
+                return;
+            }
+            const inputSheetId = this.inputSheetId;
+            const activeSheetId = this.getters.getActiveSheetId();
+            const zone = event.options.unbounded
+                ? this.getters.getUnboundedZone(activeSheetId, event.anchor.zone)
+                : event.anchor.zone;
+            const range = this.getters.getRangeFromZone(activeSheetId, zone);
+            const willAddNewRange = event.mode === "newAnchor" &&
+                !this.inputHasSingleRange &&
+                this.ranges[this.focusedRangeIndex].xc.trim() !== "";
+            if (willAddNewRange) {
+                const xc = this.getters.getSelectionRangeString(range, inputSheetId);
+                this.insertNewRange(this.ranges.length, [xc]);
+                this.focusLast();
+            }
+            else {
+                let parts = range.parts;
+                const previousXc = this.ranges[this.focusedRangeIndex].xc.trim();
+                if (previousXc) {
+                    parts = this.getters.getRangeFromSheetXC(inputSheetId, previousXc).parts;
+                }
+                const newRange = range.clone({ parts });
+                const xc = this.getters.getSelectionRangeString(newRange, inputSheetId);
+                this.setRange(this.focusedRangeIndex, [xc]);
+            }
         }
         handle(cmd) {
             switch (cmd.type) {
@@ -39481,16 +39798,6 @@
                         this.removeRange(index);
                     }
                     break;
-                case "STOP_SELECTION_INPUT":
-                    this.willAddNewRange = false;
-                    break;
-                case "PREPARE_SELECTION_INPUT_EXPANSION": {
-                    const index = this.focusedRangeIndex;
-                    if (index !== null && !this.inputHasSingleRange) {
-                        this.willAddNewRange = this.ranges[index].xc.trim() !== "";
-                    }
-                    break;
-                }
                 case "ACTIVATE_SHEET": {
                     if (cmd.sheetIdFrom !== cmd.sheetIdTo) {
                         const { col, row } = this.getters.getNextVisibleCellPosition({
@@ -39501,7 +39808,26 @@
                         const zone = this.getters.expandZone(cmd.sheetIdTo, positionToZone({ col, row }));
                         this.selection.resetAnchor(this, { cell: { col, row }, zone });
                     }
+                    break;
                 }
+                case "START_CHANGE_HIGHLIGHT":
+                    const activeSheetId = this.getters.getActiveSheetId();
+                    const newZone = this.getters.expandZone(activeSheetId, cmd.zone);
+                    const focusIndex = this.ranges.findIndex((range) => {
+                        const { xc, sheetName: sheet } = splitReference(range.xc);
+                        const sheetName = sheet || this.getters.getSheetName(this.inputSheetId);
+                        if (this.getters.getSheetName(activeSheetId) !== sheetName) {
+                            return false;
+                        }
+                        const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
+                        return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), newZone);
+                    });
+                    if (focusIndex !== -1) {
+                        this.focus(focusIndex);
+                        const { left, top } = newZone;
+                        this.selection.resetAnchor(this, { cell: { col: left, row: top }, zone: newZone });
+                    }
+                    break;
             }
         }
         // ---------------------------------------------------------------------------
@@ -39529,19 +39855,6 @@
         }
         unfocus() {
             this.focusedRangeIndex = null;
-        }
-        add(newRanges) {
-            if (this.focusedRangeIndex === null || newRanges.length === 0) {
-                return;
-            }
-            if (this.willAddNewRange) {
-                this.insertNewRange(this.ranges.length, newRanges);
-                this.focusLast();
-                this.willAddNewRange = false;
-            }
-            else {
-                this.setRange(this.focusedRangeIndex, newRanges);
-            }
         }
         setContent(index, xc) {
             this.ranges[index] = {
@@ -39588,12 +39901,12 @@
         inputToHighlights({ xc, color }) {
             const XCs = this.cleanInputs([xc])
                 .filter((range) => this.getters.isRangeValid(range))
-                .filter((reference) => this.shouldBeHighlighted(this.activeSheet, reference));
+                .filter((reference) => this.shouldBeHighlighted(this.inputSheetId, reference));
             return XCs.map((xc) => {
                 const { sheetName } = splitReference(xc);
                 return {
-                    zone: this.getters.getRangeFromSheetXC(this.activeSheet, xc).zone,
-                    sheetId: (sheetName && this.getters.getSheetIdByName(sheetName)) || this.activeSheet,
+                    zone: this.getters.getRangeFromSheetXC(this.inputSheetId, xc).zone,
+                    sheetId: (sheetName && this.getters.getSheetIdByName(sheetName)) || this.inputSheetId,
                     color,
                 };
             });
@@ -40018,10 +40331,8 @@
                         let content = cell.content;
                         if (cell.isFormula) {
                             const position = this.getters.getCellPosition(cell.id);
-                            const offsetY = newRow - position.row;
                             // we only have a vertical offset
-                            const ranges = this.getters.createAdaptedRanges(cell.dependencies, 0, offsetY, sheetId);
-                            content = this.getters.buildFormulaContent(sheetId, cell, ranges);
+                            content = this.getters.getTranslatedCellFormula(sheetId, 0, newRow - position.row, cell.compiledFormula, cell.dependencies);
                         }
                         newCellValues.style = cell.style;
                         newCellValues.content = content;
@@ -40029,10 +40340,8 @@
                     }
                     updateCellCommands.push(newCellValues);
                 }
-                for (const cmd of updateCellCommands) {
-                    this.dispatch("UPDATE_CELL", cmd);
-                }
             }
+            updateCellCommands.forEach((cmdPayload) => this.dispatch("UPDATE_CELL", cmdPayload));
         }
         /**
          * Return the distances between main merge cells in the zone.
@@ -40133,24 +40442,28 @@
         // Getters
         // ---------------------------------------------------------------------------
         getCellWidth(position) {
-            const text = this.getCellText(position);
             const style = this.getters.getCellComputedStyle(position);
-            const multiLineText = text.split(NEWLINE);
-            let contentWidth = Math.max(...multiLineText.map((line) => this.getTextWidth(line, style)));
+            let contentWidth = 0;
+            const content = this.getters.getEvaluatedCell(position).formattedValue;
+            if (content) {
+                const multiLineText = splitTextToWidth(this.ctx, content, style, undefined);
+                contentWidth += Math.max(...multiLineText.map((line) => computeTextWidth(this.ctx, line, style)));
+            }
             const icon = this.getters.getConditionalIcon(position);
             if (icon) {
-                contentWidth += computeIconWidth(this.getters.getCellStyle(position));
+                contentWidth += computeIconWidth(style);
             }
             const isFilterHeader = this.getters.isFilterHeader(position);
             if (isFilterHeader) {
                 contentWidth += ICON_EDGE_LENGTH + FILTER_ICON_MARGIN;
             }
-            if (contentWidth > 0) {
-                contentWidth += 2 * PADDING_AUTORESIZE_HORIZONTAL;
-                if (this.getters.getCellStyle(position).wrapping === "wrap") {
-                    const colWidth = this.getters.getColSize(this.getters.getActiveSheetId(), position.col);
-                    return Math.min(colWidth, contentWidth);
-                }
+            if (contentWidth === 0) {
+                return 0;
+            }
+            contentWidth += 2 * PADDING_AUTORESIZE_HORIZONTAL;
+            if (style.wrapping === "wrap") {
+                const colWidth = this.getters.getColSize(this.getters.getActiveSheetId(), position.col);
+                return Math.min(colWidth, contentWidth);
             }
             return contentWidth;
         }
@@ -40173,56 +40486,7 @@
         getCellMultiLineText(position, width) {
             const style = this.getters.getCellStyle(position);
             const text = this.getters.getCellText(position, this.getters.shouldShowFormulas());
-            const brokenText = [];
-            for (const line of text.split("\n")) {
-                const words = line.split(" ");
-                if (!width) {
-                    brokenText.push(line);
-                    continue;
-                }
-                let textLine = "";
-                let availableWidth = width;
-                for (let word of words) {
-                    const splitWord = this.splitWordToSpecificWidth(this.ctx, word, width, style);
-                    const lastPart = splitWord.pop();
-                    const lastPartWidth = computeTextWidth(this.ctx, lastPart, style);
-                    // At this step: "splitWord" is an array composed of parts of word whose
-                    // length is at most equal to "width".
-                    // Last part contains the end of the word.
-                    // Note that: When word length is less than width, then lastPart is equal
-                    // to word and splitWord is empty
-                    if (splitWord.length) {
-                        if (textLine !== "") {
-                            brokenText.push(textLine);
-                            textLine = "";
-                            availableWidth = width;
-                        }
-                        splitWord.forEach((wordPart) => {
-                            brokenText.push(wordPart);
-                        });
-                        textLine = lastPart;
-                        availableWidth = width - lastPartWidth;
-                    }
-                    else {
-                        // here "lastPart" is equal to "word" and the "word" size is smaller than "width"
-                        const _word = textLine === "" ? lastPart : " " + lastPart;
-                        const wordWidth = computeTextWidth(this.ctx, _word, style);
-                        if (wordWidth <= availableWidth) {
-                            textLine += _word;
-                            availableWidth -= wordWidth;
-                        }
-                        else {
-                            brokenText.push(textLine);
-                            textLine = lastPart;
-                            availableWidth = width - lastPartWidth;
-                        }
-                    }
-                }
-                if (textLine !== "") {
-                    brokenText.push(textLine);
-                }
-            }
-            return brokenText;
+            return splitTextToWidth(this.ctx, text, style, width);
         }
         /**
          * Returns the size, start and end coordinates of a column on an unfolded sheet
@@ -40280,26 +40544,6 @@
             const cellsPositions = positions(this.getters.getColsZone(sheetId, index, index));
             const sizes = cellsPositions.map((position) => this.getCellWidth({ sheetId, ...position }));
             return Math.max(0, ...sizes);
-        }
-        splitWordToSpecificWidth(ctx, word, width, style) {
-            const wordWidth = computeTextWidth(ctx, word, style);
-            if (wordWidth <= width) {
-                return [word];
-            }
-            const splitWord = [];
-            let wordPart = "";
-            for (let l of word) {
-                const wordPartWidth = computeTextWidth(ctx, wordPart + l, style);
-                if (wordPartWidth > width) {
-                    splitWord.push(wordPart);
-                    wordPart = l;
-                }
-                else {
-                    wordPart += l;
-                }
-            }
-            splitWord.push(wordPart);
-            return splitWord;
         }
         /**
          * Check that any "sheetId" in the command matches an existing
@@ -41195,9 +41439,7 @@
                 }
                 let content = origin.cell.content;
                 if (origin.cell.isFormula && operation === "COPY") {
-                    const offsetX = col - origin.position.col;
-                    const offsetY = row - origin.position.row;
-                    content = this.getUpdatedContent(sheetId, origin.cell, offsetX, offsetY, operation);
+                    content = this.getters.getTranslatedCellFormula(sheetId, col - origin.position.col, row - origin.position.row, origin.cell.compiledFormula, origin.cell.dependencies);
                 }
                 this.dispatch("UPDATE_CELL", {
                     ...target,
@@ -41217,13 +41459,6 @@
                     this.dispatch("CLEAR_CELL", target);
                 }
             }
-        }
-        /**
-         * Get the newly updated formula, after applying offsets
-         */
-        getUpdatedContent(sheetId, cell, offsetX, offsetY, operation) {
-            const ranges = this.getters.createAdaptedRanges(cell.dependencies, offsetX, offsetY, sheetId);
-            return this.getters.buildFormulaContent(sheetId, cell, ranges);
         }
         /**
          * If the origin position given is the top left of a merge, merge the target
@@ -41292,7 +41527,7 @@
                 .join("\n") || "\t");
         }
         getHTMLContent() {
-            if (this.cells.length == 1 && this.cells[0].length == 1) {
+            if (this.cells.length === 1 && this.cells[0].length === 1) {
                 return this.getters.getCellText(this.cells[0][0].position);
             }
             let htmlTable = '<table border="1" style="border-collapse:collapse">';
@@ -41617,7 +41852,7 @@
         status = "invisible";
         state;
         lastPasteState;
-        _isPaintingFormat = false;
+        paintFormatStatus = "inactive";
         originSheetId;
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -41632,7 +41867,7 @@
                     if (!this.state) {
                         return 24 /* CommandResult.EmptyClipboard */;
                     }
-                    const pasteOption = cmd.pasteOption || (this._isPaintingFormat ? "onlyFormat" : undefined);
+                    const pasteOption = cmd.pasteOption || (this.paintFormatStatus !== "inactive" ? "onlyFormat" : undefined);
                     return this.state.isPasteAllowed(cmd.target, { pasteOption });
                 case "PASTE_FROM_OS_CLIPBOARD": {
                     const state = new ClipboardOsState(cmd.text, this.getters, this.dispatch, this.selection);
@@ -41647,6 +41882,11 @@
                     const { cut, paste } = this.getDeleteCellsTargets(cmd.zone, cmd.shiftDimension);
                     const state = this.getClipboardStateForCopyCells(cut, "CUT");
                     return state.isPasteAllowed(paste);
+                }
+                case "ACTIVATE_PAINT_FORMAT": {
+                    if (this.paintFormatStatus !== "inactive") {
+                        return 95 /* CommandResult.AlreadyInPaintingFormatMode */;
+                    }
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -41664,11 +41904,13 @@
                     if (!this.state) {
                         break;
                     }
-                    const pasteOption = cmd.pasteOption || (this._isPaintingFormat ? "onlyFormat" : undefined);
-                    this._isPaintingFormat = false;
+                    const pasteOption = cmd.pasteOption || (this.paintFormatStatus !== "inactive" ? "onlyFormat" : undefined);
                     this.state.paste(cmd.target, { pasteOption, shouldPasteCF: true, selectTarget: true });
                     this.lastPasteState = this.state;
-                    this.status = "invisible";
+                    if (this.paintFormatStatus === "oneOff") {
+                        this.paintFormatStatus = "inactive";
+                        this.status = "invisible";
+                    }
                     break;
                 case "CLEAN_CLIPBOARD_HIGHLIGHT":
                     this.status = "invisible";
@@ -41736,8 +41978,13 @@
                 case "ACTIVATE_PAINT_FORMAT": {
                     const zones = this.getters.getSelectedZones();
                     this.state = this.getClipboardStateForCopyCells(zones, "COPY");
-                    this._isPaintingFormat = true;
                     this.status = "visible";
+                    if (cmd.persistent) {
+                        this.paintFormatStatus = "persistent";
+                    }
+                    else {
+                        this.paintFormatStatus = "oneOff";
+                    }
                     break;
                 }
                 case "DELETE_SHEET":
@@ -41749,6 +41996,11 @@
                         this.status = "invisible";
                     }
                     break;
+                case "CANCEL_PAINT_FORMAT": {
+                    this.paintFormatStatus = "inactive";
+                    this.status = "invisible";
+                    break;
+                }
                 default:
                     if (isCoreCommand(cmd)) {
                         this.status = "invisible";
@@ -41779,7 +42031,7 @@
             return this.state ? this.state.operation === "CUT" : false;
         }
         isPaintingFormat() {
-            return this._isPaintingFormat;
+            return this.paintFormatStatus !== "inactive";
         }
         // ---------------------------------------------------------------------------
         // Private methods
@@ -41949,6 +42201,7 @@
             "getTokenAtCursor",
             "getComposerHighlights",
             "getCurrentEditedCell",
+            "getCycledReference",
         ];
         col = 0;
         row = 0;
@@ -41958,10 +42211,7 @@
         currentTokens = [];
         selectionStart = 0;
         selectionEnd = 0;
-        selectionInitialStart = 0;
         initialContent = "";
-        previousRef = "";
-        previousRange = undefined;
         colorIndexByRange = {};
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -41990,9 +42240,6 @@
             }
         }
         handleEvent(event) {
-            if (this.mode !== "selecting") {
-                return;
-            }
             const sheetId = this.getters.getActiveSheetId();
             let unboundedZone;
             if (event.options.unbounded) {
@@ -42003,10 +42250,17 @@
             }
             switch (event.mode) {
                 case "newAnchor":
-                    this.insertSelectedRange(unboundedZone);
+                    if (this.mode === "selecting") {
+                        this.insertSelectedRange(unboundedZone);
+                    }
                     break;
                 default:
-                    this.replaceSelectedRanges(unboundedZone);
+                    if (this.mode === "selecting") {
+                        this.replaceSelectedRange(unboundedZone);
+                    }
+                    else {
+                        this.updateComposerRange(event.previousAnchor.zone, unboundedZone);
+                    }
                     break;
             }
         }
@@ -42063,35 +42317,12 @@
                     }
                     break;
                 case "START_CHANGE_HIGHLIGHT":
-                    // FIXME: thiws whole ordeal could be handled with the Selection Processor which would extend the feature to selection inputs
-                    this.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-                    // FIXME: we should check range SheetId compared to this.activeSheetId r maybe not have a sheetId in the payload ??
-                    const range = this.getters.getRangeFromRangeData(cmd.range);
-                    const previousRefToken = this.currentTokens
-                        .filter((token) => token.type === "REFERENCE")
-                        .find((token) => {
-                        const { xc, sheetName: sheet } = splitReference(token.value);
-                        const sheetName = sheet || this.getters.getSheetName(this.sheetId);
-                        const activeSheetId = this.getters.getActiveSheetId();
-                        if (this.getters.getSheetName(activeSheetId) !== sheetName) {
-                            return false;
-                        }
-                        const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
-                        return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), range.zone);
-                    });
-                    this.previousRef = previousRefToken.value;
-                    this.previousRange = this.getters.getRangeFromSheetXC(this.getters.getActiveSheetId(), this.previousRef);
-                    this.selectionInitialStart = previousRefToken.start;
-                    break;
-                case "CHANGE_HIGHLIGHT":
-                    const cmdRange = this.getters.getRangeFromRangeData(cmd.range);
-                    const newRef = this.getRangeReference(cmdRange, this.previousRange.parts);
-                    this.selectionStart = this.selectionInitialStart;
-                    this.selectionEnd = this.selectionInitialStart + this.previousRef.length;
-                    this.replaceSelection(newRef);
-                    this.previousRef = newRef;
-                    this.selectionStart = this.currentContent.length;
-                    this.selectionEnd = this.currentContent.length;
+                    const { left, top } = cmd.zone;
+                    // changing the highlight can conflit with the 'selecting' mode
+                    if (this.isSelectingForComposer()) {
+                        this.mode = "editing";
+                    }
+                    this.selection.resetAnchor(this, { cell: { col: left, row: top }, zone: cmd.zone });
                     break;
                 case "ACTIVATE_SHEET":
                     if (!this.currentContent.startsWith("=")) {
@@ -42117,10 +42348,7 @@
                         this.sheetId = this.getters.getActiveSheetId();
                         this.cancelEditionAndActivateSheet();
                         this.resetContent();
-                        this.ui.notifyUI({
-                            type: "ERROR",
-                            text: CELL_DELETED_MESSAGE,
-                        });
+                        this.ui.raiseBlockingErrorUI(CELL_DELETED_MESSAGE);
                     }
                     break;
                 case "CYCLE_EDITION_REFERENCES":
@@ -42175,33 +42403,45 @@
                 return this.currentTokens.find((t) => t.start <= start && t.end >= end);
             }
         }
-        // ---------------------------------------------------------------------------
-        // Misc
-        // ---------------------------------------------------------------------------
-        cycleReferences() {
-            const tokens = this.getTokensInSelection();
+        /**
+         * Return the cycled reference if any (A1 -> $A$1 -> A$1 -> $A1 -> A1)
+         */
+        getCycledReference(selection, content) {
+            const locale = this.getters.getLocale();
+            const currentTokens = content.startsWith("=") ? composerTokenize(content, locale) : [];
+            const tokens = currentTokens.filter((t) => (t.start <= selection.start && t.end >= selection.start) ||
+                (t.start >= selection.start && t.start < selection.end));
             const refTokens = tokens.filter((token) => token.type === "REFERENCE");
-            if (refTokens.length === 0)
+            if (refTokens.length === 0) {
                 return;
+            }
             const updatedReferences = tokens
                 .map(loopThroughReferenceType)
                 .map((token) => token.value)
                 .join("");
-            const content = this.currentContent;
             const start = tokens[0].start;
             const end = tokens[tokens.length - 1].end;
             const newContent = content.slice(0, start) + updatedReferences + content.slice(end);
             const lengthDiff = newContent.length - content.length;
             const startOfTokens = refTokens[0].start;
             const endOfTokens = refTokens[refTokens.length - 1].end + lengthDiff;
-            const selection = { start: startOfTokens, end: endOfTokens };
-            // Put the selection at the end of the token if we cycled on a single token
-            if (refTokens.length === 1 && this.selectionStart === this.selectionEnd) {
-                selection.start = selection.end;
+            const newSelection = { start: startOfTokens, end: endOfTokens };
+            if (refTokens.length === 1 && selection.start === selection.end) {
+                newSelection.start = newSelection.end;
+            }
+            return { content: newContent, selection: newSelection };
+        }
+        // ---------------------------------------------------------------------------
+        // Misc
+        // ---------------------------------------------------------------------------
+        cycleReferences() {
+            const updated = this.getCycledReference(this.getComposerSelection(), this.currentContent);
+            if (updated === undefined) {
+                return;
             }
             this.dispatch("SET_CURRENT_CONTENT", {
-                content: newContent,
-                selection,
+                content: updated.content,
+                selection: updated.selection,
             });
         }
         validateSelection(length, start, end) {
@@ -42212,10 +42452,7 @@
         onColumnsRemoved(cmd) {
             if (cmd.elements.includes(this.col) && this.mode !== "inactive") {
                 this.dispatch("STOP_EDITION", { cancel: true });
-                this.ui.notifyUI({
-                    type: "ERROR",
-                    text: CELL_DELETED_MESSAGE,
-                });
+                this.ui.raiseBlockingErrorUI(CELL_DELETED_MESSAGE);
                 return;
             }
             const { top, left } = updateSelectionOnDeletion({ left: this.col, right: this.col, top: this.row, bottom: this.row }, "left", [...cmd.elements]);
@@ -42225,10 +42462,7 @@
         onRowsRemoved(cmd) {
             if (cmd.elements.includes(this.row) && this.mode !== "inactive") {
                 this.dispatch("STOP_EDITION", { cancel: true });
-                this.ui.notifyUI({
-                    type: "ERROR",
-                    text: CELL_DELETED_MESSAGE,
-                });
+                this.ui.raiseBlockingErrorUI(CELL_DELETED_MESSAGE);
                 return;
             }
             const { top, left } = updateSelectionOnDeletion({ left: this.col, right: this.col, top: this.row, bottom: this.row }, "top", [...cmd.elements]);
@@ -42249,7 +42483,6 @@
                 this.selection.resetAnchor(this, { cell: { col: this.col, row: this.row }, zone });
             }
             this.mode = "selecting";
-            this.selectionInitialStart = this.selectionStart;
         }
         /**
          * start the edition of a cell
@@ -42392,10 +42625,7 @@
                 this.currentTokens = text.startsWith("=") ? composerTokenize(text, locale) : [];
                 if (this.currentTokens.length > 100) {
                     if (raise) {
-                        this.ui.notifyUI({
-                            type: "ERROR",
-                            text: _lt("This formula has over 100 parts. It can't be processed properly, consider splitting it into multiple cells"),
-                        });
+                        this.ui.raiseBlockingErrorUI(_lt("This formula has over 100 parts. It can't be processed properly, consider splitting it into multiple cells"));
                     }
                 }
             }
@@ -42409,19 +42639,49 @@
             const ref = this.getZoneReference(zone);
             if (this.canStartComposerRangeSelection()) {
                 this.insertText(ref, start);
-                this.selectionInitialStart = start;
             }
             else {
                 this.insertText("," + ref, start);
-                this.selectionInitialStart = start + 1;
             }
         }
         /**
          * Replace the current reference selected by the new one.
          * */
-        replaceSelectedRanges(zone) {
+        replaceSelectedRange(zone) {
             const ref = this.getZoneReference(zone);
-            this.replaceText(ref, this.selectionInitialStart, this.selectionEnd);
+            const currentToken = this.getTokenAtCursor();
+            const start = currentToken?.type === "REFERENCE" ? currentToken.start : this.selectionStart;
+            this.replaceText(ref, start, this.selectionEnd);
+        }
+        /**
+         * Replace the reference of the old zone by the new one.
+         */
+        updateComposerRange(oldZone, newZone) {
+            const activeSheetId = this.getters.getActiveSheetId();
+            const tokentAtCursor = this.getTokenAtCursor();
+            const tokens = tokentAtCursor ? [tokentAtCursor, ...this.currentTokens] : this.currentTokens;
+            const previousRefToken = tokens
+                .filter((token) => token.type === "REFERENCE")
+                .find((token) => {
+                const { xc, sheetName: sheet } = splitReference(token.value);
+                const sheetName = sheet || this.getters.getSheetName(this.sheetId);
+                if (this.getters.getSheetName(activeSheetId) !== sheetName) {
+                    return false;
+                }
+                const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
+                return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), oldZone);
+            });
+            // this function assumes that the previous range is always found because
+            // it's called when changing a highlight, which exists by definition
+            if (!previousRefToken) {
+                throw new Error("Previous range not found");
+            }
+            const previousRange = this.getters.getRangeFromSheetXC(activeSheetId, previousRefToken.value);
+            this.selectionStart = previousRefToken.start;
+            this.selectionEnd = this.selectionStart + previousRefToken.value.length;
+            const newRange = this.getters.getRangeFromZone(activeSheetId, newZone);
+            const newRef = this.getRangeReference(newRange, previousRange.parts);
+            this.replaceSelection(newRef);
         }
         getZoneReference(zone) {
             const inputSheetId = this.getters.getCurrentEditedCell().sheetId;
@@ -42429,14 +42689,8 @@
             const range = this.getters.getRangeFromZone(sheetId, zone);
             return this.getters.getSelectionRangeString(range, inputSheetId);
         }
-        getRangeReference(range, fixedParts = [{ colFixed: false, rowFixed: false }]) {
+        getRangeReference(range, fixedParts) {
             let _fixedParts = [...fixedParts];
-            if (fixedParts.length === 1 && getZoneArea(range.zone) > 1) {
-                _fixedParts.push({ ...fixedParts[0] });
-            }
-            else if (fixedParts.length === 2 && getZoneArea(range.zone) === 1) {
-                _fixedParts.pop();
-            }
             const newRange = range.clone({ parts: _fixedParts });
             return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell().sheetId);
         }
@@ -42562,15 +42816,6 @@
                 return true;
             }
             return false;
-        }
-        /**
-         * Return all the tokens between selectionStart and selectionEnd.
-         * Includes token that begin right on selectionStart or end right on selectionEnd.
-         */
-        getTokensInSelection() {
-            const start = Math.min(this.selectionStart, this.selectionEnd);
-            const end = Math.max(this.selectionStart, this.selectionEnd);
-            return this.currentTokens.filter((t) => (t.start <= start && t.end >= start) || (t.start >= start && t.start < end));
         }
     }
 
@@ -44414,6 +44659,7 @@
         .add("evaluation", EvaluationPlugin)
         .add("evaluation_chart", EvaluationChartPlugin)
         .add("evaluation_cf", EvaluationConditionalFormatPlugin)
+        .add("row_size", UIRowSizePlugin)
         .add("custom_colors", CustomColorsPlugin);
 
     const clickableCellRegistry = new Registry();
@@ -45536,6 +45782,11 @@
     .o-sidePanelButton:enabled {
       cursor: pointer;
     }
+
+    .o-sidePanelButton:disabled {
+      color: ${DISABLED_TEXT_COLOR};
+    }
+
     .o-sidePanelButton:last-child {
       margin-right: 0px;
     }
@@ -45669,11 +45920,11 @@
         }
         get title() {
             const name = this.actionButton.name(this.env);
-            const description = this.actionButton.description;
+            const description = this.actionButton.description(this.env);
             return name + (description ? ` (${description})` : "");
         }
         get iconTitle() {
-            return this.actionButton.icon;
+            return this.actionButton.icon(this.env);
         }
         onClick(ev) {
             if (this.isEnabled) {
@@ -46058,6 +46309,27 @@
         class: String,
     };
 
+    class PaintFormatButton extends owl.Component {
+        static template = "o-spreadsheet-PaintFormatButton";
+        get isActive() {
+            return this.env.model.getters.isPaintingFormat();
+        }
+        onDblClick() {
+            this.env.model.dispatch("ACTIVATE_PAINT_FORMAT", { persistent: true });
+        }
+        togglePaintFormat() {
+            if (this.isActive) {
+                this.env.model.dispatch("CANCEL_PAINT_FORMAT");
+            }
+            else {
+                this.env.model.dispatch("ACTIVATE_PAINT_FORMAT", { persistent: false });
+            }
+        }
+    }
+    PaintFormatButton.props = {
+        class: { type: String, optional: true },
+    };
+
     // -----------------------------------------------------------------------------
     // TopBar
     // -----------------------------------------------------------------------------
@@ -46158,6 +46430,7 @@
             TopBarComposer,
             FontSizeEditor,
             ActionButton,
+            PaintFormatButton,
             BorderEditorWidget,
         };
         state = owl.useState({
@@ -46500,11 +46773,13 @@
         }
         bindModelEvents() {
             this.model.on("update", this, () => this.render(true));
-            this.model.on("notify-ui", this, this.onNotifyUI);
+            this.model.on("notify-ui", this, this.env.notifyUser);
+            this.model.on("raise-error-ui", this, ({ text }) => this.env.raiseError(text));
         }
         unbindModelEvents() {
             this.model.off("update", this);
             this.model.off("notify-ui", this);
+            this.model.off("raise-error-ui", this);
         }
         checkViewportSize() {
             const { xRatio, yRatio } = this.env.model.getters.getFrozenSheetViewRatio(this.env.model.getters.getActiveSheetId());
@@ -46518,19 +46793,13 @@
                 }
                 this.env.notifyUser({
                     text: _lt("The current window is too small to display this sheet properly. Consider resizing your browser window or adjusting frozen rows and columns."),
-                    tag: "viewportTooSmall",
+                    type: "warning",
+                    sticky: false,
                 });
                 this.isViewportTooSmall = true;
             }
             else {
                 this.isViewportTooSmall = false;
-            }
-        }
-        onNotifyUI(payload) {
-            switch (payload.type) {
-                case "ERROR":
-                    this.env.raiseError(payload.text);
-                    break;
             }
         }
         openSidePanel(panel, panelProps) {
@@ -48010,7 +48279,7 @@
                 : "nextCluster";
             while (true) {
                 const nextCellPosition = this.getNextCellPosition(currentPosition, dim, dir);
-                // Break if nextPosition == currentPosition, which happens if there's no next valid position
+                // Break if nextPosition === currentPosition, which happens if there's no next valid position
                 if (currentPosition.col === nextCellPosition.col &&
                     currentPosition.row === nextCellPosition.row) {
                     break;
@@ -49924,12 +50193,14 @@
                 ...config,
                 mode: config.mode || "normal",
                 custom: config.custom || {},
+                defaultCurrencyFormat: config.defaultCurrencyFormat || "[$$]#,##0.00",
                 external: this.setupExternalConfig(config.external || {}),
                 transportService,
                 client,
                 moveClient: () => { },
                 snapshotRequested: false,
                 notifyUI: (payload) => this.trigger("notify-ui", payload),
+                raiseBlockingErrorUI: (text) => this.trigger("raise-error-ui", { text }),
             };
         }
         setupExternalConfig(external) {
@@ -50076,10 +50347,17 @@
          * It will call `beforeHandle` and `handle`
          */
         dispatchToHandlers(handlers, command) {
+            const isCommandCore = isCoreCommand(command);
             for (const handler of handlers) {
+                if (!isCommandCore && handler instanceof CorePlugin) {
+                    continue;
+                }
                 handler.beforeHandle(command);
             }
             for (const handler of handlers) {
+                if (!isCommandCore && handler instanceof CorePlugin) {
+                    continue;
+                }
                 handler.handle(command);
             }
         }
@@ -50221,6 +50499,7 @@
         numberToLetters,
         UuidGenerator,
         formatValue,
+        createCurrencyFormat,
         computeTextWidth,
         createEmptyWorkbookData,
         createEmptySheet,
@@ -50264,6 +50543,9 @@
     };
     function addFunction(functionName, functionDescription) {
         functionRegistry.add(functionName, functionDescription);
+        return {
+            addFunction: (fName, fDescription) => addFunction(fName, fDescription),
+        };
     }
     const constants = {
         DEFAULT_LOCALE,
@@ -50306,9 +50588,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.4.0-alpha.7';
-    __info__.date = '2023-07-04T14:12:23.240Z';
-    __info__.hash = 'b04cf78';
+    __info__.version = '16.5.0-alpha.1';
+    __info__.date = '2023-08-07T06:40:02.022Z';
+    __info__.hash = 'faa92ec';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
