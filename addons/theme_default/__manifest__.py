@@ -8,6 +8,9 @@
     'sequence': 1000,
     'version': '1.0',
     'depends': ['website'],
+    'data': [
+        'views/new_page_templates.xml',
+    ],
     'images': [
         'static/description/cover.png',
         'static/description/theme_default_screenshot.jpg',
