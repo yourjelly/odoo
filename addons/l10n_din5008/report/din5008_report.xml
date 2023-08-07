@@ -34,11 +34,11 @@
         <!-- New report layout for din5008 format -->
         <template id="external_layout_din5008">
             <div>
-                <div t-attf-class="header din_page o_company_#{company.id}_layout">
-                    <table class="company_header table-borderless" t-att-style="'height: %dmm;' % (din_header_spacing or 27)">
+                <div t-attf-class="header din_page o_company_#{company.id}_layout" contenteditable="false">
+                    <table class="company_header table-borderless" t-att-style="'height: %dmm;' % (din_header_spacing or 27)" style="height: 27mm">
                         <tr>
-                            <td><div class="h3 mt0" t-field="company.report_header"/></td>
-                            <td><img t-if="company.logo" t-att-src="image_data_uri(company.logo)" t-att-style="'max-height: %dmm;' % (din_header_spacing or 27)"/></td>
+                            <td><div class="h3 mt0" t-field="company.report_header">Company tagline</div></td>
+                            <td><img t-if="company.logo" t-att-src="image_data_uri(company.logo)" t-att-style="'max-height: %dmm;' % (din_header_spacing or 27)" style="max-height: 27mm"/></td>
                         </tr>
                     </table>
                 </div>
@@ -46,74 +46,77 @@
                 <div t-attf-class="din_page invoice_note article o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}"
                      t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});"
                      t-att-data-oe-model="o and o._name"
-                     t-att-data-oe-id="o and o.id">
+                     t-att-data-oe-id="o and o.id"
+                     contenteditable="false" data-oe-protected="true">
                     <table class="din_company_info table-borderless">
                         <tr>
                             <td>
                                 <div class="address">
                                     <t t-if="company.name">
-                                        <span t-field="company.name"/>
+                                        <span t-field="company.name">Company Name</span>
                                     </t>
                                     <t t-if="company.street">
-                                        <span>|</span> <span t-field="company.street"/>
+                                        <span>|</span> <span t-field="company.street">Street</span>
                                     </t>
                                     <t t-if="company.street2">
-                                        <span>|</span> <span t-field="company.street2"/>
+                                        <span>|</span> <span t-field="company.street2">Street (2)</span>
                                     </t>
                                     <t t-if="company.zip">
-                                        <span>|</span> <span t-field="company.zip"/>
+                                        <span>|</span> <span t-field="company.zip">Zip</span>
                                     </t>
                                     <t t-if="company.city">
-                                        <span t-if="not company.zip">|</span> <span t-field="company.city"/>
+                                        <span t-if="not company.zip">|</span> <span t-field="company.city">City</span>
                                     </t>
                                     <t t-if="company.country_id">
-                                        <span>|</span> <span t-field="company.country_id.name"/>
+                                        <span>|</span> <span t-field="company.country_id.name">Country</span>
                                     </t>
                                     <hr class="company_invoice_line" />
-                                    <div t-if="address">
-                                        <t t-out="address"/>
+                                    <div t-if="address" t-out="address">
+                                        <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center px-2 py-5 w-100 opacity-75 text-muted text-center">
+                                            <strong>Recipient address block</strong>
+                                            <div>Contains the address of the recipient.</div>
+                                        </div>
                                     </div>
-                                    <div t-else="fallback_address">
-                                        <t t-out="fallback_address"
-                                           t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True}' />
+                                    <div t-else="fallback_address" t-out="fallback_address"
+                                           t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True}' >
+                                        <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center px-2 py-5 w-100 opacity-75 text-muted text-center">
+                                            <strong>Recipient address block</strong>
+                                            <div>Contains the address of the recipient.</div>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <div class="information_block">
-                                    <t t-if="'l10n_din5008_template_data' in company" t-set="template_data" t-value="company.l10n_din5008_template_data"/>
-                                    <t t-if="o and 'l10n_din5008_template_data' in o" t-set="template_data" t-value="o.l10n_din5008_template_data"/>
-                                    <table>
-                                        <t t-foreach="template_data" t-as="row">
-                                            <tr><td><t t-out="row[0]"/></td><td><t t-out="row[1]"/></td></tr>
-                                        </t>
-                                    </table>
+                                <div t-if="information_block" class="information_block position-relative" t-out="information_block">
+                                    <div class="position-absolute bg-white h-100">
+                                        <div class="bg-light border-1 rounded d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
+                                            <strong>Information block</strong>
+                                            <div>Contains information regarding the printed document, like references, dates, etc..</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
-                        <tr t-if="o and 'l10n_din5008_addresses' in o">
-                            <t t-foreach="o.l10n_din5008_addresses" t-as="doc_address">
-                                <td>
-                                    <div class="shipping_address">
-                                        <strong><t t-out="doc_address[0]"/></strong>
-                                        <div t-out="doc_address[1]" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
-                                    </div>
-                                </td>
-                            </t>
+                        <tr name="din5008_addresses" t-out="din5008_addresses">
+                            <td colspan="2" class="bg-light border-1 rounded px-4 py-2 opacity-75 text-muted text-center align-middle">
+                                <strong>Addresses block</strong>
+                                <div>Contains addresses.</div>
+                                <div>Multiple addresses can be listed in this block, such as delivery or invoicing address.</div>
+                                <div>This block is not always present depending on the underlying document.</div>
+                            </td>
                         </tr>
                     </table>
-                    <h2>
-                        <span t-if="not o and not docs"><t t-out="company.l10n_din5008_document_title"/></span>
-                        <span t-else="">
-                            <t t-set="o" t-value="docs[0]" t-if="not o" />
-                            <span t-if="'l10n_din5008_document_title' in o"><t t-out="o.l10n_din5008_document_title"/></span>
-                            <span t-elif="'name' in o" t-field="o.name"/>
-                        </span>
+                    <h2 name="din5008_document_title" t-if="din5008_document_title" t-out="din5008_document_title">
+                        <div class="bg-light border-1 rounded px-4 p2y-2 w-100 opacity-75 text-muted text-start">
+                            <span><strong>Document name</strong> <span class="fs-5">(depends on the underlying document)</span></span>
+                        </div>
                     </h2>
-                    <t t-out="0"/>
+                    <div contenteditable="true">
+                        <t t-out="0"/>
+                    </div>
                 </div>
 
-                <div t-attf-class="din_page footer o_company_#{company.id}_layout">
+                <div t-attf-class="din_page footer o_company_#{company.id}_layout" contenteditable="false">
                     <div class="text-end page_number">
                         <div class="text-muted">
                             Page: <span class="page"/> of <span class="topage"/>
@@ -124,26 +127,26 @@
                             <tr>
                                 <td>
                                     <ul class="list-inline">
-                                        <li t-if="company.company_details"><span t-field="company.company_details"/></li>
+                                        <li t-if="company.company_details"><span t-field="company.company_details">Company details</span></li>
                                     </ul>
                                 </td>
                                 <td>
                                     <ul class="list-inline">
-                                        <li t-if="company.report_footer"><span t-field="company.report_footer"/></li>
+                                        <li t-if="company.report_footer"><span t-field="company.report_footer">Company report footer</span></li>
                                     </ul>
                                 </td>
                                 <td>
                                     <ul class="list-inline">
-                                        <li t-if="company.vat"><t t-out="company.account_fiscal_country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
-                                        <li>HRB Nr: <span t-field="company.company_registry"/></li>
+                                        <li t-if="company.vat"><t t-out="company.account_fiscal_country_id.vat_label or 'Tax ID'">VAT</t>: <span t-field="company.vat">Company VAT</span></li>
+                                        <li>HRB Nr: <span t-field="company.company_registry">Company HRB</span></li>
                                     </ul>
                                 </td>
                                 <td t-if="company.partner_id.bank_ids">
                                     <ul class="list-inline">
                                         <t t-foreach="company.partner_id.bank_ids[:2]" t-as="bank">
-                                            <li><span t-field="bank.bank_id.name"/></li>
-                                            <li>IBAN: <span t-field="bank.acc_number"/></li>
-                                            <li>BIC: <span t-field="bank.bank_id.bic"/></li>
+                                            <li><span t-field="bank.bank_id.name">Bank name</span></li>
+                                            <li>IBAN: <span t-field="bank.acc_number">Account number</span></li>
+                                            <li>BIC: <span t-field="bank.bank_id.bic">BIC</span></li>
                                         </t>
                                     </ul>
                                 </td>

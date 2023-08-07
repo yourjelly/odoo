@@ -9,6 +9,7 @@
     'depends': ['account'],
     'data': [
         'report/din5008_report.xml',
+        'report/report_invoice_templates.xml',
         'data/report_layout.xml',
     ],
     'assets': {
