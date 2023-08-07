@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Generate primary snippet templates that are not predefined -->
+<function model="website" name="_generate_primary_snippet_templates">
+    <value>theme_default</value>
+</function>
+
+<template id="new_page_template_about_0_s_text_block" inherit_id="website.new_page_template_about_0_s_text_block">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-snippet">s_text_block</attribute>
+        <attribute name="class" add="o_cc o_cc2" separator=" "/>
+        <attribute name="style" remove="background-image: none;" separator=" "/>
+        <attribute name="data-oe-shape-data">{"shape":"web_editor/Origins/18","flip":[],"showOnMobile":false,"animated":"true"}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_web_editor_Origins_18 o_we_animated"/>
+    </xpath>
+</template>
+
+<template id="new_page_template_sections_about_1" inherit_id="website.new_page_template_sections_about_1">
+    <xpath expr="//t[@t-snippet-call='website.new_page_template_about_1_s_picture']" position="before">
+        <t t-snippet-call="website.new_page_template_about_1_s_table_of_content"/>
+        <t t-snippet-call="website.new_page_template_about_1_s_countdown"/>
+    </xpath>
+</template>
+
+</odoo>

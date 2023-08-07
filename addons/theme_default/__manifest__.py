@@ -8,6 +8,9 @@
     'sequence': 1000,
     'version': '1.0',
     'depends': ['website'],
+    'data': [
+        'views/new_page_templates.xml',
+    ],
     'images': [
         'static/description/cover.png',
         'static/description/theme_default_screenshot.jpg',
@@ -18,6 +21,11 @@
         'our_services': ['s_three_columns', 's_quotes_carousel', 's_references'],
         'pricing': ['s_comparisons'],
         'privacy_policy': ['s_faq_collapse'],
+    },
+    'new_page_templates': {
+        'about': {
+            '1': ['s_table_of_content', 's_countdown', 's_picture', 's_showcase', 's_three_columns', 's_company_team', 's_quotes_carousel'],
+        },
     },
     'license': 'LGPL-3',
 }
