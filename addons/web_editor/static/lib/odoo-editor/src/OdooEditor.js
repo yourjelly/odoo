@@ -58,6 +58,7 @@ import {
     isZWS,
     getDeepestPosition,
     leftPos,
+    isVisibleStr,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -3396,7 +3397,7 @@ export class OdooEditor extends EventTarget {
                         let textIndex = 1;
                         for (const textFragment of textFragments) {
                             this._applyCommand('insertText', textFragment);
-                            if (textIndex < textFragments.length) {
+                            if (textIndex < textFragments.length && isVisibleStr(textFragment)) {
                                 this._applyCommand('oShiftEnter');
                             }
                             textIndex++;
