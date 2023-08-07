@@ -2996,11 +2996,18 @@
         constructor(args, getSheetSize) {
             this.getSheetSize = getSheetSize;
             this._zone = args.zone;
-            this.parts = args.parts;
             this.prefixSheet = args.prefixSheet;
             this.invalidXc = args.invalidXc;
             this.sheetId = args.sheetId;
             this.invalidSheetName = args.invalidSheetName;
+            let _fixedParts = [...args.parts];
+            if (args.parts.length === 1 && getZoneArea(this.zone) > 1) {
+                _fixedParts.push({ ...args.parts[0] });
+            }
+            else if (args.parts.length === 2 && getZoneArea(this.zone) === 1) {
+                _fixedParts.pop();
+            }
+            this.parts = _fixedParts;
         }
         static fromRange(range, getters) {
             if (range instanceof RangeImpl) {
@@ -4050,8 +4057,6 @@
         "START",
         "ACTIVATE_SHEET",
         "COPY",
-        "PREPARE_SELECTION_INPUT_EXPANSION",
-        "STOP_SELECTION_INPUT",
         "RESIZE_SHEETVIEW",
         "SET_VIEWPORT_OFFSET",
         "SELECT_SEARCH_NEXT_MATCH",
@@ -5127,8 +5132,7 @@
                 return { cellData: {} };
             }
             const sheetId = data.sheetId;
-            const ranges = getters.createAdaptedRanges(cell.dependencies, x, y, sheetId);
-            const content = getters.buildFormulaContent(sheetId, cell, ranges);
+            const content = getters.getTranslatedCellFormula(sheetId, x, y, cell.compiledFormula, cell.dependencies);
             return {
                 cellData: {
                     border: data.border,
@@ -22420,6 +22424,18 @@
             style[tool] = !style[tool];
             this.closeMenus();
         }
+        onKeydown(event) {
+            if (event.key === "F4") {
+                const target = event.target;
+                const update = this.env.model.getters.getCycledReference({ start: target.selectionStart ?? 0, end: target.selectionEnd ?? 0 }, target.value);
+                if (!update) {
+                    return;
+                }
+                target.value = update.content;
+                target.setSelectionRange(update.selection.start, update.selection.end);
+                target.dispatchEvent(new Event("input"));
+            }
+        }
         setColor(target, color) {
             this.state.rules.cellIs.style[target] = color;
             this.closeMenus();
@@ -24690,6 +24706,15 @@
                 y = initialFigure.y - deltaY;
             }
         }
+        // Restrict resizing if x or y reaches header boundaries
+        if (x < 0) {
+            width += x;
+            x = 0;
+        }
+        if (y < 0) {
+            height += y;
+            y = 0;
+        }
         return { ...initialFigure, x, y, width, height };
     }
 
@@ -25282,10 +25307,29 @@
                 setPosition(undefined, undefined);
             }
         }
+        function onMouseLeave(e) {
+            const x = e.offsetX;
+            const y = e.offsetY;
+            const gridRect = getBoundingRectAsPOJO(gridRef.el);
+            if (y < 0 || y > gridRect.height || x < 0 || x > gridRect.width) {
+                return updateMousePosition(e);
+            }
+            else {
+                return pause();
+            }
+        }
         useRefListener(gridRef, "mousemove", updateMousePosition);
-        useRefListener(gridRef, "mouseleave", pause);
+        useRefListener(gridRef, "mouseleave", onMouseLeave);
         useRefListener(gridRef, "mouseenter", resume);
         useRefListener(gridRef, "mousedown", recompute);
+        owl.useExternalListener(window, "click", handleGlobalClick);
+        function handleGlobalClick(e) {
+            const target = e.target;
+            const grid = gridRef.el;
+            if (!grid.contains(target)) {
+                setPosition(undefined, undefined);
+            }
+        }
         function setPosition(col, row) {
             if (col !== hoveredPosition.col || row !== hoveredPosition.row) {
                 hoveredPosition.col = col;
@@ -25609,7 +25653,6 @@
             const mouseUpSelect = () => {
                 this.state.isSelecting = false;
                 this.lastSelectedElementIndex = null;
-                this.env.model.dispatch(ev.ctrlKey ? "PREPARE_SELECTION_INPUT_EXPANSION" : "STOP_SELECTION_INPUT");
                 this._computeGrabDisplay(ev);
             };
             dragAndDropBeyondTheViewport(this.env, mouseMoveSelect, mouseUpSelect);
@@ -26174,9 +26217,7 @@
             let lastCol = isLeft ? z.left : z.right;
             let lastRow = isTop ? z.top : z.bottom;
             let currentZone = z;
-            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", {
-                range: this.env.model.getters.getRangeDataFromZone(activeSheetId, currentZone),
-            });
+            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", { zone: currentZone });
             const mouseMove = (col, row) => {
                 if (lastCol !== col || lastRow !== row) {
                     lastCol = clip(col === -1 ? lastCol : col, 0, this.env.model.getters.getNumberCols(activeSheetId) - 1);
@@ -26187,21 +26228,17 @@
                         right: Math.max(pivotCol, lastCol),
                         bottom: Math.max(pivotRow, lastRow),
                     };
-                    newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
-                        this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeFromZone(activeSheetId, this.env.model.getters.getUnboundedZone(activeSheetId, newZone)).rangeData,
-                        });
+                        this.env.model.selection.selectZone({
+                            cell: { col: newZone.left, row: newZone.top },
+                            zone: newZone,
+                        }, { unbounded: true });
                         currentZone = newZone;
                     }
                 }
             };
             const mouseUp = () => {
                 this.highlightState.shiftingMode = "none";
-                // To do:
-                // Command used here to restore focus to the current composer,
-                // to be changed when refactoring the 'edition' plugin
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
             };
             dragAndDropBeyondTheViewport(this.env, mouseMove, mouseUp);
         }
@@ -26217,9 +26254,7 @@
             const deltaRowMin = -z.top;
             const deltaRowMax = this.env.model.getters.getNumberRows(activeSheetId) - z.bottom - 1;
             let currentZone = z;
-            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", {
-                range: this.env.model.getters.getRangeDataFromZone(activeSheetId, currentZone),
-            });
+            this.env.model.dispatch("START_CHANGE_HIGHLIGHT", { zone: currentZone });
             let lastCol = initCol;
             let lastRow = initRow;
             const mouseMove = (col, row) => {
@@ -26234,21 +26269,17 @@
                         right: z.right + deltaCol,
                         bottom: z.bottom + deltaRow,
                     };
-                    newZone = this.env.model.getters.expandZone(activeSheetId, newZone);
                     if (!isEqual(newZone, currentZone)) {
-                        this.env.model.dispatch("CHANGE_HIGHLIGHT", {
-                            range: this.env.model.getters.getRangeFromZone(activeSheetId, this.env.model.getters.getUnboundedZone(activeSheetId, newZone)).rangeData,
-                        });
+                        this.env.model.selection.selectZone({
+                            cell: { col: newZone.left, row: newZone.top },
+                            zone: newZone,
+                        }, { unbounded: true });
                         currentZone = newZone;
                     }
                 }
             };
             const mouseUp = () => {
                 this.highlightState.shiftingMode = "none";
-                // To do:
-                // Command used here to restore focus to the current composer,
-                // to be changed when refactoring the 'edition' plugin
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
             };
             dragAndDropBeyondTheViewport(this.env, mouseMove, mouseUp);
         }
@@ -26741,9 +26772,6 @@
         // Zone selection with mouse
         // ---------------------------------------------------------------------------
         onCellClicked(col, row, { ctrlKey, shiftKey }) {
-            if (ctrlKey) {
-                this.env.model.dispatch("PREPARE_SELECTION_INPUT_EXPANSION");
-            }
             if (this.env.model.getters.hasOpenedPopover()) {
                 this.closeOpenedPopover();
             }
@@ -26769,7 +26797,6 @@
                 }
             };
             const onMouseUp = () => {
-                this.env.model.dispatch("STOP_SELECTION_INPUT");
                 if (this.env.model.getters.isPaintingFormat()) {
                     this.env.model.dispatch("PASTE", {
                         target: this.env.model.getters.getSelectedZones(),
@@ -31487,8 +31514,8 @@
             "zoneToXC",
             "getCells",
             "getFormulaCellContent",
+            "getTranslatedCellFormula",
             "getCellStyle",
-            "buildFormulaContent",
             "getCellById",
         ];
         nextId = 1;
@@ -31687,7 +31714,7 @@
         /*
          * Reconstructs the original formula string based on a normalized form and its dependencies
          */
-        buildFormulaContent(sheetId, cell, dependencies) {
+        getFormulaCellContent(sheetId, cell, dependencies) {
             const ranges = dependencies || [...cell.dependencies];
             return concat(cell.compiledFormula.tokens.map((token) => {
                 if (token.type === "REFERENCE") {
@@ -31697,8 +31724,15 @@
                 return token.value;
             }));
         }
-        getFormulaCellContent(sheetId, cell) {
-            return this.buildFormulaContent(sheetId, cell);
+        /*
+         * Constructs a formula string based on an initial formula and a translation vector
+         */
+        getTranslatedCellFormula(sheetId, offsetX, offsetY, compiledFormula, dependencies) {
+            const adaptedDependencies = this.getters.createAdaptedRanges(dependencies, offsetX, offsetY, sheetId);
+            return this.getFormulaCellContent(sheetId, {
+                compiledFormula,
+                dependencies: adaptedDependencies,
+            });
         }
         getCellStyle(position) {
             return this.getters.getCell(position)?.style || {};
@@ -31888,7 +31922,7 @@
          */
         createFormulaCellWithDependencies(id, compiledFormula, format, style, sheetId) {
             const dependencies = compiledFormula.dependencies.map((xc) => this.getters.getRangeFromSheetXC(sheetId, xc));
-            return new FormulaCellWithDependencies(id, compiledFormula, format, style, dependencies, sheetId, this.buildFormulaContent.bind(this));
+            return new FormulaCellWithDependencies(id, compiledFormula, format, style, dependencies, sheetId, this.getFormulaCellContent.bind(this));
         }
         createErrorFormula(id, content, format, style, error) {
             return {
@@ -31922,19 +31956,19 @@
         style;
         dependencies;
         sheetId;
-        buildFormulaContent;
+        getFormulaCellContent;
         isFormula = true;
-        constructor(id, compiledFormula, format, style, dependencies, sheetId, buildFormulaContent) {
+        constructor(id, compiledFormula, format, style, dependencies, sheetId, getFormulaCellContent) {
             this.id = id;
             this.compiledFormula = compiledFormula;
             this.format = format;
             this.style = style;
             this.dependencies = dependencies;
             this.sheetId = sheetId;
-            this.buildFormulaContent = buildFormulaContent;
+            this.getFormulaCellContent = getFormulaCellContent;
         }
         get content() {
-            return this.buildFormulaContent(this.sheetId, {
+            return this.getFormulaCellContent(this.sheetId, {
                 dependencies: this.dependencies,
                 compiledFormula: this.compiledFormula,
             });
@@ -36449,13 +36483,21 @@
                             }
                             break;
                         case "CellIsRule":
+                            const formulas = cf.rule.values.map((value) => value.startsWith("=") ? compile(value) : undefined);
                             for (let ref of cf.ranges) {
                                 const zone = this.getters.getRangeFromSheetXC(sheetId, ref).zone;
                                 for (let row = zone.top; row <= zone.bottom; row++) {
                                     for (let col = zone.left; col <= zone.right; col++) {
-                                        const pr = this.rulePredicate[cf.rule.type];
-                                        let cell = this.getters.getEvaluatedCell({ sheetId, col, row });
-                                        if (pr && pr(cell, cf.rule)) {
+                                        const predicate = this.rulePredicate[cf.rule.type];
+                                        const target = { sheetId, col, row };
+                                        const values = cf.rule.values.map((value, i) => {
+                                            const compiledFormula = formulas[i];
+                                            if (compiledFormula) {
+                                                return this.getters.getTranslatedCellFormula(sheetId, col - zone.left, row - zone.top, compiledFormula, compiledFormula.dependencies.map((d) => this.getters.getRangeFromSheetXC(sheetId, d)));
+                                            }
+                                            return value;
+                                        });
+                                        if (predicate && predicate(target, { ...cf.rule, values })) {
                                             if (!computedStyle[col])
                                                 computedStyle[col] = [];
                                             // we must combine all the properties of all the CF rules applied to the given cell
@@ -36623,12 +36665,18 @@
          * Execute the predicate to know if a conditional formatting rule should be applied to a cell
          */
         rulePredicate = {
-            CellIsRule: (cell, rule) => {
+            CellIsRule: (target, rule) => {
+                const cell = this.getters.getEvaluatedCell(target);
                 if (cell.type === CellValueType.error) {
                     return false;
                 }
                 const locale = this.getters.getLocale();
-                const values = rule.values.map((val) => parseLiteral(val, locale));
+                const values = rule.values.map((value) => {
+                    if (value.startsWith("=")) {
+                        return this.getters.evaluateFormula(target.sheetId, value);
+                    }
+                    return parseLiteral(value, locale);
+                });
                 switch (rule.operator) {
                     case "IsEmpty":
                         return cell.value.toString().trim() === "";
@@ -38553,9 +38601,17 @@
                 case "REPLACE_ALL_SEARCH":
                     this.replaceAll(cmd.replaceWith);
                     break;
+                case "EVALUATE_CELLS":
+                case "UPDATE_CELL":
+                case "REMOVE_FILTER_TABLE":
+                case "UPDATE_FILTER":
+                    this.isSearchDirty = true;
+                    break;
                 case "UNDO":
                 case "REDO":
                 case "REMOVE_COLUMNS_ROWS":
+                case "HIDE_COLUMNS_ROWS":
+                case "UNHIDE_COLUMNS_ROWS":
                 case "ADD_COLUMNS_ROWS":
                 case "EVALUATE_CELLS":
                 case "UPDATE_CELL":
@@ -38691,37 +38747,32 @@
         // ---------------------------------------------------------------------------
         // Replace
         // ---------------------------------------------------------------------------
+        replaceMatch(selectedMatch, replaceWith) {
+            if (!this.currentSearchRegex) {
+                return;
+            }
+            const sheetId = this.getters.getActiveSheetId();
+            const cell = this.getters.getCell({ sheetId, ...selectedMatch });
+            const { col, row } = selectedMatch;
+            if (cell?.isFormula && !this.searchOptions.searchFormulas) {
+                return;
+            }
+            const replaceRegex = new RegExp(this.currentSearchRegex.source, this.currentSearchRegex.flags + "g");
+            const toReplace = this.getSearchableString({ sheetId, col, row });
+            const content = toReplace.replace(replaceRegex, replaceWith);
+            const canonicalContent = canonicalizeContent(content, this.getters.getLocale());
+            this.dispatch("UPDATE_CELL", { sheetId, col, row, content: canonicalContent });
+        }
         /**
          * Replace the value of the currently selected match
          */
         replace(replaceWith) {
-            if (this.selectedMatchIndex === null || !this.currentSearchRegex) {
+            if (this.selectedMatchIndex === null) {
                 return;
             }
-            const matches = this.searchMatches;
-            const selectedMatch = matches[this.selectedMatchIndex];
-            const sheetId = this.getters.getActiveSheetId();
-            const cell = this.getters.getCell({ sheetId, ...selectedMatch });
-            if (cell?.isFormula && !this.searchOptions.searchFormulas) {
-                this.selectNextCell(Direction.next);
-            }
-            else {
-                const replaceRegex = new RegExp(this.currentSearchRegex.source, this.currentSearchRegex.flags + "g");
-                const toReplace = this.getSearchableString({
-                    sheetId,
-                    col: selectedMatch.col,
-                    row: selectedMatch.row,
-                });
-                const newContent = toReplace.replace(replaceRegex, replaceWith);
-                this.dispatch("UPDATE_CELL", {
-                    sheetId: this.getters.getActiveSheetId(),
-                    col: selectedMatch.col,
-                    row: selectedMatch.row,
-                    content: canonicalizeContent(newContent, this.getters.getLocale()),
-                });
-                this.searchMatches.splice(this.selectedMatchIndex, 1);
-                this.selectNextCell(Direction.current);
-            }
+            const selectedMatch = this.searchMatches[this.selectedMatchIndex];
+            this.replaceMatch(selectedMatch, replaceWith);
+            this.selectNextCell(Direction.next);
         }
         /**
          * Apply the replace function to all the matches one time.
@@ -38729,7 +38780,7 @@
         replaceAll(replaceWith) {
             const matchCount = this.searchMatches.length;
             for (let i = 0; i < matchCount; i++) {
-                this.replace(replaceWith);
+                this.replaceMatch(this.searchMatches[i], replaceWith);
             }
         }
         getSearchableString(position) {
@@ -39651,8 +39702,7 @@
         static getters = [];
         ranges = [];
         focusedRangeIndex = null;
-        activeSheet;
-        willAddNewRange = false;
+        inputSheetId;
         constructor(config, initialRanges, inputHasSingleRange) {
             if (inputHasSingleRange && initialRanges.length > 1) {
                 throw new Error("Input with a single range cannot be instantiated with several range references.");
@@ -39660,7 +39710,7 @@
             super(config);
             this.inputHasSingleRange = inputHasSingleRange;
             this.insertNewRange(0, initialRanges);
-            this.activeSheet = this.getters.getActiveSheetId();
+            this.inputSheetId = this.getters.getActiveSheetId();
             if (this.ranges.length === 0) {
                 this.insertNewRange(this.ranges.length, [""]);
                 this.focusLast();
@@ -39686,11 +39736,33 @@
             return 0 /* CommandResult.Success */;
         }
         handleEvent(event) {
-            const inputSheetId = this.activeSheet;
-            const sheetId = this.getters.getActiveSheetId();
-            const zone = event.anchor.zone;
-            const range = this.getters.getRangeFromZone(sheetId, event.options.unbounded ? this.getters.getUnboundedZone(sheetId, zone) : zone);
-            this.add([this.getters.getSelectionRangeString(range, inputSheetId)]);
+            if (this.focusedRangeIndex === null) {
+                return;
+            }
+            const inputSheetId = this.inputSheetId;
+            const activeSheetId = this.getters.getActiveSheetId();
+            const zone = event.options.unbounded
+                ? this.getters.getUnboundedZone(activeSheetId, event.anchor.zone)
+                : event.anchor.zone;
+            const range = this.getters.getRangeFromZone(activeSheetId, zone);
+            const willAddNewRange = event.mode === "newAnchor" &&
+                !this.inputHasSingleRange &&
+                this.ranges[this.focusedRangeIndex].xc.trim() !== "";
+            if (willAddNewRange) {
+                const xc = this.getters.getSelectionRangeString(range, inputSheetId);
+                this.insertNewRange(this.ranges.length, [xc]);
+                this.focusLast();
+            }
+            else {
+                let parts = range.parts;
+                const previousXc = this.ranges[this.focusedRangeIndex].xc.trim();
+                if (previousXc) {
+                    parts = this.getters.getRangeFromSheetXC(inputSheetId, previousXc).parts;
+                }
+                const newRange = range.clone({ parts });
+                const xc = this.getters.getSelectionRangeString(newRange, inputSheetId);
+                this.setRange(this.focusedRangeIndex, [xc]);
+            }
         }
         handle(cmd) {
             switch (cmd.type) {
@@ -39726,16 +39798,6 @@
                         this.removeRange(index);
                     }
                     break;
-                case "STOP_SELECTION_INPUT":
-                    this.willAddNewRange = false;
-                    break;
-                case "PREPARE_SELECTION_INPUT_EXPANSION": {
-                    const index = this.focusedRangeIndex;
-                    if (index !== null && !this.inputHasSingleRange) {
-                        this.willAddNewRange = this.ranges[index].xc.trim() !== "";
-                    }
-                    break;
-                }
                 case "ACTIVATE_SHEET": {
                     if (cmd.sheetIdFrom !== cmd.sheetIdTo) {
                         const { col, row } = this.getters.getNextVisibleCellPosition({
@@ -39746,7 +39808,26 @@
                         const zone = this.getters.expandZone(cmd.sheetIdTo, positionToZone({ col, row }));
                         this.selection.resetAnchor(this, { cell: { col, row }, zone });
                     }
+                    break;
                 }
+                case "START_CHANGE_HIGHLIGHT":
+                    const activeSheetId = this.getters.getActiveSheetId();
+                    const newZone = this.getters.expandZone(activeSheetId, cmd.zone);
+                    const focusIndex = this.ranges.findIndex((range) => {
+                        const { xc, sheetName: sheet } = splitReference(range.xc);
+                        const sheetName = sheet || this.getters.getSheetName(this.inputSheetId);
+                        if (this.getters.getSheetName(activeSheetId) !== sheetName) {
+                            return false;
+                        }
+                        const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
+                        return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), newZone);
+                    });
+                    if (focusIndex !== -1) {
+                        this.focus(focusIndex);
+                        const { left, top } = newZone;
+                        this.selection.resetAnchor(this, { cell: { col: left, row: top }, zone: newZone });
+                    }
+                    break;
             }
         }
         // ---------------------------------------------------------------------------
@@ -39774,19 +39855,6 @@
         }
         unfocus() {
             this.focusedRangeIndex = null;
-        }
-        add(newRanges) {
-            if (this.focusedRangeIndex === null || newRanges.length === 0) {
-                return;
-            }
-            if (this.willAddNewRange) {
-                this.insertNewRange(this.ranges.length, newRanges);
-                this.focusLast();
-                this.willAddNewRange = false;
-            }
-            else {
-                this.setRange(this.focusedRangeIndex, newRanges);
-            }
         }
         setContent(index, xc) {
             this.ranges[index] = {
@@ -39833,12 +39901,12 @@
         inputToHighlights({ xc, color }) {
             const XCs = this.cleanInputs([xc])
                 .filter((range) => this.getters.isRangeValid(range))
-                .filter((reference) => this.shouldBeHighlighted(this.activeSheet, reference));
+                .filter((reference) => this.shouldBeHighlighted(this.inputSheetId, reference));
             return XCs.map((xc) => {
                 const { sheetName } = splitReference(xc);
                 return {
-                    zone: this.getters.getRangeFromSheetXC(this.activeSheet, xc).zone,
-                    sheetId: (sheetName && this.getters.getSheetIdByName(sheetName)) || this.activeSheet,
+                    zone: this.getters.getRangeFromSheetXC(this.inputSheetId, xc).zone,
+                    sheetId: (sheetName && this.getters.getSheetIdByName(sheetName)) || this.inputSheetId,
                     color,
                 };
             });
@@ -40263,10 +40331,8 @@
                         let content = cell.content;
                         if (cell.isFormula) {
                             const position = this.getters.getCellPosition(cell.id);
-                            const offsetY = newRow - position.row;
                             // we only have a vertical offset
-                            const ranges = this.getters.createAdaptedRanges(cell.dependencies, 0, offsetY, sheetId);
-                            content = this.getters.buildFormulaContent(sheetId, cell, ranges);
+                            content = this.getters.getTranslatedCellFormula(sheetId, 0, newRow - position.row, cell.compiledFormula, cell.dependencies);
                         }
                         newCellValues.style = cell.style;
                         newCellValues.content = content;
@@ -41373,9 +41439,7 @@
                 }
                 let content = origin.cell.content;
                 if (origin.cell.isFormula && operation === "COPY") {
-                    const offsetX = col - origin.position.col;
-                    const offsetY = row - origin.position.row;
-                    content = this.getUpdatedContent(sheetId, origin.cell, offsetX, offsetY, operation);
+                    content = this.getters.getTranslatedCellFormula(sheetId, col - origin.position.col, row - origin.position.row, origin.cell.compiledFormula, origin.cell.dependencies);
                 }
                 this.dispatch("UPDATE_CELL", {
                     ...target,
@@ -41395,13 +41459,6 @@
                     this.dispatch("CLEAR_CELL", target);
                 }
             }
-        }
-        /**
-         * Get the newly updated formula, after applying offsets
-         */
-        getUpdatedContent(sheetId, cell, offsetX, offsetY, operation) {
-            const ranges = this.getters.createAdaptedRanges(cell.dependencies, offsetX, offsetY, sheetId);
-            return this.getters.buildFormulaContent(sheetId, cell, ranges);
         }
         /**
          * If the origin position given is the top left of a merge, merge the target
@@ -42144,6 +42201,7 @@
             "getTokenAtCursor",
             "getComposerHighlights",
             "getCurrentEditedCell",
+            "getCycledReference",
         ];
         col = 0;
         row = 0;
@@ -42153,10 +42211,7 @@
         currentTokens = [];
         selectionStart = 0;
         selectionEnd = 0;
-        selectionInitialStart = 0;
         initialContent = "";
-        previousRef = "";
-        previousRange = undefined;
         colorIndexByRange = {};
         // ---------------------------------------------------------------------------
         // Command Handling
@@ -42185,9 +42240,6 @@
             }
         }
         handleEvent(event) {
-            if (this.mode !== "selecting") {
-                return;
-            }
             const sheetId = this.getters.getActiveSheetId();
             let unboundedZone;
             if (event.options.unbounded) {
@@ -42198,10 +42250,17 @@
             }
             switch (event.mode) {
                 case "newAnchor":
-                    this.insertSelectedRange(unboundedZone);
+                    if (this.mode === "selecting") {
+                        this.insertSelectedRange(unboundedZone);
+                    }
                     break;
                 default:
-                    this.replaceSelectedRanges(unboundedZone);
+                    if (this.mode === "selecting") {
+                        this.replaceSelectedRange(unboundedZone);
+                    }
+                    else {
+                        this.updateComposerRange(event.previousAnchor.zone, unboundedZone);
+                    }
                     break;
             }
         }
@@ -42258,35 +42317,12 @@
                     }
                     break;
                 case "START_CHANGE_HIGHLIGHT":
-                    // FIXME: thiws whole ordeal could be handled with the Selection Processor which would extend the feature to selection inputs
-                    this.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-                    // FIXME: we should check range SheetId compared to this.activeSheetId r maybe not have a sheetId in the payload ??
-                    const range = this.getters.getRangeFromRangeData(cmd.range);
-                    const previousRefToken = this.currentTokens
-                        .filter((token) => token.type === "REFERENCE")
-                        .find((token) => {
-                        const { xc, sheetName: sheet } = splitReference(token.value);
-                        const sheetName = sheet || this.getters.getSheetName(this.sheetId);
-                        const activeSheetId = this.getters.getActiveSheetId();
-                        if (this.getters.getSheetName(activeSheetId) !== sheetName) {
-                            return false;
-                        }
-                        const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
-                        return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), range.zone);
-                    });
-                    this.previousRef = previousRefToken.value;
-                    this.previousRange = this.getters.getRangeFromSheetXC(this.getters.getActiveSheetId(), this.previousRef);
-                    this.selectionInitialStart = previousRefToken.start;
-                    break;
-                case "CHANGE_HIGHLIGHT":
-                    const cmdRange = this.getters.getRangeFromRangeData(cmd.range);
-                    const newRef = this.getRangeReference(cmdRange, this.previousRange.parts);
-                    this.selectionStart = this.selectionInitialStart;
-                    this.selectionEnd = this.selectionInitialStart + this.previousRef.length;
-                    this.replaceSelection(newRef);
-                    this.previousRef = newRef;
-                    this.selectionStart = this.currentContent.length;
-                    this.selectionEnd = this.currentContent.length;
+                    const { left, top } = cmd.zone;
+                    // changing the highlight can conflit with the 'selecting' mode
+                    if (this.isSelectingForComposer()) {
+                        this.mode = "editing";
+                    }
+                    this.selection.resetAnchor(this, { cell: { col: left, row: top }, zone: cmd.zone });
                     break;
                 case "ACTIVATE_SHEET":
                     if (!this.currentContent.startsWith("=")) {
@@ -42312,10 +42348,7 @@
                         this.sheetId = this.getters.getActiveSheetId();
                         this.cancelEditionAndActivateSheet();
                         this.resetContent();
-                        this.ui.notifyUI({
-                            type: "ERROR",
-                            text: CELL_DELETED_MESSAGE,
-                        });
+                        this.ui.raiseBlockingErrorUI(CELL_DELETED_MESSAGE);
                     }
                     break;
                 case "CYCLE_EDITION_REFERENCES":
@@ -42370,33 +42403,45 @@
                 return this.currentTokens.find((t) => t.start <= start && t.end >= end);
             }
         }
-        // ---------------------------------------------------------------------------
-        // Misc
-        // ---------------------------------------------------------------------------
-        cycleReferences() {
-            const tokens = this.getTokensInSelection();
+        /**
+         * Return the cycled reference if any (A1 -> $A$1 -> A$1 -> $A1 -> A1)
+         */
+        getCycledReference(selection, content) {
+            const locale = this.getters.getLocale();
+            const currentTokens = content.startsWith("=") ? composerTokenize(content, locale) : [];
+            const tokens = currentTokens.filter((t) => (t.start <= selection.start && t.end >= selection.start) ||
+                (t.start >= selection.start && t.start < selection.end));
             const refTokens = tokens.filter((token) => token.type === "REFERENCE");
-            if (refTokens.length === 0)
+            if (refTokens.length === 0) {
                 return;
+            }
             const updatedReferences = tokens
                 .map(loopThroughReferenceType)
                 .map((token) => token.value)
                 .join("");
-            const content = this.currentContent;
             const start = tokens[0].start;
             const end = tokens[tokens.length - 1].end;
             const newContent = content.slice(0, start) + updatedReferences + content.slice(end);
             const lengthDiff = newContent.length - content.length;
             const startOfTokens = refTokens[0].start;
             const endOfTokens = refTokens[refTokens.length - 1].end + lengthDiff;
-            const selection = { start: startOfTokens, end: endOfTokens };
-            // Put the selection at the end of the token if we cycled on a single token
-            if (refTokens.length === 1 && this.selectionStart === this.selectionEnd) {
-                selection.start = selection.end;
+            const newSelection = { start: startOfTokens, end: endOfTokens };
+            if (refTokens.length === 1 && selection.start === selection.end) {
+                newSelection.start = newSelection.end;
+            }
+            return { content: newContent, selection: newSelection };
+        }
+        // ---------------------------------------------------------------------------
+        // Misc
+        // ---------------------------------------------------------------------------
+        cycleReferences() {
+            const updated = this.getCycledReference(this.getComposerSelection(), this.currentContent);
+            if (updated === undefined) {
+                return;
             }
             this.dispatch("SET_CURRENT_CONTENT", {
-                content: newContent,
-                selection,
+                content: updated.content,
+                selection: updated.selection,
             });
         }
         validateSelection(length, start, end) {
@@ -42407,10 +42452,7 @@
         onColumnsRemoved(cmd) {
             if (cmd.elements.includes(this.col) && this.mode !== "inactive") {
                 this.dispatch("STOP_EDITION", { cancel: true });
-                this.ui.notifyUI({
-                    type: "ERROR",
-                    text: CELL_DELETED_MESSAGE,
-                });
+                this.ui.raiseBlockingErrorUI(CELL_DELETED_MESSAGE);
                 return;
             }
             const { top, left } = updateSelectionOnDeletion({ left: this.col, right: this.col, top: this.row, bottom: this.row }, "left", [...cmd.elements]);
@@ -42420,10 +42462,7 @@
         onRowsRemoved(cmd) {
             if (cmd.elements.includes(this.row) && this.mode !== "inactive") {
                 this.dispatch("STOP_EDITION", { cancel: true });
-                this.ui.notifyUI({
-                    type: "ERROR",
-                    text: CELL_DELETED_MESSAGE,
-                });
+                this.ui.raiseBlockingErrorUI(CELL_DELETED_MESSAGE);
                 return;
             }
             const { top, left } = updateSelectionOnDeletion({ left: this.col, right: this.col, top: this.row, bottom: this.row }, "top", [...cmd.elements]);
@@ -42444,7 +42483,6 @@
                 this.selection.resetAnchor(this, { cell: { col: this.col, row: this.row }, zone });
             }
             this.mode = "selecting";
-            this.selectionInitialStart = this.selectionStart;
         }
         /**
          * start the edition of a cell
@@ -42587,10 +42625,7 @@
                 this.currentTokens = text.startsWith("=") ? composerTokenize(text, locale) : [];
                 if (this.currentTokens.length > 100) {
                     if (raise) {
-                        this.ui.notifyUI({
-                            type: "ERROR",
-                            text: _lt("This formula has over 100 parts. It can't be processed properly, consider splitting it into multiple cells"),
-                        });
+                        this.ui.raiseBlockingErrorUI(_lt("This formula has over 100 parts. It can't be processed properly, consider splitting it into multiple cells"));
                     }
                 }
             }
@@ -42604,19 +42639,49 @@
             const ref = this.getZoneReference(zone);
             if (this.canStartComposerRangeSelection()) {
                 this.insertText(ref, start);
-                this.selectionInitialStart = start;
             }
             else {
                 this.insertText("," + ref, start);
-                this.selectionInitialStart = start + 1;
             }
         }
         /**
          * Replace the current reference selected by the new one.
          * */
-        replaceSelectedRanges(zone) {
+        replaceSelectedRange(zone) {
             const ref = this.getZoneReference(zone);
-            this.replaceText(ref, this.selectionInitialStart, this.selectionEnd);
+            const currentToken = this.getTokenAtCursor();
+            const start = currentToken?.type === "REFERENCE" ? currentToken.start : this.selectionStart;
+            this.replaceText(ref, start, this.selectionEnd);
+        }
+        /**
+         * Replace the reference of the old zone by the new one.
+         */
+        updateComposerRange(oldZone, newZone) {
+            const activeSheetId = this.getters.getActiveSheetId();
+            const tokentAtCursor = this.getTokenAtCursor();
+            const tokens = tokentAtCursor ? [tokentAtCursor, ...this.currentTokens] : this.currentTokens;
+            const previousRefToken = tokens
+                .filter((token) => token.type === "REFERENCE")
+                .find((token) => {
+                const { xc, sheetName: sheet } = splitReference(token.value);
+                const sheetName = sheet || this.getters.getSheetName(this.sheetId);
+                if (this.getters.getSheetName(activeSheetId) !== sheetName) {
+                    return false;
+                }
+                const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
+                return isEqual(this.getters.expandZone(activeSheetId, refRange.zone), oldZone);
+            });
+            // this function assumes that the previous range is always found because
+            // it's called when changing a highlight, which exists by definition
+            if (!previousRefToken) {
+                throw new Error("Previous range not found");
+            }
+            const previousRange = this.getters.getRangeFromSheetXC(activeSheetId, previousRefToken.value);
+            this.selectionStart = previousRefToken.start;
+            this.selectionEnd = this.selectionStart + previousRefToken.value.length;
+            const newRange = this.getters.getRangeFromZone(activeSheetId, newZone);
+            const newRef = this.getRangeReference(newRange, previousRange.parts);
+            this.replaceSelection(newRef);
         }
         getZoneReference(zone) {
             const inputSheetId = this.getters.getCurrentEditedCell().sheetId;
@@ -42624,14 +42689,8 @@
             const range = this.getters.getRangeFromZone(sheetId, zone);
             return this.getters.getSelectionRangeString(range, inputSheetId);
         }
-        getRangeReference(range, fixedParts = [{ colFixed: false, rowFixed: false }]) {
+        getRangeReference(range, fixedParts) {
             let _fixedParts = [...fixedParts];
-            if (fixedParts.length === 1 && getZoneArea(range.zone) > 1) {
-                _fixedParts.push({ ...fixedParts[0] });
-            }
-            else if (fixedParts.length === 2 && getZoneArea(range.zone) === 1) {
-                _fixedParts.pop();
-            }
             const newRange = range.clone({ parts: _fixedParts });
             return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell().sheetId);
         }
@@ -42757,15 +42816,6 @@
                 return true;
             }
             return false;
-        }
-        /**
-         * Return all the tokens between selectionStart and selectionEnd.
-         * Includes token that begin right on selectionStart or end right on selectionEnd.
-         */
-        getTokensInSelection() {
-            const start = Math.min(this.selectionStart, this.selectionEnd);
-            const end = Math.max(this.selectionStart, this.selectionEnd);
-            return this.currentTokens.filter((t) => (t.start <= start && t.end >= start) || (t.start >= start && t.start < end));
         }
     }
 
@@ -46723,11 +46773,13 @@
         }
         bindModelEvents() {
             this.model.on("update", this, () => this.render(true));
-            this.model.on("notify-ui", this, this.onNotifyUI);
+            this.model.on("notify-ui", this, this.env.notifyUser);
+            this.model.on("raise-error-ui", this, ({ text }) => this.env.raiseError(text));
         }
         unbindModelEvents() {
             this.model.off("update", this);
             this.model.off("notify-ui", this);
+            this.model.off("raise-error-ui", this);
         }
         checkViewportSize() {
             const { xRatio, yRatio } = this.env.model.getters.getFrozenSheetViewRatio(this.env.model.getters.getActiveSheetId());
@@ -46741,19 +46793,13 @@
                 }
                 this.env.notifyUser({
                     text: _lt("The current window is too small to display this sheet properly. Consider resizing your browser window or adjusting frozen rows and columns."),
-                    tag: "viewportTooSmall",
+                    type: "warning",
+                    sticky: false,
                 });
                 this.isViewportTooSmall = true;
             }
             else {
                 this.isViewportTooSmall = false;
-            }
-        }
-        onNotifyUI(payload) {
-            switch (payload.type) {
-                case "ERROR":
-                    this.env.raiseError(payload.text);
-                    break;
             }
         }
         openSidePanel(panel, panelProps) {
@@ -50154,6 +50200,7 @@
                 moveClient: () => { },
                 snapshotRequested: false,
                 notifyUI: (payload) => this.trigger("notify-ui", payload),
+                raiseBlockingErrorUI: (text) => this.trigger("raise-error-ui", { text }),
             };
         }
         setupExternalConfig(external) {
@@ -50300,10 +50347,17 @@
          * It will call `beforeHandle` and `handle`
          */
         dispatchToHandlers(handlers, command) {
+            const isCommandCore = isCoreCommand(command);
             for (const handler of handlers) {
+                if (!isCommandCore && handler instanceof CorePlugin) {
+                    continue;
+                }
                 handler.beforeHandle(command);
             }
             for (const handler of handlers) {
+                if (!isCommandCore && handler instanceof CorePlugin) {
+                    continue;
+                }
                 handler.handle(command);
             }
         }
@@ -50489,6 +50543,9 @@
     };
     function addFunction(functionName, functionDescription) {
         functionRegistry.add(functionName, functionDescription);
+        return {
+            addFunction: (fName, fDescription) => addFunction(fName, fDescription),
+        };
     }
     const constants = {
         DEFAULT_LOCALE,
@@ -50532,8 +50589,8 @@
 
 
     __info__.version = '16.5.0-alpha.1';
-    __info__.date = '2023-07-26T13:08:47.460Z';
-    __info__.hash = '9160731';
+    __info__.date = '2023-08-07T10:25:13.807Z';
+    __info__.hash = 'faa92ec';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
