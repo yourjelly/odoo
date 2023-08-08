@@ -2068,6 +2068,10 @@ const Wysiwyg = Widget.extend({
         finalOptions.autohideToolbar = typeof finalOptions.autohideToolbar === 'boolean'
             ? finalOptions.autohideToolbar
             : !finalOptions.snippets;
+        // TODO: remove this on master
+        if (options.recordInfo.res_model === 'mail.compose.message') {
+            finalOptions.dropImageAsAttachment = false;
+        }
 
         return finalOptions;
     },
