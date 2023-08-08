@@ -158,7 +158,7 @@ export function findItem(target, selector, finder = 0) {
 /** Menu (generic) */
 
 export async function toggleMenu(el, menuFinder) {
-    const menu = findItem(el, `.dropdown button.dropdown-toggle`, menuFinder);
+    const menu = findItem(el, `button.dropdown-toggle`, menuFinder);
     await click(menu);
 }
 
