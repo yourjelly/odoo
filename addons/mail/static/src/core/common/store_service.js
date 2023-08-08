@@ -7,6 +7,7 @@ import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
+import { getBundle } from "@web/assets";
 
 export class Store {
     constructor(env) {
@@ -173,3 +174,24 @@ export const storeService = {
 };
 
 registry.category("services").add("mail.store", storeService);
+
+
+(new Promise((res) => setTimeout(res, 1000))).then(() => {
+    const test = document.createElement("div");
+    test.id = "test-load-target";
+    document.body.appendChild(test);
+    getBundle("mail.test-load-target").then(({ cssLibs, cssContents }) => {
+        for (const url of cssLibs) {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = url;
+            test.appendChild(link);
+        }
+        const styles = (cssContents ?? []).join("\n");
+        if (styles.length > 0) {
+            const style = document.createElement("style");
+            style.textContent = styles;
+            test.appendChild(style);
+        }
+    });
+})

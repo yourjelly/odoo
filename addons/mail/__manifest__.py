@@ -121,6 +121,9 @@ For more specific needs, you may also assign custom-defined actions
         'web._assets_primary_variables': [
             'mail/static/src/**/primary_variables.scss',
         ],
+        'mail.test-load-target': [
+            "mail/static/src/core/web/chatter.scss",
+        ],
         'web.assets_backend': [
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
             'mail/static/src/scss/variables/derived_variables.scss',
