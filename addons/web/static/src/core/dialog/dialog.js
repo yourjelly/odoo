@@ -8,7 +8,6 @@ import { Component, useChildSubEnv, useState, useExternalListener } from "@odoo/
 export class Dialog extends Component {
     setup() {
         debugger;
-        // this.state = useState({is_open:false})
         this.modalRef = useForwardRefToParent("modalRef");
         useActiveElement("modalRef");
         this.data = useState(this.env.dialogData);
@@ -17,16 +16,11 @@ export class Dialog extends Component {
             this.data.close();
         });
         // useExternalListener(window, "mousedown", this.onWindowMouseDown);
-        // useExternalListener(window, "keydown", this.onKeydown);
-        useHotkey("control+k",() => {
-            this.data.close();
-            debugger
-            this.command.openMainPalette();
-        })
-        // if(this.data.isActive)
-        // {
+        // useHotkey("control+k",() => {
         //     this.data.close();
-        // }
+        //     debugger
+        //     this.command.openMainPalette();
+        // })
         this.id = `dialog_${this.data.id}`;
         useChildSubEnv({ inDialog: true, dialogId: this.id, closeDialog: this.data.close });
 
@@ -42,9 +36,6 @@ export class Dialog extends Component {
     }
 
     // onWindowMouseDown(ev) {
-    //     this.data.close();
-    // }
-    // onKeydown(ev){
     //     this.data.close();
     // }
 }

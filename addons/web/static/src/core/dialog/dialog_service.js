@@ -35,14 +35,15 @@ export const dialogService = {
             debugger;
             for (const dialog of Object.values(dialogs)) {
                 dialog.dialogData.isActive = false;
+                // if(props.closeAllDialog){
+                //     dialog.dialogData.close();
+                // }
             }
             const id = ++dialogId;
             function close() {
                 if (dialogs[id]) {
                     delete dialogs[id];
                     Object.values(dialogs).forEach((dialog, i, dialogArr) => {
-                        debugger;
-                        dialog.dialogData.close();
                         dialog.dialogData.isActive = i === dialogArr.length - 1;
                     });
                     if (options.onClose) {

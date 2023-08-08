@@ -144,6 +144,7 @@ export const commandService = {
                 {
                     config,
                     bus,
+                    // closeAllDialog:true,
                 },
                 {
                     onClose: () => {
