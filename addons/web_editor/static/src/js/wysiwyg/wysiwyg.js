@@ -969,7 +969,7 @@ const Wysiwyg = Widget.extend({
      */
     savePendingImages($editable = this.$editable) {
         const defs = _.map($editable, async editableEl => {
-            const {oeModel: resModel, oeId: resId} = editableEl.dataset;
+            const { res_model: resModel, res_id: resId } = this.options.recordInfo
             const b64Proms = [...editableEl.querySelectorAll('.o_b64_image_to_save')].map(async el => {
                 const attachment = await this._rpc({
                     route: '/web_editor/attachment/add_data',
