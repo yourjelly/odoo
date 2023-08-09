@@ -251,7 +251,7 @@ def load_module_graph(env, graph, status=None, perform_checks=True,
             # need to commit any modification the module's installation or
             # update made to the schema or data so the tests can run
             # (separately in their own transaction)
-            env.cr.commit()
+            # env.cr.commit()
             concrete_models = [model for model in model_names if not registry[model]._abstract]
             if concrete_models:
                 env.cr.execute("""
