@@ -1,10 +1,9 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import { _t } from "@web/core/l10n/translation";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { NameAndSignature } from "@web/legacy/js/widgets/name_and_signature";
-var qweb = core.qweb;
 
 /**
  * This widget is a signature request form. It uses

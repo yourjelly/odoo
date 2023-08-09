@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import AbstractService from "@web/legacy/js/core/abstract_service";
-import core from "@web/legacy/js/services/core";
+import { serviceRegistry } from "@web/legacy/js/services/core";
 import session from "web.session";
 
 var AjaxService = AbstractService.extend({
@@ -24,6 +24,6 @@ var AjaxService = AbstractService.extend({
     },
 });
 
-core.serviceRegistry.add('ajax', AjaxService);
+serviceRegistry.add('ajax', AjaxService);
 
 export default AjaxService;

@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import options from "@web_editor/js/editor/snippets.options";
 import { _t } from "@web/core/l10n/translation";
-
-const qweb = core.qweb;
 
 options.registry.mailing_list_subscribe = options.Class.extend({
     /**

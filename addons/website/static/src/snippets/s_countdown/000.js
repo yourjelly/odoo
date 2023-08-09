@@ -1,12 +1,10 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import weUtils from "@web_editor/js/common/utils";
 import { isCSSColor } from '@web/core/utils/colors';
 import { _t } from "@web/core/l10n/translation";
-
-const qweb = core.qweb;
 
 const CountdownWidget = publicWidget.Widget.extend({
     selector: '.s_countdown',

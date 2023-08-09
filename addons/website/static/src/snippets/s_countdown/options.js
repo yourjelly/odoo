@@ -1,9 +1,7 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import options from "@web_editor/js/editor/snippets.options";
-
-const qweb = core.qweb;
 
 options.registry.countdown = options.Class.extend({
     events: Object.assign({}, options.Class.prototype.events || {}, {

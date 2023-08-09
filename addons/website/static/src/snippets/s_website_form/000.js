@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-    import core from "@web/legacy/js/services/core";
+    import { qweb } from "@web/legacy/js/services/core";
     import time from "@web/legacy/js/core/time";
     import {ReCaptcha} from "@google_recaptcha/js/recaptcha";
     import session from "web.session";
@@ -11,8 +11,6 @@
     import { sprintf } from "@web/core/utils/strings";
     import { debounce } from "@web/core/utils/timing";
     import { _t } from "@web/core/l10n/translation";
-
-    var qweb = core.qweb;
 
     publicWidget.registry.EditModeWebsiteForm = publicWidget.Widget.extend({
         selector: '.s_website_form form, form.s_website_form', // !compatibility

@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { sprintf } from "@web/core/utils/strings";
-import core from "@web/legacy/js/services/core";
 import session from "web.session";
 import time from "@web/legacy/js/core/time";
+import { _t } from "@web/core/l10n/translation";
 
 const { DateTime } = luxon;
 
@@ -133,7 +133,7 @@ export function parseDate(value, field, options) {
             return date;
         }
     }
-    throw new Error(sprintf(core._t("'%s' is not a correct date"), value));
+    throw new Error(sprintf(_t("'%s' is not a correct date"), value));
 }
 
 /**
@@ -186,5 +186,5 @@ export function parseDateTime(value, field, options) {
             return datetime;
         }
     }
-    throw new Error(sprintf(core._t("'%s' is not a correct datetime"), value));
+    throw new Error(sprintf(_t("'%s' is not a correct datetime"), value));
 }

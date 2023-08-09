@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import dom from "@web/legacy/js/core/dom";
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import {setCookie} from "@web/legacy/js/core/cookie_utils";
 import Dialog from "@web/legacy/js/core/dialog";
 import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFromTextarea";
@@ -10,7 +10,6 @@ import { Markup } from '@web/legacy/js/core/utils';
 import session from "web.session";
 import { escape, sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
-var qweb = core.qweb;
 
 publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     selector: '.website_forum',

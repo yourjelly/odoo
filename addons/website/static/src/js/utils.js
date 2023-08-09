@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
 import { intersection } from "@web/core/utils/arrays";
-import core from "@web/legacy/js/services/core";
-
-const { qweb, _t } = core;
+import { qweb } from "@web/legacy/js/services/core";
+import { _t } from "@web/core/l10n/translation";
 
 /**
  * Allows to load anchors from a page.
@@ -290,8 +289,8 @@ function sendRequest(route, params) {
         form.setAttribute('target', '_top');
     }
 
-    if (core.csrf_token) {
-        _addInput(form, 'csrf_token', core.csrf_token);
+    if (odoo.csrf_token) {
+        _addInput(form, 'csrf_token', odoo.csrf_token);
     }
 
     for (const key in params) {

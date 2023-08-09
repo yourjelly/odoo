@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
-import core from "@web/legacy/js/services/core";
+import { bus } from "@web/legacy/js/services/core";
 
 export const presenceService = {
     start(env) {
@@ -10,7 +10,7 @@ export const presenceService = {
 
         // map window_focus event from the wowlBus to the legacy one.
         env.bus.addEventListener("window_focus", (isOdooFocused) => {
-            core.bus.trigger("window_focus", isOdooFocused);
+            bus.trigger("window_focus", isOdooFocused);
         });
 
         let isOdooFocused = true;

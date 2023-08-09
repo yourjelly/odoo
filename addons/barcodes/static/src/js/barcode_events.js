@@ -10,14 +10,14 @@
  */
 
 import { registry } from "@web/core/registry";
-import core from "@web/legacy/js/services/core";
+import { bus } from "@web/legacy/js/services/core";
 
 export const barcodeRemapperService = {
     dependencies: ["barcode"],
     start(env, { barcode }) {
         barcode.bus.addEventListener("barcode_scanned", ev => {
             const { barcode, target } = ev.detail;
-            core.bus.trigger('barcode_scanned', barcode, target);
+            bus.trigger('barcode_scanned', barcode, target);
         });
     },
 };

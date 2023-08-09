@@ -3,7 +3,7 @@
 import { browser } from '@web/core/browser/browser';
 import { registry } from '@web/core/registry';
 import { useService, useBus } from '@web/core/utils/hooks';
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import { AceEditorAdapterComponent } from '../../components/ace_editor/ace_editor';
 import { WebsiteEditorComponent } from '../../components/editor/editor';
 import { WebsiteTranslator } from '../../components/translator/translator';
@@ -284,7 +284,7 @@ export class WebsitePreview extends Component {
         if (this.websiteService.isRestrictedEditor) {
             const $wrap = $(this.iframe.el.contentDocument.querySelector('#wrapwrap.homepage')).find('#wrap');
             if ($wrap.length && $wrap.html().trim() === '') {
-                this.$welcomeMessage = $(core.qweb.render('website.homepage_editor_welcome_message'));
+                this.$welcomeMessage = $(qweb.render('website.homepage_editor_welcome_message'));
                 this.$welcomeMessage.addClass('o_homepage_editor_welcome_message');
                 this.$welcomeMessage.css('min-height', $wrap.parent('main').height() - ($wrap.outerHeight(true) - $wrap.height()));
                 $wrap.empty().append(this.$welcomeMessage);

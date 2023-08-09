@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb as QWeb } from "@web/legacy/js/services/core";
 import dom from "@web/legacy/js/core/dom";
 import Widget from "@web/legacy/js/core/widget";
 import { _t } from "@web/core/l10n/translation";
-
-var QWeb = core.qweb;
 
 /**
  * A useful class to handle dialogs.

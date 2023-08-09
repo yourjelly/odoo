@@ -1,15 +1,13 @@
 /** @odoo-module **/
 
 import concurrency from "@web/legacy/js/core/concurrency";
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import {getCookie, setCookie} from "@web/legacy/js/core/cookie_utils";
 import VariantMixin from "@website_sale/js/sale_variant_mixin";
 import website_sale_utils from "@website_sale/js/website_sale_utils";
 import { _t } from "@web/core/l10n/translation";
 const cartHandlerMixin = website_sale_utils.cartHandlerMixin;
-
-var qweb = core.qweb;
 
 // VariantMixin events are overridden on purpose here
 // to avoid registering them more than once since they are already registered

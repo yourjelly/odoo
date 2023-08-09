@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import { _t } from "@web/core/l10n/translation";
 import PortalChatter from "@portal/js/portal_chatter";
 import { roundPrecision } from "@web/core/utils/numbers";
-
-var qweb = core.qweb;
 
 /**
  * PortalChatter

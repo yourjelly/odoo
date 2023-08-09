@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
     import { escape, sprintf } from "@web/core/utils/strings";
-    import core from "@web/legacy/js/services/core";
+    import { bus } from "@web/legacy/js/services/core";
     import Dialog from "@web/legacy/js/core/dialog";
     import { _t } from "@web/core/l10n/translation";
 
@@ -30,7 +30,7 @@
             }
             // When a module wants to activate the button,
             // it must test its conditions and then call this bus.
-            core.bus.on('enableButton', this, this._enableButton);
+            bus.on('enableButton', this, this._enableButton);
         },
 
         //--------------------------------------------------------------------------
@@ -328,7 +328,7 @@
                 'is_validation': this.txContext.isValidation,
                 'access_token': this.txContext.accessToken
                     ? this.txContext.accessToken : undefined,
-                'csrf_token': core.csrf_token,
+                'csrf_token': odoo.csrf_token,
             };
         },
 

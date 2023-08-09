@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import core from "@web/legacy/js/services/core";
+import { bus } from "@web/legacy/js/services/core";
 import publicWidget from '@web/legacy/js/public/public_widget';
 
 publicWidget.registry.PaymentExpressCheckoutForm = publicWidget.Widget.extend({
@@ -19,7 +19,7 @@ publicWidget.registry.PaymentExpressCheckoutForm = publicWidget.Widget.extend({
             await this._prepareExpressCheckoutForm(expressCheckoutForm.dataset);
         }
         // Monitor updates of the amount on eCommerce's cart pages.
-        core.bus.on('cart_amount_changed', this, this._updateAmount.bind(this));
+        bus.on('cart_amount_changed', this, this._updateAmount.bind(this));
     },
 
     //--------------------------------------------------------------------------
@@ -73,7 +73,7 @@ publicWidget.registry.PaymentExpressCheckoutForm = publicWidget.Widget.extend({
             'tokenization_requested': false,
             'landing_route': this.txContext.landingRoute,
             'access_token': this.txContext.accessToken,
-            'csrf_token': core.csrf_token,
+            'csrf_token': odoo.csrf_token,
         };
     },
 

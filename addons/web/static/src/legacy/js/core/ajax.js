@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import config from "@web/legacy/js/services/config";
-import core from "@web/legacy/js/services/core";
+import { bus } from "@web/legacy/js/services/core";
 import { Markup } from "@web/legacy/js/core/utils";
 import time from "@web/legacy/js/core/time";
 import download from "@web/legacy/js/libs/download";
@@ -24,12 +24,12 @@ function _genericJsonRpc (fct_name, params, settings, fct) {
     };
 
     if (!shadow) {
-        core.bus.trigger('rpc_request', data.id);
+        bus.trigger('rpc_request', data.id);
     }
 
     var xhr = fct(data);
     var result = xhr.then(function(result) {
-        core.bus.trigger('rpc:result', data, result);
+        bus.trigger('rpc:result', data, result);
         if (result.error !== undefined) {
             console.debug(
                 "Server application error\n",
@@ -59,7 +59,7 @@ function _genericJsonRpc (fct_name, params, settings, fct) {
 
         result.then(function (result) {
             if (!shadow) {
-                core.bus.trigger('rpc_response', data.id);
+                bus.trigger('rpc_response', data.id);
             }
             resolve(result);
         }, function (reason) {
@@ -69,15 +69,15 @@ function _genericJsonRpc (fct_name, params, settings, fct) {
             var errorThrown = reason.errorThrown;
             if (type === "server") {
                 if (!shadow) {
-                    core.bus.trigger('rpc_response', data.id);
+                    bus.trigger('rpc_response', data.id);
                 }
                 if (error.code === 100) {
-                    core.bus.trigger('invalidate_session');
+                    bus.trigger('invalidate_session');
                 }
                 reject({message: error, event: $.Event()});
             } else {
                 if (!shadow) {
-                    core.bus.trigger('rpc_response_failed', data.id);
+                    bus.trigger('rpc_response_failed', data.id);
                 }
                 var nerror = {
                     code: -32098,
@@ -102,7 +102,7 @@ function _genericJsonRpc (fct_name, params, settings, fct) {
         });
 
         if (!shadow) {
-            core.bus.trigger('rpc_response');
+            bus.trigger('rpc_response');
         }
 
         if (xhr.abort) {
@@ -114,7 +114,7 @@ function _genericJsonRpc (fct_name, params, settings, fct) {
             // we want to execute this handler after all others (hence
             // setTimeout) to let the other handlers prevent the event
             if (!reason.event.isDefaultPrevented()) {
-                core.bus.trigger('rpc_error', reason.message, reason.event);
+                bus.trigger('rpc_error', reason.message, reason.event);
             }
         }, 0);
     });
@@ -167,8 +167,8 @@ function get_file(options) {
             data.append(k, v);
         }
     }
-    if (core.csrf_token) {
-        data.append('csrf_token', core.csrf_token);
+    if (odoo.csrf_token) {
+        data.append('csrf_token', odoo.csrf_token);
     }
     // IE11 wants this after xhr.open or it throws
     xhr.responseType = 'blob';
@@ -239,8 +239,8 @@ function post (controller_url, data) {
     $.each(data, function(i,val) {
         postData.append(i, val);
     });
-    if (core.csrf_token) {
-        postData.append('csrf_token', core.csrf_token);
+    if (odoo.csrf_token) {
+        postData.append('csrf_token', odoo.csrf_token);
     }
 
     return new Promise(function (resolve, reject) {

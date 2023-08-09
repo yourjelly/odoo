@@ -1,13 +1,11 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { bus, qweb } from "@web/legacy/js/services/core";
 import dom from "@web/legacy/js/core/dom";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import portalComposer from "@portal/js/portal_composer";
 import { Markup } from "@web/legacy/js/core/utils";
 import { range } from "@web/core/utils/numbers";
-
-var qweb = core.qweb;
 
 /**
  * Widget PortalChatter
@@ -65,7 +63,7 @@ var PortalChatter = publicWidget.Widget.extend({
         // bind bus event: this (portal.chatter) and 'portal.rating.composer' in portal_rating
         // are separate and sibling widgets, this event is to be triggered from portal.rating.composer,
         // hence bus event is bound to achieve usage of the event in another widget.
-        core.bus.on('reload_chatter_content', this, this._reloadChatterContent);
+        bus.on('reload_chatter_content', this, this._reloadChatterContent);
 
         return Promise.all([this._super.apply(this, arguments), this._reloadComposer()]);
     },

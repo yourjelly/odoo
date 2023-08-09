@@ -1,10 +1,8 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import "@website/js/content/snippets.animation";
-
-var qweb = core.qweb;
 
 // FIXME There is no reason to inherit from socialShare here
 var ForumShare = publicWidget.registry.socialShare.extend({

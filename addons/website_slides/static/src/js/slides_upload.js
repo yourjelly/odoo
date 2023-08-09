@@ -2,7 +2,8 @@
 
 import { uniqueId } from '@web/core/utils/functions';
 import { sprintf } from '@web/core/utils/strings';
-import {_t, qweb as QWeb} from "@web/legacy/js/services/core";
+import { qweb as QWeb } from "@web/legacy/js/services/core";
+import { _t } from "@web/core/l10n/translation";
 import Dialog from '@web/legacy/js/core/dialog';
 import publicWidget from '@web/legacy/js/public/public_widget';
 import utils from '@web/legacy/js/core/utils';

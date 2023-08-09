@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import concurrency from "@web/legacy/js/core/concurrency";
-import core from "@web/legacy/js/services/core";
+import { bus, qweb as QWeb } from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import dom from "@web/legacy/js/core/dom";
 import { Markup, confine } from "@web/legacy/js/core/utils";
@@ -12,7 +12,6 @@ import SmoothScrollOnDrag from "@web_editor/js/editor/smooth_scroll_on_drag";
 import weUtils from "@web_editor/js/common/utils";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
 import { sprintf, escape } from "@web/core/utils/strings";
-const QWeb = core.qweb;
 import { closestElement, isUnremovable } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { uniqueId } from "@web/core/utils/functions";
@@ -1874,7 +1873,7 @@ var SnippetsMenu = Widget.extend({
         // Needed as bootstrap stop the propagation of click events for dropdowns
         this.$document.on('mouseup.snippets_menu', '.dropdown-toggle', this._onClick);
 
-        core.bus.on('deactivate_snippet', this, this._onDeactivateSnippet);
+        bus.on('deactivate_snippet', this, this._onDeactivateSnippet);
 
         // Adapt overlay covering when the window is resized / content changes
         this.debouncedCoverUpdate = debounce(() => {
@@ -2019,7 +2018,7 @@ var SnippetsMenu = Widget.extend({
         if (this.debouncedCoverUpdate) {
             this.debouncedCoverUpdate.cancel();
         }
-        core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
+        bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
         $(document.body).off('click', this._checkEditorToolbarVisibilityCallback);
         this.el.ownerDocument.body.classList.remove('editor_has_snippets');
         // Dispose BS tooltips.

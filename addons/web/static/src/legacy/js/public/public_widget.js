@@ -5,7 +5,8 @@
  */
 
 import dom from '@web/legacy/js/core/dom';
-import core from "@web/legacy/js/services/core";
+import Class from "@web/legacy/js/core/class";
+import { qweb } from "@web/legacy/js/services/core";
 import mixins from "@web/legacy/js/core/mixins";
 import ServicesMixin from "@web/legacy/js/core/service_mixins";
 import { loadBundle } from '@web/core/assets';
@@ -73,7 +74,7 @@ import { loadBundle } from '@web/core/assets';
  * is loaded in the dom.
  * @see PublicWidget.selector
  */
-export const PublicWidget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
+export const PublicWidget = Class.extend(mixins.PropertiesMixin, ServicesMixin, {
     // Backbone-ish API
     tagName: 'div',
     id: null,
@@ -282,7 +283,7 @@ export const PublicWidget = core.Class.extend(mixins.PropertiesMixin, ServicesMi
     renderElement: function () {
         var $el;
         if (this.template) {
-            $el = $(core.qweb.render(this.template, {widget: this}).trim());
+            $el = $(qweb.render(this.template, {widget: this}).trim());
         } else {
             $el = this._makeDescriptive();
         }

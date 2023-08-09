@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb as QWeb } from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { _t } from "@web/core/l10n/translation";
-var QWeb = core.qweb;
 
 publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend({
     selector: '.o_website_event_track_proposal_form',

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import config from "@web/legacy/js/services/config";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { Markup } from "@web/legacy/js/core/utils";
@@ -136,7 +136,7 @@ const DynamicSnippet = publicWidget.Widget.extend({
      * @private
      */
     _prepareContent: function () {
-        this.renderedContent = core.qweb.render(
+        this.renderedContent = qweb.render(
             this.template_key,
             this._getQWebRenderOptions()
         );

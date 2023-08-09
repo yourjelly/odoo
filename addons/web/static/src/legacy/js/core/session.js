@@ -1,21 +1,19 @@
 /** @odoo-module **/
 
 import ajax from "@web/legacy/js/core/ajax";
-import core from "@web/legacy/js/services/core";
+import Class from "@web/legacy/js/core/class";
+import { bus, qweb } from "@web/legacy/js/services/core";
 import mixins from "@web/legacy/js/core/mixins";
 import {setCookie} from "@web/legacy/js/core/cookie_utils";
 import { session } from "@web/session";
 import { loadJS } from "@web/core/assets";
-
-
-var _t = core._t;
-var qweb = core.qweb;
+import { _t } from "@web/core/l10n/translation";
 
 // To do: refactor session. Session accomplishes several concerns (rpc,
 // configuration, currencies (wtf?), user permissions...). They should be
 // clarified and separated.
 
-var Session = core.Class.extend(mixins.EventDispatcherMixin, {
+var Session = Class.extend(mixins.EventDispatcherMixin, {
     /**
 
     @param parent The parent of the newly created object.
@@ -41,7 +39,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
         // TODO: session store in cookie should be optional
         this.currencies = {};
         this._groups_def = {};
-        core.bus.on('invalidate_session', this, this._onInvalidateSession);
+        bus.on('invalidate_session', this, this._onInvalidateSession);
     },
     setup: function (origin, options) {
         // must be able to customize server

@@ -3,10 +3,8 @@
 import { escape, sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 import ajax from "@web/legacy/js/core/ajax";
-import core from "@web/legacy/js/services/core";
+import { bus, qweb } from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
-
-var qweb = core.qweb;
 
 /**
  * Widget PortalComposer
@@ -201,7 +199,7 @@ var PortalComposer = publicWidget.Widget.extend({
             route: route,
             params: this._prepareMessageData(),
         });
-        core.bus.trigger('reload_chatter_content', result);
+        bus.trigger('reload_chatter_content', result);
         return result;
     },
 });

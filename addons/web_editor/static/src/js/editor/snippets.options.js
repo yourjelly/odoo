@@ -2,7 +2,7 @@
 
 import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import { MediaDialogWrapper } from "@web_editor/components/media_dialog/media_dialog_wrapper";
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import dom from "@web/legacy/js/core/dom";
 import rpc from "@web/legacy/js/core/rpc";
@@ -45,7 +45,6 @@ import {
     normalizeCSSColor,
  } from '@web/core/utils/colors';
 
-var qweb = core.qweb;
 const preserveCursor = OdooEditorLib.preserveCursor;
 const descendants = OdooEditorLib.descendants;
 const { DateTime } = luxon;

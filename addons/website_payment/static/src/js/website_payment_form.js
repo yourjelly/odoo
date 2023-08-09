@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import core, { _t } from "@web/legacy/js/services/core";
+import { bus } from "@web/legacy/js/services/core";
 import checkoutForm from '@payment/js/checkout_form';
 import { sprintf } from '@web/core/utils/strings';
+import { _t } from "@web/core/l10n/translation";
 
 checkoutForm.include({
     events: Object.assign({}, checkoutForm.prototype.events || {}, {
@@ -13,7 +14,7 @@ checkoutForm.include({
      * @override
      */
     start: function () {
-        core.bus.on('update_shipping_cost', this, this._updateShippingCost);
+        bus.on('update_shipping_cost', this, this._updateShippingCost);
         return this._super.apply(this, arguments);
     },
 

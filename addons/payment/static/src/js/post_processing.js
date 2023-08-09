@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
     import publicWidget from "@web/legacy/js/public/public_widget";
-    import core from "@web/legacy/js/services/core";
+    import { qweb } from "@web/legacy/js/services/core";
     import { Markup } from "@web/legacy/js/core/utils";
     import { _t } from "@web/core/l10n/translation";
 
@@ -38,7 +38,7 @@
             this._rpc({
                 route: '/payment/status/poll',
                 params: {
-                    'csrf_token': core.csrf_token,
+                    'csrf_token': odoo.csrf_token,
                 }
             }).then(function(data) {
                 if(data.success === true) {
@@ -122,7 +122,7 @@
             this.displayContent("payment.display_tx_list", render_values);
         },
         displayContent: function (xmlid, render_values) {
-            var html = core.qweb.render(xmlid, render_values);
+            var html = qweb.render(xmlid, render_values);
             $.unblockUI();
             this.$el.find('div[name="o_payment_status_content"]').html(html);
         },

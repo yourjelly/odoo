@@ -1,10 +1,8 @@
 /** @odoo-module **/
 
 import { uniqueId } from "@web/core/utils/functions";
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
-
-var qweb = core.qweb;
 
 const GalleryWidget = publicWidget.Widget.extend({
 

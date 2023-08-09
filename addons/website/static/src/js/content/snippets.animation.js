@@ -10,13 +10,11 @@ import { escape } from "@web/core/utils/strings";
 import { debounce, throttleForAnimation } from "@web/core/utils/timing";
 import Class from "@web/legacy/js/core/class";
 import config from "@web/legacy/js/services/config";
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import dom from "@web/legacy/js/core/dom";
 import mixins from "@web/legacy/js/core/mixins";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import wUtils from "@website/js/utils";
-
-var qweb = core.qweb;
 
 // Initialize fallbacks for the use of requestAnimationFrame,
 // cancelAnimationFrame and performance.now()

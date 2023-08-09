@@ -1,10 +1,9 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { bus, qweb } from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { _t } from "@web/core/l10n/translation";
 import concurrency from "@web/legacy/js/core/concurrency";
-const qweb = core.qweb;
 
 publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
     selector: '.oe_website_sale',
@@ -116,7 +115,7 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
      * @param {float} amount : The new total amount of to be paid
      */
     _updateShippingCost: function(amount) {
-        core.bus.trigger('update_shipping_cost', amount);
+        bus.trigger('update_shipping_cost', amount);
     },
     /**
      * @private
@@ -243,7 +242,7 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
         if (!this._isPayable(status)) {
             return;
         }
-        core.bus.trigger('enableButton');
+        bus.trigger('enableButton');
     },
     /**
      * @private

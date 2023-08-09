@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import FormEditorRegistry from "@website/js/form_editor_registry";
 import options from "@web_editor/js/editor/snippets.options";
 import Dialog from "@web/legacy/js/core/dialog";
@@ -11,7 +11,6 @@ import { sprintf } from "@web/core/utils/strings";
 import { unique } from "@web/core/utils/arrays";
 import { _t } from "@web/core/l10n/translation";
 
-const qweb = core.qweb;
 let currentActionName;
 
 const allFormsInfo = new Map();

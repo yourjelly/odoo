@@ -1,14 +1,12 @@
 /** @odoo-module **/
 
 import concurrency from "@web/legacy/js/core/concurrency";
-import core from "@web/legacy/js/services/core";
 import utils from "@web/legacy/js/core/utils";
 import ajax from "@web/legacy/js/core/ajax";
 import { sprintf } from "@web/core/utils/strings";
 import { memoize, uniqueId } from "@web/core/utils/functions";
 import { throttleForAnimation } from "@web/core/utils/timing";
-
-var _t = core._t;
+import { _t } from "@web/core/l10n/translation";
 
 var VariantMixin = {
     events: {

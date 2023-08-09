@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import config from "@web/legacy/js/services/config";
 import utils from "@web/legacy/js/core/utils";
 import Widget from "@web/legacy/js/core/widget";
@@ -379,7 +379,7 @@ export var NameAndSignature = Widget.extend({
      * @returns {string} image = mimetype + image data
      */
     _getSVGText: function (font, text, width, height) {
-        var $svg = $(core.qweb.render('web.legacy.sign_svg_text', {
+        var $svg = $(qweb.render('web.legacy.sign_svg_text', {
             width: width,
             height: height,
             font: font,

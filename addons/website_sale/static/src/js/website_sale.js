@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { bus } from "@web/legacy/js/services/core";
 import config from "@web/legacy/js/services/config";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import VariantMixin from "@website_sale/js/variant_mixin";
@@ -81,7 +81,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
 
         this.$('select[name="country_id"]').change();
 
-        core.bus.on('resize', this, function () {
+        bus.on('resize', this, function () {
             if (config.device.size_class === config.device.SIZES.XL) {
                 $('.toggle_summary_div').addClass('d-none d-xl-block');
             }
@@ -233,7 +233,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
             wSaleUtils.updateCartNavBar(data);
             wSaleUtils.showWarning(data.warning);
             // Propagating the change to the express checkout forms
-            core.bus.trigger('cart_amount_changed', data.amount, data.minor_amount);
+            bus.trigger('cart_amount_changed', data.amount, data.minor_amount);
         });
     },
     /**

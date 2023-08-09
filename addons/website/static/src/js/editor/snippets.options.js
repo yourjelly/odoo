@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import { loadBundle, loadCSS } from "@web/core/assets";
 import Dialog from "@web/legacy/js/core/dialog";
 import { Markup, sprintf } from "@web/legacy/js/core/utils";
@@ -20,8 +20,6 @@ import {
     convertRgbToHsl,
     convertHslToRgb,
  } from '@web/core/utils/colors';
-
-var qweb = core.qweb;
 
 const InputUserValueWidget = options.userValueWidgetsRegistry['we-input'];
 const SelectUserValueWidget = options.userValueWidgetsRegistry['we-select'];
@@ -213,7 +211,7 @@ const FontFamilyPickerUserValueWidget = SelectUserValueWidget.extend({
         if (this.googleLocalFonts.length) {
             const googleLocalFontsEls = fontEls.splice(-this.googleLocalFonts.length);
             googleLocalFontsEls.forEach((el, index) => {
-                $(el).append(core.qweb.render('website.delete_google_font_btn', {
+                $(el).append(qweb.render('website.delete_google_font_btn', {
                     index: index,
                     local: true,
                 }));
@@ -223,13 +221,13 @@ const FontFamilyPickerUserValueWidget = SelectUserValueWidget.extend({
         if (this.googleFonts.length) {
             const googleFontsEls = fontEls.splice(-this.googleFonts.length);
             googleFontsEls.forEach((el, index) => {
-                $(el).append(core.qweb.render('website.delete_google_font_btn', {
+                $(el).append(qweb.render('website.delete_google_font_btn', {
                     index: index,
                 }));
             });
         }
 
-        $(this.menuEl).append($(core.qweb.render('website.add_google_font_btn', {
+        $(this.menuEl).append($(qweb.render('website.add_google_font_btn', {
             variable: variable,
         })));
 
@@ -264,7 +262,7 @@ const FontFamilyPickerUserValueWidget = SelectUserValueWidget.extend({
         const variable = $(ev.currentTarget).data('variable');
         const dialog = new Dialog(this, {
             title: _t("Add a Google Font"),
-            $content: $(core.qweb.render('website.dialog.addGoogleFont')),
+            $content: $(qweb.render('website.dialog.addGoogleFont')),
             buttons: [
                 {
                     text: _t("Save & Reload"),
@@ -1399,7 +1397,7 @@ options.registry.OptionsTab = options.Class.extend({
         await Promise.all([libsProm, dataProm]);
 
         await new Promise(resolve => {
-            const $content = $(core.qweb.render('website.custom_code_dialog_content', {
+            const $content = $(qweb.render('website.custom_code_dialog_content', {
                 contentText,
             }));
             const aceEditor = this._renderAceEditor($content.find('.o_ace_editor_container')[0], website[fieldName] || '');

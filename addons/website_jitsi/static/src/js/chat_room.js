@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
 import config from "@web/legacy/js/services/config";
-import core from "@web/legacy/js/services/core";
+import { qweb as QWeb } from "@web/legacy/js/services/core";
 import publicWidget from "@web/legacy/js/public/public_widget";
-const QWeb = core.qweb;
 
 publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
     selector: '.o_wjitsi_room_widget',

@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import core from "@web/legacy/js/services/core";
+import { qweb } from "@web/legacy/js/services/core";
 import { Markup } from "@web/legacy/js/core/utils";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { escape } from "@web/core/utils/strings";
-
-var qweb = core.qweb;
 
 publicWidget.registry.twitter = publicWidget.Widget.extend({
     selector: '.twitter',

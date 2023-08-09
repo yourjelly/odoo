@@ -11,7 +11,7 @@
 
 import { uniqueId } from "@web/core/utils/functions";
 import concurrency from "@web/legacy/js/core/concurrency";
-import core from "@web/legacy/js/services/core";
+import { bus } from "@web/legacy/js/services/core";
 import { localization } from "@web/core/l10n/localization";
 
 /**
@@ -27,7 +27,7 @@ function _notify(content, callbacks) {
             c.widget.on_attach_callback(c.callback_args);
         }
     });
-    core.bus.trigger('DOM_updated', content);
+    bus.trigger('DOM_updated', content);
 }
 
 var dom = {
@@ -140,7 +140,7 @@ var dom = {
 
         $textarea.on('input focus change', resize);
         if (options.parent) {
-            core.bus.on('DOM_updated', options.parent, function () {
+            bus.on('DOM_updated', options.parent, function () {
                 resize();
                 removeVerticalResize();
             });

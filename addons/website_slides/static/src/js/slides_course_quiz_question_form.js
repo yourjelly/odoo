@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
 import publicWidget from '@web/legacy/js/public/public_widget';
-import core from "@web/legacy/js/services/core";
+import { qweb as QWeb } from "@web/legacy/js/services/core";
 import { _t } from "@web/core/l10n/translation";
-var QWeb = core.qweb;
 
 /**
  * This Widget is responsible of displaying the question inputs when adding a new question or when updating an
