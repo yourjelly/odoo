@@ -90,7 +90,6 @@ DefaultCommandItem.template = "web.DefaultCommandItem";
 
 export class CommandPalette extends Component {
     setup() {
-        debugger;
         if (this.props.bus) {
             const setConfig = ({ detail }) => this.setCommandPaletteConfig(detail);
             this.props.bus.addEventListener(`SET-CONFIG`, setConfig);
@@ -103,8 +102,6 @@ export class CommandPalette extends Component {
         this.DefaultCommandItem = DefaultCommandItem;
         this.activeElement = useService("ui").activeElement;
         this.inputRef = useAutofocus();
-        this.action = useService('action');
-        // this.dialogservice = useService("dialog")
         useHotkey("Enter", () => this.executeSelectedCommand(), { bypassEditableProtection: true });
         useHotkey("Control+Enter", () => this.executeSelectedCommand(true), {
             bypassEditableProtection: true,
@@ -270,7 +267,6 @@ export class CommandPalette extends Component {
             this.setCommandPaletteConfig(config);
         } else {
             this.props.close();
-            // this.action.doAction({type: 'ir.actions.act_window_close'});
         }
     }
 
@@ -367,6 +363,7 @@ export class CommandPalette extends Component {
     get isMobileOS() {
         return isMobileOS();
     }
+
 }
 CommandPalette.lastSessionId = 0;
 CommandPalette.template = "web.CommandPalette";

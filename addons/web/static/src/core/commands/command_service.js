@@ -132,6 +132,7 @@ export const commandService = {
          */
         function openPalette(config, onClose) {
             debugger;
+            env.services.dialog.closeAllDialogs();
             if (isPaletteOpened) {
                 bus.trigger("SET-CONFIG", config);
                 return;
@@ -144,7 +145,6 @@ export const commandService = {
                 {
                     config,
                     bus,
-                    // closeAllDialog:true,
                 },
                 {
                     onClose: () => {

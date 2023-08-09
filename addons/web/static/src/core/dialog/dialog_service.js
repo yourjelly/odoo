@@ -2,6 +2,7 @@
 
 import { registry } from "../registry";
 import { DialogContainer } from "./dialog_container";
+import { EventBus } from "@odoo/owl";
 
 import { markRaw, reactive } from "@odoo/owl";
 
@@ -32,12 +33,8 @@ export const dialogService = {
 
         
         function add(dialogClass, props, options = {}) {
-            debugger;
             for (const dialog of Object.values(dialogs)) {
                 dialog.dialogData.isActive = false;
-                // if(props.closeAllDialog){
-                //     dialog.dialogData.close();
-                // }
             }
             const id = ++dialogId;
             function close() {
@@ -75,7 +72,12 @@ export const dialogService = {
             return close;
         }
 
-        return { add };
+        function closeAllDialogs(){
+            Object.keys(dialogs).forEach((dialogId)=>{
+                dialogs[dialogId].dialogData.close();
+            })
+        }
+        return { add, closeAllDialogs };
     },
 };
 
