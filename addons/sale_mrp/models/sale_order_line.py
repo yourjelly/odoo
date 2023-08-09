@@ -83,6 +83,11 @@ class SaleOrderLine(models.Model):
                     else:
                         order_line.qty_delivered = 0.0
 
+    def _prepare_procurement_values(self, group_id=False):
+        vals = super()._prepare_procurement_values(group_id=group_id)
+        vals['mrp_sale_line_id'] = self.id
+        return vals
+
     def compute_uom_qty(self, new_qty, stock_move, rounding=True):
         #check if stock move concerns a kit
         if stock_move.bom_line_id:

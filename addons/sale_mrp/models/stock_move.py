@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models
+from odoo import fields, models
 
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
+    mrp_sale_line_id = fields.Many2one('sale.order.line', string='Sale Order Line', copy=False)
+
     def _prepare_procurement_values(self):
         res = super()._prepare_procurement_values()
         res['analytic_account_id'] = self.sale_line_id.order_id.analytic_account_id
+        res['mrp_sale_line_id'] = self.mrp_sale_line_id
         return res
 
 
