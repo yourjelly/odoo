@@ -936,7 +936,9 @@ function makeActionManager(env) {
         }
 
         if (env.isSmall) {
-            if (!view.isMobileFriendly) {
+            if (action.default_mobile_mode && views.map((v) => v.type).includes(action.default_mobile_mode)) {
+                view = views.find((v) => v.type === action.default_mobile_mode);
+            } else {
                 view = _findMobileView(views, view.multiRecord) || view;
             }
             if (lazyView && !lazyView.isMobileFriendly) {

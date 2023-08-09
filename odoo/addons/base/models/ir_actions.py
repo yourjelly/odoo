@@ -271,7 +271,11 @@ class IrActionsActWindow(models.Model):
                             help="Model name of the object to open in the view window")
     target = fields.Selection([('current', 'Current Window'), ('new', 'New Window'), ('inline', 'Inline Edit'), ('fullscreen', 'Full Screen'), ('main', 'Main action of Current Window')], default="current", string='Target Window')
     view_mode = fields.Char(required=True, default='tree,form',
-                            help="Comma-separated list of allowed view modes, such as 'form', 'tree', 'calendar', etc. (Default: tree,form)")
+                            help="Comma-separated list of allowed view modes, such as 'form', 'tree', 'calendar', etc. "
+                                 "(default: tree,form). The first view mode is used by default.")
+    default_mobile_mode = fields.Char(string="Default Mobile View", help="View mode override in mobile and small "
+                                             "screen environments. If unset, will default to kanban view "
+                                             "if available, otherwise the same view as for desktop mode")
     usage = fields.Char(string='Action Usage',
                         help="Used to filter menu and home actions from the user form.")
     view_ids = fields.One2many('ir.actions.act_window.view', 'act_window_id', string='No of Views')
@@ -327,9 +331,8 @@ class IrActionsActWindow(models.Model):
 
     def _get_readable_fields(self):
         return super()._get_readable_fields() | {
-            "context", "domain", "filter", "groups_id", "limit", "res_id",
-            "res_model", "search_view_id", "target", "view_id",
-            "view_mode", "views",
+            "context", "default_mobile_mode", "domain", "filter", "groups_id", "limit",
+            "res_id", "res_model", "search_view_id", "target", "view_id", "view_mode", "views",
             # `flags` is not a real field of ir.actions.act_window but is used
             # to give the parameters to generate the action
             "flags"
