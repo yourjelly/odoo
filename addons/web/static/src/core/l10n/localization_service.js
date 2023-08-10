@@ -100,6 +100,8 @@ export const localizationService = {
             thousandsSep: userLocalization.thousands_sep,
             weekStart: userLocalization.week_start,
             code:language, 
+            date_format: userLocalization.date_format,
+            time_format: userLocalization.time_format,
         });
         return localization;
     },

@@ -274,21 +274,21 @@ Object.entries(normalize_format_table).forEach(([key, val]) => {
  * Get date format of the user's language
  */
 export function getLangDateFormat() {
-    return strftime_to_moment_format(localization.dateFormat);
+    return strftime_to_moment_format(localization.date_format);
 }
 
 /**
  * Get time format of the user's language
  */
 export function getLangTimeFormat() {
-    return strftime_to_moment_format(localization.timeFormat);
+    return strftime_to_moment_format(localization.time_format);
 }
 
 /**
  * Get date time format of the user's language
  */
 export function getLangDatetimeFormat() {
-    return strftime_to_moment_format(localization.dateFormat + " " + localization.timeFormat);
+    return strftime_to_moment_format(localization.date_format + " " + localization.time_format);
 }
 
 const dateFormatWoZeroCache = {};
