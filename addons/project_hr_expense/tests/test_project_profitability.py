@@ -46,7 +46,7 @@ class TestProjectHrExpenseProfitability(TestProjectProfitabilityCommon, TestProj
         expense = self.env['hr.expense'].create({
             'name': 'Car Travel Expenses',
             'employee_id': self.expense_employee.id,
-            'product_id': self.product_without_company_a.id,
+            'product_id': self.product_a.id,
             'unit_amount': 350.00,
             'company_id': self.env.company.id,
             'analytic_distribution': {self.project.analytic_account_id.id: 100},
@@ -76,7 +76,7 @@ class TestProjectHrExpenseProfitability(TestProjectProfitabilityCommon, TestProj
         expense_foreign = self.env['hr.expense'].create({
             'name': 'Car Travel Expenses foreign',
             'employee_id': foreign_employee.id,
-            'product_id': self.product_without_company_a.id,
+            'product_id': self.product_a.id,
             'unit_amount': 350.00,
             'company_id': foreign_company.id,
             'analytic_distribution': {self.project.analytic_account_id.id: 100},

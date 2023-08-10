@@ -110,13 +110,13 @@ class TestItEdiReverseCharge(TestItEdi):
             'invoice_line_ids': [
                 Command.create({
                     'name': "Product A",
-                    'product_id': self.product_without_company_a.id,
+                    'product_id': self.product_a.id,
                     'price_unit': 800.40,
                     'tax_ids': [Command.set(self.sale_tax_0v.ids)],
                 }),
                 Command.create({
                     'name': "Product B",
-                    'product_id': self.product_without_company_b.id,
+                    'product_id': self.product_b.id,
                     'price_unit': 800.40,
                     'tax_ids': [Command.set(self.sale_tax_0v.ids)],
                 }),
@@ -135,13 +135,13 @@ class TestItEdiReverseCharge(TestItEdi):
             'invoice_line_ids': [
                 Command.create({
                     'name': "Product A",
-                    'product_id': self.product_without_company_a.id,
+                    'product_id': self.product_a.id,
                     'price_unit': 800.40,
                     'tax_ids': [Command.set(self.purchase_tax_22p.ids)],
                 }),
                 Command.create({
                     'name': "Product B, taxed 4%",
-                    'product_id': self.product_without_company_b.id,
+                    'product_id': self.product_b.id,
                     'price_unit': 800.40,
                     'tax_ids': [Command.set(self.purchase_tax_4p.ids)],
                 }),
@@ -164,13 +164,13 @@ class TestItEdiReverseCharge(TestItEdi):
             'invoice_line_ids': [
                 Command.create({
                     'name': "Product A",
-                    'product_id': self.product_without_company_a.id,
+                    'product_id': self.product_a.id,
                     'price_unit': 800.40,
                     'tax_ids': [Command.set(self.purchase_tax_22p.ids)],
                 }),
                 Command.create({
                     'name': "Product B, taxed 4% Already in Italy",
-                    'product_id': self.product_without_company_b.id,
+                    'product_id': self.product_b.id,
                     'price_unit': 800.40,
                     'tax_ids': [Command.set(self.purchase_tax_4p_already_in_italy.ids)],
                 }),
@@ -189,13 +189,13 @@ class TestItEdiReverseCharge(TestItEdi):
             'invoice_line_ids': [
                 Command.create({
                     'name': "Product A",
-                    'product_id': self.product_without_company_a.id,
+                    'product_id': self.product_a.id,
                     'price_unit': 800.40,
                     'tax_ids': [Command.set(self.purchase_tax_22p.ids)],
                 }),
                 Command.create({
                     'name': "Product B, taxed 4%",
-                    'product_id': self.product_without_company_b.id,
+                    'product_id': self.product_b.id,
                     'price_unit': 800.40,
                     'tax_ids': [Command.set(self.purchase_tax_4p.ids)],
                 }),
