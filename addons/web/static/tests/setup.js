@@ -10,7 +10,7 @@ import { registerCleanup } from "./helpers/cleanup";
 import { prepareRegistriesWithCleanup } from "./helpers/mock_env";
 import { session as sessionInfo } from "@web/session";
 import { config as transitionConfig } from "@web/core/transition";
-import { loadLanguages, _t } from "@web/core/l10n/translation";
+import { loadLanguages } from "@web/core/l10n/translation";
 
 transitionConfig.disabled = true;
 
