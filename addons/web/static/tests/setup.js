@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import LegacyBus from "@web/legacy/js/core/bus";
 import session from "web.session";
 import { assets, templates } from "@web/core/assets";
@@ -11,7 +10,7 @@ import { registerCleanup } from "./helpers/cleanup";
 import { prepareRegistriesWithCleanup } from "./helpers/mock_env";
 import { session as sessionInfo } from "@web/session";
 import { config as transitionConfig } from "@web/core/transition";
-import { loadLanguages } from "@web/core/l10n/translation";
+import { loadLanguages, _t } from "@web/core/l10n/translation";
 
 transitionConfig.disabled = true;
 

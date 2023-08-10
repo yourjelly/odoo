@@ -59,7 +59,8 @@ var Session = Class.extend(mixins.EventDispatcherMixin, {
     /**
      * Setup a session
      */
-    session_bind: function (origin) {
+    session_bind: async function (origin) {
+        return;
         this.setup(origin);
         qweb.default_dict._s = this.origin;
         this.uid = null;

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { qweb as QWeb } from "@web/legacy/js/services/core";
+import { bus, qweb as QWeb } from "@web/legacy/js/services/core";
 import dom from "@web/legacy/js/core/dom";
 import Widget from "@web/legacy/js/core/widget";
 import { _t } from "@web/core/l10n/translation";
@@ -99,7 +99,7 @@ var Dialog = Widget.extend({
         this.renderFooter = options.renderFooter;
         this.onForceClose = options.onForceClose;
 
-        core.bus.on('close_dialogs', this, this.destroy.bind(this));
+        bus.on('close_dialogs', this, this.destroy.bind(this));
     },
     /**
      * Wait for XML dependencies and instantiate the modal structure (except
@@ -210,7 +210,7 @@ var Dialog = Widget.extend({
             }
 
             // Notifies new webclient to adjust UI active element
-            core.bus.trigger("legacy_dialog_opened", self);
+            bus.trigger("legacy_dialog_opened", self);
         });
 
         return self;
@@ -244,7 +244,7 @@ var Dialog = Widget.extend({
 
         if (this.el) {
             // Notifies new webclient to adjust UI active element
-            core.bus.trigger("legacy_dialog_destroyed", this);
+            bus.trigger("legacy_dialog_destroyed", this);
         }
 
         // Triggers the onForceClose event if the callback is defined

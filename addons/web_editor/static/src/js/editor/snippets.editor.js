@@ -704,7 +704,7 @@ var SnippetEditor = Widget.extend({
             $element = $element.parent();
         }
 
-        var $optionsSection = $(core.qweb.render('web_editor.customize_block_options_section', {
+        var $optionsSection = $(QWeb.render('web_editor.customize_block_options_section', {
             name: this.getName(),
         })).data('editor', this);
         const $optionsSectionBtnGroup = $optionsSection.find('we-top-button-group');
