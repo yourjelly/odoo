@@ -60,7 +60,6 @@ var Session = Class.extend(mixins.EventDispatcherMixin, {
      * Setup a session
      */
     session_bind: async function (origin) {
-        return;
         this.setup(origin);
         qweb.default_dict._s = this.origin;
         this.uid = null;
@@ -76,11 +75,10 @@ var Session = Class.extend(mixins.EventDispatcherMixin, {
     session_init: function () {
         var self = this;
         var prom = this.session_reload();
+        return prom;
 
         if (this.is_frontend || this.is_report) {
-            return prom.then(function () {
-                return self.load_translations();
-            });
+            return prom;
         }
 
         return prom.then(function () {
