@@ -1,12 +1,11 @@
 /** @odoo-module **/
 
 import { sprintf } from "@web/core/utils/strings";
-import translation from "@web/legacy/js/core/translation";
 import utils from "@web/legacy/js/core/utils";
+import { localization } from "@web/core/l10n/localization";
 
 var lpad = utils.lpad;
 var rpad = utils.rpad;
-var _t = translation._t;
 
 /**
  * Replacer function for JSON.stringify, serializes Date objects to UTC
@@ -274,21 +273,21 @@ Object.entries(normalize_format_table).forEach(([key, val]) => {
  * Get date format of the user's language
  */
 export function getLangDateFormat() {
-    return strftime_to_moment_format(_t.database.parameters.date_format);
+    return strftime_to_moment_format(localization.dateFormat);
 }
 
 /**
  * Get time format of the user's language
  */
 export function getLangTimeFormat() {
-    return strftime_to_moment_format(_t.database.parameters.time_format);
+    return strftime_to_moment_format(localization.timeFormat);
 }
 
 /**
  * Get date time format of the user's language
  */
 export function getLangDatetimeFormat() {
-    return strftime_to_moment_format(_t.database.parameters.date_format + " " + _t.database.parameters.time_format);
+    return strftime_to_moment_format(localization.dateFormat + " " + localization.timeFormat);
 }
 
 const dateFormatWoZeroCache = {};

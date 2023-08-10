@@ -7,6 +7,7 @@ import { sprintf } from "@web/core/utils/strings";
 import { memoize, uniqueId } from "@web/core/utils/functions";
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { _t } from "@web/core/l10n/translation";
+import { localization } from "@web/core/l10n/localization";
 
 var VariantMixin = {
     events: {
@@ -614,7 +615,6 @@ var VariantMixin = {
      * @param {float} price
      */
     _priceToStr: function (price) {
-        var l10n = _t.database.parameters;
         var precision = 2;
 
         if ($('.decimal_precision').length) {
@@ -622,7 +622,7 @@ var VariantMixin = {
         }
         var formatted = price.toFixed(precision).split(".");
         formatted[0] = utils.insert_thousand_seps(formatted[0]);
-        return formatted.join(l10n.decimal_point);
+        return formatted.join(localization.decimalPoint);
     },
     /**
      * Returns a throttled `_getCombinationInfo` with a leading and a trailing
