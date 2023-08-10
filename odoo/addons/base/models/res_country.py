@@ -135,6 +135,13 @@ class Country(models.Model):
                 code = FLAG_MAPPING.get(country.code, country.code.lower())
                 country.image_url = "/base/static/img/country_flags/%s.png" % code
 
+    @api.constrains('code')
+    def _check_country_code(self):
+        for record in self:
+            if not record.code.isalpha():
+                raise UserError(_("The provided code is invalid. Please ensure that the "
+                              "code contains only alphabetical characters"))
+
     @api.constrains('address_format')
     def _check_address_format(self):
         for record in self:

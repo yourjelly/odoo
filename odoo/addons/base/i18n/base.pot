@@ -28279,6 +28279,15 @@ msgid ""
 msgstr ""
 
 #. module: base
+#. odoo-python
+#: code:addons/base/models/res_country.py:0
+#, python-format
+msgid ""
+"The provided code is invalid. Please ensure that the code contains only "
+"alphabetical characters"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_res_currency_rate__rate
 msgid "The rate of the currency to the currency of rate 1"
 msgstr ""

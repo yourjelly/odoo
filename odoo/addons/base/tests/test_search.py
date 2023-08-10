@@ -80,11 +80,11 @@ class test_search(TransactionCase):
         self.patch_order('res.country', 'phone_code')
         a.country_id, c.country_id = self.env['res.country'].create([{
             'name': "Country 1",
-            'code': 'C1',
+            'code': 'AA',
             'phone_code': '01',
         }, {
             'name': 'Country 2',
-            'code': 'C2',
+            'code': 'AB',
             'phone_code': '02'
         }])
 
@@ -103,7 +103,7 @@ class test_search(TransactionCase):
 
         # NULLS applies to the m2o itself, not its sub-fields, so a null `phone_code`
         # will sort normally (larger than non-null codes)
-        b.country_id = self.env['res.country'].create({'name': "Country X", 'code': 'C3'})
+        b.country_id = self.env['res.country'].create({'name': "Country X", 'code': 'AC'})
 
         for order, result in [
             ('country_id', a | c | b),
