@@ -21,7 +21,7 @@
     import { bus } from "@web/legacy/js/services/core";
     import rpc from "@web/legacy/js/core/rpc";
     import session from "web.session";
-    import { _t } from "@web/legacy/js/core/translation";
+    import { _t } from "@web/core/l10n/translation";
     import {getCookie, setCookie} from "@web/legacy/js/core/cookie_utils";
 
     const { device, isDebug } = config

@@ -60,34 +60,6 @@ class WebClient(http.Controller):
             ('Cache-Control', f'max-age={http.STATIC_CACHE}'),
         ])
 
-    @http.route('/web/webclient/bootstrap_translations', type='json', auth="none")
-    def bootstrap_translations(self, mods=None):
-        """ Load local translations from *.po files, as a temporary solution
-            until we have established a valid session. This is meant only
-            for translating the login page and db management chrome, using
-            the browser's language. """
-        # For performance reasons we only load a single translation, so for
-        # sub-languages (that should only be partially translated) we load the
-        # main language PO instead - that should be enough for the login screen.
-        lang = request.env.context['lang'].partition('_')[0]
-
-        if mods is None:
-            mods = odoo.conf.server_wide_modules or []
-            if request.db:
-                mods = request.env.registry._init_modules.union(mods)
-
-        translations_per_module = {}
-        for addon_name in mods:
-            manifest = get_manifest(addon_name)
-            if manifest and manifest['bootstrap']:
-                f_name = get_resource_path(addon_name, 'i18n', f'{lang}.po')
-                if not f_name:
-                    continue
-                translations_per_module[addon_name] = {'messages': _local_web_translations(f_name)}
-
-        return {"modules": translations_per_module,
-                "lang_parameters": None}
-
     @http.route('/web/webclient/translations/<string:unique>', type='http', auth="public", cors="*")
     def translations(self, unique, mods=None, lang=None):
         """

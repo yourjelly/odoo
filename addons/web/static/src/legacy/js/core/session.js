@@ -73,27 +73,7 @@ var Session = Class.extend(mixins.EventDispatcherMixin, {
      * Init a session, reloads from cookie, if it exists
      */
     session_init: function () {
-        var self = this;
-        var prom = this.session_reload();
-        return prom;
-
-        if (this.is_frontend || this.is_report) {
-            return prom;
-        }
-
-        return prom.then(function () {
-            var promise = self.load_qweb();
-            if (self.session_is_valid()) {
-                return promise.then(function () { return self.load_modules(); });
-            }
-            return Promise.all([
-                    promise,
-                    self.rpc('/web/webclient/bootstrap_translations')
-                        .then(function (trans) {
-                            _t.database.set_bundle(trans);
-                        })
-                    ]);
-        });
+        return this.session_reload();
     },
     session_is_valid: function () {
         var db = $.deparam.querystring().db;
@@ -107,9 +87,7 @@ var Session = Class.extend(mixins.EventDispatcherMixin, {
      */
     session_authenticate: function () {
         var self = this;
-        return Promise.resolve(this._session_authenticate.apply(this, arguments)).then(function () {
-            return self.load_modules();
-        });
+        return Promise.resolve(this._session_authenticate.apply(this, arguments));
     },
     /**
      * The session is validated either by login or by restoration of a previous session
@@ -174,48 +152,6 @@ var Session = Class.extend(mixins.EventDispatcherMixin, {
         if (!this.name) { return; }
         ttl = ttl || 24*60*60*365;
         setCookie(this.name + '|' + name, value, ttl, type);
-    },
-    /**
-     * Load additional web addons of that instance and init them
-     *
-     */
-
-    load_modules: function () {
-        var self = this;
-
-        var loaded = Promise.resolve(self.load_translations());
-        var locale = "/web/webclient/locale/" + self.user_context.lang || 'en_US';
-        var file_list = [ locale ];
-
-        return loaded.then(function () {
-            return self.load_js(file_list);
-        }).then(function () {
-            self._configureLocale();
-        });
-    },
-    load_translations: function (modules=null) {
-        var lang = this.user_context.lang
-        var html = document.documentElement
-            , htmlLang = html.getAttribute('lang');
-        if (!this.user_context.lang && htmlLang) {
-            lang = htmlLang.replace('-', '_');
-        }
-        return _t.database.load_translations(this, modules, lang, this.translationURL);
-    },
-    load_js: function (files) {
-        var self = this;
-        return new Promise(function (resolve, reject) {
-            if (files.length !== 0) {
-                var file = files.shift();
-                var url = self.url(file, null);
-                loadJS(url).then(resolve);
-            } else {
-                resolve();
-            }
-        });
-    },
-    load_qweb: async function () {
-        await odoo.ready(/\.bundle\.xml$/);
     },
     get_currency: function (currency_id) {
         return this.currencies[currency_id];
@@ -317,26 +253,6 @@ var Session = Class.extend(mixins.EventDispatcherMixin, {
         setCookie('cids', hash.cids || String(main_company_id), 24 * 60 * 60 * 365, 'required');
         $.bbq.pushState({'cids': hash.cids}, 0);
         location.reload();
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * Sets first day of week in current locale according to the user language.
-     *
-     * @private
-     */
-    _configureLocale: function () {
-        // TODO: try to test when re - writing this file in the new system with luxon
-        const dow = (_t.database.parameters.week_start || 0) % 7;
-        moment.updateLocale(moment.locale(), {
-            week: {
-                dow: dow,
-                doy: 7 + dow - 4 // Note: ISO 8601 week date: https://momentjscom.readthedocs.io/en/latest/moment/07-customization/16-dow-doy/
-            },
-        });
     },
 
     //--------------------------------------------------------------------------

@@ -72,6 +72,16 @@ export const localizationService = {
             }
         }
 
+        // @TODO REMOVE ME
+        const dow = (userLocalization.weekStart || 0) % 7;
+        moment.updateLocale(moment.locale(), {
+            week: {
+                dow: dow,
+                doy: 7 + dow - 4 // Note: ISO 8601 week date: https://momentjscom.readthedocs.io/en/latest/moment/07-customization/16-dow-doy/
+            },
+        });
+        //////////////////
+
         const dateFormat = strftimeToLuxonFormat(userLocalization.date_format);
         const timeFormat = strftimeToLuxonFormat(userLocalization.time_format);
         const dateTimeFormat = `${dateFormat} ${timeFormat}`;

@@ -35,7 +35,6 @@ function stringifyObjectValues(obj, properties) {
 function checkGlobalObjectsIntegrity() {
     const objects = [
         [session, ["user_context", "currencies"]],
-        [_t, ["database.multi_lang", "database.parameters"]],
     ];
     const initials = objects.map((obj) => stringifyObjectValues(obj[0], obj[1]));
 
