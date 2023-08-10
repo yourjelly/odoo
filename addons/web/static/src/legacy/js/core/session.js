@@ -6,8 +6,6 @@ import { bus, qweb } from "@web/legacy/js/services/core";
 import mixins from "@web/legacy/js/core/mixins";
 import {setCookie} from "@web/legacy/js/core/cookie_utils";
 import { session } from "@web/session";
-import { loadJS } from "@web/core/assets";
-import { _t } from "@web/core/l10n/translation";
 
 // To do: refactor session. Session accomplishes several concerns (rpc,
 // configuration, currencies (wtf?), user permissions...). They should be
@@ -86,7 +84,6 @@ var Session = Class.extend(mixins.EventDispatcherMixin, {
      * The session is validated by restoration of a previous session
      */
     session_authenticate: function () {
-        var self = this;
         return Promise.resolve(this._session_authenticate.apply(this, arguments));
     },
     /**
