@@ -46788,12 +46788,18 @@
                 startCellEdition: (content) => this.onGridComposerCellFocused(content),
             });
             owl.useExternalListener(window, "resize", () => this.render(true));
-            owl.useExternalListener(window, "beforeunload", this.unbindModelEvents.bind(this));
-            this.bindModelEvents();
+            owl.useExternalListener(window, "beforeunload", () => this.unbindModelEvents(this.props.model));
+            this.bindModelEvents(this.props.model);
             owl.onMounted(() => {
                 this.checkViewportSize();
             });
-            owl.onWillUnmount(() => this.unbindModelEvents());
+            owl.onWillUpdateProps((nextProps) => {
+                if (nextProps.model !== this.props.model) {
+                    this.unbindModelEvents(this.props.model);
+                    this.bindModelEvents(nextProps.model);
+                }
+            });
+            owl.onWillUnmount(() => this.unbindModelEvents(this.props.model));
             owl.onPatched(() => {
                 this.checkViewportSize();
             });
@@ -46808,15 +46814,15 @@
                 ? "inactive"
                 : this.composer.gridFocusMode;
         }
-        bindModelEvents() {
-            this.model.on("update", this, () => this.render(true));
-            this.model.on("notify-ui", this, (notification) => this.env.notifyUser(notification));
-            this.model.on("raise-error-ui", this, ({ text }) => this.env.raiseError(text));
+        bindModelEvents(model) {
+            model.on("update", this, () => this.render(true));
+            model.on("notify-ui", this, (notification) => this.env.notifyUser(notification));
+            model.on("raise-error-ui", this, ({ text }) => this.env.raiseError(text));
         }
-        unbindModelEvents() {
-            this.model.off("update", this);
-            this.model.off("notify-ui", this);
-            this.model.off("raise-error-ui", this);
+        unbindModelEvents(model) {
+            model.off("update", this);
+            model.off("notify-ui", this);
+            model.off("raise-error-ui", this);
         }
         checkViewportSize() {
             const { xRatio, yRatio } = this.env.model.getters.getFrozenSheetViewRatio(this.env.model.getters.getActiveSheetId());
