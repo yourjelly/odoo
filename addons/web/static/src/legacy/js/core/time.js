@@ -3,6 +3,7 @@
 import { sprintf } from "@web/core/utils/strings";
 import utils from "@web/legacy/js/core/utils";
 import { localization } from "@web/core/l10n/localization";
+import { _t } from "@web/core/l10n/translation";
 
 var lpad = utils.lpad;
 var rpad = utils.rpad;

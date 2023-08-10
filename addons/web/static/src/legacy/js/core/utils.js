@@ -7,6 +7,7 @@
  */
 
 import { localization } from "@web/core/l10n/localization";
+import { _t } from "@web/core/l10n/translation";
 
 import { Component } from "@odoo/owl";
 import { escape, escapeHTML, escapeMethod, sprintf as str_sprtinf } from "@web/core/utils/strings";
