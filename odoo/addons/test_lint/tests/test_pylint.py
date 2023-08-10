@@ -27,6 +27,7 @@ class TestPyLint(TransactionCase):
         'undefined-variable',
         'eval-used',
         'unreachable',
+        'duplicate-key',
 
         # custom checkers
         'sql-injection',
