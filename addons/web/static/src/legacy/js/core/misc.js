@@ -39,14 +39,6 @@ var Throbber = Widget.extend({
     },
 });
 
-/** Setup blockui */
-if ($.blockUI) {
-    $.blockUI.defaults.baseZ = 1100;
-    $.blockUI.defaults.message = '<div class="openerp oe_blockui_spin_container" style="background-color: transparent;">';
-    $.blockUI.defaults.css.border = '0';
-    $.blockUI.defaults.css["background-color"] = '';
-}
-
 
 /**
  * Remove the "accesskey" attributes to avoid the use of the access keys
@@ -74,6 +66,7 @@ function unblockAccessKeys() {
 var throbbers = [];
 
 export function blockUI() {
+    return;
     var tmp = $.blockUI.apply($, arguments);
     var throbber = new Throbber();
     throbbers.push(throbber);
@@ -84,6 +77,7 @@ export function blockUI() {
 }
 
 export function unblockUI() {
+    return;
     throbbers.forEach((throbber) => {
         throbber.destroy();
     });

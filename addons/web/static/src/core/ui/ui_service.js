@@ -135,10 +135,12 @@ export const uiService = {
         registry.category("main_components").add("BlockUI", { Component: BlockUI, props: { bus } });
 
         let blockCount = 0;
-        function block() {
+        function block(data) {
             blockCount++;
             if (blockCount === 1) {
-                bus.trigger("BLOCK");
+                bus.trigger("BLOCK", {
+                    message: data ? data.message : undefined,
+                });
             }
         }
         function unblock() {
@@ -206,7 +208,9 @@ export const uiService = {
                 return ui.isSmall;
             },
         });
-
+        if (owl.Component.env && owl.Component.env.services) {
+            owl.Component.env.services.ui = ui;
+        }
         return ui;
     },
 };

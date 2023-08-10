@@ -6,16 +6,13 @@
     import { Markup } from "@web/legacy/js/core/utils";
     import { _t } from "@web/core/l10n/translation";
 
-    $.blockUI.defaults.css.border = '0';
-    $.blockUI.defaults.css["background-color"] = '';
-    $.blockUI.defaults.overlayCSS["opacity"] = '0.9';
-
     publicWidget.registry.PaymentPostProcessing = publicWidget.Widget.extend({
         selector: 'div[name="o_payment_status"]',
 
         _pollCount: 0,
 
         start: function() {
+            this.uiService = owl.Component.env.services.ui;
             this.displayLoading();
             this.poll();
             return this._super.apply(this, arguments);
@@ -123,15 +120,12 @@
             this.displayContent("payment.display_tx_list", render_values);
         },
         displayContent: function (xmlid, render_values) {
-            $.unblockUI();
+            this.uiService.unblock();
             this.$el.find('div[name="o_payment_status_content"]').empty().append(renderToElement(xmlid, render_values));
         },
         displayLoading: function () {
-            var msg = _t("We are processing your payment, please wait ...");
-            $.blockUI({
-                'message': '<h2 class="text-white"><img src="/web/static/img/spin.png" class="fa-pulse"/>' +
-                    '    <br />' + msg +
-                    '</h2>'
+            this.uiService.block({
+                'message': _t("We are processing your payment, please wait ..."),
             });
         },
     });
