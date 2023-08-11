@@ -29,7 +29,6 @@ export const _t = translation._t;
 export const _lt = translation._lt;
 export const qweb = new QWeb(config.isDebug());
 export const serviceRegistry = new Registry();
-export const csrf_token = odoo.csrf_token;
 
 export default {
     qweb: qweb,
@@ -42,8 +41,4 @@ export default {
 
     // registries
     serviceRegistry: serviceRegistry,
-    /**
-     * @type {String}
-     */
-    csrf_token: csrf_token,
 };

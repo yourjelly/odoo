@@ -328,7 +328,7 @@
                 'is_validation': this.txContext.isValidation,
                 'access_token': this.txContext.accessToken
                     ? this.txContext.accessToken : undefined,
-                'csrf_token': core.csrf_token,
+                'csrf_token': odoo.csrf_token,
             };
         },
 

@@ -38,7 +38,7 @@
             this._rpc({
                 route: '/payment/status/poll',
                 params: {
-                    'csrf_token': core.csrf_token,
+                    'csrf_token': odoo.csrf_token,
                 }
             }).then(function(data) {
                 if(data.success === true) {
