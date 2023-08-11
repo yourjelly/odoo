@@ -532,9 +532,6 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: false,
     trigger: ".ui-menu-item > a:contains('the_flow.product')",
-}, {
-    mobile: false,
-    trigger: "td[name='name'][data-tooltip*='the_flow.product']",
     run: () => {}, // check
 }, {
     mobile: true,
@@ -570,10 +567,6 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: false,
     trigger: ".ui-menu-item > a:contains('the_flow.service')",
-}, {
-    mobile: false,
-    trigger: "td[name='name'][data-tooltip*='the_flow.service']",
-    run: () => {}, // check
 }, {
     mobile: false,
     trigger: 'label:contains("Untaxed Amount")',

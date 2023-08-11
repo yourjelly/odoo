@@ -42,9 +42,6 @@ registry.category("web_tour.tours").add('event_configurator_tour', {
 }, {
     trigger: '.o_event_sale_js_event_configurator_ok'
 }, {
-    trigger: "td[name='name'][data-tooltip*='VIP']",
-    run: function () {} // check
-}, {
     trigger: 'ul.nav a:contains("Order Lines")',
     run: 'click'
 }, {
@@ -68,8 +65,5 @@ registry.category("web_tour.tours").add('event_configurator_tour', {
     in_modal: false
 }, {
     trigger: '.o_event_sale_js_event_configurator_ok'
-}, {
-    trigger: "td[name='name'][data-tooltip*='Standard']",
-    run: function () {} // check
 }, ...stepUtils.saveForm()
 ]});
