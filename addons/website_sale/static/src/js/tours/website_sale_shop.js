@@ -48,22 +48,18 @@
             actions.auto(".modal-footer .btn-secondary");
         },
         auto: true,
-    }, {
-        trigger: "button.o_we_add_snippet_btn",
-        auto: true,
-    }, {
+    },
+    wTourUtils.goBackToBlocks(),
+    {
         trigger: "#snippet_structure .oe_snippet:eq(3) .oe_snippet_thumbnail",
         extra_trigger: "body:not(.modal-open)",
         content: _t("Drag this website block and drop it in your page."),
         position: "bottom",
         run: "drag_and_drop",
-    }, {
-        trigger: "button[data-action=save]",
-        content: Markup(_t("Once you click on <b>Save</b>, your product is updated.")),
-        position: "bottom",
-    }, {
+    }, 
+    ...wTourUtils.clickOnSave(),
+    {
         trigger: ".o_menu_systray_item .o_switch_danger_success",
-        extra_trigger: "iframe body:not(.editor_enable)",
         content: _t("Click on this button so your customers can see it."),
         position: "bottom",
     }, {

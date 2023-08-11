@@ -7,17 +7,17 @@ wTourUtils.registerWebsitePreviewTour("website_media_dialog_undraw", {
     url: '/',
     edition: true,
 }, () => [
-wTourUtils.dragNDrop({
-    id: 's_text_image',
-    name: 'Text - Image',
-}),
-{
-    trigger: '.s_text_image img',
-    run: "dblclick",
-},
-{
-    trigger: '.o_select_media_dialog:has(.o_we_search_select option[value="media-library"])',
-},
+    wTourUtils.dragNDrop({
+        id: 's_text_image',
+        name: 'Text - Image',
+    }),
+    wTourUtils.changeImage({
+        id: 's_text_image',
+        name: 'Text - Image',
+    }),
+    {
+        trigger: '.o_select_media_dialog:has(.o_we_search_select option[value="media-library"])',
+    },
 ]);
 
 wTourUtils.registerWebsitePreviewTour('website_media_dialog_icons', {
