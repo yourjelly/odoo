@@ -6,8 +6,11 @@
             <div class="o-tour-controller--content d-flex flex-column">
                 <h2 class="text-white">Tour Recorder</h2>
                 <ol>
-                    <t t-foreach="this.steps" t-as="step" t-key="step_index">
-                        <li> <t t-esc="step"/> </li>
+                    <t t-foreach="this.steps" t-as="step" t-key="step.id">
+                        <li>
+                            <t t-esc="getStepString(step)"/>
+                            <button class="btn btn-default"> <i class="text-danger fa fa-times"></i> </button>
+                        </li>
                     </t>
                 </ol>
                 <button t-on-click="startRecording" t-if="!this.state.recording" class="btn btn-success border-0 text-white"> Start </button>

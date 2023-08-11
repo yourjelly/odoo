@@ -38,6 +38,7 @@ export class TourRecorderOverlay extends Component {
         this.steps = useState([]);
         this.position = useState({ left: 0, top: 0 });
         this.notification = useService("notification");
+        this.stepCountId = 0;
         useDialogDraggable({
             ref: { el: document },
             elements: ".o-tour-controller",
@@ -60,15 +61,27 @@ export class TourRecorderOverlay extends Component {
     }
 
     generateStepsString(stepsArray) {
-        let initialString = `steps: () => [`;
-        stepsArray.forEach((element) => {
-            initialString += `
-                {
-                    trigger: "${element}",
-                },`;
-        });
-        initialString += `
-            ],`;
+        const initialString = `steps: () => [${stepsArray
+            .map((step) => {
+                let stepString = `
+            {
+                trigger: "${step.selector}",`;
+                switch (step.type) {
+                    case "click":
+                        break;
+                    case "keyPress":
+                        stepString += `
+                run: "text ${step.text}",`;
+                        break;
+                    default:
+                        break;
+                }
+                stepString += `
+            },`;
+                return stepString;
+            })
+            .join("")}
+        ],`;
         return initialString;
     }
 
@@ -77,16 +90,26 @@ export class TourRecorderOverlay extends Component {
         if (parentElement.contains(ev.target) || ev.target === document.querySelector("html")) {
             return;
         }
-        // TODO: verify if there is more than one element
         const selector = finder(ev.target);
 
-        this.steps.push(selector);
+        this.steps.push({ id: this.stepCountId++, type: "click", selector });
+    }
+
+    addKey(ev) {
+        if (this.steps.length === 0) {
+            return;
+        }
+        const lastStep = this.steps.slice(-1)[0];
+        lastStep.type = "keyPress";
+        lastStep.text = lastStep.text ? lastStep.text + ev.key : ev.key;
     }
 
     startRecording() {
         this.state.recording = true;
         this.addClickReference = this.addClick.bind(this);
+        this.addKeyReference = this.addKey.bind(this);
         document.addEventListener("click", this.addClickReference, true);
+        document.addEventListener("keypress", this.addKeyReference, true);
     }
 
     resetRecording() {
@@ -101,5 +124,11 @@ export class TourRecorderOverlay extends Component {
     stopRecording() {
         this.state.recording = false;
         document.removeEventListener("click", this.addClickReference, true);
+    }
+
+    getStepString(step) {
+        return `type: ${step.type}, ${step.text ? "text:" + step.text + ", " : ""} selector:${
+            step.selector
+        }`;
     }
 }
