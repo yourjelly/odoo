@@ -9,14 +9,13 @@ import itertools
 import logging
 import time
 from datetime import datetime, date
-from dateutil.relativedelta import relativedelta
 
 from lxml import etree
 
 import odoo
 from odoo.models import BaseModel
 from odoo.fields import Command
-from odoo.tools.safe_eval import safe_eval
+from odoo.tools.safe_eval import safe_eval, allow_instance
 
 _logger = logging.getLogger(__name__)
 
@@ -981,6 +980,7 @@ def get_static_context(context_str):
     return result
 
 
+@allow_instance
 class Dotter:
     """ Simple wrapper for a dict where keys are accessed as readonly attributes. """
     __slots__ = ['__values']

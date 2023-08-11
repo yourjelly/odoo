@@ -217,11 +217,7 @@
                                     + (' ms-4 ms-md-0' if allow_token_selection else '')"
                     >
                         <span><i class="fa fa-lock"/> Secured by</span>
-                        <span t-out="dict(provider_sudo._fields['code']._description_selection(
-                                         provider_sudo.env
-                                     ))[provider_sudo.code]"
-                              class="text-break"
-                        />
+                        <span t-field="provider_sudo.code" />
                     </p>
                 </div>
             </div>
@@ -241,11 +237,7 @@
         <!-- === Provider name (only for mobile) === -->
         <p class="align-self-end d-block d-md-none mb-0 small text-600">
             <span><i class="fa fa-lock"/> Secured by</span>
-            <span t-out="dict(provider_sudo._fields['code']._description_selection(
-                             provider_sudo.env
-                         ))[provider_sudo.code]"
-                  class="text-break"
-            />
+            <span t-field="provider_sudo.code" />
         </p>
     </template>
 
@@ -350,11 +342,7 @@
                 <!-- === Provider name === -->
                 <p class="align-self-end mb-0 ms-auto small text-600">
                     <span><i class="fa fa-lock"/> Secured by</span>
-                    <span t-out="dict(provider_sudo._fields['code']._description_selection(
-                                     provider_sudo.env
-                                 ))[provider_sudo.code]"
-                          class="text-break"
-                    />
+                    <span t-field="provider_sudo.code" />
                 </p>
             </div>
         </div>
