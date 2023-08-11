@@ -14,81 +14,131 @@ from difflib import SequenceMatcher
 # History restoration methods
 # ------------------------------------------------------------
 
+PATCH_SEPARATOR = '\n'
+LINE_SEPARATOR = '<'
 
-def restore_one(current_content, diff_list):
-    diff_list.reverse()
-    current_content_list = current_content.split('<')
+PATCH_OPERATION_LINE_AT = '@'
 
-    for diff_data in diff_list:
-        diff_data_split = diff_data.split('<')
-        diff_split = diff_data_split[0].split('|', 1)
-        diff_lines = diff_split[1].split(',', 1)
+PATCH_OPERATION_ADD = '+'
+PATCH_OPERATION_REMOVE = '-'
+PATCH_OPERATION_REPLACE = 'R'
 
-        tag_prefix = diff_split[0]
-        line_id = int(diff_lines[0])
-        end_line_id = int(diff_lines[1]) if len(diff_lines) > 1 else line_id
-        line_index = line_id - 1
 
-        text_diff = diff_data_split[1:] if len(diff_data_split) > 1 else []
-        text_diff.reverse()
+def apply_patch(initial_content, patch):
+    """ Apply a patch (multiple operations) on a content.
+        Each operation is a string with the following format:
+        <operation_type>@<start_index>[,<end_index>][:<patch_text>*]
+        patch format example:
+            +@4:</p><p>ab</p><p>cd
+            +@4,15:</p><p>ef</p><p>gh
+            -@32
+            -@125,129
+            R@523:<b>sdf</b>
 
-        if end_line_id > line_id:
-            for lid in range(end_line_id, line_id, -1):
-                if tag_prefix in ['-', 'R']:
-                    del current_content_list[lid - 1]
+        :param string initial_content: the initial content to patch
+        :param string patch: the patch to apply
 
-        if tag_prefix in ['+', 'R']:
-            for line_text in text_diff:
-                current_content_list.insert(line_id, line_text)
-        if tag_prefix in ['-', 'R']:
-            del current_content_list[line_index]
+        :return: string: the patched content
+    """
+    content = initial_content.split(LINE_SEPARATOR)
+    patch_operations = patch.split(PATCH_SEPARATOR)
+    # We need to apply operation from last to the first
+    # to preserve the indexes integrity.
+    patch_operations.reverse()
 
-    return '<'.join(current_content_list)
+    for operation in patch_operations:
+        metadata, *patch_content_line = operation.split(LINE_SEPARATOR)
+
+        operation_type, lines_index_range = metadata.split(
+            PATCH_OPERATION_LINE_AT)
+        start_index, end_index = lines_index_range.split(',')
+        start_index = int(start_index)
+        end_index = int(end_index) if end_index else start_index
+        base_index = start_index - 1
+
+        # We need to insert lines from last to the first
+        # to preserve the indexes integrity.
+        patch_content_line.reverse()
+
+        if end_index > start_index:
+            for index in range(end_index, start_index, -1):
+                if operation_type in [PATCH_OPERATION_REMOVE,
+                                      PATCH_OPERATION_REPLACE]:
+                    del content[index - 1]
+
+        if operation_type in [PATCH_OPERATION_ADD, PATCH_OPERATION_REPLACE]:
+            for line in patch_content_line:
+                content.insert(start_index, line)
+        if operation_type in [PATCH_OPERATION_REMOVE, PATCH_OPERATION_REPLACE]:
+            del content[base_index]
+
+    return LINE_SEPARATOR.join(content)
+
 
 # ------------------------------------------------------------
 # History Comparison methods
 # ------------------------------------------------------------
 
+HTML_TAG_ISOLATION_REGEX = r'^([^>]*>)(.*)$'
+ADDITION_COMPARISON_REGEX = r'\1<diffadd>\2</diffadd>'
+DELETION_COMPARISON_REGEX = r'\1<diffdel>\2</diffdel>'
 
-def compare_one(current_content, diff_list):
-    diff_list.reverse()
-    current_content_list = str(current_content).split('<')
 
-    for diff_data in diff_list:
-        diff_data_split = diff_data.split('<')
-        diff_split = diff_data_split[0].split('|', 1)
-        diff_lines = diff_split[1].split(',', 1)
+def generate_comparison(initial_content, patch):
+    """ Apply a patch on a content (see apply_patch for more details)
+        and generate a comparison html between the initial content
+        and the patched content.
 
-        tag_prefix = diff_split[0]
-        line_id = int(diff_lines[0])
-        end_line_id = int(diff_lines[1]) if len(diff_lines) > 1 else line_id
-        line_index = line_id - 1
+        :param string initial_content: the initial content to patch
+        :param string patch: the patch to apply
 
-        text_diff = diff_data_split[1:] if len(diff_data_split) > 1 else []
-        text_diff.reverse()
+        :return: string: the comparison content
+    """
+    comparison = initial_content.split(LINE_SEPARATOR)
+    patch_operations = patch.split(PATCH_SEPARATOR)
+    # We need to apply operation from last to the first
+    # to preserve the indexes integrity.
+    patch_operations.reverse()
 
-        if end_line_id > line_id:
-            for lid in range(end_line_id, line_id, -1):
-                if tag_prefix in ['-', 'R']:
-                    current_content_list[lid - 1] = re.sub(
-                        r'^([^>]*>)(.*)$',
-                        r'\1<diffdel>\2</diffdel>',
-                        current_content_list[lid - 1])
+    for operation in patch_operations:
+        metadata, *patch_content_line = operation.split(LINE_SEPARATOR)
 
-        if tag_prefix in ['+', 'R']:
-            for line_text in text_diff:
-                current_content_list.insert(
-                    line_id, re.sub(
-                        r'^([^>]*>)(.*)$',
-                        r'\1<diffadd>\2</diffadd>',
-                        line_text))
-        if tag_prefix in ['-', 'R']:
-            current_content_list[line_index] = re.sub(
-                        r'^([^>]*>)(.*)$',
-                        r'\1<diffdel>\2</diffdel>',
-                        current_content_list[line_index])
+        operation_type, lines_index_range = metadata.split(
+            PATCH_OPERATION_LINE_AT)
+        start_index, end_index = lines_index_range.split(',')
+        start_index = int(start_index)
+        end_index = int(end_index) if end_index else start_index
+        base_index = start_index - 1
 
-    return '<'.join(current_content_list)
+        # We need to insert lines from last to the first
+        # to preserve the indexes integrity.
+        patch_content_line.reverse()
+
+        if end_index > start_index:
+            for index in range(end_index, start_index, -1):
+                if operation_type in [PATCH_OPERATION_REMOVE,
+                                      PATCH_OPERATION_REPLACE]:
+                    comparison[index - 1] = re.sub(
+                        HTML_TAG_ISOLATION_REGEX,
+                        DELETION_COMPARISON_REGEX,
+                        comparison[index - 1])
+
+        if operation_type in [PATCH_OPERATION_ADD, PATCH_OPERATION_REPLACE]:
+            for line in patch_content_line:
+                comparison.insert(
+                    start_index, re.sub(
+                        HTML_TAG_ISOLATION_REGEX,
+                        ADDITION_COMPARISON_REGEX,
+                        line))
+                comparison.insert(start_index, line)
+        if operation_type in [PATCH_OPERATION_REMOVE, PATCH_OPERATION_REPLACE]:
+            comparison[start_index] = re.sub(
+                        HTML_TAG_ISOLATION_REGEX,
+                        DELETION_COMPARISON_REGEX,
+                        comparison[start_index])
+
+    return LINE_SEPARATOR.join(comparison)
+
 
 # ------------------------------------------------------------
 # Custom difflib Diff methods
@@ -106,14 +156,19 @@ def _format_range_context(start, stop):
 
 
 def _custom_diff(new_content_str, old_content_str):
-    new_content_lines = new_content_str.split('<')
-    old_content_lines = old_content_str.split('<')
+    new_content_lines = new_content_str.split(LINE_SEPARATOR)
+    old_content_lines = old_content_str.split(LINE_SEPARATOR)
 
-    prefix = dict(insert='+', delete='-', replace='R', equal='=')
-    for group in SequenceMatcher(None, new_content_lines, old_content_lines, False).get_grouped_opcodes(0):
+    prefix = dict(insert=PATCH_OPERATION_ADD,
+                  delete=PATCH_OPERATION_REMOVE,
+                  replace=PATCH_OPERATION_REPLACE,
+                  equal='=')
+
+    for group in SequenceMatcher(None, new_content_lines,  old_content_lines,
+                                 False).get_grouped_opcodes(0):
         diff_lines = []
         first, last = group[0], group[-1]
-        diff_string = '|'
+        diff_string = PATCH_OPERATION_LINE_AT
 
         diff_string += _format_range_context(first[1], last[2])
         if any(tag in {'replace', 'delete'} for tag, _, _, _, _ in group):
@@ -127,7 +182,8 @@ def _custom_diff(new_content_str, old_content_str):
                     for line in old_content_lines[j1:j2]:
                         diff_lines.append(line)
         if diff_lines:
-            yield str(diff_string) + '<' + '<'.join(diff_lines)
+            diff_lines_glued = LINE_SEPARATOR.join(diff_lines)
+            yield str(diff_string) + LINE_SEPARATOR + diff_lines_glued
         else:
             yield str(diff_string)
 
@@ -164,7 +220,7 @@ class HtmlHistoryDiff(models.Model):
     @classmethod
     def get_restored_version(cls, content, history_list):
         for history in history_list:
-            content = restore_one(content, json.loads(history.diff))
+            content = apply_patch(content, json.loads(history.diff))
         return content
 
     @classmethod

@@ -3,7 +3,7 @@
 import { Dialog } from '@web/core/dialog/dialog';
 import { useService } from "@web/core/utils/hooks";
 import {Component, onMounted, useState, markup} from '@odoo/owl';
-import { _t } from 'web.core';
+import { _t } from "@web/core/l10n/translation";
 const { DateTime } = luxon;
 
 class HtmlHistoryDialog extends Component {
@@ -82,14 +82,13 @@ class HtmlHistoryDialog extends Component {
         this.props.close();
     }
     async restoreVersion(historyDiffId) {
-        const restoredVersion = this.getHtmlAtDiffId(historyDiffId);
+        const restoredVersion = await this.getHtmlAtDiffId(historyDiffId);
         this.props.restoreRequested(restoredVersion);
     }
 
     /**
      * Getters
      **/
-
     getDiffAuthor(rec) {
         if (rec.create_uid && rec.create_uid[1]) {
             return rec.create_uid[1];
