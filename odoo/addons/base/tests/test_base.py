@@ -2,14 +2,23 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
+import sys
+
+from inspect import cleandoc
 
 from odoo import Command
 from odoo.tests.common import TransactionCase, BaseCase
 from odoo.tools import mute_logger
-from odoo.tools.safe_eval import safe_eval, const_eval, expr_eval
+from odoo.tools.safe_eval import safe_eval, const_eval, expr_eval, CodeChecker, _MATH_NODES, _ALLOWED_NODES, datetime
 
 
 class TestSafeEval(BaseCase):
+    def setUp(self):
+        self.code_checker = CodeChecker()
+
+    def inject(self, expr):
+        return ast.unparse(self.code_checker.visit(ast.parse(expr)))
+
     def test_const(self):
         # NB: True and False are names in Python 2 not consts
         expected = (1, {"a": {2.5}}, [None, u"foo"])
@@ -52,12 +61,257 @@ class TestSafeEval(BaseCase):
             safe_eval('open("/etc/passwd","r")')
 
         # no forbidden opcodes
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SyntaxError):
             safe_eval("import odoo", mode="exec")
 
         # no dunder
-        with self.assertRaises(NameError):
+        with self.assertRaises(ValueError):
             safe_eval("self.__name__", {'self': self}, mode="exec")
+
+    def test_05_call_checker_injection(self):
+        """Test that the call_checker is injected into the code"""
+        case1 = "foo(bar, baz=qux)"
+        case2 = "foo.bar(baz, qux=quux)"
+        case3 = "foo()"
+        case4 = "__call_checker(foo, bar, baz=qux)"
+        case5 = "foo(__call_checker, bar, baz=qux)"
+        case6 = "foo(bar, __call_checker=baz, qux=quux)"
+        case7 = "foo(bar, baz=__call_checker, qux=quux)"
+
+        self.assertEqual(
+            self.inject(case1),
+            "__call_checker(foo, bar, baz=qux)",
+        )
+
+        self.assertEqual(
+            self.inject(case2),
+            "__call_checker(__SafeWrapper(foo, __type_checker).bar, baz, qux=quux)",
+        )
+
+        self.assertEqual(
+            self.inject(case3),
+            "__call_checker(foo)",
+        )
+
+        with self.assertRaises(
+            NameError, msg="Forbidden name: '__call_checker'."
+        ):
+            self.inject(case4)
+
+        with self.assertRaises(
+            NameError, msg="Forbidden name: '__call_checker'."
+        ):
+            self.inject(case5)
+
+        with self.assertRaises(
+            NameError, msg="Forbidden name: '__call_checker'."
+        ):
+            self.inject(case6)
+
+        with self.assertRaises(
+            NameError, msg="Forbidden name: '__call_checker'."
+        ):
+            self.inject(case7)
+
+    def test_06_attr_injection(self):
+        code1 = "foo.bar"
+        code2 = "foo.bar.baz"
+        code3 = "foo.bar(baz)"
+        code4 = "foo.bar(baz.qux)"
+        code4 = "foo.bar(baz, qux=quux.quuz)"
+
+        self.assertEqual(
+            self.inject(code1),
+            "__SafeWrapper(foo, __type_checker).bar",
+        )
+
+        self.assertEqual(
+            self.inject(code2),
+            "__SafeWrapper(__SafeWrapper(foo, __type_checker).bar, __type_checker).baz",
+        )
+
+        self.assertEqual(
+            self.inject(code3),
+            "__call_checker(__SafeWrapper(foo, __type_checker).bar, baz)",
+        )
+
+        self.assertEqual(
+            self.inject(code4),
+            "__call_checker(__SafeWrapper(foo, __type_checker).bar, baz, qux=__SafeWrapper(quux, __type_checker).quuz)",
+        )
+
+    def test_08_subscript(self):
+        lst = [
+            0, sys
+        ]
+
+        dico = {
+            "a": "b",
+            "c": sys,
+            sys: lambda _: 1
+        }
+
+        code1 = "lst[0]"
+        code2 = "lst[1]"
+        code3 = "dico['a']"
+        code4 = "dico['c']"
+        code5 = "dico[sys]"
+
+        safe_eval(code1, globals_dict={"lst": lst})
+
+        with self.assertRaises(ValueError, msg="Object <module 'sys' (built-in)> of type '<class 'module'>' is not allowed."):
+            safe_eval(code2, globals_dict={"lst": lst})
+
+        safe_eval(code3, globals_dict={"dico": dico})
+
+        with self.assertRaises(ValueError, msg="Object <module 'sys' (built-in)> of type '<class 'module'>' is not allowed."):
+            safe_eval(code4, globals_dict={"dico": dico})
+
+        with self.assertRaises(ValueError, msg="Object <module 'sys' (built-in)> of type '<class 'module'>' is not allowed."):
+            safe_eval(code5, globals_dict={"dico": dico, "sys": sys})
+
+    def test_09_misc_escape(self):
+        class StrictStr:
+            """
+            This class represents an object that is defined in the code base.
+            An attacker can't modify this object.
+            """
+
+            def __init__(self, val):
+                self.obj_attr = (
+                    "format",
+                    "lower",
+                )
+
+                if not isinstance(val, str):
+                    raise TypeError("Expected a string.")
+
+                self.val = val
+
+            def getattrib(self, name):
+                # For some reason, it's possible to meet those kind of method in the wild
+                if name not in self.obj_attr:
+                    raise AttributeError(f"Attribute '{name}' is not allowed.")
+                return self.obj.__getattribute__(name)
+
+        class WeirdClass(StrictStr):
+            def addAttr(self, name, val):
+                # I hope that nobody will ever do this
+                self.__setattr__(name, val)
+
+        code = """
+        w = WeirdClass()
+        w.addAttr("obj", print)
+        w.addAttr("obj_attr", ('__self__', ))
+        w.getattrib("__self__").exec("import this")
+        """
+
+        with self.assertRaises(ValueError, msg="Object <module 'builtins' (built-in)> of type '<class 'module'>' is not allowed."):
+            safe_eval(cleandoc(code), globals_dict={
+                      "StrictStr": StrictStr, "WeirdClass": WeirdClass, "print": print}, mode="exec")
+
+    def test_10_format_should_be_denied(self):
+        # format is forbidden on strings
+        # because it can be used to leak data through dunders
+
+        codefmt = cleandoc(
+            """
+            fmt = "Hello {name}"
+            fmt.format(name="World")
+            """
+        )
+
+        codefmt2 = cleandoc(
+            """
+            fmt = "Hello {}"
+            fmt.format("World")
+            """
+        )
+
+        codefmt3 = cleandoc(
+            """
+            fmt = "Hello {name}"
+            fmt.format_map({"name": "World"})
+            """
+        )
+
+        codeCfmt = cleandoc(
+            """
+            fmt = "Hello %s"
+            fmt % "World"
+            """
+        )
+
+        codeNewFmt = cleandoc(
+            """
+            fmt = f"Hello {'World'}"
+            """
+        )
+
+        with self.assertRaises(ValueError, msg="format method is forbidden on strings."):
+            safe_eval(codefmt, mode="exec")
+
+        with self.assertRaises(ValueError, msg="format method is forbidden on strings."):
+            safe_eval(codefmt2, mode="exec")
+
+        with self.assertRaises(ValueError, msg="format_map method is forbidden on strings."):
+            safe_eval(codefmt3, mode="exec")
+
+        # Those type of format are allowed
+        safe_eval(codeCfmt, mode="exec")
+        safe_eval(codeNewFmt, mode="exec")
+
+        # Check that format method on other objects is allowed
+        class SomeObject:
+            def format(*args, **kwargs):    # noqa: A003 # pylint: disable=no-method-argument
+                ...
+
+        code = cleandoc(
+            """
+            fmt = SomeObject()
+            fmt.format(name="World")
+            """
+        )
+
+        safe_eval(code, globals_dict={"SomeObject": SomeObject}, mode="exec", sandboxed_types=(SomeObject,))
+
+    def test_12_use_of_denied_ast_nodes(self):
+        # Case 1: use of ast.Call with safe_eval in "math" mode
+        with self.assertRaises(ValueError, msg="ast.Call is not allowed."):
+            safe_eval("foo()", ast_subset=_MATH_NODES | {ast.Load})
+
+        # Case 2: Forcing ast.ImportFrom inside of the sandbox
+        with self.assertRaises(ValueError, msg="Node <class 'ast.ImportFrom'> is not allowed in the subset of nodes."):
+            safe_eval("from random import randint", ast_subset=_ALLOWED_NODES | {ast.ImportFrom})
+
+
+    def test_13_wrap_module(self):
+        # Everything in a module is visible, but only the allowed objects are accessible
+
+        with self.assertRaises(ValueError, msg="<class 'TypeError'> : Object <module 'sys' (built-in)> of type '<class 'module'>' is not allowed."):
+            safe_eval("datetime.sys")
+
+    def test_14_deny_attribute_modifications(self):
+        class Foo:
+            ...
+
+        with self.assertRaises(TypeError, msg="You cannot redefine an attribute"):
+            safe_eval("foo.bar = 1", globals_dict={"foo": Foo()}, sandboxed_instances=(Foo, ), mode="exec")
+
+        with self.assertRaises(TypeError, msg="You cannot redefine an attribute"):
+            safe_eval("for foo.bar in range(10): ...", globals_dict={"foo": Foo()}, sandboxed_instances=(Foo, ), mode="exec")
+
+        with self.assertRaises(TypeError, msg="You cannot redefine an attribute"):
+            safe_eval("(0 for foo.bar in range(10))", globals_dict={"foo": Foo()}, sandboxed_instances=(Foo, ), mode="exec")
+
+        safe_eval("for (a, b) in enumerate(range(10)): ...", mode="exec")
+        safe_eval("(a for (a, b) in enumerate(range(10)))", mode="exec")
+
+        with self.assertRaises(SyntaxError, msg="The delete keyword should be denied"):
+            safe_eval("del foo.bar", globals_dict={"foo": Foo()}, sandboxed_instances=(Foo, ), mode="exec")
+
+
+
 
 
 class TestParentStore(TransactionCase):
@@ -120,7 +374,6 @@ class TestParentStore(TransactionCase):
         old_struct = new_cat0.search([('parent_id', 'child_of', self.cat0.id)])
         self.assertEqual(len(old_struct), 4, "After duplication, previous record must have old childs records only")
         self.assertFalse(new_struct & old_struct, "After duplication, nodes should not be mixed")
-
 
 class TestGroups(TransactionCase):
 

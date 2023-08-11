@@ -380,9 +380,10 @@ import traceback
 import warnings
 import werkzeug
 
+from ast import parse as ast_parse, unparse as ast_unparse
 from markupsafe import Markup, escape
 from collections.abc import Sized, Mapping
-from itertools import count, chain
+from itertools import count, chain, islice
 from lxml import etree
 from dateutil.relativedelta import relativedelta
 from psycopg2.extensions import TransactionRollbackError
@@ -391,12 +392,11 @@ from odoo import api, models, tools
 from odoo.modules import registry
 from odoo.tools import config, safe_eval, pycompat
 from odoo.tools.constants import SUPPORTED_DEBUGGER, EXTERNAL_ASSET
-from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, to_opcodes, _EXPR_OPCODES, _BLACKLIST
 from odoo.tools.json import scriptsafe
 from odoo.tools.lru import LRU
 from odoo.tools.misc import str2bool
 from odoo.tools.image import image_data_uri, FILETYPE_BASE64_MAGICWORD
-from odoo.http import request
+from odoo.http import request, Session, GeoIP
 from odoo.tools.profiler import QwebTracker
 from odoo.exceptions import UserError, AccessDenied, AccessError, MissingError, ValidationError
 
@@ -411,31 +411,19 @@ token.QWEB = token.NT_OFFSET - 1
 token.tok_name[token.QWEB] = 'QWEB'
 
 
-# security safe eval opcodes for generated expression validation, used in `_compile_expr`
-_SAFE_QWEB_OPCODES = _EXPR_OPCODES.union(to_opcodes([
-    'MAKE_FUNCTION', 'CALL_FUNCTION', 'CALL_FUNCTION_KW', 'CALL_FUNCTION_EX',
-    'CALL_METHOD', 'LOAD_METHOD',
-
-    'GET_ITER', 'FOR_ITER', 'YIELD_VALUE',
-    'JUMP_FORWARD', 'JUMP_ABSOLUTE', 'JUMP_BACKWARD',
-    'JUMP_IF_FALSE_OR_POP', 'JUMP_IF_TRUE_OR_POP', 'POP_JUMP_IF_FALSE', 'POP_JUMP_IF_TRUE',
-
-    'LOAD_NAME', 'LOAD_ATTR',
-    'LOAD_FAST', 'STORE_FAST', 'UNPACK_SEQUENCE',
-    'STORE_SUBSCR',
-    'LOAD_GLOBAL',
-    # Following opcodes were added in 3.11 https://docs.python.org/3/whatsnew/3.11.html#new-opcodes
-    'RESUME',
-    'CALL',
-    'PRECALL',
-    'POP_JUMP_FORWARD_IF_FALSE',
-    'PUSH_NULL',
-    'POP_JUMP_FORWARD_IF_TRUE', 'KW_NAMES',
-    'FORMAT_VALUE', 'BUILD_STRING',
-    'RETURN_GENERATOR',
-    'POP_JUMP_BACKWARD_IF_FALSE',
-    'SWAP',
-])) - _BLACKLIST
+codeChecker = safe_eval.CodeChecker(
+    sandboxed_instances=(
+        etree._Attrib,
+        etree._Element,
+        GeoIP,
+        islice,
+        Session,
+        tools.func.lazy,
+        tools.translate._lt,
+        werkzeug.local.LocalProxy,
+        werkzeug.wrappers.request.Request,
+    ),
+)
 
 
 # eval to compile generated string python code into binary code, used in `_compile`
@@ -446,7 +434,7 @@ VOID_ELEMENTS = frozenset([
     'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen',
     'link', 'menuitem', 'meta', 'param', 'source', 'track', 'wbr'])
 # Terms allowed in addition to AVAILABLE_OBJECTS when compiling python expressions
-ALLOWED_KEYWORD = frozenset(['False', 'None', 'True', 'and', 'as', 'elif', 'else', 'for', 'if', 'in', 'is', 'not', 'or'] + list(_BUILTINS))
+ALLOWED_KEYWORD = frozenset(['False', 'None', 'True', 'and', 'as', 'elif', 'else', 'for', 'if', 'in', 'is', 'not', 'or'] + list(safe_eval._BUILTINS))
 # regexpr for string formatting and extract ( ruby-style )|( jinja-style  ) used in `_compile_format`
 FORMAT_REGEX = re.compile(r'(?:#\{(.+?)\})|(?:\{\{(.+?)\}\})')
 RSTRIP_REGEXP = re.compile(r'\n[ \t]*$')
@@ -582,8 +570,6 @@ class IrQWeb(models.AbstractModel):
             raise ValueError(f'values[{T_CALL_SLOT}] should be unset when call the _render method and only set into the template.')
 
         irQweb = self.with_context(**options)._prepare_environment(values)
-
-        safe_eval.check_values(values)
 
         template_functions, def_name = irQweb._compile(template)
         render_template = template_functions[def_name]
@@ -955,7 +941,8 @@ class IrQWeb(models.AbstractModel):
             'MissingError': MissingError,
             'ValidationError': ValidationError,
             'warning': lambda *args: _logger.warning(*args),
-            **_BUILTINS,
+            **safe_eval._BUILTINS,
+            **codeChecker.get_environment()
         }
 
     # helpers for compilation
@@ -1054,7 +1041,7 @@ class IrQWeb(models.AbstractModel):
         open_bracket_index = -1
         bracket_depth = 0
 
-        argument_name = '_arg_%s__'
+        argument_name = '_arg_%s_'
         argument_names = argument_names or []
 
         for index, t in enumerate(tokens):
@@ -1206,10 +1193,10 @@ class IrQWeb(models.AbstractModel):
             raise ValueError(f"Can not compile expression: {expr}")
 
         expression = self._compile_expr_tokens(tokens, ALLOWED_KEYWORD, raise_on_missing=raise_on_missing)
+        wrapped_expr = codeChecker.visit(ast_parse(expression))
 
-        assert_valid_codeobj(_SAFE_QWEB_OPCODES, compile(expression, '<>', 'eval'), expr)
+        return f"({ast_unparse(wrapped_expr)})"
 
-        return f"({expression})"
 
     def _compile_bool(self, attr, default=False):
         """Convert the statements as a boolean."""
