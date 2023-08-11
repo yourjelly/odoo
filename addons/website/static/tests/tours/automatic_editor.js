@@ -7,10 +7,7 @@ wTourUtils.registerWebsitePreviewTour('automatic_editor_on_new_website', {
     url: '/',
 },
 () => [
-    {
-        content: "Select the language dropdown",
-        trigger: 'iframe .js_language_selector .dropdown-toggle'
-    },
+    wTourUtils.selectLanguageDropdown(),
     {
         content: "click on Add a language",
         trigger: 'iframe a.o_add_language',
@@ -30,10 +27,7 @@ wTourUtils.registerWebsitePreviewTour('automatic_editor_on_new_website', {
         extra_trigger: '.modal div[name="lang_ids"] .rounded-pill .o_tag_badge_text:contains(Parseltongue)',
         trigger: '.modal-footer button[name=lang_install]',
     },
-    {
-        content: "Select the language dropdown",
-        trigger: 'iframe .js_language_selector .dropdown-toggle',
-    },
+    wTourUtils.selectLanguageDropdown(),
     {
         content: "Select parseltongue",
         trigger: 'iframe a.js_change_lang[data-url_code=pa_GB]',
@@ -85,13 +79,5 @@ wTourUtils.registerWebsitePreviewTour('automatic_editor_on_new_website', {
         timeout: 30000,
         run: () => null, // it's a check
     },
-    {
-        content: "exit edit mode",
-        trigger: '.o_we_website_top_actions button.btn-primary:contains("Save")',
-    },
-    {
-        content: "wait for editor to close",
-        trigger: 'iframe body:not(.editor_enable)',
-        run: () => null, // It's a check
-    }
+    ...wTourUtils.exitEditModeAndWaitForClose()
 ]);

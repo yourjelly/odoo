@@ -417,6 +417,43 @@ function selectElementInWeSelectWidget(widgetName, elementName, searchNeeded = f
     return steps;
 }
 
+function exitEditModeAndWaitForClose() {
+    return [{
+        content: "exit edit mode",
+        trigger: '.o_we_website_top_actions button.btn-primary:contains("Save")',
+    },
+    {
+        content: "wait for editor to close",
+        trigger: 'iframe body:not(.editor_enable)',
+        run: () => null, // It's a check
+    }];
+}
+
+function openSiteMenuAndHtmlEditor() {
+    return [{
+        content: "open site menu",
+        trigger: 'button[data-menu-xmlid="website.menu_site"]',
+    },
+    {
+        content: "open html editor",
+        trigger: 'a[data-menu-xmlid="website.menu_ace_editor"]',
+    }];
+}
+
+function saveHtmlEditor(stepOptions = {}) {
+    return Object.assign({}, {
+        content: "save the html editor",
+        trigger: '.o_ace_view_editor button[data-action=save]',
+    }, stepOptions);
+}
+
+function selectLanguageDropdown(stepOptions = {}){
+    return Object.assign({}, {
+        content: "Select the language dropdown",
+        trigger: 'iframe .js_language_selector .dropdown-toggle'
+    }, stepOptions);
+}
+
 export default {
     addMedia,
     assertCssVariable,
@@ -446,4 +483,8 @@ export default {
     registerWebsitePreviewTour,
     registerBackendAndFrontendTour,
     selectElementInWeSelectWidget,
+    exitEditModeAndWaitForClose,
+    openSiteMenuAndHtmlEditor,
+    saveHtmlEditor,
+    selectLanguageDropdown
 };

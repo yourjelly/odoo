@@ -4,6 +4,21 @@
     import rpc from "@web/legacy/js/core/rpc";
     import tourUtils from "@website_sale/js/tours/tour_utils";
 
+    const logOut = function(userName) {
+        return [{
+                content: "Open Dropdown for logout",
+                trigger: `#top_menu li.dropdown:visible a:contains(${userName})`,
+            },
+            {
+                content: "Logout",
+                trigger: '#o_logout:contains("Logout")',
+            }];
+    };
+    const clickOnNext = {
+        content: "Click on next button",
+        trigger: '.oe_cart .btn:contains("Next")',
+    };
+
     registry.category("web_tour.tours").add('website_sale_tour_1', {
         test: true,
         checkDelay: 250,
@@ -55,10 +70,7 @@
         content: "Shipping address is not same as billing address",
         trigger: '#shipping_use_same',
     },
-    {
-        content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
-    },
+    clickOnNext,
     {
         content: "Fulfill shipping address form",
         trigger: 'select[name="country_id"]',
@@ -72,10 +84,7 @@
             $('#country_id option:eq(1)').attr('selected', true);
         },
     },
-    {
-        content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
-    },
+    clickOnNext,
     {
         content: "Check selected billing address is same as typed in previous step",
         trigger: '#shipping_and_billing:contains(SO1 Billing Street, 33):contains(SO1BillingCity):contains(Afghanistan)',
@@ -105,10 +114,7 @@
             $('input[name="city"]').val('SO1BillingCityEdited');
         },
     },
-    {
-        content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
-    },
+    clickOnNext,
     {
         content: "Confirm Address",
         trigger: 'a.btn:contains("Confirm")',
@@ -145,15 +151,7 @@
         trigger: '.o_portal_docs a:contains("Quotations")',
     },
     // Sign in as admin change config auth_signup -> b2b, sale_show_tax -> total and Logout
-    {
-        content: "Open Dropdown for logout",
-        extra_trigger: ".o_header_standard:not(.o_transitioning)",
-        trigger: '#top_menu li.dropdown:visible a:contains("abcd")',
-    },
-    {
-        content: "Logout",
-        trigger: '#o_logout:contains("Logout")',
-    },
+    ...logOut("abcd"),
     {
         content: "Sign in as admin",
         trigger: 'header a[href="/web/login"]',
@@ -251,10 +249,7 @@
             $('#country_id option:eq(1)').attr('selected', true);
         },
     },
-    {
-        content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
-    },
+    clickOnNext,
     {
         content: "Select `Wire Transfer` payment method",
         trigger: '#payment_method label:contains("Wire Transfer")',
@@ -280,15 +275,7 @@
     },
 
     // enable extra step on website checkout and check extra step on checkout process
-    {
-        content: "Open Dropdown for logout",
-        extra_trigger: ".o_header_standard:not(.o_transitioning)",
-        trigger: '#top_menu li.dropdown:visible a:contains("abc")',
-    },
-    {
-        content: "Logout",
-        trigger: '#o_logout:contains("Logout")',
-    },
+    ...logOut("abc"),
     {
         content: "Sign in as admin",
         trigger: 'header a[href="/web/login"]',
@@ -308,15 +295,7 @@
         test: true,
         url: '/shop/cart',
         steps: () => [
-    {
-        content: "Open Dropdown for logout",
-        extra_trigger: '.progress-wizard-step:contains("Extra Info")',
-        trigger: '#top_menu li.dropdown:visible a:contains("Mitchell Admin")',
-    },
-    {
-        content: "Logout",
-        trigger: '#o_logout:contains("Logout")',
-    },
+    ...logOut("Mitchell Admin"),
     {
         content: "Sign in as abc",
         trigger: 'header a[href="/web/login"]',
@@ -344,10 +323,7 @@
         content: "Proceed to checkout",
         trigger: 'a[href*="/shop/checkout"]',
     },
-    {
-        content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
-    },
+    clickOnNext,
     {
         content: "Check selected billing address is same as typed in previous step",
         trigger: '#shipping_and_billing:contains(SO1 Billing Street Edited, 33):contains(SO1BillingCityEdited):contains(Afghanistan)',

@@ -2,6 +2,12 @@
 
 import wTourUtils from '@website/js/tours/tour_utils';
 
+const checkIcon = {
+    content: "Check if the icon remains the same",
+    trigger: 'iframe .s_process_steps .fa-unlock-alt',
+    isCheck: true
+};
+
 wTourUtils.registerWebsitePreviewTour("website_media_dialog_undraw", {
     test: true,
     url: '/',
@@ -38,11 +44,7 @@ wTourUtils.registerWebsitePreviewTour('website_media_dialog_icons', {
         content: "Pick the same icon",
         trigger: '.o_select_media_dialog .o_we_attachment_selected.fa-unlock-alt',
     },
-    {
-        content: "Check if the icon remains the same",
-        trigger: 'iframe .s_process_steps .fa-unlock-alt',
-        isCheck: true
-    },
+    checkIcon,
     {
         content: "Open MediaDialog again",
         trigger: 'iframe .s_process_steps .fa-unlock-alt',
@@ -52,11 +54,7 @@ wTourUtils.registerWebsitePreviewTour('website_media_dialog_icons', {
         content: "Click on the ADD button",
         trigger: '.o_select_media_dialog .btn:contains(Add)',
     },
-    {
-        content: "Check if the icon remains the same",
-        trigger: 'iframe .s_process_steps .fa-unlock-alt',
-        isCheck: true,
-    },
+    checkIcon,
     ...wTourUtils.clickOnSave()
 ]);
 

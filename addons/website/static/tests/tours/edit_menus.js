@@ -2,16 +2,28 @@
 
 import wTourUtils from '@website/js/tours/tour_utils';
 
+const openSiteMenu = {
+    content: "open site menu",
+    trigger: 'button[data-menu-xmlid="website.menu_site"]',
+}
+const changeLabel = function(idx, newLabel) {
+    return [{
+        content: "Change the label",
+        trigger: `.modal-dialog .o_website_dialog input:eq(${idx})`,
+        run: `text ${newLabel}`,
+    },
+    {
+        content: "Confirm the new label",
+        trigger: '.modal-footer .btn-primary',
+    }];
+}
+
 wTourUtils.registerWebsitePreviewTour('edit_menus', {
     test: true,
     url: '/',
 }, () => [
     // Add a megamenu item from the menu.
-    {
-        content: "open site menu",
-        extra_trigger: "iframe #wrapwrap",
-        trigger: 'button[data-menu-xmlid="website.menu_site"]',
-    },
+    openSiteMenu,
     {
         content: "Click on Edit Menu",
         trigger: 'a[data-menu-xmlid="website.menu_edit_menu"]',
@@ -98,15 +110,7 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
         content: "Click on Edit Link",
         trigger: 'iframe .o_edit_menu_popover a.o_we_edit_link',
     },
-    {
-        content: "Change the label",
-        trigger: '.modal-dialog .o_website_dialog input:eq(0)',
-        run: 'text Modnar',
-    },
-    {
-        content: "Confirm the new label",
-        trigger: '.modal-footer .btn-primary',
-    },
+    ...changeLabel(0, 'Modnar'),
     ...wTourUtils.clickOnSave(),
     wTourUtils.clickOnExtraMenuItem({extra_trigger: 'iframe body:not(.editor_enable)'}, true),
     {
@@ -133,15 +137,7 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
             liEl.querySelector('button.js_edit_menu').click();
         },
     },
-    {
-        content: "Change the label",
-        trigger: '.modal-dialog .o_website_dialog input:eq(0)',
-        run: 'text Modnar !!',
-    },
-    {
-        content: "Confirm the new menu label",
-        trigger: '.modal-footer .btn-primary',
-    },
+    ...changeLabel(0, 'Modnar !!'),
     {
         content: "Save the website menu with the new menu label",
         trigger: '.modal-footer .btn-primary',
@@ -157,10 +153,7 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
         run: () => {}, // It's a check.
     },
     // Nest menu item from the menu.
-    {
-        content: "open site menu",
-        trigger: 'button[data-menu-xmlid="website.menu_site"]',
-    },
+    openSiteMenu,
     {
         content: "Click on Edit Menu",
         trigger: 'a[data-menu-xmlid="website.menu_edit_menu"]',

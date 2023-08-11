@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { registry } from "@web/core/registry";
+import wTourUtils from '@website/js/tours/tour_utils';
 
 const testUrl = '/test_client_action_redirect';
 
@@ -31,14 +32,9 @@ const checkEditorSteps = [{
     trigger: 'iframe body.editor_enable',
     timeout: 30000,
     run: () => null, // it's a check
-}, {
-    content: "exit edit mode",
-    trigger: '.o_we_website_top_actions button.btn-primary:contains("Save")',
-}, {
-    content: "wait for editor to close",
-    trigger: 'iframe body:not(.editor_enable)',
-    run: () => null, // It's a check
-}];
+},
+    ...wTourUtils.exitEditModeAndWaitForClose()
+];
 
 registry.category("web_tour.tours").add('client_action_redirect', {
     test: true,

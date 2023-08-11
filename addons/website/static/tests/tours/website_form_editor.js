@@ -124,6 +124,30 @@
         return addField(name, type, label, required, false, display);
     };
 
+    const changeLabel = function(labels) {
+        return [
+            {
+                content: "Change Option 1 label",
+                trigger: 'we-list table input:eq(0)',
+                run: `text ${labels[0]}`,
+            }, {
+                content: "Change Option 2 label",
+                trigger: 'we-list table input:eq(1)',
+                run: `text ${labels[1]}`
+            }, {
+                content: "Change first Option 3 label",
+                trigger: 'we-list table input:eq(2)',
+                run: `text ${labels[2]}`
+            },
+            wTourUtils.clickOnElement('Add new Checkbox', 'we-list we-button.o_we_list_add_optional'),
+            {
+                content: "Change last Option label",
+                trigger: 'we-list table input:eq(3)',
+                run: `text ${labels[3]}`
+            },
+        ];
+    };
+
     wTourUtils.registerWebsitePreviewTour("website_form_editor_tour", {
         url: '/',
         edition: true,
@@ -191,26 +215,9 @@
         ...addExistingField('recipient_ids', 'checkbox'),
 
         ...addCustomField('one2many', 'checkbox', 'Products', true),
+
+        ...changeLabel(['Iphone', 'Galaxy S', 'Xperia', 'Wiko Stairway']),
         {
-            content: "Change Option 1 label",
-            trigger: 'we-list table input:eq(0)',
-            run: 'text Iphone',
-        }, {
-            content: "Change Option 2 label",
-            trigger: 'we-list table input:eq(1)',
-            run: 'text Galaxy S',
-        }, {
-            content: "Change first Option 3 label",
-            trigger: 'we-list table input:eq(2)',
-            run: 'text Xperia',
-        }, {
-            content: "Click on Add new Checkbox",
-            trigger: 'we-list we-button.o_we_list_add_optional',
-        }, {
-            content: "Change added Option label",
-            trigger: 'we-list table input:eq(3)',
-            run: 'text Wiko Stairway',
-        }, {
             content: "Check the resulting field",
             trigger: "iframe .s_website_form_field.s_website_form_custom.s_website_form_required" +
                         ":has(.s_website_form_multiple[data-display='horizontal'])" +
@@ -233,29 +240,9 @@
         },
 
         ...addCustomField('selection', 'radio', 'Service', true),
+
+        ...changeLabel(['After-sales Service', 'Invoicing Service', 'Development Service', 'Management Service']),
         {
-            content: "Change Option 1 label",
-            trigger: 'we-list table input:eq(0)',
-            run: 'text After-sales Service',
-        }, {
-            content: "Change Option 2 label",
-            trigger: 'we-list table input:eq(1)',
-            run: 'text Invoicing Service',
-        }, {
-            content: "Change first Option 3 label",
-            trigger: 'we-list table input:eq(2)',
-            run: 'text Development Service',
-        }, {
-            content: "Click on Add new Checkbox",
-            trigger: 'we-list we-button.o_we_list_add_optional',
-        }, {
-            content: "Change last Option label",
-            trigger: 'we-list table input:eq(3)',
-            run: 'text Management Service',
-        }, {
-            content: "Mark the field as not required",
-            trigger: 'we-button[data-name="required_opt"] we-checkbox',
-        }, {
             content: "Check the resulting field",
             trigger: "iframe .s_website_form_field.s_website_form_custom:not(.s_website_form_required)" +
                         ":has(.radio:has(label:contains('After-sales Service')):has(input[type='radio']:not([required])))" +
@@ -268,26 +255,8 @@
         ...addCustomField('many2one', 'select', 'State', true),
 
         // Customize custom selection field
+        ...changeLabel(['Germany', 'Belgium', 'France', 'Canada']),
         {
-            content: "Change Option 1 Label",
-            trigger: 'we-list table input:eq(0)',
-            run: 'text Germany',
-        }, {
-            content: "Change Option 2 Label",
-            trigger: 'we-list table input:eq(1)',
-            run: 'text Belgium',
-        }, {
-            content: "Change first Option 3 label",
-            trigger: 'we-list table input:eq(2)',
-            run: 'text France',
-        }, {
-            content: "Click on Add new Checkbox",
-            trigger: 'we-list we-button.o_we_list_add_optional',
-        }, {
-            content: "Change last Option label",
-            trigger: 'we-list table input:eq(3)',
-            run: 'text Canada',
-        }, {
             content: "Remove Germany Option",
             trigger: '.o_we_select_remove_option:eq(0)',
         }, {

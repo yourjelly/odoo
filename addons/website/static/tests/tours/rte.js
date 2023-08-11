@@ -13,10 +13,9 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     test: true,
     url: '/',
     wait_for: ready,
-}, () => [{
-    content: "click language dropdown",
-    trigger: 'iframe .js_language_selector .dropdown-toggle',
-}, {
+}, () => [
+    wTourUtils.selectLanguageDropdown(),
+{
     content: "click on Add a language",
     trigger: 'iframe a.o_add_language',
 }, {
@@ -30,11 +29,9 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     content: "load Parseltongue",
     trigger: '.modal-footer .btn-primary',
     extra_trigger: '.modal-dialog div[name="lang_ids"] .rounded-pill .o_tag_badge_text:contains(Parseltongue)',
-}, {
-    content: "click language dropdown (2)",
-    trigger: 'iframe .js_language_selector .dropdown-toggle',
-    timeout: 60000,
-}, {
+},
+wTourUtils.selectLanguageDropdown({timeout: 60000}),
+{
     content: "go to english version",
     trigger: 'iframe .js_language_selector a[data-url_code="en"]',
     extra_trigger: 'iframe html[lang*="pa-GB"]',
@@ -91,6 +88,7 @@ wTourUtils.dragNDrop({
     }
 },
 ...wTourUtils.clickOnSave(),
+wTourUtils.selectLanguageDropdown({extra_trigger: 'iframe body:not(.editor_enable)'}),
 {
     content: "click language dropdown (3)",
     trigger: 'iframe .js_language_selector .dropdown-toggle',
@@ -207,11 +205,8 @@ wTourUtils.dragNDrop({
 //     trigger: '.oe-toolbar #underline',
 },
 ...wTourUtils.clickOnSave(),
+wTourUtils.selectLanguageDropdown({extra_trigger: 'iframe body:not(.editor_enable)'}),
 {
-    content: "click language dropdown (4)",
-    trigger: 'iframe .js_language_selector .dropdown-toggle',
-    extra_trigger: 'iframe body:not(.editor_enable)',
-}, {
     content: "return in Parseltongue",
     trigger: 'iframe html[lang="en-US"] .js_language_selector .js_change_lang[data-url_code="pa_GB"]',
 }, {
@@ -221,13 +216,9 @@ wTourUtils.dragNDrop({
 }, {
     content: "check bis: placeholder translation",
     trigger: 'iframe input[placeholder="test Parseltongue placeholder"]',
-}, {
-    content: "open site menu",
-    trigger: 'button[data-menu-xmlid="website.menu_site"]',
-}, {
-    content: "Open HTML editor",
-    trigger: 'a[data-menu-xmlid="website.menu_ace_editor"]',
-}, {
+},
+...wTourUtils.openSiteMenuAndHtmlEditor(),
+{
     content: "Check that the editor is not showing translated content (1)",
     trigger: '.ace_text-layer .ace_line:contains("an HTML")',
     run: function (actions) {
