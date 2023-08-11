@@ -533,10 +533,6 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     mobile: false,
     trigger: ".ui-menu-item > a:contains('the_flow.product')",
 }, {
-    mobile: false,
-    trigger: "td[name='name'][data-tooltip*='the_flow.product']",
-    run: () => {}, // check
-}, {
     mobile: true,
     trigger: ".o_field_widget[name=product_id] input",
     extra_trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Order Lines')",
@@ -563,17 +559,12 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
      */
     mobile: false,
     trigger: ".o_field_widget[name=product_id] input, .o_field_widget[name=product_template_id] input",
-    extra_trigger: '.o_field_widget[name=order_line] .o_data_row:nth(1).o_selected_row',
     content: _t("Select a product"),
     position: "right",
     run: "text the_flow.service",
 }, {
     mobile: false,
     trigger: ".ui-menu-item > a:contains('the_flow.service')",
-}, {
-    mobile: false,
-    trigger: "td[name='name'][data-tooltip*='the_flow.service']",
-    run: () => {}, // check
 }, {
     mobile: false,
     trigger: 'label:contains("Untaxed Amount")',
