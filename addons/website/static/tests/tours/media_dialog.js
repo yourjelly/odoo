@@ -41,7 +41,7 @@ wTourUtils.registerWebsitePreviewTour('website_media_dialog_icons', {
     {
         content: "Check if the icon remains the same",
         trigger: 'iframe .s_process_steps .fa-unlock-alt',
-        run: () => null, // it's a check
+        isCheck: true
     },
     {
         content: "Open MediaDialog again",
@@ -55,7 +55,7 @@ wTourUtils.registerWebsitePreviewTour('website_media_dialog_icons', {
     {
         content: "Check if the icon remains the same",
         trigger: 'iframe .s_process_steps .fa-unlock-alt',
-        run: () => null, // it's a check
+        isCheck: true,
     },
     ...wTourUtils.clickOnSave()
 ]);

@@ -95,11 +95,10 @@ registry.category("web_tour.tours").add("snippets_all_drag_and_drop", {
     // This first step is needed as it will be used later for inner snippets
     // Without this, it will dropped inside the footer and will need an extra
     // selector.
-    {
-        content: "Drop s_text_image snippet",
-        trigger: "#oe_snippets .oe_snippet:has( > [data-snippet='s_text_image']) .oe_snippet_thumbnail",
-        run: "drag_and_drop iframe #wrap"
-    },
+    websiteTourUtils.dragNDrop({
+        id: "s_text_image",
+        name: "Text - Image"
+    }),
     {
         content: "Edit s_text_image snippet",
         trigger: "iframe #wrap.o_editable [data-snippet='s_text_image']"

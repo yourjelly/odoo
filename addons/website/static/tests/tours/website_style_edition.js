@@ -15,10 +15,9 @@ wTourUtils.registerWebsitePreviewTour("website_style_edition", {
     test: true,
     url: '/',
     edition: true,
-}, () => [{
-    content: "Go to theme options",
-    trigger: '.o_we_customize_theme_btn',
-}, {
+}, () => [
+    wTourUtils.goToTheme(),
+{
     content: "Change font size",
     trigger: '[data-variable="font-size-base"] input',
     run: `text_blur ${TARGET_FONT_SIZE}`,
@@ -33,7 +32,7 @@ wTourUtils.registerWebsitePreviewTour("website_style_edition", {
 ...wTourUtils.clickOnSave(),
 {
     content: "Check the font size is still ok outside of edit mode",
-    trigger: 'iframe body:not(.editor_enable) #wrapwrap',
+    trigger: 'iframe body #wrapwrap',
     run: checkFontSize,
 },
 ...wTourUtils.clickOnEditAndWaitEditMode(),

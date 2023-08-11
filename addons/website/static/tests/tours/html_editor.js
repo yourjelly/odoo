@@ -111,7 +111,7 @@ wTourUtils.registerWebsitePreviewTour('test_html_editor_scss', {
             extra_trigger: `div.ace_line:contains("${adminCssModif}")`,
             trigger: ".o_ace_view_editor button[data-action=save]",
         },
-         {
+        {
             content: "check that the scss modification got applied",
             trigger: 'iframe body:has(#wrap:hidden)',
             run: function () {}, // it's a check

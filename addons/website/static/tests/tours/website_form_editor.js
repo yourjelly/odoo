@@ -380,13 +380,9 @@
             trigger: 'we-input[data-attribute-name="value"] input',
             run: "text prefilled",
         },
-        {
-            content: "Save the page",
-            trigger: "button[data-action=save]",
-        },
+        ...wTourUtils.clickOnSave(),
         {
             content: 'Verify value attribute and property',
-            extra_trigger: 'iframe body:not(.editor_enable)',
             trigger: 'iframe .s_website_form_field:eq(0) input[value="John Smith"]:propValue("Mitchell Admin")',
         },
         {
@@ -419,16 +415,11 @@
         ...selectButtonByText(CONDITIONALVISIBILITY),
         ...selectButtonByData('data-set-visibility-dependency="field C"'),
         ...selectButtonByData('data-select-data-attribute="set"'),
-        {
-            content: 'Save the page',
-            trigger: 'button[data-action=save]',
-            run: 'click',
-        },
+        ...wTourUtils.clickOnSave(),
 
         // Check that the resulting form behavior is correct.
         {
             content: 'Verify that the value has not been deleted',
-            extra_trigger: 'iframe body:not(.editor_enable)',
             trigger: 'iframe .s_website_form_field:eq(0) input[value="John Smith"]',
         }, {
             content: "Check that fields A and B are not visible and that field B's prefill text is still set",

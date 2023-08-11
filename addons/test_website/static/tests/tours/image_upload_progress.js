@@ -44,18 +44,15 @@ const setupSteps = [{
     run: () => {
         unpatchMediaDialog = patchMediaDialog();
     },
-}, {
-    content: "drop a snippet",
-    trigger: "#oe_snippets .oe_snippet[name='Text - Image'] .oe_snippet_thumbnail:not(.o_we_already_dragging)",
-    moveTrigger: "iframe .oe_drop_zone",
-    run: "drag_and_drop iframe #wrap",
-}, {
-    content: "drop a snippet",
-    trigger: "#oe_snippets .oe_snippet[name='Image Gallery'] .oe_snippet_thumbnail:not(.o_we_already_dragging)",
-    extra_trigger: "body.editor_has_snippets",
-    moveTrigger: ".oe_drop_zone",
-    run: "drag_and_drop iframe #wrap",
-}];
+}, wTourUtils.dragNDrop({
+        name: 'Text - Image',
+        id: 's_text_image'
+    }),
+    wTourUtils.dragNDrop({
+        name: 'Image Gallery',
+        id: 's_image_gallery'
+    })
+];
 
 const formatErrorMsg = "format is not supported. Try with: .gif, .jpe, .jpeg, .jpg, .png, .svg, .webp";
 
