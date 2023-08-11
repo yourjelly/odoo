@@ -3,7 +3,7 @@
 import concurrency from '@web/legacy/js/core/concurrency';
 import publicWidget from '@web/legacy/js/public/public_widget';
 
-import { renderToElement, renderToString } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { Markup } from '@web/legacy/js/core/utils';
 import { debounce } from '@web/core/utils/timing';
 
@@ -147,10 +147,10 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
             const results = res['results'];
             let template = 'website.s_searchbar.autocomplete';
             const candidate = template + '.' + this.searchType;
-            if (candidate in renderToString.app.rawTemplates) {
+            if (candidate in render.app.rawTemplates) {
                 template = candidate;
             }
-            this.$menu = $(renderToElement(template, {
+            this.$menu = $(render(template, {
                 results: results,
                 parts: res['parts'],
                 hasMoreResults: results.length < res['results_count'],

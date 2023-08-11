@@ -2,7 +2,7 @@
 
 import { uniqueId } from "@web/core/utils/functions";
 import publicWidget from "@web/legacy/js/public/public_widget";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 
 const GalleryWidget = publicWidget.Widget.extend({
@@ -44,7 +44,7 @@ const GalleryWidget = publicWidget.Widget.extend({
         var $img = ($cur.is('img') === true) ? $cur : $cur.closest('img');
 
         const milliseconds = $cur.closest('.s_image_gallery').data('interval') || false;
-        this.$modal = $(renderToElement('website.gallery.slideshow.lightbox', {
+        this.$modal = $(render('website.gallery.slideshow.lightbox', {
             images: $images.get(),
             index: $images.index($img),
             dim: dimensions,

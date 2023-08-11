@@ -11,7 +11,7 @@ import { Markup } from "@web/legacy/js/core/utils";
 import Dialog from "@web/legacy/js/core/dialog";
 import "@website/js/editor/snippets.options";
 import { patch } from "@web/core/utils/patch";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 const { onRendered } = owl;
 patch(WysiwygAdapterComponent.prototype, {
@@ -500,7 +500,7 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
                 .split(' ')
                 .filter(className => !/^o_(ribbon|tag)_(left|right)$/.test(className))
                 .join(' ');
-            $select.append(renderToElement('website_sale.ribbonSelectItem', {
+            $select.append(render('website_sale.ribbonSelectItem', {
                 ribbon,
                 colorClasses,
                 isTag: /o_tag_(left|right)/.test(ribbon.html_class),

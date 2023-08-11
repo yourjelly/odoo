@@ -2,42 +2,24 @@
 
 import { blockDom, markup } from "@odoo/owl";
 
-export function renderToElement(template, context = {}) {
-    const el = render(template, context).firstElementChild;
-    el?.remove();
-    return el;
-}
-
-export function renderToFragment(template, context = {}) {
-    console.log("rtf " + template);
-    const frag = document.createDocumentFragment();
-    for (const el of [...render(template, context).children]) {
-        frag.appendChild(el);
-    }
-    return frag;
-}
-
 /**
- * renders a template with an (optional) context and outputs it as a string
+ * renders a template with an (optional) context and outputs it as a fragment
  *
  * @param {string} template
  * @param {Object} context
- * @returns string: the html of the template
+ * @returns fragment: the fragment with the elements of the template
  */
-export function renderToString(template, context = {}) {
-    return render(template, context).innerHTML;
-}
 
-function render(template, context = {}) {
-    const app = renderToString.app;
+export function render(template, context = {}) {
+    const app = render.app;
     if (!app) {
-        throw new Error("an app must be configured before using renderToString");
+        throw new Error("an app must be configured before using render");
     }
     const templateFn = app.getTemplate(template);
     const bdom = templateFn(context, {});
-    const div = document.createElement("div");
-    blockDom.mount(bdom, div);
-    return div;
+    const frag = document.createDocumentFragment();
+    blockDom.mount(bdom, frag);
+    return frag;
 }
 
 /**
@@ -49,5 +31,7 @@ function render(template, context = {}) {
  * @returns string: the html of the template, as a markup string
  */
 export function renderToMarkup(template, context = {}) {
-    return markup(renderToString(template, context));
+    const t = document.createElement("template");
+    t.content.append(render(template, context));
+    return markup(t.innerHTML);
 }

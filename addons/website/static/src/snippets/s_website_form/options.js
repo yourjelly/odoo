@@ -9,7 +9,7 @@ import "@website/js/editor/snippets.options";
 import { sprintf } from "@web/core/utils/strings";
 import { unique } from "@web/core/utils/arrays";
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 let currentActionName;
 
@@ -183,7 +183,7 @@ const FormEditor = options.Class.extend({
             }
         }
         const template = document.createElement('template');
-        template.content.append(renderToElement("website.form_field_" + field.type, params));
+        template.content.append(render("website.form_field_" + field.type, params));
         if (field.description && field.description !== true) {
             $(template.content.querySelector('.s_website_form_field_description')).replaceWith(field.description);
         }
@@ -555,7 +555,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
         this.$target[0].dataset.successMode = value;
         if (value === 'message') {
             if (!this.$message.length) {
-                this.$message = $(renderToElement('website.s_website_form_end_message'));
+                this.$message = $(render('website.s_website_form_end_message'));
             }
             this.$target.after(this.$message);
         } else {
@@ -598,7 +598,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             recaptchaLegalEl.remove();
         } else {
             const labelWidth = this.$target[0].querySelector('.s_website_form_label').style.width;
-            const legal = renderToElement("website.s_website_form_recaptcha_legal", {
+            const legal = render("website.s_website_form_recaptcha_legal", {
                 labelWidth: labelWidth,
             });
             legal.setAttribute('contentEditable', true);
@@ -691,7 +691,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
     _addHiddenField: function (value, fieldName) {
         this.$target.find(`.s_website_form_dnone:has(input[name="${fieldName}"])`).remove();
         if (value) {
-            const hiddenField = renderToElement('website.form_field_hidden', {
+            const hiddenField = render('website.form_field_hidden', {
                 field: {
                     name: fieldName,
                     value: value,

@@ -24,7 +24,7 @@ import {
 } from "@odoo/owl";
 import { LinkTools } from '@web_editor/js/wysiwyg/widgets/link_tools';
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 let cacheSnippetTemplate = {};
 
@@ -706,9 +706,9 @@ var SnippetEditor = Widget.extend({
             $element = $element.parent();
         }
 
-        var $optionsSection = $(renderToElement('web_editor.customize_block_options_section', {
+        var $optionsSection = $(render('web_editor.customize_block_options_section', {
             name: this.getName(),
-        })).data('editor', this);
+        })).firstElementChild.data('editor', this);
         const $optionsSectionBtnGroup = $optionsSection.find('we-top-button-group');
         $optionsSectionBtnGroup.contents().each((i, node) => {
             if (node.nodeType === Node.TEXT_NODE) {
@@ -4329,7 +4329,7 @@ var SnippetsMenu = Widget.extend({
         $(this.customizePanel).append(this._$toolbarContainer);
 
         // Create table-options custom container.
-        const customizeTableBlock = renderToElement('web_editor.toolbar.table-options');
+        const customizeTableBlock = render('web_editor.toolbar.table-options');
         this.options.wysiwyg.odooEditor.bindExecCommand(customizeTableBlock);
         $(this.customizePanel).append(customizeTableBlock);
         $title.append(this._toolbarWrapperEl.querySelector('#removeFormat'));

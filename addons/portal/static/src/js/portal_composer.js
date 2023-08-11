@@ -4,7 +4,7 @@ import { escape, sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 import ajax from "@web/legacy/js/core/ajax";
 import core from "@web/legacy/js/services/core";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import publicWidget from "@web/legacy/js/public/public_widget";
 
 /**
@@ -183,7 +183,7 @@ var PortalComposer = publicWidget.Widget.extend({
      * @private
      */
     _updateAttachments: function () {
-        this.$attachments.empty().append(renderToElement('portal.Chatter.Attachments', {
+        this.$attachments.empty().append(render('portal.Chatter.Attachments', {
             attachments: this.attachments,
             showDelete: true,
         }));

@@ -5,7 +5,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useService, useAutofocus } from "@web/core/utils/hooks";
 import { pick } from "@web/core/utils/objects";
-import { renderToString } from "@web/core/utils/render";
+import { renderToMarkup } from "@web/core/utils/render";
 import { getDataURLFromFile } from "@web/core/utils/urls";
 
 import { Component, useState, onWillStart, useRef, useEffect } from "@odoo/owl";
@@ -116,14 +116,14 @@ export class NameAndSignature extends Component {
      * @returns {string} image = mimetype + image data
      */
     getSVGText(font, text, width, height) {
-        const svg = renderToString("web.sign_svg_text", {
+        const svg = renderToMarkup("web.sign_svg_text", {
             width: width,
             height: height,
             font: font,
             text: text,
             type: this.props.signatureType,
             color: this.props.fontColor,
-        });
+        }).toString();
 
         return "data:image/svg+xml," + encodeURI(svg);
     }

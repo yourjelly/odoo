@@ -2,17 +2,17 @@
 
 import { AttendeeCalendarCommonRenderer } from "@calendar/views/attendee_calendar/common/attendee_calendar_common_renderer"
 import { patch } from "@web/core/utils/patch";
-import { renderToString } from "@web/core/utils/render";
+import { render, renderToMarkup } from "@web/core/utils/render";
 
 patch(AttendeeCalendarCommonRenderer.prototype, {
     get options(){
         let a = Object.assign(super.options, {
             columnHeaderHtml: function(date) {
                 if (this.props.model.scale === 'week'){
-                      return "<div>" + moment(date).format("ddd DD") +"</div>" + renderToString(this.constructor.HeaderCalendarTemplate, {date: date, today : new Date()});
+                      return "<div>" + moment(date).format("ddd DD") +"</div>" + renderToMarkup(this.constructor.HeaderCalendarTemplate, {date: date, today : new Date()}).toString();
                 }
                 if (this.props.model.scale === 'day'){
-                    return "<div>" + moment(date).format("MMMM DD, YYYY") + "</div>" + renderToString(this.constructor.HeaderCalendarTemplate, {date: date, today : new Date()});
+                    return "<div>" + moment(date).format("MMMM DD, YYYY") + "</div>" + renderToMarkup(this.constructor.HeaderCalendarTemplate, {date: date, today : new Date()}).toString();
                 }
                 return "<div>" + moment(date).format("dddd") + "</div>";
               }
@@ -111,9 +111,8 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
             let box = info.view.el.querySelector(".fc-day-top[data-date='" + ParseDate(info.date) + "']")
             if (!box)
                 return;
-            const content = renderToString(this.constructor.ButtonWorklocationTemplate, {})
-            const {children } = new DOMParser().parseFromString(content, "text/html").body
-            box.appendChild(...children)
+            const content = render(this.constructor.ButtonWorklocationTemplate, {});
+            box.appendChild(content);
         }
         super.onDayRender(...arguments);
     },
@@ -122,7 +121,7 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
         if (event.extendedProps.worklocation) {
             el.classList.add("o_homework_event");
             const multiCalendar = this.props.model.multiCalendar;
-            let injectedContentStr = "";
+            let injectedContent = document.createDocumentFragment();
             const icon = event.extendedProps.icon;
             if (multiCalendar) {
                 const records = this.props.model.worklocations[info.event.start][icon].filter((rec) => rec.title === event.title);
@@ -138,17 +137,15 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
                 }
                 if (records) {
                     const obj = {records: records, iconStr: iconStr, multiCalendar: multiCalendar};
-                    injectedContentStr = renderToString(this.constructor.WorklocationTemplate, obj);
+                    injectedContent = render(this.constructor.WorklocationTemplate, obj);
                 }
             } else {
                 const record = this.props.model.worklocations[info.event.id];
                 if (record) {
-                    injectedContentStr = renderToString(this.constructor.WorklocationTemplate, {...record});
+                    injectedContent = render(this.constructor.WorklocationTemplate, {...record});
                 }
             }
-            const domParser = new DOMParser();
-            const { children } = domParser.parseFromString(injectedContentStr, "text/html").body;
-            el.querySelector(".fc-content").replaceWith(...children);
+            el.querySelector(".fc-content").replaceWith(injectedContent);
         } else {
             super.onEventRender(...arguments);
         }

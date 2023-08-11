@@ -7,7 +7,7 @@ import { App, mount, reactive, whenReady, Component } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { hasTouch } from "@web/core/browser/feature_detection";
 import { localization } from "@web/core/l10n/localization";
-import { renderToString } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { makeEnv, startServices } from "@web/env";
 import { session } from "@web/session";
 
@@ -28,16 +28,16 @@ whenReady(() => {
 
     // Wait for all templates
     await odoo.ready(/\.bundle\.xml/);
-    // Make a temporary app to be able to use renderToString method before the main app is available.
-    const renderToStringApp = new App(Component, {
-        name: "renderToString app",
+    // Make a temporary app to be able to use render method before the main app is available.
+    const renderApp = new App(Component, {
+        name: "render app",
         templates,
         dev: !!odoo.debug,
         warnIfNoStaticProps: true,
         translatableAttributes: ["data-tooltip"],
         translateFn: _t,
     });
-    renderToString.app = renderToStringApp;
+    render.app = renderApp;
 
     // setup environment
     const env = makeEnv();
@@ -54,7 +54,7 @@ whenReady(() => {
         translateFn: _t,
         props: { disableLoader: () => (loader.isShown = false) },
     });
-    renderToString.app = app;
+    render.app = app;
     setLoadXmlDefaultApp(app);
     const root = await app.mount(document.body);
     const classList = document.body.classList;

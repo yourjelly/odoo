@@ -2,7 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { parseFloat, InvalidNumberError } from "@web/views/fields/parsers";
 import { useState } from "@odoo/owl";
@@ -74,7 +74,7 @@ export class CashMovePopup extends AbstractAwaitablePopup {
         );
 
         if (this.hardwareProxy.printer) {
-            const renderedReceipt = renderToElement("point_of_sale.CashMoveReceipt", {
+            const renderedReceipt = render("point_of_sale.CashMoveReceipt", {
                 _receipt: {
                     type,
                     reason,
@@ -118,6 +118,8 @@ export class CashMovePopup extends AbstractAwaitablePopup {
         this.amountInput.el.focus();
     }
     format(value) {
-        return this.env.utils.isValidFloat(value) ? this.env.utils.formatCurrency(parseFloat(value)) : "!!!";
+        return this.env.utils.isValidFloat(value)
+            ? this.env.utils.formatCurrency(parseFloat(value))
+            : "!!!";
     }
 }

@@ -2,7 +2,7 @@
 
 import publicWidget from '@web/legacy/js/public/public_widget';
 import session from 'web.session';
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 /**
  * Global widget for both fullscreen view and non-fullscreen view of a slide course.
@@ -60,7 +60,7 @@ export const SlideCoursePage = publicWidget.Widget.extend({
             return;
         }
 
-        const newButton = renderToElement('website.slides.sidebar.done.button', {
+        const newButton = render('website.slides.sidebar.done.button', {
             slideId: slide.id,
             uncompletedIcon: $button.data('uncompletedIcon') ?? 'fa-circle-thin',
             slideCompleted: completed,

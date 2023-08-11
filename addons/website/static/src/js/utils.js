@@ -2,7 +2,7 @@
 
 import { intersection } from "@web/core/utils/arrays";
 import { csrf_token, _t } from "@web/legacy/js/services/core";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 
 /**
@@ -193,7 +193,7 @@ function prompt(options, _qweb) {
     options.field_name = options.field_name || options[type];
 
     var def = new Promise(function (resolve, reject) {
-        var dialog = $(renderToElement(_qweb, options)).appendTo('body');
+        var dialog = $(render(_qweb, options)).appendTo('body');
         options.$dialog = dialog;
         var field = dialog.find(options.field_type).first();
         field.val(options['default']); // dict notation for IE<9

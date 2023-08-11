@@ -5,7 +5,7 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useService } from "@web/core/utils/hooks";
-import { renderToString } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { useSortable } from "@web/core/utils/sortable";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { BoardAction } from "./board_action";
@@ -110,7 +110,7 @@ export class BoardController extends Component {
     }
 
     saveBoard() {
-        const templateFn = renderToString.app.getTemplate("board.arch");
+        const templateFn = render.app.getTemplate("board.arch");
         const bdom = templateFn(this.board, {});
         const root = document.createElement("rendertostring");
         blockDom.mount(bdom, root);

@@ -19,7 +19,7 @@ import { CashOpeningPopup } from "@point_of_sale/app/store/cash_opening_popup/ca
 import { sprintf } from "@web/core/utils/strings";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
-import { renderToString } from "@web/core/utils/render";
+import { renderToMarkup } from "@web/core/utils/render";
 import { batched } from "@web/core/utils/timing";
 
 /* Returns an array containing all elements of the given
@@ -957,17 +957,17 @@ export class PosStore extends Reactive {
         return this.orders;
     }
 
-    computePriceAfterFp(price, taxes){
+    computePriceAfterFp(price, taxes) {
         const order = this.get_order();
-        if(order && order.fiscal_position) {
-            let mapped_included_taxes = [];
+        if (order && order.fiscal_position) {
+            const mapped_included_taxes = [];
             let new_included_taxes = [];
-            taxes.forEach(tax => {
+            taxes.forEach((tax) => {
                 const line_taxes = this.get_taxes_after_fp([tax.id], order.fiscal_position);
-                if (line_taxes.length && line_taxes[0].price_include){
+                if (line_taxes.length && line_taxes[0].price_include) {
                     new_included_taxes = new_included_taxes.concat(line_taxes);
                 }
-                if(tax.price_include && !line_taxes.includes(tax)){
+                if (tax.price_include && !line_taxes.includes(tax)) {
                     mapped_included_taxes.push(tax);
                 }
             });
@@ -980,16 +980,15 @@ export class PosStore extends Reactive {
                         1,
                         this.currency.rounding,
                         true
-                    ).total_excluded
+                    ).total_excluded;
                     return this.compute_all(
                         new_included_taxes,
                         price_without_taxes,
                         1,
                         this.currency.rounding,
                         false
-                    ).total_included
-                }
-                else{
+                    ).total_included;
+                } else {
                     return this.compute_all(
                         mapped_included_taxes,
                         price,
@@ -1004,7 +1003,7 @@ export class PosStore extends Reactive {
     }
 
     getTaxesByIds(taxIds) {
-        let taxes = [];
+        const taxes = [];
         for (let i = 0; i < taxIds.length; i++) {
             if (this.taxes_by_id[taxIds[i]]) {
                 taxes.push(this.taxes_by_id[taxIds[i]]);
@@ -1030,11 +1029,11 @@ export class PosStore extends Reactive {
 
         const order = this.get_order();
         if (closeUI || !order) {
-            return renderToString("point_of_sale.CustomerFacingDisplayNoOrder", {
+            return renderToMarkup("point_of_sale.CustomerFacingDisplayNoOrder", {
                 pos: this,
                 origin: window.location.origin,
                 backgroundImageCSSValue,
-            });
+            }).toString();
         }
 
         const orderLines = order.get_orderlines();
@@ -1047,14 +1046,14 @@ export class PosStore extends Reactive {
             )
         );
 
-        return renderToString("point_of_sale.CustomerFacingDisplayOrder", {
+        return renderToMarkup("point_of_sale.CustomerFacingDisplayOrder", {
             pos: this,
             formatCurrency: this.env.utils.formatCurrency,
             origin: window.location.origin,
             backgroundImageCSSValue,
             order,
             productImages,
-        });
+        }).toString();
     }
 
     push_orders(opts = {}) {

@@ -4,7 +4,7 @@ import publicWidget from "@web/legacy/js/public/public_widget";
 import weUtils from "@web_editor/js/common/utils";
 import { isCSSColor } from '@web/core/utils/colors';
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 const CountdownWidget = publicWidget.Widget.extend({
     selector: '.s_countdown',
@@ -111,7 +111,7 @@ const CountdownWidget = publicWidget.Widget.extend({
                 if (!this.$('.s_countdown_end_redirect_message').length) {
                     const $container = this.$('> .container, > .container-fluid, > .o_container_small');
                     $container.append(
-                        $(renderToElement('website.s_countdown.end_redirect_message', {
+                        $(render('website.s_countdown.end_redirect_message', {
                             redirectUrl: redirectUrl,
                         }))
                     );

@@ -3,7 +3,7 @@
 import publicWidget from '@web/legacy/js/public/public_widget';
 import { DropPrevious } from '@web/legacy/js/core/concurrency';
 import { debounce } from "@web/core/utils/timing";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 publicWidget.registry.AddressForm = publicWidget.Widget.extend({
     selector: '.oe_cart .checkout_autoformat:has(input[name="street"][data-autocomplete-enabled="1"])',
@@ -55,7 +55,7 @@ publicWidget.registry.AddressForm = publicWidget.Widget.extend({
                     }
                 })).then((response) => {
                     this._hideAutocomplete(inputContainer);
-                    inputContainer.appendChild(renderToElement("website_sale_autocomplete.AutocompleteDropDown", {
+                    inputContainer.appendChild(render("website_sale_autocomplete.AutocompleteDropDown", {
                         results: response.results
                     }));
                     if (response.session_id) {

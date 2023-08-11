@@ -3,7 +3,7 @@
 import Dialog from '@web/legacy/js/core/dialog';
 import publicWidget from '@web/legacy/js/public/public_widget';
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 var SlideUnsubscribeDialog = Dialog.extend({
     template: 'slides.course.unsubscribe.modal',
@@ -125,7 +125,7 @@ var SlideUnsubscribeDialog = Dialog.extend({
             tmpl = 'slides.course.unsubscribe.modal.leave';
         }
         this.$('.o_w_slide_unsubscribe_modal_container').empty();
-        this.$('.o_w_slide_unsubscribe_modal_container').append(renderToElement(tmpl, {widget: this}));
+        this.$('.o_w_slide_unsubscribe_modal_container').append(render(tmpl, {widget: this}));
 
         this._resetModal();
     },

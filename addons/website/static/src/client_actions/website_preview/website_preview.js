@@ -14,7 +14,7 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { sprintf } from "@web/core/utils/strings";
 import wUtils from '@website/js/utils';
 import config from "@web/legacy/js/services/config";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 const { Component, onWillStart, onMounted, onWillUnmount, useRef, useEffect, useState } = owl;
 
@@ -284,7 +284,7 @@ export class WebsitePreview extends Component {
         if (this.websiteService.isRestrictedEditor) {
             const $wrap = $(this.iframe.el.contentDocument.querySelector('#wrapwrap.homepage')).find('#wrap');
             if ($wrap.length && $wrap.html().trim() === '') {
-                this.$welcomeMessage = $(renderToElement('website.homepage_editor_welcome_message'));
+                this.$welcomeMessage = $(render('website.homepage_editor_welcome_message'));
                 this.$welcomeMessage.addClass('o_homepage_editor_welcome_message');
                 this.$welcomeMessage.css('min-height', $wrap.parent('main').height() - ($wrap.outerHeight(true) - $wrap.height()));
                 $wrap.empty().append(this.$welcomeMessage);

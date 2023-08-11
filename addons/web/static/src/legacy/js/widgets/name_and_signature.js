@@ -6,7 +6,7 @@ import Widget from "@web/legacy/js/core/widget";
 import { debounce } from "@web/core/utils/timing";
 import { uniqueId } from "@web/core/utils/functions";
 import { pick } from "@web/core/utils/objects";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 /**
  * This widget allows the user to input his name and to draw his signature.
@@ -378,7 +378,7 @@ export var NameAndSignature = Widget.extend({
      * @returns {string} image = mimetype + image data
      */
     _getSVGText: function (font, text, width, height) {
-        var $svg = $(renderToElement('web.legacy.sign_svg_text', {
+        var $svg = $(render('web.legacy.sign_svg_text', {
             width: width,
             height: height,
             font: font,

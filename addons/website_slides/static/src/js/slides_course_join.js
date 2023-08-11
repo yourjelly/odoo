@@ -2,7 +2,7 @@
 
 import { sprintf } from '@web/core/utils/strings';
 import { _t } from "@web/legacy/js/services/core";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import publicWidget from '@web/legacy/js/public/public_widget';
 
 var CourseJoinWidget = publicWidget.Widget.extend({
@@ -135,7 +135,7 @@ var CourseJoinWidget = publicWidget.Widget.extend({
                 self.afterJoin();
             } else {
                 if (data.error === 'public_user') {
-                    const popupContent = renderToElement('slide.course.join.popupContent', {
+                    const popupContent = render('slide.course.join.popupContent', {
                         channelId: channelId,
                         courseUrl: encodeURIComponent(document.URL),
                         errorSignupAllowed: data.error_signup_allowed,

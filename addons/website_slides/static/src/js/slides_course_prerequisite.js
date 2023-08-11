@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import publicWidget from '@web/legacy/js/public/public_widget';
 
 publicWidget.registry.websiteSlidesCoursePrerequisite = publicWidget.Widget.extend({
@@ -14,7 +14,7 @@ publicWidget.registry.websiteSlidesCoursePrerequisite = publicWidget.Widget.exte
             placement: 'bottom',
             container: 'body',
             html: true,
-            content: renderToElement('slide.course.prerequisite', {channels: channels}),
+            content: render('slide.course.prerequisite', {channels: channels}),
         });
     },
 });

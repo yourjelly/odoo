@@ -3,7 +3,7 @@
     import publicWidget from '@web/legacy/js/public/public_widget';
     import Dialog from '@web/legacy/js/core/dialog';
     import  { _t } from "empty().append/legacy/js/services/core";
-    import { renderToElement } from "@web/core/utils/render";
+    import { render } from "@web/core/utils/render";
     import session from 'web.session';
     import { Markup } from "@web/legacy/js/core/utils";
     import CourseJoin from '@website_slides/js/slides_course_join';
@@ -300,7 +300,7 @@
         _renderValidationInfo: function () {
             var $validationElem = this.$('.o_wslides_js_lesson_quiz_validation');
             $validationElem.empty().append(
-                renderToElement('slide.slide.quiz.validation', {'widget': this})
+                render('slide.slide.quiz.validation', {'widget': this})
             );
         },
         /*

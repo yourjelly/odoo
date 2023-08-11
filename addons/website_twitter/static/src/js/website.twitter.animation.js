@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { Markup } from "@web/legacy/js/core/utils";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { escape } from "@web/core/utils/strings";
@@ -26,7 +26,7 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
             $timeline.empty();
 
             if (data.error) {
-                $timeline.append(renderToElement('website.Twitter.Error', {data: data}));
+                $timeline.append(render('website.Twitter.Error', {data: data}));
                 return;
             }
 
@@ -65,7 +65,7 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
                         }
                     ));
 
-                return renderToElement('website.Twitter.Tweet', {tweet: tweet});
+                return render('website.Twitter.Tweet', {tweet: tweet});
 
                 function _makeLink(url, text) {
                     return Markup`<a href="${url}" target="_blank" rel="noreferrer noopener">${text}</a>`;
@@ -75,7 +75,7 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
             var f = Math.floor(tweets.length / 3);
             var tweetSlices = [tweets.slice(0, f).join(' '), tweets.slice(f, f * 2).join(' '), tweets.slice(f * 2, tweets.length).join(' ')];
 
-            self.$scroller = $(renderToElement('website.Twitter.Scroller')).appendTo($timeline);
+            self.$scroller = $(render('website.Twitter.Scroller')).appendTo($timeline);
             self.$scroller.find('div[id^="scroller"]').toArray().forEach((element, index) => {
                 var $scrollWrapper = $('<div/>', {class: 'scrollWrapper'});
                 var $scrollableArea = $('<div/>', {class: 'scrollableArea'});

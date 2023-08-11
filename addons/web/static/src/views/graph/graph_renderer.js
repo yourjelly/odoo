@@ -6,7 +6,7 @@ import { formatFloat } from "@web/views/fields/formatters";
 import { SEP } from "./graph_model";
 import { sortBy } from "@web/core/utils/arrays";
 import { loadJS } from "@web/core/assets";
-import { renderToString } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { useService } from "@web/core/utils/hooks";
 
 import { Component, onWillUnmount, useEffect, useRef, onWillStart } from "@odoo/owl";
@@ -117,14 +117,12 @@ export class GraphRenderer extends Component {
         }
         const chartAreaTop = this.chart.chartArea.top;
         const viewContentTop = this.rootRef.el.getBoundingClientRect().top;
-        const innerHTML = renderToString("web.GraphRenderer.CustomTooltip", {
+        const tooltip = render("web.GraphRenderer.CustomTooltip", {
             maxWidth: getMaxWidth(this.chart.chartArea),
             measure: measures[measure].string,
             mode: this.model.metaData.mode,
             tooltipItems: this.getTooltipItems(data, metaData, tooltipModel),
-        });
-        const template = Object.assign(document.createElement("template"), { innerHTML });
-        const tooltip = template.content.firstChild;
+        }).firstElementChild;
         this.containerRef.el.prepend(tooltip);
 
         let top;

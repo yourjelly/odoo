@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import publicWidget from "@web/legacy/js/public/public_widget";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import time from "@web/legacy/js/core/time";
 import SESSION_CHART_COLORS from "@survey/js/survey_session_colors";
 
@@ -45,7 +45,7 @@ publicWidget.registry.SurveySessionTextAnswers = publicWidget.Widget.extend({
                     textValue = moment(textValue).format(time.getLangDatetimeFormat());
                 }
 
-                var $textAnswer = $(renderToElement('survey.survey_session_text_answer', {
+                var $textAnswer = $(render('survey.survey_session_text_answer', {
                     value: textValue,
                     borderColor: `rgb(${SESSION_CHART_COLORS[self.answerIds.length % 10]})`
                 }));

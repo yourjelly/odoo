@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import Fullscreen from "@website_slides/js/slides_course_fullscreen_player";
 
 Fullscreen.include({
@@ -15,7 +15,7 @@ Fullscreen.include({
         var def = this._super.apply(this, arguments);
         var $content = this.$('.o_wslides_fs_content');
         if (this.get('slide').category === "certification"){
-            $content.empty().append(renderToElement('website.slides.fullscreen.certification',{widget: this}));
+            $content.empty().append(render('website.slides.fullscreen.certification',{widget: this}));
         }
         return Promise.all([def]);
     },

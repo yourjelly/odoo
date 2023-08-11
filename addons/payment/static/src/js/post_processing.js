@@ -2,7 +2,7 @@
 
     import publicWidget from "@web/legacy/js/public/public_widget";
     import core from "@web/legacy/js/services/core";
-    import { renderToElement } from "@web/core/utils/render";
+    import { render } from "@web/core/utils/render";
     import { Markup } from "@web/legacy/js/core/utils";
     import { _t } from "@web/core/l10n/translation";
 
@@ -124,7 +124,7 @@
         },
         displayContent: function (xmlid, render_values) {
             $.unblockUI();
-            this.$el.find('div[name="o_payment_status_content"]').empty().append(renderToElement(xmlid, render_values));
+            this.$el.find('div[name="o_payment_status_content"]').empty().append(render(xmlid, render_values));
         },
         displayLoading: function () {
             var msg = _t("We are processing your payment, please wait ...");

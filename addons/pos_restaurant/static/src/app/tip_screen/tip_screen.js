@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { parseFloat } from "@web/views/fields/parsers";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { registry } from "@web/core/registry";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
 import { ConfirmPopup } from "@point_of_sale/app/utils/confirm_popup/confirm_popup";
@@ -112,7 +112,7 @@ export class TipScreen extends Component {
 
         for (let i = 0; i < receipts.length; i++) {
             const data = receipts[i];
-            var receipt = renderToElement("pos_restaurant.TipReceipt", {
+            var receipt = render("pos_restaurant.TipReceipt", {
                 receipt: this.currentOrder.getOrderReceiptEnv().receipt,
                 data: data,
                 total: this.env.utils.formatCurrency(this.totalAmount),

@@ -2,7 +2,7 @@
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 import "@website_sale/js/website_sale_delivery";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 const WebsiteSaleDeliveryWidget = publicWidget.registry.websiteSaleDelivery;
 
@@ -52,7 +52,7 @@ WebsiteSaleDeliveryWidget.include({
      */
     _loadMondialRelayModal: function (result) {
         // add modal to body and bind 'save' button
-        $(renderToElement('website_sale_mondialrelay', {})).appendTo('body');
+        $(render('website_sale_mondialrelay', {})).appendTo('body');
         this.$modal_mondialrelay = $('#modal_mondialrelay');
         this.$modal_mondialrelay.find('#btn_confirm_relay').on('click', this._onClickBtnConfirmRelay.bind(this));
 

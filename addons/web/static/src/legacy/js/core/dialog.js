@@ -4,7 +4,7 @@ import core from "@web/legacy/js/services/core";
 import dom from "@web/legacy/js/core/dom";
 import Widget from "@web/legacy/js/core/widget";
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { uniqueId } from "@web/core/utils/functions";
 
 /**
@@ -113,7 +113,7 @@ var Dialog = Widget.extend({
         var self = this;
         return this._super.apply(this, arguments).then(function () {
             // Render modal once xml dependencies are loaded
-            self.$modal = $(renderToElement('web.DialogWidget', {
+            self.$modal = $(render('web.DialogWidget', {
                 fullscreen: self.fullscreen,
                 title: self.title,
                 subtitle: self.subtitle,
@@ -121,7 +121,7 @@ var Dialog = Widget.extend({
                 renderHeader: self.renderHeader,
                 renderFooter: self.renderFooter,
                 uniqueId: uniqueId("modal_"),
-            }));
+            }).firstElementChild);
             switch (self.size) {
                 case 'extra-large':
                     self.$modal.find('.modal-dialog').addClass('modal-xl');
@@ -386,7 +386,7 @@ var Dialog = Widget.extend({
                     $primaryButton.tooltip({
                         delay: {show: 200, hide:0},
                         title: function(){
-                            return renderToElement('FormButton.tooltip',{title:$primaryButton.text().toUpperCase()});
+                            return render('FormButton.tooltip',{title:$primaryButton.text().toUpperCase()});
                         },
                         trigger: 'manual',
                     });

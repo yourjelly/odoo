@@ -4,7 +4,7 @@
     import session from "web.session";
     import { makeTestEnvServices } from "@web/../tests/legacy/helpers/test_services";
     import { templates, setLoadXmlDefaultApp } from "@web/core/assets";
-    import { renderToString } from "@web/core/utils/render";
+    import { render } from "@web/core/utils/render";
     const { App, Component } = owl;
 
     let app;
@@ -21,7 +21,7 @@
     function makeTestEnvironment(env = {}, providedRPC = null) {
         if (!app) {
             app = new App(null, { templates, test: true });
-            renderToString.app = app;
+            render.app = app;
             setLoadXmlDefaultApp(app);
         }
 

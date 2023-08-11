@@ -5,7 +5,7 @@ import { ComponentWrapper } from "@web/legacy/js/owl_compatibility";
 import options from "@web_editor/js/editor/snippets.options";
 import wUtils from '@website/js/utils';
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 /**
  * This class provides layout methods for interacting with the ImageGallery
@@ -174,7 +174,7 @@ options.registry.GalleryLayout = options.registry.CarouselHandler.extend({
             attrClass: imageEls.length > 0 ? imageEls[0].className : '',
             attrStyle: imageEls.length > 0 ? imageEls[0].style.cssText : '',
         },
-        $slideshow = $(renderToElement('website.gallery.slideshow', params));
+        $slideshow = $(render('website.gallery.slideshow', params));
         this._replaceContent($slideshow);
         this.$("img").toArray().forEach((img, index) => {
             $(img).attr({contenteditable: true, 'data-index': index});

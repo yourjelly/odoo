@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import options from "@web_editor/js/editor/snippets.options";
 
 options.registry.countdown = options.Class.extend({
@@ -31,7 +31,7 @@ options.registry.countdown = options.Class.extend({
         this.$target[0].dataset.endAction = widgetValue;
         if (widgetValue === 'message' || widgetValue === 'message_no_countdown') {
             if (!this.$target.find('.s_countdown_end_message').length) {
-                const message = this.endMessage || renderToElement('website.s_countdown.end_message');
+                const message = this.endMessage || render('website.s_countdown.end_message');
                 this.$target.append(message);
             }
             this.$target.toggleClass('hide-countdown', widgetValue === 'message_no_countdown');

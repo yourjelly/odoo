@@ -14,7 +14,7 @@ import dom from "@web/legacy/js/core/dom";
 import mixins from "@web/legacy/js/core/mixins";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import wUtils from "@website/js/utils";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 // Initialize fallbacks for the use of requestAnimationFrame,
 // cancelAnimationFrame and performance.now()
@@ -871,7 +871,7 @@ registry.backgroundVideo = publicWidget.Widget.extend(MobileYoutubeAutoplayMixin
      */
     _appendBgVideo: function () {
         var $oldContainer = this.$bgVideoContainer || this.$('> .o_bg_video_container');
-        this.$bgVideoContainer = $(renderToElement('website.background.video', {
+        this.$bgVideoContainer = $(render('website.background.video', {
             videoSrc: this.videoSrc,
             iframeID: this.iframeID,
         }));
@@ -910,7 +910,7 @@ registry.socialShare = publicWidget.Widget.extend({
      */
     _render: function () {
         this.$el.popover({
-            content: renderToElement('website.social_hover', {medias: this.socialList}),
+            content: render('website.social_hover', {medias: this.socialList}),
             placement: 'bottom',
             container: this.$el,
             html: true,

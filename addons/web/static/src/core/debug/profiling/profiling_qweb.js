@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { loadBundle } from "@web/core/assets";
-import { renderToString } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { useDebounced } from "@web/core/utils/timing";
 
 import { Component, useState, useRef, onWillStart, onMounted, onWillUnmount } from "@odoo/owl";
@@ -300,22 +300,20 @@ export class ProfilingQwebView extends Component {
         }
     }
     _renderHover(delay, query, node) {
-        const xml = renderToString("web.ProfilingQwebView.hover", {
+        const xml = render("web.ProfilingQwebView.hover", {
             delay: this._formatDelay(delay),
             query: query,
         });
-        const div = new DOMParser().parseFromString(xml, "text/html").querySelector("div");
-        node.insertBefore(div, node.firstChild);
+        node.insertBefore(xml, node.firstChild);
     }
     _renderInfo(delays, querys, displayDetail, groups, node) {
-        const xml = renderToString("web.ProfilingQwebView.info", {
+        const xml = render("web.ProfilingQwebView.info", {
             delay: this._formatDelay(delays.reduce((a, b) => a + b, 0)),
             query: querys.reduce((a, b) => a + b, 0) || ".",
             displayDetail: displayDetail,
             groups: groups,
         });
-        const div = new DOMParser().parseFromString(xml, "text/html").querySelector("div");
-        node.insertBefore(div, node.firstChild);
+        node.insertBefore(xml, node.firstChild);
     }
 
     //--------------------------------------------------------------------------

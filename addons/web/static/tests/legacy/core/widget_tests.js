@@ -6,7 +6,7 @@ import Widget from "@web/legacy/js/core/widget";
 import session from "web.session";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import testUtils from "@web/../tests/legacy/helpers/test_utils";
-import { renderToString } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 QUnit.module('core', {}, function () {
 
@@ -179,7 +179,7 @@ QUnit.module('core', {}, function () {
     QUnit.test('template', function (assert) {
         assert.expect(3);
 
-        renderToString.app.addTemplate(
+        render.app.addTemplate(
             "test.widget.template.1",
             `<ol>
                 <li t-foreach="[0, 1, 2, 3, 4]" t-as="counter" t-key="counter_index" t-attf-class="class-#{counter}">
@@ -204,7 +204,7 @@ QUnit.module('core', {}, function () {
         assert.expect(4);
         var $fix = $( "#qunit-fixture");
 
-        renderToString.app.addTemplate(
+        render.app.addTemplate(
             "test.widget.template.2",
             `<p>
                 <t t-esc="widget.value"/>
@@ -233,7 +233,7 @@ QUnit.module('core', {}, function () {
     QUnit.test('basic-alias', function (assert) {
         assert.expect(1);
 
-        renderToString.app.addTemplate(
+        render.app.addTemplate(
             "test.widget.template.3",
             `<ol>
                 <li t-foreach="[0,1,2,3,4]" t-as="counter" t-key="counter_index" t-attf-class="class-#{counter}">
@@ -257,7 +257,7 @@ QUnit.module('core', {}, function () {
     QUnit.test('delegate', async function (assert) {
         assert.expect(5);
 
-        renderToString.app.addTemplate(
+        render.app.addTemplate(
             "test.widget.template.4",
             `<ol>
                 <li t-foreach="[0,1,2,3,4]" t-as="counter" t-key="counter_index" t-attf-class="class-#{counter}">
@@ -295,7 +295,7 @@ QUnit.module('core', {}, function () {
     QUnit.test('undelegate', async function (assert) {
         assert.expect(4);
 
-        renderToString.app.addTemplate(
+        render.app.addTemplate(
             "test.widget.template.5",
             `<ol>
                 <li t-foreach="[0,1,2,3,4]" t-as="counter" t-key="counter_index" t-attf-class="class-#{counter}">

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { NameAndSignature } from "@web/legacy/js/widgets/name_and_signature";
 
@@ -116,9 +116,9 @@ var SignatureForm = publicWidget.Widget.extend({
         }).then(function (data) {
             if (data.error) {
                 self.$('.o_portal_sign_error_msg').remove();
-                self.$controls.prepend(renderToElement('portal.portal_signature_error', {widget: data}));
+                self.$controls.prepend(render('portal.portal_signature_error', {widget: data}));
             } else if (data.success) {
-                var $success = renderToElement('portal.portal_signature_success', {widget: data});
+                var $success = render('portal.portal_signature_success', {widget: data});
                 self.$el.empty().append($success);
             }
             if (data.force_refresh) {

@@ -3,7 +3,7 @@
 import publicWidget from "@web/legacy/js/public/public_widget";
 import session from "web.session";
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 /**
  * This widget is responsible of displaying quiz questions and propositions. Submitting the quiz will fetch the
@@ -156,14 +156,14 @@ var Quiz = publicWidget.Widget.extend({
                         $answer.find('i.fa-times-circle').removeClass('d-none');
                     }
                     if (answer.awarded_points > 0) {
-                        $answer.append(renderToElement('quiz.badge', {'answer': answer}));
+                        $answer.append(render('quiz.badge', {'answer': answer}));
                     }
                 } else {
                     $answer.find('i.fa-circle').removeClass('d-none');
                 }
             });
             var $list = $question.find('.list-group');
-            $list.append(renderToElement('quiz.comment', {'answer': answer}));
+            $list.append(render('quiz.comment', {'answer': answer}));
         });
     },
 
@@ -174,7 +174,7 @@ var Quiz = publicWidget.Widget.extend({
     _renderValidationInfo: function () {
         var $validationElem = this.$('.o_quiz_js_quiz_validation');
         $validationElem.empty().append(
-            renderToElement('quiz.validation', {'widget': this})
+            render('quiz.validation', {'widget': this})
         );
     },
 

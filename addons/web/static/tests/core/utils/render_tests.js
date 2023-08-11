@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { renderToElement, renderToString } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 QUnit.module("utils", () => {
     QUnit.module("render");
 
-    QUnit.test("renderToElement always returns an element", (assert) => {
-        renderToString.app.addTemplate(
+    QUnit.test("render always returns an element", (assert) => {
+        render.app.addTemplate(
             "test.render.template.1",
             `<t t-if="False">
               <div>NotOk</div>
@@ -15,7 +15,7 @@ QUnit.module("utils", () => {
               <div>Ok</div>
             </t>`
         );
-        const compiledTemplate = renderToElement("test.render.template.1");
+        const compiledTemplate = render("test.render.template.1");
         assert.strictEqual(
             compiledTemplate.parentElement,
             null,

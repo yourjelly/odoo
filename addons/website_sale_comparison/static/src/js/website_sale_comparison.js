@@ -6,7 +6,7 @@ import {getCookie, setCookie} from "@web/legacy/js/core/cookie_utils";
 import VariantMixin from "@website_sale/js/sale_variant_mixin";
 import website_sale_utils from "@website_sale/js/website_sale_utils";
 import { _t } from "@web/core/l10n/translation";
-import { renderToString } from "@web/core/utils/render";
+import { renderToMarkup } from "@web/core/utils/render";
 
 const cartHandlerMixin = website_sale_utils.cartHandlerMixin;
 
@@ -50,7 +50,7 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
             },
             container: '.o_product_feature_panel',
             placement: 'top',
-            template: renderToString('popover'),
+            template: renderToMarkup('popover').toString(),
             content: function () {
                 return $('#comparelist .o_product_panel_content').html();
             }

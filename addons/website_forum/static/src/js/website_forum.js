@@ -9,7 +9,7 @@ import { Markup } from '@web/legacy/js/core/utils';
 import session from "web.session";
 import { escape, sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     selector: '.website_forum',
@@ -646,7 +646,7 @@ publicWidget.registry.websiteForumSpam = publicWidget.Widget.extend({
             Object.values(o).forEach((r) => {
                 r.content = $('<p>' + $(r.content).html() + '</p>').text().substring(0, 250);
             });
-            self.$('div.post_spam').empty().append(renderToElement('website_forum.spam_search_name', {
+            self.$('div.post_spam').empty().append(render('website_forum.spam_search_name', {
                 posts: o,
             }));
         });

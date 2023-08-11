@@ -2,7 +2,7 @@
 
 import config from "@web/legacy/js/services/config";
 import publicWidget from "@web/legacy/js/public/public_widget";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 
 publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
     selector: '.o_wjitsi_room_widget',
@@ -88,7 +88,7 @@ publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
             await this._joinJitsiRoom($parentNode);
         } else {
             // create a model and append the Jitsi iframe in it
-            let $jitsiModal = $(renderToElement('chat_room_modal', {}));
+            let $jitsiModal = $(render('chat_room_modal', {}));
             $("body").append($jitsiModal);
             $jitsiModal.modal('show');
 

@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { useService } from "@web/core/utils/hooks";
-import { renderToElement } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
 import { Component } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
@@ -26,7 +26,7 @@ export class SaleDetailsButton extends Component {
             "get_sale_details",
             [false, false, false, [this.pos.pos_session.id]]
         );
-        const report = renderToElement(
+        const report = render(
             "point_of_sale.SaleDetailsReport",
             Object.assign({}, saleDetails, {
                 date: new Date().toLocaleString(),

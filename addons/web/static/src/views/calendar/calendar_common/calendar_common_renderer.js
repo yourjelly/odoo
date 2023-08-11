@@ -2,7 +2,7 @@
 
 import { is24HourFormat } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
-import { renderToString } from "@web/core/utils/render";
+import { render } from "@web/core/utils/render";
 import { useDebounced } from "@web/core/utils/timing";
 import { getColor } from "../colors";
 import { useCalendarPopover, useClickHandler, useFullCalendar } from "../hooks";
@@ -202,14 +202,12 @@ export class CalendarCommonRenderer extends Component {
 
         if (record) {
             // This is needed in order to give the possibility to change the event template.
-            const injectedContentStr = renderToString(this.constructor.eventTemplate, {
+            const injectedContent = render(this.constructor.eventTemplate, {
                 ...record,
                 startTime: this.getStartTime(record),
                 endTime: this.getEndTime(record),
             });
-            const domParser = new DOMParser();
-            const { children } = domParser.parseFromString(injectedContentStr, "text/html").body;
-            el.querySelector(".fc-content").replaceWith(...children);
+            el.querySelector(".fc-content").replaceWith(injectedContent);
 
             const color = getColor(record.colorIndex);
             if (typeof color === "string") {

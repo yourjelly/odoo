@@ -5,7 +5,7 @@ import { legacySetupProm } from "./legacy/legacy_setup";
 import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
 import { localization } from "@web/core/l10n/localization";
 import { session } from "@web/session";
-import { renderToString } from "./core/utils/render";
+import { render } from "./core/utils/render";
 import { setLoadXmlDefaultApp, templates } from "@web/core/assets";
 import { hasTouch } from "@web/core/browser/feature_detection";
 
@@ -45,7 +45,7 @@ export async function startWebClient(Webclient) {
         translatableAttributes: ["data-tooltip"],
         translateFn: env._t,
     });
-    renderToString.app = app;
+    render.app = app;
     setLoadXmlDefaultApp(app);
     const root = await app.mount(document.body);
     const classList = document.body.classList;
