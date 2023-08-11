@@ -115,9 +115,9 @@ def _eval_xml(self, node, env):
             idref2 = _get_idref(self, env, f_model, self.idref)
             try:
                 return safe_eval(a_eval, idref2)
-            except Exception:
+            except Exception as e:
                 logging.getLogger('odoo.tools.convert.init').error(
-                    'Could not eval(%s) for %s in %s', a_eval, node.get('name'), env.context)
+                    'Could not eval(%s) for %s in %s -> (%s)', a_eval, node.get('name'), env.context, e)
                 raise
         def _process(s):
             matches = re.finditer(br'[^%]%\((.*?)\)[ds]'.decode('utf-8'), s)

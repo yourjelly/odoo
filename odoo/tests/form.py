@@ -19,7 +19,7 @@ from odoo.models import BaseModel
 from odoo.fields import Command
 from odoo.osv import expression
 from odoo.osv.expression import normalize_domain, TRUE_LEAF, FALSE_LEAF
-from odoo.tools.safe_eval import safe_eval
+from odoo.tools.safe_eval import safe_eval, safe_type
 
 _logger = logging.getLogger(__name__)
 
@@ -1064,7 +1064,7 @@ def _cleanup_from_default(type_, value):
         return odoo.fields.Date.to_string(value)
     return value
 
-
+@safe_type
 class Dotter:
     """ Simple wrapper for a dict where keys are accessed as readonly attributes. """
     __slots__ = ['__values']
