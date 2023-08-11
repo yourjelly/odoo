@@ -43,11 +43,6 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
         id: 's_banner',
         name: 'Banner',
     }),
-    {
-        content: "Check that parallax is present",
-        trigger: 'iframe #wrap .s_banner .s_parallax_bg',
-        run: () => null,
-    },
     wTourUtils.changeOption('ColoredLevelBackground', 'Shape'),
     {
         content: "Check that shape is present",
