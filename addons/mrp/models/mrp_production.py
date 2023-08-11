@@ -1161,7 +1161,7 @@ class MrpProduction(models.Model):
                 if byproduct._skip_byproduct_line(production.product_id):
                     continue
                 product_uom_factor = production.product_uom_id._compute_quantity(production.product_qty, production.bom_id.product_uom_id)
-                qty = byproduct.product_qty * (product_uom_factor / production.bom_Id.product_qty)
+                qty = byproduct.product_qty * (product_uom_factor / production.bom_id.product_qty)
                 moves.append(production._get_move_finished_values(
                     byproduct.product_id.id, qty, byproduct.product_uom_id.id,
                     byproduct.operation_id.id, byproduct.id, byproduct.cost_share))
@@ -1181,7 +1181,7 @@ class MrpProduction(models.Model):
                 finished_values['byproduct_production_id'] = finished_values['production_id']
                 del finished_values['production_id']
                 if finished_values.get('byproduct_id') in moves_byproduct_dict:
-                    list_byproduct_finished += [Command.update(moves_byproduct_dict[move_finished_values['byproduct_id']].id, finished_values)]
+                    list_byproduct_finished += [Command.update(moves_byproduct_dict[finished_values['byproduct_id']].id, finished_values)]
                 else:
                     list_byproduct_finished += [Command.create(finished_values)]
         if list_byproduct_finished:
@@ -1700,13 +1700,13 @@ class MrpProduction(models.Model):
             for key, values in tools_groupby(moves_to_do, key=lambda m: m.raw_material_production_id.id)
         ])
         for order in self:
-            finish_move = order.move_finish_id.filtered(lambda m: m.state not in ('done', 'cancel'))
+            finish_move = order.move_finished_id.filtered(lambda m: m.state not in ('done', 'cancel'))
             # the finish move can already be completed by the workorder.
             if finish_move:
-                if not move.quantity_done:
-                    move._set_quantity_done(float_round(order.qty_producing - order.qty_produced, precision_rounding=order.product_uom_id.rounding, rounding_method='HALF-UP'))
-                if move.has_tracking != 'none' and order.lot_producing_id:
-                    move.move_line_ids.lot_id = order.lot_producing_id
+                if not finish_move.quantity_done:
+                    finish_move._set_quantity_done(float_round(order.qty_producing - order.qty_produced, precision_rounding=order.product_uom_id.rounding, rounding_method='HALF-UP'))
+                if finish_move.has_tracking != 'none' and order.lot_producing_id:
+                    finish_move.move_line_ids.lot_id = order.lot_producing_id
             # workorder duration need to be set to calculate the price of the product
             for workorder in order.workorder_ids:
                 if workorder.state not in ('done', 'cancel'):
@@ -1843,6 +1843,8 @@ class MrpProduction(models.Model):
                     )
                     if move.raw_material_production_id:
                         move_vals['raw_material_production_id'] = backorder.id
+                    elif move.byproduct_production_id:
+                        move_vals['byproduct_production_id'] = backorder.id
                     else:
                         move_vals['production_id'] = backorder.id
                     new_moves_vals.append(move_vals)

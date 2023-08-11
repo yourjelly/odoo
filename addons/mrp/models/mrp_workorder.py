@@ -103,10 +103,13 @@ class MrpWorkorder(models.Model):
     operation_note = fields.Html("Description", related='operation_id.note', readonly=True)
     move_raw_ids = fields.One2many(
         'stock.move', 'workorder_id', 'Raw Moves',
-        domain=[('raw_material_production_id', '!=', False), ('production_id', '=', False)])
+        domain=[('raw_material_production_id', '!=', False), ('production_id', '=', False), ('byproduct_production_id', '=', False)])
     move_finished_ids = fields.One2many(
-        'stock.move', 'workorder_id', 'Finished Moves',
-        domain=[('raw_material_production_id', '=', False), ('production_id', '!=', False)])
+        'stock.move', 'workorder_id', 'Finished Move',
+        domain=[('raw_material_production_id', '=', False), '|', ('production_id', '!=', False), ('byproduct_production_id', '!=', False)])
+    move_byproduct_ids = fields.One2many(
+        'stock.move', 'workorder_id', 'By-Products Moves',
+        domain=[('raw_material_production_id', '=', False), ('production_id', '=', False), ('byproduct_production_id', '!=', False)])
     move_line_ids = fields.One2many(
         'stock.move.line', 'workorder_id', 'Moves to Track',
         help="Inventory moves for which you must scan a lot number at this work order")
@@ -474,7 +477,7 @@ class MrpWorkorder(models.Model):
             production._link_workorders_and_moves()
 
     def _get_byproduct_move_to_update(self):
-        return self.production_id.move_finished_ids.filtered(lambda x: (x.product_id.id != self.production_id.product_id.id) and (x.state not in ('done', 'cancel')))
+        return self.production_id.move_byproduct_ids.filtered(lambda m: m.state not in ('done', 'cancel'))
 
     def _plan_workorder(self, replan=False):
         self.ensure_one()
