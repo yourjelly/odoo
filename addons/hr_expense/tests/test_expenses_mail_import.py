@@ -59,6 +59,7 @@ class TestExpensesMailImport(TestExpenseCommon):
             'standard_price': 0.0,
             'can_be_expensed': True,
             'default_code': 'product_no_cost',
+            'company_id': self.company_data['company'].id,
         })
         message_parsed = {
             'message_id': "test",

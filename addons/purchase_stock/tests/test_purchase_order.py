@@ -395,6 +395,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
             'type': 'product',
             'categ_id': self.stock_account_product_categ.id,
             'standard_price': 9.876543,
+            'company_id': self.company_data['company'].id,
         })
 
         purchase_order = self.env['purchase.order'].create({

@@ -28,6 +28,7 @@ class TestAveragePrice(ValuationReconciliationTestCommon):
             'uom_po_id': self.env.ref('uom.product_uom_kgm').id,
             'supplier_taxes_id': [],
             'description': 'FIFO Ice Cream',
+            'company_id': self.company_data['company'].id,
         })
         product_cable_management_box.categ_id.property_cost_method = 'average'
 

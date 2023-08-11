@@ -170,6 +170,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
             'categ_id': fifo_pc.id,
             'type': 'product',
             'standard_price': price,
+            'company_id': self.company_data['company'].id,
         } for price in [0.91, 0.93, 75.17, 20.54]])
 
         landed_product = self.Product.create({
@@ -178,6 +179,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
             'landed_cost_ok': True,
             'split_method_landed_cost': 'by_quantity',
             'standard_price': 1000.0,
+            'company_id': self.company_data['company'].id,
         })
 
         po = self.env['purchase.order'].create({

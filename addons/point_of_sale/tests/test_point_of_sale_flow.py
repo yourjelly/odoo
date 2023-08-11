@@ -405,10 +405,12 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'type': 'product',
             'tracking': 'lot',
             'available_in_pos': True,
+            'company_id': self.company_data['company'].id,
         }, {
             'name': 'SuperProduct Untracked',
             'type': 'product',
             'available_in_pos': True,
+            'company_id': self.company_data['company'].id,
         }])
         wh_location = self.company_data['default_warehouse'].lot_stock_id
         shelf1_location = self.env['stock.location'].create({
@@ -967,13 +969,15 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'name': 'SuperProduct Tracked',
             'type': 'product',
             'tracking': 'lot',
-            'available_in_pos': True
+            'available_in_pos': True,
+            'company_id': self.company_data['company'].id,
         })
         tracked_product_2 = self.env['product.product'].create({
             'name': 'SuperProduct Tracked 2',
             'type': 'product',
             'tracking': 'lot',
-            'available_in_pos': True
+            'available_in_pos': True,
+            'company_id': self.company_data['company'].id,
         })
         tracked_product_2_lot = self.env['stock.lot'].create({
             'name': '80085',
