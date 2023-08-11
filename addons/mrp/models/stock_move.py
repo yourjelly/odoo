@@ -200,10 +200,11 @@ class StockMove(models.Model):
 
     @api.depends('product_uom_qty',
         'raw_material_production_id', 'raw_material_production_id.product_qty', 'raw_material_production_id.qty_produced',
-        'production_id', 'production_id.product_qty', 'production_id.qty_produced')
+        'production_id', 'production_id.product_qty', 'production_id.qty_produced',
+        'byproduct_production_id', 'byproduct_production_id.product_qty', 'byproduct_production_id.qty_produced')
     def _compute_unit_factor(self):
         for move in self:
-            mo = move.raw_material_production_id or move.production_id
+            mo = move.raw_material_production_id or move.production_id or move.byproduct_production_id
             if mo:
                 move.unit_factor = move.product_uom_qty / ((mo.product_qty - mo.qty_produced) or 1)
             else:

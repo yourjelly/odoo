@@ -788,9 +788,7 @@ class MrpProduction(models.Model):
                 if production.date_deadline:
                     updated_values['date_deadline'] = production.date_deadline
                 if 'date' in updated_values or 'date_deadline' in updated_values:
-                    # TODO QUWO: Need to check if writable through move_finished_ids instead (have a single write, since it's on moves after all)
-                    production.move_finished_id.write(updated_values)
-                    # production.move_byproduct_ids.write(updated_values)
+                    production.move_finished_ids.write(updated_values)
                 continue
             # delete to remove existing moves from database and clear to remove new records
             # TODO QUWO: Need to check if doable through move_finished_ids instead
