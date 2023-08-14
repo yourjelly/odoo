@@ -70,6 +70,7 @@ patch(ThreadService.prototype, {
                 areAttachmentsLoaded: true,
                 attachments: result.attachments,
                 isLoadingAttachments: false,
+                hasLoadedAttachments: true,
             });
         }
         if ("mainAttachment" in result) {

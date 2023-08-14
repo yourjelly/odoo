@@ -703,6 +703,7 @@ export class ThreadService {
                 "authorizedGroupFullName",
                 "description",
                 "hasWriteAccess",
+                "hasLoadedAttachments",
                 "is_pinned",
                 "isLoaded",
                 "isLoadingAttachments",

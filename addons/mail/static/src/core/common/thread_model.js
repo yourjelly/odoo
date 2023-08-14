@@ -60,9 +60,11 @@ export class Thread {
     isAdmin = false;
     loadOlder = false;
     loadNewer = false;
+    loadOlderAttachments = false;
     isLoadingAttachments = false;
     isLoadedDeferred = new Deferred();
     isLoaded = false;
+    hasLoadedAttachments = false;
     /** @type {import("@mail/core/common/attachment_model").Attachment} */
     mainAttachment;
     memberCount = 0;

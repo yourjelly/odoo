@@ -2,7 +2,11 @@
 
 import { assignDefined } from "@mail/utils/common/misc";
 
+import { deserializeDateTime } from "@web/core/l10n/dates";
+import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
+
+const { DateTime } = luxon;
 
 export class Attachment {
     /** @type {import("@mail/core/common/store_service").Store} */
@@ -24,6 +28,8 @@ export class Attachment {
     uploading;
     /** @type {import("@mail/core/common/message_model").Message} */
     message;
+    /** @type {string} */
+    create_date;
 
     /** @type {import("@mail/core/common/thread_model").Thread} */
     get originThread() {
@@ -51,6 +57,15 @@ export class Attachment {
 
     get isPdf() {
         return this.mimetype && this.mimetype.startsWith("application/pdf");
+    }
+
+    get dateDay() {
+        const datetime = deserializeDateTime(this.create_date);
+        let dateDay = datetime.toLocaleString(DateTime.DATE_FULL);
+        if (dateDay === DateTime.now().toLocaleString(DateTime.DATE_FULL)) {
+            dateDay = _t("Today");
+        }
+        return dateDay;
     }
 
     get isImage() {

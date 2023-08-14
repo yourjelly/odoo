@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { DateSeparator } from "@mail/core/common/date_separator";
 import { Message } from "@mail/core/common/message";
 import { useMessaging, useStore } from "@mail/core/common/messaging_hook";
 import {
@@ -36,7 +37,7 @@ export const PRESENT_THRESHOLD = 2500;
  * @extends {Component<Props, Env>}
  */
 export class Thread extends Component {
-    static components = { Message, Transition };
+    static components = { Message, Transition, DateSeparator };
     static props = [
         "isInChatWindow?",
         "hasScrollAdjust?",

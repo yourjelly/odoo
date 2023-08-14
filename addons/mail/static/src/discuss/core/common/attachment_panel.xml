@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.AttachmentPanel">
+        <t t-log="attachmentsByDate"/>
+        <ActionPanel title="title">
+            <div class="flex-grow-1">
+                <p t-if="props.thread.attachments.length === 0" class="text-center fst-italic text-500 fs-6" t-esc="emptyMessage"/>
+                <div t-else="" t-foreach="attachmentsByDate" t-as="dateDay" t-key="dateDay" class="d-flex flex-column">
+                    <DateSeparator dateDay="dateDay" className="'my-1'"/>
+                    <AttachmentList imagesHeight="300" attachments="dateDay_value" unlinkAttachment="(attachment) => this.attachmentUploadService.unlink(attachment)"/>
+                </div>
+            </div>
+            <span t-ref="loadOlder"/>
+        </ActionPanel>
+    </t>
+</templates>
