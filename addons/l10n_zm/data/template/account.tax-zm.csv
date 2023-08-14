@@ -1,0 +1,49 @@
+"id","description","invoice_label","type_tax_use","name","amount_type","amount","tax_group_id","repartition_line_ids/repartition_type","repartition_line_ids/document_type","repartition_line_ids/tag_ids","repartition_line_ids/account_id"
+"zm_tax_sale_export_0","Export Rate","0%","sale","EXPORT 0%","percent","0.0","tax_group_0","base","invoice","+0% Export Sales Base",
+,,,,,,,,"tax","invoice",,
+,,,,,,,,"base","refund","-0% Export Sales Base",
+,,,,,,,,"tax","refund",,
+"zm_tax_sale_0","Zero Rate","0%","sale","0%","percent","0.0","tax_group_0","base","invoice","+0% VAT Sales Base",
+,,,,,,,,"tax","invoice",,
+,,,,,,,,"base","refund","-0% VAT Sales Base",
+,,,,,,,,"tax","refund",,
+"zm_tax_sale_16","Standard Rate","16%","sale","16%","percent","16.0","tax_group_16","base","invoice","+16% VAT Sales Base",
+,,,,,,,,"tax","invoice",,"9500000"
+,,,,,,,,"base","refund","-16% VAT Sales Base",
+,,,,,,,,"tax","refund",,"9500000"
+"zm_tax_sale_20","20% Rate","20%","sale","20%","percent","20.0","tax_group_20","base","invoice","+20% VAT Sales Base",
+,,,,,,,,"tax","invoice",,"9500000"
+,,,,,,,,"base","refund","-20% VAT Sales Base",
+,,,,,,,,"tax","refund",,"9500000"
+"zm_tax_sale_30","30% Rate","30%","sale","30%","percent","30.0","tax_group_30","base","invoice","+30% VAT Sales Base",
+,,,,,,,,"tax","invoice",,"9500000"
+,,,,,,,,"base","refund","-30% VAT Sales Base",
+,,,,,,,,"tax","refund",,"9500000"
+"zm_tax_sale_375","37.5% Rate","37.5%","sale","37.5%","percent","37.5","tax_group_375","base","invoice","+37.5% VAT Sales Base",
+,,,,,,,,"tax","invoice",,"9500000"
+,,,,,,,,"base","refund","-37.5% VAT Sales Base",
+,,,,,,,,"tax","refund",,"9500000"
+"zm_tax_purchase_0","Zero Rate","0%","purchase","0%","percent","0.0","tax_group_0","base","invoice","+0% VAT Purchases Base",
+,,,,,,,,"tax","invoice",,
+,,,,,,,,"base","refund","-0% VAT Purchases Base",
+,,,,,,,,"tax","refund",,
+"zm_tax_purchase_16","Standard Rate","16%","purchase","16%","percent","16.0","tax_group_16","base","invoice","+16% VAT Purchases Base",
+,,,,,,,,"tax","invoice",,"8300000"
+,,,,,,,,"base","refund","-16% VAT Purchases Base",
+,,,,,,,,"tax","refund",,"8300000"
+"zm_tax_purchase_import_16","Import rate","16%","purchase","IMPORT 16%","percent","16.0","tax_group_16","base","invoice","+16% Import Purchases Base",
+,,,,,,,,"tax","invoice",,"8300000"
+,,,,,,,,"base","refund","-16% Import Purchases Base",
+,,,,,,,,"tax","refund",,"8300000"
+"zm_tax_purchase_20","20% Rate","20%","purchase","20%","percent","20.0","tax_group_20","base","invoice","+20% VAT Purchases Base",
+,,,,,,,,"tax","invoice",,"8300000"
+,,,,,,,,"base","refund","-20% VAT Purchases Base",
+,,,,,,,,"tax","refund",,"8300000"
+"zm_tax_purchase_30","30% Rate","30%","purchase","30%","percent","30.0","tax_group_30","base","invoice","+30% VAT Purchases Base",
+,,,,,,,,"tax","invoice",,"8300000"
+,,,,,,,,"base","refund","-30% VAT Purchases Base",
+,,,,,,,,"tax","refund",,"8300000"
+"zm_tax_purchase_375","37.5% Rate","37.5%","purchase","37.5%","percent","37.5","tax_group_375","base","invoice","+37.5% VAT Purchases Base",
+,,,,,,,,"tax","invoice",,"8300000"
+,,,,,,,,"base","refund","-37.5% VAT Purchases Base",
+,,,,,,,,"tax","refund",,"8300000"
