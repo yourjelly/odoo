@@ -1351,6 +1351,15 @@
                             <div class="text-center progress-wizard-steplabel">Address</div>
                           </div>
                         </a>
+                        <t t-if="extra_step">
+                            <a class="no-decoration col" t-att-href="step&gt;=25 and extra_step or '#'">
+                                <div id="wizard-step25" t-att-class="'progress-wizard-step %s' % (step == 25 and 'active' or step&gt;25 and 'complete' or 'disabled')">
+                                    <div class="progress-wizard-bar d-none d-md-block"/>
+                                    <span class="progress-wizard-dot d-none d-md-inline-block"></span>
+                                    <div class="text-center progress-wizard-steplabel">Invoicing Info</div>
+                                </div>
+                            </a>
+                        </t>
                         <a class="no-decoration col" t-att-href="step&gt;=40 and '/shop/payment' or '#'">
                           <div id="wizard-step40" t-att-class="'progress-wizard-step %s' % (step == 40 and 'active' or step&gt;40 and 'complete' or 'disabled')">
                             <div class="progress-wizard-bar d-none d-md-block"/>
@@ -1417,7 +1426,7 @@
                                             </div>
                                             <div class="mb-0 py-2 col-12 s_website_form_submit s_website_form_no_submit_options">
                                                 <div style="width: 200px;" class="s_website_form_label"/>
-                                                <a role="button" href="/shop/checkout" class="btn btn-secondary float-start"><span class="oi oi-chevron-left"/> Previous</a>
+                                                <a role="button" t-att-href="extra_step or '/shop/checkout'" class="btn btn-secondary float-start"><span class="oi oi-chevron-left"/> Previous</a>
                                                 <a role="button" class="btn btn-primary float-end s_website_form_send" href="/shop/confirm_order">Next <span class="oi oi-chevron-right" /></a>
                                                 <span id="s_website_form_result"></span>
                                             </div>
@@ -1808,7 +1817,7 @@
                                     <i class="oi oi-chevron-left"/>
                                     <span>Return to Cart</span>
                                 </a>
-                                <a role="button" href="/shop/confirm_order" class="btn btn-primary mb32">
+                                <a role="button" t-att-href="extra_step or '/shop/confirm_order'" class="btn btn-primary mb32">
                                     <span>Confirm</span>
                                     <i class="oi oi-chevron-right"/>
                                 </a>

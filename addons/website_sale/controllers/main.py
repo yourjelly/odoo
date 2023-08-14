@@ -730,12 +730,27 @@ class WebsiteSale(http.Controller):
                 order_sudo._cart_update_pricelist(update_pricelist=True)
         return request.redirect(redirect)
 
+    def _get_extra_step_callback(self):
+        """ TO OVERRIDE
+        Helper to add a step in the checkout flow between the 'Address' and the 'Confirm Order'.
+
+        It adds a flag in each of the templates during the checkout flow, allowing to add a step in the checkout wizard.
+        In addition, adjust the callback in the step before the extra step ('Address').
+
+        Return the route to call for this extra step
+        """
+        return False
+
     def _cart_values(self, **post):
         """
         This method is a hook to pass additional values when rendering the 'website_sale.cart' template (e.g. add
         a flag to trigger a style variation)
         """
-        return {}
+        values = {}
+        extra_step = self._get_extra_step_callback()
+        if extra_step:
+            values['extra_step'] = extra_step
+        return values
 
     @http.route(['/shop/cart'], type='http', auth="public", website=True, sitemap=False)
     def cart(self, access_token=None, revive='', **post):
@@ -957,7 +972,8 @@ class WebsiteSale(http.Controller):
         values = {
             'order': order,
             'shippings': shippings,
-            'only_services': order and order.only_services or False
+            'only_services': order and order.only_services or False,
+            'extra_step': self._get_extra_step_callback() or False,
         }
         return values
 
@@ -1132,6 +1148,10 @@ class WebsiteSale(http.Controller):
         values, errors = {}, {}
 
         partner_id = int(kw.get('partner_id', -1))
+
+        extra_step = self._get_extra_step_callback()
+        if extra_step:
+            kw['callback'] = extra_step
 
         # IF PUBLIC ORDER
         if order.partner_id.id == request.website.user_id.sudo().partner_id.id:
@@ -1401,12 +1421,17 @@ class WebsiteSale(http.Controller):
             'country': country,
             'country_states': country.get_website_sale_states(mode=mode[1]),
             'countries': country.get_website_sale_countries(mode=mode[1]),
+            'extra_step': self._get_extra_step_callback() or False,
         }
         return res
 
     @http.route(['/shop/checkout'], type='http', auth="public", website=True, sitemap=False)
     def checkout(self, **post):
         order = request.website.sale_get_order()
+
+        if self._get_extra_step_callback() and post.get('express'):
+            # Prevent express checkout if an extra checkout step is required
+            post.pop('express')
 
         redirection = self.checkout_redirection(order)
         if redirection:
@@ -1456,7 +1481,7 @@ class WebsiteSale(http.Controller):
         This method is a hook to pass additional values when rendering the 'website_sale.extra_info' template (e.g. add
         a flag to trigger a style variation)
         """
-        return {}
+        return {'extra_step': self._get_extra_step_callback() or False}
 
     @http.route(['/shop/extra_info'], type='http', auth="public", website=True, sitemap=False)
     def extra_info(self, **post):
@@ -1530,7 +1555,11 @@ class WebsiteSale(http.Controller):
             'transaction_route': f'/shop/payment/transaction/{order.id}',
             'landing_route': '/shop/payment/validate',
         }
-        values = {**portal_page_values, **payment_form_values}
+        values = {
+            **portal_page_values,
+            **payment_form_values,
+            'extra_step': self._get_extra_step_callback() or False,
+        }
         if request.website.enabled_delivery:
             has_storable_products = any(
                 line.product_id.type in ['consu', 'product'] for line in order.order_line
