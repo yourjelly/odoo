@@ -9,8 +9,7 @@
                     <div class="row mt8">
                         <div class="col-lg-12">
                             <h2>
-                                <span>WIP Report for <t t-out="docs.account_id.name"/></span>
-                            </h2>
+                                <span>WIP Report for <t t-foreach="docs" t-as="doc"><t t-out="doc.account_id.name"/>, </t></span>                            </h2>
                         </div>
                     </div>
                     <div class="row mt8">
