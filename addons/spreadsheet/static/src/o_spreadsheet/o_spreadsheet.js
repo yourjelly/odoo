@@ -24066,8 +24066,10 @@
         }
         onKeyup(ev) {
             if (this.contentHelper.el === document.activeElement) {
-                const isSelectingForComposer = this.env.model.getters.isSelectingForComposer();
-                if (isSelectingForComposer && ev.key?.startsWith("Arrow")) {
+                if (this.autoCompleteState.showProvider && ["ArrowUp", "ArrowDown"].includes(ev.key)) {
+                    return;
+                }
+                if (this.env.model.getters.isSelectingForComposer() && ev.key?.startsWith("Arrow")) {
                     return;
                 }
                 const { start: oldStart, end: oldEnd } = this.env.model.getters.getComposerSelection();
@@ -49437,7 +49439,14 @@
   `;
     }
 
-    const TABLE_DEFAULT_STYLE = escapeXml /*xml*/ `<tableStyleInfo name="TableStyleLight8" showFirstColumn="0" showLastColumn="0" showRowStripes="0" showColumnStripes="0"/>`;
+    const TABLE_DEFAULT_ATTRS = [
+        ["name", "TableStyleLight8"],
+        ["showFirstColumn", "0"],
+        ["showLastColumn", "0"],
+        ["showRowStripes", "0"],
+        ["showColumnStripes", "0"],
+    ];
+    const TABLE_DEFAULT_STYLE = escapeXml /*xml*/ `<tableStyleInfo ${formatAttributes(TABLE_DEFAULT_ATTRS)}/>`;
     function createTable(table, tableId, sheetData) {
         const tableAttributes = [
             ["id", tableId],
@@ -49549,7 +49558,7 @@
                     let additionalAttrs = [];
                     let cellNode = escapeXml ``;
                     // Either formula or static value inside the cell
-                    if (cell.isFormula) {
+                    if (cell.isFormula && cell.content) {
                         ({ attrs: additionalAttrs, node: cellNode } = addFormula(cell));
                     }
                     else if (cell.content && isMarkdownLink(cell.content)) {
@@ -50546,8 +50555,8 @@
 
 
     __info__.version = '16.4.3';
-    __info__.date = '2023-08-09T12:00:37.403Z';
-    __info__.hash = '1dbd302';
+    __info__.date = '2023-08-14T06:29:40.585Z';
+    __info__.hash = '445109d';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
