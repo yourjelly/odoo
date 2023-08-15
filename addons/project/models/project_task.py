@@ -1636,3 +1636,20 @@ class Task(models.Model):
             'url': '/web#model=project.task&id=%s&action=%s&view_type=form' % (self.id, self.env.ref('project.action_view_my_task').id),
             'target': 'new',
         }
+
+    # Server actions for testing purposes
+
+    def server_action_convert_b64img(self, batch_size):
+
+        from b64img_to_attachment import run_in_batches
+
+        run_in_batches(self.env, (
+            'project.task',
+            'project_task',
+            'description',
+            'text'
+        ), self.mapped('id'), batch_size)
+
+    def copy_tasks(self):
+        for record in self:
+            record.copy({"name": "copy_for_test"})

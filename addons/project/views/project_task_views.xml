@@ -955,6 +955,26 @@
             </field>
         </record>
 
+        <record id="action_server_convert_b64img" model="ir.actions.server">
+            <field name="name">Convert b64 images</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="state">code</field>
+            <field name="code">
+                records.server_action_convert_b64img(batch_size=10)
+            </field>
+            <field name="binding_model_id" ref="project.model_project_task"/>
+        </record>
+
+        <record id="action_server_copy_tasks" model="ir.actions.server">
+            <field name="name">Copy tasks</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="state">code</field>
+            <field name="code">
+                records.copy_tasks()
+            </field>
+            <field name="binding_model_id" ref="project.model_project_task"/>
+        </record>
+
         <record id="project_task_action_from_partner" model="ir.actions.act_window">
             <field name="name">Tasks</field>
             <field name="res_model">project.task</field>
