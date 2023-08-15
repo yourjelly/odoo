@@ -267,7 +267,7 @@ def convert(env, res_model, rows, id_to_res_id):
     
     # Create attachments
     img_id, vals_list = [*zip(*vals_for_attachment.items())] or ([], [])
-    attachments = env['ir.attachment'].create(vals_list)
+    attachments = env['ir.attachment'].with_context(no_document=True).create(vals_list)
     attachments.generate_access_token()
     img_srcs = [f"{attach.image_src}?access_token={attach.access_token}" for attach in attachments]
     new_srcs = dict(zip(img_id, img_srcs))
