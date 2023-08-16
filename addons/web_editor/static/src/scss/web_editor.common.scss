@@ -817,6 +817,12 @@ blockquote {
             // (used by the 'fade-currentColor()' function).
             --o-border-color: #{o-color('300')};
             --o-border-color: #{fade-currentColor()};
+
+            // Forms
+            @if ($-bg-color == $light and $-bg-color != $body-bg) {
+                --o-input-bg: #{$body-bg};
+                --o-input-border-color: var(--o-border-color);
+            }
         }
     }
 }
