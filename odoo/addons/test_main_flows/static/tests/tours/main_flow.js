@@ -532,8 +532,18 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: false,
     trigger: ".ui-menu-item > a:contains('the_flow.product')",
-    run: () => {}, // check
 }, {
+    mobile: false,
+    trigger: 'label:contains("Untaxed Amount")',
+    // click somewhere else to exit cell focus
+},
+{
+    mobile: false,
+    trigger: "td[name='name'] span:contains('the_flow.product')",
+    run: () => {}, // check
+}, 
+
+{
     mobile: true,
     trigger: ".o_field_widget[name=product_id] input",
     extra_trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Order Lines')",
@@ -567,7 +577,15 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: false,
     trigger: ".ui-menu-item > a:contains('the_flow.service')",
-}, {
+},{
+    mobile: false,
+    trigger: 'label:contains("Untaxed Amount")',
+    // click somewhere else to exit cell focus
+},{
+    mobile: false,
+    trigger: "td[name='name'] span:contains('the_flow.service')",
+    run: () => {}, // check
+},{
     mobile: false,
     trigger: 'label:contains("Untaxed Amount")',
     // click somewhere else to exit cell focus
