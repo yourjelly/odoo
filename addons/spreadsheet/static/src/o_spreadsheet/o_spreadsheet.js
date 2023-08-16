@@ -26553,7 +26553,7 @@
             owl.useExternalListener(document.body, "paste", this.paste);
             owl.onMounted(() => this.focus());
             this.props.exposeFocus(() => this.focus());
-            useGridDrawing("canvas", this.env.model, () => this.env.model.getters.getSheetViewDimensionWithHeaders());
+            useGridDrawing("canvas",  this.env.model, () => this.env.model.getters.getSheetViewDimensionWithHeaders());
             owl.useEffect(() => this.focus(), () => [this.env.model.getters.getActiveSheetId()]);
             this.onMouseWheel = useWheelHandler((deltaX, deltaY) => {
                 this.moveCanvas(deltaX, deltaY);
@@ -46755,6 +46755,7 @@
         _focusGrid;
         keyDownMapping;
         isViewportTooSmall = false;
+
         get model() {
             return this.props.model;
         }
@@ -46775,8 +46776,10 @@
                 "CTRL+F": () => this.toggleSidePanel("FindAndReplace", {}),
             };
             const fileStore = this.model.config.external.fileStore;
+            const self = this;
+            
             owl.useSubEnv({
-                model: this.model,
+                get model() { return self.model },
                 imageProvider: fileStore ? new ImageProvider(fileStore) : undefined,
                 loadCurrencies: this.model.config.external.loadCurrencies,
                 loadLocales: this.model.config.external.loadLocales,
@@ -46787,6 +46790,7 @@
                 clipboard: this.env.clipboard || instantiateClipboard(),
                 startCellEdition: (content) => this.onGridComposerCellFocused(content),
             });
+
             owl.useExternalListener(window, "resize", () => this.render(true));
             owl.useExternalListener(window, "beforeunload", () => this.unbindModelEvents(this.props.model));
             this.bindModelEvents(this.props.model);
@@ -46795,8 +46799,7 @@
             });
             owl.onWillUpdateProps((nextProps) => {
                 if (nextProps.model !== this.props.model) {
-                    this.unbindModelEvents(this.props.model);
-                    this.bindModelEvents(nextProps.model);
+                    throw new Error("don't do that, it won't work properly...")
                 }
             });
             owl.onWillUnmount(() => this.unbindModelEvents(this.props.model));
