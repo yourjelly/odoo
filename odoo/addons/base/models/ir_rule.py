@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
-import warnings
+import warnings, ast
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, ValidationError
@@ -186,6 +186,20 @@ class IrRule(models.Model):
         self.env.flush_all()
         self.clear_caches()
         return res
+
+    @api.constrains('domain_force')
+    def check_domain_field(self):
+        rules_to_delete = self.env['ir.rule']
+
+        for rule in self:
+            try:
+                domain = ast.literal_eval(rule.domain_force)
+                model = rule.model_id.model
+                self.env[model].sudo()._search(domain)
+            except Exception as e:
+                rules_to_delete += rule
+
+        rules_to_delete.unlink()
 
     def _make_access_error(self, operation, records):
         _logger.info('Access Denied by record rules for operation: %s on record ids: %r, uid: %s, model: %s', operation, records.ids[:6], self._uid, records._name)
