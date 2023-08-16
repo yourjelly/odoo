@@ -194,6 +194,9 @@ def run_batch(env, batch_params):
     template = "(%s, %s::jsonb)" if data_type == 'jsonb' else None
     new_rows = to_jsonb(new_rows) if data_type == 'jsonb' else new_rows
 
+    # Filter out unchanged rows
+    new_rows = [new_row for row, new_row in zip(rows, new_rows) if new_row[1] != row[1]]
+
     try:
         execute_values(cr._obj, update_query, new_rows, template)
     except Exception as e:
@@ -276,8 +279,6 @@ def convert(env, res_model, rows, id_to_res_id):
     report = {'created_ir_attachments': attachments.mapped('id'), 'delta_size': 0}
     new_rows = []
     for id, content in rows:
-        if not replacements[id]:
-            continue
         new_content, delta_size = apply_replacements(content, replacements[id], new_srcs)
         new_rows.append((id, new_content))
         report['delta_size'] += delta_size
