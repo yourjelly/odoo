@@ -577,6 +577,7 @@ class WebsiteSale(http.Controller):
         image_to_resequence = request.env[image_res_model].browse(image_res_id)
         product = request.env['product.product']
         product_template = request.env['product.template']
+        product_img =  request.env['product.image']
         if image_res_model == 'product.product':
             product = image_to_resequence
             product_template = product.product_tmpl_id
@@ -613,7 +614,7 @@ class WebsiteSale(http.Controller):
         # Swap images
         other_image = product_images[new_image_idx]
         source_field = hasattr(image_to_resequence, 'video_url') and image_to_resequence.video_url and 'video_url' or 'image_1920'
-        target_field = hasattr(other_image, 'video_url') and other_image.video_url and 'video_url' or 'image_1920'
+        target_field = hasattr(other_image, 'video_url') and other_image.video_url and product_img.video_url or 'image_1920'
         previous_data = other_image[target_field]
         other_image[source_field] = image_to_resequence[source_field]
         image_to_resequence[target_field] = previous_data
