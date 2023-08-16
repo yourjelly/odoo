@@ -212,6 +212,7 @@ export class PropertyDefinition extends Component {
         this.state.resModel = technical;
         this.state.resModelDescription = label;
 
+        // debugger
         const propertyDefinition = {
             ...this.state.propertyDefinition,
             comodel: technical,
@@ -219,6 +220,9 @@ export class PropertyDefinition extends Component {
             value: modelChanged ? false : this.state.propertyDefinition.value,
             domain: modelChanged ? false : this.state.propertyDefinition.domain,
         };
+        if (propertyDefinition.type === "many2many") {
+            propertyDefinition.value = propertyDefinition.value ? propertyDefinition.value : [];
+        }
         this.props.onChange(propertyDefinition);
         this.state.propertyDefinition = propertyDefinition;
         await this._updateMatchingRecordsCount();

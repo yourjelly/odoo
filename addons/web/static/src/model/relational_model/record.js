@@ -9,7 +9,7 @@ import { x2ManyCommands } from "@web/core/orm_service";
 import { pick } from "@web/core/utils/objects";
 import { escape } from "@web/core/utils/strings";
 import { DataPoint } from "./datapoint";
-import { getFieldContext, parseServerValue } from "./utils";
+import { getFieldContext, parseServerValue, createPropertyActiveField } from "./utils";
 
 export class Record extends DataPoint {
     static type = "Record";
@@ -371,6 +371,9 @@ export class Record extends DataPoint {
         for (const fieldName in data) {
             const value = data[fieldName];
             const field = this.fields[fieldName];
+            if (field.relatedPropertyField) {
+                continue;
+            }
             if (["char", "text", "html"].includes(field.type)) {
                 dataContext[fieldName] = this._textValues[fieldName];
             } else if (["one2many", "many2many"].includes(field.type)) {
@@ -603,6 +606,9 @@ export class Record extends DataPoint {
                     for (const property of parsedValues[fieldName]) {
                         const fieldPropertyName = `${fieldName}.${property.name}`;
                         if (property.type === "one2many" || property.type === "many2many") {
+                            if (!property.comodel) {
+                                continue;
+                            }
                             const staticList = this._createStaticListDatapoint(
                                 property.value.map((record) => ({
                                     id: record[0],
@@ -612,6 +618,9 @@ export class Record extends DataPoint {
                             );
                             parsedValues[fieldPropertyName] = staticList;
                         } else if (property.type === "many2one") {
+                            if (!property.comodel) {
+                                continue;
+                            }
                             parsedValues[fieldPropertyName] =
                                 property.value.length && property.value[1] === null
                                     ? [property.value[0], this.model.env._t("No Access")]
@@ -787,7 +796,10 @@ export class Record extends DataPoint {
     async _save({ noReload, onError } = {}) {
         // before saving, abandon new invalid, untouched records in x2manys
         for (const fieldName in this.activeFields) {
-            if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+            if (
+                ["one2many", "many2many"].includes(this.fields[fieldName].type) &&
+                this.data[fieldName]
+            ) {
                 this.data[fieldName]._abandonRecords();
             }
         }
@@ -928,6 +940,34 @@ export class Record extends DataPoint {
                 changes[propertyFieldName] = this.data[propertyFieldName].map((property) =>
                     property.name === field.propertyName ? { ...property, value } : property
                 );
+            } else if (field && field.type === "properties") {
+                for (const property of value) {
+                    const propertyFieldName = `${fieldName}.${property.name}`;
+                    if (
+                        (property.type === "many2many" || property.type === "many2one") &&
+                        !property.comodel
+                    ) {
+                        continue;
+                    }
+                    if (!this.fields[propertyFieldName]) {
+                        this.fields[propertyFieldName] = {
+                            ...property,
+                            name: propertyFieldName,
+                            relatedPropertyField: fieldName,
+                            propertyName: property.name,
+                            relation: property.comodel,
+                        };
+                        this.activeFields[propertyFieldName] = createPropertyActiveField(property);
+                    }
+                    // debugger
+                    Object.assign(
+                        this.data,
+                        this._parseServerValues({
+                            [propertyFieldName]: property.value,
+                        })
+                    );
+                }
+                // // debugger;
             }
         }
         const onChangeFields = Object.keys(changes).filter(
