@@ -172,9 +172,7 @@ def run_batch(env, batch_params):
         # Adapt jsonb to [((res_id, lang), content)] format.
         rows = from_jsonb(rows) if data_type == 'jsonb' else rows
     except ValueError as e:
-        cr.rollback()
-        logger.exception(e)
-        return ErrorReport("jsonb data adaptation", batch_params, e)
+        return abort_batch(cr, "jsonb data adaptation", batch_params, e)
 
     id_to_res_id = (lambda id: id[0]) if data_type == 'jsonb' else lambda id: id
 
@@ -183,9 +181,7 @@ def run_batch(env, batch_params):
     except Exception as e:
         # Created ir_attachments are handled by the rollback.
         # Created files are garbage collected.
-        cr.rollback()
-        logger.exception(e)
-        return ErrorReport("convertion to attachment", batch_params, e)
+        return abort_batch(cr, "convertion to attachment", batch_params, e)
 
     update_query = sql.SQL("""
         UPDATE {table}
@@ -206,9 +202,7 @@ def run_batch(env, batch_params):
     try:
         execute_values(cr._obj, update_query, new_rows, template)
     except Exception as e:
-        cr.rollback()
-        logger.exception(e)
-        return ErrorReport("UPDATE query", batch_params, e)
+        return abort_batch(cr, "UPDATE query", batch_params, e)
     else:
         cr.commit()
     
@@ -289,6 +283,11 @@ def convert(env, res_model, rows, id_to_res_id):
         new_rows.append((id, new_content))
         report['delta_size'] += delta_size
     return new_rows, report
+
+def abort_batch(cr, step_description, batch_params, exception):
+    cr.rollback()
+    logger.exception(exception)
+    return ErrorReport(step_description, batch_params, exception)
 
 def from_jsonb(rows):
     """
