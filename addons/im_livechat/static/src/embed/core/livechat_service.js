@@ -34,6 +34,7 @@ export const ODOO_VERSION_KEY = `${location.origin.replace(
 )}_im_livechat.odoo_version`;
 
 export class LivechatService {
+    ODOO_VERSION_KEY = `${location.origin.replace(/:\/{0,2}/g, "_")}_im_livechat.odoo_version`;
     SESSION_COOKIE = "im_livechat_session";
     OPERATOR_COOKIE = "im_livechat_previous_operator_pid";
     /** @type {keyof typeof SESSION_STATE} */
