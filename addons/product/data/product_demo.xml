@@ -336,6 +336,43 @@
             <field name="image_1920" type="base64" file="product/static/img/product_product_10-image.jpg"/>
         </record>
 
+        <!-- Products with Sale Price 0 -->
+        <record id="product_product_zero_cost_1" model="product.product">
+            <field name="name">Plumbing Valves</field>
+            <field name="categ_id" ref="product_category_5"/>
+            <field name="standard_price">0</field>
+            <field name="list_price">0</field>
+            <field name="detailed_type">consu</field>
+            <field name="weight">1</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="uom_po_id" ref="uom.product_uom_unit"/>
+            <field name="image_1920" type="base64" file="product/static/img/product_product_plumbing_valves_product.jpg"/>
+        </record>
+        
+        <record id="product_product_zero_cost_2" model="product.product">
+            <field name="name">Safety Gears</field>
+            <field name="categ_id" ref="product_category_5"/>
+            <field name="standard_price">0</field>
+            <field name="list_price">0</field>
+            <field name="detailed_type">consu</field>
+            <field name="weight">1</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="uom_po_id" ref="uom.product_uom_unit"/>
+            <field name="image_1920" type="base64" file="product/static/img/product_product_safety_gears_product.jpg"/>
+        </record>
+        
+        <record id="product_product_zero_cost_3" model="product.product">
+            <field name="name">Water Testing Kits</field>
+            <field name="categ_id" ref="product_category_5"/>
+            <field name="standard_price">0</field>
+            <field name="list_price">0</field>
+            <field name="detailed_type">consu</field>
+            <field name="weight">1</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="uom_po_id" ref="uom.product_uom_unit"/>
+            <field name="image_1920" type="base64" file="product/static/img/product_product_water_testing_kits_product.jpg"/>
+        </record>
+
         <record id="product_product_11_product_template" model="product.template">
             <field name="name">Conference Chair</field>
             <field name="categ_id" ref="product_category_5"/>
