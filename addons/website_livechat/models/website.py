@@ -3,6 +3,7 @@
 
 from odoo import fields, models, _
 from odoo.addons.http_routing.models.ir_http import url_for
+from odoo.addons.mail.tools.mail_guest import set_guest_cookie
 
 
 class Website(models.Model):
@@ -44,6 +45,11 @@ class Website(models.Model):
                 ('has_message', '=', True)
             ], order='create_date desc', limit=1)
             if chat_request_channel:
+                guest = self.env['mail.guest']._get_guest_from_context()
+                if not guest:
+                    guest = chat_request_channel.channel_member_ids.filtered(lambda m: m.guest_id).guest_id
+                    if guest:
+                        set_guest_cookie(guest)
                 return {
                     "folded": False,
                     "id": chat_request_channel.id,

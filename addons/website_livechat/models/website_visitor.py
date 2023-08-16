@@ -7,6 +7,7 @@ from odoo import api, Command, fields, models, _
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.tools.sql import column_exists, create_column
+from odoo.addons.mail.tools.mail_guest import find_or_create_guest_for_channel
 
 
 class WebsiteVisitor(models.Model):
@@ -68,8 +69,6 @@ class WebsiteVisitor(models.Model):
             members_to_add = [Command.link(operator.partner_id.id)]
             if visitor.partner_id:
                 members_to_add.append(Command.link(visitor.partner_id.id))
-            else:
-                members_to_add.append(Command.link(self.env.ref('base.public_partner').id))
             discuss_channel_vals_list.append({
                 'channel_partner_ids': members_to_add,
                 'livechat_channel_id': visitor.website_id.channel_id.id,
@@ -81,8 +80,16 @@ class WebsiteVisitor(models.Model):
                 'livechat_visitor_id': visitor.id,
                 'livechat_active': True,
             })
-        if discuss_channel_vals_list:
             discuss_channels = self.env['discuss.channel'].create(discuss_channel_vals_list)
+            for channel in discuss_channels:
+                if not channel.livechat_visitor_id.partner_id:
+                    find_or_create_guest_for_channel(
+                        channel,
+                        country_id=country.id,
+                        timezone=visitor.timezone,
+                        guest_name=_("Visitor #%d") % channel.livechat_visitor_id.id,
+                        post_joined_message=False
+                    )
             # Open empty chatter to allow the operator to start chatting with the visitor.
             channel_members = self.env['discuss.channel.member'].sudo().search([
                 ('partner_id', '=', self.env.user.partner_id.id),

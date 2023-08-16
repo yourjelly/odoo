@@ -6,9 +6,7 @@ QUnit.module("messaging service (patch)");
 
 QUnit.test("Should open chat window on send chat request to website visitor", async (assert) => {
     const pyEnv = await startServer();
-    const visitorId = pyEnv["website.visitor"].create({
-        display_name: "Visitor #11",
-    });
+    const visitorId = pyEnv["website.visitor"].create({});
     const { env, openFormView } = await start({
         serverData: {
             views: {
@@ -36,5 +34,5 @@ QUnit.test("Should open chat window on send chat request to website visitor", as
     });
     assert.containsOnce($, ".o-mail-ChatWindow");
     assert.ok(document.activeElement, $(".o-mail-ChatWindow .o-mail-Composer-input")[0]);
-    assert.strictEqual($(".o-mail-ChatWindow-name").text(), "Visitor #11");
+    assert.strictEqual($(".o-mail-ChatWindow-name").text(), `Visitor #${visitorId}`);
 });
