@@ -42,19 +42,17 @@ class TestGetDiscussChannel(TestImLivechatCommon):
 
         # ensure member info are hidden (in particular email and real name when livechat username is present)
         # shape of channelMembers is [('insert', data...)], [0][1] accesses the data
-        self.assertEqual(sorted(map(lambda m: m['persona']['partner'], channel_info['channel']['channelMembers'][0][1]), key=lambda m: m['id']), sorted([{
+        self.assertEqual(sorted((m['persona'].get('partner', m['persona'].get('guest')) for m in channel_info['channel']['channelMembers'][0][1]), key=lambda m: m['id']), sorted([{
+            'id': self.env['discuss.channel'].browse(channel_info['id']).channel_member_ids.filtered(lambda m: m.guest_id)[0].guest_id.id,
+            'name': 'Visitor',
+            'im_status': 'offline',
+        }, {
             'active': True,
             'country': [['clear']],
             'id': operator.partner_id.id,
             'is_bot': False,
             'is_public': False,
             'user_livechat_username': 'Michel Operator',
-        }, {
-            'active': False,
-            'id': public_user.partner_id.id,
-            'is_bot': False,
-            'is_public': True,
-            'name': 'Public user',
         }], key=lambda m: m['id']))
 
         # ensure visitor info are correct with real user

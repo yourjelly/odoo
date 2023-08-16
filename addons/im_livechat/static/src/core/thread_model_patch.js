@@ -69,7 +69,7 @@ patch(Thread.prototype, {
         if (this.type !== "livechat") {
             return super.imgUrl;
         }
-        return this.correspondent && !this.correspondent.is_public
+        return this.correspondent && this.correspondent.type !== "guest"
             ? `/web/image/res.partner/${this.correspondent.id}/avatar_128`
             : DEFAULT_AVATAR;
     },
@@ -84,9 +84,6 @@ patch(Thread.prototype, {
         }
         if (persona.user_livechat_username) {
             return persona.user_livechat_username;
-        }
-        if (persona.is_public && this.anonymous_name) {
-            return this.anonymous_name;
         }
         return super.getMemberName(persona);
     },

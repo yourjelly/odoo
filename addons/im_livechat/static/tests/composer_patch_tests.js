@@ -2,6 +2,7 @@
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
+import { Command } from "@mail/../tests/helpers/command";
 import {
     afterNextRender,
     click,
@@ -45,11 +46,12 @@ QUnit.test("Attachment upload via drag and drop disabled", async (assert) => {
 
 QUnit.test("Can execute help command on livechat channels", async (assert) => {
     const pyEnv = await startServer();
+    const guestId = pyEnv["mail.guest"].create({ name: "Visitor 11" });
     pyEnv["discuss.channel"].create({
         anonymous_name: "Visitor 11",
         channel_member_ids: [
             [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: pyEnv.publicPartnerId }],
+            Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
         livechat_operator_id: pyEnv.currentPartnerId,
@@ -72,11 +74,12 @@ QUnit.test("Can execute help command on livechat channels", async (assert) => {
 
 QUnit.test('Receives visitor typing status "is typing"', async (assert) => {
     const pyEnv = await startServer();
+    const guestId = pyEnv["mail.guest"].create({ name: "Visitor 20" });
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Visitor 20",
         channel_member_ids: [
             [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: pyEnv.publicPartnerId }],
+            Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
         livechat_operator_id: pyEnv.currentPartnerId,
@@ -87,7 +90,7 @@ QUnit.test('Receives visitor typing status "is typing"', async (assert) => {
     const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
     // simulate receive typing notification from livechat visitor "is typing"
     await afterNextRender(() =>
-        pyEnv.withUser(pyEnv.publicUserId, () =>
+        pyEnv.withGuest(guestId, () =>
             env.services.rpc("/im_livechat/notify_typing", {
                 is_typing: true,
                 uuid: channel.uuid,
@@ -99,11 +102,12 @@ QUnit.test('Receives visitor typing status "is typing"', async (assert) => {
 
 QUnit.test('display canned response suggestions on typing ":"', async () => {
     const pyEnv = await startServer();
+    const guestId = pyEnv["mail.guest"].create({ name: "Mario" });
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Mario",
         channel_member_ids: [
             [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: pyEnv.publicPartnerId }],
+            Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
         livechat_operator_id: pyEnv.currentPartnerId,
@@ -122,11 +126,12 @@ QUnit.test('display canned response suggestions on typing ":"', async () => {
 
 QUnit.test("use a canned response", async (assert) => {
     const pyEnv = await startServer();
+    const guestId = pyEnv["mail.guest"].create({ name: "Mario" });
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Mario",
         channel_member_ids: [
             [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: pyEnv.publicPartnerId }],
+            Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
         livechat_operator_id: pyEnv.currentPartnerId,
@@ -152,11 +157,12 @@ QUnit.test("use a canned response", async (assert) => {
 
 QUnit.test("use a canned response some text", async (assert) => {
     const pyEnv = await startServer();
+    const guestId = pyEnv["mail.guest"].create({ name: "Mario" });
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Mario",
         channel_member_ids: [
             [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: pyEnv.publicPartnerId }],
+            Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
         livechat_operator_id: pyEnv.currentPartnerId,
@@ -184,11 +190,12 @@ QUnit.test("use a canned response some text", async (assert) => {
 
 QUnit.test("add an emoji after a canned response", async (assert) => {
     const pyEnv = await startServer();
+    const guestId = pyEnv["mail.guest"].create({ name: "Visitor 20" });
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Visitor 20",
         channel_member_ids: [
             [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: pyEnv.publicPartnerId }],
+            Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
         livechat_operator_id: pyEnv.currentPartnerId,

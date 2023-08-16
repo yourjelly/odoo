@@ -240,7 +240,7 @@ class Channel(models.Model):
             partner_ids_to_add = partner_ids
             # always add current user to new channel to have right values for
             # is_pinned + ensure they have rights to see channel
-            if not self.env.context.get('install_mode'):
+            if not self.env.context.get('install_mode') and not self.env.user._is_public():
                 partner_ids_to_add = list(set(partner_ids + [self.env.user.partner_id.id]))
             vals['channel_member_ids'] = membership_ids_cmd + [
                 (0, 0, {'partner_id': pid})
@@ -406,8 +406,9 @@ class Channel(models.Model):
                         notification = (Markup('<div class="o_mail_notification">%s</div>') % _("invited %s to the channel")) % member.partner_id._get_html_link()
                     member.channel_id.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
             for member in new_members.filtered(lambda member: member.guest_id):
-                member.channel_id.message_post(body=Markup('<div class="o_mail_notification">%s</div>') % _('joined the channel'),
-                    message_type="notification", subtype_xmlid="mail.mt_comment")
+                if post_joined_message:
+                    member.channel_id.message_post(body=Markup('<div class="o_mail_notification">%s</div>') % _('joined the channel'),
+                        message_type="notification", subtype_xmlid="mail.mt_comment")
                 guest = member.guest_id
                 if guest:
                     notifications.append((guest, 'discuss.channel/joined', {

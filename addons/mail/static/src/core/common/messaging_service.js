@@ -59,8 +59,8 @@ export class Messaging {
     /**
      * Import data received from init_messaging
      */
-    initialize() {
-        this.rpc("/mail/init_messaging", {}, { silent: true }).then(
+    async initialize() {
+        await this.rpc("/mail/init_messaging", {}, { silent: true }).then(
             this.initMessagingCallback.bind(this)
         );
     }
