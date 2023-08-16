@@ -414,14 +414,19 @@ def generate_agg_report(reports, failed_batches):
         'total_delta_size_MB': 0,
         'batch_reports': reports,
     }
-    for report in (r for r in reports if isinstance(r, SuccessReport)):
-        res_model, table, field, data_type, ids = report.batch_params
+
+    # Avoid using defaultdict so stats can be pickled.
+    def get_default_dict(res_model, field):
         if (res_model, field) not in stats['fields']:
             stats['fields'][(res_model, field)] = {
-            'updated_records': [],
-            'delta_size_MB': 0,
-            'failed_to_update_records': []
-        }
+                'updated_records': [],
+                'delta_size_MB': 0,
+                'failed_to_update_records': []
+            }
+
+    for report in (r for r in reports if isinstance(r, SuccessReport)):
+        res_model, table, field, data_type, ids = report.batch_params
+        get_default_dict(res_model, field)
         stats['fields'][(res_model, field)]['updated_records'].extend(report.updated_record_ids)
         stats['fields'][(res_model, field)]['delta_size_MB'] += report.delta_size_MB
         stats['ir_attachments_created'].extend(report.created_ir_attachment_ids)
@@ -429,6 +434,7 @@ def generate_agg_report(reports, failed_batches):
     
     for batch_params in failed_batches:
         res_model, table, field, data_type, ids = batch_params
+        get_default_dict(res_model, field)
         stats['fields'][(res_model, field)]['failed_to_update_records'].extend(ids)
 
     log_agg_report(stats)
