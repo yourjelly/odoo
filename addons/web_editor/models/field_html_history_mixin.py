@@ -3,128 +3,100 @@
 
 from odoo import fields, models, _
 
+from patch_utils import apply_patch, generate_comparison, generate_patch
+
 
 class HtmlHistory(models.AbstractModel):
     _name = "field.html.history.mixin"
     _description = "Field html History"
 
-    history_diff_ids = fields.One2many(
-        "field.html.history.diff", "related_id", string="Body History",
+    history_revision_ids = fields.One2many(
+        "field.html.history.revision", "res_id", string="Related revision Ids",
         copy=True)
 
-    def _get_html_history_field_name(self):
-        """ This method should be overriden to return the name of the field to track """
-        return False
+    def _get_versioned_field_names(self):
+        """ This method should be overriden
+
+            :return: list: The names of the fields to track
+        """
+        return []
 
     def write(self, vals):
-        history_field_name = self._get_html_history_field_name()
-        if history_field_name and history_field_name in vals:
-            new_body_str = vals[history_field_name]
+        versioned_fields = self._get_versioned_field_names()
+        for field_name in versioned_fields:
+            if field_name not in vals:
+                continue
 
-            if self.id and isinstance(new_body_str, str):
-                old_body_str = getattr(self, history_field_name)
-                if isinstance(old_body_str, str) and new_body_str != old_body_str:
-                    diff = self.env['field.html.history.diff'].get_diff(new_body_str, old_body_str)
-                    self.env['field.html.history.diff'].create({"related_id": self.id,
-                                                                "related_model": self._name,
-                                                                "diff": diff})
+            new_content = vals[field_name]
+            if self.id and isinstance(new_content, str):
+                old_content = getattr(self, field_name)
+                if isinstance(old_content, str) and new_content != old_content:
+                    patch = generate_patch(new_content, old_content)
+                    self.env['field.html.history.revision'].create({
+                        "res_id": self.id,
+                        "res_model": self._name,
+                        "res_field": field_name,
+                        "patch": patch})
 
         return super().write(vals)
 
     def unlink(self):
-        """ This override will delete all HtmlHistoryDiff related to this document """
-        self.env['field.html.history.diff'].search([('related_id', 'in', self.ids)]).unlink()
+        """ Delete all HtmlHistoryDiff related to this document """
+        # todo : look into the possibility of using cascade delete
+        # on the one2manyreference field in field.html.history.revision
+        self.env['field.html.history.revision'].search(
+            [('res_id', 'in', self.ids)]).unlink()
         return super().unlink()
 
-    # ------------------------------------------------------------
-    # VIEW ACTIONS
-    # ------------------------------------------------------------
+    def get_revisions_for_field(self, field_name):
+        """ Get the list of revision linked to the provided field name.
+            Order from the most recent to the oldest.
 
-    def action_related_history(self):
-        self.ensure_one()
-        return {
-            'name': _("Related History"),
-            'type': 'ir.actions.act_window',
-            'view_mode': 'tree,form',
-            'res_model': "field.html.history.diff",
-            'domain': [('id', 'in', self.history_diff_ids.ids)]
-        }
+            :param str field_name: the name of the field
 
-    # ------------------------------------------------------------
-    # History List
-    # ------------------------------------------------------------
-
-    def get_history_list(self):
-        """
-        Get the list of history diff for the current article.
-        Order from the most recent to the oldest.
-        :return: list of history diff
+            :return: list: list of revision
         """
         self.ensure_one()
-        return self.env['field.html.history.diff'].search(
-            [('related_id', '=', self.id),
-             ('related_model', '=', self._name)], order='id desc')
+        return self.env['field.html.history.revision'].search(
+            [('res_id', '=', self.id),
+             ('res_model', '=', self._name),
+             ('res_field', '=', field_name)], order='id desc')
 
+    def get_field_content_at_revision(self, field_name, revision_id):
+        """ Get the requested field content restored until the revision_id.
 
-    # ------------------------------------------------------------
-    # HISTORY Restoring
-    # ------------------------------------------------------------
+            :param str field_name: the name of the field
+            :param int revision_id: id of the last revision to restore
 
-    def get_version_at(self, diff_id):
-        """
-        Get the current article version at a given time.
-        :param int diff_id: id of the version diff to restore to
-        """
-        self.ensure_one()
-        history_field_name = self._get_html_history_field_name()
-
-        diff_to_restore = self.env['field.html.history.diff'].search(
-            [('related_id', '=', self.id),
-             ('related_model', '=', self._name),
-             ('id', '>=', diff_id)], order='id desc')
-        if len(diff_to_restore) > 0 and history_field_name:
-            restored_content = self.env['field.html.history.diff'].get_restored_version(
-                getattr(self, history_field_name), diff_to_restore)
-            return restored_content
-        return False
-
-    def restore_history_to(self, diff_id):
-        """
-        Restore the current article to a previous version.
-        :param int diff_id: id of the version diff to restore to
+            :return: string: the restored content
         """
         self.ensure_one()
-        restored_content = self.get_version_at(diff_id)
-        if restored_content:
-            self.write({self._get_html_history_field_name(): restored_content})
+        revisions = self.env['field.html.history.revision'].search(
+            [('res_id', '=', self.id),
+             ('res_model', '=', self._name),
+             ('res_field', '=', field_name),
+             ('id', '>=', revision_id)], order='id desc')
 
-        return {
-            'name': _("Restored content"),
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': self._name,
-            'res_id': self.id
-        }
+        content = getattr(self, field_name)
 
-    # ------------------------------------------------------------
-    # HISTORY comparison
-    # ------------------------------------------------------------
+        for revision in revisions:
+            content = apply_patch(content, revision.patch) # todo : check if revision.patch make sence / works
 
-    def get_version_comparison_at(self, diff_id):
-        """
-        Get a comparison between the current version and the version at diff_id
-        :param int diff_id: id of the version diff to restore to
+        return content
+
+    def get_field_comparison_at_revision(self, field_name, revision_id):
+        """ For the requested field,
+            Get a comparison between the current content
+            and the content at the restored until the revision_id.
+
+            :param str field_name: the name of the field
+            :param int revision_id: id of the last revision to compare
+
+            :return: string: the comparison
         """
         self.ensure_one()
-        history_field_name = self._get_html_history_field_name()
+        content = getattr(self, field_name)
+        restored_content = self.get_field_content_at_revision(
+            field_name, revision_id)
 
-        diff_to_restore = self.env['field.html.history.diff'].search(
-            [('related_id', '=', self.id),
-             ('related_model', '=', self._name),
-             ('id', '>=', diff_id)], order='id desc')
-        if len(diff_to_restore) > 0 and history_field_name:
-            comparison = self.env['field.html.history.diff'].\
-                get_comparison_version(getattr(self, history_field_name),
-                                       diff_to_restore)
-            return comparison
-        return False
+        return generate_comparison(content, restored_content)
