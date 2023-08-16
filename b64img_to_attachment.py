@@ -168,8 +168,14 @@ def run_batch(env, batch_params):
     cr.execute(select_query, [ids])
     rows = cr.fetchall()
 
-    # jsonb fields need to be adapted.
-    rows = from_jsonb(rows) if data_type == 'jsonb' else rows
+    try:
+        # Adapt jsonb to [((res_id, lang), content)] format.
+        rows = from_jsonb(rows) if data_type == 'jsonb' else rows
+    except ValueError as e:
+        cr.rollback()
+        logger.exception(e)
+        return ErrorReport("jsonb data adaptation", batch_params, e)
+
     id_to_res_id = (lambda id: id[0]) if data_type == 'jsonb' else lambda id: id
 
     try:
@@ -292,8 +298,16 @@ def from_jsonb(rows):
     [(1, {'en_US': 'abc', 'fr_BE': 'def'})] -> [((1, 'en_US'), 'abc'), 
                                                 ((1, 'fr_BE'), 'def')]
     """
-    return [((id, lang), content) for id, obj in rows
-                                    for lang, content in obj.items()]
+    # Validate data format.
+    adapted_rows = []
+    for res_id, translations_dict in rows:
+        if not isinstance(translations_dict, dict):
+            raise ValueError("Unexpected format for jsonb data, expected dict")
+        for lang, content in translations_dict.items():
+            if not isinstance(content, str):
+                raise ValueError("Unexpected format for jsonb data, expected str as dict value")
+            adapted_rows.append(((res_id, lang), content))
+    return adapted_rows
 
 def to_jsonb(rows):
     """
