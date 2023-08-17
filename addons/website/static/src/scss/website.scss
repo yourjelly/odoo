@@ -151,6 +151,13 @@ $-seen-urls: ();
         $custom-colors: append($custom-colors, $key);
     }
     @include print-variable('custom-colors', $custom-colors);
+
+    // Border color
+    // Set a default border-color to be eventually overridden by color-presets.
+    // By default this value should match $border-color's fallback in order to
+    // keep consistent visual result across BS components, utility classes
+    // and custom odoo classes (eg s_hr).
+    @include print-variable('o-border-color', o-color('300'));
 }
 
 #wrapwrap {
@@ -2485,4 +2492,8 @@ input[value*="data-oe-translation-initial-sha"] {
 // Odoo dropdown menu
 .o_dropdown_menu {
     @extend .dropdown-menu;
+}
+
+.o_table tr {
+    border-color: $table-border-color;
 }
