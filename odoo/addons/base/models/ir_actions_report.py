@@ -750,8 +750,19 @@ class IrActionsReport(models.Model):
             # we look on the pdf structure using pypdf to compute the outlines_pages from
             # the top level heading in /Outlines.
             html_ids_wo_none = [x for x in html_ids if x]
+            reader = PdfFileReader(pdf_content_stream)
+            if reader.numPages == len(res_ids_wo_stream):
+                for i in range(0, reader.numPages):
+                    attachment_writer = PdfFileWriter()
+                    attachment_writer.addPage(reader.getPage(i))
+                    stream = io.BytesIO()
+                    attachment_writer.write(stream)
+                    collected_streams[res_ids[i]]['stream'] = stream
+                return collected_streams
+
             if len(res_ids_wo_stream) > 1 and set(res_ids_wo_stream) == set(html_ids_wo_none):
                 reader = PdfFileReader(pdf_content_stream)
+
                 root = reader.trailer['/Root']
                 has_valid_outlines = '/Outlines' in root and '/First' in root['/Outlines']
                 if not has_valid_outlines:
