@@ -300,6 +300,7 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
         fieldInfo.isHandle = true;
     }
 
+    // sgv note, seems that fields are not read here
     if (X2M_TYPES.includes(fields[name].type)) {
         const views = {};
         let relatedFields = fieldInfo.field.relatedFields;

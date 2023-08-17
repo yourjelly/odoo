@@ -41,4 +41,5 @@ export const resumeX2ManyField = {
     component: ResumeX2ManyField,
 };
 
+
 registry.category("fields").add("resume_one2many", resumeX2ManyField);
