@@ -6,6 +6,7 @@ import { formatDate } from "@web/core/l10n/dates";
 
 import { SkillsX2ManyField, skillsX2ManyField } from "./skills_one2many";
 import { CommonSkillsListRenderer } from "../views/skills_list_renderer";
+import { x2ManyField, X2ManyField } from "@web/views/fields/x2many/x2many_field";
 
 export class ResumeListRenderer extends CommonSkillsListRenderer {
     get groupBy() {
@@ -29,16 +30,17 @@ ResumeListRenderer.template = 'hr_skills.ResumeListRenderer';
 ResumeListRenderer.rowsTemplate = "hr_skills.ResumeListRenderer.Rows";
 ResumeListRenderer.recordRowTemplate = "hr_skills.ResumeListRenderer.RecordRow";
 
-
 export class ResumeX2ManyField extends SkillsX2ManyField {}
 ResumeX2ManyField.components = {
     ...SkillsX2ManyField.components,
     ListRenderer: ResumeListRenderer,
+    relatedFields: false,
 };
 
 export const resumeX2ManyField = {
     ...skillsX2ManyField,
     component: ResumeX2ManyField,
 };
+
 
 registry.category("fields").add("resume_one2many", resumeX2ManyField);

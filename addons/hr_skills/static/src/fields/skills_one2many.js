@@ -44,6 +44,10 @@ SkillsX2ManyField.components = {
 export const skillsX2ManyField = {
     ...x2ManyField,
     component: SkillsX2ManyField,
+    relatedFields: [
+        { name: "skill_type_id", type: "many2one" },
+    ],
+
 };
 
 registry.category("fields").add("skills_one2many", skillsX2ManyField);
