@@ -699,7 +699,7 @@ def posix_to_ldml(fmt, locale):
 
     return ''.join(buf)
 
-def split_every(n, iterable, piece_maker=tuple):
+def split_every(n, iterable, piece_maker=lambda x: x):
     """Splits an iterable into length-n pieces. The last piece will be shorter
        if ``n`` does not evenly divide the iterable length.
 
