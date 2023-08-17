@@ -3,7 +3,7 @@
 
 from odoo import fields, models, _
 
-from patch_utils import apply_patch, generate_comparison, generate_patch
+from .patch_utils import apply_patch, generate_comparison, generate_patch
 
 
 class HtmlHistory(models.AbstractModel):
@@ -17,7 +17,7 @@ class HtmlHistory(models.AbstractModel):
     def _get_versioned_field_names(self):
         """ This method should be overriden
 
-            :return: list: The names of the fields to track
+            :return: list[string]: The names of the fields to be versioned
         """
         return []
 
@@ -33,17 +33,15 @@ class HtmlHistory(models.AbstractModel):
                 if isinstance(old_content, str) and new_content != old_content:
                     patch = generate_patch(new_content, old_content)
                     self.env['field.html.history.revision'].create({
-                        "res_id": self.id,
-                        "res_model": self._name,
-                        "res_field": field_name,
-                        "patch": patch})
+                        'res_id': self.id,
+                        'res_model': self._name,
+                        'res_field': field_name,
+                        'patch': patch})
 
         return super().write(vals)
 
     def unlink(self):
         """ Delete all HtmlHistoryDiff related to this document """
-        # todo : look into the possibility of using cascade delete
-        # on the one2manyreference field in field.html.history.revision
         self.env['field.html.history.revision'].search(
             [('res_id', 'in', self.ids)]).unlink()
         return super().unlink()
@@ -80,7 +78,9 @@ class HtmlHistory(models.AbstractModel):
         content = getattr(self, field_name)
 
         for revision in revisions:
-            content = apply_patch(content, revision.patch) # todo : check if revision.patch make sence / works
+            print("============================ revision =====================")
+            print(revision)
+            content = apply_patch(content, revision.patch) # todo : make sure revision.patch works
 
         return content
 

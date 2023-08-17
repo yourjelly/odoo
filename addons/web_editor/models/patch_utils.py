@@ -42,6 +42,7 @@ def apply_patch(initial_content, patch):
 
         :return: string: the patched content
     """
+    print("    > apply_patch :" + str(patch))
     content = initial_content.split(LINE_SEPARATOR)
     patch_operations = patch.split(OPERATION_SEPARATOR)
     # We need to apply operation from last to the first
@@ -55,9 +56,9 @@ def apply_patch(initial_content, patch):
             PATCH_OPERATION_LINE_AT)
         # We need to remove PATCH_OPERATION_CONTENT char from lines_index_range.
         lines_index_range = lines_index_range.split(PATCH_OPERATION_CONTENT)[0]
-        start_index, end_index = lines_index_range.split(',')
-        start_index = int(start_index)
-        end_index = int(end_index) if end_index else start_index
+        indexes = lines_index_range.split(',')
+        start_index = int(indexes[0])
+        end_index = int(indexes[1]) if len(indexes) > 1 else start_index
 
         # We need to insert lines from last to the first
         # to preserve the indexes integrity.
@@ -106,9 +107,9 @@ def generate_comparison(new_content, old_content):
             PATCH_OPERATION_LINE_AT)
         # We need to remove PATCH_OPERATION_CONTENT char from lines_index_range.
         lines_index_range = lines_index_range.split(PATCH_OPERATION_CONTENT)[0]
-        start_index, end_index = lines_index_range.split(',')
-        start_index = int(start_index)
-        end_index = int(end_index) if end_index else start_index
+        indexes = lines_index_range.split(',')
+        start_index = int(indexes[0])
+        end_index = int(indexes[1]) if len(indexes) > 1 else start_index
 
         # We need to insert lines from last to the first
         # to preserve the indexes integrity.

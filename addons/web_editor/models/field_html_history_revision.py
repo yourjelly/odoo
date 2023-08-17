@@ -13,6 +13,17 @@ class HtmlHistoryRevision(models.Model):
     res_model = fields.Char('Related Document Model Name',
                             required=True, index=True)
     res_id = fields.Many2oneReference('Related Document ID',
-                                      index=True, model_field='res_model')
+                                      index=True,
+                                      model_field='res_model')
 
     patch = fields.Text(string="Diff", readonly=True)
+
+    def get_content(self):
+        return self.env[self.res_model].browse(
+            [self.res_id]
+        ).get_field_content_at_revision(self.res_field, self.id)
+
+    def get_comparison(self):
+        return self.env[self.res_model].browse(
+            [self.res_id]
+        ).get_field_comparison_at_revision(self.res_field, self.id)
