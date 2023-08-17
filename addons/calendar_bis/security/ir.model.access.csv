@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+calendar_bis.access_calendar_event_private,access_calendar_event_private,calendar_bis.model_calendar_event_private,base.group_user,1,1,1,1
+calendar_bis.access_calendar_timeslot,access_calendar_timeslot,calendar_bis.model_calendar_timeslot,base.group_user,1,1,1,1
+calendar_bis.access_calendar_attendee,access_calendar_attendee,calendar_bis.model_calendar_attendee,base.group_user,1,1,1,1

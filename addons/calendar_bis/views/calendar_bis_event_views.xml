@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="calendar_bis_event_calendar" model="ir.ui.view">
+        <field name="name">calendar_bis.calendar.event.calendar</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <calendar string="Meetings" mode="month" date_start="start" date_stop="stop" date_delay="duration" color="partner_id" quick_create="0">
+                <field name="name" string="Subject" decoration-bf="1" readonly="1"/>
+                <field name="partner_id" widget="many2one_avatar_user" readonly="1"/>
+                <field name="attendee_ids" widget="many2many_tags" readonly="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Calendar Events : Views and Actions  -->
+    <record id="calendar_bis_event_tree" model="ir.ui.view">
+        <field name="name">calendar_bis.calendar.event.tree</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <tree string="Meetings" sample="1">
+                <field name="can_write" invisible="1"/>
+                <field name="name" string="Subject" decoration-bf="1" readonly="not can_write"/>
+                <field name="start" string="Start Date" readonly="not can_write"/>
+                <field name="stop" string="End Date" readonly="not can_write"/>
+                <field name="duration" string="Duration" widget="float_time" optional="hide" readonly="not can_write"/>
+                <field name="partner_id" widget="many2one_avatar_user" readonly="not can_write" optional="hide"/>
+                <field name="attendee_ids" widget="many2many_tags" readonly="not can_write" optional="show"/>
+                <field name="is_public" optional="hide" readonly="not can_write"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="calendar_bis_event_form" model="ir.ui.view">
+        <field name="name">calendar_bis.calendar_event.form</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <form string="Meetings">
+                <sheet>
+                    <field name="can_write" invisible="1"/>
+                    <field name="can_read_private" invisible="1"/>
+                    <field name="name" string="Subject" decoration-bf="1" readonly="not can_write"/>
+                    <group string="Public" readonly="not can_write">
+                        <field name="start" string="Start Date" required="1"/>
+                        <field name="stop" string="End Date" required="1"/>
+                        <field name="duration" string="Duration" widget="float_time"/>
+                        <field name="is_public"/>
+                    </group>
+                    <group string="Private" readonly="not can_write" invisible="not can_read_private">
+                        <field name="partner_id"/>
+                        <field name="attendee_ids" widget="many2many_tags"/>
+                        <field name="note"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="calendar_bis_event_search" model="ir.ui.view">
+        <field name="name">calendar_bis.calendar.event.search</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <search string="Search Meetings">
+            </search>
+        </field>
+    </record>
+
+    <record id="action_calendar_event" model="ir.actions.act_window">
+        <field name="name">Meetings</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">calendar,tree,form</field>
+        <field name="view_id" ref="calendar_bis_event_calendar"/>
+        <field name="search_view_id" ref="calendar_bis_event_search"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No meetings found. Let's schedule one!
+          </p><p>
+            The calendar is shared between employees and fully integrated with
+            other applications such as the employee leaves or the business
+            opportunities.
+          </p>
+        </field>
+    </record>
+
+    <record id="action_calendar.event_calendar" model="ir.actions.act_window.view">
+        <field name="act_window_id" ref="action_calendar.event"/>
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="calendar_bis_event_calendar"/>
+    </record>
+
+    <record id="action_calendar.event_tree" model="ir.actions.act_window.view">
+        <field name="act_window_id" ref="action_calendar_event"/>
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="calendar_bis_event_tree"/>
+    </record>
+
+    <record id="action_calendar_event_form" model="ir.actions.act_window.view">
+        <field name="act_window_id" ref="action_calendar_event"/>
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="calendar_bis_event_form"/>
+    </record>
+
+    <menuitem id="mail_menu_calendar_bis"
+        name="Calendar"
+        sequence="10"
+        groups="base.group_user"
+              web_icon="calendar_bis,static/description/icon.png"/>
+
+    <menuitem
+        id="calendar_bis_event_menu"
+        name="Calendar"
+        sequence="10"
+        action="action_calendar_event"
+        parent="mail_menu_calendar_bis"
+        groups="base.group_user"/>
+</odoo>
