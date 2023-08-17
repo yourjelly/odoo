@@ -22,7 +22,8 @@
     }
     .s_alert_icon {
         float: left;
-        margin-right: 10px;
+        background-color: rgba($black, 10%); // Fallback
+        background-color: fade-currentColor(25%);
     }
     .s_alert_content {
         overflow: hidden;
