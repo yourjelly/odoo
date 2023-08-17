@@ -8,7 +8,7 @@ import { useDebounced } from "@web/core/utils/timing";
 import { scrollTo } from "@web/core/utils/scrolling";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { TagsList } from "@web/core/tags_list/tags_list";
-import { useAutofocus } from "@web/core/utils/hooks";
+import { useChildRef } from "@web/core/utils/hooks";
 
 export class SelectMenu extends Component {
     static template = "web.SelectMenu";
@@ -88,6 +88,7 @@ export class SelectMenu extends Component {
             searchValue: "",
         });
         this.inputRef = useRef("inputRef");
+        this.menuRef = useChildRef();
         this.debouncedOnInput = useDebounced(
             () => this.onInput(this.inputRef.el ? this.inputRef.el.value.trim() : ""),
             250
@@ -106,7 +107,18 @@ export class SelectMenu extends Component {
             },
             () => [this.props.choices, this.props.groups]
         );
-        useAutofocus({ refName: "inputRef" });
+
+        /**@type {import('../navigation/navigation.js').NavigationOptions} */
+        this.navigationOptions = {
+            virtualFocus: this.props.searchable,
+            onEnter: (index, items) => {
+                if (items.length === 1) {
+                    items[0].select();
+                } else {
+                    items[index]?.select();
+                }
+            },
+        };
     }
 
     get displayValue() {
@@ -141,8 +153,10 @@ export class SelectMenu extends Component {
 
     onOpened() {
         this.state.searchValue = "";
+        this.inputRef.el?.focus();
+        this.menuRef.el?.addEventListener("scroll", (ev) => this.onScroll(ev));
 
-        const selectedElement = document.querySelector(".o_select_active");
+        const selectedElement = this.menuRef.el?.querySelectorAll(".o_select_active")[0];
         if (selectedElement) {
             scrollTo(selectedElement);
         }
@@ -178,21 +192,6 @@ export class SelectMenu extends Component {
         }
         if (this.props.onInput) {
             this.executeOnInput(searchString);
-        }
-    }
-
-    onSearchKeydown(ev) {
-        if (ev.key === "ArrowDown" || ev.key === "Enter") {
-            // Focus the first choice when navigating from the input using the arrow down key
-            const target = ev.target.parentElement.querySelector(".o_select_menu_item");
-            ev.target.classList.remove("focus");
-            target?.classList.add("focus");
-            target?.focus();
-            ev.preventDefault();
-        }
-        if (ev.key === "Enter" && this.state.choices.length === 1) {
-            // When there is only one displayed option, the enter key selects the value
-            ev.target.parentElement.querySelector(".o_select_menu_item").click();
         }
     }
 
@@ -266,18 +265,6 @@ export class SelectMenu extends Component {
         }
 
         this.sliceDisplayedOptions();
-    }
-
-    /**
-     * Returns each group starting index.
-     * @param {[]} choices
-     * @returns {[]}
-     */
-    getGroupsIndex(choices) {
-        if (choices.length === 0) {
-            return [];
-        }
-        return choices.flatMap((choice, index) => (index === 0 ? 0 : choice.isGroup ? index : []));
     }
 
     // ==========================================================================================
