@@ -811,6 +811,12 @@ blockquote {
                     border-color: $-btn-primary-color;
                 }
             }
+
+            // Border
+            // Provide a fallback for browsers that don't support 'color-mix()'
+            // (used by the 'fade-currentColor()' function).
+            --o-border-color: #{o-color('300')};
+            --o-border-color: #{fade-currentColor()};
         }
     }
 }
