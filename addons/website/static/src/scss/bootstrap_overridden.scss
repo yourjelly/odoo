@@ -132,6 +132,10 @@ $h6-margin-bottom: o-website-value('h6-margin-bottom') or $headings-margin-botto
 
 $headings-color: o-color('o-cc1-headings') !default;
 
+$display-line-height: .9;
+
+$lead-font-size: o-website-value('font-size-base') * 1.2 !default;
+
 $font-weight-bold: 600 !default;
 
 $text-muted: mute-color($body-color) !default;

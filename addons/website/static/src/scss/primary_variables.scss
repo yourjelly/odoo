@@ -1949,17 +1949,35 @@ $o-selected-color-palettes-names: (
 );
 
 //------------------------------------------------------------------------------
+// Typography metric (Default)
+//------------------------------------------------------------------------------
+
+$o-typo-base-size: 1rem !default;
+$o-typo-base-baseline: 1.6 !default;
+$o-typo-base-spacing: $o-typo-base-size * $o-typo-base-baseline !default;
+
+$o-typo-heading-baseline: 1.1 !default;
+$o-typo-heading-spacing: $o-typo-base-size * 2 !default;
+
+//------------------------------------------------------------------------------
 // Website customizations
 //------------------------------------------------------------------------------
 
 $o-base-website-values-palette: (
-    'font-size-base': 1rem, // Need a set value as the value is used in bootstrap_overridden files
-    'body-line-height': 1.5,
-    'headings-line-height': 1.2,
+    'font-size-base': $o-typo-base-size,
+    'body-line-height': $o-typo-base-spacing, // it should be $o-typo-base-baseline: -> traceback
+    'headings-line-height': $o-typo-heading-baseline,
     'paragraph-margin-top': 0,
-    'paragraph-margin-bottom': 16px,
-    'headings-margin-top': 0,
-    'headings-margin-bottom': 0.5rem,
+    'paragraph-margin-bottom': $o-typo-base-spacing,
+    'headings-margin-top': $o-typo-base-spacing * 2,
+    'headings-margin-bottom': $o-typo-base-spacing,
+
+    'h1-margin-bottom': $o-typo-base-spacing,
+    'h2-margin-bottom': $o-typo-base-spacing,
+    'h3-margin-bottom': $o-typo-base-spacing,
+    'h4-margin-bottom': $o-typo-base-spacing,
+    'h5-margin-bottom': $o-typo-base-spacing * 0.5,
+    'h6-margin-bottom': $o-typo-base-spacing * 0.5,
 
     'google-fonts': null,
     'google-local-fonts': null,

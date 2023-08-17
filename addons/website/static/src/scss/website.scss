@@ -419,6 +419,12 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+@each $-name, $-size in $display-font-sizes {
+    .display-#{$-name} {
+        margin-bottom: $-size * 0.5;
+    }
+}
+
 .btn {
     @if ($o-theme-buttons-font != $o-theme-font) {
         font-family: $o-theme-buttons-font;
@@ -433,6 +439,14 @@ p {
 font[style*='background']:not(.text-gradient),
 font[class*='bg-'] {
     padding: 2px 6px 4px;
+}
+
+.lead {
+    $-bs-lead-ratio: 1.2; // Bootstrap '.lead' font-size multiplier.
+
+    // Use the multiplier to adapt according to user's preference.
+    line-height: o-website-value('body-line-height') * $-bs-lead-ratio;
+    margin-bottom: o-website-value('paragraph-margin-bottom') * $-bs-lead-ratio;
 }
 
 // Icons
