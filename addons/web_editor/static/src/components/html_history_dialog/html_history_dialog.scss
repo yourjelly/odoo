@@ -10,12 +10,14 @@
             padding-left: 24px;
         }
 
-        diffdel {
+        removed {
+            display: inline;
             background-color: #f1afaf;
             text-decoration: line-through;
             opacity: 0.5;
         }
-        diffadd {
+        added {
+            display: inline;
             background-color: #c8f1af;
         }
         p {

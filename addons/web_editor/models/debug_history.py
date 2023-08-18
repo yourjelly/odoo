@@ -28,24 +28,33 @@ def debug_generate_patch():
 
 def restore_all():
     patches = []
-    for i in range(len(mock_revisions)-1, 1, -1):
+    for i in range(len(mock_revisions)-1, 0, -1):
         patches.append(generate_patch(mock_revisions[i], mock_revisions[i-1]))
 
     restored = mock_revisions[-1]
+    restored_list = [restored]
     for patch in patches:
-        print('--------\napply_patch loop')
-        print('before :')
-        print(restored)
         restored = apply_patch(restored, patch)
-        print('after :')
-        print(restored)
+        restored_list.insert(0, restored)
+
+    for i in range(len(restored_list)):
+        print('\n  >>' + str(i) + ' : ' + str(restored_list[i] == mock_revisions[i]))
+        print(restored_list[i])
+        print(mock_revisions[i])
+
+
+def compare_one():
+    comparison = generate_comparison(mock_revisions[1], mock_revisions[0])
+    print(comparison)
 
 
 def main():
     # print('--------\ndebug_generate_patch')
     # debug_generate_patch()
-    print('--------\nrestore_all')
-    restore_all()
+    # print('--------\nrestore_all')
+    # restore_all()
+    print('--------\ncompare_one')
+    compare_one()
 
 
 if __name__ == '__main__':

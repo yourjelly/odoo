@@ -42,8 +42,8 @@ def apply_patch(initial_content, patch):
 
         :return: string: the patched content
     """
-    print("    > apply_patch :" + str(patch))
     content = initial_content.split(LINE_SEPARATOR)
+    print("       ? content line :" + str(content))
     patch_operations = patch.split(OPERATION_SEPARATOR)
     # We need to apply operation from last to the first
     # to preserve the indexes integrity.
@@ -80,8 +80,9 @@ def apply_patch(initial_content, patch):
 
 
 HTML_TAG_ISOLATION_REGEX = r'^([^>]*>)(.*)$'
-ADDITION_COMPARISON_REGEX = r'\1<diffadd>\2</diffadd>'
-DELETION_COMPARISON_REGEX = r'\1<diffdel>\2</diffdel>'
+ADDITION_COMPARISON_REGEX = r'\1<added>\2</added>'
+DELETION_COMPARISON_REGEX = r'\1<removed>\2</removed>'
+EMPTY_OPERATION_TAG = r'<(added|removed)><\/(added|removed)>'
 
 
 def generate_comparison(new_content, old_content):
@@ -93,14 +94,22 @@ def generate_comparison(new_content, old_content):
 
         :return: string: the comparison content
     """
+    print("    > generate_comparison")
+    print("    > old_content :" + str(old_content))
+    print("    > new_content :" + str(new_content))
     patch = generate_patch(new_content, old_content)
+    print("    > patch :" + str(patch))
+
+    print("    ?? apply patch :" + str(apply_patch(new_content, patch)))
     comparison = new_content.split(LINE_SEPARATOR)
+    print("    > comparison lines :" + str(comparison))
     patch_operations = patch.split(OPERATION_SEPARATOR)
     # We need to apply operation from last to the first
     # to preserve the indexes integrity.
     patch_operations.reverse()
 
     for operation in patch_operations:
+        print("\n      > > operation :" + str(operation))
         metadata, *patch_content_line = operation.split(LINE_SEPARATOR)
 
         operation_type, lines_index_range = metadata.split(
@@ -113,13 +122,14 @@ def generate_comparison(new_content, old_content):
 
         # We need to insert lines from last to the first
         # to preserve the indexes integrity.
+        print("      > > patch_content_line :" + str(patch_content_line))
         patch_content_line.reverse()
 
         if end_index > start_index:
             for index in range(end_index, start_index, -1):
                 if operation_type in [PATCH_OPERATION_REMOVE,
                                       PATCH_OPERATION_REPLACE]:
-                    comparison[index - 1] = re.sub(
+                    comparison[index] = re.sub(
                         HTML_TAG_ISOLATION_REGEX,
                         DELETION_COMPARISON_REGEX,
                         comparison[index])
@@ -127,17 +137,19 @@ def generate_comparison(new_content, old_content):
         if operation_type in [PATCH_OPERATION_ADD, PATCH_OPERATION_REPLACE]:
             for line in patch_content_line:
                 comparison.insert(
-                    start_index, re.sub(
+                    start_index + 1, re.sub(
                         HTML_TAG_ISOLATION_REGEX,
                         ADDITION_COMPARISON_REGEX,
                         line))
-                comparison.insert(start_index + 1, line)
         if operation_type in [PATCH_OPERATION_REMOVE, PATCH_OPERATION_REPLACE]:
             comparison[start_index] = re.sub(
                         HTML_TAG_ISOLATION_REGEX,
                         DELETION_COMPARISON_REGEX,
                         comparison[start_index])
+        print("      > > comparison :" + str(comparison))
 
+    comparison = [re.sub(EMPTY_OPERATION_TAG, '', line) for line in comparison]
+    print("\n      > > end comparison :" + str(comparison))
     return LINE_SEPARATOR.join(comparison)
 
 
