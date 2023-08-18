@@ -9256,7 +9256,7 @@
         }
         // Example continuation: matchingRows = {0, 2}
         // 4 - return for each database row corresponding, the cells corresponding to the field parameter
-        const fieldCol = database[index].map((col) => col);
+        const fieldCol = database[index];
         // Example continuation:: fieldCol = ["C", "j", "k", 7]
         const matchingCells = [...matchingRows].map((x) => fieldCol[x + 1]);
         // Example continuation:: matchingCells = ["j", 7]
@@ -50817,8 +50817,8 @@
 
 
     __info__.version = '16.5.0-alpha.5';
-    __info__.date = '2023-08-17T11:19:14.474Z';
-    __info__.hash = 'e0cb3aa';
+    __info__.date = '2023-08-18T07:21:09.378Z';
+    __info__.hash = '3d43dd1';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
