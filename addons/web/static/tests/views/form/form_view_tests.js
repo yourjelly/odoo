@@ -45,6 +45,7 @@ import { DateTimeField } from "@web/views/fields/datetime/datetime_field";
 import { IntegerField } from "@web/views/fields/integer/integer_field";
 import { FormController } from "@web/views/form/form_controller";
 import { companyService } from "@web/webclient/company_service";
+import { x2ManyField, X2ManyField } from "@web/views/fields/x2many/x2many_field";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
@@ -13726,4 +13727,47 @@ QUnit.module("Views", (hooks) => {
             await click(target, ".o_form_button_save");
         }
     );
+
+    QUnit.debug("form with o2m having a field with fieldDependencies", async function (assert) {
+        class MyField extends X2ManyField {}
+        fieldRegistry.add("my_widget", {
+            ...x2ManyField,
+            component: MyField,
+            relatedFields: [{ name: "display_name", type: "char" }],
+        });
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="p" widget='my_widget'>
+                        <tree editable="bottom" >
+                            <field name="foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 2,
+            mockRPC(route, args) {
+                if (args.method === "web_read") {
+                    assert.step("web_read");
+                    assert.deepEqual(args.kwargs.specification.p.fields, {
+                        display_name: {},
+                        foo: {},
+                    });
+                } else if (args.method === "write") {
+                    assert.step("write");
+                    assert.deepEqual(args.args[1].p[0][2], {
+                        foo: "new record",
+                    });
+                }
+            },
+        });
+
+        await addRow(target);
+        await editInput(target, ".o_data_row [name='foo'] input", "new record");
+        await clickSave(target);
+        assert.verifySteps(["web_read", "write", "web_read"]);
+    });
 });

@@ -308,10 +308,14 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
             if (relatedFields instanceof Function) {
                 relatedFields = relatedFields(fieldInfo);
             }
+            for (const relatedField of relatedFields) {
+                relatedField.modifiers = { readonly: true, ...relatedField.modifiers };
+            }
             relatedFields = Object.fromEntries(relatedFields.map((f) => [f.name, f]));
             views.default = { fieldNodes: relatedFields, fields: relatedFields };
             fieldInfo.viewMode = "default";
-        } else {
+        }
+        if (node.children.length) {
             for (const child of node.children) {
                 const viewType = child.tagName === "tree" ? "list" : child.tagName;
                 const { ArchParser } = viewRegistry.get(viewType);
@@ -322,6 +326,7 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
                     ...archInfo,
                     limit: archInfo.limit || 40,
                     fields: models[fields[name].relation],
+                    fieldNodes: { ...relatedFields, ...archInfo.fieldNodes },
                 };
             }
 
