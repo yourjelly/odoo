@@ -56,6 +56,7 @@ export class AttendeeCalendarCommonRenderer extends CalendarCommonRenderer {
      * Allow slots to be selected over multiple days
      */
     isSelectionAllowed(event) {
+        // CHECK: if set to false, can not create even of multiple days... in every view.(month,week)
         return true;
     }
 }

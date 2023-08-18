@@ -131,7 +131,8 @@ export class CalendarCommonRenderer extends Component {
         return Object.values(this.props.model.records).map((r) => this.convertRecordToEvent(r));
     }
     convertRecordToEvent(record) {
-        const allDay = record.isAllDay || record.end.diff(record.start, "hours").hours >= 24;
+        const allDay = record.isAllDay || record.end.diff(record.start, "hours").hours >= 0;
+        // debugger;
         return {
             id: record.id,
             title: record.title,
@@ -140,7 +141,7 @@ export class CalendarCommonRenderer extends Component {
                 ["week", "month"].includes(this.props.model.scale) &&
                 (record.isAllDay ||
                     (allDay && record.end.toMillis() !== record.end.startOf("day").toMillis()))
-                    ? record.end.plus({ days: 1 }).toISO()
+                    ? record.end.plus({ days: 0 }).toISO()
                     : record.end.toISO(),
             allDay: allDay,
         };
@@ -262,7 +263,8 @@ export class CalendarCommonRenderer extends Component {
         if (end) {
             res.end = luxon.DateTime.fromJSDate(end);
             if (["week", "month"].includes(this.props.model.scale) && allDay) {
-                res.end = res.end.minus({ days: 1 });
+                // debugger;
+                res.end = res.end.minus({ days: 0 });
             }
         }
         if (id) {
