@@ -13,6 +13,7 @@ import SurveyPreloadImageMixin from "@survey/js/survey_preload_image_mixin";
 import { SurveyImageZoomer } from "@survey/js/survey_image_zoomer";
 
 var isMac = navigator.platform.toUpperCase().includes('MAC');
+const { DateTime } = luxon;
 
 publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloadImageMixin, {
     selector: '.o_survey_form',
@@ -306,7 +307,11 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
 
         if (nextPageEvent) {
             if (nextPageEvent.type === 'next_question') {
-                var serverDelayMS = moment.utc().valueOf() - moment.unix(nextPageEvent.payload.question_start).utc().valueOf();
+                var serverDelayMS =
+                    DateTime.utc().toMillis() -
+                    DateTime.fromSeconds(nextPageEvent.payload.question_start, {
+                        zone: "utc",
+                    }).toMillis();
                 if (serverDelayMS < 0) {
                     serverDelayMS = 0;
                 } else if (serverDelayMS > 1000) {
@@ -959,7 +964,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
                 up: 'oi oi-chevron-up',
                 down: 'oi oi-chevron-down',
             },
-            locale: moment.locale(),
+            locale: DateTime.now().locale,
             allowInputToggle: true,
         });
         $dateGroup.on('error.datetimepicker', (err) => {

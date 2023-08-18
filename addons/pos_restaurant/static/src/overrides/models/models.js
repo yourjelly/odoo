@@ -2,6 +2,7 @@
 
 import { Order, Orderline, Payment } from "@point_of_sale/app/store/models";
 import { patch } from "@web/core/utils/patch";
+// const { DateTime } = luxon;
 
 // New orders are now associated with the current table, if any.
 patch(Order.prototype, {
@@ -29,6 +30,7 @@ patch(Order.prototype, {
         super.init_from_JSON(...arguments);
         if (this.pos.config.module_pos_restaurant) {
             this.tableId = json.table_id;
+            // this.validation_date = DateTime.fromISO(json.creation_date).toJSDate(); //ex : json.creation_date = "2023-08-23T07:04:17.562Z"
             this.validation_date = moment.utc(json.creation_date).local().toDate();
             this.customerCount = json.customer_count;
         }

@@ -9,7 +9,7 @@ import "@website/js/editor/snippets.options";
 import { unique } from "@web/core/utils/arrays";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
-
+const { DateTime } = luxon;
 let currentActionName;
 
 const allFormsInfo = new Map();
@@ -1067,7 +1067,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
      * Select the date as value property and convert it to the right format
      */
     selectValueProperty: function (previewMode, value, params) {
-        this.$target[0].value = value ? moment.unix(value).format(params.format) : '';
+        this.$target[0].value = value ? DateTime.fromSeconds(value).toFormat(params.format) : "";
     },
     /**
      * Select the display of the multicheckbox field (vertical & horizontal)

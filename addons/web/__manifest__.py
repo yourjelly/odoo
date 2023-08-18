@@ -200,6 +200,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/scss/pre_variables.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
             'web/static/lib/luxon/luxon.js',
+            'web/static/lib/luxon/luxon_to_human.js',
 
             ('include', 'web._assets_bootstrap_frontend'),
 
