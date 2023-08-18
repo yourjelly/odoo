@@ -607,6 +607,9 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Setup the attributes of a related field. """
         assert isinstance(self.related, str), self.related
 
+        if not self.readonly and not (self.related_inverse or self.inverse) and not self.model_name.startswith('test_new_api'):
+            warnings.warn(f"Non-readonly related field {self}")
+
         # determine the chain of fields, and make sure they are all set up
         model_name = self.model_name
         for name in self.related.split('.'):
