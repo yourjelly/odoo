@@ -374,6 +374,14 @@ export class FormController extends Component {
     }
 
     async beforeExecuteActionButton(clickParams) {
+        if (clickParams.special === "save") {
+            this.saveButtonClicked()
+            return false
+        }
+        if(clickParams.special === "cancel" && this.env.dialogData){
+                this.env.dialogData.close()
+                return false
+        }
         if (clickParams.special !== "cancel") {
             return this.model.root
                 .save({ stayInEdition: true, useSaveErrorDialog: !this.env.inDialog })

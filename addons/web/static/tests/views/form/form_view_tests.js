@@ -4313,16 +4313,6 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test('buttons with attr "special=save" save', async function (assert) {
-        const fakeActionService = {
-            start() {
-                return {
-                    doActionButton() {
-                        assert.step("execute_action");
-                    },
-                };
-            },
-        };
-        serviceRegistry.add("action", fakeActionService, { force: true });
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4340,7 +4330,7 @@ QUnit.module("Views", (hooks) => {
 
         await editInput(target, ".o_field_widget[name=foo] input", "tralala");
         await click(target.querySelector(".o_content button.btn-primary"));
-        assert.verifySteps(["get_views", "read", "write", "read", "execute_action"]);
+        assert.verifySteps(["get_views", "read", "write", "read"]);
     });
 
     QUnit.test("missing widgets do not crash", async function (assert) {
@@ -10884,32 +10874,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         '"bare" buttons in template should not trigger button click',
         async function (assert) {
-            assert.expect(4);
-
-            const actionService = {
-                start() {
-                    return {
-                        doActionButton(args) {
-                            assert.step("doActionButton");
-                            delete args.onClose;
-                            assert.deepEqual(args, {
-                                buttonContext: {},
-                                context: {
-                                    lang: "en",
-                                    tz: "taht",
-                                    uid: 7,
-                                },
-                                resId: 2,
-                                resIds: [2],
-                                resModel: "partner",
-                                special: "save",
-                            });
-                        },
-                    };
-                },
-            };
-
-            registry.category("services").add("action", actionService, { force: true });
+            assert.expect(2);
 
             await makeView({
                 type: "form",
@@ -10924,7 +10889,7 @@ QUnit.module("Views", (hooks) => {
             });
 
             await click(target.querySelector(".o_form_view .o_content button.btn-primary"));
-            assert.verifySteps(["doActionButton"]);
+            assert.verifySteps([]);
             await click(target.querySelector(".o_form_view button.mybutton"));
             assert.verifySteps([]);
         }
