@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="job_feed">
+    <job t-foreach="data" t-as="job">
+        <partnerJobId><t t-out="job['partnerJobId']"/></partnerJobId>
+        <company><t t-out="job['company']"/></company>
+        <title><t t-out="job['title']"/></title>
+        <description><t t-out="job['description']"/></description>
+        <applyUrl><t t-out="job['applyUrl']"/></applyUrl>
+        <companyId><t t-out="job['companyId']"/></companyId>
+        <location><t t-out="job['location']"/></location>
+        <city><t t-out="job['city']"/></city>
+        <state><t t-out="job['state']"/></state>
+        <country><t t-out="job['country']"/></country>
+        <jobtype><t t-out="job['jobtype']"/></jobtype>
+    </job>
+</template>
+</odoo>
