@@ -18,6 +18,7 @@ options.registry.TableOfContent = options.Class.extend({
         const config = {attributes: false, childList: true, subtree: true, characterData: true};
         this.observer = new MutationObserver(() => this._generateNav());
         this.observer.observe(targetNode, config);
+        this.$target.on('content_changed', () => this._generateNav());
         return this._super(...arguments);
     },
     /**
@@ -50,7 +51,8 @@ options.registry.TableOfContent = options.Class.extend({
         _.each($headings, el => {
             const $el = $(el);
             const id = 'table_of_content_heading_' + _.now() + '_' + _.uniqueId();
-            $('<a>').attr('href', "#" + id)
+            const visibilityId = $el.closest('[data-visibility-id]').data('visibility-id');
+            $('<a>').attr({ 'href': "#" + id, 'data-visibility-id': visibilityId })
                     .addClass('table_of_content_link list-group-item list-group-item-action py-2 border-0 rounded-0')
                     .text($el.text())
                     .appendTo($nav);
