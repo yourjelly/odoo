@@ -1812,13 +1812,12 @@ actual arch.
 
             elif attr.startswith('decoration-'):
                 try:
-                    get_variable_names(expr)
-                except SyntaxError:
+                    vnames = get_variable_names(expr)
+                except SyntaxError as e:
                     msg = _(
-                        "\nThe Decoration contains syntax error:\n'%s'", expr
+                        "\nThe Decoration '%s' contains syntax error:\n%s", expr, e.msg
                     )
                     self._raise_view_error(msg, node)
-                vnames = get_variable_names(expr)
                 if vnames:
                     name_manager.must_have_fields(node, vnames, f"{attr}={expr}")
 

@@ -2494,6 +2494,23 @@ class TestViews(ViewCase):
             """Field 'model' used in attrs ({'readonly': [('parent.model', '=', 'ir.ui.view')]}) must be present in view but is missing.""",
         )
 
+    def test_attrs_decoration_validation(self):
+        model = self.env['ir.model']._get('ir.ui.view')
+        custom_field = self.env['ir.model.fields'].create([{
+            'name': 'x_state_key',
+            'ttype': 'selection',
+            'field_description': 'state',
+            'selection': "[('draft','Draft'),('reported','Reported')]",
+            'model_id': model.id,
+        }])
+        form_arch = """<form><field name="x_state_key" decoration-info="x_state_key in ['draft', reported']"/></form>"""
+        view = self.View.create({
+            'name': 'view',
+            'type': 'form',
+            'model': 'ir.ui.view',
+            'arch': form_arch,
+        })
+
     def test_attrs_groups_behavior(self):
         view = self.View.create({
             'name': 'foo',
