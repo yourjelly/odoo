@@ -1072,8 +1072,12 @@ class PosGlobalState extends PosModel {
                 return tax1.sequence - tax2.sequence;
             });
             _(taxes).each(function(tax){
-                if(tax.amount_type === 'group')
+                if(tax.amount_type === 'group') {
+                    for (var i = 0; i < tax.children_tax_ids.length; i++) {
+                        tax.children_tax_ids[i].parent_tax_id = tax.id;
+                    }
                     all_taxes = _collect_taxes(tax.children_tax_ids, all_taxes);
+                }
                 else
                     all_taxes.push(tax);
             });
@@ -1179,6 +1183,7 @@ class PosGlobalState extends PosModel {
                 'name': tax.name,
                 'amount': sign * tax_amount,
                 'base': sign * round_pr(tax_base_amount, currency_rounding),
+                'parent_tax_id': tax.parent_tax_id || false,
             });
 
             if(tax.include_base_amount){
@@ -2095,8 +2100,41 @@ class Orderline extends PosModel {
             taxdetail[tax.id] = {
                 amount: tax.amount,
                 base: tax.base,
+                parent_tax_id: tax.parent_tax_id,
             };
         });
+
+        const groupedTaxDetails = {};
+        for (const taxId in taxdetail) {
+            const tax = taxdetail[taxId];
+            if (tax.parent_tax_id) {
+                if (!groupedTaxDetails[tax.parent_tax_id]) {
+                    groupedTaxDetails[tax.parent_tax_id] = [];
+                }
+                groupedTaxDetails[tax.parent_tax_id].push({
+                    amount: tax.amount,
+                    base: tax.base,
+                    id: taxId,
+                });
+            }
+        }
+        for (const parentTax in groupedTaxDetails) {
+            const taxEntries = groupedTaxDetails[parentTax];
+            if (taxEntries.length > 1) {
+                let referenceAmount = taxEntries[0].amount;
+                for (let i = 1; i < taxEntries.length; i++) {
+                    let tax = taxEntries[i]
+                    const amount = tax.amount;
+                    if (amount !== referenceAmount && !this.pos.taxes_by_id[tax.id].include_base_amount) {
+                        const diff = referenceAmount - amount;
+                        taxdetail[tax.id].amount = referenceAmount;
+                        taxdetail[tax.id].base += diff;
+                        taxtotal += diff;
+                        all_taxes.total_excluded -= diff;
+                    }
+                }
+            }
+        }
 
         return {
             "priceWithTax": all_taxes.total_included,
