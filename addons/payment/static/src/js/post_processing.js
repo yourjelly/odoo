@@ -6,15 +6,14 @@
     import { Markup } from "@web/legacy/js/core/utils";
     import { _t } from "@web/core/l10n/translation";
 
-    $.blockUI.defaults.css.border = '0';
-    $.blockUI.defaults.css["background-color"] = '';
-    $.blockUI.defaults.overlayCSS["opacity"] = '0.9';
-
     publicWidget.registry.PaymentPostProcessing = publicWidget.Widget.extend({
         selector: 'div[name="o_payment_status"]',
 
         _pollCount: 0,
 
+        init: function () {
+            this.uiService = useService("ui");
+        },
         start: function() {
             this.displayLoading();
             this.poll();
@@ -123,16 +122,18 @@
             this.displayContent("payment.display_tx_list", render_values);
         },
         displayContent: function (xmlid, render_values) {
-            $.unblockUI();
+            this.uiService.unblock();
             this.$el.find('div[name="o_payment_status_content"]').empty().append(renderToElement(xmlid, render_values));
         },
         displayLoading: function () {
+            this.uiService.block();
+            /*
             var msg = _t("We are processing your payment, please wait ...");
             $.blockUI({
                 'message': '<h2 class="text-white"><img src="/web/static/img/spin.png" class="fa-pulse"/>' +
                     '    <br />' + msg +
                     '</h2>'
-            });
+            });*/
         },
     });
 
