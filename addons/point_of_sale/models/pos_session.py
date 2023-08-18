@@ -1762,7 +1762,7 @@ class PosSession(models.Model):
                 'domain': self.env['account.tax']._check_company_domain(self.company_id),
                 'fields': [
                     'name', 'price_include', 'include_base_amount', 'is_base_affected',
-                    'amount_type', 'children_tax_ids', 'amount', 'id'
+                    'amount_type', 'children_tax_ids', 'amount', 'id', 'invoice_label',
                 ],
             },
         }
