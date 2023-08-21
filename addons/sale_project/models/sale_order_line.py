@@ -37,7 +37,7 @@ class SaleOrderLine(models.Model):
                 except AccessError:
                     del res['order_id']
 
-            if 'order_id' in fields and 'order_id' not in res:
+            if 'order_id' in fields and ('order_id' not in res or not res.get('order_id')):
                 assert (partner_id := self.env.context.get('default_partner_id'))
                 project_id = self.env.context.get('link_to_project')
                 sale_order = None
@@ -60,9 +60,11 @@ class SaleOrderLine(models.Model):
                     }
 
                 if not sale_order:
-                    company_id = self.env.context.get('defaut_company_id', False)
+                    company_id = self.env.context.get('defaut_company_id', self.env.company.id)
                     if company_id:
                         so_create_values['company_id'] = company_id
+                        if not default_values.get('company_id'):
+                            default_values['company_id'] = self.env.company.id
                     sale_order = self.env['sale.order'].create(so_create_values)
                     sale_order.action_confirm()
                 default_values['order_id'] = sale_order.id
