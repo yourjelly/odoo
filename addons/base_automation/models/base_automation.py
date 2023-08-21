@@ -513,7 +513,7 @@ class BaseAutomation(models.Model):
                     action.sudo().with_context(**ctx).run()
                 except Exception as e:
                     self._add_postmortem_automation(e)
-                    raise e
+                    raise
 
     def _check_trigger_fields(self, record):
         """ Return whether any of the trigger fields has been modified on ``record``. """
@@ -656,7 +656,7 @@ class BaseAutomation(models.Model):
                         res = action.run()
                     except Exception as e:
                         automation_rule._add_postmortem_automation(e)
-                        raise e
+                        raise
 
                     if res:
                         if 'value' in res:
@@ -686,11 +686,12 @@ class BaseAutomation(models.Model):
 
             # Do not crash if the model of the base_action_rule was uninstalled
             if Model is None:
-                _logger.warning("Automation rule with name '%s' (ID %d) depends on model %s (ID: %d)" %
-                                (automation_rule.id,
-                                 automation_rule.name,
-                                 automation_rule.model_name,
-                                 automation_rule.model_id.id))
+                _logger.warning(
+                    "Automation rule with name '%s' (ID %d) depends on model %s (ID: %d)",
+                    automation_rule.id,
+                    automation_rule.name,
+                    automation_rule.model_name,
+                    automation_rule.model_id.id)
                 continue
 
             if automation_rule.trigger in set(CREATE_TRIGGERS + WRITE_TRIGGERS):
