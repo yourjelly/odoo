@@ -3,7 +3,8 @@ from itertools import chain
 import base64
 import json
 import re
-from odoo.tests.common import TransactionCase, Form
+
+from odoo import models
 from odoo.exceptions import ValidationError
 
 markdown_link_regex = r"^\[([^\[]+)\]\((.+)\)$"
@@ -191,23 +192,30 @@ def xml_ids_in_spreadsheet(data):
     }
 
 
-class ValidateSpreadsheetData(TransactionCase):
-    def validate_spreadsheet_data(self, stringified_data, spreadsheet_name):
-        data = json.loads(stringified_data)
+
+class SpreadsheetMixin(models.AbstractModel):
+    _inherit = "spreadsheet.mixin"
+
+    def _validate_spreadsheet_data(self):
+        spreadsheet_name = self.display_name
+        data = json.loads(self.spreadsheet_data)
+        errors = []
         for model, fields in fields_in_spreadsheet(data).items():
             if model not in self.env:
-                raise AssertionError(
+                errors.append(
                     f"model '{model}' used in '{spreadsheet_name}' does not exist"
                 )
+                continue
             for field_chain in fields:
                 field_model = model
                 for fname in field_chain.split(
                     "."
                 ):  # field chain 'product_id.channel_ids'
                     if fname not in self.env[field_model]._fields:
-                        raise AssertionError(
+                        errors.append(
                             f"field '{fname}' used in spreadsheet '{spreadsheet_name}' does not exist on model '{field_model}'"
                         )
+                        continue
                     field = self.env[field_model]._fields[fname]
                     if field.relational:
                         field_model = field.comodel_name
@@ -215,6 +223,9 @@ class ValidateSpreadsheetData(TransactionCase):
         for xml_id in xml_ids_in_spreadsheet(data):
             record = self.env.ref(xml_id, raise_if_not_found=False)
             if not record:
-                raise AssertionError(
+                errors.append(
                     f"xml id '{xml_id}' used in spreadsheet '{spreadsheet_name}' does not exist"
                 )
+
+        if errors:
+            raise ValidationError("\n".join(errors))

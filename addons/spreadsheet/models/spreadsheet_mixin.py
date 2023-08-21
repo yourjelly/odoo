@@ -20,6 +20,11 @@ class SpreadsheetMixin(models.AbstractModel):
     spreadsheet_data = fields.Text(compute='_compute_spreadsheet_data', inverse='_inverse_spreadsheet_data')
     thumbnail = fields.Binary()
 
+    @api.constrains("spreadsheet_binary_data")
+    def _check_data_is_valid(self):
+        for spreadsheet in self:
+            self._validate_spreadsheet_data()
+
     @api.depends("spreadsheet_binary_data")
     def _compute_spreadsheet_data(self):
         for spreadsheet in self.with_context(bin_size=False):
