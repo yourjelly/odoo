@@ -7,7 +7,6 @@
                     <div class="page">
                         <h2>Expenses Report</h2>
                         <div class="oe_structure"></div> 
-
                         <div class="row mt32 mb32">
                             <div class="col-2">
                                 <strong>Employee:</strong>
@@ -31,7 +30,6 @@
                             </div>
                         </div>
                         <div class="oe_structure"></div>
-
                         <table class="table table-sm">
                             <thead>
                                 <tr>
@@ -86,7 +84,6 @@
                             </tbody>
                         </table>
                         <div class="oe_structure"></div>
-
                         <div class="row justify-content-end">
                             <div class="col-4">
                                 <table class="table table-sm">
@@ -100,7 +97,6 @@
                             </div>
                         </div>
                         <div class="oe_structure"></div>
-
                         <p>Certified honest and conform,<br/>(Date and signature).<br/><br/></p>
                         <div class="oe_structure"></div>
                     </div>
@@ -119,5 +115,4 @@
         <field name="binding_model_id" ref="model_hr_expense_sheet"/>
         <field name="binding_type">report</field>
     </record>
-
 </odoo>

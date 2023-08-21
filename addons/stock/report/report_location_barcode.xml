@@ -24,7 +24,7 @@
                                                 </div>
                                                 <div class="text-center mt-3">
                                                     <span t-if="o.barcode" t-field="o.barcode" style="padding:0"
-                                                             t-options="{'widget': 'barcode', 'humanreadable': 1, 'symbology': 'auto', 'img_style': 'width:47mm;height:11mm'}">1234567890</span>
+                                                        t-options="{'widget': 'barcode', 'humanreadable': 1, 'symbology': 'auto', 'img_style': 'width:47mm;height:11mm'}">1234567890</span>
                                                 </div>
                                             </div>
                                         </td>

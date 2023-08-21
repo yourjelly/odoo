@@ -150,7 +150,7 @@
                                 </span>
                                 <div t-if="attendee and attendee.partner_id" class="mb-2 o_event_full_page_ticket_side_info_booked_by">
                                     <div class="o_event_full_page_ticket_font_faded o_event_full_page_ticket_small_caps fw-bold">Booked By</div>
-                                     <div class="o_event_full_page_ticket_small"><span t-field="attendee.partner_id">Marc Demo</span></div>
+                                    <div class="o_event_full_page_ticket_small"><span t-field="attendee.partner_id">Marc Demo</span></div>
                                 </div>
                             </div>
                         </div>
