@@ -90,3 +90,17 @@ $o-navbar-nav-pills-link-border-radius: $nav-pills-border-radius !default;
 .carousel-control-next .visually-hidden {
     left: 50%; // Avoid horizontal scrollbar in Chrome
 }
+
+// Review pagination layout
+.pagination {
+    padding: $pagination-padding-y $pagination-padding-y;
+    border: $border-width solid var(--o-contrast-border-color);
+    border-radius: $pagination-border-radius-lg;
+    gap: map-get($spacers, 1);
+
+    .page-item:last-child .page-link,
+    .page-item:first-child .page-link,
+    .page-link {
+        border-radius: $pagination-border-radius;
+    }
+}

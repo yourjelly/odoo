@@ -280,3 +280,16 @@ $btn-close-color: $body-color !default;
 
 // HR Separator
 $hr-color: $border-color !default;
+
+// Pagination
+$pagination-bg: transparent !default;
+$pagination-border-color: transparent !default;
+$pagination-color: var(--o-contrast-color) !default;
+$pagination-hover-bg: transparent !default;
+$pagination-hover-color: var(--o-contrast-color) !default;
+$pagination-hover-border-color: $component-active-bg !default;
+$pagination-disabled-bg: $body-bg !default;
+$pagination-disabled-color: $text-muted !default;
+$pagination-disabled-border-color: transparent !default;
+$pagination-focus-bg: o-color('primary') !default;
+$pagination-focus-color: color-contrast(o-color('primary')) !default;
