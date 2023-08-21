@@ -180,7 +180,6 @@
                         'default_partner_id': partner_id,
                         'default_company_id': company_id,
                         'default_order_id': project_sale_order_id,
-                        'link_to_project' : project_id,
                     }"
                     placeholder="Non-billable"
                     readonly="0"

@@ -63,8 +63,6 @@ class SaleOrderLine(models.Model):
                     company_id = self.env.context.get('defaut_company_id', self.env.company.id)
                     if company_id:
                         so_create_values['company_id'] = company_id
-                        if not default_values.get('company_id'):
-                            default_values['company_id'] = self.env.company.id
                     sale_order = self.env['sale.order'].create(so_create_values)
                     sale_order.action_confirm()
                 default_values['order_id'] = sale_order.id
