@@ -197,6 +197,9 @@ class configmanager(object):
         group.add_option("--screenshots", dest="screenshots", action="store", my_default=temp_tests_dir,
                          metavar='DIR',
                          help="Screenshots will go in DIR/{db_name}/screenshots. Defaults to %s." % temp_tests_dir)
+        group.add_option("--chrome-port", dest="chrome_port", action="store", my_default=8969,
+                         metavar='PORT', type=int,
+                         help="Port of the headless chrome instance running on the local machine")
         parser.add_option_group(group)
 
         # Logging Group
@@ -452,7 +455,7 @@ class configmanager(object):
                 'smtp_ssl_certificate_filename', 'smtp_ssl_private_key_filename',
                 'db_maxconn', 'db_maxconn_gevent', 'import_partial', 'addons_path', 'upgrade_path',
                 'syslog', 'without_demo', 'screencasts', 'screenshots',
-                'dbfilter', 'log_level', 'log_db',
+                'dbfilter', 'log_level', 'log_db', 'chrome_port',
                 'log_db_level', 'geoip_city_db', 'geoip_country_db', 'dev_mode',
                 'shell_interface',
         ]

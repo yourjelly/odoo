@@ -13,7 +13,6 @@ import os.path
 import pprint
 import re
 import subprocess
-import warnings
 
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta

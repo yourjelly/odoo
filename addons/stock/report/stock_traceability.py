@@ -224,7 +224,7 @@ class MrpStockReport(models.TransientModel):
         header = self.env['ir.actions.report']._render_template("web.internal_layout", values=rcontext)
         header = self.env['ir.actions.report']._render_template("web.minimal_layout", values=dict(rcontext, subst=True, body=Markup(header.decode())))
 
-        return self.env['ir.actions.report']._run_wkhtmltopdf(
+        return self.env['ir.actions.report']._html2pdf(
             [body],
             header=header.decode(),
             landscape=True,

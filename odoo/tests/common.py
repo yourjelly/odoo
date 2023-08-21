@@ -1011,6 +1011,7 @@ class ChromeBrowser:
             '--disable-breakpad': '',
             '--disable-client-side-phishing-detection': '',
             '--disable-crash-reporter': '',
+            '--disable-default-apps': '',
             '--disable-dev-shm-usage': '',
             '--disable-namespace-sandbox': '',
             '--disable-translate': '',

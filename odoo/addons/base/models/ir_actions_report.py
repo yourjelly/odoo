@@ -389,7 +389,7 @@ class IrActionsReport(models.Model):
         return bodies, res_ids, header, footer, specific_paperformat_args
 
     @api.model
-    def _run_wkhtmltopdf(
+    def _html2pdf(
             self,
             bodies,
             report_ref=False,
@@ -411,6 +411,7 @@ class IrActionsReport(models.Model):
         :return: Content of the pdf as bytes
         :rtype: bytes
         '''
+
         paperformat_id = self._get_report(report_ref).get_paperformat() if report_ref else self.get_paperformat()
 
         # Build the base command args for wkhtmltopdf bin
@@ -707,7 +708,7 @@ class IrActionsReport(models.Model):
                     self.name,
                 ))
 
-            pdf_content = self._run_wkhtmltopdf(
+            pdf_content = self._html2pdf(
                 bodies,
                 report_ref=report_ref,
                 header=header,

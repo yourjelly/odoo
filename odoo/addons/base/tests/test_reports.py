@@ -68,10 +68,10 @@ class TestReports(odoo.tests.TransactionCase):
         })
 
         pdf_text = "0"
-        def _run_wkhtmltopdf(*args, **kwargs):
+        def _html2pdf(*args, **kwargs):
             return bytes(pdf_text, "utf-8")
 
-        self.patch(type(Report), "_run_wkhtmltopdf", _run_wkhtmltopdf)
+        self.patch(type(Report), "_html2pdf", _html2pdf)
 
         # sanity check: the report is not set to save attachment
         # assert that there are no pre-existing attachment
