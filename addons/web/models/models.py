@@ -242,7 +242,7 @@ class Base(models.AbstractModel):
             'length': total number of groups
         }
         """
-        groups = self._web_read_group(domain, fields, groupby, limit, offset, orderby, lazy)
+        groups = self.read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
         if not groups:
             length = 0
@@ -257,20 +257,8 @@ class Base(models.AbstractModel):
             length = len(groups) + offset
         return {
             'groups': groups,
-            'length': length
+            'length': length,
         }
-
-    @api.model
-    def _web_read_group(self, domain, fields, groupby, limit=None, offset=0, orderby=False, lazy=True):
-        """
-        Performs a read_group and optionally a web_search_read for each group.
-        See ``web_read_group`` for params description.
-
-        :returns: array of groups
-        """
-        groups = self.read_group(domain, fields, groupby, offset=offset, limit=limit,
-                                 orderby=orderby, lazy=lazy)
-        return groups
 
     @api.model
     def read_progress_bar(self, domain, group_by, progress_bar):
