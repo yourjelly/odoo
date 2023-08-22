@@ -115,4 +115,5 @@
         <field name="binding_model_id" ref="model_hr_expense_sheet"/>
         <field name="binding_type">report</field>
     </record>
+    
 </odoo>

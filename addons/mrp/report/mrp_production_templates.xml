@@ -50,6 +50,7 @@
                             <span t-field="o.product_uom_id.name" groups="uom.group_uom">Units</span>
                         </div>
                     </div>
+                    
                     <div t-if="o.workorder_ids" groups="mrp.group_mrp_routings">
                         <h3>
                             <span t-if="o.state == 'done'">Operations Done</span>

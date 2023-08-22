@@ -33,6 +33,7 @@
                         <span t-out="date_start" t-options="{'widget': 'datetime'}">2-03-2000 9:00 AM</span> - <span t-out="date_stop" t-options="{'widget': 'datetime'}">Demo 3-03-2000 5:00 PM</span>
                     </t>
                 </div>
+
                 <br/>
                 <br/>
                 <div class="oe_structure"></div>
@@ -154,7 +155,9 @@
                     </table>
                     <div class="oe_structure"></div>
                 </t>
+
                 <br/>
+
                 <t t-if="refund_products" id="refunds">
                     <h3>Refunds</h3>
                     <table class="table table-sm">
@@ -197,6 +200,7 @@
                                         <t t-else="" >
                                             <span t-out='currency["symbol"]'>$</span><span t-out='line["total_paid"]' t-options="{'widget': 'float', 'precision': currency['precision']}">0.00</span>
                                         </t>
+
                                         <t t-if='line["discount"] != 0'>
                                             Disc: <span t-out='line["discount"]'>0</span>%
                                         </t>
@@ -276,6 +280,7 @@
                 </t>
                 <div class="oe_structure"></div>
                 <br/>
+
                 <t t-if="payments" id="payments">
                     <t t-if="payments" id="other_payments">
                         <h3>Payments</h3>
@@ -301,6 +306,7 @@
                         <div class="oe_structure"></div>
                     </t>
                 </t>
+                
                 <br/>
                 <br/>
                 <div id="discounts" style="break-inside: avoid;">

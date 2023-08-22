@@ -19,7 +19,6 @@
     </data>
 
     <template id="qr_codes_page">
-<<<<<<< HEAD
         <!-- This page-break-inside does not seem to work;
             It would be nice to have the qr codes so the title is never on
             a different page then the qr code itself -->
@@ -29,62 +28,6 @@
                 <img src="/pos_self_order/static/img/default_qrcode_odoo.png" style="width: 100px; height: 100px; margin-right: 25px;"/>
                 <h2 stlye="color: #714C67;">Place the QR codes on your tables,<br/>
                     so your customer scan it to order</h2>
-=======
-        <t t-call="web.basic_layout">
-            <div class="page">
-                <h1 class="text-center">
-                    QR Code Menu
-                </h1>
-                <div class="oe_structure"></div>
-                <!-- There is a very annoying problem here:
-                wkhtmltopdf does not handle flex-wrap. ( at least not in this version )
-                This makes it so the bootstrap grid system does not work.
-                We have to do a workaround -->
-                <t t-foreach="floors" t-as="floor">
-                <!-- MDN states that "page-break-after" has been replaced by "break-after",
-                but "break-after" is not supported in this version of wkhtmltopdf so we 
-                have to keep using "page-break-after" -->
-                    <div style="page-break-after: always;">
-                        <h3 t-if="floor.get('name')" t-out="floor['name']" class="mb-5">Sample Floor Name</h3>
-                        <div class="oe_structure"></div>
-                        <div
-                            t-foreach="floor['rows_of_tables']"
-                            t-as="row_of_tables"
-                            class="d-flex"
-                            >
-                            <t t-foreach="row_of_tables"
-                                t-as="table"
-                                t-call="pos_self_order.qr_code"
-                                />
-                        </div>
-                    </div>
-                    <div class="oe_structure"></div>
-                </t>
-            </div>
-        </t>
-    </template>
-
-    <template id="qr_code">
-        <t t-set="qr_code_size" t-value="180"/>
-        <div style="padding: 0px 40px; margin-bottom:40px; page-break-inside: avoid;">
-            <!-- This page-break-inside does not seem to work;
-            It would be nice to have the qr codes so the title is never on
-            a different page then the qr code itself -->
-            <h4 class="fw-bold text-center"
-                style="margin-top: 20px"
-                t-if="table['id']"
-                >
-                Table: <span t-out="table['name']">Sample Table Name</span>
-            </h4>
-            <div class="oe_structure"></div>
-            <div class="p-3">
-                <div class="mt-1 mb-4 position-relative top-0 start-0">
-                    <img t-att-src="'/report/barcode/QR/%s?width=%s&amp;height=%s&amp;barLevel=H' %(table['url'], qr_code_size, qr_code_size)"
-                        class="position-relative top-0 start-0"
-                    />
-                    <t t-call="pos_self_order.first_letter_of_odoo_logo_svg"/>
-                </div>
->>>>>>> b1ebd4279110 ([IMP] POS: improve report)
             </div>
 
             <div>

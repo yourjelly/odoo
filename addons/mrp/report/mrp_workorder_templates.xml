@@ -40,7 +40,9 @@
                         </div>
                     </div>
                     <br/>
+
                     <t t-call="mrp.report_mrp_production_components" t-if="o.move_raw_ids"/>
+                    
                     <div class="oe_structure"/>
                 </div>
             </t>
