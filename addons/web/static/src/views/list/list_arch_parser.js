@@ -80,16 +80,21 @@ export class ListArchParser extends XMLParser {
                     type: "button",
                     id: buttonId++,
                 };
+                const columnInvisible = node.getAttribute("column_invisible") || "False";
                 if (buttonGroup) {
                     buttonGroup.buttons.push(button);
-                    buttonGroup.column_invisible = combineModifiers(buttonGroup.column_invisible, node.getAttribute('column_invisible'), "AND");
+                    buttonGroup.column_invisible = combineModifiers(
+                        buttonGroup.column_invisible,
+                        columnInvisible,
+                        "AND",
+                    );
                 } else {
                     buttonGroup = {
                         id: `column_${nextId++}`,
                         type: "button_group",
                         buttons: [button],
                         hasLabel: false,
-                        column_invisible: node.getAttribute('column_invisible'),
+                        column_invisible: columnInvisible,
                     };
                     columns.push(buttonGroup);
                 }
@@ -127,7 +132,7 @@ export class ListArchParser extends XMLParser {
                     name: widgetInfo.name,
                     // FIXME: this is dumb, we encode it into a weird object so that the widget
                     // can decode it later...
-                    node: encodeObjectForTemplate({ attrs: widgetInfo.attrs }).slice(1, -1),
+                    node: encodeObjectForTemplate({ attrs: widgetInfo.attrscolumnInvisible }).slice(1, -1),
                     className: node.getAttribute("class") || "",
                 };
                 columns.push({
@@ -152,12 +157,11 @@ export class ListArchParser extends XMLParser {
                 // AAB: not sure we need to handle invisible="True" button as the usecase seems way
                 // less relevant than for fields (so for buttons, relying on the modifiers logic
                 // that applies later on could be enough, even if the value is always true)
-                headerButtons = [...node.children]
-                    .map((node) => ({
-                        ...this.processButton(node),
-                        type: "button",
-                        id: buttonId++,
-                    }));
+                headerButtons = [...node.children].map((node) => ({
+                    ...this.processButton(node),
+                    type: "button",
+                    id: buttonId++,
+                }));
                 return false;
             } else if (node.tagName === "control") {
                 for (const childNode of node.children) {
@@ -203,7 +207,7 @@ export class ListArchParser extends XMLParser {
 
                 treeAttr.defaultGroupBy = xmlDoc.getAttribute("default_group_by");
                 treeAttr.defaultOrder = stringToOrderBy(
-                    xmlDoc.getAttribute("default_order") || null
+                    xmlDoc.getAttribute("default_order") || null,
                 );
 
                 // custom open action when clicking on record row

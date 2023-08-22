@@ -48,7 +48,9 @@ export const BUTTON_CLICK_PARAMS = [
 export function addFieldDependencies(info, activeFields, fields) {
     const { fieldDependencies } = info.field || info.widget;
     const deps =
-        typeof fieldDependencies === "function" ? fieldDependencies(info) : fieldDependencies;
+        typeof fieldDependencies === "function"
+            ? fieldDependencies(info)
+            : fieldDependencies;
     addDependencies(deps, activeFields, fields);
 }
 
@@ -88,7 +90,8 @@ export function archParseBoolean(str, trueIfEmpty = false) {
  * @returns {string | false}
  */
 function getViewClass(type) {
-    const isValidType = Boolean(type) && registry.category("views").contains(type);
+    const isValidType =
+        Boolean(type) && registry.category("views").contains(type);
     return isValidType && `o_${type}_view`;
 }
 
@@ -98,7 +101,11 @@ function getViewClass(type) {
  * @param {string[]} additionalClassList
  * @returns {string}
  */
-export function computeViewClassName(viewType, rootNode, additionalClassList = []) {
+export function computeViewClassName(
+    viewType,
+    rootNode,
+    additionalClassList = [],
+) {
     const subType = rootNode?.getAttribute("js_class");
     const classList = rootNode?.getAttribute("class")?.split(" ") || [];
     const uniqueClasses = new Set([
@@ -159,12 +166,16 @@ export const computeReportMeasures = (fields, fieldAttrs, activeMeasures) => {
         }
     }
 
-    const sortedMeasures = Object.entries(measures).sort(([m1, f1], [m2, f2]) => {
-        if (m1 === "__count" || m2 === "__count") {
-            return m1 === "__count" ? 1 : -1; // Count is always last
-        }
-        return f1.string.toLowerCase().localeCompare(f2.string.toLowerCase());
-    });
+    const sortedMeasures = Object.entries(measures).sort(
+        ([m1, f1], [m2, f2]) => {
+            if (m1 === "__count" || m2 === "__count") {
+                return m1 === "__count" ? 1 : -1; // Count is always last
+            }
+            return f1.string
+                .toLowerCase()
+                .localeCompare(f2.string.toLowerCase());
+        },
+    );
 
     return Object.fromEntries(sortedMeasures);
 };
@@ -177,7 +188,9 @@ export const computeReportMeasures = (fields, fieldAttrs, activeMeasures) => {
  */
 export function getFormattedValue(record, fieldName, attrs) {
     const field = record.fields[fieldName];
-    const formatter = registry.category("formatters").get(field.type, (val) => val);
+    const formatter = registry
+        .category("formatters")
+        .get(field.type, (val) => val);
     const formatOptions = {
         escape: false,
         data: record.data,
@@ -218,7 +231,9 @@ export function getDecoration(rootNode) {
     for (const name of rootNode.getAttributeNames()) {
         if (name.startsWith("decoration-")) {
             decorations.push({
-                class: getClassNameFromDecoration(name.replace("decoration-", "")),
+                class: getClassNameFromDecoration(
+                    name.replace("decoration-", ""),
+                ),
                 condition: rootNode.getAttribute(name),
             });
         }
@@ -258,7 +273,9 @@ export function processButton(node) {
     const clickParams = {};
     for (const { name, value } of node.attributes) {
         if (BUTTON_CLICK_PARAMS.includes(name)) {
-            clickParams[name] = withDefault[name] ? withDefault[name](value) : value;
+            clickParams[name] = withDefault[name]
+                ? withDefault[name](value)
+                : value;
         }
     }
     return {
@@ -270,10 +287,14 @@ export function processButton(node) {
         options: JSON.parse(node.getAttribute("options") || "{}"),
         display: node.getAttribute("display") || "selection",
         clickParams,
-        column_invisible: node.getAttribute("column_invisible"),
-        invisible: combineModifiers(node.getAttribute("column_invisible"), node.getAttribute("invisible"), "OR"),
-        readonly: node.getAttribute("readonly"),
-        required: node.getAttribute("required"),
+        column_invisible: node.getAttribute("column_invisible") || "False",
+        invisible: combineModifiers(
+            node.getAttribute("column_invisible") || "False",
+            node.getAttribute("invisible") || "False",
+            "OR",
+        ),
+        readonly: node.getAttribute("readonly") || "False",
+        required: node.getAttribute("required") || "False",
     };
 }
 

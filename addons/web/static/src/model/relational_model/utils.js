@@ -103,8 +103,11 @@ export function createPropertyActiveField(property) {
 }
 
 export function combineModifiers(mod1, mod2, operator) {
+    if (typeof mod1 !== "string" || typeof mod2 !== "string") {
+        throw new Error("combineModifiers: modifier is not a string");
+    }
     if (operator === "AND") {
-        if (!mod1 || mod1 === "False" || !mod2 || mod2 === "False") {
+        if (mod1 === "False" || mod2 === "False") {
             return "False";
         }
         if (mod1 === "True") {
@@ -118,10 +121,10 @@ export function combineModifiers(mod1, mod2, operator) {
         if (mod1 === "True" || mod2 === "True") {
             return "True";
         }
-        if (!mod1 || mod1 === "False") {
+        if (mod1 === "False") {
             return mod2;
         }
-        if (!mod2 || mod2 === "False") {
+        if (mod2 === "False") {
             return mod1;
         }
         return "(" + mod1 + ") or (" + mod2 + ")";
