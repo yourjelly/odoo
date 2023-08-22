@@ -303,8 +303,12 @@ STATIC_CACHE_LONG = 60 * 60 * 24 * 365
 class SessionExpiredException(Exception):
     pass
 
-def content_disposition(filename):
-    return "attachment; filename*=UTF-8''{}".format(
+def content_disposition(filename, inline=False):
+    if inline:
+        cd = "inline; filename*=UTF-8''{}"
+    else:
+        cd = "attachment; filename*=UTF-8''{}"
+    return cd.format(
         url_quote(filename, safe='')
     )
 
