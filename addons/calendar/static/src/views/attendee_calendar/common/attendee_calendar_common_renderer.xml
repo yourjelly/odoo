@@ -2,17 +2,27 @@
 <templates>
     <t t-name="calendar.AttendeeCalendarCommonRenderer.event">
         <div class="fc-content">
-            <div t-attf-class="#{attendeeStatus != 'accepted' ? 'fw-normal' : ''} o_event_title me-2">
-                <span t-if="isAlone" class="fa fa-exclamation-circle"/>
-                <t t-esc="title"/>
-                <t t-if="!isAllDay">
-                    <t t-if="24 > duration and duration > 0.5">
-                        <br/><t t-esc="startTime"/> - <t t-esc="endTime"/>
+            <div t-attf-class="o_event_title d-flex gap-1" t-att-class="isMonth ? 'text-truncate' : ''">
+                <i t-if="isAlone" class="fa fa-exclamation-circle align-self-baseline" data-tooltip="You're alone in this meeting"/>
+                <div t-att-class="isMonth ? 'text-truncate' : ''">
+                    <t t-if="isMonth">
+                        <span t-if="!isTimeHidden" class="fc-time fw-normal me-1" t-out="startTime" />
+                        <span t-out="title" t-attf-class="#{(attendeeStatus == 'accepted' || rawRecord.is_highlighted) ? 'fw-bolder' : ''}"/>
                     </t>
-                    <t t-else="">, <t t-esc="startTime"/></t>
-                </t>
+                    <t t-else="">
+                        <span t-out="title" t-attf-class="#{attendeeStatus != 'accepted' ? 'fw-normal' : ''}"/>
+                        <t t-if="!isAllDay">
+                            <t t-if="24 > duration and duration > 0.5">
+                                <br/><span class="fw-normal mt-1"><t t-esc="startTime"/> - <t t-esc="endTime"/></span>
+                            </t>
+                            <t t-else="">
+                                , <t t-esc="startTime"/>
+                            </t>
+                        </t>
+                    </t>
+                </div>
             </div>
-            <span t-if="!isTimeHidden" class="fc-time" t-esc="startTime" />
+            <span t-if="!isTimeHidden and !isMonth" class="fc-time" t-esc="startTime" />
         </div>
     </t>
 </templates>

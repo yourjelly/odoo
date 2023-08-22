@@ -1,3 +1,11 @@
+.o_field_widget.o_field_float_time.oe_inline {
+    --Field-max-width: 4.5ch;
+}
+
+.o_field_widget.o_field_integer.oe_inline {
+    --Field-max-width: 4.5ch;
+}
+
 .o_cw_popover .o_cw_popover_fields_secondary {
     max-height: 75vh;
     & > li > div {
@@ -85,7 +93,7 @@
     padding-top: 0px !important;
 }
 
-.o_field_many2manyattendee .o_field_tags {
+.o_field_many2manyattendeeexpandable .o_field_tags {
     flex-direction: column;
     span.badge {
         width: fit-content;
@@ -95,89 +103,248 @@
     }
 }
 
-.o_attendee_border {
-    border-width: 2px;
-    border-style: solid;
-}
+// .o_attendee_border {
+//     border-width: 2px;
+//     border-style: solid;
+//     border-color: transparent;
+// }
 
-.o_attendee_border_accepted {
-    border-color: map-get($theme-colors, 'success');
-}
-.o_attendee_border_declined {
-    border-color: map-get($theme-colors, 'danger');
-}
-.o_attendee_border_tentative {
-    border-color: map-get($theme-colors, 'light');
+// // This is a hack to have a colored status circle over the image.
+// // Ideally we should use Mail's avatar component for this.
+
+.o_attendee_state {
+    + div {
+        &:before {
+            content:'\f111';
+            display: none;
+            position: absolute;
+            left: -1em;
+            top: 13px;
+            font-family: 'FontAwesome';
+            font-size: 14px;
+            text-shadow: -1px -1px white, 1px -1px white, -1px 1px white;
+        }
+
+        &:after {
+            position: absolute;
+            top: 16px;
+            left: -1.5em;
+            font-family: 'FontAwesome';
+            font-size: 10px;
+            color: transparent;
+            font-kerning: none;
+            width: 14px;
+            text-align: center;
+        }
+    }
+
+    &.o_attendee_state_accepted + div {
+        &:before {
+            display: inline-block;
+            color: tint-color($success, 80%);
+        }
+
+        &:after {
+            content:'\f00c';
+            color: $success;
+        }
+    }
+
+    &.o_attendee_state_declined + div{
+        &:before {
+            display: inline-block;
+            color: tint-color($danger, 80%);
+        }
+
+        &:after {
+            content:'\f00d';
+            color: $danger;
+        }
+    }
+
+    &.o_attendee_state_tentative + div {
+        &:before {
+            display: inline-block;
+            color: $gray-300;
+        }
+
+        &:after {
+            content:'\f128';
+            color: $text-muted;
+        }
+    }
 }
 
 @for $i from 1 through length($o-colors-complete) {
     $color: nth($o-colors-complete, $i);
+    $stripeColor: tint-color($color, 50%);
 
-    .o_cw_popover_link.o_calendar_color_#{$i - 1} {
-        &.o_attendee_status_tentative {
-            color: color-contrast($color);
-            background: repeating-linear-gradient(
-                45deg,
-                $color,
-                $color 10px,
-                rgba($color, 0.7) 10px,
-                rgba($color, 0.7) 20px
-            ) !important;
-        }
+    // .o_cw_popover_link.o_calendar_color_#{$i - 1} {
+//         &.o_attendee_status_tentative {
+//             color: color-contrast($color);
+//             background: repeating-linear-gradient(
+//                 45deg,
+//                 $stripeColor,
+//                 $stripeColor 10px,
+//                 rgba($color, 0.1) 10px,
+//                 rgba($color, 0.1) 20px
+//             ) !important;
+//         }
 
-        &.o_attendee_status_needsAction {
-            background-color: rgba($o-view-background-color, 0.9) !important;
-        }
+//         &.o_attendee_status_needsAction {
+//             background-color: rgba($o-view-background-color, 0.9) !important;
+//         }
 
-        &.o_attendee_status_declined {
-            text-decoration: line-through;
-            background-color: rgba($o-view-background-color, 0.9) !important;
-        }
-    }
+//         &.o_attendee_status_declined {
+//             text-decoration: line-through;
+//             background-color: rgba($o-view-background-color, 0.9) !important;
+//         }
+    // }
 
-    .o_calendar_renderer {
-        .fc-event.o_calendar_color_#{$i - 1} {
-            &.o_attendee_status_needsAction,
-            &.o_attendee_status_tentative,
-            &.o_attendee_status_declined,
-            &.o_attendee_status_alone {
-                border-width: 2px 2px 2px !important;
+    .o_calendar_renderer .fc-event.o_calendar_color_#{$i - 1} {
+                &.o_event_dot {
+                    display: flex;
+                    align-items: center;
+                    border: none;
 
-                &.o_cw_custom_highlight {
-                    background-color: $color;
+                    &:not(:hover) {
+                        background-color: transparent;
+                    }
+
+                    &:before {
+                        content:'\f111'; // fa-circle
+                        display: inline-block;
+                        z-index: 2;
+                        margin-left: map-get($spacers, 1 );
+                        font-family: Fontawesome;
+                        color: $color;
+                    }
+
+                    &.o_attendee_status_needsAction, &.o_event_hatched {
+                        &:before {
+                            content: "\f1db"; // fa-circle-thin
+                        }
+                    }
+
+                    &.o_attendee_status_tentative:before {
+                        content: "\f059"; // fa-question-circle
+                    }
+
+                    &.o_attendee_status_declined:before {
+                        content: "\f05e"; // fa-ban
+                    }
+
+                    &.o_attendee_status_alone {
+                        content: "\f06a"; // fa-exclamation-circle
+                    }
+
+                    &:hover {
+                        --o-bg-opacity: .9;
+                    }
                 }
-            }
 
-            &.o_attendee_status_tentative {
-                color: color-contrast($color) !important;
-                .fc-bg {
-                    background: repeating-linear-gradient(
-                        45deg,
-                        $color,
-                        $color 10px,
-                        rgba(white, 0.4) 10px,
-                        rgba(white, 0.4) 20px
-                    ) !important;
-                }
-            }
+                &:not(.o_event_dot) {
+                    &.o_attendee_status_tentative, &.o_event_hatched,
+                    &.o_attendee_status_alone,
+                    &.o_attendee_status_needsAction,
+                    &.o_attendee_status_accepted,
+                    &.o_attendee_status_declined {
+                        &:hover, &.o_cw_custom_highlight {
+                            --o-bg-opacity: .3;
+                        }
+                    }
+                    &.o_attendee_status_tentative, &.o_event_hatched {
+                        --o-bg-opacity: .5;
 
-            &.o_attendee_status_alone,
-            &.o_attendee_status_needsAction {
-                background-color: rgba($o-view-background-color, 0.9) !important;
-                color: $o-black !important;
-                .fc-bg {
-                    background-color: rgba($o-view-background-color, 0.9) !important;
-                }
-            }
+                        .fc-bg {
+                            background: repeating-linear-gradient(
+                            45deg,
+                            transparent,
+                            transparent 10px,
+                            $o-view-background-color 10px,
+                            $o-view-background-color 20px
+                        ) !important;
 
-            &.o_attendee_status_declined {
-                text-decoration: line-through;
-                background-color: rgba($o-view-background-color, 0.9) !important;
-                color: $o-black !important;
-                .fc-bg {
-                    background-color: rgba($o-view-background-color, 0.9) !important;
+                        }
+                    }
+
+                    &.o_attendee_status_alone,
+                    &.o_attendee_status_needsAction {
+                        --o-bg-opacity: .8;
+                    }
+
+                    &.o_attendee_status_declined {
+                        --o-bg-opacity: 1;
+                    }
+
                 }
-            }
-        }
+
+                &.o_attendee_status_declined .fc-content {
+                    text-decoration: line-through;
+                }
+
+//         .o_event_dot.fc-event.o_calendar_color_#{$i - 1} {
+// //             display: flex;
+// //             align-items: center;
+// //             &.o_attendee_status_needsAction,
+// //             &.o_attendee_status_tentative,
+// //             &.o_attendee_status_declined,
+// //             &.o_attendee_status_alone {
+//                 &:before {
+//                     content: "\f111";
+//                     display: inline-block;
+//                     z-index: 2;
+//                     margin-left: map-get($spacers, 1 );
+//                     font-family: Fontawesome;
+//                     color: $color;
+//                 }
+//                 border: none;
+//             }
+
+//             .fc-bg {
+//                 --o-bg-opacity: 1;
+//             }
+
+//             &:hover .fc-bg {
+//                 --o-bg-opacity: .7;
+//             }
+
+//         }
+        // &.o_calendar_color_#{$i - 1}:not(.o_event_dot){
+        //     &.o_attendee_status_needsAction,
+        //     &.o_attendee_status_tentative,
+        //     &.o_attendee_status_declined,
+        //     &.o_attendee_status_alone {
+        //         border-width: 1px 1px 1px 1px !important;
+        //     }
+
+        //     &.o_attendee_status_tentative {
+        //         color: $color !important;
+        //         .fc-bg {
+        //             background: repeating-linear-gradient(
+        //                 45deg,
+        //                 $stripeColor,
+        //                 $stripeColor 10px,
+        //                 rgba(white, 0.4) 10px,
+        //                 rgba(white, 0.4) 20px
+        //             ) !important;
+        //         }
+        //     }
+
+        //     &.o_attendee_status_alone,
+        //     &.o_attendee_status_needsAction {
+        //         // background-color: rgba($o-view-background-color, 0.9) !important;
+        //         --bg-opacity: .7;
+        //     }
+
+        //     &.o_attendee_status_declined {
+        //         color: $color !important;
+        //         text-decoration: line-through;
+        //         .fc-bg {
+        //             --bg-opacity: 1;
+        //         }
+        //     }
+
+        // }
     }
 }

@@ -40,6 +40,12 @@ $o-cw-popup-avatar-size: 16px;
     .list-group-item {
         padding: 0.5rem 1rem;
         border: none;
+
+        .fa-users {
+            transform: translateY(-5px); // Quickfix to realign icon with first avatar
+            // `align-items-baseline` takes the baseline of the absolutely positioned backdrop.
+            // To remove if we switch the avatar components with Mail's avatar component.
+        }
     }
 
     .o_cw_popover_fields_secondary {

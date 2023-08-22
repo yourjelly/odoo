@@ -28,7 +28,7 @@ export class Many2ManyAttendee extends Many2ManyTagsAvatarField {
         const tags = super.tags.map((tag) => {
             const partner = partnerIds.find((partner) => tag.resId === partner.id);
             if (partner) {
-                tag.imageClass = `o_attendee_border o_attendee_border_${partner.status}`;
+                tag.imageClass = `o_attendee_state o_attendee_state_${partner.status} fa fa-circle`;
             }
             return tag;
         });

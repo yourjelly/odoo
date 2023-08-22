@@ -181,6 +181,7 @@ class Meeting(models.Model):
     # attendees
     attendee_ids = fields.One2many(
         'calendar.attendee', 'event_id', 'Participant')
+    attending_state = fields.Selection(get_state_selections, string="Attending?", default="needsAction")
     partner_ids = fields.Many2many(
         'res.partner', 'calendar_event_res_partner_rel',
         string='Attendees', default=_default_partners)
@@ -191,7 +192,7 @@ class Meeting(models.Model):
         string='Reminders', ondelete="restrict",
         help="Notifications sent to all attendees to remind of the meeting.")
     # RECURRENCE FIELD
-    recurrency = fields.Boolean('Recurrent')
+    recurrency = fields.Boolean('Repeat')
     recurrence_id = fields.Many2one(
         'calendar.recurrence', string="Recurrence Rule")
     follow_recurrence = fields.Boolean(default=False) # Indicates if an event follows the recurrence, i.e. is not an exception

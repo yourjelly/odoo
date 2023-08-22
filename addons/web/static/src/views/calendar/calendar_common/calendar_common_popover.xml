@@ -17,11 +17,9 @@
 
     <t t-name="web.CalendarCommonPopover.popover">
         <div class="card-header d-flex justify-content-between py-2 pe-2">
-            <h4 class="p-0 pt-1">
-                <span class="popover-header border-0" t-esc="props.record.title" />
-            </h4>
+            <span class="popover-header border-0" t-esc="props.record.title" />
             <span class="o_cw_popover_close ms-4 mt-2 me-2" t-on-click.stop="() => props.close()">
-                <i class="fa fa-close" />
+                <i class="oi oi-close" />
             </span>
         </div>
         <div class="o_cw_body">
@@ -34,12 +32,12 @@
 
     <t t-name="web.CalendarCommonPopover.body">
         <ul class="list-group list-group-flush">
-            <li t-if="date" class="list-group-item">
-                <i class="fa fa-fw fa-calendar-o" />
+            <li t-if="date" class="list-group-item d-flex align-items-baseline gap-1">
+                <i class="fa fa-fw fa-calendar text-400"/>
                 <b class="text-capitalize" t-esc="date" /> <small t-if="dateDuration"><b t-esc="`(${dateDuration})`" /></small>
             </li>
             <li t-if="time" class="list-group-item">
-                <i class="fa fa-fw fa-clock-o" />
+                <i class="fa fa-fw fa-clock-o text-400" />
                 <b t-esc="time" /> <small t-if="timeDuration"><b t-esc="`(${timeDuration})`" /></small>
             </li>
         </ul>
@@ -48,17 +46,15 @@
                 <t t-foreach="Object.keys(props.model.popoverFieldNodes)" t-as="fieldId" t-key="fieldId">
                     <t t-set="fieldInfo" t-value="props.model.popoverFieldNodes[fieldId]"/>
                     <t t-if="!isInvisible(fieldInfo, slot.record)">
-                        <li class="list-group-item flex-shrink-0 d-flex align-items-start" t-att-class="fieldInfo.attrs.class">
-                            <strong class="me-2" t-if="!fieldInfo.options.noLabel">
+                        <li class="list-group-item flex-shrink-0 d-flex align-items-baseline gap-1" t-att-class="fieldInfo.attrs.class">
+                            <t t-if="!fieldInfo.options.noLabel">
                                 <t t-if="fieldInfo.options.icon">
-                                    <b>
-                                        <i t-att-class="fieldInfo.options.icon" />
-                                    </b>
+                                    <i t-att-class="fieldInfo.options.icon" />
                                 </t>
                                 <t t-else="">
                                     <t t-esc="fieldInfo.string" />:
                                 </t>
-                            </strong>
+                            </t>
                             <div class="flex-grow-1">
                                 <Field name="fieldInfo.name" record="slot.record" fieldInfo="fieldInfo" type="fieldInfo.widget" />
                             </div>

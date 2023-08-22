@@ -108,9 +108,10 @@ export class InnerGroup extends Group {
             const sizeOfDataCell = 100 / (maxCols - labelCount);
             dataCells.forEach((c) => {
                 const itemSpan = c.subType === "item_component" ? c.itemSpan - 1 : c.itemSpan;
-                c.width = (itemSpan || 1) * sizeOfDataCell;
+                // c.width = (itemSpan || 1) * sizeOfDataCell;
             });
         });
+
         return rows;
     }
 }

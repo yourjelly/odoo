@@ -24,9 +24,9 @@ class Attendee(models.Model):
 
     STATE_SELECTION = [
         ('needsAction', 'Needs Action'),
-        ('tentative', 'Uncertain'),
-        ('declined', 'Declined'),
-        ('accepted', 'Accepted'),
+        ('tentative', 'Maybe'),
+        ('declined', 'No'),
+        ('accepted', 'Yes'),
     ]
 
     # event

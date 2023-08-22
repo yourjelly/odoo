@@ -1,5 +1,24 @@
-.o_recurrent_weekdays .form-check .form-check-input {
-    float: none;
-    margin-left: 0;
-    margin-right: map-get($spacers, 1);
+.o_recurrent_weekdays {
+    .form-check {
+        padding: 0;
+    }
+
+    .form-check-input {
+        display: none;
+        + label {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 100%;
+            background-color: $o-gray-200;
+            color: rgba(color-contrast($o-gray-200), .5);
+        }
+        &:checked + label {
+            background-color: $o-action;
+            color: color-contrast($o-action);
+        }
+    }
+
 }

@@ -425,6 +425,7 @@
 
     @include media-breakpoint-up(sm) {
         .o_inner_group {
+            grid-template-areas: "label field";
             grid-template-columns: fit-content(150px) 1fr;
             &.o_form_fw_labels {
                 grid-template-columns: 150px 1fr;
@@ -688,14 +689,14 @@
     .o_field_float_time, .o_field_percentage {
         &.oe_inline {
             &, input {
-                max-width: 7ch;
+                max-width: var(--Field-max-width, 7ch);
             }
         }
     }
 
     .o_field_integer.oe_inline {
         &, input {
-            max-width: 7rem;
+            max-width: var(--Field-max-width, 7rem);
         }
     }
 
@@ -834,7 +835,7 @@
         }
     }
 
-    // Boolean 
+    // Boolean
     .o_field_boolean + .o_form_label {
         margin-right: $o-form-spacing-unit * 3;
     }

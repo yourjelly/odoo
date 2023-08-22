@@ -81,8 +81,8 @@ export class CalendarCommonRenderer extends Component {
             eventDrop: this.onEventDrop,
             eventLimit: this.props.model.eventLimit,
             eventLimitClick: this.onEventLimitClick,
-            eventMouseEnter: this.onEventMouseEnter,
-            eventMouseLeave: this.onEventMouseLeave,
+            // eventMouseEnter: this.onEventMouseEnter,
+            // eventMouseLeave: this.onEventMouseLeave,
             eventRender: this.onEventRender,
             eventResizableFromStart: true,
             eventResize: this.onEventResize,
@@ -169,7 +169,7 @@ export class CalendarCommonRenderer extends Component {
         this.popover.open(
             target,
             this.getPopoverProps(record),
-            `o_cw_popover o_calendar_color_${typeof color === "number" ? color : 0}`
+            `o_cw_popover o_calendar_color_${typeof color === "number" ? color : 0}`,
         );
     }
     updateSize() {
@@ -203,11 +203,12 @@ export class CalendarCommonRenderer extends Component {
     }
     onEventClick(info) {
         this.click(info);
+        info.el.classList.toggle('o_calendar_popover_open');
     }
     onEventRender(info) {
         const { el, event } = info;
         el.dataset.eventId = event.id;
-        el.classList.add("o_event", "py-0");
+        el.classList.add("o_event");
         const record = this.props.model.records[event.id];
 
         if (record) {
@@ -239,9 +240,13 @@ export class CalendarCommonRenderer extends Component {
             if (record.duration <= 0.25) {
                 el.classList.add("o_event_oneliner");
             }
+            if (!record.isAllDay && !record.isTimeHidden && record.isMonth) {
+                el.classList.add("o_event_dot");
+            } else if (record.isAllDay) {
+                el.classList.add("o_event_allday");
+            }
         }
-
-        if (!el.querySelector(".fc-bg")) {
+        if (!el.classList.contains("fc-bg")) {
             const bg = document.createElement("div");
             bg.classList.add("fc-bg");
             el.appendChild(bg);

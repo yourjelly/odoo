@@ -4,7 +4,7 @@
     <t t-name="web.TagsList">
         <t t-foreach="visibleTags" t-as="tag" t-key="tag.id or tag_index">
             <span
-                class="o_tag position-relative d-inline-flex align-items-center user-select-none"
+                class="o_tag position-relative d-inline-flex gap-2 align-items-center user-select-none"
                 t-att-class="{
                     'o_avatar opacity-trigger-hover' : tag.img,
                     'o_badge badge rounded-pill lh-1': !tag.img,
@@ -19,7 +19,7 @@
                 <!-- Avatar's :hover backdrop -->
                 <span
                     t-if="tag.img &amp;&amp; props.displayText"
-                    class="o_avatar_backdrop position-absolute top-0 end-0 bottom-0 start-0 ms-n2 mt-n1 mb-n1 bg-view rounded border shadow opacity-0 opacity-100-hover"/>
+                    class="o_avatar_backdrop position-absolute top-0 end-0 bottom-0 start-0 ms-n2 mt-n1 mb-n1 bg-view rounded border shadow-sm opacity-0 opacity-100-hover"/>
 
                 <img
                     t-if="tag.img"
@@ -32,7 +32,8 @@
                 <div
                     t-if="props.displayText"
                     class="o_tag_badge_text"
-                    t-att-class="{'position-relative ms-1' : tag.img}"
+                    t-att-class="{'position-relative' : tag.img,
+                        'pe-2': !tag.onDelete and tag.img}"
                     t-out="tag.text"/>
 
                 <a
@@ -40,7 +41,7 @@
                     t-on-click.stop.prevent="(ev) => tag.onDelete and tag.onDelete(ev)"
                     class="o_delete opacity-100-hover"
                     t-att-class="{
-                            'btn btn-link position-relative py-0 px-1 text-danger opacity-0': tag.img,
+                            'btn btn-link position-relative py-0 ps-0 pe-1 text-danger opacity-0': tag.img,
                             'ps-1 opacity-75': !tag.img
                         }"
                     title="Delete"
