@@ -117,4 +117,16 @@
             </div>
         </we-multi>
     </t>
+    <t t-name="web_editor.WeSelectPager">
+        <we-select class="o_we_user_value_widget o_we_select_pager" t-att-class="this.cssClasses">
+            <div>
+                <we-toggler class="o_we_toggler_pager" t-on-click="this.onTogglerClick" t-att-class="{'active': togglerState.open}">
+                    <t t-out="this.togglerValue"/>
+                </we-toggler>
+                <we-selection-items class="o_we_has_pager position-fixed top-0 end-0 z-index-1 rounded-0">
+                    <t t-slot="default"/>
+                </we-selection-items>
+            </div>
+        </we-select>
+    </t>
 </templates>

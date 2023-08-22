@@ -165,8 +165,10 @@ export class UserValueWidget extends Component {
                 containerData.subWidgets.push(this.data);
                 containerData.triggerWidgetsNames.push(...this.data.triggerWidgetsNames);
                 containerData.triggerWidgetsValues.push(...this.data.triggerWidgetsValues);
+                this.data.optionValues = containerData.optionValues;
             }
         }
+        this.optionValues = useState(this.data.optionValues);
         this.env.registerWidgetId(this.id);
 
         this.visibilityState = useParentedVisibility(this.id);
@@ -247,7 +249,7 @@ export class UserValueWidget extends Component {
         return pick(Object.fromEntries(values), ...this.env.validMethodNames);
     }
     isActive() {
-        for (const value of Object.entries(this.state.values)) {
+        for (const value of Object.entries(this.optionValues)) {
             if (value && value !== NULL_ID) {
                 return true;
             }
@@ -415,6 +417,7 @@ class WeBaseSelection extends UserValueWidget {
                     this.onUserValueChange(values);
                 }
             },
+            registerWidgetId: (id) => {}
         });
     }
     onUserValuePreview(values) {
@@ -661,6 +664,7 @@ export class WeColorPicker extends UserValueWidget {
         });
         if (this.props.withCombinations) {
             this.data.methodNames.add(this.props.withCombinations);
+            this.data.possibleValues[this.props.withCombinations] = [];
         }
         this.isGradient = false;
         this.ccValue = "";
@@ -858,5 +862,17 @@ export class WeMulti extends UserValueWidget {
                 .join(" ");
         }
         this.notifyValueChange(newValues, previewMode, this.id);
+    }
+}
+
+export class WeSelectPager extends WeSelect {
+    static template = "web_editor.WeSelectPager";
+    static defaultProps = { ...WeSelect.defaultProps, closeOnSelect: false };
+    /**
+     * @override
+     */
+    get cssClasses() {
+        const classesObj = super.cssClasses;
+        return {"o_we_widget_open": this.togglerState.open, ...classesObj};
     }
 }
