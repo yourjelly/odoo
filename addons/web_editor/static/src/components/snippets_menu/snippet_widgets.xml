@@ -24,11 +24,14 @@
                 <t t-if="this.img">
                     <img t-att-src="this.img"/>
                 </t>
+                <t t-if="this.props.faIcon">
+                    <i t-att-class="this.props.faIcon"/>
+                </t>
                 <!-- For now, hide the title if there's an image
                     Note that this can be worked around by adding the img html
                     inside the default slot
                 -->
-                <t t-if="!(this.img || this.svg)" t-slot="default"/>
+                <t t-if="!showTooltip" t-slot="default"/>
             </div>
         </we-button>
     </t>
@@ -128,5 +131,10 @@
                 </we-selection-items>
             </div>
         </we-select>
+    </t>
+    <t t-name="web_editor.WeMediaPicker">
+        <WeButton t-on-click.capture.stop="this.onEditMedia" class="this.buttonClass" faIcon="this.faIcon">
+            <t t-slot="default"/>
+        </WeButton>
     </t>
 </templates>

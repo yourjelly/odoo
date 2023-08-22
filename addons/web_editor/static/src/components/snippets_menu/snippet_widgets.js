@@ -17,6 +17,7 @@ import {
 } from "@odoo/owl";
 import { useParentedVisibility } from "@web_editor/utils/hooks";
 import { useService } from "@web/core/utils/hooks";
+import { MediaDialog } from "@web_editor/components/media_dialog/media_dialog";
 
 const NULL_ID = "__NULL__";
 /**
@@ -294,6 +295,7 @@ export class WeButton extends UserValueWidget {
     static props = {
         ...UserValueWidget.props,
         img: { type: String, optional: true },
+        faIcon: { type: String, optional: true },
     };
     setup() {
         super.setup();
@@ -370,8 +372,11 @@ export class WeButton extends UserValueWidget {
         this.toggleTooltip(false);
         this.onUserValueReset();
     }
+    get showTooltip() {
+        return this.img || this.svg || this.props.faIcon;
+    }
     toggleTooltip(show) {
-        if (show && (this.img || this.svg) && this.props.slots?.default) {
+        if (show && this.showTooltip && this.props.slots?.default) {
             this.removePopover = this.popover.add(this.valueRef.el, WeTooltip, {slots: {
                 default: this.props.slots.default
             }});
@@ -874,5 +879,114 @@ export class WeSelectPager extends WeSelect {
     get cssClasses() {
         const classesObj = super.cssClasses;
         return {"o_we_widget_open": this.togglerState.open, ...classesObj};
+    }
+}
+
+export class WeMediaPicker extends UserValueWidget {
+    static components = { WeButton };
+    static template = "web_editor.WeMediaPicker";
+    static props = {
+        ...UserValueWidget.props,
+        buttonStyle: { type: Boolean, optional: true },
+    };
+    static defaultProps = {
+        buttonStyle: false,
+    };
+    setup() {
+        super.setup();
+        this.dialog = useService("dialog");
+    }
+    get buttonClass() {
+        return {
+            "active": this.isActive(),
+        };
+    }
+    get faIcon() {
+        if (this.props.buttonStyle) {
+            return "fa fa-fw fa-camera";
+        }
+        return false;
+    }
+    notifyValueChange(mediaSrc) {
+        // In the case of the Mediapicker, we will call all the methods with
+        // the same values.
+        // TODO: Maybe this should be made more generic.
+        const values = {};
+        for (const methodName of this.data.methodNames.values()) {
+            values[methodName] = mediaSrc;
+        }
+        super.notifyValueChange(values, false, this.id);
+    }
+    /**
+     * Creates and opens a media dialog to edit a given element's media.
+     *
+     * @private
+     * @param {HTMLElement} el the element whose media should be edited
+     * @param {boolean} [images] whether images should be available
+     *   default: false
+     * @param {boolean} [videos] whether videos should be available
+     *   default: false
+     * @param {Function} save the function called when the dialog is confirmed.
+     */
+    openDialog(el, {images = false, videos = false, save}) {
+        el.src = Object.values(this.state.values)[0];
+        const editable = this.env.editable.matches(".o_editable") || this.env.editable.querySelector(".o_editable");
+        this.dialog.add(MediaDialog, {
+            noImages: !images,
+            noVideos: !videos,
+            noIcons: true,
+            noDocuments: true,
+            isForBgVideo: true,
+            vimeoPreviewIds: ['299225971', '414790269', '420192073', '368484050', '334729960', '417478345',
+                '312451183', '415226028', '367762632', '340475898', '374265101', '370467553'],
+            'res_model': editable.dataset.oeModel,
+            'res_id': editable.dataset.oeId,
+            save,
+            media: el,
+        });
+    }
+    /**
+     * Called when the edit button is clicked.
+     *
+     * @private
+     * @param {Event} ev
+     */
+    onEditMedia() {}
+}
+
+export class WeImagePicker extends WeMediaPicker {
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    onEditMedia(ev) {
+        // Need a dummy element for the media dialog to modify.
+        const dummyEl = document.createElement('img');
+        this.openDialog(dummyEl, {
+            images: true,
+            save: (media) => {
+                // Accessing the value directly through dummyEl.src converts the url to absolute,
+                // using getAttribute allows us to keep the url as it was inserted in the DOM
+                // which can be useful to compare it to values stored in db.
+                this.notifyValueChange(media.getAttribute("src"));
+            }
+        });
+    }
+}
+export class WeVideoPicker extends WeMediaPicker {
+    /**
+     * @override
+     */
+    onEditMedia(ev) {
+        // Need a dummy element for the media dialog to modify.
+        const dummyEl = document.createElement('iframe');
+        this.openDialog(dummyEl, {
+            videos: true,
+            save: (media) => {
+                this.notifyValueChange(media.querySelector('iframe').src);
+            }});
     }
 }

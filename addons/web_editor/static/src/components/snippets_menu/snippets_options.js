@@ -1980,7 +1980,7 @@ class SnippetTestOption extends SnippetOption {
     setup() {
         super.setup();
         useSubEnv({
-            validMethodNames: [...this.env.validMethodNames, "wait", "test"],
+            validMethodNames: [...this.env.validMethodNames, "wait", "test", "testImg"],
         });
     }
     async wait(widgetValue, previewMode, params) {
@@ -1990,6 +1990,8 @@ class SnippetTestOption extends SnippetOption {
         await promise;
     }
     async test(widgetValue, previewMode, params) {}
+
+    testImg() {}
     /**
      * @override
      */
@@ -1999,6 +2001,9 @@ class SnippetTestOption extends SnippetOption {
         }
         if (methodName === "test") {
             return false;
+        }
+        if (methodName === "testImg") {
+            return "/web/image/website.s_text_image_default_image";
         }
         return super.computeWidgetState(...arguments);
     }

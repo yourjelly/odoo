@@ -17,6 +17,9 @@
                            withGradients="true"
                            selectedTab="'gradients'"
             />
+            <WeImagePicker testImg="true" buttonStyle="true">
+                Image
+            </WeImagePicker>
         </WeRow>
     </t>
     <t t-name="web_editor.TestChildOption">
