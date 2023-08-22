@@ -225,6 +225,58 @@ class Base(models.AbstractModel):
         return values_list
 
     @api.model
+    def unity_web_read_group(
+        self, domain, fields, groupby,
+        read_specification, limit_unfold=None, orderby=False, limit_by_group=80,
+    ):
+        """
+        Returns the result of a read_group (and optionally search for and read records inside each
+        group), and the total number of groups matching the search domain.
+
+        :param domain: search domain
+        :param groupby: list of field to group on (see ``groupby``` param of ``read_group``)
+        :param fields: list of aggregates to group on (see ``groupby``` param of ``read_group``)
+        :param read_specification: web_read specification to read records for unfolded group
+        :param orderby: see ``orderby`` param of ``read_group``
+        :param limit_by_group: limit on records to read by group
+        :return: {
+            'groups': [
+                # array of read groups
+                {
+                    '<groupby>': <value_groupby_field1>
+                    '<aggregate_1>': <value_aggregate_1>
+                    '__records': <unity_web_search_read_result>
+                }
+            ]
+            'length': total number of groups
+        }
+        """
+        # TODO: We should refactor `read_group` before to use the same logic than _read_group
+        res_read_group = self.web_read_group(domain, fields, groupby, orderby=orderby, lazy=True)
+
+        group_list = res_read_group['groups']
+
+        unfold_groups = tuple(group for group in group_list if not group.get('__fold', False))
+        if limit_unfold:
+            unfold_groups = tuple(itertools.islice(unfold_groups, limit_unfold))
+
+        for group in unfold_groups:
+            records = self.search_fetch(group['__domain'], read_specification.keys(), limit=limit_by_group)
+            group['__records'] = records
+
+        all_records = self.union(*(
+            record
+            for one_group in group_list if '__records' in one_group
+            for record in one_group['__records'] if record
+        ))
+        all_result = all_records.web_read(read_specification)
+        result_by_id = {result['id']: result for result in all_result}
+        for group in unfold_groups:
+            group['__records'] = [result_by_id[record.id] for record in group['__records']]
+
+        return res_read_group
+
+    @api.model
     def web_read_group(self, domain, fields, groupby, limit=None, offset=0, orderby=False, lazy=True):
         """
         Returns the result of a read_group (and optionally search for and read records inside each
