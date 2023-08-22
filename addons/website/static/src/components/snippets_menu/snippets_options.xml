@@ -110,4 +110,25 @@
         <WeButton class="'fa fa-fw fa-angle-left'" moveSnippet="'prev'" noPreview="true" name="'move_left_opt'"/>
         <WeButton class="'fa fa-fw fa-angle-right'" moveSnippet="'next'" noPreview="true" name="'move_right_opt'"/>
     </t>
+    <t t-name="website.VerticalAlignment">
+        <WeButtonGroup class="'o_we_sublevel_1'" dependencies="['normal_mode']">
+            <t t-set-slot="title">Vert. Alignment</t>
+            <WeButton selectClass="'align-items-start'"
+                      img="'/website/static/src/img/snippets_options/align_top.svg'">
+                Align Top
+            </WeButton>
+            <WeButton selectClass="'align-items-center'"
+                      img="'/website/static/src/img/snippets_options/align_middle.svg'">
+                Align Middle
+            </WeButton>
+            <WeButton selectClass="'align-items-end'"
+                      img="'/website/static/src/img/snippets_options/align_bottom.svg'">
+                Align Bottom
+            </WeButton>
+            <WeButton selectClass="'align-items-stretch'"
+                      img="'/website/static/src/img/snippets_options/align_stretch.svg'">
+                Stretch To Equal Height
+            </WeButton>
+        </WeButtonGroup>
+    </t>
 </templates>

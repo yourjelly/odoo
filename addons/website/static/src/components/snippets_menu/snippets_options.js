@@ -224,3 +224,25 @@ registry.category("snippets_options").add("move_horizontally_opt", {
     selector: ".row:not(.s_col_no_resize) > div, .nav-item",
     exclude: ".s_showcase .row > div",
 });
+
+class VerticalAlignment extends SnippetOption {
+    /**
+     * @override
+     */
+    async computeWidgetState(methodName, params) {
+        const value = await super.computeWidgetState(...arguments);
+        if (methodName === 'selectClass' && !value) {
+            // If there is no `align-items-` class on the row, then the `align-
+            // items-stretch` class is selected, because the behaviors are
+            // equivalent in both situations.
+            return 'align-items-stretch';
+        }
+        return value;
+    }
+}
+registry.category("snippets_options").add("VerticalAlignment", {
+    component: VerticalAlignment,
+    template: "website.VerticalAlignment",
+    selector: ".s_text_image, .s_image_text, .s_three_columns",
+    target: ".row",
+});
