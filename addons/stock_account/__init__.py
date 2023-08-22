@@ -21,6 +21,7 @@ def _configure_journals(env):
                     'property_stock_account_input_categ_id',
                     'property_stock_account_output_categ_id',
                     'property_stock_valuation_account_id',
+                    'property_stock_account_production_cost_id',
                 ]
             }
         }

@@ -32,21 +32,3 @@ class StockMove(models.Model):
 
     def _ignore_automatic_valuation(self):
         return bool(self.raw_material_production_id)
-
-    def _get_src_account(self, accounts_data):
-        if self._is_production():
-            return self.location_id.valuation_out_account_id.id or accounts_data['production'].id
-        return super()._get_src_account(accounts_data)
-
-    def _get_dest_account(self, accounts_data):
-        if self._is_production_consumed():
-            return self.location_dest_id.valuation_in_account_id.id or accounts_data['production'].id
-        return super()._get_dest_account(accounts_data)
-
-    def _is_production(self):
-        self.ensure_one()
-        return self.location_id.usage == 'production' and self.location_dest_id._should_be_valued()
-
-    def _is_production_consumed(self):
-        self.ensure_one()
-        return self.location_dest_id.usage == 'production' and self.location_id._should_be_valued()

@@ -79,6 +79,7 @@ class ProductTemplate(models.Model):
             'stock_input': res['stock_input'] or self.categ_id.property_stock_account_input_categ_id,
             'stock_output': res['stock_output'] or self.categ_id.property_stock_account_output_categ_id,
             'stock_valuation': self.categ_id.property_stock_valuation_account_id or False,
+            'production': self.categ_id.property_stock_account_production_cost_id,
         })
         return accounts
 
@@ -755,13 +756,19 @@ class ProductCategory(models.Model):
         'account.account', 'Stock Valuation Account', company_dependent=True,
         domain="[('deprecated', '=', False)]", check_company=True,
         help="""When automated inventory valuation is enabled on a product, this account will hold the current value of the products.""",)
-
+    property_stock_account_production_cost_id = fields.Many2one(
+        'account.account', 'Production Account', company_dependent=True,
+        domain="[('deprecated', '=', False)]", check_company=True,
+        help="""This account will be used as a valuation counterpart for incoming and outgoing moves into locations used for production.
+                When the manufacturing app is installed, this includes both components and final products for manufacturing orders and
+                any workcenter/employee costs for completed productions.""")
     @api.model
     def _get_stock_account_property_field_names(self):
         return [
             'property_stock_account_input_categ_id',
             'property_stock_account_output_categ_id',
             'property_stock_valuation_account_id',
+            'property_stock_account_production_cost_id',
         ]
 
     @api.constrains(lambda self: tuple(self._get_stock_account_property_field_names() + ['property_valuation']))
