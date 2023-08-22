@@ -572,7 +572,10 @@ export class SnippetOption extends Component {
                 i++;
             }
             const proms = allSubWidgets.map(async (widget) => {
-                const show = await this.computeWidgetVisibility(widget.name, params);
+                const show = await this.computeWidgetVisibility(widget.name || "", {
+                    ...params,
+                    possibleValues: widget.possibleValues,
+                });
                 if (!show) {
                     widget.toggleVisibility(false);
                     return;
