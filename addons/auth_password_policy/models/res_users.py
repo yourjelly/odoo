@@ -24,9 +24,7 @@ class ResUsers(models.Model):
 
         minlength = int(params.get_param('auth_password_policy.minlength', default=0))
         for password in passwords:
-            if not password:
-                continue
-            if len(password) < minlength:
+            if password and len(password) < minlength:
                 failures.append(_(u"Passwords must have at least %d characters, got %d.") % (minlength, len(password)))
 
         if failures:
