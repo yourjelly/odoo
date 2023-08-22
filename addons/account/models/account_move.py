@@ -3105,9 +3105,31 @@ class AccountMove(models.Model):
     # Export Electronic Document
     ####################################################
 
+    def _get_checkboxes_for_edi_docs_export(self):
+        """
+        To override
+        :return a dict of the checkbox to enable in the 'Send and Print' wizard
+        """
+        return {}
+
     def _action_download_electronic_invoice(self):
         if not self:
             return False
+
+        # Create edi documents if they are not yet generated
+        options = {
+            'checkbox_download': False,
+            'checkbox_send_mail': False,
+            'checkbox_send_by_post': False,
+        }
+        additional_options = self._get_checkboxes_for_edi_docs_export()
+        options.update(additional_options)
+
+        wizard = self.env['account.move.send'] \
+            .with_context(active_model='account.move', active_ids=self.ids) \
+            .create(options)
+        wizard.action_send_and_print(from_cron=True)
+
         return {
             'type': 'ir.actions.act_url',
             'url': '/account/export_edi_documents?%s' % url_encode({'ids': self.ids}),

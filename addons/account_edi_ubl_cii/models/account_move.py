@@ -56,3 +56,8 @@ class AccountMove(models.Model):
     def _get_edi_doc_attachments_to_export(self):
         # EXTENDS 'account'
         return super()._get_edi_doc_attachments_to_export() + self.ubl_cii_xml_id
+
+    def _get_checkboxes_for_edi_docs_export(self):
+        options = super()._get_checkboxes_for_edi_docs_export()
+        options['checkbox_ubl_cii_xml'] = True
+        return options

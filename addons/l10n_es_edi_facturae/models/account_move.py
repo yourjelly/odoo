@@ -375,3 +375,8 @@ class AccountMove(models.Model):
         except ValueError:
             errors.append(_('No valid certificate found for this company, Facturae EDI file will not be signed.\n'))
         return xml_content, errors
+
+    def _get_checkboxes_for_edi_docs_export(self):
+        options = super()._get_checkboxes_for_edi_docs_export()
+        options['l10n_es_edi_facturae_checkbox_xml'] = True
+        return options
