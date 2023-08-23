@@ -403,9 +403,9 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsN(target, ".o-form-buttonbox > button", 3);
-        assert.containsOnce(target, ".o-dropdown.oe_stat_button .o_button_more");
+        assert.containsOnce(target, ".oe_stat_button .o_button_more");
 
-        await click(target, ".o-dropdown.oe_stat_button .o_button_more");
+        await click(target, "div.oe_stat_button .o_button_more");
         assert.containsOnce(target, ".o-dropdown--menu #btn4");
     });
 
@@ -437,7 +437,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsN(target, ".o-form-buttonbox > button", 7);
-        assert.containsOnce(target, ".o-form-buttonbox > .oe_stat_button.o-dropdown");
+        assert.containsOnce(target, ".o-form-buttonbox > .oe_stat_button .o-dropdown");
 
         const buttonBox = target.querySelector(".o-form-buttonbox");
         const buttonBoxRect = buttonBox.getBoundingClientRect();
@@ -1882,7 +1882,7 @@ QUnit.module("Views", (hooks) => {
 
             await editInput(target, "[name='foo'] input", "blop");
             await click(target, ".o_navbar_apps_menu button");
-            await click(target, ".o_navbar_apps_menu .dropdown-item[data-section='2']");
+            await click(target, ".o-dropdown--menu .dropdown-item[data-section='2']");
             await nextTick();
             assert.strictEqual(
                 target.querySelector(".o_main_navbar .o_menu_brand").textContent,
@@ -1891,7 +1891,7 @@ QUnit.module("Views", (hooks) => {
 
             await editInput(target, "[name='display_name'] input", "blop");
             await click(target, ".o_navbar_apps_menu button");
-            await click(target, ".o_navbar_apps_menu .dropdown-item[data-section='2']");
+            await click(target, ".o-dropdown--menu .dropdown-item[data-section='2']");
             await nextTick();
             assert.strictEqual(
                 target.querySelector(".o_main_navbar .o_menu_brand").textContent,
@@ -4297,7 +4297,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_cp_action_menus");
 
         await toggleActionMenu(target);
-        assert.containsOnce(target, ".o_cp_action_menus span:contains(Archive)");
+        assert.containsOnce(target, ".o-dropdown--menu span:contains(Archive)");
 
         await toggleMenuItem(target, "Archive");
         assert.containsOnce(document.body, ".modal");
@@ -4305,12 +4305,12 @@ QUnit.module("Views", (hooks) => {
         await click(document.body.querySelector(".modal-footer .btn-primary"));
 
         await toggleActionMenu(target);
-        assert.containsOnce(target, ".o_cp_action_menus span:contains(Unarchive)");
+        assert.containsOnce(target, ".o-dropdown--menu span:contains(Unarchive)");
 
         await toggleMenuItem(target, "UnArchive");
 
         await toggleActionMenu(target);
-        assert.containsOnce(target, ".o_cp_action_menus span:contains(Archive)");
+        assert.containsOnce(target, ".o-dropdown--menu span:contains(Archive)");
 
         assert.verifySteps([
             "get_views",
@@ -4357,7 +4357,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_cp_action_menus");
 
         await toggleActionMenu(target);
-        assert.containsOnce(target, ".o_cp_action_menus span:contains(Archive)");
+        assert.containsOnce(target, ".o-dropdown--menu span:contains(Archive)");
 
         await toggleMenuItem(target, "Archive");
         assert.verifySteps(["customArchive"]);
@@ -4413,7 +4413,7 @@ QUnit.module("Views", (hooks) => {
 
         await toggleActionMenu(target);
         assert.deepEqual(
-            getNodesTextContent(target.querySelectorAll(".o_cp_action_menus .dropdown-item")),
+            getNodesTextContent(target.querySelectorAll(".o-dropdown--menu .dropdown-item")),
             ["Custom Default Available", "Duplicate", "Custom Available", "Delete"]
         );
 
@@ -4481,7 +4481,7 @@ QUnit.module("Views", (hooks) => {
             "web_read: partner",
         ]);
         await toggleActionMenu(target);
-        assert.containsOnce(target, ".o_cp_action_menus span:contains(Archive)");
+        assert.containsOnce(target, ".o-dropdown--menu .o-dropdown-item:contains(Archive)");
 
         await toggleMenuItem(target, "Archive");
         assert.containsOnce(document.body, ".modal");
@@ -8307,7 +8307,7 @@ QUnit.module("Views", (hooks) => {
                 <field name="bar"/>
             </button>`);
 
-        const statButtonSelector = ".o-form-buttonbox .oe_stat_button:not(.o-dropdown)";
+        const statButtonSelector = ".o-form-buttonbox button.oe_stat_button";
 
         const formView = await makeView({
             type: "form",
@@ -8494,12 +8494,12 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_cp_action_menus .dropdown-menu_group:contains(Print)");
         assert.containsN(
             target,
-            ".o_cp_action_menus .dropdown-item",
+            ".o-dropdown--menu .dropdown-item",
             3,
             "there should be 3 actions"
         );
         assert.deepEqual(
-            getNodesTextContent(target.querySelectorAll(".o_cp_action_menus .dropdown-item")),
+            getNodesTextContent(target.querySelectorAll(".o-dropdown--menu .dropdown-item")),
             ["Duplicate", "Delete", "Action partner"]
         );
 
@@ -11396,13 +11396,13 @@ QUnit.module("Views", (hooks) => {
             await click(target.querySelector(".o_optional_columns_dropdown .dropdown-toggle"));
             assert.containsN(
                 target,
-                ".o_optional_columns_dropdown .dropdown-item",
+                ".o-dropdown--menu .dropdown-item",
                 1,
                 "dropdown have 1 optional field"
             );
 
             // enable optional field
-            await click(target.querySelector(`.o_optional_columns_dropdown input[name="bar"]`));
+            await click(target.querySelector(`.o-dropdown--menu input[name="bar"]`));
             assert.verifySteps([
                 "getItem " + localStorageKey,
                 "setItem " + localStorageKey + " to bar",
@@ -11488,13 +11488,13 @@ QUnit.module("Views", (hooks) => {
             await click(target.querySelector(".o_optional_columns_dropdown .dropdown-toggle"));
             assert.containsN(
                 target,
-                ".o_optional_columns_dropdown .dropdown-item",
+                ".o-dropdown--menu .dropdown-item",
                 1,
                 "dropdown have 1 optional field"
             );
 
             // enable optional field
-            await click(target.querySelector(`.o_optional_columns_dropdown input[name="foo"]`));
+            await click(target.querySelector(`.o-dropdown--menu input[name="foo"]`));
             assert.verifySteps([
                 "getItem " + localStorageKey,
                 "setItem " + localStorageKey + " to foo",
@@ -12482,7 +12482,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_pager_counter").textContent, "1 / 1");
         assert.strictEqual(target.querySelector(".o_field_widget[name='foo'] input").value, "test");
         await click(target, ".o_cp_action_menus button");
-        await click(target.querySelector(".o_cp_action_menus .dropdown-menu .dropdown-item"));
+        await click(target.querySelector(".o-dropdown--menu .dropdown-item"));
 
         assert.verifySteps(["web_save"]);
         assert.strictEqual(target.querySelector(".o_pager_counter").textContent, "2 / 2");
@@ -12515,7 +12515,7 @@ QUnit.module("Views", (hooks) => {
 
         await editInput(target, ".o_field_widget[name='foo'] input", "test");
         await click(target, ".o_cp_action_menus button");
-        await click(target.querySelector(".o_cp_action_menus .dropdown-menu .dropdown-item"));
+        await click(target.querySelector(".o-dropdown--menu .dropdown-item"));
         assert.verifySteps(["web_save"]);
         await nextTick();
         assert.containsOnce(target, ".o_error_dialog");
@@ -13484,7 +13484,7 @@ QUnit.module("Views", (hooks) => {
         assert.isVisible(target.querySelector(".o_form_status_indicator_buttons"));
 
         await click(target, ".o_cp_action_menus .dropdown-toggle");
-        await click($(target).find(".o_cp_action_menus .dropdown-item:contains(Delete)")[0]);
+        await click($(target).find(".o-dropdown--menu .dropdown-item:contains(Delete)")[0]);
         assert.containsOnce(target, ".modal");
 
         await click(target, ".modal-footer button.btn-primary");
