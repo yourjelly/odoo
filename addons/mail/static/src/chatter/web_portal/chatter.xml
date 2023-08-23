@@ -36,14 +36,14 @@
                     </FileUploader>
                     <t t-else="" t-call="mail.Chatter.attachFiles"/>
                     <div t-if="props.hasFollowers" class="o-mail-Followers d-flex me-1">
-                        <Dropdown position="'bottom-end'" menuClass="'o-mail-Followers-dropdown d-flex flex-column'">
+                        <Dropdown position="'bottom-end'" menuClass="'o-mail-Followers-dropdown d-flex flex-column'" state="followerListDropdown">
                             <button t-att-class="'o-mail-Followers-button btn btn-link text-action px-1 ' + (props.compactHeight ? '' : 'my-2')" t-att-disabled="isDisabled" t-att-title="followerButtonLabel">
                                 <i class="fa fa-user-o me-1" role="img"/>
                                 <i t-if="state.thread.id and state.thread.followersCount === undefined" class="fa fa-circle-o-notch fa-spin"/>
                                 <span t-else="" class="o-mail-Followers-counter" t-esc="state.thread.followersCount ?? 0"/>
                             </button>
                             <t t-set-slot="content">
-                                <FollowerList onAddFollowers.bind="onAddFollowers" onFollowerChanged.bind="onFollowerChanged" thread="state.thread"/>
+                                <FollowerList onAddFollowers.bind="onAddFollowers" onFollowerChanged.bind="onFollowerChanged" thread="state.thread" dropdown="followerListDropdown"/>
                             </t>
                         </Dropdown>
                     </div>

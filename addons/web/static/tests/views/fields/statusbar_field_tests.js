@@ -7,6 +7,7 @@ import {
 import {
     click,
     editInput,
+    getDropdownMenu,
     getFixture,
     nextTick,
     patchWithCleanup,
@@ -473,7 +474,7 @@ QUnit.module("Fields", (hooks) => {
         );
 
         await click(target, ".o_statusbar_status .dropdown-toggle:not(.d-none)");
-        await click(target, ".o-dropdown .dropdown-item");
+        await click(target, ".o-dropdown--menu .dropdown-item");
         assert.strictEqual(
             target.querySelector("[aria-label='Current state']").textContent,
             "second record",

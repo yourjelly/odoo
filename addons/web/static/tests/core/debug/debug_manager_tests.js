@@ -17,11 +17,11 @@ import {
     makeFakeDialogService,
     makeFakeLocalizationService,
 } from "../../helpers/mock_services";
+import { popoverService } from "@web/core/popover/popover_service";
 import {
     click,
     getFixture,
     getNodesTextContent,
-    mount,
     nextTick,
     patchWithCleanup,
 } from "../../helpers/utils";
@@ -38,6 +38,7 @@ import {
 import { fieldService } from "@web/core/field_service";
 
 import { Component, xml } from "@odoo/owl";
+import { mountInFixture } from "../../helpers/mountInFixture";
 
 export class DebugMenuParent extends Component {
     static template = xml`<DebugMenu/>`;
@@ -62,7 +63,8 @@ QUnit.module("DebugMenu", (hooks) => {
             .add("dialog", makeFakeDialogService())
             .add("localization", makeFakeLocalizationService())
             .add("field", fieldService)
-            .add("command", fakeCommandService);
+            .add("command", fakeCommandService)
+            .add("popover", popoverService);
         const mockRPC = async (route, args) => {
             if (args.method === "check_access_rights") {
                 return Promise.resolve(true);
@@ -115,7 +117,7 @@ QUnit.module("DebugMenu", (hooks) => {
                 return null;
             });
         const env = await makeTestEnv(testConfig);
-        await mount(DebugMenuParent, target, { env });
+        await mountInFixture(DebugMenuParent, target, { env });
         await click(target.querySelector("button.dropdown-toggle"));
         assert.containsN(target, ".dropdown-menu .dropdown-item", 3);
         assert.containsOnce(target, ".dropdown-divider");
@@ -169,7 +171,7 @@ QUnit.module("DebugMenu", (hooks) => {
                 };
             });
         const env = await makeTestEnv(testConfig);
-        await mount(DebugMenuParent, target, { env });
+        await mountInFixture(DebugMenuParent, target, { env });
         await click(target.querySelector("button.dropdown-toggle"));
         const items = [...target.querySelectorAll(".dropdown-menu .dropdown-item")];
         assert.deepEqual(
@@ -184,7 +186,7 @@ QUnit.module("DebugMenu", (hooks) => {
             isActive: true,
             close() {},
         };
-        await mount(ActionDialog, target, {
+        await mountInFixture(ActionDialog, target, {
             env,
             props: { close: () => {} },
         });
@@ -241,18 +243,16 @@ QUnit.module("DebugMenu", (hooks) => {
                 isActive: true,
                 close() {},
             };
-            await mount(WithCustom, target, {
+            await mountInFixture(WithCustom, target, {
                 env,
                 props: { close: () => {} },
             });
             assert.containsOnce(target, ".o_dialog");
             assert.containsOnce(target, ".o_dialog .o_debug_manager .fa-bug");
             await click(target, ".o_dialog .o_debug_manager button");
-            const debugManagerEl = target.querySelector(".o_debug_manager");
-            assert.containsN(debugManagerEl, ".dropdown-menu .dropdown-item", 2);
+            assert.containsN(target, ".dropdown-menu .dropdown-item", 2);
             // Check that global debugManager elements are not displayed (global_1)
-            const items =
-                [...debugManagerEl.querySelectorAll(".dropdown-menu .dropdown-item")] || [];
+            const items = [...target.querySelectorAll(".dropdown-menu .dropdown-item")] || [];
             assert.deepEqual(
                 items.map((el) => el.textContent),
                 ["Item 1", "Item 2"]
@@ -282,7 +282,7 @@ QUnit.module("DebugMenu", (hooks) => {
         });
         debugRegistry.category("default").add("regenerateAssets", regenerateAssets);
         const env = await makeTestEnv(testConfig);
-        await mount(DebugMenuParent, target, { env });
+        await mountInFixture(DebugMenuParent, target, { env });
         await click(target.querySelector("button.dropdown-toggle"));
         assert.containsOnce(target, ".dropdown-menu .dropdown-item");
         const item = target.querySelector(".dropdown-menu .dropdown-item");
@@ -335,7 +335,7 @@ QUnit.module("DebugMenu", (hooks) => {
 
         await createWebClient({ serverData, mockRPC });
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".dropdown-menu .dropdown-item"));
         assert.containsOnce(target, ".modal .o_list_view");
 
         await click(target.querySelector(".modal .o_list_view .o_data_row td"));
@@ -411,7 +411,7 @@ QUnit.module("DebugMenu", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1234);
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".dropdown-menu .dropdown-item"));
         assert.containsOnce(target, ".breadcrumb-item");
         assert.containsOnce(target, ".o_breadcrumb .active");
         assert.strictEqual(target.querySelector(".o_breadcrumb .active").textContent, "Edit view");
@@ -454,7 +454,7 @@ QUnit.module("DebugMenu", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1);
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".dropdown-menu .dropdown-item"));
         assert.containsOnce(target, ".breadcrumb-item");
         assert.containsOnce(target, ".o_breadcrumb .active");
         assert.strictEqual(target.querySelector(".o_breadcrumb .active").textContent, "Edit view");
@@ -516,7 +516,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.containsOnce(target, ".o-toy-view");
 
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".dropdown-menu .dropdown-item"));
         assert.containsOnce(target, ".breadcrumb-item");
         assert.containsOnce(target, ".o_breadcrumb .active");
         assert.strictEqual(target.querySelector(".o_breadcrumb .active").textContent, "Edit view");
@@ -544,7 +544,7 @@ QUnit.module("DebugMenu", (hooks) => {
             // opens a form view in a dialog without a control panel.
             await doAction(webClient, 5);
             await click(target.querySelector(".o_dialog .o_debug_manager button"));
-            assert.containsNone(target, ".o_debug_manager .dropdown-item");
+            assert.containsNone(target, ".dropdown-menu .dropdown-item");
         }
     );
 
@@ -586,7 +586,7 @@ QUnit.module("DebugMenu", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1234);
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".dropdown-menu .dropdown-item"));
         assert.containsOnce(target, ".modal");
         assert.containsOnce(target, ".modal select#formview_default_fields");
         assert.containsN(target.querySelector(".modal #formview_default_fields"), "option", 2);
@@ -634,7 +634,7 @@ QUnit.module("DebugMenu", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1234);
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".dropdown-menu .dropdown-item"));
         assert.containsOnce(target, ".modal");
 
         await click(target.querySelector(".modal .modal-footer button"));
@@ -683,7 +683,7 @@ QUnit.module("DebugMenu", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1234);
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".dropdown-menu .dropdown-item"));
         assert.containsOnce(target, ".modal");
 
         const select = target.querySelector(".modal #formview_default_fields");
@@ -776,7 +776,7 @@ QUnit.module("DebugMenu", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1234);
         await click(target.querySelector(".o_debug_manager button"));
-        await click(target.querySelector(".o_debug_manager .dropdown-item"));
+        await click(target.querySelector(".dropdown-menu .dropdown-item"));
         assert.containsOnce(target, ".modal");
         assert.deepEqual(
             getNodesTextContent(

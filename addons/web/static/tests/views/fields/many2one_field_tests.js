@@ -12,6 +12,7 @@ import {
     clickSave,
     dragAndDrop,
     editInput,
+    getDropdownMenu,
     getFixture,
     getNodesTextContent,
     makeDeferred,
@@ -613,10 +614,8 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual($("tr.o_data_row").length, 9, "should display 9 records");
         assert.equal(target.querySelector(".o_field_widget[name=trululu] input").value, "aaa");
 
-        const modal = target.querySelector(".modal");
-
-        await toggleSearchBarMenu(modal);
-        await toggleMenuItem(modal, "Filter");
+        await toggleSearchBarMenu(target.querySelector(".modal"));
+        await toggleMenuItem(getDropdownMenu(target, ".o_searchview_dropdown_toggler"), "Filter");
 
         assert.strictEqual($("tr.o_data_row").length, 0, "should display 0 records");
     });
@@ -3975,12 +3974,10 @@ QUnit.module("Fields", (hooks) => {
 
         // dropdown selector
         const searchDropdown = ".o_control_panel_actions .o-dropdown";
-
-        await click(document.querySelector(`${searchDropdown} .dropdown-toggle`));
-
+        await click(document.querySelector(searchDropdown));
         assert.hasClass(document.querySelector(searchDropdown), "show");
         assert.isVisible(
-            document.querySelector(`${searchDropdown} > .dropdown-menu`),
+            getDropdownMenu(target, searchDropdown),
             "the search bar dropdown menu should be visible"
         );
     });
@@ -4176,7 +4173,7 @@ QUnit.module("Fields", (hooks) => {
         await selectDropdownItem(target, "trululu", "Search More...");
         const modal = target.querySelector(".modal");
         await toggleSearchBarMenu(modal);
-        await toggleMenuItem(modal, "Bar");
+        await toggleMenuItem(getDropdownMenu(target, ".o_searchview_dropdown_toggler"), "Bar");
 
         await click(modal.querySelectorAll(".o_group_header")[1]);
 

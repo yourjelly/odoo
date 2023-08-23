@@ -761,18 +761,19 @@ QUnit.module("test_mail", {}, function () {
 
         await doAction(webClient, 1);
         await toggleSearchBarMenu(document);
+
         assert.containsN(
             document.body,
-            ".o_cp_searchview .o_dropdown_container",
+            ".o-dropdown--menu .o_dropdown_container",
             2,
             "only two elements should be available in view search"
         );
         assert.isVisible(
-            document.querySelector(".o_cp_searchview .o_dropdown_container.o_filter_menu"),
+            document.querySelector(".o-dropdown--menu .o_dropdown_container.o_filter_menu"),
             "filter should be available in view search"
         );
         assert.isVisible(
-            document.querySelector(".o_cp_searchview .o_dropdown_container.o_favorite_menu"),
+            document.querySelector(".o-dropdown--menu .o_dropdown_container.o_favorite_menu"),
             "favorites should be available in view search"
         );
     });

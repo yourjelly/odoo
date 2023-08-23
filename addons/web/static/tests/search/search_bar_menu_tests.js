@@ -8,6 +8,7 @@ import {
     patchDate,
     patchWithCleanup,
     nextTick,
+    getDropdownMenu,
 } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
 import {
@@ -322,7 +323,6 @@ QUnit.module("Search", (hooks) => {
             await deleteFavorite(target, 0);
 
             assert.verifySteps([]);
-
             await click(document.querySelector("div.o_dialog footer button"));
 
             assert.deepEqual(getFacetTexts(target), []);
@@ -1131,8 +1131,6 @@ QUnit.module("Search", (hooks) => {
             await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "Date");
 
-            const optionEls = target.querySelectorAll(".dropdown .o_item_option");
-
             // default filter should be activated with the global default period 'this_month'
             assert.deepEqual(getDomain(controlPanel), [
                 "&",
@@ -1143,6 +1141,7 @@ QUnit.module("Search", (hooks) => {
             assert.ok(isOptionSelected(target, "Date", "March"));
 
             // check option descriptions
+            const optionEls = target.querySelectorAll(".o-dropdown--menu .o_item_option");
             const optionDescriptions = [...optionEls].map((e) => e.innerText.trim());
             const expectedDescriptions = [
                 "March",

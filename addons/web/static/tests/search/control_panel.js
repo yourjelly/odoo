@@ -39,9 +39,9 @@ QUnit.module("Search", (hooks) => {
 
         assert.containsOnce(target, ".o_control_panel_breadcrumbs");
         assert.containsOnce(target, ".o_control_panel_actions");
-        assert.strictEqual(target.querySelector(".o_control_panel_actions").innerHTML, "");
+        assert.strictEqual(target.querySelector(".o_control_panel_actions").innerText, "");
         assert.containsOnce(target, ".o_control_panel_navigation");
-        assert.strictEqual(target.querySelector(".o_control_panel_navigation").innerHTML, "");
+        assert.strictEqual(target.querySelector(".o_control_panel_navigation").innerText, "");
 
         assert.containsNone(target, ".o_cp_switch_buttons");
 

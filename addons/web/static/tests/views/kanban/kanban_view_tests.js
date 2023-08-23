@@ -8,6 +8,7 @@ import {
     drag,
     dragAndDrop,
     editInput,
+    getDropdownMenu,
     getFixture,
     getNodesTextContent,
     makeDeferred,
@@ -69,6 +70,7 @@ import {
     validateColumn,
     toggleColumnActions,
     loadMore,
+    getColumnDropdownMenu,
 } from "./helpers";
 
 const serviceRegistry = registry.category("services");
@@ -480,10 +482,7 @@ QUnit.module("Views", (hooks) => {
         await toggleColumnActions(target, 0);
 
         // check available actions in kanban header's config dropdown
-        assert.containsOnce(
-            target,
-            ".o_kanban_header:first-child .o_kanban_config .o_kanban_toggle_fold"
-        );
+        assert.containsOnce(target, ".o-dropdown--menu .o_kanban_toggle_fold");
         assert.containsNone(target, ".o_kanban_header:first-child .o_kanban_config .o_column_edit");
         assert.containsNone(
             target,
@@ -572,14 +571,8 @@ QUnit.module("Views", (hooks) => {
             const clickColumnAction = await toggleColumnActions(target, 1);
 
             // check archive/restore all actions in kanban header's config dropdown
-            assert.containsOnce(
-                target,
-                ".o_kanban_group:last-child .o_kanban_header .o_kanban_config .o_column_archive_records"
-            );
-            assert.containsOnce(
-                target,
-                ".o_kanban_group:last-child .o_kanban_header .o_kanban_config .o_column_unarchive_records"
-            );
+            assert.containsOnce(getColumnDropdownMenu(1), ".o_column_archive_records");
+            assert.containsOnce(getColumnDropdownMenu(1), ".o_column_unarchive_records");
             assert.containsN(target, ".o_kanban_group", 2);
             assert.containsOnce(target, ".o_kanban_group:first-child .o_kanban_record");
             assert.containsN(target, ".o_kanban_group:last-child .o_kanban_record", 3);
@@ -656,12 +649,12 @@ QUnit.module("Views", (hooks) => {
 
             // check archive/restore all actions in kanban header's config dropdown
             assert.containsOnce(
-                target,
-                ".o_kanban_header:first-child .o_kanban_config .o_column_archive_records"
+                getDropdownMenu(target, ".o_kanban_header:first-child .o_kanban_config"),
+                ".o_column_archive_records"
             );
             assert.containsOnce(
-                target,
-                ".o_kanban_header:first-child .o_kanban_config .o_column_unarchive_records"
+                getDropdownMenu(target, ".o_kanban_header:first-child .o_kanban_config"),
+                ".o_column_unarchive_records"
             );
             assert.containsN(target, ".o_kanban_group", 2);
             assert.containsOnce(target, ".o_kanban_group:first-child .o_kanban_record");
@@ -2771,7 +2764,7 @@ QUnit.module("Views", (hooks) => {
 
         // Select state in kanban
         await click(getCard(target, 0), ".o_status");
-        await click(getCard(target, 0), ".o_field_state_selection .dropdown-item:nth-child(2)");
+        await click(target, ".dropdown-item:nth-child(2)");
 
         assert.hasClass(
             target.querySelector(".o_status"),
@@ -6061,22 +6054,22 @@ QUnit.module("Views", (hooks) => {
         // check available actions in kanban header's config dropdown
         await toggleColumnActions(target, 0);
         assert.containsOnce(
-            getColumn(target, 0),
+            getColumnDropdownMenu(target, 0),
             ".o_kanban_toggle_fold",
             "should be able to fold the column"
         );
         assert.containsOnce(
-            getColumn(target, 0),
+            getColumnDropdownMenu(target, 0),
             ".o_column_edit",
             "should be able to edit the column"
         );
         assert.containsOnce(
-            getColumn(target, 0),
+            getColumnDropdownMenu(target, 0),
             ".o_column_delete",
             "should be able to delete the column"
         );
         assert.containsNone(
-            getColumn(target, 0),
+            getColumnDropdownMenu(target, 0),
             ".o_column_archive_records",
             "should not be able to archive all the records"
         );
@@ -6121,27 +6114,27 @@ QUnit.module("Views", (hooks) => {
         await click(getColumn(target, 0));
         await toggleColumnActions(target, 0);
         assert.containsOnce(
-            getColumn(target, 0),
+            getColumnDropdownMenu(target, 0),
             ".o_kanban_toggle_fold",
             "should be able to fold the column"
         );
         assert.containsNone(
-            getColumn(target, 0),
+            getColumnDropdownMenu(target, 0),
             ".o_column_edit",
             "should be able to edit the column"
         );
         assert.containsNone(
-            getColumn(target, 0),
+            getColumnDropdownMenu(target, 0),
             ".o_column_delete",
-            "should be able to delete the column"
+            "should not be able to delete the column"
         );
         assert.containsNone(
-            getColumn(target, 0),
+            getColumnDropdownMenu(target, 0),
             ".o_column_archive_records",
             "should not be able to archive all the records"
         );
         assert.containsNone(
-            getColumn(target, 0),
+            getColumnDropdownMenu(target, 0),
             ".o_column_unarchive_records",
             "should not be able to restore all the records"
         );
@@ -7643,9 +7636,11 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_view_nocontent");
     });
 
-    QUnit.test("empty grouped kanban with sample data: keyboard navigation", async (assert) => {
-        await makeView({
-            arch: `
+    QUnit.test(
+        "empty grouped kanban with sample data: disabled keyboard navigation, stay in search input",
+        async (assert) => {
+            await makeView({
+                arch: `
                 <kanban sample="1">
                     <field name="product_id"/>
                     <templates>
@@ -7655,28 +7650,27 @@ QUnit.module("Views", (hooks) => {
                         </div>
                     </templates>
                 </kanban>`,
-            serverData,
-            groupBy: ["product_id"],
-            resModel: "partner",
-            type: "kanban",
-            async mockRPC(route, { kwargs, method }, performRpc) {
-                const result = await performRpc(...arguments);
-                if (method === "web_read_group") {
-                    result.groups.forEach((g) => (g.product_id_count = 0));
-                }
-                return result;
-            },
-        });
+                serverData,
+                groupBy: ["product_id"],
+                resModel: "partner",
+                type: "kanban",
+                async mockRPC(route, { kwargs, method }, performRpc) {
+                    const result = await performRpc(...arguments);
+                    if (method === "web_read_group") {
+                        result.groups.forEach((g) => (g.product_id_count = 0));
+                    }
+                    return result;
+                },
+            });
 
-        await toggleColumnActions(target, 0);
+            assert.containsN(target, ".o_kanban_record", 16);
+            assert.hasClass(document.activeElement, "o_searchview_input");
 
-        assert.containsN(target, ".o_kanban_record", 16);
-        assert.hasClass(document.activeElement, "o_searchview_input");
+            await triggerEvent(document.activeElement, null, "keydown", { key: "ArrowDown" });
 
-        await triggerEvent(document.activeElement, null, "keydown", { key: "ArrowDown" });
-
-        assert.hasClass(document.activeElement, "o_searchview_input");
-    });
+            assert.hasClass(document.activeElement, "o_searchview_input");
+        }
+    );
 
     QUnit.test("empty kanban with sample data", async (assert) => {
         serverData.models.partner.records = [];
@@ -7933,7 +7927,10 @@ QUnit.module("Views", (hooks) => {
 
         await toggleColumnActions(target, 0);
 
-        assert.hasClass(target.querySelector(".o_kanban_config .o_kanban_toggle_fold"), "disabled");
+        assert.hasClass(
+            getDropdownMenu(target, ".o_kanban_config").querySelector(".o_kanban_toggle_fold"),
+            "disabled"
+        );
     });
 
     QUnit.skip("empty grouped kanban with sample data: fold/unfold a column", async (assert) => {
@@ -8710,9 +8707,9 @@ QUnit.module("Views", (hooks) => {
             });
             assert.containsN(target, ".o_kanban_group .o_kanban_config", 2);
 
-            assert.containsNone(target, ".o_kanban_config .o-dropdown--menu");
+            assert.containsNone(target, ".o-dropdown--menu");
             await click(target.querySelectorAll(".o_kanban_config .dropdown-toggle")[0]);
-            assert.containsOnce(target, ".o_kanban_config .o-dropdown--menu");
+            assert.containsOnce(target, ".o-dropdown--menu");
         }
     );
 
@@ -8780,13 +8777,13 @@ QUnit.module("Views", (hooks) => {
             "no record should have the color 12"
         );
         assert.containsOnce(
-            target,
-            ".o_kanban_record:first-child .oe_kanban_colorpicker",
+            getDropdownMenu(target, ".o_kanban_record:first-child"),
+            ".oe_kanban_colorpicker",
             "there should be a color picker"
         );
         assert.containsN(
-            target,
-            ".o_kanban_record:first-child .oe_kanban_colorpicker > *",
+            getDropdownMenu(target, ".o_kanban_record:first-child"),
+            ".oe_kanban_colorpicker > *",
             12,
             "the color picker should have 12 children (the colors)"
         );
@@ -11084,7 +11081,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await toggleRecordDropdown(target, 0);
-        await click(getCard(target, 0), ".oe_kanban_action");
+        await click(getDropdownMenu(target, getCard(0)), ".oe_kanban_action");
 
         assert.containsNone(getCard(target, 0), "img", "Initially there is no image.");
 
@@ -11096,7 +11093,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, 'img[data-src*="/web/image/1"]');
 
         await toggleRecordDropdown(target, 1);
-        const coverButton = getCard(target, 1).querySelector("a");
+        const coverButton = getDropdownMenu(target, getCard(target, 1)).querySelector("a");
         assert.strictEqual(coverButton.innerText.trim(), "Set Cover Image");
         await click(coverButton);
 
@@ -12400,11 +12397,11 @@ QUnit.module("Views", (hooks) => {
             `,
         });
 
-        assert.containsNone(target, ".o_content .dropdown-menu");
+        assert.containsNone(target, ".o-dropdown--menu");
         await click(target, ".o_kanban_renderer .dropdown-toggle");
-        assert.containsOnce(target, ".o_content .dropdown-menu");
-        await click(target, ".o_kanban_renderer .dropdown-menu .dropdown-item");
-        assert.containsNone(target, ".o_content .dropdown-menu");
+        assert.containsOnce(target, ".o-dropdown--menu");
+        await click(target, ".o-dropdown--menu .dropdown-item");
+        assert.containsNone(target, ".o-dropdown--menu");
     });
 
     QUnit.test("can use JSON in kanban template", async (assert) => {
@@ -12563,7 +12560,7 @@ QUnit.module("Views", (hooks) => {
         // Changes the state of the first record of the "Yes" column to "def"
         // The updated record should remain visible
         await click(getCard(target, 2), ".o_status");
-        await click(getCard(target, 2), ".o_field_state_selection .dropdown-item:nth-child(2)");
+        await click(getDropdownMenu(target, getCard(target, 2)), ".o-dropdown-item:nth-child(2)");
 
         assert.deepEqual(getCounters(target), ["1", "1"]);
         assert.containsN(getColumn(target, 1), ".o_kanban_record", 2);
@@ -13926,7 +13923,7 @@ QUnit.module("Views", (hooks) => {
             // check availability of delete action in kanban header's config dropdown
             await toggleColumnActions(target, 2);
             assert.containsOnce(
-                getColumn(target, 2),
+                getColumnDropdownMenu(target, 2),
                 ".o_column_delete",
                 "should be able to delete the column"
             );

@@ -2,11 +2,12 @@
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { DropdownGroup } from "@web/core/dropdown/dropdown_group";
+import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
 import { Component, useChildSubEnv, useState } from "@odoo/owl";
 import { debounce } from "@web/core/utils/timing";
-import { useService } from "@web/core/utils/hooks";
 
 class CompanySelector {
     constructor(companyService, toggleDelay) {
@@ -98,7 +99,7 @@ export class SwitchCompanyItem extends Component {
 
 export class SwitchCompanyMenu extends Component {
     static template = "web.SwitchCompanyMenu";
-    static components = { Dropdown, DropdownItem, SwitchCompanyItem };
+    static components = { Dropdown, DropdownItem, SwitchCompanyItem, DropdownGroup };
     static props = {};
     static toggleDelay = 1000;
 

@@ -15,7 +15,7 @@
     <t t-name="board.Content">
         <div t-if="!env.isSmall" class="o-dashboard-header d-flex justify-content-end">
             <Dropdown>
-                <button togglerClass="btn btn-secondary m-2 p-2">
+                <button class="btn btn-secondary m-2 p-2">
                     <img t-attf-src="/board/static/img/layout_{{board.layout}}.png" width="16" height="16" alt=""/>
                     Change Layout
                 </button>

@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownGroup } from "@web/core/dropdown/dropdown_group";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { browser } from "@web/core/browser/browser";
@@ -14,7 +15,7 @@ const userMenuRegistry = registry.category("user_menuitems");
 
 export class UserMenu extends Component {
     static template = "web.UserMenu";
-    static components = { Dropdown, DropdownItem, CheckBox };
+    static components = { DropdownGroup, Dropdown, DropdownItem, CheckBox };
     static props = {};
 
     setup() {

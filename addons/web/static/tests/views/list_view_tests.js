@@ -727,9 +727,7 @@ QUnit.module("Views", (hooks) => {
             assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
             await toggleActionMenu(target);
             assert.deepEqual(
-                getNodesTextContent(
-                    target.querySelectorAll(".o_control_panel .o_cp_action_menus .o_menu_item")
-                ),
+                getNodesTextContent(target.querySelectorAll(".o-dropdown--menu .o_menu_item")),
                 ["Duplicate", "Delete"],
                 "action menu should not contain the Export button"
             );
@@ -760,9 +758,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
         await toggleActionMenu(target);
         assert.deepEqual(
-            getNodesTextContent(
-                target.querySelectorAll(".o_control_panel .o_cp_action_menus .o_menu_item")
-            ),
+            getNodesTextContent(target.querySelectorAll(".o-dropdown--menu .o_menu_item")),
             ["Export", "Duplicate", "Delete"],
             "action menu should have Export button"
         );
@@ -1374,7 +1370,7 @@ QUnit.module("Views", (hooks) => {
 
         await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
         const optionalColumnLabels = [
-            ...target.querySelectorAll(".o_optional_columns_dropdown .dropdown-item"),
+            ...target.querySelectorAll(".o-dropdown--menu .dropdown-item"),
         ].map((item) => item.textContent.trim());
         assert.deepEqual(optionalColumnLabels, [
             "Display Name",
@@ -2316,7 +2312,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
         assert.containsNone(
             target,
-            "div.o_control_panel .o_cp_action_menus .dropdown",
+            "div.o_control_panel .o_cp_action_menus .dropdown-toggle",
             "should not have dropdown as delete item is not there"
         );
 
@@ -2326,10 +2322,10 @@ QUnit.module("Views", (hooks) => {
 
         await click(target.querySelector(".o_data_row .o_list_record_selector input"));
         assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
-        assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus .dropdown");
-        await click(target, "div.o_control_panel .o_cp_action_menus .dropdown button");
+        assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus .dropdown-toggle");
+        await click(target, "div.o_control_panel .o_cp_action_menus .dropdown-toggle");
         assert.deepEqual(
-            [...target.querySelectorAll(".o_cp_action_menus .o_menu_item")].map(
+            [...target.querySelectorAll(".o-dropdown--menu .o_menu_item")].map(
                 (el) => el.innerText
             ),
             ["Duplicate", "Delete"]
@@ -6235,9 +6231,9 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_cp_action_menus", "sidebar should be visible");
 
         await click(target.querySelector(".o_cp_action_menus .dropdown-toggle"));
-        const archiveItem = [
-            ...target.querySelectorAll(".o_cp_action_menus .dropdown-menu .o_menu_item"),
-        ].filter((elem) => elem.textContent === "Archive");
+        const archiveItem = [...target.querySelectorAll(".o-dropdown--menu .o_menu_item")].filter(
+            (elem) => elem.textContent === "Archive"
+        );
         await click(archiveItem[0]);
         assert.strictEqual(
             document.querySelectorAll(".modal").length,
@@ -6348,7 +6344,7 @@ QUnit.module("Views", (hooks) => {
 
         await toggleActionMenu(target);
         assert.deepEqual(
-            getNodesTextContent(target.querySelectorAll(".o_cp_action_menus .dropdown-item")),
+            getNodesTextContent(target.querySelectorAll(".o-dropdown--menu .dropdown-item")),
             ["Custom Default Available", "Export", "Duplicate", "Custom Available", "Delete"]
         );
 
@@ -7778,7 +7774,7 @@ QUnit.module("Views", (hooks) => {
 
         await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
 
-        await click(target, ".o_optional_columns_dropdown span.dropdown-item:first-child label");
+        await click(target, ".o-dropdown--menu span.dropdown-item:first-child label");
 
         assert.hasClass(target.querySelector(".o_list_view .o_content"), "o_view_sample_data");
         assert.ok(target.querySelectorAll(".o_data_row").length > 0);
@@ -9682,7 +9678,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_list_record_selector input"));
         await toggleActionMenu(target);
         assert.deepEqual(
-            getNodesTextContent(target.querySelectorAll(".o_cp_action_menus .dropdown-item")),
+            getNodesTextContent(target.querySelectorAll(".o-dropdown--menu .dropdown-item")),
             ["Export", "Duplicate", "Delete", "Action event"]
         );
     });
@@ -10671,7 +10667,7 @@ QUnit.module("Views", (hooks) => {
 
             const modal = target.querySelector(".modal");
             await toggleSearchBarMenu(modal);
-            await toggleMenuItem(modal, "cornichon");
+            await toggleMenuItem(target, "cornichon");
             await click(target.querySelector(".o_group_header"));
             assert.containsOnce(target, ".modal-content .o_group_open");
         }
@@ -13336,7 +13332,7 @@ QUnit.module("Views", (hooks) => {
             checkSearchRead = true;
             await click(target.querySelector(".o_cp_action_menus .dropdown-toggle"));
             const deleteMenuItem = [
-                ...target.querySelectorAll(".o_cp_action_menus .o_menu_item"),
+                ...target.querySelectorAll(".o-dropdown--menu .o_menu_item"),
             ].filter((el) => el.innerText === "Delete")[0];
             await click(deleteMenuItem);
             await click(target, ".modal button.btn-primary");
@@ -16113,13 +16109,13 @@ QUnit.module("Views", (hooks) => {
         await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
         assert.containsN(
             target,
-            "div.o_optional_columns_dropdown span.dropdown-item",
+            ".o-dropdown--menu span.dropdown-item",
             2,
             "dropdown have 2 optional field foo with checked and bar with unchecked"
         );
 
         // enable optional field
-        await click(target, "div.o_optional_columns_dropdown span.dropdown-item:first-child");
+        await click(target, ".o-dropdown--menu span.dropdown-item:first-child");
         // 5 th (1 for checkbox, 3 for columns, 1 for optional columns)
         assert.containsN(target, "th", 5, "should have 5 th");
         assert.containsN(target, "tfoot td", 5, "should have 5 td");
@@ -16130,15 +16126,15 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(
             target.querySelectorAll(
-                "div.o_optional_columns_dropdown span.dropdown-item:first-child input:checked"
+                ".o-dropdown--menu span.dropdown-item:first-child input:checked"
             )[0],
-            [...target.querySelectorAll("div.o_optional_columns_dropdown span.dropdown-item")]
+            [...target.querySelectorAll(".o-dropdown--menu span.dropdown-item")]
                 .filter((el) => el.innerText === "M2O field")[0]
                 .querySelector("input"),
             "m2o advanced field check box should be checked in dropdown"
         );
 
-        await click(target, "div.o_optional_columns_dropdown span.dropdown-item:first-child");
+        await click(target, ".o-dropdown--menu span.dropdown-item:first-child");
         // 4 th (1 for checkbox, 2 for columns, 1 for optional columns)
         assert.containsN(target, "th", 4, "should have 4 th");
         assert.containsN(target, "tfoot td", 4, "should have 4 td");
@@ -16149,9 +16145,7 @@ QUnit.module("Views", (hooks) => {
 
         await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
         assert.notOk(
-            $(target)
-                .find('div.o_optional_columns_dropdown span.dropdown-item [name="m2o"]')
-                .is(":checked")
+            $(target).find('.o-dropdown--menu span.dropdown-item [name="m2o"]').is(":checked")
         );
     });
 
@@ -16212,11 +16206,10 @@ QUnit.module("Views", (hooks) => {
             // enable optional field
             await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
             assert.notOk(
-                target.querySelector(
-                    "div.o_optional_columns_dropdown span.dropdown-item:first-child input"
-                ).checked
+                target.querySelector(".o-dropdown--menu span.dropdown-item:first-child input")
+                    .checked
             );
-            await click(target, "div.o_optional_columns_dropdown span.dropdown-item:first-child");
+            await click(target, ".o-dropdown--menu span.dropdown-item:first-child");
             assert.containsN(
                 target,
                 "th",
@@ -16244,9 +16237,8 @@ QUnit.module("Views", (hooks) => {
 
             await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
             assert.ok(
-                target.querySelector(
-                    "div.o_optional_columns_dropdown span.dropdown-item:first-child input"
-                ).checked
+                target.querySelector(".o-dropdown--menu span.dropdown-item:first-child input")
+                    .checked
             );
         }
     );
@@ -16283,7 +16275,7 @@ QUnit.module("Views", (hooks) => {
 
         // disable optional field
         await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
-        await click(target, "div.o_optional_columns_dropdown span.dropdown-item:first-child");
+        await click(target, ".o-dropdown--menu span.dropdown-item:first-child");
         assert.containsN(
             target,
             "th",
@@ -16320,7 +16312,7 @@ QUnit.module("Views", (hooks) => {
 
         // add an optional field
         await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
-        await click(target, ".o_optional_columns_dropdown span.dropdown-item:first-child label");
+        await click(target, ".o-dropdown--menu span.dropdown-item:first-child label");
         assert.containsN(target, "th", 4);
         assert.containsOnce(target, ".o_list_record_selector input:checked");
 
@@ -16330,7 +16322,7 @@ QUnit.module("Views", (hooks) => {
 
         // remove an optional field
         await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
-        await click(target, ".o_optional_columns_dropdown span.dropdown-item:first-child label");
+        await click(target, ".o-dropdown--menu span.dropdown-item:first-child label");
         assert.containsN(target, "th", 3);
         assert.containsN(target, ".o_list_record_selector input:checked", 5);
     });
@@ -16365,24 +16357,24 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsN(target, "th", 3);
-        assert.containsNone(target, ".o_optional_columns_dropdown.show");
+        assert.containsNone(target, ".o_optional_columns_dropdown .show");
 
         // add an optional field (we click on the label on purpose, as it will trigger
         // a second event on the input)
         await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
-        assert.containsOnce(target, ".o_optional_columns_dropdown.show");
-        assert.containsNone(target, ".o_optional_columns_dropdown input:checked");
+        assert.containsOnce(target, ".o_optional_columns_dropdown .show");
+        assert.containsNone(target, ".o-dropdown--menu input:checked");
 
-        await click(target, ".o_optional_columns_dropdown span.dropdown-item:first-child label");
+        await click(target, ".o-dropdown--menu span.dropdown-item:first-child label");
         assert.containsN(target, "th", 3);
-        assert.containsOnce(target, ".o_optional_columns_dropdown.show");
-        assert.containsOnce(target, ".o_optional_columns_dropdown input:checked");
+        assert.containsOnce(target, ".o_optional_columns_dropdown .show");
+        assert.containsOnce(target, ".o-dropdown--menu input:checked");
 
         def.resolve();
         await nextTick();
         assert.containsN(target, "th", 4);
-        assert.containsOnce(target, ".o_optional_columns_dropdown.show");
-        assert.containsOnce(target, ".o_optional_columns_dropdown input:checked");
+        assert.containsOnce(target, ".o_optional_columns_dropdown .show");
+        assert.containsOnce(target, ".o-dropdown--menu input:checked");
     });
 
     QUnit.test("change the viewType of the current action", async function (assert) {
@@ -16438,17 +16430,13 @@ QUnit.module("Views", (hooks) => {
         await click(target, "table .o_optional_columns_dropdown_toggle");
 
         assert.notOk(
-            $(target)
-                .find('div.o_optional_columns_dropdown span.dropdown-item [name="m2o"]')
-                .is(":checked")
+            $(target).find('.o-dropdown--menu span.dropdown-item [name="m2o"]').is(":checked")
         );
         assert.ok(
-            $(target)
-                .find('div.o_optional_columns_dropdown span.dropdown-item [name="o2m"]')
-                .is(":checked")
+            $(target).find('.o-dropdown--menu span.dropdown-item [name="o2m"]').is(":checked")
         );
 
-        await click(target.querySelector("div.o_optional_columns_dropdown span.dropdown-item"));
+        await click(target.querySelector(".o-dropdown--menu span.dropdown-item"));
         assert.containsN(
             target,
             "th",
@@ -16491,18 +16479,12 @@ QUnit.module("Views", (hooks) => {
         // disable optional field
         await click(target, "table .o_optional_columns_dropdown_toggle");
         assert.ok(
-            $(target)
-                .find('div.o_optional_columns_dropdown span.dropdown-item [name="m2o"]')
-                .is(":checked")
+            $(target).find('.o-dropdown--menu span.dropdown-item [name="m2o"]').is(":checked")
         );
         assert.ok(
-            $(target)
-                .find('div.o_optional_columns_dropdown span.dropdown-item [name="o2m"]')
-                .is(":checked")
+            $(target).find('.o-dropdown--menu span.dropdown-item [name="o2m"]').is(":checked")
         );
-        await click(
-            target.querySelectorAll("div.o_optional_columns_dropdown span.dropdown-item input")[1]
-        );
+        await click(target.querySelectorAll(".o-dropdown--menu span.dropdown-item input")[1]);
         assert.ok(
             $(target).find("th:not(.o_list_actions_header):contains(M2O field)").is(":visible"),
             "should have a visible m2o field"
@@ -16590,16 +16572,14 @@ QUnit.module("Views", (hooks) => {
             await click(target.querySelector("table .o_optional_columns_dropdown button"));
             assert.containsN(
                 target,
-                "div.o_optional_columns_dropdown span.dropdown-item",
+                ".o-dropdown--menu span.dropdown-item",
                 2,
                 "dropdown have 2 optional fields"
             );
 
             forceLocalStorage = false;
             // enable optional field
-            await click(
-                $(target).find("div.o_optional_columns_dropdown span.dropdown-item:eq(1) input")[0]
-            );
+            await click($(target).find(".o-dropdown--menu span.dropdown-item:eq(1) input")[0]);
 
             // Only a setItem since the list view maintains its own internal state of toggled
             // optional columns.
@@ -17646,7 +17626,7 @@ QUnit.module("Views", (hooks) => {
             await click(target.querySelector("tbody .o_data_row td.o_list_record_selector input"));
             assert.containsOnce(target, ".o_cp_action_menus", "sidebar should be available");
 
-            await click(target, "div.o_control_panel .o_cp_action_menus .dropdown button");
+            await click(target, "div.o_control_panel .o_cp_action_menus .dropdown-toggle");
             assert.containsNone(
                 target,
                 "a:contains(Archive)",
@@ -18392,13 +18372,13 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_selected_row");
         assert.containsOnce(target, "div[name=foo] input:focus");
 
-        await click(target, ".o_optional_columns_dropdown span.dropdown-item:nth-child(3) label");
+        await click(target, ".o-dropdown--menu span.dropdown-item:nth-child(3) label");
 
         assert.containsOnce(target, ".o_selected_row");
         assert.containsOnce(target, "div[name=foo] input:focus");
         assert.containsOnce(target, ".o_selected_row div[name=bar]");
 
-        await click(target, ".o_optional_columns_dropdown span.dropdown-item:nth-child(1) label");
+        await click(target, ".o-dropdown--menu span.dropdown-item:nth-child(1) label");
 
         assert.containsOnce(target, ".o_selected_row");
         // This below would be better if it still focused foo, but it is an acceptable tradeoff.
@@ -18695,7 +18675,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_char']");
         assert.strictEqual(
@@ -18751,7 +18731,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_boolean']");
         assert.strictEqual(
@@ -18802,7 +18782,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_integer']");
         assert.strictEqual(
@@ -18855,7 +18835,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_float']");
         assert.strictEqual(
@@ -18911,7 +18891,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_date']");
         assert.strictEqual(
@@ -18967,7 +18947,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(
             target,
@@ -19027,7 +19007,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(
             target,
@@ -19088,7 +19068,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_tags']");
         assert.strictEqual(
@@ -19155,7 +19135,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(
             target,
@@ -19211,7 +19191,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(target, ".o_optional_columns_dropdown input[type='checkbox']");
+        await click(target, ".o-dropdown--menu input[type='checkbox']");
 
         assert.containsOnce(
             target,
@@ -19259,12 +19239,8 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        await click(
-            target.querySelectorAll(".o_optional_columns_dropdown input[type='checkbox']")[0]
-        );
-        await click(
-            target.querySelectorAll(".o_optional_columns_dropdown input[type='checkbox']")[1]
-        );
+        await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[0]);
+        await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[1]);
 
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_char']");
         assert.containsN(target, ".o_field_cell.o_char_cell", 3);
@@ -19308,27 +19284,19 @@ QUnit.module("Views", (hooks) => {
 
         await click(target, ".o_optional_columns_dropdown_toggle");
 
-        await click(
-            target.querySelectorAll(".o_optional_columns_dropdown input[type='checkbox']")[0]
-        );
+        await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[0]);
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_char']");
         assert.containsNone(target, ".o_list_renderer th[data-name='properties.property_boolean']");
 
-        await click(
-            target.querySelectorAll(".o_optional_columns_dropdown input[type='checkbox']")[1]
-        );
+        await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[1]);
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_char']");
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_boolean']");
 
-        await click(
-            target.querySelectorAll(".o_optional_columns_dropdown input[type='checkbox']")[0]
-        );
+        await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[0]);
         assert.containsNone(target, ".o_list_renderer th[data-name='properties.property_char']");
         assert.containsOnce(target, ".o_list_renderer th[data-name='properties.property_boolean']");
 
-        await click(
-            target.querySelectorAll(".o_optional_columns_dropdown input[type='checkbox']")[1]
-        );
+        await click(target.querySelectorAll(".o-dropdown--menu input[type='checkbox']")[1]);
         assert.containsNone(target, ".o_list_renderer th[data-name='properties.property_char']");
         assert.containsNone(target, ".o_list_renderer th[data-name='properties.property_boolean']");
     });
