@@ -60,10 +60,10 @@ class HtmlHistoryDialog extends Component {
                 domain: [
                     ["id", "in", this.props.recordsIds],
                     ["res_field", "=", this.props.versionnedFieldName]
-                    ["order_by", "id", "desc"]
                 ],
                 offset: offset,
                 limit: limit,
+                order: "id desc"
             }
         );
         console.log("this.state.revisionsData", this.state.revisionsData);

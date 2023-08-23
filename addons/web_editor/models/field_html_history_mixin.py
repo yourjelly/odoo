@@ -99,4 +99,5 @@ class HtmlHistory(models.AbstractModel):
         restored_content = self.get_field_content_at_revision(
             field_name, revision_id)
 
-        return generate_comparison(content, restored_content)
+        return generate_comparison(
+            content, restored_content, ['data-last-history-steps'])

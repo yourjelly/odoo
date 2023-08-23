@@ -85,15 +85,21 @@ DELETION_COMPARISON_REGEX = r'\1<removed>\2</removed>'
 EMPTY_OPERATION_TAG = r'<(added|removed)><\/(added|removed)>'
 
 
-def generate_comparison(new_content, old_content):
+def generate_comparison(new_content, old_content, html_attribute_to_ignore=[]):
     """ Compare a content to an older content
         and generate a comparison html between both content.
 
         :param string new_content: the current content
         :param string old_content: the old content
+        :param list html_attribute_to_ignore: list of html attributes to ignore
 
         :return: string: the comparison content
     """
+    # remove ignored html attributes from both contents
+    for attribute in html_attribute_to_ignore:
+        new_content = re.sub(r'{}="[^"]*"'.format(attribute), '', new_content)
+        old_content = re.sub(r'{}="[^"]*"'.format(attribute), '', old_content)
+
     print("    > generate_comparison")
     print("    > old_content :" + str(old_content))
     print("    > new_content :" + str(new_content))
