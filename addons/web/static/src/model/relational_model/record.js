@@ -375,7 +375,10 @@ export class Record extends DataPoint {
             if (["char", "text", "html"].includes(field.type)) {
                 dataContext[fieldName] = this._textValues[fieldName];
             } else if (["one2many", "many2many"].includes(field.type)) {
-                dataContext[fieldName] = value.currentIds.filter((id) => typeof id === "number");
+                dataContext[fieldName] = value.currentIds;
+                // when sent to the server, remove virtual records from the list of ids
+                dataContext[fieldName].toJSON = () =>
+                    dataContext[fieldName].filter((id) => typeof id === "number");
             } else if (value && field.type === "date") {
                 dataContext[fieldName] = serializeDate(value);
             } else if (value && field.type === "datetime") {
