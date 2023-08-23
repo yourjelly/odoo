@@ -1,12 +1,11 @@
 /** @odoo-module **/
 
-import { getBundle, loadBundle } from "@web/core/assets";
+import { loadBundle } from "@web/core/assets";
 
 export async function loadLegacyWysiwygAssets(additionnalAssets=[]) {
     const xmlids = ['web_editor.assets_legacy_wysiwyg', ...additionnalAssets];
     for (const xmlid of xmlids) {
-        const assets = await getBundle(xmlid);
-        await loadBundle(assets);
+        await loadBundle(xmlid);
     }
 }
 

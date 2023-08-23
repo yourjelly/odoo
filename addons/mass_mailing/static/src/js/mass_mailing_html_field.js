@@ -5,7 +5,7 @@ import { _t } from "@web/core/l10n/translation";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { initializeDesignTabCss } from "@mass_mailing/js/mass_mailing_design_constants";
 import { toInline, getCSSRules } from "@web_editor/js/backend/convert_inline";
-import { getBundle, loadBundle, loadJS } from "@web/core/assets";
+import { loadBundle, loadJS } from "@web/core/assets";
 import { qweb } from "@web/legacy/js/services/core";
 import { useService } from "@web/core/utils/hooks";
 import { buildQuery } from "@web/legacy/js/core/rpc";
@@ -165,8 +165,7 @@ export class MassMailingHtmlField extends HtmlField {
     async startWysiwyg(...args) {
         await super.startWysiwyg(...args);
 
-        const assets = await getBundle("mass_mailing.assets_wysiwyg");
-        await loadBundle(assets);
+        await loadBundle("mass_mailing.assets_wysiwyg");
 
         if (status(this) === "destroyed") {
             return;

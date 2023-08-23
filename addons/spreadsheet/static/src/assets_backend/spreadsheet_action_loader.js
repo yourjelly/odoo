@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { getBundle, loadBundle } from "@web/core/assets";
+import { loadBundle } from "@web/core/assets";
 import { sprintf } from "@web/core/utils/strings";
 
 const actionRegistry = registry.category("actions");
@@ -13,8 +13,7 @@ const actionRegistry = registry.category("actions");
  * @param {function} actionLazyLoader
  */
 export async function loadSpreadsheetAction(env, actionName, actionLazyLoader) {
-    const desc = await getBundle("spreadsheet.o_spreadsheet");
-    await loadBundle(desc);
+    await loadBundle("spreadsheet.o_spreadsheet");
 
     if (actionRegistry.get(actionName) === actionLazyLoader) {
         // At this point, the real spreadsheet client action should be loaded and have

@@ -14,11 +14,10 @@ import {
     useState,
 } from "@odoo/owl";
 
-import { getBundle, loadBundle } from "@web/core/assets";
+import { loadBundle } from "@web/core/assets";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { memoize } from "@web/core/utils/functions";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { useService } from "@web/core/utils/hooks";
 
@@ -106,7 +105,7 @@ export function useEmojiPicker(ref, props, options = {}) {
 }
 
 export const loader = {
-    loadEmoji: memoize(() => getBundle("web.assets_emoji").then(loadBundle)),
+    loadEmoji: async () => loadBundle("web.assets_emoji"),
 };
 
 /**
