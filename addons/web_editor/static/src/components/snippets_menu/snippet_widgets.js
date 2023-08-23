@@ -235,7 +235,7 @@ export class UserValueWidget extends Component {
         const propKeys = Object.keys(this.props);
         for (const methodName of this.optionValues.keys()) {
             if (propKeys.includes(methodName)) {
-                return this.data.possibleValues[name];
+                return this.data.possibleValues[methodName];
             }
         }
         return "";
@@ -504,6 +504,7 @@ export class WeInput extends UserValueWidget {
         withUnit: { type: String, optional: true },
         extraClass: { type: String, optional: true },
         unit: { type: String, optional: true },
+        placeholder: { type: String, optional: true },
     };
     setup() {
         super.setup();
@@ -547,6 +548,10 @@ export class WeInput extends UserValueWidget {
         const propKeys = Object.keys(this.props);
         for (const [name, value] of values) {
             if (propKeys.includes(name)) {
+                if (value === undefined || "") {
+                    this.state.inputValue = "";
+                    return "";
+                }
                 if (!this.state.preview) {
                     this.state.inputValue = weUtils.convertValueToUnit(value, this.props.unit);
                 }

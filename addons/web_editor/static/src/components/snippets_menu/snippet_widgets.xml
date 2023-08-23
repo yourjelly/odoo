@@ -74,6 +74,7 @@
                        t-on-input="onInput"
                        t-on-blur="onBlur"
                        t-on-keydown="onKeydown"
+                       t-att-placeholder="this.props.placeholder"
                 />
                 <span t-out="this.props.unit"/>
             </div>
