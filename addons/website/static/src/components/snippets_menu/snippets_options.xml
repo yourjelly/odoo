@@ -21,7 +21,7 @@
     <t t-name="website.Carousel">
         <WeRow>
             <t t-set-slot="title">Slide</t>
-            <WeButton addSlide="true" noPreview="true" class="o_we_bg_brand_primary">Add Slide</WeButton>
+            <WeButton addSlide="true" noPreview="true" class="'o_we_bg_brand_primary'">Add Slide</WeButton>
         </WeRow>
         <WeSelect>
             <t t-set-slot="title">Style</t>
@@ -42,6 +42,38 @@
             <t t-set-slot="title">Speed</t>
         </WeInput>
     </t>
+    <t t-name="website.CarouselItem">
+        <WeButton class="'fa fa-fw fa-angle-left'" switchToSlide="'left'" noPreview="true">
+            <t t-set-slot="title">Move Backward</t>
+        </WeButton>
+        <WeButton class="'fa fa-fw fa-angle-right me-2'" switchToSlide="'right'" noPreview="true">
+            <t t-set-slot="title">Move Forward</t>
+        </WeButton>
+        <WeButton class="'fa fa-fw fa-plus o_we_bg_success'" addSlideItem="true" noPreview="true">
+            <t t-set-slot="title">Add Slide</t>
+        </WeButton>
+        <WeButton class="'fa fa-fw fa-minus o_we_bg_danger'" removeSlide="true" noPreview="true" >
+            <t t-set-slot="title">Remove Slide</t>
+        </WeButton>
+    </t>
+    <t t-name="website.GalleryElement">
+        <WeRow noPreview="true">
+            <t t-set-slot="title">Re-order</t>
+            <WeButton class="'fa fa-fw fa-angle-double-left'" position="'first'">
+                <t t-set-slot="title">Move to first</t>
+            </WeButton>
+            <WeButton class="'fa fa-fw fa-angle-left'" position="'prev'">
+                <t t-set-slot="title">Move to previous</t>
+            </WeButton>
+            <WeButton class="'fa fa-fw fa-angle-right'" position="'next'">
+                <t t-set-slot="title">Move to next</t>
+            </WeButton>
+            <WeButton class="'fa fa-fw fa-angle-double-right'" position="'last'">
+                <t t-set-slot="title">Move to last</t>
+            </WeButton>
+        </WeRow>
+    </t>
+
     <t t-name="website.snippet_options_shadow_widgets">
         <WeButtonGroup shadowClass="'shadow'" variable="shadow_variable">
             <t t-set-slot="title">Shadow</t>

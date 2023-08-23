@@ -81,6 +81,13 @@ export class SnippetOption extends Component {
      * @type {boolean}
      */
     static displayOverlayOptions = false;
+    // TODO this
+    // /**
+    //  * Forces the target to not be possible to remove.
+    //  *
+    //  * @type {boolean}
+    //  */
+    // static forceNoDeleteButton = false;
     events = {
         onBuilt: this.onBuilt.bind(this),
         onClone: this.onClone.bind(this),
@@ -1973,6 +1980,98 @@ export class SnippetMove extends SnippetOption {
         //// Update the "Invisible Elements" panel as the order of invisible
         //// snippets could have changed on the page.
         //this.trigger_up("update_invisible_dom");
+    }
+}
+
+/*
+ * Abstract option to be extended by the Carousel and gallery options (through
+ * the "CarouselHandler" option) that handles all the common parts (reordering
+ * of elements).
+ */
+export class GalleryHandler extends SnippetOption {
+
+    /**
+     * Handles reordering of items.
+     *
+     * @override
+     */
+    notify(name, data) {
+        this._super(...arguments);
+        if (name === "reorder_items") {
+            const itemsEls = this.getGalleryItems();
+            const oldPosition = itemsEls.indexOf(data.itemEl);
+            if (oldPosition === 0 && data.position === "prev") {
+                data.position = "last";
+            } else if (oldPosition === itemsEls.length - 1 && data.position === "next") {
+                data.position = "first";
+            }
+            itemsEls.splice(oldPosition, 1);
+            switch (data.position) {
+                case "first":
+                    itemsEls.unshift(data.itemEl);
+                    break;
+                case "prev":
+                    itemsEls.splice(Math.max(oldPosition - 1, 0), 0, data.itemEl);
+                    break;
+                case "next":
+                    itemsEls.splice(oldPosition + 1, 0, data.itemEl);
+                    break;
+                case "last":
+                    itemsEls.push(data.itemEl);
+                    break;
+            }
+            this.reorderItems(itemsEls, itemsEls.indexOf(data.itemEl));
+        }
+    }
+    /**
+     * Called to get the items of the gallery sorted by index if any (see
+     * gallery option) or by the order on the DOM otherwise.
+     *
+     * @abstract
+     * @returns {HTMLElement[]}
+     */
+    getGalleryItems() {}
+    /**
+     * Called to reorder the items of the gallery.
+     *
+     * @abstract
+     * @param {HTMLElement[]} itemsEls - the items to reorder.
+     * @param {integer} newItemPosition - the new position of the moved items.
+     */
+    reorderItems(itemsEls, newItemPosition) {}
+}
+
+/*
+ * Abstract option to be extended by the Carousel and gallery options that
+ * handles the update of the carousel indicator.
+ */
+export class CarouselHandler extends GalleryHandler {
+
+    /**
+     * Gets the bootstrap instance of the carousel.
+     */
+    get bsCarousel() {
+        const targetWindow = this.target.ownerDocument.defaultView;
+        return targetWindow.Carousel.getOrCreateInstance(this.target);
+    }
+    /**
+     * Update the carousel indicator.
+     *
+     * @param {integer} position - the position of the indicator to activate on
+     * the carousel.
+     */
+    updateIndicatorAndActivateSnippet(position) {
+        const carouselEl = this.target.classList.contains("carousel") ? this.target
+            : this.target.querySelector(".carousel");
+        carouselEl.classList.remove("slide");
+        this.bsCarousel.to(position);
+        for (const indicatorEl of this.target.querySelectorAll(".carousel-indicators li")) {
+            indicatorEl.classList.remove("active");
+        }
+        this.target.querySelector(`.carousel-indicators li[data-bs-slide-to="${position}"]`)
+            .classList.add("active");
+        this.env.activateSnippet(this.target.querySelector(".carousel-item.active img"));
+        carouselEl.classList.add("slide");
     }
 }
 
