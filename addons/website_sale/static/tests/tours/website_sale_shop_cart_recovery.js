@@ -1,8 +1,10 @@
 /** @odoo-module **/
 
-import localStorage from "@web/legacy/js/core/local_storage";
+import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import tourUtils from "@website_sale/js/tours/tour_utils";
+
+const localStorage = browser.localStorage;
 
 var orderIdKey = 'website_sale.tour_shop_cart_recovery.orderId';
 var recoveryLinkKey = 'website_sale.tour_shop_cart_recovery.recoveryLink';

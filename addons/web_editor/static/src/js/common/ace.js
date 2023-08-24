@@ -5,12 +5,14 @@ import { Mutex } from "@web/core/utils/concurrency";
 import { _t } from "@web/core/l10n/translation";
 import dom from "@web/legacy/js/core/dom";
 import Widget from "@web/legacy/js/core/widget";
-import localStorage from "@web/legacy/js/core/local_storage";
+import { browser } from "@web/core/browser/browser";
 import { debounce } from "@web/core/utils/timing";
 import { sortBy } from "@web/core/utils/arrays";
 import { pick } from "@web/core/utils/objects";
 import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { markup } from "@odoo/owl";
+
+const localStorage = browser.localStorage;
 
 /**
  * Formats a content-check result (@see checkXML, checkSCSS).
