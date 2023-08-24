@@ -30,7 +30,7 @@
         tourUtils.goToCart({quantity: 2}),
     {
         content: "Check for 2 products in cart and proceed to checkout",
-        extra_trigger: '#cart_products tr:contains("Storage Box Test") input.js_quantity:propValue(2)',
+        extra_trigger: '#cart_products div:has(a>h6:contains("Storage Box Test")) input.js_quantity:propValue(2)',
         trigger: 'a[href*="/shop/checkout"]',
     },
     ...tourUtils.assertCartAmounts({
@@ -214,7 +214,7 @@
         tourUtils.goToCart({quantity: 2}),
     {
         content: "Check for 2 products in cart and proceed to checkout",
-        extra_trigger: '#cart_products tr:contains("Storage Box Test") input.js_quantity:propValue(2)',
+        extra_trigger: '#cart_products div:has(a>h6:contains("Storage Box Test")) input.js_quantity:propValue(2)',
         trigger: 'a[href*="/shop/checkout"]',
     },
     ...tourUtils.assertCartAmounts({

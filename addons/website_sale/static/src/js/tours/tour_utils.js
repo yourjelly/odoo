@@ -114,7 +114,7 @@ function goToCart({quantity = 1, position = "bottom", backend = false} = {}) {
 function goToCheckout() {
     return {
         content: 'Checkout your order',
-        trigger: 'a[role="button"] span:contains("Process Checkout")',
+        trigger: 'button:contains("Checkout")',
         run: 'click',
     };
 }
@@ -124,7 +124,7 @@ function pay() {
         content: 'Pay',
         //Either there are multiple payment methods, and one is checked, either there is only one, and therefore there are no radio inputs
         // extra_trigger: '#payment_method input:checked,#payment_method:not(:has("input:radio:visible"))',
-        trigger: 'button[name="o_payment_submit_button"]:visible:not(:disabled)'
+        trigger: 'button[name="o_wsale_payment_submit_button"]:visible:not(:disabled)'
     };
 }
 
