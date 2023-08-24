@@ -15589,9 +15589,11 @@
     class AbstractChart {
         sheetId;
         title;
+        extraData;
         getters;
         constructor(definition, sheetId, getters) {
             this.title = definition.title;
+            this.extraData = definition.extraData;
             this.sheetId = sheetId;
             this.getters = getters;
         }
@@ -16343,6 +16345,7 @@
                 title: this.title,
                 stacked: this.stacked,
                 aggregated: this.aggregated,
+                extraData: this.extraData,
             };
         }
         getDefinitionForExcel() {
@@ -16579,6 +16582,7 @@
                 dataRange: dataRange
                     ? this.getters.getRangeString(dataRange, targetSheetId || this.sheetId)
                     : undefined,
+                extraData: this.extraData,
             };
         }
         getDefinitionForExcel() {
@@ -16899,6 +16903,7 @@
                 labelsAsText: this.labelsAsText,
                 stacked: this.stacked,
                 aggregated: this.aggregated,
+                extraData: this.extraData,
             };
         }
         getContextCreation() {
@@ -17196,6 +17201,7 @@
                     : undefined,
                 title: this.title,
                 aggregated: this.aggregated,
+                extraData: this.extraData,
             };
         }
         copyForSheetId(sheetId) {
@@ -17391,6 +17397,7 @@
                 keyValue: keyValue
                     ? this.getters.getRangeString(keyValue, targetSheetId || this.sheetId)
                     : undefined,
+                extraData: this.extraData,
             };
         }
         getDefinitionForExcel() {
@@ -50825,8 +50832,8 @@
 
 
     __info__.version = '16.5.0-alpha.5';
-    __info__.date = '2023-08-24T07:14:21.242Z';
-    __info__.hash = '5765f66';
+    __info__.date = '2023-08-24T07:22:41.432Z';
+    __info__.hash = '210568e';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
