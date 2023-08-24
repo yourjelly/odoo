@@ -8,6 +8,7 @@ from itertools import zip_longest
 from lxml import etree as ET, html
 from lxml.html import builder as h
 
+from odoo.modules.module import _DEFAULT_MANIFEST, get_manifest
 from odoo.tests import common, HttpCase, tagged
 
 
@@ -1510,6 +1511,7 @@ class TestThemeViews(common.TransactionCase):
 
         # 2. Simulate a theme install with a child view of `main_view`
         test_theme_module = self.env['ir.module.module'].create({'name': 'test_theme'})
+        get_manifest('test_theme').update(_DEFAULT_MANIFEST)
         self.env['ir.model.data'].create({
             'module': 'base',
             'name': 'module_test_theme_module',
