@@ -2791,6 +2791,7 @@ class Model(models.AbstractModel):
         An optional access_uid holds the user that will access the document
         that could be different from the current user. """
         view_id = self.sudo().get_formview_id(access_uid=access_uid)
+        print("\n\n\n-----get_formview_action--------------",self._context)
         return {
             'type': 'ir.actions.act_window',
             'res_model': self._name,

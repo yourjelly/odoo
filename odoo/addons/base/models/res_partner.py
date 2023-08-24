@@ -854,6 +854,8 @@ class Partner(models.Model):
             name = "%s <%s>" % (name, partner.email)
         if self._context.get('show_vat') and partner.vat:
             name = "%s ‒ %s" % (name, partner.vat)
+        # print('\n\n\n-------context--------',self._context)
+        # print('\n\n\n-------main--------',name)
         return name.strip()
 
     def name_get(self):

@@ -189,6 +189,12 @@ export class Many2OneField extends Component {
         return this.value ? this.value[1].split("\n")[0] : "";
     }
     get extraLines() {
+        console.log("extraLines:",this.value
+            ? this.value[1]
+                  .split("\n")
+                  .map((line) => line.trim())
+                  .slice(1)
+            : []);
         return this.value
             ? this.value[1]
                   .split("\n")
@@ -203,6 +209,7 @@ export class Many2OneField extends Component {
         return "value" in this.props ? this.props.value : this.props.record.data[this.props.name];
     }
     get Many2XAutocompleteProps() {
+        debugger;
         return {
             value: this.displayName,
             id: this.props.id,
@@ -232,6 +239,7 @@ export class Many2OneField extends Component {
         return typeof domain === "function" ? domain() : domain;
     }
     async openAction() {
+        console.log("this.context",this.context);
         const action = await this.orm.call(this.relation, "get_formview_action", [[this.resId]], {
             context: this.context,
         });
