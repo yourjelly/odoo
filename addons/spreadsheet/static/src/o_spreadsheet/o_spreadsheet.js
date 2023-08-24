@@ -3424,6 +3424,39 @@
         }
     }
 
+    function createActions(menuItems) {
+        return menuItems.map(createAction).sort((a, b) => a.sequence - b.sequence);
+    }
+    const uuidGenerator$2 = new UuidGenerator();
+    function createAction(item) {
+        const name = item.name;
+        const children = item.children;
+        const description = item.description;
+        const icon = item.icon;
+        return {
+            id: item.id || uuidGenerator$2.uuidv4(),
+            name: typeof name === "function" ? name : () => name,
+            isVisible: item.isVisible ? item.isVisible : () => true,
+            isEnabled: item.isEnabled ? item.isEnabled : () => true,
+            isActive: item.isActive,
+            execute: item.execute,
+            children: children
+                ? (env) => {
+                    return children
+                        .map((child) => (typeof child === "function" ? child(env) : child))
+                        .flat()
+                        .map(createAction);
+                }
+                : () => [],
+            isReadonlyAllowed: item.isReadonlyAllowed || false,
+            separator: item.separator || false,
+            icon: typeof icon === "function" ? icon : () => icon || "",
+            description: typeof description === "function" ? description : () => description || "",
+            textColor: item.textColor,
+            sequence: item.sequence || 0,
+        };
+    }
+
     class ChartJsComponent extends owl.Component {
         static template = "o-spreadsheet-ChartJsComponent";
         canvas = owl.useRef("graphContainer");
@@ -9256,7 +9289,7 @@
         }
         // Example continuation: matchingRows = {0, 2}
         // 4 - return for each database row corresponding, the cells corresponding to the field parameter
-        const fieldCol = database[index].map((col) => col);
+        const fieldCol = database[index];
         // Example continuation:: fieldCol = ["C", "j", "k", 7]
         const matchingCells = [...matchingRows].map((x) => fieldCol[x + 1]);
         // Example continuation:: matchingCells = ["j", 7]
@@ -15287,39 +15320,6 @@
         isVisible: (env) => env.model.getters.getVisibleSheetIds().length !== 1,
         execute: (env) => env.model.dispatch("HIDE_SHEET", { sheetId: env.model.getters.getActiveSheetId() }),
     };
-
-    function createActions(menuItems) {
-        return menuItems.map(createAction).sort((a, b) => a.sequence - b.sequence);
-    }
-    const uuidGenerator$2 = new UuidGenerator();
-    function createAction(item) {
-        const name = item.name;
-        const children = item.children;
-        const description = item.description;
-        const icon = item.icon;
-        return {
-            id: item.id || uuidGenerator$2.uuidv4(),
-            name: typeof name === "function" ? name : () => name,
-            isVisible: item.isVisible ? item.isVisible : () => true,
-            isEnabled: item.isEnabled ? item.isEnabled : () => true,
-            isActive: item.isActive,
-            execute: item.execute,
-            children: children
-                ? (env) => {
-                    return children
-                        .map((child) => (typeof child === "function" ? child(env) : child))
-                        .flat()
-                        .map(createAction);
-                }
-                : () => [],
-            isReadonlyAllowed: item.isReadonlyAllowed || false,
-            separator: item.separator || false,
-            icon: typeof icon === "function" ? icon : () => icon || "",
-            description: typeof description === "function" ? description : () => description || "",
-            textColor: item.textColor,
-            sequence: item.sequence || 0,
-        };
-    }
 
     /**
      * The class Registry is extended in order to add the function addChild
@@ -46971,6 +46971,11 @@
             owl.useExternalListener(window, "resize", () => this.render(true));
             owl.useExternalListener(window, "beforeunload", this.unbindModelEvents.bind(this));
             this.bindModelEvents();
+            owl.onWillUpdateProps((nextProps) => {
+                if (nextProps.model !== this.props.model) {
+                    throw new Error("Changing the props model is not supported at the moment.");
+                }
+            });
             owl.onMounted(() => {
                 this.checkViewportSize();
             });
@@ -50744,6 +50749,8 @@
         isDefined: isDefined$1,
         lazy,
         genericRepeat,
+        createAction,
+        createActions,
     };
     const links = {
         isMarkdownLink,
@@ -50768,6 +50775,7 @@
         ScorecardChartConfigPanel,
         ScorecardChartDesignPanel,
         FigureComponent,
+        Menu,
     };
     function addFunction(functionName, functionDescription) {
         functionRegistry.add(functionName, functionDescription);
@@ -50817,8 +50825,8 @@
 
 
     __info__.version = '16.5.0-alpha.5';
-    __info__.date = '2023-08-17T11:19:14.474Z';
-    __info__.hash = 'e0cb3aa';
+    __info__.date = '2023-08-24T06:23:26.164Z';
+    __info__.hash = 'e72bf97';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
