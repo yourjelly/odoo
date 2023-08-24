@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* mrp
-# 
+#
 # Translators:
 # kalatchev, 2020
 # Kaloyan Naumov <kaloyan@lumnus.net>, 2020
@@ -20,7 +20,7 @@
 # Александра Николова <alexandra1nikolova@gmail.com>, 2020
 # Igor Sheludko <igor.sheludko@gmail.com>, 2020
 # Ивайло Малинов <iv.malinov@gmail.com>, 2021
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -29,17 +29,18 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:14+0000\n"
 "Last-Translator: Ивайло Малинов <iv.malinov@gmail.com>, 2021\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__state
 msgid ""
 " * Draft: The MO is not confirmed yet.\n"
-" * Confirmed: The MO is confirmed, the stock rules and the reordering of the components are trigerred.\n"
+" * Confirmed: The MO is confirmed, the stock rules and the reordering of the "
+"components are trigerred.\n"
 " * In Progress: The production has started (on the MO or on the WO).\n"
 " * To Close: The production is done, the MO has to be closed.\n"
 " * Done: The MO is closed, the stock moves are posted. \n"
@@ -50,8 +51,10 @@ msgstr ""
 #: model:ir.model.fields,help:mrp.field_mrp_production__reservation_state
 msgid ""
 " * Ready: The material is available to start the production.\n"
-"            * Waiting: The material is not available to start the production.\n"
-"            The material availability is impacted by the manufacturing readiness            defined on the BoM."
+"            * Waiting: The material is not available to start the "
+"production.\n"
+"            The material availability is impacted by the manufacturing "
+"readiness            defined on the BoM."
 msgstr ""
 
 #. module: mrp
@@ -146,12 +149,17 @@ msgstr ""
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_kanban
 #: model_terms:ir.ui.view,arch_db:mrp.stock_production_type_kanban
-msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
+msgid ""
+"<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title="
+"\"Manage\"/>"
+msgstr ""
+"<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title="
+"\"Manage\"/>"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.workcenter_line_kanban
-msgid "<i class=\"fa fa-pause\" role=\"img\" aria-label=\"Pause\" title=\"Pause\"/>"
+msgid ""
+"<i class=\"fa fa-pause\" role=\"img\" aria-label=\"Pause\" title=\"Pause\"/>"
 msgstr ""
 
 #. module: mrp
@@ -161,7 +169,8 @@ msgstr ""
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.workcenter_line_kanban
-msgid "<i class=\"fa fa-stop\" role=\"img\" aria-label=\"Stop\" title=\"Stop\"/>"
+msgid ""
+"<i class=\"fa fa-stop\" role=\"img\" aria-label=\"Stop\" title=\"Stop\"/>"
 msgstr ""
 
 #. module: mrp
@@ -171,7 +180,8 @@ msgid ""
 "<p class=\"o_view_nocontent_smiling_face\">\n"
 "                        Upload files to your product\n"
 "                    </p><p>\n"
-"                        Use this feature to store any files, like drawings or specifications.\n"
+"                        Use this feature to store any files, like drawings "
+"or specifications.\n"
 "                    </p>"
 msgstr ""
 
@@ -179,12 +189,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
 msgid ""
 "<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" role=\"img\" aria-label=\"Values set here are company-"
-"specific.\" groups=\"base.group_multi_company\"/>"
+"specific.\" role=\"img\" aria-label=\"Values set here are company-specific."
+"\" groups=\"base.group_multi_company\"/>"
 msgstr ""
 "<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" role=\"img\" aria-label=\"Values set here are company-"
-"specific.\" groups=\"base.group_multi_company\"/>"
+"specific.\" role=\"img\" aria-label=\"Values set here are company-specific."
+"\" groups=\"base.group_multi_company\"/>"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
@@ -216,8 +226,7 @@ msgstr "<span class=\"o_stat_text\">Произведено</span>"
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_view
 msgid "<span class=\"o_stat_text\">OEE</span>"
 msgstr ""
-"<span class=\"o_stat_text\">Цялостна ефективност на оборудването - "
-"OEE</span>"
+"<span class=\"o_stat_text\">Цялостна ефективност на оборудването - OEE</span>"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_view
@@ -497,11 +506,13 @@ msgstr ""
 msgid ""
 "All product quantities must be greater or equal to 0.\n"
 "Lines with 0 quantities can be used as optional lines. \n"
-"You should install the mrp_byproduct module if you want to manage extra products on BoMs !"
+"You should install the mrp_byproduct module if you want to manage extra "
+"products on BoMs !"
 msgstr ""
 "Всички продуктови количества трябва да са по-големи от 0.\n"
 "Редове с 0 количества са позволени за опционалните редове\n"
-"Трябва да инсталирате модула mrp_byproduct, ако искате да управлявате доп. продукти в спецификациите!"
+"Трябва да инсталирате модула mrp_byproduct, ако искате да управлявате доп. "
+"продукти в спецификациите!"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__use_create_components_lots
@@ -690,8 +701,8 @@ msgstr "Отчет за структурата на материалите"
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom_line__child_line_ids
 msgid "BOM lines of the referred bom"
 msgstr ""
-"Редове на фактура за поръчка на материали за реферираната фактура за поръчка"
-" на материали"
+"Редове на фактура за поръчка на материали за реферираната фактура за поръчка "
+"на материали"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_production_backorder_line
@@ -722,8 +733,7 @@ msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__backorder_sequence
-msgid ""
-"Backorder sequence, if equals to 0 means there is not related backorder"
+msgid "Backorder sequence, if equals to 0 means there is not related backorder"
 msgstr ""
 
 #. module: mrp
@@ -795,7 +805,8 @@ msgstr "Списъци с материали"
 #: model_terms:ir.actions.act_window,help:mrp.mrp_bom_form_action
 msgid ""
 "Bills of materials allow you to define the list of required raw\n"
-"                materials used to make a finished product; through a manufacturing\n"
+"                materials used to make a finished product; through a "
+"manufacturing\n"
 "                order or a pack of products."
 msgstr ""
 "Списък с материали позволява да опишете необходимите\n"
@@ -1181,8 +1192,8 @@ msgid ""
 "Conversion between Units of Measure can only occur if they belong to the "
 "same category. The conversion will be made based on the ratios."
 msgstr ""
-"Преобразуването на мерните единици може да възникне, само ако те принадлежат"
-" към една и съща категория. Преобразуването ще се извърши въз основа на "
+"Преобразуването на мерните единици може да възникне, само ако те принадлежат "
+"към една и съща категория. Преобразуването ще се извърши въз основа на "
 "съотношенията."
 
 #. module: mrp
@@ -1215,8 +1226,8 @@ msgstr ""
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_backorder_form
 msgid ""
-"Create a backorder if you expect to process the remaining products later. Do"
-" not create a backorder if you will not process the remaining products."
+"Create a backorder if you expect to process the remaining products later. Do "
+"not create a backorder if you will not process the remaining products."
 msgstr ""
 
 #. module: mrp
@@ -1375,10 +1386,13 @@ msgstr "Определете графика за ползване на ресу�
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__consumption
 msgid ""
-"Defines if you can consume more or less components than the quantity defined on the BoM:\n"
+"Defines if you can consume more or less components than the quantity defined "
+"on the BoM:\n"
 "  * Allowed: allowed for all manufacturing users.\n"
-"  * Allowed with warning: allowed for all manufacturing users with summary of consumption differences when closing the manufacturing order.\n"
-"  * Blocked: only a manager can close a manufacturing order when the BoM consumption is not respected."
+"  * Allowed with warning: allowed for all manufacturing users with summary "
+"of consumption differences when closing the manufacturing order.\n"
+"  * Blocked: only a manager can close a manufacturing order when the BoM "
+"consumption is not respected."
 msgstr ""
 
 #. module: mrp
@@ -1389,8 +1403,7 @@ msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__ready_to_produce
-msgid ""
-"Defines when a Manufacturing Order is considered as ready to be started"
+msgid "Defines when a Manufacturing Order is considered as ready to be started"
 msgstr ""
 
 #. module: mrp
@@ -1631,8 +1644,7 @@ msgstr "Изключение(я):"
 #. module: mrp
 #: code:addons/mrp/models/mrp_production.py:0
 #, python-format
-msgid ""
-"Existing Serial number (%s). Please correct the serial numbers encoded."
+msgid "Existing Serial number (%s). Please correct the serial numbers encoded."
 msgstr ""
 
 #. module: mrp
@@ -1802,8 +1814,8 @@ msgstr ""
 msgid ""
 "Gives the sequence order when displaying a list of routing Work Centers."
 msgstr ""
-"Задава реда на последователност, когато показва списък с работни центрове за"
-" маршрутизация."
+"Задава реда на последователност, когато показва списък с работни центрове за "
+"маршрутизация."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__sequence
@@ -2038,8 +2050,7 @@ msgstr ""
 #: code:addons/mrp/models/mrp_production.py:0
 #, python-format
 msgid ""
-"Impossible to plan the workorder. Please check the workcenter "
-"availabilities."
+"Impossible to plan the workorder. Please check the workcenter availabilities."
 msgstr ""
 
 #. module: mrp
@@ -2085,11 +2096,10 @@ msgstr "Движение на инвентара"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workorder__move_line_ids
-msgid ""
-"Inventory moves for which you must scan a lot number at this work order"
+msgid "Inventory moves for which you must scan a lot number at this work order"
 msgstr ""
-"Движения в инвентара, голям брой от които трябва да сканирате в тази работна"
-" поръчка"
+"Движения в инвентара, голям брой от които трябва да сканирате в тази работна "
+"поръчка"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom__message_is_follower
@@ -2339,8 +2349,8 @@ msgstr ""
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
 msgid ""
-"Lock the manufacturing order to prevent changes to what has been consumed or"
-" produced."
+"Lock the manufacturing order to prevent changes to what has been consumed or "
+"produced."
 msgstr ""
 
 #. module: mrp
@@ -2411,7 +2421,6 @@ msgstr "Основен Прикачен Файл"
 
 #. module: mrp
 #: code:addons/mrp/models/stock_warehouse.py:0
-#: code:addons/mrp/models/stock_warehouse.py:0
 #, python-format
 msgid "Make To Order"
 msgstr "Направете по поръчка"
@@ -2419,8 +2428,8 @@ msgstr "Направете по поръчка"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
 msgid ""
-"Makes confirmed manufacturing orders locked rather than unlocked by default."
-" This only applies to new manufacturing orders, not previously created ones."
+"Makes confirmed manufacturing orders locked rather than unlocked by default. "
+"This only applies to new manufacturing orders, not previously created ones."
 msgstr ""
 
 #. module: mrp
@@ -2434,7 +2443,6 @@ msgid "Manual Duration"
 msgstr "Механична продължителност"
 
 #. module: mrp
-#: code:addons/mrp/models/stock_warehouse.py:0
 #: code:addons/mrp/models/stock_warehouse.py:0
 #: model:ir.model.fields,field_description:mrp.field_stock_warehouse__manufacture_steps
 #: model:ir.model.fields.selection,name:mrp.selection__stock_rule__action__manufacture
@@ -2570,15 +2578,19 @@ msgstr "Производствена референция"
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_workcenter_action
 msgid ""
-"Manufacturing operations are processed at Work Centers. A Work Center can be composed of\n"
-"                workers and/or machines, they are used for costing, scheduling, capacity planning, etc."
+"Manufacturing operations are processed at Work Centers. A Work Center can be "
+"composed of\n"
+"                workers and/or machines, they are used for costing, "
+"scheduling, capacity planning, etc."
 msgstr ""
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_workcenter_kanban_action
 msgid ""
-"Manufacturing operations are processed at Work Centers. A Work Center can be composed of\n"
-"                workers and/or machines, they are used for costing, scheduling, capacity planning, etc.\n"
+"Manufacturing operations are processed at Work Centers. A Work Center can be "
+"composed of\n"
+"                workers and/or machines, they are used for costing, "
+"scheduling, capacity planning, etc.\n"
 "                They can be defined via the configuration menu."
 msgstr ""
 
@@ -2678,14 +2690,10 @@ msgstr "Name"
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_production.py:0
-#: code:addons/mrp/models/mrp_production.py:0
-#: code:addons/mrp/models/mrp_production.py:0
-#: code:addons/mrp/models/mrp_unbuild.py:0
-#: code:addons/mrp/models/mrp_unbuild.py:0
 #: code:addons/mrp/models/mrp_unbuild.py:0
 #, python-format
 msgid "New"
-msgstr "Nieuw"
+msgstr "Нов"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__activity_date_deadline
@@ -2785,8 +2793,7 @@ msgstr ""
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_scrap__workorder_id
 msgid "Not to restrict or prefer quants, but informative."
-msgstr ""
-"Да не се ограничават или предпочитат количества, а да са информативни."
+msgstr "Да не се ограничават или предпочитат количества, а да са информативни."
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_workcenter.py:0
@@ -2798,7 +2805,7 @@ msgid ""
 msgstr ""
 
 #. module: mrp
-#: code:addons/mrp/models/product.py:0 code:addons/mrp/models/product.py:0
+#: code:addons/mrp/models/product.py:0
 #, python-format
 msgid ""
 "Note that product(s): '%s' is/are still linked to active Bill of Materials, "
@@ -2857,8 +2864,8 @@ msgstr "Брой съобщения с грешка при предаване"
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__capacity
 msgid ""
 "Number of pieces that can be produced in parallel. In case the work center "
-"has a capacity of 5 and you have to produce 10 units on your work order, the"
-" usual operation time will be multiplied by 2."
+"has a capacity of 5 and you have to produce 10 units on your work order, the "
+"usual operation time will be multiplied by 2."
 msgstr ""
 
 #. module: mrp
@@ -2912,7 +2919,8 @@ msgstr "Тип операция"
 #: model_terms:ir.actions.act_window,help:mrp.mrp_routing_action
 msgid ""
 "Operation define that need to be done to realize a Work Order.\n"
-"                Each operation is done at a specific Work Center and has a specific duration."
+"                Each operation is done at a specific Work Center and has a "
+"specific duration."
 msgstr ""
 
 #. module: mrp
@@ -3235,8 +3243,10 @@ msgstr "Група за доставки"
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_warehouse__manufacture_steps
 msgid ""
-"Produce : Move the components to the production location        directly and start the manufacturing process.\n"
-"Pick / Produce : Unload        the components from the Stock to Input location first, and then        transfer it to the Production location."
+"Produce : Move the components to the production location        directly and "
+"start the manufacturing process.\n"
+"Pick / Produce : Unload        the components from the Stock to Input "
+"location first, and then        transfer it to the Production location."
 msgstr ""
 
 #. module: mrp
@@ -3531,8 +3541,8 @@ msgid ""
 "Recursion error!  A product with a Bill of Material should not have itself "
 "in its BoM or child BoMs!"
 msgstr ""
-"Рекурсивна грешка!  Продукт с фактура за покупка на материали не би трябвало"
-" да съдържа в себе си фактура за покупка на материали или второстепенни "
+"Рекурсивна грешка!  Продукт с фактура за покупка на материали не би трябвало "
+"да съдържа в себе си фактура за покупка на материали или второстепенни "
 "фактури за покупка на материали!"
 
 #. module: mrp
@@ -3549,11 +3559,9 @@ msgstr "Референцията трябва да е уникална за вс
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__origin
-msgid ""
-"Reference of the document that generated this production order request."
+msgid "Reference of the document that generated this production order request."
 msgstr ""
-"Референция на документа, който създава тази заявка за производствена "
-"поръчка."
+"Референция на документа, който създава тази заявка за производствена поръчка."
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.report_mrp_bom
@@ -3839,8 +3847,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
 msgid "Show all records which has next action date is before today"
 msgstr ""
-"Показване на всички записи, на които следващата дата на действие е преди "
-"днес"
+"Показване на всички записи, на които следващата дата на действие е преди днес"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production_backorder__show_backorder_lines
@@ -4150,14 +4157,14 @@ msgid "The Bill of Material this operation is linked to"
 msgstr ""
 
 #. module: mrp
-#: code:addons/mrp/models/mrp_bom.py:0 code:addons/mrp/models/mrp_bom.py:0
+#: code:addons/mrp/models/mrp_bom.py:0
 #, python-format
 msgid ""
 "The Product Unit of Measure you chose has a different category than in the "
 "product form."
 msgstr ""
-"Избраната от Вас мерна единица има различна категория от тази в продуктовата"
-" форма."
+"Избраната от Вас мерна единица има различна категория от тази в продуктовата "
+"форма."
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_workcenter.py:0
@@ -4238,8 +4245,8 @@ msgstr "The record id this is attached to."
 #: code:addons/mrp/models/mrp_production.py:0
 #, python-format
 msgid ""
-"The serial number %(number)s used for byproduct %(product_name)s has already"
-" been produced"
+"The serial number %(number)s used for byproduct %(product_name)s has already "
+"been produced"
 msgstr ""
 
 #. module: mrp
@@ -4329,8 +4336,10 @@ msgstr ""
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.action_mrp_unbuild_moves
 msgid ""
-"This menu gives you the full traceability of inventory operations on a specific product.\n"
-"                You can filter on the product to see all the past movements for the product."
+"This menu gives you the full traceability of inventory operations on a "
+"specific product.\n"
+"                You can filter on the product to see all the past movements "
+"for the product."
 msgstr ""
 
 #. module: mrp
@@ -4610,8 +4619,7 @@ msgid ""
 "Unit of Measure (Unit of Measure) is the unit of measurement for the "
 "inventory control"
 msgstr ""
-"Мерната единица (мерна единица) е единицата за измерване контрол на "
-"инвентара"
+"Мерната единица (мерна единица) е единицата за измерване контрол на инвентара"
 
 #. module: mrp
 #: model:product.product,uom_name:mrp.product_product_computer_desk
@@ -4791,7 +4799,6 @@ msgid "Warn Insufficient Unbuild Quantity"
 msgstr ""
 
 #. module: mrp
-#: code:addons/mrp/models/mrp_bom.py:0 code:addons/mrp/models/mrp_bom.py:0
 #: code:addons/mrp/models/mrp_bom.py:0
 #: code:addons/mrp/models/mrp_production.py:0
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_workorder__consumption__warning
@@ -4838,8 +4845,8 @@ msgstr "История на комуникацията на уебсайт"
 #: model:ir.model.fields,help:mrp.field_mrp_bom__picking_type_id
 msgid ""
 "When a procurement has a ‘produce’ route with a operation type set, it will "
-"try to create a Manufacturing Order for that product using a BoM of the same"
-" operation type. That allows to define stock rules which trigger different "
+"try to create a Manufacturing Order for that product using a BoM of the same "
+"operation type. That allows to define stock rules which trigger different "
 "manufacturing orders with different BoMs."
 msgstr ""
 
@@ -4853,8 +4860,7 @@ msgstr ""
 msgid ""
 "When products are manufactured, they can be manufactured in this warehouse."
 msgstr ""
-"Когато продуктите се произвеждат, те могат да бъдат произведени в този "
-"склад."
+"Когато продуктите се произвеждат, те могат да бъдат произведени в този склад."
 
 #. module: mrp
 #: code:addons/mrp/models/stock_rule.py:0
@@ -5010,7 +5016,8 @@ msgstr "Работен график"
 #: model_terms:ir.actions.act_window,help:mrp.action_work_orders
 msgid ""
 "Work orders are operations to do as part of a manufacturing order.\n"
-"                    Operations are defined in the bill of materials or added in the manufacturing order directly."
+"                    Operations are defined in the bill of materials or added "
+"in the manufacturing order directly."
 msgstr ""
 
 #. module: mrp
@@ -5020,7 +5027,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:mrp.mrp_workorder_todo
 msgid ""
 "Work orders are operations to do as part of a manufacturing order.\n"
-"            Operations are defined in the bill of materials or added in the manufacturing order directly."
+"            Operations are defined in the bill of materials or added in the "
+"manufacturing order directly."
 msgstr ""
 
 #. module: mrp
@@ -5128,15 +5136,15 @@ msgid ""
 "You can not delete a Bill of Material with running manufacturing orders.\n"
 "Please close or cancel it first."
 msgstr ""
-"Не можете да изтривате фактура за покупка на материали с производствена поръчка, която се изпълнява.\n"
+"Не можете да изтривате фактура за покупка на материали с производствена "
+"поръчка, която се изпълнява.\n"
 "Моля, първо я затворете или отменете."
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_workorder.py:0
 #, python-format
 msgid ""
-"You cannot change the workcenter of a work order that is in progress or "
-"done."
+"You cannot change the workcenter of a work order that is in progress or done."
 msgstr ""
 "Не можете да променяте работния център за работна порчка, ако тя е в процес "
 "на изпълнение или вече изпълнена."
@@ -5151,8 +5159,7 @@ msgstr "Не можете да създавате нов списък с мат�
 #: code:addons/mrp/models/mrp_unbuild.py:0
 #, python-format
 msgid "You cannot delete an unbuild order if the state is 'Done'."
-msgstr ""
-"Не можете да поръчка за разглобяване, ако състоянието й е 'изпълнено'."
+msgstr "Не можете да поръчка за разглобяване, ако състоянието й е 'изпълнено'."
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_production.py:0
@@ -5165,8 +5172,7 @@ msgstr "Не можете да получите %s  хем като краен, 
 #, python-format
 msgid "You cannot link this work order to another manufacturing order."
 msgstr ""
-"Не можете да свържете тази работна поръчка с друго нареждане за "
-"производство."
+"Не можете да свържете тази работна поръчка с друго нареждане за производство."
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_production.py:0
@@ -5192,13 +5198,18 @@ msgstr "Не можете да разглобите нареждане за пр
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_consumption_warning_form
 msgid ""
 "You consumed a different quantity than expected for the following products.\n"
-"                        <b attrs=\"{'invisible': [('consumption', '=', 'strict')]}\">\n"
+"                        <b attrs=\"{'invisible': [('consumption', '=', "
+"'strict')]}\">\n"
 "                            Please confirm it has been done on purpose.\n"
 "                        </b>\n"
-"                        <b attrs=\"{'invisible': [('consumption', '!=', 'strict')]}\">\n"
-"                            Please review your component consumption or ask a manager to validate \n"
-"                            <span attrs=\"{'invisible':[('mrp_production_count', '!=', 1)]}\">this manufacturing order</span>\n"
-"                            <span attrs=\"{'invisible':[('mrp_production_count', '=', 1)]}\">these manufacturing orders</span>.\n"
+"                        <b attrs=\"{'invisible': [('consumption', '!=', "
+"'strict')]}\">\n"
+"                            Please review your component consumption or ask "
+"a manager to validate \n"
+"                            <span attrs=\"{'invisible':"
+"[('mrp_production_count', '!=', 1)]}\">this manufacturing order</span>\n"
+"                            <span attrs=\"{'invisible':"
+"[('mrp_production_count', '=', 1)]}\">these manufacturing orders</span>.\n"
 "                        </b>"
 msgstr ""
 
@@ -5206,8 +5217,8 @@ msgstr ""
 #: code:addons/mrp/wizard/change_production_qty.py:0
 #, python-format
 msgid ""
-"You have already processed %(quantity)s. Please input a quantity higher than"
-" %(minimum)s "
+"You have already processed %(quantity)s. Please input a quantity higher than "
+"%(minimum)s "
 msgstr ""
 
 #. module: mrp
@@ -5243,8 +5254,8 @@ msgstr ""
 #, python-format
 msgid ""
 "You need to define at least one productivity loss in the category "
-"'Productivity'. Create one from the Manufacturing app, menu: Configuration /"
-" Productivity Losses."
+"'Productivity'. Create one from the Manufacturing app, menu: Configuration / "
+"Productivity Losses."
 msgstr ""
 "Трябва да определите поне една загуба на производителност в категорията "
 "'Продуктивност'. Създайте такава от приложението 'Производство', менюто: "
@@ -5316,7 +5327,6 @@ msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/models/stock_rule.py:0
-#: code:addons/mrp/models/stock_rule.py:0
 #, python-format
 msgid "day(s)"
 msgstr "ден(дни)"
@@ -5344,7 +5354,6 @@ msgid "manufacturing order"
 msgstr "нареждане за производство"
 
 #. module: mrp
-#: code:addons/mrp/report/mrp_report_bom_structure.py:0
 #: code:addons/mrp/report/mrp_report_bom_structure.py:0
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_form_view
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_view

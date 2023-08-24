@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* purchase
-# 
+#
 # Translators:
 # Anton Vassilev, 2020
 # kalatchev, 2020
@@ -22,7 +22,7 @@
 # Ивайло Малинов <iv.malinov@gmail.com>, 2021
 # SAKodoo <sak@odoo.com>, 2021
 # Nikola Iliev, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -31,17 +31,18 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:17+0000\n"
 "Last-Translator: Nikola Iliev, 2023\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: purchase
 #: model:ir.actions.report,print_report_name:purchase.action_report_purchase_order
 msgid ""
 "\n"
-"                (object.state in ('draft', 'sent') and 'Request for Quotation - %s' % (object.name) or\n"
+"                (object.state in ('draft', 'sent') and 'Request for "
+"Quotation - %s' % (object.name) or\n"
 "                'Purchase Order - %s' % (object.name))"
 msgstr ""
 
@@ -99,7 +100,8 @@ msgid ""
 "            (${object.partner_id.parent_id.name})\n"
 "        % endif\n"
 "        <br/><br/>\n"
-"        Here is a reminder that the delivery of the purchase order <strong>${object.name}</strong>\n"
+"        Here is a reminder that the delivery of the purchase order <strong>"
+"${object.name}</strong>\n"
 "        % if object.partner_ref:\n"
 "            <strong>(${object.partner_ref})</strong>\n"
 "        % endif \n"
@@ -124,15 +126,18 @@ msgid ""
 "            (${object.partner_id.parent_id.name})\n"
 "        % endif\n"
 "        <br/><br/>\n"
-"        Here is in attachment a purchase order <strong>${object.name}</strong>\n"
+"        Here is in attachment a purchase order <strong>${object.name}</"
+"strong>\n"
 "        % if object.partner_ref:\n"
 "            with reference: ${object.partner_ref}\n"
 "        % endif\n"
-"        amounting in <strong>${format_amount(object.amount_total, object.currency_id)}</strong>\n"
+"        amounting in <strong>${format_amount(object.amount_total, object."
+"currency_id)}</strong>\n"
 "        from ${object.company_id.name}. \n"
 "        <br/><br/>\n"
 "        % if object.date_planned:\n"
-"            The receipt is expected for <strong>${format_date(object.date_planned)}</strong>.\n"
+"            The receipt is expected for <strong>${format_date(object."
+"date_planned)}</strong>.\n"
 "            <br/><br/>\n"
 "            Could you please acknowledge the receipt of this order?\n"
 "        % endif\n"
@@ -150,7 +155,8 @@ msgid ""
 "            (${object.partner_id.parent_id.name})\n"
 "        % endif\n"
 "        <br/><br/>\n"
-"        Here is in attachment a request for quotation <strong>${object.name}</strong>\n"
+"        Here is in attachment a request for quotation <strong>${object.name}"
+"</strong>\n"
 "        % if object.partner_ref:\n"
 "            with reference: ${object.partner_ref}\n"
 "        % endif\n"
@@ -193,7 +199,6 @@ msgstr ""
 
 #. module: purchase
 #: code:addons/purchase/models/purchase.py:0
-#: code:addons/purchase/models/purchase.py:0
 #, python-format
 msgid "<p> &nbsp; - %s from %s to %s </p>"
 msgstr ""
@@ -216,18 +221,20 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
 msgid ""
 "<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\" role=\"img\"/>"
+"specific.\" aria-label=\"Values set here are company-specific.\" groups="
+"\"base.group_multi_company\" role=\"img\"/>"
 msgstr ""
 "<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\" role=\"img\"/>"
+"specific.\" aria-label=\"Values set here are company-specific.\" groups="
+"\"base.group_multi_company\" role=\"img\"/>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid ""
-"<span class=\"o_form_label\" attrs=\"{'invisible': [('state','not in',('draft','sent'))]}\">Request for Quotation </span>\n"
-"                        <span class=\"o_form_label\" attrs=\"{'invisible': [('state','in',('draft','sent'))]}\">Purchase Order </span>"
+"<span class=\"o_form_label\" attrs=\"{'invisible': [('state','not in',"
+"('draft','sent'))]}\">Request for Quotation </span>\n"
+"                        <span class=\"o_form_label\" attrs=\"{'invisible': "
+"[('state','in',('draft','sent'))]}\">Purchase Order </span>"
 msgstr ""
 
 #. module: purchase
@@ -397,7 +404,8 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order_line__product_type
 msgid ""
-"A storable product is a product for which you manage stock. The Inventory app has to be installed.\n"
+"A storable product is a product for which you manage stock. The Inventory "
+"app has to be installed.\n"
 "A consumable product is a product for which stock is not managed.\n"
 "A service is a non-material product you provide."
 msgstr ""
@@ -415,7 +423,8 @@ msgstr "Предупреждение за достъп"
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order_line__qty_received_method
 msgid ""
-"According to product configuration, the received quantity can be automatically computed by mechanism :\n"
+"According to product configuration, the received quantity can be "
+"automatically computed by mechanism :\n"
 "  - Manual: the quantity is set manually on the line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
@@ -705,8 +714,8 @@ msgstr "Календарен изглед"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
 msgid ""
-"Calls for tenders are used when you want to generate requests for quotations"
-" to several vendors for a given set of products. You can configure per "
+"Calls for tenders are used when you want to generate requests for quotations "
+"to several vendors for a given set of products. You can configure per "
 "product if you directly do a Request for Quotation to one vendor or if you "
 "want a Call for Tenders to compare offers from several vendors."
 msgstr ""
@@ -850,8 +859,8 @@ msgid ""
 "Conversion between Units of Measure can only occur if they belong to the "
 "same category. The conversion will be made based on the ratios."
 msgstr ""
-"Преобразуването на мерните единици може да възникне, само ако те принадлежат"
-" към една и съща категория. Преобразуването ще се извърши въз основа на "
+"Преобразуването на мерните единици може да възникне, само ако те принадлежат "
+"към една и съща категория. Преобразуването ще се извърши въз основа на "
 "съотношенията."
 
 #. module: purchase
@@ -917,7 +926,6 @@ msgstr ""
 
 #. module: purchase
 #: code:addons/purchase/models/purchase.py:0
-#: code:addons/purchase/models/purchase.py:0
 #, python-format
 msgid "Date Updated"
 msgstr ""
@@ -973,8 +981,8 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_report__date_order
 msgid ""
-"Depicts the date when the Quotation should be validated and converted into a"
-" purchase order."
+"Depicts the date when the Quotation should be validated and converted into a "
+"purchase order."
 msgstr ""
 
 #. module: purchase
@@ -1321,11 +1329,10 @@ msgstr ""
 #. module: purchase
 #. openerp-web
 #: code:addons/purchase/static/src/js/tours/purchase.js:0
-#: code:addons/purchase/static/src/js/tours/purchase.js:0
 #, python-format
 msgid ""
-"Let's try the Purchase app to manage the flow from purchase to reception and"
-" invoice control."
+"Let's try the Purchase app to manage the flow from purchase to reception and "
+"invoice control."
 msgstr ""
 
 #. module: purchase
@@ -1391,20 +1398,19 @@ msgstr ""
 #: model:ir.model.fields,help:purchase.field_res_config_settings__po_lead
 msgid ""
 "Margin of error for vendor lead times. When the system generates Purchase "
-"Orders for procuring products, they will be scheduled that many days earlier"
-" to cope with unexpected vendor delays."
+"Orders for procuring products, they will be scheduled that many days earlier "
+"to cope with unexpected vendor delays."
 msgstr ""
-"Марж на грешка за времената на търговските лийдове. Когато системата създава"
-" поръчки за покупки за доставни продукти, те ще бъдат насрочени достатъчно "
-"дни по-рано, за да се справят с неочаквани забавяния от страна на "
-"доставчика."
+"Марж на грешка за времената на търговските лийдове. Когато системата създава "
+"поръчки за покупки за доставни продукти, те ще бъдат насрочени достатъчно "
+"дни по-рано, за да се справят с неочаквани забавяния от страна на доставчика."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_res_config_settings__use_po_lead
 msgid ""
 "Margin of error for vendor lead times. When the system generates Purchase "
-"Orders for reordering products,they will be scheduled that many days earlier"
-" to cope with unexpected vendor delays."
+"Orders for reordering products,they will be scheduled that many days earlier "
+"to cope with unexpected vendor delays."
 msgstr ""
 "Буфер за грешката в сроковете за доставка. Когато системата създава поръчки "
 "за повторни покупки, те ще бъдат насрочени с толкова дни по-рано, за да "
@@ -1851,8 +1857,8 @@ msgid ""
 msgstr ""
 "Анализът на покупките Ви позволява лесно да проверявате и анализирате "
 "историята и производителността на покупките на компанията. От това меню "
-"можете да проследите ефективността на водените преговори, производителността"
-" на доставчиците си и т.н."
+"можете да проследите ефективността на водените преговори, производителността "
+"на доставчиците си и т.н."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.view_product_supplier_inherit
@@ -2228,8 +2234,8 @@ msgstr "Референтна Мерна единица"
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__origin
 msgid ""
-"Reference of the document that generated this purchase order request (e.g. a"
-" sales order)"
+"Reference of the document that generated this purchase order request (e.g. a "
+"sales order)"
 msgstr ""
 
 #. module: purchase
@@ -2241,8 +2247,8 @@ msgid ""
 msgstr ""
 "Референция за поръчката за продажба или офертата, изпратени от доставчика. "
 "Използва се, за да извършва подбора, когато получавате продуктите, тъй като "
-"тази референция обикновено е изписана на поръчката за доставка, изпратена от"
-" Вашия доставчик."
+"тази референция обикновено е изписана на поръчката за доставка, изпратена от "
+"Вашия доставчик."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__mail_reminder_confirmed
@@ -2286,8 +2292,10 @@ msgstr "Заявки за оферта"
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.purchase_rfq
 msgid ""
-"Requests for quotation are documents that will be sent to your suppliers to request prices for different products you consider buying.\n"
-"                Once an agreement has been found with the supplier, they will be confirmed and turned into purchase orders."
+"Requests for quotation are documents that will be sent to your suppliers to "
+"request prices for different products you consider buying.\n"
+"                Once an agreement has been found with the supplier, they "
+"will be confirmed and turned into purchase orders."
 msgstr ""
 
 #. module: purchase
@@ -2394,7 +2402,6 @@ msgstr "Изпратете по имейл"
 #. module: purchase
 #. openerp-web
 #: code:addons/purchase/static/src/js/tours/purchase.js:0
-#: code:addons/purchase/static/src/js/tours/purchase.js:0
 #, python-format
 msgid "Send the request for quotation to your vendor."
 msgstr ""
@@ -2425,8 +2432,7 @@ msgstr "Споделете"
 #: model_terms:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 msgid "Show all records which has next action date is before today"
 msgstr ""
-"Показване на всички записи, на които следващата дата на действие е преди "
-"днес"
+"Показване на всички записи, на които следващата дата на действие е преди днес"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_bill_union__reference
@@ -2516,11 +2522,14 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:purchase.act_res_partner_2_purchase_order
 msgid ""
 "The request for quotation is the first step of the purchases flow. Once\n"
-"                    converted into a purchase order, you will be able to control the receipt\n"
+"                    converted into a purchase order, you will be able to "
+"control the receipt\n"
 "                    of the products and the vendor bill."
 msgstr ""
-"Заявката за оферта е първата стъпка от процеса по осъществяване на покупки. Веднъж\n"
-"                    конвертирана в поръчка за покупка, ще можете да контролирате касовата бележка\n"
+"Заявката за оферта е първата стъпка от процеса по осъществяване на покупки. "
+"Веднъж\n"
+"                    конвертирана в поръчка за покупка, ще можете да "
+"контролирате касовата бележка\n"
 "                    на продуктите и фактурата за покупка."
 
 #. module: purchase
@@ -2820,8 +2829,10 @@ msgid ""
 "                    you receive from your vendor according to the draft\n"
 "                    document in Odoo."
 msgstr ""
-"Фактури за покупка могат да бъдат предварително създадени на основата на поръчки за\n"
-"                    покупки или касови бележки. Това Ви позволява да контролирате фактурите за покупка,\n"
+"Фактури за покупка могат да бъдат предварително създадени на основата на "
+"поръчки за\n"
+"                    покупки или касови бележки. Това Ви позволява да "
+"контролирате фактурите за покупка,\n"
 "                    които получавате от доставчика си според чернова\n"
 "                     документа в Odoo."
 
@@ -2855,7 +2866,6 @@ msgid "Warning"
 msgstr "Предупреждение"
 
 #. module: purchase
-#: code:addons/purchase/models/purchase.py:0
 #: code:addons/purchase/models/purchase.py:0
 #, python-format
 msgid "Warning for %s"
@@ -2894,8 +2904,8 @@ msgid ""
 "When creating a purchase order, have a look at the vendor's <i>On Time "
 "Delivery</i> rate: the percentage of products shipped on time. If it is too "
 "low, activate the <i>automated reminders</i>. A few days before the due "
-"shipment, Odoo will send the vendor an email to ask confirmation of shipment"
-" dates and keep you informed in case of any delays. To get the vendor's "
+"shipment, Odoo will send the vendor an email to ask confirmation of shipment "
+"dates and keep you informed in case of any delays. To get the vendor's "
 "performance statistics, click on the OTD rate."
 msgstr ""
 
@@ -2945,8 +2955,10 @@ msgstr ""
 #: code:addons/purchase/models/purchase.py:0
 #, python-format
 msgid ""
-"Your quotation contains products from company %(product_company)s whereas your quotation belongs to company %(quote_company)s. \n"
-" Please change the company of your quotation or remove the products from other companies (%(bad_products)s)."
+"Your quotation contains products from company %(product_company)s whereas "
+"your quotation belongs to company %(quote_company)s. \n"
+" Please change the company of your quotation or remove the products from "
+"other companies (%(bad_products)s)."
 msgstr ""
 
 #. module: purchase

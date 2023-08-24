@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* sale_management
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Boris Stefanov <borkata@gmail.com>, 2020
@@ -13,7 +13,7 @@
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
 # Ivan Goychev <igoychev.projects@gmail.com>, 2020
 # TIhomir Nikolov <whltd.03@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -22,10 +22,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:18+0000\n"
 "Last-Translator: TIhomir Nikolov <whltd.03@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: sale_management
@@ -132,8 +132,8 @@ msgid ""
 "Conversion between Units of Measure can only occur if they belong to the "
 "same category. The conversion will be made based on the ratios."
 msgstr ""
-"Преобразуването на мерните единици може да възникне, само ако те принадлежат"
-" към една и съща категория. Преобразуването ще се извърши въз основа на "
+"Преобразуването на мерните единици може да възникне, само ако те принадлежат "
+"към една и съща категория. Преобразуването ще се извърши въз основа на "
 "съотношенията."
 
 #. module: sale_management
@@ -185,7 +185,9 @@ msgstr "Описание"
 #: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
 msgid ""
 "Design your quotation templates using building blocks<br/>\n"
-"                            <em attrs=\"{'invisible': [('module_sale_quotation_builder','=',False)]}\">Warning: this option will install the Website app.</em>"
+"                            <em attrs=\"{'invisible': "
+"[('module_sale_quotation_builder','=',False)]}\">Warning: this option will "
+"install the Website app.</em>"
 msgstr ""
 
 #. module: sale_management
@@ -558,8 +560,8 @@ msgid ""
 "This e-mail template will be sent on confirmation. Leave empty to send "
 "nothing."
 msgstr ""
-"Този шаблон за имейли ще бъде изпратен при потвърждение. Оставете празно, за"
-" да не изпратите нищо."
+"Този шаблон за имейли ще бъде изпратен при потвърждение. Оставете празно, за "
+"да не изпратите нищо."
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_option__is_present
@@ -612,7 +614,8 @@ msgstr "Мерна единица"
 #: model_terms:ir.actions.act_window,help:sale_management.sale_order_template_action
 msgid ""
 "Use templates to create polished, professional quotes in minutes.\n"
-"                Send these quotes by email and let your customers sign online.\n"
+"                Send these quotes by email and let your customers sign "
+"online.\n"
 "                Use cross-selling and discounts to push and boost your sales."
 msgstr ""
 
@@ -634,8 +637,10 @@ msgstr ""
 #: code:addons/sale_management/models/sale_order.py:0
 #, python-format
 msgid ""
-"Your quotation contains products from company %(product_company)s whereas your quotation belongs to company %(quote_company)s. \n"
-" Please change the company of your quotation or remove the products from other companies (%(bad_products)s)."
+"Your quotation contains products from company %(product_company)s whereas "
+"your quotation belongs to company %(quote_company)s. \n"
+" Please change the company of your quotation or remove the products from "
+"other companies (%(bad_products)s)."
 msgstr ""
 
 #. module: sale_management
@@ -648,8 +653,10 @@ msgstr ""
 #: code:addons/sale_management/models/sale_order_template.py:0
 #, python-format
 msgid ""
-"Your template contains products from company %(product_company)s whereas your template belongs to company %(template_company)s. \n"
-" Please change the company of your template or remove the products from other companies."
+"Your template contains products from company %(product_company)s whereas "
+"your template belongs to company %(template_company)s. \n"
+" Please change the company of your template or remove the products from "
+"other companies."
 msgstr ""
 
 #. module: sale_management

@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* adyen_platforms
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2020
@@ -10,7 +10,7 @@
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
 # Ivan Goychev <igoychev.projects@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -19,10 +19,10 @@ msgstr ""
 "PO-Revision-Date: 2020-11-16 13:49+0000\n"
 "Last-Translator: Ivan Goychev <igoychev.projects@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: adyen_platforms
@@ -31,11 +31,16 @@ msgstr ""
 #, python-format
 msgid ""
 ". If we or our\n"
-"            Processor at any time discover that the information you provided about your\n"
-"            business is incorrect or has changed without informing us or if you violate any of\n"
-"            these conditions, the services may be suspended and/or terminated with\n"
-"            immediate effect and fines may be applied by the Credit Card Schemes and/or the\n"
-"            authorities for unregistered or inappropriate use of payment services which will in\n"
+"            Processor at any time discover that the information you provided "
+"about your\n"
+"            business is incorrect or has changed without informing us or if "
+"you violate any of\n"
+"            these conditions, the services may be suspended and/or "
+"terminated with\n"
+"            immediate effect and fines may be applied by the Credit Card "
+"Schemes and/or the\n"
+"            authorities for unregistered or inappropriate use of payment "
+"services which will in\n"
 "            such case be payable by you."
 msgstr ""
 
@@ -245,8 +250,8 @@ msgstr ""
 #: code:addons/adyen_platforms/models/adyen_account.py:0
 #, python-format
 msgid ""
-"Bank statements must be greater than 10kB (except for PDFs) and smaller than"
-" 10MB"
+"Bank statements must be greater than 10kB (except for PDFs) and smaller than "
+"10MB"
 msgstr ""
 
 #. module: adyen_platforms
@@ -736,7 +741,6 @@ msgstr ""
 #. module: adyen_platforms
 #. openerp-web
 #: code:addons/adyen_platforms/static/src/xml/adyen_account_templates.xml:0
-#: code:addons/adyen_platforms/static/src/xml/adyen_account_templates.xml:0
 #, python-format
 msgid "Legal Entity"
 msgstr ""
@@ -1114,14 +1118,22 @@ msgstr ""
 #: code:addons/adyen_platforms/static/src/xml/adyen_account_templates.xml:0
 #, python-format
 msgid ""
-"The payment processing services ordered by you by placing this order will be\n"
-"            provided to you by Adyen N.V. (hereafter “Processor”), with which you are\n"
-"            entering into a direct agreement by confirming this order. Odoo S.A.\n"
-"            (hereafter “We /Us”) will assist and support you in your use of the services to be\n"
-"            provided by the Processor and we will provide you first line assistance with and\n"
-"            enable you to connect to the systems of Processor to be able to use its services.\n"
-"            For this purpose, you hereby instruct Processor to provide us access to your data\n"
-"            and setting in Processor’s systems which are used by Processor to provide the\n"
+"The payment processing services ordered by you by placing this order will "
+"be\n"
+"            provided to you by Adyen N.V. (hereafter “Processor”), with "
+"which you are\n"
+"            entering into a direct agreement by confirming this order. Odoo "
+"S.A.\n"
+"            (hereafter “We /Us”) will assist and support you in your use of "
+"the services to be\n"
+"            provided by the Processor and we will provide you first line "
+"assistance with and\n"
+"            enable you to connect to the systems of Processor to be able to "
+"use its services.\n"
+"            For this purpose, you hereby instruct Processor to provide us "
+"access to your data\n"
+"            and setting in Processor’s systems which are used by Processor "
+"to provide the\n"
 "            services and authorise us to manage these on your behalf."
 msgstr ""
 
@@ -1188,11 +1200,16 @@ msgstr ""
 #, python-format
 msgid ""
 "WARNING: Please note that the right to use the payment services is only for\n"
-"            sales in your own name. You may not resell, hire or on any other basis allow third\n"
-"            parties to use the payment services to enable such third parties to be paid for their\n"
-"            services. You may not use the payment services for different types of product and\n"
-"            services than as registered with your application. In particular you confirm that you\n"
-"            will not use the payment services for any type of product or service appearing in the"
+"            sales in your own name. You may not resell, hire or on any other "
+"basis allow third\n"
+"            parties to use the payment services to enable such third parties "
+"to be paid for their\n"
+"            services. You may not use the payment services for different "
+"types of product and\n"
+"            services than as registered with your application. In particular "
+"you confirm that you\n"
+"            will not use the payment services for any type of product or "
+"service appearing in the"
 msgstr ""
 
 #. module: adyen_platforms
@@ -1209,8 +1226,8 @@ msgstr "Чакащ за потвърждение"
 #: code:addons/adyen_platforms/models/adyen_account.py:0
 #, python-format
 msgid ""
-"We had troubles reaching Adyen, please retry later or contact the support if"
-" the problem persists"
+"We had troubles reaching Adyen, please retry later or contact the support if "
+"the problem persists"
 msgstr ""
 
 #. module: adyen_platforms
@@ -1237,8 +1254,8 @@ msgstr ""
 #. module: adyen_platforms
 #: model:ir.model.fields,help:adyen_platforms.field_adyen_bank_account__bank_statement
 msgid ""
-"You need to provide a bank statement to allow payouts.         The file must"
-" be a bank statement, a screenshot of your online banking environment, a "
+"You need to provide a bank statement to allow payouts.         The file must "
+"be a bank statement, a screenshot of your online banking environment, a "
 "letter from the bank or a cheque and must contain         the logo of the "
 "bank or it's name in a unique font, the bank account details, the name of "
 "the account holder.        Allowed formats: jpg, pdf, png. Maximum allowed "
@@ -1265,14 +1282,12 @@ msgstr ""
 #. module: adyen_platforms
 #. openerp-web
 #: code:addons/adyen_platforms/static/src/xml/adyen_account_templates.xml:0
-#: code:addons/adyen_platforms/static/src/xml/adyen_account_templates.xml:0
 #, python-format
 msgid "here"
 msgstr "тук"
 
 #. module: adyen_platforms
 #. openerp-web
-#: code:addons/adyen_platforms/static/src/xml/adyen_account_templates.xml:0
 #: code:addons/adyen_platforms/static/src/xml/adyen_account_templates.xml:0
 #, python-format
 msgid "to download and review)"

@@ -1,14 +1,14 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* base_automation
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2020
 # aleksandar ivanov, 2020
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~13.3\n"
@@ -17,10 +17,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:10+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: base_automation
@@ -174,12 +174,16 @@ msgstr "Дни"
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_range
 msgid ""
 "Delay after the trigger date.\n"
-"                                    You can put a negative number if you need a delay before the\n"
-"                                    trigger date, like sending a reminder 15 minutes before a meeting."
+"                                    You can put a negative number if you "
+"need a delay before the\n"
+"                                    trigger date, like sending a reminder 15 "
+"minutes before a meeting."
 msgstr ""
 "Забавяне след пусковата дата.\n"
-"                                    Можете да поставите отрицателно число, ако се нуждаете от забавяне преди\n"
-"                                    пусковата дата, като изпратите напомняне, което да се активира 15 минути преди дадено заседание."
+"                                    Можете да поставите отрицателно число, "
+"ако се нуждаете от забавяне преди\n"
+"                                    пусковата дата, като изпратите "
+"напомняне, което да се активира 15 минути преди дадено заседание."
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__trg_date_range
@@ -204,8 +208,10 @@ msgstr ""
 #, python-format
 msgid ""
 "Disabling this automated action will enable you to continue your workflow\n"
-"                    but any data created after this could potentially be corrupted,\n"
-"                    as you are effectively disabling a customization that may set\n"
+"                    but any data created after this could potentially be "
+"corrupted,\n"
+"                    as you are effectively disabling a customization that "
+"may set\n"
 "                    important and/or required fields."
 msgstr ""
 
@@ -278,8 +284,7 @@ msgstr ""
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_pre_domain
 msgid ""
-"If present, this condition must be satisfied before the update of the "
-"record."
+"If present, this condition must be satisfied before the update of the record."
 msgstr ""
 "Ако е налице, това условие трябва да бъде изпълнено преди актуализацията на "
 "записа"
@@ -388,11 +393,11 @@ msgstr "В процес на актуализиране"
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__help
 msgid ""
-"Optional help text for the users with a description of the target view, such"
-" as its usage and purpose."
+"Optional help text for the users with a description of the target view, such "
+"as its usage and purpose."
 msgstr ""
-"Optional help text for the users with a description of the target view, such"
-" as its usage and purpose."
+"Optional help text for the users with a description of the target view, such "
+"as its usage and purpose."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__link_field_id
@@ -471,8 +476,8 @@ msgstr ""
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trigger_field_ids
 msgid ""
-"The action will be triggered if and only if one of these fields is "
-"updated.If empty, all fields are watched."
+"The action will be triggered if and only if one of these fields is updated."
+"If empty, all fields are watched."
 msgstr ""
 
 #. module: base_automation
@@ -507,7 +512,8 @@ msgid ""
 "- 'Execute Python Code': a block of python code that will be executed\n"
 "- 'Create': create a new record with new values\n"
 "- 'Update a Record': update the values of a record\n"
-"- 'Execute several actions': define an action that triggers several other server actions\n"
+"- 'Execute several actions': define an action that triggers several other "
+"server actions\n"
 "- 'Send Email': automatically send an email (Discuss)\n"
 "- 'Add Followers': add followers to a record (Discuss)\n"
 "- 'Create Next Activity': create an activity (Discuss)"
@@ -522,8 +528,8 @@ msgstr "Употреба"
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__activity_user_type
 msgid ""
-"Use 'Specific User' to always assign the same user on the next activity. Use"
-" 'Generic User From Record' to specify the field name of the user to choose "
+"Use 'Specific User' to always assign the same user on the next activity. Use "
+"'Generic User From Record' to specify the field name of the user to choose "
 "on the record."
 msgstr ""
 
@@ -536,9 +542,11 @@ msgstr "Използвайте календар"
 #: model_terms:ir.actions.act_window,help:base_automation.base_automation_act
 msgid ""
 "Use automated actions to automatically trigger actions for\n"
-"                various screens. Example: a lead created by a specific user may\n"
+"                various screens. Example: a lead created by a specific user "
+"may\n"
 "                be automatically set to a specific Sales Team, or an\n"
-"                opportunity which still has status pending after 14 days might\n"
+"                opportunity which still has status pending after 14 days "
+"might\n"
 "                trigger an automatic reminder email."
 msgstr ""
 
@@ -580,22 +588,24 @@ msgstr ""
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_id
 msgid ""
 "When should the condition be triggered.\n"
-"                                  If present, will be checked by the scheduler. If empty, will be checked at creation and update."
+"                                  If present, will be checked by the "
+"scheduler. If empty, will be checked at creation and update."
 msgstr ""
 "Когато се налага условието да влезе в сила.\n"
-"                                  Ако е налице, ще бъде отметнато от планьора. Ако мястото е празно, ще бъде отметнато при създаването и актуализирането."
+"                                  Ако е налице, ще бъде отметнато от "
+"планьора. Ако мястото е празно, ще бъде отметнато при създаването и "
+"актуализирането."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__active
 msgid "When unchecked, the rule is hidden and will not be executed."
-msgstr ""
-"Когато не е отметнато, правилото е скрито и не може да бъде приложено."
+msgstr "Когато не е отметнато, правилото е скрито и не може да бъде приложено."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__code
 msgid ""
-"Write Python code that the action will execute. Some variables are available"
-" for use; help about python expression is given in the help tab."
+"Write Python code that the action will execute. Some variables are available "
+"for use; help about python expression is given in the help tab."
 msgstr ""
 
 #. module: base_automation

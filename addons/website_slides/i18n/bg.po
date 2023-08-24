@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_slides
-# 
+#
 # Translators:
 # TIhomir Nikolov <whltd.03@gmail.com>, 2020
 # Александра Николова <alexandra1nikolova@gmail.com>, 2020
@@ -14,7 +14,7 @@
 # Ivan Goychev <igoychev.projects@gmail.com>, 2020
 # aleksandar ivanov, 2020
 # Ивайло Малинов <iv.malinov@gmail.com>, 2021
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -23,10 +23,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:22+0000\n"
 "Last-Translator: Ивайло Малинов <iv.malinov@gmail.com>, 2021\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: website_slides
@@ -126,7 +126,8 @@ msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hello<br/><br/>\n"
-"        You have been invited to join a new course: ${object.channel_id.name}.\n"
+"        You have been invited to join a new course: ${object.channel_id."
+"name}.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -136,16 +137,27 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.slide_template_shared
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
 "                        Hello<br/><br/>\n"
-"                        ${user.name} shared the ${object.slide_type} <strong>${object.name}</strong> with you!\n"
-"                        <div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a href=\"${(object.website_url + '?fullscreen=1') if ctx['fullscreen'] else object.website_url | safe}\">\n"
-"                                <img alt=\"${object.name}\" src=\"${ctx['base_url']}/web/image/slide.slide/${object.id}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        ${user.name} shared the ${object.slide_type} <strong>"
+"${object.name}</strong> with you!\n"
+"                        <div style=\"margin: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a href=\"${(object.website_url + '?"
+"fullscreen=1') if ctx['fullscreen'] else object.website_url | safe}\">\n"
+"                                <img alt=\"${object.name}\" src="
+"\"${ctx['base_url']}/web/image/slide.slide/${object.id}/image_1024\" style="
+"\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a href=\"${(object.website_url + '?fullscreen=1') if ctx['fullscreen'] else object.website_url | safe}\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">View <strong>${object.name}</strong></a>\n"
+"                        <div style=\"margin: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a href=\"${(object.website_url + '?"
+"fullscreen=1') if ctx['fullscreen'] else object.website_url | safe}\" style="
+"\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: "
+"none; color: #fff; border-radius: 5px;\">View <strong>${object.name}</"
+"strong></a>\n"
 "                        </div>\n"
 "                        % if user.signature\n"
 "                            <br/>\n"
@@ -160,19 +172,27 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.slide_template_published
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
 "                        Hello<br/><br/>\n"
-"                        There is something new in the course <strong>${object.channel_id.name}</strong> you are following:<br/><br/>\n"
+"                        There is something new in the course <strong>"
+"${object.channel_id.name}</strong> you are following:<br/><br/>\n"
 "                        <center><strong>${object.name}</strong></center>\n"
 "                        % if object.image_1024\n"
-"                        <div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
+"                        <div style=\"margin: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
 "                            <a href=\"${object.website_url}\">\n"
-"                                <img alt=\"${object.name}\" src=\"${ctx['base_url']}/web/image/slide.slide/${object.id}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img alt=\"${object.name}\" src="
+"\"${ctx['base_url']}/web/image/slide.slide/${object.id}/image_1024\" style="
+"\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        % endif\n"
-"                        <div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
-"                            <a href=\"${object.website_url}\" style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;\">View content</a>\n"
+"                        <div style=\"margin: 16px 8px 16px 8px; text-align: "
+"center;\">\n"
+"                            <a href=\"${object.website_url}\" style="
+"\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-decoration: "
+"none; color: #fff; border-radius: 5px;\">View content</a>\n"
 "                        </div>\n"
 "                        Enjoy this exclusive content!\n"
 "                        % if user.signature\n"
@@ -204,8 +224,8 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid ""
-"<i class=\"fa fa-chevron-left mr-2\"/> <span class=\"d-none d-sm-inline-"
-"block\">Prev</span>"
+"<i class=\"fa fa-chevron-left mr-2\"/> <span class=\"d-none d-sm-inline-block"
+"\">Prev</span>"
 msgstr ""
 
 #. module: website_slides
@@ -221,8 +241,8 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-clock-o mr-2\" aria-label=\"Duration\" role=\"img\" "
-"title=\"Duration\"/>"
+"<i class=\"fa fa-clock-o mr-2\" aria-label=\"Duration\" role=\"img\" title="
+"\"Duration\"/>"
 msgstr ""
 
 #. module: website_slides
@@ -270,13 +290,15 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide_forbidden
 msgid ""
-"<i class=\"fa fa-exclamation-triangle\" role=\"img\" aria-"
-"label=\"Attention\" title=\"Attention\"/> This document is private."
+"<i class=\"fa fa-exclamation-triangle\" role=\"img\" aria-label=\"Attention"
+"\" title=\"Attention\"/> This document is private."
 msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
-msgid "<i class=\"fa fa-eye mr-2\" aria-label=\"Views\" role=\"img\" title=\"Views\"/>"
+msgid ""
+"<i class=\"fa fa-eye mr-2\" aria-label=\"Views\" role=\"img\" title=\"Views"
+"\"/>"
 msgstr ""
 
 #. module: website_slides
@@ -289,8 +311,8 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-file-image-o mr-2\" aria-label=\"Infographic\" role=\"img\""
-" title=\"Infographic\"/>"
+"<i class=\"fa fa-file-image-o mr-2\" aria-label=\"Infographic\" role=\"img\" "
+"title=\"Infographic\"/>"
 msgstr ""
 
 #. module: website_slides
@@ -303,13 +325,15 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-file-video-o mr-2\" aria-label=\"Video\" role=\"img\" "
-"title=\"Video\"/>"
+"<i class=\"fa fa-file-video-o mr-2\" aria-label=\"Video\" role=\"img\" title="
+"\"Video\"/>"
 msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
-msgid "<i class=\"fa fa-flag mr-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/>"
+msgid ""
+"<i class=\"fa fa-flag mr-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/"
+">"
 msgstr ""
 
 #. module: website_slides
@@ -370,7 +394,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid ""
 "<i class=\"fa fa-info-circle\"/>\n"
-"                    The social sharing module will be unlocked when a moderator will allow your publication."
+"                    The social sharing module will be unlocked when a "
+"moderator will allow your publication."
 msgstr ""
 
 #. module: website_slides
@@ -414,8 +439,8 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-question mr-2\" aria-label=\"Number of Questions\" "
-"role=\"img\" title=\"Number of Questions\"/>"
+"<i class=\"fa fa-question mr-2\" aria-label=\"Number of Questions\" role="
+"\"img\" title=\"Number of Questions\"/>"
 msgstr ""
 
 #. module: website_slides
@@ -460,7 +485,8 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.rating_rating_view_kanban_slide_channel
-msgid "<i class=\"fa fa-star-half-o\" aria-label=\"Half a star\" role=\"img\"/>"
+msgid ""
+"<i class=\"fa fa-star-half-o\" aria-label=\"Half a star\" role=\"img\"/>"
 msgstr ""
 
 #. module: website_slides
@@ -481,7 +507,9 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid "<i class=\"fa fa-thumbs-up fa-1x\" role=\"img\" aria-label=\"Likes\" title=\"Likes\"/>"
+msgid ""
+"<i class=\"fa fa-thumbs-up fa-1x\" role=\"img\" aria-label=\"Likes\" title="
+"\"Likes\"/>"
 msgstr ""
 
 #. module: website_slides
@@ -496,8 +524,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_main
 msgid ""
 "<small><span class=\"badge badge-pill badge-success pull-right my-1 py-1 "
-"px-2 font-weight-normal\"><i class=\"fa fa-check\"/> "
-"Completed</span></small>"
+"px-2 font-weight-normal\"><i class=\"fa fa-check\"/> Completed</span></small>"
 msgstr ""
 
 #. module: website_slides
@@ -527,15 +554,15 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_card
 msgid ""
-"<span class=\"badge badge-pill badge-success pull-right py-1 px-2\"><i "
-"class=\"fa fa-check\"/> Completed</span>"
+"<span class=\"badge badge-pill badge-success pull-right py-1 px-2\"><i class="
+"\"fa fa-check\"/> Completed</span>"
 msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
 msgid ""
-"<span class=\"badge badge-pill badge-success py-1 px-2 mx-auto\" "
-"style=\"font-size: 1em\"><i class=\"fa fa-check\"/> Completed</span>"
+"<span class=\"badge badge-pill badge-success py-1 px-2 mx-auto\" style="
+"\"font-size: 1em\"><i class=\"fa fa-check\"/> Completed</span>"
 msgstr ""
 
 #. module: website_slides
@@ -606,15 +633,16 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
 msgid ""
-"<span class=\"form-text text-muted d-block w-100\">Send presentation through"
-" email</span>"
+"<span class=\"form-text text-muted d-block w-100\">Send presentation through "
+"email</span>"
 msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid ""
 "<span class=\"o_form_label\">Slides</span>\n"
-"                        <span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
+"                        <span class=\"fa fa-lg fa-globe\" title=\"Values set "
+"here are website-specific.\" groups=\"website.group_multi_website\"/>"
 msgstr ""
 
 #. module: website_slides
@@ -659,12 +687,14 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
-msgid "<span name=\"done_members_count_label\" class=\"text-muted\">Finished</span>"
+msgid ""
+"<span name=\"done_members_count_label\" class=\"text-muted\">Finished</span>"
 msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
-msgid "<span name=\"members_done_count_label\" class=\"o_stat_text\">Finished</span>"
+msgid ""
+"<span name=\"members_done_count_label\" class=\"o_stat_text\">Finished</span>"
 msgstr ""
 
 #. module: website_slides
@@ -778,8 +808,7 @@ msgstr ""
 
 #. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_slide_exclusion_html_content_and_url
-msgid ""
-"A slide is either filled with a document url or HTML content. Not both."
+msgid "A slide is either filled with a document url or HTML content. Not both."
 msgstr ""
 
 #. module: website_slides
@@ -1262,7 +1291,6 @@ msgstr ""
 #: code:addons/website_slides/static/src/js/slides_slide_archive.js:0
 #: code:addons/website_slides/static/src/js/slides_upload.js:0
 #: code:addons/website_slides/static/src/xml/slide_quiz_create.xml:0
-#: code:addons/website_slides/static/src/xml/slide_quiz_create.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
 #, python-format
 msgid "Cancel"
@@ -1376,7 +1404,6 @@ msgstr ""
 
 #. module: website_slides
 #. openerp-web
-#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
 #, python-format
 msgid "Check answers"
@@ -1622,8 +1649,8 @@ msgstr ""
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 #, python-format
 msgid ""
-"Congratulations, you've created your first course.<br/>Click on the title of"
-" this content to see it in fullscreen mode."
+"Congratulations, you've created your first course.<br/>Click on the title of "
+"this content to see it in fullscreen mode."
 msgstr ""
 
 #. module: website_slides
@@ -1682,9 +1709,6 @@ msgstr "Съдържание"
 
 #. module: website_slides
 #. openerp-web
-#: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
-#: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
-#: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
 #: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
 #, python-format
 msgid "Content Preview"
@@ -1765,7 +1789,8 @@ msgid ""
 "Could not fetch data from url. Document or access right not available:\n"
 "%s"
 msgstr ""
-"Данните от URL адреса не можаха да бъдат извлечени. Документът или правото на достъп не са налични:\n"
+"Данните от URL адреса не можаха да бъдат извлечени. Документът или правото "
+"на достъп не са налични:\n"
 "%s"
 
 #. module: website_slides
@@ -1962,7 +1987,8 @@ msgstr ""
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__promote_strategy
 msgid ""
-"Depending the promote strategy, a slide will appear on the top of the course's page :\n"
+"Depending the promote strategy, a slide will appear on the top of the "
+"course's page :\n"
 " * Latest Published : the slide created last.\n"
 " * Most Voted : the slide which has to most votes.\n"
 " * Most Viewed ; the slide which has been viewed the most.\n"
@@ -1996,8 +2022,6 @@ msgstr ""
 #: code:addons/website_slides/static/src/js/slides_category_add.js:0
 #: code:addons/website_slides/static/src/js/slides_course_tag_add.js:0
 #: code:addons/website_slides/static/src/js/slides_course_unsubscribe.js:0
-#: code:addons/website_slides/static/src/js/slides_course_unsubscribe.js:0
-#: code:addons/website_slides/static/src/js/slides_upload.js:0
 #: code:addons/website_slides/static/src/js/slides_upload.js:0
 #: code:addons/website_slides/static/src/js/website_slides.editor.js:0
 #, python-format
@@ -2326,7 +2350,6 @@ msgstr ""
 #. module: website_slides
 #. openerp-web
 #: code:addons/website_slides/static/src/js/slides_upload.js:0
-#: code:addons/website_slides/static/src/js/slides_upload.js:0
 #, python-format
 msgid "Failed to install \"%s\"."
 msgstr ""
@@ -2502,7 +2525,6 @@ msgstr ""
 
 #. module: website_slides
 #. openerp-web
-#: code:addons/website_slides/static/src/xml/activity.xml:0
 #: code:addons/website_slides/static/src/xml/activity.xml:0
 #, python-format
 msgid "Grant Access"
@@ -2826,7 +2848,8 @@ msgid ""
 "Internal server error, please try again later or contact administrator.\n"
 "Here is the error message: %s"
 msgstr ""
-"Вътрешна сървърна грешка. Моля, опитайте отново по-късно или се обърнете към администратора.\n"
+"Вътрешна сървърна грешка. Моля, опитайте отново по-късно или се обърнете към "
+"администратора.\n"
 "Това е съобщението за грешка: %s"
 
 #. module: website_slides
@@ -2911,7 +2934,6 @@ msgstr ""
 #. module: website_slides
 #. openerp-web
 #: code:addons/website_slides/static/src/xml/slide_course_join.xml:0
-#: code:addons/website_slides/static/src/xml/slide_course_join.xml:0
 #, python-format
 msgid "Join the Course"
 msgstr ""
@@ -2969,15 +2991,16 @@ msgstr ""
 #: model:slide.channel,description:website_slides.slide_channel_demo_3_furn0
 #: model:slide.channel,description_short:website_slides.slide_channel_demo_3_furn0
 msgid ""
-"Knowing which kind of wood to use depending on your application is important. In this course you\n"
+"Knowing which kind of wood to use depending on your application is "
+"important. In this course you\n"
 "will learn the basics of wood characteristics."
 msgstr ""
 
 #. module: website_slides
 #: model:slide.slide,description:website_slides.slide_slide_demo_2_3
 msgid ""
-"Knowing wood characteristics is a requirement in order to know which kind of"
-" wood to use in a given situation."
+"Knowing wood characteristics is a requirement in order to know which kind of "
+"wood to use in a given situation."
 msgstr ""
 
 #. module: website_slides
@@ -3085,7 +3108,6 @@ msgstr ""
 
 #. module: website_slides
 #. openerp-web
-#: code:addons/website_slides/static/src/js/slides_course_unsubscribe.js:0
 #: code:addons/website_slides/static/src/js/slides_course_unsubscribe.js:0
 #, python-format
 msgid "Leave the course"
@@ -3304,7 +3326,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 msgid "New"
-msgstr "Nieuw"
+msgstr "Нов"
 
 #. module: website_slides
 #: model:mail.template,subject:website_slides.slide_template_published
@@ -3628,7 +3650,6 @@ msgstr ""
 
 #. module: website_slides
 #: code:addons/website_slides/models/slide_slide.py:0
-#: code:addons/website_slides/models/slide_slide.py:0
 #, python-format
 msgid "Please enter valid Youtube or Google Doc URL"
 msgstr "Моля, въведете валиден URL адрес на Youtube или Google Doc"
@@ -3766,7 +3787,8 @@ msgstr ""
 #. module: website_slides
 #: code:addons/website_slides/models/slide_question.py:0
 #, python-format
-msgid "Question \"%s\" must have 1 correct answer and at least 1 incorrect answer"
+msgid ""
+"Question \"%s\" must have 1 correct answer and at least 1 incorrect answer"
 msgstr ""
 
 #. module: website_slides
@@ -3880,7 +3902,6 @@ msgstr "Получатели"
 
 #. module: website_slides
 #. openerp-web
-#: code:addons/website_slides/static/src/xml/activity.xml:0
 #: code:addons/website_slides/static/src/xml/activity.xml:0
 #, python-format
 msgid "Refuse Access"
@@ -4051,7 +4072,6 @@ msgstr "SMS при грешка на доставка"
 #. openerp-web
 #: code:addons/website_slides/static/src/js/slides_category_add.js:0
 #: code:addons/website_slides/static/src/js/slides_course_unsubscribe.js:0
-#: code:addons/website_slides/static/src/js/slides_upload.js:0
 #: code:addons/website_slides/static/src/js/slides_upload.js:0
 #: code:addons/website_slides/static/src/xml/slide_quiz_create.xml:0
 #, python-format
@@ -4234,7 +4254,6 @@ msgstr ""
 #. module: website_slides
 #. openerp-web
 #: code:addons/website_slides/static/src/xml/website_slides_share.xml:0
-#: code:addons/website_slides/static/src/xml/website_slides_share.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_share_social
 #, python-format
 msgid "Share on Facebook"
@@ -4242,7 +4261,6 @@ msgstr ""
 
 #. module: website_slides
 #. openerp-web
-#: code:addons/website_slides/static/src/xml/website_slides_share.xml:0
 #: code:addons/website_slides/static/src/xml/website_slides_share.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_share_social
 #, python-format
@@ -4260,7 +4278,6 @@ msgstr "Споделете в социалните мрежи "
 
 #. module: website_slides
 #. openerp-web
-#: code:addons/website_slides/static/src/xml/website_slides_share.xml:0
 #: code:addons/website_slides/static/src/xml/website_slides_share.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_share_social
 #, python-format
@@ -4354,8 +4371,7 @@ msgstr ""
 #: code:addons/website_slides/controllers/main.py:0
 #, python-format
 msgid ""
-"Slide with questions must be marked as done when submitting all good answers"
-" "
+"Slide with questions must be marked as done when submitting all good answers "
 msgstr ""
 
 #. module: website_slides
@@ -4465,11 +4481,6 @@ msgstr ""
 #. module: website_slides
 #. openerp-web
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
-#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
-#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
-#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
-#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
-#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
 #, python-format
 msgid "Succeed and gain karma"
 msgstr ""
@@ -4505,7 +4516,6 @@ msgstr "Име на маркер"
 #. module: website_slides
 #. openerp-web
 #: code:addons/website_slides/static/src/js/slides_upload.js:0
-#: code:addons/website_slides/static/src/xml/website_slides_channel.xml:0
 #: code:addons/website_slides/static/src/xml/website_slides_channel.xml:0
 #: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__tag_ids
@@ -4696,7 +4706,6 @@ msgstr ""
 #. openerp-web
 #: code:addons/website_slides/static/src/xml/website_slides_channel.xml:0
 #: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
-#: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__name
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_link__name
 #, python-format
@@ -4794,7 +4803,6 @@ msgstr ""
 
 #. module: website_slides
 #: code:addons/website_slides/models/slide_channel.py:0
-#: code:addons/website_slides/models/slide_channel.py:0
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
 #, python-format
 msgid "Uncategorized"
@@ -4864,7 +4872,6 @@ msgstr "Качете презентация"
 
 #. module: website_slides
 #. openerp-web
-#: code:addons/website_slides/static/src/js/slides_upload.js:0
 #: code:addons/website_slides/static/src/js/slides_upload.js:0
 #, python-format
 msgid "Upload a document"
@@ -5157,9 +5164,6 @@ msgstr ""
 #. module: website_slides
 #. openerp-web
 #: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
-#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
-#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
-#: code:addons/website_slides/static/src/xml/slide_quiz.xml:0
 #, python-format
 msgid "XP"
 msgstr ""
@@ -5181,8 +5185,8 @@ msgstr "Да"
 #: code:addons/website_slides/wizard/slide_channel_invite.py:0
 #, python-format
 msgid ""
-"You are not allowed to add members to this course. Please contact the course"
-" responsible or an administrator."
+"You are not allowed to add members to this course. Please contact the course "
+"responsible or an administrator."
 msgstr ""
 
 #. module: website_slides
@@ -5391,8 +5395,8 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid ""
-"e.g. In this video, we'll give you the keys on how Odoo can help you to grow"
-" your business. At the end, we'll propose you a quiz to test your knowledge."
+"e.g. In this video, we'll give you the keys on how Odoo can help you to grow "
+"your business. At the end, we'll propose you a quiz to test your knowledge."
 msgstr ""
 
 #. module: website_slides
@@ -5438,8 +5442,8 @@ msgstr "регистрация"
 #: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
 #, python-format
 msgid ""
-"means? The YouTube \"unlisted\" means it is a video which can be viewed only"
-" by the users with the link to it. Your video will never come up in the "
+"means? The YouTube \"unlisted\" means it is a video which can be viewed only "
+"by the users with the link to it. Your video will never come up in the "
 "search results nor on your channel."
 msgstr ""
 
@@ -5495,7 +5499,6 @@ msgstr ""
 
 #. module: website_slides
 #. openerp-web
-#: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
 #: code:addons/website_slides/static/src/xml/website_slides_upload.xml:0
 #, python-format
 msgid "unlisted"

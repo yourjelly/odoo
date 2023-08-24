@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_event_track
-# 
+#
 # Translators:
 # Chudomir Monevski <cm@plana.solutions>, 2020
 # Martin Trigaux, 2020
@@ -15,7 +15,7 @@
 # Александра Николова <alexandra1nikolova@gmail.com>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
 # Ивайло Малинов <iv.malinov@gmail.com>, 2021
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -24,10 +24,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:21+0000\n"
 "Last-Translator: Ивайло Малинов <iv.malinov@gmail.com>, 2021\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: website_event_track
@@ -75,11 +75,15 @@ msgid ""
 "<?xml version=\"1.0\"?>\n"
 "<div>\n"
 "    Dear ${object.partner_name or ''}<br/>\n"
-"    We are pleased to inform you that your proposal ${object.name} has been accepted and confirmed for the event ${object.event_id.name}.\n"
+"    We are pleased to inform you that your proposal ${object.name} has been "
+"accepted and confirmed for the event ${object.event_id.name}.\n"
 "    <br/>\n"
 "    You will find more details here:\n"
 "    <div style=\"margin: 16px 0px 16px 0px;\">\n"
-"        <a href=\"/event/${object.event_id.id}/track/${object.id}\" style=\"padding: 8px 16px 8px 16px; font-size: 14px; color: #FFFFFF; text-decoration: none !important; background-color: #875A7B; border: 0px solid #875A7B; border-radius:3px\">\n"
+"        <a href=\"/event/${object.event_id.id}/track/${object.id}\" style="
+"\"padding: 8px 16px 8px 16px; font-size: 14px; color: #FFFFFF; text-"
+"decoration: none !important; background-color: #875A7B; border: 0px solid "
+"#875A7B; border-radius:3px\">\n"
 "            View Talk\n"
 "        </a>\n"
 "    </div>\n"
@@ -136,7 +140,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid ""
 "<i class=\"fa fa-info-circle\"/>\n"
-"                                You can add multiple speakers by separating names, emails and phones with commas."
+"                                You can add multiple speakers by separating "
+"names, emails and phones with commas."
 msgstr ""
 
 #. module: website_event_track
@@ -170,10 +175,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid ""
 "<strong>Lightning Talks</strong>. These are 30 minutes talks on many\n"
-"                                    different topics. Most topics are accepted in lightning talks."
+"                                    different topics. Most topics are "
+"accepted in lightning talks."
 msgstr ""
-"<strong>Светкавични разговори</strong>. Това са 30-минутни разговори на най-различна\n"
-"                                    тематика. Повечето теми се акцентират именно в светкавични разговори."
+"<strong>Светкавични разговори</strong>. Това са 30-минутни разговори на най-"
+"различна\n"
+"                                    тематика. Повечето теми се акцентират "
+"именно в светкавични разговори."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content
@@ -186,7 +194,8 @@ msgid ""
 "<strong>Regular Talks</strong>. These are standard talks with slides,\n"
 "                                    alocated in slots of 60 minutes."
 msgstr ""
-"<strong>Редовни разговори</strong>. Това са стандартни разговори със слайдове,\n"
+"<strong>Редовни разговори</strong>. Това са стандартни разговори със "
+"слайдове,\n"
 "                                    разпределени в слотове от 60 минути."
 
 #. module: website_event_track
@@ -199,8 +208,10 @@ msgstr ""
 #: model_terms:event.sponsor,website_description:website_event_track.event_sponsor_2
 msgid ""
 "A non-profit international educational and scientific\n"
-"                    organisation, hosting three departments (aeronautics and\n"
-"                    aerospace, environmental and applied fluid dynamics, and\n"
+"                    organisation, hosting three departments (aeronautics "
+"and\n"
+"                    aerospace, environmental and applied fluid dynamics, "
+"and\n"
 "                    turbomachinery and propulsion)."
 msgstr ""
 
@@ -311,7 +322,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid ""
 "Allow video and audio recording of their\n"
-"                                    presentation, for publishing on our website."
+"                                    presentation, for publishing on our "
+"website."
 msgstr ""
 "Позволяват видео и аудио запис на\n"
 " презентацията си за публикуване в нашия уебсайт."
@@ -355,16 +367,19 @@ msgstr ""
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track_visitor__is_blacklisted
 msgid ""
-"As key track cannot be un-wishlisted, this field store the partner choice to"
-" remove the reminder for key tracks."
+"As key track cannot be un-wishlisted, this field store the partner choice to "
+"remove the reminder for key tracks."
 msgstr ""
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_17
 msgid ""
-"As you may have heard before, making your own furniture is actually not as difficult or as complicated as you think.\n"
-"    In fact, some projects are so easy anyone could successfully complete them. For example, making a cute stool out of\n"
-"    a old tire is a real piece of cake and if you’re in need of a coffee table you can easily put one together using\n"
+"As you may have heard before, making your own furniture is actually not as "
+"difficult or as complicated as you think.\n"
+"    In fact, some projects are so easy anyone could successfully complete "
+"them. For example, making a cute stool out of\n"
+"    a old tire is a real piece of cake and if you’re in need of a coffee "
+"table you can easily put one together using\n"
 "    wood crates."
 msgstr ""
 
@@ -602,7 +617,8 @@ msgstr ""
 #: model_terms:event.sponsor,website_description:website_event_track.event_sponsor_3
 msgid ""
 "Deco Addict designs, develops, integrates and supports HR and Supply\n"
-"                Chain processes in order to make our customers more productive,\n"
+"                Chain processes in order to make our customers more "
+"productive,\n"
 "                responsive and profitable."
 msgstr ""
 
@@ -852,7 +868,6 @@ msgstr ""
 
 #. module: website_event_track
 #. openerp-web
-#: code:addons/website_event_track/static/src/js/event_track_reminder.js:0
 #: code:addons/website_event_track/static/src/js/event_track_reminder.js:0
 #: model_terms:ir.ui.view,arch_db:website_event_track.track_widget_reminder
 #, python-format
@@ -1229,7 +1244,8 @@ msgstr ""
 msgid ""
 "It provides post-graduate education in fluid dynamics\n"
 "                    (research master in fluid dynamics, former \"Diploma\n"
-"                    Course\", doctoral program, stagiaire program and lecture\n"
+"                    Course\", doctoral program, stagiaire program and "
+"lecture\n"
 "                    series) and encourages \"training in research through\n"
 "                    research\"."
 msgstr ""
@@ -1239,13 +1255,19 @@ msgstr ""
 #: model_terms:event.sponsor,website_description:website_event_track.event_sponsor_2
 msgid ""
 "It undertakes and promotes research in the field of fluid\n"
-"                    dynamics. It possesses about fifty different wind tunnels,\n"
-"                    turbomachinery and other specialized test facilities, some\n"
-"                    of which are unique or the largest in the world. Extensive\n"
+"                    dynamics. It possesses about fifty different wind "
+"tunnels,\n"
+"                    turbomachinery and other specialized test facilities, "
+"some\n"
+"                    of which are unique or the largest in the world. "
+"Extensive\n"
 "                    research on experimental, computational and theoretical\n"
-"                    aspects of gas and liquid flows is carried out under the\n"
-"                    direction of the faculty and research engineers, sponsored\n"
-"                    mainly by governmental and international agencies as well\n"
+"                    aspects of gas and liquid flows is carried out under "
+"the\n"
+"                    direction of the faculty and research engineers, "
+"sponsored\n"
+"                    mainly by governmental and international agencies as "
+"well\n"
 "                    as industries."
 msgstr ""
 
@@ -1615,7 +1637,8 @@ msgstr ""
 msgid ""
 "Our experts invent, imagine and develop solutions which meet\n"
 "                your business requirements. They build a new technical\n"
-"                environment for your company, but they always take the already\n"
+"                environment for your company, but they always take the "
+"already\n"
 "                installed IT software into account. That is why Idealis\n"
 "                Consulting delivers excellence in HR and SC Management."
 msgstr ""
@@ -1816,7 +1839,6 @@ msgstr "Последователност"
 #. module: website_event_track
 #. openerp-web
 #: code:addons/website_event_track/static/src/js/event_track_reminder.js:0
-#: code:addons/website_event_track/static/src/js/event_track_reminder.js:0
 #: model_terms:ir.ui.view,arch_db:website_event_track.track_widget_reminder
 #, python-format
 msgid "Set Favorite"
@@ -1826,8 +1848,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Show all records which has next action date is before today"
 msgstr ""
-"Показване на всички записи, на които следващата дата на действие е преди "
-"днес"
+"Показване на всички записи, на които следващата дата на действие е преди днес"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_event_view_form
@@ -1961,7 +1982,8 @@ msgstr "Спонсори"
 #: model_terms:ir.actions.act_window,help:website_event_track.event_sponsor_action_from_event
 msgid ""
 "Sponsors might be advertised on your event pages footer.<br>\n"
-"    Exhibitors might have a dedicated page with chat room for people to connect with them."
+"    Exhibitors might have a dedicated page with chat room for people to "
+"connect with them."
 msgstr ""
 
 #. module: website_event_track
@@ -2120,8 +2142,10 @@ msgstr ""
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_5
 msgid ""
-"There are several variants of wood is available in the world but we are talking about most expensive\n"
-"    ones in the world and keeping to the point we have arranged ten most expensive wood."
+"There are several variants of wood is available in the world but we are "
+"talking about most expensive\n"
+"    ones in the world and keeping to the point we have arranged ten most "
+"expensive wood."
 msgstr ""
 
 #. module: website_event_track
@@ -2190,8 +2214,10 @@ msgstr ""
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_5
 msgid ""
-"Top most expensive wood in the world is quite interesting topic and several people may be surprised\n"
-"    that there are hundreds of wood types exist around the globe following different properties and use."
+"Top most expensive wood in the world is quite interesting topic and several "
+"people may be surprised\n"
+"    that there are hundreds of wood types exist around the globe following "
+"different properties and use."
 msgstr ""
 
 #. module: website_event_track
@@ -2392,16 +2418,21 @@ msgstr "Брой непрочетени съобщения"
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_6
 msgid ""
-"Use these simple steps to easily haul LONG lumber in a short box pickup truck.  A dose of carpenter's\n"
-"    ingenuity along with a couple boards, a sturdy strap and a few screws are all I use to easily haul\n"
-"    long boards from the lumberyard to the Next Level Carpentry shop or jobsite."
+"Use these simple steps to easily haul LONG lumber in a short box pickup "
+"truck.  A dose of carpenter's\n"
+"    ingenuity along with a couple boards, a sturdy strap and a few screws "
+"are all I use to easily haul\n"
+"    long boards from the lumberyard to the Next Level Carpentry shop or "
+"jobsite."
 msgstr ""
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_6
 msgid ""
-"Using a unique wrapping method for a tie down strap (NOT Bungee cords!!!) allows lumber to be\n"
-"    cinched securely WITHOUT the need to tie and untie tricky or complicated knots."
+"Using a unique wrapping method for a tie down strap (NOT Bungee cords!!!) "
+"allows lumber to be\n"
+"    cinched securely WITHOUT the need to tie and untie tricky or complicated "
+"knots."
 msgstr ""
 
 #. module: website_event_track

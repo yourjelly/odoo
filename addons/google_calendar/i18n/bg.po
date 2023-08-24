@@ -1,14 +1,14 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* google_calendar
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Igor Sheludko <igor.sheludko@gmail.com>, 2020
 # aleksandar ivanov, 2020
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0+e\n"
@@ -17,10 +17,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:12+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: google_calendar
@@ -112,7 +112,6 @@ msgstr "Настройки конфигурация"
 
 #. module: google_calendar
 #. openerp-web
-#: code:addons/google_calendar/static/src/js/google_calendar.js:0
 #: code:addons/google_calendar/static/src/js/google_calendar.js:0
 #, python-format
 msgid "Configuration"
@@ -223,8 +222,8 @@ msgid ""
 "Last Calendar ID who has been synchronized. If it is changed, we remove all "
 "links between GoogleID and Odoo Google Internal ID"
 msgstr ""
-"ИН на последния синхронизиран календар. В случай че е променен, отстраняваме"
-" всички линкове между GoogleID и вътрешния ИН на Google в Odoo."
+"ИН на последния синхронизиран календар. В случай че е променен, отстраняваме "
+"всички линкове между GoogleID и вътрешния ИН на Google в Odoo."
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_calendar_event____last_update

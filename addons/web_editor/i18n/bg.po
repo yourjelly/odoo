@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* web_editor
-# 
+#
 # Translators:
 # Radina <radis.choice@gmail.com>, 2020
 # Igor Sheludko <igor.sheludko@gmail.com>, 2020
@@ -11,7 +11,7 @@
 # aleksandar ivanov, 2020
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -20,10 +20,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:20+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: web_editor
@@ -233,7 +233,6 @@ msgstr ""
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Apply"
 msgstr "Прилагайте"
@@ -348,7 +347,6 @@ msgstr ""
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
-#: code:addons/web_editor/static/src/xml/snippets.xml:0
 #, python-format
 msgid "Button"
 msgstr "Бутон"
@@ -404,7 +402,6 @@ msgstr ""
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:0
-#: code:addons/web_editor/static/src/xml/ace.xml:0
 #: code:addons/web_editor/static/src/xml/ace.xml:0
 #, python-format
 msgid "Close"
@@ -565,7 +562,6 @@ msgstr "Описание"
 #: code:addons/web_editor/static/src/js/wysiwyg/widgets/dialog.js:0
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippets
 #, python-format
 msgid "Discard"
@@ -635,7 +631,6 @@ msgstr "Плъзнете изображението тук"
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
-#: code:addons/web_editor/static/src/xml/snippets.xml:0
 #, python-format
 msgid "Duplicate Container"
 msgstr "Дублиран контейнер"
@@ -658,7 +653,6 @@ msgstr ""
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/editor/rte.summernote.js:0
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:0
 #, python-format
 msgid "Edit"
@@ -708,7 +702,6 @@ msgstr ""
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/xml/ace.xml:0
 #: code:addons/web_editor/static/src/xml/ace.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
@@ -1302,7 +1295,6 @@ msgstr ""
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:0
-#: code:addons/web_editor/static/src/js/editor/rte.summernote.js:0
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 #, python-format
@@ -1442,10 +1434,6 @@ msgstr "Пиктограма"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Preview"
@@ -1621,7 +1609,6 @@ msgstr "Премахнете"
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
-#: code:addons/web_editor/static/src/xml/snippets.xml:0
 #, python-format
 msgid "Remove Block"
 msgstr "Отстранете блок"
@@ -1662,7 +1649,6 @@ msgstr "Пренастройте"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Reset Image"
@@ -1771,14 +1757,12 @@ msgstr ""
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Search"
 msgstr "Потърсете"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/xml/snippets.xml:0
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 #, python-format
 msgid "Search Contact"
@@ -1865,14 +1849,12 @@ msgstr ""
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Size"
 msgstr "Размер"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/editor/rte.summernote.js:0
 #: code:addons/web_editor/static/src/js/editor/rte.summernote.js:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
@@ -1954,8 +1936,7 @@ msgstr "Текст за показване"
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
-msgid ""
-"The URL contains an image. The file will be added in the image section."
+msgid "The URL contains an image. The file will be added in the image section."
 msgstr ""
 
 #. module: web_editor
@@ -2085,8 +2066,7 @@ msgstr "Заглавие"
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 #, python-format
 msgid ""
-"To make changes, drop this block and use the new options in the last "
-"version."
+"To make changes, drop this block and use the new options in the last version."
 msgstr ""
 
 #. module: web_editor
@@ -2119,7 +2099,6 @@ msgstr "Изскачащо съобщение"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/xml/backend.xml:0
 #: code:addons/web_editor/static/src/xml/backend.xml:0
 #, python-format
 msgid "Translate"
@@ -2298,7 +2277,6 @@ msgstr "Широчина"
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/ace.xml:0
-#: code:addons/web_editor/static/src/xml/ace.xml:0
 #, python-format
 msgid "XML (HTML)"
 msgstr ""
@@ -2441,7 +2419,6 @@ msgstr ""
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "px"

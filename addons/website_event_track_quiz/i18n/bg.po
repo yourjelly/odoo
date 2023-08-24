@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_event_track_quiz
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2020
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -16,10 +16,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:21+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: website_event_track_quiz
@@ -57,7 +57,6 @@ msgstr "Отговор"
 
 #. module: website_event_track_quiz
 #. openerp-web
-#: code:addons/website_event_track_quiz/static/src/xml/quiz_templates.xml:0
 #: code:addons/website_event_track_quiz/static/src/xml/quiz_templates.xml:0
 #, python-format
 msgid "Check answers"
@@ -109,8 +108,7 @@ msgstr ""
 #. module: website_event_track_quiz
 #: model:event.quiz.answer,comment:website_event_track_quiz.event_7_track_5_question_0_1
 msgid ""
-"Correct! Even if you have a big trunk, some long products need to be "
-"secured."
+"Correct! Even if you have a big trunk, some long products need to be secured."
 msgstr ""
 
 #. module: website_event_track_quiz
@@ -338,7 +336,8 @@ msgstr ""
 #. module: website_event_track_quiz
 #: code:addons/website_event_track_quiz/models/event_quiz.py:0
 #, python-format
-msgid "Question \"%s\" must have 1 correct answer and at least 1 incorrect answer"
+msgid ""
+"Question \"%s\" must have 1 correct answer and at least 1 incorrect answer"
 msgstr ""
 
 #. module: website_event_track_quiz
@@ -422,6 +421,11 @@ msgid "Search courses"
 msgstr ""
 
 #. module: website_event_track_quiz
+#: model_terms:ir.ui.view,arch_db:website_event_track_quiz.leaderboard_search_bar
+msgid "Search users"
+msgstr ""
+
+#. module: website_event_track_quiz
 #: model:event.quiz,name:website_event_track_quiz.event_7_track_5_quiz
 msgid "Securing your Lumber during transport"
 msgstr ""
@@ -444,7 +448,6 @@ msgstr ""
 
 #. module: website_event_track_quiz
 #. openerp-web
-#: code:addons/website_event_track_quiz/static/src/xml/quiz_templates.xml:0
 #: code:addons/website_event_track_quiz/static/src/xml/quiz_templates.xml:0
 #, python-format
 msgid "Succeed and gain karma"
@@ -470,8 +473,10 @@ msgstr ""
 #. module: website_event_track_quiz
 #: model:ir.model.fields,help:website_event_track_quiz.field_event_quiz_answer__comment
 msgid ""
-"This comment will be displayed to the user if he selects this answer, after submitting the quiz.\n"
-"                It is used as a small informational text helping to understand why this answer is correct / incorrect."
+"This comment will be displayed to the user if he selects this answer, after "
+"submitting the quiz.\n"
+"                It is used as a small informational text helping to "
+"understand why this answer is correct / incorrect."
 msgstr ""
 
 #. module: website_event_track_quiz

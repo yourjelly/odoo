@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_form
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2020
@@ -11,7 +11,7 @@
 # Александра Николова <alexandra1nikolova@gmail.com>, 2020
 # Kaloyan Naumov <kaloyan@lumnus.net>, 2020
 # Boyan Rabchev <boyan.rabchev@plana.solutions>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -20,10 +20,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:21+0000\n"
 "Last-Translator: Boyan Rabchev <boyan.rabchev@plana.solutions>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: website_form
@@ -56,7 +56,8 @@ msgstr "<p>Прикачи файлове: </p>"
 #: model_terms:website.page,arch_db:website_form.contactus_thanks
 msgid ""
 "<span class=\"fa fa-check-circle\"/>\n"
-"                                            <span>Your message has been sent <b>successfully</b></span>"
+"                                            <span>Your message has been sent "
+"<b>successfully</b></span>"
 msgstr ""
 
 #. module: website_form
@@ -68,7 +69,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_form.contactus_form
 msgid ""
 "<span class=\"s_website_form_label_content\">Email</span>\n"
-"                                            <span class=\"s_website_form_mark\"> *</span>"
+"                                            <span class=\"s_website_form_mark"
+"\"> *</span>"
 msgstr ""
 
 #. module: website_form
@@ -80,7 +82,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_form.contactus_form
 msgid ""
 "<span class=\"s_website_form_label_content\">Subject</span>\n"
-"                                            <span class=\"s_website_form_mark\"> *</span>"
+"                                            <span class=\"s_website_form_mark"
+"\"> *</span>"
 msgstr ""
 
 #. module: website_form
@@ -92,7 +95,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_form.contactus_form
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                            <span class=\"s_website_form_mark\"> *</span>"
+"                                            <span class=\"s_website_form_mark"
+"\"> *</span>"
 msgstr ""
 
 #. module: website_form
@@ -196,7 +200,6 @@ msgstr "Активирайте функцията за съставяне на �
 
 #. module: website_form
 #. openerp-web
-#: code:addons/website_form/static/src/xml/website_form.xml:0
 #: code:addons/website_form/static/src/xml/website_form.xml:0
 #, python-format
 msgid "Error"
@@ -341,7 +344,6 @@ msgstr "Няколко полета за отметка"
 #. module: website_form
 #. openerp-web
 #: code:addons/website_form/static/src/xml/website_form_editor.xml:0
-#: code:addons/website_form/static/src/xml/website_form_editor.xml:0
 #, python-format
 msgid "No matching record !"
 msgstr "Липсва съвпадащ запис !"
@@ -369,7 +371,6 @@ msgstr ""
 #. module: website_form
 #. openerp-web
 #: code:addons/website_form/static/src/snippets/s_website_form/options.js:0
-#: code:addons/website_form/static/src/snippets/s_website_form/options.js:0
 #, python-format
 msgid "Option 1"
 msgstr ""
@@ -377,14 +378,12 @@ msgstr ""
 #. module: website_form
 #. openerp-web
 #: code:addons/website_form/static/src/snippets/s_website_form/options.js:0
-#: code:addons/website_form/static/src/snippets/s_website_form/options.js:0
 #, python-format
 msgid "Option 2"
 msgstr ""
 
 #. module: website_form
 #. openerp-web
-#: code:addons/website_form/static/src/snippets/s_website_form/options.js:0
 #: code:addons/website_form/static/src/snippets/s_website_form/options.js:0
 #, python-format
 msgid "Option 3"
@@ -466,8 +465,7 @@ msgstr ""
 
 #. module: website_form
 #: model:ir.model.fields,help:website_form.field_ir_model__website_form_default_field_id
-msgid ""
-"Specify the field which will contain meta and custom form fields datas."
+msgid "Specify the field which will contain meta and custom form fields datas."
 msgstr ""
 "Посочете полето, което ще съдържа полевите данни за мета- и персонализирани "
 "формуляри."
@@ -480,7 +478,6 @@ msgstr "Изпращане"
 
 #. module: website_form
 #. openerp-web
-#: code:addons/website_form/static/src/xml/website_form.xml:0
 #: code:addons/website_form/static/src/xml/website_form.xml:0
 #, python-format
 msgid "Success"

@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* base_import
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2020
@@ -9,7 +9,7 @@
 # aleksandar ivanov, 2020
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -18,10 +18,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:10+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: base_import
@@ -69,8 +69,8 @@ msgstr ""
 #, python-format
 msgid ""
 "An unknown issue occurred during import (possibly lost connection, data "
-"limit exceeded or memory limits exceeded). Please retry in case the issue is"
-" transient. If the issue still occurs, try to split the file rather than "
+"limit exceeded or memory limits exceeded). Please retry in case the issue is "
+"transient. If the issue still occurs, try to split the file rather than "
 "import it at once."
 msgstr ""
 
@@ -137,7 +137,6 @@ msgstr ""
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:0
-#: code:addons/base_import/static/src/js/import_action.js:0
 #, python-format
 msgid "Comma"
 msgstr "Запетая"
@@ -146,8 +145,7 @@ msgstr "Запетая"
 #: code:addons/base_import/models/base_import.py:0
 #, python-format
 msgid ""
-"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: "
-"%(error)s"
+"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s"
 msgstr ""
 
 #. module: base_import
@@ -217,7 +215,6 @@ msgstr "Валута"
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:0
-#: code:addons/base_import/models/base_import.py:0
 #, python-format
 msgid "Database ID"
 msgstr "ИН на база данни"
@@ -282,7 +279,6 @@ msgstr "Точка"
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/xml/base_import.xml:0
-#: code:addons/base_import/static/src/xml/base_import.xml:0
 #, python-format
 msgid "Download"
 msgstr "Изтеглете от системата"
@@ -324,11 +320,9 @@ msgstr "Всичко изглежда валидно."
 #: code:addons/base_import/static/src/xml/base_import.xml:0
 #, python-format
 msgid "Excel files are recommended as fields formatting is automatic."
-msgstr ""
-"Препоръчваме Excel файл, заради автоматичното форматиране на полетата."
+msgstr "Препоръчваме Excel файл, заради автоматичното форматиране на полетата."
 
 #. module: base_import
-#: code:addons/base_import/models/base_import.py:0
 #: code:addons/base_import/models/base_import.py:0
 #, python-format
 msgid "External ID"
@@ -355,7 +349,6 @@ msgid "File Type"
 msgstr "Вид файл"
 
 #. module: base_import
-#: code:addons/base_import/models/base_import.py:0
 #: code:addons/base_import/models/base_import.py:0
 #, python-format
 msgid "File size exceeds configured maximum (%s bytes)"
@@ -384,8 +377,8 @@ msgstr ""
 #: code:addons/base_import/models/base_import.py:0
 #, python-format
 msgid ""
-"Found invalid image data, images should be imported as either URLs or "
-"base64-encoded data."
+"Found invalid image data, images should be imported as either URLs or base64-"
+"encoded data."
 msgstr ""
 
 #. module: base_import
@@ -648,7 +641,6 @@ msgstr ""
 #. module: base_import
 #. openerp-web
 #: code:addons/base_import/static/src/js/import_action.js:0
-#: code:addons/base_import/static/src/js/import_action.js:0
 #, python-format
 msgid "See possible values"
 msgstr ""
@@ -844,7 +836,8 @@ msgstr "Проследете историята в хода на въвежда�
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:0
 #, python-format
-msgid "Unable to load \"{extension}\" file: requires Python module \"{modname}\""
+msgid ""
+"Unable to load \"{extension}\" file: requires Python module \"{modname}\""
 msgstr ""
 "Не можете да заредите \"{extension}\" файл: изисква се модур Pyton "
 "\"{modname}\""
@@ -889,8 +882,8 @@ msgstr ""
 #: code:addons/base_import/static/src/xml/base_import.xml:0
 #, python-format
 msgid ""
-"Warning: ignores the labels line, empty lines and"
-"                             lines composed only of empty cells"
+"Warning: ignores the labels line, empty lines "
+"and                             lines composed only of empty cells"
 msgstr ""
 
 #. module: base_import

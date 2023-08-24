@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* website_sale
-# 
+#
 # Translators:
 # Boris Stefanov <borkata@gmail.com>, 2020
 # Anton Vassilev, 2020
@@ -23,7 +23,7 @@
 # Ивайло Малинов <iv.malinov@gmail.com>, 2021
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2022
 # Nikola Iliev, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -32,10 +32,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:22+0000\n"
 "Last-Translator: Nikola Iliev, 2023\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: website_sale
@@ -88,24 +88,36 @@ msgstr "2 години"
 #: model:mail.template,body_html:website_sale.mail_template_sale_cart_recovery
 msgid ""
 "<?xml version=\"1.0\"?>\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\"center\">\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"padding: 16px; background-color: white; color: #454748; border-collapse:separate;\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td align="
+"\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style="
+"\"padding: 16px; background-color: white; color: #454748; border-collapse:"
+"separate;\">\n"
 "<tbody>\n"
 "    <!-- HEADER -->\n"
 "    <tr>\n"
 "        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width="
+"\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px "
+"0px 8px; border-collapse:separate;\">\n"
 "                <tr><td valign=\"middle\">\n"
-"                    % set company = object.company_id or object.user_id.company_id or user.company_id\n"
+"                    % set company = object.company_id or object.user_id."
+"company_id or user.company_id\n"
 "                    <span style=\"font-size: 10px;\">Your Cart</span><br/>\n"
 "                    <span style=\"font-size: 20px; font-weight: bold;\">\n"
 "                        ${object.name}\n"
 "                    </span>\n"
 "                </td><td valign=\"middle\" align=\"right\">\n"
-"                    <img src=\"/logo.png?company=${company.id}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${company.name}\"/>\n"
+"                    <img src=\"/logo.png?company=${company.id}\" style="
+"\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${company."
+"name}\"/>\n"
 "                </td></tr>\n"
 "                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
-"                  <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                  <hr width=\"100%\" style=\"background-color:"
+"rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;"
+"min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
 "                </td></tr>\n"
 "            </table>\n"
 "        </td>\n"
@@ -113,38 +125,53 @@ msgid ""
 "    <!-- CONTENT -->\n"
 "    <tr>\n"
 "        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width="
+"\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px "
+"0px 8px; border-collapse:separate;\">\n"
 "                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
-"                    <h1 style=\"color:#A9A9A9;\">THERE'S SOMETHING IN YOUR CART.</h1>\n"
+"                    <h1 style=\"color:#A9A9A9;\">THERE'S SOMETHING IN YOUR "
+"CART.</h1>\n"
 "                    Would you like to complete your purchase?<br/><br/>\n"
 "                    % if object.order_line:\n"
 "                        % for line in object.website_order_line:\n"
 "                            <hr/>\n"
 "                            <table width=\"100%\">\n"
 "                                <tr>\n"
-"                                    <td style=\"padding: 10px; width:150px;\">\n"
-"                                        <img src=\"/web/image/product.product/${line.product_id.id}/image_128\" style=\"width: 100px; height: 100px; object-fit: contain;\" alt=\"Product image\"/>\n"
+"                                    <td style=\"padding: 10px; width:150px;"
+"\">\n"
+"                                        <img src=\"/web/image/product."
+"product/${line.product_id.id}/image_128\" style=\"width: 100px; height: "
+"100px; object-fit: contain;\" alt=\"Product image\"/>\n"
 "                                    </td>\n"
 "                                    <td>\n"
-"                                        <strong>${line.product_id.display_name}</strong><br/>${line.name}\n"
+"                                        <strong>${line.product_id."
+"display_name}</strong><br/>${line.name}\n"
 "                                    </td>\n"
 "                                    <td width=\"100px\" align=\"right\">\n"
-"                                        ${(line.product_uom_qty) | int} ${(line.product_uom.name)}\n"
+"                                        ${(line.product_uom_qty) | int} "
+"${(line.product_uom.name)}\n"
 "                                    </td>\n"
 "                                </tr>\n"
 "                            </table>\n"
 "                        % endfor\n"
 "                        <hr/>\n"
 "                    % endif\n"
-"                    <div style=\"text-align: center; margin: 16px 0px 16px 0px; font-size: 14px;\">\n"
-"                        <a href=\"${object.get_base_url()}/shop/cart?access_token=${object.access_token}\" target=\"_blank\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"                    <div style=\"text-align: center; margin: 16px 0px 16px "
+"0px; font-size: 14px;\">\n"
+"                        <a href=\"${object.get_base_url()}/shop/cart?"
+"access_token=${object.access_token}\" target=\"_blank\" style=\"background-"
+"color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"#fff; border-radius: 5px; font-size:13px;\">\n"
 "                            Resume order\n"
 "                        </a>\n"
 "                    </div>\n"
-"                    <div style=\"text-align: center;\"><strong>Thank you for shopping with ${company.name}!</strong></div>\n"
+"                    <div style=\"text-align: center;\"><strong>Thank you for "
+"shopping with ${company.name}!</strong></div>\n"
 "                </td></tr>\n"
 "                <tr><td style=\"text-align:center;\">\n"
-"                  <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                  <hr width=\"100%\" style=\"background-color:"
+"rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;"
+"min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
 "                </td></tr>\n"
 "            </table>\n"
 "        </td>\n"
@@ -152,17 +179,22 @@ msgid ""
 "    <!-- FOOTER -->\n"
 "    <tr>\n"
 "        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width="
+"\"590\" style=\"min-width: 590px; background-color: white; font-size: 11px; "
+"padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
 "                <tr><td valign=\"middle\" align=\"left\">\n"
 "                    ${company.name}\n"
 "                </td></tr>\n"
-"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: 0.7;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
 "                    ${company.phone}\n"
 "                    % if company.email\n"
-"                        | <a href=\"'mailto:%s' % ${company.email}\" style=\"text-decoration:none; color: #454748;\">${company.email}</a>\n"
+"                        | <a href=\"'mailto:%s' % ${company.email}\" style="
+"\"text-decoration:none; color: #454748;\">${company.email}</a>\n"
 "                    % endif\n"
 "                    % if company.website\n"
-"                        | <a href=\"'%s' % ${company.website}\" style=\"text-decoration:none; color: #454748;\">${company.website}</a>\n"
+"                        | <a href=\"'%s' % ${company.website}\" style=\"text-"
+"decoration:none; color: #454748;\">${company.website}</a>\n"
 "                    % endif\n"
 "                </td></tr>\n"
 "            </table>\n"
@@ -173,9 +205,12 @@ msgid ""
 "</td></tr>\n"
 "<!-- POWERED BY -->\n"
 "<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
-"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
 "      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
-"        Powered by <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=website\" style=\"color: #875A7B;\">Odoo</a>\n"
+"        Powered by <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=website\" style=\"color: #875A7B;\">Odoo</a>\n"
 "      </td></tr>\n"
 "    </table>\n"
 "</td></tr>\n"
@@ -245,7 +280,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.checkout
 msgid ""
 "<i class=\"fa fa-plus-square\"/>\n"
-"                                                        <span>Add an address</span>"
+"                                                        <span>Add an "
+"address</span>"
 msgstr ""
 
 #. module: website_sale
@@ -263,16 +299,19 @@ msgstr ""
 #, python-format
 msgid ""
 "<p class=\"o_view_nocontent_smiling_face\">\n"
-"                        You can find all abandoned carts here, i.e. the carts generated by your website's visitors from over an hour ago that haven't been confirmed yet.</p>\n"
-"                        <p>You should send an email to the customers to encourage them!</p>\n"
+"                        You can find all abandoned carts here, i.e. the "
+"carts generated by your website's visitors from over an hour ago that "
+"haven't been confirmed yet.</p>\n"
+"                        <p>You should send an email to the customers to "
+"encourage them!</p>\n"
 "                    "
 msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.terms
 msgid ""
-"<small class=\"text-muted float-right\">Source: "
-"https://termsfeed.com/blog/sample-terms-and-conditions-template</small>"
+"<small class=\"text-muted float-right\">Source: https://termsfeed.com/blog/"
+"sample-terms-and-conditions-template</small>"
 msgstr ""
 
 #. module: website_sale
@@ -307,14 +346,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.cart
 msgid ""
 "<span class=\"fa fa-chevron-left\"/>\n"
-"                                        <span class=\"\">Continue Shopping</span>"
+"                                        <span class=\"\">Continue Shopping</"
+"span>"
 msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart
 msgid ""
 "<span class=\"fa fa-chevron-left\"/>\n"
-"                                    Continue<span class=\"d-none d-md-inline\"> Shopping</span>"
+"                                    Continue<span class=\"d-none d-md-inline"
+"\"> Shopping</span>"
 msgstr ""
 
 #. module: website_sale
@@ -333,14 +374,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid ""
 "<span class=\"o_form_label\">Abandoned Carts</span>\n"
-"                            <span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
+"                            <span class=\"fa fa-lg fa-globe\" title=\"Values "
+"set here are website-specific.\" groups=\"website.group_multi_website\"/>"
 msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid ""
 "<span class=\"o_form_label\">Assignment</span>\n"
-"                            <span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-specific.\" groups=\"website.group_multi_website\"/>"
+"                            <span class=\"fa fa-lg fa-globe\" title=\"Values "
+"set here are website-specific.\" groups=\"website.group_multi_website\"/>"
 msgstr ""
 
 #. module: website_sale
@@ -355,12 +398,14 @@ msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.extra_info
-msgid "<span class=\"s_website_form_label_content\">A document to provide</span>"
+msgid ""
+"<span class=\"s_website_form_label_content\">A document to provide</span>"
 msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.extra_info
-msgid "<span class=\"s_website_form_label_content\">Give us your feedback</span>"
+msgid ""
+"<span class=\"s_website_form_label_content\">Give us your feedback</span>"
 msgstr ""
 
 #. module: website_sale
@@ -384,7 +429,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.address
 msgid ""
 "<span>Next</span>\n"
-"                                            <i class=\"fa fa-chevron-right\"/>"
+"                                            <i class=\"fa fa-chevron-right\"/"
+">"
 msgstr ""
 
 #. module: website_sale
@@ -416,7 +462,8 @@ msgstr "<strong>Добавете в количката</strong>"
 #: model_terms:ir.ui.view,arch_db:website_sale.payment
 msgid ""
 "<strong>No suitable payment option could be found.</strong><br/>\n"
-"                                    If you believe that it is an error, please contact the website administrator."
+"                                    If you believe that it is an error, "
+"please contact the website administrator."
 msgstr ""
 
 #. module: website_sale
@@ -445,15 +492,15 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.terms
 msgid ""
-"A <b>Limit What Users Can Do</b> clause can inform users that by agreeing to"
-" use your service, they’re also agreeing to not do certain things. This can "
+"A <b>Limit What Users Can Do</b> clause can inform users that by agreeing to "
+"use your service, they’re also agreeing to not do certain things. This can "
 "be part of a very long and thorough list in your Terms and Conditions "
 "agreements so as to encompass the most amount of negative uses."
 msgstr ""
 "Клауза <b>Ограничаване дейността на потребителите</b> може да информира "
 "потребителите, че при съгласие да използват услугата се съгласяват и да не "
-"правят определени неща. Това може да е част от много дълъг и подробен списък"
-" в споразуменията Ви за сроковете и условията, така че да обхване най-много "
+"правят определени неща. Това може да е част от много дълъг и подробен списък "
+"в споразуменията Ви за сроковете и условията, така че да обхване най-много "
 "отрицателни употреби."
 
 #. module: website_sale
@@ -461,29 +508,29 @@ msgstr ""
 msgid ""
 "A <b>Links To Other Web Sites</b> clause will inform users that you are not "
 "responsible for any third party web sites that you link to. This kind of "
-"clause will generally inform users that they are responsible for reading and"
-" agreeing (or disagreeing) with the Terms and Conditions or Privacy Policies"
-" of these third parties."
+"clause will generally inform users that they are responsible for reading and "
+"agreeing (or disagreeing) with the Terms and Conditions or Privacy Policies "
+"of these third parties."
 msgstr ""
 "A <b>Линкове към други уебсайтове</b> специална клаузата ще информира "
 "потребителите, че не носите отговорност за уебсайтове на трети страни, с "
-"които се свързвате. Този вид клауза като цяло ще информира потребителите, че"
-" носят отговорност за прочитането и съгласяването (или несъгласяването) със "
+"които се свързвате. Този вид клауза като цяло ще информира потребителите, че "
+"носят отговорност за прочитането и съгласяването (или несъгласяването) със "
 "сроковете и условията или политиките по поверителност на тези трети страни."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.terms
 msgid ""
-"A <b>Termination</b> clause will inform that users’ accounts on your website"
-" and mobile app or users’ access to your website and mobile (if users can’t "
+"A <b>Termination</b> clause will inform that users’ accounts on your website "
+"and mobile app or users’ access to your website and mobile (if users can’t "
 "have an account with you) can be terminated in case of abuses or at your "
 "sole discretion."
 msgstr ""
 "AКлауза <b>Прекратяване на договора</b>ще информира, че профилите на "
 "потребителите на уебсайта и мобилното ви приложение или достъпа на "
-"потребителите до Вашия уебсайт и мобилен телефон (ако потребителите не могат"
-" да имат профил с Вас) могат да бъдат прекратени в случай на злоупотреби или"
-" по Ваше лично усмотрение. "
+"потребителите до Вашия уебсайт и мобилен телефон (ако потребителите не могат "
+"да имат профил с Вас) могат да бъдат прекратени в случай на злоупотреби или "
+"по Ваше лично усмотрение. "
 
 #. module: website_sale
 #: model_terms:ir.actions.act_window,help:website_sale.product_template_action_website
@@ -552,8 +599,8 @@ msgstr ""
 #: model:ir.model.fields,help:website_sale.field_product_product__accessory_product_ids
 #: model:ir.model.fields,help:website_sale.field_product_template__accessory_product_ids
 msgid ""
-"Accessories show up when the customer reviews the cart before payment "
-"(cross-sell strategy)."
+"Accessories show up when the customer reviews the cart before payment (cross-"
+"sell strategy)."
 msgstr ""
 
 #. module: website_sale
@@ -659,7 +706,6 @@ msgstr "Атрибути"
 #. module: website_sale
 #. openerp-web
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #, python-format
 msgid "Average Order"
 msgstr ""
@@ -711,8 +757,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid ""
 "Boost your sales with two kinds of discount programs: promotions and coupon "
-"codes. Specific conditions can be set (products, customers, minimum purchase"
-" amount, period). Rewards can be discounts (% or amount) or free products."
+"codes. Specific conditions can be set (products, customers, minimum purchase "
+"amount, period). Rewards can be discounts (% or amount) or free products."
 msgstr ""
 
 #. module: website_sale
@@ -727,7 +773,6 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #, python-format
 msgid "Campaigns"
@@ -773,7 +818,6 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #, python-format
 msgid "Carts"
@@ -969,7 +1013,6 @@ msgstr "Контакт"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #, python-format
 msgid "Conversion"
@@ -1326,8 +1369,7 @@ msgstr "Генерирай фактура за изпълнени поръчки
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"Generate the invoice automatically when the online payment is confirmed"
+msgid "Generate the invoice automatically when the online payment is confirmed"
 msgstr ""
 
 #. module: website_sale
@@ -1408,11 +1450,11 @@ msgstr "ID"
 msgid ""
 "If your website or mobile apps allows users to create content and make that "
 "content public to other users, a <b>Content</b> section will inform users "
-"that they own the rights to the content they have created.<br/>The “Content”"
-" clause usually mentions that users must give you (the website or mobile app"
-" developer) a license so that you can share this content on your "
-"website/mobile app and to make it available to other users.<br/>Because the "
-"content created by users is public to other users, a DMCA notice clause (or "
+"that they own the rights to the content they have created.<br/>The “Content” "
+"clause usually mentions that users must give you (the website or mobile app "
+"developer) a license so that you can share this content on your website/"
+"mobile app and to make it available to other users.<br/>Because the content "
+"created by users is public to other users, a DMCA notice clause (or "
 "Copyright Infringement ) section is helpful to inform users and copyright "
 "authors that, if any content is found to be a copyright infringement, you "
 "will respond to any DMCA take down notices received and you will take down "
@@ -1420,18 +1462,18 @@ msgid ""
 msgstr ""
 "Ако уебсайтът или мобилните Ви приложения позволяват на потребителите да "
 "създават съдържание и да го публикуват за други потребители, раздел "
-"<b>Съдържание</b> ще информира потребителите, че те притежават правата върху"
-" съдържанието, което са създали.<br/>Клаузата “Съдържание” обикновено "
+"<b>Съдържание</b> ще информира потребителите, че те притежават правата върху "
+"съдържанието, което са създали.<br/>Клаузата “Съдържание” обикновено "
 "споменава, че потребителите трябва да Ви предоставят (уебсайта или "
-"разработчика на мобилното приложение) лиценз, така че да можете да споделяте"
-" това съдържание на уебсайта/мобилното си приложение и да го направите "
+"разработчика на мобилното приложение) лиценз, така че да можете да споделяте "
+"това съдържание на уебсайта/мобилното си приложение и да го направите "
 "достъпно за други потребители.<br/>Тъй като създаденото от потребителите "
-"съдържание е достъпно за други потребители, разделът с клауза за известие по"
-" Закона за авторските права в цифровото хилядолетие - DMCA (или нарушението "
+"съдържание е достъпно за други потребители, разделът с клауза за известие по "
+"Закона за авторските права в цифровото хилядолетие - DMCA (или нарушението "
 "на авторските права) е полезен, тъй като информира потребителите и "
-"съдържателите на авторските права, че ако дадено съдържание се окаже предмет"
-" на нарушение на авторски права, ще отговаряте на всякакви получени известия"
-" за премахване по силата на DMCA и ще се наложи да свалите съдържанието."
+"съдържателите на авторските права, че ако дадено съдържание се окаже предмет "
+"на нарушение на авторски права, ще отговаряте на всякакви получени известия "
+"за премахване по силата на DMCA и ще се наложи да свалите съдържанието."
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_image__image_1920
@@ -1472,6 +1514,15 @@ msgstr "Име на изображение"
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_res_config_settings__module_website_sale_stock
 msgid "Installs the \"Website Delivery Information\" application"
+msgstr ""
+
+#. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid ""
+"If you are ordering for an external person, please place your order via the "
+"backend. If you wish to change your name or email address, please do so in "
+"the account settings or contact your administrator."
 msgstr ""
 
 #. module: website_sale
@@ -1630,8 +1681,8 @@ msgstr ""
 #: code:addons/website_sale/static/src/js/tours/website_sale_shop.js:0
 #, python-format
 msgid ""
-"Let's now take a look at your administration dashboard to get your eCommerce"
-" website ready in no time."
+"Let's now take a look at your administration dashboard to get your eCommerce "
+"website ready in no time."
 msgstr ""
 
 #. module: website_sale
@@ -1744,8 +1795,8 @@ msgstr ""
 #: code:addons/website_sale/controllers/main.py:0
 #, python-format
 msgid ""
-"No payment method is available for your current order. Please contact us for"
-" more information."
+"No payment method is available for your current order. Please contact us for "
+"more information."
 msgstr ""
 
 #. module: website_sale
@@ -1921,8 +1972,8 @@ msgid ""
 "Order Lines to be displayed on the website. They should not be used for "
 "computation purpose."
 msgstr ""
-"Редове с поръчки, отразени в сайта. Не трябва да се използват с изчислителна"
-" цел."
+"Редове с поръчки, отразени в сайта. Не трябва да се използват с изчислителна "
+"цел."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.short_cart_summary
@@ -1936,7 +1987,6 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #: model:ir.actions.act_window,name:website_sale.action_orders_ecommerce
 #: model:ir.ui.menu,name:website_sale.menu_orders
@@ -1964,7 +2014,6 @@ msgstr "За фактуриране"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #, python-format
 msgid "Orders/Day"
@@ -2260,10 +2309,10 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid ""
-"Provide customers with product-specific links or downloadable content in the"
-" confirmation page of the checkout process if the payment gets through. To "
-"do so, attach some files to a product using the new Files button and publish"
-" them."
+"Provide customers with product-specific links or downloadable content in the "
+"confirmation page of the checkout process if the payment gets through. To do "
+"so, attach some files to a product using the new Files button and publish "
+"them."
 msgstr ""
 
 #. module: website_sale
@@ -2448,7 +2497,6 @@ msgstr ""
 #. module: website_sale
 #. openerp-web
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #: model:ir.actions.act_window,name:website_sale.sale_report_action_carts
 #: model_terms:ir.ui.view,arch_db:website_sale.digest_digest_view_form
 #: model_terms:ir.ui.view,arch_db:website_sale.sale_report_view_search_website
@@ -2479,7 +2527,6 @@ msgstr ""
 #. module: website_sale
 #. openerp-web
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #, python-format
 msgid "Sales Since Last Month"
 msgstr ""
@@ -2487,14 +2534,12 @@ msgstr ""
 #. module: website_sale
 #. openerp-web
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #, python-format
 msgid "Sales Since Last Week"
 msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #, python-format
 msgid "Sales Since Last Year"
@@ -2609,7 +2654,9 @@ msgstr "Услуги"
 #: model_terms:ir.ui.view,arch_db:website_sale.address
 msgid ""
 "Ship to the same address\n"
-"                                                    <span class=\"ship_to_other text-muted\" style=\"display: none\">&amp;nbsp;(<i>Your shipping address will be requested later) </i></span>"
+"                                                    <span class="
+"\"ship_to_other text-muted\" style=\"display: none\">&amp;nbsp;(<i>Your "
+"shipping address will be requested later) </i></span>"
 msgstr ""
 
 #. module: website_sale
@@ -2706,7 +2753,6 @@ msgstr ""
 #. module: website_sale
 #. openerp-web
 #: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
-#: code:addons/website_sale/static/src/xml/website_sale_dashboard.xml:0
 #, python-format
 msgid "Sold"
 msgstr ""
@@ -2789,8 +2835,8 @@ msgstr "Междинна сума:"
 #: model:ir.model.fields,help:website_sale.field_product_product__alternative_product_ids
 #: model:ir.model.fields,help:website_sale.field_product_template__alternative_product_ids
 msgid ""
-"Suggest alternatives to your customer (upsell strategy). Those products show"
-" up on the product page."
+"Suggest alternatives to your customer (upsell strategy). Those products show "
+"up on the product page."
 msgstr ""
 
 #. module: website_sale
@@ -2939,7 +2985,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.s_products_recently_viewed
 msgid ""
 "This is a preview of the recently viewed products by the user.<br/>\n"
-"                Once the user has seen at least one product this snippet will be visible."
+"                Once the user has seen at least one product this snippet "
+"will be visible."
 msgstr ""
 
 #. module: website_sale
@@ -3241,8 +3288,10 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
 msgid ""
-"You are editing your <b>billing and shipping</b> addresses at the same time!<br/>\n"
-"                                            If you want to modify your shipping address, create a"
+"You are editing your <b>billing and shipping</b> addresses at the same time!"
+"<br/>\n"
+"                                            If you want to modify your "
+"shipping address, create a"
 msgstr ""
 
 #. module: website_sale
@@ -3265,7 +3314,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:website_sale.action_view_abandoned_tree
 msgid ""
 "You'll find here all the carts abandoned by your visitors.\n"
-"                If they completed their address, you should send them a recovery email!"
+"                If they completed their address, you should send them a "
+"recovery email!"
 msgstr ""
 
 #. module: website_sale

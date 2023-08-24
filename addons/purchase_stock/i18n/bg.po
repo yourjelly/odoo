@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* purchase_stock
-# 
+#
 # Translators:
 # kirily <kiril@teracomp.eu>, 2020
 # Martin Trigaux, 2020
@@ -12,7 +12,7 @@
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Весел Карастоянов <vesel@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -21,10 +21,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:17+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: purchase_stock
@@ -63,8 +63,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
 msgid ""
 "<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\"/>"
+"specific.\" aria-label=\"Values set here are company-specific.\" groups="
+"\"base.group_multi_company\"/>"
 msgstr ""
 
 #. module: purchase_stock
@@ -101,7 +101,8 @@ msgstr "<strong>Адрес за шипинг:</strong>"
 #. module: purchase_stock
 #: model:ir.model.fields,help:purchase_stock.field_purchase_order_line__qty_received_method
 msgid ""
-"According to product configuration, the received quantity can be automatically computed by mechanism :\n"
+"According to product configuration, the received quantity can be "
+"automatically computed by mechanism :\n"
 "  - Manual: the quantity is set manually on the line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
@@ -281,8 +282,8 @@ msgstr "Изключение(я):"
 #: code:addons/purchase_stock/models/purchase.py:0
 #, python-format
 msgid ""
-"For the product %s, the warehouse of the operation type (%s) is inconsistent"
-" with the location (%s) of the reordering rule (%s). Change the operation "
+"For the product %s, the warehouse of the operation type (%s) is inconsistent "
+"with the location (%s) of the reordering rule (%s). Change the operation "
 "type or cancel the request for quotation."
 msgstr ""
 
@@ -405,8 +406,8 @@ msgstr "Може да подрябват ръчни действия."
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
 msgid ""
 "Margin of error for vendor lead times. When the system generates Purchase "
-"Orders for reordering products,they will be scheduled that many days earlier"
-" to cope with unexpected vendor delays."
+"Orders for reordering products,they will be scheduled that many days earlier "
+"to cope with unexpected vendor delays."
 msgstr ""
 "Буфер за грешката в сроковете за доставка. Когато системата създава поръчки "
 "за повторни покупки, те ще бъдат насрочени с толкова дни по-рано, за да "
@@ -436,8 +437,8 @@ msgstr ""
 #: code:addons/purchase_stock/models/account_invoice.py:0
 #, python-format
 msgid ""
-"Odoo is not able to generate the anglo saxon entries. The total valuation of"
-" %s is zero."
+"Odoo is not able to generate the anglo saxon entries. The total valuation of "
+"%s is zero."
 msgstr ""
 
 #. module: purchase_stock
@@ -680,22 +681,23 @@ msgstr ""
 #: code:addons/purchase_stock/models/stock_rule.py:0
 #, python-format
 msgid ""
-"There is no matching vendor price to generate the purchase order for product"
-" %s (no vendor defined, minimum quantity not reached, dates not valid, ...)."
-" Go on the product form and complete the list of vendors."
+"There is no matching vendor price to generate the purchase order for product "
+"%s (no vendor defined, minimum quantity not reached, dates not valid, ...). "
+"Go on the product form and complete the list of vendors."
 msgstr ""
-"Не откривам съвпадаща цена при доставчика за да генерирам поръчка за продукт"
-"  %s (не зададен доставчик, не достигнати мин. кол-ва, не валидни дати, "
-"...). Отидете към екрана на продукта и попълнете списъка с доставчиците."
+"Не откривам съвпадаща цена при доставчика за да генерирам поръчка за "
+"продукт  %s (не зададен доставчик, не достигнати мин. кол-ва, не валидни "
+"дати, ...). Отидете към екрана на продукта и попълнете списъка с "
+"доставчиците."
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_purchase
 msgid ""
-"This adds a dropshipping route to apply on products in order to request your"
-" vendors to deliver to your customers. A product to dropship will generate a"
-" purchase request for quotation once the sales order confirmed. This is a "
-"on-demand flow. The requested delivery address will be the customer delivery"
-" address and not your warehouse."
+"This adds a dropshipping route to apply on products in order to request your "
+"vendors to deliver to your customers. A product to dropship will generate a "
+"purchase request for quotation once the sales order confirmed. This is a on-"
+"demand flow. The requested delivery address will be the customer delivery "
+"address and not your warehouse."
 msgstr ""
 "Това добавя маршрут за dropshipping към продуктите за да наредите "
 "доставчиците да доставят на клиентите Ви. Dropship продукт ще генерира "
@@ -722,8 +724,7 @@ msgstr "Прехвърлете"
 #: code:addons/purchase_stock/models/purchase.py:0
 #, python-format
 msgid ""
-"Unable to cancel purchase order %s as some receptions have already been "
-"done."
+"Unable to cancel purchase order %s as some receptions have already been done."
 msgstr ""
 "Не можете да отмените поръчка за покупка %s, тъй като някои касови бележки "
 "вече са издадени."
@@ -773,8 +774,8 @@ msgstr "Закупените продукти могат да бъдат дос�
 #, python-format
 msgid ""
 "When products are needed in <b>%s</b>, <br/> a request for quotation is "
-"created to fulfill the need.<br/>Note: This rule will be used in combination"
-" with the rules<br/>of the reception route(s)"
+"created to fulfill the need.<br/>Note: This rule will be used in combination "
+"with the rules<br/>of the reception route(s)"
 msgstr ""
 
 #. module: purchase_stock
@@ -794,8 +795,6 @@ msgid "You must set a Vendor Location for this partner %s"
 msgstr "Трябва да настроите местоположение на доставчик за този контрагент %s"
 
 #. module: purchase_stock
-#: code:addons/purchase_stock/models/stock_rule.py:0
-#: code:addons/purchase_stock/models/stock_rule.py:0
 #: code:addons/purchase_stock/models/stock_rule.py:0
 #, python-format
 msgid "day(s)"

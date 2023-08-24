@@ -1,12 +1,12 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* sale_product_matrix
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Igor Sheludko <igor.sheludko@gmail.com>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~13.5\n"
@@ -15,10 +15,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:18+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: sale_product_matrix
@@ -31,7 +31,8 @@ msgstr ""
 #: model:ir.model.fields,help:sale_product_matrix.field_product_product__product_add_mode
 #: model:ir.model.fields,help:sale_product_matrix.field_product_template__product_add_mode
 msgid ""
-"Configurator: choose attribute values to add the matching         product variant to the order.\n"
+"Configurator: choose attribute values to add the matching         product "
+"variant to the order.\n"
 "Grid: add several variants at once from the grid of attribute values"
 msgstr ""
 

@@ -1,12 +1,12 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* payment_authorize
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~13.5\n"
@@ -15,10 +15,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:15+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: payment_authorize
@@ -158,7 +158,6 @@ msgstr ""
 #. module: payment_authorize
 #. openerp-web
 #: code:addons/payment_authorize/static/src/js/payment_form.js:0
-#: code:addons/payment_authorize/static/src/js/payment_form.js:0
 #, python-format
 msgid "Server Error"
 msgstr "Сървърна грешка"
@@ -173,8 +172,8 @@ msgstr "Неуспешно създаването на потребителск�
 #: code:addons/payment_authorize/controllers/main.py:0
 #, python-format
 msgid ""
-"The transaction cannot be processed because some contact details are missing"
-" or invalid: "
+"The transaction cannot be processed because some contact details are missing "
+"or invalid: "
 msgstr ""
 
 #. module: payment_authorize
@@ -190,9 +189,9 @@ msgstr ""
 #: model:ir.model.fields,help:payment_authorize.field_payment_token__save_token
 msgid ""
 "This option allows customers to save their credit card as a payment token "
-"and to reuse it for a later purchase. If you manage subscriptions (recurring"
-" invoicing), you need it to automatically charge the customer when you issue"
-" an invoice."
+"and to reuse it for a later purchase. If you manage subscriptions (recurring "
+"invoicing), you need it to automatically charge the customer when you issue "
+"an invoice."
 msgstr ""
 
 #. module: payment_authorize

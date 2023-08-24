@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* hr_org_chart
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # aleksandar ivanov, 2020
@@ -9,7 +9,7 @@
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
 # Ивайло Малинов <iv.malinov@gmail.com>, 2021
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2021
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~13.5\n"
@@ -18,10 +18,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:13+0000\n"
 "Last-Translator: Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2021\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: hr_org_chart
@@ -67,8 +67,7 @@ msgstr "ID"
 #, python-format
 msgid "In order to get an organigram, set a manager and save the record."
 msgstr ""
-"За да получите диаграма на организацията, задайте мениджър и запазете "
-"записа."
+"За да получите диаграма на организацията, задайте мениджър и запазете записа."
 
 #. module: hr_org_chart
 #: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee__child_all_count
@@ -93,7 +92,6 @@ msgstr "Последно променено на"
 
 #. module: hr_org_chart
 #. openerp-web
-#: code:addons/hr_org_chart/static/src/xml/hr_org_chart.xml:0
 #: code:addons/hr_org_chart/static/src/xml/hr_org_chart.xml:0
 #, python-format
 msgid "More managers"
@@ -120,7 +118,6 @@ msgstr "Публичен служител"
 
 #. module: hr_org_chart
 #. openerp-web
-#: code:addons/hr_org_chart/static/src/xml/hr_org_chart.xml:0
 #: code:addons/hr_org_chart/static/src/xml/hr_org_chart.xml:0
 #, python-format
 msgid "Redirect"

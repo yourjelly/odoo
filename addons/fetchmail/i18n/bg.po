@@ -1,14 +1,14 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* fetchmail
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2020
 # Igor Sheludko <igor.sheludko@gmail.com>, 2020
 # aleksandar ivanov, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~13.5\n"
@@ -17,10 +17,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:12+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: fetchmail
@@ -384,9 +384,9 @@ msgid ""
 "attached to each processed message. This will usually double the size of "
 "your message database."
 msgstr ""
-"Независимо дали трябва да съхранявате цялото оригинално копие на всеки имейл"
-" за референция и даго прилагате към всяко обработено съобщение. Това на свой"
-" ред ще удвои размера на базата данни на съобщенията ви."
+"Независимо дали трябва да съхранявате цялото оригинално копие на всеки имейл "
+"за референция и даго прилагате към всяко обработено съобщение. Това на свой "
+"ред ще удвои размера на базата данни на съобщенията ви."
 
 #. module: fetchmail
 #: model:ir.model.fields,help:fetchmail.field_fetchmail_server__attach

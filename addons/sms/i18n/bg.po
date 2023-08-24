@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* sms
-# 
+#
 # Translators:
 # kalatchev, 2020
 # Martin Trigaux, 2020
@@ -15,7 +15,7 @@
 # Ivan Goychev <igoychev.projects@gmail.com>, 2020
 # Александра Николова <alexandra1nikolova@gmail.com>, 2020
 # Ивайло Малинов <iv.malinov@gmail.com>, 2021
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -24,10 +24,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:18+0000\n"
 "Last-Translator: Ивайло Малинов <iv.malinov@gmail.com>, 2021\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: sms
@@ -48,7 +48,6 @@ msgstr "%s (копие)"
 
 #. module: sms
 #. openerp-web
-#: code:addons/sms/static/src/js/fields_sms_widget.js:0
 #: code:addons/sms/static/src/js/fields_sms_widget.js:0
 #, python-format
 msgid "%s characters, fits in %s SMS (%s) "
@@ -71,14 +70,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 msgid ""
 "<span class=\"o_stat_text\">Add</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</span>"
+"                                <span class=\"o_stat_text\">Context Action</"
+"span>"
 msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 msgid ""
 "<span class=\"o_stat_text\">Remove</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</span>"
+"                                <span class=\"o_stat_text\">Context Action</"
+"span>"
 msgstr ""
 
 #. module: sms
@@ -134,8 +135,8 @@ msgstr "Приложете на"
 #: code:addons/sms/wizard/sms_cancel.py:0
 #, python-format
 msgid ""
-"Are you sure you want to discard %s SMS delivery failures? You won't be able"
-" to re-send these SMS later!"
+"Are you sure you want to discard %s SMS delivery failures? You won't be able "
+"to re-send these SMS later!"
 msgstr ""
 
 #. module: sms
@@ -500,8 +501,8 @@ msgstr "Ако е отметнато, някои от съобщенията и�
 #. module: sms
 #: model:ir.model.fields,help:sms.field_res_partner__phone_sanitized_blacklisted
 msgid ""
-"If the sanitized phone number is on the blacklist, the contact won't receive"
-" mass mailing sms anymore, from any list"
+"If the sanitized phone number is on the blacklist, the contact won't receive "
+"mass mailing sms anymore, from any list"
 msgstr ""
 
 #. module: sms
@@ -747,8 +748,8 @@ msgstr "Брой съобщения с грешка при предаване"
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_composer__res_ids_count
 msgid ""
-"Number of recipients that will receive the SMS if sent in mass mode, without"
-" applying the Active Domain value"
+"Number of recipients that will receive the SMS if sent in mass mode, without "
+"applying the Active Domain value"
 msgstr ""
 
 #. module: sms
@@ -769,10 +770,10 @@ msgid ""
 "a placeholder expression that provides the appropriate language, e.g. "
 "${object.partner_id.lang}."
 msgstr ""
-"Незадължителен език за превод (код ISO) за избор при изпращане на имейл. Ако"
-" не е настроено, ще се използва английската версия. Това обикновено трябва "
-"да е израз-заместител, който предоставя подходящия език, напр. "
-"${object.partner_id.lang}."
+"Незадължителен език за превод (код ISO) за избор при изпращане на имейл. Ако "
+"не е настроено, ще се използва английската версия. Това обикновено трябва да "
+"е израз-заместител, който предоставя подходящия език, напр. ${object."
+"partner_id.lang}."
 
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_template__null_value
@@ -886,7 +887,6 @@ msgstr ""
 #. module: sms
 #. openerp-web
 #: code:addons/sms/static/src/components/message/message.xml:0
-#: code:addons/sms/static/src/components/message/message.xml:0
 #: model:ir.actions.act_window,name:sms.sms_sms_action
 #: model:ir.model.fields,field_description:sms.field_mail_notification__sms_id
 #: model:ir.model.fields.selection,name:sms.selection__mail_message__message_type__sms
@@ -957,7 +957,6 @@ msgstr ""
 #. module: sms
 #. openerp-web
 #: code:addons/sms/static/src/js/fields_sms_widget.js:0
-#: code:addons/sms/static/src/js/fields_sms_widget.js:0
 #, python-format
 msgid "SMS Pricing"
 msgstr ""
@@ -1022,10 +1021,12 @@ msgstr ""
 #: model:ir.model.fields,help:sms.field_sms_template__model_object_field
 msgid ""
 "Select target field from the related document model.\n"
-"If it is a relationship field you will be able to select a target field at the destination of the relationship."
+"If it is a relationship field you will be able to select a target field at "
+"the destination of the relationship."
 msgstr ""
 "Изберете целево поле от свързания модел на документ.\n"
-"В случай че това е поле за връзка, ще можете да изберете целево поле в самото местоназначение на връзката."
+"В случай че това е поле за връзка, ще можете да изберете целево поле в "
+"самото местоназначение на връзката."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_composer_view_form
@@ -1046,7 +1047,6 @@ msgstr ""
 
 #. module: sms
 #. openerp-web
-#: code:addons/sms/static/src/js/fields_phone_widget.js:0
 #: code:addons/sms/static/src/js/fields_phone_widget.js:0
 #: model:ir.actions.act_window,name:sms.res_partner_act_window_sms_composer_multi
 #: model:ir.actions.act_window,name:sms.res_partner_act_window_sms_composer_single
@@ -1199,7 +1199,8 @@ msgid ""
 "- 'Execute Python Code': a block of python code that will be executed\n"
 "- 'Create': create a new record with new values\n"
 "- 'Update a Record': update the values of a record\n"
-"- 'Execute several actions': define an action that triggers several other server actions\n"
+"- 'Execute several actions': define an action that triggers several other "
+"server actions\n"
 "- 'Send Email': automatically send an email (Discuss)\n"
 "- 'Add Followers': add followers to a record (Discuss)\n"
 "- 'Create Next Activity': create an activity (Discuss)"
@@ -1208,8 +1209,8 @@ msgstr ""
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_composer__recipient_single_number_itf
 msgid ""
-"UX field allowing to edit the recipient number. If changed it will be stored"
-" onto the recipient."
+"UX field allowing to edit the recipient number. If changed it will be stored "
+"onto the recipient."
 msgstr ""
 
 #. module: sms
@@ -1264,9 +1265,9 @@ msgid ""
 "When a relationship field is selected as first field, this field lets you "
 "select the target field within the destination document model (sub-model)."
 msgstr ""
-"Когато полето за връзка е избрано като първо поле, това поле Ви позволява да"
-" изберете целевото поле в рамките на модела на документа за "
-"местоназначението (подмодел)."
+"Когато полето за връзка е избрано като първо поле, това поле Ви позволява да "
+"изберете целевото поле в рамките на модела на документа за местоназначението "
+"(подмодел)."
 
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_template__sub_object

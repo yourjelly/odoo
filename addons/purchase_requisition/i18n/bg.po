@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* purchase_requisition
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Boris Stefanov <borkata@gmail.com>, 2020
@@ -14,7 +14,7 @@
 # Ivan Goychev <igoychev.projects@gmail.com>, 2020
 # Александра Николова <alexandra1nikolova@gmail.com>, 2020
 # Ивайло Малинов <iv.malinov@gmail.com>, 2021
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -23,10 +23,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:17+0000\n"
 "Last-Translator: Ивайло Малинов <iv.malinov@gmail.com>, 2021\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: purchase_requisition
@@ -235,8 +235,8 @@ msgid ""
 "Conversion between Units of Measure can only occur if they belong to the "
 "same category. The conversion will be made based on the ratios."
 msgstr ""
-"Преобразуването на мерните единици може да възникне, само ако те принадлежат"
-" към една и съща категория. Преобразуването ще се извърши въз основа на "
+"Преобразуването на мерните единици може да възникне, само ако те принадлежат "
+"към една и съща категория. Преобразуването ще се извърши въз основа на "
 "съотношенията."
 
 #. module: purchase_requisition
@@ -249,9 +249,9 @@ msgstr "Създайте чернова поръчка за покупка"
 #: model:ir.model.fields,help:purchase_requisition.field_product_template__purchase_requisition
 msgid ""
 "Create a draft purchase order: Based on your product configuration, the "
-"system will create a draft purchase order.Propose a call for tender : If the"
-" 'purchase_requisition' module is installed and this option is selected, the"
-" system will create a draft call for tender."
+"system will create a draft purchase order.Propose a call for tender : If the "
+"'purchase_requisition' module is installed and this option is selected, the "
+"system will create a draft call for tender."
 msgstr ""
 
 #. module: purchase_requisition
@@ -354,7 +354,8 @@ msgstr "Икона, примерно fa-tasks"
 #: model_terms:ir.actions.act_window,help:purchase_requisition.action_purchase_requisition
 msgid ""
 "For a blanket order, you can record an agreement for a specifc period\n"
-"            (e.g. a year) and you order products within this agreement, benefiting\n"
+"            (e.g. a year) and you order products within this agreement, "
+"benefiting\n"
 "            from the negotiated prices."
 msgstr ""
 
@@ -406,12 +407,15 @@ msgstr "Ако е отметнато, някои от съобщенията и�
 #: model_terms:ir.actions.act_window,help:purchase_requisition.action_purchase_requisition
 msgid ""
 "In a call for tenders, you can record the products you need to buy\n"
-"            and generate the creation of RfQs to vendors. Once the tenders have\n"
+"            and generate the creation of RfQs to vendors. Once the tenders "
+"have\n"
 "            been registered, you can review and compare them and you can\n"
 "            validate some and cancel others."
 msgstr ""
-"В покана за участие в търг можете да регистрирате продуктите, които трябва да купите\n"
-"            и да създадете заявки за оферти към доставчиците. След като офертите\n"
+"В покана за участие в търг можете да регистрирате продуктите, които трябва "
+"да купите\n"
+"            и да създадете заявки за оферти към доставчиците. След като "
+"офертите\n"
 "            са регистрирани, можете да ги прегледате и сравните, както и\n"
 "            да валидирате някои от тях и да анулирате други."
 
@@ -757,9 +761,12 @@ msgstr "Изберете само една заявка за оферта (из�
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_type__exclusive
 msgid ""
-"Select only one RFQ (exclusive):  when a purchase order is confirmed, cancel the remaining purchase order.\n"
+"Select only one RFQ (exclusive):  when a purchase order is confirmed, cancel "
+"the remaining purchase order.\n"
 "\n"
-"                    Select multiple RFQ (non-exclusive): allows multiple purchase orders. On confirmation of a purchase order it does not cancel the remaining orders"
+"                    Select multiple RFQ (non-exclusive): allows multiple "
+"purchase orders. On confirmation of a purchase order it does not cancel the "
+"remaining orders"
 msgstr ""
 
 #. module: purchase_requisition
@@ -776,8 +783,7 @@ msgstr "Настройте количествата механично"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Show all records which has next action date is before today"
 msgstr ""
-"Показване на всички записи, на които следващата дата на действие е преди "
-"днес"
+"Показване на всички записи, на които следващата дата на действие е преди днес"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__origin
@@ -923,8 +929,6 @@ msgid "You cannot confirm agreement '%s' because there is no product line."
 msgstr ""
 
 #. module: purchase_requisition
-#: code:addons/purchase_requisition/models/purchase_requisition.py:0
-#: code:addons/purchase_requisition/models/purchase_requisition.py:0
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 #, python-format
 msgid "You cannot confirm the blanket order without price."

@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* project_timesheet_holidays
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Георги Пехливанов <sonaris@gmail.com>, 2020
@@ -10,7 +10,7 @@
 # aleksandar ivanov, 2020
 # Albena Mincheva <albena_vicheva@abv.bg>, 2020
 # Maria Boyadjieva <marabo2000@gmail.com>, 2020
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~13.5\n"
@@ -19,10 +19,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:17+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: project_timesheet_holidays
@@ -92,7 +92,6 @@ msgstr ""
 
 #. module: project_timesheet_holidays
 #: code:addons/project_timesheet_holidays/models/res_company.py:0
-#: code:addons/project_timesheet_holidays/models/res_company.py:0
 #, python-format
 msgid "Internal"
 msgstr "Вътрешни"
@@ -147,7 +146,6 @@ msgid ""
 msgstr ""
 
 #. module: project_timesheet_holidays
-#: code:addons/project_timesheet_holidays/models/res_company.py:0
 #: code:addons/project_timesheet_holidays/models/res_company.py:0
 #: model:ir.model,name:project_timesheet_holidays.model_hr_leave
 #, python-format

@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* repair
-# 
+#
 # Translators:
 # Martin Trigaux, 2020
 # Boris Stefanov <borkata@gmail.com>, 2020
@@ -14,7 +14,7 @@
 # Ivan Goychev <igoychev.projects@gmail.com>, 2020
 # Александра Николова <alexandra1nikolova@gmail.com>, 2020
 # Ивайло Малинов <iv.malinov@gmail.com>, 2021
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
@@ -23,10 +23,10 @@ msgstr ""
 "PO-Revision-Date: 2020-09-07 08:17+0000\n"
 "Last-Translator: Ивайло Малинов <iv.malinov@gmail.com>, 2021\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
+"Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: bg\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: repair
@@ -43,7 +43,8 @@ msgstr ""
 #: model:ir.actions.report,print_report_name:repair.action_report_repair_order
 msgid ""
 "(\n"
-"                object.state == 'draft' and 'Repair Quotation - %s' % (object.name) or\n"
+"                object.state == 'draft' and 'Repair Quotation - %s' % "
+"(object.name) or\n"
 "                'Repair Order - %s' % (object.name))"
 msgstr ""
 
@@ -60,19 +61,28 @@ msgstr "(актуализация)"
 #. module: repair
 #: model:ir.model.fields,help:repair.field_repair_order__state
 msgid ""
-"* The 'Draft' status is used when a user is encoding a new and unconfirmed repair order.\n"
+"* The 'Draft' status is used when a user is encoding a new and unconfirmed "
+"repair order.\n"
 "* The 'Confirmed' status is used when a user confirms the repair order.\n"
-"* The 'Ready to Repair' status is used to start to repairing, user can start repairing only after repair order is confirmed.\n"
-"* The 'To be Invoiced' status is used to generate the invoice before or after repairing done.\n"
+"* The 'Ready to Repair' status is used to start to repairing, user can start "
+"repairing only after repair order is confirmed.\n"
+"* The 'To be Invoiced' status is used to generate the invoice before or "
+"after repairing done.\n"
 "* The 'Done' status is set when repairing is completed.\n"
 "* The 'Cancelled' status is used when user cancel repair order."
 msgstr ""
-"* Състоянието 'Чернова' се използва, когато потребителят кодира нова и непотвърдена поръчка за ремонт.\n"
-"* Състоянието 'Потвърдено' се използва, когато потребителят потвърждава поръчката за ремонт.\n"
-"* Състоянието 'Готово за ремонт' се използва при започването на ремонта, потребителят може да започне ремонта, само след като поръчката за ремонт е потвърдена.\n"
-"* Състоянието 'За фактуриране' се използва, за да се създаде фактурата, преди или след като е извършен ремонта.\n"
+"* Състоянието 'Чернова' се използва, когато потребителят кодира нова и "
+"непотвърдена поръчка за ремонт.\n"
+"* Състоянието 'Потвърдено' се използва, когато потребителят потвърждава "
+"поръчката за ремонт.\n"
+"* Състоянието 'Готово за ремонт' се използва при започването на ремонта, "
+"потребителят може да започне ремонта, само след като поръчката за ремонт е "
+"потвърдена.\n"
+"* Състоянието 'За фактуриране' се използва, за да се създаде фактурата, "
+"преди или след като е извършен ремонта.\n"
 "* Състоянието 'Извършено' се настройва, когато ремонтът е приключил.\n"
-"* Състоянието 'Отменено' се използва, когато потребителят отмени поръчката за ремонт."
+"* Състоянието 'Отменено' се използва, когато потребителят отмени поръчката "
+"за ремонт."
 
 #. module: repair
 #: code:addons/repair/models/repair.py:0
@@ -87,12 +97,14 @@ msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px;font-size: 13px;\">\n"
 "        Hello ${object.partner_id.name},<br/>\n"
-"        Here is your repair order ${doc_name} <strong>${object.name}</strong>\n"
+"        Here is your repair order ${doc_name} <strong>${object.name}</"
+"strong>\n"
 "        % if object.origin:\n"
 "            (with reference: ${object.origin} )\n"
 "        % endif\n"
 "        % if object.invoice_method != 'none':\n"
-"            amounting in <strong>${format_amount(object.amount_total, object.pricelist_id.currency_id)}.</strong><br/>\n"
+"            amounting in <strong>${format_amount(object.amount_total, object."
+"pricelist_id.currency_id)}.</strong><br/>\n"
 "        % else:\n"
 "            .<br/>\n"
 "        % endif\n"
@@ -292,12 +304,12 @@ msgid ""
 "Conversion between Units of Measure can only occur if they belong to the "
 "same category. The conversion will be made based on the ratios."
 msgstr ""
-"Преобразуването на мерните единици може да възникне, само ако те принадлежат"
-" към една и съща категория. Преобразуването ще се извърши въз основа на "
+"Преобразуването на мерните единици може да възникне, само ако те принадлежат "
+"към една и съща категория. Преобразуването ще се извърши въз основа на "
 "съотношенията."
 
 #. module: repair
-#: code:addons/repair/models/repair.py:0 code:addons/repair/models/repair.py:0
+#: code:addons/repair/models/repair.py:0
 #, python-format
 msgid ""
 "Couldn't find a pricelist line matching this product and quantity.\n"
@@ -523,11 +535,14 @@ msgstr "Ако е отметнато, някои от съобщенията и�
 #: model_terms:ir.actions.act_window,help:repair.action_repair_order_tree
 msgid ""
 "In a repair order, you can detail the components you remove,\n"
-"                add or replace and record the time you spent on the different\n"
+"                add or replace and record the time you spent on the "
+"different\n"
 "                operations."
 msgstr ""
-"В поръчката за ремонт можете да детайлизирате компонентите, които премахвате,\n"
-"                добавяте или заменяте, както и да записвате времето, прекерано в различните\n"
+"В поръчката за ремонт можете да детайлизирате компонентите, които "
+"премахвате,\n"
+"                добавяте или заменяте, както и да записвате времето, "
+"прекерано в различните\n"
 "                операции."
 
 #. module: repair
@@ -707,13 +722,13 @@ msgid "No Invoice"
 msgstr "Без фактура"
 
 #. module: repair
-#: code:addons/repair/models/repair.py:0 code:addons/repair/models/repair.py:0
+#: code:addons/repair/models/repair.py:0
 #, python-format
 msgid "No account defined for product \"%s\"."
 msgstr "За продукта не е определена сметка \"%s\"."
 
 #. module: repair
-#: code:addons/repair/models/repair.py:0 code:addons/repair/models/repair.py:0
+#: code:addons/repair/models/repair.py:0
 #, python-format
 msgid "No pricelist found."
 msgstr ""
@@ -730,7 +745,7 @@ msgid "No repair order found. Let's create one!"
 msgstr ""
 
 #. module: repair
-#: code:addons/repair/models/repair.py:0 code:addons/repair/models/repair.py:0
+#: code:addons/repair/models/repair.py:0
 #, python-format
 msgid "No valid pricelist line found."
 msgstr ""
@@ -1052,8 +1067,8 @@ msgid ""
 "you don't want to generate invoice for this repair order."
 msgstr ""
 "Изборът 'Преди поправка' или 'След поправка' ще Ви позволи да създадете "
-"фактура респективно преди или след извършването на поправката. 'Без фактура'"
-" означава, че не желаете да създавате фактура за тази поръчка за поправка."
+"фактура респективно преди или след извършването на поправката. 'Без фактура' "
+"означава, че не желаете да създавате фактура за тази поръчка за поправка."
 
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.view_repair_order_form
@@ -1075,8 +1090,7 @@ msgstr "Настройте на чернова"
 #: model_terms:ir.ui.view,arch_db:repair.view_repair_order_form_filter
 msgid "Show all records which has next action date is before today"
 msgstr ""
-"Показване на всички записи, на които следващата дата на действие е преди "
-"днес"
+"Показване на всички записи, на които следващата дата на действие е преди днес"
 
 #. module: repair
 #: model:ir.model.fields,field_description:repair.field_repair_line__location_id
@@ -1293,8 +1307,8 @@ msgstr "История на комуникацията на уебсайт"
 #: code:addons/repair/models/repair.py:0
 #, python-format
 msgid ""
-"You can not delete a repair order once it has been confirmed. You must first"
-" cancel it."
+"You can not delete a repair order once it has been confirmed. You must first "
+"cancel it."
 msgstr ""
 
 #. module: repair
@@ -1324,7 +1338,7 @@ msgid "You cannot delete a completed repair order."
 msgstr ""
 
 #. module: repair
-#: code:addons/repair/models/repair.py:0 code:addons/repair/models/repair.py:0
+#: code:addons/repair/models/repair.py:0
 #, python-format
 msgid ""
 "You have to select a pricelist in the Repair form !\n"
