@@ -3551,6 +3551,7 @@
             type="text"
             class="o-input o-input-with-count"
             t-on-input="onInput"
+            t-on-focusin="onFocusSearch"
             t-on-keydown="onKeydownSearch"
           />
           <div class="o-input-count" t-if="hasSearchResult">
@@ -3559,6 +3560,23 @@
             <t t-esc="env.model.getters.getSearchMatches().length"/>
           </div>
           <div t-elif="!pendingSearch and state.toSearch !== ''" class="o-input-count">0 / 0</div>
+        </div>
+        <select
+          class="o-input o-type-selector o-type-range-selector mt-3 mb-3"
+          t-model="state.searchOptions.searchScope"
+          t-on-change="updateSearch">
+          <option value="allSheets">All sheets</option>
+          <option value="thisSheet">This sheet</option>
+          <option value="specificRange">Specific range</option>
+        </select>
+        <div t-if="state.searchOptions.searchScope === 'specificRange'" t-ref="selectionInput">
+          <SelectionInput
+            ranges="() => [this.getRange()]"
+            onSelectionChanged="(ranges) => this.onSearchRangeChanged(ranges)"
+            onSelectionConfirmed="() => this.updateDataRange()"
+            hasSingleRange="true"
+            required="true"
+          />
         </div>
         <div>
           <!-- TODO: go through this css, the group misses a padding and could profit from BootStrap -->
@@ -3586,6 +3604,29 @@
             />
             <span>Search in formulas</span>
           </label>
+        </div>
+        <div
+          class="o-matches-count mt-4"
+          t-if="state.toSearch !== '' &amp;&amp; state.toSearch !== null">
+          <div
+            t-if="state.searchOptions.searchScope === 'specificRange' &amp;&amp; dataRange != ''">
+            <span
+              t-if="state.searchOptions.specificRange !== null &amp;&amp; state.searchOptions.specificRange !== ''">
+              <t t-esc="env.model.getters.getTotalMatchesSpecificRange()"/>
+              match(s) in
+              <t t-esc="env.model.getters.getSheetName(env.model.getters.getActiveSheetId())"/>
+              of range
+              <t t-esc="dataRange"/>
+            </span>
+          </div>
+          <div>
+            <t t-esc="env.model.getters.getTotalMatchesThisSheet()"/>
+            match(s) in this page
+          </div>
+          <div>
+            <t t-esc="env.model.getters.getTotalMatchesAllSheets()"/>
+            match(s) in all pages
+          </div>
         </div>
       </div>
       <div class="o-sidePanelButtons">
@@ -3753,6 +3794,7 @@
     <div
       class="o-spreadsheet"
       t-on-keydown="(ev) => !env.isDashboard() and this.onKeydown(ev)"
+      t-ref="spreadsheet"
       t-att-style="getStyle()">
       <t t-if="env.isDashboard()">
         <SpreadsheetDashboard/>
@@ -3967,6 +4009,6 @@
 </odoo>
 <!--
   __info__.version = '16.5.0-alpha.5';
-  __info__.date = '2023-08-17T11:19:17.129Z';
-  __info__.hash = 'e0cb3aa';
+  __info__.date = '2023-08-24T07:02:50.530Z';
+  __info__.hash = '38a0836';
 -->

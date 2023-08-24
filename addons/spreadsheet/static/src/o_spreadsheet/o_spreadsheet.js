@@ -3424,6 +3424,39 @@
         }
     }
 
+    function createActions(menuItems) {
+        return menuItems.map(createAction).sort((a, b) => a.sequence - b.sequence);
+    }
+    const uuidGenerator$2 = new UuidGenerator();
+    function createAction(item) {
+        const name = item.name;
+        const children = item.children;
+        const description = item.description;
+        const icon = item.icon;
+        return {
+            id: item.id || uuidGenerator$2.uuidv4(),
+            name: typeof name === "function" ? name : () => name,
+            isVisible: item.isVisible ? item.isVisible : () => true,
+            isEnabled: item.isEnabled ? item.isEnabled : () => true,
+            isActive: item.isActive,
+            execute: item.execute,
+            children: children
+                ? (env) => {
+                    return children
+                        .map((child) => (typeof child === "function" ? child(env) : child))
+                        .flat()
+                        .map(createAction);
+                }
+                : () => [],
+            isReadonlyAllowed: item.isReadonlyAllowed || false,
+            separator: item.separator || false,
+            icon: typeof icon === "function" ? icon : () => icon || "",
+            description: typeof description === "function" ? description : () => description || "",
+            textColor: item.textColor,
+            sequence: item.sequence || 0,
+        };
+    }
+
     class ChartJsComponent extends owl.Component {
         static template = "o-spreadsheet-ChartJsComponent";
         canvas = owl.useRef("graphContainer");
@@ -9256,7 +9289,7 @@
         }
         // Example continuation: matchingRows = {0, 2}
         // 4 - return for each database row corresponding, the cells corresponding to the field parameter
-        const fieldCol = database[index].map((col) => col);
+        const fieldCol = database[index];
         // Example continuation:: fieldCol = ["C", "j", "k", 7]
         const matchingCells = [...matchingRows].map((x) => fieldCol[x + 1]);
         // Example continuation:: matchingCells = ["j", 7]
@@ -15287,39 +15320,6 @@
         isVisible: (env) => env.model.getters.getVisibleSheetIds().length !== 1,
         execute: (env) => env.model.dispatch("HIDE_SHEET", { sheetId: env.model.getters.getActiveSheetId() }),
     };
-
-    function createActions(menuItems) {
-        return menuItems.map(createAction).sort((a, b) => a.sequence - b.sequence);
-    }
-    const uuidGenerator$2 = new UuidGenerator();
-    function createAction(item) {
-        const name = item.name;
-        const children = item.children;
-        const description = item.description;
-        const icon = item.icon;
-        return {
-            id: item.id || uuidGenerator$2.uuidv4(),
-            name: typeof name === "function" ? name : () => name,
-            isVisible: item.isVisible ? item.isVisible : () => true,
-            isEnabled: item.isEnabled ? item.isEnabled : () => true,
-            isActive: item.isActive,
-            execute: item.execute,
-            children: children
-                ? (env) => {
-                    return children
-                        .map((child) => (typeof child === "function" ? child(env) : child))
-                        .flat()
-                        .map(createAction);
-                }
-                : () => [],
-            isReadonlyAllowed: item.isReadonlyAllowed || false,
-            separator: item.separator || false,
-            icon: typeof icon === "function" ? icon : () => icon || "",
-            description: typeof description === "function" ? description : () => description || "",
-            textColor: item.textColor,
-            sequence: item.sequence || 0,
-        };
-    }
 
     /**
      * The class Registry is extended in order to add the function addChild
@@ -22949,7 +22949,9 @@
         debounceTimeoutId;
         showFormulaState = false;
         debouncedUpdateSearch;
+        static components = { SelectionInput };
         findAndReplaceRef = owl.useRef("findAndReplace");
+        dataRange = "";
         get hasSearchResult() {
             return this.env.model.getters.getCurrentSelectedMatchIndex() !== null;
         }
@@ -22968,6 +22970,10 @@
                 this.state.searchOptions.searchFormulas = this.env.model.getters.shouldShowFormulas();
                 this.searchFormulas();
             }, () => [this.env.model.getters.shouldShowFormulas()]);
+        }
+        onFocusSearch() {
+            this.env.model.dispatch("UNFOCUS_SELECTION_INPUT");
+            this.updateDataRange();
         }
         onInput(ev) {
             this.state.toSearch = ev.target.value;
@@ -22992,6 +22998,27 @@
                 show: this.state.searchOptions.searchFormulas,
             });
             this.updateSearch();
+        }
+        onSearchRangeChanged(ranges) {
+            this.dataRange = ranges[0];
+        }
+        getRange() {
+            return this.dataRange || "";
+        }
+        updateDataRange() {
+            this.env.model.dispatch("UNFOCUS_SELECTION_INPUT");
+            const range = this.dataRange;
+            const sheetId = this.env.model.getters.getActiveSheetId();
+            if (!range) {
+                return;
+            }
+            if (this.state.searchOptions.searchScope === "specificRange") {
+                this.state.searchOptions.specificRange = this.env.model.getters.getRangeFromSheetXC(sheetId, range);
+            }
+            this.env.model.dispatch("UPDATE_SEARCH", {
+                toSearch: this.state.toSearch,
+                searchOptions: this.state.searchOptions,
+            });
         }
         onSelectPreviousCell() {
             this.env.model.dispatch("SELECT_SEARCH_PREVIOUS_MATCH");
@@ -23033,6 +23060,8 @@
                     matchCase: false,
                     exactMatch: false,
                     searchFormulas: false,
+                    searchScope: "allSheets",
+                    specificRange: undefined,
                 },
             };
         }
@@ -26763,7 +26792,6 @@
             owl.onMounted(() => this.focus());
             this.props.exposeFocus(() => this.focus());
             useGridDrawing("canvas", this.env.model, () => this.env.model.getters.getSheetViewDimensionWithHeaders());
-            owl.useEffect(() => this.focus(), () => [this.env.model.getters.getActiveSheetId()]);
             this.onMouseWheel = useWheelHandler((deltaX, deltaY) => {
                 this.moveCanvas(deltaX, deltaY);
                 this.hoveredCell.col = undefined;
@@ -38789,7 +38817,13 @@
      */
     class FindAndReplacePlugin extends UIPlugin {
         static layers = [3 /* LAYERS.Search */];
-        static getters = ["getSearchMatches", "getCurrentSelectedMatchIndex"];
+        static getters = [
+            "getSearchMatches",
+            "getCurrentSelectedMatchIndex",
+            "getTotalMatchesAllSheets",
+            "getTotalMatchesThisSheet",
+            "getTotalMatchesSpecificRange",
+        ];
         searchMatches = [];
         selectedMatchIndex = null;
         currentSearchRegex = null;
@@ -38797,9 +38831,14 @@
             matchCase: false,
             exactMatch: false,
             searchFormulas: false,
+            searchScope: "allSheets",
+            specificRange: undefined,
         };
         toSearch = "";
         isSearchDirty = false;
+        totalMatchesAllSheets = 0;
+        totalMatchesThisSheet = 0;
+        totalMatchesSpecificRange = 0;
         // ---------------------------------------------------------------------------
         // Command Handling
         // ---------------------------------------------------------------------------
@@ -38840,7 +38879,7 @@
                     this.isSearchDirty = true;
                     break;
                 case "ACTIVATE_SHEET":
-                    this.refreshSearch();
+                    this.totalMatches();
                     break;
             }
         }
@@ -38858,6 +38897,15 @@
         }
         getCurrentSelectedMatchIndex() {
             return this.selectedMatchIndex;
+        }
+        getTotalMatchesAllSheets() {
+            return this.totalMatchesAllSheets;
+        }
+        getTotalMatchesThisSheet() {
+            return this.totalMatchesThisSheet;
+        }
+        getTotalMatchesSpecificRange() {
+            return this.totalMatchesSpecificRange;
         }
         // ---------------------------------------------------------------------------
         // Search
@@ -38879,9 +38927,36 @@
          * refresh the matches according to the current search options
          */
         refreshSearch() {
-            const matches = this.findMatches();
-            this.searchMatches = matches;
+            this.selectedMatchIndex = null;
+            this.searchMatches = this.findMatches();
+            this.totalMatches();
             this.selectNextCell(Direction.current);
+        }
+        totalMatches() {
+            if (this.toSearch != "") {
+                this.totalMatchesAllSheets = this.getMatchesAllSheets().length;
+                this.totalMatchesThisSheet = this.getMatchesThisSheet().length;
+                this.totalMatchesSpecificRange = this.getMatchesSpecificRange().length;
+            }
+        }
+        getMatchesAllSheets() {
+            let matches = [];
+            const sheetIds = this.getters.getSheetIds();
+            for (const sheetId of sheetIds) {
+                matches.push(...this.findMatchesInSheet(sheetId));
+            }
+            return matches;
+        }
+        getMatchesThisSheet() {
+            return this.findMatchesInSheet(this.getters.getActiveSheetId());
+        }
+        getMatchesSpecificRange() {
+            let matches = [];
+            const specificRange = this.searchOptions.specificRange;
+            if (specificRange) {
+                matches = this.findMatchesInSheet(specificRange.sheetId, specificRange);
+            }
+            return matches;
         }
         /**
          * Updates the regex based on the current searchOptions and
@@ -38895,36 +38970,72 @@
             }
             this.currentSearchRegex = RegExp(searchValue, flags);
         }
+        getSearchSheets() {
+            let sheetIds = [];
+            switch (this.searchOptions.searchScope) {
+                case "allSheets":
+                    sheetIds = this.getters.getSheetIds();
+                    const activeSheetIndex = sheetIds.findIndex((id) => id === this.getters.getActiveSheetId());
+                    sheetIds = [
+                        sheetIds[activeSheetIndex],
+                        ...sheetIds.slice(activeSheetIndex + 1),
+                        ...sheetIds.slice(0, activeSheetIndex),
+                    ];
+                    break;
+                case "thisSheet":
+                    sheetIds = [this.getters.getActiveSheetId()];
+                    break;
+                case "specificRange":
+                    const specificRange = this.searchOptions.specificRange;
+                    if (!specificRange) {
+                        return [];
+                    }
+                    sheetIds = [specificRange.sheetId];
+                    break;
+            }
+            return sheetIds;
+        }
         /**
          * Find matches using the current regex
          */
         findMatches() {
-            const sheetId = this.getters.getActiveSheetId();
-            const cells = this.getters.getCells(sheetId);
             const matches = [];
-            if (this.toSearch) {
-                for (const cell of Object.values(cells)) {
-                    const { col, row } = this.getters.getCellPosition(cell.id);
-                    const isColHidden = this.getters.isColHidden(sheetId, col);
-                    const isRowHidden = this.getters.isRowHidden(sheetId, row);
-                    if (isColHidden || isRowHidden) {
-                        continue;
-                    }
-                    if (cell &&
-                        this.currentSearchRegex &&
-                        this.currentSearchRegex.test(this.getSearchableString({ sheetId, col, row }))) {
-                        const match = { col, row, selected: false };
-                        matches.push(match);
-                    }
+            let sheetIds;
+            const specificRange = this.searchOptions.specificRange;
+            if (!this.toSearch) {
+                return matches;
+            }
+            sheetIds = this.getSearchSheets();
+            for (const sheetId of sheetIds) {
+                matches.push(...this.findMatchesInSheet(sheetId, specificRange));
+            }
+            return matches.sort((a, b) => this.sortBySheetinitialStateIndexThenRowThenColumn(a, b));
+        }
+        findMatchesInSheet(sheetId, specificRange) {
+            const matches = [];
+            const zone = this.searchOptions.searchScope === "specificRange" && specificRange
+                ? specificRange.zone
+                : this.getters.getSheetZone(sheetId);
+            const cellPositions = positions(zone);
+            for (const position of cellPositions) {
+                const { col, row } = position;
+                const cellPosition = { sheetId, col, row };
+                if (this.currentSearchRegex?.test(this.getSearchableString(cellPosition))) {
+                    const match = { sheetId, col, row, selected: false };
+                    matches.push(match);
                 }
             }
-            return matches.sort(this.sortByRowThenColumn);
+            return matches;
         }
-        sortByRowThenColumn(a, b) {
-            if (a.row === b.row) {
-                return a.col - b.col;
-            }
-            return a.row > b.row ? 1 : -1;
+        sortBySheetinitialStateIndexThenRowThenColumn(a, b) {
+            return a.sheetId !== b.sheetId
+                ? this.getters.getSheetIds().indexOf(a.sheetId) -
+                    this.getters.getSheetIds().indexOf(b.sheetId)
+                : a.row === b.row
+                    ? a.col - b.col
+                    : a.row > b.row
+                        ? 1
+                        : -1;
         }
         /**
          * Changes the selected search cell. Given a direction it will
@@ -38942,15 +39053,32 @@
             }
             let nextIndex;
             if (this.selectedMatchIndex === null) {
-                nextIndex = 0;
+                let nextMatchIndex = -1;
+                const sheetIds = this.getSearchSheets();
+                // if search is not available in current sheet will select in next sheet
+                for (let i = 0; i < sheetIds.length; i++) {
+                    nextMatchIndex = matches.findIndex((match) => match.sheetId === sheetIds[i]);
+                    if (nextMatchIndex !== -1) {
+                        break;
+                    }
+                }
+                nextIndex = nextMatchIndex;
             }
             else {
                 nextIndex = this.selectedMatchIndex + indexChange;
             }
-            //modulo of negative value to be able to cycle in both directions with previous and next
-            nextIndex = ((nextIndex % matches.length) + matches.length) % matches.length;
+            // modulo of negative value to be able to cycle in both directions with previous and next
+            nextIndex = (nextIndex + matches.length) % matches.length;
             this.selectedMatchIndex = nextIndex;
-            this.selection.selectCell(matches[nextIndex].col, matches[nextIndex].row);
+            const selectedMatch = matches[nextIndex];
+            // Switch to the sheet where the match is located
+            if (this.getters.getActiveSheetId() !== selectedMatch.sheetId) {
+                this.dispatch("ACTIVATE_SHEET", {
+                    sheetIdFrom: this.getters.getActiveSheetId(),
+                    sheetIdTo: selectedMatch.sheetId,
+                });
+            }
+            this.selection.selectCell(selectedMatch.col, selectedMatch.row);
             for (let index = 0; index < this.searchMatches.length; index++) {
                 this.searchMatches[index].selected = index === this.selectedMatchIndex;
             }
@@ -38964,6 +39092,8 @@
                 matchCase: false,
                 exactMatch: false,
                 searchFormulas: false,
+                searchScope: "allSheets",
+                specificRange: undefined,
             };
         }
         // ---------------------------------------------------------------------------
@@ -38973,9 +39103,8 @@
             if (!this.currentSearchRegex) {
                 return;
             }
-            const sheetId = this.getters.getActiveSheetId();
-            const cell = this.getters.getCell({ sheetId, ...selectedMatch });
-            const { col, row } = selectedMatch;
+            const { sheetId, col, row } = selectedMatch;
+            const cell = this.getters.getCell({ sheetId, col, row });
             if (cell?.isFormula && !this.searchOptions.searchFormulas) {
                 return;
             }
@@ -39006,6 +39135,16 @@
             }
         }
         getSearchableString(position) {
+            const { sheetId, col, row } = position;
+            const cell = this.getters.getCell(position);
+            if (!cell) {
+                return "";
+            }
+            const isColHidden = this.getters.isColHidden(sheetId, col);
+            const isRowHidden = this.getters.isRowHidden(sheetId, row);
+            if (isColHidden || isRowHidden) {
+                return "";
+            }
             return this.getters.getCellText(position, this.searchOptions.searchFormulas);
         }
         // ---------------------------------------------------------------------------
@@ -39015,6 +39154,9 @@
             const { ctx } = renderingContext;
             const sheetId = this.getters.getActiveSheetId();
             for (const match of this.searchMatches) {
+                if (match.sheetId !== sheetId) {
+                    continue; // Skip drawing matches from other sheets
+                }
                 const merge = this.getters.getMerge({ sheetId, col: match.col, row: match.row });
                 const left = merge ? merge.left : match.col;
                 const right = merge ? merge.right : match.col;
@@ -39028,6 +39170,17 @@
                         ctx.strokeStyle = BORDER_COLOR;
                         ctx.strokeRect(x, y, width, height);
                     }
+                }
+            }
+            if (this.searchOptions.specificRange && this.searchOptions.specificRange.sheetId === sheetId) {
+                const selectedZone = this.searchOptions.specificRange.zone;
+                if (this.searchOptions.searchScope === "specificRange") {
+                    if (!selectedZone) {
+                        return;
+                    }
+                    const { x, y, width, height } = this.getters.getVisibleRect(selectedZone);
+                    ctx.strokeStyle = BORDER_COLOR;
+                    ctx.strokeRect(x, y, width, height);
                 }
             }
         }
@@ -46934,6 +47087,7 @@
         static components = { TopBar, Grid, BottomBar, SidePanel, SpreadsheetDashboard };
         sidePanel;
         composer;
+        spreadsheetRef = owl.useRef("spreadsheet");
         _focusGrid;
         keyDownMapping;
         isViewportTooSmall = false;
@@ -46968,9 +47122,25 @@
                 clipboard: this.env.clipboard || instantiateClipboard(),
                 startCellEdition: (content) => this.onGridComposerCellFocused(content),
             });
+            owl.useEffect(() => {
+                /**
+                 * Only refocus the grid if the active element is not a child of the spreadsheet
+                 * and spreadsheet is a child of that element. Anything else means that the focus
+                 * is on an element that needs to keep it.
+                 */
+                if (!this.spreadsheetRef.el.contains(document.activeElement) &&
+                    document.activeElement?.contains(this.spreadsheetRef.el)) {
+                    this.focusGrid();
+                }
+            }, () => [this.env.model.getters.getActiveSheetId()]);
             owl.useExternalListener(window, "resize", () => this.render(true));
             owl.useExternalListener(window, "beforeunload", this.unbindModelEvents.bind(this));
             this.bindModelEvents();
+            owl.onWillUpdateProps((nextProps) => {
+                if (nextProps.model !== this.props.model) {
+                    throw new Error("Changing the props model is not supported at the moment.");
+                }
+            });
             owl.onMounted(() => {
                 this.checkViewportSize();
             });
@@ -50744,6 +50914,8 @@
         isDefined: isDefined$1,
         lazy,
         genericRepeat,
+        createAction,
+        createActions,
     };
     const links = {
         isMarkdownLink,
@@ -50768,6 +50940,7 @@
         ScorecardChartConfigPanel,
         ScorecardChartDesignPanel,
         FigureComponent,
+        Menu,
     };
     function addFunction(functionName, functionDescription) {
         functionRegistry.add(functionName, functionDescription);
@@ -50817,8 +50990,8 @@
 
 
     __info__.version = '16.5.0-alpha.5';
-    __info__.date = '2023-08-17T11:19:14.474Z';
-    __info__.hash = 'e0cb3aa';
+    __info__.date = '2023-08-24T07:02:47.466Z';
+    __info__.hash = '38a0836';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
