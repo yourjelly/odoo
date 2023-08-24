@@ -1288,10 +1288,12 @@ export function isFontSize(node, props) {
  * @returns {boolean}
  */
 export function isSelectionFormat(editable, format) {
+    const sel = document.getSelection();
+    const range = sel.getRangeAt(0);
     const selectedNodes = getTraversedNodes(editable)
-        .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length);
+        .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length && range.isPointInRange(n, 0));
     const isFormatted = formatsSpecs[format].isFormatted;
-    return selectedNodes.every(n => isFormatted(n, editable));
+    return selectedNodes.length && selectedNodes.every(n => isFormatted(n, editable));
 }
 
 export function isUnbreakable(node) {
