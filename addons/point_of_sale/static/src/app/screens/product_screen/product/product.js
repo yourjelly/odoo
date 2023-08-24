@@ -32,9 +32,13 @@ export class ProductItem extends Component {
         return this.pos.default_pricelist;
     }
     get price() {
-        const formattedUnitPrice = this.env.utils.formatCurrency(
-            this.props.product.get_display_price(this.pricelist, 1)
+        const price = this.pos.tax.get_display_price(
+            this.pricelist,
+            1,
+            this.pos.get_order(),
+            this.props.product
         );
+        const formattedUnitPrice = this.env.utils.formatCurrency(price);
         if (this.props.product.to_weight) {
             return `${formattedUnitPrice}/${
                 this.pos.units_by_id[this.props.product.uom_id[0]].name

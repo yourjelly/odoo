@@ -246,86 +246,7 @@ export class Product extends PosModel {
     // and were automatically sorted based on their _order by the
     // ORM. After that they are added in this order to the pricelists.
     get_price(pricelist, quantity, price_extra = 0, recurring = false) {
-        const date = DateTime.now();
-
-        // In case of nested pricelists, it is necessary that all pricelists are made available in
-        // the POS. Display a basic alert to the user in the case where there is a pricelist item
-        // but we can't load the base pricelist to get the price when calling this method again.
-        // As this method is also call without pricelist available in the POS, we can't just check
-        // the absence of pricelist.
-        if (recurring && !pricelist) {
-            alert(
-                _t(
-                    "An error occurred when loading product prices. " +
-                        "Make sure all pricelists are available in the POS."
-                )
-            );
-        }
-
-        const rules = !pricelist
-            ? []
-            : (this.applicablePricelistItems[pricelist.id] || []).filter((item) =>
-                  this.isPricelistItemUsable(item, date)
-              );
-
-        let price = this.lst_price + (price_extra || 0);
-        const rule = rules.find((rule) => !rule.min_quantity || quantity >= rule.min_quantity);
-        if (!rule) {
-            return price;
-        }
-
-        if (rule.base === "pricelist") {
-            const base_pricelist = this.pos.pricelists.find(
-                (pricelist) => pricelist.id === rule.base_pricelist_id[0]
-            );
-            if (base_pricelist) {
-                price = this.get_price(base_pricelist, quantity, 0, true);
-            }
-        } else if (rule.base === "standard_price") {
-            price = this.standard_price;
-        }
-
-        if (rule.compute_price === "fixed") {
-            price = rule.fixed_price;
-        } else if (rule.compute_price === "percentage") {
-            price = price - price * (rule.percent_price / 100);
-        } else {
-            var price_limit = price;
-            price -= price * (rule.price_discount / 100);
-            if (rule.price_round) {
-                price = round_pr(price, rule.price_round);
-            }
-            if (rule.price_surcharge) {
-                price += rule.price_surcharge;
-            }
-            if (rule.price_min_margin) {
-                price = Math.max(price, price_limit + rule.price_min_margin);
-            }
-            if (rule.price_max_margin) {
-                price = Math.min(price, price_limit + rule.price_max_margin);
-            }
-        }
-
-        // This return value has to be rounded with round_di before
-        // being used further. Note that this cannot happen here,
-        // because it would cause inconsistencies with the backend for
-        // pricelist that have base == 'pricelist'.
-        return price;
-    }
-    get_display_price(pricelist, quantity) {
-        const order = this.pos.get_order();
-        const taxes = this.pos.get_taxes_after_fp(this.taxes_id, order && order.fiscal_position);
-        const currentTaxes = this.pos.getTaxesByIds(this.taxes_id);
-        const priceAfterFp = this.pos.computePriceAfterFp(
-            this.get_price(pricelist, quantity),
-            currentTaxes
-        );
-        const allPrices = this.pos.compute_all(taxes, priceAfterFp, 1, this.pos.currency.rounding);
-        if (this.pos.config.iface_tax_included === "total") {
-            return allPrices.total_included;
-        } else {
-            return allPrices.total_excluded;
-        }
+        return this.pos.tax.get_price(this, pricelist, quantity, price_extra, recurring);
     }
 }
 
@@ -859,8 +780,11 @@ export class Orderline extends PosModel {
         } else {
             var product = this.get_product();
             var taxes_ids = this.tax_ids || product.taxes_id;
-            var product_taxes = this.pos.get_taxes_after_fp(taxes_ids, this.order.fiscal_position);
-            var all_taxes = this.compute_all(
+            var product_taxes = this.pos.tax.get_taxes_after_fp(
+                taxes_ids,
+                this.order.fiscal_position
+            );
+            var all_taxes = this.pos.tax.compute_all(
                 product_taxes,
                 price_unit,
                 1,
@@ -881,8 +805,13 @@ export class Orderline extends PosModel {
         const lstPrice = this.compute_fixed_price(this.get_lst_price());
         const product = this.get_product();
         const taxesIds = product.taxes_id;
-        const productTaxes = this.pos.get_taxes_after_fp(taxesIds, this.order.fiscal_position);
-        const unitPrices = this.compute_all(productTaxes, lstPrice, 1, this.pos.currency.rounding);
+        const productTaxes = this.pos.tax.get_taxes_after_fp(taxesIds, this.order.fiscal_position);
+        const unitPrices = this.pos.tax.compute_all(
+            productTaxes,
+            lstPrice,
+            1,
+            this.pos.currency.rounding
+        );
         if (this.pos.config.iface_tax_included === "total") {
             return unitPrices.total_included;
         } else {
@@ -923,7 +852,7 @@ export class Orderline extends PosModel {
     }
     get_taxes() {
         var taxes_ids = this.tax_ids || this.get_product().taxes_id;
-        return this.pos.getTaxesByIds(taxes_ids);
+        return this.pos.tax.getTaxesByIds(taxes_ids);
     }
     /**
      * Calculate the amount of taxes of a specific Orderline, that are included in the price.
@@ -940,28 +869,6 @@ export class Orderline extends PosModel {
         return this.pos._map_tax_fiscal_position(tax, order);
     }
     /**
-     * Mirror JS method of:
-     * _compute_amount in addons/account/models/account.py
-     */
-    _compute_all(tax, base_amount, quantity, price_exclude) {
-        return this.pos._compute_all(tax, base_amount, quantity, price_exclude);
-    }
-    /**
-     * Mirror JS method of:
-     * compute_all in addons/account/models/account.py
-     *
-     * Read comments in the python side method for more details about each sub-methods.
-     */
-    compute_all(taxes, price_unit, quantity, currency_rounding, handle_price_include = true) {
-        return this.pos.compute_all(
-            taxes,
-            price_unit,
-            quantity,
-            currency_rounding,
-            handle_price_include
-        );
-    }
-    /**
      * Calculates the taxes for a product, and converts the taxes based on the fiscal position of the order.
      *
      * @returns {Object} The calculated product taxes after filtering and fiscal position conversion.
@@ -970,7 +877,7 @@ export class Orderline extends PosModel {
         const product = this.get_product();
         let taxesIds = this.tax_ids || product.taxes_id;
         taxesIds = taxesIds.filter((t) => t in this.pos.taxes_by_id);
-        return this.pos.get_taxes_after_fp(taxesIds, this.order.fiscal_position);
+        return this.pos.tax.get_taxes_after_fp(taxesIds, this.order.fiscal_position);
     }
     get_all_prices(qty = this.get_quantity()) {
         var price_unit = this.get_unit_price() * (1.0 - this.get_discount() / 100.0);
@@ -980,15 +887,15 @@ export class Orderline extends PosModel {
         var taxes_ids = this.tax_ids || product.taxes_id;
         taxes_ids = taxes_ids.filter((t) => t in this.pos.taxes_by_id);
         var taxdetail = {};
-        var product_taxes = this.pos.get_taxes_after_fp(taxes_ids, this.order.fiscal_position);
+        var product_taxes = this.pos.tax.get_taxes_after_fp(taxes_ids, this.order.fiscal_position);
 
-        var all_taxes = this.compute_all(
+        var all_taxes = this.pos.tax.compute_all(
             product_taxes,
             price_unit,
             qty,
             this.pos.currency.rounding
         );
-        var all_taxes_before_discount = this.compute_all(
+        var all_taxes_before_discount = this.pos.tax.compute_all(
             product_taxes,
             this.get_unit_price(),
             qty,
@@ -1015,7 +922,7 @@ export class Orderline extends PosModel {
         return this.order.pricelist ? this.order.pricelist.discount_policy : "with_discount";
     }
     compute_fixed_price(price) {
-        return this.pos.computePriceAfterFp(price, this.get_taxes());
+        return this.pos.tax.computePriceAfterFp(price, this.get_taxes(), this.pos.get_order());
     }
     get_fixed_lst_price() {
         return this.compute_fixed_price(this.get_lst_price());
@@ -1195,7 +1102,7 @@ export class Payment extends PosModel {
             payment_method_id: this.payment_method.id,
             amount: this.get_amount(),
             payment_status: this.payment_status,
-            can_be_reversed: this.can_be_reversed,
+            can_be_reversed: this.can_be_resersed,
             ticket: this.ticket,
             card_type: this.card_type,
             cardholder_name: this.cardholder_name,
@@ -1331,8 +1238,7 @@ export class Order extends PosModel {
             if (fiscal_position) {
                 this.fiscal_position = fiscal_position;
             } else {
-                this.fiscal_position_not_found = true;
-                console.error('ERROR: trying to load a fiscal position not available in the pos');
+                console.error("ERROR: trying to load a fiscal position not available in the pos");
             }
         }
 
