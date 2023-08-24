@@ -139,7 +139,7 @@ class LivechatController(http.Controller):
     def _get_guest_name(self):
         return _("Visitor")
 
-    @http.route('/im_livechat/get_session', type="json", auth='public', cors="*")
+    @http.route('/im_livechat/get_session', methods=["POST"], type="json", auth='public', cors="*")
     @add_guest_to_context
     def get_session(self, channel_id, anonymous_name, previous_operator_id=None, chatbot_script_id=None, persisted=True, **kwargs):
         user_id = None
