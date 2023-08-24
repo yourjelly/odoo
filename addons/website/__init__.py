@@ -3,6 +3,7 @@
 from . import controllers
 from . import models
 from . import wizard
+from .tools import generate_primary_snippet_templates
 
 import odoo
 from odoo import api, SUPERUSER_ID
@@ -39,6 +40,8 @@ def uninstall_hook(env):
 
 
 def post_init_hook(env):
+    generate_primary_snippet_templates(env, 'website')
+
     env['ir.module.module'].update_theme_images()
 
     if request:

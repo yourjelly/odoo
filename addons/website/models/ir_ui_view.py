@@ -7,6 +7,7 @@ import werkzeug
 
 from odoo import api, fields, models
 from odoo import tools
+from odoo.addons.website.tools import generate_primary_snippet_templates
 from odoo.exceptions import AccessError
 from odoo.osv import expression
 from odoo.http import request
@@ -514,3 +515,8 @@ class View(models.Model):
         if website:
             return website.default_lang_id.code
         return super()._get_base_lang()
+
+    def _validate_module_views(self, module):
+        if module == 'website' or module.startswith('website_') or module.startswith('theme_'):
+            generate_primary_snippet_templates(self.env, module)
+        return super()._validate_module_views(module)
