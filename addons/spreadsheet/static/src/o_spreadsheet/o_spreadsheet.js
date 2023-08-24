@@ -50825,8 +50825,8 @@
 
 
     __info__.version = '16.5.0-alpha.5';
-    __info__.date = '2023-08-24T06:23:26.164Z';
-    __info__.hash = 'e72bf97';
+    __info__.date = '2023-08-24T07:14:21.242Z';
+    __info__.hash = '5765f66';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
