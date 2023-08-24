@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from contextlib import contextmanager
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
+from unittest.mock import patch
 
 from odoo import Command
 from odoo.addons.event.tests.common import EventCase
@@ -30,7 +32,7 @@ class TestMailSchedule(EventCase, MockEmail):
         event_date_begin = datetime(2021, 3, 22, 8, 0, 0)
         event_date_end = datetime(2021, 3, 24, 18, 0, 0)
 
-        with freeze_time(now):
+        with self._freeze_time(now):
             # create with admin to force create_date
             test_event = self.env['event.event'].create({
                 'name': 'TestEventMail',
@@ -92,7 +94,7 @@ class TestMailSchedule(EventCase, MockEmail):
         self.assertEqual(event_next_scheduler.mail_count_done, 0)
 
         # create some registrations
-        with freeze_time(now), self.mock_mail_gateway():
+        with self._freeze_time(now), self.mock_mail_gateway():
             reg1 = self.env['event.registration'].create({
                 'create_date': now,
                 'event_id': test_event.id,
@@ -141,7 +143,7 @@ class TestMailSchedule(EventCase, MockEmail):
         self.assertEqual(after_sub_scheduler_2.mail_count_done, 0)
 
         # execute event reminder scheduler explicitly, before scheduled date -> should not do anything
-        with freeze_time(now), self.mock_mail_gateway():
+        with self._freeze_time(now), self.mock_mail_gateway():
             after_sub_scheduler_2.execute()
         self.assertFalse(any(mail_reg.mail_sent for mail_reg in after_sub_scheduler_2.mail_registration_ids))
         self.assertFalse(after_sub_scheduler_2.mail_done)
@@ -150,7 +152,7 @@ class TestMailSchedule(EventCase, MockEmail):
 
         # execute event reminder scheduler explicitly, right at scheduled date -> should sent mails
         now_registration = now + relativedelta(hours=1)
-        with freeze_time(now_registration), self.mock_mail_gateway():
+        with self._freeze_time(now_registration), self.mock_mail_gateway():
             after_sub_scheduler_2.execute()
 
         # verify that subscription scheduler was auto-executed after each registration
@@ -178,7 +180,7 @@ class TestMailSchedule(EventCase, MockEmail):
 
         # simulate cron running before scheduled date -> should not do anything
         now_start = event_date_begin + relativedelta(hours=-25, microsecond=654321)
-        with freeze_time(now_start), self.mock_mail_gateway():
+        with self._freeze_time(now_start), self.mock_mail_gateway():
             event_cron_id.method_direct_trigger()
 
         self.assertFalse(event_prev_scheduler.mail_done)
@@ -188,7 +190,7 @@ class TestMailSchedule(EventCase, MockEmail):
 
         # execute cron to run schedulers after scheduled date
         now_start = event_date_begin + relativedelta(hours=-23, microsecond=654321)
-        with freeze_time(now_start), self.mock_mail_gateway():
+        with self._freeze_time(now_start), self.mock_mail_gateway():
             event_cron_id.method_direct_trigger()
 
         # check that scheduler is finished
@@ -209,7 +211,7 @@ class TestMailSchedule(EventCase, MockEmail):
         # --------------------------------------------------
 
         test_event.write({'auto_confirm': False})
-        with freeze_time(now_start), self.mock_mail_gateway():
+        with self._freeze_time(now_start), self.mock_mail_gateway():
             reg3 = self.env['event.registration'].create({
                 'create_date': now_start,
                 'event_id': test_event.id,
@@ -229,7 +231,7 @@ class TestMailSchedule(EventCase, MockEmail):
         # confirm registration -> should trigger registration schedulers
         # NOTE: currently all schedulers are based on create_date
         # meaning several communications may be sent in the time time
-        with freeze_time(now_start + relativedelta(hours=1)), self.mock_mail_gateway():
+        with self._freeze_time(now_start + relativedelta(hours=1)), self.mock_mail_gateway():
             reg3.action_confirm()
 
         # verify that subscription scheduler was auto-executed after new registration confirmed
@@ -263,7 +265,7 @@ class TestMailSchedule(EventCase, MockEmail):
 
         # execute event reminder scheduler explicitly after its schedule date
         new_end = event_date_end + relativedelta(hours=2)
-        with freeze_time(new_end), self.mock_mail_gateway():
+        with self._freeze_time(new_end), self.mock_mail_gateway():
             event_cron_id.method_direct_trigger()
 
         # check that scheduler is finished
@@ -280,6 +282,8 @@ class TestMailSchedule(EventCase, MockEmail):
             fields_values={'subject': '%s: today' % test_event.name,
                            'email_from': self.user_eventmanager.company_id.email_formatted,
                           })
+
+        raise Exception("qsd")
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')
     def test_unique_event_mail_ids(self):
@@ -336,3 +340,8 @@ class TestMailSchedule(EventCase, MockEmail):
 
         self.assertEqual(len(duplicate_mails), 0,
             "The duplicate configuration (first one from event_type.event_type_mail_ids which has same configuration as the sent one) should not have been added")
+
+    @contextmanager
+    def _freeze_time(self, now):
+        with freeze_time(now), patch.object(self.env.cr, 'now', lambda: now):
+            yield
