@@ -347,9 +347,11 @@ class SaleOrder(models.Model):
 
     @api.depends('partner_id')
     def _compute_partner_invoice_id(self):
+        self.env.context=dict(self.env.context)
+        self.env.context.update({'show_address': False, 'show_vat': False})
         for order in self:
-            order.partner_invoice_id = order.partner_id.address_get(['invoice'])['invoice'] if order.partner_id else False
-
+            order.partner_invoice_id = order.partner_id.address_get(['invoice'])['invoice'] if order.partner_id else False 
+    
     @api.depends('partner_id')
     def _compute_partner_shipping_id(self):
         for order in self:
@@ -613,9 +615,8 @@ class SaleOrder(models.Model):
         for order in self:
             order.amount_to_invoice = order.amount_total
             for invoice in order.invoice_ids.filtered(lambda x: x.state == 'posted'):
-                prices = sum(invoice.line_ids.filtered(lambda x: x.sale_line_ids.order_id.id == order.id).mapped('price_total'))
                 invoice_amount_currency = invoice.currency_id._convert(
-                    prices * -invoice.direction_sign,
+                    invoice.tax_totals['amount_total'] * -invoice.direction_sign,
                     order.currency_id,
                     invoice.company_id,
                     invoice.date,
@@ -1117,7 +1118,6 @@ class SaleOrder(models.Model):
             'transaction_ids': [Command.set(self.transaction_ids.ids)],
             'company_id': self.company_id.id,
             'invoice_line_ids': [],
-            'user_id': self.user_id.id,
         }
 
     def action_view_invoice(self, invoices=False):
