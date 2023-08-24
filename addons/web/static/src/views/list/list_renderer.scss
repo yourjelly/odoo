@@ -201,8 +201,7 @@
                 margin-left: 10px;
 
                 > button {
-                    @include o-hover-text-color($o-brand-primary, darken($o-brand-primary, 20%));
-                    background-color: transparent;
+                    //@include o-hover-text-color($o-brand-primary, darken($o-brand-primary, 20%));
                     border: none;
                     padding-top: 0;
                     padding-bottom: 0;
