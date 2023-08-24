@@ -9,6 +9,7 @@ import { _t } from "@web/core/l10n/translation";
 
 patch(Messaging.prototype, {
     async initialize() {
+        await this.env.services["im_livechat.livechat"].initializedDeferred;
         if (this.env.services["im_livechat.livechat"].state === SESSION_STATE.PERSISTED) {
             try {
                 await super.initialize();

@@ -47,9 +47,9 @@ export class LivechatService {
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {{
-     * cookie: typeof import("@web/core/browser/cookie_service").cookieService.start,
-     * bus_service: typeof import("@bus/services/bus_service").busService.start,
-     * rpc: typeof import("@web/core/network/rpc_service").rpcService.start,
+     * cookie: ReturnType<typeof import("@web/core/browser/cookie_service").cookieService.start>,
+     * bus_service: ReturnType<typeof import("@bus/services/bus_service").busService.start>,
+     * rpc: ReturnType<typeof import("@web/core/network/rpc_service").rpcService.start>,
      * "mail.store": import("@mail/core/common/store_service").Store
      * }} services
      */
@@ -96,8 +96,6 @@ export class LivechatService {
         }
         this.state = persisted ? SESSION_STATE.PERSISTED : SESSION_STATE.CREATED;
         session.chatbotScriptId = chatbotScriptId;
-        session.isLoaded = true;
-        session.status = "ready";
         if (session.operator_pid) {
             this.state = persisted ? SESSION_STATE.PERSISTED : SESSION_STATE.CREATED;
             this.updateSession(session);
@@ -146,13 +144,6 @@ export class LivechatService {
         if (session?.uuid && this.state === SESSION_STATE.NONE) {
             // Channel is already created on the server.
             this.state = SESSION_STATE.PERSISTED;
-            const [messages] = await Promise.all([
-                this.rpc("/im_livechat/chat_history", {
-                    uuid: session.uuid,
-                }),
-                await this.initializePersistedSession(),
-            ]);
-            session.messages = messages.reverse();
         }
         if (!session || (!session.uuid && persisted)) {
             session = await this._createSession({ persisted });
