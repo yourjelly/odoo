@@ -5,11 +5,7 @@ import { evaluateExpr, evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { utils } from "@web/core/ui/ui_service";
 import { getFieldContext } from "@web/model/relational_model/utils";
-import {
-    archParseBoolean,
-    getClassNameFromDecoration,
-    X2M_TYPES,
-} from "@web/views/utils";
+import { archParseBoolean, getClassNameFromDecoration, X2M_TYPES } from "@web/views/utils";
 import { getTooltipInfo } from "./field_tooltip";
 
 import { Component, xml } from "@odoo/owl";
@@ -174,9 +170,8 @@ export class Field extends Component {
 
         let propsFromNode = {};
         if (this.props.fieldInfo) {
-            const evalContext = record.getEvalContext?.(false) || record.evalContext;
             let fieldInfo = this.props.fieldInfo;
-            readonly = readonly || evaluateBooleanExpr(fieldInfo.readonly, evalContext);
+            readonly = readonly || evaluateBooleanExpr(fieldInfo.readonly, record.evalContext);
 
             if (this.field.extractProps) {
                 if (this.props.attrs) {
@@ -191,7 +186,7 @@ export class Field extends Component {
                         return getFieldContext(record, fieldInfo.name, fieldInfo.context);
                     },
                     domain() {
-                        const evalContext = record.getEvalContext?.(true) || record.evalContext;
+                        const evalContext = record.evalContext;
                         if (fieldInfo.domain) {
                             return new Domain(evaluateExpr(fieldInfo.domain, evalContext)).toList();
                         }
@@ -200,7 +195,7 @@ export class Field extends Component {
                             ? new Domain(evaluateExpr(domain, evalContext)).toList()
                             : domain || [];
                     },
-                    required: evaluateBooleanExpr(fieldInfo.required, evalContext),
+                    required: evaluateBooleanExpr(fieldInfo.required, record.evalContext),
                     readonly: readonly,
                 };
                 propsFromNode = this.field.extractProps(fieldInfo, dynamicInfo);
@@ -296,7 +291,7 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
         }
     }
     if (name === "id") {
-        fieldInfo.readonly = 'True';
+        fieldInfo.readonly = "True";
     }
 
     if (widget === "handle") {
