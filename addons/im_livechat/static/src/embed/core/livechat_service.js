@@ -54,9 +54,9 @@ export class LivechatService {
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {{
-     * cookie: typeof import("@web/core/browser/cookie_service").cookieService.start,
-     * bus_service: typeof import("@bus/services/bus_service").busService.start,
-     * rpc: typeof import("@web/core/network/rpc_service").rpcService.start,
+     * cookie: ReturnType<typeof import("@web/core/browser/cookie_service").cookieService.start>,
+     * bus_service: ReturnType<typeof import("@bus/services/bus_service").busService.start>,
+     * rpc: ReturnType<typeof import("@web/core/network/rpc_service").rpcService.start>,
      * "mail.store": import("@mail/core/common/store_service").Store
      * }} services
      */
@@ -106,18 +106,10 @@ export class LivechatService {
             },
             { shadow: true }
         );
-        if (!session) {
-            this.cookie.deleteCookie(this.SESSION_COOKIE);
-            this.state = SESSION_STATE.NONE;
+        if (!session?.operator_pid) {
             return;
         }
-        session.chatbotScriptId = chatbotScriptId;
-        session.isLoaded = true;
-        session.status = "ready";
-        if (session.operator_pid) {
-            this.state = persisted ? SESSION_STATE.PERSISTED : SESSION_STATE.CREATED;
-            this.updateSession(session);
-        }
+        this.updateSession({ ...session, chatbotScriptId });
         return session;
     }
 
@@ -158,23 +150,18 @@ export class LivechatService {
     }
 
     async getSession({ persisted = false } = {}) {
-        let session = JSON.parse(this.cookie.current[this.SESSION_COOKIE] ?? false);
-        if (session?.uuid && this.state === SESSION_STATE.NONE) {
-            // Channel is already created on the server.
-            this.state = SESSION_STATE.PERSISTED;
-            const [messages] = await Promise.all([
-                this.rpc("/im_livechat/chat_history", {
-                    uuid: session.uuid,
-                }),
-                await this.initializePersistedSession(),
-            ]);
-            session.messages = messages.reverse();
-        }
+        let session = this.sessionCookie;
         if (!session || (!session.uuid && persisted)) {
             session = await this._createSession({ persisted });
-            if (this.state === SESSION_STATE.PERSISTED) {
-                await this.initializePersistedSession();
-            }
+        }
+        if (!session) {
+            this.state = SESSION_STATE.NONE;
+            return;
+        }
+        const wasJustPersisted = this.state !== SESSION_STATE.PERSISTED && session?.uuid;
+        this.state = session.uuid ? SESSION_STATE.PERSISTED : SESSION_STATE.CREATED;
+        if (wasJustPersisted) {
+            await this.initializePersistedSession();
         }
         return session;
     }

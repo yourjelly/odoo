@@ -46,9 +46,6 @@ patch(MockServer.prototype, {
         if (route === "/im_livechat/email_livechat_transcript") {
             return true;
         }
-        if (route === "/im_livechat/chat_history") {
-            return this._mockRouteImLivechatChatHistory(args.uuid, args.last_id, args.limit);
-        }
         return super._performRPC(...arguments);
     },
     /**
@@ -209,17 +206,6 @@ patch(MockServer.prototype, {
         }
         [channel] = this.pyEnv["discuss.channel"].searchRead([["uuid", "=", uuid]]);
         return channel.rating_ids[0];
-    },
-
-    /**
-     * Simulates the `/im_livechat/chat_history` route.
-     */
-    _mockRouteImLivechatChatHistory(uuid, lastId, limit = 20) {
-        const [channel] = this.pyEnv["discuss.channel"].searchRead([["uuid", "=", uuid]]);
-        if (!channel) {
-            return [];
-        }
-        return this._mockDiscussChannel_channel_fetch_message(channel.id, lastId, limit);
     },
 
     /**
