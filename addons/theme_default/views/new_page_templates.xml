@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="s_text_block_about_0" inherit_id="website.s_text_block" primary="True">
+<template id="new_page_template_about_0_s_text_block" inherit_id="website.new_page_template_about_0_s_text_block">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_text_block</attribute>
         <attribute name="class" add="o_cc o_cc2" separator=" "/>
@@ -12,11 +12,11 @@
         <div class="o_we_shape o_web_editor_Origins_18 o_we_animated"/>
     </xpath>
 </template>
-
-<template id="new_page_template_about_0" inherit_id="website.new_page_template_about_0">
-    <xpath expr="//t[@t-snippet-call='website.s_text_block']" position="attributes">
-        <attribute name="t-snippet-call">theme_default.s_text_block_about_0</attribute>
+<!--
+<template id="new_page_template_about_0" inherit_id="website.new_page_template_sections_about_0">
+    <xpath expr="//t[@t-snippet-call='website.new_page_template_about_0_s_text_block']" position="attributes">
+        <attribute name="t-snippet-call">theme_default.new_page_template_about_0_s_text_block</attribute>
     </xpath>
 </template>
-
+-->
 </odoo>
