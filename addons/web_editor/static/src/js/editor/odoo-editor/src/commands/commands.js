@@ -49,6 +49,8 @@ import {
     fillEmpty,
     isEmptyBlock,
     getCursorDirection,
+    firstLeaf,
+    lastLeaf,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
@@ -175,8 +177,15 @@ export const editorCommands = {
         // a list, unwrap the list elements from the list.
         if (closestElement(selection.anchorNode, 'UL, OL') &&
             (container.firstChild.nodeName === 'UL' || container.firstChild.nodeName === 'OL')) {
-            container.replaceChildren(...container.firstChild.childNodes);
+            unwrapContents(container.firstChild);
         }
+
+        // Similarly for LastChild
+        if (closestElement(selection.focusNode, 'UL, OL') &&
+            (container.lastChild.nodeName === 'UL' || container.lastChild.nodeName === 'OL')) {
+            unwrapContents(container.lastChild);
+        }
+
         startNode = startNode || editor.document.getSelection().anchorNode;
 
         // In case the html inserted is all contained in a single root <p> or <li>
@@ -192,6 +201,11 @@ export const editorCommands = {
         } else if (container.childElementCount > 1) {
             // Grab the content of the first child block and isolate it.
             if (isBlock(container.firstChild) && !['TABLE', 'UL', 'OL'].includes(container.firstChild.nodeName)) {
+                if (container.firstChild.classList.contains('oe-nested')) {
+                    const deepestLi = closestElement(firstLeaf(container.firstChild), 'li');
+                    splitAroundUntil(deepestLi, container.firstChild);
+                    container.firstChild.replaceChildren(...deepestLi.childNodes);
+                }
                 containerFirstChild.replaceChildren(...container.firstElementChild.childNodes);
                 container.firstElementChild.remove();
             }
@@ -222,12 +236,23 @@ export const editorCommands = {
         let lastChildNode = false;
         const tagULOL = ['OL', 'UL'];
         const currentList = currentNode && closestElement(currentNode, 'UL, OL');
-        const mode =  currentList && (currentList.classList.contains('o_checklist') ? 'CL' : currentList.nodeName);
+        const mode = currentList && (currentList.classList.contains('o_checklist') ? 'CL' : currentList.nodeName);
+        //FIXME: to find a better alternative than to use temp variable hack.
+        let temp = null;
         const convertList = (node) => {
-            editor.historyPauseSteps();
-            setSelection(node.firstChild, 0, node.lastChild, nodeSize(node.lastChild));
-            editor.execCommand('toggleList', mode);
-            editor.historyUnpauseSteps();
+            //FIXME: CTRL+Z not working properly some history issue. :(
+            temp = temp || node.firstChild;
+            setSelection(firstLeaf(node), 0, lastLeaf(node), nodeSize(lastLeaf(node)));
+            if (node.firstChild && mode !== getListMode(node) &&
+                (tagULOL.includes(node.nodeName) || 
+                (node.classList.contains('oe-nested') && mode !== getListMode(node.firstChild)))) {
+                editor.execCommand('toggleList', mode);
+            } else if (node.firstChild && (mode === getListMode(node) || node.classList.contains('oe-nested'))) {
+                const childNodes = node.childNodes;
+                [...childNodes].forEach(n => n.classList.contains('oe-nested') && convertList(n));
+            }
+            document.getSelection().collapseToEnd();
+            return temp.parentNode;
         }
         const _insertAt = (reference, nodes, insertBefore) => {
             for (const child of (insertBefore ? nodes.reverse() : nodes)) {
@@ -240,18 +265,23 @@ export const editorCommands = {
             const toInsert = [...containerLastChild.childNodes]; // Prevent mutation
             _insertAt(currentNode, [...toInsert], insertBefore);
             if (tagULOL.includes(toInsert[0].nodeName)) {
-                convertList(toInsert[0]);
-                convertedList = currentNode.nextSibling;
+                convertedList = convertList(toInsert[0]);
+                temp = null;//FIXME:
             }
-            currentNode = insertBefore ? toInsert[0] : currentNode;
+            if (convertedList && convertedList.nextSibling) {
+                editor._applyCommand('oDeleteForward');
+            }
+            currentNode = insertBefore ?
+                        (editor.editable.contains(toInsert[0]) && toInsert[0]) || convertedList :
+                        currentNode;
             lastChildNode = toInsert[toInsert.length - 1];
         }
         if (containerFirstChild.hasChildNodes()) {
             const toInsert = [...containerFirstChild.childNodes]; // Prevent mutation
             _insertAt(currentNode, [...toInsert], insertBefore);
             if (tagULOL.includes(toInsert[0].nodeName)) {
-                convertList(toInsert[0]);
-                convertedList = currentNode.nextSibling;
+                convertedList = convertList(toInsert[0]);
+                temp = null;//FIXME:
             }
             currentNode = editor.editable.contains(toInsert[toInsert.length - 1]) ?
                         toInsert[toInsert.length - 1] :
@@ -260,7 +290,7 @@ export const editorCommands = {
         }
         // If all the Html have been isolated, We force a split of the parent element
         // to have the need new line in the final result
-        if (!container.hasChildNodes() || tagULOL.includes(currentNode.nodeName)) {
+        if (!container.hasChildNodes()) {
             if (isUnbreakable(closestBlock(currentNode.nextSibling))) {
                 currentNode.nextSibling.oShiftEnter(0);
             } else {
@@ -268,13 +298,9 @@ export const editorCommands = {
                 let parent = currentNode.nextSibling.parentElement;
                 const index = [...parent.childNodes].indexOf(currentNode.nextSibling);
                 parent.oEnter(index);
-                if (currentNode.nodeType === 3 && currentNode.parentNode.nodeName === "LI") {
-                    parent = currentNode.parentNode.nextElementSibling;
-                }
-                if (parent.textContent && parent.classList.contains('oe-hint')) {
-                    parent.classList.remove('oe-hint');
-                } else if (parent.hasAttribute('id')) {
-                    parent.removeAttribute('id');
+                parent = parent.nextSibling;
+                if (parent && parent.nodeName === 'LI' && tagULOL.includes(parent.firstChild.nodeName)) {
+                    parent.classList.add('oe-nested');
                 }
             }
         }
@@ -303,12 +329,15 @@ export const editorCommands = {
                     if (offset) {
                         const [left, right] = splitElement(currentNode.parentElement, offset);
                         currentNode = insertBefore ? right : left;
+                        if (right.nodeName === 'LI' && tagULOL.includes(right.firstChild?.nodeName)) {
+                            right.classList.add('oe-nested')
+                        }
                     } else {
                         currentNode = currentNode.parentElement;
                     }
                 }
             }
-            if (nodeToInsert.nodeName === 'P' && currentNode.nodeName === 'LI' ) {
+            if (isBlock(nodeToInsert) && currentNode.nodeName === 'LI') {
                 // When multiple <p>text1</p><p>text2</p><p>text3</p><p>text3</p> only start and end were converting to <li>,
                 // and rest were pasted as <p> only, convert remaining <p> to <li> before pasting on list.
                 setTagName(nodeToInsert, 'LI');
@@ -319,19 +348,14 @@ export const editorCommands = {
             } else {
                 currentNode.after(nodeToInsert);
             }
-            if (tagULOL.includes(nodeToInsert.firstChild.nodeName) && currentNode.nodeName === 'LI') {
-                convertList(nodeToInsert.firstChild);
-                convertedList = currentNode.nextSibling;
+            if (nodeToInsert.nodeName === 'LI' && nodeToInsert.classList.contains('oe-nested')) {
+                convertedList = convertList(nodeToInsert.firstChild);
+                temp = null;//FIXME:
             }
             if (currentNode.tagName !== 'BR' && isShrunkBlock(currentNode)) {
                 currentNode.remove();
             }
             currentNode = nodeToInsert;
-        }
-        // Make sure the converted UL/OL pasted in li, li must have class 'oe-nested'
-        // But if the text in pasted in a list with text content.
-        if (convertedList && !convertedList.parentNode.firstChild.nodeValue) {
-            convertedList.parentElement.classList.add('oe-nested');
         }
 
         currentNode = lastChildNode &&
@@ -340,7 +364,8 @@ export const editorCommands = {
         selection.removeAllRanges();
         const newRange = new Range();
         let lastPosition = rightPos(currentNode);
-        if (lastPosition[0] === editor.editable) {
+        //FIXME: Still some issues with cursor
+        if (lastPosition[0] === editor.editable || lastPosition[0].classList.contains('oe-nested')) {
             // Correct the position if it happens to be in the editable root.
             lastPosition = getDeepestPosition(...lastPosition);
         }
@@ -548,7 +573,7 @@ export const editorCommands = {
             }
         }
 
-        let target = [...(blocks)];
+        let target = [...(blocks.size ? blocks : li)];
         while (target.length) {
             const node = target.pop();
             // only apply one li per ul
