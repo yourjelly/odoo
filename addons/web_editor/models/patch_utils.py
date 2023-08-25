@@ -52,8 +52,9 @@ def apply_patch(initial_content, patch):
     for operation in patch_operations:
         metadata, *patch_content_line = operation.split(LINE_SEPARATOR)
 
-        operation_type, lines_index_range = metadata.split(
-            PATCH_OPERATION_LINE_AT)
+        metadata_split = metadata.split(PATCH_OPERATION_LINE_AT)
+        operation_type = metadata_split[0]
+        lines_index_range = metadata_split[1] if len(metadata_split) > 1 else ''
         # We need to remove PATCH_OPERATION_CONTENT char from lines_index_range.
         lines_index_range = lines_index_range.split(PATCH_OPERATION_CONTENT)[0]
         indexes = lines_index_range.split(',')
@@ -118,8 +119,9 @@ def generate_comparison(new_content, old_content, html_attribute_to_ignore=[]):
         print("\n      > > operation :" + str(operation))
         metadata, *patch_content_line = operation.split(LINE_SEPARATOR)
 
-        operation_type, lines_index_range = metadata.split(
-            PATCH_OPERATION_LINE_AT)
+        metadata_split = metadata.split(PATCH_OPERATION_LINE_AT)
+        operation_type = metadata_split[0]
+        lines_index_range = metadata_split[1] if len(metadata_split) > 1 else ''
         # We need to remove PATCH_OPERATION_CONTENT char from lines_index_range.
         lines_index_range = lines_index_range.split(PATCH_OPERATION_CONTENT)[0]
         indexes = lines_index_range.split(',')
