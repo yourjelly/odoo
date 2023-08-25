@@ -480,6 +480,11 @@ class Channel(models.Model):
             slide_channel.partner_ids = partner_ids
             slide_channel.partner_all_ids = partner_ids + data.get((slide_channel, 'invited'), [])
 
+    def get_website_slides_fields(self):
+        website_slides_model = self.env['ir.model'].search([('model', '=', 'slide.channel')])
+        fields = self.env['ir.model.fields'].search([('model_id', '=', website_slides_model.id)])
+        return fields.mapped('name')
+
     def _search_partner_ids(self, operator, value):
         if isinstance(value, int) and operator == 'in':
             value = [value]

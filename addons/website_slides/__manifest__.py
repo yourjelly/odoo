@@ -69,6 +69,7 @@ Featuring
     ],
     'installable': True,
     'application': True,
+    'uninstall_hook': 'uninstall_hook',
     'assets': {
         'web.assets_backend': [
             'website_slides/static/src/activity/**/*',
