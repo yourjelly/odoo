@@ -12,7 +12,7 @@ import werkzeug.utils
 import werkzeug.wrappers
 
 from itertools import islice
-from lxml import etree
+from lxml import etree, html
 from textwrap import shorten
 from werkzeug.exceptions import NotFound
 from xml.etree import ElementTree as ET
@@ -654,14 +654,20 @@ class Website(Home):
                 'title': group_el.text,
                 'templates': templates,
             }
+
+            def adjust_template(template_html):
+                tree = html.fromstring(template_html)
+                View._adjust_new_page_template(tree)
+                return html.tostring(tree)
+            
             for template in View.search([
                 ('mode', '=', 'primary'),
-                ('key', 'like', escape_psql(f'new_page_template_{group["id"]}_')),
+                ('key', 'like', escape_psql(f'new_page_template_sections_{group["id"]}_')),
             ], order='key'):
                 try:
                     templates.append({
                         'key': template.key,
-                        'template': View._render_template(template.key),
+                        'template': adjust_template(View._render_template(template.key)),
                     })
                 except QWebException as qe:
                     # Do not fail if theme is not compatible.

@@ -520,3 +520,11 @@ class View(models.Model):
         if module == 'website' or module.startswith('website_') or module.startswith('theme_'):
             generate_primary_snippet_templates(self.env, module)
         return super()._validate_module_views(module)
+
+    @api.model
+    def _adjust_new_page_template(self, html_tree):
+        # data-snippet must be the short general name
+        for section_el in html_tree.xpath("//section[@data-snippet]"):
+            snippet = section_el.attrib['data-snippet']
+            if '_s_' in snippet:
+                section_el.attrib['data-snippet'] = f's_{snippet.split("_s_")[-1]}'
