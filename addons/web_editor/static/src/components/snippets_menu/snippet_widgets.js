@@ -1683,7 +1683,7 @@ export class WeMany2one extends UserValueWidget {
         return fields;
     }
     /**
-     * @override 
+     * @override
      */
     computeValues(values) {
         for (const [methodName, value] of values) {
@@ -1728,7 +1728,7 @@ export class WeMany2one extends UserValueWidget {
      */
     async search(searchValue) {
         const recTuples = await this.orm.call(
-            this.props.model, 
+            this.props.model,
             "name_search",
             [],
             {
@@ -1804,7 +1804,7 @@ export class WeMany2Many extends UserValueWidget {
                 listWidget.optionValues.set("renderListItems", JSON.stringify(entries));
             }
         }
-        return values;
+        return super.computeValues(values);
     }
     /**
      * @override

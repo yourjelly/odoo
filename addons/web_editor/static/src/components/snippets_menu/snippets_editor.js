@@ -37,6 +37,7 @@ export class SnippetEditor extends Component {
         "showOverlay",
         "snippetEditionRequest",
         "toggleOverlay",
+        "toggleSnippetOptionVisibility",
         "getDragAndDropOptions",
         "requestUserValueWidget",
         "updateUICounter",
@@ -76,6 +77,7 @@ export class SnippetEditor extends Component {
         this.props.events.cleanForSave = this.cleanForSave.bind(this);
         this.props.events.onClone = this.onClone.bind(this);
         this.props.events.onRemove = this.onRemove.bind(this);
+        this.props.events.toggleTargetVisibility = this.toggleTargetVisibility.bind(this);
 
         this.state = useState({
             name: this.name,
@@ -425,6 +427,7 @@ export class SnippetEditor extends Component {
                             value === undefined
                                 ? (option.props.visible = this.props.showOptions && !option.props.visible)
                                 : (option.props.visible = this.props.showOptions && value),
+                        toggleSnippetOptionVisibility: this.props.toggleSnippetOptionVisibility,
                         target: target,
                         updateOverlay: () => {
                             this.cover();

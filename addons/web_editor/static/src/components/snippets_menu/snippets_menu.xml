@@ -106,6 +106,36 @@
         <t t-if="state.contentLoading">
             <t t-call="web_editor.LoadingEffect"/>
         </t>
+        <WeInvisibleDOMPanel odooEditor="this.env.odooEditor"
+            onInvisibleEntryClick="onInvisibleEntryClick.bind(this)"
+            invisibleSelector="invisibleSelector"
+            invisibleSnippetsEls="state.invisibleSnippetsEls"/>
     </div>
 </t>
+
+<t t-name="web_editor.WeInvisibleDOMPanel">
+    <div t-if="state.invisibleEntriesProps.length" class="o_we_invisible_el_panel">
+        <div class="o_panel_header">
+            Invisible Elements
+        </div>
+        <t t-foreach="state.invisibleEntriesProps" t-as="entryProps" t-key="entryProps.id"
+           class="'o_we_invisible_entry d-flex align-items-center justify-content-between'">
+            <WeInvisibleSnippet t-props="entryProps"/>
+        </t>
+    </div>
+</t>
+
+<t t-name="web_editor.WeInvisibleSnippet">
+    <div t-on-click="onInvisibleEntryClick" class="o_we_invisible_entry d-flex align-items-center justify-content-between"
+         t-att-class="{'o_we_invisible_root_parent': props.isRootParent, 'o_we_sublevel_1': props.isDescendant}">
+        <we-title t-esc="props.title"/>
+        <i class="fa ms-2" t-attf-class="{{ state.show ? 'fa-eye' : 'fa-eye-slash' }}"/>
+    </div>
+    <ul t-if="state.invisibleEntriesProps.length">
+        <t t-foreach="state.invisibleEntriesProps" t-as="entryProps" t-key="entryProps.id">
+            <WeInvisibleSnippet t-props="entryProps"/>
+        </t>
+    </ul>
+</t>
+
 </template>

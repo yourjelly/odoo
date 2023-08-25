@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { registry } from "@web/core/registry";
+import { session } from "@web/session";
 import {
     SnippetOption,
     Box,
@@ -16,7 +17,10 @@ import {
 } from "@web_editor/components/snippets_menu/snippets_options";
 
 import {
+    onMounted,
     onRendered,
+    onWillStart,
+    useState,
     useSubEnv,
     xml,
 } from "@odoo/owl";
@@ -646,3 +650,347 @@ registry.category("snippets_options").add("website.ScrollButton", {
     selector: "section",
     exclude: "[data-snippet] :not(.oe_structure) > [data-snippet]",
 })
+
+/**
+ * Manage the visibility of snippets on mobile/desktop.
+ */
+class DeviceVisibility extends SnippetOption {
+    setup() {
+        super.setup();
+        useSubEnv({
+            validMethodNames: [...this.env.validMethodNames, "toggleDeviceVisibility"],
+        });
+    }
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Toggles the device visibility.
+     *
+     * @see this.selectClass for parameters
+     */
+    async toggleDeviceVisibility(previewMode, widgetValue, params) {
+        this.target.classList.remove('d-none', 'd-md-none', 'd-lg-none',
+            'o_snippet_mobile_invisible', 'o_snippet_desktop_invisible',
+            'o_snippet_override_invisible',
+        );
+        const style = getComputedStyle(this.target);
+        this.target.classList.remove(`d-md-${style['display']}`, `d-lg-${style['display']}`);
+
+        if (widgetValue === 'no_desktop') {
+            this.target.classList.add('d-lg-none', 'o_snippet_desktop_invisible');
+        } else if (widgetValue === 'no_mobile') {
+            this.target.classList.add(`d-lg-${style['display']}`, 'd-none', 'o_snippet_mobile_invisible');
+        }
+
+        // Update invisible elements.
+        const isMobile = this._website.context.isMobile;
+        const show = widgetValue !== (isMobile ? 'no_mobile' : 'no_desktop');
+        this.props.toggleSnippetOptionVisibility(show);
+    }
+    /**
+     * @override
+     */
+    async onTargetHide() {
+        this.target.classList.remove('o_snippet_override_invisible');
+    }
+    /**
+     * @override
+     */
+    async onTargetShow() {
+        if (this.target.classList.contains('o_snippet_mobile_invisible')
+                || this.target.classList.contains('o_snippet_desktop_invisible')) {
+            this.target.classList.add('o_snippet_override_invisible');
+        }
+    }
+    /**
+     * @override
+     */
+    cleanForSave() {
+        this.target.classList.remove('o_snippet_override_invisible');
+    }
+    /**
+     * @override
+     */
+    async computeWidgetState(methodName, params) {
+        if (methodName === 'toggleDeviceVisibility') {
+            const classList = [...this.target.classList];
+            if (classList.includes('d-none') &&
+                    classList.some(className => className.match(/^d-(md|lg)-/))) {
+                return 'no_mobile';
+            }
+            if (classList.some(className => className.match(/d-(md|lg)-none/))) {
+                return 'no_desktop';
+            }
+            return '';
+        }
+        return await super.computeWidgetState(...arguments);
+    }
+    /**
+     * @override
+     */
+    computeWidgetVisibility(widgetName, params) {
+        if (this.target.classList.contains('s_table_of_content_main')) {
+            return false;
+        }
+        return super.computeWidgetVisibility(...arguments);
+    }
+    /**
+     * @override
+     */
+    async computeVisibility() {
+        return await super.computeVisibility(...arguments) &&
+            !this.target.classList.contains('s_website_form_field_hidden');
+    }
+}
+registry.category("snippets_options").add("DeviceVisibility", {
+    component: DeviceVisibility,
+    template: "website.DeviceVisibility",
+    selector: "section .row > div",
+});
+
+class ConditionalVisibility extends DeviceVisibility {
+    setup() {
+        super.setup();
+        useSubEnv({
+            validMethodNames: [...this.env.validMethodNames, "selectRecord", "selectValue"],
+        });
+        this.orm = useService("orm");
+        this.optionsAttributes = [];
+        this.state = useState({
+            geoipCountryCode: undefined,
+            websiteLanguageIds: [],
+        });
+
+        onWillStart(async () => {
+            const websiteLanguageIds = (await this.orm.read(
+                "website",
+                [this._website.currentWebsite.id],
+                ["language_ids"],
+            ))[0].language_ids;
+            this.state.websiteLanguageIds = Object.values(websiteLanguageIds);
+            this.state.geoipCountryCode = session.geoip_country_code;
+        });
+
+        onMounted(() => {
+            for (const widget of Object.values(this.widgets)) {
+                const params = widget.params;
+                if (params.saveAttribute) {
+                    this.optionsAttributes.push({
+                        saveAttribute: params.saveAttribute,
+                        attributeName: params.attributeName,
+                        // If callWith dataAttribute is not specified, the default
+                        // field to check on the record will be .value for values
+                        // coming from another widget than M2M.
+                        callWith: params.callWith || 'value',
+                        // TODO OWL: remove this once WeMany2Many is fully
+                        // implemented
+                        model: params.m2oModel,
+                    });
+                }
+            }
+        });
+    }
+    /**
+     * @override
+     */
+    async onTargetHide() {
+        await super.onTargetHide(...arguments);
+        if (this.target.classList.contains('o_snippet_invisible')) {
+            this.target.classList.add('o_conditional_hidden');
+        }
+    }
+    /**
+     * @override
+     */
+    async onTargetShow() {
+        await super.onTargetShow(...arguments);
+        this.target.classList.remove('o_conditional_hidden');
+    }
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Inserts or deletes record's id and value in target's data-attributes
+     * if no ids are selected, deletes the attribute.
+     *
+     * @see this.selectClass for parameters
+     */
+    async selectRecord(previewMode, widgetValue, params) {
+        const recordsData = JSON.parse(widgetValue);
+        if (recordsData.length) {
+            this.target.dataset[params.saveAttribute] = widgetValue;
+        } else {
+            delete this.target.dataset[params.saveAttribute];
+        }
+
+        await this.updateCSSSelectors();
+    }
+    /**
+     * Selects a value for target's data-attributes.
+     * Should be used instead of selectRecord if the visibility is not related
+     * to database values.
+     *
+     * @see this.selectClass for parameters
+     */
+    selectValue(previewMode, widgetValue, params) {
+        if (widgetValue) {
+            const widgetValueIndex = params.possibleValues.indexOf(widgetValue);
+            const value = [{value: widgetValue, id: widgetValueIndex}];
+            this.target.dataset[params.saveAttribute] = JSON.stringify(value);
+        } else {
+            delete this.target.dataset[params.saveAttribute];
+        }
+
+        this.updateCSSSelectors();
+    }
+    /**
+     * Opens the toggler when 'conditional' is selected.
+     *
+     * @override
+     */
+    async selectDataAttribute(previewMode, widgetValue, params) {
+        await super.selectDataAttribute(...arguments);
+
+        if (params.attributeName === "visibility") {
+            if (widgetValue === "conditional") {
+                // TODO OWL: pass this as a prop to WeCollapse.
+        //         const collapseEl = this.$el.children('we-collapse')[0];
+        //         this._toggleCollapseEl(collapseEl);
+            } else {
+                // TODO create a param to allow doing this automatically for genericSelectDataAttribute?
+                delete this.target.dataset.visibility;
+
+                for (const attribute of this.optionsAttributes) {
+                    delete this.target.dataset[attribute.saveAttribute];
+                    delete this.target.dataset[`${attribute.saveAttribute}Rule`];
+                }
+            }
+        } else if (!params.isVisibilityCondition) {
+            return;
+        }
+
+        await this.updateCSSSelectors();
+    }
+    /**
+     * @override
+     */
+    selectClass(previewMode, widgetValue, params) {
+        super.selectClass(...arguments);
+        this.props.toggleSnippetOptionVisibility(true);
+    }
+
+    //--------------------------------------------------------------------------
+    // Internal
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async computeWidgetState(methodName, params) {
+        if (methodName === 'selectRecord') {
+            return this.target.dataset[params.saveAttribute] || '[]';
+        }
+        if (methodName === 'selectValue') {
+            const selectedValue = this.target.dataset[params.saveAttribute];
+            return selectedValue ? JSON.parse(selectedValue)[0].value : params.attributeDefaultValue;
+        }
+        return await super.computeWidgetState(...arguments);
+    }
+    /**
+     * Reads target's attributes and creates CSS selectors.
+     * Stores them in data-attributes to then be reapplied by
+     * content/inject_dom.js (ideally we should save them in a <style> tag
+     * directly but that would require a new website.page field and would not
+     * be possible in dynamic (controller) pages... maybe some day).
+     *
+     */
+    async updateCSSSelectors() {
+        // There are 2 data attributes per option:
+        // - One that stores the current records selected
+        // - Another that stores the value of the rule "Hide for / Visible for"
+        const visibilityIDParts = [];
+        const onlyAttributes = [];
+        const hideAttributes = [];
+        for (const attribute of this.optionsAttributes) {
+            if (this.target.dataset[attribute.saveAttribute]) {
+                let records = JSON.parse(this.target.dataset[attribute.saveAttribute]);
+                // TODO OWL: remove the following condition once all the options of
+                // the Many2ManyWidget have been converted to OWL's WeMany2Many.
+                // Then, `updateCSSSelectors()` won't need to be async.
+                if (["visibilityValueLang", "visibilityValueCountry"].includes(attribute.saveAttribute)) {
+                    const recordsProms = records.map(record => {
+                        return this.orm.read(
+                            attribute.model,
+                            [record.id],
+                            [attribute.callWith],
+                        );
+                    });
+                    records = (await Promise.all(recordsProms)).map(result => result[0]);
+                }
+                records = records.map(record => {
+                    return { id: record.id, value: record[attribute.callWith] };
+                });
+                if (attribute.saveAttribute === "visibilityValueLang") {
+                    records = records.map(lang => {
+                        lang.value = lang.value.replace(/_/g, '-');
+                        return lang;
+                    });
+                }
+                const hideFor = this.target.dataset[`${attribute.saveAttribute}Rule`] === "hide";
+                if (hideFor) {
+                    hideAttributes.push({ name: attribute.attributeName, records: records});
+                } else {
+                    onlyAttributes.push({ name: attribute.attributeName, records: records});
+                }
+                // Create a visibilityId based on the options name and their
+                // values. eg: hide for en_US(id:1) -> lang1h
+                const type = attribute.attributeName.replace("data-", "");
+                const valueIDs = records.map(record => record.id).sort();
+                visibilityIDParts.push(`${type}_${hideFor ? 'h' : 'o'}_${valueIDs.join('_')}`);
+            }
+        }
+        const visibilityId = visibilityIDParts.join('_');
+        // Creates CSS selectors based on those attributes, the reducers
+        // combine the attributes' values.
+        let selectors = '';
+        for (const attribute of onlyAttributes) {
+            // example of selector:
+            // html:not([data-attr-1="valueAttr1"]):not([data-attr-1="valueAttr2"]) [data-visibility-id="ruleId"]
+            const selector = attribute.records.reduce((acc, record) => {
+                return acc += `:not([${attribute.name}="${record.value}"])`;
+            }, 'html') + ` body:not(.editor_enable) [data-visibility-id="${visibilityId}"]`;
+            selectors += selector + ', ';
+        }
+        for (const attribute of hideAttributes) {
+            // html[data-attr-1="valueAttr1"] [data-visibility-id="ruleId"],
+            // html[data-attr-1="valueAttr2"] [data-visibility-id="ruleId"]
+            const selector = attribute.records.reduce((acc, record, i, a) => {
+                acc += `html[${attribute.name}="${record.value}"] body:not(.editor_enable) [data-visibility-id="${visibilityId}"]`;
+                return acc + (i !== a.length - 1 ? ',' : '');
+            }, '');
+            selectors += selector + ', ';
+        }
+        selectors = selectors.slice(0, -2);
+        if (selectors) {
+            this.target.dataset.visibilitySelectors = selectors;
+        } else {
+            delete this.target.dataset.visibilitySelectors;
+        }
+
+        if (visibilityId) {
+            this.target.dataset.visibilityId = visibilityId;
+        } else {
+            delete this.target.dataset.visibilityId;
+        }
+    }
+}
+registry.category("snippets_options").add("ConditionalVisibility", {
+    component: ConditionalVisibility,
+    template: "website.ConditionalVisibility",
+    selector: "section",
+});

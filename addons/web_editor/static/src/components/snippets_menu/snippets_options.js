@@ -59,6 +59,7 @@ export class SnippetOption extends Component {
         "updateOverlay",
         "visible",
         "toggleVisibility",
+        "toggleSnippetOptionVisibility",
         "toggleOverlay",
         "optionUpdate",
         "requestUserValueWidget",
