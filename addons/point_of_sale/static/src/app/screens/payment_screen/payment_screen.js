@@ -248,7 +248,7 @@ export class PaymentScreen extends Component {
 
         try {
             // 2. Invoice.
-            if (this.currentOrder.is_to_invoice()) {
+            if (this.currentOrder.is_to_invoice() && this.shouldDownloadInvoice()) {
                 if (syncOrderResult[0]?.account_move) {
                     await this.report.download("account.account_invoices", [
                         syncOrderResult[0].account_move,
@@ -280,6 +280,11 @@ export class PaymentScreen extends Component {
         }
 
         this.afterOrderValidation(!!syncOrderResult && syncOrderResult.length > 0);
+    }
+    shouldDownloadInvoice() {
+        //This method is meant to be overriden by localization that do not want to print the invoice pdf
+        //every time they create an account move.
+        return true;
     }
     async postPushOrderResolve(ordersServerId) {
         const postPushResult = await this._postPushOrderResolve(this.currentOrder, ordersServerId);
