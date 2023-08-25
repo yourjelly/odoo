@@ -880,20 +880,15 @@ QUnit.module("Fields", (hooks) => {
                 },
                 mockRPC(route, { method, kwargs }) {
                     if (method === "get_views") {
-                        assert.step(method);
-                        if (kwargs.context.default_name === "ABC") {
-                            assert.strictEqual(kwargs.context.form_view_ref, undefined);
-                        } else {
-                            assert.strictEqual(kwargs.context.form_view_ref, "test_form_view");
-                        }
+                        assert.step(JSON.stringify([method, kwargs.context.default_name, kwargs.context.form_view_ref]));
                     }
                 },
             });
 
-            assert.verifySteps(["get_views"]);
+            assert.verifySteps(['["get_views",null,"test_form_view"]']);
             await editInput(target, ".o_field_widget[name=trululu] input", "ABC");
             await click(target, ".o_field_widget[name=trululu] .o_m2o_dropdown_option_create_edit");
-            assert.verifySteps(["get_views"]);
+            assert.verifySteps(['["get_views",null,null]']);
         }
     );
 
