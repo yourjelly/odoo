@@ -216,6 +216,8 @@ class Lead(models.Model):
     probability = fields.Float(
         'Probability', group_operator="avg", copy=False,
         compute='_compute_probabilities', readonly=False, store=True)
+    check_approval_id = fields.Many2one('approval.request')
+    is_approved = fields.Boolean("Approved", compute='_compute_is_approved')
     automated_probability = fields.Float('Automated Probability', compute='_compute_probabilities', readonly=True, store=True)
     is_automated_probability = fields.Boolean('Is automated probability?', compute="_compute_is_automated_probability")
     # Won/Lost
@@ -707,16 +709,39 @@ class Lead(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        print("\n\n\n\n\n\n\n <>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><>>>>>>")
+        approval_name = ""
         for vals in vals_list:
             if vals.get('website'):
                 vals['website'] = self.env['res.partner']._clean_website(vals['website'])
+            if vals.get('name'):
+                approval_name = vals['name']
         leads = super(Lead, self).create(vals_list)
 
         for lead, values in zip(leads, vals_list):
             if any(field in ['active', 'stage_id'] for field in values):
                 lead._handle_won_lost(values)
 
+        print("\n\n val",vals_list)
+        print("\n\n leads",leads)
+        approval = self.env['approval.request'].create({
+            'category_id': 10,
+            'request_owner_id': self.env.user.id,
+            'name': approval_name,
+            'lead_id': leads.id,
+        })
+        leads.check_approval_id = approval.id
+        approval.action_confirm()
         return leads
+    
+
+    @api.depends('company_id')
+    def _compute_is_approved(self):
+        for lead in self:
+            if lead.check_approval_id.request_status == 'approved':
+                lead.is_approved = True
+            else:
+                lead.is_approved = False
 
     def write(self, vals):
         if vals.get('website'):
