@@ -28,6 +28,11 @@
                                 <field name="module_hr_recruitment_extract" widget="upgrade_boolean"/>
                             </setting>
                         </block>
+                        <block title="Developer Accounts" name="linkedin_account">
+                            <setting id="recruitment_extract_settings_linkedin" string="Linkedin Account" help="Configure your Linkedin account" title="Use this to link your Linkedin Account">
+                                <field name="module_hr_recruitment_linkedin"/>
+                            </setting>
+                        </block>
                     </app>
                 </xpath>
             </field>

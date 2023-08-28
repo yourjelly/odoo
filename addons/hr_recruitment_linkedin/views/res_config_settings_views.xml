@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.hr.recruitment</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="75"/>
+            <field name="inherit_id" ref="hr_recruitment.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <field name="module_hr_recruitment_linkedin" position="after">
+                    <div class="content-group" invisible="not module_hr_recruitment_linkedin">
+                        <div class="mt16">
+                            <label for="linkedin_api_token" string="API Token" class="col-3 col-lg-3 o_form_label"/>
+                            <field name="linkedin_api_token" password="True" class="oe_inline"/>
+                        </div>
+                        <div class="mt16">
+                            <label for="linkedin_secret_key" string="Secret Key" class="col-3 col-lg-3 o_form_label"/>
+                            <field name="linkedin_secret_key" password="True" class="oe_inline"/>
+                        </div>
+                    </div>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>
