@@ -133,6 +133,8 @@ export class SampleServer {
                 return this._mockWebSearchReadUnity(params);
             case "web_read_group":
                 return this._mockWebReadGroup(params);
+            case "unity_web_read_group":
+                return this._mockWebReadGroupUnity(params);
             case "read_group":
                 return this._mockReadGroup(params);
             case "read_progress_bar":
@@ -628,12 +630,7 @@ export class SampleServer {
      * @returns {{ records: Object[], length: number }}
      */
     _mockWebSearchRead(params) {
-        const model = this.data[params.model];
-        const rawRecords = model.records.slice(0, SampleServer.SEARCH_READ_LIMIT);
-        const records = this._mockRead({
-            model: params.model,
-            args: [rawRecords.map((r) => r.id), params.fields],
-        });
+        const records = this._searchRead(params.model, params.fields);
         return { records, length: records.length };
     }
 
@@ -697,6 +694,14 @@ export class SampleServer {
             groups,
             length: groups.length,
         };
+    }
+
+    _mockWebReadGroupUnity(params) {
+        const result = this._mockWebReadGroup(params);
+        for (const group of result.groups) {
+            group.__records = this._searchRead(params.model, params.fields)
+        }
+        return result;
     }
 
     /**
@@ -767,6 +772,14 @@ export class SampleServer {
      */
     _sanitizeNumber(value) {
         return parseFloat(value.toFixed(SampleServer.FLOAT_PRECISION));
+    }
+
+    _searchRead(model, fields) {
+        const rawRecords = this.data[model].records.slice(0, SampleServer.SEARCH_READ_LIMIT);
+        return this._mockRead({
+            model,
+            args: [rawRecords.map((r) => r.id), fields],
+        });
     }
 
     /**

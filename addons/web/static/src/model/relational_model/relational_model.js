@@ -184,6 +184,7 @@ export class RelationalModel extends Model {
         const config = this._getNextConfig(this.config, params);
         const data = await this.keepLast.add(this._loadData(config));
         this.root = this._createRoot(config, data);
+        window.root = this.root;
         this.config = config;
     }
 
@@ -372,7 +373,7 @@ export class RelationalModel extends Model {
                 (o.name in config.activeFields &&
                     config.fields[o.name].group_operator !== undefined)
         );
-        const response = await this._unityWebReadGroup(config, firstGroupByName, orderBy);
+        const response = await this._webReadGroup(config, firstGroupByName, orderBy);
         const { groups: groupsData, length } = response;
         const groupBy = config.groupBy.slice(1);
         const groupByField = config.fields[config.groupBy[0].split(":")[0]];
@@ -680,22 +681,6 @@ export class RelationalModel extends Model {
     }
 
     async _webReadGroup(config, firstGroupByName, orderBy) {
-        return this.orm.webReadGroup(
-            config.resModel,
-            config.domain,
-            unique([...Object.keys(config.activeFields), firstGroupByName]),
-            [config.groupBy[0]],
-            {
-                orderby: orderByToString(orderBy),
-                lazy: true, // maybe useless
-                offset: config.offset,
-                limit: config.limit,
-                context: config.context,
-            }
-        );
-    }
-
-    async _unityWebReadGroup(config, firstGroupByName, orderBy) {
         const { activeFields, fields, context } = config;
         let specification;
         if (config.openGroupsByDefault) {
@@ -707,12 +692,12 @@ export class RelationalModel extends Model {
             unique([...Object.keys(config.activeFields), firstGroupByName]),
             [config.groupBy[0]],
             {
-                specification,
+                read_specification: specification,
                 orderby: orderByToString(orderBy),
                 limit_unfold: this.constructor.MAX_NUMBER_OPENED_GROUPS,
                 limit_by_group: this.initialLimit,
-                offset: config.offset,
-                limit: config.limit,
+                // offset: config.offset,
+                // limit: config.limit,
                 context: config.context,
             }
         );

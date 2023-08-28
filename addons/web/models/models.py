@@ -227,7 +227,7 @@ class Base(models.AbstractModel):
     @api.model
     def unity_web_read_group(
         self, domain, fields, groupby,
-        read_specification, limit_unfold=None, orderby=False, limit_by_group=80,
+        read_specification=None, limit_unfold=None, orderby=False, limit_by_group=80,
     ):
         """
         Returns the result of a read_group (and optionally search for and read records inside each
@@ -260,19 +260,20 @@ class Base(models.AbstractModel):
         if limit_unfold:
             unfold_groups = tuple(itertools.islice(unfold_groups, limit_unfold))
 
-        for group in unfold_groups:
-            records = self.search_fetch(group['__domain'], read_specification.keys(), limit=limit_by_group)
-            group['__records'] = records
+        if read_specification is not None:
+            for group in unfold_groups:
+                records = self.search_fetch(group['__domain'], read_specification.keys(), limit=limit_by_group)
+                group['__records'] = records
 
-        all_records = self.union(*(
-            record
-            for one_group in group_list if '__records' in one_group
-            for record in one_group['__records'] if record
-        ))
-        all_result = all_records.web_read(read_specification)
-        result_by_id = {result['id']: result for result in all_result}
-        for group in unfold_groups:
-            group['__records'] = [result_by_id[record.id] for record in group['__records']]
+            all_records = self.union(*(
+                record
+                for one_group in group_list if '__records' in one_group
+                for record in one_group['__records'] if record
+            ))
+            all_result = all_records.web_read(read_specification)
+            result_by_id = {result['id']: result for result in all_result}
+            for group in unfold_groups:
+                group['__records'] = [result_by_id[record.id] for record in group['__records']]
 
         return res_read_group
 
