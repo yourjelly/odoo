@@ -25,23 +25,31 @@ class SaleOrderDiscountWizard(models.TransientModel):
             if not (line.product_uom_qty and line.price_unit):
                 continue
             total_price_per_tax[line.tax_id] += line.price_unit * line.product_uom_qty
-        discount_factor = min(1, (self.discount_amount / self.sale_order_id.amount_total)) if self.sale_order_id.amount_total else 1
-        self.env['sale.order.line'].create([{
-            'order_id': self.sale_order_id.id,
-            'product_id': discount_product_id,
-            'name': _(
-                'Discount %(tax_str)s',
-                tax_str=_('- On product with the following taxes: ') + tax.name if tax else '',
-            ) if self.discount_type == 'fixed_amount'
-            else _(
-                'Discount: %(desc)s%% %(tax_str)s',
-                desc=self.discount_amount,
-                tax_str=_('- On product with the following taxes: ') + tax.name if tax else '',
-            ),
-            'price_unit': -price_subtotal * discount_factor if self.discount_type == 'fixed_amount' else - price_subtotal * self.discount_amount / 100,
-            'sequence': 999,
-            'tax_id': [(Command.CLEAR, 0, 0)] + [(Command.LINK, tax.id, False)] if tax else [],
-        } for tax, price_subtotal in total_price_per_tax.items()])
+        if self.discount_type == 'fixed_amount':
+            self.env['sale.order.line'].create({
+                'order_id': self.sale_order_id.id,
+                'product_id': discount_product_id,
+                'name': _(
+                    'Discount: %(desc)s',
+                    desc=self.discount_amount,
+                ),
+                'price_unit': -self.discount_amount,
+                'sequence': 999,
+                'tax_id': False,
+            })
+        else:
+            self.env['sale.order.line'].create([{
+                'order_id': self.sale_order_id.id,
+                'product_id': discount_product_id,
+                'name':_(
+                    'Discount: %(desc)s%% %(tax_str)s',
+                    desc=self.discount_amount,
+                    tax_str=_('- On product with the following taxes: ') + tax.name if tax else '',
+                ),
+                'price_unit': - price_subtotal * self.discount_amount / 100,
+                'sequence': 999,
+                'tax_id': [(Command.CLEAR, 0, 0)] + [(Command.LINK, tax.id, False)] if tax else [],
+            } for tax, price_subtotal in total_price_per_tax.items()])
 
     def action_apply(self):
         if self.discount_type == 'on_all_order_lines':
