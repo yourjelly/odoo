@@ -2239,6 +2239,15 @@ class AccountMoveLine(models.Model):
             plan['partials'] = partials[start_range:start_range + size]
             start_range += size
 
+        # ==== Create misc
+        if self._context.get('add_exchange_misc'):
+            move_line = self.filtered(lambda l: l.move_id.move_type == 'out_invoice')
+            move = move_line[0].move_id if move_line else None
+            reverse_move_line = self.filtered(lambda l: l.move_id.move_type == 'out_refund')
+            reverse_move = reverse_move_line[0].move_id if reverse_move_line else None
+            if move and reverse_move:
+                self._create_exchange_misc(move, reverse_move)
+
         # ==== Create the partial exchange journal entries ====
         exchange_moves = self._create_exchange_difference_moves(exchange_diff_values_list)
         for index, exchange_move in zip(exchange_diff_partial_index, exchange_moves):
@@ -2773,6 +2782,46 @@ class AccountMoveLine(models.Model):
                 next_sequence += 2
 
         return caba_lines_to_reconcile
+
+    def _create_exchange_misc(self, move, reverse_move):
+        group = (move.line_ids + reverse_move.line_ids) \
+            .filtered(lambda l: l.display_type == 'product') \
+            .grouped(lambda l: (l.account_id, l.tax_ids))
+        line_ids_vals = []
+        for (account_id, tax_ids), lines in group.items():
+            exchange_diff = -sum(lines.mapped('balance'))
+            if exchange_diff:
+                line_ids_vals.append(
+                    (0, 0, {
+                        'account_id': account_id.id,
+                        'balance': exchange_diff,
+                        'tax_ids': tax_ids,
+                    })
+                )
+                # No tax means no automatic balancing line
+                if not tax_ids:
+                    line_ids_vals.append(
+                        (0, 0, {
+                            'account_id': move.company_id.account_journal_suspense_account_id.id,
+                            'balance': -exchange_diff,
+                        })
+                    )
+        if line_ids_vals:
+            misc = self.env['account.move'].create({
+                'move_type': 'entry',
+                'date': reverse_move.date,
+                'invoice_date': reverse_move.invoice_date,
+                'currency_id': move.company_currency_id.id,
+                'line_ids': line_ids_vals,
+            })
+            move_payment_term_line_account = move.line_ids.filtered(lambda l: l.display_type == 'payment_term').account_id
+            misc.line_ids.filtered(lambda l: l.account_id == move.company_id.account_journal_suspense_account_id).account_id = move_payment_term_line_account
+            misc._post()
+            group = (move.line_ids + misc.line_ids) \
+                .filtered(lambda l: l.account_id.reconcile and not l.reconciled) \
+                .grouped(lambda l: (l.account_id, l.tax_ids))
+            for (_account, _tax), lines in group.items():
+                lines.with_context(no_exchange_difference=False, add_exchange_misc=False).reconcile()
 
     def reconcile(self):
         """ Reconcile the current move lines all together. """

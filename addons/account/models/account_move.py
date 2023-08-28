@@ -3569,7 +3569,7 @@ class AccountMove(models.Model):
                 .grouped(lambda l: (l.account_id, l.currency_id))
             for (account, _currency), lines in group.items():
                 if account.reconcile or account.account_type in ('asset_cash', 'liability_credit_card'):
-                    lines.with_context(move_reverse_cancel=move_reverse_cancel).reconcile()
+                    lines.with_context(move_reverse_cancel=move_reverse_cancel, no_exchange_difference=True, add_exchange_misc=True).reconcile()
         return reverse_moves
 
 
@@ -3967,7 +3967,7 @@ class AccountMove(models.Model):
         self.ensure_one()
         lines = self.env['account.move.line'].browse(line_id)
         lines += self.line_ids.filtered(lambda line: line.account_id == lines[0].account_id and not line.reconciled)
-        return lines.reconcile()
+        return lines.with_context(no_exchange_difference=True, add_exchange_misc=True).reconcile()
 
     def js_remove_outstanding_partial(self, partial_id):
         ''' Called by the 'payment' widget to remove a reconciled entry to the present invoice.
