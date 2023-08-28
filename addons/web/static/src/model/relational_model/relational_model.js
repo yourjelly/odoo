@@ -372,7 +372,7 @@ export class RelationalModel extends Model {
                 (o.name in config.activeFields &&
                     config.fields[o.name].group_operator !== undefined)
         );
-        const response = await this._webReadGroup(config, firstGroupByName, orderBy);
+        const response = await this._unityWebReadGroup(config, firstGroupByName, orderBy);
         const { groups: groupsData, length } = response;
         const groupBy = config.groupBy.slice(1);
         const groupByField = config.fields[config.groupBy[0].split(":")[0]];
@@ -473,14 +473,18 @@ export class RelationalModel extends Model {
                 }
             }
             if (!groupConfig.isFolded && group.count > 0) {
-                const prom = this._loadData(groupConfig.list).then((response) => {
-                    if (groupBy.length) {
-                        group.groups = response ? response.groups : [];
-                    } else {
-                        group.records = response ? response.records : [];
-                    }
-                });
-                proms.push(prom);
+                if (groupData.__records) {
+                    group.records = groupData.__records;
+                } else {
+                    const prom = this._loadData(groupConfig.list).then((response) => {
+                        if (groupBy.length) {
+                            group.groups = response ? response.groups : [];
+                        } else {
+                            group.records = response ? response.records : [];
+                        }
+                    });
+                    proms.push(prom);
+                }
             }
             groups.push(group);
         }
@@ -684,6 +688,29 @@ export class RelationalModel extends Model {
             {
                 orderby: orderByToString(orderBy),
                 lazy: true, // maybe useless
+                offset: config.offset,
+                limit: config.limit,
+                context: config.context,
+            }
+        );
+    }
+
+    async _unityWebReadGroup(config, firstGroupByName, orderBy) {
+        const { activeFields, fields, context } = config;
+        let specification;
+        if (config.openGroupsByDefault) {
+            specification = getFieldsSpec(activeFields, fields, context);
+        }
+        return this.orm.unityWebReadGroup(
+            config.resModel,
+            config.domain,
+            unique([...Object.keys(config.activeFields), firstGroupByName]),
+            [config.groupBy[0]],
+            {
+                specification,
+                orderby: orderByToString(orderBy),
+                limit_unfold: this.constructor.MAX_NUMBER_OPENED_GROUPS,
+                limit_by_group: this.initialLimit,
                 offset: config.offset,
                 limit: config.limit,
                 context: config.context,

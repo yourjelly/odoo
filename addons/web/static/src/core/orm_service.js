@@ -256,6 +256,15 @@ export class ORM {
         });
     }
 
+    unityWebReadGroup(model, domain, fields, groupby, kwargs = {}) {
+        return this.call(model, "unity_web_read_group", [], {
+            ...kwargs,
+            groupby,
+            domain,
+            fields,
+        });
+    }
+
     /**
      * @param {string} model
      * @param {number[]} ids
