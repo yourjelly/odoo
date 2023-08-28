@@ -7,6 +7,7 @@ from collections import defaultdict, OrderedDict
 
 from odoo import api, fields, models
 from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
+from odoo.addons.website.tools import generate_primary_snippet_templates
 from odoo.exceptions import MissingError
 from odoo.http import request
 from odoo.tools import split_every
@@ -230,6 +231,7 @@ class IrModuleModule(models.Model):
         for module in self:
             _logger.info('Load theme %s for website %s from template.' % (module.mapped('name'), website.id))
 
+            generate_primary_snippet_templates(self.env, module.name)
             for model_name in self._theme_model_names:
                 module._update_records(model_name, website)
 
@@ -441,6 +443,7 @@ class IrModuleModule(models.Model):
         ], order='name')
 
         for theme in themes:
+            generate_primary_snippet_templates(self.env, theme.name)
             terp = self.get_module_info(theme.name)
             images = terp.get('images', [])
             for image in images:

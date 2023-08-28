@@ -28,4 +28,15 @@ group names -->
     Its arch contains t-snippet-calls to each listed snippet, all nested in a div#wrap.
 -->
 
+<!-- TODO Have those blocks used in some theme's snippets_list -->
+<!-- Missing base configurator templates -->
+<!-- Defined by Anelusia but not in snippets_list -->
+<template id="configurator_s_showcase" inherit_id="s_showcase" primary="True"><t/></template>
+<!-- Defined by Buzzy but not in snippets_list -->
+<template id="configurator_s_process_steps" inherit_id="s_process_steps" primary="True"><t/></template>
+<!-- Defined by Notes but not in snippets_list -->
+<template id="configurator_s_features_grid" inherit_id="s_features_grid" primary="True"><t/></template>
+<!-- Defined by Yes but not in snippets_list -->
+<template id="configurator_s_image_gallery" inherit_id="s_image_gallery" primary="True"><t/></template>
+
 </odoo>

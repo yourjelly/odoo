@@ -19,7 +19,7 @@ from markupsafe import Markup
 from odoo import api, fields, models, tools, http, release, registry
 from odoo.addons.http_routing.models.ir_http import RequestUID, slugify, url_for
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
-from odoo.addons.website.tools import similarity_score, text_from_html, get_base_domain
+from odoo.addons.website.tools import similarity_score, text_from_html, get_base_domain, generate_primary_snippet_templates
 from odoo.addons.portal.controllers.portal import pager
 from odoo.addons.iap.tools import iap_tools
 from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
@@ -487,7 +487,7 @@ class Website(models.Model):
             for i, snippet in enumerate(snippet_list, start=1):
                 try:
                     IrQweb = self.env['ir.qweb'].with_context(website_id=website.id, lang=website.default_lang_id.code)
-                    render = IrQweb._render('website.' + snippet, cta_data)
+                    render = IrQweb._render('website.configurator_%s_%s' % (page_code, snippet), cta_data)
                     if render:
                         el = html.fromstring(render)
 
@@ -549,6 +549,7 @@ class Website(models.Model):
         website = self.get_current_website()
         theme_name = kwargs['theme_name']
         theme = self.env['ir.module.module'].search([('name', '=', theme_name)])
+        generate_primary_snippet_templates(self.env, theme_name)
         url = theme.button_choose_theme()
 
         # Force to refresh env after install of module
