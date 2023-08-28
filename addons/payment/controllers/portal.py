@@ -13,7 +13,7 @@ from odoo.addons.payment.controllers.post_processing import PaymentPostProcessin
 from odoo.addons.portal.controllers import portal
 
 
-class PaymentPortal(portal.CustomerPortal):  # TODO split in two
+class PaymentPortal(portal.CustomerPortal):
 
     """ This controller contains the foundations for online payments through the portal.
 
@@ -113,7 +113,9 @@ class PaymentPortal(portal.CustomerPortal):  # TODO split in two
             company_id, partner_sudo.id, amount, currency_id=currency.id, **kwargs
         )  # In sudo mode to read the fields of providers and partner (if logged out).
         payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
-            providers_sudo.ids
+            providers_sudo.ids,
+            partner_sudo.id,
+            currency_id=currency.id,
         )  # In sudo mode to read the fields of providers.
         tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
             providers_sudo.ids, partner_sudo.id
@@ -141,6 +143,7 @@ class PaymentPortal(portal.CustomerPortal):  # TODO split in two
             'amount': amount,
             'currency': currency,
             'partner_id': partner_sudo.id,
+            'providers_sudo': providers_sudo,
             'payment_methods_sudo': payment_methods_sudo,
             'tokens_sudo': tokens_sudo,
             'transaction_route': '/payment/transaction',
@@ -196,7 +199,9 @@ class PaymentPortal(portal.CustomerPortal):  # TODO split in two
             **kwargs,
         )  # In sudo mode to read the fields of providers and partner (if logged out).
         payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
-            providers_sudo.ids
+            providers_sudo.ids,
+            partner_sudo.id,
+            force_tokenization=True,
         )  # In sudo mode to read the fields of providers.
         tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
             None, partner_sudo.id, is_validation=True
@@ -212,6 +217,7 @@ class PaymentPortal(portal.CustomerPortal):  # TODO split in two
         payment_context = {
             'reference_prefix': payment_utils.singularize_reference_prefix(prefix='V'),
             'partner_id': partner_sudo.id,
+            'providers_sudo': providers_sudo,
             'payment_methods_sudo': payment_methods_sudo,
             'tokens_sudo': tokens_sudo,
             'transaction_route': '/payment/transaction',

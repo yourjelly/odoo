@@ -61,6 +61,11 @@ class PaymentCommon(BaseCommon):
             'country_id': cls.country_belgium.id,
         })
 
+        # Activate pm
+        cls.env.ref('payment.payment_method_unknown').write({
+            'active': True,
+            'support_tokenization': True,
+        })
         # Create a dummy provider to allow basic tests without any specific provider implementation
         arch = """
         <form action="dummy" method="post">
@@ -90,6 +95,7 @@ class PaymentCommon(BaseCommon):
         cls.provider = cls.dummy_provider
         cls.payment_methods = cls.provider.payment_method_ids
         cls.payment_method_id = cls.provider.payment_method_ids[:1].id
+        cls.payment_method_code = cls.provider.payment_method_ids[:1].code
         cls.amount = 1111.11
         cls.company = cls.env.company
         cls.company_id = cls.company.id

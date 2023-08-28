@@ -140,7 +140,8 @@ class PaymentTransaction(models.Model):
         :return: The Stripe-formatted payload for the PaymentIntent request.
         :rtype: dict
         """
-        payment_method_type = self.payment_method_id.parent_id.code or self.payment_method_code
+        ppm_code = self.payment_method_id.primary_payment_method_id.code
+        payment_method_type = ppm_code or self.payment_method_code
         payment_intent_payload = {
             'amount': payment_utils.to_minor_currency_units(self.amount, self.currency_id),
             'currency': self.currency_id.name.lower(),
@@ -363,10 +364,12 @@ class PaymentTransaction(models.Model):
             return
 
         # Update the payment method.
-        payment_method_type = notification_data.get('payment_method', {}).get('type')
-        if self.payment_method_id.code == payment_method_type == 'card':
-            payment_method_code = notification_data['payment_method']['card']['brand']
-            payment_method = self.env['payment.method']._get_from_code(payment_method_code)
+        payment_method = notification_data.get('payment_method')
+        if isinstance(payment_method, dict):  # capture/void/refund requests receive a string.
+            payment_method_type = payment_method.get('type')
+            if self.payment_method_id.code == payment_method_type == 'card':
+                payment_method_type = notification_data['payment_method']['card']['brand']
+            payment_method = self.env['payment.method']._get_from_code(payment_method_type)
             self.payment_method_id = payment_method or self.payment_method_id
 
         # Update the provider reference and the payment state.

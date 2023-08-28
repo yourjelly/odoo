@@ -192,7 +192,9 @@ class CustomerPortal(payment_portal.PaymentPortal):
             **kwargs,
         )  # In sudo mode to read the fields of providers and partner (if logged out).
         payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
-            providers_sudo.ids
+            providers_sudo.ids,
+            partner.id,
+            currency_id=currency.id,
         )  # In sudo mode to read the fields of providers.
         tokens = request.env['payment.token']._get_available_tokens(
             providers_sudo.ids, partner.id, **kwargs
@@ -216,6 +218,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
             'amount': amount,
             'currency': currency,
             'partner_id': partner.id,
+            'providers_sudo': providers_sudo,
             'payment_methods_sudo': payment_methods_sudo,
             'tokens_sudo': tokens,
             'transaction_route': order_sudo.get_portal_url(suffix='/transaction'),
