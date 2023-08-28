@@ -10,7 +10,9 @@
     'installable': True,
     'license': 'LGPL-3',
     'data': [
+        'security/ir.model.access.csv',
         'views/public_readonly_spreadsheet_templates.xml',
+        'views/spreadsheet_server_function.xml',
     ],
     'assets': {
         'spreadsheet.o_spreadsheet': [

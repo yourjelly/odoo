@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+spreadsheet_server_function_system,spreadsheet_server_function,model_spreadsheet_server_function,base.group_system,1,1,1,1
+spreadsheet_server_function_user,spreadsheet_server_function,model_spreadsheet_server_function,base.group_user,1,0,0,0
+spreadsheet_server_function_arg_system,spreadsheet_server_function_arg,model_spreadsheet_server_function_arg,base.group_system,1,1,1,1
+spreadsheet_server_function_arg_user,spreadsheet_server_function_arg,model_spreadsheet_server_function_arg,base.group_user,1,0,0,0
