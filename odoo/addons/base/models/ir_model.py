@@ -1093,7 +1093,8 @@ class IrModelFields(models.Model):
                     if module == parent_module
                 )
             ):
-                xml_id = field_xmlid(module, field_model, field_name)
+                field_module = field._module or module
+                xml_id = field_xmlid(field_module, field_model, field_name)
                 record = self.browse(field_id)
                 data_list.append({'xml_id': xml_id, 'record': record})
         self.env['ir.model.data']._update_xmlids(data_list)
