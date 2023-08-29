@@ -54,6 +54,10 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
         trigger: 'iframe #wrap .s_banner .row > :first-child',
     },
     removeSelectedBlock(),
+    // Remove all images in the snippet, selected automatically one after the other.
+    removeSelectedBlock(),
+    removeSelectedBlock(),
+    removeSelectedBlock(),
     {
         content: "Check that #wrap is empty",
         trigger: 'iframe #wrap:empty',
