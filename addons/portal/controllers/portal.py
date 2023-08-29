@@ -488,8 +488,10 @@ class CustomerPortal(Controller):
             ReportAction = ReportAction.with_company(model.company_id)
 
         method_name = '_render_qweb_%s' % (report_type)
-        # report = getattr(ReportAction, method_name)(report_ref, list(model.ids), data={'report_type': report_type})[0]
-        report = model._get_built_pdf()
+        if report_type == 'pdf' and model._name == 'sale.order':
+            report = model._get_built_pdf()
+        else:
+            report = getattr(ReportAction, method_name)(report_ref, list(model.ids), data={'report_type': report_type})[0]
         reporthttpheaders = [
             ('Content-Type', 'application/pdf' if report_type == 'pdf' else 'text/html'),
             ('Content-Length', len(report)),

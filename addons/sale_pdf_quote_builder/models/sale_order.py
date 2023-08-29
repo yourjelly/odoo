@@ -22,22 +22,24 @@ class SaleOrder(models.Model):
         footer = record.footer
 
         if not footer and not header:
-            return pdf
+            return pdf_raw
 
         IrBinary = self.env['ir.binary']
         merger = PdfFileMerger()
         quote = PdfFileReader(io.BytesIO(pdf_raw))
 
-        # TODO read from stream
-
         if header:
-            quote_header = PdfFileReader(io.BytesIO(IrBinary._record_to_stream(record, 'header').read()))
+            quote_header = PdfFileReader(
+                io.BytesIO(IrBinary._record_to_stream(record, 'header').read())
+            )
             merger.append(quote_header)
 
-        merger.append(quote)
+        merger.append(quote, import_bookmarks=False)  # No bookmarks in quotes, but fails at import
 
         if footer:
-            quote_footer = PdfFileReader(io.BytesIO(IrBinary._record_to_stream(record, 'footer').read()))
+            quote_footer = PdfFileReader(
+                io.BytesIO(IrBinary._record_to_stream(record, 'footer').read())
+            )
             merger.append(quote_footer)
 
         out_buff = io.BytesIO()
