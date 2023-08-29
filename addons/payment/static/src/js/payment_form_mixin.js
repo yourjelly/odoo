@@ -324,7 +324,7 @@
             // Generic payment flows that are not attached to a document require extra params.
             if (this.txContext['transactionRoute'] === '/payment/transaction') {
                 Object.assign(tx_params, {
-                    
+
                     'currency_id': this.txContext.currencyId
                         ? parseInt(this.txContext.currencyId) : null,
                     'partner_id': parseInt(this.txContext.partnerId),

@@ -391,9 +391,8 @@ class PaymentPortal(payment_portal.PaymentPortal):
                 rendering_context_values['amount'] = 0.0
 
             rendering_context_values.update({
-                'transaction_route': f'/my/orders/{sale_order_id}/transaction',
-                'landing_route': f'{order_sudo.access_url}'
-                                 f'?access_token={order_sudo._portal_ensure_token()}',
+                'transaction_route': order_sudo.get_portal_url(suffix='/transaction'),
+                'landing_route': order_sudo.get_portal_url(), #TODO check access token existance
                 'access_token': order_sudo.access_token,
             })
         return rendering_context_values
