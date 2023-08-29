@@ -467,8 +467,11 @@ class MassMailing(models.Model):
     def create(self, vals_list):
         ab_testing_cron = self.env.ref('mass_mailing.ir_cron_mass_mailing_ab_testing').sudo()
         for values in vals_list:
+            sha_to_url = None
+            if values.get('body_arch'):
+                values['body_arch'], sha_to_url = self._convert_inline_images_to_urls(values['body_arch'])
             if values.get('body_html'):
-                values['body_html'] = self._convert_inline_images_to_urls(values['body_html'])
+                values['body_html'], _ = self._convert_inline_images_to_urls(values['body_html'], sha_to_url)
             if values.get('ab_testing_schedule_datetime'):
                 at = fields.Datetime.from_string(values['ab_testing_schedule_datetime'])
                 ab_testing_cron._trigger(at=at)
@@ -479,8 +482,11 @@ class MassMailing(models.Model):
         return mailings
 
     def write(self, values):
+        sha_to_url = None
+        if values.get('body_arch'):
+            values['body_arch'], sha_to_url = self._convert_inline_images_to_urls(values['body_arch'])
         if values.get('body_html'):
-            values['body_html'] = self._convert_inline_images_to_urls(values['body_html'])
+            values['body_html'], _ = self._convert_inline_images_to_urls(values['body_html'], sha_to_url)
         # If ab_testing is already enabled on a mailing and the campaign is removed, we raise a ValidationError
         if values.get('campaign_id') is False and any(mailing.ab_testing_enabled for mailing in self) and 'ab_testing_enabled' not in values:
             raise ValidationError(_("A campaign should be set when A/B test is enabled"))
@@ -1280,14 +1286,14 @@ class MassMailing(models.Model):
     # TOOLS
     # ------------------------------------------------------
 
-    def _convert_inline_images_to_urls(self, body_html):
+    def _convert_inline_images_to_urls(self, body_content, sha_to_url=None):
         """
         Find inline base64 encoded images, make an attachement out of
         them and replace the inline image with an url to the attachement.
         Find VML v:image elements, crop their source images, make an attachement
         out of them and replace their source with an url to the attachement.
         """
-        root = lxml.html.fromstring(body_html)
+        root = lxml.html.fromstring(body_content)
         did_modify_body = False
 
         conversion_info = []  # list of tuples (image: base64 image, node: lxml node, old_url: string or None))
@@ -1336,8 +1342,14 @@ class MassMailing(models.Model):
                                 conversion_info.append((base64.b64encode(image.source), node, url))
 
         # Apply the changes.
-        urls = self._create_attachments_from_inline_images([image for (image, _, _) in conversion_info])
+        images = [image for (image, _, _) in conversion_info]
+        if sha_to_url:
+            urls = [sha_to_url.get(hashlib.sha1(image).hexdigest()) for image in images]
+        else:
+            urls = self._create_attachments_from_inline_images(images)
+            sha_to_url = {hashlib.sha1(image).hexdigest(): url for image, url in zip(images, urls)}
         for ((image, node, old_url), new_url) in zip(conversion_info, urls):
+            # TODO: consider skipping if new_url is None
             did_modify_body = True
             if node.tag == 'img':
                 node.attrib['src'] = new_url
@@ -1347,8 +1359,8 @@ class MassMailing(models.Model):
                 node.text = node.text.replace(old_url, new_url)
 
         if did_modify_body:
-            return lxml.html.tostring(root, encoding='unicode')
-        return body_html
+            return lxml.html.tostring(root, encoding='unicode'), sha_to_url
+        return body_content, sha_to_url
 
     def _create_attachments_from_inline_images(self, b64images):
         if not b64images:
