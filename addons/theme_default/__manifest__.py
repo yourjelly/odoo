@@ -22,5 +22,10 @@
         'pricing': ['s_comparisons'],
         'privacy_policy': ['s_faq_collapse'],
     },
+    'new_page_templates': {
+        'about': {
+            '1': ['s_table_of_content', 's_countdown', 's_picture', 's_showcase', 's_three_columns', 's_company_team', 's_quotes_carousel'],
+        },
+    },
     'license': 'LGPL-3',
 }

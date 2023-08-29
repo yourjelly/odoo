@@ -39,4 +39,32 @@ group names -->
 <!-- Defined by Yes but not in snippets_list -->
 <template id="configurator_s_image_gallery" inherit_id="s_image_gallery" primary="True"><t/></template>
 
+<!-- Previews for blocks -->
+<!-- Defined in website so that every theme can benefit from it -->
+<!-- Table of content -->
+<template id="new_page_template_s_table_of_content" inherit_id="s_table_of_content" primary="True">
+    <xpath expr="//div[hasclass('s_table_of_content_navbar')]" position="attributes">
+        <attribute name="style">top: 76px; max-height: calc(100vh - 96px);</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('s_table_of_content_navbar')]" position="inside">
+        <a href="#table_of_content_heading_1_1" class="table_of_content_link list-group-item list-group-item-action py-2 border-0 rounded-0 active">Intuitive system</a>
+        <a href="#table_of_content_heading_1_2" class="table_of_content_link list-group-item list-group-item-action py-2 border-0 rounded-0">Design features</a>        
+    </xpath>
+    <xpath expr="//section//section[1]//h1" position="attributes">
+        <attribute name="id">table_of_content_heading_1_1</attribute>
+    </xpath>
+    <xpath expr="//section//section[2]//h1" position="attributes">
+        <attribute name="id">table_of_content_heading_1_2</attribute>
+    </xpath>
+</template>
+
+<!-- Countdown -->
+<!-- TODO Produce an SVG that looks like countdown -->
+<!-- The content of the .o_new_page_snippet_preview is removed upon page creation -->
+<template id="new_page_template_s_countdown" inherit_id="s_countdown" primary="True">
+    <xpath expr="//div[hasclass('s_countdown_canvas_wrapper')]" position="inside">
+        <div class="o_new_page_snippet_preview d-flex justify-content-center" style="font-size: 100px;">O O O O</div>
+    </xpath>
+</template>
+
 </odoo>

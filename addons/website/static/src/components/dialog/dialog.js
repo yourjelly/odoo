@@ -198,7 +198,11 @@ export class AddPageTemplatePreview extends Component {
         if (this.holderRef.el.classList.contains("o_loading")) {
             return;
         }
-        this.props.addPage(this.iframeRef.el.contentDocument.getElementById("wrap").innerHTML);
+        const wrapEl = this.iframeRef.el.contentDocument.getElementById("wrap").cloneNode(true);
+        for (const previewEl of wrapEl.querySelectorAll(".o_new_page_snippet_preview")) {
+            previewEl.remove();
+        }
+        this.props.addPage(wrapEl.innerHTML);
     }
 }
 AddPageTemplatePreview.props = {

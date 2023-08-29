@@ -297,41 +297,42 @@ def generate_primary_snippet_templates(env, module):
                     ))
         create_count += create_missing(values_list)
 
-        # Create or update template views per group x key
-        values_list = []
-        for group in templates:
-            for key in templates[group]:
-                xmlid = f'{module}.new_page_template_sections_{group}_{key}'
-                wrapper = f'%s.new_page_template_{group}_{key}_%s'
-                calls = ''.join([
-                    f'<t t-snippet-call="{wrapper % split_key(snippet_key)}"/>'
-                    for snippet_key in templates[group][key]
-                ])
-                values_list.append({
-                    'name': f"New page template: {group} #{key}",
-                    'type': 'qweb',
-                    'key': xmlid,
-                    'arch': f'<div id="wrap">{calls}</div>',
-                })
-        keys = [values['key'] for values in values_list]
-        existing_primary_templates = env['ir.ui.view'].search_read([('mode', '=', 'primary'), ('key', 'in', keys)], ['key'])
-        existing_primary_template_keys = [data['key'] for data in existing_primary_templates]
-        missing_values_list = [values for values in values_list if values['key'] not in existing_primary_template_keys]
-        if missing_values_list:
-            ids = env['ir.ui.view'].create(missing_values_list).ids
-            create_model_data(ids, missing_values_list)
-            _logger.info('Generated %s primary page templates for %s', len(missing_values_list), module)
-        if existing_primary_templates:
-            for existing_primary_template in existing_primary_templates:
-                values = [
-                    values
-                    for values in filter(
-                        lambda values: values['key'] == existing_primary_template['key'],
-                        values_list
-                    )
-                ][0]
-                env['ir.ui.view'].browse(existing_primary_template['id']).write({'arch': values['arch']})
-            _logger.info('Updated %s primary page templates for %s', len(existing_primary_templates), module)
+        if not module.startswith('theme_'):
+            # Create or update template views per group x key
+            values_list = []
+            for group in templates:
+                for key in templates[group]:
+                    xmlid = f'{module}.new_page_template_sections_{group}_{key}'
+                    wrapper = f'%s.new_page_template_{group}_{key}_%s'
+                    calls = ''.join([
+                        f'<t t-snippet-call="{wrapper % split_key(snippet_key)}"/>'
+                        for snippet_key in templates[group][key]
+                    ])
+                    values_list.append({
+                        'name': f"New page template: {group} #{key}",
+                        'type': 'qweb',
+                        'key': xmlid,
+                        'arch': f'<div id="wrap">{calls}</div>',
+                    })
+            keys = [values['key'] for values in values_list]
+            existing_primary_templates = env['ir.ui.view'].search_read([('mode', '=', 'primary'), ('key', 'in', keys)], ['key'])
+            existing_primary_template_keys = [data['key'] for data in existing_primary_templates]
+            missing_values_list = [values for values in values_list if values['key'] not in existing_primary_template_keys]
+            if missing_values_list:
+                ids = env['ir.ui.view'].create(missing_values_list).ids
+                create_model_data(ids, missing_values_list)
+                _logger.info('Generated %s primary page templates for %s', len(missing_values_list), module)
+            if existing_primary_templates:
+                for existing_primary_template in existing_primary_templates:
+                    values = [
+                        values
+                        for values in filter(
+                            lambda values: values['key'] == existing_primary_template['key'],
+                            values_list
+                        )
+                    ][0]
+                    env['ir.ui.view'].browse(existing_primary_template['id']).write({'arch': values['arch']})
+                _logger.info('Updated %s primary page templates for %s', len(existing_primary_templates), module)
 
     if create_count:
         _logger.info('Generated %s primary snippet templates for %s', create_count, module)
