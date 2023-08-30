@@ -111,8 +111,13 @@
                 <span>ExVAT</span>
                 <span>Total</span>
                 <t t-foreach="receipt.tax_details" t-as="tax" t-key="tax.tax.id">
-                    <span t-esc="getTaxLetter(tax.tax)" />
-                    <span><t t-esc="tax.tax.amount"/> %</span> 
+                    <t t-if="getTaxLetter(tax.tax)">
+                        <span t-esc="getTaxLetter(tax.tax)" />
+                    </t>
+                    <t t-else="">
+                        <span></span>
+                    </t>
+                    <span><t t-esc="tax.tax.amount"/> %</span>
                     <span t-esc="env.utils.formatCurrency(tax.amount, false)" />
                     <span t-esc="env.utils.formatCurrency(tax.base, false)" />
                     <span t-esc="env.utils.formatCurrency(tax.amount + tax.base, false)" />
