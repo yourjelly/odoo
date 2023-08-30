@@ -659,7 +659,9 @@ class Website(Home):
                 tree = html.fromstring(template_html)
                 View._adjust_new_page_template(tree)
                 return html.tostring(tree)
-            
+
+            new_page_template_context = {}
+            View._prepare_new_page_template_context(new_page_template_context)
             for template in View.search([
                 ('mode', '=', 'primary'),
                 ('key', 'like', escape_psql(f'new_page_template_sections_{group["id"]}_')),
@@ -667,7 +669,10 @@ class Website(Home):
                 try:
                     templates.append({
                         'key': template.key,
-                        'template': adjust_template(View._render_template(template.key)),
+                        'template': adjust_template(View._render_template(
+                            template.key,
+                            new_page_template_context
+                        )),
                     })
                 except QWebException as qe:
                     # Do not fail if theme is not compatible.

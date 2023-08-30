@@ -528,3 +528,7 @@ class View(models.Model):
             snippet = section_el.attrib['data-snippet']
             if '_s_' in snippet:
                 section_el.attrib['data-snippet'] = f's_{snippet.split("_s_")[-1]}'
+
+    @api.model
+    def _prepare_new_page_template_context(self, context):
+        pass
