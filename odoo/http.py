@@ -1362,6 +1362,7 @@ class Root(object):
             httprequest.session.db = db_monodb(httprequest)
 
     def setup_lang(self, httprequest):
+        print("setup_lang", httprequest.session.context)
         if "lang" not in httprequest.session.context:
             alang = httprequest.accept_languages.best or "en-US"
             try:
@@ -1373,6 +1374,8 @@ class Root(object):
             except (ValueError, KeyError):
                 lang = 'en_US'
             httprequest.session.context["lang"] = lang
+
+            print("changed to", httprequest.session.context["lang"])
 
     def get_request(self, httprequest):
         # deduce type of request

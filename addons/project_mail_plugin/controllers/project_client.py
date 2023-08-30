@@ -12,6 +12,9 @@ class ProjectClient(http.Controller):
         """
         projects = request.env['project.project'].search([('name', 'ilike', search_term)], limit=limit)
 
+        print("projects_search")
+        print(request.env.context)
+
         return [
             {
                 'project_id': project.id,

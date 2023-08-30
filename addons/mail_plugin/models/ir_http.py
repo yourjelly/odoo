@@ -24,3 +24,8 @@ class IrHttp(models.AbstractModel):
 
         # take the identity of the API key user
         request.uid = user_id
+        request.session.context['lang'] = request.env['res.users'].browse(user_id).sudo().lang or "en_US"
+
+        print("\n" * 2)
+        print("_auth_method_outlook")
+        print(request.session.context)
