@@ -72,3 +72,21 @@ class IrAttachment(models.Model):
         - Non admin user uploading an unsplash image (bypass binary/url check)
         """
         return False
+
+    def create_image_attachment(self, vals):
+        # use get to avoid key error
+        bin_data = vals.get('raw')
+        res_model = vals.get('res_model')
+        res_id = vals.get('res_id')
+        if bin_data and res_model and res_id:
+            checksum = self._compute_checksum(bin_data)
+            att = self.env['ir_attachment'].search([
+                ('res_model', '=', res_model),
+                ('res_id', '=', res_id),
+                ('checksum', '=', checksum),
+            ])
+            att = self._filter_attachment_access(att.mapped('id'))
+            if len(att):
+                return att[0]
+
+        return self.create(vals)
