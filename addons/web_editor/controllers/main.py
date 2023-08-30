@@ -17,7 +17,7 @@ from odoo.http import request, Response
 from odoo import http, tools, _, SUPERUSER_ID
 from odoo.addons.http_routing.models.ir_http import slug, unslug
 from odoo.addons.web_editor.tools import get_video_url_data
-from odoo.exceptions import UserError, MissingError, ValidationError
+from odoo.exceptions import UserError, MissingError, ValidationError, AccessError
 from odoo.modules.module import get_resource_path
 from odoo.tools import file_open
 from odoo.tools.mimetypes import guess_mimetype
@@ -83,6 +83,27 @@ def handle_history_divergence(record, html_field_name, vals):
 
     # Save only the latest id.
     vals[html_field_name] = incoming_html[0:incoming_history_matches.start(1)] + last_step_id + incoming_html[incoming_history_matches.end(1):]
+
+def get_existing_attachment(ir_attachment, vals):
+    """
+    Check if an attachment already exists for the same vals. Return it if
+    so, None otherwise.
+    """
+    fields = dict(vals)
+    fields['res_id'] = fields.get('res_id') or 0
+    raw, datas = fields.pop('raw', None), fields.pop('datas', None)
+    domain = [(field, '=', value) for field, value in fields.items()]
+    if raw or datas:
+        domain.append(('checksum', '=', ir_attachment._compute_checksum(raw or b64decode(datas))))
+    try:
+        # Might raise AccessError.
+        existing_attachment = ir_attachment.search(domain, limit=1)
+        if existing_attachment:
+            # Might raise AccessError or UserError.
+            existing_attachment.check('read')
+        return existing_attachment or None
+    except (AccessError, UserError):
+        return None
 
 class Web_Editor(http.Controller):
     #------------------------------------------------------
@@ -352,6 +373,8 @@ class Web_Editor(http.Controller):
             'original': (attachment.original_id or attachment).read(['id', 'image_src', 'mimetype'])[0],
         }
 
+
+
     def _attachment_create(self, name='', data=False, url=False, res_id=False, res_model='ir.ui.view'):
         """Create and return a new attachment."""
         IrAttachment = request.env['ir.attachment']
@@ -401,7 +424,8 @@ class Web_Editor(http.Controller):
             if not attachment_data['public']:
                 attachment.sudo().generate_access_token()
         else:
-            attachment = IrAttachment.create(attachment_data)
+            attachment = get_existing_attachment(IrAttachment, attachment_data) \
+                or IrAttachment.create(attachment_data)
 
         return attachment
 
@@ -575,7 +599,11 @@ class Web_Editor(http.Controller):
             fields['res_id'] = res_id
         if name:
             fields['name'] = name
-        attachment = attachment.copy(fields)
+        existing_attachment = get_existing_attachment(request.env['ir.attachment'], fields)
+        if existing_attachment and not existing_attachment.url:
+            attachment = existing_attachment
+        else:
+            attachment = attachment.copy(fields)
         if attachment.url:
             # Don't keep url if modifying static attachment because static images
             # are only served from disk and don't fallback to attachments.
