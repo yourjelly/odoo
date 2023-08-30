@@ -52,8 +52,9 @@
                                 <div t-foreach="state.selectedCombos" t-as="combo" t-key="combo.id" class="d-flex align-items-center justify-content-between w-100 gap-3 py-3 p-2 pe-4 mb-3 rounded shadow-sm bg-view">
                                     <t t-set="product" t-value="this.selfOrder.productByIds[combo.product.id]"/>
                                     <img
-                                        class="o_self_order_item_card_image w-auto h-100 rounded bg-view"
+                                        class="o_self_order_item_card_image w-auto rounded bg-view"
                                         t-attf-src="/menu/get-image/{{ combo.product.id }}/512?unique={{product.write_date}}"
+                                        t-attf-style="height: 150px"
                                         alt="Product image"
                                         loading="lazy"
                                         onerror="this.remove()" />

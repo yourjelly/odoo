@@ -24,3 +24,36 @@ body {
   object-fit: contain;
   aspect-ratio: 1/1;
 }
+
+/* Overwritte btn-primary for company colors */
+
+.btn-primary {
+  background-color: var(--companyColor);
+  border-color: transparent;
+
+  &:hover {
+      background-color: var(--companyColor);
+      border-color: var(--companyColor);
+  }
+
+  &:active, &:focus {
+      background-color: $white;
+      color: var(--companyColor);
+      border-color: var(--companyColor);
+  }
+
+  &.disabled {
+      background-color: var(--companyColor);
+      border-color: var(--companyColor);
+      opacity: .5;
+  }
+}
+
+.text-bg-primary, .bg-primary {
+  background-color: var(--companyColor) !important;
+  border-color: var(--companyColor) !important;
+}
+
+.border-primary {
+  border-color: var(--companyColor) !important;
+}
