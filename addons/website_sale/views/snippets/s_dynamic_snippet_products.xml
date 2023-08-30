@@ -41,4 +41,53 @@
         <field name="path">website_sale/static/src/snippets/s_dynamic_snippet_products/000.js</field>
     </record>
 
+    <!-- Cannot patch beyond t-call => inherit dynamic snippet instead -->
+    <template id="new_page_template_sections_about_2" inherit_id="website.new_page_template_sections_about_2">
+        <xpath expr="//t[@t-snippet-call='website.new_page_template_about_2_s_banner']" position="before">
+            <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
+            <t t-snippet-call="website.new_page_template_about_2_s_dynamic_snippet_template"/>
+        </xpath>
+    </template>
+    <template id="new_page_template_s_dynamic_snippet_template" inherit_id="website.new_page_template_s_dynamic_snippet_template">
+        <xpath expr="//section" position="attributes">
+            <attribute name="t-attf-class" remove="o_dynamic_empty" separator=" "/>
+            <attribute name="data-snippet">s_dynamic_snippet_products</attribute>
+            <attribute name="data-name">Products</attribute>
+            <attribute name="data-product-category-id">all</attribute>
+            <attribute name="data-number-of-records">16</attribute>
+            <attribute name="t-att-data-filter-id">website_sale_filter_id</attribute>
+            <attribute name="data-template-key">website_sale.dynamic_filter_template_product_product_borderless_1</attribute>
+            <attribute name="data-carousel-interval">5000</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('dynamic_snippet_template')]" position="inside">
+            <div class="o_new_page_snippet_preview">
+                <t t-set="is_sample" t-value="True"/>
+                <div class="carousel slide">
+                    <div class="carousel-inner row w-100 mx-auto" role="listbox">
+                        <div class="carousel-item active">
+                            <div class="row">
+                                <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                                    <t t-set="records" t-value="[website_sale_records[0]]"/>
+                                    <t t-call="website_sale.dynamic_filter_template_product_product_borderless_1"/>
+                                </div>
+                                <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                                    <t t-set="records" t-value="[website_sale_records[1]]"/>
+                                    <t t-call="website_sale.dynamic_filter_template_product_product_borderless_1"/>
+                                </div>
+                                <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                                    <t t-set="records" t-value="[website_sale_records[2]]"/>
+                                    <t t-call="website_sale.dynamic_filter_template_product_product_borderless_1"/>
+                                </div>
+                                <div class="d-flex flex-grow-0 flex-shrink-0 col-3">
+                                    <t t-set="records" t-value="[website_sale_records[3]]"/>
+                                    <t t-call="website_sale.dynamic_filter_template_product_product_borderless_1"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
 </odoo>

@@ -3,6 +3,7 @@
 from . import controllers
 from . import models
 from . import wizard
+from .tools import generate_primary_snippet_templates
 
 import odoo
 from odoo import api, SUPERUSER_ID

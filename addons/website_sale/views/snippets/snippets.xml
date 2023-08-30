@@ -362,4 +362,9 @@
     </xpath>
 </template>
 
+<!-- Generate primary snippet templates for website_sale snippets -->
+<function model="website" name="_generate_primary_snippet_templates">
+    <value>website_sale</value>
+</function>
+
 </odoo>

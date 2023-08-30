@@ -111,5 +111,10 @@
             'website_sale/static/tests/**/*',
         ],
     },
+    'new_page_templates': {
+        'about': {
+            '2': ['s_dynamic_snippet_template', 's_banner', 's_three_columns', 's_showcase', 's_company_team', 's_quotes_carousel'],
+        },
+    },
     'license': 'LGPL-3',
 }

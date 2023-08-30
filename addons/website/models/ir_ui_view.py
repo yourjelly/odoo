@@ -514,3 +514,7 @@ class View(models.Model):
         if website:
             return website.default_lang_id.code
         return super()._get_base_lang()
+
+    @api.model
+    def _prepare_new_page_template_context(self, context):
+        pass

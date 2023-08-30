@@ -655,6 +655,8 @@ class Website(Home):
                 'title': group_el.text,
                 'templates': templates,
             }
+            new_page_template_context = {}
+            View._prepare_new_page_template_context(new_page_template_context)
             for template in View.search([
                 ('mode', '=', 'primary'),
                 ('key', 'like', escape_psql(f'new_page_template_sections_{group["id"]}_')),
@@ -663,6 +665,7 @@ class Website(Home):
                     # data-snippet must be the short general name
                     html_tree = html.fromstring(View._render_template(
                         template.key,
+                        new_page_template_context
                     ))
                     for section_el in html_tree.xpath("//section[@data-snippet]"):
                         snippet = section_el.attrib['data-snippet']
