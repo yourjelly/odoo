@@ -2230,7 +2230,7 @@ class MrpProduction(models.Model):
                 workorders_to_unlink = self.workorder_ids
             self.bom_id = bom
             moves_to_unlink.unlink()
-            workorders_to_unlink.unlink()
+            # workorders_to_unlink.unlink()
             return
 
         def operation_key_values(record):
