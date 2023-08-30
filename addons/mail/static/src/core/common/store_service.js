@@ -7,7 +7,7 @@ import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
-import { modelRegistry } from "./record";
+import { Record } from "./record";
 
 export class Store {
     /** @type {typeof import("@mail/core/web/activity_model").Activity} */
@@ -177,7 +177,7 @@ export const storeService = {
      */
     start(env, services) {
         const res = reactive(new Store(env, services));
-        for (const [name, Model] of modelRegistry.getEntries()) {
+        for (const [name, Model] of Record.modelRegistry.getEntries()) {
             if (res[name]) {
                 throw new Error(
                     `There must be no duplicated Model Names (duplicate found: ${name})`

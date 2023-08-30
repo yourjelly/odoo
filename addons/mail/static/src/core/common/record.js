@@ -3,10 +3,16 @@
 import { toRaw } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 
-export const modelRegistry = registry.category("discuss.model");
+const modelRegistry = registry.category("discuss.model");
 
 export class Record {
     static records = {};
+    static get modelRegistry() {
+        return modelRegistry;
+    }
+    static register() {
+        modelRegistry.add(this.name, this);
+    }
 
     /**
      * @param {Object} data
@@ -35,4 +41,4 @@ export class Record {
     }
 }
 
-modelRegistry.add(Record.name, Record);
+Record.register();
