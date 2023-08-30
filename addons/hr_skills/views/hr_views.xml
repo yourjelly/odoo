@@ -194,6 +194,10 @@
     <record id="hr_resume_type_action" model="ir.actions.act_window">
         <field name="name">Resume Line Types</field>
         <field name="res_model">hr.resume.line.type</field>
+        <field name="context"> {
+            'active_test': False
+            'search_default_filter_active': 1,}
+        </field>
         <field name="view_mode">tree,form</field>
     </record>
 
@@ -332,6 +336,7 @@
         <field name="arch" type="xml">
             <search string="Search Skill Type">
                 <field name="active" invisible="1"/>
+                <filter name="filter_active" string="UnArchived" domain="[('active', '=', True)]"/>
                 <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
                 <separator/>
             </search>
