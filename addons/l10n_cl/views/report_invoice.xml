@@ -44,20 +44,20 @@
                 <div name="right-upper-side" class="col-4">
                     <div class="row">
                         <div name="right-upper-side" class="col-12">
-                            <div class="row border border-dark">
+                            <div class="row border border-4 border-dark">
                                 <div class="col-12 text-center">
-                                    <h6 t-att-style="'color: %s;' % o.company_id.primary_color">
-                                        <strong t-att-style="'color: %s;' % o.company_id.primary_color">
+                                    <h6 style="color: black;">
+                                        <strong>
                                             <br/>
-                                            <span style="line-height: 180%;">RUT:</span>
+                                            <span style="font-family:arial; line-height: 180%;">RUT:</span>
                                             <t t-if="o.company_id.partner_id.vat">
-                                                <span t-esc="o.company_id.partner_id._format_dotted_vat_cl(o.company_id.partner_id.vat)"/>
+                                                <span style="font-family:arial;" t-esc="o.company_id.partner_id._format_dotted_vat_cl(o.company_id.partner_id.vat)"/>
                                             </t>
                                             <br/>
-                                            <span class="text-uppercase" t-esc="report_name"/>
+                                            <span style="font-family:arial;" class="text-uppercase" t-esc="report_name"/>
                                             <br/>
                                             <span>Nº:</span>
-                                            <span style="line-height: 200%;" t-esc="report_number"/>
+                                            <span style="font-family:arial;line-height: 200%;" t-esc="report_number"/>
                                         </strong>
                                     </h6>
                                 </div>
@@ -154,13 +154,31 @@
 
         <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" position="before">
             <t t-set="l10n_cl_values" t-value="line._l10n_cl_prices_and_taxes()"/>
+            <t t-set="line_amounts" t-value="l10n_cl_values['line_amounts']"/>
         </t>
+
+        <xpath expr="//span[@t-field='line.price_unit']" position="before">
+            <t t-if="'second_currency' in line_amounts" t-set="line_second_currency_round" t-value="line_amounts['second_currency']['round_currency']"/>
+        </xpath>
 
         <xpath expr="//span[@t-field='line.price_unit']" position="attributes">
             <attribute name="t-field"></attribute>
-            <attribute name="t-esc">line.price_unit</attribute>
-            <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+            <attribute t-if="not o.l10n_latam_document_type_id._is_doc_type_electronic_ticket()" name="t-esc">line_amounts['price_item_document']</attribute>
+            <attribute name="t-options">{"widget": "float", "precision": 2}</attribute>
         </xpath>
+
+        <th name="th_price_unit" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}" position="after">
+            <th name="th_price_unit" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                <span>Disc.</span>
+            </th>
+        </th>
+
+        <td t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}" position="after">
+            <td t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+                <span class="text-nowrap" t-esc="line_amounts['total_discount']" t-options="{'widget': 'monetary', 'display_currency': line_amounts['main_currency']}"/>
+            </td>
+        </td>
+
 
         <xpath expr="//span[@id='line_tax_ids']" position="attributes">
             <attribute name="t-esc">', '.join(map(lambda x: (x.description or x.name), line.tax_lines))</attribute>
@@ -170,14 +188,10 @@
             <attribute name="t-value">current_subtotal + l10n_cl_values['price_subtotal']</attribute>
         </t>
 
-        <xpath expr="//th[@name='th_subtotal']/span[@groups='account.group_show_line_subtotals_tax_included']" position="replace">
-            <span groups="account.group_show_line_subtotals_tax_included">Amount</span>
-        </xpath>
-
         <span t-field="line.price_subtotal" position="attributes">
-            <attribute name="t-field"></attribute>
-            <attribute name="t-esc">l10n_cl_values['price_subtotal']</attribute>
-            <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+            <attribute name="t-field"/>
+            <attribute name="t-esc">line_amounts['price_line_document']</attribute>
+            <attribute name="t-options">{"widget": "monetary", "display_currency": line_amounts['main_currency']}</attribute>
         </span>
 
         <t t-set="tax_totals" position="attributes">
@@ -204,12 +218,24 @@
             <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}"/>
         </xpath>
 
-        <xpath expr="//div[@id='total']" position="after">
+        <xpath expr="//div[@id='total']/div" position="inside">
+            <div name="stamp" class="col-11 text-center"/>
+        </xpath>
+
+        <xpath expr="//div[@id='total']//div//table" position="after">
             <div class="row">
-                <div name="stamp" class="col-4 text-center"/>
-                <div name="transferable-table" class="col-4"/>
-                <div name="transferable-legend" class="col-4 float-end"/>
+                <div class="col-12 text-end" t-if="o.l10n_latam_document_type_id.code == '39' and o.country_code == 'CL'" name="vat_boleta">
+                    The VAT tax of this boleta is: <span t-esc="o._l10n_cl_get_amounts()['vat_amount']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>.
+                </div>
+                <div name="transferable-table" class="col-6"/>
+                <div name="transferable-legend" class="col-6 text-end"/>
             </div>
+        </xpath>
+
+        <xpath expr="//span[@t-field='line.name']" position="replace">
+            <t t-set="all_taxes" t-value="'all_taxes'"/>
+            <t t-if="'second_currency' in line_amounts" t-set="line_second_currency_round" t-value="line_amounts['second_currency']['round_currency']"/>
+            <span t-esc="line_amounts['line_description']" t-options="{'widget': 'text'}"/>
         </xpath>
 
     </template>
