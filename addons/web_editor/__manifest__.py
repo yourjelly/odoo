@@ -41,6 +41,7 @@ Odoo Web Editor widget.
             # 'web/static/lib/bootstrap/js/dist/scrollspy.js',
             # 'web/static/lib/bootstrap/js/dist/tab.js',
             # 'web/static/lib/bootstrap/js/dist/toast.js',
+            'web/static/lib/clipboard/clipboard.js',
             'web_editor/static/src/js/editor/snippets.editor.js',
             'web_editor/static/src/js/editor/snippets.options.js',
             'web_editor/static/src/js/editor/smooth_scroll_on_drag.js',
