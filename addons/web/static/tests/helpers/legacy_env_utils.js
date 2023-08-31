@@ -3,7 +3,6 @@
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
 import { patch } from "@web/core/utils/patch";
-import { makeLegacyDialogMappingService } from "@web/legacy/utils";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import core from "@web/legacy/js/services/core";
 import makeTestEnvironment from "@web/../tests/legacy/helpers/test_env";
@@ -24,7 +23,6 @@ export async function makeLegacyDialogMappingTestEnv() {
     const legacyEnv = makeTestEnvironment({ bus: core.bus });
     serviceRegistry.add("ui", uiService);
     serviceRegistry.add("hotkey", hotkeyService);
-    serviceRegistry.add("legacy_dialog_mapping", makeLegacyDialogMappingService(legacyEnv));
 
     const env = await makeTestEnv();
     legacyEnv.services.hotkey = env.services.hotkey;
