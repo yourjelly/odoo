@@ -93,7 +93,7 @@ group names -->
         <attribute name="class" add="pb0" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h1 style="text-align: center;">About Us</h1>
         </div>
@@ -105,7 +105,7 @@ group names -->
         <attribute name="data-snippet">s_text_block</attribute>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h2 style="text-align: center;">Meet The Team</h2>
         </div>
@@ -118,7 +118,7 @@ group names -->
         <attribute name="class" add="pb0" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h2 style="text-align: left;">Our Story</h2>
         </div>
@@ -131,7 +131,7 @@ group names -->
         <attribute name="class" add="pb0 o_cc o_cc3" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h2 style="text-align: center;">What Makes Me Proud</h2>
         </div>
@@ -143,7 +143,7 @@ group names -->
         <attribute name="data-snippet">s_text_block</attribute>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h2 style="text-align: left;">Contact Us</h2>
         </div>
@@ -156,7 +156,7 @@ group names -->
         <attribute name="class" add="pb0 o_cc2" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h2 style="text-align: center;">Our Offer</h2>
         </div>
@@ -169,7 +169,7 @@ group names -->
         <attribute name="class" add="pb0 o_cc2" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h2 style="text-align: center;">Our Services</h2>
             <t t-snippet-call="website.s_searchbar_input"/>
@@ -183,7 +183,7 @@ group names -->
         <attribute name="class" add="pb0" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h2 style="text-align: left;">Questions?</h2>
         </div>
@@ -196,7 +196,7 @@ group names -->
         <attribute name="class" add="pb0" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h2 style="text-align: center;">Gallery</h2>
         </div>
@@ -208,7 +208,7 @@ group names -->
         <attribute name="data-snippet">s_text_block</attribute>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h1 style="text-align: center;">Our Services</h1>
         </div>
@@ -220,7 +220,7 @@ group names -->
         <attribute name="class" add="pb0" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h1 style="text-align: center;">Our Services</h1>
         </div>
@@ -232,7 +232,7 @@ group names -->
         <attribute name="data-snippet">s_text_block</attribute>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h1 style="text-align: center;">Our Team</h1>
         </div>
@@ -245,7 +245,7 @@ group names -->
         <attribute name="class" add="pb0" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h1 style="text-align: center;">Our Team</h1>
         </div>
@@ -258,7 +258,7 @@ group names -->
         <attribute name="class" add="pb0" remove="pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h1 style="text-align: center;">Pricing Plans</h1>
         </div>
@@ -271,7 +271,7 @@ group names -->
         <attribute name="class" add="pt40 pb40" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('container')]" position="replace">
+    <xpath expr="//div[hasclass('container')]|//div[hasclass('o_container_small')]" position="replace">
         <div class="container s_allow_columns">
             <h1 style="text-align: center;">About Us</h1>
         </div>
@@ -283,9 +283,6 @@ group names -->
         <attribute name="data-snippet">s_text_block</attribute>
         <attribute name="class" add="pt40 pb40 o_colored_level" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
-    </xpath>
-    <xpath expr="//p" position="after">
-        <t t-snippet-call="website.s_text_highlight"/>
     </xpath>
 </template>
 
@@ -346,7 +343,6 @@ group names -->
 <template id="s_image_text_service" inherit_id="website.s_image_text" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_image_text</attribute>
-        <attribute name="class" add="o_cc o_cc2 o_colored_level pt48 pb56" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
         <attribute name="data-oe-shape-data"/> 
     </xpath>
@@ -362,7 +358,6 @@ group names -->
 <template id="s_image_text_service_1" inherit_id="website.s_image_text" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_image_text</attribute>
-        <attribute name="class" add="o_cc o_cc2 o_colored_level pt48 pb56" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
         <attribute name="data-oe-shape-data"/> 
     </xpath>
@@ -396,7 +391,6 @@ group names -->
 <template id="s_image_text_team" inherit_id="website.s_image_text" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_image_text</attribute>
-        <attribute name="class" add="o_cc o_cc2 o_colored_level pt48 pb56" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
         <attribute name="data-oe-shape-data"/> 
     </xpath>
@@ -412,7 +406,6 @@ group names -->
 <template id="s_image_text_team_1" inherit_id="website.s_image_text" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_image_text</attribute>
-        <attribute name="class" add="o_cc o_cc2 o_colored_level pt48 pb56" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
         <attribute name="data-oe-shape-data"/> 
     </xpath>
@@ -489,8 +482,7 @@ group names -->
 <template id="s_picture_about_0" inherit_id="website.s_picture" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_picture</attribute>
-        <attribute name="class" add="o_colored_level pt0 pb0 bg-o-color-3" separator=" "/>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
+        <attribute name="class" add="o_colored_level pt0 pb0" separator=" "/>
     </xpath>
     <xpath expr="//h1|//h2" position="replace"/>
     <xpath expr="//p" position="replace"/>
@@ -499,8 +491,7 @@ group names -->
 <template id="s_picture_about_team" inherit_id="website.s_picture" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_picture</attribute>
-        <attribute name="class" add="o_colored_level pt0 pb0 bg-o-color-3" separator=" "/>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
+        <attribute name="class" add="o_colored_level pt0 pb0" separator=" "/>
     </xpath>
     <xpath expr="//h1|//h2" position="replace">
         <h2 style="text-align: center;">Our Team</h2>
@@ -644,25 +635,12 @@ group names -->
         <attribute name="class" add="o_colored_level" remove="pt48" separator=" "/>
         <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
-    <xpath expr="//p" position="after">
-        <t t-snippet-call="website.s_blockquote"/>
-    </xpath>
-    <xpath expr="(//p)[2]" position="after">
-        <t t-snippet-call="website.s_blockquote"/>
-    </xpath>
-    <xpath expr="(//p)[3]" position="after">
-        <t t-snippet-call="website.s_blockquote"/>
-    </xpath>
-    <xpath expr="(//p)[4]" position="after">
-        <t t-snippet-call="website.s_blockquote"/>
-    </xpath>
 </template>
 
 <template id="s_quotes_carousel_about_0" inherit_id="website.s_quotes_carousel" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_quotes_carousel</attribute>
         <attribute name="class" add="o_colored_level o_cc o_cc1" separator=" "/>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
 </template> 
 
@@ -689,7 +667,6 @@ group names -->
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_cover</attribute>
         <attribute name="class" add="pt40 pb40" remove="pt96 pb96" separator=" "/>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h1" position="replace">
         <h1 style="text-align: center;">About Us</h1>
@@ -702,7 +679,6 @@ group names -->
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_cover</attribute>
         <attribute name="class" add="pt256 pb256" remove="pt96 pb96" separator=" "/>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h1" position="replace">
         <h1 style="text-align: center;">Coming Soon</h1>
@@ -715,7 +691,6 @@ group names -->
 <template id="s_cover_landing" inherit_id="website.s_cover" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_cover</attribute>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h1" position="replace">
         <h1 class="text-center">Personalized Fitness</h1>
@@ -728,7 +703,6 @@ group names -->
 <template id="s_banner_landing" inherit_id="website.s_banner" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_banner</attribute>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h1" position="replace">
         <h1>Elevate Your Brand With Us</h1>
@@ -744,7 +718,6 @@ group names -->
 <template id="s_banner_gallery" inherit_id="website.s_banner" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_banner</attribute>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h1" position="replace">
         <h1>Discover Our Univers</h1>
@@ -783,7 +756,6 @@ group names -->
 <template id="s_three_columns_about" inherit_id="website.s_three_columns" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_three_columns</attribute>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h3|//h4|//h5" position="replace">
         <h3 class="card-title">Our Story</h3>
@@ -808,7 +780,6 @@ group names -->
 <template id="s_three_columns_landing" inherit_id="website.s_three_columns" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_three_columns</attribute>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h3|//h4|//h5" position="replace">
         <h3 class="card-title">Amazing Sound Quality</h3>
@@ -824,7 +795,6 @@ group names -->
 <template id="s_three_columns_landing_1" inherit_id="website.s_three_columns" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_three_columns</attribute>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h3|//h4|//h5" position="replace">
         <h3 class="card-title">Personalized Workouts</h3>
@@ -849,7 +819,6 @@ group names -->
 <template id="s_three_columns_service" inherit_id="website.s_three_columns" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_three_columns</attribute>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h3|//h4|//h5" position="replace">
         <h3 class="card-title">Wellness Coaching</h3>
@@ -874,7 +843,6 @@ group names -->
 <template id="s_three_columns_team" inherit_id="website.s_three_columns" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-snippet">s_three_columns</attribute>
-        <attribute name="style" remove="background-image: none;" separator=" "/>
     </xpath>
     <xpath expr="//h3|//h4|//h5" position="replace">
         <h3 class="card-title">Tony Fred, CEO</h3>
@@ -1027,296 +995,6 @@ group names -->
         <attribute name="style" add="background-position: 0% 44.4099%;" separator=" "/>
     </xpath>
 </template>
-
-<!-- About Pages -->
-
-<record id="new_page_template_about_mini" model="ir.ui.view">
-    <field name="name">New page template: About Minimalist</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_about_mini</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_cover_about_0"/>
-            <t t-snippet-call="website.s_text_block_title_about_3"/>
-            <t t-snippet-call="website.s_text_block_about_0"/>
-            <t t-snippet-call="website.s_picture_about_0"/>
-            <t t-snippet-call="website.s_text_block_title_contact"/>
-            <t t-snippet-call="website.s_website_form_about_0"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_about_full" model="ir.ui.view">
-    <field name="name">New page template: About Full</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_about_full</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title_about"/>
-            <t t-snippet-call="website.s_image_text_about_0"/>
-            <t t-snippet-call="website.s_text_image_about_0"/>
-            <t t-snippet-call="website.s_numbers_about_0"/>
-            <t t-snippet-call="website.s_picture_about_team"/>
-            <t t-snippet-call="website.s_quotes_carousel_about_0"/>
-            <t t-snippet-call="website.s_references_about_0"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_about_full_2" model="ir.ui.view">
-    <field name="name">New page template: About Full #2</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_about_full_2</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title"/>
-            <t t-snippet-call="website.s_three_columns_about"/>
-            <t t-snippet-call="website.s_text_block_title_about_1"/>
-            <t t-snippet-call="website.s_company_team_block_about"/>
-            <t t-snippet-call="website.s_references_about_0"/>
-            <t t-snippet-call="website.s_quotes_carousel_about_0"/>
-            <t t-snippet-call="website.s_call_to_action"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_about_personal" model="ir.ui.view">
-    <field name="name">New page template: About Personal</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_about_personal</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_cover_about_personal"/>
-            <t t-snippet-call="website.s_image_text_about_personal"/>
-            <t t-snippet-call="website.s_text_block_title_about_personal"/>
-            <t t-snippet-call="website.s_numbers_about_personal"/>
-            <t t-snippet-call="website.s_features_about_personal"/>
-            <t t-snippet-call="website.s_call_to_action_about"/>
-        </div>
-    </field>
-</record>
-
-<!-- Landing Pages -->
-
-<record id="new_page_template_landing_0" model="ir.ui.view">
-    <field name="name">New page template: Landing Pages #0</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_landing_0</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_cover_soon_0"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_landing_1" model="ir.ui.view">
-    <field name="name">New page template: Landing Pages #1</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_landing_1</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_banner_landing"/>
-            <t t-snippet-call="website.s_features_landing"/>
-            <t t-snippet-call="website.s_masonry_block_landing"/>
-            <t t-snippet-call="website.s_call_to_action_landing_2"/>
-            <t t-snippet-call="website.s_references_about_0"/>
-            <t t-snippet-call="website.s_quotes_carousel_about_0"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_landing_2" model="ir.ui.view">
-    <field name="name">New page template: Landing Pages #2</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_landing_2</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_cover_landing"/>
-            <t t-snippet-call="website.s_text_image_landing"/>
-            <t t-snippet-call="website.s_text_block_title_landing_service"/>
-            <t t-snippet-call="website.s_three_columns_landing_1"/>
-            <t t-snippet-call="website.s_call_to_action_landing"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_landing_3" model="ir.ui.view">
-    <field name="name">New page template: Landing Pages #3</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_landing_3</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_cover_landing"/>
-            <t t-snippet-call="website.s_text_block_title_landing"/>
-            <t t-snippet-call="website.s_three_columns_landing"/>
-            <t t-snippet-call="website.s_showcase_landing"/>
-            <t t-snippet-call="website.s_color_blocks_2_landing"/>
-            <t t-snippet-call="website.s_quotes_carousel_about_0"/>
-            <t t-snippet-call="website.s_call_to_action_landing_1"/>
-        </div>
-    </field>
-</record>
-
-<!-- Gallery Pages -->
-
-<record id="new_page_template_gallery_0" model="ir.ui.view">
-    <field name="name">New page template: Gallery #0</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_gallery_0</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title_gallery"/>
-            <t t-snippet-call="website.s_images_wall"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_gallery_1" model="ir.ui.view">
-    <field name="name">New page template: Gallery #1</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_gallery_1</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_banner_gallery"/>
-            <t t-snippet-call="website.s_text_block_gallery"/>
-            <t t-snippet-call="website.s_image_gallery"/>
-            <t t-snippet-call="website.s_picture_about_0"/>
-        </div>
-    </field>
-</record>
-
-<!-- Services Pages -->
-
-<record id="new_page_template_services_0" model="ir.ui.view">
-    <field name="name">New page template: Services #0</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_services_0</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title_services_no_padding"/>
-            <t t-snippet-call="website.s_text_block_service"/>
-            <t t-snippet-call="website.s_three_columns_service"/>
-            <t t-snippet-call="website.s_text_block_title_contact"/>
-            <t t-snippet-call="website.s_website_form_about_0"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_services_1" model="ir.ui.view">
-    <field name="name">New page template: Services #1</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_services_1</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title_services_no_padding"/>
-            <t t-snippet-call="website.s_features_grid"/>
-            <t t-snippet-call="website.s_text_block_title_faq"/>
-            <t t-snippet-call="website.s_faq_collapse"/>
-            <t t-snippet-call="website.s_call_to_action"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_services_2" model="ir.ui.view">
-    <field name="name">New page template: Services #2</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_services_2</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_cover_service"/>
-            <t t-snippet-call="website.s_image_text_service"/>
-            <t t-snippet-call="website.s_text_image_service"/>
-            <t t-snippet-call="website.s_image_text_service_1"/>
-            <t t-snippet-call="website.s_call_to_action_landing_2"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_services_3" model="ir.ui.view">
-    <field name="name">New page template: Services #3</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_services_3</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title_services"/>
-            <t t-snippet-call="website.s_parallax_services"/>
-            <t t-snippet-call="website.s_table_of_content"/>
-            <t t-snippet-call="website.s_call_to_action"/>
-        </div>
-    </field>
-</record>
-
-<!-- Pricing Pages -->
-
-<record id="new_page_template_pricing_0" model="ir.ui.view">
-    <field name="name">New page template: Pricing Plans #0</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_pricing_0</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title_pricing"/>
-            <t t-snippet-call="website.s_comparisons"/>
-            <t t-snippet-call="website.s_text_block_pricing"/>
-            <t t-snippet-call="website.s_showcase"/>
-            <t t-snippet-call="website.s_text_block_title_faq"/>
-            <t t-snippet-call="website.s_faq_collapse"/>
-            <t t-snippet-call="website.s_call_to_action"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_pricing_menu" model="ir.ui.view">
-    <field name="name">New page template: Pricing Plans Menu</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_pricing_menu</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_carousel_menu"/> 
-            <t t-snippet-call="website.s_product_catalog"/>
-            <t t-snippet-call="website.s_call_to_action_menu"/>
-        </div>
-    </field>
-</record>
-
-<!-- Team Pages -->
-
-<record id="new_page_template_team_0" model="ir.ui.view">
-    <field name="name">New page template: Team #0</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_team_0</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title_team"/>
-            <t t-snippet-call="website.s_three_columns_team"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_team_1" model="ir.ui.view">
-    <field name="name">New page template: Team #1</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_team_1</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title_team"/>
-            <t t-snippet-call="website.s_image_text_team"/>
-            <t t-snippet-call="website.s_text_image_team"/>
-            <t t-snippet-call="website.s_image_text_team_1"/>
-        </div>
-    </field>
-</record>
-
-<record id="new_page_template_team_2" model="ir.ui.view">
-    <field name="name">New page template: Team #2</field>
-    <field name="type">qweb</field>
-    <field name="key">website.new_page_template_team_2</field>
-    <field name="arch" type="xml">
-        <div id="wrap">
-            <t t-snippet-call="website.s_text_block_title_team_no_padding"/>
-            <t t-snippet-call="website.s_company_team"/>
-        </div>
-    </field>
-</record>
 
 </odoo>
 
