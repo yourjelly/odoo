@@ -218,6 +218,9 @@ Odoo Web Editor widget.
         'web.assets_backend': [
             'web_editor/static/src/js/editor/odoo-editor/src/base_style.scss',
             'web_editor/static/lib/vkbeautify/**/*',
+            'web/static/lib/select2/select2.css',
+            'web/static/lib/select2-bootstrap-css/select2-bootstrap.css',
+            'web/static/lib/select2/select2.js',
             'web_editor/static/src/js/common/**/*',
             'web_editor/static/src/js/editor/odoo-editor/src/utils/utils.js',
             'web_editor/static/src/js/wysiwyg/fonts.js',
