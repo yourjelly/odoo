@@ -334,10 +334,7 @@ def load_certificate():
         Path(get_path_nginx()).joinpath('conf/nginx-cert.crt').write_text(result['x509_pem'])
         Path(get_path_nginx()).joinpath('conf/nginx-cert.key').write_text(result['private_key_pem'])
     time.sleep(3)
-    if platform.system() == 'Windows':
-        odoo_restart(0)
-    elif platform.system() == 'Linux':
-        start_nginx_server()
+    start_nginx_server()
     return True
 
 def download_iot_handlers(auto=True):
