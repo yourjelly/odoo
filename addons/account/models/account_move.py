@@ -2610,35 +2610,29 @@ class AccountMove(models.Model):
                 #     .filtered(lambda l: l.display_type == 'product') \
                 #     .grouped(lambda l: (l.account_id, l.tax_ids))
 
-                lines = (move.invoice_line_ids + reverse_move.invoice_line_ids)
-
-                # Grouping by a combination of account_id and tax_ids
-                grouped_lines = {}
-                for key, group in groupby(lines, key=lambda l: (l.account_id, l.tax_ids)):
-                    grouped_lines[key] = list(group)
-
-
-                line_ids_vals = []
-                for (_account, _tax), lines in grouped_lines.items():
-                    # lines_of_move = lines.filtered(lambda l: l.move_id == move.id)
-                    # lines_of_reverse_move = lines.filtered(lambda l: l.move_id == reverse_move.id)
-                    exchange_diff = - sum(lines.mapped('balance'))
-
-                    # move_product_lines = move.line_ids.filtered(lambda l: l.display_type == 'product')
-                    # reverse_move_product_lines = reverse_move.line_ids.filtered(lambda l: l.display_type == 'product')
-                    line_ids_vals.append(
-                        (0, 0, {
-                            'account_id': lines[0].account_id.id,
-                            'balance': exchange_diff,
-                            'tax_ids': lines[0].tax_ids,
-                        })
-                    )
-
-                self.env['account.move'].create({
-                    'move_type': 'entry',
-                    'currency_id': move.currency_id.id,
-                    'line_ids': line_ids_vals,
-                })
+                # lines = (move.invoice_line_ids + reverse_move.invoice_line_ids)
+                #
+                # grouped_lines = {}
+                # for key, group in groupby(lines, key=lambda l: (l.account_id, l.tax_ids)):
+                #     grouped_lines[key] = list(group)
+                #
+                # line_ids_vals = []
+                # for (_account, _tax), lines in grouped_lines.items():
+                #     exchange_diff = - sum(lines.mapped('balance'))
+                #
+                #     line_ids_vals.append(
+                #         (0, 0, {
+                #             'account_id': lines[0].account_id.id,
+                #             'balance': exchange_diff,
+                #             'tax_ids': lines[0].tax_ids,
+                #         })
+                #     )
+                #
+                # self.env['account.move'].create({
+                #     'move_type': 'entry',
+                #     'currency_id': move.currency_id.id,
+                #     'line_ids': line_ids_vals,
+                # })
 
         return reverse_moves
 
