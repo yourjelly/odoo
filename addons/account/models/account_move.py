@@ -5042,6 +5042,8 @@ class AccountMoveLine(models.Model):
 
         return exchange_move
 
+    def _create_exchange_misc(self):
+        pass
     def reconcile(self):
         ''' Reconcile the current move lines all together.
         :return: A dictionary representing a summary of what has been done during the reconciliation:
@@ -5124,6 +5126,10 @@ class AccountMoveLine(models.Model):
 
             if self._context.get('no_exchange_difference'):
                 exchange_move = None
+            if self._context.get('add_exchange_misc'):
+                exchange_diff = sum(self.move_id.line_ids.filtered(lambda l: l.account_internal_group == 'income').mapped('balance'))
+                # misc = involved_lines._create_exchange_misc()
+                
             else:
                 exchange_move = involved_lines._create_exchange_difference_move()
                 if exchange_move:
