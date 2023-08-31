@@ -2604,7 +2604,7 @@ class AccountMove(models.Model):
                     group[(line.account_id, line.currency_id)].append(line.id)
                 for (account, dummy), line_ids in group.items():
                     if account.reconcile or account.internal_type == 'liquidity':
-                        self.env['account.move.line'].browse(line_ids).with_context(move_reverse_cancel=cancel, no_exchange_difference=True).reconcile()
+                        self.env['account.move.line'].browse(line_ids).with_context(move_reverse_cancel=cancel, no_exchange_difference=True, add_exchange_misc=True).reconcile()
 
                 # group = (move.line_ids + reverse_move.line_ids) \
                 #     .filtered(lambda l: l.display_type == 'product') \
@@ -5042,8 +5042,6 @@ class AccountMoveLine(models.Model):
 
         return exchange_move
 
-    def _create_exchange_misc(self):
-        pass
     def reconcile(self):
         ''' Reconcile the current move lines all together.
         :return: A dictionary representing a summary of what has been done during the reconciliation:
@@ -5123,13 +5121,52 @@ class AccountMoveLine(models.Model):
         if is_full_needed:
 
             # ==== Create the exchange difference move ====
+            if self._context.get('add_exchange_misc'):
+                income_lines = self.move_id.line_ids.filtered(lambda l: l.account_internal_group == 'income')
+                # exchange_diff = sum(income_lines.mapped('balance'))
+
+                # group = (move.line_ids + reverse_move.line_ids) \
+                #     .filtered(lambda l: l.display_type == 'product') \
+                #     .grouped(lambda l: (l.account_id, l.tax_ids))
+
+                # lines = (move.invoice_line_ids + reverse_move.invoice_line_ids)
+
+                grouped_lines = {}
+                for key, lines in groupby(income_lines, key=lambda l: (l.account_id, l.tax_ids)):
+                    grouped_lines[key] = self.env['account.move.line'].concat(*lines)
+
+                line_ids_vals = []
+                for (_account, _tax), lines in grouped_lines.items():
+                    exchange_diff = - sum(lines.mapped('balance'))
+
+                    line_ids_vals.append(
+                        (0, 0, {
+                            'account_id': lines[0].account_id.id,
+                            'balance': exchange_diff,
+                            'amount_currency': exchange_diff,
+                            'tax_ids': lines[0].tax_ids,
+                        })
+                    )
+
+                misc = self.env['account.move'].create({
+                    'move_type': 'entry',
+                    'currency_id': income_lines.company_id.currency_id.id,
+                    'line_ids': line_ids_vals,
+                })
+
+                misc2 = self.env['account.move'].create({
+                    'move_type': 'entry',
+                    'currency_id': income_lines.company_id.currency_id.id,
+                    'line_ids': [(0, 0, {
+                            'account_id': income_lines[0].account_id.id,
+                            'balance': 1000,
+                            'amount_currency': 1000,
+                            'tax_ids': [],
+                        })]
+                })
 
             if self._context.get('no_exchange_difference'):
                 exchange_move = None
-            if self._context.get('add_exchange_misc'):
-                exchange_diff = sum(self.move_id.line_ids.filtered(lambda l: l.account_internal_group == 'income').mapped('balance'))
-                # misc = involved_lines._create_exchange_misc()
-
             else:
                 exchange_move = involved_lines._create_exchange_difference_move()
                 if exchange_move:
