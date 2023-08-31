@@ -5129,7 +5129,7 @@ class AccountMoveLine(models.Model):
             if self._context.get('add_exchange_misc'):
                 exchange_diff = sum(self.move_id.line_ids.filtered(lambda l: l.account_internal_group == 'income').mapped('balance'))
                 # misc = involved_lines._create_exchange_misc()
-                
+
             else:
                 exchange_move = involved_lines._create_exchange_difference_move()
                 if exchange_move:
