@@ -288,6 +288,8 @@ class PosConfig(models.Model):
                         or []
                     ),
                 ],
+                limit=1000,
+                order='',
             )
         )
 
