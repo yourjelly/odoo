@@ -101,3 +101,6 @@ class CrmLead(models.Model):
         # add all the orders from all lead to merge
         fields_info['order_ids'] = lambda fname, leads: [(4, order.id) for order in leads.order_ids]
         return fields_info
+
+
+

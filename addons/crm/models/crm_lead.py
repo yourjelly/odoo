@@ -2663,3 +2663,23 @@ class Lead(models.Model):
                         lead_values.append(('tag_id', tag.id))
                 leads_values_dict[lead.id] = {'values': lead_values, 'team_id': lead['team_id'].id}
             return leads_values_dict
+
+    def _send_mail_on_reached_date(self):
+        # template = self.env.ref('y_not_sale_type.email_template_invoice_ynotdesign', raise_if_not_found=False)
+        # if template:
+        #     template.send_mail(
+        #         self.id,
+        #         notif_layout='mail.mail_notification_light',
+        #         force_send=True)
+        
+        template = self.env.ref('crm.email_crm_template_lead_reached')
+        records = self.env['crm.lead'].search([('date_deadline', '=', fields.Date.today())])
+        print("\n\n\n")
+        print("here records",records)
+        print("\n\n\n")
+        for rec in records:
+            template.send_mail(
+                rec.id,
+                email_layout_xmlid='mail.mail_notification_light',
+                force_send=True
+            )
