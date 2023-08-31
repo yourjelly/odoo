@@ -384,7 +384,7 @@
                     closeButton.focus();
                     triggerClick(closeButton, "modal close button");
                 } else {
-                    $modal.modal("hide");
+                    // $modal.modal("hide");
                 }
                 isModal = true;
                 return true;
