@@ -5,7 +5,10 @@ import { TEST_USER_IDS } from "@bus/../tests/helpers/test_constants";
 import { registry } from "@web/core/registry";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { makeMockServer } from "@web/../tests/helpers/mock_server";
+import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { serializeDateTime, serializeDate } from "@web/core/l10n/dates";
+import { session } from "@web/session";
+
 const { DateTime } = luxon;
 
 const modelDefinitionsPromise = new Promise((resolve) => {
@@ -111,6 +114,20 @@ export const pyEnvTarget = {
         )[0];
         this._authenticate(user);
         this.cookie.set("authenticated_user_sid", this.cookie.get("sid"));
+        if (!user) {
+            return;
+        }
+        const [partner] = this.mockServer.getRecords(
+            "res.partner",
+            [["id", "=", user.partner_id]],
+            { active_test: false }
+        );
+        patchWithCleanup(session, {
+            uid: user.id,
+            name: user.name,
+            username: user.login,
+            partner_id: partner?.id,
+        });
     },
     /**
      * Logout the current user.
