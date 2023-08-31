@@ -17,7 +17,7 @@ class ProductTemplate(models.Model):
     _name = "product.template"
     _inherit = ['mail.thread', 'mail.activity.mixin', 'image.mixin']
     _description = "Product"
-    _order = "priority desc, name"
+    _order = "is_favorite desc, name"
 
     @tools.ormcache()
     def _get_default_category_id(self):
@@ -137,11 +137,7 @@ class ProductTemplate(models.Model):
     has_configurable_attributes = fields.Boolean("Is a configurable product", compute='_compute_has_configurable_attributes', store=True)
 
     product_tooltip = fields.Char(compute='_compute_product_tooltip')
-
-    priority = fields.Selection([
-        ('0', 'Normal'),
-        ('1', 'Favorite'),
-    ], default='0', string="Favorite")
+    is_favorite = fields.Boolean(string="Favorite")
 
     product_tag_ids = fields.Many2many(
         string="Product Template Tags",

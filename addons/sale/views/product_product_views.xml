@@ -22,7 +22,7 @@
                             <div class="oe_kanban_details p-2 d-flex">
                                 <div class="o_kanban_record_top flex-column m-0">
                                     <div class="d-flex">
-                                        <field class="me-2" name="priority" widget="priority"/>
+                                        <field class="me-2" name="is_favorite" widget="boolean_favorite"/>
                                         <h4 class="o_kanban_record_title text-reset">
                                             <strong><field name="name"/></strong>
                                         </h4>
@@ -63,7 +63,7 @@
                        groups="product.group_product_variant"/>
                 <field name="product_tmpl_id" string="Product Template"/>
                 <!-- Filter -->
-                <filter string="Favorites" name="favorites" domain="[('priority', '= ','1')]"/>
+                <filter string="Favorites" name="favorites" domain="[('is_favorite', '=', '1')]"/>
                 <separator/>
                 <filter string="Services" name="services" domain="[('type', '=', 'service')]"/>
                 <filter string="Products"
