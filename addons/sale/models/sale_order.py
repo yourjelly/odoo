@@ -347,6 +347,8 @@ class SaleOrder(models.Model):
 
     @api.depends('partner_id')
     def _compute_partner_invoice_id(self):
+        self.env.context= dict(self.env.context)
+        self.env.context.update({'show_address':False,'show_vat':False})
         for order in self:
             order.partner_invoice_id = order.partner_id.address_get(['invoice'])['invoice'] if order.partner_id else False
 
