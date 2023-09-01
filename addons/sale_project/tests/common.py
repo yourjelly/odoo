@@ -17,7 +17,7 @@ class TestSaleProjectCommon(TestSaleCommon):
         cls.account_sale = cls.company_data['default_account_revenue']
 
         cls.analytic_plan = cls.env['account.analytic.plan'].create({
-            'name': 'Plan Test',
+            'name': 'Sale Plan Test',
             'company_id': cls.company_data['company'].id,
         })
         cls.analytic_account_sale = cls.env['account.analytic.account'].create({

@@ -15,7 +15,11 @@ class AccountAnalyticPlan(models.Model):
     def _default_color(self):
         return randint(1, 11)
 
-    name = fields.Char(required=True, translate=True)
+    name = fields.Char(
+        required=True,
+        translate=True,
+        inverse='_inverse_name',
+    )
     description = fields.Text(string='Description')
     parent_id = fields.Many2one(
         'account.analytic.plan',
@@ -82,6 +86,26 @@ class AccountAnalyticPlan(models.Model):
         'analytic_plan_id',
         string='Applicability',
     )
+
+    def _inverse_name(self):
+        for plan in self:
+            fname = f"x_plan{plan.id}_id"
+            prev = self.env['ir.model.fields'].search([
+                ('name', '=', fname),
+                ('model', '=', 'account.analytic.line'),
+            ])
+            if prev:
+                prev.field_description = plan.name
+            else:
+                self.env['ir.model.fields'].with_context(update_custom_fields=False).create({
+                    'name': fname,
+                    'field_description': plan.name,
+                    'state': 'manual',
+                    'model': 'account.analytic.line',
+                    'model_id': self.env['ir.model']._get_id('account.analytic.line'),
+                    'ttype': 'many2one',
+                    'relation': 'account.analytic.account',
+                })
 
     @api.depends('name', 'parent_id.complete_name')
     def _compute_complete_name(self):
@@ -185,6 +209,13 @@ class AccountAnalyticPlan(models.Model):
                 'name': 'Default',
                 'company_id': False,
             })
+
+    def unlink(self):
+        self.env['ir.model.fields'].search([
+            ('name', 'in', [f"x_plan{plan.id}_id" for plan in self]),
+            ('model', '=', 'account.analytic.line'),
+        ]).unlink()
+        return super().unlink()
 
 
 class AccountAnalyticApplicability(models.Model):

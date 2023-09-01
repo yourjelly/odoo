@@ -35,6 +35,13 @@ class AccountAnalyticAccount(models.Model):
         tracking=True,
     )
 
+    composition_ids = fields.Many2many(
+        'account.analytic.account',
+        relation='analytic_account_composition', column1='aggregate_id', column2='detail_id',
+        check_company=True,
+        domain=[('composition_ids', '=', False)],  # disallow already added plans
+        recursive=True,  # not really but ORM not happy...
+    )
     plan_id = fields.Many2one(
         'account.analytic.plan',
         string='Plan',

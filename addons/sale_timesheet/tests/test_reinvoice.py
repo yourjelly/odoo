@@ -29,7 +29,7 @@ class TestReInvoice(TestCommonSaleTimesheet):
 
         # create AA, SO and invoices
         cls.analytic_plan = cls.env['account.analytic.plan'].create({
-            'name': 'Plan',
+            'name': 'Timesheet Plan',
             'company_id': cls.company_data['company'].id,
         })
 

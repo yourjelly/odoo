@@ -29,7 +29,7 @@ class TestCommonTimesheet(TransactionCase):
         })
 
         cls.analytic_plan = cls.env['account.analytic.plan'].create({
-            'name': 'Plan Test',
+            'name': 'Timesheet Plan Test',
             'company_id': False,
         })
         cls.analytic_account = cls.env['account.analytic.account'].create({
