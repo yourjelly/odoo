@@ -2886,7 +2886,6 @@ class AccountMoveLine(models.Model):
             # distribution_on_each_plan corresponds to the proportion that is distributed to each plan to be able to
             # give the real amount when we achieve a 100% distribution
             distribution_on_each_plan = {}
-
             for account_id, distribution in self.analytic_distribution.items():
                 line_values = self._prepare_analytic_distribution_line(float(distribution), account_id, distribution_on_each_plan)
                 if not self.currency_id.is_zero(line_values.get('amount')):
@@ -2898,20 +2897,22 @@ class AccountMoveLine(models.Model):
             analytic tags with analytic distribution.
         """
         self.ensure_one()
-        account_id = int(account_id)
-        account = self.env['account.analytic.account'].browse(account_id)
-        distribution_plan = distribution_on_each_plan.get(account.root_plan_id, 0) + distribution
+        account_field_values = {}
         decimal_precision = self.env['decimal.precision'].precision_get('Percentage Analytic')
-        if float_compare(distribution_plan, 100, precision_digits=decimal_precision) == 0:
-            amount = -self.balance * (100 - distribution_on_each_plan.get(account.root_plan_id, 0)) / 100.0
-        else:
-            amount = -self.balance * distribution / 100.0
-        distribution_on_each_plan[account.root_plan_id] = distribution_plan
+        amount = 0
+        for account in self.env['account.analytic.account'].browse(map(int, account_id.split(","))):
+            distribution_plan = distribution_on_each_plan.get(account.root_plan_id, 0) + distribution
+            if float_compare(distribution_plan, 100, precision_digits=decimal_precision) == 0:
+                amount = -self.balance * (100 - distribution_on_each_plan.get(account.root_plan_id, 0)) / 100.0
+            else:
+                amount = -self.balance * distribution / 100.0
+            distribution_on_each_plan[account.root_plan_id] = distribution_plan
+            account_field_values[account.plan_id._column_name()] = account.id
         default_name = self.name or (self.ref or '/' + ' -- ' + (self.partner_id and self.partner_id.name or '/'))
         return {
             'name': default_name,
             'date': self.date,
-            'account_id': account_id,
+            **account_field_values,
             'partner_id': self.partner_id.id,
             'unit_amount': self.quantity,
             'product_id': self.product_id and self.product_id.id or False,
@@ -2921,7 +2922,7 @@ class AccountMoveLine(models.Model):
             'ref': self.ref,
             'move_line_id': self.id,
             'user_id': self.move_id.invoice_user_id.id or self._uid,
-            'company_id': account.company_id.id or self.company_id.id or self.env.company.id,
+            'company_id': self.company_id.id or self.env.company.id,
             'category': 'invoice' if self.move_id.is_sale_document() else 'vendor_bill' if self.move_id.is_purchase_document() else 'other',
         }
 

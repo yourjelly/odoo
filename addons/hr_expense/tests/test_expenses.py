@@ -272,13 +272,13 @@ class TestExpenses(TestExpenseCommon):
             {
                 'amount': -869.57,
                 'date': fields.Date.from_string('2016-01-01'),
-                'account_id': self.analytic_account_1.id,
+                self.analytic_account_1.plan_id._column_name(): self.analytic_account_1.id,
                 'currency_id': self.company_data['currency'].id,
             },
             {
                 'amount': -434.78,
                 'date': fields.Date.from_string('2016-01-01'),
-                'account_id': self.analytic_account_2.id,
+                self.analytic_account_1.plan_id._column_name(): self.analytic_account_2.id,
                 'currency_id': self.company_data['currency'].id,
             },
         ])

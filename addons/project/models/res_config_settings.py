@@ -18,8 +18,11 @@ class ResConfigSettings(models.TransientModel):
     analytic_plan_id = fields.Many2one(
         comodel_name='account.analytic.plan',
         string="Analytic Plan",
-        readonly=False,
-        related='company_id.analytic_plan_id',
+        config_parameter="analytic.analytic_plan_projects",
+    )
+    company_dependent_project = fields.Boolean(
+        help="The projects are shared between companies",
+        config_parameter="project.share_analytic_account",
     )
 
     @api.model
