@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+<t t-name="web_editor.DrawDialog" owl="1">
+    <Dialog 
+        size="size"
+        title="title">
+        <Draw canvasElements="props.canvas_elements"/>
+        <t t-set-slot="footer">
+            <button class="btn btn-primary" t-on-click="() => this.save()">Add</button>
+            <button class="btn btn-secondary" t-on-click="() => this.props.close()">Discard</button>
+        </t>
+    </Dialog>
+</t>
+</templates>

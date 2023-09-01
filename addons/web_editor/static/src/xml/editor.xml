@@ -194,6 +194,7 @@
                 <div id="media-replace" title="Replace media" class="btn o_we_bg_success editor-ignore">Replace</div>
                 <span class="oe-toolbar-separator d-flex"/>
                 <div id="image-delete" class="btn btn-link text-danger editor-ignore fa fa-trash" title="Remove (DELETE)"></div>
+                <div id="draw-canvas" class="btn btn-link text-danger editor-ignore fa fa-paint-brush" title="draw"></div>
             </div>
 
             <div id="fa-resize" class="btn-group only_fa">

@@ -801,3 +801,54 @@ class Web_Editor(http.Controller):
             ensure_no_history_divergence(record, field_name, history_ids)
         except ValidationError:
             return record[field_name]
+    
+    @http.route('/web_editor/canvas_element', type='json', auth='user', website=True)
+    def processCanvasElement(self, data, elements, res_id = False, res_model = 'ir.ui.view',  **kw):
+        self._clean_context()
+        # # b64decode(data)
+        # # data = image_data_uri(data)
+        # data = b64decode(data)
+        # # img = Image.open(io.BytesIO(data))
+        # # data = tools.image_process(data)
+        # name = 'canvas_' + str(res_id) + '.jpg'
+        # with open(name, 'wb') as f:
+        #     data = f.write(data)
+        # # mimetype = guess_mimetype(data)
+
+        # attachement = self._attachment_create(name=name, data=data, res_id=res_id, res_model=res_model)
+        # canvas_element = request.env['canvas.elements']
+        # canvas_data = {
+        #     'attachment_id': attachement.id,
+        #     'elements' : elements,
+        # }
+        # canvas = canvas_element.sudo().create(canvas_data)
+
+        # return [attachement._get_media_info(), canvas.elements, canvas.id]
+
+        if ',' in data:
+            data = data.split(',')[1]
+        
+        # Decode the base64 data
+        decoded_data = b64decode(data)
+        
+        # Create an attachment
+        attachment = request.env['ir.attachment'].create({
+            'name': 'canvas_' + str(res_id) + '.png',
+            'datas': b64encode(decoded_data),
+            'res_model': res_model,
+            'res_id': int(res_id),
+        })
+
+        # Create a canvas element record
+        canvas_element = request.env['canvas.elements']
+        canvas_data = {
+            'attachment_id': attachment.id,
+            'elements': elements,
+        }
+        canvas = canvas_element.sudo().create(canvas_data)
+
+        return {
+            'attachmentData': attachment._get_media_info(),
+            'canvasElements': canvas.elements,
+            'canvasId': canvas.id,
+        }

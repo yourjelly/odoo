@@ -2,6 +2,7 @@
 
 import { session } from "@web/session";
 import { MediaDialog } from "@web_editor/components/media_dialog/media_dialog";
+import { DrawDialog } from "@web_editor/components/media_dialog/draw_dialog";
 import { VideoSelector } from "@web_editor/components/media_dialog/video_selector";
 import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
@@ -1619,6 +1620,50 @@ export class Wysiwyg extends Component {
             ...params,
         });
     }
+
+    openDrawDialog(params = {}) {
+        let canvas_elements = [];
+        const sel = this.odooEditor.document.getSelection();
+        const dataSet = this.el.getElementsByTagName('img');
+        if (dataSet[0] !== undefined) {
+            canvas_elements = JSON.parse(this.element_data);
+            canvas_elements = JSON.parse(canvas_elements);
+        };
+
+        if (!sel.rangeCount) {
+            return;
+        }
+        const range = sel.getRangeAt(0);
+        // We lose the current selection inside the content editable when we
+        // click the media dialog button so we need to be able to restore the
+        // selection when the modal is closed.
+        const restoreSelection = preserveCursor(this.odooEditor.document);
+
+        const $editable = $(OdooEditorLib.closestElement(range.startContainer, '.o_editable') || this.odooEditor.editable);
+        const model = $editable.data('oe-model');
+        const field = $editable.data('oe-field');
+        const type = $editable.data('oe-type');
+
+        this.env.services.dialog.add(DrawDialog, {
+            canvas_elements: this.element_data,
+            resModel: model,
+            resId: $editable.data('oe-id'),
+            domain: $editable.data('oe-media-domain'),
+            useMediaLibrary: !!(field && (model === 'ir.ui.view' && field === 'arch' || type === 'html')),
+            media: params.node,
+            save: this._onDrawDialogSave.bind(this, {
+                node: params.node,
+                restoreSelection: restoreSelection,
+                resModel: model,
+                resId: id
+            }),
+            onAttachmentChange: this._onAttachmentChange.bind(this),
+            close: () => restoreSelection(),
+            ...this.options.mediaModalParams,
+            ...params,
+        });
+    }
+
     // todo: test me
     showEmojiPicker() {
         const targetEl = this.odooEditor.document.getSelection();
@@ -1703,6 +1748,40 @@ export class Wysiwyg extends Component {
             });
         }
     }
+    async _onDrawDialogSave (params, img_data) {
+        params.restoreSelection();
+        const sel = this.odooEditor.document.getSelection();
+        const range = sel.getRangeAt(0);
+        const $editable = $(OdooEditorLib.closestElement(range.startContainer, '.o_editable') || this.odooEditor.editable);
+        const model = $editable.data('oe-model');
+        const id = $editable.data('oe-id');
+
+        const { attachmentData, canvasElements, canvasId } = await this._rpc({
+            route: '/web_editor/canvas_element', 
+            params: {
+            'data' : img_data.src,
+            'elements': JSON.stringify(img_data.dataset.elements),
+            'res_model': model,
+            'res_id': id,
+            }  
+        });
+        let img_element = document.createElement('img');
+        img_element.src = attachmentData.image_src;
+        img_element.style.width = '100%';
+        img_element.setAttribute('canvas-id', canvasId);
+        const canvas_elements = JSON.parse(canvasElements);
+        this.element_data = JSON.parse(canvas_elements);
+        this.img_data = img_element;
+
+        if (params.node) {
+            params.node.replaceWith(this.img_data);
+            this.odooEditor.unbreakableStepUnactive();
+            this.odooEditor.historyStep();
+        } else {
+            return this.odooEditor.execCommand('insert', this.img_data);
+        }
+    }
+
     getInSelection(selector) {
         return getInSelection(this.odooEditor.document, selector);
     }
@@ -1808,9 +1887,16 @@ export class Wysiwyg extends Component {
                 }
             }
         };
+        const openCanvas = e => {
+            if (e.target.id == 'draw-canvas'){
+                this.openDrawDialog(this.element_data);
+                this.odooEditor.toolbarHide();
+            }
+        }
         if (!options.snippets) {
             $toolbar.find('#justify, #media-insert').remove();
         }
+        $toolbar.find('#draw-canvas').click(openCanvas);
         $toolbar.find('#image-fullscreen').click(() => {
             if (!this.lastMediaClicked?.src) {
                 return;
@@ -1874,7 +1960,7 @@ export class Wysiwyg extends Component {
             $(this.lastMediaClicked).on('image_cropper_destroyed', () => this.odooEditor.toolbarShow());
         });
         $toolbar.find('#image-transform').click(e => {
-            if (!this.lastMediaClicked) {
+            if (!this.lastMedidraw-canvasaClicked) {
                 return;
             }
             const $image = $(this.lastMediaClicked);
@@ -2503,6 +2589,18 @@ export class Wysiwyg extends Component {
                 fontawesome: 'fa-file-image-o',
                 callback: () => {
                     this.openMediaDialog();
+                },
+            });
+        }
+        if (editorOptions.allowCommandImage) {
+            commands.push({
+                category: _t('Draw'),
+                name: _t('Draw'),
+                priority: 40,
+                description: _t('Insert a Drawing'),
+                fontawesome: 'fa-file-image-o',
+                callback: () => {
+                    this.openDrawDialog();
                 },
             });
         }
