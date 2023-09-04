@@ -626,6 +626,23 @@ publicWidget.registry.hoverableDropdown = animations.Animation.extend({
     },
 });
 
+publicWidget.registry.MegaMenuMobileDropdown = publicWidget.Widget.extend({
+    selector: '.o_mega_menu',
+    events: {
+        'click': '_onClick',
+    },
+
+    /**
+     * Avoid closing the dropdown if clicked inside
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClick: function(ev) {
+        ev.stopPropagation();
+    },
+});
+
 publicWidget.registry.HeaderMainCollapse = publicWidget.Widget.extend({
     selector: 'header#top',
     disabledInEditableMode: false,

@@ -1179,6 +1179,8 @@ header {
 }
 
 // Mega menu
+$o_mega_nav_height: 3rem;
+
 .o_mega_menu {
     width: 100%;
     padding: 0;
@@ -1193,6 +1195,51 @@ header {
         // inside another container (the one in the navbar)
         padding-left: $grid-gutter-width / 2;
         padding-right: $grid-gutter-width / 2;
+    }
+}
+
+// Offcanvas menu on mobile or offcanvas themed header override
+.o_navbar_mobile .btn-close {
+    z-index: 1002;
+}
+
+.o_mobile_or_offcanvas {
+    .o_mega_nav, .o_mega_menu {
+        max-width: $offcanvas-horizontal-width;
+        transition: transform .3s ease-in-out, visibility .3s ease-in-out;
+        transform: translateX(var(--FakeOffcanvas-animation, 100%));
+    }
+
+    .o_mega_menu.show, .o_mega_menu.show ~ .o_mega_nav {
+        visibility: visible !important;
+        transform: translateX(0%);
+        transition: transform .3s ease-in-out, visibility .3s ease-in-out;
+    }
+
+    .o_mega_nav {
+        z-index: 1001;
+        height: $o_mega_nav_height;
+        padding-left: $grid-gutter-width / 2;
+    }
+
+    .o_mega_menu {
+        inset: 0 0 0 auto !important;
+
+        [class^="s_mega_menu"] {
+            padding-top: $o_mega_nav_height !important;
+        }
+    }
+
+    .o_mega_menu_toggle::after {
+        content: unset;
+    }
+
+    .o_mega_menu_left {
+        inset: 0 auto 0 0 !important;
+    }
+
+    .list-group-item-action.active {
+       color: var(--o-cc1-btn-primary-text) !important;
     }
 }
 
