@@ -5,6 +5,7 @@
     'description': "Build nice quotations",
     'depends': ['sale_management'],
     'data': [
+        'data/sale_pdf_quote_builder_data.xml',
         'views/sale_order_template_views.xml',
         'views/res_config_settings_views.xml',
     ],

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="base.main_company" model="res.company">
+            <field name="header"
+                   type="base64"
+                   file="sale_pdf_quote_builder/static/quote_builder_pdf/quote_header_pages.pdf"/>
+            <field name="footer"
+                   type="base64"
+                   file="sale_pdf_quote_builder/static/quote_builder_pdf/quote_footer_pages.pdf"/>
+        </record>
+
+    </data>
+</odoo>
