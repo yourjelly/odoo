@@ -120,7 +120,7 @@ patch(ThreadService.prototype, {
             const tmpData = {
                 id: tmpId,
                 author: { id: this.store.self.id },
-                body: _t("Creating a new record..."),
+                body: _t("Creating a new task..."),
                 message_type: "notification",
                 trackingValues: [],
                 res_id: thread.id,
