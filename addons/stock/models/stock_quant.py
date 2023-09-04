@@ -333,6 +333,9 @@ class StockQuant(models.Model):
                 return
             if any(field for field in vals.keys() if field not in allowed_fields):
                 raise UserError(_("Quant's editing is restricted, you can't do this operation."))
+            if 'location' in vals:
+                self._move_quants(vals['location'])
+                del vals['location']
             self = self.sudo()
         return super(StockQuant, self).write(vals)
 
@@ -1126,14 +1129,15 @@ class StockQuant(models.Model):
     def _get_inventory_fields_create(self):
         """ Returns a list of fields user can edit when he want to create a quant in `inventory_mode`.
         """
-        return ['product_id', 'location_id', 'lot_id', 'package_id', 'owner_id'] + self._get_inventory_fields_write()
+        return ['product_id', 'lot_id', 'package_id', 'owner_id'] + self._get_inventory_fields_write()
 
     @api.model
     def _get_inventory_fields_write(self):
         """ Returns a list of fields user can edit when he want to edit a quant in `inventory_mode`.
         """
         fields = ['inventory_quantity', 'inventory_quantity_auto_apply', 'inventory_diff_quantity',
-                  'inventory_date', 'user_id', 'inventory_quantity_set', 'is_outdated', 'lot_id']
+                  'inventory_date', 'user_id', 'inventory_quantity_set', 'is_outdated', 'lot_id',
+                  'location_id']
         return fields
 
     def _get_inventory_move_values(self, qty, location_id, location_dest_id, out=False):
