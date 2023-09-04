@@ -237,6 +237,10 @@ select {
 // uses (eg. '.fw-bolder' class).
 b, strong {
   font-weight: $font-weight-bold;
+
+  & & {
+    font-weight: $font-weight-bolder;
+  }
 }
 
 //== Titles
