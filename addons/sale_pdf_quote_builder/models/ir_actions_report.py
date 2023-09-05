@@ -34,7 +34,8 @@ class IrActionsReport(models.Model):
                 included_product_docs = self.env['product.document']
                 for line in order.order_line:
                     document = line.product_id.product_document_ids or line.product_template_id.product_document_ids
-                    included_product_docs += document.filtered(lambda d: d.attached_on == 'inside')
+                    doc_to_include = document.filtered(lambda d: d.attached_on == 'inside')
+                    included_product_docs = included_product_docs | doc_to_include
                     # TODO edm: this code makes me bleed, working for now
 
                 # TODO edm: constraint if not PDF, either on the product document or filter here
