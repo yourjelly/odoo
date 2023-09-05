@@ -11,4 +11,3 @@ class ServerAction(models.Model):
         ('base_automation', 'Automation Rule')
     ], ondelete={'base_automation': 'cascade'})
     base_automation_id = fields.Many2one('base.automation', string='Automation Rule', ondelete='cascade')
-
