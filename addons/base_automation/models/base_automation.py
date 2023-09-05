@@ -84,23 +84,23 @@ class BaseAutomation(models.Model):
     active = fields.Boolean(default=True, help="When unchecked, the rule is hidden and will not be executed.")
     trigger = fields.Selection(
         [
-            ('on_stage_set', _("Stage is set to")),
-            ('on_user_set', _("User is set")),
-            ('on_tag_set', _("Tag is added")),
-            ('on_state_set', _("State is set to")),
-            ('on_priority_set', _("Priority is set to")),
-            ('on_archive', _("On archived")),
-            ('on_unarchive', _("On unarchived")),
-            ('on_create_or_write', _("On save")),
-            ('on_create', _("On create")),  # deprecated, use 'on_create_or_write' instead
-            ('on_write', _("On write")),  # deprecated, use 'on_create_or_write' instead
+            ('on_stage_set', "Stage is set to"),
+            ('on_user_set', "User is set"),
+            ('on_tag_set', "Tag is added"),
+            ('on_state_set', "State is set to"),
+            ('on_priority_set', "Priority is set to"),
+            ('on_archive', "On archived"),
+            ('on_unarchive', "On unarchived"),
+            ('on_create_or_write', "On save"),
+            ('on_create', "On creation"),  # deprecated, use 'on_create_or_write' instead
+            ('on_write', "On update"),  # deprecated, use 'on_create_or_write' instead
 
-            ('on_unlink', _("On delete")),
-            ('on_change', _("On live update")),
+            ('on_unlink', "On deletion"),
+            ('on_change', "On live update"),
 
-            ('on_time', _("Based on date field")),
-            ('on_time_created', _("After creation")),
-            ('on_time_updated', _("After last update")),
+            ('on_time', "Based on date field"),
+            ('on_time_created', "After creation"),
+            ('on_time_updated', "After last update"),
         ], string='Trigger',
         compute='_compute_trigger_and_trigger_field_ids', readonly=False, store=True, required=True)
     trg_selection_field_id = fields.Many2one(
