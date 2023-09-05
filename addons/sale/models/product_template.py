@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.addons.base.models.res_partner import WARNING_MESSAGE, WARNING_HELP
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_round
 
 
@@ -99,6 +99,11 @@ class ProductTemplate(models.Model):
                 'message': _("You cannot change the product's type because it is already used in sales orders.")
             }
         return res
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_discount_product(self):
+        if self.env.ref('product.product_product_consumable').id == self.id:
+            raise UserError(_('The operation cannot be completed: another model requires the record being deleted. If possible, archive it instead.'))
 
     @api.depends('type')
     def _compute_service_type(self):
