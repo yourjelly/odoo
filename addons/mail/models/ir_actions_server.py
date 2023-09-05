@@ -43,7 +43,6 @@ class ServerActions(models.Model):
         string='Send Email As',
         compute='_compute_mail_post_method',
         readonly=False, store=True)
-    mail_post_method_helper = fields.Char('Send As helper message', compute='_compute_mail_post_method_helper')
 
     # Next Activity
     activity_type_id = fields.Many2one(
