@@ -762,8 +762,6 @@ class Task(models.Model):
         elif 'default_user_ids' not in self.env.context and 'user_ids' in default_fields:
             user_ids = vals.get('user_ids', [])
             user_ids.append(Command.link(self.env.user.id))
-            vals['user_ids'] = user_ids
-
         return vals
 
     def _ensure_fields_are_accessible(self, fields, operation='read', check_group_user=True):
