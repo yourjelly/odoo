@@ -79,7 +79,7 @@ export class TriggerSelectionField extends SelectionField {
             }
 
             // first, compute the derived options
-            this.derivedOptions = computeDerivedOptions(
+            const derivedOptions = computeDerivedOptions(
                 fields[this.props.name].selection,
                 relatedModelFields,
                 data[this.props.name]
@@ -87,7 +87,7 @@ export class TriggerSelectionField extends SelectionField {
 
             // then group and sort them
             this.groupedOptions.length = 0;
-            for (const option of this.derivedOptions) {
+            for (const option of derivedOptions) {
                 const group = this.groupedOptions.find((g) => g.key === option.group.key) ?? {
                     ...option.group,
                     options: [],
