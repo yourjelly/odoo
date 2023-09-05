@@ -395,12 +395,14 @@ class BaseAutomation(models.Model):
             self._register_hook()
             self.env.registry.registry_invalidated = True
 
-    def _get_automations(self, records, triggers):
+    def _get_actions(self, records, triggers):
         """ Return the automations of the given triggers for records' model. The
             returned automations' context contain an object to manage processing.
         """
-        if '__automation_done' not in self._context:
-            self = self.with_context(__automation_done={})
+        # Note: we keep the old action naming for the method and context variable
+        # to avoid breaking existing code/downstream modules
+        if '__action_done' not in self._context:
+            self = self.with_context(__action_done={})
         domain = [('model_name', '=', records._name), ('trigger', 'in', triggers)]
         automations = self.with_context(active_test=True).sudo().search(domain)
         return automations.with_env(self.env)
@@ -455,7 +457,7 @@ class BaseAutomation(models.Model):
             return records, None
 
     @api.model
-    def _add_postmortem_automation(self, e):
+    def _add_postmortem(self, e):
         if self.user_has_groups('base.group_user'):
             e.context = {}
             e.context['exception_class'] = 'base_automation'
@@ -467,7 +469,7 @@ class BaseAutomation(models.Model):
     def _process(self, records, domain_post=None):
         """ Process automation ``self`` on the ``records`` that have not been done yet. """
         # filter out the records on which self has already been done
-        automation_done = self._context['__automation_done']
+        automation_done = self._context['__action_done']
         records_done = automation_done.get(self, records.browse())
         records -= records_done
         if not records:
@@ -476,8 +478,8 @@ class BaseAutomation(models.Model):
         # mark the remaining records as done (to avoid recursive processing)
         automation_done = dict(automation_done)
         automation_done[self] = records_done + records
-        self = self.with_context(__automation_done=automation_done)
-        records = records.with_context(__automation_done=automation_done)
+        self = self.with_context(__action_done=automation_done)
+        records = records.with_context(__action_done=automation_done)
 
         # modify records
         if 'date_automation_last' in records._fields:
@@ -501,7 +503,7 @@ class BaseAutomation(models.Model):
                 try:
                     action.with_context(**ctx).run()
                 except Exception as e:
-                    self._add_postmortem_automation(e)
+                    self._add_postmortem(e)
                     raise
 
     def _check_trigger_fields(self, record):
@@ -545,7 +547,7 @@ class BaseAutomation(models.Model):
             @api.model_create_multi
             def create(self, vals_list, **kw):
                 # retrieve the automation rules to possibly execute
-                automations = self.env['base.automation']._get_automations(self, CREATE_TRIGGERS)
+                automations = self.env['base.automation']._get_actions(self, CREATE_TRIGGERS)
                 if not automations:
                     return create.origin(self, vals_list, **kw)
                 # call original method
@@ -561,7 +563,7 @@ class BaseAutomation(models.Model):
             """ Instanciate a write method that processes automation rules. """
             def write(self, vals, **kw):
                 # retrieve the automation rules to possibly execute
-                automations = self.env['base.automation']._get_automations(self, WRITE_TRIGGERS)
+                automations = self.env['base.automation']._get_actions(self, WRITE_TRIGGERS)
                 if not (automations and self):
                     return write.origin(self, vals, **kw)
                 records = self.with_env(automations.env).filtered('id')
@@ -593,7 +595,7 @@ class BaseAutomation(models.Model):
                 if not any(stored_fields):
                     return _compute_field_value.origin(self, field)
                 # retrieve the action rules to possibly execute
-                automations = self.env['base.automation']._get_automations(self, WRITE_TRIGGERS)
+                automations = self.env['base.automation']._get_actions(self, WRITE_TRIGGERS)
                 records = self.filtered('id').with_env(automations.env)
                 if not (automations and records):
                     _compute_field_value.origin(self, field)
@@ -619,7 +621,7 @@ class BaseAutomation(models.Model):
             """ Instanciate an unlink method that processes automation rules. """
             def unlink(self, **kwargs):
                 # retrieve the action rules to possibly execute
-                automations = self.env['base.automation']._get_automations(self, ['on_unlink'])
+                automations = self.env['base.automation']._get_actions(self, ['on_unlink'])
                 records = self.with_env(automations.env)
                 # check conditions, and execute actions on the records that satisfy them
                 for automation in automations:
@@ -644,7 +646,7 @@ class BaseAutomation(models.Model):
                     try:
                         res = action.run()
                     except Exception as e:
-                        automation_rule._add_postmortem_automation(e)
+                        automation_rule._add_postmortem(e)
                         raise
 
                     if res:
@@ -724,8 +726,8 @@ class BaseAutomation(models.Model):
     @api.model
     def _check(self, automatic=False, use_new_cursor=False):
         """ This Function is called by scheduler. """
-        if '__automation_done' not in self._context:
-            self = self.with_context(__automation_done={})
+        if '__action_done' not in self._context:
+            self = self.with_context(__action_done={})
 
         # retrieve all the automation rules to run based on a timed condition
         eval_context = self._get_eval_context()
