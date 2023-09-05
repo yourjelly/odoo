@@ -353,12 +353,22 @@ class BaseAutomation(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        if self.env.su:
+            if self.env.context.get('install_xmlid'):
+                _logger.warning(self.env.context.get('install_xmlid'))
+            else:
+                _logger.warning(''.join(traceback.format_stack()))
         base_automations = super(BaseAutomation, self).create(vals_list)
         self._update_cron()
         self._update_registry()
         return base_automations
 
     def write(self, vals):
+        if self.env.su:
+            if self.env.context.get('install_xmlid'):
+                _logger.warning(self.env.context.get('install_xmlid'))
+            else:
+                _logger.warning(''.join(traceback.format_stack()))
         res = super(BaseAutomation, self).write(vals)
         if set(vals).intersection(self.CRITICAL_FIELDS):
             self._update_cron()
