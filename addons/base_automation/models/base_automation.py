@@ -54,6 +54,8 @@ WRITE_TRIGGERS = [
     'on_user_set',
 ]
 
+CREATE_WRITE_SET = set(CREATE_TRIGGERS + WRITE_TRIGGERS)
+
 TIME_TRIGGERS = [
     'on_time',
     'on_time_created',
@@ -694,7 +696,7 @@ class BaseAutomation(models.Model):
                     automation_rule.model_id.id)
                 continue
 
-            if automation_rule.trigger in set(CREATE_TRIGGERS + WRITE_TRIGGERS):
+            if automation_rule.trigger in CREATE_WRITE_SET:
                 if automation_rule.trigger in CREATE_TRIGGERS:
                     patch(Model, 'create', make_create())
                 if automation_rule.trigger in WRITE_TRIGGERS:
