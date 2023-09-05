@@ -30,7 +30,7 @@ DATE_RANGE_FACTOR = {
     False: 0,
 }
 
-CREATE_TRIGGERS = {
+CREATE_TRIGGERS = [
     'on_create',
 
     'on_create_or_write',
@@ -39,9 +39,9 @@ CREATE_TRIGGERS = {
     'on_state_set',
     'on_tag_set',
     'on_user_set',
-}
+]
 
-WRITE_TRIGGERS = {
+WRITE_TRIGGERS = [
     'on_write',
     'on_archive',
     'on_unarchive',
@@ -52,15 +52,15 @@ WRITE_TRIGGERS = {
     'on_state_set',
     'on_tag_set',
     'on_user_set',
-}
+]
 
-CREATE_WRITE_SET = CREATE_TRIGGERS.union(WRITE_TRIGGERS)
+CREATE_WRITE_SET = set(CREATE_TRIGGERS + WRITE_TRIGGERS)
 
-TIME_TRIGGERS = {
+TIME_TRIGGERS = [
     'on_time',
     'on_time_created',
     'on_time_updated',
-}
+]
 
 
 class BaseAutomation(models.Model):
