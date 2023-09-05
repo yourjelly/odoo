@@ -622,7 +622,7 @@ class IrActionsServer(models.Model):
 
     def _run_action_object_write(self, eval_context=None):
         """Apply specified write changes to active_id."""
-        vals = self.eval_value(eval_context=eval_context)
+        vals = self._eval_value(eval_context=eval_context)
         res = {action.update_field_id.name: vals[action.id] for action in self}
 
         if self._context.get('onchange_self'):
@@ -803,7 +803,7 @@ class IrActionsServer(models.Model):
             if action.selection_value:
                 action.value = action.selection_value.name
 
-    def eval_value(self, eval_context=None):
+    def _eval_value(self, eval_context=None):
         result = {}
         for action in self:
             expr = action.value
