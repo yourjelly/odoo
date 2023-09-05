@@ -285,13 +285,8 @@ class SaleOrder(models.Model):
     def init(self):
         create_index(self._cr, 'sale_order_date_order_id_idx', 'sale_order', ["date_order desc", "id desc"])
 
-    def action_open_discount_wizard(self):
-        self.ensure_one()
-        if self.order_line:
-            return self.env['ir.actions.actions']._for_xml_id('sale.sale_order_line_wizard_action')
-        return True
-
     #=== COMPUTE METHODS ===#
+
     @api.depends('partner_id')
     @api.depends_context('sale_show_partner_name')
     def _compute_display_name(self):
@@ -796,6 +791,12 @@ class SaleOrder(models.Model):
                     " You must first cancel it."))
 
     #=== ACTION METHODS ===#
+
+    def action_open_discount_wizard(self):
+        self.ensure_one()
+        if self.order_line:
+            return self.env['ir.actions.actions']._for_xml_id('sale.sale_order_line_wizard_action')
+        return True
 
     def action_draft(self):
         orders = self.filtered(lambda s: s.state in ['cancel', 'sent'])

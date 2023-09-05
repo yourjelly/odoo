@@ -650,16 +650,13 @@
                                 </templates>
                             </kanban>
                         </field>
-                        <xpath expr="//button[@name='so_button_below_order_lines']" position="inside">
-                            <button string="Discount" 
-                            name="action_open_discount_wizard" 
-                            type="object" 
-                            class="btn btn-secondary"
-                            groups="product.group_discount_per_so_line"/>
-                        </xpath>
                         <div class="oe_right d-flex gap-1 mb-2 ms-1"
-                             invisible="1"
                              name="so_button_below_order_lines">
+                            <button string="Discount"
+                                    name="action_open_discount_wizard"
+                                    type="object"
+                                    class="btn btn-secondary"
+                                    groups="product.group_discount_per_so_line"/>
                         </div>
                         <group name="note_group" col="6" class="mt-2 mt-md-0">
                             <group colspan="4">
