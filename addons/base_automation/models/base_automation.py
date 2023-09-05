@@ -76,7 +76,7 @@ class BaseAutomation(models.Model):
         comodel_name="base.automation.action.link",
         inverse_name="base_automation_id",
         context={'default_usage': 'base_automation'},
-        string="Action",
+        string="Actions",
         compute="_compute_action_server_ids",
         store=True,
         readonly=False,
