@@ -321,16 +321,6 @@ class BaseAutomation(models.Model):
             automation.trigger_field_ids = self.env['ir.model.fields'].search(domain, limit=1)
             automation.trigger = False if not automation.trigger_field_ids else automation.trigger
 
-    @api.onchange('model_id')
-    def _onchange_model(self):
-        if self.action_server_ids:
-            return {
-                'warning': {
-                    'title': _("Warning"),
-                    'message': _("Changing the model will reset the actions."),
-                }
-            }
-
     @api.onchange('trigger', 'action_server_ids')
     def _onchange_trigger_or_actions(self):
         no_code_actions = self.action_server_ids.filtered(lambda a: a.state != 'code')
