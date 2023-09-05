@@ -25,7 +25,6 @@ class ServerActions(models.Model):
         string='Send SMS As',
         compute='_compute_sms_method',
         readonly=False, store=True)
-    sms_method_helper = fields.Char('Send As (SMS) helper message', compute='_compute_sms_method_helper')
 
     @api.depends('state', 'sms_template_id')
     def _compute_name(self):
@@ -54,25 +53,6 @@ class ServerActions(models.Model):
         other = self - to_reset
         if other:
             other.sms_method = 'sms'
-
-    @api.depends('sms_method')
-    def _compute_sms_method_helper(self):
-        for action in self:
-            if action.sms_method == 'sms':
-                action.sms_method_helper = _(
-                    'The message will be sent as an SMS to the recipients of the'
-                    ' template and will not appear in the messaging history.')
-            elif action.sms_method == 'note':
-                action.sms_method_helper = _(
-                    'The SMS will not be sent, it will only be posted as an '
-                    'internal note in the messaging history.')
-            elif action.sms_method == 'comment':
-                action.sms_method_helper = _(
-                    'The SMS will be sent as an SMS to the recipients of the '
-                    'template and it will also be posted as an internal note '
-                    'in the messaging history.')
-            else:
-                action.sms_method_helper = ''
 
     def _check_model_coherency(self):
         super()._check_model_coherency()
