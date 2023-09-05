@@ -169,8 +169,8 @@ class BaseAutomation(models.Model):
     trigger_field_ids = fields.Many2many(
         'ir.model.fields', string='Trigger Fields',
         compute='_compute_trigger_and_trigger_field_ids', readonly=False, store=True,
-        help="""The automation rule will be triggered if and only if
-        one of these fields is updated. If empty, all fields are watched.""")
+        help="The automation rule will be triggered if and only if one of these fields is updated."
+             "If empty, all fields are watched."
     least_delay_msg = fields.Char(compute='_compute_least_delay_msg')
 
     # which fields have an impact on the registry and the cron
