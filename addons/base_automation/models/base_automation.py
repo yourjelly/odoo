@@ -198,12 +198,15 @@ class BaseAutomation(models.Model):
     def _compute_action_server_ids(self):
         self.action_server_ids = [Command.clear()]
 
-    @api.depends('model_id', 'trigger')
+    @api.depends('model_id', 'trigger', 'trigger_field_ids')
     def _compute_trg_date_id(self):
         to_reset = self.filtered(
-            lambda a: a.trigger not in TIME_TRIGGERS or (a.model_id and a.trg_date_id.model_id != a.model_id)
+            lambda a: a.trigger not in TIME_TRIGGERS or (a.model_id and a.trg_date_id.model_id != a.model_id) or len(a.trigger_field_ids) != 1
         )
         to_reset.trg_date_id = False
+        for record in (self - to_reset):
+            record.trg_date_id = record.trigger_field_ids
+
 
     @api.depends('trigger')
     def _compute_trg_date_range_data(self):
@@ -306,7 +309,7 @@ class BaseAutomation(models.Model):
                 domain += [
                     ('relation', '=', 'res.users'),
                     ('ttype', 'in', ['many2one', 'many2many']),
-                    ('name', 'in', ['user_id', 'x_studio_user_id']),
+                    ('name', 'in', ['user_id', 'user_ids', 'x_studio_user_id', 'x_studio_user_ids']),
                 ]
             elif automation.trigger in ['on_archive', 'on_unarchive']:
                 domain += [('ttype', '=', 'boolean'), ('name', 'in', ['active', 'x_active'])]

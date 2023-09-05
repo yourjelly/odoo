@@ -7,8 +7,8 @@ export const TRIGGER_FILTERS = {
     on_change: (f) => true,
     on_unlink: (f) => true,
     on_time: (f) => true,
-    on_time_created: (f) => f.name === "create_date",
-    on_time_updated: (f) => f.name === "write_date",
+    on_time_created: (f) => f.ttype === "datetime" && f.name === "create_date",
+    on_time_updated: (f) => f.ttype === "datetime" && f.name === "write_date",
     on_stage_set: (f) =>
         f.ttype === "many2one" && ["stage_id", "x_studio_stage_id"].includes(f.name),
     on_user_set: (f) =>

@@ -2,7 +2,6 @@
 
 import { useState } from "@odoo/owl";
 import { _lt } from "@web/core/l10n/translation";
-import { x2ManyCommands } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { selectionField, SelectionField } from "@web/views/fields/selection/selection_field";
@@ -37,12 +36,6 @@ const OPT_GROUPS = [
     },
 ];
 
-function getTriggerFieldData(trigger, field) {
-    return ["on_time_created", "on_time_updated"].includes(trigger)
-        ? { trg_date_id: [field.id, field.description] }
-        : { trigger_field_ids: [x2ManyCommands.set([field.id])] };
-}
-
 function computeDerivedOptions(options, fields, recordValue) {
     // filter options to display, derived from the current value and the model fields
     const derivedOptions = [];
@@ -59,10 +52,6 @@ function computeDerivedOptions(options, fields, recordValue) {
             continue;
         }
         const option = { group, value, label };
-        if (triggerFields.length === 1) {
-            // if there is only one corresponding field, we set the trigger field data
-            option.triggerFieldData = getTriggerFieldData(value, triggerFields[0]);
-        }
         derivedOptions.push(option);
     }
     return derivedOptions;
@@ -110,15 +99,6 @@ export class TriggerSelectionField extends SelectionField {
             }
             this.groupedOptions.sort((a, b) => a.sequence - b.sequence);
         });
-    }
-
-    /**
-     * @override
-     */
-    onChange(ev) {
-        const value = JSON.parse(ev.target.value);
-        const option = this.derivedOptions.find((o) => o.value === value);
-        this.props.record.update({ [this.props.name]: value, ...option.triggerFieldData });
     }
 }
 
